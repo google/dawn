@@ -74,6 +74,10 @@ class NativeType(Type):
     def __init__(self, name, record):
         Type.__init__(self, name, record, native=True)
 
+class NativelyDefined(Type):
+    def __init__(self, name, record):
+        Type.__init__(self, name, record)
+
 class MethodArgument:
     def __init__(self, name, typ, annotation):
         self.name = name
@@ -86,11 +90,17 @@ class ObjectType(Type):
     def __init__(self, name, record):
         Type.__init__(self, name, record)
         self.methods = []
+        self.native_methods = []
 
 ############################################################
 # PARSE
 ############################################################
 import json
+
+def is_native_method(method):
+    return method.return_type.category == "natively defined" or \
+        any([arg.type.category == "natively defined" for arg in method.arguments])
+
 def link_object(obj, types):
     def make_method(record):
         arguments = []
@@ -110,13 +120,16 @@ def link_object(obj, types):
 
         return Method(Name(record['name']), types[record.get('returns', 'void')], arguments)
 
-    obj.methods = [make_method(m) for m in obj.record.get('methods', [])]
+    methods = [make_method(m) for m in obj.record.get('methods', [])]
+    obj.methods = [method for method in methods if not is_native_method(method)]
+    obj.native_methods = [method for method in methods if is_native_method(method)]
 
 def parse_json(json):
     category_to_parser = {
         'bitmask': BitmaskType,
         'enum': EnumType,
         'native': NativeType,
+        'natively defined': NativelyDefined,
         'object': ObjectType,
     }
 
@@ -296,11 +309,14 @@ def as_backendType(typ):
     else:
         return as_cType(typ.name)
 
-def native_methods(types, typ):
-    return [
+def c_native_methods(types, typ):
+    return cpp_native_methods(typ) + [
         Method(Name('reference'), types['void'], []),
         Method(Name('release'), types['void'], []),
-    ] + typ.methods
+    ]
+
+def cpp_native_methods(typ):
+    return typ.methods + typ.native_methods
 
 def debug(text):
     print(text)
@@ -349,26 +365,29 @@ def main():
         'as_cppType': as_cppType,
         'as_varName': as_varName,
         'decorate': decorate,
-        'native_methods': lambda typ: native_methods(api_params['types'], typ)
     }
 
     renders = []
 
+    c_params = {'native_methods': lambda typ: c_native_methods(api_params['types'], typ)}
+
     if 'nxt' in targets:
-        renders.append(FileRender('api.h', 'nxt/nxt.h', [base_params, api_params]))
-        renders.append(FileRender('api.c', 'nxt/nxt.c', [base_params, api_params]))
+        renders.append(FileRender('api.h', 'nxt/nxt.h', [base_params, api_params, c_params]))
+        renders.append(FileRender('api.c', 'nxt/nxt.c', [base_params, api_params, c_params]))
 
     if 'nxtcpp' in targets:
-        renders.append(FileRender('apicpp.h', 'nxt/nxtcpp.h', [base_params, api_params]))
-        renders.append(FileRender('apicpp.cpp', 'nxt/nxtcpp.cpp', [base_params, api_params]))
+        additional_params = {'native_methods': cpp_native_methods}
+        renders.append(FileRender('apicpp.h', 'nxt/nxtcpp.h', [base_params, api_params, additional_params]))
+        renders.append(FileRender('apicpp.cpp', 'nxt/nxtcpp.cpp', [base_params, api_params, additional_params]))
 
     if 'mock_nxt' in targets:
-        renders.append(FileRender('mock_api.h', 'mock/mock_nxt.h', [base_params, api_params]))
-        renders.append(FileRender('mock_api.cpp', 'mock/mock_nxt.cpp', [base_params, api_params]))
+        renders.append(FileRender('mock_api.h', 'mock/mock_nxt.h', [base_params, api_params, c_params]))
+        renders.append(FileRender('mock_api.cpp', 'mock/mock_nxt.cpp', [base_params, api_params, c_params]))
 
     base_backend_params = [
         base_params,
         api_params,
+        c_params,
         {
             'as_backendType': lambda typ: as_backendType(typ), # TODO as_backendType and friends take a Type and not a Name :(
             'as_annotated_backendType': lambda arg: annotated(as_backendType(arg.type), arg)

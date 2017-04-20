@@ -30,6 +30,8 @@ SetPic(wire_autogen)
 
 add_library(nxt_wire SHARED
     ${WIRE_DIR}/TerribleCommandBuffer.h
+    ${WIRE_DIR}/WireCmd.cpp
+    ${WIRE_DIR}/WireCmd.h
 )
 target_link_libraries(nxt_wire wire_autogen)
 SetCXX14(nxt_wire)

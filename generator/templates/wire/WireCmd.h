@@ -83,12 +83,17 @@ namespace wire {
         //* The command structure used when sending that an ID is destroyed.
         {% set Suffix = as_MethodSuffix(type.name, Name("destroy")) %}
         struct {{Suffix}}Cmd {
-            wire::WireCmd commandId = wire::WireCmd::{{Suffix}};
+            WireCmd commandId = WireCmd::{{Suffix}};
             uint32_t objectId;
 
             size_t GetRequiredSize() const;
         };
     {% endfor %}
+
+    //* Enum used as a prefix to each command on the return wire format.
+    enum class ReturnWireCmd : uint32_t {
+        DeviceErrorCallback,
+    };
 
 }
 }

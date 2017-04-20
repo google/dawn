@@ -28,7 +28,7 @@ namespace wire {
             //* The backend-provided handle to this object.
             T handle;
             //* Used by the error-propagation mechanism to know if this object is an error.
-            //* TODO(cwallez@chromium.org): this is doubling the memory usae of
+            //* TODO(cwallez@chromium.org): this is doubling the memory usage of
             //* std::vector<ObjectDataBase> consider making it a special marker value in handle instead.
             bool valid;
             //* Whether this object has been allocated, used by the KnownObjects queries
@@ -103,13 +103,28 @@ namespace wire {
                 std::vector<Data> known;
         };
 
+        void ForwardDeviceErrorToServer(const char* message, nxtCallbackUserdata userdata);
+
         class Server : public CommandHandler {
             public:
-                Server(nxtDevice device, const nxtProcTable& procs) : procs(procs) {
+                Server(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer)
+                    : procs(procs), serializer(serializer) {
                     //* The client-server knowledge is bootstrapped with device 1.
                     auto* deviceData = knownDevice.Allocate(1);
                     deviceData->handle = device;
                     deviceData->valid = true;
+
+                    auto userdata = static_cast<nxtCallbackUserdata>(reinterpret_cast<intptr_t>(this));
+                    procs.deviceSetErrorCallback(device, ForwardDeviceErrorToServer, userdata);
+                }
+
+                void OnDeviceError(const char* message) {
+                    ReturnDeviceErrorCallbackCmd cmd;
+                    cmd.messageStrlen = std::strlen(message);
+
+                    auto allocCmd = reinterpret_cast<ReturnDeviceErrorCallbackCmd*>(GetCmdSpace(cmd.GetRequiredSize()));
+                    *allocCmd = cmd;
+                    strcpy(allocCmd->GetMessage(), message);
                 }
 
                 const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
@@ -147,13 +162,14 @@ namespace wire {
                     return commands;
                 }
 
-                void OnSynchronousError() override {
-                    gotError = true;
-                }
-
             private:
                 nxtProcTable procs;
+                CommandSerializer* serializer = nullptr;
                 bool gotError = false;
+
+                void* GetCmdSpace(size_t size) {
+                    return serializer->GetCmdSpace(size);
+                }
 
                 //* The list of known IDs for each object type.
                 {% for type in by_category["object"] %}
@@ -164,7 +180,7 @@ namespace wire {
                 //* Checks there is enough data left, updates the buffer / size and returns
                 //* the command (or nullptr for an error).
                 template<typename T>
-                const T* GetCommand(const uint8_t** commands, size_t* size) {
+                static const T* GetCommand(const uint8_t** commands, size_t* size) {
                     if (*size < sizeof(T)) {
                         return nullptr;
                     }
@@ -333,11 +349,14 @@ namespace wire {
                 {% endfor %}
         };
 
+        void ForwardDeviceErrorToServer(const char* message, nxtCallbackUserdata userdata) {
+            auto server = reinterpret_cast<Server*>(static_cast<intptr_t>(userdata));
+            server->OnDeviceError(message);
+        }
     }
 
     CommandHandler* NewServerCommandHandler(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer) {
-        //TODO(cwallez@chromium.org) do something with the serializer
-        return new server::Server(device, procs);
+        return new server::Server(device, procs, serializer);
     }
 
 }

@@ -33,6 +33,10 @@
 
 {% endfor %}
 
+// Custom types depending on the target language
+typedef uint64_t nxtCallbackUserdata;
+typedef void (*nxtDeviceErrorCallback)(const char* message, nxtCallbackUserdata userdata);
+
 #ifdef __cplusplus
 extern "C" {
 #endif

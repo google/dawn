@@ -190,6 +190,9 @@
             }
         ]
     },
+    "callback userdata": {
+        "category": "natively defined"
+    },
     "char": {
         "category": "native"
     },
@@ -368,8 +371,18 @@
                     {"name": "source", "type": "bind group"},
                     {"name": "target", "type": "bind group"}
                 ]
+            },
+            {
+                "name": "set error callback",
+                "args": [
+                    {"name": "callback", "type": "device error callback"},
+                    {"name": "userdata", "type": "callback userdata"}
+                ]
             }
         ]
+    },
+    "device error callback": {
+        "category": "natively defined"
     },
     "filter mode": {
         "category": "enum",

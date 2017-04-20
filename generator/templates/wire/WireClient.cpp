@@ -100,6 +100,9 @@ namespace wire {
                     ObjectAllocator<{{type.name.CamelCase()}}> {{type.name.camelCase()}};
                 {% endfor %}
 
+                nxtDeviceErrorCallback errorCallback = nullptr;
+                nxtCallbackUserdata errorUserdata;
+
             private:
                CommandSerializer* serializer = nullptr;
         };
@@ -200,6 +203,11 @@ namespace wire {
         void ClientDeviceRelease(Device* self) {
         }
 
+        void ClientDeviceSetErrorCallback(Device* self, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) {
+            self->errorCallback = callback;
+            self->errorUserdata = userdata;
+        }
+
         nxtProcTable GetProcs() {
             nxtProcTable table;
             {% for type in by_category["object"] %}
@@ -216,16 +224,72 @@ namespace wire {
                 }
 
                 const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
-                    // TODO(cwallez@chromium.org): process callbacks
-                    return nullptr;
-                }
+                    while (size > sizeof(ReturnWireCmd)) {
+                        ReturnWireCmd cmdId = *reinterpret_cast<const ReturnWireCmd*>(commands);
 
-                void OnSynchronousError() override {
-                    // TODO(cwallez@chromium.org): this will disappear
+                        bool success = false;
+                        switch (cmdId) {
+                            case ReturnWireCmd::DeviceErrorCallback:
+                                success = HandleDeviceErrorCallbackCmd(&commands, &size);
+                                break;
+                            default:
+                                success = false;
+                        }
+
+                        if (!success) {
+                            return nullptr;
+                        }
+                    }
+
+                    if (size != 0) {
+                        return nullptr;
+                    }
+
+                    return commands;
                 }
 
             private:
                 Device* device = nullptr;
+
+                //* Helper function for the getting of the command data in command handlers.
+                //* Checks there is enough data left, updates the buffer / size and returns
+                //* the command (or nullptr for an error).
+                template<typename T>
+                static const T* GetCommand(const uint8_t** commands, size_t* size) {
+                    if (*size < sizeof(T)) {
+                        return nullptr;
+                    }
+
+                    const T* cmd = reinterpret_cast<const T*>(*commands);
+
+                    size_t cmdSize = cmd->GetRequiredSize();
+                    if (*size < cmdSize) {
+                        return nullptr;
+                    }
+
+                    *commands += cmdSize;
+                    *size -= cmdSize;
+
+                    return cmd;
+                }
+
+                bool HandleDeviceErrorCallbackCmd(const uint8_t** commands, size_t* size) {
+                    const auto* cmd = GetCommand<ReturnDeviceErrorCallbackCmd>(commands, size);
+                    if (cmd == nullptr) {
+                        return false;
+                    }
+
+                    if (cmd->GetMessage()[cmd->messageStrlen] != '\0') {
+                        return false;
+                    }
+
+                    if (device->errorCallback != nullptr) {
+                        device->errorCallback(cmd->GetMessage(), device->errorUserdata);
+                    }
+
+                    return true;
+                }
+
         };
 
     }

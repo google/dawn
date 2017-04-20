@@ -33,8 +33,6 @@ namespace wire {
         public:
             virtual ~CommandHandler() = default;
             virtual const uint8_t* HandleCommands(const uint8_t* commands, size_t size) = 0;
-
-            virtual void OnSynchronousError() = 0;
     };
 
     CommandHandler* NewClientDevice(nxtProcTable* procs, nxtDevice* device, CommandSerializer* serializer);

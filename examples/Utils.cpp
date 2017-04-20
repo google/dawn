@@ -28,8 +28,6 @@
 BackendBinding* CreateMetalBinding();
 
 namespace backend {
-    void RegisterSynchronousErrorCallback(nxtDevice device, void(*)(const char*, void*), void* userData);
-
     namespace opengl {
         void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device);
         void HACKCLEAR();
@@ -61,6 +59,10 @@ class OpenGLBinding : public BackendBinding {
         }
 };
 
+void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
+    std::cout << "Device error: " << message << std::endl;
+}
+
 enum class BackendType {
     OpenGL,
     Metal,
@@ -82,15 +84,6 @@ static nxt::wire::CommandHandler* wireServer = nullptr;
 static nxt::wire::CommandHandler* wireClient = nullptr;
 static nxt::wire::TerribleCommandBuffer* c2sBuf = nullptr;
 static nxt::wire::TerribleCommandBuffer* s2cBuf = nullptr;
-
-void HandleSynchronousError(const char* errorMessage, void* userData) {
-    std::cerr << errorMessage << std::endl;
-
-    if (userData != nullptr) {
-        auto wireServer = reinterpret_cast<nxt::wire::CommandHandler*>(userData);
-        wireServer->OnSynchronousError();
-    }
-}
 
 void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
     switch (backendType) {
@@ -147,8 +140,7 @@ void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
             break;
     }
 
-    //TODO(cwallez@chromium.org) this will disappear
-    backend::RegisterSynchronousErrorCallback(backendDevice, HandleSynchronousError, wireServer);
+    procs->deviceSetErrorCallback(device->Get(), PrintDeviceError, 0);
 }
 
 nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source) {

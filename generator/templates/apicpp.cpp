@@ -64,7 +64,7 @@ namespace nxt {
                             {{as_varName(arg.name)}}.Get()
                         {%- elif arg.type.category == "enum" or arg.type.category == "bitmask" -%}
                             static_cast<{{as_cType(arg.type.name)}}>({{as_varName(arg.name)}})
-                        {%- elif arg.type.category == "native" -%}
+                        {%- elif arg.type.category in ["native", "natively defined"] -%}
                             {{as_varName(arg.name)}}
                         {%- else -%}
                             UNHANDLED
@@ -76,7 +76,7 @@ namespace nxt {
             )
         {%- endmacro %}
 
-        {% for method in type.methods %}
+        {% for method in native_methods(type) %}
             {{render_cpp_method_declaration(type, method)}} {
                 {% if method.return_type.name.concatcase() == "void" %}
                     {{render_cpp_to_c_method_call(type, method)}};

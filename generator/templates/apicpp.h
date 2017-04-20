@@ -47,6 +47,10 @@ namespace nxt {
 
     {% endfor %}
 
+    {% for type in by_category["natively defined"] %}
+        using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
+    {% endfor %}
+
     {% for type in by_category["object"] %}
         class {{as_cppType(type.name)}};
     {% endfor %}
@@ -132,7 +136,7 @@ namespace nxt {
                 using ObjectBase::ObjectBase;
                 using ObjectBase::operator=;
 
-                {% for method in type.methods %}
+                {% for method in native_methods(type) %}
                     {{render_cpp_method_declaration(type, method)}};
                 {% endfor %}
 

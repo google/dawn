@@ -30,11 +30,6 @@
 
 namespace backend {
 
-    void RegisterSynchronousErrorCallback(nxtDevice device, ErrorCallback callback, void* userData) {
-        auto deviceBase = reinterpret_cast<DeviceBase*>(device);
-        deviceBase->RegisterErrorCallback(callback, userData);
-    }
-
     // DeviceBase::Caches
 
     // The caches are unordered_sets of pointers with special hash and compare functions
@@ -57,13 +52,13 @@ namespace backend {
 
     void DeviceBase::HandleError(const char* message) {
         if (errorCallback) {
-            errorCallback(message, errorUserData);
+            errorCallback(message, errorUserdata);
         }
     }
 
-    void DeviceBase::RegisterErrorCallback(ErrorCallback callback, void* userData) {
+    void DeviceBase::SetErrorCallback(nxt::DeviceErrorCallback callback, nxt::CallbackUserdata userdata) {
         this->errorCallback = callback;
-        this->errorUserData = userData;
+        this->errorUserdata = userdata;
     }
 
     BindGroupLayoutBase* DeviceBase::GetOrCreateBindGroupLayout(const BindGroupLayoutBase* blueprint, BindGroupLayoutBuilder* builder) {

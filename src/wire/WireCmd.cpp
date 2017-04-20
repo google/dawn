@@ -12,25 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef WIRE_WIRECMD_H_
-#define WIRE_WIRECMD_H_
-
-#include "wire/WireCmd_autogen.h"
+#include "WireCmd.h"
 
 namespace nxt {
 namespace wire {
 
-    struct ReturnDeviceErrorCallbackCmd {
-        wire::ReturnWireCmd commandId = ReturnWireCmd::DeviceErrorCallback;
+    size_t ReturnDeviceErrorCallbackCmd::GetRequiredSize() const {
+        return sizeof(*this) + messageStrlen + 1;
+    }
 
-        size_t messageStrlen;
+    char* ReturnDeviceErrorCallbackCmd::GetMessage() {
+        return reinterpret_cast<char*>(this + 1);
+    }
 
-        size_t GetRequiredSize() const;
-        char* GetMessage();
-        const char* GetMessage() const;
-    };
+    const char* ReturnDeviceErrorCallbackCmd::GetMessage() const {
+        return reinterpret_cast<const char*>(this + 1);
+    }
 
 }
 }
-
-#endif // WIRE_WIRECMD_H_
