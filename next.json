@@ -1,0 +1,670 @@
+{
+    "_comment": [
+        "Copyright 2017 The NXT Authors",
+        "",
+        "Licensed under the Apache License, Version 2.0 (the \"License\");",
+        "you may not use this file except in compliance with the License.",
+        "You may obtain a copy of the License at",
+        "",
+        "    http://www.apache.org/licenses/LICENSE-2.0",
+        "",
+        "Unless required by applicable law or agreed to in writing, software",
+        "distributed under the License is distributed on an \"AS IS\" BASIS,",
+        "WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.",
+        "See the License for the specific language governing permissions and",
+        "limitations under the License."
+    ],
+    "bind group": {
+        "category": "object"
+    },
+    "bind group builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "bind group"
+            },
+            {
+                "name": "set layout",
+                "args": [
+                    {"name": "layout", "type": "bind group layout"}
+                ]
+            },
+            {
+                "name": "set usage",
+                "args": [
+                    {"name": "usage", "type": "bind group usage"}
+                ]
+            },
+            {
+                "name": "set buffer views",
+                "args": [
+                    {"name": "start", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "buffer views", "type": "buffer view", "annotation": "const*", "length": "count"}
+                ]
+            },
+            {
+                "name": "set samplers",
+                "args": [
+                    {"name": "start", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "samplers", "type": "sampler", "annotation": "const*", "length": "count"}
+                ]
+            },
+            {
+                "name": "set texture views",
+                "args": [
+                    {"name": "start", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "texture views", "type": "texture view", "annotation": "const*", "length": "count"}
+                ]
+            }
+        ],
+        "TODO": [
+            "When resource are added, add methods for setting the content of the bind group"
+        ]
+    },
+    "bind group usage": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "frozen"},
+            {"value": 1, "name": "dynamic"}
+        ]
+    },
+    "bind group layout": {
+        "category": "object"
+    },
+    "bind group layout builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "bind group layout"
+            },
+            {
+                "name": "set bindings type",
+                "args": [
+                    {"name": "visibility", "type": "shader stage bit"},
+                    {"name": "binding type", "type": "binding type"},
+                    {"name": "start", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"}
+                ]
+            }
+        ]
+    },
+    "binding type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "uniform buffer"},
+            {"value": 1, "name": "sampler"},
+            {"value": 2, "name": "sampled texture"},
+            {"value": 3, "name": "storage buffer"}
+        ]
+    },
+    "buffer": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "create buffer view builder",
+                "returns": "buffer view builder"
+            },
+            {
+                "name": "set sub data",
+                "args": [
+                    {"name": "start", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "data", "type": "uint32_t", "annotation": "const*", "length": "count"}
+                ]
+            },
+            {
+                "name": "transition usage",
+                "args": [
+                    {"name": "usage", "type": "buffer usage bit"}
+                ]
+            },
+            {
+                "name": "freeze usage",
+                "args": [
+                    {"name": "usage", "type": "buffer usage bit"}
+                ]
+            }
+        ]
+    },
+    "buffer builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "buffer"
+            },
+            {
+                "name": "set allowed usage",
+                "args": [
+                    {"name": "usage", "type": "buffer usage bit"}
+                ]
+            },
+            {
+                "name": "set initial usage",
+                "args": [
+                    {"name": "usage", "type": "buffer usage bit"}
+                ]
+            },
+            {
+                "name": "set size",
+                "args": [
+                    {"name": "size", "type": "uint32_t"}
+                ]
+            }
+        ]
+    },
+    "buffer usage bit": {
+        "category": "bitmask",
+        "values": [
+            {"value": 0, "name": "none"},
+            {"value": 1, "name": "mapped"},
+            {"value": 2, "name": "transfer src"},
+            {"value": 4, "name": "transfer dst"},
+            {"value": 8, "name": "index"},
+            {"value": 16, "name": "vertex"},
+            {"value": 32, "name": "uniform"},
+            {"value": 64, "name": "storage"}
+        ]
+    },
+    "buffer view": {
+        "category": "object"
+    },
+    "buffer view builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "buffer view"
+            },
+            {
+                "name": "set extent",
+                "args": [
+                    {"name": "offset", "type": "uint32_t"},
+                    {"name": "size", "type": "uint32_t"}
+                ]
+            }
+        ]
+    },
+    "char": {
+        "category": "native"
+    },
+    "command buffer": {
+        "category": "object"
+    },
+    "command buffer builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "command buffer"
+            },
+            {
+                "name": "copy buffer to texture",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "texture", "type": "texture"},
+                    {"name": "x", "type": "uint32_t"},
+                    {"name": "y", "type": "uint32_t"},
+                    {"name": "z", "type": "uint32_t"},
+                    {"name": "width", "type": "uint32_t"},
+                    {"name": "height", "type": "uint32_t"},
+                    {"name": "depth", "type": "uint32_t"},
+                    {"name": "level", "type": "uint32_t"}
+                ],
+                "TODO": [
+                    "Make pretty with Offset and Extents structures",
+                    "Allow choosing the aspect (depth vs. stencil)?",
+                    "The following where removed because gmock supports only 10 arguments",
+                    "this means the buffer is assumed to be packed and starting at 0.",
+                    {"name": "row length", "type": "uint32_t"},
+                    {"name": "image height", "type": "uint32_t"},
+                    {"name": "buffer offset", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "dispatch",
+                "args": [
+                    {"name": "x", "type": "uint32_t"},
+                    {"name": "y", "type": "uint32_t"},
+                    {"name": "z", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "draw arrays",
+                "args": [
+                    {"name": "vertex count", "type": "uint32_t"},
+                    {"name": "instance count", "type": "uint32_t"},
+                    {"name": "first vertex", "type": "uint32_t"},
+                    {"name": "first instance", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "draw elements",
+                "args": [
+                    {"name": "index count", "type": "uint32_t"},
+                    {"name": "instance count", "type": "uint32_t"},
+                    {"name": "first index", "type": "uint32_t"},
+                    {"name": "first instance", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set bind group",
+                "args": [
+                    {"name": "group index", "type": "uint32_t"},
+                    {"name": "group", "type": "bind group"}
+                ]
+            },
+            {
+                "name": "set index buffer",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "offset", "type": "uint32_t"},
+                    {"name": "format", "type": "index format"}
+                ]
+            },
+            {
+                "name": "set push constants",
+                "TODO": [
+                    "data should be void*",
+                    "TODO Vulkan has an additional stage mask"
+                ],
+                "args": [
+                    {"name": "stage", "type": "shader stage bit"},
+                    {"name": "offset", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "data", "type": "uint32_t", "annotation": "const*", "length": "count"}
+                ]
+            },
+            {
+                "name": "set pipeline",
+                "args": [
+                    {"name": "pipeline", "type": "pipeline"}
+                ],
+                "notes": [
+                    "Not specifying graphics or compute because we know from render pass"
+                ]
+            },
+            {
+                "name": "set vertex buffers",
+                "args": [
+                    {"name": "start slot", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "buffers", "type": "buffer", "annotation": "const*", "length": "count"},
+                    {"name": "offsets", "type": "uint32_t", "annotation": "const*", "length": "count"}
+                ]
+            },
+            {
+                "name": "transition buffer usage",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "usage", "type": "buffer usage bit"}
+                ]
+            },
+            {
+                "name": "transition texture usage",
+                "args": [
+                    {"name": "texture", "type": "texture"},
+                    {"name": "usage", "type": "texture usage bit"}
+                ]
+            }
+        ]
+    },
+    "device": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "create bind group builder",
+                "returns": "bind group builder"
+            },
+            {
+                "name": "create bind group layout builder",
+                "returns": "bind group layout builder"
+            },
+            {
+                "name": "create buffer builder",
+                "returns": "buffer builder"
+            },
+            {
+                "name": "create command buffer builder",
+                "returns": "command buffer builder"
+            },
+            {
+                "name": "create input state builder",
+                "returns": "input state builder"
+            },
+            {
+                "name": "create pipeline builder",
+                "returns": "pipeline builder"
+            },
+            {
+                "name": "create pipeline layout builder",
+                "returns": "pipeline layout builder"
+            },
+            {
+                "name": "create queue builder",
+                "returns": "queue builder"
+            },
+            {
+                "name": "create sampler builder",
+                "returns": "sampler builder"
+            },
+            {
+                "name": "create shader module builder",
+                "returns": "shader module builder"
+            },
+            {
+                "name": "create texture builder",
+                "returns": "texture builder"
+            },
+            {
+                "name": "copy bind groups",
+                "args": [
+                    {"name": "start", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "source", "type": "bind group"},
+                    {"name": "target", "type": "bind group"}
+                ]
+            }
+        ]
+    },
+    "filter mode": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name":"nearest"},
+            {"value": 1, "name":"linear"}
+        ]
+    },
+    "index format": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "uint16"},
+            {"value": 1, "name": "uint32"}
+        ]
+    },
+    "input state": {
+        "category": "object"
+    },
+    "input state builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "input state"
+            },
+            {
+                "name": "set attribute",
+                "args": [
+                    {"name": "shader location", "type": "uint32_t"},
+                    {"name": "binding slot", "type": "uint32_t"},
+                    {"name": "format", "type": "vertex format"},
+                    {"name": "offset", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set input",
+                "args": [
+                    {"name": "binding slot", "type": "uint32_t"},
+                    {"name": "stride", "type": "uint32_t"},
+                    {"name": "step mode", "type": "input step mode"}
+                ]
+            }
+        ]
+    },
+    "input step mode": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "vertex"},
+            {"value": 1, "name": "instance"}
+        ]
+    },
+    "pipeline": {
+        "category": "object"
+    },
+    "pipeline builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "pipeline"
+            },
+            {
+                "name": "set layout",
+                "args": [
+                    {"name": "layout", "type": "pipeline layout"}
+                ]
+            },
+            {
+                "name": "set stage",
+                "args": [
+                    {"name": "stage", "type": "shader stage"},
+                    {"name": "module", "type": "shader module"},
+                    {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set input state",
+                "args": [
+                    {"name": "input", "type": "input state"}
+                ]
+            }
+        ]
+    },
+    "pipeline layout": {
+        "category": "object"
+    },
+    "pipeline layout builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "pipeline layout"
+            },
+            {
+                "name": "set bind group layout",
+                "args": [
+                    {"name": "group index", "type": "uint32_t"},
+                    {"name": "layout", "type": "bind group layout"}
+                ]
+            }
+        ]
+    },
+    "queue": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "submit",
+                "args": [
+                    {"name": "num commands", "type": "uint32_t"},
+                    {"name": "commands", "type": "command buffer", "annotation": "const*", "length": "num commands"}
+                ]
+            }
+        ]
+    },
+    "queue builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "queue"
+            }
+        ]
+    },
+    "sampler": {
+        "category": "object"
+    },
+    "sampler builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "sampler"
+            },
+            {
+                "name": "set filter mode",
+                "args": [
+                    {"name": "mag filter", "type": "filter mode"},
+                    {"name": "min filter", "type": "filter mode"},
+                    {"name": "mipmap filter", "type": "filter mode"}
+                ]
+            }
+        ]
+    },
+    "shader module": {
+        "category": "object"
+    },
+    "shader module builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "shader module"
+            },
+            {
+                "name": "set source",
+                "args": [
+                    {"name": "code size", "type": "uint32_t"},
+                    {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
+                ]
+            }
+        ]
+    },
+    "shader stage": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "vertex"},
+            {"value": 1, "name": "fragment"},
+            {"value": 2, "name": "compute"}
+        ]
+    },
+    "shader stage bit": {
+        "category": "bitmask",
+        "values": [
+            {"value": 1, "name": "vertex"},
+            {"value": 2, "name": "fragment"},
+            {"value": 4, "name": "compute"}
+        ]
+    },
+    "texture": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "create texture view builder",
+                "returns": "texture view builder"
+            },
+            {
+                "name": "transition usage",
+                "args": [
+                    {"name": "usage", "type": "texture usage bit"}
+                ]
+            },
+            {
+                "name": "freeze usage",
+                "args": [
+                    {"name": "usage", "type": "texture usage bit"}
+                ]
+            }
+        ]
+    },
+    "texture builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "texture"
+            },
+            {
+                "name": "set dimension",
+                "args": [
+                    {"name": "dimension", "type": "texture dimension"}
+                ]
+            },
+            {
+                "name": "set extent",
+                "args": [
+                    {"name": "width", "type": "uint32_t"},
+                    {"name": "height", "type": "uint32_t"},
+                    {"name": "depth", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set format",
+                "args": [
+                    {"name": "format", "type": "texture format"}
+                ]
+            },
+            {
+                "name": "set mip levels",
+                "args": [
+                    {"name": "num mip levels", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set allowed usage",
+                "args": [
+                    {"name": "usage", "type": "texture usage bit"}
+                ]
+            },
+            {
+                "name": "set initial usage",
+                "args": [
+                    {"name": "usage", "type": "texture usage bit"}
+                ]
+            }
+        ]
+    },
+    "texture dimension": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "2D"}
+        ]
+    },
+    "texture usage bit": {
+        "category": "bitmask",
+        "values": [
+            {"value": 0, "name": "none"},
+            {"value": 1, "name": "transfer src"},
+            {"value": 2, "name": "transfer dst"},
+            {"value": 4, "name": "sampled"},
+            {"value": 8, "name": "storage"},
+            {"value": 16, "name": "color attachment"},
+            {"value": 32, "name": "depth stencil attachment"}
+        ]
+    },
+    "texture view": {
+        "category": "object"
+    },
+    "texture view builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "texture view"
+            }
+        ]
+    },
+    "texture format": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "r8 g8 b8 a8 unorm"}
+        ]
+    },
+    "vertex format": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "float r32 g32 b32 a32"},
+            {"value": 1, "name": "float r32 g32 b32"},
+            {"value": 2, "name": "float r32 g32"}
+        ]
+    },
+    "void": {
+        "category": "native"
+    },
+    "uint32_t": {
+        "category": "native"
+    }
+}
