@@ -91,6 +91,7 @@ class ObjectType(Type):
         Type.__init__(self, name, record)
         self.methods = []
         self.native_methods = []
+        self.built_type = None
 
 ############################################################
 # PARSE
@@ -123,6 +124,14 @@ def link_object(obj, types):
     methods = [make_method(m) for m in obj.record.get('methods', [])]
     obj.methods = [method for method in methods if not is_native_method(method)]
     obj.native_methods = [method for method in methods if is_native_method(method)]
+
+    # Compute the built object type for builders
+    if obj.is_builder:
+        for method in obj.methods:
+            if method.name.canonical_case() == "get result":
+                obj.built_type = method.return_type
+                break
+        assert(obj.built_type != None)
 
 def parse_json(json):
     category_to_parser = {

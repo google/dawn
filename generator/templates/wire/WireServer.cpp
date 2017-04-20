@@ -25,8 +25,15 @@ namespace wire {
         //* Stores what the backend knows about the type.
         template<typename T>
         struct ObjectDataBase {
-            //* The backend-provided handle to this object.
+            //* The backend-provided handle and serial to this object.
             T handle;
+            uint32_t serial = 0;
+
+            //* Built object ID and serial, needed to send to the client along with builder error callbacks
+            //* TODO(cwallez@chromium.org) only have this for builder T
+            uint32_t builtObjectId = 0;
+            uint32_t builtObjectSerial = 0;
+
             //* Used by the error-propagation mechanism to know if this object is an error.
             //* TODO(cwallez@chromium.org): this is doubling the memory usage of
             //* std::vector<ObjectDataBase> consider making it a special marker value in handle instead.
@@ -105,6 +112,10 @@ namespace wire {
 
         void ForwardDeviceErrorToServer(const char* message, nxtCallbackUserdata userdata);
 
+        {% for type in by_category["object"] if type.is_builder%}
+            void Forward{{type.name.CamelCase()}}ToClient(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2);
+        {% endfor %}
+
         class Server : public CommandHandler {
             public:
                 Server(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer)
@@ -126,6 +137,37 @@ namespace wire {
                     *allocCmd = cmd;
                     strcpy(allocCmd->GetMessage(), message);
                 }
+
+                {% for type in by_category["object"] if type.is_builder%}
+                    {% set Type = type.name.CamelCase() %}
+                    void On{{Type}}Error(nxtBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial) {
+                        auto* builder = known{{Type}}.Get(id);
+
+                        if (builder == nullptr || builder->serial != serial) {
+                            return;
+                        }
+
+                        if (status != NXT_BUILDER_ERROR_STATUS_SUCCESS) {
+                            builder->valid = false;
+                        }
+
+                        if (status != NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
+                            //* Unknown is the only status that can be returned without a call to GetResult
+                            //* so we are guaranteed to have created an object.
+                            assert(builder->builtObjectId != 0);
+
+                            Return{{Type}}ErrorCallbackCmd cmd;
+                            cmd.builtObjectId = builder->builtObjectId;
+                            cmd.builtObjectSerial = builder->builtObjectSerial;
+                            cmd.status = status;
+                            cmd.messageStrlen = std::strlen(message);
+
+                            auto allocCmd = reinterpret_cast<Return{{Type}}ErrorCallbackCmd*>(GetCmdSpace(cmd.GetRequiredSize()));
+                            *allocCmd = cmd;
+                            strcpy(allocCmd->GetMessage(), message);
+                        }
+                    }
+                {% endfor %}
 
                 const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
                     while (size > sizeof(WireCmd)) {
@@ -275,13 +317,20 @@ namespace wire {
                             //* At that point all the data has been upacked in cmd->* or arg_*
 
                             //* In all cases allocate the object data as it will be refered-to by the client.
-                            {% set returns = method.return_type.name.canonical_case() != "void" %}
+                            {% set return_type = method.return_type %}
+                            {% set returns = return_type.name.canonical_case() != "void" %}
                             {% if returns %}
                                 {% set Type = method.return_type.name.CamelCase() %}
                                 auto* resultData = known{{Type}}.Allocate(cmd->resultId);
                                 if (resultData == nullptr) {
                                     return false;
                                 }
+                                resultData->serial = cmd->resultSerial;
+
+                                {% if type.is_builder %}
+                                    selfData->builtObjectId = cmd->resultId;
+                                    selfData->builtObjectSerial = cmd->resultSerial;
+                                {% endif %}
                             {% endif %}
 
                             //* After the data is allocated, apply the argument error propagation mechanism
@@ -305,16 +354,17 @@ namespace wire {
                             {% if returns %}
                                 resultData->handle = result;
                                 resultData->valid = result != nullptr;
-                            {% endif %}
 
-                            if (gotError) {
-                                {% if type.is_builder %}
-                                    //* Get the data again, has been invalidated by the call to
-                                    //* known.Allocate
-                                    known{{type.name.CamelCase()}}.Get(cmd->self)->valid = false;
+                                //* builders remember the ID of the object they built so that they can send it
+                                //* in the callback to the client.
+                                {% if return_type.is_builder %}
+                                    if (result != nullptr) {
+                                        uint64_t userdata1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
+                                        uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd->resultId;
+                                        procs.{{as_varName(return_type.name, Name("set error callback"))}}(result, Forward{{return_type.name.CamelCase()}}ToClient, userdata1, userdata2);
+                                    }
                                 {% endif %}
-                                gotError = false;
-                            }
+                            {% endif %}
 
                             return true;
                         }
@@ -353,6 +403,15 @@ namespace wire {
             auto server = reinterpret_cast<Server*>(static_cast<intptr_t>(userdata));
             server->OnDeviceError(message);
         }
+
+        {% for type in by_category["object"] if type.is_builder%}
+            void Forward{{type.name.CamelCase()}}ToClient(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) {
+                auto server = reinterpret_cast<Server*>(static_cast<intptr_t>(userdata1));
+                uint32_t id = userdata2 & 0xFFFFFFFFu;
+                uint32_t serial = userdata2 >> uint64_t(32);
+                server->On{{type.name.CamelCase()}}Error(status, message, id, serial);
+            }
+        {% endfor %}
     }
 
     CommandHandler* NewServerCommandHandler(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer) {

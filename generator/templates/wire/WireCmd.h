@@ -49,6 +49,7 @@ namespace wire {
                 //* Commands creating objects say which ID the created object will be referred as.
                 {% if method.return_type.category == "object" %}
                     uint32_t resultId;
+                    uint32_t resultSerial;
                 {% endif %}
 
                 //* Value types are directly in the command, objects being replaced with their IDs.
@@ -88,12 +89,31 @@ namespace wire {
 
             size_t GetRequiredSize() const;
         };
+
     {% endfor %}
 
     //* Enum used as a prefix to each command on the return wire format.
     enum class ReturnWireCmd : uint32_t {
         DeviceErrorCallback,
+        {% for type in by_category["object"] if type.is_builder %}
+                {{type.name.CamelCase()}}ErrorCallback,
+        {% endfor %}
     };
+
+    {% for type in by_category["object"] if type.is_builder %}
+        struct Return{{type.name.CamelCase()}}ErrorCallbackCmd {
+            wire::ReturnWireCmd commandId = ReturnWireCmd::{{type.name.CamelCase()}}ErrorCallback;
+
+            uint32_t builtObjectId;
+            uint32_t builtObjectSerial;
+            uint32_t status;
+            size_t messageStrlen;
+
+            size_t GetRequiredSize() const;
+            char* GetMessage();
+            const char* GetMessage() const;
+        };
+    {% endfor %}
 
 }
 }

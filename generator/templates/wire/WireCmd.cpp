@@ -71,5 +71,20 @@ namespace wire {
         }
     {% endfor %}
 
+    {% for type in by_category["object"] if type.is_builder %}
+        {% set Type = type.name.CamelCase() %}
+        size_t Return{{Type}}ErrorCallbackCmd::GetRequiredSize() const {
+            return sizeof(*this) + messageStrlen + 1;
+        }
+
+        char* Return{{Type}}ErrorCallbackCmd::GetMessage() {
+            return reinterpret_cast<char*>(this + 1);
+        }
+
+        const char* Return{{Type}}ErrorCallbackCmd::GetMessage() const {
+            return reinterpret_cast<const char*>(this + 1);
+        }
+    {% endfor %}
+
 }
 }

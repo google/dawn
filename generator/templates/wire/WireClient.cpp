@@ -15,8 +15,11 @@
 #include "Wire.h"
 #include "WireCmd.h"
 
+#include <cassert>
 #include <cstring>
 #include <vector>
+
+#include <iostream>
 
 namespace nxt {
 namespace wire {
@@ -25,6 +28,20 @@ namespace wire {
     namespace client {
 
         class Device;
+
+        struct BuilderCallbackData {
+            void Call(nxtBuilderErrorStatus status, const char* message) {
+                if (canCall && callback != nullptr) {
+                    canCall = true;
+                    callback(status, message, userdata1, userdata2);
+                }
+            }
+
+            nxtBuilderErrorCallback callback = nullptr;
+            nxtCallbackUserdata userdata1 = 0;
+            nxtCallbackUserdata userdata2 = 0;
+            bool canCall = true;
+        };
 
         //* All non-Device objects of the client side have:
         //*  - A pointer to the device to get where to serialize commands
@@ -38,6 +55,8 @@ namespace wire {
             Device* device;
             uint32_t refcount;
             uint32_t id;
+
+            BuilderCallbackData builderCallback;
         };
 
         {% for type in by_category["object"] if not type.name.canonical_case() == "device" %}
@@ -46,19 +65,58 @@ namespace wire {
             };
         {% endfor %}
 
-        //* TODO: Remember objects so they can all be destroyed at device destruction.
+        //* TODO(cwallez@chromium.org): Do something with objects before they are destroyed ?
+        //*  - Call still uncalled builder callbacks
         template<typename T>
         class ObjectAllocator {
             public:
+                struct ObjectAndSerial {
+                    ObjectAndSerial(std::unique_ptr<T> object, uint32_t serial)
+                        : object(std::move(object)), serial(serial) {
+                    }
+                    std::unique_ptr<T> object;
+                    uint32_t serial;
+                };
+
                 ObjectAllocator(Device* device) : device(device) {
+                    // ID 0 is nullptr
+                    objects.emplace_back(nullptr, 0);
                 }
 
-                T* New() {
-                    return new T(device, 1, GetNewId());
+                ObjectAndSerial* New() {
+                    uint32_t id = GetNewId();
+                    T* result = new T(device, 1, id);
+                    auto object = std::unique_ptr<T>(result);
+
+                    if (id >= objects.size()) {
+                        assert(id == objects.size());
+                        objects.emplace_back(std::move(object), 0);
+                    } else {
+                        assert(objects[id].object == nullptr);
+                        //* TODO(cwallez@chromium.org): investigate if overflows could cause bad things to happen
+                        objects[id].serial++;
+                        objects[id].object = std::move(object);
+                    }
+
+                    return &objects[id];
                 }
                 void Free(T* obj) {
                     FreeId(obj->id);
-                    delete obj;
+                    objects[obj->id].object = nullptr;
+                }
+
+                T* GetObject(uint32_t id) {
+                    if (id >= objects.size()) {
+                        return nullptr;
+                    }
+                    return objects[id].object.get();
+                }
+
+                uint32_t GetSerial(uint32_t id) {
+                    if (id >= objects.size()) {
+                        return 0;
+                    }
+                    return objects[id].serial;
                 }
 
             private:
@@ -77,6 +135,7 @@ namespace wire {
                 // 0 is an ID reserved to represent nullptr
                 uint32_t currentId = 1;
                 std::vector<uint32_t> freeIds;
+                std::vector<ObjectAndSerial> objects;
                 Device* device;
         };
 
@@ -165,18 +224,31 @@ namespace wire {
 
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
-                        auto result = self->device->{{method.return_type.name.camelCase()}}.New();
-                        allocCmd->resultId = result->id;
-                        return result;
+                        auto* allocation = self->device->{{method.return_type.name.camelCase()}}.New();
+
+                        {% if type.is_builder %}
+                            //* We are in GetResult, so the callback that should be called is the
+                            //* currently set one. Copy it over to the created object and prevent the
+                            //* builder from calling the callback on destruction.
+                            allocation->object->builderCallback = self->builderCallback;
+                            self->builderCallback.canCall = false;
+                        {% endif %}
+
+                        allocCmd->resultId = allocation->object->id;
+                        allocCmd->resultSerial = allocation->serial;
+                        return allocation->object.get();
                     {% endif %}
                 }
             {% endfor %}
 
             {% if type.is_builder %}
-                void Client{{as_MethodSuffix(type.name, Name("set error callback"))}}(nxtBuilderErrorCallback callback,
+                void Client{{as_MethodSuffix(type.name, Name("set error callback"))}}({{Type}}* self,
+                                                                                      nxtBuilderErrorCallback callback,
                                                                                       nxtCallbackUserdata userdata1,
                                                                                       nxtCallbackUserdata userdata2) {
-                    //TODO(cwallez@chromium.org): will be implemented in a follow-up commit.
+                    self->builderCallback.callback = callback;
+                    self->builderCallback.userdata1 = userdata1;
+                    self->builderCallback.userdata2 = userdata2;
                 }
             {% endif %}
 
@@ -188,6 +260,8 @@ namespace wire {
                     if (obj->refcount > 0) {
                         return;
                     }
+
+                    obj->builderCallback.Call(NXT_BUILDER_ERROR_STATUS_UNKNOWN, "Unknown");
 
                     wire::{{as_MethodSuffix(type.name, Name("destroy"))}}Cmd cmd;
                     cmd.objectId = obj->id;
@@ -240,6 +314,11 @@ namespace wire {
                             case ReturnWireCmd::DeviceErrorCallback:
                                 success = HandleDeviceErrorCallbackCmd(&commands, &size);
                                 break;
+                            {% for type in by_category["object"] if type.is_builder %}
+                                case ReturnWireCmd::{{type.name.CamelCase()}}ErrorCallback:
+                                    success = Handle{{type.name.CamelCase()}}ErrorCallbackCmd(&commands, &size);
+                                    break;
+                            {% endfor %}
                             default:
                                 success = false;
                         }
@@ -298,6 +377,30 @@ namespace wire {
                     return true;
                 }
 
+                {% for type in by_category["object"] if type.is_builder %}
+                    {% set Type = type.name.CamelCase() %}
+                    bool Handle{{Type}}ErrorCallbackCmd(const uint8_t** commands, size_t* size) {
+                        const auto* cmd = GetCommand<Return{{Type}}ErrorCallbackCmd>(commands, size);
+                        if (cmd == nullptr) {
+                            return false;
+                        }
+
+                        if (cmd->GetMessage()[cmd->messageStrlen] != '\0') {
+                            return false;
+                        }
+
+                        auto* builtObject = device->{{type.built_type.name.camelCase()}}.GetObject(cmd->builtObjectId);
+                        uint32_t objectSerial = device->{{type.built_type.name.camelCase()}}.GetSerial(cmd->builtObjectId);
+
+                        //* The object might have been deleted or a new object created with the same ID.
+                        if (builtObject == nullptr || objectSerial != cmd->builtObjectSerial) {
+                            return true;
+                        }
+
+                        builtObject->builderCallback.Call(static_cast<nxtBuilderErrorStatus>(cmd->status), cmd->GetMessage());
+                        return true;
+                    }
+                {% endfor %}
         };
 
     }
