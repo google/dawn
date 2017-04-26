@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 # Copyright 2017 The NXT Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
