@@ -27,18 +27,18 @@
 {% endfor %}
 
 #include "nxt/nxt.h"
-#include "wtf/text/StringUTF8Adaptor.h"
+#include "platform/wtf/text/StringUTF8Adaptor.h"
 
 namespace blink {
 
     {% for type in by_category["object"] %}
         {% set Class = "NXT" + type.name.CamelCase() %}
         {{Class}}::{{Class}}({{as_cType(type.name)}} self, Member<NXTState> state)
-            : m_self(self), m_state(state) {
+            : self_(self), state_(state) {
         }
-        void {{Class}}::dispose() {
+        void {{Class}}::Dispose() {
             {% if type.name.canonical_case() != "device" %}
-                m_state->getProcTable()->{{as_varName(type.name, Name("release"))}}(m_self);
+                state_->GetProcTable()->{{as_varName(type.name, Name("release"))}}(self_);
             {% endif %}
         }
 
@@ -76,7 +76,7 @@ namespace blink {
                     {% elif arg.annotation == "const*" %}
                         {% if arg.length == "strlen" %}
                             WTF::StringUTF8Adaptor {{argName}}Adaptor({{argName}}_);
-                            std::string {{argName}}String({{argName}}Adaptor.data(), {{argName}}Adaptor.length());
+                            std::string {{argName}}String({{argName}}Adaptor.Data(), {{argName}}Adaptor.length());
                             const char* {{argName}} = {{argName}}String.c_str();
                         {% elif arg.type.category == "object" %}
                             //* TODO error on bad length
@@ -95,7 +95,7 @@ namespace blink {
                 {% if method.return_type.name.concatcase() != "void" %}
                     auto result =
                 {%- endif %}
-                m_state->getProcTable()->{{as_varName(type.name, method.name)}}(m_self
+                state_->GetProcTable()->{{as_varName(type.name, method.name)}}(self_
                     {%- for arg in method.arguments -%}
                         , {{as_varName(arg.name)}}
                     {%- endfor -%}
@@ -105,13 +105,13 @@ namespace blink {
                     return this;
                 {% else %}
                     // TODO actually return the object given by the call to the procs
-                    return new NXT{{method.return_type.name.CamelCase()}}(result, m_state);
+                    return new NXT{{method.return_type.name.CamelCase()}}(result, state_);
                 {% endif %}
             }
         {% endfor %}
 
         {{as_cType(type.name)}} {{Class}}::GetNXT() {
-            return m_self;
+            return self_;
         }
     {% endfor %}
 }

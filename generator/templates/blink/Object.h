@@ -29,7 +29,7 @@
 
 #include "bindings/core/v8/ScriptWrappable.h"
 #include "platform/heap/GarbageCollected.h"
-#include "wtf/text/WTFString.h"
+#include "platform/wtf/text/WTFString.h"
 
 #include "../NXTState.h"
 #include "Forward.h"
@@ -41,10 +41,10 @@ class {{Class}} final :
         public ScriptWrappable {
 
     WTF_MAKE_NONCOPYABLE({{Class}});
-    USING_PRE_FINALIZER({{Class}}, dispose);
+    USING_PRE_FINALIZER({{Class}}, Dispose);
     public:
         DEFINE_INLINE_TRACE() {
-            visitor->trace(m_state);
+            visitor->Trace(state_);
         };
 
     public:
@@ -52,7 +52,7 @@ class {{Class}} final :
 
     public:
         {{Class}}({{as_cType(type.name)}} self, Member<NXTState> state);
-        void dispose();
+        void Dispose();
 
         {% for method in type.methods %}
             {% if method.return_type.name.concatcase() == "void" %}
@@ -89,8 +89,8 @@ class {{Class}} final :
         {% endif %}
 
     private:
-        {{as_cType(type.name)}} m_self = nullptr;
-        Member<NXTState> m_state;
+        {{as_cType(type.name)}} self_ = nullptr;
+        Member<NXTState> state_;
 };
 
 }
