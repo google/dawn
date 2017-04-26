@@ -77,8 +77,7 @@ namespace nxt {
     template<typename T>
     constexpr bool HasZeroOrOneBits(T value) {
         using Integral = typename UnderlyingType<T>::type;
-        Integral v = static_cast<Integral>(value);
-        return (v & (v - 1)) == 0;
+        return (static_cast<Integral>(value) & (static_cast<Integral>(value) - 1)) == 0;
     }
 
     template<typename T1, typename T2, typename = typename std::enable_if<
