@@ -25,9 +25,11 @@ NXT is missing a lot of things to be usable for anything else than prototyping:
 - Buffer mapping
 - ...
 
-We chose to use SPIRV in our prototype because it was the only language that had translators to other shading languages, thanks to SPIRV-Cross which saved us a ton of work. [SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross) doesn’t have an HLSL backend so we didn’t attempt a D3D12 backend (and D3D11 was too limiting for our prototype API). Only the Metal and the OpenGL backends are functional at this time. The OpenGL backend let us integrate in Chromium very easily.
+We chose to use SPIRV in our prototype because it was the only language that had translators to other shading languages, thanks to SPIRV-Cross which saved us a ton of work. [SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross) didn’t have an HLSL backend so we didn’t attempt a D3D12 backend (and D3D11 was too limiting for our prototype API). Only the Metal and the OpenGL backends are functional at this time. The OpenGL backend let us integrate in Chromium very easily.
 
 ## Links
+
+An [overview document](https://docs.google.com/document/d/1-lAvR9GXaNJiqUIpm3N2XuGUWv_JrkpGizDN0bNq7wY) of the goals and design of NXT.
 
 Some of the investigations we made on the design of potential backend APIs:
 
