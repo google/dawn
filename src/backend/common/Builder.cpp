@@ -18,20 +18,69 @@
 
 namespace backend {
 
-    bool Builder::WasConsumed() const {
-        return consumed;
+    bool BuilderBase::CanBeUsed() const {
+        return !consumed && !gotStatus;
     }
 
-    Builder::Builder(DeviceBase* device) : device(device) {
+    void BuilderBase::HandleError(const char* message) {
+        SetStatus(nxt::BuilderErrorStatus::Error, message);
     }
 
-    void Builder::MarkConsumed() {
+    void BuilderBase::SetErrorCallback(nxt::BuilderErrorCallback callback,
+                                   nxt::CallbackUserdata userdata1,
+                                   nxt::CallbackUserdata userdata2) {
+        this->callback = callback;
+        this->userdata1 = userdata1;
+        this->userdata2 = userdata2;
+    }
+
+    BuilderBase::BuilderBase(DeviceBase* device) : device(device) {
+    }
+
+    BuilderBase::~BuilderBase() {
+        if (!consumed && callback != nullptr) {
+            callback(NXT_BUILDER_ERROR_STATUS_UNKNOWN, "Builder destroyed before GetResult", userdata1, userdata2);
+        }
+    }
+
+    void BuilderBase::SetStatus(nxt::BuilderErrorStatus status, const char* message) {
+        ASSERT(status != nxt::BuilderErrorStatus::Success);
+        ASSERT(status != nxt::BuilderErrorStatus::Unknown);
+        ASSERT(!gotStatus); // This is not strictly necessary but something to strive for.
+        gotStatus = true;
+
+        storedStatus = status;
+        storedMessage = std::move(message);
+    }
+
+    bool BuilderBase::HandleResult(RefCounted* result) {
+        // GetResult can only be called once.
         ASSERT(!consumed);
         consumed = true;
-    }
 
-    void Builder::HandleError(const char* message) {
-        device->HandleError(message);
+        // result == nullptr implies there was an error which implies we should have a status set.
+        ASSERT(result != nullptr || gotStatus);
+
+        // If we have any error, then we have to return nullptr
+        if (gotStatus) {
+            ASSERT(storedStatus != nxt::BuilderErrorStatus::Success);
+
+            // The application will never see "result" so we need to remove the
+            // external ref here.
+            if (result != nullptr) {
+                result->Release();
+                result = nullptr;
+            }
+        } else {
+            ASSERT(storedStatus == nxt::BuilderErrorStatus::Success);
+            ASSERT(storedMessage.empty());
+        }
+
+        if (callback) {
+            callback(static_cast<nxtBuilderErrorStatus>(storedStatus), storedMessage.c_str(), userdata1, userdata2);
+        }
+
+        return result != nullptr;
     }
 
 }

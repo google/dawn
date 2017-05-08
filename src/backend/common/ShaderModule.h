@@ -71,18 +71,19 @@ namespace backend {
             nxt::ShaderStage executionModel;
     };
 
-    class ShaderModuleBuilder : public Builder {
+    class ShaderModuleBuilder : public Builder<ShaderModuleBase> {
         public:
             ShaderModuleBuilder(DeviceBase* device);
 
             std::vector<uint32_t> AcquireSpirv();
 
             // NXT API
-            ShaderModuleBase* GetResult();
             void SetSource(uint32_t codeSize, const uint32_t* code);
 
         private:
             friend class ShaderModuleBase;
+
+            ShaderModuleBase* GetResultImpl() override;
 
             std::vector<uint32_t> spirv;
     };

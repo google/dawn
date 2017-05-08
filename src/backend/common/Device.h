@@ -30,7 +30,7 @@ namespace backend {
             ~DeviceBase();
 
             void HandleError(const char* message);
-            void SetErrorCallback(nxt::DeviceErrorCallback, nxt::CallbackUserdata userdata);
+            void SetErrorCallback(nxt::DeviceErrorCallback callback, nxt::CallbackUserdata userdata);
 
             virtual BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) = 0;
             virtual BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) = 0;
@@ -86,7 +86,7 @@ namespace backend {
             Caches* caches = nullptr;
 
             nxt::DeviceErrorCallback errorCallback = nullptr;
-            nxt::CallbackUserdata errorUserdata;
+            nxt::CallbackUserdata errorUserdata = 0;
     };
 
 }

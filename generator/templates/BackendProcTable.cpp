@@ -91,7 +91,7 @@ namespace {{namespace}} {
                     {%- endfor -%}
                 ) {
                     {% if type.is_builder and method.name.canonical_case() not in ("release", "reference") %}
-                        if (self->WasConsumed()) return false;
+                        if (!self->CanBeUsed()) return false;
                     {% else %}
                         (void) self;
                     {% endif %}
@@ -121,6 +121,8 @@ namespace {{namespace}} {
                         {%- endfor -%}
                     );
 
+                    //* Some function have very heavy checks in a seperate method, so that they
+                    //* can be skipped in the NonValidatingEntryPoints.
                     {% if suffix in methodsWithExtraValidation %}
                         if (valid) {
                             valid = self->Validate{{method.name.CamelCase()}}(
@@ -130,12 +132,27 @@ namespace {{namespace}} {
                             );
                         }
                     {% endif %}
-                    //* TODO Do the hand-written checks if necessary
-                    //* On success, forward the arguments to the method, else error out without calling it
+
+                    //* If there is an error we forward it appropriately.
                     if (!valid) {
-                        // TODO get the device and give it the error?
-                        std::cout << "Error in {{suffix}}" << std::endl;
+                        //* An error in a builder methods is always handled by the builder
+                        {% if type.is_builder %}
+                            //* HACK(cwallez@chromium.org): special casing GetResult so that the error callback
+                            //* is called if needed. Without this, no call to HandleResult would happen, and the
+                            //* error callback would always get called with an Unknown status
+                            {% if method.name.canonical_case() == "get result" %}
+                                {{as_backendType(method.return_type)}} fakeResult = nullptr;
+                                bool shouldBeFalse = self->HandleResult(fakeResult);
+                                assert(shouldBeFalse == false);
+                            {% else %}
+                                self->HandleError("Error in {{suffix}}");
+                            {% endif %}
+                        {% else %}
+                            // TODO get the device or builder and give it the error?
+                            std::cout << "Error in {{suffix}}" << std::endl;
+                        {% endif %}
                     }
+
                     {% if method.return_type.name.canonical_case() == "void" %}
                         if (!valid) return;
                     {% else %}

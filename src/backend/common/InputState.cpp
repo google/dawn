@@ -81,7 +81,7 @@ namespace backend {
     InputStateBuilder::InputStateBuilder(DeviceBase* device) : Builder(device) {
     }
 
-    InputStateBase* InputStateBuilder::GetResult() {
+    InputStateBase* InputStateBuilder::GetResultImpl() {
         for (uint32_t location = 0; location < kMaxVertexAttributes; ++location) {
             if (attributesSetMask[location] &&
                     !inputsSetMask[attributeInfos[location].bindingSlot]) {
@@ -90,7 +90,6 @@ namespace backend {
             }
         }
 
-        MarkConsumed();
         return device->CreateInputState(this);
     }
 

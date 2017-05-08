@@ -59,7 +59,7 @@ namespace backend {
             Ref<InputStateBase> inputState;
     };
 
-    class PipelineBuilder : public Builder {
+    class PipelineBuilder : public Builder<PipelineBase> {
         public:
             PipelineBuilder(DeviceBase* device);
 
@@ -70,13 +70,14 @@ namespace backend {
             const StageInfo& GetStageInfo(nxt::ShaderStage stage) const;
 
             // NXT API
-            PipelineBase* GetResult();
             void SetLayout(PipelineLayoutBase* layout);
             void SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
             void SetInputState(InputStateBase* inputState);
 
         private:
             friend class PipelineBase;
+
+            PipelineBase* GetResultImpl() override;
 
             Ref<PipelineLayoutBase> layout;
             nxt::ShaderStageBit stageMask;

@@ -39,7 +39,7 @@ namespace backend {
     PipelineLayoutBuilder::PipelineLayoutBuilder(DeviceBase* device) : Builder(device) {
     }
 
-    PipelineLayoutBase* PipelineLayoutBuilder::GetResult() {
+    PipelineLayoutBase* PipelineLayoutBuilder::GetResultImpl() {
         // TODO(cwallez@chromium.org): this is a hack, have the null bind group layout somewhere in the device
         // once we have a cache of BGL
         for (size_t group = 0; group < kMaxBindGroups; ++group) {
@@ -48,7 +48,6 @@ namespace backend {
             }
         }
 
-        MarkConsumed();
         return device->CreatePipelineLayout(this);
     }
 

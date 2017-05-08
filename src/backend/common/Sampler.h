@@ -28,7 +28,7 @@ namespace backend {
             SamplerBase(SamplerBuilder* builder);
     };
 
-    class SamplerBuilder : public Builder {
+    class SamplerBuilder : public Builder<SamplerBase> {
         public:
             SamplerBuilder(DeviceBase* device);
 
@@ -37,11 +37,12 @@ namespace backend {
             nxt::FilterMode GetMipMapFilter() const;
 
             // NXT API
-            SamplerBase* GetResult();
             void SetFilterMode(nxt::FilterMode magFilter, nxt::FilterMode minFilter, nxt::FilterMode mipMapFilter);
 
         private:
             friend class SamplerBase;
+
+            SamplerBase* GetResultImpl() override;
 
             int propertiesSet = 0;
 

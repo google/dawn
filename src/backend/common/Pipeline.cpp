@@ -98,7 +98,7 @@ namespace backend {
         return stages[stage];
     }
 
-    PipelineBase* PipelineBuilder::GetResult() {
+    PipelineBase* PipelineBuilder::GetResultImpl() {
         // TODO(cwallez@chromium.org): the layout should be required, and put the default objects in the device
         if (!layout) {
             layout = device->CreatePipelineLayoutBuilder()->GetResult();
@@ -107,7 +107,6 @@ namespace backend {
             inputState = device->CreateInputStateBuilder()->GetResult();
         }
 
-        MarkConsumed();
         return device->CreatePipeline(this);
     }
 

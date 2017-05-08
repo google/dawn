@@ -64,11 +64,10 @@ namespace backend {
         BINDGROUP_PROPERTY_LAYOUT = 0x2,
     };
 
-    BindGroupBuilder::BindGroupBuilder(DeviceBase* device)
-        : Builder(device) {
+    BindGroupBuilder::BindGroupBuilder(DeviceBase* device) : Builder(device) {
     }
 
-    BindGroupBase* BindGroupBuilder::GetResult() {
+    BindGroupBase* BindGroupBuilder::GetResultImpl() {
         constexpr int allProperties = BINDGROUP_PROPERTY_USAGE | BINDGROUP_PROPERTY_LAYOUT;
         if ((propertiesSet & allProperties) != allProperties) {
             HandleError("Bindgroup missing properties");
@@ -80,7 +79,6 @@ namespace backend {
             return nullptr;
         }
 
-        MarkConsumed();
         return device->CreateBindGroup(this);
     }
 

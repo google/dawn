@@ -41,12 +41,12 @@ namespace backend {
             }
     };
 
-    class QueueBuilder : public Builder {
+    class QueueBuilder : public Builder<QueueBase> {
         public:
             QueueBuilder(DeviceBase* device);
 
-            // NXT API
-            QueueBase* GetResult();
+        private:
+            QueueBase* GetResultImpl() override;
     };
 
 }

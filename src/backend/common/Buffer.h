@@ -52,18 +52,19 @@ namespace backend {
             bool frozen = false;
     };
 
-    class BufferBuilder : public Builder {
+    class BufferBuilder : public Builder<BufferBase> {
         public:
             BufferBuilder(DeviceBase* device);
 
             // NXT API
-            BufferBase* GetResult();
             void SetAllowedUsage(nxt::BufferUsageBit usage);
             void SetInitialUsage(nxt::BufferUsageBit usage);
             void SetSize(uint32_t size);
 
         private:
             friend class BufferBase;
+
+            BufferBase* GetResultImpl() override;
 
             uint32_t size;
             nxt::BufferUsageBit allowedUsage = nxt::BufferUsageBit::None;
@@ -85,16 +86,17 @@ namespace backend {
             uint32_t offset;
     };
 
-    class BufferViewBuilder : public Builder {
+    class BufferViewBuilder : public Builder<BufferViewBase> {
         public:
             BufferViewBuilder(DeviceBase* device, BufferBase* buffer);
 
             // NXT API
-            BufferViewBase* GetResult();
             void SetExtent(uint32_t offset, uint32_t size);
 
         private:
             friend class BufferViewBase;
+
+            BufferViewBase* GetResultImpl() override;
 
             Ref<BufferBase> buffer;
             uint32_t offset = 0;

@@ -121,7 +121,7 @@ namespace backend {
         : Builder(device) {
     }
 
-    TextureBase* TextureBuilder::GetResult() {
+    TextureBase* TextureBuilder::GetResultImpl() {
         constexpr int allProperties = TEXTURE_PROPERTY_DIMENSION | TEXTURE_PROPERTY_EXTENT |
             TEXTURE_PROPERTY_FORMAT | TEXTURE_PROPERTY_MIP_LEVELS | TEXTURE_PROPERTY_ALLOWED_USAGE;
         if ((propertiesSet & allProperties) != allProperties) {
@@ -136,7 +136,6 @@ namespace backend {
 
         // TODO(cwallez@chromium.org): check stuff based on the dimension
 
-        MarkConsumed();
         return device->CreateTexture(this);
     }
 
@@ -223,8 +222,7 @@ namespace backend {
         : Builder(device), texture(texture) {
     }
 
-    TextureViewBase* TextureViewBuilder::GetResult() {
-        MarkConsumed();
+    TextureViewBase* TextureViewBuilder::GetResultImpl() {
         return device->CreateTextureView(this);
     }
 

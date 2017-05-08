@@ -198,13 +198,12 @@ namespace backend {
         return std::move(spirv);
     }
 
-    ShaderModuleBase* ShaderModuleBuilder::GetResult() {
+    ShaderModuleBase* ShaderModuleBuilder::GetResultImpl() {
         if (spirv.size() == 0) {
             HandleError("Shader module needs to have the source set");
             return nullptr;
         }
 
-        MarkConsumed();
         return device->CreateShaderModule(this);
     }
 

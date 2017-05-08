@@ -40,16 +40,17 @@ namespace backend {
             std::bitset<kMaxBindGroups> mask;
     };
 
-    class PipelineLayoutBuilder : public Builder {
+    class PipelineLayoutBuilder : public Builder<PipelineLayoutBase> {
         public:
             PipelineLayoutBuilder(DeviceBase* device);
 
             // NXT API
-            PipelineLayoutBase* GetResult();
             void SetBindGroupLayout(uint32_t groupIndex, BindGroupLayoutBase* layout);
 
         private:
             friend class PipelineLayoutBase;
+
+            PipelineLayoutBase* GetResultImpl() override;
 
             BindGroupLayoutArray bindGroupLayouts;
             std::bitset<kMaxBindGroups> mask;

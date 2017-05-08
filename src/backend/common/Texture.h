@@ -60,12 +60,11 @@ namespace backend {
             bool frozen = false;
     };
 
-    class TextureBuilder : public Builder {
+    class TextureBuilder : public Builder<TextureBase> {
         public:
             TextureBuilder(DeviceBase* device);
 
             // NXT API
-            TextureBase* GetResult();
             void SetDimension(nxt::TextureDimension dimension);
             void SetExtent(uint32_t width, uint32_t height, uint32_t depth);
             void SetFormat(nxt::TextureFormat format);
@@ -75,6 +74,8 @@ namespace backend {
 
         private:
             friend class TextureBase;
+
+            TextureBase* GetResultImpl() override;
 
             int propertiesSet = 0;
 
@@ -96,15 +97,14 @@ namespace backend {
             Ref<TextureBase> texture;
     };
 
-    class TextureViewBuilder : public Builder {
+    class TextureViewBuilder : public Builder<TextureViewBase> {
         public:
             TextureViewBuilder(DeviceBase* device, TextureBase* texture);
 
-            // NXT API
-            TextureViewBase* GetResult();
-
         private:
             friend class TextureViewBase;
+
+            TextureViewBase* GetResultImpl() override;
 
             Ref<TextureBase> texture;
     };

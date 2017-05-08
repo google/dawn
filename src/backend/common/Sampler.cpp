@@ -43,11 +43,6 @@ namespace backend {
         return mipMapFilter;
     }
 
-    SamplerBase* SamplerBuilder::GetResult() {
-        MarkConsumed();
-        return device->CreateSampler(this);
-    }
-
     void SamplerBuilder::SetFilterMode(nxt::FilterMode magFilter, nxt::FilterMode minFilter, nxt::FilterMode mipMapFilter) {
         if ((propertiesSet & SAMPLER_PROPERTY_FILTER) != 0) {
             HandleError("Sampler filter property set multiple times");
@@ -59,4 +54,9 @@ namespace backend {
         this->mipMapFilter = mipMapFilter;
         propertiesSet |= SAMPLER_PROPERTY_FILTER;
     }
+
+    SamplerBase* SamplerBuilder::GetResultImpl() {
+        return device->CreateSampler(this);
+    }
+
 }

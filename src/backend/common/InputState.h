@@ -57,12 +57,11 @@ namespace backend {
             std::array<InputInfo, kMaxVertexInputs> inputInfos;
     };
 
-    class InputStateBuilder : public Builder {
+    class InputStateBuilder : public Builder<InputStateBase> {
         public:
             InputStateBuilder(DeviceBase* device);
 
             // NXT API
-            InputStateBase* GetResult();
             void SetAttribute(uint32_t shaderLocation, uint32_t bindingSlot,
                     nxt::VertexFormat format, uint32_t offset);
             void SetInput(uint32_t bindingSlot, uint32_t stride,
@@ -70,6 +69,8 @@ namespace backend {
 
         private:
             friend class InputStateBase;
+
+            InputStateBase* GetResultImpl() override;
 
             std::bitset<kMaxVertexAttributes> attributesSetMask;
             std::array<InputStateBase::AttributeInfo, kMaxVertexAttributes> attributeInfos;

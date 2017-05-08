@@ -172,6 +172,14 @@ namespace wire {
                 }
             {% endfor %}
 
+            {% if type.is_builder %}
+                void Client{{as_MethodSuffix(type.name, Name("set error callback"))}}(nxtBuilderErrorCallback callback,
+                                                                                      nxtCallbackUserdata userdata1,
+                                                                                      nxtCallbackUserdata userdata2) {
+                    //TODO(cwallez@chromium.org): will be implemented in a follow-up commit.
+                }
+            {% endif %}
+
             {% if not type.name.canonical_case() == "device" %}
                 //* When an object's refcount reaches 0, notify the server side of it and delete it.
                 void Client{{as_MethodSuffix(type.name, Name("release"))}}({{Type}}* obj) {

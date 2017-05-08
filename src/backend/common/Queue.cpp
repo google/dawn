@@ -30,8 +30,7 @@ namespace backend {
     QueueBuilder::QueueBuilder(DeviceBase* device) : Builder(device) {
     }
 
-    QueueBase* QueueBuilder::GetResult() {
-        MarkConsumed();
+    QueueBase* QueueBuilder::GetResultImpl() {
         return device->CreateQueue(this);
     }
 

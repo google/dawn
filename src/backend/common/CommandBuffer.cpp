@@ -136,7 +136,7 @@ namespace backend {
     }
 
     CommandBufferBuilder::~CommandBufferBuilder() {
-        if (!WasConsumed()) {
+        if (!commandsAcquired) {
             MoveToIterator();
             FreeCommands(&iterator);
         }
@@ -484,12 +484,13 @@ namespace backend {
     }
 
     CommandIterator CommandBufferBuilder::AcquireCommands() {
+        ASSERT(!commandsAcquired);
+        commandsAcquired = true;
         return std::move(iterator);
     }
 
-    CommandBufferBase* CommandBufferBuilder::GetResult() {
+    CommandBufferBase* CommandBufferBuilder::GetResultImpl() {
         MoveToIterator();
-        MarkConsumed();
         return device->CreateCommandBuffer(this);
     }
 

@@ -309,14 +309,23 @@ def as_backendType(typ):
     else:
         return as_cType(typ.name)
 
+def cpp_native_methods(types, typ):
+    methods = typ.methods + typ.native_methods
+
+    if typ.is_builder:
+        methods.append(Method(Name('set error callback'), types['void'], [
+            MethodArgument(Name('callback'), types['builder error callback'], 'value'),
+            MethodArgument(Name('userdata1'), types['callback userdata'], 'value'),
+            MethodArgument(Name('userdata2'), types['callback userdata'], 'value'),
+        ]))
+
+    return methods
+
 def c_native_methods(types, typ):
-    return cpp_native_methods(typ) + [
+    return cpp_native_methods(types, typ) + [
         Method(Name('reference'), types['void'], []),
         Method(Name('release'), types['void'], []),
     ]
-
-def cpp_native_methods(typ):
-    return typ.methods + typ.native_methods
 
 def debug(text):
     print(text)
@@ -376,7 +385,7 @@ def main():
         renders.append(FileRender('api.c', 'nxt/nxt.c', [base_params, api_params, c_params]))
 
     if 'nxtcpp' in targets:
-        additional_params = {'native_methods': cpp_native_methods}
+        additional_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
         renders.append(FileRender('apicpp.h', 'nxt/nxtcpp.h', [base_params, api_params, additional_params]))
         renders.append(FileRender('apicpp.cpp', 'nxt/nxtcpp.cpp', [base_params, api_params, additional_params]))
 

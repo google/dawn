@@ -43,12 +43,11 @@ namespace backend {
             std::array<Ref<RefCounted>, kMaxBindingsPerGroup> bindings;
     };
 
-    class BindGroupBuilder : public Builder {
+    class BindGroupBuilder : public Builder<BindGroupBase> {
         public:
             BindGroupBuilder(DeviceBase* device);
 
             // NXT API
-            BindGroupBase* GetResult();
             void SetLayout(BindGroupLayoutBase* layout);
             void SetUsage(nxt::BindGroupUsage usage);
 
@@ -76,6 +75,7 @@ namespace backend {
         private:
             friend class BindGroupBase;
 
+            BindGroupBase* GetResultImpl() override;
             void SetBindingsBase(uint32_t start, uint32_t count, RefCounted* const * objects);
             bool SetBindingsValidationBase(uint32_t start, uint32_t count);
 

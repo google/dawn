@@ -121,7 +121,7 @@ namespace backend {
     BufferBuilder::BufferBuilder(DeviceBase* device) : Builder(device) {
     }
 
-    BufferBase* BufferBuilder::GetResult() {
+    BufferBase* BufferBuilder::GetResultImpl() {
         constexpr int allProperties = BUFFER_PROPERTY_ALLOWED_USAGE | BUFFER_PROPERTY_SIZE;
         if ((propertiesSet & allProperties) != allProperties) {
             HandleError("Buffer missing properties");
@@ -133,7 +133,6 @@ namespace backend {
             return nullptr;
         }
 
-        MarkConsumed();
         return device->CreateBuffer(this);
     }
 
@@ -195,14 +194,13 @@ namespace backend {
         : Builder(device), buffer(buffer) {
     }
 
-    BufferViewBase* BufferViewBuilder::GetResult() {
+    BufferViewBase* BufferViewBuilder::GetResultImpl() {
         constexpr int allProperties = BUFFER_VIEW_PROPERTY_EXTENT;
         if ((propertiesSet & allProperties) != allProperties) {
             HandleError("Buffer view missing properties");
             return nullptr;
         }
 
-        MarkConsumed();
         return device->CreateBufferView(this);
     }
 

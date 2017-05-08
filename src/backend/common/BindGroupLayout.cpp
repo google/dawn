@@ -101,8 +101,7 @@ namespace backend {
         return bindingInfo;
     }
 
-    BindGroupLayoutBase* BindGroupLayoutBuilder::GetResult() {
-        MarkConsumed();
+    BindGroupLayoutBase* BindGroupLayoutBuilder::GetResultImpl() {
         BindGroupLayoutBase blueprint(this, true);
 
         auto* result = device->GetOrCreateBindGroupLayout(&blueprint, this);

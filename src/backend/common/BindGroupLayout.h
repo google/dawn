@@ -44,18 +44,19 @@ namespace backend {
             bool blueprint = false;
     };
 
-    class BindGroupLayoutBuilder : public Builder {
+    class BindGroupLayoutBuilder : public Builder<BindGroupLayoutBase> {
         public:
             BindGroupLayoutBuilder(DeviceBase* device);
 
             const BindGroupLayoutBase::LayoutBindingInfo& GetBindingInfo() const;
 
             // NXT API
-            BindGroupLayoutBase* GetResult();
             void SetBindingsType(nxt::ShaderStageBit visibility, nxt::BindingType bindingType, uint32_t start, uint32_t count);
 
         private:
             friend class BindGroupLayoutBase;
+
+            BindGroupLayoutBase* GetResultImpl() override;
 
             BindGroupLayoutBase::LayoutBindingInfo bindingInfo;
     };

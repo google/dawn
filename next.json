@@ -102,6 +102,18 @@
             {"value": 3, "name": "storage buffer"}
         ]
     },
+    "builder error status": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "error", "TODO": "cwallez@chromium.org: recoverable errors like GPU OOM"},
+            {"value": 2, "name": "unknown"},
+            {"value": 3, "name": "context lost"}
+        ]
+    },
+    "builder error callback": {
+        "category": "natively defined"
+    },
     "buffer": {
         "category": "object",
         "methods": [
