@@ -28,6 +28,7 @@ namespace backend {
     }
 
     void ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
+        // TODO(cwallez@chromium.org): make errors here builder-level
         const auto& resources = compiler.get_shader_resources();
 
         switch (compiler.get_execution_model()) {
@@ -190,10 +191,7 @@ namespace backend {
         return true;
     }
 
-    ShaderModuleBuilder::ShaderModuleBuilder(DeviceBase* device) : device(device) {}
-
-    bool ShaderModuleBuilder::WasConsumed() const {
-        return consumed;
+    ShaderModuleBuilder::ShaderModuleBuilder(DeviceBase* device) : Builder(device) {
     }
 
     std::vector<uint32_t> ShaderModuleBuilder::AcquireSpirv() {
@@ -202,11 +200,11 @@ namespace backend {
 
     ShaderModuleBase* ShaderModuleBuilder::GetResult() {
         if (spirv.size() == 0) {
-            device->HandleError("Shader module needs to have the source set");
+            HandleError("Shader module needs to have the source set");
             return nullptr;
         }
 
-        consumed = true;
+        MarkConsumed();
         return device->CreateShaderModule(this);
     }
 

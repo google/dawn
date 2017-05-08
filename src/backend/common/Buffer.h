@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_BUFFER_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -51,11 +52,9 @@ namespace backend {
             bool frozen = false;
     };
 
-    class BufferBuilder : public RefCounted {
+    class BufferBuilder : public Builder {
         public:
             BufferBuilder(DeviceBase* device);
-
-            bool WasConsumed() const;
 
             // NXT API
             BufferBase* GetResult();
@@ -66,12 +65,10 @@ namespace backend {
         private:
             friend class BufferBase;
 
-            DeviceBase* device;
             uint32_t size;
             nxt::BufferUsageBit allowedUsage = nxt::BufferUsageBit::None;
             nxt::BufferUsageBit currentUsage = nxt::BufferUsageBit::None;
             int propertiesSet = 0;
-            bool consumed = false;
     };
 
     class BufferViewBase : public RefCounted {
@@ -88,11 +85,9 @@ namespace backend {
             uint32_t offset;
     };
 
-    class BufferViewBuilder : public RefCounted {
+    class BufferViewBuilder : public Builder {
         public:
             BufferViewBuilder(DeviceBase* device, BufferBase* buffer);
-
-            bool WasConsumed() const;
 
             // NXT API
             BufferViewBase* GetResult();
@@ -101,12 +96,10 @@ namespace backend {
         private:
             friend class BufferViewBase;
 
-            DeviceBase* device;
             Ref<BufferBase> buffer;
             uint32_t offset = 0;
             uint32_t size = 0;
             int propertiesSet = 0;
-            bool consumed = false;
     };
 
 }

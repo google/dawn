@@ -28,8 +28,7 @@ namespace backend {
     enum SamplerSetProperties {
         SAMPLER_PROPERTY_FILTER = 0x1,
     };
-    SamplerBuilder::SamplerBuilder(DeviceBase* device)
-        :device(device) {
+    SamplerBuilder::SamplerBuilder(DeviceBase* device) : Builder(device) {
     }
 
     nxt::FilterMode SamplerBuilder::GetMagFilter() const {
@@ -44,18 +43,14 @@ namespace backend {
         return mipMapFilter;
     }
 
-    bool SamplerBuilder::WasConsumed() const {
-        return consumed;
-    }
-
     SamplerBase* SamplerBuilder::GetResult() {
-        consumed = true;
+        MarkConsumed();
         return device->CreateSampler(this);
     }
 
     void SamplerBuilder::SetFilterMode(nxt::FilterMode magFilter, nxt::FilterMode minFilter, nxt::FilterMode mipMapFilter) {
         if ((propertiesSet & SAMPLER_PROPERTY_FILTER) != 0) {
-            device->HandleError("Sampler filter property set multiple times");
+            HandleError("Sampler filter property set multiple times");
             return;
         }
 

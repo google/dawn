@@ -678,7 +678,7 @@ namespace metal {
                 newComputePipelineStateWithFunction:function error:&error];
             if (error != nil) {
                 NSLog(@" error => %@", error);
-                device->HandleError("Error creating pipeline state");
+                builder->HandleError("Error creating pipeline state");
                 return;
             }
 
@@ -720,7 +720,7 @@ namespace metal {
                 newRenderPipelineStateWithDescriptor:descriptor error:&error];
             if (error != nil) {
                 NSLog(@" error => %@", error);
-                device->HandleError("Error creating pipeline state");
+                builder->HandleError("Error creating pipeline state");
                 return;
             }
 
@@ -898,7 +898,7 @@ namespace metal {
         mtlLibrary = [device->GetMTLDevice() newLibraryWithSource:mslSource options:nil error:&error];
         if (error != nil) {
             NSLog(@"MTLDevice newLibraryWithSource => %@", error);
-            device->HandleError("Error creating MTLLibrary from MSL source");
+            builder->HandleError("Error creating MTLLibrary from MSL source");
         }
     }
 

@@ -23,6 +23,8 @@ list(APPEND BACKEND_SOURCES
     ${COMMON_DIR}/BindGroupLayout.cpp
     ${COMMON_DIR}/BindGroupLayout.h
     ${COMMON_DIR}/BitSetIterator.h
+    ${COMMON_DIR}/Builder.cpp
+    ${COMMON_DIR}/Builder.h
     ${COMMON_DIR}/Buffer.cpp
     ${COMMON_DIR}/Buffer.h
     ${COMMON_DIR}/CommandAllocator.cpp

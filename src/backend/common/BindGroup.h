@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_BINDGROUP_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -42,11 +43,9 @@ namespace backend {
             std::array<Ref<RefCounted>, kMaxBindingsPerGroup> bindings;
     };
 
-    class BindGroupBuilder : public RefCounted {
+    class BindGroupBuilder : public Builder {
         public:
             BindGroupBuilder(DeviceBase* device);
-
-            bool WasConsumed() const;
 
             // NXT API
             BindGroupBase* GetResult();
@@ -80,10 +79,8 @@ namespace backend {
             void SetBindingsBase(uint32_t start, uint32_t count, RefCounted* const * objects);
             bool SetBindingsValidationBase(uint32_t start, uint32_t count);
 
-            DeviceBase* device;
             std::bitset<kMaxBindingsPerGroup> setMask;
             int propertiesSet = 0;
-            bool consumed = false;
 
             Ref<BindGroupLayoutBase> layout;
             nxt::BindGroupUsage usage;

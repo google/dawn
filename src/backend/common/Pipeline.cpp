@@ -29,7 +29,7 @@ namespace backend {
 
         if (stageMask != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment) &&
             stageMask != nxt::ShaderStageBit::Compute) {
-            device->HandleError("Wrong combination of stage for pipeline");
+            builder->HandleError("Wrong combination of stage for pipeline");
             return;
         }
 
@@ -52,7 +52,7 @@ namespace backend {
 
         for (auto stageBit : IterateStages(builder->stageMask)) {
             if (!builder->stages[stageBit].module->IsCompatibleWithPipelineLayout(layout.Get())) {
-                device->HandleError("Stage not compatible with layout");
+                builder->HandleError("Stage not compatible with layout");
                 return;
             }
 
@@ -61,7 +61,7 @@ namespace backend {
 
         if (!IsCompute()) {
             if ((builder->stages[nxt::ShaderStage::Vertex].module->GetUsedVertexAttributes() & ~inputState->GetAttributesSetMask()).any()) {
-                device->HandleError("Pipeline vertex stage uses inputs not in the input state");
+                builder->HandleError("Pipeline vertex stage uses inputs not in the input state");
                 return;
             }
         }
@@ -90,11 +90,7 @@ namespace backend {
     // PipelineBuilder
 
     PipelineBuilder::PipelineBuilder(DeviceBase* device)
-        : device(device), stageMask(static_cast<nxt::ShaderStageBit>(0)) {
-    }
-
-    bool PipelineBuilder::WasConsumed() const {
-        return consumed;
+        : Builder(device), stageMask(static_cast<nxt::ShaderStageBit>(0)) {
     }
 
     const PipelineBuilder::StageInfo& PipelineBuilder::GetStageInfo(nxt::ShaderStage stage) const {
@@ -111,7 +107,7 @@ namespace backend {
             inputState = device->CreateInputStateBuilder()->GetResult();
         }
 
-        consumed = true;
+        MarkConsumed();
         return device->CreatePipeline(this);
     }
 
@@ -121,18 +117,18 @@ namespace backend {
 
     void PipelineBuilder::SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint) {
         if (entryPoint != std::string("main")) {
-            device->HandleError("Currently the entry point has to be main()");
+            HandleError("Currently the entry point has to be main()");
             return;
         }
 
         if (stage != module->GetExecutionModel()) {
-            device->HandleError("Setting module with wrong execution model");
+            HandleError("Setting module with wrong execution model");
             return;
         }
 
         nxt::ShaderStageBit bit = StageBit(stage);
         if (stageMask & bit) {
-            device->HandleError("Setting already set stage");
+            HandleError("Setting already set stage");
             return;
         }
         stageMask |= bit;

@@ -118,35 +118,31 @@ namespace backend {
     };
 
     TextureBuilder::TextureBuilder(DeviceBase* device)
-        : device(device) {
-    }
-
-    bool TextureBuilder::WasConsumed() const {
-        return consumed;
+        : Builder(device) {
     }
 
     TextureBase* TextureBuilder::GetResult() {
         constexpr int allProperties = TEXTURE_PROPERTY_DIMENSION | TEXTURE_PROPERTY_EXTENT |
             TEXTURE_PROPERTY_FORMAT | TEXTURE_PROPERTY_MIP_LEVELS | TEXTURE_PROPERTY_ALLOWED_USAGE;
         if ((propertiesSet & allProperties) != allProperties) {
-            device->HandleError("Texture missing properties");
+            HandleError("Texture missing properties");
             return nullptr;
         }
 
         if (!TextureBase::IsUsagePossible(allowedUsage, currentUsage)) {
-            device->HandleError("Initial texture usage is not allowed");
+            HandleError("Initial texture usage is not allowed");
             return nullptr;
         }
 
         // TODO(cwallez@chromium.org): check stuff based on the dimension
 
-        consumed = true;
+        MarkConsumed();
         return device->CreateTexture(this);
     }
 
     void TextureBuilder::SetDimension(nxt::TextureDimension dimension) {
         if ((propertiesSet & TEXTURE_PROPERTY_DIMENSION) != 0) {
-            device->HandleError("Texture dimension property set multiple times");
+            HandleError("Texture dimension property set multiple times");
             return;
         }
 
@@ -156,12 +152,12 @@ namespace backend {
 
     void TextureBuilder::SetExtent(uint32_t width, uint32_t height, uint32_t depth) {
         if ((propertiesSet & TEXTURE_PROPERTY_EXTENT) != 0) {
-            device->HandleError("Texture extent property set multiple times");
+            HandleError("Texture extent property set multiple times");
             return;
         }
 
         if (width == 0 || height == 0 || depth == 0) {
-            device->HandleError("Cannot create an empty texture");
+            HandleError("Cannot create an empty texture");
             return;
         }
 
@@ -173,7 +169,7 @@ namespace backend {
 
     void TextureBuilder::SetFormat(nxt::TextureFormat format) {
         if ((propertiesSet & TEXTURE_PROPERTY_FORMAT) != 0) {
-            device->HandleError("Texture format property set multiple times");
+            HandleError("Texture format property set multiple times");
             return;
         }
 
@@ -183,7 +179,7 @@ namespace backend {
 
     void TextureBuilder::SetMipLevels(uint32_t numMipLevels) {
         if ((propertiesSet & TEXTURE_PROPERTY_MIP_LEVELS) != 0) {
-            device->HandleError("Texture mip levels property set multiple times");
+            HandleError("Texture mip levels property set multiple times");
             return;
         }
 
@@ -193,7 +189,7 @@ namespace backend {
 
     void TextureBuilder::SetAllowedUsage(nxt::TextureUsageBit usage) {
         if ((propertiesSet & TEXTURE_PROPERTY_ALLOWED_USAGE) != 0) {
-            device->HandleError("Texture allowed usage property set multiple times");
+            HandleError("Texture allowed usage property set multiple times");
             return;
         }
 
@@ -203,7 +199,7 @@ namespace backend {
 
     void TextureBuilder::SetInitialUsage(nxt::TextureUsageBit usage) {
         if ((propertiesSet & TEXTURE_PROPERTY_INITIAL_USAGE) != 0) {
-            device->HandleError("Texture initial usage property set multiple times");
+            HandleError("Texture initial usage property set multiple times");
             return;
         }
 
@@ -224,15 +220,11 @@ namespace backend {
     // TextureViewBuilder
 
     TextureViewBuilder::TextureViewBuilder(DeviceBase* device, TextureBase* texture)
-        : device(device), texture(texture) {
-    }
-
-    bool TextureViewBuilder::WasConsumed() const {
-        return false;
+        : Builder(device), texture(texture) {
     }
 
     TextureViewBase* TextureViewBuilder::GetResult() {
-        consumed = true;
+        MarkConsumed();
         return device->CreateTextureView(this);
     }
 

@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_BINDGROUPLAYOUT_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -43,11 +44,10 @@ namespace backend {
             bool blueprint = false;
     };
 
-    class BindGroupLayoutBuilder : public RefCounted {
+    class BindGroupLayoutBuilder : public Builder {
         public:
             BindGroupLayoutBuilder(DeviceBase* device);
 
-            bool WasConsumed() const;
             const BindGroupLayoutBase::LayoutBindingInfo& GetBindingInfo() const;
 
             // NXT API
@@ -57,9 +57,7 @@ namespace backend {
         private:
             friend class BindGroupLayoutBase;
 
-            DeviceBase* device;
             BindGroupLayoutBase::LayoutBindingInfo bindingInfo;
-            bool consumed = false;
     };
 
     // Implements the functors necessary for the unordered_set<BGL*>-based cache.

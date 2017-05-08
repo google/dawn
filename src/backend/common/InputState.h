@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_INPUTSTATE_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -56,11 +57,9 @@ namespace backend {
             std::array<InputInfo, kMaxVertexInputs> inputInfos;
     };
 
-    class InputStateBuilder : public RefCounted {
+    class InputStateBuilder : public Builder {
         public:
             InputStateBuilder(DeviceBase* device);
-
-            bool WasConsumed() const;
 
             // NXT API
             InputStateBase* GetResult();
@@ -72,12 +71,10 @@ namespace backend {
         private:
             friend class InputStateBase;
 
-            DeviceBase* device;
             std::bitset<kMaxVertexAttributes> attributesSetMask;
             std::array<InputStateBase::AttributeInfo, kMaxVertexAttributes> attributeInfos;
             std::bitset<kMaxVertexInputs> inputsSetMask;
             std::array<InputStateBase::InputInfo, kMaxVertexInputs> inputInfos;
-            bool consumed = false;
     };
 
 }

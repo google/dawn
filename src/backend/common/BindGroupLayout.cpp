@@ -94,11 +94,7 @@ namespace backend {
 
     // BindGroupLayoutBuilder
 
-    BindGroupLayoutBuilder::BindGroupLayoutBuilder(DeviceBase* device) : device(device) {
-    }
-
-    bool BindGroupLayoutBuilder::WasConsumed() const {
-        return consumed;
+    BindGroupLayoutBuilder::BindGroupLayoutBuilder(DeviceBase* device) : Builder(device) {
     }
 
     const BindGroupLayoutBase::LayoutBindingInfo& BindGroupLayoutBuilder::GetBindingInfo() const {
@@ -106,7 +102,7 @@ namespace backend {
     }
 
     BindGroupLayoutBase* BindGroupLayoutBuilder::GetResult() {
-        consumed = true;
+        MarkConsumed();
         BindGroupLayoutBase blueprint(this, true);
 
         auto* result = device->GetOrCreateBindGroupLayout(&blueprint, this);
@@ -116,13 +112,13 @@ namespace backend {
 
     void BindGroupLayoutBuilder::SetBindingsType(nxt::ShaderStageBit visibility, nxt::BindingType bindingType, uint32_t start, uint32_t count) {
         if (start + count > kMaxBindingsPerGroup) {
-            device->HandleError("Setting bindings type over maximum number of bindings");
+            HandleError("Setting bindings type over maximum number of bindings");
             return;
         }
 
         for (size_t i = start; i < start + count; i++) {
             if (bindingInfo.mask[i]) {
-                device->HandleError("Setting already set binding type");
+                HandleError("Setting already set binding type");
                 return;
             }
             bindingInfo.mask.set(i);

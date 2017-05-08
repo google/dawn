@@ -36,11 +36,7 @@ namespace backend {
 
     // PipelineLayoutBuilder
 
-    PipelineLayoutBuilder::PipelineLayoutBuilder(DeviceBase* device) : device(device) {
-    }
-
-    bool PipelineLayoutBuilder::WasConsumed() const {
-        return consumed;
+    PipelineLayoutBuilder::PipelineLayoutBuilder(DeviceBase* device) : Builder(device) {
     }
 
     PipelineLayoutBase* PipelineLayoutBuilder::GetResult() {
@@ -52,17 +48,17 @@ namespace backend {
             }
         }
 
-        consumed = true;
+        MarkConsumed();
         return device->CreatePipelineLayout(this);
     }
 
     void PipelineLayoutBuilder::SetBindGroupLayout(uint32_t groupIndex, BindGroupLayoutBase* layout) {
         if (groupIndex >= kMaxBindGroups) {
-            device->HandleError("groupIndex is over the maximum allowed");
+            HandleError("groupIndex is over the maximum allowed");
             return;
         }
         if (mask[groupIndex]) {
-            device->HandleError("Bind group layout already specified");
+            HandleError("Bind group layout already specified");
             return;
         }
 

@@ -118,32 +118,28 @@ namespace backend {
         BUFFER_PROPERTY_SIZE = 0x4,
     };
 
-    BufferBuilder::BufferBuilder(DeviceBase* device) : device(device) {
-    }
-
-    bool BufferBuilder::WasConsumed() const {
-        return consumed;
+    BufferBuilder::BufferBuilder(DeviceBase* device) : Builder(device) {
     }
 
     BufferBase* BufferBuilder::GetResult() {
         constexpr int allProperties = BUFFER_PROPERTY_ALLOWED_USAGE | BUFFER_PROPERTY_SIZE;
         if ((propertiesSet & allProperties) != allProperties) {
-            device->HandleError("Buffer missing properties");
+            HandleError("Buffer missing properties");
             return nullptr;
         }
 
         if (!BufferBase::IsUsagePossible(allowedUsage, currentUsage)) {
-            device->HandleError("Initial buffer usage is not allowed");
+            HandleError("Initial buffer usage is not allowed");
             return nullptr;
         }
 
-        consumed = true;
+        MarkConsumed();
         return device->CreateBuffer(this);
     }
 
     void BufferBuilder::SetAllowedUsage(nxt::BufferUsageBit usage) {
         if ((propertiesSet & BUFFER_PROPERTY_ALLOWED_USAGE) != 0) {
-            device->HandleError("Buffer allowedUsage property set multiple times");
+            HandleError("Buffer allowedUsage property set multiple times");
             return;
         }
 
@@ -153,7 +149,7 @@ namespace backend {
 
     void BufferBuilder::SetInitialUsage(nxt::BufferUsageBit usage) {
         if ((propertiesSet & BUFFER_PROPERTY_INITIAL_USAGE) != 0) {
-            device->HandleError("Buffer initialUsage property set multiple times");
+            HandleError("Buffer initialUsage property set multiple times");
             return;
         }
 
@@ -163,7 +159,7 @@ namespace backend {
 
     void BufferBuilder::SetSize(uint32_t size) {
         if ((propertiesSet & BUFFER_PROPERTY_SIZE) != 0) {
-            device->HandleError("Buffer size property set multiple times");
+            HandleError("Buffer size property set multiple times");
             return;
         }
 
@@ -196,32 +192,29 @@ namespace backend {
     };
 
     BufferViewBuilder::BufferViewBuilder(DeviceBase* device, BufferBase* buffer)
-        : device(device), buffer(buffer) {
-    }
-
-    bool BufferViewBuilder::WasConsumed() const {
-        return consumed;
+        : Builder(device), buffer(buffer) {
     }
 
     BufferViewBase* BufferViewBuilder::GetResult() {
         constexpr int allProperties = BUFFER_VIEW_PROPERTY_EXTENT;
         if ((propertiesSet & allProperties) != allProperties) {
-            device->HandleError("Buffer view missing properties");
+            HandleError("Buffer view missing properties");
             return nullptr;
         }
 
+        MarkConsumed();
         return device->CreateBufferView(this);
     }
 
     void BufferViewBuilder::SetExtent(uint32_t offset, uint32_t size) {
         if ((propertiesSet & BUFFER_VIEW_PROPERTY_EXTENT) != 0) {
-            device->HandleError("Buffer view extent property set multiple times");
+            HandleError("Buffer view extent property set multiple times");
             return;
         }
 
         uint64_t viewEnd = static_cast<uint64_t>(offset) + static_cast<uint64_t>(size);
         if (viewEnd > static_cast<uint64_t>(buffer->GetSize())) {
-            device->HandleError("Buffer view end is OOB");
+            HandleError("Buffer view end is OOB");
             return;
         }
 

@@ -65,32 +65,28 @@ namespace backend {
     };
 
     BindGroupBuilder::BindGroupBuilder(DeviceBase* device)
-        : device(device) {
-    }
-
-    bool BindGroupBuilder::WasConsumed() const {
-        return consumed;
+        : Builder(device) {
     }
 
     BindGroupBase* BindGroupBuilder::GetResult() {
         constexpr int allProperties = BINDGROUP_PROPERTY_USAGE | BINDGROUP_PROPERTY_LAYOUT;
         if ((propertiesSet & allProperties) != allProperties) {
-            device->HandleError("Bindgroup missing properties");
+            HandleError("Bindgroup missing properties");
             return nullptr;
         }
 
         if (setMask != layout->GetBindingInfo().mask) {
-            device->HandleError("Bindgroup missing bindings");
+            HandleError("Bindgroup missing bindings");
             return nullptr;
         }
 
-        consumed = true;
+        MarkConsumed();
         return device->CreateBindGroup(this);
     }
 
     void BindGroupBuilder::SetLayout(BindGroupLayoutBase* layout) {
         if ((propertiesSet & BINDGROUP_PROPERTY_LAYOUT) != 0) {
-            device->HandleError("Bindgroup layout property set multiple times");
+            HandleError("Bindgroup layout property set multiple times");
             return;
         }
 
@@ -100,7 +96,7 @@ namespace backend {
 
     void BindGroupBuilder::SetUsage(nxt::BindGroupUsage usage) {
         if ((propertiesSet & BINDGROUP_PROPERTY_USAGE) != 0) {
-            device->HandleError("Bindgroup usage property set multiple times");
+            HandleError("Bindgroup usage property set multiple times");
             return;
         }
 
@@ -127,12 +123,12 @@ namespace backend {
 
                 case nxt::BindingType::Sampler:
                 case nxt::BindingType::SampledTexture:
-                    device->HandleError("Setting buffer for a wrong binding type");
+                    HandleError("Setting buffer for a wrong binding type");
                     return;
             }
 
             if (!(bufferViews[j]->GetBuffer()->GetAllowedUsage() & requiredBit)) {
-                device->HandleError("Buffer needs to allow the correct usage bit");
+                HandleError("Buffer needs to allow the correct usage bit");
                 return;
             }
         }
@@ -148,7 +144,7 @@ namespace backend {
         const auto& layoutInfo = layout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
             if (layoutInfo.types[i] != nxt::BindingType::Sampler) {
-                device->HandleError("Setting binding for a wrong layout binding type");
+                HandleError("Setting binding for a wrong layout binding type");
                 return;
             }
         }
@@ -164,12 +160,12 @@ namespace backend {
         const auto& layoutInfo = layout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
             if (layoutInfo.types[i] != nxt::BindingType::SampledTexture) {
-                device->HandleError("Setting binding for a wrong layout binding type");
+                HandleError("Setting binding for a wrong layout binding type");
                 return;
             }
 
             if (!(textureViews[j]->GetTexture()->GetAllowedUsage() & nxt::TextureUsageBit::Sampled)) {
-                device->HandleError("Texture needs to allow the sampled usage bit");
+                HandleError("Texture needs to allow the sampled usage bit");
                 return;
             }
         }
@@ -186,24 +182,24 @@ namespace backend {
 
     bool BindGroupBuilder::SetBindingsValidationBase(uint32_t start, uint32_t count) {
         if (start + count > kMaxBindingsPerGroup) {
-            device->HandleError("Setting bindings type over maximum number of bindings");
+            HandleError("Setting bindings type over maximum number of bindings");
             return false;
         }
 
         if ((propertiesSet & BINDGROUP_PROPERTY_LAYOUT) == 0) {
-            device->HandleError("Bindgroup layout must be set before views");
+            HandleError("Bindgroup layout must be set before views");
             return false;
         }
 
         const auto& layoutInfo = layout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
             if (setMask[i]) {
-                device->HandleError("Setting already set binding");
+                HandleError("Setting already set binding");
                 return false;
             }
 
             if (!layoutInfo.mask[i]) {
-                device->HandleError("Setting binding that isn't present in the layout");
+                HandleError("Setting binding that isn't present in the layout");
                 return false;
             }
         }

@@ -132,18 +132,14 @@ namespace backend {
         commands->DataWasDestroyed();
     }
 
-    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : device(device) {
+    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : Builder(device) {
     }
 
     CommandBufferBuilder::~CommandBufferBuilder() {
-        if (!consumed) {
+        if (!WasConsumed()) {
             MoveToIterator();
             FreeCommands(&iterator);
         }
-    }
-
-    bool CommandBufferBuilder::WasConsumed() const {
-        return consumed;
     }
 
     enum ValidationAspect {
@@ -215,7 +211,7 @@ namespace backend {
 
                             auto buffer = group->GetBindingAsBufferView(i)->GetBuffer();
                             if (!bufferHasGuaranteedUsageBit(buffer, requiredUsage)) {
-                                device->HandleError("Can't guarantee buffer usage needed by bind group");
+                                HandleError("Can't guarantee buffer usage needed by bind group");
                                 return false;
                             }
                         }
@@ -226,7 +222,7 @@ namespace backend {
 
                             auto texture = group->GetBindingAsTextureView(i)->GetTexture();
                             if (!textureHasGuaranteedUsageBit(texture, requiredUsage)) {
-                                device->HandleError("Can't guarantee texture usage needed by bind group");
+                                HandleError("Can't guarantee texture usage needed by bind group");
                                 return false;
                             }
                         }
@@ -256,17 +252,17 @@ namespace backend {
                         uint32_t level = copy->level;
 
                         if (!bufferHasGuaranteedUsageBit(buffer, nxt::BufferUsageBit::TransferSrc)) {
-                            device->HandleError("Buffer needs the transfer source usage bit");
+                            HandleError("Buffer needs the transfer source usage bit");
                             return false;
                         }
 
                         if (!textureHasGuaranteedUsageBit(texture, nxt::TextureUsageBit::TransferDst)) {
-                            device->HandleError("Texture needs the transfer destination usage bit");
+                            HandleError("Texture needs the transfer destination usage bit");
                             return false;
                         }
 
                         if (width == 0 || height == 0 || depth == 0) {
-                            device->HandleError("Empty copy");
+                            HandleError("Empty copy");
                             return false;
                         }
 
@@ -275,7 +271,7 @@ namespace backend {
                         uint64_t dataSize = width * height * depth * pixelSize;
 
                         if (dataSize + static_cast<uint64_t>(bufferOffset) > static_cast<uint64_t>(buffer->GetSize())) {
-                            device->HandleError("Copy would read after end of the buffer");
+                            HandleError("Copy would read after end of the buffer");
                             return false;
                         }
 
@@ -283,7 +279,7 @@ namespace backend {
                             y + height > static_cast<uint64_t>(texture->GetHeight()) ||
                             z + depth > static_cast<uint64_t>(texture->GetDepth()) ||
                             level > texture->GetNumMipLevels()) {
-                            device->HandleError("Copy would write outside of the texture");
+                            HandleError("Copy would write outside of the texture");
                             return false;
                         }
                     }
@@ -311,7 +307,7 @@ namespace backend {
 
                             // Check again if anything is missing
                             if ((requiredDispatchAspects & ~aspects).any()) {
-                                device->HandleError("Some dispatch state is missing");
+                                HandleError("Some dispatch state is missing");
                                 return false;
                             }
                         }
@@ -339,7 +335,7 @@ namespace backend {
 
                             // Check again if anything is missing
                             if ((requiredDrawAspects & ~aspects).any()) {
-                                device->HandleError("Some draw state is missing");
+                                HandleError("Some draw state is missing");
                                 return false;
                             }
                         }
@@ -351,7 +347,7 @@ namespace backend {
                             DrawElementsCmd* draw = iterator.NextCommand<DrawElementsCmd>();
 
                             if (!aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-                                device->HandleError("Draw elements requires an index buffer");
+                                HandleError("Draw elements requires an index buffer");
                                 return false;
                             }
                         }
@@ -394,7 +390,7 @@ namespace backend {
                         SetPushConstantsCmd* cmd = iterator.NextCommand<SetPushConstantsCmd>();
                         iterator.NextData<uint32_t>(cmd->count);
                         if (cmd->count + cmd->offset > kMaxPushConstants) {
-                            device->HandleError("Setting pushconstants past the limit");
+                            HandleError("Setting pushconstants past the limit");
                             return false;
                         }
                     }
@@ -406,7 +402,7 @@ namespace backend {
                         uint32_t index = cmd->index;
 
                         if (cmd->group->GetLayout() != lastPipeline->GetLayout()->GetBindGroupLayout(index)) {
-                            device->HandleError("Bind group layout mismatch");
+                            HandleError("Bind group layout mismatch");
                             return false;
                         }
                         if (!validateBindGroupUsages(cmd->group.Get())) {
@@ -422,7 +418,7 @@ namespace backend {
                         auto buffer = cmd->buffer;
                         auto usage = nxt::BufferUsageBit::Index;
                         if (!bufferHasGuaranteedUsageBit(buffer.Get(), usage)) {
-                            device->HandleError("Buffer needs the index usage bit to be guaranteed");
+                            HandleError("Buffer needs the index usage bit to be guaranteed");
                             return false;
                         }
 
@@ -440,7 +436,7 @@ namespace backend {
                             auto buffer = buffers[i];
                             auto usage = nxt::BufferUsageBit::Vertex;
                             if (!bufferHasGuaranteedUsageBit(buffer.Get(), usage)) {
-                                device->HandleError("Buffer needs vertex usage bit to be guaranteed");
+                                HandleError("Buffer needs vertex usage bit to be guaranteed");
                                 return false;
                             }
                             inputsSet.set(cmd->startSlot + i);
@@ -455,7 +451,7 @@ namespace backend {
                         auto usage = cmd->usage;
 
                         if (!cmd->buffer->IsTransitionPossible(cmd->usage)) {
-                            device->HandleError("Buffer frozen or usage not allowed");
+                            HandleError("Buffer frozen or usage not allowed");
                             return false;
                         }
 
@@ -472,7 +468,7 @@ namespace backend {
                         auto usage = cmd->usage;
 
                         if (!cmd->texture->IsTransitionPossible(cmd->usage)) {
-                            device->HandleError("Texture frozen or usage not allowed");
+                            HandleError("Texture frozen or usage not allowed");
                             return false;
                         }
 
@@ -493,7 +489,7 @@ namespace backend {
 
     CommandBufferBase* CommandBufferBuilder::GetResult() {
         MoveToIterator();
-        consumed = true;
+        MarkConsumed();
         return device->CreateCommandBuffer(this);
     }
 
@@ -548,7 +544,7 @@ namespace backend {
 
     void CommandBufferBuilder::SetPushConstants(nxt::ShaderStageBit stage, uint32_t offset, uint32_t count, const void* data) {
         if (offset + count > kMaxPushConstants) {
-            device->HandleError("Setting too many push constants");
+            HandleError("Setting too many push constants");
             return;
         }
 
@@ -564,7 +560,7 @@ namespace backend {
 
     void CommandBufferBuilder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {
         if (groupIndex >= kMaxBindGroups) {
-            device->HandleError("Setting bind group over the max");
+            HandleError("Setting bind group over the max");
             return;
         }
 

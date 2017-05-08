@@ -78,37 +78,34 @@ namespace backend {
 
     // InputStateBuilder
 
-    InputStateBuilder::InputStateBuilder(DeviceBase* device) : device(device) {
-    }
-
-    bool InputStateBuilder::WasConsumed() const {
-        return consumed;
+    InputStateBuilder::InputStateBuilder(DeviceBase* device) : Builder(device) {
     }
 
     InputStateBase* InputStateBuilder::GetResult() {
         for (uint32_t location = 0; location < kMaxVertexAttributes; ++location) {
             if (attributesSetMask[location] &&
                     !inputsSetMask[attributeInfos[location].bindingSlot]) {
-                device->HandleError("Attribute uses unset input");
+                HandleError("Attribute uses unset input");
                 return nullptr;
             }
         }
-        consumed = true;
+
+        MarkConsumed();
         return device->CreateInputState(this);
     }
 
     void InputStateBuilder::SetAttribute(uint32_t shaderLocation,
             uint32_t bindingSlot, nxt::VertexFormat format, uint32_t offset) {
         if (shaderLocation >= kMaxVertexAttributes) {
-            device->HandleError("Setting attribute out of bounds");
+            HandleError("Setting attribute out of bounds");
             return;
         }
         if (bindingSlot >= kMaxVertexInputs) {
-            device->HandleError("Binding slot out of bounds");
+            HandleError("Binding slot out of bounds");
             return;
         }
         if (attributesSetMask[shaderLocation]) {
-            device->HandleError("Setting already set attribute");
+            HandleError("Setting already set attribute");
             return;
         }
 
@@ -122,11 +119,11 @@ namespace backend {
     void InputStateBuilder::SetInput(uint32_t bindingSlot, uint32_t stride,
             nxt::InputStepMode stepMode) {
         if (bindingSlot >= kMaxVertexInputs) {
-            device->HandleError("Setting input out of bounds");
+            HandleError("Setting input out of bounds");
             return;
         }
         if (inputsSetMask[bindingSlot]) {
-            device->HandleError("Setting already set input");
+            HandleError("Setting already set input");
             return;
         }
 

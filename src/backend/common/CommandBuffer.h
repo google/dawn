@@ -18,6 +18,7 @@
 #include "nxt/nxtcpp.h"
 
 #include "CommandAllocator.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include <set>
@@ -44,12 +45,11 @@ namespace backend {
             std::set<TextureBase*> texturesTransitioned;
     };
 
-    class CommandBufferBuilder : public RefCounted {
+    class CommandBufferBuilder : public Builder {
         public:
             CommandBufferBuilder(DeviceBase* device);
             ~CommandBufferBuilder();
 
-            bool WasConsumed() const;
             bool ValidateGetResult();
 
             CommandIterator AcquireCommands();
@@ -83,10 +83,8 @@ namespace backend {
 
             void MoveToIterator();
 
-            DeviceBase* device;
             CommandAllocator allocator;
             CommandIterator iterator;
-            bool consumed = false;
             bool movedToIterator = false;
             // These pointers will remain valid since they are referenced by
             // the bind groups which are referenced by this command buffer.

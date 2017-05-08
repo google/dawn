@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_PIPELINE_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "PerStage.h"
 #include "RefCounted.h"
 
@@ -58,11 +59,9 @@ namespace backend {
             Ref<InputStateBase> inputState;
     };
 
-    class PipelineBuilder : public RefCounted {
+    class PipelineBuilder : public Builder {
         public:
             PipelineBuilder(DeviceBase* device);
-
-            bool WasConsumed() const;
 
             struct StageInfo {
                 std::string entryPoint;
@@ -79,12 +78,10 @@ namespace backend {
         private:
             friend class PipelineBase;
 
-            DeviceBase* device;
             Ref<PipelineLayoutBase> layout;
             nxt::ShaderStageBit stageMask;
             PerStage<StageInfo> stages;
             Ref<InputStateBase> inputState;
-            bool consumed = false;
     };
 
 }

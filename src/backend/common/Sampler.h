@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_SAMPLER_H_
 
 #include "Forward.h"
+#include "Buffer.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -27,15 +28,13 @@ namespace backend {
             SamplerBase(SamplerBuilder* builder);
     };
 
-    class SamplerBuilder : public RefCounted {
+    class SamplerBuilder : public Builder {
         public:
             SamplerBuilder(DeviceBase* device);
 
             nxt::FilterMode GetMagFilter() const;
             nxt::FilterMode GetMinFilter() const;
             nxt::FilterMode GetMipMapFilter() const;
-
-            bool WasConsumed() const;
 
             // NXT API
             SamplerBase* GetResult();
@@ -44,9 +43,7 @@ namespace backend {
         private:
             friend class SamplerBase;
 
-            DeviceBase* device;
             int propertiesSet = 0;
-            bool consumed = false;
 
             nxt::FilterMode magFilter = nxt::FilterMode::Nearest;
             nxt::FilterMode minFilter = nxt::FilterMode::Nearest;

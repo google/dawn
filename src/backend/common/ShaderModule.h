@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_SHADERMODULE_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -70,11 +71,9 @@ namespace backend {
             nxt::ShaderStage executionModel;
     };
 
-    class ShaderModuleBuilder : public RefCounted {
+    class ShaderModuleBuilder : public Builder {
         public:
             ShaderModuleBuilder(DeviceBase* device);
-
-            bool WasConsumed() const;
 
             std::vector<uint32_t> AcquireSpirv();
 
@@ -85,9 +84,7 @@ namespace backend {
         private:
             friend class ShaderModuleBase;
 
-            DeviceBase* device;
             std::vector<uint32_t> spirv;
-            bool consumed = false;
     };
 
 }

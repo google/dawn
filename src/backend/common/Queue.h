@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_QUEUE_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -40,18 +41,12 @@ namespace backend {
             }
     };
 
-    class QueueBuilder : public RefCounted {
+    class QueueBuilder : public Builder {
         public:
             QueueBuilder(DeviceBase* device);
 
-            bool WasConsumed() const;
-
             // NXT API
             QueueBase* GetResult();
-
-        private:
-            DeviceBase* device;
-            bool consumed = false;
     };
 
 }

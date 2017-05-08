@@ -12,27 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "Queue.h"
+#ifndef BACKEND_COMMON_BUILDER_H_
+#define BACKEND_COMMON_BUILDER_H_
 
-#include "Device.h"
-#include "CommandBuffer.h"
+#include "Forward.h"
+#include "RefCounted.h"
 
 namespace backend {
 
-    // QueueBase
+    class Builder : public RefCounted {
+        public:
+            bool WasConsumed() const;
+            void HandleError(const char* message);
 
-    bool QueueBase::ValidateSubmitCommand(CommandBufferBase* command) {
-        return command->ValidateResourceUsagesImmediate();
-    }
+        protected:
+            Builder(DeviceBase* device);
 
-    // QueueBuilder
+            void MarkConsumed();
 
-    QueueBuilder::QueueBuilder(DeviceBase* device) : Builder(device) {
-    }
+            DeviceBase* const device;
 
-    QueueBase* QueueBuilder::GetResult() {
-        MarkConsumed();
-        return device->CreateQueue(this);
-    }
+        private:
+            bool consumed = false;
+    };
 
 }
+
+#endif // BACKEND_COMMON_BUILDER_H_

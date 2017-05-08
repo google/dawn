@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_PIPELINELAYOUT_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -39,11 +40,9 @@ namespace backend {
             std::bitset<kMaxBindGroups> mask;
     };
 
-    class PipelineLayoutBuilder : public RefCounted {
+    class PipelineLayoutBuilder : public Builder {
         public:
             PipelineLayoutBuilder(DeviceBase* device);
-
-            bool WasConsumed() const;
 
             // NXT API
             PipelineLayoutBase* GetResult();
@@ -52,10 +51,8 @@ namespace backend {
         private:
             friend class PipelineLayoutBase;
 
-            DeviceBase* device;
             BindGroupLayoutArray bindGroupLayouts;
             std::bitset<kMaxBindGroups> mask;
-            bool consumed = false;
     };
 
 }

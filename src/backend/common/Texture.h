@@ -16,6 +16,7 @@
 #define BACKEND_COMMON_TEXTURE_H_
 
 #include "Forward.h"
+#include "Builder.h"
 #include "RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -59,11 +60,9 @@ namespace backend {
             bool frozen = false;
     };
 
-    class TextureBuilder : public RefCounted {
+    class TextureBuilder : public Builder {
         public:
             TextureBuilder(DeviceBase* device);
-
-            bool WasConsumed() const;
 
             // NXT API
             TextureBase* GetResult();
@@ -77,9 +76,7 @@ namespace backend {
         private:
             friend class TextureBase;
 
-            DeviceBase* device;
             int propertiesSet = 0;
-            bool consumed = false;
 
             nxt::TextureDimension dimension;
             uint32_t width, height, depth;
@@ -99,11 +96,9 @@ namespace backend {
             Ref<TextureBase> texture;
     };
 
-    class TextureViewBuilder : public RefCounted {
+    class TextureViewBuilder : public Builder {
         public:
             TextureViewBuilder(DeviceBase* device, TextureBase* texture);
-
-            bool WasConsumed() const;
 
             // NXT API
             TextureViewBase* GetResult();
@@ -111,8 +106,6 @@ namespace backend {
         private:
             friend class TextureViewBase;
 
-            DeviceBase* device;
-            bool consumed = false;
             Ref<TextureBase> texture;
     };
 
