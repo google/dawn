@@ -29,7 +29,7 @@ class ProcTableAsClass {
         {% endfor %}
 
         {% for type in by_category["object"] %}
-            {% for method in native_methods(type) %}
+            {% for method in native_methods(type) if len(method.arguments) < 10 %}
                 virtual {{as_cType(method.return_type.name)}} {{as_MethodSuffix(type.name, method.name)}}(
                     {{-as_cType(type.name)}} {{as_varName(type.name)}}
                     {%- for arg in method.arguments -%}
@@ -47,7 +47,7 @@ class ProcTableAsClass {
 class MockProcTable : public ProcTableAsClass {
     public:
         {% for type in by_category["object"] %}
-            {% for method in native_methods(type) %}
+            {% for method in native_methods(type) if len(method.arguments) < 10 %}
                 MOCK_METHOD{{len(method.arguments) + 1}}(
                     {{-as_MethodSuffix(type.name, method.name)}},
                     {{as_cType(method.return_type.name)}}(
