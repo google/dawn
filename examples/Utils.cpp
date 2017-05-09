@@ -69,6 +69,7 @@ enum class BackendType {
 enum class CmdBufType {
     None,
     Terrible,
+    //TODO(cwallez@chromium.org) double terrible cmdbuf
 };
 
 static BackendType backendType = BackendType::OpenGL;
@@ -78,7 +79,9 @@ static BackendBinding* binding = nullptr;
 static GLFWwindow* window = nullptr;
 
 static nxt::wire::CommandHandler* wireServer = nullptr;
-static nxt::wire::TerribleCommandBuffer* cmdBuf = nullptr;
+static nxt::wire::CommandHandler* wireClient = nullptr;
+static nxt::wire::TerribleCommandBuffer* c2sBuf = nullptr;
+static nxt::wire::TerribleCommandBuffer* s2cBuf = nullptr;
 
 void HandleSynchronousError(const char* errorMessage, void* userData) {
     std::cerr << errorMessage << std::endl;
@@ -127,12 +130,16 @@ void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
 
         case CmdBufType::Terrible:
             {
-                wireServer = nxt::wire::CreateCommandHandler(backendDevice, backendProcs);
-                cmdBuf = new nxt::wire::TerribleCommandBuffer(wireServer);
+                c2sBuf = new nxt::wire::TerribleCommandBuffer();
+                s2cBuf = new nxt::wire::TerribleCommandBuffer();
+
+                wireServer = nxt::wire::NewServerCommandHandler(backendDevice, backendProcs, s2cBuf);
+                c2sBuf->SetHandler(wireServer);
 
                 nxtDevice clientDevice;
                 nxtProcTable clientProcs;
-                nxt::wire::NewClientDevice(&clientProcs, &clientDevice, cmdBuf);
+                wireClient = nxt::wire::NewClientDevice(&clientProcs, &clientDevice, c2sBuf);
+                s2cBuf->SetHandler(wireClient);
 
                 *procs = clientProcs;
                 *device = nxt::Device::Acquire(clientDevice);
@@ -140,6 +147,7 @@ void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
             break;
     }
 
+    //TODO(cwallez@chromium.org) this will disappear
     backend::RegisterSynchronousErrorCallback(backendDevice, HandleSynchronousError, wireServer);
 }
 
@@ -250,8 +258,9 @@ extern "C" {
     }
 
     void SwapBuffers() {
-        if (cmdBuf) {
-            cmdBuf->Flush();
+        if (cmdBufType == CmdBufType::Terrible) {
+            c2sBuf->Flush();
+            s2cBuf->Flush();
         }
         glfwPollEvents();
         binding->SwapBuffers();

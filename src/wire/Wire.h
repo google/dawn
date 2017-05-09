@@ -29,8 +29,6 @@ namespace wire {
             virtual void Flush() = 0;
     };
 
-    void NewClientDevice(nxtProcTable* procs, nxtDevice* device, CommandSerializer* serializer);
-
     class CommandHandler {
         public:
             virtual ~CommandHandler() = default;
@@ -39,7 +37,8 @@ namespace wire {
             virtual void OnSynchronousError() = 0;
     };
 
-    CommandHandler* CreateCommandHandler(nxtDevice device, const nxtProcTable& procs);
+    CommandHandler* NewClientDevice(nxtProcTable* procs, nxtDevice* device, CommandSerializer* serializer);
+    CommandHandler* NewServerCommandHandler(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer);
 
 }
 }

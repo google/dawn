@@ -28,27 +28,34 @@ class WireTests : public Test {
             nxtDevice mockDevice;
             api.GetProcTableAndDevice(&mockProcs, &mockDevice);
 
-            wireServer = CreateCommandHandler(mockDevice, mockProcs);
+            s2cBuf = new TerribleCommandBuffer();
+            c2sBuf = new TerribleCommandBuffer(wireServer);
 
-            cmdBuf = new TerribleCommandBuffer(wireServer);
+            wireServer = NewServerCommandHandler(mockDevice, mockProcs, s2cBuf);
+            c2sBuf->SetHandler(wireServer);
 
-            nxtDevice clientDevice;
             nxtProcTable clientProcs;
-            NewClientDevice(&clientProcs, &clientDevice, cmdBuf);
-
+            wireClient = NewClientDevice(&clientProcs, &device, c2sBuf);
             nxtSetProcs(&clientProcs);
-            device = clientDevice;
+            s2cBuf->SetHandler(wireClient);
+
             apiDevice = mockDevice;
         }
 
         void TearDown() override {
             nxtSetProcs(nullptr);
             delete wireServer;
-            delete cmdBuf;
+            delete wireClient;
+            delete c2sBuf;
+            delete s2cBuf;
         }
 
-        void Flush() {
-            cmdBuf->Flush();
+        void FlushClient() {
+            c2sBuf->Flush();
+        }
+
+        void FlushServer() {
+            s2cBuf->Flush();
         }
 
         MockProcTable api;
@@ -57,7 +64,9 @@ class WireTests : public Test {
 
     private:
         CommandHandler* wireServer = nullptr;
-        TerribleCommandBuffer* cmdBuf = nullptr;
+        CommandHandler* wireClient = nullptr;
+        TerribleCommandBuffer* s2cBuf = nullptr;
+        TerribleCommandBuffer* c2sBuf = nullptr;
 };
 
 // One call gets forwarded correctly.
@@ -68,7 +77,7 @@ TEST_F(WireTests, CallForwarded) {
     EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
         .WillOnce(Return(apiCmdBufBuilder));
 
-    Flush();
+    FlushClient();
 }
 
 // Test that calling methods on a new object works as expected.
@@ -84,7 +93,7 @@ TEST_F(WireTests, CreateThenCall) {
     EXPECT_CALL(api, CommandBufferBuilderGetResult(apiCmdBufBuilder))
         .WillOnce(Return(apiCmdBuf));
 
-    Flush();
+    FlushClient();
 }
 
 // Test that client reference/release do not call the backend API.
@@ -98,7 +107,7 @@ TEST_F(WireTests, RefCountKeptInClient) {
     EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
         .WillOnce(Return(apiCmdBufBuilder));
 
-    Flush();
+    FlushClient();
 }
 
 // Test that client reference/release do not call the backend API.
@@ -113,7 +122,7 @@ TEST_F(WireTests, ReleaseCalledOnRefCount0) {
 
     EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
 
-    Flush();
+    FlushClient();
 }
 
 TEST_F(WireTests, ObjectAsValueArgument) {
@@ -139,7 +148,7 @@ TEST_F(WireTests, ObjectAsValueArgument) {
 
     EXPECT_CALL(api, CommandBufferBuilderSetPipeline(apiCmdBufBuilder, apiPipeline));
 
-    Flush();
+    FlushClient();
 }
 
 TEST_F(WireTests, OneObjectAsPointerArgument) {
@@ -172,7 +181,7 @@ TEST_F(WireTests, OneObjectAsPointerArgument) {
 
     EXPECT_CALL(api, QueueSubmit(apiQueue, 1, Pointee(apiCmdBuf)));
 
-    Flush();
+    FlushClient();
 }
 
 // TODO

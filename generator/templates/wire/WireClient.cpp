@@ -210,11 +210,33 @@ namespace wire {
             return table;
         }
 
+        class Client : public CommandHandler {
+            public:
+                Client(Device* device) : device(device) {
+                }
+
+                const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
+                    // TODO(cwallez@chromium.org): process callbacks
+                    return nullptr;
+                }
+
+                void OnSynchronousError() override {
+                    // TODO(cwallez@chromium.org): this will disappear
+                }
+
+            private:
+                Device* device = nullptr;
+        };
+
     }
 
-    void NewClientDevice(nxtProcTable* procs, nxtDevice* device, CommandSerializer* serializer) {
-        *device = reinterpret_cast<nxtDeviceImpl*>(new client::Device(serializer));
+    CommandHandler* NewClientDevice(nxtProcTable* procs, nxtDevice* device, CommandSerializer* serializer) {
+        auto clientDevice = new client::Device(serializer);
+
+        *device = reinterpret_cast<nxtDeviceImpl*>(clientDevice);
         *procs = client::GetProcs();
+
+        return new client::Client(clientDevice);
     }
 
 }

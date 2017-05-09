@@ -273,16 +273,16 @@ namespace wire {
                                 return true;
                             }
 
-                            {% if returns -%}
-                                auto result =
-                            {%- endif -%}
+                            {% if returns %}
+                                auto result ={{" "}}
+                            {%- endif %}
                             procs.{{as_varName(type.name, method.name)}}(self
                                 {%- for arg in method.arguments -%}
-                                    {% if arg.annotation == "value" and arg.type.category != "object" %}
+                                    {%- if arg.annotation == "value" and arg.type.category != "object" -%}
                                         , cmd->{{as_varName(arg.name)}}
-                                    {% else %}
+                                    {%- else -%}
                                         , arg_{{as_varName(arg.name)}}
-                                    {% endif %}
+                                    {%- endif -%}
                                 {%- endfor -%}
                             );
 
@@ -335,7 +335,8 @@ namespace wire {
 
     }
 
-    CommandHandler* CreateCommandHandler(nxtDevice device, const nxtProcTable& procs) {
+    CommandHandler* NewServerCommandHandler(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer) {
+        //TODO(cwallez@chromium.org) do something with the serializer
         return new server::Server(device, procs);
     }
 

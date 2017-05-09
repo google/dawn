@@ -24,8 +24,16 @@ namespace wire {
 
 class TerribleCommandBuffer : public CommandSerializer {
     public:
+        TerribleCommandBuffer() {
+        }
+
         TerribleCommandBuffer(CommandHandler* handler) : handler(handler) {
         }
+
+        void SetHandler(CommandHandler* handler) {
+            this->handler = handler;
+        }
+
         void* GetCmdSpace(size_t size) {
             if (size > sizeof(buffer)) {
                 return nullptr;
@@ -41,6 +49,7 @@ class TerribleCommandBuffer : public CommandSerializer {
 
             return result;
         }
+
         void Flush() {
             handler->HandleCommands(buffer, offset);
             offset = 0;
