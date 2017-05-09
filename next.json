@@ -207,6 +207,7 @@
                 "name": "copy buffer to texture",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
+                    {"name": "buffer offset", "type": "uint32_t"},
                     {"name": "texture", "type": "texture"},
                     {"name": "x", "type": "uint32_t"},
                     {"name": "y", "type": "uint32_t"},
@@ -219,11 +220,9 @@
                 "TODO": [
                     "Make pretty with Offset and Extents structures",
                     "Allow choosing the aspect (depth vs. stencil)?",
-                    "The following where removed because gmock supports only 10 arguments",
-                    "this means the buffer is assumed to be packed and starting at 0.",
+                    "Add these arguments too",
                     {"name": "row length", "type": "uint32_t"},
-                    {"name": "image height", "type": "uint32_t"},
-                    {"name": "buffer offset", "type": "uint32_t"}
+                    {"name": "image height", "type": "uint32_t"}
                 ]
             },
             {

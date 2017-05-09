@@ -330,7 +330,7 @@ namespace metal {
                         encoders.EnsureBlit(commandBuffer);
                         [encoders.blit
                             copyFromBuffer:buffer->GetMTLBuffer()
-                            sourceOffset:0
+                            sourceOffset:copy->bufferOffset
                             sourceBytesPerRow:rowSize
                             sourceBytesPerImage:(rowSize * copy->height)
                             sourceSize:size

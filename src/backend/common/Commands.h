@@ -41,6 +41,7 @@ namespace backend {
 
     struct CopyBufferToTextureCmd {
         Ref<BufferBase> buffer;
+        uint32_t bufferOffset;
         Ref<TextureBase> texture;
         uint32_t x, y, z;
         uint32_t width, height, depth;

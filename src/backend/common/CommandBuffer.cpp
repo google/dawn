@@ -245,6 +245,7 @@ namespace backend {
                     {
                         CopyBufferToTextureCmd* copy = iterator.NextCommand<CopyBufferToTextureCmd>();
                         BufferBase* buffer = copy->buffer.Get();
+                        uint32_t bufferOffset = copy->bufferOffset;
                         TextureBase* texture = copy->texture.Get();
                         uint64_t width = copy->width;
                         uint64_t height = copy->height;
@@ -273,8 +274,7 @@ namespace backend {
                         uint64_t pixelSize = TextureFormatPixelSize(texture->GetFormat());
                         uint64_t dataSize = width * height * depth * pixelSize;
 
-                        // TODO(cwallez@chromium.org): handle buffer offset when it is in the command.
-                        if (dataSize > static_cast<uint64_t>(buffer->GetSize())) {
+                        if (dataSize + static_cast<uint64_t>(bufferOffset) > static_cast<uint64_t>(buffer->GetSize())) {
                             device->HandleError("Copy would read after end of the buffer");
                             return false;
                         }
@@ -497,11 +497,13 @@ namespace backend {
         return device->CreateCommandBuffer(this);
     }
 
-    void CommandBufferBuilder::CopyBufferToTexture(BufferBase* buffer, TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
+    void CommandBufferBuilder::CopyBufferToTexture(BufferBase* buffer, uint32_t bufferOffset,
+                                                   TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
                                                    uint32_t width, uint32_t height, uint32_t depth, uint32_t level) {
         CopyBufferToTextureCmd* copy = allocator.Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
         new(copy) CopyBufferToTextureCmd;
         copy->buffer = buffer;
+        copy->bufferOffset = bufferOffset;
         copy->texture = texture;
         copy->x = x;
         copy->y = y;

@@ -74,7 +74,8 @@ namespace opengl {
                         glBindTexture(target, texture->GetHandle());
 
                         glTexSubImage2D(target, copy->level, copy->x, copy->y, copy->width, copy->height,
-                                        format.format, format.type, nullptr);
+                                        format.format, format.type,
+                                        reinterpret_cast<void*>(static_cast<uintptr_t>(copy->bufferOffset)));
                         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
                     }
                     break;
