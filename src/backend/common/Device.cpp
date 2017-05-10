@@ -61,6 +61,10 @@ namespace backend {
         this->errorUserdata = userdata;
     }
 
+    DeviceBase* DeviceBase::GetDevice() {
+        return this;
+    }
+
     BindGroupLayoutBase* DeviceBase::GetOrCreateBindGroupLayout(const BindGroupLayoutBase* blueprint, BindGroupLayoutBuilder* builder) {
         // The blueprint is only used to search in the cache and is not modified. However cached
         // objects can be modified, and unordered_set cannot search for a const pointer in a non

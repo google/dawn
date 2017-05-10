@@ -24,10 +24,11 @@
 namespace backend {
 
     class QueueBase : public RefCounted {
-        private:
-            bool ValidateSubmitCommand(CommandBufferBase* command);
-
         public:
+            QueueBase(QueueBuilder* builder);
+
+            DeviceBase* GetDevice();
+
             template<typename T>
             bool ValidateSubmit(uint32_t numCommands, T* const * commands) {
                 static_assert(std::is_base_of<CommandBufferBase, T>::value, "invalid command buffer type");
@@ -39,6 +40,11 @@ namespace backend {
                 }
                 return true;
             }
+
+        private:
+            bool ValidateSubmitCommand(CommandBufferBase* command);
+
+            DeviceBase* device;
     };
 
     class QueueBuilder : public Builder<QueueBase> {
@@ -46,6 +52,7 @@ namespace backend {
             QueueBuilder(DeviceBase* device);
 
         private:
+            friend class QueueBase;
             QueueBase* GetResultImpl() override;
     };
 

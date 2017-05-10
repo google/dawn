@@ -803,7 +803,7 @@ namespace metal {
     // Queue
 
     Queue::Queue(Device* device, QueueBuilder* builder)
-        : device(device) {
+        : QueueBase(builder), device(device) {
         commandQueue = [device->GetMTLDevice() newCommandQueue];
     }
 

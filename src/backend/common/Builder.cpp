@@ -22,6 +22,10 @@ namespace backend {
         return !consumed && !gotStatus;
     }
 
+    DeviceBase* BuilderBase::GetDevice() {
+        return device;
+    }
+
     void BuilderBase::HandleError(const char* message) {
         SetStatus(nxt::BuilderErrorStatus::Error, message);
     }

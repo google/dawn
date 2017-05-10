@@ -42,6 +42,7 @@ namespace backend {
             // Used by the auto-generated validation to prevent usage of the builder
             // after GetResult or an error.
             bool CanBeUsed() const;
+            DeviceBase* GetDevice();
 
             // Set the status of the builder to an error.
             void HandleError(const char* message);

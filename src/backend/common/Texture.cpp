@@ -33,6 +33,10 @@ namespace backend {
         allowedUsage(builder->allowedUsage), currentUsage(builder->currentUsage) {
     }
 
+    DeviceBase* TextureBase::GetDevice() {
+        return device;
+    }
+
     nxt::TextureDimension TextureBase::GetDimension() const {
         return dimension;
     }

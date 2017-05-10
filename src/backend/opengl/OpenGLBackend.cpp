@@ -167,7 +167,8 @@ namespace opengl {
 
     // Queue
 
-    Queue::Queue(Device* device, QueueBuilder* builder) : device(device) {
+    Queue::Queue(Device* device, QueueBuilder* builder)
+        : QueueBase(builder), device(device) {
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {

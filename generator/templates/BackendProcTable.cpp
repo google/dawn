@@ -17,8 +17,6 @@
 
 #include "{{namespace}}/GeneratedCodeIncludes.h"
 
-#include <iostream>
-
 namespace backend {
 namespace {{namespace}} {
 
@@ -91,18 +89,30 @@ namespace {{namespace}} {
                     {%- endfor -%}
                 ) {
                     {% if type.is_builder and method.name.canonical_case() not in ("release", "reference") %}
-                        if (!self->CanBeUsed()) return false;
+                        if (!self->CanBeUsed()) {
+                            self->GetDevice()->HandleError("Builder cannot be used after GetResult");
+                            return false;
+                        }
                     {% else %}
                         (void) self;
                     {% endif %}
+                    bool error = false;
                     {% for arg in method.arguments %}
                         {% if arg.type.category == "enum" %}
-                            if (!CheckEnum{{as_cType(arg.type.name)}}({{as_varName(arg.name)}})) return false;
+                            if (!CheckEnum{{as_cType(arg.type.name)}}({{as_varName(arg.name)}})) error = true;;
                         {% elif arg.type.category == "bitmask" %}
-                            if (!CheckBitmask{{as_cType(arg.type.name)}}({{as_varName(arg.name)}})) return false;
+                            if (!CheckBitmask{{as_cType(arg.type.name)}}({{as_varName(arg.name)}})) error = true;
                         {% else %}
                             (void) {{as_varName(arg.name)}};
                         {% endif %}
+                        if (error) {
+                            {% if type.is_builder %}
+                                self->HandleError("Bad value in {{suffix}}");
+                            {% else %}
+                                self->GetDevice()->HandleError("Bad value in {{suffix}}");
+                            {% endif %}
+                            return false;
+                        }
                     {% endfor %}
                     return true;
                 }
@@ -133,25 +143,16 @@ namespace {{namespace}} {
                         }
                     {% endif %}
 
-                    //* If there is an error we forward it appropriately.
-                    if (!valid) {
-                        //* An error in a builder methods is always handled by the builder
-                        {% if type.is_builder %}
-                            //* HACK(cwallez@chromium.org): special casing GetResult so that the error callback
-                            //* is called if needed. Without this, no call to HandleResult would happen, and the
-                            //* error callback would always get called with an Unknown status
-                            {% if method.name.canonical_case() == "get result" %}
-                                {{as_backendType(method.return_type)}} fakeResult = nullptr;
-                                bool shouldBeFalse = self->HandleResult(fakeResult);
-                                assert(shouldBeFalse == false);
-                            {% else %}
-                                self->HandleError("Error in {{suffix}}");
-                            {% endif %}
-                        {% else %}
-                            // TODO get the device or builder and give it the error?
-                            std::cout << "Error in {{suffix}}" << std::endl;
-                        {% endif %}
-                    }
+                    //* HACK(cwallez@chromium.org): special casing GetResult so that the error callback
+                    //* is called if needed. Without this, no call to HandleResult would happen, and the
+                    //* error callback would always get called with an Unknown status
+                    {% if type.is_builder and method.name.canonical_case() == "get result" %}
+                        if (!valid) {
+                            {{as_backendType(method.return_type)}} fakeResult = nullptr;
+                            bool shouldBeFalse = self->HandleResult(fakeResult);
+                            assert(shouldBeFalse == false);
+                        }
+                    {% endif %}
 
                     {% if method.return_type.name.canonical_case() == "void" %}
                         if (!valid) return;

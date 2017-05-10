@@ -43,6 +43,8 @@ namespace backend {
             bool IsTransitionPossible(nxt::TextureUsageBit usage) const;
             void TransitionUsageImpl(nxt::TextureUsageBit usage);
 
+            DeviceBase* GetDevice();
+
             // NXT API
             TextureViewBuilder* CreateTextureViewBuilder();
             void TransitionUsage(nxt::TextureUsageBit usage);

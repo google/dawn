@@ -34,6 +34,10 @@ namespace backend {
         return new BufferViewBuilder(device, this);
     }
 
+    DeviceBase* BufferBase::GetDevice() {
+        return device;
+    }
+
     uint32_t BufferBase::GetSize() const {
         return size;
     }

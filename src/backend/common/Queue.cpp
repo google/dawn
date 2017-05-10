@@ -21,6 +21,13 @@ namespace backend {
 
     // QueueBase
 
+    QueueBase::QueueBase(QueueBuilder* builder) : device(builder->device) {
+    }
+
+    DeviceBase* QueueBase::GetDevice() {
+        return device;
+    }
+
     bool QueueBase::ValidateSubmitCommand(CommandBufferBase* command) {
         return command->ValidateResourceUsagesImmediate();
     }
