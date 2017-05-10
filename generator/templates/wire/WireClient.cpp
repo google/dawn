@@ -29,6 +29,14 @@ namespace wire {
 
         class Device;
 
+        void PrintBuilderError(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata, nxtCallbackUserdata) {
+            if (status == NXT_BUILDER_ERROR_STATUS_SUCCESS || status == NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
+                return;
+            }
+
+            std::cout << "Got a builder error " << status << ": " << message << std::endl;
+        }
+
         struct BuilderCallbackData {
             void Call(nxtBuilderErrorStatus status, const char* message) {
                 if (canCall && callback != nullptr) {
@@ -37,7 +45,8 @@ namespace wire {
                 }
             }
 
-            nxtBuilderErrorCallback callback = nullptr;
+            //* For help with development, prints all builder errors by default.
+            nxtBuilderErrorCallback callback = PrintBuilderError;
             nxtCallbackUserdata userdata1 = 0;
             nxtCallbackUserdata userdata2 = 0;
             bool canCall = true;
