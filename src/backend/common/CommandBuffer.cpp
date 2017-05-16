@@ -55,6 +55,18 @@ namespace backend {
         Command type;
         while(commands->NextCommandId(&type)) {
             switch (type) {
+                case Command::AdvanceSubpass:
+                    {
+                        AdvanceSubpassCmd* cmd = commands->NextCommand<AdvanceSubpassCmd>();
+                        cmd->~AdvanceSubpassCmd();
+                    }
+                    break;
+                case Command::BeginRenderPass:
+                    {
+                        BeginRenderPassCmd* begin = commands->NextCommand<BeginRenderPassCmd>();
+                        begin->~BeginRenderPassCmd();
+                    }
+                    break;
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = commands->NextCommand<CopyBufferToTextureCmd>();
@@ -77,6 +89,12 @@ namespace backend {
                     {
                         DrawElementsCmd* draw = commands->NextCommand<DrawElementsCmd>();
                         draw->~DrawElementsCmd();
+                    }
+                    break;
+                case Command::EndRenderPass:
+                    {
+                        EndRenderPassCmd* cmd = commands->NextCommand<EndRenderPassCmd>();
+                        cmd->~EndRenderPassCmd();
                     }
                     break;
                 case Command::SetPipeline:
@@ -148,6 +166,7 @@ namespace backend {
         VALIDATION_ASPECT_BINDGROUPS,
         VALIDATION_ASPECT_VERTEX_BUFFERS,
         VALIDATION_ASPECT_INDEX_BUFFER,
+        VALIDATION_ASPECT_RENDER_PASS,
 
         VALIDATION_ASPECT_COUNT,
     };
@@ -162,6 +181,7 @@ namespace backend {
         std::bitset<kMaxVertexInputs> inputsSet;
         PipelineBase* lastPipeline = nullptr;
 
+        // TODO(kainino@chromium.org): Manage this state inside an object, change lambdas to methods
         std::map<BufferBase*, nxt::BufferUsageBit> mostRecentBufferUsages;
         auto bufferHasGuaranteedUsageBit = [&](BufferBase* buffer, nxt::BufferUsageBit usage) -> bool {
             assert(usage != nxt::BufferUsageBit::None && nxt::HasZeroOrOneBits(usage));
@@ -234,9 +254,84 @@ namespace backend {
             return true;
         };
 
+        // TODO(kainino@chromium.org): Manage this state inside an object, change lambda to a method
+        RenderPassBase* currentRenderPass = nullptr;
+        FramebufferBase* currentFramebuffer = nullptr;
+        uint32_t currentSubpass = 0;
+        auto beginSubpass = [&]() -> bool {
+            auto& subpassInfo = currentRenderPass->GetSubpassInfo(currentSubpass);
+            for (auto attachmentSlot : subpassInfo.colorAttachments) {
+                auto* tv = currentFramebuffer->GetTextureView(attachmentSlot);
+                // TODO(kainino@chromium.org): the TextureView can only be null
+                // because of the null=backbuffer hack (null representing the
+                // backbuffer). Once that hack is removed (once we have WSI)
+                // this check isn't needed.
+                if (tv == nullptr) {
+                    continue;
+                }
+
+                auto* texture = tv->GetTexture();
+                if (texture->HasFrozenUsage(nxt::TextureUsageBit::ColorAttachment)) {
+                    continue;
+                }
+                if (!texture->IsTransitionPossible(nxt::TextureUsageBit::ColorAttachment)) {
+                    HandleError("Can't transition attachment to ColorAttachment usage");
+                    return false;
+                }
+                mostRecentTextureUsages.erase(texture);
+                texturesTransitioned.insert(texture);
+            }
+            return true;
+        };
+
         Command type;
         while(iterator.NextCommandId(&type)) {
             switch (type) {
+                case Command::AdvanceSubpass:
+                    {
+                        iterator.NextCommand<AdvanceSubpassCmd>();
+                        if (currentRenderPass == nullptr) {
+                            HandleError("Can't advance subpass without an active render pass");
+                            return false;
+                        }
+                        if (currentSubpass + 1 >= currentRenderPass->GetSubpassCount()) {
+                            HandleError("Can't advance beyond the last subpass");
+                            return false;
+                        }
+                        currentSubpass += 1;
+                        if (!beginSubpass()) {
+                            return false;
+                        }
+                        aspects.reset(VALIDATION_ASPECT_RENDER_PIPELINE);
+                    }
+                    break;
+
+                case Command::BeginRenderPass:
+                    {
+                        BeginRenderPassCmd* begin = iterator.NextCommand<BeginRenderPassCmd>();
+                        auto* renderPass = begin->renderPass.Get();
+                        auto* framebuffer = begin->framebuffer.Get();
+                        if (currentRenderPass != nullptr) {
+                            HandleError("A render pass is already active");
+                            return false;
+                        }
+                        if (!framebuffer->GetRenderPass()->IsCompatibleWith(renderPass)) {
+                            HandleError("Framebuffer is incompatible with this render pass");
+                            return false;
+                        }
+
+                        aspects.reset(VALIDATION_ASPECT_COMPUTE_PIPELINE);
+                        aspects.reset(VALIDATION_ASPECT_RENDER_PIPELINE);
+                        aspects.set(VALIDATION_ASPECT_RENDER_PASS);
+                        currentRenderPass = renderPass;
+                        currentFramebuffer = framebuffer;
+                        currentSubpass = 0;
+                        if (!beginSubpass()) {
+                            return false;
+                        }
+                    }
+                    break;
+
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = iterator.NextCommand<CopyBufferToTextureCmd>();
@@ -250,6 +345,11 @@ namespace backend {
                         uint64_t y = copy->y;
                         uint64_t z = copy->z;
                         uint32_t level = copy->level;
+
+                        if (currentRenderPass) {
+                            HandleError("Blit cannot occur during a render pass");
+                            return false;
+                        }
 
                         if (!bufferHasGuaranteedUsageBit(buffer, nxt::BufferUsageBit::TransferSrc)) {
                             HandleError("Buffer needs the transfer source usage bit");
@@ -354,6 +454,24 @@ namespace backend {
                     }
                     break;
 
+                case Command::EndRenderPass:
+                    {
+                        iterator.NextCommand<EndRenderPassCmd>();
+                        if (currentRenderPass == nullptr) {
+                            HandleError("No render pass is currently active");
+                            return false;
+                        }
+                        if (currentSubpass < currentRenderPass->GetSubpassCount() - 1) {
+                            HandleError("Can't end a render pass before the last subpass");
+                            return false;
+                        }
+                        currentRenderPass = nullptr;
+                        currentFramebuffer = nullptr;
+                        aspects.reset(VALIDATION_ASPECT_RENDER_PASS);
+                        aspects.reset(VALIDATION_ASPECT_RENDER_PIPELINE);
+                    }
+                    break;
+
                 case Command::SetPipeline:
                     {
                         SetPipelineCmd* cmd = iterator.NextCommand<SetPipelineCmd>();
@@ -361,11 +479,21 @@ namespace backend {
                         PipelineLayoutBase* layout = pipeline->GetLayout();
 
                         if (pipeline->IsCompute()) {
+                            if (currentRenderPass) {
+                                HandleError("Can't use a compute pipeline while a render pass is active");
+                                return false;
+                            }
                             aspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
-                            aspects.reset(VALIDATION_ASPECT_RENDER_PIPELINE);
                         } else {
+                            if (!currentRenderPass) {
+                                HandleError("A render pass must be active when a render pipeline is set");
+                                return false;
+                            }
+                            if (!pipeline->GetRenderPass()->IsCompatibleWith(currentRenderPass)) {
+                                HandleError("Pipeline is incompatible with this render pass");
+                                return false;
+                            }
                             aspects.set(VALIDATION_ASPECT_RENDER_PIPELINE);
-                            aspects.reset(VALIDATION_ASPECT_COMPUTE_PIPELINE);
                         }
                         aspects.reset(VALIDATION_ASPECT_BINDGROUPS);
                         aspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
@@ -472,6 +600,29 @@ namespace backend {
                             return false;
                         }
 
+                        // TODO(kainino@chromium.org): We should be able to
+                        // optimize this by tracking which textures are in use
+                        // as attachments. Maybe it's possible that the
+                        // XAttachment usages could mark this: disallow
+                        // explicit transitions to XAttachment usages, and
+                        // disallow explicit transitions of resources already
+                        // in an XAttachment usage.
+                        if (currentRenderPass) {
+                            auto& info = currentRenderPass->GetSubpassInfo(currentSubpass);
+                            for (uint32_t location = 0; location < info.colorAttachments.size(); ++location) {
+                                if (!info.colorAttachmentsSet[location]) {
+                                    continue;
+                                }
+                                uint32_t attachmentSlot = info.colorAttachments[location];
+                                auto* tv = currentFramebuffer->GetTextureView(attachmentSlot);
+                                // TODO(kainino@chromium.org): remove check for tv being non-null once the null=backbuffer hack is removed.
+                                if (tv && tv->GetTexture() == texture) {
+                                    HandleError("Can't transition a texture while it's used as a color attachment");
+                                    return false;
+                                }
+                            }
+                        }
+
                         mostRecentTextureUsages[texture] = usage;
 
                         texturesTransitioned.insert(texture);
@@ -492,6 +643,17 @@ namespace backend {
     CommandBufferBase* CommandBufferBuilder::GetResultImpl() {
         MoveToIterator();
         return device->CreateCommandBuffer(this);
+    }
+
+    void CommandBufferBuilder::AdvanceSubpass() {
+        allocator.Allocate<AdvanceSubpassCmd>(Command::AdvanceSubpass);
+    }
+
+    void CommandBufferBuilder::BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer) {
+        BeginRenderPassCmd* cmd = allocator.Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
+        new(cmd) BeginRenderPassCmd;
+        cmd->renderPass = renderPass;
+        cmd->framebuffer = framebuffer;
     }
 
     void CommandBufferBuilder::CopyBufferToTexture(BufferBase* buffer, uint32_t bufferOffset,
@@ -535,6 +697,10 @@ namespace backend {
         draw->instanceCount = instanceCount;
         draw->firstIndex = firstIndex;
         draw->firstInstance = firstInstance;
+    }
+
+    void CommandBufferBuilder::EndRenderPass() {
+        allocator.Allocate<EndRenderPassCmd>(Command::EndRenderPass);
     }
 
     void CommandBufferBuilder::SetPipeline(PipelineBase* pipeline) {

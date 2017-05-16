@@ -28,6 +28,8 @@ nxt::Buffer modelBuffer;
 std::array<nxt::Buffer, 2> particleBuffers;
 
 nxt::Pipeline renderPipeline;
+nxt::RenderPass renderpass;
+nxt::Framebuffer framebuffer;
 
 nxt::Buffer updateParams;
 nxt::Pipeline updatePipeline;
@@ -134,7 +136,9 @@ void initRender() {
         .SetInput(1, sizeof(glm::vec2), nxt::InputStepMode::Vertex)
         .GetResult();
 
+    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
     renderPipeline = device.CreatePipelineBuilder()
+        .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
         .SetInputState(inputState)
@@ -279,11 +283,13 @@ void initCommandBuffers() {
             .SetBindGroup(0, updateBGs[i])
             .Dispatch(kNumParticles, 1, 1)
 
-            .SetPipeline(renderPipeline)
-            .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Vertex)
-            .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
-            .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)
-            .DrawArrays(3, kNumParticles, 0, 0)
+            .BeginRenderPass(renderpass, framebuffer)
+                .SetPipeline(renderPipeline)
+                .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Vertex)
+                .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
+                .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)
+                .DrawArrays(3, kNumParticles, 0, 0)
+            .EndRenderPass()
 
             .GetResult();
     }

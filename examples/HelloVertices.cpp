@@ -23,6 +23,8 @@ nxt::Buffer vertexBuffer;
 
 nxt::Queue queue;
 nxt::Pipeline pipeline;
+nxt::RenderPass renderpass;
+nxt::Framebuffer framebuffer;
 
 void initBuffers() {
     static const float vertexData[12] = {
@@ -59,7 +61,7 @@ void init() {
 
     nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
-        out vec4 fragColor;
+        layout(location = 0) out vec4 fragColor;
         void main() {
             fragColor = vec4(1.0, 0.0, 0.0, 1.0);
         })"
@@ -70,7 +72,9 @@ void init() {
         .SetInput(0, 4 * sizeof(float), nxt::InputStepMode::Vertex)
         .GetResult();
 
+    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
     pipeline = device.CreatePipelineBuilder()
+        .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
         .SetInputState(inputState)
@@ -80,9 +84,11 @@ void init() {
 void frame() {
     static const uint32_t vertexBufferOffsets[1] = {0};
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .SetPipeline(pipeline)
-        .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
-        .DrawArrays(3, 1, 0, 0)
+        .BeginRenderPass(renderpass, framebuffer)
+            .SetPipeline(pipeline)
+            .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
+            .DrawArrays(3, 1, 0, 0)
+        .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);

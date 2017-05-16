@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO(kainino@chromium.org): split this backend into many files
+
 #include "MetalBackend.h"
 
 #include <spirv-cross/spirv_msl.hpp>
@@ -81,6 +83,9 @@ namespace metal {
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(this, builder);
     }
+    FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
+        return new Framebuffer(this, builder);
+    }
     PipelineBase* Device::CreatePipeline(PipelineBuilder* builder) {
         return new Pipeline(this, builder);
     }
@@ -89,6 +94,9 @@ namespace metal {
     }
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(this, builder);
+    }
+    RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
+        return new RenderPass(this, builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
         return new Sampler(this, builder);
@@ -248,7 +256,10 @@ namespace metal {
             id<MTLComputeCommandEncoder> compute = nil;
             id<MTLRenderCommandEncoder> render = nil;
 
+            BeginRenderPassCmd* currentRenderPass = nullptr;
+
             void FinishEncoders() {
+                ASSERT(render == nil);
                 if (blit != nil) {
                     [blit endEncoding];
                     blit = nil;
@@ -256,10 +267,6 @@ namespace metal {
                 if (compute != nil) {
                     [compute endEncoding];
                     compute = nil;
-                }
-                if (render != nil) {
-                    [render endEncoding];
-                    render = nil;
                 }
             }
 
@@ -276,22 +283,49 @@ namespace metal {
                     // TODO(cwallez@chromium.org): does any state need to be reset?
                 }
             }
-            void EnsureRender(id<MTLCommandBuffer> commandBuffer) {
-                if (render == nil) {
-                    FinishEncoders();
+            void BeginSubpass(id<MTLCommandBuffer> commandBuffer, uint32_t subpass) {
+                ASSERT(currentRenderPass);
+                if (render != nil) {
+                    [render endEncoding];
+                    render = nil;
+                }
 
-                    // TODO(cwallez@chromium.org): this should be created from a renderpass subpass
-                    MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-                    descriptor.colorAttachments[0].texture = device->GetCurrentTexture();
-                    descriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
-                    descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+                const auto& info = currentRenderPass->renderPass->GetSubpassInfo(subpass);
+                auto& framebuffer = currentRenderPass->framebuffer;
+
+                MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+                bool usingBackbuffer = false; // HACK(kainino@chromium.org): workaround for not having depth attachments
+                for (uint32_t index = 0; index < info.colorAttachments.size(); ++index) {
+                    uint32_t attachment = info.colorAttachments[index];
+
+                    // TODO(kainino@chromium.org): currently a 'null' texture view
+                    // falls back to the 'back buffer' but this should go away
+                    // when we have WSI.
+                    id<MTLTexture> texture = nil;
+                    if (auto textureView = framebuffer->GetTextureView(attachment)) {
+                        texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
+                    } else {
+                        texture = device->GetCurrentTexture();
+                        usingBackbuffer = true;
+                    }
+                    descriptor.colorAttachments[index].texture = texture;
+                    descriptor.colorAttachments[index].loadAction = MTLLoadActionLoad;
+                    descriptor.colorAttachments[index].storeAction = MTLStoreActionStore;
+                }
+                // TODO(kainino@chromium.org): load depth attachment from subpass
+                if (usingBackbuffer) {
                     descriptor.depthAttachment.texture = device->GetCurrentDepthTexture();
                     descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
                     descriptor.depthAttachment.storeAction = MTLStoreActionStore;
-
-                    render = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-                    // TODO(cwallez@chromium.org): does any state need to be reset?
                 }
+
+                render = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+                // TODO(cwallez@chromium.org): does any state need to be reset?
+            }
+            void EndRenderPass() {
+                ASSERT(render != nil);
+                [render endEncoding];
+                render = nil;
             }
         };
 
@@ -307,15 +341,34 @@ namespace metal {
         CurrentEncoders encoders;
         encoders.device = device;
 
+        uint32_t currentSubpass = 0;
+        id<MTLRenderCommandEncoder> renderEncoder = nil;
+
         while (commands.NextCommandId(&type)) {
             switch (type) {
+                case Command::AdvanceSubpass:
+                    {
+                        commands.NextCommand<AdvanceSubpassCmd>();
+                        currentSubpass += 1;
+                        encoders.BeginSubpass(commandBuffer, currentSubpass);
+                    }
+                    break;
+
+                case Command::BeginRenderPass:
+                    {
+                        encoders.currentRenderPass = commands.NextCommand<BeginRenderPassCmd>();
+                        encoders.FinishEncoders();
+                        currentSubpass = 0;
+                        encoders.BeginSubpass(commandBuffer, currentSubpass);
+                    }
+                    break;
+
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();
                         Buffer* buffer = ToBackend(copy->buffer.Get());
                         Texture* texture = ToBackend(copy->texture.Get());
 
-                        // TODO(kainino@chromium.org): this has to be in a Blit encoder, not a Render encoder, so ordering is lost here
                         unsigned rowSize = copy->width * TextureFormatPixelSize(texture->GetFormat());
                         MTLOrigin origin;
                         origin.x = copy->x;
@@ -356,7 +409,7 @@ namespace metal {
                     {
                         DrawArraysCmd* draw = commands.NextCommand<DrawArraysCmd>();
 
-                        encoders.EnsureRender(commandBuffer);
+                        ASSERT(encoders.render);
                         [encoders.render
                             drawPrimitives:MTLPrimitiveTypeTriangle
                             vertexStart:draw->firstVertex
@@ -370,7 +423,7 @@ namespace metal {
                     {
                         DrawElementsCmd* draw = commands.NextCommand<DrawElementsCmd>();
 
-                        encoders.EnsureRender(commandBuffer);
+                        ASSERT(encoders.render);
                         [encoders.render
                             drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                             indexCount:draw->indexCount
@@ -383,6 +436,13 @@ namespace metal {
                     }
                     break;
 
+                case Command::EndRenderPass:
+                    {
+                        commands.NextCommand<EndRenderPassCmd>();
+                        encoders.EndRenderPass();
+                    }
+                    break;
+
                 case Command::SetPipeline:
                     {
                         SetPipelineCmd* cmd = commands.NextCommand<SetPipelineCmd>();
@@ -392,7 +452,7 @@ namespace metal {
                             encoders.EnsureCompute(commandBuffer);
                             lastPipeline->Encode(encoders.compute);
                         } else {
-                            encoders.EnsureRender(commandBuffer);
+                            ASSERT(encoders.render);
                             lastPipeline->Encode(encoders.render);
                         }
                     }
@@ -420,7 +480,7 @@ namespace metal {
                         if (lastPipeline->IsCompute()) {
                             encoders.EnsureCompute(commandBuffer);
                         } else {
-                            encoders.EnsureRender(commandBuffer);
+                            ASSERT(encoders.render);
                         }
 
                         // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup so that we
@@ -558,7 +618,7 @@ namespace metal {
                             mtlOffsets[i] = offsets[i];
                         }
 
-                        encoders.EnsureRender(commandBuffer);
+                        ASSERT(encoders.render);
                         [encoders.render
                             setVertexBuffers:mtlBuffers.data()
                             offsets:mtlOffsets.data()
@@ -660,6 +720,15 @@ namespace metal {
 
     MTLVertexDescriptor* InputState::GetMTLVertexDescriptor() {
         return mtlVertexDescriptor;
+    }
+
+    // Framebuffer
+
+    Framebuffer::Framebuffer(Device* device, FramebufferBuilder* builder)
+        : FramebufferBase(builder), device(device) {
+    }
+
+    Framebuffer::~Framebuffer() {
     }
 
     // Pipeline
@@ -840,6 +909,15 @@ namespace metal {
         }];
 
         [commandBuffer commit];
+    }
+
+    // RenderPass
+
+    RenderPass::RenderPass(Device* device, RenderPassBuilder* builder)
+        : RenderPassBase(builder), device(device) {
+    }
+
+    RenderPass::~RenderPass() {
     }
 
     // Sampler

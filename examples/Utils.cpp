@@ -200,6 +200,19 @@ nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage
         .GetResult();
 }
 
+void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer) {
+    *renderPass = device.CreateRenderPassBuilder()
+        .SetAttachmentCount(1)
+        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+        .SetSubpassCount(1)
+        .SubpassSetColorAttachment(0, 0, 0)
+        .GetResult();
+    *framebuffer = device.CreateFramebufferBuilder()
+        .SetRenderPass(*renderPass)
+        .SetDimensions(640, 480)
+        .GetResult();
+}
+
 extern "C" {
     bool InitUtils(int argc, const char** argv) {
         for (int i = 0; i < argc; i++) {

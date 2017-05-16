@@ -21,8 +21,10 @@
 #include "common/BindGroup.h"
 #include "common/BindGroupLayout.h"
 #include "common/Device.h"
+#include "common/Framebuffer.h"
 #include "common/InputState.h"
 #include "common/Queue.h"
+#include "common/RenderPass.h"
 #include "common/ToBackend.h"
 
 #include "glad/glad.h"
@@ -43,6 +45,8 @@ namespace opengl {
     class ShaderModule;
     class Texture;
     class TextureView;
+    class Framebuffer;
+    class RenderPass;
 
     struct OpenGLBackendTraits {
         using BindGroupType = BindGroup;
@@ -58,6 +62,8 @@ namespace opengl {
         using ShaderModuleType = ShaderModule;
         using TextureType = Texture;
         using TextureViewType = TextureView;
+        using FramebufferType = Framebuffer;
+        using RenderPassType = RenderPass;
     };
 
     template<typename T>
@@ -74,9 +80,11 @@ namespace opengl {
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
             InputStateBase* CreateInputState(InputStateBuilder* builder) override;
+            FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
             PipelineBase* CreatePipeline(PipelineBuilder* builder) override;
             PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
             QueueBase* CreateQueue(QueueBuilder* builder) override;
+            RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
             SamplerBase* CreateSampler(SamplerBuilder* builder) override;
             ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
             TextureBase* CreateTexture(TextureBuilder* builder) override;
@@ -124,6 +132,14 @@ namespace opengl {
             Device* device;
     };
 
+    class Framebuffer : public FramebufferBase {
+        public:
+            Framebuffer(Device* device, FramebufferBuilder* builder);
+
+        private:
+            Device* device;
+    };
+
     class InputState : public InputStateBase {
         public:
             InputState(Device* device, InputStateBuilder* builder);
@@ -140,6 +156,14 @@ namespace opengl {
 
             // NXT API
             void Submit(uint32_t numCommands, CommandBuffer* const * commands);
+
+        private:
+            Device* device;
+    };
+
+    class RenderPass : public RenderPassBase {
+        public:
+            RenderPass(Device* device, RenderPassBuilder* builder);
 
         private:
             Device* device;

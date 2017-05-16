@@ -219,6 +219,19 @@
                 "returns": "command buffer"
             },
             {
+                "name": "begin render pass",
+                "args": [
+                    {"name": "render pass", "type": "render pass"},
+                    {"name": "framebuffer", "type": "framebuffer"}
+                ]
+            },
+            {
+                "name": "advance subpass"
+            },
+            {
+                "name": "end render pass"
+            },
+            {
                 "name": "copy buffer to texture",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
@@ -348,6 +361,10 @@
                 "returns": "command buffer builder"
             },
             {
+                "name": "create framebuffer builder",
+                "returns": "framebuffer builder"
+            },
+            {
                 "name": "create input state builder",
                 "returns": "input state builder"
             },
@@ -362,6 +379,10 @@
             {
                 "name": "create queue builder",
                 "returns": "queue builder"
+            },
+            {
+                "name": "create render pass builder",
+                "returns": "render pass builder"
             },
             {
                 "name": "create sampler builder",
@@ -401,6 +422,38 @@
         "values": [
             {"value": 0, "name":"nearest"},
             {"value": 1, "name":"linear"}
+        ]
+    },
+    "framebuffer": {
+        "category": "object"
+    },
+    "framebuffer builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "framebuffer"
+            },
+            {
+                "name": "set render pass",
+                "args": [
+                    {"name": "render pass", "type": "render pass"}
+                ]
+            },
+            {
+                "name": "set dimensions",
+                "args": [
+                    {"name": "width", "type": "uint32_t"},
+                    {"name": "height", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set attachment",
+                "args": [
+                    {"name": "attachment slot", "type": "uint32_t"},
+                    {"name": "texture views", "type": "texture view"}
+                ]
+            }
         ]
     },
     "index format": {
@@ -463,6 +516,13 @@
                 ]
             },
             {
+                "name": "set subpass",
+                "args": [
+                    {"name": "render pass", "type": "render pass"},
+                    {"name": "subpass", "type": "uint32_t"}
+                ]
+            },
+            {
                 "name": "set stage",
                 "args": [
                     {"name": "stage", "type": "shader stage"},
@@ -517,6 +577,50 @@
                 "returns": "queue"
             }
         ]
+    },
+    "render pass builder": {
+        "category": "object",
+        "TODO": {
+            "attachments": "Also need load op, store op, depth/stencil attachments and depth/stencil ops, and maybe usages for the implicit attachment transitions",
+            "subpasses": "Also need input attachments, resolve attachments, and preserve attachments"
+        },
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "render pass"
+            },
+            {
+                "name": "set attachment count",
+                "args": [
+                    {"name": "attachment count", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "attachment set format",
+                "TODO": "Also need sample count",
+                "args": [
+                    {"name": "attachment slot", "type": "uint32_t"},
+                    {"name": "format", "type": "texture format"}
+                ]
+            },
+            {
+                "name": "set subpass count",
+                "args": [
+                    {"name": "subpass count", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "subpass set color attachment",
+                "args": [
+                    {"name": "subpass index", "type": "uint32_t"},
+                    {"name": "output attachment location", "type": "uint32_t"},
+                    {"name": "attachment slot", "type": "uint32_t"}
+                ]
+            }
+        ]
+    },
+    "render pass": {
+        "category": "object"
     },
     "sampler": {
         "category": "object"

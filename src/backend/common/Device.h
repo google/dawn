@@ -40,10 +40,12 @@ namespace backend {
             virtual BufferBase* CreateBuffer(BufferBuilder* builder) = 0;
             virtual BufferViewBase* CreateBufferView(BufferViewBuilder* builder) = 0;
             virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
+            virtual FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) = 0;
             virtual InputStateBase* CreateInputState(InputStateBuilder* builder) = 0;
             virtual PipelineBase* CreatePipeline(PipelineBuilder* builder) = 0;
             virtual PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) = 0;
             virtual QueueBase* CreateQueue(QueueBuilder* builder) = 0;
+            virtual RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) = 0;
             virtual SamplerBase* CreateSampler(SamplerBuilder* builder) = 0;
             virtual ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) = 0;
             virtual TextureBase* CreateTexture(TextureBuilder* builder) = 0;
@@ -72,10 +74,12 @@ namespace backend {
             BufferBuilder* CreateBufferBuilder();
             BufferViewBuilder* CreateBufferViewBuilder();
             CommandBufferBuilder* CreateCommandBufferBuilder();
+            FramebufferBuilder* CreateFramebufferBuilder();
             InputStateBuilder* CreateInputStateBuilder();
             PipelineBuilder* CreatePipelineBuilder();
             PipelineLayoutBuilder* CreatePipelineLayoutBuilder();
             QueueBuilder* CreateQueueBuilder();
+            RenderPassBuilder* CreateRenderPassBuilder();
             SamplerBuilder* CreateSamplerBuilder();
             ShaderModuleBuilder* CreateShaderModuleBuilder();
             TextureBuilder* CreateTextureBuilder();

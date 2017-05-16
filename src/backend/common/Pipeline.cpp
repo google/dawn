@@ -17,6 +17,7 @@
 #include "Device.h"
 #include "InputState.h"
 #include "PipelineLayout.h"
+#include "RenderPass.h"
 #include "ShaderModule.h"
 
 namespace backend {
@@ -25,6 +26,7 @@ namespace backend {
 
     PipelineBase::PipelineBase(PipelineBuilder* builder)
         : device(builder->device), stageMask(builder->stageMask), layout(std::move(builder->layout)),
+          renderPass(std::move(builder->renderPass)), subpass(builder->subpass),
           inputState(std::move(builder->inputState)) {
 
         if (stageMask != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment) &&
@@ -32,6 +34,12 @@ namespace backend {
             builder->HandleError("Wrong combination of stage for pipeline");
             return;
         }
+
+        if (!IsCompute() && !renderPass) {
+            builder->HandleError("Pipeline render pass not set");
+            return;
+        }
+        // TODO(kainino@chromium.org): Need to verify the pipeline against its render subpass.
 
         auto FillPushConstants = [](const ShaderModuleBase* module, PushConstantInfo* info) {
             const auto& moduleInfo = module->GetPushConstants();
@@ -79,6 +87,10 @@ namespace backend {
         return layout.Get();
     }
 
+    RenderPassBase* PipelineBase::GetRenderPass() {
+        return renderPass.Get();
+    }
+
     InputStateBase* PipelineBase::GetInputState() {
         return inputState.Get();
     }
@@ -112,6 +124,11 @@ namespace backend {
 
     void PipelineBuilder::SetLayout(PipelineLayoutBase* layout) {
         this->layout = layout;
+    }
+
+    void PipelineBuilder::SetSubpass(RenderPassBase* renderPass, uint32_t subpass) {
+        this->renderPass = renderPass;
+        this->subpass = subpass;
     }
 
     void PipelineBuilder::SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint) {

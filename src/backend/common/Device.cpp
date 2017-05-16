@@ -18,10 +18,12 @@
 #include "BindGroupLayout.h"
 #include "Buffer.h"
 #include "CommandBuffer.h"
+#include "Framebuffer.h"
 #include "InputState.h"
 #include "Pipeline.h"
 #include "PipelineLayout.h"
 #include "Queue.h"
+#include "RenderPass.h"
 #include "Sampler.h"
 #include "ShaderModule.h"
 #include "Texture.h"
@@ -96,6 +98,9 @@ namespace backend {
     CommandBufferBuilder* DeviceBase::CreateCommandBufferBuilder() {
         return new CommandBufferBuilder(this);
     }
+    FramebufferBuilder* DeviceBase::CreateFramebufferBuilder() {
+        return new FramebufferBuilder(this);
+    }
     InputStateBuilder* DeviceBase::CreateInputStateBuilder() {
         return new InputStateBuilder(this);
     }
@@ -107,6 +112,9 @@ namespace backend {
     }
     QueueBuilder* DeviceBase::CreateQueueBuilder() {
         return new QueueBuilder(this);
+    }
+    RenderPassBuilder* DeviceBase::CreateRenderPassBuilder() {
+        return new RenderPassBuilder(this);
     }
     SamplerBuilder* DeviceBase::CreateSamplerBuilder() {
         return new SamplerBuilder(this);

@@ -45,6 +45,7 @@ namespace backend {
             nxt::ShaderStageBit GetStageMask() const;
 
             PipelineLayoutBase* GetLayout();
+            RenderPassBase* GetRenderPass();
             InputStateBase* GetInputState();
 
             // TODO(cwallez@chromium.org): split compute and render pipelines
@@ -55,6 +56,8 @@ namespace backend {
 
             nxt::ShaderStageBit stageMask;
             Ref<PipelineLayoutBase> layout;
+            Ref<RenderPassBase> renderPass;
+            uint32_t subpass;
             PerStage<PushConstantInfo> pushConstants;
             Ref<InputStateBase> inputState;
     };
@@ -71,6 +74,7 @@ namespace backend {
 
             // NXT API
             void SetLayout(PipelineLayoutBase* layout);
+            void SetSubpass(RenderPassBase* renderPass, uint32_t subpass);
             void SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
             void SetInputState(InputStateBase* inputState);
 
@@ -80,6 +84,8 @@ namespace backend {
             PipelineBase* GetResultImpl() override;
 
             Ref<PipelineLayoutBase> layout;
+            Ref<RenderPassBase> renderPass;
+            uint32_t subpass;
             nxt::ShaderStageBit stageMask;
             PerStage<StageInfo> stages;
             Ref<InputStateBase> inputState;

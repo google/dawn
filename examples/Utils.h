@@ -32,6 +32,7 @@ extern "C" {
     #include <nxt/nxtcpp.h>
     void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device);
     nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source);
+    void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer);
 #else
     void GetProcTableAndDevice(nxtProcTable* procs, nxtDevice* device);
     nxtShaderModule CreateShaderModule(nxtDevice device, nxtShaderStage stage, const char* source);

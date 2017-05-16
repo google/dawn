@@ -63,6 +63,9 @@ namespace opengl {
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(this, builder);
     }
+    FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
+        return new Framebuffer(this, builder);
+    }
     PipelineBase* Device::CreatePipeline(PipelineBuilder* builder) {
         return new Pipeline(this, builder);
     }
@@ -71,6 +74,9 @@ namespace opengl {
     }
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(this, builder);
+    }
+    RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
+        return new RenderPass(this, builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
         return new Sampler(this, builder);
@@ -165,6 +171,12 @@ namespace opengl {
         return vertexArrayObject;
     }
 
+    // Framebuffer
+
+    Framebuffer::Framebuffer(Device* device, FramebufferBuilder* builder)
+        : FramebufferBase(builder), device(device) {
+    }
+
     // Queue
 
     Queue::Queue(Device* device, QueueBuilder* builder)
@@ -175,6 +187,12 @@ namespace opengl {
         for (uint32_t i = 0; i < numCommands; ++i) {
             commands[i]->Execute();
         }
+    }
+
+    // RenderPass
+
+    RenderPass::RenderPass(Device* device, RenderPassBuilder* builder)
+        : RenderPassBase(builder), device(device) {
     }
 
 }

@@ -27,6 +27,8 @@ nxt::Sampler sampler;
 
 nxt::Queue queue;
 nxt::Pipeline pipeline;
+nxt::RenderPass renderpass;
+nxt::Framebuffer framebuffer;
 nxt::BindGroup bindGroup;
 
 void initBuffers() {
@@ -135,7 +137,9 @@ void init() {
         .SetBindGroupLayout(0, bgl)
         .GetResult();
 
+    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
     pipeline = device.CreatePipelineBuilder()
+        .SetSubpass(renderpass, 0)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -159,11 +163,13 @@ void frame() {
     if (s.b >= 1.0f) {s.b = 0.0f;}
     static const uint32_t vertexBufferOffsets[1] = {0};
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .SetPipeline(pipeline)
-        .SetBindGroup(0, bindGroup)
-        .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
-        .SetIndexBuffer(indexBuffer, 0, nxt::IndexFormat::Uint32)
-        .DrawElements(3, 1, 0, 0)
+        .BeginRenderPass(renderpass, framebuffer)
+            .SetPipeline(pipeline)
+            .SetBindGroup(0, bindGroup)
+            .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
+            .SetIndexBuffer(indexBuffer, 0, nxt::IndexFormat::Uint32)
+            .DrawElements(3, 1, 0, 0)
+        .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);

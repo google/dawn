@@ -19,6 +19,8 @@
 nxtDevice device;
 nxtQueue queue;
 nxtPipeline pipeline;
+nxtRenderPass renderpass;
+nxtFramebuffer framebuffer;
 
 void init() {
     nxtProcTable procs;
@@ -48,7 +50,24 @@ void init() {
     nxtShaderModule fsModule = CreateShaderModule(device, NXT_SHADER_STAGE_FRAGMENT, fs);
 
     {
+        nxtRenderPassBuilder builder = nxtDeviceCreateRenderPassBuilder(device);
+        nxtRenderPassBuilderSetAttachmentCount(builder, 1);
+        nxtRenderPassBuilderAttachmentSetFormat(builder, 0, NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM);
+        nxtRenderPassBuilderSetSubpassCount(builder, 1);
+        nxtRenderPassBuilderSubpassSetColorAttachment(builder, 0, 0, 0);
+        renderpass = nxtRenderPassBuilderGetResult(builder);
+        nxtRenderPassBuilderRelease(builder);
+    }
+    {
+        nxtFramebufferBuilder builder = nxtDeviceCreateFramebufferBuilder(device);
+        nxtFramebufferBuilderSetRenderPass(builder, renderpass);
+        nxtFramebufferBuilderSetDimensions(builder, 640, 480);
+        framebuffer = nxtFramebufferBuilderGetResult(builder);
+        nxtFramebufferBuilderRelease(builder);
+    }
+    {
         nxtPipelineBuilder builder = nxtDeviceCreatePipelineBuilder(device);
+        nxtPipelineBuilderSetSubpass(builder, renderpass, 0);
         nxtPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_VERTEX, vsModule, "main");
         nxtPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_FRAGMENT, fsModule, "main");
         pipeline = nxtPipelineBuilderGetResult(builder);
@@ -63,8 +82,10 @@ void frame() {
     nxtCommandBuffer commands;
     {
         nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
+        nxtCommandBufferBuilderBeginRenderPass(builder, renderpass, framebuffer);
         nxtCommandBufferBuilderSetPipeline(builder, pipeline);
         nxtCommandBufferBuilderDrawArrays(builder, 3, 1, 0, 0);
+        nxtCommandBufferBuilderEndRenderPass(builder);
         commands = nxtCommandBufferBuilderGetResult(builder);
         nxtCommandBufferBuilderRelease(builder);
     }

@@ -114,12 +114,14 @@ namespace backend {
             HandleError("Setting bindings type over maximum number of bindings");
             return;
         }
-
         for (size_t i = start; i < start + count; i++) {
             if (bindingInfo.mask[i]) {
                 HandleError("Setting already set binding type");
                 return;
             }
+        }
+
+        for (size_t i = start; i < start + count; i++) {
             bindingInfo.mask.set(i);
             bindingInfo.visibilities[i] = visibility;
             bindingInfo.types[i] = bindingType;

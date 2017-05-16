@@ -60,6 +60,17 @@ namespace opengl {
 
         while(commands.NextCommandId(&type)) {
             switch (type) {
+                case Command::AdvanceSubpass:
+                    {
+                        // TODO(kainino@chromium.org): implement
+                    }
+                    break;
+
+                case Command::BeginRenderPass:
+                    {
+                        // TODO(kainino@chromium.org): implement
+                    }
+                    break;
 
                 case Command::CopyBufferToTexture:
                     {
@@ -121,6 +132,12 @@ namespace opengl {
                                 reinterpret_cast<void*>(draw->firstIndex * formatSize + indexBufferOffset),
                                 draw->instanceCount);
                         }
+                    }
+                    break;
+
+                case Command::EndRenderPass:
+                    {
+                        // TODO(kainino@chromium.org): implement
                     }
                     break;
 

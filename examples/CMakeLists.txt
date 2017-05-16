@@ -60,6 +60,10 @@ add_executable(HelloCompute HelloCompute.cpp)
 target_link_libraries(HelloCompute utils)
 SetCXX14(HelloCompute)
 
+add_executable(RenderToTexture RenderToTexture.cpp)
+target_link_libraries(RenderToTexture utils)
+SetCXX14(RenderToTexture)
+
 add_executable(Animometer Animometer.cpp)
 target_link_libraries(Animometer utils)
 SetCXX14(Animometer)

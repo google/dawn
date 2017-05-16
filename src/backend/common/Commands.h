@@ -15,6 +15,8 @@
 #ifndef BACKEND_COMMON_COMMANDS_H_
 #define BACKEND_COMMON_COMMANDS_H_
 
+#include "Framebuffer.h"
+#include "RenderPass.h"
 #include "Texture.h"
 
 #include "nxt/nxtcpp.h"
@@ -26,10 +28,13 @@ namespace backend {
     // dependencies: Ref<Object> needs Object to be defined.
 
     enum class Command {
+        AdvanceSubpass,
+        BeginRenderPass,
         CopyBufferToTexture,
         Dispatch,
         DrawArrays,
         DrawElements,
+        EndRenderPass,
         SetPipeline,
         SetPushConstants,
         SetBindGroup,
@@ -37,6 +42,14 @@ namespace backend {
         SetVertexBuffers,
         TransitionBufferUsage,
         TransitionTextureUsage,
+    };
+
+    struct AdvanceSubpassCmd {
+    };
+
+    struct BeginRenderPassCmd {
+        Ref<RenderPassBase> renderPass;
+        Ref<FramebufferBase> framebuffer;
     };
 
     struct CopyBufferToTextureCmd {
@@ -66,6 +79,9 @@ namespace backend {
         uint32_t instanceCount;
         uint32_t firstIndex;
         uint32_t firstInstance;
+    };
+
+    struct EndRenderPassCmd {
     };
 
     struct SetPipelineCmd {

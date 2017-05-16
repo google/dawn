@@ -19,6 +19,8 @@
 nxt::Device device;
 nxt::Queue queue;
 nxt::Pipeline pipeline;
+nxt::RenderPass renderpass;
+nxt::Framebuffer framebuffer;
 nxt::Buffer buffer;
 nxt::BindGroup bindGroup;
 
@@ -59,7 +61,9 @@ void init() {
         .SetBindGroupLayout(0, bgl)
         .GetResult();
 
+    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
     pipeline = device.CreatePipelineBuilder()
+        .SetSubpass(renderpass, 0)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -91,10 +95,12 @@ void frame() {
     buffer.SetSubData(0, sizeof(s) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&s));
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .SetPipeline(pipeline)
-        .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Uniform)
-        .SetBindGroup(0, bindGroup)
-        .DrawArrays(3, 1, 0, 0)
+        .BeginRenderPass(renderpass, framebuffer)
+            .SetPipeline(pipeline)
+            .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Uniform)
+            .SetBindGroup(0, bindGroup)
+            .DrawArrays(3, 1, 0, 0)
+        .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);

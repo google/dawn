@@ -27,9 +27,11 @@
 #include "common/Device.h"
 #include "common/CommandBuffer.h"
 #include "common/InputState.h"
+#include "common/Framebuffer.h"
 #include "common/Pipeline.h"
 #include "common/PipelineLayout.h"
 #include "common/Queue.h"
+#include "common/RenderPass.h"
 #include "common/Sampler.h"
 #include "common/ShaderModule.h"
 #include "common/Texture.h"
@@ -52,9 +54,11 @@ namespace metal {
     class BufferView;
     class CommandBuffer;
     class InputState;
+    class Framebuffer;
     class Pipeline;
     class PipelineLayout;
     class Queue;
+    class RenderPass;
     class Sampler;
     class ShaderModule;
     class Texture;
@@ -67,9 +71,11 @@ namespace metal {
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
         using InputStateType = InputState;
+        using FramebufferType = Framebuffer;
         using PipelineType = Pipeline;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
+        using RenderPassType = RenderPass;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
         using TextureType = Texture;
@@ -92,9 +98,11 @@ namespace metal {
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
             InputStateBase* CreateInputState(InputStateBuilder* builder) override;
+            FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
             PipelineBase* CreatePipeline(PipelineBuilder* builder) override;
             PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
             QueueBase* CreateQueue(QueueBuilder* builder) override;
+            RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
             SamplerBase* CreateSampler(SamplerBuilder* builder) override;
             ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
             TextureBase* CreateTexture(TextureBuilder* builder) override;
@@ -184,6 +192,15 @@ namespace metal {
             MTLVertexDescriptor* mtlVertexDescriptor = nil;
     };
 
+    class Framebuffer : public FramebufferBase {
+        public:
+            Framebuffer(Device* device, FramebufferBuilder* builder);
+            ~Framebuffer();
+
+        private:
+            Device* device;
+    };
+
     class Pipeline : public PipelineBase {
         public:
             Pipeline(Device* device, PipelineBuilder* builder);
@@ -228,6 +245,15 @@ namespace metal {
         private:
             Device* device;
             id<MTLCommandQueue> commandQueue = nil;
+    };
+
+    class RenderPass : public RenderPassBase {
+        public:
+            RenderPass(Device* device, RenderPassBuilder* builder);
+            ~RenderPass();
+
+        private:
+            Device* device;
     };
 
     class Sampler : public SamplerBase {

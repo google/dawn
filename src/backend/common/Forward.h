@@ -32,6 +32,8 @@ namespace backend {
     class BufferViewBuilder;
     class CommandBufferBase;
     class CommandBufferBuilder;
+    class FramebufferBase;
+    class FramebufferBuilder;
     class InputStateBase;
     class InputStateBuilder;
     class PipelineBase;
@@ -40,6 +42,8 @@ namespace backend {
     class PipelineLayoutBuilder;
     class QueueBase;
     class QueueBuilder;
+    class RenderPassBase;
+    class RenderPassBuilder;
     class SamplerBase;
     class SamplerBuilder;
     class ShaderModuleBase;
@@ -64,6 +68,7 @@ namespace backend {
     static constexpr uint32_t kMaxVertexAttributes = 16u;
     static constexpr uint32_t kMaxVertexInputs = 16u;
     static constexpr uint32_t kNumStages = 3;
+    static constexpr uint32_t kMaxColorAttachments = 4u;
 
     enum PushConstantType : uint8_t;
 }

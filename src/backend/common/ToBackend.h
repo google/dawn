@@ -49,6 +49,11 @@ namespace backend {
     };
 
     template<typename BackendTraits>
+    struct ToBackendTraits<FramebufferBase, BackendTraits> {
+        using BackendType = typename BackendTraits::FramebufferType;
+    };
+
+    template<typename BackendTraits>
     struct ToBackendTraits<InputStateBase, BackendTraits> {
         using BackendType = typename BackendTraits::InputStateType;
     };
@@ -66,6 +71,11 @@ namespace backend {
     template<typename BackendTraits>
     struct ToBackendTraits<QueueBase, BackendTraits> {
         using BackendType = typename BackendTraits::QueueType;
+    };
+
+    template<typename BackendTraits>
+    struct ToBackendTraits<RenderPassBase, BackendTraits> {
+        using BackendType = typename BackendTraits::RenderPassType;
     };
 
     template<typename BackendTraits>

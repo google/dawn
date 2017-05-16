@@ -22,6 +22,8 @@
 nxt::Device device;
 nxt::Queue queue;
 nxt::Pipeline pipeline;
+nxt::RenderPass renderpass;
+nxt::Framebuffer framebuffer;
 
 float RandomFloat(float min, float max) {
     float zeroOne = rand() / float(RAND_MAX);
@@ -103,7 +105,9 @@ void init() {
         })"
     );
 
+    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
     pipeline = device.CreatePipelineBuilder()
+        .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
         .GetResult();
@@ -129,6 +133,7 @@ void frame() {
     for (int j = 0; j < 50; j++) {
 
         nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
+            .BeginRenderPass(renderpass, framebuffer)
             .SetPipeline(pipeline)
             .Clone();
 
@@ -140,6 +145,7 @@ void frame() {
             i++;
         }
 
+        builder.EndRenderPass();
         commands[j] = builder.GetResult();
     }
 

@@ -34,6 +34,8 @@ list(APPEND BACKEND_SOURCES
     ${COMMON_DIR}/Device.cpp
     ${COMMON_DIR}/Device.h
     ${COMMON_DIR}/Forward.h
+    ${COMMON_DIR}/Framebuffer.cpp
+    ${COMMON_DIR}/Framebuffer.h
     ${COMMON_DIR}/InputState.cpp
     ${COMMON_DIR}/InputState.h
     ${COMMON_DIR}/Math.cpp
@@ -46,6 +48,8 @@ list(APPEND BACKEND_SOURCES
     ${COMMON_DIR}/PipelineLayout.h
     ${COMMON_DIR}/Queue.cpp
     ${COMMON_DIR}/Queue.h
+    ${COMMON_DIR}/RenderPass.cpp
+    ${COMMON_DIR}/RenderPass.h
     ${COMMON_DIR}/RefCounted.cpp
     ${COMMON_DIR}/RefCounted.h
     ${COMMON_DIR}/Sampler.cpp
