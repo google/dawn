@@ -18,18 +18,25 @@
 #include <gmock/gmock.h>
 #include <nxt/nxt.h>
 
+// An abstract base class representing a proc table so that API calls can be mocked. Most API calls
+// are directly represented by a delete virtual method but others need minimal state tracking to be
+// useful as mocks.
 class ProcTableAsClass {
     public:
         virtual ~ProcTableAsClass();
 
         void GetProcTableAndDevice(nxtProcTable* table, nxtDevice* device);
 
+        // Creates an object that can be returned by a mocked call as in WillOnce(Return(foo)).
+        // It returns an object of the write type that isn't equal to any previously returned object.
+        // Otherwise some mock expectation could be triggered by two different objects having the same
+        // value.
         {% for type in by_category["object"] %}
             {{as_cType(type.name)}} GetNew{{type.name.CamelCase()}}();
         {% endfor %}
 
         {% for type in by_category["object"] %}
-            {% for method in native_methods(type) if len(method.arguments) < 10 %}
+            {% for method in type.methods if len(method.arguments) < 10 %}
                 virtual {{as_cType(method.return_type.name)}} {{as_MethodSuffix(type.name, method.name)}}(
                     {{-as_cType(type.name)}} {{as_varName(type.name)}}
                     {%- for arg in method.arguments -%}
@@ -37,17 +44,39 @@ class ProcTableAsClass {
                     {%- endfor -%}
                 ) = 0;
             {% endfor %}
+            virtual void {{as_MethodSuffix(type.name, Name("reference"))}}({{as_cType(type.name)}} self) = 0;
+            virtual void {{as_MethodSuffix(type.name, Name("release"))}}({{as_cType(type.name)}} self) = 0;
 
+            // Stores callback and userdata and calls OnBuilderSetErrorCallback
+            {% if type.is_builder %}
+                void {{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2);
+            {% endif %}
         {% endfor %}
 
+        // Stores callback and userdata and calls OnDeviceSetErrorCallback
+        void DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata);
+
+        // Special cased mockable methods
+        virtual void OnDeviceSetErrorCallback(nxtDevice device, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) = 0;
+        virtual void OnBuilderSetErrorCallback(nxtBufferBuilder builder, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) = 0;
+
+        struct Object {
+            ProcTableAsClass* procs = nullptr;
+            nxtDeviceErrorCallback deviceErrorCallback = nullptr;
+            nxtBuilderErrorCallback builderErrorCallback = nullptr;
+            nxtCallbackUserdata userdata1 = 0;
+            nxtCallbackUserdata userdata2 = 0;
+        };
+
     private:
-        std::vector<ProcTableAsClass**> selfPtrs;
+        // Remembers the values returned by GetNew* so they can be freed.
+        std::vector<std::unique_ptr<Object>> objects;
 };
 
 class MockProcTable : public ProcTableAsClass {
     public:
         {% for type in by_category["object"] %}
-            {% for method in native_methods(type) if len(method.arguments) < 10 %}
+            {% for method in type.methods if len(method.arguments) < 10 %}
                 MOCK_METHOD{{len(method.arguments) + 1}}(
                     {{-as_MethodSuffix(type.name, method.name)}},
                     {{as_cType(method.return_type.name)}}(
@@ -58,7 +87,12 @@ class MockProcTable : public ProcTableAsClass {
                     ));
             {% endfor %}
 
+            MOCK_METHOD1({{as_MethodSuffix(type.name, Name("reference"))}}, void({{as_cType(type.name)}} self));
+            MOCK_METHOD1({{as_MethodSuffix(type.name, Name("release"))}}, void({{as_cType(type.name)}} self));
         {% endfor %}
+
+        MOCK_METHOD3(OnDeviceSetErrorCallback, void(nxtDevice device, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata));
+        MOCK_METHOD4(OnBuilderSetErrorCallback, void(nxtBufferBuilder builder, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2));
 };
 
 #endif // MOCK_NXT_H

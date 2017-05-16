@@ -18,15 +18,26 @@
 #include "wire/TerribleCommandBuffer.h"
 #include "wire/Wire.h"
 
+#include <iostream>
+
 using namespace testing;
 using namespace nxt::wire;
 
-class WireTests : public Test {
+class WireTestsBase : public Test {
     protected:
+        WireTestsBase(bool ignoreSetCallbackCalls)
+            : ignoreSetCallbackCalls(ignoreSetCallbackCalls) {
+        }
+
         void SetUp() override {
             nxtProcTable mockProcs;
             nxtDevice mockDevice;
             api.GetProcTableAndDevice(&mockProcs, &mockDevice);
+
+            if (ignoreSetCallbackCalls) {
+                EXPECT_CALL(api, OnDeviceSetErrorCallback(_, _, _)).Times(Exactly(1));
+                EXPECT_CALL(api, OnBuilderSetErrorCallback(_, _, _, _)).Times(AnyNumber());
+            }
 
             s2cBuf = new TerribleCommandBuffer();
             c2sBuf = new TerribleCommandBuffer(wireServer);
@@ -63,10 +74,18 @@ class WireTests : public Test {
         nxtDevice device;
 
     private:
+        bool ignoreSetCallbackCalls = false;
+
         CommandHandler* wireServer = nullptr;
         CommandHandler* wireClient = nullptr;
         TerribleCommandBuffer* s2cBuf = nullptr;
         TerribleCommandBuffer* c2sBuf = nullptr;
+};
+
+class WireTests : public WireTestsBase {
+    public:
+        WireTests() : WireTestsBase(true) {
+        }
 };
 
 // One call gets forwarded correctly.
@@ -189,3 +208,11 @@ TEST_F(WireTests, OneObjectAsPointerArgument) {
 //  - Test multiple objects as value work
 //  - Object creation, then calls do nothing after error on builder
 //  - Object creation then error then create object, then should do nothing.
+//  - Device error gets forwarded properly
+//  - Builder error
+//    - An error gets forwarded properly
+//    - No other call to builder after error
+//    - No call to object after error
+//    - No error -> success
+//    - Builder destroyed on client side -> gets unknown
+//    - Same for getresult then destroyed object

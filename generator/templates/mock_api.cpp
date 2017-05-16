@@ -23,8 +23,8 @@ namespace {
                     , {{as_annotated_cType(arg)}}
                 {%- endfor -%}
             ) {
-                auto tablePtr = reinterpret_cast<ProcTableAsClass**>(self);
-                return (*tablePtr)->{{as_MethodSuffix(type.name, method.name)}}(self
+                auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+                return object->procs->{{as_MethodSuffix(type.name, method.name)}}(self
                     {%- for arg in method.arguments -%}
                         , {{as_varName(arg.name)}}
                     {%- endfor -%}
@@ -36,9 +36,6 @@ namespace {
 }
 
 ProcTableAsClass::~ProcTableAsClass() {
-    for (auto ptr : selfPtrs) {
-        delete ptr;
-    }
 }
 
 void ProcTableAsClass::GetProcTableAndDevice(nxtProcTable* table, nxtDevice* device) {
@@ -51,10 +48,29 @@ void ProcTableAsClass::GetProcTableAndDevice(nxtProcTable* table, nxtDevice* dev
     {% endfor %}
 }
 
+void ProcTableAsClass::DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+    object->deviceErrorCallback = callback;
+    object->userdata1 = userdata;
+
+    this->OnDeviceSetErrorCallback(self, callback, userdata);
+}
+
+{% for type in by_category["object"] if type.is_builder %}
+    void ProcTableAsClass::{{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) {
+        auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+        object->builderErrorCallback = callback;
+        object->userdata1 = userdata1;
+        object->userdata2 = userdata2;
+
+        this->OnBuilderSetErrorCallback(reinterpret_cast<nxtBufferBuilder>(self), callback, userdata1, userdata2);
+    }
+{% endfor %}
+
 {% for type in by_category["object"] %}
     {{as_cType(type.name)}} ProcTableAsClass::GetNew{{type.name.CamelCase()}}() {
-        auto self = new ProcTableAsClass*(this);
-        selfPtrs.push_back(self);
-        return reinterpret_cast<{{as_cType(type.name)}}>(self);
+        objects.emplace_back(new Object);
+        objects.back()->procs = this;
+        return reinterpret_cast<{{as_cType(type.name)}}>(objects.back().get());
     }
 {% endfor %}
