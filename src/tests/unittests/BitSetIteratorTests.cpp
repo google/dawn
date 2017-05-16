@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "common/BitSetIterator.h"
+#include "backend/common/BitSetIterator.h"
 
 // This is ANGLE's BitSetIterator_unittests.cpp file.
 

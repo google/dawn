@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "common/PerStage.h"
+#include "backend/common/PerStage.h"
 
 using namespace backend;
 

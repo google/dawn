@@ -13,10 +13,18 @@
 # limitations under the License.
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
+set(UNITTESTS_DIR ${TESTS_DIR}/unittests)
 add_executable(nxt_unittests
-    ${TESTS_DIR}/EnumClassBitmasksTests.cpp
+    ${UNITTESTS_DIR}/BitSetIteratorTests.cpp
+    ${UNITTESTS_DIR}/CommandAllocatorTests.cpp
+    ${UNITTESTS_DIR}/EnumClassBitmasksTests.cpp
+    ${UNITTESTS_DIR}/MathTests.cpp
+    ${UNITTESTS_DIR}/PerStageTests.cpp
+    ${UNITTESTS_DIR}/RefCountedTests.cpp
+    ${UNITTESTS_DIR}/ToBackendTests.cpp
+    ${UNITTESTS_DIR}/WireTests.cpp
     ${TESTS_DIR}/UnittestsMain.cpp
 )
-target_link_libraries(nxt_unittests gtest nxtcpp)
+target_link_libraries(nxt_unittests gtest nxt_backend mock_nxt nxt_wire)
+target_include_directories(nxt_unittests PRIVATE ${SRC_DIR})
 SetCXX14(nxt_unittests)

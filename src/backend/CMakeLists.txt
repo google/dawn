@@ -120,16 +120,3 @@ if (APPLE)
 endif()
 target_include_directories(nxt_backend PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 SetCXX14(nxt_backend)
-
-add_executable(backend_unittests
-    ${TESTS_DIR}/BitSetIteratorTests.cpp
-    ${TESTS_DIR}/CommandAllocatorTests.cpp
-    ${TESTS_DIR}/MathTests.cpp
-    ${TESTS_DIR}/PerStageTests.cpp
-    ${TESTS_DIR}/RefCountedTests.cpp
-    ${TESTS_DIR}/ToBackendTests.cpp
-    ${TESTS_DIR}/UnittestsMain.cpp
-)
-target_link_libraries(backend_unittests nxt_backend gtest)
-target_include_directories(backend_unittests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-SetCXX14(backend_unittests)

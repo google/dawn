@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "common/CommandAllocator.h"
+#include "backend/common/CommandAllocator.h"
 
 using namespace backend;
 

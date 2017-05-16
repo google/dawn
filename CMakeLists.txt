@@ -68,6 +68,8 @@ target_include_directories(mock_nxt PUBLIC ${GENERATED_DIR})
 target_link_libraries(mock_nxt nxt gtest)
 SetCXX14(mock_nxt)
 
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 add_subdirectory(src/backend)
 add_subdirectory(src/wire)
 add_subdirectory(src/tests)

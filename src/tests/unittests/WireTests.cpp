@@ -15,8 +15,8 @@
 #include "gtest/gtest.h"
 #include "mock/mock_nxt.h"
 
-#include "TerribleCommandBuffer.h"
-#include "Wire.h"
+#include "wire/TerribleCommandBuffer.h"
+#include "wire/Wire.h"
 
 using namespace testing;
 using namespace nxt::wire;

@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/RefCounted.h"
-#include "common/ToBackend.h"
+#include "backend/common/RefCounted.h"
+#include "backend/common/ToBackend.h"
 
 #include <type_traits>
 
