@@ -60,6 +60,10 @@ class ProcTableAsClass {
         virtual void OnDeviceSetErrorCallback(nxtDevice device, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) = 0;
         virtual void OnBuilderSetErrorCallback(nxtBufferBuilder builder, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) = 0;
 
+        // Calls the stored callbacks
+        void CallDeviceErrorCallback(nxtDevice device, const char* message);
+        void CallBuilderErrorCallback(void* builder , nxtBuilderErrorStatus status, const char* message);
+
         struct Object {
             ProcTableAsClass* procs = nullptr;
             nxtDeviceErrorCallback deviceErrorCallback = nullptr;

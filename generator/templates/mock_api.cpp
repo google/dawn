@@ -56,6 +56,15 @@ void ProcTableAsClass::DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCall
     this->OnDeviceSetErrorCallback(self, callback, userdata);
 }
 
+void ProcTableAsClass::CallDeviceErrorCallback(nxtDevice device, const char* message) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
+    object->deviceErrorCallback(message, object->userdata1);
+}
+void ProcTableAsClass::CallBuilderErrorCallback(void* builder , nxtBuilderErrorStatus status, const char* message) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(builder);
+    object->builderErrorCallback(status, message, object->userdata1, object->userdata2);
+}
+
 {% for type in by_category["object"] if type.is_builder %}
     void ProcTableAsClass::{{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) {
         auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
