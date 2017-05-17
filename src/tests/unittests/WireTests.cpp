@@ -144,6 +144,79 @@ TEST_F(WireTests, ReleaseCalledOnRefCount0) {
     FlushClient();
 }
 
+// Test that the wire is able to send numerical values
+TEST_F(WireTests, ValueArgument) {
+    nxtSamplerBuilder builder = nxtDeviceCreateSamplerBuilder(device);
+    nxtSamplerBuilderSetFilterMode(builder, NXT_FILTER_MODE_LINEAR, NXT_FILTER_MODE_LINEAR, NXT_FILTER_MODE_NEAREST);
+
+    nxtSamplerBuilder apiBuilder = api.GetNewSamplerBuilder();
+    EXPECT_CALL(api, DeviceCreateSamplerBuilder(apiDevice))
+        .WillOnce(Return(apiBuilder));
+
+    EXPECT_CALL(api, SamplerBuilderSetFilterMode(apiBuilder, NXT_FILTER_MODE_LINEAR, NXT_FILTER_MODE_LINEAR, NXT_FILTER_MODE_NEAREST))
+        .Times(1);
+
+    FlushClient();
+}
+
+// Test that the wire is able to send arrays of numerical values
+static constexpr uint32_t testPushConstantValues[4] = {
+    0,
+    42,
+    0xDEADBEEFu,
+    0xFFFFFFFFu
+};
+
+bool CheckPushConstantValues(const uint32_t* values) {
+    for (int i = 0; i < 4; ++i) {
+        if (values[i] != testPushConstantValues[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+TEST_F(WireTests, ValueArrayArgument) {
+    nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
+    nxtCommandBufferBuilderSetPushConstants(builder, NXT_SHADER_STAGE_BIT_VERTEX, 0, 4, testPushConstantValues);
+
+    nxtCommandBufferBuilder apiBuilder = api.GetNewCommandBufferBuilder();
+    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
+        .WillOnce(Return(apiBuilder));
+
+    EXPECT_CALL(api, CommandBufferBuilderSetPushConstants(apiBuilder, NXT_SHADER_STAGE_BIT_VERTEX, 0, 4, ResultOf(CheckPushConstantValues, Eq(true))));
+
+    FlushClient();
+}
+
+// Test that the wire is able to send C strings
+TEST_F(WireTests, CStringArgument) {
+    // Create shader module
+    nxtShaderModuleBuilder shaderModuleBuilder = nxtDeviceCreateShaderModuleBuilder(device);
+    nxtShaderModule shaderModule = nxtShaderModuleBuilderGetResult(shaderModuleBuilder);
+
+    nxtShaderModuleBuilder apiShaderModuleBuilder = api.GetNewShaderModuleBuilder();
+    EXPECT_CALL(api, DeviceCreateShaderModuleBuilder(apiDevice))
+        .WillOnce(Return(apiShaderModuleBuilder));
+
+    nxtShaderModule apiShaderModule = api.GetNewShaderModule();
+    EXPECT_CALL(api, ShaderModuleBuilderGetResult(apiShaderModuleBuilder))
+        .WillOnce(Return(apiShaderModule));
+
+    // Create pipeline
+    nxtPipelineBuilder pipelineBuilder = nxtDeviceCreatePipelineBuilder(device);
+    nxtPipelineBuilderSetStage(pipelineBuilder, NXT_SHADER_STAGE_FRAGMENT, shaderModule, "my entry point");
+
+    nxtPipelineBuilder apiPipelineBuilder = api.GetNewPipelineBuilder();
+    EXPECT_CALL(api, DeviceCreatePipelineBuilder(apiDevice))
+        .WillOnce(Return(apiPipelineBuilder));
+
+    EXPECT_CALL(api, PipelineBuilderSetStage(apiPipelineBuilder, NXT_SHADER_STAGE_FRAGMENT, apiShaderModule, StrEq("my entry point")));
+
+    FlushClient();
+}
+
+// Test that the wire is able to send objects as value arguments
 TEST_F(WireTests, ObjectAsValueArgument) {
     // Create pipeline
     nxtPipelineBuilder pipelineBuilder = nxtDeviceCreatePipelineBuilder(device);
@@ -170,18 +243,37 @@ TEST_F(WireTests, ObjectAsValueArgument) {
     FlushClient();
 }
 
-TEST_F(WireTests, OneObjectAsPointerArgument) {
-    // Create command buffer
-    nxtCommandBufferBuilder cmdBufBuilder = nxtDeviceCreateCommandBufferBuilder(device);
-    nxtCommandBuffer cmdBuf = nxtCommandBufferBuilderGetResult(cmdBufBuilder);
+// GMock doesn't support lambdas in ResultOf, so we make a functor instead.
+struct AreAPICmdBufs {
+    using result_type = bool;
+    using argument_type = const nxtCommandBuffer*;
+    bool operator() (const nxtCommandBuffer* cmdBufs) const {
+        return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
+    }
+    nxtCommandBuffer apiCmdBufs[2];
+};
 
-    nxtCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
-        .WillOnce(Return(apiCmdBufBuilder));
+// Test that the wire is able to send array of objects
+TEST_F(WireTests, ObjectsAsPointerArgument) {
+    nxtCommandBuffer cmdBufs[2];
+    nxtCommandBuffer apiCmdBufs[2];
 
-    nxtCommandBuffer apiCmdBuf = api.GetNewCommandBuffer();
-    EXPECT_CALL(api, CommandBufferBuilderGetResult(apiCmdBufBuilder))
-        .WillOnce(Return(apiCmdBuf));
+    // Create two command buffers we need to use a GMock sequence otherwise the order of the
+    // CreateCommandBufferBuilder might be swapped since they are equivalent in term of matchers
+    Sequence s;
+    for (int i = 0; i < 2; ++i) {
+        nxtCommandBufferBuilder cmdBufBuilder = nxtDeviceCreateCommandBufferBuilder(device);
+        cmdBufs[i] = nxtCommandBufferBuilderGetResult(cmdBufBuilder);
+
+        nxtCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
+        EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
+            .InSequence(s)
+            .WillOnce(Return(apiCmdBufBuilder));
+
+        apiCmdBufs[i] = api.GetNewCommandBuffer();
+        EXPECT_CALL(api, CommandBufferBuilderGetResult(apiCmdBufBuilder))
+            .WillOnce(Return(apiCmdBufs[i]));
+    }
 
     // Create queue
     nxtQueueBuilder queueBuilder = nxtDeviceCreateQueueBuilder(device);
@@ -195,17 +287,19 @@ TEST_F(WireTests, OneObjectAsPointerArgument) {
     EXPECT_CALL(api, QueueBuilderGetResult(apiQueueBuilder))
         .WillOnce(Return(apiQueue));
 
-    // Submit command buffer
-    nxtQueueSubmit(queue, 1, &cmdBuf);
+    // Submit command buffer and check we got a call with both API-side command buffers
+    nxtQueueSubmit(queue, 2, cmdBufs);
 
-    EXPECT_CALL(api, QueueSubmit(apiQueue, 1, Pointee(apiCmdBuf)));
+    AreAPICmdBufs predicate;
+    predicate.apiCmdBufs[0] = apiCmdBufs[0];
+    predicate.apiCmdBufs[1] = apiCmdBufs[1];
+
+    EXPECT_CALL(api, QueueSubmit(apiQueue, 2, ResultOf(predicate, Eq(true))));
 
     FlushClient();
 }
 
 // TODO
-//  - Test values work
-//  - Test multiple objects as value work
 //  - Object creation, then calls do nothing after error on builder
 //  - Object creation then error then create object, then should do nothing.
 //  - Device error gets forwarded properly
