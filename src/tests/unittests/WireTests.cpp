@@ -368,6 +368,67 @@ TEST_F(WireTests, CallsSkippedAfterBuilderError) {
     FlushServer();
 }
 
+// Test that we get a success builder error status when no error happens
+TEST_F(WireTests, SuccessCallbackOnBuilderSuccess) {
+    nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+    nxtBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 1, 2);
+    nxtBuffer buffer = nxtBufferBuilderGetResult(bufferBuilder);
+
+    nxtBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
+    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+        .WillOnce(Return(apiBufferBuilder));
+
+    nxtBuffer apiBuffer = api.GetNewBuffer();
+    EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
+        .WillOnce(InvokeWithoutArgs([&]() -> nxtBuffer {
+            api.CallBuilderErrorCallback(apiBufferBuilder, NXT_BUILDER_ERROR_STATUS_SUCCESS, "I like cheese");
+            return apiBuffer;
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBuilderErrorCallback, Call(NXT_BUILDER_ERROR_STATUS_SUCCESS, _ , 1 ,2));
+
+    FlushServer();
+}
+
+// Test that the client calls the builder callback with unknown when it HAS to fire the callback but can't
+// know the status yet.
+TEST_F(WireTests, UnknownBuilderErrorStatusCallback) {
+    // The builder is destroyed before the object is built
+    {
+        nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+        nxtBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 1, 2);
+
+        EXPECT_CALL(*mockBuilderErrorCallback, Call(NXT_BUILDER_ERROR_STATUS_UNKNOWN, _ , 1 ,2)).Times(1);
+
+        nxtBufferBuilderRelease(bufferBuilder);
+    }
+
+    // If the builder has been consumed, it doesn't fire the callback with unknown
+    {
+        nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+        nxtBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 3, 4);
+        nxtBuffer buffer = nxtBufferBuilderGetResult(bufferBuilder);
+
+        EXPECT_CALL(*mockBuilderErrorCallback, Call(NXT_BUILDER_ERROR_STATUS_UNKNOWN, _ , 3, 4)).Times(0);
+
+        nxtBufferBuilderRelease(bufferBuilder);
+    }
+
+    // If the builder has been consumed, and the object is destroyed before the result comes from the server,
+    // then the callback is fired with unknown
+    {
+        nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+        nxtBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 5, 6);
+        nxtBuffer buffer = nxtBufferBuilderGetResult(bufferBuilder);
+
+        EXPECT_CALL(*mockBuilderErrorCallback, Call(NXT_BUILDER_ERROR_STATUS_UNKNOWN, _ , 5, 6)).Times(1);
+
+        nxtBufferRelease(buffer);
+    }
+}
+
 class WireSetCallbackTests : public WireTestsBase {
     public:
         WireSetCallbackTests() : WireTestsBase(false) {
@@ -430,9 +491,3 @@ TEST_F(WireSetCallbackTests, BuilderErrorCallback) {
 
     FlushServer();
 }
-
-// TODO
-//  - Builder error
-//    - No error -> success
-//    - Builder destroyed on client side -> gets unknown
-//    - Same for getresult then destroyed object

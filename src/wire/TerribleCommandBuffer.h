@@ -57,7 +57,7 @@ class TerribleCommandBuffer : public CommandSerializer {
 
     private:
         CommandHandler* handler = nullptr;
-        size_t offset;
+        size_t offset = 0;
         uint8_t buffer[10000000];
 };
 
