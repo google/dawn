@@ -326,6 +326,48 @@ TEST_F(WireTests, ObjectsAsPointerArgument) {
     FlushClient();
 }
 
+// Test that the server doesn't forward calls to error objects or with error objects
+// Also test that when GetResult is called on an error builder, the error callback is fired
+TEST_F(WireTests, CallsSkippedAfterBuilderError) {
+    nxtCommandBufferBuilder cmdBufBuilder = nxtDeviceCreateCommandBufferBuilder(device);
+    nxtCommandBufferBuilderSetErrorCallback(cmdBufBuilder, ToMockBuilderErrorCallback, 1, 2);
+
+    nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+    nxtBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 3, 4);
+    nxtBuffer buffer = nxtBufferBuilderGetResult(bufferBuilder); // Hey look an error!
+
+    // These calls will be skipped because of the error
+    nxtBufferTransitionUsage(buffer, NXT_BUFFER_USAGE_BIT_UNIFORM);
+    nxtCommandBufferBuilderTransitionBufferUsage(cmdBufBuilder, buffer, NXT_BUFFER_USAGE_BIT_UNIFORM);
+    nxtCommandBuffer cmdBuf = nxtCommandBufferBuilderGetResult(cmdBufBuilder);
+
+    nxtCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
+    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
+        .WillOnce(Return(apiCmdBufBuilder));
+
+    nxtBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
+    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+        .WillOnce(Return(apiBufferBuilder));
+
+    // Hey look an error!
+    EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
+        .WillOnce(InvokeWithoutArgs([&]() -> nxtBuffer {
+            api.CallBuilderErrorCallback(apiBufferBuilder, NXT_BUILDER_ERROR_STATUS_ERROR, "Error");
+            return nullptr;
+        }));
+
+    EXPECT_CALL(api, BufferTransitionUsage(_, _)).Times(0);
+    EXPECT_CALL(api, CommandBufferBuilderTransitionBufferUsage(_, _, _)).Times(0);
+    EXPECT_CALL(api, CommandBufferBuilderGetResult(_)).Times(0);
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBuilderErrorCallback, Call(NXT_BUILDER_ERROR_STATUS_ERROR, _, 1, 2)).Times(1);
+    EXPECT_CALL(*mockBuilderErrorCallback, Call(NXT_BUILDER_ERROR_STATUS_ERROR, _, 3, 4)).Times(1);
+
+    FlushServer();
+}
+
 class WireSetCallbackTests : public WireTestsBase {
     public:
         WireSetCallbackTests() : WireTestsBase(false) {
@@ -390,11 +432,7 @@ TEST_F(WireSetCallbackTests, BuilderErrorCallback) {
 }
 
 // TODO
-//  - Object creation, then calls do nothing after error on builder
-//  - Object creation then error then create object, then should do nothing.
 //  - Builder error
-//    - No other call to builder after error
-//    - No call to object after error
 //    - No error -> success
 //    - Builder destroyed on client side -> gets unknown
 //    - Same for getresult then destroyed object

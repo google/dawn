@@ -336,6 +336,13 @@ namespace wire {
 
                             //* After the data is allocated, apply the argument error propagation mechanism
                             if (!valid) {
+                                {% if type.is_builder %}
+                                    selfData->valid = false;
+                                    //* If we are in GetResult, fake an error callback
+                                    {% if returns %}
+                                        On{{type.name.CamelCase()}}Error(NXT_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd->self, selfData->serial);
+                                    {% endif %}
+                                {% endif %}
                                 return true;
                             }
 
