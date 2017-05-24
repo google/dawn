@@ -59,6 +59,24 @@ class OpenGLBinding : public BackendBinding {
         }
 };
 
+namespace backend {
+    namespace null {
+        void Init(nxtProcTable* procs, nxtDevice* device);
+    }
+}
+
+class NullBinding : public BackendBinding {
+    public:
+        void SetupGLFWWindowHints() override {
+        }
+        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+            backend::null::Init(procs, device);
+        }
+        void SwapBuffers() override {
+        }
+};
+
+
 void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
     std::cout << "Device error: " << message << std::endl;
 }
@@ -66,6 +84,7 @@ void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
 enum class BackendType {
     OpenGL,
     Metal,
+    Null,
 };
 
 enum class CmdBufType {
@@ -96,6 +115,9 @@ void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
             #else
                 fprintf(stderr, "Metal backend no present on this platform\n");
             #endif
+            break;
+        case BackendType::Null:
+            binding = new NullBinding;
             break;
     }
 
@@ -226,7 +248,11 @@ extern "C" {
                     backendType = BackendType::Metal;
                     continue;
                 }
-                fprintf(stderr, "--backend expects a backend name (opengl, metal)\n");
+                if (i < argc && std::string("null") == argv[i]) {
+                    backendType = BackendType::Null;
+                    continue;
+                }
+                fprintf(stderr, "--backend expects a backend name (opengl, metal, null)\n");
                 return false;
             }
             if (std::string("-c") == argv[i] || std::string("--comand-buffer") == argv[i]) {
@@ -244,7 +270,7 @@ extern "C" {
             }
             if (std::string("-h") == argv[i] || std::string("--help") == argv[i]) {
                 printf("Usage: %s [-b BACKEND] [-c COMMAND_BUFFER]\n", argv[0]);
-                printf("  BACKEND is one of: opengl, metal\n");
+                printf("  BACKEND is one of: opengl, metal, null\n");
                 printf("  COMMAND_BUFFER is one of: none, terrible\n");
                 return false;
             }

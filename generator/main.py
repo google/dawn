@@ -340,7 +340,7 @@ def debug(text):
     print(text)
 
 def main():
-    targets = ['nxt', 'nxtcpp', 'mock_nxt', 'opengl', 'metal', 'wire', 'blink']
+    targets = ['nxt', 'nxtcpp', 'mock_nxt', 'opengl', 'metal', 'null', 'wire', 'blink']
 
     parser = argparse.ArgumentParser(
         description = 'Generates code for various target for NXT.',
@@ -423,6 +423,12 @@ def main():
             'namespace': 'metal',
         }
         renders.append(FileRender('BackendProcTable.cpp', 'metal/ProcTable.mm', base_backend_params + [metal_params]))
+
+    if 'null' in targets:
+        null_params = {
+            'namespace': 'null',
+        }
+        renders.append(FileRender('BackendProcTable.cpp', 'null/ProcTable.mm', base_backend_params + [null_params]))
 
     if 'wire' in targets:
         renders.append(FileRender('wire/WireCmd.h', 'wire/WireCmd_autogen.h', base_backend_params))
