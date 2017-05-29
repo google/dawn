@@ -54,7 +54,7 @@ namespace backend {
         gotStatus = true;
 
         storedStatus = status;
-        storedMessage = std::move(message);
+        storedMessage = message;
     }
 
     bool BuilderBase::HandleResult(RefCounted* result) {

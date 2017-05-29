@@ -23,7 +23,6 @@
 using namespace testing;
 using namespace nxt::wire;
 
-
 class MockDeviceErrorCallback {
     public:
         MOCK_METHOD2(Call, void(const char* message, nxtCallbackUserdata userdata));
