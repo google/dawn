@@ -22,7 +22,7 @@ using namespace backend;
 TEST(Math, ScanForward) {
     // Test extrema
     ASSERT_EQ(ScanForward(1), 0);
-    ASSERT_EQ(ScanForward(0x8000000000000000), 63);
+    ASSERT_EQ(ScanForward(0x80000000), 31);
 
     // Test with more than one bit set.
     ASSERT_EQ(ScanForward(256), 8);

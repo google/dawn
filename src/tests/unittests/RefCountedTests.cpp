@@ -103,7 +103,7 @@ TEST(Ref, BoolConversion) {
 
 // Test Ref's copy constructor
 TEST(Ref, CopyConstructor) {
-    bool deleted;
+    bool deleted = false;
     RCTest* original = new RCTest(&deleted);
 
     Ref<RCTest> source(original);
@@ -121,7 +121,7 @@ TEST(Ref, CopyConstructor) {
 
 // Test Ref's copy assignment
 TEST(Ref, CopyAssignment) {
-    bool deleted;
+    bool deleted = false;
     RCTest* original = new RCTest(&deleted);
 
     Ref<RCTest> source(original);
@@ -143,7 +143,7 @@ TEST(Ref, CopyAssignment) {
 
 // Test Ref's move constructor
 TEST(Ref, MoveConstructor) {
-    bool deleted;
+    bool deleted = false;
     RCTest* original = new RCTest(&deleted);
 
     Ref<RCTest> source(original);
@@ -160,7 +160,7 @@ TEST(Ref, MoveConstructor) {
 
 // Test Ref's move assignment
 TEST(Ref, MoveAssignment) {
-    bool deleted;
+    bool deleted = false;
     RCTest* original = new RCTest(&deleted);
 
     Ref<RCTest> source(original);
