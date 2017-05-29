@@ -397,6 +397,7 @@ def main():
         additional_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
         renders.append(FileRender('apicpp.h', 'nxt/nxtcpp.h', [base_params, api_params, additional_params]))
         renders.append(FileRender('apicpp.cpp', 'nxt/nxtcpp.cpp', [base_params, api_params, additional_params]))
+        renders.append(FileRender('apicpp_traits.h', 'nxt/nxtcpp_traits.h', [base_params, api_params, additional_params]))
 
     if 'mock_nxt' in targets:
         renders.append(FileRender('mock_api.h', 'mock/mock_nxt.h', [base_params, api_params, c_params]))
