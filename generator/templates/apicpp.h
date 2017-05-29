@@ -58,8 +58,7 @@ namespace nxt {
     template<typename Derived, typename CType>
     class ObjectBase {
         public:
-            ObjectBase(): handle(nullptr) {
-            }
+            ObjectBase() = default;
             ObjectBase(CType handle): handle(handle) {
                 if (handle) Derived::NxtReference(handle);
             }
@@ -71,14 +70,13 @@ namespace nxt {
             Derived& operator=(ObjectBase const& other) = delete;
 
             ObjectBase(ObjectBase&& other) {
-                Derived::NxtRelease(handle);
                 handle = other.handle;
                 other.handle = 0;
             }
             Derived& operator=(ObjectBase&& other) {
                 if (&other == this) return static_cast<Derived&>(*this);
 
-                Derived::NxtRelease(handle);
+                if (handle) Derived::NxtRelease(handle);
                 handle = other.handle;
                 other.handle = 0;
 
@@ -106,7 +104,7 @@ namespace nxt {
             }
 
         protected:
-            CType handle;
+            CType handle = nullptr;
     };
 
     {% macro render_cpp_method_declaration(type, method) %}
