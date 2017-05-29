@@ -210,12 +210,12 @@ class PreprocessingLoader(jinja2.BaseLoader):
         for line in lines:
             # The capture in the regex adds one element per block start or end so we divide by two
             # there is also an extra line chunk corresponding to the line end, so we substract it.
-            numends = (len(self.blockend.split(line)) - 1) / 2
+            numends = (len(self.blockend.split(line)) - 1) // 2
             indentation_level -= numends
 
             result.append(self.remove_indentation(line, indentation_level))
 
-            numstarts = (len(self.blockstart.split(line)) - 1) / 2
+            numstarts = (len(self.blockstart.split(line)) - 1) // 2
             indentation_level += numstarts
 
         return '\n'.join(result)
@@ -456,6 +456,7 @@ def main():
             [os.path.abspath(args.json[0])] +
             [os.path.realpath(__file__)]
         )
+        dependencies = [dependency.replace('\\', '/') for dependency in dependencies]
         sys.stdout.write(output_separator.join(dependencies))
         return 0
 
@@ -463,6 +464,7 @@ def main():
         outputs = set(
             [os.path.abspath(args.output_dir + os.path.sep + render.output) for render in renders]
         )
+        outputs = [output.replace('\\', '/') for output in outputs]
         sys.stdout.write(output_separator.join(outputs))
         return 0
 

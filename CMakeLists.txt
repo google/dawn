@@ -29,6 +29,13 @@ function(SetPIC Target)
     endif()
 endfunction()
 
+if (WIN32)
+    # Define NOMINMAX to prevent conflics between std::min/max and the min/max macros in WinDef.h
+    add_definitions(-DNOMINMAX)
+    # Remove compile error where the mock NXT creates too many sections for the old obj format.
+    add_compile_options("/bigobj")
+endif()
+
 add_subdirectory(third_party)
 add_subdirectory(generator)
 

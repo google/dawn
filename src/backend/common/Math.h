@@ -21,7 +21,7 @@
 namespace backend {
 
     // The following are not valid for 0
-    unsigned long ScanForward(unsigned long bits);
+    uint32_t ScanForward(uint32_t bits);
     uint32_t Log2(uint32_t value);
     bool IsPowerOfTwo(size_t n);
 

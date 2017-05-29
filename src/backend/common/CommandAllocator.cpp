@@ -16,6 +16,7 @@
 
 #include "Math.h"
 
+#include <algorithm>
 #include <cassert>
 #include <climits>
 #include <cstdlib>

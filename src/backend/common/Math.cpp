@@ -14,23 +14,34 @@
 
 #include "Math.h"
 
+#include <intrin.h>
+
 #include "Forward.h"
 
 namespace backend {
 
-    unsigned long ScanForward(unsigned long bits) {
+    uint32_t ScanForward(uint32_t bits) {
         ASSERT(bits != 0);
-        // TODO(cwallez@chromium.org): handle non-posix platforms
-        // unsigned long firstBitIndex = 0ul;
-        // unsigned char ret = _BitScanForward(&firstBitIndex, bits);
-        // ASSERT(ret != 0);
-        // return firstBitIndex;
-        return static_cast<unsigned long>(__builtin_ctzl(bits));
+        #if defined(_WIN32) || defined(_WIN64)
+            unsigned long firstBitIndex = 0ul;
+            unsigned char ret = _BitScanForward(&firstBitIndex, bits);
+            ASSERT(ret != 0);
+            return firstBitIndex;
+        #else
+            return static_cast<unsigned long>(__builtin_ctz(bits));
+        #endif
     }
 
     uint32_t Log2(uint32_t value) {
         ASSERT(value != 0);
-        return 31 - __builtin_clz(value);
+        #if defined(_WIN32) || defined(_WIN64)
+            unsigned long firstBitIndex = 0ul;
+            unsigned char ret = _BitScanReverse(&firstBitIndex, value);
+            ASSERT(ret != 0);
+            return firstBitIndex;
+        #else
+            return 31 - __builtin_clz(value);
+        #endif
     }
 
     bool IsPowerOfTwo(size_t n) {
