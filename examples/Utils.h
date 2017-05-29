@@ -18,11 +18,12 @@
 extern "C" {
 #endif
     bool InitUtils(int argc, const char** argv);
-    void SwapBuffers();
+    void DoSwapBuffers();
     bool ShouldQuit();
+    void USleep(uint64_t usecs);
 
     struct GLFWwindow;
-    struct GLFWwindow* GetWindow();
+    struct GLFWwindow* GetGLFWWindow();
 #if defined(__cplusplus)
 }
 #endif
@@ -30,10 +31,10 @@ extern "C" {
 // Yuck
 #if defined(__cplusplus)
     #include <nxt/nxtcpp.h>
-    void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device);
+    nxt::Device CreateCppNXTDevice();
     nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source);
     void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer);
 #else
-    void GetProcTableAndDevice(nxtProcTable* procs, nxtDevice* device);
+    nxtDevice CreateNXTDevice();
     nxtShaderModule CreateShaderModule(nxtDevice device, nxtShaderStage stage, const char* source);
 #endif

@@ -14,8 +14,6 @@
 
 #include "Utils.h"
 
-#include <unistd.h>
-
 nxtDevice device;
 nxtQueue queue;
 nxtPipeline pipeline;
@@ -23,9 +21,7 @@ nxtRenderPass renderpass;
 nxtFramebuffer framebuffer;
 
 void init() {
-    nxtProcTable procs;
-    GetProcTableAndDevice(&procs, &device);
-    nxtSetProcs(&procs);
+    device = CreateNXTDevice();
 
     {
         nxtQueueBuilder builder = nxtDeviceCreateQueueBuilder(device);
@@ -93,7 +89,7 @@ void frame() {
     nxtQueueSubmit(queue, 1, &commands);
     nxtCommandBufferRelease(commands);
 
-    SwapBuffers();
+    DoSwapBuffers();
 }
 
 int main(int argc, const char* argv[]) {
@@ -104,7 +100,7 @@ int main(int argc, const char* argv[]) {
 
     while (!ShouldQuit()) {
         frame();
-        usleep(16000);
+        USleep(16000);
     }
 
     // TODO release stuff

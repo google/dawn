@@ -15,7 +15,6 @@
 #include "Utils.h"
 
 #include <bitset>
-#include <unistd.h>
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -450,9 +449,7 @@ namespace {
     }
 
     void init() {
-        nxtProcTable procs;
-        GetProcTableAndDevice(&procs, &device);
-        nxtSetProcs(&procs);
+        device = CreateCppNXTDevice();
 
         queue = device.CreateQueueBuilder().GetResult();
 
@@ -575,7 +572,7 @@ namespace {
             const auto& node = scene.nodes.at(n);
             drawNode(node);
         }
-        SwapBuffers();
+        DoSwapBuffers();
     }
 }
 
@@ -640,14 +637,14 @@ int main(int argc, const char* argv[]) {
 
     init();
 
-    GLFWwindow* window = GetWindow();
+    GLFWwindow* window = GetGLFWWindow();
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPosCallback);
     glfwSetScrollCallback(window, scrollCallback);
 
     while (!ShouldQuit()) {
         frame();
-        usleep(16000);
+        USleep(16000);
     }
 
     // TODO release stuff

@@ -25,6 +25,12 @@
 #include <sstream>
 #include <iomanip>
 
+#ifdef _WIN32
+    #include <Windows.h>
+#else
+    #include <unistd.h>
+#endif
+
 BackendBinding* CreateMetalBinding();
 
 namespace backend {
@@ -104,7 +110,7 @@ static nxt::wire::CommandHandler* wireClient = nullptr;
 static nxt::wire::TerribleCommandBuffer* c2sBuf = nullptr;
 static nxt::wire::TerribleCommandBuffer* s2cBuf = nullptr;
 
-void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
+nxt::Device CreateCppNXTDevice() {
     switch (backendType) {
         case BackendType::OpenGL:
             binding = new OpenGLBinding;
@@ -122,13 +128,13 @@ void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
     }
 
     if (!glfwInit()) {
-        return;
+        return nxt::Device();
     }
 
     binding->SetupGLFWWindowHints();
     window = glfwCreateWindow(640, 480, "NXT window", nullptr, nullptr);
     if (!window) {
-        return;
+        return nxt::Device();
     }
 
     binding->SetWindow(window);
@@ -137,10 +143,12 @@ void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
     nxtProcTable backendProcs;
     binding->GetProcAndDevice(&backendProcs, &backendDevice);
 
+    nxtDevice cDevice = nullptr;
+    nxtProcTable procs;
     switch (cmdBufType) {
         case CmdBufType::None:
-            *procs = backendProcs;
-            *device = nxt::Device::Acquire(backendDevice);
+            procs = backendProcs;
+            cDevice = backendDevice;
             break;
 
         case CmdBufType::Terrible:
@@ -156,13 +164,15 @@ void GetProcTableAndDevice(nxtProcTable* procs, nxt::Device* device) {
                 wireClient = nxt::wire::NewClientDevice(&clientProcs, &clientDevice, c2sBuf);
                 s2cBuf->SetHandler(wireClient);
 
-                *procs = clientProcs;
-                *device = nxt::Device::Acquire(clientDevice);
+                procs = clientProcs;
+                cDevice = clientDevice;
             }
             break;
     }
 
-    procs->deviceSetErrorCallback(device->Get(), PrintDeviceError, 0);
+    nxtSetProcs(&procs);
+    procs.deviceSetErrorCallback(cDevice, PrintDeviceError, 0);
+    return nxt::Device::Acquire(cDevice);
 }
 
 nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source) {
@@ -278,17 +288,15 @@ extern "C" {
         return true;
     }
 
-    void GetProcTableAndDevice(nxtProcTable* procs, nxtDevice* device) {
-        nxt::Device cppDevice;
-        GetProcTableAndDevice(procs, &cppDevice);
-        *device = cppDevice.Release();
+    nxtDevice CreateNXTDevice() {
+        return CreateCppNXTDevice().Release();
     }
 
     nxtShaderModule CreateShaderModule(nxtDevice device, nxtShaderStage stage, const char* source) {
         return CreateShaderModule(device, static_cast<nxt::ShaderStage>(stage), source).Release();
     }
 
-    void SwapBuffers() {
+    void DoSwapBuffers() {
         if (cmdBufType == CmdBufType::Terrible) {
             c2sBuf->Flush();
             s2cBuf->Flush();
@@ -297,11 +305,21 @@ extern "C" {
         binding->SwapBuffers();
     }
 
+#ifdef _WIN32
+    void USleep(uint64_t usecs) {
+        Sleep(usecs / 1000);
+    }
+#else
+    void USleep(uint64_t usecs) {
+        usleep(usecs);
+    }
+#endif
+
     bool ShouldQuit() {
         return glfwWindowShouldClose(window);
     }
 
-    GLFWwindow* GetWindow() {
+    GLFWwindow* GetGLFWWindow() {
         return window;
     }
 }

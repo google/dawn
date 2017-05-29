@@ -16,7 +16,6 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <unistd.h>
 #include <vector>
 
 nxt::Device device;
@@ -42,9 +41,7 @@ struct ShaderData {
 static std::vector<ShaderData> shaderData;
 
 void init() {
-    nxtProcTable procs;
-    GetProcTableAndDevice(&procs, &device);
-    nxtSetProcs(&procs);
+    device = CreateCppNXTDevice();
 
     queue = device.CreateQueueBuilder().GetResult();
 
@@ -150,7 +147,7 @@ void frame() {
     }
 
     queue.Submit(50, commands.data());
-    SwapBuffers();
+    DoSwapBuffers();
     fprintf(stderr, "frame %i\n", f);
 }
 
@@ -162,7 +159,7 @@ int main(int argc, const char* argv[]) {
 
     while (!ShouldQuit()) {
         frame();
-        usleep(16000);
+        USleep(16000);
     }
 
     // TODO release stuff

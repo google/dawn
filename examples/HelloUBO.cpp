@@ -14,8 +14,6 @@
 
 #include "Utils.h"
 
-#include <unistd.h>
-
 nxt::Device device;
 nxt::Queue queue;
 nxt::Pipeline pipeline;
@@ -27,9 +25,7 @@ nxt::BindGroup bindGroup;
 struct {uint32_t a; float b;} s;
 
 void init() {
-    nxtProcTable procs;
-    GetProcTableAndDevice(&procs, &device);
-    nxtSetProcs(&procs);
+    device = CreateCppNXTDevice();
 
     queue = device.CreateQueueBuilder().GetResult();
 
@@ -104,7 +100,7 @@ void frame() {
         .GetResult();
 
     queue.Submit(1, &commands);
-    SwapBuffers();
+    DoSwapBuffers();
 }
 
 int main(int argc, const char* argv[]) {
@@ -115,7 +111,7 @@ int main(int argc, const char* argv[]) {
 
     while (!ShouldQuit()) {
         frame();
-        usleep(16000);
+        USleep(16000);
     }
 
     // TODO release stuff

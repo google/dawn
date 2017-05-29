@@ -17,7 +17,6 @@
 #include <array>
 #include <cstring>
 #include <random>
-#include <unistd.h>
 
 #include <glm/glm.hpp>
 
@@ -296,9 +295,7 @@ void initCommandBuffers() {
 }
 
 void init() {
-    nxtProcTable procs;
-    GetProcTableAndDevice(&procs, &device);
-    nxtSetProcs(&procs);
+    device = CreateCppNXTDevice();
 
     queue = device.CreateQueueBuilder().GetResult();
 
@@ -310,7 +307,7 @@ void init() {
 
 void frame() {
     queue.Submit(1, &commandBuffers[pingpong]);
-    SwapBuffers();
+    DoSwapBuffers();
 
     pingpong = (pingpong + 1) % 2;
 }
@@ -323,7 +320,7 @@ int main(int argc, const char* argv[]) {
 
     while (!ShouldQuit()) {
         frame();
-        usleep(16000);
+        USleep(16000);
     }
 
     // TODO release stuff
