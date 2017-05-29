@@ -14,6 +14,7 @@
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UNITTESTS_DIR ${TESTS_DIR}/unittests)
+set(VALIDATION_TESTS_DIR ${UNITTESTS_DIR}/validation)
 add_executable(nxt_unittests
     ${UNITTESTS_DIR}/BitSetIteratorTests.cpp
     ${UNITTESTS_DIR}/CommandAllocatorTests.cpp
@@ -24,6 +25,9 @@ add_executable(nxt_unittests
     ${UNITTESTS_DIR}/RefCountedTests.cpp
     ${UNITTESTS_DIR}/ToBackendTests.cpp
     ${UNITTESTS_DIR}/WireTests.cpp
+    ${VALIDATION_TESTS_DIR}/BufferValidationTest.cpp
+    ${VALIDATION_TESTS_DIR}/ValidationTest.cpp
+    ${VALIDATION_TESTS_DIR}/ValidationTest.h
     ${TESTS_DIR}/UnittestsMain.cpp
 )
 target_link_libraries(nxt_unittests gtest nxt_backend mock_nxt nxt_wire)
