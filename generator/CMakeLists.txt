@@ -22,7 +22,7 @@ execute_process(
     RESULT_VARIABLE RET
 )
 if (NOT RET EQUAL 0)
-    message(FATAL_ERROR "Missing dependencies for VkCPP generation, please ensure you have python-jinja2 installed.")
+    message(FATAL_ERROR "Missing dependencies for code generation, please ensure you have python-jinja2 installed.")
 endif()
 
 function(Generate)

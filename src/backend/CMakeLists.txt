@@ -138,7 +138,7 @@ if (APPLE)
     )
 endif()
 
-add_library(nxt_backend SHARED ${BACKEND_SOURCES})
+add_library(nxt_backend STATIC ${BACKEND_SOURCES})
 target_link_libraries(nxt_backend opengl_autogen null_autogen glfw glad spirv-cross)
 if (APPLE)
     target_link_libraries(nxt_backend metal_autogen)

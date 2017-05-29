@@ -24,7 +24,7 @@ if (APPLE)
     )
 endif()
 
-add_library(utils SHARED ${UTILS_SOURCES})
+add_library(utils STATIC ${UTILS_SOURCES})
 target_link_libraries(utils nxt_backend nxt_wire shaderc nxtcpp nxt)
 SetCXX14(utils)
 

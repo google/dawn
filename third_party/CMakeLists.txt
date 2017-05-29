@@ -29,7 +29,7 @@ find_package(Threads)
 target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
 
 # Glad
-add_library(glad SHARED
+add_library(glad STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/src/glad.c
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include/glad/glad.h
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include/KHR/khrplatform.h
@@ -48,7 +48,7 @@ SetPIC(shaderc)
 SetPIC(shaderc_util)
 
 # SPIRV-Cross
-add_library(spirv-cross SHARED
+add_library(spirv-cross STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/GLSL.std.450.h
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_common.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_cfg.cpp

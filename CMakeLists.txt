@@ -36,7 +36,7 @@ set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 
 Generate(
     LIB_NAME nxt
-    LIB_TYPE SHARED
+    LIB_TYPE STATIC
     PRINT_NAME libNXT
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
@@ -46,7 +46,7 @@ target_include_directories(nxt PUBLIC ${GENERATED_DIR})
 
 Generate(
     LIB_NAME nxtcpp
-    LIB_TYPE SHARED
+    LIB_TYPE STATIC
     PRINT_NAME libNXT++
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
@@ -58,7 +58,7 @@ SetCXX14(nxtcpp)
 
 Generate(
     LIB_NAME mock_nxt
-    LIB_TYPE SHARED
+    LIB_TYPE STATIC
     PRINT_NAME libMockNXT
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
