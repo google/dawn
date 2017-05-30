@@ -80,6 +80,9 @@ namespace metal {
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBuffer(this, builder);
     }
+    DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
+        return new DepthStencilState(this, builder);
+    }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(this, builder);
     }
@@ -469,6 +472,18 @@ namespace metal {
                     }
                     break;
 
+                case Command::SetStencilReference:
+                    {
+                        SetStencilReferenceCmd* cmd = commands.NextCommand<SetStencilReferenceCmd>();
+
+                        ASSERT(encoders.render);
+
+                        [encoders.render 
+                            setStencilFrontReferenceValue:cmd->frontReference
+                            backReferenceValue:cmd->backReference];
+                    }
+                    break;
+
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();
@@ -648,6 +663,112 @@ namespace metal {
         encoders.FinishEncoders();
     }
 
+    // DepthStencilState
+
+    static MTLCompareFunction DepthStencilCompareFunction(nxt::CompareFunction compareFunction) {
+        switch (compareFunction) {
+			case nxt::CompareFunction::Never:
+				return MTLCompareFunctionNever;
+			case nxt::CompareFunction::Less:
+				return MTLCompareFunctionLess;
+			case nxt::CompareFunction::LessEqual:
+				return MTLCompareFunctionLessEqual;
+			case nxt::CompareFunction::Greater:
+				return MTLCompareFunctionGreater;
+			case nxt::CompareFunction::GreaterEqual:
+				return MTLCompareFunctionGreaterEqual;
+			case nxt::CompareFunction::NotEqual:
+				return MTLCompareFunctionNotEqual;
+			case nxt::CompareFunction::Equal:
+				return MTLCompareFunctionEqual;
+			case nxt::CompareFunction::Always:
+				return MTLCompareFunctionAlways;
+			default:
+				ASSERT(false);
+		}
+    }
+
+    static MTLStencilOperation StencilOperation(nxt::StencilOperation stencilOperation) {
+        switch (stencilOperation) {
+			case nxt::StencilOperation::Keep:
+				return MTLStencilOperationKeep;
+			case nxt::StencilOperation::Zero:
+				return MTLStencilOperationZero;
+			case nxt::StencilOperation::Replace:
+				return MTLStencilOperationReplace;
+			case nxt::StencilOperation::Invert:
+				return MTLStencilOperationInvert;
+			case nxt::StencilOperation::IncrementClamp:
+				return MTLStencilOperationIncrementClamp;
+			case nxt::StencilOperation::DecrementClamp:
+				return MTLStencilOperationDecrementClamp;
+			case nxt::StencilOperation::IncrementWrap:
+				return MTLStencilOperationIncrementWrap;
+			case nxt::StencilOperation::DecrementWrap:
+				return MTLStencilOperationDecrementWrap;
+			default: 
+				ASSERT(false);
+		}
+    }
+
+    DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
+        : DepthStencilStateBase(builder), device(device) {
+        mtlDepthStencilDescriptor = [MTLDepthStencilDescriptor new];
+
+        if (DepthIsEnabled()) {
+            auto& depth = GetDepth();
+            mtlDepthStencilDescriptor.depthCompareFunction = DepthStencilCompareFunction(depth.compareFunction);
+            switch (depth.depthWriteMode) {
+                case nxt::DepthWriteMode::Disabled:
+                    mtlDepthStencilDescriptor.depthWriteEnabled = false;
+                    break;
+                case nxt::DepthWriteMode::Enabled:
+                    mtlDepthStencilDescriptor.depthWriteEnabled = true;
+                    break;
+                default:
+                    ASSERT(false);
+                    break;
+			}
+        }
+
+        if (StencilIsEnabled()) {
+            MTLStencilDescriptor* backFaceStencil = [MTLStencilDescriptor new];
+            MTLStencilDescriptor* frontFaceStencil = [MTLStencilDescriptor new];
+
+            auto& back = GetStencil(nxt::Face::Back);
+            auto& front = GetStencil(nxt::Face::Front);
+            
+            backFaceStencil.stencilCompareFunction = DepthStencilCompareFunction(back.compareFunction);
+            backFaceStencil.stencilFailureOperation = StencilOperation(back.stencilFail);
+            backFaceStencil.depthFailureOperation = StencilOperation(back.depthFail);
+            backFaceStencil.depthStencilPassOperation = StencilOperation(back.stencilPass);
+            backFaceStencil.readMask = back.readMask;
+            backFaceStencil.writeMask = back.writeMask;
+
+            frontFaceStencil.stencilCompareFunction = DepthStencilCompareFunction(front.compareFunction);
+            frontFaceStencil.stencilFailureOperation = StencilOperation(front.stencilFail);
+            frontFaceStencil.depthFailureOperation = StencilOperation(front.depthFail);
+            frontFaceStencil.depthStencilPassOperation = StencilOperation(front.stencilPass);
+            frontFaceStencil.readMask = front.readMask;
+            frontFaceStencil.writeMask = front.writeMask;
+
+            mtlDepthStencilDescriptor.backFaceStencil = backFaceStencil;
+            mtlDepthStencilDescriptor.frontFaceStencil = frontFaceStencil;
+            [backFaceStencil release];
+            [frontFaceStencil release];
+        }
+
+    }
+
+    DepthStencilState::~DepthStencilState() {
+        [mtlDepthStencilDescriptor release];
+        mtlDepthStencilDescriptor = nil;
+    }
+
+    MTLDepthStencilDescriptor* DepthStencilState::GetMTLDepthStencilDescriptor() {
+        return mtlDepthStencilDescriptor;
+    }
+
     // InputState
 
     static MTLVertexFormat VertexFormatType(nxt::VertexFormat format) {
@@ -792,14 +913,12 @@ namespace metal {
                 builder->HandleError("Error creating pipeline state");
                 return;
             }
-
-            MTLDepthStencilDescriptor* dsDesc = [MTLDepthStencilDescriptor new];
-            dsDesc.depthWriteEnabled = true;
-            dsDesc.depthCompareFunction = MTLCompareFunctionLess;
+            
+            DepthStencilState* depthStencilState = ToBackend(GetDepthStencilState());
+            MTLDepthStencilDescriptor* dsDesc = depthStencilState->GetMTLDepthStencilDescriptor();
             mtlDepthStencilState = [device->GetMTLDevice()
                 newDepthStencilStateWithDescriptor:dsDesc];
 
-            [dsDesc release];
             [descriptor release];
         }
     }

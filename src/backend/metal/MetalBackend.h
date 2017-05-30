@@ -26,6 +26,7 @@
 #include "common/BindGroupLayout.h"
 #include "common/Device.h"
 #include "common/CommandBuffer.h"
+#include "common/DepthStencilState.h"
 #include "common/InputState.h"
 #include "common/Framebuffer.h"
 #include "common/Pipeline.h"
@@ -53,6 +54,7 @@ namespace metal {
     class Buffer;
     class BufferView;
     class CommandBuffer;
+    class DepthStencilState;
     class InputState;
     class Framebuffer;
     class Pipeline;
@@ -70,6 +72,7 @@ namespace metal {
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
+        using DepthStencilStateType = DepthStencilState;
         using InputStateType = InputState;
         using FramebufferType = Framebuffer;
         using PipelineType = Pipeline;
@@ -97,6 +100,7 @@ namespace metal {
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+            DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
             InputStateBase* CreateInputState(InputStateBuilder* builder) override;
             FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
             PipelineBase* CreatePipeline(PipelineBuilder* builder) override;
@@ -178,6 +182,18 @@ namespace metal {
         private:
             Device* device;
             CommandIterator commands;
+    };
+
+    class DepthStencilState : public DepthStencilStateBase {
+        public:
+            DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
+            ~DepthStencilState();
+
+            MTLDepthStencilDescriptor* GetMTLDepthStencilDescriptor();
+
+        private:
+            Device* device;
+            MTLDepthStencilDescriptor* mtlDepthStencilDescriptor = nil;
     };
 
     class InputState : public InputStateBase {
