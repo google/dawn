@@ -429,7 +429,7 @@ def main():
         null_params = {
             'namespace': 'null',
         }
-        renders.append(FileRender('BackendProcTable.cpp', 'null/ProcTable.mm', base_backend_params + [null_params]))
+        renders.append(FileRender('BackendProcTable.cpp', 'null/ProcTable.cpp', base_backend_params + [null_params]))
 
     if 'wire' in targets:
         renders.append(FileRender('wire/WireCmd.h', 'wire/WireCmd_autogen.h', base_backend_params))
