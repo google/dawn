@@ -51,7 +51,7 @@ namespace backend {
                 private:
                     unsigned long getNextBit();
 
-                    static const size_t BitsPerWord = sizeof(unsigned long) * 8;
+                    static const size_t BitsPerWord = sizeof(uint32_t) * 8;
                     std::bitset<N> mBits;
                     unsigned long mCurrentBit;
                     unsigned long mOffset;
@@ -110,10 +110,10 @@ namespace backend {
 
     template <size_t N, typename T>
     unsigned long BitSetIterator<N, T>::Iterator::getNextBit() {
-        static std::bitset<N> wordMask(std::numeric_limits<unsigned long>::max());
+        static std::bitset<N> wordMask(std::numeric_limits<uint32_t>::max());
 
         while (mOffset < N) {
-            unsigned long wordBits = (mBits & wordMask).to_ulong();
+            uint32_t wordBits = (mBits & wordMask).to_ulong();
             if (wordBits != 0ul) {
                 return ScanForward(wordBits) + mOffset;
             }
