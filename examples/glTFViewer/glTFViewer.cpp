@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Enable this before including any headers as we want inttypes.h to define
+// format macros such as PRId64 that are used in picojson.
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
+#endif
+
 #include "Utils.h"
 
 #include <bitset>
