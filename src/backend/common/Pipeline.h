@@ -47,6 +47,7 @@ namespace backend {
             PipelineLayoutBase* GetLayout();
             RenderPassBase* GetRenderPass();
             InputStateBase* GetInputState();
+			DepthStencilStateBase* GetDepthStencilState();
 
             // TODO(cwallez@chromium.org): split compute and render pipelines
             bool IsCompute() const;
@@ -60,6 +61,7 @@ namespace backend {
             uint32_t subpass;
             PerStage<PushConstantInfo> pushConstants;
             Ref<InputStateBase> inputState;
+			Ref<DepthStencilStateBase> depthStencilState;
     };
 
     class PipelineBuilder : public Builder<PipelineBase> {
@@ -77,6 +79,7 @@ namespace backend {
             void SetSubpass(RenderPassBase* renderPass, uint32_t subpass);
             void SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
             void SetInputState(InputStateBase* inputState);
+			void SetDepthStencilState(DepthStencilStateBase* depthStencilState);
 
         private:
             friend class PipelineBase;
@@ -89,6 +92,7 @@ namespace backend {
             nxt::ShaderStageBit stageMask;
             PerStage<StageInfo> stages;
             Ref<InputStateBase> inputState;
+			Ref<DepthStencilStateBase> depthStencilState;
     };
 
 }

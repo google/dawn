@@ -32,6 +32,8 @@ namespace backend {
     class BufferViewBuilder;
     class CommandBufferBase;
     class CommandBufferBuilder;
+    class DepthStencilStateBase;
+    class DepthStencilStateBuilder;
     class FramebufferBase;
     class FramebufferBuilder;
     class InputStateBase;

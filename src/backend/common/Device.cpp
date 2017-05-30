@@ -18,6 +18,7 @@
 #include "BindGroupLayout.h"
 #include "Buffer.h"
 #include "CommandBuffer.h"
+#include "DepthStencilState.h"
 #include "Framebuffer.h"
 #include "InputState.h"
 #include "Pipeline.h"
@@ -97,6 +98,9 @@ namespace backend {
     }
     CommandBufferBuilder* DeviceBase::CreateCommandBufferBuilder() {
         return new CommandBufferBuilder(this);
+    }
+    DepthStencilStateBuilder* DeviceBase::CreateDepthStencilStateBuilder() {
+        return new DepthStencilStateBuilder(this);
     }
     FramebufferBuilder* DeviceBase::CreateFramebufferBuilder() {
         return new FramebufferBuilder(this);

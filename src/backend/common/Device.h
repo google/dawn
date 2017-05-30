@@ -40,6 +40,7 @@ namespace backend {
             virtual BufferBase* CreateBuffer(BufferBuilder* builder) = 0;
             virtual BufferViewBase* CreateBufferView(BufferViewBuilder* builder) = 0;
             virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
+            virtual DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) = 0;
             virtual FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) = 0;
             virtual InputStateBase* CreateInputState(InputStateBuilder* builder) = 0;
             virtual PipelineBase* CreatePipeline(PipelineBuilder* builder) = 0;
@@ -74,6 +75,7 @@ namespace backend {
             BufferBuilder* CreateBufferBuilder();
             BufferViewBuilder* CreateBufferViewBuilder();
             CommandBufferBuilder* CreateCommandBufferBuilder();
+            DepthStencilStateBuilder* CreateDepthStencilStateBuilder();
             FramebufferBuilder* CreateFramebufferBuilder();
             InputStateBuilder* CreateInputStateBuilder();
             PipelineBuilder* CreatePipelineBuilder();

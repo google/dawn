@@ -29,6 +29,8 @@ namespace opengl {
     void HACKCLEAR() {
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearStencil(0);
+		glClear(GL_STENCIL_BUFFER_BIT);
     }
 
     void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device) {
@@ -42,6 +44,52 @@ namespace opengl {
         *procs = GetValidatingProcs();
         *device = reinterpret_cast<nxtDevice>(new Device);
     }
+
+	static GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction) {
+		switch (compareFunction) {
+			case nxt::CompareFunction::Never:
+				return GL_NEVER;
+			case nxt::CompareFunction::Less:
+				return GL_LESS;
+			case nxt::CompareFunction::LessEqual:
+				return GL_LEQUAL;
+			case nxt::CompareFunction::Greater:
+				return GL_GREATER;
+			case nxt::CompareFunction::GreaterEqual:
+				return GL_GEQUAL;
+			case nxt::CompareFunction::NotEqual:
+				return GL_NOTEQUAL;
+			case nxt::CompareFunction::Equal:
+				return GL_EQUAL;
+			case nxt::CompareFunction::Always:
+				return GL_ALWAYS;
+			default:
+				ASSERT(false);
+		}
+	}
+
+	static GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation) {
+		switch (stencilOperation) {
+			case nxt::StencilOperation::Keep:
+				return GL_KEEP;
+			case nxt::StencilOperation::Zero:
+				return GL_ZERO;
+			case nxt::StencilOperation::Replace:
+				return GL_REPLACE;
+			case nxt::StencilOperation::Invert:
+				return GL_INVERT;
+			case nxt::StencilOperation::IncrementClamp:
+				return GL_INCR;
+			case nxt::StencilOperation::DecrementClamp:
+				return GL_DECR;
+			case nxt::StencilOperation::IncrementWrap:
+				return GL_INCR_WRAP;
+			case nxt::StencilOperation::DecrementWrap:
+				return GL_DECR_WRAP;
+			default: 
+				ASSERT(false);
+		}
+	}
 
     // Device
 
@@ -60,6 +108,9 @@ namespace opengl {
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBuffer(this, builder);
     }
+	DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
+		return new DepthStencilState(this, builder);
+	}
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(this, builder);
     }
@@ -132,6 +183,56 @@ namespace opengl {
     BufferView::BufferView(Device* device, BufferViewBuilder* builder)
         : BufferViewBase(builder), device(device) {
     }
+
+	DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
+		: DepthStencilStateBase(builder), device(device) {
+
+	}
+
+	void DepthStencilState::Apply() {
+		if (DepthIsEnabled()) {
+			glEnable(GL_DEPTH_TEST);
+			auto& depth = GetDepth();
+			glDepthFunc(OpenGLCompareFunction(depth.compareFunction));
+			switch (depth.depthWriteMode) {
+                case nxt::DepthWriteMode::Disabled:
+                    glDepthMask(GL_FALSE);
+                    break;
+                case nxt::DepthWriteMode::Enabled:
+                    glDepthMask(GL_TRUE);
+                    break;
+                default:
+                    ASSERT(false);
+                    break;
+			}
+		}
+		else {
+			glDisable(GL_DEPTH_TEST);
+		}
+
+		static const GLuint GL_FACES[2] = { GL_BACK, GL_FRONT };
+		static const nxt::Face NXT_FACES[2] = { nxt::Face::Back, nxt::Face::Front };
+		if (StencilIsEnabled()) {
+			glEnable(GL_STENCIL_TEST);
+			for (uint32_t i = 0; i < 2; ++i) {
+				auto& stencil = GetStencil(NXT_FACES[i]);
+				glStencilFuncSeparate(GL_FACES[i],
+					OpenGLCompareFunction(stencil.compareFunction),
+					stencil.reference,
+					stencil.readMask
+				);
+				glStencilOpSeparate(GL_FACES[i],
+					OpenGLStencilOperation(stencil.stencilFail),
+					OpenGLStencilOperation(stencil.depthFail),
+					OpenGLStencilOperation(stencil.stencilPass)
+				);
+				glStencilMaskSeparate(GL_FACES[i], stencil.writeMask);
+			}
+		}
+		else {
+			glDisable(GL_STENCIL_TEST);
+		}
+	}
 
     // InputState
 

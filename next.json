@@ -341,6 +341,19 @@
             }
         ]
     },
+    "compare function": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "never"},
+            {"value": 1, "name": "less"},
+            {"value": 2, "name": "less equal"},
+            {"value": 3, "name": "greater"},
+            {"value": 4, "name": "greater equal"},
+            {"value": 5, "name": "equal"},
+            {"value": 6, "name": "not equal"},
+            {"value": 7, "name": "always"}
+        ]
+    },
     "device": {
         "category": "object",
         "methods": [
@@ -359,6 +372,10 @@
             {
                 "name": "create command buffer builder",
                 "returns": "command buffer builder"
+            },
+            {
+                "name": "create depth stencil state builder",
+                "returns": "depth stencil state builder"
             },
             {
                 "name": "create framebuffer builder",
@@ -414,8 +431,96 @@
             }
         ]
     },
+    "depth stencil state": {
+        "category": "object"
+    },
+    "depth stencil state builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "depth stencil state"
+            },
+            {
+                "name": "set depth enabled",
+                "args": [
+                    {"name": "depth enabled", "type": "bool"}
+                ]
+            },
+            {
+                "name": "set depth compare function",
+                "args": [
+                    {"name": "depth compare function", "type": "compare function"}
+                ]
+            },
+            {
+                "name": "set depth write",
+                "args" : [
+                    {"name": "depth write mode", "type": "depth write mode"}
+                ]
+            },
+            {
+                "name": "set stencil enabled",
+                "args": [
+                    {"name": "stencil enabled", "type": "bool"}
+                ]
+            },
+            {
+                "name": "set stencil reference mode",
+                "args": [
+                    {"name": "reference mode", "type": "stencil reference mode"}
+                ]
+            },
+            {
+                "name": "set stencil operation",
+                "args": [
+                    {"name": "face", "type": "face"},
+                    {"name": "stencil failure operation", "type": "stencil operation"},
+                    {"name": "depth failure operation", "type": "stencil operation"},
+                    {"name": "stencil pass operation", "type": "stencil operation"}
+                ]
+            },
+            {
+                "name": "set stencil compare function",
+                "args": [
+                    {"name": "face", "type": "face"},
+                    {"name": "stencil compare function", "type": "compare function"}
+                ]
+            },
+            {
+                "name": "set stencil mask",
+                "args": [
+                    {"name": "face", "type": "face"},
+                    {"name": "read mask", "type": "uint32_t"},
+                    {"name": "write mask", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set stencil reference",
+                "args": [
+                    {"name": "face", "type": "face"},
+                    {"name": "reference", "type": "int"}
+                ]
+            }
+        ]
+    },
+    "depth write mode": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "disabled"},
+            {"value": 1, "name": "enabled"}
+        ]
+    },
     "device error callback": {
         "category": "natively defined"
+    },
+    "face": {
+        "category": "bitmask",
+        "values": [
+            {"value": 1, "name": "back"},
+            {"value": 2, "name": "front"},
+            {"value": 3, "name": "both"}
+        ]
     },
     "filter mode": {
         "category": "enum",
@@ -534,6 +639,12 @@
                 "name": "set input state",
                 "args": [
                     {"name": "input", "type": "input state"}
+                ]
+            },
+            {
+                "name": "set depth stencil state",
+                "args": [
+                    {"name": "input", "type": "depth stencil state"}
                 ]
             }
         ]
@@ -677,6 +788,26 @@
             {"value": 4, "name": "compute"}
         ]
     },
+    "stencil reference mode": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "static"},
+            {"value": 1, "name": "dynamic"}
+        ]
+    },
+    "stencil operation": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "keep"},
+            {"value": 1, "name": "zero"},
+            {"value": 2, "name": "replace"},
+            {"value": 3, "name": "invert"},
+            {"value": 4, "name": "increment clamp"},
+            {"value": 5, "name": "decrement clamp"},
+            {"value": 6, "name": "increment wrap"},
+            {"value": 7, "name": "decrement wrap"}
+        ]  
+    },
     "texture": {
         "category": "object",
         "methods": [
@@ -793,6 +924,12 @@
         "category": "native"
     },
     "uint32_t": {
+        "category": "native"
+    },
+    "bool": {
+        "category": "native"
+    },
+    "int": {
         "category": "native"
     }
 }

@@ -72,4 +72,8 @@ add_executable(SpirvTest SpirvTest.cpp)
 target_link_libraries(SpirvTest shaderc spirv-cross nxtcpp)
 SetCXX14(SpirvTest)
 
+add_executable(CppHelloDepthStencil HelloDepthStencil.cpp)
+target_link_libraries(CppHelloDepthStencil utils)
+SetCXX14(CppHelloDepthStencil)
+
 add_subdirectory(glTFViewer)

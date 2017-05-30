@@ -49,6 +49,11 @@ namespace backend {
     };
 
     template<typename BackendTraits>
+    struct ToBackendTraits<DepthStencilStateBase, BackendTraits> {
+        using BackendType = typename BackendTraits::DepthStencilStateType;
+    };
+
+    template<typename BackendTraits>
     struct ToBackendTraits<FramebufferBase, BackendTraits> {
         using BackendType = typename BackendTraits::FramebufferType;
     };

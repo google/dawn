@@ -15,6 +15,7 @@
 #include "Pipeline.h"
 
 #include "Device.h"
+#include "DepthStencilState.h"
 #include "InputState.h"
 #include "PipelineLayout.h"
 #include "RenderPass.h"
@@ -27,7 +28,7 @@ namespace backend {
     PipelineBase::PipelineBase(PipelineBuilder* builder)
         : device(builder->device), stageMask(builder->stageMask), layout(std::move(builder->layout)),
           renderPass(std::move(builder->renderPass)), subpass(builder->subpass),
-          inputState(std::move(builder->inputState)) {
+          inputState(std::move(builder->inputState)), depthStencilState(std::move(builder->depthStencilState)) {
 
         if (stageMask != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment) &&
             stageMask != nxt::ShaderStageBit::Compute) {
@@ -95,6 +96,10 @@ namespace backend {
         return inputState.Get();
     }
 
+	DepthStencilStateBase* PipelineBase::GetDepthStencilState() {
+		return depthStencilState.Get();
+	}
+
     bool PipelineBase::IsCompute() const {
         return stageMask == nxt::ShaderStageBit::Compute;
     }
@@ -118,6 +123,9 @@ namespace backend {
         if (!inputState) {
             inputState = device->CreateInputStateBuilder()->GetResult();
         }
+		if (!depthStencilState) {
+			depthStencilState = device->CreateDepthStencilStateBuilder()->GetResult();
+		}
 
         return device->CreatePipeline(this);
     }
@@ -156,6 +164,10 @@ namespace backend {
     void PipelineBuilder::SetInputState(InputStateBase* inputState) {
         this->inputState = inputState;
     }
+
+	void PipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
+		this->depthStencilState = depthStencilState;
+	}
 
 
 }

@@ -204,9 +204,11 @@ namespace opengl {
 
     void Pipeline::ApplyNow() {
         glUseProgram(program);
-
+        
         auto inputState = ToBackend(GetInputState());
         glBindVertexArray(inputState->GetVAO());
+        auto depthStencilState = ToBackend(GetDepthStencilState());
+        depthStencilState->Apply();
     }
 
 }

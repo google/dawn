@@ -32,6 +32,8 @@ list(APPEND BACKEND_SOURCES
     ${COMMON_DIR}/CommandAllocator.h
     ${COMMON_DIR}/CommandBuffer.cpp
     ${COMMON_DIR}/CommandBuffer.h
+    ${COMMON_DIR}/DepthStencilState.cpp
+    ${COMMON_DIR}/DepthStencilState.h
     ${COMMON_DIR}/Device.cpp
     ${COMMON_DIR}/Device.h
     ${COMMON_DIR}/Forward.h
