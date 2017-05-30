@@ -184,12 +184,14 @@ namespace opengl {
         : BufferViewBase(builder), device(device) {
     }
 
+    // DepthStencilState
+
 	DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
 		: DepthStencilStateBase(builder), device(device) {
 
 	}
 
-	void DepthStencilState::Apply() {
+	void DepthStencilState::ApplyNow() {
 		if (DepthIsEnabled()) {
 			glEnable(GL_DEPTH_TEST);
 			auto& depth = GetDepth();
@@ -210,29 +212,46 @@ namespace opengl {
 			glDisable(GL_DEPTH_TEST);
 		}
 
-		static const GLuint GL_FACES[2] = { GL_BACK, GL_FRONT };
-		static const nxt::Face NXT_FACES[2] = { nxt::Face::Back, nxt::Face::Front };
 		if (StencilIsEnabled()) {
 			glEnable(GL_STENCIL_TEST);
-			for (uint32_t i = 0; i < 2; ++i) {
-				auto& stencil = GetStencil(NXT_FACES[i]);
-				glStencilFuncSeparate(GL_FACES[i],
-					OpenGLCompareFunction(stencil.compareFunction),
-					stencil.reference,
-					stencil.readMask
-				);
-				glStencilOpSeparate(GL_FACES[i],
-					OpenGLStencilOperation(stencil.stencilFail),
-					OpenGLStencilOperation(stencil.depthFail),
-					OpenGLStencilOperation(stencil.stencilPass)
-				);
-				glStencilMaskSeparate(GL_FACES[i], stencil.writeMask);
-			}
+            auto& back = GetStencil(nxt::Face::Back);
+            auto& front = GetStencil(nxt::Face::Front);
+
+            glStencilOpSeparate(GL_BACK,
+                OpenGLStencilOperation(back.stencilFail),
+                OpenGLStencilOperation(back.depthFail),
+                OpenGLStencilOperation(back.stencilPass)
+            );
+            glStencilOpSeparate(GL_FRONT,
+                OpenGLStencilOperation(front.stencilFail),
+                OpenGLStencilOperation(front.depthFail),
+                OpenGLStencilOperation(front.stencilPass)
+            );
+
+			glStencilMaskSeparate(GL_BACK, back.writeMask);
+            glStencilMaskSeparate(GL_FRONT, front.writeMask);
 		}
 		else {
 			glDisable(GL_STENCIL_TEST);
 		}
 	}
+
+    void DepthStencilState::ApplyStencilReferenceNow(uint32_t backReference, uint32_t frontReference) {
+        if (StencilIsEnabled()) {
+            auto& back = GetStencil(nxt::Face::Back);
+            auto& front = GetStencil(nxt::Face::Front);
+            glStencilFuncSeparate(GL_BACK,
+                OpenGLCompareFunction(back.compareFunction),
+                backReference,
+                back.readMask
+            );
+            glStencilFuncSeparate(GL_FRONT,
+                OpenGLCompareFunction(front.compareFunction),
+                frontReference,
+                front.readMask
+            );
+        }
+    }
 
     // InputState
 

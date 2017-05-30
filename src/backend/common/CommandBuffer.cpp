@@ -110,6 +110,12 @@ namespace backend {
                         cmd->~SetPushConstantsCmd();
                     }
                     break;
+				case Command::SetStencilReference:
+					{
+						SetStencilReferenceCmd* cmd = commands->NextCommand<SetStencilReferenceCmd>();
+						cmd->~SetStencilReferenceCmd();
+					}
+					break;
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
@@ -563,6 +569,12 @@ namespace backend {
                         }
                     }
                     break;
+                
+                case Command::SetStencilReference:
+					{
+						SetStencilReferenceCmd* cmd = iterator.NextCommand<SetStencilReferenceCmd>();
+					}
+                    break;
 
                 case Command::SetBindGroup:
                     {
@@ -752,6 +764,13 @@ namespace backend {
 
         uint32_t* values = allocator.AllocateData<uint32_t>(count);
         memcpy(values, data, count * sizeof(uint32_t));
+    }
+
+    void CommandBufferBuilder::SetStencilReference(uint32_t backReference, uint32_t frontReference) {
+        SetStencilReferenceCmd* cmd = allocator.Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
+        new(cmd) SetStencilReferenceCmd;
+        cmd->backReference = backReference;
+        cmd->frontReference = frontReference;
     }
 
     void CommandBufferBuilder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {

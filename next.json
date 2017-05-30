@@ -280,6 +280,13 @@
                 ]
             },
             {
+                "name": "set stencil reference",
+                "args": [
+                    {"name": "back reference", "type": "uint32_t"},
+                    {"name": "front reference", "type": "uint32_t"}
+                ]
+            },
+            {
                 "name": "set bind group",
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
@@ -466,12 +473,6 @@
                 ]
             },
             {
-                "name": "set stencil reference mode",
-                "args": [
-                    {"name": "reference mode", "type": "stencil reference mode"}
-                ]
-            },
-            {
                 "name": "set stencil operation",
                 "args": [
                     {"name": "face", "type": "face"},
@@ -493,13 +494,6 @@
                     {"name": "face", "type": "face"},
                     {"name": "read mask", "type": "uint32_t"},
                     {"name": "write mask", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "set stencil reference",
-                "args": [
-                    {"name": "face", "type": "face"},
-                    {"name": "reference", "type": "int"}
                 ]
             }
         ]
@@ -788,13 +782,6 @@
             {"value": 4, "name": "compute"}
         ]
     },
-    "stencil reference mode": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "static"},
-            {"value": 1, "name": "dynamic"}
-        ]
-    },
     "stencil operation": {
         "category": "enum",
         "values": [
@@ -927,9 +914,6 @@
         "category": "native"
     },
     "bool": {
-        "category": "native"
-    },
-    "int": {
         "category": "native"
     }
 }

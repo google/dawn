@@ -40,19 +40,16 @@ namespace backend {
 				nxt::StencilOperation stencilPass = nxt::StencilOperation::Keep;
                 uint32_t readMask = 0xff;
                 uint32_t writeMask = 0xff;
-				int reference = 0;
             };
 
 			bool DepthIsEnabled() const;
 			bool StencilIsEnabled() const;
-			nxt::StencilReferenceMode GetStencilReferenceMode() const;
             const DepthInfo& GetDepth() const;
             const StencilInfo& GetStencil(nxt::Face face) const;
 
         private:
 			bool depthEnabled = false;
 			bool stencilEnabled = false;
-            nxt::StencilReferenceMode referenceMode = nxt::StencilReferenceMode::Static;
             DepthInfo depthInfo;
             StencilInfo stencilInfos[2];
     };
@@ -66,12 +63,10 @@ namespace backend {
 			void SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction);
             void SetDepthWrite(nxt::DepthWriteMode depthWriteMode);
 			void SetStencilEnabled(bool stencilEnabled);
-            void SetStencilReferenceMode(nxt::StencilReferenceMode referenceMode);
             void SetStencilOperation(nxt::Face face, nxt::StencilOperation stencilFail, 
                     nxt::StencilOperation depthFail, nxt::StencilOperation stencilPass);
             void SetStencilCompareFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction);
             void SetStencilMask(nxt::Face face, uint32_t readMask, uint32_t writeMask);
-			void SetStencilReference(nxt::Face face, int reference);
 
         private:
             friend class DepthStencilStateBase;
@@ -80,7 +75,6 @@ namespace backend {
 
 			bool depthEnabled;
 			bool stencilEnabled;
-            nxt::StencilReferenceMode referenceMode;
             DepthStencilStateBase::DepthInfo depthInfo;
             DepthStencilStateBase::StencilInfo stencilInfos[2];
     };

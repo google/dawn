@@ -208,7 +208,7 @@ namespace opengl {
         auto inputState = ToBackend(GetInputState());
         glBindVertexArray(inputState->GetVAO());
         auto depthStencilState = ToBackend(GetDepthStencilState());
-        depthStencilState->Apply();
+        depthStencilState->ApplyNow();
     }
 
 }

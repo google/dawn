@@ -170,10 +170,6 @@ void init() {
 		.SetInput(1, 6 * sizeof(float), nxt::InputStepMode::Vertex)
 		.GetResult();
 
-	auto depthStencilState = device.CreateDepthStencilStateBuilder()
-		.SetDepthEnabled(true)
-		.GetResult();
-
 	nxt::BindGroupLayout bgl = device.CreateBindGroupLayoutBuilder()
 		.SetBindingsType(nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer, 0, 2)
 		.GetResult();
@@ -236,6 +232,12 @@ void init() {
 		.GetResult();
 
     CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+
+	auto depthStencilState = device.CreateDepthStencilStateBuilder()
+		.SetDepthEnabled(true)
+		.SetStencilEnabled(false)
+		.GetResult();
+
     pipeline = device.CreatePipelineBuilder()
         .SetSubpass(renderpass, 0)
 		.SetLayout(pl)
@@ -249,8 +251,6 @@ void init() {
 		.SetDepthEnabled(true)
 		.SetDepthWrite(nxt::DepthWriteMode::Disabled)
 		.SetStencilEnabled(true)
-		.SetStencilReferenceMode(nxt::StencilReferenceMode::Static)
-		.SetStencilReference(nxt::Face::Both, 1)
 		.SetStencilCompareFunction(nxt::Face::Both, nxt::CompareFunction::Always)
 		.SetStencilOperation(nxt::Face::Both, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
 		.SetStencilMask(nxt::Face::Both, 0xff, 0xff)
@@ -269,8 +269,6 @@ void init() {
 		.SetDepthEnabled(true)
 		.SetDepthWrite(nxt::DepthWriteMode::Enabled)
 		.SetStencilEnabled(true)
-		.SetStencilReferenceMode(nxt::StencilReferenceMode::Static)
-		.SetStencilReference(nxt::Face::Both, 1)
 		.SetStencilCompareFunction(nxt::Face::Both, nxt::CompareFunction::Equal)
 		.SetStencilOperation(nxt::Face::Both, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
 		.SetStencilMask(nxt::Face::Both, 0xff, 0x00)
@@ -314,10 +312,12 @@ void frame() {
             .DrawElements(36, 1, 0, 0)
 
 			.SetPipeline(planePipeline)
+			.SetStencilReference(0x1, 0x1)
 			.SetVertexBuffers(0, 1, &planeBuffer, vertexBufferOffsets)
 			.DrawElements(6, 1, 0, 0)
 
 			.SetPipeline(reflectionPipeline)
+			.SetStencilReference(0x1, 0x1)
 			.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
 			.SetBindGroup(0, bindGroup[1])
 			.DrawElements(36, 1, 0, 0)

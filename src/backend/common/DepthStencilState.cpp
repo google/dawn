@@ -34,10 +34,6 @@ namespace backend {
 		return stencilEnabled;
 	}
 
-	nxt::StencilReferenceMode DepthStencilStateBase::GetStencilReferenceMode() const {
-		return referenceMode;
-	}
-
 	const DepthStencilStateBase::DepthInfo& DepthStencilStateBase::GetDepth() const {
 		return depthInfo;
 	}
@@ -79,10 +75,6 @@ namespace backend {
 		this->stencilEnabled = stencilEnabled;
 	}
 
-	void DepthStencilStateBuilder::SetStencilReferenceMode(nxt::StencilReferenceMode referenceMode) {
-		this->referenceMode = referenceMode;
-	}
-
     void DepthStencilStateBuilder::SetStencilOperation(nxt::Face face, nxt::StencilOperation stencilFail, 
             nxt::StencilOperation depthFail, nxt::StencilOperation stencilPass) {
         if (face & nxt::Face::Back) {
@@ -122,16 +114,5 @@ namespace backend {
 			stencilInfo.writeMask = writeMask;
 		}
     }
-
-	void DepthStencilStateBuilder::SetStencilReference(nxt::Face face, int reference) {
-		if (face & nxt::Face::Back) {
-			auto& stencilInfo = stencilInfos[0];
-			stencilInfo.reference = reference;
-		}
-		if (face & nxt::Face::Front) {
-			auto& stencilInfo = stencilInfos[1];
-			stencilInfo.reference = reference;
-		}
-	}
-
+	
 }

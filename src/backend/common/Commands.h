@@ -37,6 +37,7 @@ namespace backend {
         EndRenderPass,
         SetPipeline,
         SetPushConstants,
+        SetStencilReference,
         SetBindGroup,
         SetIndexBuffer,
         SetVertexBuffers,
@@ -92,6 +93,11 @@ namespace backend {
         nxt::ShaderStageBit stage;
         uint32_t offset;
         uint32_t count;
+    };
+
+    struct SetStencilReferenceCmd {
+        uint32_t backReference;
+        uint32_t frontReference;
     };
 
     struct SetBindGroupCmd {

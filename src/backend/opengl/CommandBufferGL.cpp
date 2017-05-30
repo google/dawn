@@ -177,6 +177,14 @@ namespace opengl {
                         }
                     }
                     break;
+                
+                case Command::SetStencilReference:
+                    {
+                        SetStencilReferenceCmd* cmd = commands.NextCommand<SetStencilReferenceCmd>();
+                        DepthStencilState* depthStencilState = ToBackend(lastPipeline->GetDepthStencilState());
+                        depthStencilState->ApplyStencilReferenceNow(cmd->backReference, cmd->frontReference);
+                    }
+					break;
 
                 case Command::SetBindGroup:
                     {

@@ -68,6 +68,7 @@ namespace backend {
             void EndRenderPass();
             void SetPushConstants(nxt::ShaderStageBit stage, uint32_t offset, uint32_t count, const void* data);
             void SetPipeline(PipelineBase* pipeline);
+            void SetStencilReference(uint32_t backReference, uint32_t frontReference);
             void SetBindGroup(uint32_t groupIndex, BindGroupBase* group);
             void SetIndexBuffer(BufferBase* buffer, uint32_t offset, nxt::IndexFormat format);
 

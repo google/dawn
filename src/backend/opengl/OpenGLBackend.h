@@ -139,7 +139,8 @@ namespace opengl {
 	class DepthStencilState : public DepthStencilStateBase {
 		public:
 			DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
-			void Apply();
+			void ApplyNow();
+            void ApplyStencilReferenceNow(uint32_t backReference, uint32_t frontReference);
 
 		private:
 			Device* device;
