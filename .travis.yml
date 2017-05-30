@@ -1,0 +1,58 @@
+os:
+ - linux
+ - osx
+
+language:
+ - cpp
+
+env:
+ - BUILD_TYPE=Debug
+ - BUILD_TYPE=Release
+
+compiler:
+ - clang
+ - gcc
+
+addons:
+ # Everything under apt is only used on linux
+ apt:
+  sources:
+   # PPAs to get newer toolchains
+   - llvm-toolchain-precise
+   - ubuntu-toolchain-r-test
+   # PPA to get a semi-recent cmake (3.2)
+   - george-edison55-precise-backports
+  packages:
+   # Get recent compilers
+   - gcc-6
+   - g++-6
+   - clang-5.0
+   # Get a newer CMake than the 2.8 default
+   - cmake
+   - cmake-data
+   # Ninja builds are faster
+   - ninja-build
+   # Required for the code generator, unfortunately this is jinja2 2.6 which lacks some of the options we use
+   - python-jinja2
+   # Required dependency for GLFW on Linux
+   - xorg-dev
+
+install:
+ # Install dependencies required on OSX
+ - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install ninja; fi
+ - if [ "$TRAVIS_OS_NAME" == "osx" ]; then pip install jinja2; fi
+
+script:
+ # Use the more recent compilers we just installed
+ - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$CXX" == "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
+ - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$CXX" == "clang++" ]; then export CXX="clang++-5.0" CC="clang-5.0"; fi
+
+ # Build
+ - mkdir -p build
+ - cd build
+ - cmake --version
+ - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+ - cmake --build .
+
+ # Test
+ - ./src/tests/nxt_unittests
