@@ -28,9 +28,9 @@ namespace opengl {
 
     void HACKCLEAR() {
         glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glStencilMask(0xff);
 		glClearStencil(0);
-		glClear(GL_STENCIL_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
     void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device) {

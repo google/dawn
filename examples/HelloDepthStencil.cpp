@@ -163,6 +163,15 @@ void init() {
         })"
     );
 
+	nxt::ShaderModule fsReflectionModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+        #version 450
+		layout(location = 2) in vec3 f_col;
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(mix(f_col, vec3(0.5, 0.5, 0.5), 0.5), 1.0);
+        })"
+	);
+
 	auto inputState = device.CreateInputStateBuilder()
 		.SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32, 0)
 		.SetAttribute(1, 0, nxt::VertexFormat::FloatR32G32B32, 3 * sizeof(float))
@@ -278,7 +287,7 @@ void init() {
 		.SetSubpass(renderpass, 0)
 		.SetLayout(pl)
 		.SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-		.SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+		.SetStage(nxt::ShaderStage::Fragment, fsReflectionModule, "main")
 		.SetInputState(inputState)
 		.SetDepthStencilState(reflectionStencilState)
 		.GetResult();
@@ -294,8 +303,8 @@ void frame() {
     static const uint32_t vertexBufferOffsets[1] = {0};
 
 	cameraData.view = glm::lookAt(
-		glm::vec3(10.f * std::sin(glm::radians(s.b * 360.f)), 2.f, 10.f * std::cos(glm::radians(s.b * 360.f))),
-		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(8.f * std::sin(glm::radians(s.b * 360.f)), 2.f, 8.f * std::cos(glm::radians(s.b * 360.f))),
+		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
