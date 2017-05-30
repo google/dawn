@@ -27,7 +27,7 @@ endif()
 
 function(Generate)
     set(oneValueArgs LIB_NAME LIB_TYPE PRINT_NAME EXECUTABLE)
-    set(multiValueArgs COMMAND_LINE_ARGS EXTRA_DEPS SOURCE)
+    set(multiValueArgs COMMAND_LINE_ARGS EXTRA_DEPS EXTRA_SOURCES)
     cmake_parse_arguments(G "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     execute_process(
@@ -57,7 +57,7 @@ function(Generate)
     )
 
     add_library(${G_LIB_NAME} ${G_LIB_TYPE}
-        ${G_SOURCE}
+        ${G_EXTRA_SOURCES}
         ${OUTPUTS}
     )
 endfunction()

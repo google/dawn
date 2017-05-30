@@ -23,6 +23,9 @@ Generate(
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
         -T wire
+    EXTRA_SOURCES
+        ${WIRE_DIR}/WireCmd.cpp
+        ${WIRE_DIR}/WireCmd.h
 )
 target_include_directories(wire_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(wire_autogen PUBLIC ${GENERATED_DIR})
@@ -31,9 +34,9 @@ SetCXX14(wire_autogen)
 SetPic(wire_autogen)
 
 add_library(nxt_wire STATIC
+    ${WIRE_DIR}/TerribleCommandBuffer.cpp
     ${WIRE_DIR}/TerribleCommandBuffer.h
-    ${WIRE_DIR}/WireCmd.cpp
-    ${WIRE_DIR}/WireCmd.h
+    ${WIRE_DIR}/Wire.h
 )
 target_link_libraries(nxt_wire wire_autogen)
 SetCXX14(nxt_wire)
