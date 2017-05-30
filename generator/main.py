@@ -213,7 +213,14 @@ class PreprocessingLoader(jinja2.BaseLoader):
             numends = (len(self.blockend.split(line)) - 1) // 2
             indentation_level -= numends
 
-            result.append(self.remove_indentation(line, indentation_level))
+            line = self.remove_indentation(line, indentation_level)
+
+            # Manually perform the lstrip_blocks jinja2 env options as it available starting from 2.7
+            # and Travis only has Jinja 2.6
+            if line.lstrip().startswith('{%'):
+                line = line.lstrip()
+
+            result.append(line)
 
             numstarts = (len(self.blockstart.split(line)) - 1) // 2
             indentation_level += numstarts
@@ -233,7 +240,7 @@ class PreprocessingLoader(jinja2.BaseLoader):
 FileRender = namedtuple('FileRender', ['template', 'output', 'params_dicts'])
 
 def do_renders(renders, template_dir, output_dir):
-    env = jinja2.Environment(loader=PreprocessingLoader(template_dir), trim_blocks=True, lstrip_blocks=True, line_comment_prefix='//*')
+    env = jinja2.Environment(loader=PreprocessingLoader(template_dir), trim_blocks=True, line_comment_prefix='//*')
     for render in renders:
         params = {}
         for param_dict in render.params_dicts:
