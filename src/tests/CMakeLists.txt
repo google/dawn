@@ -19,6 +19,7 @@ add_executable(nxt_unittests
     ${UNITTESTS_DIR}/CommandAllocatorTests.cpp
     ${UNITTESTS_DIR}/EnumClassBitmasksTests.cpp
     ${UNITTESTS_DIR}/MathTests.cpp
+    ${UNITTESTS_DIR}/ObjectBaseTests.cpp
     ${UNITTESTS_DIR}/PerStageTests.cpp
     ${UNITTESTS_DIR}/RefCountedTests.cpp
     ${UNITTESTS_DIR}/ToBackendTests.cpp
