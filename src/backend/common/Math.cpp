@@ -14,7 +14,9 @@
 
 #include "Math.h"
 
-#include <intrin.h>
+#if defined(_WIN32) || defined(_WIN64)
+    #include <intrin.h>
+#endif
 
 #include "Forward.h"
 
