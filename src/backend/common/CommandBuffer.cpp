@@ -110,12 +110,12 @@ namespace backend {
                         cmd->~SetPushConstantsCmd();
                     }
                     break;
-				case Command::SetStencilReference:
-					{
-						SetStencilReferenceCmd* cmd = commands->NextCommand<SetStencilReferenceCmd>();
-						cmd->~SetStencilReferenceCmd();
-					}
-					break;
+                case Command::SetStencilReference:
+                    {
+                        SetStencilReferenceCmd* cmd = commands->NextCommand<SetStencilReferenceCmd>();
+                        cmd->~SetStencilReferenceCmd();
+                    }
+                    break;
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
@@ -569,11 +569,11 @@ namespace backend {
                         }
                     }
                     break;
-                
+
                 case Command::SetStencilReference:
-					{
-						SetStencilReferenceCmd* cmd = iterator.NextCommand<SetStencilReferenceCmd>();
-					}
+                    {
+                        SetStencilReferenceCmd* cmd = iterator.NextCommand<SetStencilReferenceCmd>();
+                    }
                     break;
 
                 case Command::SetBindGroup:

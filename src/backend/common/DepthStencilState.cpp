@@ -21,33 +21,33 @@ namespace backend {
     // DepthStencilStateBase
 
     DepthStencilStateBase::DepthStencilStateBase(DepthStencilStateBuilder* builder)
-		: depthEnabled(builder->depthEnabled), stencilEnabled(builder->stencilEnabled),
-			depthInfo(builder->depthInfo), 
-			stencilInfos { builder->stencilInfos[0], builder->stencilInfos[1] } {
+        : depthEnabled(builder->depthEnabled), stencilEnabled(builder->stencilEnabled),
+            depthInfo(builder->depthInfo),
+            stencilInfos { builder->stencilInfos[0], builder->stencilInfos[1] } {
     }
 
-	bool DepthStencilStateBase::DepthIsEnabled() const {
-		return depthEnabled;
-	}
+    bool DepthStencilStateBase::DepthIsEnabled() const {
+        return depthEnabled;
+    }
 
-	bool DepthStencilStateBase::StencilIsEnabled() const {
-		return stencilEnabled;
-	}
+    bool DepthStencilStateBase::StencilIsEnabled() const {
+        return stencilEnabled;
+    }
 
-	const DepthStencilStateBase::DepthInfo& DepthStencilStateBase::GetDepth() const {
-		return depthInfo;
-	}
+    const DepthStencilStateBase::DepthInfo& DepthStencilStateBase::GetDepth() const {
+        return depthInfo;
+    }
 
-	const DepthStencilStateBase::StencilInfo& DepthStencilStateBase::GetStencil(nxt::Face face) const {
-		switch (face) {
-			case nxt::Face::Back:
-				return stencilInfos[0];
-			case nxt::Face::Front:
-				return stencilInfos[1];
-			default:
-				ASSERT(false);
-		}
-	}
+    const DepthStencilStateBase::StencilInfo& DepthStencilStateBase::GetStencil(nxt::Face face) const {
+        switch (face) {
+            case nxt::Face::Back:
+                return stencilInfos[0];
+            case nxt::Face::Front:
+                return stencilInfos[1];
+            default:
+                ASSERT(false);
+        }
+    }
 
 
     // DepthStencilStateBuilder
@@ -59,9 +59,9 @@ namespace backend {
         return device->CreateDepthStencilState(this);
     }
 
-	void DepthStencilStateBuilder::SetDepthEnabled(bool depthEnabled) {
-		this->depthEnabled = depthEnabled;
-	}
+    void DepthStencilStateBuilder::SetDepthEnabled(bool depthEnabled) {
+        this->depthEnabled = depthEnabled;
+    }
 
     void DepthStencilStateBuilder::SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction) {
         depthInfo.compareFunction = depthCompareFunction;
@@ -71,48 +71,48 @@ namespace backend {
         depthInfo.depthWriteMode = depthWriteMode;
     }
 
-	void DepthStencilStateBuilder::SetStencilEnabled(bool stencilEnabled) {
-		this->stencilEnabled = stencilEnabled;
-	}
+    void DepthStencilStateBuilder::SetStencilEnabled(bool stencilEnabled) {
+        this->stencilEnabled = stencilEnabled;
+    }
 
-    void DepthStencilStateBuilder::SetStencilOperation(nxt::Face face, nxt::StencilOperation stencilFail, 
+    void DepthStencilStateBuilder::SetStencilOperation(nxt::Face face, nxt::StencilOperation stencilFail,
             nxt::StencilOperation depthFail, nxt::StencilOperation stencilPass) {
         if (face & nxt::Face::Back) {
             auto& stencilInfo = stencilInfos[0];
-			stencilInfo.stencilFail = stencilFail;
-			stencilInfo.depthFail = stencilFail;
-			stencilInfo.stencilPass = stencilPass;
+            stencilInfo.stencilFail = stencilFail;
+            stencilInfo.depthFail = stencilFail;
+            stencilInfo.stencilPass = stencilPass;
         }
         if (face & nxt::Face::Front) {
-			auto& stencilInfo = stencilInfos[1];
-			stencilInfo.stencilFail = stencilFail;
-			stencilInfo.depthFail = stencilFail;
-			stencilInfo.stencilPass = stencilPass;
+            auto& stencilInfo = stencilInfos[1];
+            stencilInfo.stencilFail = stencilFail;
+            stencilInfo.depthFail = stencilFail;
+            stencilInfo.stencilPass = stencilPass;
         }
     }
 
     void DepthStencilStateBuilder::SetStencilCompareFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction) {
-		if (face & nxt::Face::Back) {
-			auto& stencilInfo = stencilInfos[0];
-			stencilInfo.compareFunction = stencilCompareFunction;
-		}
-		if (face & nxt::Face::Front) {
-			auto& stencilInfo = stencilInfos[1];
-			stencilInfo.compareFunction = stencilCompareFunction;
-		}
+        if (face & nxt::Face::Back) {
+            auto& stencilInfo = stencilInfos[0];
+            stencilInfo.compareFunction = stencilCompareFunction;
+        }
+        if (face & nxt::Face::Front) {
+            auto& stencilInfo = stencilInfos[1];
+            stencilInfo.compareFunction = stencilCompareFunction;
+        }
     }
 
     void DepthStencilStateBuilder::SetStencilMask(nxt::Face face, uint32_t readMask, uint32_t writeMask) {
-		if (face & nxt::Face::Back) {
-			auto& stencilInfo = stencilInfos[0];
-			stencilInfo.readMask = readMask;
-			stencilInfo.writeMask = writeMask;
-		}
-		if (face & nxt::Face::Front) {
-			auto& stencilInfo = stencilInfos[1];
-			stencilInfo.readMask = readMask;
-			stencilInfo.writeMask = writeMask;
-		}
+        if (face & nxt::Face::Back) {
+            auto& stencilInfo = stencilInfos[0];
+            stencilInfo.readMask = readMask;
+            stencilInfo.writeMask = writeMask;
+        }
+        if (face & nxt::Face::Front) {
+            auto& stencilInfo = stencilInfos[1];
+            stencilInfo.readMask = readMask;
+            stencilInfo.writeMask = writeMask;
+        }
     }
-	
+
 }

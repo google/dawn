@@ -96,9 +96,9 @@ namespace backend {
         return inputState.Get();
     }
 
-	DepthStencilStateBase* PipelineBase::GetDepthStencilState() {
-		return depthStencilState.Get();
-	}
+    DepthStencilStateBase* PipelineBase::GetDepthStencilState() {
+        return depthStencilState.Get();
+    }
 
     bool PipelineBase::IsCompute() const {
         return stageMask == nxt::ShaderStageBit::Compute;
@@ -123,9 +123,9 @@ namespace backend {
         if (!inputState) {
             inputState = device->CreateInputStateBuilder()->GetResult();
         }
-		if (!depthStencilState) {
-			depthStencilState = device->CreateDepthStencilStateBuilder()->GetResult();
-		}
+        if (!depthStencilState) {
+            depthStencilState = device->CreateDepthStencilStateBuilder()->GetResult();
+        }
 
         return device->CreatePipeline(this);
     }
@@ -165,9 +165,9 @@ namespace backend {
         this->inputState = inputState;
     }
 
-	void PipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
-		this->depthStencilState = depthStencilState;
-	}
+    void PipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
+        this->depthStencilState = depthStencilState;
+    }
 
 
 }

@@ -35,21 +35,21 @@ namespace backend {
 
             struct StencilInfo {
                 nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
-				nxt::StencilOperation stencilFail = nxt::StencilOperation::Keep;
-				nxt::StencilOperation depthFail = nxt::StencilOperation::Keep;
-				nxt::StencilOperation stencilPass = nxt::StencilOperation::Keep;
+                nxt::StencilOperation stencilFail = nxt::StencilOperation::Keep;
+                nxt::StencilOperation depthFail = nxt::StencilOperation::Keep;
+                nxt::StencilOperation stencilPass = nxt::StencilOperation::Keep;
                 uint32_t readMask = 0xff;
                 uint32_t writeMask = 0xff;
             };
 
-			bool DepthIsEnabled() const;
-			bool StencilIsEnabled() const;
+            bool DepthIsEnabled() const;
+            bool StencilIsEnabled() const;
             const DepthInfo& GetDepth() const;
             const StencilInfo& GetStencil(nxt::Face face) const;
 
         private:
-			bool depthEnabled = false;
-			bool stencilEnabled = false;
+            bool depthEnabled = false;
+            bool stencilEnabled = false;
             DepthInfo depthInfo;
             StencilInfo stencilInfos[2];
     };
@@ -59,10 +59,10 @@ namespace backend {
             DepthStencilStateBuilder(DeviceBase* device);
 
             // NXT API
-			void SetDepthEnabled(bool depthEnabled);
-			void SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction);
+            void SetDepthEnabled(bool depthEnabled);
+            void SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction);
             void SetDepthWrite(nxt::DepthWriteMode depthWriteMode);
-			void SetStencilEnabled(bool stencilEnabled);
+            void SetStencilEnabled(bool stencilEnabled);
             void SetStencilOperation(nxt::Face face, nxt::StencilOperation stencilFail, 
                     nxt::StencilOperation depthFail, nxt::StencilOperation stencilPass);
             void SetStencilCompareFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction);
@@ -73,8 +73,8 @@ namespace backend {
 
             DepthStencilStateBase* GetResultImpl() override;
 
-			bool depthEnabled;
-			bool stencilEnabled;
+            bool depthEnabled;
+            bool stencilEnabled;
             DepthStencilStateBase::DepthInfo depthInfo;
             DepthStencilStateBase::StencilInfo stencilInfos[2];
     };

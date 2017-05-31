@@ -42,7 +42,7 @@ namespace null {
     class Buffer;
     using BufferView = BufferViewBase;
     using CommandBuffer = CommandBufferBase;
-	using DepthStencilState = DepthStencilStateBase;
+    using DepthStencilState = DepthStencilStateBase;
     using InputState = InputStateBase;
     using Framebuffer = FramebufferBase;
     using Pipeline = PipelineBase;
@@ -60,7 +60,7 @@ namespace null {
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
-		using DepthStencilStateType = DepthStencilState;
+        using DepthStencilStateType = DepthStencilState;
         using InputStateType = InputState;
         using FramebufferType = Framebuffer;
         using PipelineType = Pipeline;
@@ -88,7 +88,7 @@ namespace null {
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-			DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
+            DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
             InputStateBase* CreateInputState(InputStateBuilder* builder) override;
             FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
             PipelineBase* CreatePipeline(PipelineBuilder* builder) override;

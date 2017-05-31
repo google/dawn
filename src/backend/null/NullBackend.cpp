@@ -50,9 +50,9 @@ namespace null {
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBufferBase(builder);
     }
-	DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
-		return new DepthStencilStateBase(builder);
-	}
+    DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
+        return new DepthStencilStateBase(builder);
+    }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputStateBase(builder);
     }

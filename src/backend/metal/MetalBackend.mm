@@ -667,48 +667,48 @@ namespace metal {
 
     static MTLCompareFunction DepthStencilCompareFunction(nxt::CompareFunction compareFunction) {
         switch (compareFunction) {
-			case nxt::CompareFunction::Never:
-				return MTLCompareFunctionNever;
-			case nxt::CompareFunction::Less:
-				return MTLCompareFunctionLess;
-			case nxt::CompareFunction::LessEqual:
-				return MTLCompareFunctionLessEqual;
-			case nxt::CompareFunction::Greater:
-				return MTLCompareFunctionGreater;
-			case nxt::CompareFunction::GreaterEqual:
-				return MTLCompareFunctionGreaterEqual;
-			case nxt::CompareFunction::NotEqual:
-				return MTLCompareFunctionNotEqual;
-			case nxt::CompareFunction::Equal:
-				return MTLCompareFunctionEqual;
-			case nxt::CompareFunction::Always:
-				return MTLCompareFunctionAlways;
-			default:
-				ASSERT(false);
-		}
+            case nxt::CompareFunction::Never:
+                return MTLCompareFunctionNever;
+            case nxt::CompareFunction::Less:
+                return MTLCompareFunctionLess;
+            case nxt::CompareFunction::LessEqual:
+                return MTLCompareFunctionLessEqual;
+            case nxt::CompareFunction::Greater:
+                return MTLCompareFunctionGreater;
+            case nxt::CompareFunction::GreaterEqual:
+                return MTLCompareFunctionGreaterEqual;
+            case nxt::CompareFunction::NotEqual:
+                return MTLCompareFunctionNotEqual;
+            case nxt::CompareFunction::Equal:
+                return MTLCompareFunctionEqual;
+            case nxt::CompareFunction::Always:
+                return MTLCompareFunctionAlways;
+            default:
+                ASSERT(false);
+        }
     }
 
     static MTLStencilOperation StencilOperation(nxt::StencilOperation stencilOperation) {
         switch (stencilOperation) {
-			case nxt::StencilOperation::Keep:
-				return MTLStencilOperationKeep;
-			case nxt::StencilOperation::Zero:
-				return MTLStencilOperationZero;
-			case nxt::StencilOperation::Replace:
-				return MTLStencilOperationReplace;
-			case nxt::StencilOperation::Invert:
-				return MTLStencilOperationInvert;
-			case nxt::StencilOperation::IncrementClamp:
-				return MTLStencilOperationIncrementClamp;
-			case nxt::StencilOperation::DecrementClamp:
-				return MTLStencilOperationDecrementClamp;
-			case nxt::StencilOperation::IncrementWrap:
-				return MTLStencilOperationIncrementWrap;
-			case nxt::StencilOperation::DecrementWrap:
-				return MTLStencilOperationDecrementWrap;
-			default: 
-				ASSERT(false);
-		}
+            case nxt::StencilOperation::Keep:
+                return MTLStencilOperationKeep;
+            case nxt::StencilOperation::Zero:
+                return MTLStencilOperationZero;
+            case nxt::StencilOperation::Replace:
+                return MTLStencilOperationReplace;
+            case nxt::StencilOperation::Invert:
+                return MTLStencilOperationInvert;
+            case nxt::StencilOperation::IncrementClamp:
+                return MTLStencilOperationIncrementClamp;
+            case nxt::StencilOperation::DecrementClamp:
+                return MTLStencilOperationDecrementClamp;
+            case nxt::StencilOperation::IncrementWrap:
+                return MTLStencilOperationIncrementWrap;
+            case nxt::StencilOperation::DecrementWrap:
+                return MTLStencilOperationDecrementWrap;
+            default: 
+                ASSERT(false);
+        }
     }
 
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
@@ -728,7 +728,7 @@ namespace metal {
                 default:
                     ASSERT(false);
                     break;
-			}
+            }
         }
 
         if (StencilIsEnabled()) {

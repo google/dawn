@@ -28,8 +28,8 @@ namespace opengl {
 
     void HACKCLEAR() {
         glClearColor(0, 0, 0, 1);
-		glStencilMask(0xff);
-		glClearStencil(0);
+        glStencilMask(0xff);
+        glClearStencil(0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
@@ -45,51 +45,51 @@ namespace opengl {
         *device = reinterpret_cast<nxtDevice>(new Device);
     }
 
-	static GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction) {
-		switch (compareFunction) {
-			case nxt::CompareFunction::Never:
-				return GL_NEVER;
-			case nxt::CompareFunction::Less:
-				return GL_LESS;
-			case nxt::CompareFunction::LessEqual:
-				return GL_LEQUAL;
-			case nxt::CompareFunction::Greater:
-				return GL_GREATER;
-			case nxt::CompareFunction::GreaterEqual:
-				return GL_GEQUAL;
-			case nxt::CompareFunction::NotEqual:
-				return GL_NOTEQUAL;
-			case nxt::CompareFunction::Equal:
-				return GL_EQUAL;
-			case nxt::CompareFunction::Always:
-				return GL_ALWAYS;
-			default:
-				ASSERT(false);
-		}
-	}
+    static GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction) {
+        switch (compareFunction) {
+            case nxt::CompareFunction::Never:
+                return GL_NEVER;
+            case nxt::CompareFunction::Less:
+                return GL_LESS;
+            case nxt::CompareFunction::LessEqual:
+                return GL_LEQUAL;
+            case nxt::CompareFunction::Greater:
+                return GL_GREATER;
+            case nxt::CompareFunction::GreaterEqual:
+                return GL_GEQUAL;
+            case nxt::CompareFunction::NotEqual:
+                return GL_NOTEQUAL;
+            case nxt::CompareFunction::Equal:
+                return GL_EQUAL;
+            case nxt::CompareFunction::Always:
+                return GL_ALWAYS;
+            default:
+                ASSERT(false);
+        }
+    }
 
-	static GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation) {
-		switch (stencilOperation) {
-			case nxt::StencilOperation::Keep:
-				return GL_KEEP;
-			case nxt::StencilOperation::Zero:
-				return GL_ZERO;
-			case nxt::StencilOperation::Replace:
-				return GL_REPLACE;
-			case nxt::StencilOperation::Invert:
-				return GL_INVERT;
-			case nxt::StencilOperation::IncrementClamp:
-				return GL_INCR;
-			case nxt::StencilOperation::DecrementClamp:
-				return GL_DECR;
-			case nxt::StencilOperation::IncrementWrap:
-				return GL_INCR_WRAP;
-			case nxt::StencilOperation::DecrementWrap:
-				return GL_DECR_WRAP;
-			default: 
-				ASSERT(false);
-		}
-	}
+    static GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation) {
+        switch (stencilOperation) {
+            case nxt::StencilOperation::Keep:
+                return GL_KEEP;
+            case nxt::StencilOperation::Zero:
+                return GL_ZERO;
+            case nxt::StencilOperation::Replace:
+                return GL_REPLACE;
+            case nxt::StencilOperation::Invert:
+                return GL_INVERT;
+            case nxt::StencilOperation::IncrementClamp:
+                return GL_INCR;
+            case nxt::StencilOperation::DecrementClamp:
+                return GL_DECR;
+            case nxt::StencilOperation::IncrementWrap:
+                return GL_INCR_WRAP;
+            case nxt::StencilOperation::DecrementWrap:
+                return GL_DECR_WRAP;
+            default:
+                ASSERT(false);
+        }
+    }
 
     // Device
 
@@ -108,9 +108,9 @@ namespace opengl {
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBuffer(this, builder);
     }
-	DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
-		return new DepthStencilState(this, builder);
-	}
+    DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
+        return new DepthStencilState(this, builder);
+    }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(this, builder);
     }
@@ -186,17 +186,17 @@ namespace opengl {
 
     // DepthStencilState
 
-	DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
-		: DepthStencilStateBase(builder), device(device) {
+    DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
+        : DepthStencilStateBase(builder), device(device) {
 
-	}
+    }
 
-	void DepthStencilState::ApplyNow() {
-		if (DepthIsEnabled()) {
-			glEnable(GL_DEPTH_TEST);
-			auto& depth = GetDepth();
-			glDepthFunc(OpenGLCompareFunction(depth.compareFunction));
-			switch (depth.depthWriteMode) {
+    void DepthStencilState::ApplyNow() {
+        if (DepthIsEnabled()) {
+            glEnable(GL_DEPTH_TEST);
+            auto& depth = GetDepth();
+            glDepthFunc(OpenGLCompareFunction(depth.compareFunction));
+            switch (depth.depthWriteMode) {
                 case nxt::DepthWriteMode::Disabled:
                     glDepthMask(GL_FALSE);
                     break;
@@ -206,14 +206,14 @@ namespace opengl {
                 default:
                     ASSERT(false);
                     break;
-			}
-		}
-		else {
-			glDisable(GL_DEPTH_TEST);
-		}
+            }
+        }
+        else {
+            glDisable(GL_DEPTH_TEST);
+        }
 
-		if (StencilIsEnabled()) {
-			glEnable(GL_STENCIL_TEST);
+        if (StencilIsEnabled()) {
+            glEnable(GL_STENCIL_TEST);
             auto& back = GetStencil(nxt::Face::Back);
             auto& front = GetStencil(nxt::Face::Front);
 
@@ -228,13 +228,13 @@ namespace opengl {
                 OpenGLStencilOperation(front.stencilPass)
             );
 
-			glStencilMaskSeparate(GL_BACK, back.writeMask);
+            glStencilMaskSeparate(GL_BACK, back.writeMask);
             glStencilMaskSeparate(GL_FRONT, front.writeMask);
-		}
-		else {
-			glDisable(GL_STENCIL_TEST);
-		}
-	}
+        }
+        else {
+            glDisable(GL_STENCIL_TEST);
+        }
+    }
 
     void DepthStencilState::ApplyStencilReferenceNow(uint32_t backReference, uint32_t frontReference) {
         if (StencilIsEnabled()) {

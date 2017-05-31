@@ -38,7 +38,7 @@ namespace opengl {
     class Buffer;
     class BufferView;
     class CommandBuffer;
-	class DepthStencilState;
+    class DepthStencilState;
     class InputState;
     class Pipeline;
     class PipelineLayout;
@@ -56,7 +56,7 @@ namespace opengl {
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
-		using DepthStencilStateType = DepthStencilState;
+        using DepthStencilStateType = DepthStencilState;
         using InputStateType = InputState;
         using PipelineType = Pipeline;
         using PipelineLayoutType = PipelineLayout;
@@ -82,7 +82,7 @@ namespace opengl {
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-			DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
+            DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
             InputStateBase* CreateInputState(InputStateBuilder* builder) override;
             FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
             PipelineBase* CreatePipeline(PipelineBuilder* builder) override;
@@ -136,15 +136,15 @@ namespace opengl {
             Device* device;
     };
 
-	class DepthStencilState : public DepthStencilStateBase {
-		public:
-			DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
-			void ApplyNow();
+    class DepthStencilState : public DepthStencilStateBase {
+        public:
+            DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
+            void ApplyNow();
             void ApplyStencilReferenceNow(uint32_t backReference, uint32_t frontReference);
 
-		private:
-			Device* device;
-	};
+        private:
+            Device* device;
+    };
 
     class Framebuffer : public FramebufferBase {
         public:
