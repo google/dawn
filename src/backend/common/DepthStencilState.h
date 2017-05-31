@@ -45,13 +45,15 @@ namespace backend {
             bool DepthIsEnabled() const;
             bool StencilIsEnabled() const;
             const DepthInfo& GetDepth() const;
-            const StencilInfo& GetStencil(nxt::Face face) const;
+            const StencilInfo& GetBackStencil() const;
+            const StencilInfo& GetFrontStencil() const;
 
         private:
             bool depthEnabled = false;
             bool stencilEnabled = false;
             DepthInfo depthInfo;
-            StencilInfo stencilInfos[2];
+            StencilInfo backStencilInfo;
+            StencilInfo frontStencilInfo;
     };
 
     class DepthStencilStateBuilder : public Builder<DepthStencilStateBase> {
@@ -63,7 +65,7 @@ namespace backend {
             void SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction);
             void SetDepthWrite(nxt::DepthWriteMode depthWriteMode);
             void SetStencilEnabled(bool stencilEnabled);
-            void SetStencilOperation(nxt::Face face, nxt::StencilOperation stencilFail, 
+            void SetStencilOperation(nxt::Face face, nxt::StencilOperation stencilFail,
                     nxt::StencilOperation depthFail, nxt::StencilOperation stencilPass);
             void SetStencilCompareFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction);
             void SetStencilMask(nxt::Face face, uint32_t readMask, uint32_t writeMask);
@@ -76,7 +78,8 @@ namespace backend {
             bool depthEnabled;
             bool stencilEnabled;
             DepthStencilStateBase::DepthInfo depthInfo;
-            DepthStencilStateBase::StencilInfo stencilInfos[2];
+            DepthStencilStateBase::StencilInfo backStencilInfo;
+            DepthStencilStateBase::StencilInfo frontStencilInfo;
     };
 
 }

@@ -214,8 +214,8 @@ namespace opengl {
 
         if (StencilIsEnabled()) {
             glEnable(GL_STENCIL_TEST);
-            auto& back = GetStencil(nxt::Face::Back);
-            auto& front = GetStencil(nxt::Face::Front);
+            auto& back = GetBackStencil();
+            auto& front = GetFrontStencil();
 
             glStencilOpSeparate(GL_BACK,
                 OpenGLStencilOperation(back.stencilFail),
@@ -238,8 +238,8 @@ namespace opengl {
 
     void DepthStencilState::ApplyStencilReferenceNow(uint32_t backReference, uint32_t frontReference) {
         if (StencilIsEnabled()) {
-            auto& back = GetStencil(nxt::Face::Back);
-            auto& front = GetStencil(nxt::Face::Front);
+            auto& back = GetBackStencil();
+            auto& front = GetFrontStencil();
             glStencilFuncSeparate(GL_BACK,
                 OpenGLCompareFunction(back.compareFunction),
                 backReference,

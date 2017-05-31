@@ -478,7 +478,7 @@ namespace metal {
 
                         ASSERT(encoders.render);
 
-                        [encoders.render 
+                        [encoders.render
                             setStencilFrontReferenceValue:cmd->frontReference
                             backReferenceValue:cmd->backReference];
                     }
@@ -706,7 +706,7 @@ namespace metal {
                 return MTLStencilOperationIncrementWrap;
             case nxt::StencilOperation::DecrementWrap:
                 return MTLStencilOperationDecrementWrap;
-            default: 
+            default:
                 ASSERT(false);
         }
     }
@@ -735,9 +735,9 @@ namespace metal {
             MTLStencilDescriptor* backFaceStencil = [MTLStencilDescriptor new];
             MTLStencilDescriptor* frontFaceStencil = [MTLStencilDescriptor new];
 
-            auto& back = GetStencil(nxt::Face::Back);
-            auto& front = GetStencil(nxt::Face::Front);
-            
+            auto& back = GetBackStencil();
+            auto& front = GetFrontStencil();
+
             backFaceStencil.stencilCompareFunction = DepthStencilCompareFunction(back.compareFunction);
             backFaceStencil.stencilFailureOperation = StencilOperation(back.stencilFail);
             backFaceStencil.depthFailureOperation = StencilOperation(back.depthFail);
@@ -913,7 +913,7 @@ namespace metal {
                 builder->HandleError("Error creating pipeline state");
                 return;
             }
-            
+
             DepthStencilState* depthStencilState = ToBackend(GetDepthStencilState());
             MTLDepthStencilDescriptor* dsDesc = depthStencilState->GetMTLDepthStencilDescriptor();
             mtlDepthStencilState = [device->GetMTLDevice()
