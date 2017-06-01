@@ -15,6 +15,7 @@
 #include "PipelineGL.h"
 
 #include "OpenGLBackend.h"
+#include "PersistentPipelineStateGL.h"
 #include "PipelineLayoutGL.h"
 #include "ShaderModuleGL.h"
 
@@ -202,13 +203,15 @@ namespace opengl {
         return program;
     }
 
-    void Pipeline::ApplyNow() {
+    void Pipeline::ApplyNow(PersistentPipelineState &persistentPipelineState) {
         glUseProgram(program);
 
         auto inputState = ToBackend(GetInputState());
         glBindVertexArray(inputState->GetVAO());
-        auto depthStencilState = ToBackend(GetDepthStencilState());
-        depthStencilState->ApplyNow();
+
+        persistentPipelineState.UpdateDepthStencilInfo(GetDepthStencilState());
+        persistentPipelineState.ApplyDepthNow();
+        persistentPipelineState.ApplyStencilNow();
     }
 
 }

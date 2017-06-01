@@ -45,7 +45,7 @@ namespace opengl {
         *device = reinterpret_cast<nxtDevice>(new Device);
     }
 
-    static GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction) {
+    GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction) {
         switch (compareFunction) {
             case nxt::CompareFunction::Never:
                 return GL_NEVER;
@@ -68,7 +68,7 @@ namespace opengl {
         }
     }
 
-    static GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation) {
+    GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation) {
         switch (stencilOperation) {
             case nxt::StencilOperation::Keep:
                 return GL_KEEP;
@@ -188,69 +188,6 @@ namespace opengl {
 
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
         : DepthStencilStateBase(builder), device(device) {
-
-    }
-
-    void DepthStencilState::ApplyNow() {
-        if (DepthIsEnabled()) {
-            glEnable(GL_DEPTH_TEST);
-            auto& depth = GetDepth();
-            glDepthFunc(OpenGLCompareFunction(depth.compareFunction));
-            switch (depth.depthWriteMode) {
-                case nxt::DepthWriteMode::Disabled:
-                    glDepthMask(GL_FALSE);
-                    break;
-                case nxt::DepthWriteMode::Enabled:
-                    glDepthMask(GL_TRUE);
-                    break;
-                default:
-                    ASSERT(false);
-                    break;
-            }
-        }
-        else {
-            glDisable(GL_DEPTH_TEST);
-        }
-
-        if (StencilIsEnabled()) {
-            glEnable(GL_STENCIL_TEST);
-            auto& back = GetBackStencil();
-            auto& front = GetFrontStencil();
-
-            glStencilOpSeparate(GL_BACK,
-                OpenGLStencilOperation(back.stencilFail),
-                OpenGLStencilOperation(back.depthFail),
-                OpenGLStencilOperation(back.stencilPass)
-            );
-            glStencilOpSeparate(GL_FRONT,
-                OpenGLStencilOperation(front.stencilFail),
-                OpenGLStencilOperation(front.depthFail),
-                OpenGLStencilOperation(front.stencilPass)
-            );
-
-            glStencilMaskSeparate(GL_BACK, back.writeMask);
-            glStencilMaskSeparate(GL_FRONT, front.writeMask);
-        }
-        else {
-            glDisable(GL_STENCIL_TEST);
-        }
-    }
-
-    void DepthStencilState::ApplyStencilReferenceNow(uint32_t backReference, uint32_t frontReference) {
-        if (StencilIsEnabled()) {
-            auto& back = GetBackStencil();
-            auto& front = GetFrontStencil();
-            glStencilFuncSeparate(GL_BACK,
-                OpenGLCompareFunction(back.compareFunction),
-                backReference,
-                back.readMask
-            );
-            glStencilFuncSeparate(GL_FRONT,
-                OpenGLCompareFunction(front.compareFunction),
-                frontReference,
-                front.readMask
-            );
-        }
     }
 
     // InputState

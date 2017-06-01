@@ -573,6 +573,14 @@ namespace backend {
                 case Command::SetStencilReference:
                     {
                         SetStencilReferenceCmd* cmd = iterator.NextCommand<SetStencilReferenceCmd>();
+                        if (lastPipeline->IsCompute()) {
+                            HandleError("Can't set stencil reference in a compute pipeline");
+                            return false;
+                        }
+                        if (currentRenderPass == nullptr) {
+                            HandleError("Can't set stencil reference without an active render pass");
+                            return false;
+                        }
                     }
                     break;
 
@@ -766,11 +774,10 @@ namespace backend {
         memcpy(values, data, count * sizeof(uint32_t));
     }
 
-    void CommandBufferBuilder::SetStencilReference(uint32_t backReference, uint32_t frontReference) {
+    void CommandBufferBuilder::SetStencilReference(uint32_t reference) {
         SetStencilReferenceCmd* cmd = allocator.Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
         new(cmd) SetStencilReferenceCmd;
-        cmd->backReference = backReference;
-        cmd->frontReference = frontReference;
+        cmd->reference = reference;
     }
 
     void CommandBufferBuilder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {

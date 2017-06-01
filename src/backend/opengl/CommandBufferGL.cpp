@@ -16,6 +16,7 @@
 
 #include "common/Commands.h"
 #include "OpenGLBackend.h"
+#include "PersistentPipelineStateGL.h"
 #include "PipelineGL.h"
 #include "PipelineLayoutGL.h"
 #include "SamplerGL.h"
@@ -25,6 +26,8 @@
 
 namespace backend {
 namespace opengl {
+
+    PersistentPipelineState persistentPipelineState;
 
     CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
         : CommandBufferBase(builder), device(device), commands(builder->AcquireCommands()) {
@@ -144,7 +147,7 @@ namespace opengl {
                 case Command::SetPipeline:
                     {
                         SetPipelineCmd* cmd = commands.NextCommand<SetPipelineCmd>();
-                        ToBackend(cmd->pipeline)->ApplyNow();
+                        ToBackend(cmd->pipeline)->ApplyNow(persistentPipelineState);
                         lastPipeline = ToBackend(cmd->pipeline).Get();
                     }
                     break;
@@ -182,7 +185,8 @@ namespace opengl {
                     {
                         SetStencilReferenceCmd* cmd = commands.NextCommand<SetStencilReferenceCmd>();
                         DepthStencilState* depthStencilState = ToBackend(lastPipeline->GetDepthStencilState());
-                        depthStencilState->ApplyStencilReferenceNow(cmd->backReference, cmd->frontReference);
+                        persistentPipelineState.UpdateStencilReference(cmd->reference);
+                        persistentPipelineState.ApplyStencilNow();
                     }
                     break;
 

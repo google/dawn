@@ -14,6 +14,7 @@
 
 #include "OpenGLBackend.h"
 #include "CommandBufferGL.h"
+#include "PersistentPipelineStateGL.h"
 #include "PipelineGL.h"
 #include "PipelineLayoutGL.h"
 #include "SamplerGL.h"

@@ -176,7 +176,6 @@ void init() {
         .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32, 0)
         .SetAttribute(1, 0, nxt::VertexFormat::FloatR32G32B32, 3 * sizeof(float))
         .SetInput(0, 6 * sizeof(float), nxt::InputStepMode::Vertex)
-        .SetInput(1, 6 * sizeof(float), nxt::InputStepMode::Vertex)
         .GetResult();
 
     nxt::BindGroupLayout bgl = device.CreateBindGroupLayoutBuilder()
@@ -243,8 +242,8 @@ void init() {
     CreateDefaultRenderPass(device, &renderpass, &framebuffer);
 
     auto depthStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthEnabled(true)
-        .SetStencilEnabled(false)
+        .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        .SetDepthWriteEnabled(true)
         .GetResult();
 
     pipeline = device.CreatePipelineBuilder()
@@ -257,12 +256,9 @@ void init() {
         .GetResult();
 
     auto planeStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthEnabled(true)
-        .SetDepthWrite(nxt::DepthWriteMode::Disabled)
-        .SetStencilEnabled(true)
-        .SetStencilCompareFunction(nxt::Face::Both, nxt::CompareFunction::Always)
-        .SetStencilOperation(nxt::Face::Both, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
-        .SetStencilMask(nxt::Face::Both, 0xff, 0xff)
+        .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        .SetDepthWriteEnabled(false)
+        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
         .GetResult();
 
     planePipeline = device.CreatePipelineBuilder()
@@ -275,12 +271,9 @@ void init() {
         .GetResult();
 
     auto reflectionStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthEnabled(true)
-        .SetDepthWrite(nxt::DepthWriteMode::Enabled)
-        .SetStencilEnabled(true)
-        .SetStencilCompareFunction(nxt::Face::Both, nxt::CompareFunction::Equal)
-        .SetStencilOperation(nxt::Face::Both, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
-        .SetStencilMask(nxt::Face::Both, 0xff, 0x00)
+        .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        .SetDepthWriteEnabled(true)
+        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Equal, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
         .GetResult();
 
     reflectionPipeline = device.CreatePipelineBuilder()
@@ -320,13 +313,12 @@ void frame() {
             .SetIndexBuffer(indexBuffer, 0, nxt::IndexFormat::Uint32)
             .DrawElements(36, 1, 0, 0)
 
+            .SetStencilReference(0x1)
             .SetPipeline(planePipeline)
-            .SetStencilReference(0x1, 0x1)
             .SetVertexBuffers(0, 1, &planeBuffer, vertexBufferOffsets)
             .DrawElements(6, 1, 0, 0)
 
             .SetPipeline(reflectionPipeline)
-            .SetStencilReference(0x1, 0x1)
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
             .SetBindGroup(0, bindGroup[1])
             .DrawElements(36, 1, 0, 0)

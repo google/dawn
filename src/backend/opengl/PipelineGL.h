@@ -25,6 +25,7 @@ namespace backend {
 namespace opengl {
 
     class Device;
+    class PersistentPipelineState;
     class ShaderModule;
 
     class Pipeline : public PipelineBase {
@@ -39,7 +40,7 @@ namespace opengl {
             const std::vector<GLuint>& GetTextureUnitsForTexture(GLuint index) const;
             GLuint GetProgramHandle() const;
 
-            void ApplyNow();
+            void ApplyNow(PersistentPipelineState &persistentPipelineState);
 
         private:
             GLuint program;

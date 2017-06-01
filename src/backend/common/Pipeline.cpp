@@ -36,6 +36,11 @@ namespace backend {
             return;
         }
 
+        if (IsCompute() && depthStencilState) {
+            builder->HandleError("Compute pipeline cannot have depth stencil state");
+            return;
+        }
+
         if (!IsCompute() && !renderPass) {
             builder->HandleError("Pipeline render pass not set");
             return;
@@ -123,11 +128,15 @@ namespace backend {
         if (!inputState) {
             inputState = device->CreateInputStateBuilder()->GetResult();
         }
-        if (!depthStencilState) {
+        if (!depthStencilState && !IsCompute()) {
             depthStencilState = device->CreateDepthStencilStateBuilder()->GetResult();
         }
 
         return device->CreatePipeline(this);
+    }
+
+    bool PipelineBuilder::IsCompute() const {
+        return stageMask == nxt::ShaderStageBit::Compute;
     }
 
     void PipelineBuilder::SetLayout(PipelineLayoutBase* layout) {

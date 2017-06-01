@@ -29,31 +29,32 @@ namespace backend {
             DepthStencilStateBase(DepthStencilStateBuilder* builder);
 
             struct DepthInfo {
-                nxt::CompareFunction compareFunction = nxt::CompareFunction::Less;
-                nxt::DepthWriteMode depthWriteMode = nxt::DepthWriteMode::Enabled;
+                nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
+                bool depthWriteEnabled = false;
             };
 
-            struct StencilInfo {
+            struct StencilFaceInfo {
                 nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
                 nxt::StencilOperation stencilFail = nxt::StencilOperation::Keep;
                 nxt::StencilOperation depthFail = nxt::StencilOperation::Keep;
-                nxt::StencilOperation stencilPass = nxt::StencilOperation::Keep;
-                uint32_t readMask = 0xff;
-                uint32_t writeMask = 0xff;
+                nxt::StencilOperation depthStencilPass = nxt::StencilOperation::Keep;
+                uint32_t mask = 0xff;
             };
 
-            bool DepthIsEnabled() const;
-            bool StencilIsEnabled() const;
+            struct StencilInfo {
+                bool stencilTestEnabled;
+                StencilFaceInfo back;
+                StencilFaceInfo front;
+            };
+
+            bool DepthTestEnabled() const;
+            bool StencilTestEnabled() const;
             const DepthInfo& GetDepth() const;
-            const StencilInfo& GetBackStencil() const;
-            const StencilInfo& GetFrontStencil() const;
+            const StencilInfo& GetStencil() const;
 
         private:
-            bool depthEnabled = false;
-            bool stencilEnabled = false;
             DepthInfo depthInfo;
-            StencilInfo backStencilInfo;
-            StencilInfo frontStencilInfo;
+            StencilInfo stencilInfo;
     };
 
     class DepthStencilStateBuilder : public Builder<DepthStencilStateBase> {
@@ -61,25 +62,21 @@ namespace backend {
             DepthStencilStateBuilder(DeviceBase* device);
 
             // NXT API
-            void SetDepthEnabled(bool depthEnabled);
             void SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction);
-            void SetDepthWrite(nxt::DepthWriteMode depthWriteMode);
-            void SetStencilEnabled(bool stencilEnabled);
-            void SetStencilOperation(nxt::Face face, nxt::StencilOperation stencilFail,
-                    nxt::StencilOperation depthFail, nxt::StencilOperation stencilPass);
-            void SetStencilCompareFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction);
-            void SetStencilMask(nxt::Face face, uint32_t readMask, uint32_t writeMask);
+            void SetDepthWriteEnabled(bool enabled);
+            void SetStencilFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction,
+                nxt::StencilOperation stencilFail, nxt::StencilOperation depthFail, nxt::StencilOperation depthStencilPass);
+            void SetStencilMask(nxt::Face face, uint32_t mask);
 
         private:
             friend class DepthStencilStateBase;
 
             DepthStencilStateBase* GetResultImpl() override;
 
-            bool depthEnabled;
-            bool stencilEnabled;
+            int propertiesSet = 0;
+
             DepthStencilStateBase::DepthInfo depthInfo;
-            DepthStencilStateBase::StencilInfo backStencilInfo;
-            DepthStencilStateBase::StencilInfo frontStencilInfo;
+            DepthStencilStateBase::StencilInfo stencilInfo;
     };
 
 }

@@ -40,6 +40,7 @@ namespace opengl {
     class CommandBuffer;
     class DepthStencilState;
     class InputState;
+    class PersistentPipelineState;
     class Pipeline;
     class PipelineLayout;
     class Queue;
@@ -73,6 +74,9 @@ namespace opengl {
     auto ToBackend(T&& common) -> decltype(ToBackendBase<OpenGLBackendTraits>(common)) {
         return ToBackendBase<OpenGLBackendTraits>(common);
     }
+
+    GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction);
+    GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation);
 
     // Definition of backend types
     class Device : public DeviceBase {
@@ -139,8 +143,6 @@ namespace opengl {
     class DepthStencilState : public DepthStencilStateBase {
         public:
             DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
-            void ApplyNow();
-            void ApplyStencilReferenceNow(uint32_t backReference, uint32_t frontReference);
 
         private:
             Device* device;

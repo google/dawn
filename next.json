@@ -14,6 +14,9 @@
         "See the License for the specific language governing permissions and",
         "limitations under the License."
     ],
+    "bool": {
+        "category": "native"
+    },
     "bind group": {
         "category": "object"
     },
@@ -282,8 +285,7 @@
             {
                 "name": "set stencil reference",
                 "args": [
-                    {"name": "back reference", "type": "uint32_t"},
-                    {"name": "front reference", "type": "uint32_t"}
+                    {"name": "reference", "type": "uint32_t"}
                 ]
             },
             {
@@ -449,60 +451,34 @@
                 "returns": "depth stencil state"
             },
             {
-                "name": "set depth enabled",
-                "args": [
-                    {"name": "depth enabled", "type": "bool"}
-                ]
-            },
-            {
                 "name": "set depth compare function",
                 "args": [
                     {"name": "depth compare function", "type": "compare function"}
                 ]
             },
             {
-                "name": "set depth write",
+                "name": "set depth write enabled",
                 "args" : [
-                    {"name": "depth write mode", "type": "depth write mode"}
+                    {"name": "enabled", "type": "bool"}
                 ]
             },
             {
-                "name": "set stencil enabled",
-                "args": [
-                    {"name": "stencil enabled", "type": "bool"}
-                ]
-            },
-            {
-                "name": "set stencil operation",
+                "name": "set stencil function",
                 "args": [
                     {"name": "face", "type": "face"},
+                    {"name": "stencil compare function", "type": "compare function"},
                     {"name": "stencil failure operation", "type": "stencil operation"},
                     {"name": "depth failure operation", "type": "stencil operation"},
                     {"name": "stencil pass operation", "type": "stencil operation"}
                 ]
             },
             {
-                "name": "set stencil compare function",
-                "args": [
-                    {"name": "face", "type": "face"},
-                    {"name": "stencil compare function", "type": "compare function"}
-                ]
-            },
-            {
                 "name": "set stencil mask",
                 "args": [
                     {"name": "face", "type": "face"},
-                    {"name": "read mask", "type": "uint32_t"},
-                    {"name": "write mask", "type": "uint32_t"}
+                    {"name": "mask", "type": "uint32_t"}
                 ]
             }
-        ]
-    },
-    "depth write mode": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "disabled"},
-            {"value": 1, "name": "enabled"}
         ]
     },
     "device error callback": {
@@ -511,6 +487,7 @@
     "face": {
         "category": "bitmask",
         "values": [
+            {"value": 0, "name": "none"},
             {"value": 1, "name": "back"},
             {"value": 2, "name": "front"},
             {"value": 3, "name": "both"}
@@ -638,7 +615,7 @@
             {
                 "name": "set depth stencil state",
                 "args": [
-                    {"name": "input", "type": "depth stencil state"}
+                    {"name": "depth stencil state", "type": "depth stencil state"}
                 ]
             }
         ]
@@ -793,7 +770,7 @@
             {"value": 5, "name": "decrement clamp"},
             {"value": 6, "name": "increment wrap"},
             {"value": 7, "name": "decrement wrap"}
-        ]  
+        ]
     },
     "texture": {
         "category": "object",
@@ -911,9 +888,6 @@
         "category": "native"
     },
     "uint32_t": {
-        "category": "native"
-    },
-    "bool": {
         "category": "native"
     }
 }

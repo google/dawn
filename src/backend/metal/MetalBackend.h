@@ -189,11 +189,12 @@ namespace metal {
             DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
             ~DepthStencilState();
 
-            MTLDepthStencilDescriptor* GetMTLDepthStencilDescriptor();
+            id<MTLDepthStencilState> GetMTLDepthStencilState();
 
         private:
             Device* device;
-            MTLDepthStencilDescriptor* mtlDepthStencilDescriptor = nil;
+
+            id<MTLDepthStencilState> mtlDepthStencilState = nil;
     };
 
     class InputState : public InputStateBase {
@@ -230,8 +231,6 @@ namespace metal {
             Device* device;
 
             id<MTLRenderPipelineState> mtlRenderPipelineState = nil;
-            id<MTLDepthStencilState> mtlDepthStencilState = nil;
-
             id<MTLComputePipelineState> mtlComputePipelineState = nil;
             MTLSize localWorkgroupSize;
     };

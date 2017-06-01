@@ -86,6 +86,8 @@ namespace backend {
 
             PipelineBase* GetResultImpl() override;
 
+            bool IsCompute() const;
+
             Ref<PipelineLayoutBase> layout;
             Ref<RenderPassBase> renderPass;
             uint32_t subpass;

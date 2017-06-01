@@ -456,6 +456,8 @@ namespace metal {
                             lastPipeline->Encode(encoders.compute);
                         } else {
                             ASSERT(encoders.render);
+                            DepthStencilState* depthStencilState = ToBackend(lastPipeline->GetDepthStencilState());
+                            [encoders.render setDepthStencilState:depthStencilState->GetMTLDepthStencilState()];
                             lastPipeline->Encode(encoders.render);
                         }
                     }
@@ -478,9 +480,7 @@ namespace metal {
 
                         ASSERT(encoders.render);
 
-                        [encoders.render
-                            setStencilFrontReferenceValue:cmd->frontReference
-                            backReferenceValue:cmd->backReference];
+                        [encoders.render setStencilReferenceValue:cmd->reference];
                     }
                     break;
 
@@ -665,7 +665,7 @@ namespace metal {
 
     // DepthStencilState
 
-    static MTLCompareFunction DepthStencilCompareFunction(nxt::CompareFunction compareFunction) {
+    static MTLCompareFunction MetalDepthStencilCompareFunction(nxt::CompareFunction compareFunction) {
         switch (compareFunction) {
             case nxt::CompareFunction::Never:
                 return MTLCompareFunctionNever;
@@ -683,12 +683,10 @@ namespace metal {
                 return MTLCompareFunctionEqual;
             case nxt::CompareFunction::Always:
                 return MTLCompareFunctionAlways;
-            default:
-                ASSERT(false);
         }
     }
 
-    static MTLStencilOperation StencilOperation(nxt::StencilOperation stencilOperation) {
+    static MTLStencilOperation MetalStencilOperation(nxt::StencilOperation stencilOperation) {
         switch (stencilOperation) {
             case nxt::StencilOperation::Keep:
                 return MTLStencilOperationKeep;
@@ -706,51 +704,38 @@ namespace metal {
                 return MTLStencilOperationIncrementWrap;
             case nxt::StencilOperation::DecrementWrap:
                 return MTLStencilOperationDecrementWrap;
-            default:
-                ASSERT(false);
         }
     }
 
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
         : DepthStencilStateBase(builder), device(device) {
-        mtlDepthStencilDescriptor = [MTLDepthStencilDescriptor new];
+        MTLDepthStencilDescriptor* mtlDepthStencilDescriptor = [MTLDepthStencilDescriptor new];
 
-        if (DepthIsEnabled()) {
+        if (DepthTestEnabled()) {
             auto& depth = GetDepth();
-            mtlDepthStencilDescriptor.depthCompareFunction = DepthStencilCompareFunction(depth.compareFunction);
-            switch (depth.depthWriteMode) {
-                case nxt::DepthWriteMode::Disabled:
-                    mtlDepthStencilDescriptor.depthWriteEnabled = false;
-                    break;
-                case nxt::DepthWriteMode::Enabled:
-                    mtlDepthStencilDescriptor.depthWriteEnabled = true;
-                    break;
-                default:
-                    ASSERT(false);
-                    break;
-            }
+            mtlDepthStencilDescriptor.depthCompareFunction = MetalDepthStencilCompareFunction(depth.compareFunction);
+            mtlDepthStencilDescriptor.depthWriteEnabled = depth.depthWriteEnabled;
         }
 
-        if (StencilIsEnabled()) {
+        auto& stencil = GetStencil();
+
+        if (StencilTestEnabled()) {
             MTLStencilDescriptor* backFaceStencil = [MTLStencilDescriptor new];
             MTLStencilDescriptor* frontFaceStencil = [MTLStencilDescriptor new];
 
-            auto& back = GetBackStencil();
-            auto& front = GetFrontStencil();
+            backFaceStencil.stencilCompareFunction = MetalDepthStencilCompareFunction(stencil.back.compareFunction);
+            backFaceStencil.stencilFailureOperation = MetalStencilOperation(stencil.back.stencilFail);
+            backFaceStencil.depthFailureOperation = MetalStencilOperation(stencil.back.depthFail);
+            backFaceStencil.depthStencilPassOperation = MetalStencilOperation(stencil.back.depthStencilPass);
+            backFaceStencil.readMask = stencil.back.mask;
+            backFaceStencil.writeMask = stencil.back.mask;
 
-            backFaceStencil.stencilCompareFunction = DepthStencilCompareFunction(back.compareFunction);
-            backFaceStencil.stencilFailureOperation = StencilOperation(back.stencilFail);
-            backFaceStencil.depthFailureOperation = StencilOperation(back.depthFail);
-            backFaceStencil.depthStencilPassOperation = StencilOperation(back.stencilPass);
-            backFaceStencil.readMask = back.readMask;
-            backFaceStencil.writeMask = back.writeMask;
-
-            frontFaceStencil.stencilCompareFunction = DepthStencilCompareFunction(front.compareFunction);
-            frontFaceStencil.stencilFailureOperation = StencilOperation(front.stencilFail);
-            frontFaceStencil.depthFailureOperation = StencilOperation(front.depthFail);
-            frontFaceStencil.depthStencilPassOperation = StencilOperation(front.stencilPass);
-            frontFaceStencil.readMask = front.readMask;
-            frontFaceStencil.writeMask = front.writeMask;
+            frontFaceStencil.stencilCompareFunction = MetalDepthStencilCompareFunction(stencil.front.compareFunction);
+            frontFaceStencil.stencilFailureOperation = MetalStencilOperation(stencil.front.stencilFail);
+            frontFaceStencil.depthFailureOperation = MetalStencilOperation(stencil.front.depthFail);
+            frontFaceStencil.depthStencilPassOperation = MetalStencilOperation(stencil.front.depthStencilPass);
+            frontFaceStencil.readMask = stencil.front.mask;
+            frontFaceStencil.writeMask = stencil.front.mask;
 
             mtlDepthStencilDescriptor.backFaceStencil = backFaceStencil;
             mtlDepthStencilDescriptor.frontFaceStencil = frontFaceStencil;
@@ -758,15 +743,17 @@ namespace metal {
             [frontFaceStencil release];
         }
 
+        mtlDepthStencilState = [device->GetMTLDevice() newDepthStencilStateWithDescriptor:mtlDepthStencilDescriptor];
+        [mtlDepthStencilDescriptor release];
     }
 
     DepthStencilState::~DepthStencilState() {
-        [mtlDepthStencilDescriptor release];
-        mtlDepthStencilDescriptor = nil;
+        [mtlDepthStencilState release];
+        mtlDepthStencilState = nil;
     }
 
-    MTLDepthStencilDescriptor* DepthStencilState::GetMTLDepthStencilDescriptor() {
-        return mtlDepthStencilDescriptor;
+    id<MTLDepthStencilState> DepthStencilState::GetMTLDepthStencilState() {
+        return mtlDepthStencilState;
     }
 
     // InputState
@@ -914,24 +901,17 @@ namespace metal {
                 return;
             }
 
-            DepthStencilState* depthStencilState = ToBackend(GetDepthStencilState());
-            MTLDepthStencilDescriptor* dsDesc = depthStencilState->GetMTLDepthStencilDescriptor();
-            mtlDepthStencilState = [device->GetMTLDevice()
-                newDepthStencilStateWithDescriptor:dsDesc];
-
             [descriptor release];
         }
     }
 
     Pipeline::~Pipeline() {
         [mtlRenderPipelineState release];
-        [mtlDepthStencilState release];
         [mtlComputePipelineState release];
     }
 
     void Pipeline::Encode(id<MTLRenderCommandEncoder> encoder) {
         ASSERT(!IsCompute());
-        [encoder setDepthStencilState:mtlDepthStencilState];
         [encoder setRenderPipelineState:mtlRenderPipelineState];
     }
 

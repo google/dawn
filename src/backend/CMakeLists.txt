@@ -85,6 +85,8 @@ list(APPEND BACKEND_SOURCES
     ${OPENGL_DIR}/CommandBufferGL.h
     ${OPENGL_DIR}/OpenGLBackend.cpp
     ${OPENGL_DIR}/OpenGLBackend.h
+    ${OPENGL_DIR}/PersistentPipelineStateGL.cpp
+    ${OPENGL_DIR}/PersistentPipelineStateGL.h
     ${OPENGL_DIR}/PipelineGL.cpp
     ${OPENGL_DIR}/PipelineGL.h
     ${OPENGL_DIR}/PipelineLayoutGL.cpp

@@ -96,8 +96,7 @@ namespace backend {
     };
 
     struct SetStencilReferenceCmd {
-        uint32_t backReference;
-        uint32_t frontReference;
+        uint32_t reference;
     };
 
     struct SetBindGroupCmd {
