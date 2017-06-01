@@ -58,13 +58,7 @@ void initBuffers() {
         20, 21, 22,
         20, 22, 23
     };
-    indexBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Index)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(indexData))
-        .GetResult();
-    indexBuffer.SetSubData(0, sizeof(indexData) / sizeof(uint32_t), indexData);
-    indexBuffer.FreezeUsage(nxt::BufferUsageBit::Index);
+    indexBuffer = CreateFrozenBufferFromData(device, (void*)indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
 
     static const float vertexData[6 * 4 * 6] = {
         -1.0, -1.0,  1.0,    1.0, 0.0, 0.0,
@@ -97,15 +91,7 @@ void initBuffers() {
         -1.0,  1.0,  1.0,    1.0, 1.0, 1.0,
         -1.0,  1.0, -1.0,    1.0, 1.0, 1.0
     };
-
-    vertexBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Vertex)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(vertexData))
-        .GetResult();
-    vertexBuffer.SetSubData(0, sizeof(vertexData) / sizeof(uint32_t),
-            reinterpret_cast<const uint32_t*>(vertexData));
-    vertexBuffer.FreezeUsage(nxt::BufferUsageBit::Vertex);
+    vertexBuffer = CreateFrozenBufferFromData(device, (void*)vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 
     static const float planeData[6 * 4] = {
         -2.0, -1.0, -2.0,    0.5, 0.5, 0.5,
@@ -113,15 +99,7 @@ void initBuffers() {
         2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
         -2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
     };
-
-    planeBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Vertex)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(planeData))
-        .GetResult();
-    planeBuffer.SetSubData(0, sizeof(planeData) / sizeof(uint32_t),
-        reinterpret_cast<const uint32_t*>(planeData));
-    planeBuffer.FreezeUsage(nxt::BufferUsageBit::Vertex);
+    planeBuffer = CreateFrozenBufferFromData(device, (void*)planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
 }
 
 struct {

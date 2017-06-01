@@ -245,6 +245,17 @@ void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderP
         .GetResult();
 }
 
+nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, void* data, uint32_t size, nxt::BufferUsageBit usage) {
+    nxt::Buffer buffer = device.CreateBufferBuilder()
+        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | usage)
+        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
+        .SetSize(size)
+        .GetResult();
+    buffer.SetSubData(0, size / sizeof(uint32_t), reinterpret_cast<const uint32_t*>(data));
+    buffer.FreezeUsage(usage);
+    return buffer;
+}
+
 extern "C" {
     bool InitUtils(int argc, const char** argv) {
         for (int i = 0; i < argc; i++) {
@@ -294,6 +305,10 @@ extern "C" {
 
     nxtShaderModule CreateShaderModule(nxtDevice device, nxtShaderStage stage, const char* source) {
         return CreateShaderModule(device, static_cast<nxt::ShaderStage>(stage), source).Release();
+    }
+
+    nxtBuffer CreateFrozenBufferFromData(nxtDevice device, void* data, uint32_t size, nxtBufferUsageBit usage) {
+        return CreateFrozenBufferFromData(device, data, size, usage);
     }
 
     void DoSwapBuffers() {

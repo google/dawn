@@ -34,7 +34,9 @@ extern "C" {
     nxt::Device CreateCppNXTDevice();
     nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source);
     void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer);
+    nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, void* data, uint32_t size, nxt::BufferUsageBit usage);
 #else
     nxtDevice CreateNXTDevice();
     nxtShaderModule CreateShaderModule(nxtDevice device, nxtShaderStage stage, const char* source);
+    nxtBuffer CreateFrozenBufferFromData(nxtDevice device, void* data, uint32_t size, nxtBufferUsageBit usage);
 #endif
