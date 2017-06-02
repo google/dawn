@@ -38,13 +38,13 @@ namespace backend {
                 nxt::StencilOperation stencilFail = nxt::StencilOperation::Keep;
                 nxt::StencilOperation depthFail = nxt::StencilOperation::Keep;
                 nxt::StencilOperation depthStencilPass = nxt::StencilOperation::Keep;
-                uint32_t mask = 0xff;
             };
 
             struct StencilInfo {
-                bool stencilTestEnabled;
                 StencilFaceInfo back;
                 StencilFaceInfo front;
+                uint32_t readMask = 0xff;
+                uint32_t writeMask = 0xff;
             };
 
             bool DepthTestEnabled() const;
@@ -66,7 +66,7 @@ namespace backend {
             void SetDepthWriteEnabled(bool enabled);
             void SetStencilFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction,
                 nxt::StencilOperation stencilFail, nxt::StencilOperation depthFail, nxt::StencilOperation depthStencilPass);
-            void SetStencilMask(nxt::Face face, uint32_t mask);
+            void SetStencilMask(uint32_t readMask, uint32_t writeMask);
 
         private:
             friend class DepthStencilStateBase;

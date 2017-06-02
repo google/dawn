@@ -15,55 +15,25 @@
 #ifndef BACKEND_OPENGL_PERSISTENTPIPELINESTATE_H_
 #define BACKEND_OPENGL_PERSISTENTPIPELINESTATE_H_
 
-#include "common/DepthStencilState.h"
+#include "nxt/nxtcpp.h"
 
-#include <bitset>
+#include "glad/glad.h"
 
 namespace backend {
 namespace opengl {
 
     class PersistentPipelineState {
         public:
-            PersistentPipelineState();
-            void UpdateDepthStencilInfo(const DepthStencilStateBase* const depthStencilState);
-            void UpdateStencilReference(uint32_t stencilReference);
-
-            void ApplyDepthNow();
-            void ApplyStencilNow();
-
-            enum Field {
-                DEPTH_COMPARE_FUNCTION,
-                DEPTH_WRITE_ENABLED,
-                DEPTH_ENABLED,
-                STENCIL_ENABLED,
-                STENCIL_BACK_COMPARE_FUNCTION,
-                STENCIL_BACK_STENCIL_FAIL,
-                STENCIL_BACK_DEPTH_FAIL,
-                STENCIL_BACK_DEPTH_STENCIL_PASS,
-                STENCIL_BACK_MASK,
-                STENCIL_FRONT_COMPARE_FUNCTION,
-                STENCIL_FRONT_STENCIL_FAIL,
-                STENCIL_FRONT_DEPTH_FAIL,
-                STENCIL_FRONT_DEPTH_STENCIL_PASS,
-                STENCIL_FRONT_MASK,
-                STENCIL_REFERENCE,
-                Count
-            };
-
-            struct State {
-                bool depthEnabled;
-                bool stencilEnabled;
-                DepthStencilStateBase::DepthInfo depthInfo;
-                DepthStencilStateBase::StencilInfo stencilInfo;
-                uint32_t stencilReference;
-            };
+            void SetDefaultState();
+            void CacheStencilFuncsAndMask(GLenum stencilBackCompareFunction, GLenum stencilFrontCompareFunction, uint32_t stencilReadMask);
+            void SetStencilReference(uint32_t stencilReference);
+            GLuint GetCachedStencilReference() const;
 
         private:
-            State state;
-            std::bitset<Field::Count> dirtyFields;
-
-            inline bool IsDirty(Field field) const;
-            inline void CleanField(Field field);
+            GLenum stencilBackCompareFunction;
+            GLenum stencilFrontCompareFunction;
+            GLuint stencilReadMask;
+            GLuint stencilReference;
     };
 
 }

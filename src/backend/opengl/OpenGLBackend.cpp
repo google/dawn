@@ -15,6 +15,7 @@
 #include "OpenGLBackend.h"
 
 #include "CommandBufferGL.h"
+#include "DepthStencilStateGL.h"
 #include "PipelineGL.h"
 #include "PipelineLayoutGL.h"
 #include "ShaderModuleGL.h"
@@ -43,52 +44,6 @@ namespace opengl {
 
         *procs = GetValidatingProcs();
         *device = reinterpret_cast<nxtDevice>(new Device);
-    }
-
-    GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction) {
-        switch (compareFunction) {
-            case nxt::CompareFunction::Never:
-                return GL_NEVER;
-            case nxt::CompareFunction::Less:
-                return GL_LESS;
-            case nxt::CompareFunction::LessEqual:
-                return GL_LEQUAL;
-            case nxt::CompareFunction::Greater:
-                return GL_GREATER;
-            case nxt::CompareFunction::GreaterEqual:
-                return GL_GEQUAL;
-            case nxt::CompareFunction::NotEqual:
-                return GL_NOTEQUAL;
-            case nxt::CompareFunction::Equal:
-                return GL_EQUAL;
-            case nxt::CompareFunction::Always:
-                return GL_ALWAYS;
-            default:
-                ASSERT(false);
-        }
-    }
-
-    GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation) {
-        switch (stencilOperation) {
-            case nxt::StencilOperation::Keep:
-                return GL_KEEP;
-            case nxt::StencilOperation::Zero:
-                return GL_ZERO;
-            case nxt::StencilOperation::Replace:
-                return GL_REPLACE;
-            case nxt::StencilOperation::Invert:
-                return GL_INVERT;
-            case nxt::StencilOperation::IncrementClamp:
-                return GL_INCR;
-            case nxt::StencilOperation::DecrementClamp:
-                return GL_DECR;
-            case nxt::StencilOperation::IncrementWrap:
-                return GL_INCR_WRAP;
-            case nxt::StencilOperation::DecrementWrap:
-                return GL_DECR_WRAP;
-            default:
-                ASSERT(false);
-        }
     }
 
     // Device
@@ -182,12 +137,6 @@ namespace opengl {
 
     BufferView::BufferView(Device* device, BufferViewBuilder* builder)
         : BufferViewBase(builder), device(device) {
-    }
-
-    // DepthStencilState
-
-    DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
-        : DepthStencilStateBase(builder), device(device) {
     }
 
     // InputState

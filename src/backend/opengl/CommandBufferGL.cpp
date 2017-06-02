@@ -27,8 +27,6 @@
 namespace backend {
 namespace opengl {
 
-    PersistentPipelineState persistentPipelineState;
-
     CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
         : CommandBufferBase(builder), device(device), commands(builder->AcquireCommands()) {
     }
@@ -60,6 +58,9 @@ namespace opengl {
         Pipeline* lastPipeline = nullptr;
         uint32_t indexBufferOffset = 0;
         nxt::IndexFormat indexBufferFormat = nxt::IndexFormat::Uint16;
+
+        PersistentPipelineState persistentPipelineState;
+        persistentPipelineState.SetDefaultState();
 
         while(commands.NextCommandId(&type)) {
             switch (type) {
@@ -184,9 +185,8 @@ namespace opengl {
                 case Command::SetStencilReference:
                     {
                         SetStencilReferenceCmd* cmd = commands.NextCommand<SetStencilReferenceCmd>();
-                        DepthStencilState* depthStencilState = ToBackend(lastPipeline->GetDepthStencilState());
-                        persistentPipelineState.UpdateStencilReference(cmd->reference);
-                        persistentPipelineState.ApplyStencilNow();
+                        // DepthStencilState* depthStencilState = ToBackend(lastPipeline->GetDepthStencilState());
+                        persistentPipelineState.SetStencilReference(cmd->reference);
                     }
                     break;
 

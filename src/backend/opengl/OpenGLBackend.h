@@ -75,9 +75,6 @@ namespace opengl {
         return ToBackendBase<OpenGLBackendTraits>(common);
     }
 
-    GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction);
-    GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation);
-
     // Definition of backend types
     class Device : public DeviceBase {
         public:
@@ -135,14 +132,6 @@ namespace opengl {
     class BufferView : public BufferViewBase {
         public:
             BufferView(Device* device, BufferViewBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
-    class DepthStencilState : public DepthStencilStateBase {
-        public:
-            DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
 
         private:
             Device* device;

@@ -83,6 +83,8 @@ SetPIC(opengl_autogen)
 list(APPEND BACKEND_SOURCES
     ${OPENGL_DIR}/CommandBufferGL.cpp
     ${OPENGL_DIR}/CommandBufferGL.h
+    ${OPENGL_DIR}/DepthStencilStateGL.cpp
+    ${OPENGL_DIR}/DepthStencilStateGL.h
     ${OPENGL_DIR}/OpenGLBackend.cpp
     ${OPENGL_DIR}/OpenGLBackend.h
     ${OPENGL_DIR}/PersistentPipelineStateGL.cpp

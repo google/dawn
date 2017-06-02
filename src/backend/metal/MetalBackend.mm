@@ -727,15 +727,15 @@ namespace metal {
             backFaceStencil.stencilFailureOperation = MetalStencilOperation(stencil.back.stencilFail);
             backFaceStencil.depthFailureOperation = MetalStencilOperation(stencil.back.depthFail);
             backFaceStencil.depthStencilPassOperation = MetalStencilOperation(stencil.back.depthStencilPass);
-            backFaceStencil.readMask = stencil.back.mask;
-            backFaceStencil.writeMask = stencil.back.mask;
+            backFaceStencil.readMask = stencil.readMask;
+            backFaceStencil.writeMask = stencil.writeMask;
 
             frontFaceStencil.stencilCompareFunction = MetalDepthStencilCompareFunction(stencil.front.compareFunction);
             frontFaceStencil.stencilFailureOperation = MetalStencilOperation(stencil.front.stencilFail);
             frontFaceStencil.depthFailureOperation = MetalStencilOperation(stencil.front.depthFail);
             frontFaceStencil.depthStencilPassOperation = MetalStencilOperation(stencil.front.depthStencilPass);
-            frontFaceStencil.readMask = stencil.front.mask;
-            frontFaceStencil.writeMask = stencil.front.mask;
+            frontFaceStencil.readMask = stencil.readMask;
+            frontFaceStencil.writeMask = stencil.writeMask;
 
             mtlDepthStencilDescriptor.backFaceStencil = backFaceStencil;
             mtlDepthStencilDescriptor.frontFaceStencil = frontFaceStencil;

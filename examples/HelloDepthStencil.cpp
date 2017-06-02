@@ -102,7 +102,7 @@ void initBuffers() {
     planeBuffer = CreateFrozenBufferFromData(device, (void*)planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
 }
 
-struct {
+struct CameraData {
     glm::mat4 view;
     glm::mat4 proj;
 } cameraData;
@@ -167,31 +167,17 @@ void init() {
     cameraBuffer = device.CreateBufferBuilder()
         .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Uniform)
         .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(cameraData))
+        .SetSize(sizeof(CameraData))
         .GetResult();
 
     glm::mat4 transform(1.0);
-
-    transformBuffer[0] = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Uniform)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(glm::mat4))
-        .GetResult();
-    transformBuffer[0].SetSubData(0, sizeof(glm::mat4) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&transform));
-    transformBuffer[0].FreezeUsage(nxt::BufferUsageBit::Uniform);
+    transformBuffer[0] = CreateFrozenBufferFromData(device, (void*)&transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
 
     transform = glm::translate(transform, glm::vec3(0.f, -2.f, 0.f));
-
-    transformBuffer[1] = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Uniform)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(glm::mat4))
-        .GetResult();
-    transformBuffer[1].SetSubData(0, sizeof(glm::mat4) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&transform));
-    transformBuffer[1].FreezeUsage(nxt::BufferUsageBit::Uniform);
+    transformBuffer[1] = CreateFrozenBufferFromData(device, (void*)&transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
 
     nxt::BufferView cameraBufferView = cameraBuffer.CreateBufferViewBuilder()
-        .SetExtent(0, sizeof(cameraData))
+        .SetExtent(0, sizeof(CameraData))
         .GetResult();
 
     nxt::BufferView transformBufferView[2] = {
@@ -280,7 +266,7 @@ void frame() {
     );
 
     cameraBuffer.TransitionUsage(nxt::BufferUsageBit::Mapped);
-    cameraBuffer.SetSubData(0, sizeof(cameraData) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&cameraData));
+    cameraBuffer.SetSubData(0, sizeof(CameraData) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&cameraData));
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderpass, framebuffer)

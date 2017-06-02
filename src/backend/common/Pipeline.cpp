@@ -125,7 +125,7 @@ namespace backend {
         if (!layout) {
             layout = device->CreatePipelineLayoutBuilder()->GetResult();
         }
-        if (!inputState) {
+        if (!inputState && !IsCompute()) {
             inputState = device->CreateInputStateBuilder()->GetResult();
         }
         if (!depthStencilState && !IsCompute()) {

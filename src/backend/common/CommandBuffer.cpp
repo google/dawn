@@ -573,10 +573,6 @@ namespace backend {
                 case Command::SetStencilReference:
                     {
                         SetStencilReferenceCmd* cmd = iterator.NextCommand<SetStencilReferenceCmd>();
-                        if (lastPipeline->IsCompute()) {
-                            HandleError("Can't set stencil reference in a compute pipeline");
-                            return false;
-                        }
                         if (currentRenderPass == nullptr) {
                             HandleError("Can't set stencil reference without an active render pass");
                             return false;

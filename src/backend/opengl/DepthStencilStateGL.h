@@ -12,12 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "OpenGLBackend.h"
-#include "CommandBufferGL.h"
-#include "DepthStencilStateGL.h"
-#include "PersistentPipelineStateGL.h"
-#include "PipelineGL.h"
-#include "PipelineLayoutGL.h"
-#include "SamplerGL.h"
-#include "ShaderModuleGL.h"
-#include "TextureGL.h"
+#ifndef BACKEND_OPENGL_DEPTHSTENCILSTATEGL_H_
+#define BACKEND_OPENGL_DEPTHSTENCILSTATEGL_H_
+
+#include "common/DepthStencilState.h"
+
+namespace backend {
+namespace opengl {
+
+    class Device;
+    class PersistentPipelineState;
+
+    class DepthStencilState : public DepthStencilStateBase {
+        public:
+            DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
+
+            void ApplyNow(PersistentPipelineState &persistentPipelineState) const;
+
+        private:
+            Device* device;
+    };
+
+}
+}
+
+#endif // BACKEND_OPENGL_DEPTHSTENCILSTATEGL_H_

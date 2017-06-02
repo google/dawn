@@ -475,8 +475,8 @@
             {
                 "name": "set stencil mask",
                 "args": [
-                    {"name": "face", "type": "face"},
-                    {"name": "mask", "type": "uint32_t"}
+                    {"name": "readMask", "type": "uint32_t"},
+                    {"name": "writeMask", "type": "uint32_t"}
                 ]
             }
         ]
