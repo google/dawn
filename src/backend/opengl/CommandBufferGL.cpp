@@ -66,12 +66,14 @@ namespace opengl {
             switch (type) {
                 case Command::AdvanceSubpass:
                     {
+                        commands.NextCommand<AdvanceSubpassCmd>();
                         // TODO(kainino@chromium.org): implement
                     }
                     break;
 
                 case Command::BeginRenderPass:
                     {
+                        commands.NextCommand<BeginRenderPassCmd>();
                         // TODO(kainino@chromium.org): implement
                     }
                     break;
@@ -141,6 +143,7 @@ namespace opengl {
 
                 case Command::EndRenderPass:
                     {
+                        commands.NextCommand<EndRenderPassCmd>();
                         // TODO(kainino@chromium.org): implement
                     }
                     break;
