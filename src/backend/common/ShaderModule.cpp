@@ -29,6 +29,7 @@ namespace backend {
 
     void ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
         // TODO(cwallez@chromium.org): make errors here builder-level
+        // currently errors here do not prevent the shadermodule from being used
         const auto& resources = compiler.get_shader_resources();
 
         switch (compiler.get_execution_model()) {

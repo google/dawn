@@ -57,7 +57,7 @@ void init() {
             float scalarOffset;
         } c;
 
-        out vec4 v_color;
+        layout(location = 0) out vec4 v_color;
 
         const vec4 positions[3] = vec4[3](
             vec4( 0.0f,  0.1f, 0.0f, 1.0f),
@@ -96,7 +96,7 @@ void init() {
     nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         out vec4 fragColor;
-        in vec4 v_color;
+        layout(location = 0) in vec4 v_color;
         void main() {
             fragColor = v_color;
         })"
