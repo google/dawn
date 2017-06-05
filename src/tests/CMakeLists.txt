@@ -25,8 +25,8 @@ add_executable(nxt_unittests
     ${UNITTESTS_DIR}/RefCountedTests.cpp
     ${UNITTESTS_DIR}/ToBackendTests.cpp
     ${UNITTESTS_DIR}/WireTests.cpp
-    ${VALIDATION_TESTS_DIR}/BufferValidationTest.cpp
-    ${VALIDATION_TESTS_DIR}/DepthStencilStateValidationTest.cpp
+    ${VALIDATION_TESTS_DIR}/BufferValidationTests.cpp
+    ${VALIDATION_TESTS_DIR}/DepthStencilStateValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/ValidationTest.cpp
     ${VALIDATION_TESTS_DIR}/ValidationTest.h
     ${TESTS_DIR}/UnittestsMain.cpp
