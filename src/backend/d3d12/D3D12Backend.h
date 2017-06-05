@@ -20,17 +20,14 @@
 #include "common/Buffer.h"
 #include "common/BindGroup.h"
 #include "common/BindGroupLayout.h"
-#include "common/CommandBuffer.h"
 #include "common/Device.h"
 #include "common/Framebuffer.h"
 #include "common/DepthStencilState.h"
 #include "common/InputState.h"
-#include "common/Pipeline.h"
 #include "common/PipelineLayout.h"
 #include "common/Queue.h"
 #include "common/RenderPass.h"
 #include "common/Sampler.h"
-#include "common/ShaderModule.h"
 #include "common/Texture.h"
 #include "common/ToBackend.h"
 
@@ -85,7 +82,7 @@ namespace d3d12 {
     // Definition of backend types
     class Device : public DeviceBase {
         public:
-            Device(Microsoft::WRL::ComPtr<ID3D12Device> d3d12Device);
+            Device(ComPtr<ID3D12Device> d3d12Device);
             ~Device();
 
             BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
@@ -105,23 +102,21 @@ namespace d3d12 {
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
-            Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device();
-            Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature();
-            Microsoft::WRL::ComPtr<ID3D12CommandQueue> GetCommandQueue();
-            Microsoft::WRL::ComPtr<ID3D12Resource> GetNextRenderTarget();
+            ComPtr<ID3D12Device> GetD3D12Device();
+            ComPtr<ID3D12CommandQueue> GetCommandQueue();
+            ComPtr<ID3D12Resource> GetNextRenderTarget();
             D3D12_CPU_DESCRIPTOR_HANDLE GetNextRenderTargetDescriptor();
 
-            void SetNextRenderTarget(Microsoft::WRL::ComPtr<ID3D12Resource> renderTargetResource, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
+            void SetNextRenderTarget(ComPtr<ID3D12Resource> renderTargetResource, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
 
             // NXT API
             void Reference();
             void Release();
 
         private:
-            Microsoft::WRL::ComPtr<ID3D12Device> d3d12Device;
-            Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
-            Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-            Microsoft::WRL::ComPtr<ID3D12Resource> renderTargetResource;
+            ComPtr<ID3D12Device> d3d12Device;
+            ComPtr<ID3D12CommandQueue> commandQueue;
+            ComPtr<ID3D12Resource> renderTargetResource;
             D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor;
     };
 
@@ -160,14 +155,6 @@ namespace d3d12 {
             Device* device;
     };
 
-    class CommandBuffer : public CommandBufferBase {
-        public:
-            CommandBuffer(Device* device, CommandBufferBuilder* buidler);
-
-        private:
-            Device* device;
-    };
-
     class Framebuffer : public FramebufferBase {
         public:
             Framebuffer(Device* device, FramebufferBuilder* builder);
@@ -192,33 +179,6 @@ namespace d3d12 {
             Device* device;
     };
 
-    class Pipeline : public PipelineBase {
-        public:
-            Pipeline(Device* device, PipelineBuilder* buidler);
-
-        private:
-            Device* device;
-    };
-
-    class PipelineLayout : public PipelineLayoutBase {
-        public:
-            PipelineLayout(Device* device, PipelineLayoutBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
-    class Queue : public QueueBase {
-        public:
-            Queue(Device* device, QueueBuilder* builder);
-
-            // NXT API
-            void Submit(uint32_t numCommands, CommandBuffer* const * commands);
-
-        private:
-            Device* device;
-    };
-
     class RenderPass : public RenderPassBase {
         public:
             RenderPass(Device* device, RenderPassBuilder* builder);
@@ -230,14 +190,6 @@ namespace d3d12 {
     class Sampler : public SamplerBase {
         public:
             Sampler(Device* device, SamplerBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
-    class ShaderModule : public ShaderModuleBase {
-        public:
-            ShaderModule(Device* device, ShaderModuleBuilder* builder);
 
         private:
             Device* device;

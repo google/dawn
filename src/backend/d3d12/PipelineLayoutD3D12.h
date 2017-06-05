@@ -12,9 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "D3D12Backend.h"
-#include "CommandBufferD3D12.h"
-#include "PipelineD3D12.h"
-#include "PipelineLayoutD3D12.h"
-#include "QueueD3D12.h"
-#include "ShaderModuleD3D12.h"
+#ifndef BACKEND_D3D12_PIPELINELAYOUTD3D12_H_
+#define BACKEND_D3D12_PIPELINELAYOUTD3D12_H_
+
+#include "common/PipelineLayout.h"
+
+#include "d3d12_platform.h"
+
+namespace backend {
+namespace d3d12 {
+
+    class Device;
+
+    class PipelineLayout : public PipelineLayoutBase {
+        public:
+            PipelineLayout(Device* device, PipelineLayoutBuilder* builder);
+
+            ComPtr<ID3D12RootSignature> GetRootSignature();
+
+        private:
+            Device* device;
+
+            ComPtr<ID3D12RootSignature> rootSignature;
+    };
+
+}
+}
+
+#endif // BACKEND_D3D12_PIPELINELAYOUTD3D12_H_

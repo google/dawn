@@ -12,9 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "D3D12Backend.h"
-#include "CommandBufferD3D12.h"
-#include "PipelineD3D12.h"
-#include "PipelineLayoutD3D12.h"
-#include "QueueD3D12.h"
-#include "ShaderModuleD3D12.h"
+#ifndef BACKEND_D3D12_SHADERMODULED3D12_H_
+#define BACKEND_D3D12_SHADERMODULED3D12_H_
+
+#include "common/ShaderModule.h"
+
+namespace backend {
+namespace d3d12 {
+
+    class Device;
+
+    class ShaderModule : public ShaderModuleBase {
+        public:
+            ShaderModule(Device* device, ShaderModuleBuilder* builder);
+
+            const std::string& GetHLSLSource() const;
+
+        private:
+            Device* device;
+
+            std::string hlslSource;
+    };
+
+}
+}
+
+#endif // BACKEND_D3D12_SHADERMODULED3D12_H_

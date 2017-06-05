@@ -36,6 +36,14 @@ namespace backend {
         return textureViews[index].Get();
     }
 
+    uint32_t FramebufferBase::GetWidth() const {
+        return width;
+    }
+
+    uint32_t FramebufferBase::GetHeight() const {
+        return height;
+    }
+
     // FramebufferBuilder
 
     enum FramebufferSetProperties {

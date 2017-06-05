@@ -14,6 +14,12 @@
 
 #include "D3D12Backend.h"
 
+#include "CommandBufferD3D12.h"
+#include "PipelineD3D12.h"
+#include "PipelineLayoutD3D12.h"
+#include "QueueD3D12.h"
+#include "ShaderModuleD3D12.h"
+
 namespace backend {
 namespace d3d12 {
 
@@ -45,19 +51,6 @@ namespace d3d12 {
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
         ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
-
-        // Create an empty root signature.
-        D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor;
-        rootSignatureDescriptor.NumParameters = 0;
-        rootSignatureDescriptor.pParameters = nullptr;
-        rootSignatureDescriptor.NumStaticSamplers = 0;
-        rootSignatureDescriptor.pStaticSamplers = nullptr;
-        rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-        ComPtr<ID3DBlob> signature;
-        ComPtr<ID3DBlob> error;
-        ASSERT_SUCCESS(D3D12SerializeRootSignature(&rootSignatureDescriptor, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-        ASSERT_SUCCESS(d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
     }
 
     Device::~Device() {
@@ -67,15 +60,11 @@ namespace d3d12 {
         return d3d12Device;
     }
 
-    ComPtr<ID3D12RootSignature> Device::GetRootSignature() {
-        return rootSignature;
-    }
-
     ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() {
         return commandQueue;
     }
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> Device::GetNextRenderTarget() {
+    ComPtr<ID3D12Resource> Device::GetNextRenderTarget() {
         return renderTargetResource;
     }
 
@@ -170,12 +159,6 @@ namespace d3d12 {
         : BufferViewBase(builder), device(device) {
     }
 
-    // CommandBuffer
-
-    CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), device(device) {
-    }
-
     // DepthStencilState
 
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
@@ -194,28 +177,6 @@ namespace d3d12 {
         : InputStateBase(builder), device(device) {
     }
 
-    // Pipeline
-
-    Pipeline::Pipeline(Device* device, PipelineBuilder* builder)
-        : PipelineBase(builder), device(device) {
-    }
-
-    // PipelineLayout
-
-    PipelineLayout::PipelineLayout(Device* device, PipelineLayoutBuilder* builder)
-        : PipelineLayoutBase(builder), device(device) {
-    }
-
-    // Queue
-
-    Queue::Queue(Device* device, QueueBuilder* builder)
-        : QueueBase(builder), device(device) {
-    }
-
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
-
-    }
-
     // RenderPass
 
     RenderPass::RenderPass(Device* device, RenderPassBuilder* builder)
@@ -226,12 +187,6 @@ namespace d3d12 {
 
     Sampler::Sampler(Device* device, SamplerBuilder* builder)
         : SamplerBase(builder), device(device) {
-    }
-
-    // ShaderModule
-
-    ShaderModule::ShaderModule(Device* device, ShaderModuleBuilder* builder)
-        : ShaderModuleBase(builder), device(device) {
     }
 
     // Texture

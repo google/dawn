@@ -259,7 +259,8 @@ namespace metal {
             id<MTLComputeCommandEncoder> compute = nil;
             id<MTLRenderCommandEncoder> render = nil;
 
-            BeginRenderPassCmd* currentRenderPass = nullptr;
+            RenderPass* currentRenderPass = nullptr;
+            Framebuffer* currentFramebuffer = nullptr;
 
             void FinishEncoders() {
                 ASSERT(render == nil);
@@ -293,8 +294,7 @@ namespace metal {
                     render = nil;
                 }
 
-                const auto& info = currentRenderPass->renderPass->GetSubpassInfo(subpass);
-                auto& framebuffer = currentRenderPass->framebuffer;
+                const auto& info = currentRenderPass->GetSubpassInfo(subpass);
 
                 MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
                 bool usingBackbuffer = false; // HACK(kainino@chromium.org): workaround for not having depth attachments
@@ -305,7 +305,7 @@ namespace metal {
                     // falls back to the 'back buffer' but this should go away
                     // when we have WSI.
                     id<MTLTexture> texture = nil;
-                    if (auto textureView = framebuffer->GetTextureView(attachment)) {
+                    if (auto textureView = currentFramebuffer->GetTextureView(attachment)) {
                         texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
                     } else {
                         texture = device->GetCurrentTexture();
@@ -359,7 +359,9 @@ namespace metal {
 
                 case Command::BeginRenderPass:
                     {
-                        encoders.currentRenderPass = commands.NextCommand<BeginRenderPassCmd>();
+                        BeginRenderPassCmd* beginRenderPassCmd = commands.NextCommand<BeginRenderPassCmd>();
+                        encoders.currentRenderPass = ToBackend(beginRenderPassCmd->renderPass.Get());
+                        encoders.currentFramebuffer = ToBackend(beginRenderPassCmd->framebuffer.Get());
                         encoders.FinishEncoders();
                         currentSubpass = 0;
                         encoders.BeginSubpass(commandBuffer, currentSubpass);

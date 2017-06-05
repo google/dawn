@@ -32,6 +32,8 @@ namespace backend {
 
             RenderPassBase* GetRenderPass();
             TextureViewBase* GetTextureView(uint32_t index);
+            uint32_t GetWidth() const;
+            uint32_t GetHeight() const;
 
         private:
             Ref<RenderPassBase> renderPass;
