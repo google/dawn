@@ -156,7 +156,58 @@ if (WIN32)
             ${GENERATOR_COMMON_ARGS}
             -T d3d12
     )
+    # WIN10_SDK_PATH will be something like C:\Program Files (x86)\Windows Kits\10
+    get_filename_component(WIN10_SDK_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0;InstallationFolder]" ABSOLUTE CACHE)
 
+    # TEMP_WIN10_SDK_VERSION will be something like ${CMAKE_CURRENT_SOURCE_DIR}\10.0.14393 or ${CMAKE_CURRENT_SOURCE_DIR}\10.0.14393.0
+    get_filename_component(TEMP_WIN10_SDK_VERSION "[HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0;ProductVersion]" ABSOLUTE CACHE)
+
+    # strip off ${CMAKE_CURRENT_SOURCE_DIR} to get just the version number
+    get_filename_component(WIN10_SDK_VERSION ${TEMP_WIN10_SDK_VERSION} NAME)
+    # WIN10_SDK_VERSION will be something like 10.0.14393 or 10.0.14393.0; we need the one that matches the directory name.
+    if (IS_DIRECTORY "${WIN10_SDK_PATH}/Include/${WIN10_SDK_VERSION}.0")
+        set(WIN10_SDK_VERSION "${WIN10_SDK_VERSION}.0")
+    endif()
+
+    # Find the d3d12 and dxgi include path, it will typically look something like this.
+    # C:\Program Files (x86)\Windows Kits\10\Include\10.0.10586.0\um\d3d12.h
+    # C:\Program Files (x86)\Windows Kits\10\Include\10.0.10586.0\shared\dxgi1_4.h
+    find_path(D3D12_INCLUDE_DIR     # Set variable D3D12_INCLUDE_DIR
+        d3d12.h                     # Find a path with d3d12.h
+        HINTS "${WIN10_SDK_PATH}/Include/${WIN10_SDK_VERSION}/um"
+        DOC "path to WIN10 SDK header files"
+        HINTS
+    )
+
+    find_path(DXGI_INCLUDE_DIR      # Set variable DXGI_INCLUDE_DIR
+        dxgi1_4.h                   # Find a path with dxgi1_4.h
+        HINTS "${WIN10_SDK_PATH}/Include/${WIN10_SDK_VERSION}/shared"
+        DOC "path to WIN10 SDK header files"
+        HINTS
+    )
+
+    if (CMAKE_GENERATOR MATCHES "Visual Studio.*ARM" )
+        set(WIN10_SDK_LIB_PATH ${WIN10_SDK_PATH}/Lib/${WIN10_SDK_VERSION}/um/arm)
+    elseif (CMAKE_GENERATOR MATCHES "Visual Studio.*ARM64" )
+        set(WIN10_SDK_LIB_PATH ${WIN10_SDK_PATH}/Lib/${WIN10_SDK_VERSION}/um/arm64)
+    elseif (CMAKE_GENERATOR MATCHES "Visual Studio.*Win64" )
+        set(WIN10_SDK_LIB_PATH ${WIN10_SDK_PATH}/Lib/${WIN10_SDK_VERSION}/um/x64)
+    else()
+        set(WIN10_SDK_LIB_PATH ${WIN10_SDK_PATH}/Lib/${WIN10_SDK_VERSION}/um/x86)
+    endif()
+
+    find_library(D3D12_LIBRARY NAMES d3d12.lib HINTS ${WIN10_SDK_LIB_PATH})
+    find_library(DXGI_LIBRARY NAMES dxgi.lib HINTS ${WIN10_SDK_LIB_PATH})
+    find_library(D3DCOMPILER_LIBRARY NAMES d3dcompiler.lib HINTS ${WIN10_SDK_LIB_PATH})
+
+    set(D3D12_LIBRARIES
+        ${D3D12_LIBRARY}
+        ${DXGI_LIBRARY}
+        ${D3DCOMPILER_LIBRARY}
+    )
+
+    target_link_libraries(d3d12_autogen glfw nxtcpp ${D3D12_LIBRARIES})
+    target_include_directories(d3d12_autogen SYSTEM PRIVATE ${D3D12_INCLUDE_DIR} ${DXGI_INCLUDE_DIR})
     target_include_directories(d3d12_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     target_include_directories(d3d12_autogen PUBLIC ${GENERATED_DIR})
     SetCXX14(d3d12_autogen)

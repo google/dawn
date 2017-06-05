@@ -62,6 +62,8 @@ add_library(spirv-cross STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_msl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_msl.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.hpp
 )
 target_include_directories(spirv-cross PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 SetCXX14(spirv-cross)

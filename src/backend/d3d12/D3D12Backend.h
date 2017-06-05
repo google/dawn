@@ -34,6 +34,8 @@
 #include "common/Texture.h"
 #include "common/ToBackend.h"
 
+#include "d3d12_platform.h"
+
 namespace backend {
 namespace d3d12 {
 
@@ -78,10 +80,12 @@ namespace d3d12 {
         return ToBackendBase<D3D12BackendTraits>(common);
     }
 
+    void ASSERT_SUCCESS(HRESULT hr);
+
     // Definition of backend types
     class Device : public DeviceBase {
         public:
-            Device();
+            Device(Microsoft::WRL::ComPtr<ID3D12Device> d3d12Device);
             ~Device();
 
             BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
@@ -101,9 +105,24 @@ namespace d3d12 {
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
+            Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device();
+            Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature();
+            Microsoft::WRL::ComPtr<ID3D12CommandQueue> GetCommandQueue();
+            Microsoft::WRL::ComPtr<ID3D12Resource> GetNextRenderTarget();
+            D3D12_CPU_DESCRIPTOR_HANDLE GetNextRenderTargetDescriptor();
+
+            void SetNextRenderTarget(Microsoft::WRL::ComPtr<ID3D12Resource> renderTargetResource, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
+
             // NXT API
             void Reference();
             void Release();
+
+        private:
+            Microsoft::WRL::ComPtr<ID3D12Device> d3d12Device;
+            Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
+            Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
+            Microsoft::WRL::ComPtr<ID3D12Resource> renderTargetResource;
+            D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor;
     };
 
 

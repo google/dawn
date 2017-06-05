@@ -20,15 +20,72 @@ namespace d3d12 {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
-    void Init(nxtProcTable* procs, nxtDevice* device) {
+    void Init(ComPtr<ID3D12Device> d3d12Device, nxtProcTable* procs, nxtDevice* device) {
         *device = nullptr;
         *procs = GetValidatingProcs();
+        *device = reinterpret_cast<nxtDevice>(new Device(d3d12Device));
     }
 
-    Device::Device() {
+    ComPtr<ID3D12CommandQueue> GetCommandQueue(nxtDevice device) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        return backendDevice->GetCommandQueue();
+    }
+
+    void SetNextRenderTarget(nxtDevice device, ComPtr<ID3D12Resource> renderTargetResource, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        backendDevice->SetNextRenderTarget(renderTargetResource, renderTargetDescriptor);
+    }
+
+    void ASSERT_SUCCESS(HRESULT hr) {
+        ASSERT(SUCCEEDED(hr));
+    }
+
+    Device::Device(ComPtr<ID3D12Device> d3d12Device) : d3d12Device(d3d12Device) {
+        D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+        queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+        queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+        ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+
+        // Create an empty root signature.
+        D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor;
+        rootSignatureDescriptor.NumParameters = 0;
+        rootSignatureDescriptor.pParameters = nullptr;
+        rootSignatureDescriptor.NumStaticSamplers = 0;
+        rootSignatureDescriptor.pStaticSamplers = nullptr;
+        rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+        ComPtr<ID3DBlob> signature;
+        ComPtr<ID3DBlob> error;
+        ASSERT_SUCCESS(D3D12SerializeRootSignature(&rootSignatureDescriptor, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+        ASSERT_SUCCESS(d3d12Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
     }
 
     Device::~Device() {
+    }
+
+    ComPtr<ID3D12Device> Device::GetD3D12Device() {
+        return d3d12Device;
+    }
+
+    ComPtr<ID3D12RootSignature> Device::GetRootSignature() {
+        return rootSignature;
+    }
+
+    ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() {
+        return commandQueue;
+    }
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> Device::GetNextRenderTarget() {
+        return renderTargetResource;
+    }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE Device::GetNextRenderTargetDescriptor() {
+        return renderTargetDescriptor;
+    }
+
+    void Device::SetNextRenderTarget(ComPtr<ID3D12Resource> renderTargetResource, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
+        this->renderTargetResource = renderTargetResource;
+        this->renderTargetDescriptor = renderTargetDescriptor;
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
