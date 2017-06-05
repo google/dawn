@@ -347,7 +347,7 @@ def debug(text):
     print(text)
 
 def main():
-    targets = ['nxt', 'nxtcpp', 'mock_nxt', 'opengl', 'metal', 'null', 'wire', 'blink']
+    targets = ['nxt', 'nxtcpp', 'mock_nxt', 'opengl', 'metal', 'd3d12', 'null', 'wire', 'blink']
 
     parser = argparse.ArgumentParser(
         description = 'Generates code for various target for NXT.',
@@ -432,10 +432,17 @@ def main():
         }
         renders.append(FileRender('BackendProcTable.cpp', 'metal/ProcTable.mm', base_backend_params + [metal_params]))
 
+    if 'd3d12' in targets:
+        d3d12_params = {
+            'namespace': 'd3d12',
+        }
+        renders.append(FileRender('BackendProcTable.cpp', 'd3d12/ProcTable.cpp', base_backend_params + [d3d12_params]))
+
     if 'null' in targets:
         null_params = {
             'namespace': 'null',
         }
+
         renders.append(FileRender('BackendProcTable.cpp', 'null/ProcTable.cpp', base_backend_params + [null_params]))
 
     if 'wire' in targets:
@@ -459,7 +466,7 @@ def main():
     output_separator = '\n' if args.gn else ';'
     if args.print_dependencies:
         dependencies = set(
-            [os.path.abspath(args.template_dir + os.path.sep + render.template) for render in renders] + 
+            [os.path.abspath(args.template_dir + os.path.sep + render.template) for render in renders] +
             [os.path.abspath(args.json[0])] +
             [os.path.realpath(__file__)]
         )

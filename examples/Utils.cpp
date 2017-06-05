@@ -32,6 +32,7 @@
 #endif
 
 BackendBinding* CreateMetalBinding();
+BackendBinding* CreateD3D12Binding();
 
 namespace backend {
     namespace opengl {
@@ -82,7 +83,6 @@ class NullBinding : public BackendBinding {
         }
 };
 
-
 void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
     std::cout << "Device error: " << message << std::endl;
 }
@@ -90,6 +90,7 @@ void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
 enum class BackendType {
     OpenGL,
     Metal,
+    D3D12,
     Null,
 };
 
@@ -99,7 +100,14 @@ enum class CmdBufType {
     //TODO(cwallez@chromium.org) double terrible cmdbuf
 };
 
+#if defined(__APPLE__)
+static BackendType backendType = BackendType::Metal;
+#elif defined(_WIN32)
+static BackendType backendType = BackendType::D3D12;
+#else
 static BackendType backendType = BackendType::OpenGL;
+#endif
+
 static CmdBufType cmdBufType = CmdBufType::Terrible;
 static BackendBinding* binding = nullptr;
 
@@ -119,7 +127,14 @@ nxt::Device CreateCppNXTDevice() {
             #if defined(__APPLE__)
                 binding = CreateMetalBinding();
             #else
-                fprintf(stderr, "Metal backend no present on this platform\n");
+                fprintf(stderr, "Metal backend not present on this platform\n");
+            #endif
+            break;
+        case BackendType::D3D12:
+            #if defined(_WIN32)
+                binding = CreateD3D12Binding();
+            #else
+                fprintf(stderr, "D3D12 backend not present on this platform\n");
             #endif
             break;
         case BackendType::Null:
@@ -269,11 +284,15 @@ extern "C" {
                     backendType = BackendType::Metal;
                     continue;
                 }
+                if (i < argc && std::string("d3d12") == argv[i]) {
+                    backendType = BackendType::D3D12;
+                    continue;
+                }
                 if (i < argc && std::string("null") == argv[i]) {
                     backendType = BackendType::Null;
                     continue;
                 }
-                fprintf(stderr, "--backend expects a backend name (opengl, metal, null)\n");
+                fprintf(stderr, "--backend expects a backend name (opengl, metal, d3d12, null)\n");
                 return false;
             }
             if (std::string("-c") == argv[i] || std::string("--comand-buffer") == argv[i]) {
@@ -291,7 +310,7 @@ extern "C" {
             }
             if (std::string("-h") == argv[i] || std::string("--help") == argv[i]) {
                 printf("Usage: %s [-b BACKEND] [-c COMMAND_BUFFER]\n", argv[0]);
-                printf("  BACKEND is one of: opengl, metal, null\n");
+                printf("  BACKEND is one of: opengl, metal, d3d12, null\n");
                 printf("  COMMAND_BUFFER is one of: none, terrible\n");
                 return false;
             }

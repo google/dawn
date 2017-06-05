@@ -24,6 +24,12 @@ if (APPLE)
     )
 endif()
 
+if (WIN32)
+    list(APPEND UTILS_SOURCES
+        D3D12Binding.cpp
+    )
+endif()
+
 add_library(utils STATIC ${UTILS_SOURCES})
 target_link_libraries(utils nxt_backend nxt_wire shaderc nxtcpp nxt)
 SetCXX14(utils)
