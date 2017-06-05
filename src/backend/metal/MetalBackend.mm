@@ -1065,10 +1065,7 @@ namespace metal {
         compiler = new spirv_cross::CompilerMSL(builder->AcquireSpirv());
         ExtractSpirvInfo(*compiler);
 
-        spirv_cross::MSLConfiguration mslConfig;
-        mslConfig.flip_vert_y = false;
-        mslConfig.flip_frag_y = false;
-        std::string msl = compiler->compile(mslConfig);
+        std::string msl = compiler->compile();
 
         NSString* mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];
         NSError *error = nil;
