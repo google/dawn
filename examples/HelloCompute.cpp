@@ -34,8 +34,8 @@ void init() {
     struct {uint32_t a; float b;} s;
     memset(&s, sizeof(s), 0);
     buffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Uniform | nxt::BufferUsageBit::Storage)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
+        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Uniform | nxt::BufferUsageBit::Storage)
+        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
         .SetSize(sizeof(s))
         .GetResult();
     buffer.SetSubData(0, sizeof(s) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&s));

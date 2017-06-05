@@ -147,14 +147,7 @@ namespace {
             uint32_t iBufferViewSize =
                 iBufferView.byteLength ? iBufferView.byteLength :
                 (iBuffer.data.size() - iBufferView.byteOffset);
-            auto oBuffer = device.CreateBufferBuilder()
-                .SetAllowedUsage(nxt::BufferUsageBit::Mapped | usage)
-                .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-                .SetSize(iBufferViewSize)
-                .GetResult();
-            oBuffer.SetSubData(0, iBufferViewSize / sizeof(uint32_t),
-                    reinterpret_cast<const uint32_t*>(&iBuffer.data.at(iBufferView.byteOffset)));
-            oBuffer.FreezeUsage(usage);
+            auto oBuffer = CreateFrozenBufferFromData(device, &iBuffer.data.at(iBufferView.byteOffset), iBufferViewSize, usage);
             buffers[iBufferViewID] = std::move(oBuffer);
         }
     }
@@ -272,8 +265,8 @@ namespace {
             .GetResult();
 
         auto uniformBuffer = device.CreateBufferBuilder()
-            .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Uniform)
-            .SetInitialUsage(nxt::BufferUsageBit::Mapped)
+            .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Uniform)
+            .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
             .SetSize(sizeof(u_transform_block))
             .GetResult();
 
@@ -379,16 +372,8 @@ namespace {
                 .GetResult();
                 // TODO: release this texture
 
-            nxt::Buffer staging = device.CreateBufferBuilder()
-                .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-                .SetSize(4)
-                .GetResult();
-                // TODO: release this buffer
-
             uint32_t white = 0xffffffff;
-            staging.SetSubData(0, 1, &white);
-            staging.FreezeUsage(nxt::BufferUsageBit::TransferSrc);
+            nxt::Buffer staging = CreateFrozenBufferFromData(device, &white, sizeof(white), nxt::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
                 .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
                 .CopyBufferToTexture(staging, 0, oTexture, 0, 0, 0, 1, 1, 1, 0)
@@ -442,16 +427,7 @@ namespace {
                 fprintf(stderr, "unsupported image.component %d\n", iImage.component);
             }
 
-            nxt::Buffer staging = device.CreateBufferBuilder()
-                .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-                .SetSize(numPixels * 4)
-                .GetResult();
-                // TODO: release this buffer
-
-            staging.SetSubData(0, numPixels,
-                    reinterpret_cast<const uint32_t*>(data));
-            staging.FreezeUsage(nxt::BufferUsageBit::TransferSrc);
+            nxt::Buffer staging = CreateFrozenBufferFromData(device, data, numPixels * 4, nxt::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
                 .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
                 .CopyBufferToTexture(staging, 0, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)
@@ -513,7 +489,7 @@ namespace {
                 }
             }
             const MaterialInfo& material = getMaterial(iPrim.material, strides[0], strides[1], strides[2]);
-            material.uniformBuffer.TransitionUsage(nxt::BufferUsageBit::Mapped);
+            material.uniformBuffer.TransitionUsage(nxt::BufferUsageBit::MapWrite);
             material.uniformBuffer.SetSubData(0,
                     sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));

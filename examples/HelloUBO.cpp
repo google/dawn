@@ -66,8 +66,8 @@ void init() {
         .GetResult();
 
     buffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Uniform)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
+        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Uniform)
+        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
         .SetSize(sizeof(s))
         .GetResult();
 
@@ -87,7 +87,7 @@ void frame() {
     s.b += 0.02;
     if (s.b >= 1.0f) {s.b = 0.0f;}
 
-    buffer.TransitionUsage(nxt::BufferUsageBit::Mapped);
+    buffer.TransitionUsage(nxt::BufferUsageBit::MapWrite);
     buffer.SetSubData(0, sizeof(s) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&s));
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()

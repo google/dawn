@@ -38,14 +38,7 @@ void initBuffers() {
         -0.5f, -0.5f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Vertex)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(vertexData))
-        .GetResult();
-    vertexBuffer.SetSubData(0, sizeof(vertexData) / sizeof(uint32_t),
-            reinterpret_cast<const uint32_t*>(vertexData));
-    vertexBuffer.FreezeUsage(nxt::BufferUsageBit::Vertex);
+    vertexBuffer = CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 
     static const float vertexDataQuad[24] = {
         -1.0f, -1.0f, 0.0f, 1.0f,
@@ -55,14 +48,7 @@ void initBuffers() {
         1.0f, -1.0f, 0.0f, 1.0f,
         1.0f, 1.0f, 0.0f, 1.0f,
     };
-    vertexBufferQuad = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Vertex)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(vertexDataQuad))
-        .GetResult();
-    vertexBufferQuad.SetSubData(0, sizeof(vertexDataQuad) / sizeof(uint32_t),
-            reinterpret_cast<const uint32_t*>(vertexDataQuad));
-    vertexBufferQuad.FreezeUsage(nxt::BufferUsageBit::Vertex);
+    vertexBufferQuad = CreateFrozenBufferFromData(device, vertexDataQuad, sizeof(vertexDataQuad), nxt::BufferUsageBit::Vertex);
 }
 
 void initTextures() {

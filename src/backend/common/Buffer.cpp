@@ -56,8 +56,8 @@ namespace backend {
             return;
         }
 
-        if (!(currentUsage & nxt::BufferUsageBit::Mapped)) {
-            device->HandleError("Buffer needs the mapped usage bit");
+        if (!(currentUsage & nxt::BufferUsageBit::MapWrite)) {
+            device->HandleError("Buffer needs the map write usage bit");
             return;
         }
 
@@ -74,6 +74,7 @@ namespace backend {
 
     bool BufferBase::IsUsagePossible(nxt::BufferUsageBit allowedUsage, nxt::BufferUsageBit usage) {
         const nxt::BufferUsageBit allReadBits =
+            nxt::BufferUsageBit::MapRead |
             nxt::BufferUsageBit::TransferSrc |
             nxt::BufferUsageBit::Index |
             nxt::BufferUsageBit::Vertex |

@@ -177,7 +177,8 @@
         "category": "bitmask",
         "values": [
             {"value": 0, "name": "none"},
-            {"value": 1, "name": "mapped"},
+            {"value": 1, "name": "map read"},
+            {"value": 1, "name": "map write"},
             {"value": 2, "name": "transfer src"},
             {"value": 4, "name": "transfer dst"},
             {"value": 8, "name": "index"},

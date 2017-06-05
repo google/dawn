@@ -62,24 +62,10 @@ void initBuffers() {
         {0.01, -0.02},
         {0.00, 0.02},
     };
-    modelBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Vertex)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(model))
-        .GetResult();
-    modelBuffer.SetSubData(0, sizeof(model) / sizeof(uint32_t),
-            reinterpret_cast<uint32_t*>(model));
-    modelBuffer.FreezeUsage(nxt::BufferUsageBit::Vertex);
+    modelBuffer = CreateFrozenBufferFromData(device, model, sizeof(model), nxt::BufferUsageBit::Vertex);
 
     SimParams params = { 0.04, 0.1, 0.025, 0.025, 0.02, 0.05, 0.005, kNumParticles };
-    updateParams = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Uniform)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(SimParams))
-        .GetResult();
-    updateParams.SetSubData(0, sizeof(SimParams) / sizeof(uint32_t),
-            reinterpret_cast<uint32_t*>(&params));
-    updateParams.FreezeUsage(nxt::BufferUsageBit::Uniform);
+    updateParams = CreateFrozenBufferFromData(device, &params, sizeof(params), nxt::BufferUsageBit::Uniform);
 
     std::vector<Particle> initialParticles(kNumParticles);
     {
@@ -94,8 +80,8 @@ void initBuffers() {
 
     for (int i = 0; i < 2; i++) {
         particleBuffers[i] = device.CreateBufferBuilder()
-            .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Storage)
-            .SetInitialUsage(nxt::BufferUsageBit::Mapped)
+            .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Storage)
+            .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
             .SetSize(sizeof(Particle) * kNumParticles)
             .GetResult();
 

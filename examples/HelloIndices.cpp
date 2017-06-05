@@ -30,27 +30,14 @@ void initBuffers() {
     static const uint32_t indexData[3] = {
         0, 1, 2,
     };
-    indexBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Index)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(indexData))
-        .GetResult();
-    indexBuffer.SetSubData(0, sizeof(indexData) / sizeof(uint32_t), indexData);
-    indexBuffer.FreezeUsage(nxt::BufferUsageBit::Index);
+    indexBuffer = CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
 
     static const float vertexData[12] = {
         0.0f, 0.5f, 0.0f, 1.0f,
         -0.5f, -0.5f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Vertex)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(vertexData))
-        .GetResult();
-    vertexBuffer.SetSubData(0, sizeof(vertexData) / sizeof(uint32_t),
-            reinterpret_cast<const uint32_t*>(vertexData));
-    vertexBuffer.FreezeUsage(nxt::BufferUsageBit::Vertex);
+    vertexBuffer = CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 }
 
 void init() {

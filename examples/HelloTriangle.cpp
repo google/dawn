@@ -34,27 +34,14 @@ void initBuffers() {
     static const uint32_t indexData[3] = {
         0, 1, 2,
     };
-    indexBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Index)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(indexData))
-        .GetResult();
-    indexBuffer.SetSubData(0, sizeof(indexData) / sizeof(uint32_t), indexData);
-    indexBuffer.FreezeUsage(nxt::BufferUsageBit::Index);
+    indexBuffer = CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
 
     static const float vertexData[12] = {
         0.0f, 0.5f, 0.0f, 1.0f,
         -0.5f, -0.5f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::Vertex)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(sizeof(vertexData))
-        .GetResult();
-    vertexBuffer.SetSubData(0, sizeof(vertexData) / sizeof(uint32_t),
-            reinterpret_cast<const uint32_t*>(vertexData));
-    vertexBuffer.FreezeUsage(nxt::BufferUsageBit::Vertex);
+    vertexBuffer = CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 }
 
 void initTextures() {
@@ -76,14 +63,8 @@ void initTextures() {
         data[i] = i % 253;
     }
 
-    nxt::Buffer stagingBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Mapped | nxt::BufferUsageBit::TransferSrc)
-        .SetInitialUsage(nxt::BufferUsageBit::Mapped)
-        .SetSize(data.size())
-        .GetResult();
-    stagingBuffer.SetSubData(0, data.size() / sizeof(uint32_t), reinterpret_cast<uint32_t*>(data.data()));
-    stagingBuffer.FreezeUsage(nxt::BufferUsageBit::TransferSrc);
 
+    nxt::Buffer stagingBuffer = CreateFrozenBufferFromData(device, data.data(), data.size(), nxt::BufferUsageBit::TransferSrc);
     nxt::CommandBuffer copy = device.CreateCommandBufferBuilder()
         .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
         .CopyBufferToTexture(stagingBuffer, 0, texture, 0, 0, 0, 1024, 1024, 1, 0)
