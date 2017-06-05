@@ -58,7 +58,7 @@ void initBuffers() {
         20, 21, 22,
         20, 22, 23
     };
-    indexBuffer = CreateFrozenBufferFromData(device, (void*)indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
+    indexBuffer = CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
 
     static const float vertexData[6 * 4 * 6] = {
         -1.0, -1.0,  1.0,    1.0, 0.0, 0.0,
@@ -91,7 +91,7 @@ void initBuffers() {
         -1.0,  1.0,  1.0,    1.0, 1.0, 1.0,
         -1.0,  1.0, -1.0,    1.0, 1.0, 1.0
     };
-    vertexBuffer = CreateFrozenBufferFromData(device, (void*)vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
+    vertexBuffer = CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 
     static const float planeData[6 * 4] = {
         -2.0, -1.0, -2.0,    0.5, 0.5, 0.5,
@@ -99,7 +99,7 @@ void initBuffers() {
         2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
         -2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
     };
-    planeBuffer = CreateFrozenBufferFromData(device, (void*)planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
+    planeBuffer = CreateFrozenBufferFromData(device, planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
 }
 
 struct CameraData {
@@ -171,10 +171,10 @@ void init() {
         .GetResult();
 
     glm::mat4 transform(1.0);
-    transformBuffer[0] = CreateFrozenBufferFromData(device, (void*)&transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
+    transformBuffer[0] = CreateFrozenBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
 
     transform = glm::translate(transform, glm::vec3(0.f, -2.f, 0.f));
-    transformBuffer[1] = CreateFrozenBufferFromData(device, (void*)&transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
+    transformBuffer[1] = CreateFrozenBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
 
     nxt::BufferView cameraBufferView = cameraBuffer.CreateBufferViewBuilder()
         .SetExtent(0, sizeof(CameraData))

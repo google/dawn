@@ -20,36 +20,40 @@ namespace backend {
 namespace opengl {
 
     void PersistentPipelineState::SetDefaultState() {
-        stencilBackCompareFunction = GL_ALWAYS;
-        stencilFrontCompareFunction = GL_ALWAYS;
-        stencilReadMask = 0xff;
-        SetStencilReference(0);
+        CallGLStencilFunc();
     }
 
-    void PersistentPipelineState::CacheStencilFuncsAndMask(GLenum stencilBackCompareFunction, GLenum stencilFrontCompareFunction, uint32_t stencilReadMask) {
+    void PersistentPipelineState::SetStencilFuncsAndMask(GLenum stencilBackCompareFunction, GLenum stencilFrontCompareFunction, uint32_t stencilReadMask) {
+        if (this->stencilBackCompareFunction == stencilBackCompareFunction &&
+            this->stencilFrontCompareFunction == stencilFrontCompareFunction &&
+            this->stencilReadMask == stencilReadMask) {
+            return;
+        }
+
         this->stencilBackCompareFunction = stencilBackCompareFunction;
         this->stencilFrontCompareFunction = stencilFrontCompareFunction;
         this->stencilReadMask = stencilReadMask;
+        CallGLStencilFunc();
     }
 
     void PersistentPipelineState::SetStencilReference(uint32_t stencilReference) {
-        if (this->stencilReference != stencilReference) {
-            this->stencilReference = stencilReference;
-            glStencilFuncSeparate(GL_BACK,
-                stencilBackCompareFunction,
-                stencilReference,
-                stencilReadMask
-            );
-            glStencilFuncSeparate(GL_FRONT,
-                stencilFrontCompareFunction,
-                stencilReference,
-                stencilReadMask
-            );
+        if (this->stencilReference == stencilReference) {
+            return;
         }
+
+        this->stencilReference = stencilReference;
+        CallGLStencilFunc();
     }
 
-    GLuint PersistentPipelineState::GetCachedStencilReference() const {
-        return stencilReference;
+    void PersistentPipelineState::CallGLStencilFunc() {
+        glStencilFuncSeparate(GL_BACK,
+                stencilBackCompareFunction,
+                stencilReference,
+                stencilReadMask);
+        glStencilFuncSeparate(GL_FRONT,
+                stencilFrontCompareFunction,
+                stencilReference,
+                stencilReadMask);
     }
 
 }

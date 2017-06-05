@@ -95,32 +95,20 @@ namespace opengl {
 
         GLenum backCompareFunction = OpenGLCompareFunction(stencilInfo.back.compareFunction);
         GLenum frontCompareFunction = OpenGLCompareFunction(stencilInfo.front.compareFunction);
-
-        persistentPipelineState.CacheStencilFuncsAndMask(backCompareFunction, frontCompareFunction, stencilInfo.readMask);
+        persistentPipelineState.SetStencilFuncsAndMask(backCompareFunction, frontCompareFunction, stencilInfo.readMask);
 
         glStencilOpSeparate(GL_BACK,
             OpenGLStencilOperation(stencilInfo.back.stencilFail),
             OpenGLStencilOperation(stencilInfo.back.depthFail),
             OpenGLStencilOperation(stencilInfo.back.depthStencilPass)
         );
-        glStencilFuncSeparate(GL_BACK,
-            backCompareFunction,
-            persistentPipelineState.GetCachedStencilReference(),
-            stencilInfo.readMask
-        );
-        glStencilMaskSeparate(GL_BACK, stencilInfo.writeMask);
-
         glStencilOpSeparate(GL_FRONT,
             OpenGLStencilOperation(stencilInfo.front.stencilFail),
             OpenGLStencilOperation(stencilInfo.front.depthFail),
             OpenGLStencilOperation(stencilInfo.front.depthStencilPass)
         );
-        glStencilFuncSeparate(GL_FRONT,
-            frontCompareFunction,
-            persistentPipelineState.GetCachedStencilReference(),
-            stencilInfo.readMask
-        );
-        glStencilMaskSeparate(GL_FRONT, stencilInfo.writeMask);
+
+        glStencilMask(stencilInfo.writeMask);
 
     }
 

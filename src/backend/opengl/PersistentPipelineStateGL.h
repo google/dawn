@@ -25,15 +25,16 @@ namespace opengl {
     class PersistentPipelineState {
         public:
             void SetDefaultState();
-            void CacheStencilFuncsAndMask(GLenum stencilBackCompareFunction, GLenum stencilFrontCompareFunction, uint32_t stencilReadMask);
+            void SetStencilFuncsAndMask(GLenum stencilBackCompareFunction, GLenum stencilFrontCompareFunction, uint32_t stencilReadMask);
             void SetStencilReference(uint32_t stencilReference);
-            GLuint GetCachedStencilReference() const;
 
         private:
-            GLenum stencilBackCompareFunction;
-            GLenum stencilFrontCompareFunction;
-            GLuint stencilReadMask;
-            GLuint stencilReference;
+            void CallGLStencilFunc();
+
+            GLenum stencilBackCompareFunction = GL_ALWAYS;
+            GLenum stencilFrontCompareFunction = GL_ALWAYS;
+            GLuint stencilReadMask = 0xffffffff;
+            GLuint stencilReference = 0;
     };
 
 }

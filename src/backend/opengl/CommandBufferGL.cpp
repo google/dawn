@@ -185,7 +185,6 @@ namespace opengl {
                 case Command::SetStencilReference:
                     {
                         SetStencilReferenceCmd* cmd = commands.NextCommand<SetStencilReferenceCmd>();
-                        // DepthStencilState* depthStencilState = ToBackend(lastPipeline->GetDepthStencilState());
                         persistentPipelineState.SetStencilReference(cmd->reference);
                     }
                     break;

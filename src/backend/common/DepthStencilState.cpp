@@ -29,16 +29,14 @@ namespace backend {
     }
 
     bool DepthStencilStateBase::StencilTestEnabled() const {
-        return (
-            stencilInfo.back.compareFunction != nxt::CompareFunction::Always ||
+        return stencilInfo.back.compareFunction != nxt::CompareFunction::Always ||
             stencilInfo.back.stencilFail != nxt::StencilOperation::Keep ||
             stencilInfo.back.depthFail != nxt::StencilOperation::Keep ||
             stencilInfo.back.depthStencilPass != nxt::StencilOperation::Keep ||
             stencilInfo.front.compareFunction != nxt::CompareFunction::Always ||
             stencilInfo.front.stencilFail != nxt::StencilOperation::Keep ||
             stencilInfo.front.depthFail != nxt::StencilOperation::Keep ||
-            stencilInfo.front.depthStencilPass != nxt::StencilOperation::Keep
-        );
+            stencilInfo.front.depthStencilPass != nxt::StencilOperation::Keep;
     }
 
     const DepthStencilStateBase::DepthInfo& DepthStencilStateBase::GetDepth() const {
