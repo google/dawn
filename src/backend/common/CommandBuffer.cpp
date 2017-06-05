@@ -436,18 +436,12 @@ namespace backend {
 
                         constexpr ValidationAspects requiredDispatchAspects =
                             1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
-                            1 << VALIDATION_ASPECT_BINDGROUPS |
-                            1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
+                            1 << VALIDATION_ASPECT_BINDGROUPS;
 
                         if ((requiredDispatchAspects & ~aspects).any()) {
                             // Compute the lazily computed aspects
                             if (bindgroupsSet.all()) {
                                 aspects.set(VALIDATION_ASPECT_BINDGROUPS);
-                            }
-
-                            auto requiredInputs = lastPipeline->GetInputState()->GetInputsSetMask();
-                            if ((inputsSet & ~requiredInputs).none()) {
-                                aspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
                             }
 
                             // Check again if anything is missing
