@@ -4,7 +4,7 @@ configuration:
  - Debug
 
 image:
- - Visual Studio 2015
+ - Visual Studio 2017
 
 install:
  - pip install jinja2
