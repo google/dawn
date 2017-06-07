@@ -57,17 +57,7 @@ namespace d3d12 {
                           D3D12_RECT scissorRect = { 0.f, 0.f, width, height };
                           commandList->RSSetViewports(1, &viewport);
                           commandList->RSSetScissorRects(1, &scissorRect);
-
-                          // TODO(enga@google.com): Set the back buffer as the render target only when a new render target is set
-                          D3D12_RESOURCE_BARRIER resourceBarrier;
-                          resourceBarrier.Transition.pResource = device->GetNextRenderTarget().Get();
-                          resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-                          resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-                          resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                          resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                          resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                          commandList->ResourceBarrier(1, &resourceBarrier);
-                          commandList->OMSetRenderTargets(1, &device->GetNextRenderTargetDescriptor(), FALSE, nullptr);
+                          commandList->OMSetRenderTargets(1, &device->GetCurrentRenderTargetDescriptor(), FALSE, nullptr);
                       }
                       break;
 
@@ -109,16 +99,6 @@ namespace d3d12 {
                   case Command::EndRenderPass:
                       {
                           EndRenderPassCmd* cmd = commands.NextCommand<EndRenderPassCmd>();
-
-                          // TODO(enga@google.com): Present the back buffer only before swap
-                          D3D12_RESOURCE_BARRIER resourceBarrier;
-                          resourceBarrier.Transition.pResource = device->GetNextRenderTarget().Get();
-                          resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-                          resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-                          resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                          resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                          resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                          commandList->ResourceBarrier(1, &resourceBarrier);
                       }
                       break;
 

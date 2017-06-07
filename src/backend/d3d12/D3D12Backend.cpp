@@ -37,9 +37,9 @@ namespace d3d12 {
         return backendDevice->GetCommandQueue();
     }
 
-    void SetNextRenderTarget(nxtDevice device, ComPtr<ID3D12Resource> renderTargetResource, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
+    void SetNextRenderTargetDescriptor(nxtDevice device, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
-        backendDevice->SetNextRenderTarget(renderTargetResource, renderTargetDescriptor);
+        backendDevice->SetNextRenderTargetDescriptor(renderTargetDescriptor);
     }
 
     void ASSERT_SUCCESS(HRESULT hr) {
@@ -64,16 +64,11 @@ namespace d3d12 {
         return commandQueue;
     }
 
-    ComPtr<ID3D12Resource> Device::GetNextRenderTarget() {
-        return renderTargetResource;
-    }
-
-    D3D12_CPU_DESCRIPTOR_HANDLE Device::GetNextRenderTargetDescriptor() {
+    D3D12_CPU_DESCRIPTOR_HANDLE Device::GetCurrentRenderTargetDescriptor() {
         return renderTargetDescriptor;
     }
 
-    void Device::SetNextRenderTarget(ComPtr<ID3D12Resource> renderTargetResource, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
-        this->renderTargetResource = renderTargetResource;
+    void Device::SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
         this->renderTargetDescriptor = renderTargetDescriptor;
     }
 

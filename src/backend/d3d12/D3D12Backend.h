@@ -104,10 +104,9 @@ namespace d3d12 {
 
             ComPtr<ID3D12Device> GetD3D12Device();
             ComPtr<ID3D12CommandQueue> GetCommandQueue();
-            ComPtr<ID3D12Resource> GetNextRenderTarget();
-            D3D12_CPU_DESCRIPTOR_HANDLE GetNextRenderTargetDescriptor();
+            D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetDescriptor();
 
-            void SetNextRenderTarget(ComPtr<ID3D12Resource> renderTargetResource, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
+            void SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
 
             // NXT API
             void Reference();
@@ -116,7 +115,6 @@ namespace d3d12 {
         private:
             ComPtr<ID3D12Device> d3d12Device;
             ComPtr<ID3D12CommandQueue> commandQueue;
-            ComPtr<ID3D12Resource> renderTargetResource;
             D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor;
     };
 
