@@ -32,9 +32,24 @@ namespace d3d12 {
             IID_PPV_ARGS(&commandList)
         ));
         ASSERT_SUCCESS(commandList->Close());
+
+        ASSERT_SUCCESS(device->GetD3D12Device()->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+        fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+        ASSERT(fenceEvent != nullptr);
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
+        // TODO(enga@google.com): This will stall on the previous submit because
+        // the commands must finish exeuting before the ID3D12CommandAllocator is reset.
+        // This should be fixed / optimized by using multiple command allocators.
+        const uint64_t currentFence = fenceValue++;
+        ASSERT_SUCCESS(device->GetCommandQueue()->Signal(fence.Get(), fenceValue));
+
+        if (fence->GetCompletedValue() < currentFence) {
+            ASSERT_SUCCESS(fence->SetEventOnCompletion(currentFence, fenceEvent));
+            WaitForSingleObject(fenceEvent, INFINITE);
+        }
+
         ASSERT_SUCCESS(commandAllocator->Reset());
         ASSERT_SUCCESS(commandList->Reset(commandAllocator.Get(), NULL));
 
