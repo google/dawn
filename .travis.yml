@@ -11,7 +11,6 @@ env:
 
 compiler:
  - clang
- - gcc
 
 addons:
  # Everything under apt is only used on linux
@@ -24,8 +23,6 @@ addons:
    - george-edison55-precise-backports
   packages:
    # Get recent compilers
-   - gcc-6
-   - g++-6
    - clang-5.0
    # Get a newer CMake than the 2.8 default
    - cmake
@@ -44,7 +41,6 @@ install:
 
 script:
  # Use the more recent compilers we just installed
- - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$CXX" == "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$CXX" == "clang++" ]; then export CXX="clang++-5.0" CC="clang-5.0"; fi
 
  # Build
