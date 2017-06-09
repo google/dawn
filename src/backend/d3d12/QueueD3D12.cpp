@@ -31,7 +31,6 @@ namespace d3d12 {
             nullptr,
             IID_PPV_ARGS(&commandList)
         ));
-        ASSERT_SUCCESS(commandList->Close());
 
         ASSERT_SUCCESS(device->GetD3D12Device()->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
         fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -39,10 +38,22 @@ namespace d3d12 {
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
-        // TODO(enga@google.com): This will stall on the previous submit because
+        ComPtr<ID3D12CommandAllocator> pendingCommandAllocator = device->GetPendingCommandAllocator();
+        ComPtr<ID3D12GraphicsCommandList> pendingCommandList = device->GetPendingCommandList();
+        ASSERT_SUCCESS(pendingCommandList->Close());
+
+        for (uint32_t i = 0; i < numCommands; ++i) {
+            commands[i]->FillCommands(commandList);
+        }
+        ASSERT_SUCCESS(commandList->Close());
+
+        ID3D12CommandList* commandLists[] = { pendingCommandList.Get(), commandList.Get() };
+        device->GetCommandQueue()->ExecuteCommandLists(_countof(commandLists), commandLists);
+
+        // TODO(enga@google.com): This will stall on the submit because
         // the commands must finish exeuting before the ID3D12CommandAllocator is reset.
         // This should be fixed / optimized by using multiple command allocators.
-        const uint64_t currentFence = fenceValue++;
+        const uint64_t currentFence = ++fenceValue;
         ASSERT_SUCCESS(device->GetCommandQueue()->Signal(fence.Get(), fenceValue));
 
         if (fence->GetCompletedValue() < currentFence) {
@@ -51,16 +62,9 @@ namespace d3d12 {
         }
 
         ASSERT_SUCCESS(commandAllocator->Reset());
+        ASSERT_SUCCESS(pendingCommandAllocator->Reset());
+        ASSERT_SUCCESS(pendingCommandList->Reset(pendingCommandAllocator.Get(), NULL));
         ASSERT_SUCCESS(commandList->Reset(commandAllocator.Get(), NULL));
-
-        for (uint32_t i = 0; i < numCommands; ++i) {
-            commands[i]->FillCommands(commandList);
-        }
-
-        ASSERT_SUCCESS(commandList->Close());
-
-        ID3D12CommandList* commandLists[] = { commandList.Get() };
-        device->GetCommandQueue()->ExecuteCommandLists(_countof(commandLists), commandLists);
     }
 
 }

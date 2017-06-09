@@ -14,7 +14,9 @@
 
 #include "D3D12Backend.h"
 
+#include "BufferD3D12.h"
 #include "CommandBufferD3D12.h"
+#include "InputStateD3D12.h"
 #include "PipelineD3D12.h"
 #include "PipelineLayoutD3D12.h"
 #include "QueueD3D12.h"
@@ -51,6 +53,15 @@ namespace d3d12 {
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
         ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+
+        ASSERT_SUCCESS(d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&pendingCommandAllocator)));
+        ASSERT_SUCCESS(d3d12Device->CreateCommandList(
+            0,
+            D3D12_COMMAND_LIST_TYPE_DIRECT,
+            pendingCommandAllocator.Get(),
+            nullptr,
+            IID_PPV_ARGS(&pendingCommandList)
+        ));
     }
 
     Device::~Device() {
@@ -62,6 +73,14 @@ namespace d3d12 {
 
     ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() {
         return commandQueue;
+    }
+
+    ComPtr<ID3D12CommandAllocator> Device::GetPendingCommandAllocator() {
+        return pendingCommandAllocator;
+    }
+
+    ComPtr<ID3D12GraphicsCommandList> Device::GetPendingCommandList() {
+        return pendingCommandList;
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE Device::GetCurrentRenderTargetDescriptor() {
@@ -139,26 +158,6 @@ namespace d3d12 {
         : BindGroupLayoutBase(builder), device(device) {
     }
 
-    // Buffer
-
-    Buffer::Buffer(Device* device, BufferBuilder* builder)
-        : BufferBase(builder), device(device) {
-    }
-
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
-    }
-
-    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
-        // TODO(cwallez@chromium.org): Implement Map Read for the null backend
-    }
-
-    void Buffer::UnmapImpl() {
-        // TODO(cwallez@chromium.org): Implement Map Read for the null backend
-    }
-
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
-    }
-
     // BufferView
 
     BufferView::BufferView(Device* device, BufferViewBuilder* builder)
@@ -175,12 +174,6 @@ namespace d3d12 {
 
     Framebuffer::Framebuffer(Device* device, FramebufferBuilder* builder)
         : FramebufferBase(builder), device(device) {
-    }
-
-    // InputState
-
-    InputState::InputState(Device* device, InputStateBuilder * builder)
-        : InputStateBase(builder), device(device) {
     }
 
     // RenderPass

@@ -106,6 +106,8 @@ namespace d3d12 {
 
             ComPtr<ID3D12Device> GetD3D12Device();
             ComPtr<ID3D12CommandQueue> GetCommandQueue();
+            ComPtr<ID3D12CommandAllocator> GetPendingCommandAllocator();
+            ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
             D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetDescriptor();
 
             void SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
@@ -117,6 +119,8 @@ namespace d3d12 {
         private:
             ComPtr<ID3D12Device> d3d12Device;
             ComPtr<ID3D12CommandQueue> commandQueue;
+            ComPtr<ID3D12CommandAllocator> pendingCommandAllocator;
+            ComPtr<ID3D12GraphicsCommandList> pendingCommandList;
             D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor;
     };
 
@@ -134,19 +138,6 @@ namespace d3d12 {
             BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder);
 
         private:
-            Device* device;
-    };
-
-    class Buffer : public BufferBase {
-        public:
-            Buffer(Device* device, BufferBuilder* builder);
-
-        private:
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
-
             Device* device;
     };
 
@@ -169,14 +160,6 @@ namespace d3d12 {
     class DepthStencilState : public DepthStencilStateBase {
         public:
             DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
-    class InputState : public InputStateBase {
-        public:
-            InputState(Device* device, InputStateBuilder* builder);
 
         private:
             Device* device;

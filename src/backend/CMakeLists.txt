@@ -216,10 +216,14 @@ if (WIN32)
     SetPIC(d3d12_autogen)
 
     list(APPEND BACKEND_SOURCES
+        ${D3D12_DIR}/BufferD3D12.cpp
+        ${D3D12_DIR}/BufferD3D12.h
         ${D3D12_DIR}/CommandBufferD3D12.cpp
         ${D3D12_DIR}/CommandBufferD3D12.h
         ${D3D12_DIR}/D3D12Backend.cpp
         ${D3D12_DIR}/D3D12Backend.h
+        ${D3D12_DIR}/InputStateD3D12.cpp
+        ${D3D12_DIR}/InputStateD3D12.h
         ${D3D12_DIR}/PipelineD3D12.cpp
         ${D3D12_DIR}/PipelineD3D12.h
         ${D3D12_DIR}/PipelineLayoutD3D12.cpp

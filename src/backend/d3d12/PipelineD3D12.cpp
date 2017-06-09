@@ -15,6 +15,7 @@
 #include "PipelineD3D12.h"
 
 #include "D3D12Backend.h"
+#include "InputStateD3D12.h"
 #include "ShaderModuleD3D12.h"
 #include "PipelineLayoutD3D12.h"
 
@@ -114,6 +115,9 @@ namespace d3d12 {
                     shader->BytecodeLength = compiledShader[stage]->GetBufferSize();
                 }
             }
+
+            InputState* inputState = ToBackend(GetInputState());
+            descriptor.InputLayout = inputState->GetD3D12InputLayoutDescriptor();
 
             descriptor.pRootSignature = ToBackend(GetLayout())->GetRootSignature().Get();
 
