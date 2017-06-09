@@ -71,6 +71,8 @@ struct u_transform_block {
 
 nxt::Device device;
 nxt::Queue queue;
+nxt::RenderPass renderpass;
+nxt::Framebuffer framebuffer;
 
 nxt::Buffer defaultBuffer;
 std::map<std::string, nxt::Buffer> buffers;
@@ -252,14 +254,21 @@ namespace {
             .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::SampledTexture, 2, 1)
             .GetResult();
 
+        auto depthStencilState = device.CreateDepthStencilStateBuilder()
+            .SetDepthCompareFunction(nxt::CompareFunction::Less)
+            .SetDepthWriteEnabled(true)
+            .GetResult();
+
         auto pipelineLayout = device.CreatePipelineLayoutBuilder()
             .SetBindGroupLayout(0, bindGroupLayout)
             .GetResult();
         auto pipeline = device.CreatePipelineBuilder()
+            .SetSubpass(renderpass, 0)
             .SetLayout(pipelineLayout)
             .SetStage(nxt::ShaderStage::Vertex, oVSModule, "main")
             .SetStage(nxt::ShaderStage::Fragment, oFSModule, "main")
             .SetInputState(inputState)
+            .SetDepthStencilState(depthStencilState)
             .GetResult();
 
         auto uniformBuffer = device.CreateBufferBuilder()
@@ -458,6 +467,18 @@ namespace {
         device = CreateCppNXTDevice();
 
         queue = device.CreateQueueBuilder().GetResult();
+        renderpass = device.CreateRenderPassBuilder()
+            .SetAttachmentCount(1)
+            .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetSubpassCount(1)
+            .SubpassSetColorAttachment(0, 0, 0)
+            .GetResult();
+        framebuffer = device.CreateFramebufferBuilder()
+            .SetRenderPass(renderpass)
+            // attachment 0 -> back buffer
+            // (implicit) // TODO(kainino@chromium.org): use the texture provided by WSI
+            .SetDimensions(640, 480)
+            .GetResult();
 
         initBuffers();
         initSamplers();
@@ -496,6 +517,7 @@ namespace {
             material.uniformBuffer.SetSubData(0,
                     sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));
+            cmd.BeginRenderPass(renderpass, framebuffer);
             cmd.SetPipeline(material.pipeline);
             cmd.TransitionBufferUsage(material.uniformBuffer, nxt::BufferUsageBit::Uniform);
             cmd.SetBindGroup(0, material.bindGroup0);
@@ -539,6 +561,7 @@ namespace {
                 // DrawArrays
                 cmd.DrawArrays(vertexCount, 1, 0, 0);
             }
+            cmd.EndRenderPass();
         }
         auto commands = cmd.GetResult();
         queue.Submit(1, &commands);
