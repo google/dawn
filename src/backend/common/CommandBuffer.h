@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_COMMON_COMMANDBUFFERGL_H_
-#define BACKEND_COMMON_COMMANDBUFFERGL_H_
+#ifndef BACKEND_COMMON_COMMANDBUFFER_H_
+#define BACKEND_COMMON_COMMANDBUFFER_H_
 
 #include "nxt/nxtcpp.h"
 
@@ -21,6 +21,7 @@
 #include "Builder.h"
 #include "RefCounted.h"
 
+#include <memory>
 #include <set>
 #include <utility>
 
@@ -28,6 +29,7 @@ namespace backend {
 
     class BindGroupBase;
     class BufferBase;
+    class CommandBufferStateTracker;
     class FramebufferBase;
     class DeviceBase;
     class PipelineBase;
@@ -88,16 +90,13 @@ namespace backend {
             CommandBufferBase* GetResultImpl() override;
             void MoveToIterator();
 
+            std::unique_ptr<CommandBufferStateTracker> state;
             CommandAllocator allocator;
             CommandIterator iterator;
             bool movedToIterator = false;
             bool commandsAcquired = false;
-            // These pointers will remain valid since they are referenced by
-            // the bind groups which are referenced by this command buffer.
-            std::set<BufferBase*> buffersTransitioned;
-            std::set<TextureBase*> texturesTransitioned;
     };
 
 }
 
-#endif // BACKEND_COMMON_COMMANDBUFFERGL_H_
+#endif // BACKEND_COMMON_COMMANDBUFFER_H_

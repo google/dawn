@@ -15,9 +15,9 @@
 #include "CommandBuffer.h"
 
 #include "BindGroup.h"
-#include "BindGroupLayout.h"
 #include "Buffer.h"
 #include "Commands.h"
+#include "CommandBufferStateTracker.h"
 #include "Device.h"
 #include "InputState.h"
 #include "Pipeline.h"
@@ -31,8 +31,8 @@ namespace backend {
 
     CommandBufferBase::CommandBufferBase(CommandBufferBuilder* builder)
         : device(builder->device),
-          buffersTransitioned(std::move(builder->buffersTransitioned)),
-          texturesTransitioned(std::move(builder->texturesTransitioned)) {
+          buffersTransitioned(std::move(builder->state->buffersTransitioned)),
+          texturesTransitioned(std::move(builder->state->texturesTransitioned)) {
     }
 
     bool CommandBufferBase::ValidateResourceUsagesImmediate() {
@@ -156,7 +156,7 @@ namespace backend {
         commands->DataWasDestroyed();
     }
 
-    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : Builder(device) {
+    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : Builder(device), state(std::make_unique<CommandBufferStateTracker>(this)) {
     }
 
     CommandBufferBuilder::~CommandBufferBuilder() {
@@ -166,212 +166,27 @@ namespace backend {
         }
     }
 
-    enum ValidationAspect {
-        VALIDATION_ASPECT_RENDER_PIPELINE,
-        VALIDATION_ASPECT_COMPUTE_PIPELINE,
-        VALIDATION_ASPECT_BINDGROUPS,
-        VALIDATION_ASPECT_VERTEX_BUFFERS,
-        VALIDATION_ASPECT_INDEX_BUFFER,
-        VALIDATION_ASPECT_RENDER_PASS,
-
-        VALIDATION_ASPECT_COUNT,
-    };
-
-    using ValidationAspects = std::bitset<VALIDATION_ASPECT_COUNT>;
-
     bool CommandBufferBuilder::ValidateGetResult() {
         MoveToIterator();
 
-        ValidationAspects aspects;
-        std::bitset<kMaxBindGroups> bindgroupsSet;
-        std::bitset<kMaxVertexInputs> inputsSet;
-        PipelineBase* lastPipeline = nullptr;
-
-        // TODO(kainino@chromium.org): Manage this state inside an object, change lambdas to methods
-        std::map<BufferBase*, nxt::BufferUsageBit> mostRecentBufferUsages;
-        auto bufferHasGuaranteedUsageBit = [&](BufferBase* buffer, nxt::BufferUsageBit usage) -> bool {
-            assert(usage != nxt::BufferUsageBit::None && nxt::HasZeroOrOneBits(usage));
-            if (buffer->HasFrozenUsage(usage)) {
-                return true;
-            }
-            auto it = mostRecentBufferUsages.find(buffer);
-            return it != mostRecentBufferUsages.end() && (it->second & usage);
-        };
-
-        std::map<TextureBase*, nxt::TextureUsageBit> mostRecentTextureUsages;
-        auto textureHasGuaranteedUsageBit = [&](TextureBase* texture, nxt::TextureUsageBit usage) -> bool {
-            assert(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
-            if (texture->HasFrozenUsage(usage)) {
-                return true;
-            }
-            auto it = mostRecentTextureUsages.find(texture);
-            return it != mostRecentTextureUsages.end() && (it->second & usage);
-        };
-        auto isTextureTransitionPossible = [&](TextureBase* texture, nxt::TextureUsageBit usage) -> bool {
-            const nxt::TextureUsageBit attachmentUsages =
-                nxt::TextureUsageBit::ColorAttachment |
-                nxt::TextureUsageBit::DepthStencilAttachment;
-            ASSERT(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
-            if (usage & attachmentUsages) {
-                return false;
-            }
-            auto it = mostRecentTextureUsages.find(texture);
-            if (it != mostRecentTextureUsages.end()) {
-                if (it->second & attachmentUsages) {
-                    return false;
-                }
-            }
-            return texture->IsTransitionPossible(usage);
-        };
-
-        auto validateBindGroupUsages = [&](BindGroupBase* group) -> bool {
-            const auto& layoutInfo = group->GetLayout()->GetBindingInfo();
-            for (size_t i = 0; i < kMaxBindingsPerGroup; ++i) {
-                if (!layoutInfo.mask[i]) {
-                    continue;
-                }
-
-                nxt::BindingType type = layoutInfo.types[i];
-                switch (type) {
-                    case nxt::BindingType::UniformBuffer:
-                    case nxt::BindingType::StorageBuffer:
-                        {
-                            nxt::BufferUsageBit requiredUsage;
-                            switch (type) {
-                                case nxt::BindingType::UniformBuffer:
-                                    requiredUsage = nxt::BufferUsageBit::Uniform;
-                                    break;
-
-                                case nxt::BindingType::StorageBuffer:
-                                    requiredUsage = nxt::BufferUsageBit::Storage;
-                                    break;
-
-                                default:
-                                    assert(false);
-                                    return false;
-                            }
-
-                            auto buffer = group->GetBindingAsBufferView(i)->GetBuffer();
-                            if (!bufferHasGuaranteedUsageBit(buffer, requiredUsage)) {
-                                HandleError("Can't guarantee buffer usage needed by bind group");
-                                return false;
-                            }
-                        }
-                        break;
-                    case nxt::BindingType::SampledTexture:
-                        {
-                            auto requiredUsage = nxt::TextureUsageBit::Sampled;
-
-                            auto texture = group->GetBindingAsTextureView(i)->GetTexture();
-                            if (!textureHasGuaranteedUsageBit(texture, requiredUsage)) {
-                                HandleError("Can't guarantee texture usage needed by bind group");
-                                return false;
-                            }
-                        }
-                        break;
-                    case nxt::BindingType::Sampler:
-                        continue;
-                }
-            }
-            return true;
-        };
-
-        // TODO(kainino@chromium.org): Manage this state inside an object, change lambda to a method
-        RenderPassBase* currentRenderPass = nullptr;
-        FramebufferBase* currentFramebuffer = nullptr;
-        uint32_t currentSubpass = 0;
-        auto beginSubpass = [&]() -> bool {
-            auto& subpassInfo = currentRenderPass->GetSubpassInfo(currentSubpass);
-            for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
-                auto attachmentSlot = subpassInfo.colorAttachments[location];
-                auto* tv = currentFramebuffer->GetTextureView(attachmentSlot);
-                // TODO(kainino@chromium.org): the TextureView can only be null
-                // because of the null=backbuffer hack (null representing the
-                // backbuffer). Once that hack is removed (once we have WSI)
-                // this check isn't needed.
-                if (tv == nullptr) {
-                    continue;
-                }
-
-                auto* texture = tv->GetTexture();
-                if (texture->HasFrozenUsage(nxt::TextureUsageBit::ColorAttachment)) {
-                    continue;
-                }
-                if (!texture->IsTransitionPossible(nxt::TextureUsageBit::ColorAttachment)) {
-                    HandleError("Can't transition attachment to ColorAttachment usage");
-                    return false;
-                }
-                mostRecentTextureUsages[texture] = nxt::TextureUsageBit::ColorAttachment;
-                texturesTransitioned.insert(texture);
-            }
-            return true;
-        };
-        auto endSubpass = [&]() {
-            auto& subpassInfo = currentRenderPass->GetSubpassInfo(currentSubpass);
-            for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
-                auto attachmentSlot = subpassInfo.colorAttachments[location];
-                auto* tv = currentFramebuffer->GetTextureView(attachmentSlot);
-                // TODO(kainino@chromium.org): the TextureView can only be null
-                // because of the null=backbuffer hack (null representing the
-                // backbuffer). Once that hack is removed (once we have WSI)
-                // this check isn't needed.
-                if (tv == nullptr) {
-                    continue;
-                }
-
-                auto* texture = tv->GetTexture();
-                if (texture->IsFrozen()) {
-                    continue;
-                }
-                mostRecentTextureUsages[texture] = nxt::TextureUsageBit::None;
-            }
-        };
-
         Command type;
-        while(iterator.NextCommandId(&type)) {
+        while (iterator.NextCommandId(&type)) {
             switch (type) {
                 case Command::AdvanceSubpass:
                     {
                         iterator.NextCommand<AdvanceSubpassCmd>();
-                        if (currentRenderPass == nullptr) {
-                            HandleError("Can't advance subpass without an active render pass");
+                        if (!state->AdvanceSubpass()) {
                             return false;
                         }
-                        if (currentSubpass + 1 >= currentRenderPass->GetSubpassCount()) {
-                            HandleError("Can't advance beyond the last subpass");
-                            return false;
-                        }
-
-                        endSubpass();
-                        currentSubpass += 1;
-                        if (!beginSubpass()) {
-                            return false;
-                        }
-                        aspects.reset(VALIDATION_ASPECT_RENDER_PIPELINE);
                     }
                     break;
 
                 case Command::BeginRenderPass:
                     {
-                        BeginRenderPassCmd* begin = iterator.NextCommand<BeginRenderPassCmd>();
-                        auto* renderPass = begin->renderPass.Get();
-                        auto* framebuffer = begin->framebuffer.Get();
-                        if (currentRenderPass != nullptr) {
-                            HandleError("A render pass is already active");
-                            return false;
-                        }
-                        if (!framebuffer->GetRenderPass()->IsCompatibleWith(renderPass)) {
-                            HandleError("Framebuffer is incompatible with this render pass");
-                            return false;
-                        }
-
-                        aspects.reset(VALIDATION_ASPECT_COMPUTE_PIPELINE);
-                        aspects.reset(VALIDATION_ASPECT_RENDER_PIPELINE);
-                        aspects.set(VALIDATION_ASPECT_RENDER_PASS);
-                        currentRenderPass = renderPass;
-                        currentFramebuffer = framebuffer;
-                        currentSubpass = 0;
-                        if (!beginSubpass()) {
+                        BeginRenderPassCmd* cmd = iterator.NextCommand<BeginRenderPassCmd>();
+                        auto* renderPass = cmd->renderPass.Get();
+                        auto* framebuffer = cmd->framebuffer.Get();
+                        if (!state->BeginRenderPass(renderPass, framebuffer)) {
                             return false;
                         }
                     }
@@ -391,21 +206,6 @@ namespace backend {
                         uint64_t z = copy->z;
                         uint32_t level = copy->level;
 
-                        if (currentRenderPass) {
-                            HandleError("Blit cannot occur during a render pass");
-                            return false;
-                        }
-
-                        if (!bufferHasGuaranteedUsageBit(buffer, nxt::BufferUsageBit::TransferSrc)) {
-                            HandleError("Buffer needs the transfer source usage bit");
-                            return false;
-                        }
-
-                        if (!textureHasGuaranteedUsageBit(texture, nxt::TextureUsageBit::TransferDst)) {
-                            HandleError("Texture needs the transfer destination usage bit");
-                            return false;
-                        }
-
                         if (width == 0 || height == 0 || depth == 0) {
                             HandleError("Empty copy");
                             return false;
@@ -414,7 +214,6 @@ namespace backend {
                         // TODO(cwallez@chromium.org): check for overflows
                         uint64_t pixelSize = TextureFormatPixelSize(texture->GetFormat());
                         uint64_t dataSize = width * height * depth * pixelSize;
-
                         if (dataSize + static_cast<uint64_t>(bufferOffset) > static_cast<uint64_t>(buffer->GetSize())) {
                             HandleError("Copy would read after end of the buffer");
                             return false;
@@ -427,68 +226,38 @@ namespace backend {
                             HandleError("Copy would write outside of the texture");
                             return false;
                         }
+
+                        if (!state->ValidateCanCopy() ||
+                            !state->ValidateCanUseBufferAs(buffer, nxt::BufferUsageBit::TransferSrc) ||
+                            !state->ValidateCanUseTextureAs(texture, nxt::TextureUsageBit::TransferDst)) {
+                            return false;
+                        }
                     }
                     break;
 
                 case Command::Dispatch:
                     {
-                        DispatchCmd* cmd = iterator.NextCommand<DispatchCmd>();
-
-                        constexpr ValidationAspects requiredDispatchAspects =
-                            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
-                            1 << VALIDATION_ASPECT_BINDGROUPS;
-
-                        if ((requiredDispatchAspects & ~aspects).any()) {
-                            // Compute the lazily computed aspects
-                            if (bindgroupsSet.all()) {
-                                aspects.set(VALIDATION_ASPECT_BINDGROUPS);
-                            }
-
-                            // Check again if anything is missing
-                            if ((requiredDispatchAspects & ~aspects).any()) {
-                                HandleError("Some dispatch state is missing");
-                                return false;
-                            }
+                        iterator.NextCommand<DispatchCmd>();
+                        if (!state->ValidateCanDispatch()) {
+                            return false;
                         }
                     }
                     break;
 
                 case Command::DrawArrays:
+                    {
+                        iterator.NextCommand<DrawArraysCmd>();
+                        if (!state->ValidateCanDrawArrays()) {
+                            return false;
+                        }
+                    }
+                    break;
+
                 case Command::DrawElements:
                     {
-                        constexpr ValidationAspects requiredDrawAspects =
-                            1 << VALIDATION_ASPECT_RENDER_PIPELINE |
-                            1 << VALIDATION_ASPECT_BINDGROUPS |
-                            1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
-
-                        if ((requiredDrawAspects & ~aspects).any()) {
-                            // Compute the lazily computed aspects
-                            if (bindgroupsSet.all()) {
-                                aspects.set(VALIDATION_ASPECT_BINDGROUPS);
-                            }
-
-                            auto requiredInputs = lastPipeline->GetInputState()->GetInputsSetMask();
-                            if ((inputsSet & ~requiredInputs).none()) {
-                                aspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
-                            }
-
-                            // Check again if anything is missing
-                            if ((requiredDrawAspects & ~aspects).any()) {
-                                HandleError("Some draw state is missing");
-                                return false;
-                            }
-                        }
-
-                        if (type == Command::DrawArrays) {
-                            DrawArraysCmd* draw = iterator.NextCommand<DrawArraysCmd>();
-                        } else {
-                            ASSERT(type == Command::DrawElements);
-                            DrawElementsCmd* draw = iterator.NextCommand<DrawElementsCmd>();
-
-                            if (!aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-                                HandleError("Draw elements requires an index buffer");
-                                return false;
-                            }
+                        iterator.NextCommand<DrawElementsCmd>();
+                        if (!state->ValidateCanDrawElements()) {
+                            return false;
                         }
                     }
                     break;
@@ -496,19 +265,9 @@ namespace backend {
                 case Command::EndRenderPass:
                     {
                         iterator.NextCommand<EndRenderPassCmd>();
-                        if (currentRenderPass == nullptr) {
-                            HandleError("No render pass is currently active");
+                        if (!state->EndRenderPass()) {
                             return false;
                         }
-                        if (currentSubpass < currentRenderPass->GetSubpassCount() - 1) {
-                            HandleError("Can't end a render pass before the last subpass");
-                            return false;
-                        }
-                        endSubpass();
-                        currentRenderPass = nullptr;
-                        currentFramebuffer = nullptr;
-                        aspects.reset(VALIDATION_ASPECT_RENDER_PASS);
-                        aspects.reset(VALIDATION_ASPECT_RENDER_PIPELINE);
                     }
                     break;
 
@@ -516,40 +275,9 @@ namespace backend {
                     {
                         SetPipelineCmd* cmd = iterator.NextCommand<SetPipelineCmd>();
                         PipelineBase* pipeline = cmd->pipeline.Get();
-                        PipelineLayoutBase* layout = pipeline->GetLayout();
-
-                        if (pipeline->IsCompute()) {
-                            if (currentRenderPass) {
-                                HandleError("Can't use a compute pipeline while a render pass is active");
-                                return false;
-                            }
-                            aspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
-                        } else {
-                            if (!currentRenderPass) {
-                                HandleError("A render pass must be active when a render pipeline is set");
-                                return false;
-                            }
-                            if (!pipeline->GetRenderPass()->IsCompatibleWith(currentRenderPass)) {
-                                HandleError("Pipeline is incompatible with this render pass");
-                                return false;
-                            }
-                            aspects.set(VALIDATION_ASPECT_RENDER_PIPELINE);
+                        if (!state->SetPipeline(pipeline)) {
+                            return false;
                         }
-                        aspects.reset(VALIDATION_ASPECT_BINDGROUPS);
-                        aspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
-                        bindgroupsSet = ~layout->GetBindGroupsLayoutMask();
-
-                        // Only bindgroups that were not the same layout in the last pipeline need to be set again.
-                        if (lastPipeline) {
-                            PipelineLayoutBase* lastLayout = lastPipeline->GetLayout();
-                            for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                                if (lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
-                                    bindgroupsSet |= uint64_t(1) << i;
-                                }
-                            }
-                        }
-
-                        lastPipeline = pipeline;
                     }
                     break;
 
@@ -567,7 +295,7 @@ namespace backend {
                 case Command::SetStencilReference:
                     {
                         SetStencilReferenceCmd* cmd = iterator.NextCommand<SetStencilReferenceCmd>();
-                        if (currentRenderPass == nullptr) {
+                        if (!state->HaveRenderPass()) {
                             HandleError("Can't set stencil reference without an active render pass");
                             return false;
                         }
@@ -577,30 +305,18 @@ namespace backend {
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = iterator.NextCommand<SetBindGroupCmd>();
-                        uint32_t index = cmd->index;
-
-                        if (cmd->group->GetLayout() != lastPipeline->GetLayout()->GetBindGroupLayout(index)) {
-                            HandleError("Bind group layout mismatch");
+                        if (!state->SetBindGroup(cmd->index, cmd->group.Get())) {
                             return false;
                         }
-                        if (!validateBindGroupUsages(cmd->group.Get())) {
-                            return false;
-                        }
-                        bindgroupsSet |= uint64_t(1) << index;
                     }
                     break;
 
                 case Command::SetIndexBuffer:
                     {
                         SetIndexBufferCmd* cmd = iterator.NextCommand<SetIndexBufferCmd>();
-                        auto buffer = cmd->buffer;
-                        auto usage = nxt::BufferUsageBit::Index;
-                        if (!bufferHasGuaranteedUsageBit(buffer.Get(), usage)) {
-                            HandleError("Buffer needs the index usage bit to be guaranteed");
+                        if (!state->SetIndexBuffer(cmd->buffer.Get())) {
                             return false;
                         }
-
-                        aspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
                     }
                     break;
 
@@ -611,13 +327,7 @@ namespace backend {
                         iterator.NextData<uint32_t>(cmd->count);
 
                         for (uint32_t i = 0; i < cmd->count; ++i) {
-                            auto buffer = buffers[i];
-                            auto usage = nxt::BufferUsageBit::Vertex;
-                            if (!bufferHasGuaranteedUsageBit(buffer.Get(), usage)) {
-                                HandleError("Buffer needs vertex usage bit to be guaranteed");
-                                return false;
-                            }
-                            inputsSet.set(cmd->startSlot + i);
+                            state->SetVertexBuffer(cmd->startSlot + i, buffers[i].Get());
                         }
                     }
                     break;
@@ -625,46 +335,19 @@ namespace backend {
                 case Command::TransitionBufferUsage:
                     {
                         TransitionBufferUsageCmd* cmd = iterator.NextCommand<TransitionBufferUsageCmd>();
-                        auto buffer = cmd->buffer.Get();
-                        auto usage = cmd->usage;
-
-                        if (!buffer->IsTransitionPossible(usage)) {
-                            if (buffer->IsFrozen()) {
-                                HandleError("Buffer transition not possible (usage is frozen)");
-                            } else if (!BufferBase::IsUsagePossible(buffer->GetAllowedUsage(), usage)) {
-                                HandleError("Buffer transition not possible (usage not allowed)");
-                            } else {
-                                HandleError("Buffer transition not possible");
-                            }
+                        if (!state->TransitionBufferUsage(cmd->buffer.Get(), cmd->usage)) {
                             return false;
                         }
-
-                        mostRecentBufferUsages[buffer] = usage;
-
-                        buffersTransitioned.insert(buffer);
                     }
                     break;
 
                 case Command::TransitionTextureUsage:
                     {
                         TransitionTextureUsageCmd* cmd = iterator.NextCommand<TransitionTextureUsageCmd>();
-                        auto texture = cmd->texture.Get();
-                        auto usage = cmd->usage;
-
-                        if (!isTextureTransitionPossible(texture, usage)) {
-                            if (texture->IsFrozen()) {
-                                HandleError("Texture transition not possible (usage is frozen)");
-                            } else if (!TextureBase::IsUsagePossible(texture->GetAllowedUsage(), usage)) {
-                                HandleError("Texture transition not possible (usage not allowed)");
-                            } else {
-                                HandleError("Texture transition not possible");
-                            }
+                        if (!state->TransitionTextureUsage(cmd->texture.Get(), cmd->usage)) {
                             return false;
                         }
 
-                        mostRecentTextureUsages[texture] = usage;
-
-                        texturesTransitioned.insert(texture);
                     }
                     break;
             }
