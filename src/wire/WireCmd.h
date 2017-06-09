@@ -30,6 +30,31 @@ namespace wire {
         const char* GetMessage() const;
     };
 
+    struct BufferMapReadAsyncCmd {
+        wire::WireCmd commandId = WireCmd::BufferMapReadAsync;
+
+        uint32_t bufferId;
+        uint32_t requestSerial;
+        uint32_t start;
+        uint32_t size;
+
+        size_t GetRequiredSize() const;
+    };
+
+    struct ReturnBufferMapReadAsyncCallbackCmd {
+        wire::ReturnWireCmd commandId = ReturnWireCmd::BufferMapReadAsyncCallback;
+
+        uint32_t bufferId;
+        uint32_t bufferSerial;
+        uint32_t requestSerial;
+        uint32_t status;
+        uint32_t dataLength;
+
+        size_t GetRequiredSize() const;
+        void* GetData();
+        const void* GetData() const;
+    };
+
 }
 }
 

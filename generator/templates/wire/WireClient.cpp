@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <iostream>
+#include <map>
 
 namespace nxt {
 namespace wire {
@@ -69,11 +70,50 @@ namespace wire {
             BuilderCallbackData builderCallback;
         };
 
-        {% for type in by_category["object"] if not type.name.canonical_case() == "device" %}
+        {% set special_objects = [
+            "device",
+            "buffer",
+        ] %}
+        {% for type in by_category["object"] if not type.name.canonical_case() in special_objects %}
             struct {{type.name.CamelCase()}} : ObjectBase {
                 using ObjectBase::ObjectBase;
             };
         {% endfor %}
+
+        struct Buffer : ObjectBase {
+            using ObjectBase::ObjectBase;
+
+            ~Buffer() {
+                //* Callbacks need to be fired in all cases, as they can handle freeing resources
+                //* so we call them with "Unknown" status.
+                ClearMapRequests(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN);
+
+                if (mappedData) {
+                    free(mappedData);
+                }
+            }
+
+            void ClearMapRequests(nxtBufferMapReadStatus status) {
+                for (auto& it : readRequests) {
+                    it.second.callback(status, nullptr, it.second.userdata);
+                }
+                readRequests.clear();
+            }
+
+            //* We want to defer all the validation to the server, which means we could have multiple
+            //* map request in flight at a single time and need to track them separately.
+            //* On well-behaved applications, only one request should exist at a single time.
+            struct MapReadRequestData {
+                nxtBufferMapReadCallback callback = nullptr;
+                nxtCallbackUserdata userdata = 0;
+                uint32_t size = 0;
+            };
+            std::map<uint32_t, MapReadRequestData> readRequests;
+            uint32_t readRequestSerial = 0;
+
+            //* Only one mapped pointer can be active at a time because Unmap clears all the in-flight requests.
+            void* mappedData = nullptr;
+        };
 
         //* TODO(cwallez@chromium.org): Do something with objects before they are destroyed ?
         //*  - Call still uncalled builder callbacks
@@ -168,6 +208,12 @@ namespace wire {
                 {% for type in by_category["object"] if not type.name.canonical_case() == "device" %}
                     ObjectAllocator<{{type.name.CamelCase()}}> {{type.name.camelCase()}};
                 {% endfor %}
+
+                void HandleError(const char* message) {
+                    if (errorCallback) {
+                        errorCallback(message, errorUserdata);
+                    }
+                }
 
                 nxtDeviceErrorCallback errorCallback = nullptr;
                 nxtCallbackUserdata errorUserdata;
@@ -290,6 +336,41 @@ namespace wire {
         {% endfor %}
 
         void ClientBufferMapReadAsync(Buffer* buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
+            uint32_t serial = buffer->readRequestSerial++;
+            assert(buffer->readRequests.find(serial) == buffer->readRequests.end());
+
+            Buffer::MapReadRequestData request;
+            request.callback = callback;
+            request.userdata = userdata;
+            request.size = size;
+            buffer->readRequests[serial] = request;
+
+            wire::BufferMapReadAsyncCmd cmd;
+            cmd.bufferId = buffer->id;
+            cmd.requestSerial = serial;
+            cmd.start = start;
+            cmd.size = size;
+
+            size_t requiredSize = cmd.GetRequiredSize();
+            auto allocCmd = reinterpret_cast<decltype(cmd)*>(buffer->device->GetCmdSpace(requiredSize));
+            *allocCmd = cmd;
+        }
+
+        void ProxyClientBufferUnmap(Buffer* buffer) {
+            //* Invalidate the local pointer, and cancel all other in-flight requests that would turn into
+            //* errors anyway (you can't double map). This prevents race when the following happens, where
+            //* the application code would have unmapped a buffer but still receive a callback:
+            //*  - Client -> Server: MapRequest1, Unmap, MapRequest2
+            //*  - Server -> Client: Result of MapRequest1
+            //*  - Unmap locally on the client
+            //*  - Server -> Client: Result of MapRequest2
+            if (buffer->mappedData) {
+                free(buffer->mappedData);
+                buffer->mappedData = nullptr;
+            }
+            buffer->ClearMapRequests(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN);
+
+            ClientBufferUnmap(buffer);
         }
 
         void ClientDeviceReference(Device* self) {
@@ -303,11 +384,23 @@ namespace wire {
             self->errorUserdata = userdata;
         }
 
+        // Some commands don't have a custom wire format, but need to be handled manually to update
+        // some client-side state tracking. For these we have to functions:
+        //  - An autogenerated Client{{suffix}} method that sends the command on the wire
+        //  - A manual ProxyClient{{suffix}} method that will be inserted in the proctable instead of
+        //    the autogenerated one, and that will have to call Client{{suffix}}
+        {% set proxied_commands = ["BufferUnmap"] %}
+
         nxtProcTable GetProcs() {
             nxtProcTable table;
             {% for type in by_category["object"] %}
                 {% for method in native_methods(type) %}
-                    table.{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(Client{{as_MethodSuffix(type.name, method.name)}});
+                    {% set suffix = as_MethodSuffix(type.name, method.name) %}
+                    {% if suffix in proxied_commands %}
+                        table.{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(ProxyClient{{suffix}});
+                    {% else %}
+                        table.{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(Client{{suffix}});
+                    {% endif %}
                 {% endfor %}
             {% endfor %}
             return table;
@@ -332,6 +425,9 @@ namespace wire {
                                     success = Handle{{type.name.CamelCase()}}ErrorCallbackCmd(&commands, &size);
                                     break;
                             {% endfor %}
+                            case ReturnWireCmd::BufferMapReadAsyncCallback:
+                                success = HandleBufferMapReadAsyncCallback(&commands, &size);
+                                break;
                             default:
                                 success = false;
                         }
@@ -383,9 +479,7 @@ namespace wire {
                         return false;
                     }
 
-                    if (device->errorCallback != nullptr) {
-                        device->errorCallback(cmd->GetMessage(), device->errorUserdata);
-                    }
+                    device->HandleError(cmd->GetMessage());
 
                     return true;
                 }
@@ -414,6 +508,49 @@ namespace wire {
                         return true;
                     }
                 {% endfor %}
+
+                bool HandleBufferMapReadAsyncCallback(const uint8_t** commands, size_t* size) {
+                    const auto* cmd = GetCommand<ReturnBufferMapReadAsyncCallbackCmd>(commands, size);
+                    if (cmd == nullptr) {
+                        return false;
+                    }
+
+                    auto* buffer = device->buffer.GetObject(cmd->bufferId);
+                    uint32_t bufferSerial = device->buffer.GetSerial(cmd->bufferId);
+
+                    //* The buffer might have been deleted or recreated so this isn't an error.
+                    if (buffer == nullptr || bufferSerial != cmd->bufferSerial) {
+                        return true;
+                    }
+
+                    //* The requests can have been deleted via an Unmap so this isn't an error.
+                    auto requestIt = buffer->readRequests.find(cmd->requestSerial);
+                    if (requestIt == buffer->readRequests.end()) {
+                        return true;
+                    }
+
+                    auto request = requestIt->second;
+
+                    //* On success, we copy the data locally because the IPC buffer isn't valid outside of this function
+                    if (cmd->status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS) {
+
+                        //* The server didn't send the right amount of data, this is an error and could cause
+                        //* the application to crash if we did call the callback.
+                        if (request.size != cmd->dataLength) {
+                            return false;
+                        }
+
+                        if (buffer->mappedData != nullptr) {
+                            return false;
+                        }
+                        buffer->mappedData = malloc(request.size);
+                        memcpy(buffer->mappedData, cmd->GetData(), request.size);
+                    }
+
+                    request.callback(static_cast<nxtBufferMapReadStatus>(cmd->status), buffer->mappedData, request.userdata);
+                    buffer->readRequests.erase(requestIt);
+                    return true;
+                }
         };
 
     }

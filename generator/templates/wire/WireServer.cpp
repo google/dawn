@@ -23,6 +23,16 @@ namespace nxt {
 namespace wire {
 
     namespace server {
+        class Server;
+
+        struct MapReadUserdata {
+            Server* server;
+            uint32_t bufferId;
+            uint32_t bufferSerial;
+            uint32_t requestSerial;
+            uint32_t size;
+        };
+
         //* Stores what the backend knows about the type.
         template<typename T>
         struct ObjectDataBase {
@@ -117,6 +127,8 @@ namespace wire {
             void Forward{{type.name.CamelCase()}}ToClient(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2);
         {% endfor %}
 
+        void ForwardBufferMapReadAsync(nxtBufferMapReadStatus status, const void* ptr, nxtCallbackUserdata userdata);
+
         class Server : public CommandHandler {
             public:
                 Server(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer)
@@ -170,6 +182,28 @@ namespace wire {
                     }
                 {% endfor %}
 
+                void OnMapReadAsyncCallback(nxtBufferMapReadStatus status, const void* ptr, MapReadUserdata* data) {
+                    ReturnBufferMapReadAsyncCallbackCmd cmd;
+                    cmd.bufferId = data->bufferId;
+                    cmd.bufferSerial = data->bufferSerial;
+                    cmd.requestSerial = data->requestSerial;
+                    cmd.status = status;
+
+                    cmd.dataLength = 0;
+                    if (status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS) {
+                        cmd.dataLength = data->size;
+                    }
+
+                    auto allocCmd = reinterpret_cast<ReturnBufferMapReadAsyncCallbackCmd*>(GetCmdSpace(cmd.GetRequiredSize()));
+                    *allocCmd = cmd;
+
+                    if (status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS) {
+                        memcpy(allocCmd->GetData(), ptr, data->size);
+                    }
+
+                    delete data;
+                }
+
                 const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
                     while (size > sizeof(WireCmd)) {
                         WireCmd cmdId = *reinterpret_cast<const WireCmd*>(commands);
@@ -188,6 +222,9 @@ namespace wire {
                                     success = Handle{{Suffix}}(&commands, &size);
                                     break;
                             {% endfor %}
+                            case WireCmd::BufferMapReadAsync:
+                                success = HandleBufferMapReadAsync(&commands, &size);
+                                break;
 
                             default:
                                 success = false;
@@ -405,6 +442,39 @@ namespace wire {
                         return true;
                     }
                 {% endfor %}
+
+                bool HandleBufferMapReadAsync(const uint8_t** commands, size_t* size) {
+                    //* These requests are just forwarded to the buffer, with userdata containing what the client
+                    //* will require in the return command.
+                    const auto* cmd = GetCommand<BufferMapReadAsyncCmd>(commands, size);
+                    if (cmd == nullptr) {
+                        return false;
+                    }
+
+                    auto* buffer = knownBuffer.Get(cmd->bufferId);
+                    if (buffer == nullptr) {
+                        return false;
+                    }
+
+                    auto* data = new MapReadUserdata;
+                    data->server = this;
+                    data->bufferId = cmd->bufferId;
+                    data->bufferSerial = buffer->serial;
+                    data->requestSerial = cmd->requestSerial;
+                    data->size = cmd->size;
+
+                    auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
+
+                    if (!buffer->valid) {
+                        //* Fake the buffer returning a failure, data will be freed in this call.
+                        ForwardBufferMapReadAsync(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
+                        return true;
+                    }
+
+                    procs.bufferMapReadAsync(buffer->handle, cmd->start, cmd->size, ForwardBufferMapReadAsync, userdata);
+
+                    return true;
+                }
         };
 
         void ForwardDeviceErrorToServer(const char* message, nxtCallbackUserdata userdata) {
@@ -414,12 +484,17 @@ namespace wire {
 
         {% for type in by_category["object"] if type.is_builder%}
             void Forward{{type.name.CamelCase()}}ToClient(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) {
-                auto server = reinterpret_cast<Server*>(static_cast<intptr_t>(userdata1));
+                auto server = reinterpret_cast<Server*>(static_cast<uintptr_t>(userdata1));
                 uint32_t id = userdata2 & 0xFFFFFFFFu;
                 uint32_t serial = userdata2 >> uint64_t(32);
                 server->On{{type.name.CamelCase()}}Error(status, message, id, serial);
             }
         {% endfor %}
+
+        void ForwardBufferMapReadAsync(nxtBufferMapReadStatus status, const void* ptr, nxtCallbackUserdata userdata) {
+            auto data = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata));
+            data->server->OnMapReadAsyncCallback(status, ptr, data);
+        }
     }
 
     CommandHandler* NewServerCommandHandler(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer) {

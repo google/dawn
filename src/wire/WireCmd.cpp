@@ -29,5 +29,21 @@ namespace wire {
         return reinterpret_cast<const char*>(this + 1);
     }
 
+    size_t BufferMapReadAsyncCmd::GetRequiredSize() const {
+        return sizeof(*this);
+    }
+
+    size_t ReturnBufferMapReadAsyncCallbackCmd::GetRequiredSize() const {
+        return sizeof(*this) + dataLength;
+    }
+
+    void* ReturnBufferMapReadAsyncCallbackCmd::GetData() {
+        return this + 1;
+    }
+
+    const void* ReturnBufferMapReadAsyncCallbackCmd::GetData() const {
+        return this + 1;
+    }
+
 }
 }

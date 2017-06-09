@@ -28,6 +28,7 @@ namespace wire {
             {% endfor %}
             {{as_MethodSuffix(type.name, Name("destroy"))}},
         {% endfor %}
+        BufferMapReadAsync,
     };
 
     {% for type in by_category["object"] %}
@@ -98,6 +99,7 @@ namespace wire {
         {% for type in by_category["object"] if type.is_builder %}
                 {{type.name.CamelCase()}}ErrorCallback,
         {% endfor %}
+        BufferMapReadAsyncCallback,
     };
 
     {% for type in by_category["object"] if type.is_builder %}
