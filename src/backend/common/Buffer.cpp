@@ -30,6 +30,12 @@ namespace backend {
           currentUsage(builder->currentUsage) {
     }
 
+    BufferBase::~BufferBase() {
+        if (mapped) {
+            CallMapReadCallback(mapReadSerial, NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr);
+        }
+    }
+
     BufferViewBuilder* BufferBase::CreateBufferViewBuilder() {
         return new BufferViewBuilder(device, this);
     }
@@ -50,6 +56,13 @@ namespace backend {
         return currentUsage;
     }
 
+    void BufferBase::CallMapReadCallback(uint32_t serial, nxtBufferMapReadStatus status, const void* pointer) {
+        if (mapReadCallback && serial == mapReadSerial) {
+            mapReadCallback(status, pointer, mapReadUserdata);
+            mapReadCallback = nullptr;
+        }
+    }
+
     void BufferBase::SetSubData(uint32_t start, uint32_t count, const uint32_t* data) {
         if ((start + count) * sizeof(uint32_t) > GetSize()) {
             device->HandleError("Buffer subdata out of range");
@@ -62,6 +75,46 @@ namespace backend {
         }
 
         SetSubDataImpl(start, count, data);
+    }
+
+    void BufferBase::MapReadAsync(uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
+        if (start + size > GetSize()) {
+            device->HandleError("Buffer map read out of range");
+            callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
+            return;
+        }
+
+        if (!(currentUsage & nxt::BufferUsageBit::MapRead)) {
+            device->HandleError("Buffer needs the map read usage bit");
+            callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
+            return;
+        }
+
+        if (mapped) {
+            device->HandleError("Buffer already mapped");
+            callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
+            return;
+        }
+
+        // TODO(cwallez@chromium.org): what to do on wraparound? Could cause crashes.
+        mapReadSerial ++;
+        mapReadCallback = callback;
+        mapReadUserdata = userdata;
+        MapReadAsyncImpl(mapReadSerial, start, size);
+        mapped = true;
+    }
+
+    void BufferBase::Unmap() {
+        if (!mapped) {
+            device->HandleError("Buffer wasn't mapped");
+            return;
+        }
+
+        // A map request can only be called once, so this will fire only if the request wasn't
+        // completed before the Unmap
+        CallMapReadCallback(mapReadSerial, NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr);
+        UnmapImpl();
+        mapped = false;
     }
 
     bool BufferBase::IsFrozen() const {
@@ -86,7 +139,7 @@ namespace backend {
     }
 
     bool BufferBase::IsTransitionPossible(nxt::BufferUsageBit usage) const {
-        if (frozen) {
+        if (frozen || mapped) {
             return false;
         }
         return IsUsagePossible(allowedUsage, usage);
@@ -138,6 +191,7 @@ namespace backend {
             return nullptr;
         }
 
+        // TODO(cwallez@chromium.org) disallow using MapRead with anything else than TransferDst
         return device->CreateBuffer(this);
     }
 

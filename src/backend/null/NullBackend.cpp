@@ -107,6 +107,14 @@ namespace null {
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
     }
 
+    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+        // TODO(cwallez@chromium.org): Implement Map Read for the null backend
+    }
+
+    void Buffer::UnmapImpl() {
+        // TODO(cwallez@chromium.org): Implement Map Read for the null backend
+    }
+
     // Queue
 
     Queue::Queue(QueueBuilder* builder)

@@ -133,6 +133,19 @@
                 ]
             },
             {
+                "_comment": "Contrary to set sub data, this is in char size",
+                "name": "map read async",
+                "args": [
+                    {"name": "start", "type": "uint32_t"},
+                    {"name": "size", "type": "uint32_t"},
+                    {"name": "callback", "type": "buffer map read callback"},
+                    {"name": "userdata", "type": "callback userdata"}
+                ]
+            },
+            {
+                "name": "unmap"
+            },
+            {
                 "name": "transition usage",
                 "args": [
                     {"name": "usage", "type": "buffer usage bit"}
@@ -171,6 +184,18 @@
                     {"name": "size", "type": "uint32_t"}
                 ]
             }
+        ]
+    },
+    "buffer map read callback": {
+        "category": "natively defined"
+    },
+    "buffer map read status": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "error"},
+            {"value": 2, "name": "unknown"},
+            {"value": 3, "name": "context lost"}
         ]
     },
     "buffer usage bit": {

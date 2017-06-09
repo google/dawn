@@ -289,6 +289,9 @@ namespace wire {
             {% endif %}
         {% endfor %}
 
+        void ClientBufferMapReadAsync(Buffer* buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
+        }
+
         void ClientDeviceReference(Device* self) {
         }
 

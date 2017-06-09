@@ -56,6 +56,14 @@ void ProcTableAsClass::DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCall
     this->OnDeviceSetErrorCallback(self, callback, userdata);
 }
 
+void ProcTableAsClass::BufferMapReadAsync(nxtBuffer self, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+    object->mapReadCallback = callback;
+    object->userdata1 = userdata;
+
+    this->OnBufferMapReadAsyncCallback(self, start, size, callback, userdata);
+}
+
 void ProcTableAsClass::CallDeviceErrorCallback(nxtDevice device, const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->deviceErrorCallback(message, object->userdata1);
@@ -63,6 +71,10 @@ void ProcTableAsClass::CallDeviceErrorCallback(nxtDevice device, const char* mes
 void ProcTableAsClass::CallBuilderErrorCallback(void* builder , nxtBuilderErrorStatus status, const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(builder);
     object->builderErrorCallback(status, message, object->userdata1, object->userdata2);
+}
+void ProcTableAsClass::CallMapReadCallback(nxtBuffer buffer, nxtBufferMapReadStatus status, const void* data) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
+    object->mapReadCallback(status, data, object->userdata1);
 }
 
 {% for type in by_category["object"] if type.is_builder %}

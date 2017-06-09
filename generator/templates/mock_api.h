@@ -55,21 +55,25 @@ class ProcTableAsClass {
             {% endif %}
         {% endfor %}
 
-        // Stores callback and userdata and calls OnDeviceSetErrorCallback
+        // Stores callback and userdata and calls the On* methods
         void DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata);
+        void BufferMapReadAsync(nxtBuffer self, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata);
 
         // Special cased mockable methods
         virtual void OnDeviceSetErrorCallback(nxtDevice device, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) = 0;
         virtual void OnBuilderSetErrorCallback(nxtBufferBuilder builder, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) = 0;
+        virtual void OnBufferMapReadAsyncCallback(nxtBuffer buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) = 0;
 
         // Calls the stored callbacks
         void CallDeviceErrorCallback(nxtDevice device, const char* message);
         void CallBuilderErrorCallback(void* builder , nxtBuilderErrorStatus status, const char* message);
+        void CallMapReadCallback(nxtBuffer buffer, nxtBufferMapReadStatus status, const void* data);
 
         struct Object {
             ProcTableAsClass* procs = nullptr;
             nxtDeviceErrorCallback deviceErrorCallback = nullptr;
             nxtBuilderErrorCallback builderErrorCallback = nullptr;
+            nxtBufferMapReadCallback mapReadCallback = nullptr;
             nxtCallbackUserdata userdata1 = 0;
             nxtCallbackUserdata userdata2 = 0;
         };
@@ -99,6 +103,7 @@ class MockProcTable : public ProcTableAsClass {
 
         MOCK_METHOD3(OnDeviceSetErrorCallback, void(nxtDevice device, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata));
         MOCK_METHOD4(OnBuilderSetErrorCallback, void(nxtBufferBuilder builder, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2));
+        MOCK_METHOD5(OnBufferMapReadAsyncCallback, void(nxtBuffer buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata));
 };
 
 #endif // MOCK_NXT_H

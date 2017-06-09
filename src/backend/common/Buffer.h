@@ -26,6 +26,7 @@ namespace backend {
     class BufferBase : public RefCounted {
         public:
             BufferBase(BufferBuilder* builder);
+            ~BufferBase();
 
             uint32_t GetSize() const;
             nxt::BufferUsageBit GetAllowedUsage() const;
@@ -41,17 +42,30 @@ namespace backend {
             // NXT API
             BufferViewBuilder* CreateBufferViewBuilder();
             void SetSubData(uint32_t start, uint32_t count, const uint32_t* data);
+            void MapReadAsync(uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata);
+            void Unmap();
             void TransitionUsage(nxt::BufferUsageBit usage);
             void FreezeUsage(nxt::BufferUsageBit usage);
 
+        protected:
+            void CallMapReadCallback(uint32_t serial, nxtBufferMapReadStatus status, const void* pointer);
+
         private:
             virtual void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) = 0;
+            virtual void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
+            virtual void UnmapImpl() = 0;
 
             DeviceBase* device;
             uint32_t size;
             nxt::BufferUsageBit allowedUsage = nxt::BufferUsageBit::None;
             nxt::BufferUsageBit currentUsage = nxt::BufferUsageBit::None;
+
+            nxtBufferMapReadCallback mapReadCallback = nullptr;
+            nxtCallbackUserdata mapReadUserdata = 0;
+            uint32_t mapReadSerial = 0;
+
             bool frozen = false;
+            bool mapped = false;
     };
 
     class BufferBuilder : public Builder<BufferBase> {
