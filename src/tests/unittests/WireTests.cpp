@@ -43,6 +43,17 @@ static void ToMockBuilderErrorCallback(nxtBuilderErrorStatus status, const char*
     mockBuilderErrorCallback->Call(status, message, userdata1, userdata2);
 }
 
+class MockBufferMapReadCallback {
+    public:
+        MOCK_METHOD3(Call, void(nxtBufferMapReadStatus status, const uint32_t* ptr, nxtCallbackUserdata userdata));
+};
+
+static MockBufferMapReadCallback* mockBufferMapReadCallback = nullptr;
+static void ToMockBufferMapReadCallback(nxtBufferMapReadStatus status, const void* ptr, nxtCallbackUserdata userdata) {
+    // Assume the data is uint32_t to make writing matchers easier
+    mockBufferMapReadCallback->Call(status, reinterpret_cast<const uint32_t*>(ptr), userdata);
+}
+
 class WireTestsBase : public Test {
     protected:
         WireTestsBase(bool ignoreSetCallbackCalls)
@@ -52,6 +63,7 @@ class WireTestsBase : public Test {
         void SetUp() override {
             mockDeviceErrorCallback = new MockDeviceErrorCallback;
             mockBuilderErrorCallback = new MockBuilderErrorCallback;
+            mockBufferMapReadCallback = new MockBufferMapReadCallback;
 
             nxtProcTable mockProcs;
             nxtDevice mockDevice;
@@ -85,6 +97,7 @@ class WireTestsBase : public Test {
             delete s2cBuf;
             delete mockDeviceErrorCallback;
             delete mockBuilderErrorCallback;
+            delete mockBufferMapReadCallback;
         }
 
         void FlushClient() {
@@ -488,5 +501,144 @@ TEST_F(WireSetCallbackTests, BuilderErrorCallback) {
     EXPECT_CALL(*mockBuilderErrorCallback, Call(NXT_BUILDER_ERROR_STATUS_SUCCESS, StrEq("Success!"), userdata1, userdata2))
         .Times(1);
 
+    FlushServer();
+}
+
+class WireBufferMappingTests : public WireTestsBase {
+    public:
+        WireBufferMappingTests() : WireTestsBase(true) {
+        }
+
+        void SetUp() override {
+            WireTestsBase::SetUp();
+
+            {
+                nxtBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
+                nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+                EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+                    .WillOnce(Return(apiBufferBuilder))
+                    .RetiresOnSaturation();
+
+                apiBuffer = api.GetNewBuffer();
+                buffer = nxtBufferBuilderGetResult(bufferBuilder);
+                EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
+                    .WillOnce(Return(apiBuffer))
+                    .RetiresOnSaturation();
+                FlushClient();
+            }
+            {
+                nxtBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
+                nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+                EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+                    .WillOnce(Return(apiBufferBuilder))
+                    .RetiresOnSaturation();
+
+                errorBuffer = nxtBufferBuilderGetResult(bufferBuilder);
+                EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
+                    .WillOnce(Return(nullptr))
+                    .RetiresOnSaturation();
+                FlushClient();
+            }
+        }
+
+    protected:
+        // A successfully created buffer
+        nxtBuffer buffer;
+        nxtBuffer apiBuffer;
+
+        // An buffer that wasn't created on the server side
+        nxtBuffer errorBuffer;
+};
+
+// Check mapping a succesfully created buffer
+TEST_F(WireBufferMappingTests, MappingSuccessBuffer) {
+    nxtCallbackUserdata userdata = 8653;
+    nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+    
+    uint32_t bufferContent = 31337;
+    EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
+        .Times(1);
+
+    FlushServer();
+
+    nxtBufferUnmap(buffer);
+    EXPECT_CALL(api, BufferUnmap(apiBuffer))
+        .Times(1);
+
+    FlushClient();
+}
+
+// Check that things work correctly when a validation error happens when mapping the buffer
+TEST_F(WireBufferMappingTests, ErrorWhileMapping) {
+    nxtCallbackUserdata userdata = 8654;
+    nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+    
+    EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr);
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata))
+        .Times(1);
+
+    FlushServer();
+}
+
+// Check mapping a buffer that didn't get created on the server side
+TEST_F(WireBufferMappingTests, MappingErrorBuffer) {
+    nxtCallbackUserdata userdata = 8655;
+    nxtBufferMapReadAsync(errorBuffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata))
+        .Times(1);
+
+    FlushServer();
+
+    nxtBufferUnmap(errorBuffer);
+
+    FlushClient();
+}
+
+// Check that the callback is called with UNKNOWN when the buffer is destroyed before the request is finished
+TEST_F(WireBufferMappingTests, DestroyBeforeRequestEnd) {
+    nxtCallbackUserdata userdata = 8656;
+    nxtBufferMapReadAsync(errorBuffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr, userdata))
+        .Times(1);
+
+    nxtBufferRelease(errorBuffer);
+}
+
+// Check the callback is called with UNKNOWN when the map request would have worked, but Unmap was called
+TEST_F(WireBufferMappingTests, UnmapCalledTooEarly) {
+    nxtCallbackUserdata userdata = 8657;
+    nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+    
+    uint32_t bufferContent = 31337;
+    EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+        }));
+
+    FlushClient();
+
+    // Oh no! We are calling Unmap too early!
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr, userdata))
+        .Times(1);
+    nxtBufferUnmap(buffer);
+
+    // The callback shouldn't get called, even when the request succeeded on the server side
     FlushServer();
 }
