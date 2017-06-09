@@ -113,6 +113,14 @@ namespace backend {
         return RevalidateCanDraw();
     }
 
+    bool CommandBufferStateTracker::ValidateEndCommandBuffer() const {
+        if (currentRenderPass != nullptr) {
+            builder->HandleError("Can't end command buffer with an active render pass");
+            return false;
+        }
+        return true;
+    }
+
     bool CommandBufferStateTracker::BeginSubpass() {
         if (currentRenderPass == nullptr) {
             builder->HandleError("Can't begin a subpass without an active render pass");

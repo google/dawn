@@ -34,6 +34,7 @@ namespace backend {
             bool ValidateCanDispatch();
             bool ValidateCanDrawArrays();
             bool ValidateCanDrawElements();
+            bool ValidateEndCommandBuffer() const;
 
             // State-modifying methods
             bool BeginSubpass();

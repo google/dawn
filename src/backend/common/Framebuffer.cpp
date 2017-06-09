@@ -85,6 +85,11 @@ namespace backend {
             HandleError("Framebuffer render pass property set multiple times");
             return;
         }
+        // TODO(kainino@chromium.org): null checks should not be necessary
+        if (renderPass == nullptr) {
+            HandleError("Render pass invalid");
+            return;
+        }
 
         this->renderPass = renderPass;
         this->textureViews.resize(renderPass->GetAttachmentCount());

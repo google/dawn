@@ -186,6 +186,15 @@ namespace backend {
                         BeginRenderPassCmd* cmd = iterator.NextCommand<BeginRenderPassCmd>();
                         auto* renderPass = cmd->renderPass.Get();
                         auto* framebuffer = cmd->framebuffer.Get();
+                        // TODO(kainino@chromium.org): null checks should not be necessary
+                        if (renderPass == nullptr) {
+                            HandleError("Render pass is invalid");
+                            return false;
+                        }
+                        if (framebuffer == nullptr) {
+                            HandleError("Framebuffer is invalid");
+                            return false;
+                        }
                         if (!state->BeginRenderPass(renderPass, framebuffer)) {
                             return false;
                         }
@@ -351,6 +360,10 @@ namespace backend {
                     }
                     break;
             }
+        }
+
+        if (!state->ValidateEndCommandBuffer()) {
+            return false;
         }
 
         return true;
