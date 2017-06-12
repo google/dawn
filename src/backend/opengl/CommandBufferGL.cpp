@@ -78,6 +78,19 @@ namespace opengl {
                     }
                     break;
 
+                case Command::CopyBufferToBuffer:
+                    {
+                        CopyBufferToBufferCmd* copy = commands.NextCommand<CopyBufferToBufferCmd>();
+
+                        glBindBuffer(GL_PIXEL_PACK_BUFFER, ToBackend(copy->source)->GetHandle());
+                        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, ToBackend(copy->destination)->GetHandle());
+                        glCopyBufferSubData(GL_PIXEL_PACK_BUFFER, GL_PIXEL_UNPACK_BUFFER, copy->sourceOffset, copy->destinationOffset, copy->size);
+
+                        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+                        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+                    }
+                    break;
+
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();

@@ -30,6 +30,7 @@ namespace backend {
     enum class Command {
         AdvanceSubpass,
         BeginRenderPass,
+        CopyBufferToBuffer,
         CopyBufferToTexture,
         Dispatch,
         DrawArrays,
@@ -51,6 +52,14 @@ namespace backend {
     struct BeginRenderPassCmd {
         Ref<RenderPassBase> renderPass;
         Ref<FramebufferBase> framebuffer;
+    };
+
+    struct CopyBufferToBufferCmd {
+        Ref<BufferBase> source;
+        Ref<BufferBase> destination;
+        uint32_t sourceOffset;
+        uint32_t destinationOffset;
+        uint32_t size;
     };
 
     struct CopyBufferToTextureCmd {

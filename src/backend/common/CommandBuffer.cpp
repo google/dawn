@@ -67,6 +67,12 @@ namespace backend {
                         begin->~BeginRenderPassCmd();
                     }
                     break;
+                case Command::CopyBufferToBuffer:
+                    {
+                        CopyBufferToBufferCmd* copy = commands->NextCommand<CopyBufferToBufferCmd>();
+                        copy->~CopyBufferToBufferCmd();
+                    }
+                    break;
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = commands->NextCommand<CopyBufferToTextureCmd>();
@@ -196,6 +202,35 @@ namespace backend {
                             return false;
                         }
                         if (!state->BeginRenderPass(renderPass, framebuffer)) {
+                            return false;
+                        }
+                    }
+                    break;
+
+                case Command::CopyBufferToBuffer:
+                    {
+                        CopyBufferToBufferCmd* copy = iterator.NextCommand<CopyBufferToBufferCmd>();
+                        BufferBase* source = copy->source.Get();
+                        BufferBase* destination = copy->destination.Get();
+                        uint32_t sourceOffset = copy->sourceOffset;
+                        uint32_t destinationOffset = copy->destinationOffset;
+                        uint32_t size = copy->size;
+
+                        uint64_t sourceEnd = uint64_t(sourceOffset) + uint64_t(size);
+                        if (sourceEnd > uint64_t(source->GetSize())) {
+                            HandleError("Copy would read after end of the source buffer");
+                            return false;
+                        }
+
+                        uint64_t destinationEnd = uint64_t(destinationOffset) + uint64_t(size);
+                        if (destinationEnd > uint64_t(destination->GetSize())) {
+                            HandleError("Copy would read after end of the destination buffer");
+                            return false;
+                        }
+
+                        if (!state->ValidateCanCopy() ||
+                            !state->ValidateCanUseBufferAs(source, nxt::BufferUsageBit::TransferSrc) ||
+                            !state->ValidateCanUseBufferAs(destination, nxt::BufferUsageBit::TransferDst)) {
                             return false;
                         }
                     }
@@ -389,6 +424,16 @@ namespace backend {
         new(cmd) BeginRenderPassCmd;
         cmd->renderPass = renderPass;
         cmd->framebuffer = framebuffer;
+    }
+
+    void CommandBufferBuilder::CopyBufferToBuffer(BufferBase* source, uint32_t sourceOffset, BufferBase* destination, uint32_t destinationOffset, uint32_t size) {
+        CopyBufferToBufferCmd* copy = allocator.Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
+        new(copy) CopyBufferToBufferCmd;
+        copy->source = source;
+        copy->sourceOffset = sourceOffset;
+        copy->destination = destination;
+        copy->destinationOffset = destinationOffset;
+        copy->size = size;
     }
 
     void CommandBufferBuilder::CopyBufferToTexture(BufferBase* buffer, uint32_t bufferOffset,

@@ -261,6 +261,19 @@
                 "name": "end render pass"
             },
             {
+                "name": "copy buffer to buffer",
+                "args": [
+                    {"name": "source", "type": "buffer"},
+                    {"name": "source offset", "type": "uint32_t"},
+                    {"name": "destination", "type": "buffer"},
+                    {"name": "destination offset", "type": "uint32_t"},
+                    {"name": "size", "type": "uint32_t"}
+                ],
+                "TODO": [
+                    "Restrictions on the alignment of the copy? Cf Metal on OSX"
+                ]
+            },
+            {
                 "name": "copy buffer to texture",
                 "args": [
                     {"name": "buffer", "type": "buffer"},

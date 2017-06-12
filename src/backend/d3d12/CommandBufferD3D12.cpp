@@ -61,6 +61,12 @@ namespace d3d12 {
                       }
                       break;
 
+                  case Command::CopyBufferToBuffer:
+                      {
+                          CopyBufferToBufferCmd* copy = commands.NextCommand<CopyBufferToBufferCmd>();
+                      }
+                      break;
+
                   case Command::CopyBufferToTexture:
                       {
                           CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();

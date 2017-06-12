@@ -376,6 +376,20 @@ namespace metal {
                     }
                     break;
 
+                case Command::CopyBufferToBuffer:
+                    {
+                        CopyBufferToBufferCmd* copy = commands.NextCommand<CopyBufferToBufferCmd>();
+
+                        encoders.EnsureBlit(commandBuffer);
+                        [encoders.blit
+                            copyFromBuffer:ToBackend(copy->source)->GetMTLBuffer()
+                            sourceOffset:copy->sourceOffset
+                            toBuffer:ToBackend(copy->destination)->GetMTLBuffer()
+                            destinationOffset:copy->destinationOffset
+                            size:copy->size];
+                    }
+                    break;
+
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();

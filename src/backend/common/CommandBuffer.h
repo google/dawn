@@ -61,6 +61,7 @@ namespace backend {
             // NXT API
             void AdvanceSubpass();
             void BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
+            void CopyBufferToBuffer(BufferBase* source, uint32_t sourceOffset, BufferBase* destination, uint32_t destinationOffset, uint32_t size);
             void CopyBufferToTexture(BufferBase* buffer, uint32_t bufferOffset,
                                      TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
                                      uint32_t width, uint32_t height, uint32_t depth, uint32_t level);
