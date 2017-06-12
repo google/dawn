@@ -116,7 +116,7 @@ namespace null {
 
     Buffer::Buffer(BufferBuilder* builder)
         : BufferBase(builder) {
-        if (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
+        if (GetAllowedUsage() & (nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
             backingData = std::unique_ptr<char[]>(new char[GetSize()]);
         }
     }

@@ -41,8 +41,8 @@ class BufferValidationTest : public ValidationTest {
         nxt::Buffer CreateSetSubDataBuffer(uint32_t size) {
             return device.CreateBufferBuilder()
                 .SetSize(size)
-                .SetAllowedUsage(nxt::BufferUsageBit::MapWrite)
-                .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
+                .SetAllowedUsage(nxt::BufferUsageBit::TransferDst)
+                .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
                 .GetResult();
         }
 
@@ -275,7 +275,7 @@ TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
 TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
     nxt::Buffer buf = device.CreateBufferBuilder()
         .SetSize(4)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Vertex)
+        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Vertex)
         .SetInitialUsage(nxt::BufferUsageBit::Vertex)
         .GetResult();
 

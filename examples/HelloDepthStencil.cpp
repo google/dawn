@@ -165,8 +165,8 @@ void init() {
         .GetResult();
 
     cameraBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Uniform)
-        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
+        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Uniform)
+        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .SetSize(sizeof(CameraData))
         .GetResult();
 
@@ -265,7 +265,7 @@ void frame() {
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
 
-    cameraBuffer.TransitionUsage(nxt::BufferUsageBit::MapWrite);
+    cameraBuffer.TransitionUsage(nxt::BufferUsageBit::TransferDst);
     cameraBuffer.SetSubData(0, sizeof(CameraData) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&cameraData));
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()

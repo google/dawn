@@ -80,8 +80,8 @@ void initBuffers() {
 
     for (int i = 0; i < 2; i++) {
         particleBuffers[i] = device.CreateBufferBuilder()
-            .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Storage)
-            .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
+            .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Storage)
+            .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
             .SetSize(sizeof(Particle) * kNumParticles)
             .GetResult();
 

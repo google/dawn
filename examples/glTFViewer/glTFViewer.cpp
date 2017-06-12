@@ -265,8 +265,8 @@ namespace {
             .GetResult();
 
         auto uniformBuffer = device.CreateBufferBuilder()
-            .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Uniform)
-            .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
+            .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Uniform)
+            .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
             .SetSize(sizeof(u_transform_block))
             .GetResult();
 
@@ -489,7 +489,7 @@ namespace {
                 }
             }
             const MaterialInfo& material = getMaterial(iPrim.material, strides[0], strides[1], strides[2]);
-            material.uniformBuffer.TransitionUsage(nxt::BufferUsageBit::MapWrite);
+            material.uniformBuffer.TransitionUsage(nxt::BufferUsageBit::TransferDst);
             material.uniformBuffer.SetSubData(0,
                     sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));

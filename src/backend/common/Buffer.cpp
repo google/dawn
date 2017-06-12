@@ -69,8 +69,8 @@ namespace backend {
             return;
         }
 
-        if (!(currentUsage & nxt::BufferUsageBit::MapWrite)) {
-            device->HandleError("Buffer needs the map write usage bit");
+        if (!(currentUsage & nxt::BufferUsageBit::TransferDst)) {
+            device->HandleError("Buffer needs the transfer dst usage bit");
             return;
         }
 

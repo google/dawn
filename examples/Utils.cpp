@@ -262,8 +262,8 @@ void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderP
 
 nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, const void* data, uint32_t size, nxt::BufferUsageBit usage) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | usage)
-        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
+        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | usage)
+        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .SetSize(size)
         .GetResult();
     buffer.SetSubData(0, size / sizeof(uint32_t), reinterpret_cast<const uint32_t*>(data));
