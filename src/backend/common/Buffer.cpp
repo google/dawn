@@ -145,7 +145,7 @@ namespace backend {
         return IsUsagePossible(allowedUsage, usage);
     }
 
-    void BufferBase::TransitionUsageImpl(nxt::BufferUsageBit usage) {
+    void BufferBase::UpdateUsageInternal(nxt::BufferUsageBit usage) {
         assert(IsTransitionPossible(usage));
         currentUsage = usage;
     }
@@ -155,7 +155,8 @@ namespace backend {
             device->HandleError("Buffer frozen or usage not allowed");
             return;
         }
-        TransitionUsageImpl(usage);
+        TransitionUsageImpl(currentUsage, usage);
+        currentUsage = usage;
     }
 
     void BufferBase::FreezeUsage(nxt::BufferUsageBit usage) {
@@ -164,6 +165,7 @@ namespace backend {
             return;
         }
         allowedUsage = usage;
+        TransitionUsageImpl(currentUsage, usage);
         currentUsage = usage;
         frozen = true;
     }

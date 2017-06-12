@@ -145,6 +145,7 @@ namespace d3d12 {
             void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
             void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
             void UnmapImpl() override;
+            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
             Device* device;
     };
@@ -202,6 +203,8 @@ namespace d3d12 {
             Texture(Device* device, TextureBuilder* builder);
 
         private:
+            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+
             Device* device;
     };
 

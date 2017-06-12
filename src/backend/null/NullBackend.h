@@ -52,7 +52,7 @@ namespace null {
     using RenderPass = RenderPassBase;
     using Sampler = SamplerBase;
     using ShaderModule = ShaderModuleBase;
-    using Texture = TextureBase;
+    class Texture;
     using TextureView = TextureViewBase;
 
     struct NullBackendTraits {
@@ -129,6 +129,7 @@ namespace null {
             void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
             void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
             void UnmapImpl() override;
+            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
             std::unique_ptr<char[]> backingData;
     };
@@ -140,6 +141,15 @@ namespace null {
 
             // NXT API
             void Submit(uint32_t numCommands, CommandBuffer* const * commands);
+    };
+
+    class Texture : public TextureBase {
+        public:
+            Texture(TextureBuilder* buidler);
+            ~Texture();
+
+        private:
+            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
     };
 
 }

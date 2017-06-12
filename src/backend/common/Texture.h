@@ -41,7 +41,7 @@ namespace backend {
             bool HasFrozenUsage(nxt::TextureUsageBit usage) const;
             static bool IsUsagePossible(nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit usage);
             bool IsTransitionPossible(nxt::TextureUsageBit usage) const;
-            void TransitionUsageImpl(nxt::TextureUsageBit usage);
+            void UpdateUsageInternal(nxt::TextureUsageBit usage);
 
             DeviceBase* GetDevice();
 
@@ -51,6 +51,8 @@ namespace backend {
             void FreezeUsage(nxt::TextureUsageBit usage);
 
         private:
+            virtual void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) = 0;
+
             DeviceBase* device;
 
             nxt::TextureDimension dimension;

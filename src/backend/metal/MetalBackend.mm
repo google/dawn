@@ -233,6 +233,9 @@ namespace metal {
         // TODO(cwallez@chromium.org): Implement Map Read for the metal backend
     }
 
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
+    }
+
     // BufferView
 
     BufferView::BufferView(Device* device, BufferViewBuilder* builder)
@@ -669,7 +672,7 @@ namespace metal {
                     {
                         TransitionBufferUsageCmd* cmd = commands.NextCommand<TransitionBufferUsageCmd>();
 
-                        cmd->buffer->TransitionUsageImpl(cmd->usage);
+                        cmd->buffer->UpdateUsageInternal(cmd->usage);
                     }
                     break;
 
@@ -677,7 +680,7 @@ namespace metal {
                     {
                         TransitionTextureUsageCmd* cmd = commands.NextCommand<TransitionTextureUsageCmd>();
 
-                        cmd->texture->TransitionUsageImpl(cmd->usage);
+                        cmd->texture->UpdateUsageInternal(cmd->usage);
                     }
                     break;
 ;
@@ -1154,6 +1157,9 @@ namespace metal {
 
     id<MTLTexture> Texture::GetMTLTexture() {
         return mtlTexture;
+    }
+
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
     }
 
     // TextureView

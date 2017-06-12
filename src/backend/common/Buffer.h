@@ -35,7 +35,7 @@ namespace backend {
             bool IsTransitionPossible(nxt::BufferUsageBit usage) const;
             bool IsFrozen() const;
             bool HasFrozenUsage(nxt::BufferUsageBit usage) const;
-            void TransitionUsageImpl(nxt::BufferUsageBit usage);
+            void UpdateUsageInternal(nxt::BufferUsageBit usage);
 
             DeviceBase* GetDevice();
 
@@ -54,6 +54,7 @@ namespace backend {
             virtual void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) = 0;
             virtual void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
             virtual void UnmapImpl() = 0;
+            virtual void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) = 0;
 
             DeviceBase* device;
             uint32_t size;

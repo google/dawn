@@ -87,7 +87,7 @@ namespace backend {
         return IsUsagePossible(allowedUsage, usage);
     }
 
-    void TextureBase::TransitionUsageImpl(nxt::TextureUsageBit usage) {
+    void TextureBase::UpdateUsageInternal(nxt::TextureUsageBit usage) {
         assert(IsTransitionPossible(usage));
         currentUsage = usage;
     }
@@ -97,7 +97,8 @@ namespace backend {
             device->HandleError("Texture frozen or usage not allowed");
             return;
         }
-        TransitionUsageImpl(usage);
+        TransitionUsageImpl(currentUsage, usage);
+        currentUsage = usage;
     }
 
     void TextureBase::FreezeUsage(nxt::TextureUsageBit usage) {
@@ -106,6 +107,7 @@ namespace backend {
             return;
         }
         allowedUsage = usage;
+        TransitionUsageImpl(currentUsage, usage);
         currentUsage = usage;
         frozen = true;
     }

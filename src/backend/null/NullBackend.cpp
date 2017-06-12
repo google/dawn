@@ -83,7 +83,7 @@ namespace null {
         return module;
     }
     TextureBase* Device::CreateTexture(TextureBuilder* builder) {
-        return new TextureBase(builder);
+        return new Texture(builder);
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
         return new TextureViewBase(builder);
@@ -149,6 +149,9 @@ namespace null {
     void Buffer::UnmapImpl() {
     }
 
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
+    }
+
     // Queue
 
     Queue::Queue(QueueBuilder* builder)
@@ -166,6 +169,18 @@ namespace null {
         }
 
         operations.clear();
+    }
+
+    // Texture
+
+    Texture::Texture(TextureBuilder* builder)
+        : TextureBase(builder) {
+    }
+
+    Texture::~Texture() {
+    }
+
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
     }
 
 }

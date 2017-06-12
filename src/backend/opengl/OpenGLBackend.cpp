@@ -141,6 +141,9 @@ namespace opengl {
         // TODO(cwallez@chromium.org): Implement Map Read for the GL backend
     }
 
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
+    }
+
     // BufferView
 
     BufferView::BufferView(Device* device, BufferViewBuilder* builder)

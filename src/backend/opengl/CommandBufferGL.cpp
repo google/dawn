@@ -325,7 +325,7 @@ namespace opengl {
                     {
                         TransitionBufferUsageCmd* cmd = commands.NextCommand<TransitionBufferUsageCmd>();
 
-                        cmd->buffer->TransitionUsageImpl(cmd->usage);
+                        cmd->buffer->UpdateUsageInternal(cmd->usage);
                     }
                     break;
 
@@ -333,7 +333,7 @@ namespace opengl {
                     {
                         TransitionTextureUsageCmd* cmd = commands.NextCommand<TransitionTextureUsageCmd>();
 
-                        cmd->texture->TransitionUsageImpl(cmd->usage);
+                        cmd->texture->UpdateUsageInternal(cmd->usage);
                     }
                     break;
             }

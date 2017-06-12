@@ -156,6 +156,9 @@ namespace d3d12 {
         // TODO(cwallez@chromium.org): Implement Map Read for the null backend
     }
 
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
+    }
+
     // BufferView
 
     BufferView::BufferView(Device* device, BufferViewBuilder* builder)
@@ -196,6 +199,9 @@ namespace d3d12 {
 
     Texture::Texture(Device* device, TextureBuilder* builder)
         : TextureBase(builder), device(device) {
+    }
+
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
     }
 
     // TextureView

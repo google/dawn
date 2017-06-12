@@ -39,6 +39,8 @@ namespace opengl {
             TextureFormatInfo GetGLFormat() const;
 
         private:
+            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+
             Device* device;
             GLuint handle;
             GLenum target;
