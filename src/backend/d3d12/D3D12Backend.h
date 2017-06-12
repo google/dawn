@@ -42,6 +42,7 @@ namespace d3d12 {
     class BufferView;
     class CommandBuffer;
     class DepthStencilState;
+    class Device;
     class InputState;
     class Pipeline;
     class PipelineLayout;
@@ -60,6 +61,7 @@ namespace d3d12 {
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
         using DepthStencilStateType = DepthStencilState;
+        using DeviceType = Device;
         using InputStateType = InputState;
         using PipelineType = Pipeline;
         using PipelineLayoutType = PipelineLayout;

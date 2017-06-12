@@ -39,6 +39,7 @@ namespace opengl {
     class BufferView;
     class CommandBuffer;
     class DepthStencilState;
+    class Device;
     class InputState;
     class PersistentPipelineState;
     class Pipeline;
@@ -58,6 +59,7 @@ namespace opengl {
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
         using DepthStencilStateType = DepthStencilState;
+        using DeviceType = Device;
         using InputStateType = InputState;
         using PipelineType = Pipeline;
         using PipelineLayoutType = PipelineLayout;

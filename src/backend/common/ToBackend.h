@@ -54,6 +54,11 @@ namespace backend {
     };
 
     template<typename BackendTraits>
+    struct ToBackendTraits<DeviceBase, BackendTraits> {
+        using BackendType = typename BackendTraits::DeviceType;
+    };
+
+    template<typename BackendTraits>
     struct ToBackendTraits<FramebufferBase, BackendTraits> {
         using BackendType = typename BackendTraits::FramebufferType;
     };

@@ -43,6 +43,7 @@ namespace null {
     using BufferView = BufferViewBase;
     using CommandBuffer = CommandBufferBase;
     using DepthStencilState = DepthStencilStateBase;
+    class Device;
     using InputState = InputStateBase;
     using Framebuffer = FramebufferBase;
     using Pipeline = PipelineBase;
@@ -61,6 +62,7 @@ namespace null {
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
         using DepthStencilStateType = DepthStencilState;
+        using DeviceType = Device;
         using InputStateType = InputState;
         using FramebufferType = Framebuffer;
         using PipelineType = Pipeline;
