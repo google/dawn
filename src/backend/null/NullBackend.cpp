@@ -89,6 +89,13 @@ namespace null {
         return new TextureViewBase(builder);
     }
 
+    void Device::AddPendingOperation(std::unique_ptr<PendingOperation> operation) {
+        pendingOperations.emplace_back(std::move(operation));
+    }
+    std::vector<std::unique_ptr<PendingOperation>> Device::AcquirePendingOperations() {
+        return std::move(pendingOperations);
+    }
+
     void Device::Reference() {
     }
 
@@ -97,22 +104,49 @@ namespace null {
 
     // Buffer
 
+    struct BufferMapReadOperation : PendingOperation {
+        virtual void Execute() {
+            buffer->MapReadOperationCompleted(serial, ptr);
+        }
+
+        Ref<Buffer> buffer;
+        const void* ptr;
+        uint32_t serial;
+    };
+
     Buffer::Buffer(BufferBuilder* builder)
         : BufferBase(builder) {
+        if (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
+            backingData = std::unique_ptr<char[]>(new char[GetSize()]);
+        }
     }
 
     Buffer::~Buffer() {
     }
 
+    void Buffer::MapReadOperationCompleted(uint32_t serial, const void* ptr) {
+        CallMapReadCallback(serial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, ptr);
+    }
+
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
+        ASSERT(start + count <= GetSize());
+        ASSERT(backingData);
+        memcpy(backingData.get() + start, data, count);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
-        // TODO(cwallez@chromium.org): Implement Map Read for the null backend
+        ASSERT(start + count <= GetSize());
+        ASSERT(backingData);
+
+        auto operation = new BufferMapReadOperation;
+        operation->buffer = this;
+        operation->ptr = backingData.get() + start;
+        operation->serial = serial;
+
+        ToBackend(GetDevice())->AddPendingOperation(std::unique_ptr<PendingOperation>(operation));
     }
 
     void Buffer::UnmapImpl() {
-        // TODO(cwallez@chromium.org): Implement Map Read for the null backend
     }
 
     // Queue
@@ -125,6 +159,13 @@ namespace null {
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
+        auto operations = ToBackend(GetDevice())->AcquirePendingOperations();
+
+        for (auto& operation : operations) {
+            operation->Execute();
+        }
+
+        operations.clear();
     }
 
 }

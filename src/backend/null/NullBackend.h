@@ -80,6 +80,11 @@ namespace null {
         return ToBackendBase<NullBackendTraits>(common);
     }
 
+    struct PendingOperation {
+        virtual ~PendingOperation() = default;
+        virtual void Execute() = 0;
+    };
+
     class Device : public DeviceBase {
         public:
             Device();
@@ -102,9 +107,15 @@ namespace null {
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
+            void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
+            std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
+
             // NXT API
             void Reference();
             void Release();
+
+        private:
+            std::vector<std::unique_ptr<PendingOperation>> pendingOperations;
     };
 
     class Buffer : public BufferBase {
@@ -112,10 +123,14 @@ namespace null {
             Buffer(BufferBuilder* builder);
             ~Buffer();
 
+            void MapReadOperationCompleted(uint32_t serial, const void* ptr);
+
         private:
             void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
             void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
             void UnmapImpl() override;
+
+            std::unique_ptr<char[]> backingData;
     };
 
     class Queue : public QueueBase {
