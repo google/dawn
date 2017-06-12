@@ -17,6 +17,7 @@
 class DepthStencilStateValidationTest : public ValidationTest {
 };
 
+// Test cases where creation should succeed
 TEST_F(DepthStencilStateValidationTest, CreationSuccess) {
     // Success for setting all properties
     {
@@ -46,6 +47,7 @@ TEST_F(DepthStencilStateValidationTest, CreationSuccess) {
     }
 }
 
+// Test creation failure when specifying properties multiple times
 TEST_F(DepthStencilStateValidationTest, CreationDuplicates) {
     // Test failure when specifying depth write enabled multiple times
     {

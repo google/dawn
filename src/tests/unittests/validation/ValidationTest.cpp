@@ -29,6 +29,8 @@ ValidationTest::ValidationTest() {
 
     nxtSetProcs(&procs);
     device = nxt::Device::Acquire(cDevice);
+
+    device.SetErrorCallback(ValidationTest::OnDeviceError, static_cast<nxtCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
 }
 
 ValidationTest::~ValidationTest() {
@@ -39,6 +41,8 @@ ValidationTest::~ValidationTest() {
 }
 
 void ValidationTest::TearDown() {
+    ASSERT_FALSE(expectError);
+
     for (auto& expectation : expectations) {
         std::string name = expectation.debugName;
         if (name.empty()) {
@@ -54,6 +58,29 @@ void ValidationTest::TearDown() {
             << "Got wrong status value for " << name
             << ", status was " << expectation.status << " with \"" << expectation.statusMessage << "\"";
     }
+}
+
+void ValidationTest::StartExpectDeviceError() {
+    expectError = true;
+    error = false;
+}
+bool ValidationTest::EndExpectDeviceError() {
+    expectError = false;
+    return error;
+}
+
+void ValidationTest::OnDeviceError(const char* message, nxtCallbackUserdata userdata) {
+    // Skip this one specific error that is raised when a builder is used after it got an error
+    // this is important because we don't want to wrap all creation tests in ASSERT_DEVICE_ERROR.
+    // Yes the error message is misleading.
+    if (std::string(message) == "Builder cannot be used after GetResult") {
+        return;
+    }
+
+    auto self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata));
+    ASSERT_TRUE(self->expectError) << "Got unexpected device error: " << message;
+    ASSERT_FALSE(self->error) << "Got two errors in expect block";
+    self->error = true;
 }
 
 void ValidationTest::OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, nxt::CallbackUserdata userdata1, nxt::CallbackUserdata userdata2) {

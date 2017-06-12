@@ -19,6 +19,11 @@
 #include "nxt/nxtcpp.h"
 #include "nxt/nxtcpp_traits.h"
 
+#define ASSERT_DEVICE_ERROR(statement) \
+    StartExpectDeviceError(); \
+    statement; \
+    ASSERT_TRUE(EndExpectDeviceError());
+
 class ValidationTest : public testing::Test {
     public:
         ValidationTest();
@@ -38,12 +43,19 @@ class ValidationTest : public testing::Test {
         template<typename Builder>
         Builder AssertWillBeError(Builder builder, std::string debugName = "");
 
+        void StartExpectDeviceError();
+        bool EndExpectDeviceError();
+
         void TearDown() override;
 
     protected:
         nxt::Device device;
 
     private:
+        static void OnDeviceError(const char* message, nxtCallbackUserdata userdata);
+        bool expectError = false;
+        bool error = false;
+
         struct BuilderStatusExpectations {
             bool expectSuccess;
             std::string debugName;
