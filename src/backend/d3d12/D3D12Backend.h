@@ -32,6 +32,7 @@
 #include "common/ToBackend.h"
 
 #include "d3d12_platform.h"
+#include "ResourceUploader.h"
 
 namespace backend {
 namespace d3d12 {
@@ -109,8 +110,13 @@ namespace d3d12 {
             ComPtr<ID3D12CommandAllocator> GetPendingCommandAllocator();
             ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
             D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetDescriptor();
+            ResourceUploader* GetResourceUploader();
 
             void SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
+
+            void Tick();
+            uint64_t GetSerial() const;
+            void IncrementSerial();
 
             // NXT API
             void Reference();
@@ -122,6 +128,12 @@ namespace d3d12 {
             ComPtr<ID3D12CommandAllocator> pendingCommandAllocator;
             ComPtr<ID3D12GraphicsCommandList> pendingCommandList;
             D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor;
+
+            ResourceUploader resourceUploader;
+
+            uint64_t serial = 0;
+            ComPtr<ID3D12Fence> fence;
+            HANDLE fenceEvent;
     };
 
 

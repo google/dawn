@@ -48,7 +48,7 @@ namespace d3d12 {
         ASSERT(SUCCEEDED(hr));
     }
 
-    Device::Device(ComPtr<ID3D12Device> d3d12Device) : d3d12Device(d3d12Device) {
+    Device::Device(ComPtr<ID3D12Device> d3d12Device) : d3d12Device(d3d12Device), resourceUploader(this) {
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -62,6 +62,10 @@ namespace d3d12 {
             nullptr,
             IID_PPV_ARGS(&pendingCommandList)
         ));
+
+        ASSERT_SUCCESS(d3d12Device->CreateFence(serial++, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+        fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+        ASSERT(fenceEvent != nullptr);
     }
 
     Device::~Device() {
@@ -87,8 +91,51 @@ namespace d3d12 {
         return renderTargetDescriptor;
     }
 
+    ResourceUploader* Device::GetResourceUploader() {
+        return &resourceUploader;
+    }
+
     void Device::SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
         this->renderTargetDescriptor = renderTargetDescriptor;
+    }
+
+    void Device::Tick() {
+        // Execute any pending commands
+        ASSERT_SUCCESS(pendingCommandList->Close());
+        ID3D12CommandList* commandLists[] = { pendingCommandList.Get() };
+        commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+
+        // Update state tracking for objects requiring the serial
+        resourceUploader.EnqueueUploadingResources(GetSerial() + 1);
+
+        IncrementSerial();
+
+        // Signal when the pending commands have finished
+        ASSERT_SUCCESS(commandQueue->Signal(fence.Get(), GetSerial()));
+
+        // Handle objects awaiting GPU execution
+        const uint64_t lastCompletedSerial = fence->GetCompletedValue();
+        resourceUploader.FreeCompletedResources(lastCompletedSerial);
+
+        // TODO(enga@google.com): This will stall on the submit because
+        // the commands must finish exeuting before the ID3D12CommandAllocator is reset.
+        // This should be fixed / optimized by using multiple command allocators.
+        const uint64_t currentFence = GetSerial();
+        if (lastCompletedSerial < currentFence) {
+            ASSERT_SUCCESS(fence->SetEventOnCompletion(currentFence, fenceEvent));
+            WaitForSingleObject(fenceEvent, INFINITE);
+        }
+
+        ASSERT_SUCCESS(pendingCommandAllocator->Reset());
+        ASSERT_SUCCESS(pendingCommandList->Reset(pendingCommandAllocator.Get(), NULL));
+    }
+
+    uint64_t Device::GetSerial() const {
+        return serial;
+    }
+
+    void Device::IncrementSerial() {
+        serial++;
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
