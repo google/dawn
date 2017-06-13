@@ -545,9 +545,12 @@ namespace wire {
                         }
                         buffer->mappedData = malloc(request.size);
                         memcpy(buffer->mappedData, cmd->GetData(), request.size);
+
+                        request.callback(static_cast<nxtBufferMapReadStatus>(cmd->status), buffer->mappedData, request.userdata);
+                    } else {
+                        request.callback(static_cast<nxtBufferMapReadStatus>(cmd->status), nullptr, request.userdata);
                     }
 
-                    request.callback(static_cast<nxtBufferMapReadStatus>(cmd->status), buffer->mappedData, request.userdata);
                     buffer->readRequests.erase(requestIt);
                     return true;
                 }

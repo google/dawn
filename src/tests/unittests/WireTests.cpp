@@ -642,3 +642,39 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarly) {
     // The callback shouldn't get called, even when the request succeeded on the server side
     FlushServer();
 }
+
+// Check that an error callback gets nullptr while a buffer is already mapped
+TEST_F(WireBufferMappingTests, MappingErrorWhileAlreadyMappedGetsNullptr) {
+    // Successful map
+    nxtCallbackUserdata userdata = 34098;
+    nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+
+    uint32_t bufferContent = 31337;
+    EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+        }))
+        .RetiresOnSaturation();
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
+        .Times(1);
+
+    FlushServer();
+
+    // Map failure while the buffer is already mapped
+    userdata ++;
+    nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+    EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr);
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata))
+        .Times(1);
+
+    FlushServer();
+}
