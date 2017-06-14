@@ -17,6 +17,8 @@
 
 #include "d3d12_platform.h"
 
+#include "common/SerialQueue.h"
+
 #include <map>
 #include <vector>
 
@@ -30,15 +32,12 @@ namespace d3d12 {
             ResourceUploader(Device* device);
 
             void UploadToBuffer(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const uint8_t* data);
-            void EnqueueUploadingResources(const uint64_t serial);
             void FreeCompletedResources(const uint64_t lastCompletedSerial);
 
         private:
             Device* device;
 
-            std::vector<ComPtr<ID3D12Resource>> pendingResources;
-            std::vector<std::pair<uint64_t, std::vector<ComPtr<ID3D12Resource>>>> uploadingResources;
-
+            SerialQueue<ComPtr<ID3D12Resource>> uploadingResources;
     };
 
 }

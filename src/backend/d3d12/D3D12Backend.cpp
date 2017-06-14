@@ -105,9 +105,6 @@ namespace d3d12 {
         ID3D12CommandList* commandLists[] = { pendingCommandList.Get() };
         commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 
-        // Update state tracking for objects requiring the serial
-        resourceUploader.EnqueueUploadingResources(GetSerial() + 1);
-
         IncrementSerial();
 
         // Signal when the pending commands have finished
