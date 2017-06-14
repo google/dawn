@@ -75,6 +75,8 @@ namespace metal {
         return ToBackendBase<MetalBackendTraits>(common);
     }
 
+    class ResourceUploader;
+
     class Device : public DeviceBase {
         public:
             Device(id<MTLDevice> mtlDevice);
@@ -106,17 +108,30 @@ namespace metal {
             id<MTLTexture> GetCurrentTexture();
             id<MTLTexture> GetCurrentDepthTexture();
 
+            id<MTLCommandBuffer> GetPendingCommandBuffer();
+            void SubmitPendingCommandBuffer();
+            Serial GetPendingCommandSerial();
+
+            ResourceUploader* GetResourceUploader() const;
+
             // NXT API
             void Reference();
             void Release();
 
         private:
+            void OnCompletedHandler();
+
             id<MTLDevice> mtlDevice = nil;
             id<MTLCommandQueue> commandQueue = nil;
+            ResourceUploader* resourceUploader;
 
             id<CAMetalDrawable> currentDrawable = nil;
             id<MTLTexture> currentTexture = nil;
             id<MTLTexture> currentDepthTexture = nil;
+
+            Serial finishedCommandSerial = 0;
+            Serial pendingCommandSerial = 1;
+            id<MTLCommandBuffer> pendingCommands = nil;
     };
 
     class BindGroup : public BindGroupBase {

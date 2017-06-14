@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_METAL_COMMANDBUFFERMTL_H_
-#define BACKEND_METAL_COMMANDBUFFERMTL_H_
+#ifndef BACKEND_METAL_RESOURCEUPLOADER_H_
+#define BACKEND_METAL_RESOURCEUPLOADER_H_
 
-#include "common/CommandBuffer.h"
+#include "common/SerialQueue.h"
 
 #import <Metal/Metal.h>
 
@@ -24,19 +24,21 @@ namespace metal {
 
     class Device;
 
-    class CommandBuffer : public CommandBufferBase {
+    class ResourceUploader {
         public:
-            CommandBuffer(Device* device, CommandBufferBuilder* builder);
-            ~CommandBuffer();
+            ResourceUploader(Device* device);
+            ~ResourceUploader();
 
-            void FillCommands(id<MTLCommandBuffer> commandBuffer);
+            void BufferSubData(id<MTLBuffer> buffer, uint32_t start, uint32_t size, const void* data);
+            void Tick(Serial finishedSerial);
 
         private:
             Device* device;
-            CommandIterator commands;
+            SerialQueue<id<MTLBuffer>> inflightUploadBuffers;
     };
 
+
 }
 }
 
-#endif // BACKEND_METAL_COMMANDBUFFERMTL_H_
+#endif // BACKEND_METAL_RESOURCEUPLOADER_H_

@@ -22,6 +22,7 @@
 #include "InputStateMTL.h"
 #include "PipelineMTL.h"
 #include "PipelineLayoutMTL.h"
+#include "ResourceUploader.h"
 #include "SamplerMTL.h"
 #include "ShaderModuleMTL.h"
 #include "TextureMTL.h"
@@ -50,12 +51,19 @@ namespace metal {
 
     // Device
 
-    Device::Device(id<MTLDevice> mtlDevice) : mtlDevice(mtlDevice) {
+    Device::Device(id<MTLDevice> mtlDevice)
+        : mtlDevice(mtlDevice), resourceUploader(new ResourceUploader(this)) {
         [mtlDevice retain];
         commandQueue = [mtlDevice newCommandQueue];
     }
 
     Device::~Device() {
+        [pendingCommands release];
+        pendingCommands = nil;
+
+        delete resourceUploader;
+        resourceUploader = nullptr;
+
         [mtlDevice release];
         mtlDevice = nil;
 
@@ -119,6 +127,11 @@ namespace metal {
     }
 
     void Device::TickImpl() {
+        resourceUploader->Tick(finishedCommandSerial);
+
+        // Code above might have added GPU work, submit it. This also makes sure
+        // that even when no GPU work is happening, the serial number keeps incrementing.
+        SubmitPendingCommandBuffer();
     }
 
     void Device::SetNextDrawable(id<CAMetalDrawable> drawable) {
@@ -183,6 +196,44 @@ namespace metal {
         return currentDepthTexture;
     }
 
+    id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {
+        if (pendingCommands == nil) {
+            pendingCommands = [commandQueue commandBuffer];
+        }
+        return pendingCommands;
+    }
+
+    void Device::SubmitPendingCommandBuffer() {
+        if (pendingCommands == nil) {
+            return;
+        }
+
+        // Ok, ObjC blocks are weird. My understanding is that local variables are captured by value
+        // so this-> works as expected. However it is unclear how members are captured, (are they
+        // captured using this-> or by value?) so we make a copy of the pendingCommandSerial on the stack.
+        Serial pendingSerial = pendingCommandSerial;
+        [pendingCommands addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
+            this->finishedCommandSerial = pendingSerial;
+        }];
+
+        [pendingCommands commit];
+        pendingCommands = nil;
+        pendingCommandSerial ++;
+    }
+
+    uint64_t Device::GetPendingCommandSerial() {
+        // If this is called, then it means some piece of code somewhere will wait for this serial to
+        // complete. Make sure the pending command buffer is created so that it is on the worst case
+        // enqueued on the next Tick() and eventually increments the serial. Otherwise if no GPU work
+        // happens we could be waiting for this serial forever.
+        GetPendingCommandBuffer();
+        return pendingCommandSerial;
+    }
+
+    ResourceUploader* Device::GetResourceUploader() const {
+        return resourceUploader;
+    }
+
     void Device::Reference() {
     }
 
@@ -227,29 +278,14 @@ namespace metal {
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
-        id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
-
-        // Mutexes are necessary to prevent buffers from being written from the
-        // CPU before their previous value has been read from the GPU.
-        // https://developer.apple.com/library/content/documentation/3DDrawing/Conceptual/MTLBestPracticesGuide/TripleBuffering.html
-        // TODO(kainino@chromium.org): When we have resource transitions, all of these mutexes will be replaced.
-        std::unordered_set<std::mutex*> mutexes;
+        Device* device = ToBackend(GetDevice());
+        id<MTLCommandBuffer> commandBuffer = device->GetPendingCommandBuffer();
 
         for (uint32_t i = 0; i < numCommands; ++i) {
-            commands[i]->FillCommands(commandBuffer, &mutexes);
+            commands[i]->FillCommands(commandBuffer);
         }
 
-        for (auto mutex : mutexes) {
-            mutex->lock();
-        }
-        [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
-            // 'mutexes' is copied into this Block
-            for (auto mutex : mutexes) {
-                mutex->unlock();
-            }
-        }];
-
-        [commandBuffer commit];
+        device->SubmitPendingCommandBuffer();
     }
 
     // RenderPass

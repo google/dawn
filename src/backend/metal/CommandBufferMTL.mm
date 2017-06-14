@@ -126,7 +126,7 @@ namespace metal {
         FreeCommands(&commands);
     }
 
-    void CommandBuffer::FillCommands(id<MTLCommandBuffer> commandBuffer, std::unordered_set<std::mutex*>* mutexes) {
+    void CommandBuffer::FillCommands(id<MTLCommandBuffer> commandBuffer) {
         Command type;
         Pipeline* lastPipeline = nullptr;
         id<MTLBuffer> indexBuffer = nil;
@@ -339,7 +339,6 @@ namespace metal {
                                     {
                                         BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
                                         auto b = ToBackend(view->GetBuffer());
-                                        mutexes->insert(&b->GetMutex());
                                         const id<MTLBuffer> buffer = b->GetMTLBuffer();
                                         const NSUInteger offset = view->GetOffset();
                                         if (vertStage) {
@@ -414,7 +413,6 @@ namespace metal {
                     {
                         SetIndexBufferCmd* cmd = commands.NextCommand<SetIndexBufferCmd>();
                         auto b = ToBackend(cmd->buffer.Get());
-                        mutexes->insert(&b->GetMutex());
                         indexBuffer = b->GetMTLBuffer();
                         indexBufferOffset = cmd->offset;
                         indexType = IndexFormatType(cmd->format);
@@ -436,7 +434,6 @@ namespace metal {
                         // a NXT API primitive to avoid reconstructing this array?
                         for (uint32_t i = 0; i < cmd->count; ++i) {
                             Buffer* buffer = ToBackend(buffers[i].Get());
-                            mutexes->insert(&buffer->GetMutex());
                             mtlBuffers[i] = buffer->GetMTLBuffer();
                             mtlOffsets[i] = offsets[i];
                         }

@@ -15,6 +15,7 @@
 #include "BufferMTL.h"
 
 #include "MetalBackend.h"
+#include "ResourceUploader.h"
 
 namespace backend {
 namespace metal {
@@ -22,11 +23,10 @@ namespace metal {
     Buffer::Buffer(BufferBuilder* builder)
         : BufferBase(builder) {
         mtlBuffer = [ToBackend(GetDevice())->GetMTLDevice() newBufferWithLength:GetSize()
-            options:MTLResourceStorageModeManaged];
+            options:MTLResourceStorageModePrivate];
     }
 
     Buffer::~Buffer() {
-        std::lock_guard<std::mutex> lock(mutex);
         [mtlBuffer release];
         mtlBuffer = nil;
     }
@@ -35,17 +35,9 @@ namespace metal {
         return mtlBuffer;
     }
 
-    std::mutex& Buffer::GetMutex() {
-        return mutex;
-    }
-
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
-        uint32_t* dest = reinterpret_cast<uint32_t*>([mtlBuffer contents]);
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            memcpy(&dest[start], data, count * sizeof(uint32_t));
-        }
-        [mtlBuffer didModifyRange:NSMakeRange(start * sizeof(uint32_t), count * sizeof(uint32_t))];
+        auto* uploader = ToBackend(GetDevice())->GetResourceUploader();
+        uploader->BufferSubData(mtlBuffer, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {

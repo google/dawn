@@ -157,6 +157,8 @@ if (APPLE)
         ${METAL_DIR}/PipelineMTL.h
         ${METAL_DIR}/PipelineLayoutMTL.mm
         ${METAL_DIR}/PipelineLayoutMTL.h
+        ${METAL_DIR}/ResourceUploader.mm
+        ${METAL_DIR}/ResourceUploader.h
         ${METAL_DIR}/SamplerMTL.mm
         ${METAL_DIR}/SamplerMTL.h
         ${METAL_DIR}/ShaderModuleMTL.mm

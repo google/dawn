@@ -19,8 +19,6 @@
 
 #import <Metal/Metal.h>
 
-#include <mutex>
-
 namespace backend {
 namespace metal {
 
@@ -30,7 +28,6 @@ namespace metal {
             ~Buffer();
 
             id<MTLBuffer> GetMTLBuffer();
-            std::mutex& GetMutex();
 
         private:
             void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
@@ -38,7 +35,6 @@ namespace metal {
             void UnmapImpl() override;
             void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
-            std::mutex mutex;
             id<MTLBuffer> mtlBuffer = nil;
     };
 
