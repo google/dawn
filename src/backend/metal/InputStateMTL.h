@@ -12,13 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "MetalBackend.h"
-#include "BufferMTL.h"
-#include "CommandBufferMTL.h"
-#include "DepthStencilStateMTL.h"
-#include "InputStateMTL.h"
-#include "PipelineMTL.h"
-#include "PipelineLayoutMTL.h"
-#include "SamplerMTL.h"
-#include "ShaderModuleMTL.h"
-#include "TextureMTL.h"
+#ifndef BACKEND_METAL_INPUTSTATEMTL_H_
+#define BACKEND_METAL_INPUTSTATEMTL_H_
+
+#include "common/InputState.h"
+
+#import <Metal/Metal.h>
+
+namespace backend {
+namespace metal {
+
+    class InputState : public InputStateBase {
+        public:
+            InputState(InputStateBuilder* builder);
+            ~InputState();
+
+            MTLVertexDescriptor* GetMTLVertexDescriptor();
+
+        private:
+            MTLVertexDescriptor* mtlVertexDescriptor = nil;
+    };
+
+}
+}
+
+#endif // BACKEND_METAL_COMMANDINPUTSTATEMTL_H_

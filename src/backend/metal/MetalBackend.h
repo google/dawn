@@ -17,34 +17,17 @@
 
 #include "nxt/nxtcpp.h"
 
-#include <map>
-#include <mutex>
-#include <unordered_set>
-
-#include "common/Buffer.h"
 #include "common/BindGroup.h"
 #include "common/BindGroupLayout.h"
 #include "common/Device.h"
-#include "common/CommandBuffer.h"
-#include "common/DepthStencilState.h"
-#include "common/InputState.h"
 #include "common/Framebuffer.h"
-#include "common/Pipeline.h"
-#include "common/PipelineLayout.h"
 #include "common/Queue.h"
 #include "common/RenderPass.h"
-#include "common/Sampler.h"
-#include "common/ShaderModule.h"
-#include "common/Texture.h"
 #include "common/ToBackend.h"
 
 #include <type_traits>
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
-
-namespace spirv_cross {
-    class CompilerMSL;
-}
 
 namespace backend {
 namespace metal {
@@ -152,70 +135,6 @@ namespace metal {
             Device* device;
     };
 
-    class Buffer : public BufferBase {
-        public:
-            Buffer(Device* device, BufferBuilder* builder);
-            ~Buffer();
-
-            id<MTLBuffer> GetMTLBuffer();
-            std::mutex& GetMutex();
-
-        private:
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
-
-            Device* device;
-            std::mutex mutex;
-            id<MTLBuffer> mtlBuffer = nil;
-    };
-
-    class BufferView : public BufferViewBase {
-        public:
-            BufferView(Device* device, BufferViewBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
-    class CommandBuffer : public CommandBufferBase {
-        public:
-            CommandBuffer(Device* device, CommandBufferBuilder* builder);
-            ~CommandBuffer();
-
-            void FillCommands(id<MTLCommandBuffer> commandBuffer, std::unordered_set<std::mutex*>* mutexes);
-
-        private:
-            Device* device;
-            CommandIterator commands;
-    };
-
-    class DepthStencilState : public DepthStencilStateBase {
-        public:
-            DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
-            ~DepthStencilState();
-
-            id<MTLDepthStencilState> GetMTLDepthStencilState();
-
-        private:
-            Device* device;
-
-            id<MTLDepthStencilState> mtlDepthStencilState = nil;
-    };
-
-    class InputState : public InputStateBase {
-        public:
-            InputState(Device* device, InputStateBuilder* builder);
-            ~InputState();
-
-            MTLVertexDescriptor* GetMTLVertexDescriptor();
-
-        private:
-            Device* device;
-            MTLVertexDescriptor* mtlVertexDescriptor = nil;
-    };
-
     class Framebuffer : public FramebufferBase {
         public:
             Framebuffer(Device* device, FramebufferBuilder* builder);
@@ -223,35 +142,6 @@ namespace metal {
 
         private:
             Device* device;
-    };
-
-    class Pipeline : public PipelineBase {
-        public:
-            Pipeline(Device* device, PipelineBuilder* builder);
-            ~Pipeline();
-
-            void Encode(id<MTLRenderCommandEncoder> encoder);
-            void Encode(id<MTLComputeCommandEncoder> encoder);
-            MTLSize GetLocalWorkGroupSize() const;
-
-        private:
-            Device* device;
-
-            id<MTLRenderPipelineState> mtlRenderPipelineState = nil;
-            id<MTLComputePipelineState> mtlComputePipelineState = nil;
-            MTLSize localWorkgroupSize;
-    };
-
-    class PipelineLayout : public PipelineLayoutBase {
-        public:
-            PipelineLayout(Device* device, PipelineLayoutBuilder* builder);
-
-            using BindingIndexInfo = std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;
-            const BindingIndexInfo& GetBindingIndexInfo(nxt::ShaderStage stage) const;
-
-        private:
-            Device* device;
-            PerStage<BindingIndexInfo> indexInfo;
     };
 
     class Queue : public QueueBase {
@@ -273,54 +163,6 @@ namespace metal {
         public:
             RenderPass(Device* device, RenderPassBuilder* builder);
             ~RenderPass();
-
-        private:
-            Device* device;
-    };
-
-    class Sampler : public SamplerBase {
-        public:
-            Sampler(Device* device, SamplerBuilder* builder);
-            ~Sampler();
-
-            id<MTLSamplerState> GetMTLSamplerState();
-
-        private:
-            Device* device;
-            id<MTLSamplerState> mtlSamplerState = nil;
-    };
-
-    class ShaderModule : public ShaderModuleBase {
-        public:
-            ShaderModule(Device* device, ShaderModuleBuilder* builder);
-            ~ShaderModule();
-
-            id<MTLFunction> GetFunction(const char* functionName) const;
-            MTLSize GetLocalWorkGroupSize(const std::string& entryPoint) const;
-
-        private:
-            Device* device;
-            id<MTLLibrary> mtlLibrary = nil;
-            spirv_cross::CompilerMSL* compiler = nullptr;
-    };
-
-    class Texture : public TextureBase {
-        public:
-            Texture(Device* device, TextureBuilder* builder);
-            ~Texture();
-
-            id<MTLTexture> GetMTLTexture();
-
-        private:
-            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
-
-            Device* device;
-            id<MTLTexture> mtlTexture = nil;
-    };
-
-    class TextureView : public TextureViewBase {
-        public:
-            TextureView(Device* device, TextureViewBuilder* builder);
 
         private:
             Device* device;

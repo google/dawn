@@ -12,14 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_OPENGL_COMMANDBUFFERGL_H_
-#define BACKEND_OPENGL_COMMANDBUFFERGL_H_
+#ifndef BACKEND_METAL_COMMANDBUFFERMTL_H_
+#define BACKEND_METAL_COMMANDBUFFERMTL_H_
 
-#include "common/CommandAllocator.h"
 #include "common/CommandBuffer.h"
 
+#import <Metal/Metal.h>
+
+#include <mutex>
+#include <unordered_set>
+
 namespace backend {
-namespace opengl {
+namespace metal {
 
     class Device;
 
@@ -28,7 +32,7 @@ namespace opengl {
             CommandBuffer(Device* device, CommandBufferBuilder* builder);
             ~CommandBuffer();
 
-            void Execute();
+            void FillCommands(id<MTLCommandBuffer> commandBuffer, std::unordered_set<std::mutex*>* mutexes);
 
         private:
             Device* device;
@@ -38,4 +42,4 @@ namespace opengl {
 }
 }
 
-#endif // BACKEND_OPENGL_COMMANDBUFFERGL_H_
+#endif // BACKEND_METAL_COMMANDBUFFERMTL_H_

@@ -143,8 +143,26 @@ if (APPLE)
     SetPIC(metal_autogen)
 
     list(APPEND BACKEND_SOURCES
+        ${METAL_DIR}/BufferMTL.mm
+        ${METAL_DIR}/BufferMTL.h
+        ${METAL_DIR}/CommandBufferMTL.mm
+        ${METAL_DIR}/CommandBufferMTL.h
+        ${METAL_DIR}/DepthStencilStateMTL.mm
+        ${METAL_DIR}/DepthStencilStateMTL.h
+        ${METAL_DIR}/InputStateMTL.mm
+        ${METAL_DIR}/InputStateMTL.h
         ${METAL_DIR}/MetalBackend.mm
         ${METAL_DIR}/MetalBackend.h
+        ${METAL_DIR}/PipelineMTL.mm
+        ${METAL_DIR}/PipelineMTL.h
+        ${METAL_DIR}/PipelineLayoutMTL.mm
+        ${METAL_DIR}/PipelineLayoutMTL.h
+        ${METAL_DIR}/SamplerMTL.mm
+        ${METAL_DIR}/SamplerMTL.h
+        ${METAL_DIR}/ShaderModuleMTL.mm
+        ${METAL_DIR}/ShaderModuleMTL.h
+        ${METAL_DIR}/TextureMTL.mm
+        ${METAL_DIR}/TextureMTL.h
     )
 endif()
 

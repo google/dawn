@@ -12,30 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_OPENGL_COMMANDBUFFERGL_H_
-#define BACKEND_OPENGL_COMMANDBUFFERGL_H_
+#ifndef BACKEND_METAL_TEXTUREMTL_H_
+#define BACKEND_METAL_TEXTUREMTL_H_
 
-#include "common/CommandAllocator.h"
-#include "common/CommandBuffer.h"
+#include "common/Texture.h"
+
+#import <Metal/Metal.h>
 
 namespace backend {
-namespace opengl {
+namespace metal {
 
-    class Device;
-
-    class CommandBuffer : public CommandBufferBase {
+    class Texture : public TextureBase {
         public:
-            CommandBuffer(Device* device, CommandBufferBuilder* builder);
-            ~CommandBuffer();
+            Texture(TextureBuilder* builder);
+            ~Texture();
 
-            void Execute();
+            id<MTLTexture> GetMTLTexture();
 
         private:
-            Device* device;
-            CommandIterator commands;
+            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+
+            id<MTLTexture> mtlTexture = nil;
+    };
+
+    class TextureView : public TextureViewBase {
+        public:
+            TextureView(TextureViewBuilder* builder);
     };
 
 }
 }
 
-#endif // BACKEND_OPENGL_COMMANDBUFFERGL_H_
+#endif // BACKEND_METAL_TEXTUREMTL_H_

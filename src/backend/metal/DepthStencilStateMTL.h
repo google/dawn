@@ -12,30 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_OPENGL_COMMANDBUFFERGL_H_
-#define BACKEND_OPENGL_COMMANDBUFFERGL_H_
+#ifndef BACKEND_METAL_DEPTHSTENCILSTATEMTL_H_
+#define BACKEND_METAL_DEPTHSTENCILSTATEMTL_H_
 
-#include "common/CommandAllocator.h"
-#include "common/CommandBuffer.h"
+#include "common/DepthStencilState.h"
+
+#import <Metal/Metal.h>
 
 namespace backend {
-namespace opengl {
+namespace metal {
 
     class Device;
 
-    class CommandBuffer : public CommandBufferBase {
+    class DepthStencilState : public DepthStencilStateBase {
         public:
-            CommandBuffer(Device* device, CommandBufferBuilder* builder);
-            ~CommandBuffer();
+            DepthStencilState(DepthStencilStateBuilder* builder);
+            ~DepthStencilState();
 
-            void Execute();
+            id<MTLDepthStencilState> GetMTLDepthStencilState();
 
         private:
-            Device* device;
-            CommandIterator commands;
+            id<MTLDepthStencilState> mtlDepthStencilState = nil;
     };
 
 }
 }
 
-#endif // BACKEND_OPENGL_COMMANDBUFFERGL_H_
+#endif // BACKEND_METAL_DEPTHSTENCILSTATEMTL_H_

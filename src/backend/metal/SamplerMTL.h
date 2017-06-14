@@ -12,13 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "MetalBackend.h"
-#include "BufferMTL.h"
-#include "CommandBufferMTL.h"
-#include "DepthStencilStateMTL.h"
-#include "InputStateMTL.h"
-#include "PipelineMTL.h"
-#include "PipelineLayoutMTL.h"
-#include "SamplerMTL.h"
-#include "ShaderModuleMTL.h"
-#include "TextureMTL.h"
+#ifndef BACKEND_METAL_SAMPLERMTL_H_
+#define BACKEND_METAL_SAMPLERMTL_H_
+
+#include "common/Sampler.h"
+
+#import <Metal/Metal.h>
+
+namespace backend {
+namespace metal {
+
+    class Sampler : public SamplerBase {
+        public:
+            Sampler(SamplerBuilder* builder);
+            ~Sampler();
+
+            id<MTLSamplerState> GetMTLSamplerState();
+
+        private:
+            id<MTLSamplerState> mtlSamplerState = nil;
+    };
+
+}
+}
+
+#endif // BACKEND_METAL_SAMPLERMTL_H_
