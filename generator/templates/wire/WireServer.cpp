@@ -205,6 +205,8 @@ namespace wire {
                 }
 
                 const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
+                    procs.deviceTick(knownDevice.Get(1)->handle);
+
                     while (size > sizeof(WireCmd)) {
                         WireCmd cmdId = *reinterpret_cast<const WireCmd*>(commands);
 

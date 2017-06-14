@@ -462,6 +462,9 @@
                 "returns": "texture builder"
             },
             {
+                "name": "tick"
+            },
+            {
                 "name": "copy bind groups",
                 "args": [
                     {"name": "start", "type": "uint32_t"},

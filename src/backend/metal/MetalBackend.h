@@ -114,6 +114,8 @@ namespace metal {
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
+            void TickImpl() override;
+
             void SetNextDrawable(id<CAMetalDrawable> drawable);
             void Present();
 

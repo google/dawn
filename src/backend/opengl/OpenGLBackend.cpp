@@ -97,6 +97,9 @@ namespace opengl {
         return new TextureView(this, builder);
     }
 
+    void Device::TickImpl() {
+    }
+
     void Device::Reference() {
     }
 

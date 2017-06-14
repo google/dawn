@@ -114,6 +114,9 @@ namespace metal {
         return new TextureView(this, builder);
     }
 
+    void Device::TickImpl() {
+    }
+
     void Device::SetNextDrawable(id<CAMetalDrawable> drawable) {
         [currentDrawable release];
         currentDrawable = drawable;

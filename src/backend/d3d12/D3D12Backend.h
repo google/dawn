@@ -105,6 +105,8 @@ namespace d3d12 {
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
+            void TickImpl() override;
+
             ComPtr<ID3D12Device> GetD3D12Device();
             ComPtr<ID3D12CommandQueue> GetCommandQueue();
             ComPtr<ID3D12CommandAllocator> GetPendingCommandAllocator();
@@ -114,7 +116,6 @@ namespace d3d12 {
 
             void SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
 
-            void Tick();
             uint64_t GetSerial() const;
             void IncrementSerial();
 

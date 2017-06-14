@@ -74,6 +74,7 @@ class WireTestsBase : public Test {
             if (ignoreSetCallbackCalls) {
                 EXPECT_CALL(api, OnBuilderSetErrorCallback(_, _, _, _)).Times(AnyNumber());
             }
+            EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
 
             s2cBuf = new TerribleCommandBuffer();
             c2sBuf = new TerribleCommandBuffer(wireServer);

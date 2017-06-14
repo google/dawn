@@ -107,6 +107,8 @@ namespace null {
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
+            void TickImpl() override;
+
             void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
             std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
 

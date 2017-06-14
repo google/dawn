@@ -130,6 +130,10 @@ namespace backend {
         return new TextureBuilder(this);
     }
 
+    void DeviceBase::Tick() {
+        TickImpl();
+    }
+
     void DeviceBase::CopyBindGroups(uint32_t start, uint32_t count, BindGroupBase* source, BindGroupBase* target) {
         // TODO(cwallez@chromium.org): update state tracking then call the backend
     }

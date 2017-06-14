@@ -97,6 +97,8 @@ namespace opengl {
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
+            void TickImpl() override;
+
             // NXT API
             void Reference();
             void Release();

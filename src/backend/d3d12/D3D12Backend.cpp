@@ -99,7 +99,7 @@ namespace d3d12 {
         this->renderTargetDescriptor = renderTargetDescriptor;
     }
 
-    void Device::Tick() {
+    void Device::TickImpl() {
         // Execute any pending commands
         ASSERT_SUCCESS(pendingCommandList->Close());
         ID3D12CommandList* commandLists[] = { pendingCommandList.Get() };

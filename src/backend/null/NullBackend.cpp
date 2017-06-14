@@ -89,6 +89,9 @@ namespace null {
         return new TextureViewBase(builder);
     }
 
+    void Device::TickImpl() {
+    }
+
     void Device::AddPendingOperation(std::unique_ptr<PendingOperation> operation) {
         pendingOperations.emplace_back(std::move(operation));
     }
