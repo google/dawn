@@ -44,26 +44,56 @@ namespace d3d12 {
         backendDevice->SetNextRenderTargetDescriptor(renderTargetDescriptor);
     }
 
+    uint64_t GetSerial(const nxtDevice device) {
+        const Device* backendDevice = reinterpret_cast<const Device*>(device);
+        return backendDevice->GetSerial();
+    }
+
+    void NextSerial(nxtDevice device) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        backendDevice->NextSerial();
+    }
+
+    void ExecuteCommandLists(nxtDevice device, std::initializer_list<ID3D12CommandList*> commandLists) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        backendDevice->ExecuteCommandLists(commandLists);
+    }
+
+    void WaitForSerial(nxtDevice device, uint64_t serial) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        backendDevice->WaitForSerial(serial);
+    }
+
+    ComPtr<ID3D12CommandAllocator> ReserveCommandAllocator(nxtDevice device) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        return backendDevice->GetCommandAllocatorManager()->ReserveCommandAllocator();
+    }
+
     void ASSERT_SUCCESS(HRESULT hr) {
         ASSERT(SUCCEEDED(hr));
     }
 
-    Device::Device(ComPtr<ID3D12Device> d3d12Device) : d3d12Device(d3d12Device), resourceUploader(this) {
+    Device::Device(ComPtr<ID3D12Device> d3d12Device)
+        : d3d12Device(d3d12Device),
+          commandAllocatorManager(this),
+          resourceUploader(this),
+          pendingCommands{ commandAllocatorManager.ReserveCommandAllocator() } {
+
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
         ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
 
-        ASSERT_SUCCESS(d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&pendingCommandAllocator)));
         ASSERT_SUCCESS(d3d12Device->CreateCommandList(
             0,
             D3D12_COMMAND_LIST_TYPE_DIRECT,
-            pendingCommandAllocator.Get(),
+            pendingCommands.commandAllocator.Get(),
             nullptr,
-            IID_PPV_ARGS(&pendingCommandList)
+            IID_PPV_ARGS(&pendingCommands.commandList)
         ));
+        pendingCommands.open = true;
 
-        ASSERT_SUCCESS(d3d12Device->CreateFence(serial++, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+        ASSERT_SUCCESS(d3d12Device->CreateFence(serial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
         fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         ASSERT(fenceEvent != nullptr);
     }
@@ -79,12 +109,14 @@ namespace d3d12 {
         return commandQueue;
     }
 
-    ComPtr<ID3D12CommandAllocator> Device::GetPendingCommandAllocator() {
-        return pendingCommandAllocator;
-    }
-
     ComPtr<ID3D12GraphicsCommandList> Device::GetPendingCommandList() {
-        return pendingCommandList;
+        // Callers of GetPendingCommandList do so to record commands. Only reserve a command allocator when it is needed so we don't submit empty command lists
+        if (!pendingCommands.open) {
+            pendingCommands.commandAllocator = commandAllocatorManager.ReserveCommandAllocator();
+            ASSERT_SUCCESS(pendingCommands.commandList->Reset(pendingCommands.commandAllocator.Get(), nullptr));
+            pendingCommands.open = true;
+        }
+        return pendingCommands.commandList;
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE Device::GetCurrentRenderTargetDescriptor() {
@@ -95,44 +127,50 @@ namespace d3d12 {
         return &resourceUploader;
     }
 
+    CommandAllocatorManager* Device::GetCommandAllocatorManager() {
+        return &commandAllocatorManager;
+    }
+
     void Device::SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
         this->renderTargetDescriptor = renderTargetDescriptor;
     }
 
     void Device::TickImpl() {
-        // Execute any pending commands
-        ASSERT_SUCCESS(pendingCommandList->Close());
-        ID3D12CommandList* commandLists[] = { pendingCommandList.Get() };
-        commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-
-        IncrementSerial();
-
-        // Signal when the pending commands have finished
-        ASSERT_SUCCESS(commandQueue->Signal(fence.Get(), GetSerial()));
-
-        // Handle objects awaiting GPU execution
+        // Perform cleanup operations to free unused objects
         const uint64_t lastCompletedSerial = fence->GetCompletedValue();
         resourceUploader.FreeCompletedResources(lastCompletedSerial);
-
-        // TODO(enga@google.com): This will stall on the submit because
-        // the commands must finish exeuting before the ID3D12CommandAllocator is reset.
-        // This should be fixed / optimized by using multiple command allocators.
-        const uint64_t currentFence = GetSerial();
-        if (lastCompletedSerial < currentFence) {
-            ASSERT_SUCCESS(fence->SetEventOnCompletion(currentFence, fenceEvent));
-            WaitForSingleObject(fenceEvent, INFINITE);
-        }
-
-        ASSERT_SUCCESS(pendingCommandAllocator->Reset());
-        ASSERT_SUCCESS(pendingCommandList->Reset(pendingCommandAllocator.Get(), NULL));
+        commandAllocatorManager.ResetCompletedAllocators(lastCompletedSerial);
     }
 
     uint64_t Device::GetSerial() const {
         return serial;
     }
 
-    void Device::IncrementSerial() {
-        serial++;
+    void Device::NextSerial() {
+        ASSERT_SUCCESS(commandQueue->Signal(fence.Get(), serial++));
+    }
+
+    void Device::WaitForSerial(uint64_t serial) {
+        const uint64_t lastCompletedSerial = fence->GetCompletedValue();
+        if (lastCompletedSerial < serial) {
+            ASSERT_SUCCESS(fence->SetEventOnCompletion(serial, fenceEvent));
+            WaitForSingleObject(fenceEvent, INFINITE);
+        }
+    }
+
+    void Device::ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists) {
+        // If there are pending commands, prepend them to ExecuteCommandLists
+        if (pendingCommands.open) {
+            std::vector<ID3D12CommandList*> lists(commandLists.size() + 1);
+            pendingCommands.commandList->Close();
+            pendingCommands.open = false;
+            lists[0] = pendingCommands.commandList.Get();
+            std::copy(commandLists.begin(), commandLists.end(), lists.begin() + 1);
+            commandQueue->ExecuteCommandLists(commandLists.size() + 1, lists.data());
+        } else {
+            std::vector<ID3D12CommandList*> lists(commandLists);
+            commandQueue->ExecuteCommandLists(commandLists.size(), lists.data());
+        }
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {

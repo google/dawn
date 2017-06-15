@@ -35,11 +35,7 @@ namespace d3d12 {
         private:
             Device* device;
 
-            ComPtr<ID3D12CommandAllocator> commandAllocator;
             ComPtr<ID3D12GraphicsCommandList> commandList;
-            ComPtr<ID3D12Fence> fence;
-            uint64_t fenceValue = 0;
-            HANDLE fenceEvent;
     };
 
 }

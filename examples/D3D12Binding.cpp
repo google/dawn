@@ -18,6 +18,7 @@
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
+#include <initializer_list>
 #include <assert.h>
 #include <wrl.h>
 #include <d3d12.h>
@@ -32,6 +33,11 @@ namespace d3d12 {
     void Init(ComPtr<ID3D12Device> d3d12Device, nxtProcTable* procs, nxtDevice* device);
     ComPtr<ID3D12CommandQueue> GetCommandQueue(nxtDevice device);
     void SetNextRenderTargetDescriptor(nxtDevice device, D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
+    uint64_t GetSerial(const nxtDevice device);
+    void NextSerial(nxtDevice device);
+    void ExecuteCommandLists(nxtDevice device, std::initializer_list<ID3D12CommandList*> commandLists);
+    void WaitForSerial(nxtDevice device, uint64_t serial);
+    ComPtr<ID3D12CommandAllocator> ReserveCommandAllocator(nxtDevice device);
 }
 }
 
@@ -102,15 +108,13 @@ class D3D12Binding : public BackendBinding {
 
             rtvDescriptorSize = d3d12Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-            // Create a RTV and command allocators for each frame.
+            // Create a RTV for each frame.
             {
                 D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewHandle = renderTargetViewHeap->GetCPUDescriptorHandleForHeapStart();
                 for (uint32_t n = 0; n < kFrameCount; ++n) {
                     ASSERT_SUCCESS(swapChain->GetBuffer(n, IID_PPV_ARGS(&renderTargetResources[n])));
                     d3d12Device->CreateRenderTargetView(renderTargetResources[n].Get(), nullptr, renderTargetViewHandle);
                     renderTargetViewHandle.ptr += rtvDescriptorSize;
-
-                    ASSERT_SUCCESS(d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocators[n])));
                 }
             }
 
@@ -118,23 +122,19 @@ class D3D12Binding : public BackendBinding {
             previousRenderTargetIndex = renderTargetIndex = swapChain->GetCurrentBackBufferIndex();
             previousRenderTargetIndex = renderTargetIndex == 0 ? 1 : 0;
 
-            // Initialize the current frame, the last completed frame, and all last frame each render target was used to 0
-            // so that it looks like we completed all previous frames
-            currentFrameNumber = 0;
+            // Initial the serial for all render targets
+            const uint64_t initialSerial = backend::d3d12::GetSerial(backendDevice);
             for (uint32_t n = 0; n < kFrameCount; ++n) {
-                lastFrameRenderTargetWasUsed[n] = 0;
+                lastSerialRenderTargetWasUsed[n] = initialSerial;
             }
-            ASSERT_SUCCESS(d3d12Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-
-            fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-            ASSERT(fenceEvent != nullptr);
 
             // Transition the first frame to be a render target
             {
+                ComPtr<ID3D12CommandAllocator> commandAllocator = backend::d3d12::ReserveCommandAllocator(backendDevice);
                 ASSERT_SUCCESS(d3d12Device->CreateCommandList(
                     0,
                     D3D12_COMMAND_LIST_TYPE_DIRECT,
-                    commandAllocators[previousRenderTargetIndex].Get(),
+                    commandAllocator.Get(),
                     nullptr,
                     IID_PPV_ARGS(&commandList)
                 ));
@@ -149,7 +149,9 @@ class D3D12Binding : public BackendBinding {
                 commandList->ResourceBarrier(1, &resourceBarrier);
                 ASSERT_SUCCESS(commandList->Close());
                 ID3D12CommandList* commandLists[] = { commandList.Get() };
-                commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+                backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
+
+                backend::d3d12::NextSerial(backendDevice);
             }
 
             D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewHandle = renderTargetViewHeap->GetCPUDescriptorHandleForHeapStart();
@@ -160,7 +162,8 @@ class D3D12Binding : public BackendBinding {
         void SwapBuffers() override {
             // Transition current frame's render target for presenting
             {
-                ASSERT_SUCCESS(commandList->Reset(commandAllocators[renderTargetIndex].Get(), nullptr));
+                ComPtr<ID3D12CommandAllocator> commandAllocator = backend::d3d12::ReserveCommandAllocator(backendDevice);
+                ASSERT_SUCCESS(commandList->Reset(commandAllocator.Get(), nullptr));
                 D3D12_RESOURCE_BARRIER resourceBarrier;
                 resourceBarrier.Transition.pResource = renderTargetResources[renderTargetIndex].Get();
                 resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -171,14 +174,15 @@ class D3D12Binding : public BackendBinding {
                 commandList->ResourceBarrier(1, &resourceBarrier);
                 ASSERT_SUCCESS(commandList->Close());
                 ID3D12CommandList* commandLists[] = { commandList.Get() };
-                commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+                backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
             }
 
             ASSERT_SUCCESS(swapChain->Present(1, 0));
 
             // Transition last frame's render target back to being a render target
             {
-                ASSERT_SUCCESS(commandList->Reset(commandAllocators[renderTargetIndex].Get(), nullptr));
+                ComPtr<ID3D12CommandAllocator> commandAllocator = backend::d3d12::ReserveCommandAllocator(backendDevice);
+                ASSERT_SUCCESS(commandList->Reset(commandAllocator.Get(), nullptr));
                 D3D12_RESOURCE_BARRIER resourceBarrier;
                 resourceBarrier.Transition.pResource = renderTargetResources[previousRenderTargetIndex].Get();
                 resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
@@ -189,29 +193,20 @@ class D3D12Binding : public BackendBinding {
                 commandList->ResourceBarrier(1, &resourceBarrier);
                 ASSERT_SUCCESS(commandList->Close());
                 ID3D12CommandList* commandLists[] = { commandList.Get() };
-                commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+                backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
             }
-            ASSERT_SUCCESS(commandQueue->Signal(fence.Get(), currentFrameNumber));
 
-            // Advance to the next frame
-            currentFrameNumber++;
+            backend::d3d12::NextSerial(backendDevice);
 
             previousRenderTargetIndex = renderTargetIndex;
             renderTargetIndex = swapChain->GetCurrentBackBufferIndex();
 
             // If the next render target is not ready to be rendered yet, wait until it is ready.
-            // If the last completed frame is less than the last requested frame for this render target,
+            // If the last completed serial is less than the last requested serial for this render target,
             // then the commands previously executed on this render target have not yet completed
-            const uint64_t lastFrameCompletedOnGPU = fence->GetCompletedValue();
-            if (lastFrameCompletedOnGPU < lastFrameRenderTargetWasUsed[renderTargetIndex]) {
-                ASSERT_SUCCESS(fence->SetEventOnCompletion(lastFrameRenderTargetWasUsed[renderTargetIndex], fenceEvent));
-                WaitForSingleObjectEx(fenceEvent, INFINITE, FALSE);
-            }
+            backend::d3d12::WaitForSerial(backendDevice, lastSerialRenderTargetWasUsed[renderTargetIndex]);
 
-            lastFrameRenderTargetWasUsed[renderTargetIndex] = currentFrameNumber;
-
-            // The block above checked that the commands in this allocator are done executing
-            ASSERT_SUCCESS(commandAllocators[renderTargetIndex]->Reset());
+            lastSerialRenderTargetWasUsed[renderTargetIndex] = backend::d3d12::GetSerial(backendDevice);
 
             // Tell the backend to render to the current render target
             D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewHandle = renderTargetViewHeap->GetCPUDescriptorHandleForHeapStart();
@@ -237,12 +232,8 @@ class D3D12Binding : public BackendBinding {
         // Frame synchronization. Updated every frame
         uint32_t renderTargetIndex;
         uint32_t previousRenderTargetIndex;
-        uint64_t currentFrameNumber;
-        uint64_t lastFrameRenderTargetWasUsed[kFrameCount];
-        ComPtr<ID3D12CommandAllocator> commandAllocators[kFrameCount];
+        uint64_t lastSerialRenderTargetWasUsed[kFrameCount];
         ComPtr<ID3D12GraphicsCommandList> commandList;
-        ComPtr<ID3D12Fence> fence;
-        HANDLE fenceEvent;
 
         static void ASSERT_SUCCESS(HRESULT hr) {
             assert(SUCCEEDED(hr));

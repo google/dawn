@@ -78,6 +78,8 @@ namespace backend {
             void Clear();
             void ClearUpTo(Serial serial);
 
+            Serial FirstSerial() const;
+
         private:
             // Returns the first StorageIterator that a serial bigger than serial.
             StorageIterator FindUpTo(Serial serial) const;
@@ -141,6 +143,12 @@ namespace backend {
     template<typename T>
     void SerialQueue<T>::ClearUpTo(Serial serial) {
         storage.erase(storage.begin(), FindUpTo(serial));
+    }
+
+    template<typename T>
+    Serial SerialQueue<T>::FirstSerial() const {
+        ASSERT(!Empty());
+        return storage.front().first;
     }
 
     template<typename T>

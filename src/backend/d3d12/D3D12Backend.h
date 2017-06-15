@@ -33,6 +33,7 @@
 
 #include "d3d12_platform.h"
 #include "ResourceUploader.h"
+#include "CommandAllocatorManager.h"
 
 namespace backend {
 namespace d3d12 {
@@ -109,32 +110,42 @@ namespace d3d12 {
 
             ComPtr<ID3D12Device> GetD3D12Device();
             ComPtr<ID3D12CommandQueue> GetCommandQueue();
-            ComPtr<ID3D12CommandAllocator> GetPendingCommandAllocator();
-            ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
-            D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetDescriptor();
+            CommandAllocatorManager* GetCommandAllocatorManager();
             ResourceUploader* GetResourceUploader();
 
+            ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
+            
+            D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetDescriptor();
             void SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
 
             uint64_t GetSerial() const;
-            void IncrementSerial();
+            void NextSerial();
+            void WaitForSerial(uint64_t serial);
+
+            void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
             // NXT API
             void Reference();
             void Release();
 
         private:
-            ComPtr<ID3D12Device> d3d12Device;
-            ComPtr<ID3D12CommandQueue> commandQueue;
-            ComPtr<ID3D12CommandAllocator> pendingCommandAllocator;
-            ComPtr<ID3D12GraphicsCommandList> pendingCommandList;
-            D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor;
-
-            ResourceUploader resourceUploader;
-
             uint64_t serial = 0;
             ComPtr<ID3D12Fence> fence;
             HANDLE fenceEvent;
+
+            ComPtr<ID3D12Device> d3d12Device;
+            ComPtr<ID3D12CommandQueue> commandQueue;
+
+            CommandAllocatorManager commandAllocatorManager;
+            ResourceUploader resourceUploader;
+            
+            struct PendingCommandList {
+                ComPtr<ID3D12CommandAllocator> commandAllocator;
+                ComPtr<ID3D12GraphicsCommandList> commandList;
+                bool open = false;
+            } pendingCommands;
+
+            D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor;
     };
 
 

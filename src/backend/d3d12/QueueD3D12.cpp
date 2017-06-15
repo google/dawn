@@ -23,45 +23,32 @@ namespace d3d12 {
     Queue::Queue(Device* device, QueueBuilder* builder)
         : QueueBase(builder), device(device) {
 
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator)));
+        // TODO(enga@google.com): We don't need this allocator, but it's needed for command list initialization. Is there a better way to do this?
+        // Is CommandList creation expensive or can it be done every Queue::Submit?
+        ComPtr<ID3D12CommandAllocator> temporaryCommandAllocator;
+        ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&temporaryCommandAllocator)));
         ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommandList(
             0,
             D3D12_COMMAND_LIST_TYPE_DIRECT,
-            commandAllocator.Get(),
+            temporaryCommandAllocator.Get(),
             nullptr,
             IID_PPV_ARGS(&commandList)
         ));
         ASSERT_SUCCESS(commandList->Close());
-
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-        fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        ASSERT(fenceEvent != nullptr);
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
         device->Tick();
 
-        // TODO(enga@google.com): This will stall on the previous submit because
-        // the commands must finish exeuting before the ID3D12CommandAllocator is reset.
-        // This should be fixed / optimized by using multiple command allocators.
-        const uint64_t currentFence = fenceValue++;
-        ASSERT_SUCCESS(device->GetCommandQueue()->Signal(fence.Get(), fenceValue));
-
-        if (fence->GetCompletedValue() < currentFence) {
-            ASSERT_SUCCESS(fence->SetEventOnCompletion(currentFence, fenceEvent));
-            WaitForSingleObject(fenceEvent, INFINITE);
-        }
-
-        ASSERT_SUCCESS(commandAllocator->Reset());
-        ASSERT_SUCCESS(commandList->Reset(commandAllocator.Get(), NULL));
-
+        ASSERT_SUCCESS(commandList->Reset(device->GetCommandAllocatorManager()->ReserveCommandAllocator().Get(), nullptr));
         for (uint32_t i = 0; i < numCommands; ++i) {
             commands[i]->FillCommands(commandList);
         }
         ASSERT_SUCCESS(commandList->Close());
 
-        ID3D12CommandList* commandLists[] = { commandList.Get() };
-        device->GetCommandQueue()->ExecuteCommandLists(_countof(commandLists), commandLists);
+        device->ExecuteCommandLists({ commandList.Get() });
+
+        device->NextSerial();
     }
 
 }

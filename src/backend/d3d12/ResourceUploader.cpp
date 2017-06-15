@@ -70,7 +70,7 @@ namespace d3d12 {
         uploadResource->Unmap(0, &writeRange);
         device->GetPendingCommandList()->CopyBufferRegion(resource.Get(), start, uploadResource.Get(), 0, count);
 
-        uploadingResources.Enqueue(std::move(uploadResource), device->GetSerial() + 1);
+        uploadingResources.Enqueue(std::move(uploadResource), device->GetSerial());
     }
 
     void ResourceUploader::FreeCompletedResources(const uint64_t lastCompletedSerial) {

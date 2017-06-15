@@ -219,6 +219,8 @@ if (WIN32)
     list(APPEND BACKEND_SOURCES
         ${D3D12_DIR}/BufferD3D12.cpp
         ${D3D12_DIR}/BufferD3D12.h
+        ${D3D12_DIR}/CommandAllocatorManager.cpp
+        ${D3D12_DIR}/CommandAllocatorManager.h
         ${D3D12_DIR}/CommandBufferD3D12.cpp
         ${D3D12_DIR}/CommandBufferD3D12.h
         ${D3D12_DIR}/D3D12Backend.cpp
