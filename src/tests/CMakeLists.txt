@@ -23,6 +23,7 @@ add_executable(nxt_unittests
     ${UNITTESTS_DIR}/ObjectBaseTests.cpp
     ${UNITTESTS_DIR}/PerStageTests.cpp
     ${UNITTESTS_DIR}/RefCountedTests.cpp
+    ${UNITTESTS_DIR}/SerialQueueTests.cpp
     ${UNITTESTS_DIR}/ToBackendTests.cpp
     ${UNITTESTS_DIR}/WireTests.cpp
     ${VALIDATION_TESTS_DIR}/BufferValidationTests.cpp

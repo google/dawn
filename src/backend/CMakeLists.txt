@@ -60,6 +60,7 @@ list(APPEND BACKEND_SOURCES
     ${COMMON_DIR}/RefCounted.h
     ${COMMON_DIR}/Sampler.cpp
     ${COMMON_DIR}/Sampler.h
+    ${COMMON_DIR}/SerialQueue.h
     ${COMMON_DIR}/ShaderModule.cpp
     ${COMMON_DIR}/ShaderModule.h
     ${COMMON_DIR}/Texture.cpp
