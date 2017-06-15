@@ -23,10 +23,20 @@ namespace d3d12 {
     }
 
     void ResourceUploader::UploadToBuffer(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const uint8_t* data) {
+        // TODO(enga@google.com): Use a handle to a subset of a large ring buffer. On Release, decrease reference count on the ring buffer and free when 0.
+        // Alternatively, the SerialQueue could be used to track which last point of the ringbuffer is in use, and start reusing chunks of it that aren't in flight.
+        UploadHandle uploadHandle = GetUploadBuffer(count);
+        memcpy(uploadHandle.mappedBuffer, data, count);
+        device->GetPendingCommandList()->CopyBufferRegion(resource.Get(), start, uploadHandle.resource.Get(), 0, count);
+        Release(uploadHandle);
+    }
+
+    ResourceUploader::UploadHandle ResourceUploader::GetUploadBuffer(uint32_t requiredSize) {
+        // TODO(enga@google.com): This will find or create a mapped buffer of sufficient size and return a handle to a mapped range
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         resourceDescriptor.Alignment = 0;
-        resourceDescriptor.Width = count;
+        resourceDescriptor.Width = requiredSize;
         resourceDescriptor.Height = 1;
         resourceDescriptor.DepthOrArraySize = 1;
         resourceDescriptor.MipLevels = 1;
@@ -36,45 +46,19 @@ namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-        ComPtr<ID3D12Resource> uploadResource;
-
-        D3D12_HEAP_PROPERTIES heapProperties;
-        heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
-        heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-        heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-        heapProperties.CreationNodeMask = 0;
-        heapProperties.VisibleNodeMask = 0;
-
-        // TODO(enga@google.com): Use a ResourceAllocationManager
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommittedResource(
-            &heapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDescriptor,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&uploadResource)
-        ));
-
+        UploadHandle uploadHandle;
+        uploadHandle.resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor, D3D12_RESOURCE_STATE_GENERIC_READ);
         D3D12_RANGE readRange;
         readRange.Begin = 0;
         readRange.End = 0;
 
-        D3D12_RANGE writeRange;
-        writeRange.Begin = 0;
-        writeRange.End = count;
-
-        uint8_t* mappedResource = nullptr;
-
-        ASSERT_SUCCESS(uploadResource->Map(0, &readRange, reinterpret_cast<void**>(&mappedResource)));
-        memcpy(mappedResource, data, count);
-        uploadResource->Unmap(0, &writeRange);
-        device->GetPendingCommandList()->CopyBufferRegion(resource.Get(), start, uploadResource.Get(), 0, count);
-
-        uploadingResources.Enqueue(std::move(uploadResource), device->GetSerial());
+        uploadHandle.resource->Map(0, &readRange, reinterpret_cast<void**>(&uploadHandle.mappedBuffer));
+        return uploadHandle;
     }
 
-    void ResourceUploader::FreeCompletedResources(const uint64_t lastCompletedSerial) {
-        uploadingResources.ClearUpTo(lastCompletedSerial);
+    void ResourceUploader::Release(UploadHandle uploadHandle) {
+        uploadHandle.resource->Unmap(0, nullptr);
+        device->GetResourceAllocator()->Release(uploadHandle.resource);
     }
 
 }

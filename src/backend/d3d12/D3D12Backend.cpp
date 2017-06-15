@@ -76,6 +76,7 @@ namespace d3d12 {
     Device::Device(ComPtr<ID3D12Device> d3d12Device)
         : d3d12Device(d3d12Device),
           commandAllocatorManager(this),
+          resourceAllocator(this),
           resourceUploader(this),
           pendingCommands{ commandAllocatorManager.ReserveCommandAllocator() } {
 
@@ -109,6 +110,18 @@ namespace d3d12 {
         return commandQueue;
     }
 
+    CommandAllocatorManager* Device::GetCommandAllocatorManager() {
+        return &commandAllocatorManager;
+    }
+
+    ResourceAllocator* Device::GetResourceAllocator() {
+        return &resourceAllocator;
+    }
+
+    ResourceUploader* Device::GetResourceUploader() {
+        return &resourceUploader;
+    }
+
     ComPtr<ID3D12GraphicsCommandList> Device::GetPendingCommandList() {
         // Callers of GetPendingCommandList do so to record commands. Only reserve a command allocator when it is needed so we don't submit empty command lists
         if (!pendingCommands.open) {
@@ -123,14 +136,6 @@ namespace d3d12 {
         return renderTargetDescriptor;
     }
 
-    ResourceUploader* Device::GetResourceUploader() {
-        return &resourceUploader;
-    }
-
-    CommandAllocatorManager* Device::GetCommandAllocatorManager() {
-        return &commandAllocatorManager;
-    }
-
     void Device::SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
         this->renderTargetDescriptor = renderTargetDescriptor;
     }
@@ -138,7 +143,7 @@ namespace d3d12 {
     void Device::TickImpl() {
         // Perform cleanup operations to free unused objects
         const uint64_t lastCompletedSerial = fence->GetCompletedValue();
-        resourceUploader.FreeCompletedResources(lastCompletedSerial);
+        resourceAllocator.FreeUnusedResources(lastCompletedSerial);
         commandAllocatorManager.ResetCompletedAllocators(lastCompletedSerial);
     }
 

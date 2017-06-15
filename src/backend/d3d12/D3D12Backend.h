@@ -32,8 +32,9 @@
 #include "common/ToBackend.h"
 
 #include "d3d12_platform.h"
-#include "ResourceUploader.h"
 #include "CommandAllocatorManager.h"
+#include "ResourceAllocator.h"
+#include "ResourceUploader.h"
 
 namespace backend {
 namespace d3d12 {
@@ -110,11 +111,13 @@ namespace d3d12 {
 
             ComPtr<ID3D12Device> GetD3D12Device();
             ComPtr<ID3D12CommandQueue> GetCommandQueue();
+
             CommandAllocatorManager* GetCommandAllocatorManager();
+            ResourceAllocator* GetResourceAllocator();
             ResourceUploader* GetResourceUploader();
 
             ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
-            
+
             D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetDescriptor();
             void SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor);
 
@@ -137,8 +140,9 @@ namespace d3d12 {
             ComPtr<ID3D12CommandQueue> commandQueue;
 
             CommandAllocatorManager commandAllocatorManager;
+            ResourceAllocator resourceAllocator;
             ResourceUploader resourceUploader;
-            
+
             struct PendingCommandList {
                 ComPtr<ID3D12CommandAllocator> commandAllocator;
                 ComPtr<ID3D12GraphicsCommandList> commandList;

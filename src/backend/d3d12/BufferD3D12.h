@@ -27,6 +27,7 @@ namespace d3d12 {
     class Buffer : public BufferBase {
         public:
             Buffer(Device* device, BufferBuilder* builder);
+            ~Buffer();
 
             ComPtr<ID3D12Resource> GetD3D12Resource();
             D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
@@ -34,7 +35,6 @@ namespace d3d12 {
 
         private:
             Device* device;
-            ComPtr<ID3D12Resource> uploadResource;
             ComPtr<ID3D12Resource> resource;
 
             // NXT API

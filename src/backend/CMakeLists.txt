@@ -233,6 +233,8 @@ if (WIN32)
         ${D3D12_DIR}/PipelineLayoutD3D12.h
         ${D3D12_DIR}/QueueD3D12.cpp
         ${D3D12_DIR}/QueueD3D12.h
+        ${D3D12_DIR}/ResourceAllocator.cpp
+        ${D3D12_DIR}/ResourceAllocator.h
         ${D3D12_DIR}/ResourceUploader.cpp
         ${D3D12_DIR}/ResourceUploader.h
         ${D3D12_DIR}/ShaderModuleD3D12.cpp

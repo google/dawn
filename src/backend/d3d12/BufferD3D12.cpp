@@ -15,6 +15,7 @@
 #include "BufferD3D12.h"
 
 #include "D3D12Backend.h"
+#include "ResourceAllocator.h"
 
 namespace backend {
 namespace d3d12 {
@@ -59,22 +60,11 @@ namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-        D3D12_HEAP_PROPERTIES heapProperties;
-        heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-        heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-        heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-        heapProperties.CreationNodeMask = 0;
-        heapProperties.VisibleNodeMask = 0;
+        resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12BufferUsage(GetUsage()));
+    }
 
-        // TODO(enga@google.com): Use a ResourceAllocationManager
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommittedResource(
-            &heapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDescriptor,
-            D3D12BufferUsage(GetUsage()),
-            nullptr,
-            IID_PPV_ARGS(&resource)
-        ));
+    Buffer::~Buffer() {
+        device->GetResourceAllocator()->Release(resource);
     }
 
     ComPtr<ID3D12Resource> Buffer::GetD3D12Resource() {

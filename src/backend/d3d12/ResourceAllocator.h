@@ -12,36 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_RESOURCEUPLOADER_H_
-#define BACKEND_D3D12_RESOURCEUPLOADER_H_
+#ifndef BACKEND_D3D12_RESOURCEALLOCATIONMANAGER_H_
+#define BACKEND_D3D12_RESOURCEALLOCATIONMANAGER_H_
 
 #include "d3d12_platform.h"
 
-#include "common/Forward.h"
+#include "common/SerialQueue.h"
+
+#include <set>
 
 namespace backend {
 namespace d3d12 {
 
     class Device;
 
-    class ResourceUploader {
-        public:
-            ResourceUploader(Device* device);
+    class ResourceAllocator {
 
-            void UploadToBuffer(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const uint8_t* data);
+        public:
+            ResourceAllocator(Device* device);
+
+            ComPtr<ID3D12Resource> Allocate(D3D12_HEAP_TYPE heapType, const D3D12_RESOURCE_DESC &resourceDescriptor, D3D12_RESOURCE_STATES initialUsage);
+            void Release(ComPtr<ID3D12Resource> resource);
+            void FreeUnusedResources(uint64_t lastCompletedSerial);
 
         private:
-            struct UploadHandle {
-                ComPtr<ID3D12Resource> resource;
-                uint8_t* mappedBuffer;
-            };
-
-            UploadHandle GetUploadBuffer(uint32_t requiredSize);
-            void Release(UploadHandle uploadHandle);
-
             Device* device;
+
+            SerialQueue<ComPtr<ID3D12Resource>> releasedResources;
     };
+
 }
 }
 
-#endif // BACKEND_D3D12_RESOURCEUPLOADER_H_
+#endif // BACKEND_D3D12_RESOURCEALLOCATIONMANAGER_H_
