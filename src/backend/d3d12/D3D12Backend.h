@@ -32,9 +32,6 @@
 #include "common/ToBackend.h"
 
 #include "d3d12_platform.h"
-#include "CommandAllocatorManager.h"
-#include "ResourceAllocator.h"
-#include "ResourceUploader.h"
 
 namespace backend {
 namespace d3d12 {
@@ -56,6 +53,10 @@ namespace d3d12 {
     class TextureView;
     class Framebuffer;
     class RenderPass;
+
+    class CommandAllocatorManager;
+    class ResourceAllocator;
+    class ResourceUploader;
 
     struct D3D12BackendTraits {
         using BindGroupType = BindGroup;
@@ -139,9 +140,9 @@ namespace d3d12 {
             ComPtr<ID3D12Device> d3d12Device;
             ComPtr<ID3D12CommandQueue> commandQueue;
 
-            CommandAllocatorManager commandAllocatorManager;
-            ResourceAllocator resourceAllocator;
-            ResourceUploader resourceUploader;
+            CommandAllocatorManager* commandAllocatorManager;
+            ResourceAllocator* resourceAllocator;
+            ResourceUploader* resourceUploader;
 
             struct PendingCommandList {
                 ComPtr<ID3D12CommandAllocator> commandAllocator;

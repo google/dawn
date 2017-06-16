@@ -15,6 +15,7 @@
 #include "QueueD3D12.h"
 
 #include "D3D12Backend.h"
+#include "CommandAllocatorManager.h"
 #include "CommandBufferD3D12.h"
 
 namespace backend {

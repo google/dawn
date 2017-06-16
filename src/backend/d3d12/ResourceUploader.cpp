@@ -15,6 +15,7 @@
 #include "ResourceUploader.h"
 
 #include "D3D12Backend.h"
+#include "ResourceAllocator.h"
 
 namespace backend {
 namespace d3d12 {

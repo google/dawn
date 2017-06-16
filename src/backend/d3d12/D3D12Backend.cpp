@@ -22,6 +22,10 @@
 #include "QueueD3D12.h"
 #include "ShaderModuleD3D12.h"
 
+#include "CommandAllocatorManager.h"
+#include "ResourceAllocator.h"
+#include "ResourceUploader.h"
+
 namespace backend {
 namespace d3d12 {
 
@@ -75,10 +79,10 @@ namespace d3d12 {
 
     Device::Device(ComPtr<ID3D12Device> d3d12Device)
         : d3d12Device(d3d12Device),
-          commandAllocatorManager(this),
-          resourceAllocator(this),
-          resourceUploader(this),
-          pendingCommands{ commandAllocatorManager.ReserveCommandAllocator() } {
+          commandAllocatorManager(new CommandAllocatorManager(this)),
+          resourceAllocator(new ResourceAllocator(this)),
+          resourceUploader(new ResourceUploader(this)),
+          pendingCommands{ commandAllocatorManager->ReserveCommandAllocator() } {
 
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -111,21 +115,21 @@ namespace d3d12 {
     }
 
     CommandAllocatorManager* Device::GetCommandAllocatorManager() {
-        return &commandAllocatorManager;
+        return commandAllocatorManager;
     }
 
     ResourceAllocator* Device::GetResourceAllocator() {
-        return &resourceAllocator;
+        return resourceAllocator;
     }
 
     ResourceUploader* Device::GetResourceUploader() {
-        return &resourceUploader;
+        return resourceUploader;
     }
 
     ComPtr<ID3D12GraphicsCommandList> Device::GetPendingCommandList() {
         // Callers of GetPendingCommandList do so to record commands. Only reserve a command allocator when it is needed so we don't submit empty command lists
         if (!pendingCommands.open) {
-            pendingCommands.commandAllocator = commandAllocatorManager.ReserveCommandAllocator();
+            pendingCommands.commandAllocator = commandAllocatorManager->ReserveCommandAllocator();
             ASSERT_SUCCESS(pendingCommands.commandList->Reset(pendingCommands.commandAllocator.Get(), nullptr));
             pendingCommands.open = true;
         }
@@ -143,8 +147,8 @@ namespace d3d12 {
     void Device::TickImpl() {
         // Perform cleanup operations to free unused objects
         const uint64_t lastCompletedSerial = fence->GetCompletedValue();
-        resourceAllocator.FreeUnusedResources(lastCompletedSerial);
-        commandAllocatorManager.ResetCompletedAllocators(lastCompletedSerial);
+        resourceAllocator->FreeUnusedResources(lastCompletedSerial);
+        commandAllocatorManager->ResetCompletedAllocators(lastCompletedSerial);
     }
 
     uint64_t Device::GetSerial() const {
