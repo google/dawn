@@ -12,13 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "D3D12Backend.h"
-#include "BufferD3D12.h"
-#include "CommandBufferD3D12.h"
-#include "InputStateD3D12.h"
-#include "PipelineD3D12.h"
-#include "PipelineLayoutD3D12.h"
-#include "QueueD3D12.h"
-#include "SamplerD3D12.h"
-#include "ShaderModuleD3D12.h"
-#include "TextureD3D12.h"
+#ifndef BACKEND_D3D12_SAMPLERD3D12_H_
+#define BACKEND_D3D12_SAMPLERD3D12_H_
+
+#include "common/Sampler.h"
+
+#include "d3d12_platform.h"
+
+namespace backend {
+namespace d3d12 {
+
+    class Sampler : public SamplerBase {
+        public:
+            Sampler(SamplerBuilder* builder);
+
+            const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
+
+        private:
+            D3D12_SAMPLER_DESC samplerDesc;
+    };
+
+}
+}
+
+#endif // BACKEND_D3D12_SAMPLERD3D12_H_

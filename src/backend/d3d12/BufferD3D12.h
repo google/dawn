@@ -29,6 +29,7 @@ namespace d3d12 {
             Buffer(Device* device, BufferBuilder* builder);
             ~Buffer();
 
+            uint32_t GetD3D12Size() const;
             ComPtr<ID3D12Resource> GetD3D12Resource();
             D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
             bool GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier);
@@ -43,6 +44,20 @@ namespace d3d12 {
             void UnmapImpl() override;
             void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
+    };
+
+    class BufferView : public BufferViewBase {
+        public:
+            BufferView(Device* device, BufferViewBuilder* builder);
+
+            uint32_t GetD3D12Size() const;
+            const D3D12_CONSTANT_BUFFER_VIEW_DESC& GetCBVDescriptor() const;
+            const D3D12_UNORDERED_ACCESS_VIEW_DESC& GetUAVDescriptor() const;
+
+        private:
+            Device* device;
+            D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+            D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
     };
 
 }

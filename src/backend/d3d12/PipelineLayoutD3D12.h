@@ -28,10 +28,34 @@ namespace d3d12 {
         public:
             PipelineLayout(Device* device, PipelineLayoutBuilder* builder);
 
+            class Descriptor {
+                public:
+                    enum class Type {
+                        CBV,
+                        UAV,
+                        SRV,
+                        Sampler,
+                        Count
+                    };
+                    static constexpr unsigned int TypeCount = static_cast<typename std::underlying_type<Type>::type>(Type::Count);
+            };
+
+            uint32_t GetCbvUavSrvRootParameterIndex(uint32_t group) const;
+            uint32_t GetSamplerRootParameterIndex(uint32_t group) const;
+
             ComPtr<ID3D12RootSignature> GetRootSignature();
 
         private:
+
+            static constexpr unsigned int ToIndex(Descriptor::Type type) {
+                return static_cast<typename std::underlying_type<Descriptor::Type>::type>(type);
+            }
+
             Device* device;
+
+            std::array<uint32_t, kMaxBindGroups> cbvUavSrvRootParameterInfo;
+            std::array<uint32_t, kMaxBindGroups> samplerRootParameterInfo;
+            std::array<std::array<uint32_t, Descriptor::TypeCount>, kMaxBindGroups> descriptorCountInfo;
 
             ComPtr<ID3D12RootSignature> rootSignature;
     };

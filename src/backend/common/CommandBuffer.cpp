@@ -218,6 +218,85 @@ namespace backend {
         commands->DataWasDestroyed();
     }
 
+    void SkipCommand(CommandIterator* commands, Command type) {
+        switch (type) {
+            case Command::AdvanceSubpass:
+                commands->NextCommand<AdvanceSubpassCmd>();
+                break;
+
+            case Command::BeginRenderPass:
+                commands->NextCommand<BeginRenderPassCmd>();
+                break;
+
+            case Command::CopyBufferToBuffer:
+                commands->NextCommand<CopyBufferToBufferCmd>();
+                break;
+
+            case Command::CopyBufferToTexture:
+                commands->NextCommand<CopyBufferToTextureCmd>();
+                break;
+
+            case Command::CopyTextureToBuffer:
+                commands->NextCommand<CopyTextureToBufferCmd>();
+                break;
+
+            case Command::Dispatch:
+                commands->NextCommand<DispatchCmd>();
+                break;
+
+            case Command::DrawArrays:
+                commands->NextCommand<DrawArraysCmd>();
+                break;
+
+            case Command::DrawElements:
+                commands->NextCommand<DrawElementsCmd>();
+                break;
+
+            case Command::EndRenderPass:
+                commands->NextCommand<EndRenderPassCmd>();
+                break;
+
+            case Command::SetPipeline:
+                commands->NextCommand<SetPipelineCmd>();
+                break;
+
+            case Command::SetPushConstants:
+                {
+                    auto* cmd = commands->NextCommand<SetPushConstantsCmd>();
+                    commands->NextData<uint32_t>(cmd->count);
+                }
+                break;
+
+            case Command::SetStencilReference:
+                commands->NextCommand<SetStencilReferenceCmd>();
+                break;
+
+            case Command::SetBindGroup:
+                commands->NextCommand<SetBindGroupCmd>();
+                break;
+
+            case Command::SetIndexBuffer:
+                commands->NextCommand<SetIndexBufferCmd>();
+                break;
+
+            case Command::SetVertexBuffers:
+                {
+                    auto* cmd = commands->NextCommand<SetVertexBuffersCmd>();
+                    commands->NextData<Ref<BufferBase>>(cmd->count);
+                    commands->NextData<uint32_t>(cmd->count);
+                }
+                break;
+
+            case Command::TransitionBufferUsage:
+                commands->NextCommand<TransitionBufferUsageCmd>();
+                break;
+
+            case Command::TransitionTextureUsage:
+                commands->NextCommand<TransitionTextureUsageCmd>();
+                break;
+        }
+    }
+
     CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : Builder(device), state(std::make_unique<CommandBufferStateTracker>(this)) {
     }
 

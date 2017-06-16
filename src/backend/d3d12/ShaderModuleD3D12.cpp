@@ -24,7 +24,7 @@ namespace d3d12 {
         spirv_cross::CompilerHLSL compiler(builder->AcquireSpirv());
 
         spirv_cross::CompilerHLSL::Options options;
-        options.shader_model = 40;
+        options.shader_model = 51;
         options.flip_vert_y = false;
         options.fixup_clipspace = true;
 
@@ -32,7 +32,46 @@ namespace d3d12 {
 
         ExtractSpirvInfo(compiler);
 
+        enum RegisterType {
+            Buffer,
+            UnorderedAccess,
+            Texture,
+            Sampler,
+            Count,
+        };
+
+        std::array<uint32_t, RegisterType::Count * kMaxBindGroups> baseRegisters = {};
+
+        const auto& resources = compiler.get_shader_resources();
+
+        // rename bindings so that each register type b/u/t/s starts at 0 and then offset by kMaxBindingsPerGroup * bindGroupIndex
+        auto RenumberBindings = [&](std::vector<spirv_cross::Resource> resources, uint32_t offset) {
+            for (const auto& resource : resources) {
+                auto bindGroupIndex = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+                auto& baseRegister = baseRegisters[RegisterType::Count * bindGroupIndex + offset];
+                auto bindGroupOffset = bindGroupIndex * kMaxBindingsPerGroup;
+                compiler.set_decoration(resource.id, spv::DecorationBinding, bindGroupOffset + baseRegister++);
+            }
+        };
+
+        RenumberBindings(resources.uniform_buffers, RegisterType::Buffer);
+        RenumberBindings(resources.storage_buffers, RegisterType::UnorderedAccess);
+        RenumberBindings(resources.separate_images, RegisterType::Texture);
+        RenumberBindings(resources.separate_samplers, RegisterType::Sampler);
+
         hlslSource = compiler.compile();
+
+        {
+            // pending https://github.com/KhronosGroup/SPIRV-Cross/issues/216
+            // rename ": register(cN)" to ": register(bN)"
+            std::string::size_type pos = 0;
+            const std::string search = ": register(c";
+            const std::string replace = ": register(b";
+            while ((pos = hlslSource.find(search, pos)) != std::string::npos) {
+                hlslSource.replace(pos, search.length(), replace);
+                pos += replace.length();
+            }
+        }
     }
 
     const std::string& ShaderModule::GetHLSLSource() const {

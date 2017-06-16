@@ -51,7 +51,7 @@ namespace d3d12 {
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         resourceDescriptor.Alignment = 0;
-        resourceDescriptor.Width = GetSize();
+        resourceDescriptor.Width = GetD3D12Size();
         resourceDescriptor.Height = 1;
         resourceDescriptor.DepthOrArraySize = 1;
         resourceDescriptor.MipLevels = 1;
@@ -66,6 +66,11 @@ namespace d3d12 {
 
     Buffer::~Buffer() {
         device->GetResourceAllocator()->Release(resource);
+    }
+
+    uint32_t Buffer::GetD3D12Size() const {
+        // TODO(enga@google.com): TODO investigate if this needs to be a constraint at the API level
+        return ((GetSize() + 256 - 1) / 256) * 256; // size is required to be 256-byte aligned.
     }
 
     ComPtr<ID3D12Resource> Buffer::GetD3D12Resource() {
@@ -111,6 +116,35 @@ namespace d3d12 {
         if (GetResourceTransitionBarrier(currentUsage, targetUsage, &barrier)) {
             device->GetPendingCommandList()->ResourceBarrier(1, &barrier);
         }
+    }
+
+
+    BufferView::BufferView(Device* device, BufferViewBuilder* builder)
+        : BufferViewBase(builder), device(device) {
+
+        cbvDesc.BufferLocation = ToBackend(GetBuffer())->GetVA() + GetOffset();
+        cbvDesc.SizeInBytes = GetD3D12Size();
+
+        uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+        uavDesc.Buffer.FirstElement = GetOffset();
+        uavDesc.Buffer.NumElements = GetD3D12Size();
+        uavDesc.Buffer.StructureByteStride = 1;
+        uavDesc.Buffer.CounterOffsetInBytes = 0;
+        uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+    }
+
+    uint32_t BufferView::GetD3D12Size() const {
+        // TODO(enga@google.com): TODO investigate if this needs to be a constraint at the API level
+        return ((GetSize() + 256 - 1) / 256) * 256; // size is required to be 256-byte aligned.
+    }
+
+    const D3D12_CONSTANT_BUFFER_VIEW_DESC& BufferView::GetCBVDescriptor() const {
+        return cbvDesc;
+    }
+
+    const D3D12_UNORDERED_ACCESS_VIEW_DESC& BufferView::GetUAVDescriptor() const {
+        return uavDesc;
     }
 
 }

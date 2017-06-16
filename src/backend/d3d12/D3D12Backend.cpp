@@ -20,9 +20,12 @@
 #include "PipelineD3D12.h"
 #include "PipelineLayoutD3D12.h"
 #include "QueueD3D12.h"
+#include "SamplerD3D12.h"
 #include "ShaderModuleD3D12.h"
+#include "TextureD3D12.h"
 
 #include "CommandAllocatorManager.h"
+#include "DescriptorHeapAllocator.h"
 #include "ResourceAllocator.h"
 #include "ResourceUploader.h"
 
@@ -80,6 +83,7 @@ namespace d3d12 {
     Device::Device(ComPtr<ID3D12Device> d3d12Device)
         : d3d12Device(d3d12Device),
           commandAllocatorManager(new CommandAllocatorManager(this)),
+          descriptorHeapAllocator(new DescriptorHeapAllocator(this)),
           resourceAllocator(new ResourceAllocator(this)),
           resourceUploader(new ResourceUploader(this)) {
 
@@ -102,6 +106,10 @@ namespace d3d12 {
 
     ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() {
         return commandQueue;
+    }
+
+    DescriptorHeapAllocator* Device::GetDescriptorHeapAllocator() {
+        return descriptorHeapAllocator;
     }
 
     ResourceAllocator* Device::GetResourceAllocator() {
@@ -142,6 +150,8 @@ namespace d3d12 {
 
     void Device::SetNextRenderTargetDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor) {
         this->renderTargetDescriptor = renderTargetDescriptor;
+        static const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GetPendingCommandList()->ClearRenderTargetView(renderTargetDescriptor, clearColor, 0, nullptr);
     }
 
     void Device::TickImpl() {
@@ -149,6 +159,7 @@ namespace d3d12 {
         const uint64_t lastCompletedSerial = fence->GetCompletedValue();
         resourceAllocator->FreeUnusedResources(lastCompletedSerial);
         commandAllocatorManager->ResetCompletedAllocators(lastCompletedSerial);
+        descriptorHeapAllocator->FreeDescriptorHeaps(lastCompletedSerial);
     }
 
     uint64_t Device::GetSerial() const {
@@ -219,7 +230,7 @@ namespace d3d12 {
         return new RenderPass(this, builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
-        return new Sampler(this, builder);
+        return new Sampler(builder);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
         return new ShaderModule(this, builder);
@@ -249,12 +260,6 @@ namespace d3d12 {
         : BindGroupLayoutBase(builder), device(device) {
     }
 
-    // BufferView
-
-    BufferView::BufferView(Device* device, BufferViewBuilder* builder)
-        : BufferViewBase(builder), device(device) {
-    }
-
     // DepthStencilState
 
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
@@ -271,27 +276,6 @@ namespace d3d12 {
 
     RenderPass::RenderPass(Device* device, RenderPassBuilder* builder)
         : RenderPassBase(builder), device(device) {
-    }
-
-    // Sampler
-
-    Sampler::Sampler(Device* device, SamplerBuilder* builder)
-        : SamplerBase(builder), device(device) {
-    }
-
-    // Texture
-
-    Texture::Texture(Device* device, TextureBuilder* builder)
-        : TextureBase(builder), device(device) {
-    }
-
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
-    }
-
-    // TextureView
-
-    TextureView::TextureView(Device* device, TextureViewBuilder* builder)
-        : TextureViewBase(builder), device(device) {
     }
 
 }

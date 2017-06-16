@@ -55,6 +55,7 @@ namespace d3d12 {
     class RenderPass;
 
     class CommandAllocatorManager;
+    class DescriptorHeapAllocator;
     class ResourceAllocator;
     class ResourceUploader;
 
@@ -113,6 +114,7 @@ namespace d3d12 {
             ComPtr<ID3D12Device> GetD3D12Device();
             ComPtr<ID3D12CommandQueue> GetCommandQueue();
 
+            DescriptorHeapAllocator* GetDescriptorHeapAllocator();
             ResourceAllocator* GetResourceAllocator();
             ResourceUploader* GetResourceUploader();
 
@@ -141,6 +143,7 @@ namespace d3d12 {
             ComPtr<ID3D12CommandQueue> commandQueue;
 
             CommandAllocatorManager* commandAllocatorManager;
+            DescriptorHeapAllocator* descriptorHeapAllocator;
             ResourceAllocator* resourceAllocator;
             ResourceUploader* resourceUploader;
 
@@ -169,14 +172,6 @@ namespace d3d12 {
             Device* device;
     };
 
-    class BufferView : public BufferViewBase {
-        public:
-            BufferView(Device* device, BufferViewBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
     class Framebuffer : public FramebufferBase {
         public:
             Framebuffer(Device* device, FramebufferBuilder* builder);
@@ -196,32 +191,6 @@ namespace d3d12 {
     class RenderPass : public RenderPassBase {
         public:
             RenderPass(Device* device, RenderPassBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
-    class Sampler : public SamplerBase {
-        public:
-            Sampler(Device* device, SamplerBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
-    class Texture : public TextureBase {
-        public:
-            Texture(Device* device, TextureBuilder* builder);
-
-        private:
-            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
-
-            Device* device;
-    };
-
-    class TextureView : public TextureViewBase {
-        public:
-            TextureView(Device* device, TextureViewBuilder* builder);
 
         private:
             Device* device;

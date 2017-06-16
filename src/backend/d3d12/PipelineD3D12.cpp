@@ -32,6 +32,8 @@ namespace d3d12 {
         // Enable better shader debugging with the graphics debugging tools.
         compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
+        // SPRIV-cross does matrix multiplication expecting row major matrices
+        compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
         if (IsCompute()) {
           const auto& module = ToBackend(builder->GetStageInfo(nxt::ShaderStage::Compute).module);
@@ -54,7 +56,7 @@ namespace d3d12 {
               &compiledShader,
               &errors
           ))) {
-              printf("%s\n", errors->GetBufferPointer());
+              printf("%s\n", reinterpret_cast<char*>(errors->GetBufferPointer()));
               ASSERT(false);
           }
 
@@ -82,11 +84,11 @@ namespace d3d12 {
                 switch (stage) {
                 case nxt::ShaderStage::Vertex:
                     shader = &descriptor.VS;
-                    compileTarget = "vs_5_0";
+                    compileTarget = "vs_5_1";
                     break;
                 case nxt::ShaderStage::Fragment:
                     shader = &descriptor.PS;
-                    compileTarget = "ps_5_0";
+                    compileTarget = "ps_5_1";
                     break;
                 case nxt::ShaderStage::Compute:
                     ASSERT(false);
@@ -106,7 +108,7 @@ namespace d3d12 {
                     &compiledShader[stage],
                     &errors
                 ))) {
-                    printf("%s\n", errors->GetBufferPointer());
+                    printf("%s\n", reinterpret_cast<char*>(errors->GetBufferPointer()));
                     ASSERT(false);
                 }
 
@@ -116,10 +118,15 @@ namespace d3d12 {
                 }
             }
 
-            InputState* inputState = ToBackend(GetInputState());
-            descriptor.InputLayout = inputState->GetD3D12InputLayoutDescriptor();
+            PipelineLayout* layout = ToBackend(GetLayout());
 
-            descriptor.pRootSignature = ToBackend(GetLayout())->GetRootSignature().Get();
+            descriptor.pRootSignature = layout->GetRootSignature().Get();
+
+            // D3D12 logs warnings if any empty input state is used
+            InputState* inputState = ToBackend(GetInputState());
+            if (inputState->GetAttributesSetMask().any()) {
+                descriptor.InputLayout = inputState->GetD3D12InputLayoutDescriptor();
+            }
 
             descriptor.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
             descriptor.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;

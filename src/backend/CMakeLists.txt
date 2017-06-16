@@ -243,6 +243,8 @@ if (WIN32)
         ${D3D12_DIR}/CommandAllocatorManager.h
         ${D3D12_DIR}/CommandBufferD3D12.cpp
         ${D3D12_DIR}/CommandBufferD3D12.h
+        ${D3D12_DIR}/DescriptorHeapAllocator.cpp
+        ${D3D12_DIR}/DescriptorHeapAllocator.h
         ${D3D12_DIR}/D3D12Backend.cpp
         ${D3D12_DIR}/D3D12Backend.h
         ${D3D12_DIR}/InputStateD3D12.cpp
@@ -257,8 +259,12 @@ if (WIN32)
         ${D3D12_DIR}/ResourceAllocator.h
         ${D3D12_DIR}/ResourceUploader.cpp
         ${D3D12_DIR}/ResourceUploader.h
+        ${D3D12_DIR}/SamplerD3D12.cpp
+        ${D3D12_DIR}/SamplerD3D12.h
         ${D3D12_DIR}/ShaderModuleD3D12.cpp
         ${D3D12_DIR}/ShaderModuleD3D12.h
+        ${D3D12_DIR}/TextureD3D12.cpp
+        ${D3D12_DIR}/TextureD3D12.h
     )
 endif()
 
