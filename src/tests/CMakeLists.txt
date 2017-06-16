@@ -15,6 +15,8 @@
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UNITTESTS_DIR ${TESTS_DIR}/unittests)
 set(VALIDATION_TESTS_DIR ${UNITTESTS_DIR}/validation)
+set(END2END_TESTS_DIR ${TESTS_DIR}/end2end)
+
 add_executable(nxt_unittests
     ${UNITTESTS_DIR}/BitSetIteratorTests.cpp
     ${UNITTESTS_DIR}/CommandAllocatorTests.cpp
@@ -40,3 +42,13 @@ add_executable(nxt_unittests
 target_link_libraries(nxt_unittests gtest nxt_backend mock_nxt nxt_wire)
 target_include_directories(nxt_unittests PRIVATE ${SRC_DIR})
 SetCXX14(nxt_unittests)
+
+add_executable(nxt_end2end_tests
+    ${END2END_TESTS_DIR}/BasicTests.cpp
+    ${TESTS_DIR}/End2EndTestsMain.cpp
+    ${TESTS_DIR}/NXTTest.cpp
+    ${TESTS_DIR}/NXTTest.h
+)
+target_link_libraries(nxt_end2end_tests gtest utils)
+target_include_directories(nxt_end2end_tests PRIVATE ${SRC_DIR})
+SetCXX14(nxt_end2end_tests)

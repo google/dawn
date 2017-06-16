@@ -31,6 +31,8 @@ namespace utils {
 
     class BackendBinding {
         public:
+            virtual ~BackendBinding() = default;
+
             virtual void SetupGLFWWindowHints() = 0;
             virtual void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) = 0;
             virtual void SwapBuffers() = 0;
