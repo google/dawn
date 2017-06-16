@@ -68,9 +68,9 @@ namespace d3d12 {
         backendDevice->WaitForSerial(serial);
     }
 
-    ComPtr<ID3D12CommandAllocator> ReserveCommandAllocator(nxtDevice device) {
+    void OpenCommandList(nxtDevice device, ComPtr<ID3D12GraphicsCommandList>* commandList) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
-        return backendDevice->GetCommandAllocatorManager()->ReserveCommandAllocator();
+        return backendDevice->OpenCommandList(commandList);
     }
 
     void ASSERT_SUCCESS(HRESULT hr) {
@@ -81,22 +81,12 @@ namespace d3d12 {
         : d3d12Device(d3d12Device),
           commandAllocatorManager(new CommandAllocatorManager(this)),
           resourceAllocator(new ResourceAllocator(this)),
-          resourceUploader(new ResourceUploader(this)),
-          pendingCommands{ commandAllocatorManager->ReserveCommandAllocator() } {
+          resourceUploader(new ResourceUploader(this)) {
 
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
         ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
-
-        ASSERT_SUCCESS(d3d12Device->CreateCommandList(
-            0,
-            D3D12_COMMAND_LIST_TYPE_DIRECT,
-            pendingCommands.commandAllocator.Get(),
-            nullptr,
-            IID_PPV_ARGS(&pendingCommands.commandList)
-        ));
-        pendingCommands.open = true;
 
         ASSERT_SUCCESS(d3d12Device->CreateFence(serial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
         fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -114,10 +104,6 @@ namespace d3d12 {
         return commandQueue;
     }
 
-    CommandAllocatorManager* Device::GetCommandAllocatorManager() {
-        return commandAllocatorManager;
-    }
-
     ResourceAllocator* Device::GetResourceAllocator() {
         return resourceAllocator;
     }
@@ -126,11 +112,25 @@ namespace d3d12 {
         return resourceUploader;
     }
 
+    void Device::OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList) {
+        ComPtr<ID3D12GraphicsCommandList> &cmdList = *commandList;
+        if (!cmdList) {
+            ASSERT_SUCCESS(d3d12Device->CreateCommandList(
+                0,
+                D3D12_COMMAND_LIST_TYPE_DIRECT,
+                commandAllocatorManager->ReserveCommandAllocator().Get(),
+                nullptr,
+                IID_PPV_ARGS(&cmdList)
+            ));
+        } else {
+            ASSERT_SUCCESS(cmdList->Reset(commandAllocatorManager->ReserveCommandAllocator().Get(), nullptr));
+        }
+    }
+
     ComPtr<ID3D12GraphicsCommandList> Device::GetPendingCommandList() {
         // Callers of GetPendingCommandList do so to record commands. Only reserve a command allocator when it is needed so we don't submit empty command lists
         if (!pendingCommands.open) {
-            pendingCommands.commandAllocator = commandAllocatorManager->ReserveCommandAllocator();
-            ASSERT_SUCCESS(pendingCommands.commandList->Reset(pendingCommands.commandAllocator.Get(), nullptr));
+            OpenCommandList(&pendingCommands.commandList);
             pendingCommands.open = true;
         }
         return pendingCommands.commandList;

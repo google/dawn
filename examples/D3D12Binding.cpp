@@ -37,7 +37,7 @@ namespace d3d12 {
     void NextSerial(nxtDevice device);
     void ExecuteCommandLists(nxtDevice device, std::initializer_list<ID3D12CommandList*> commandLists);
     void WaitForSerial(nxtDevice device, uint64_t serial);
-    ComPtr<ID3D12CommandAllocator> ReserveCommandAllocator(nxtDevice device);
+    void OpenCommandList(nxtDevice device, ComPtr<ID3D12GraphicsCommandList>* commandList);
 }
 }
 
@@ -130,14 +130,7 @@ class D3D12Binding : public BackendBinding {
 
             // Transition the first frame to be a render target
             {
-                ComPtr<ID3D12CommandAllocator> commandAllocator = backend::d3d12::ReserveCommandAllocator(backendDevice);
-                ASSERT_SUCCESS(d3d12Device->CreateCommandList(
-                    0,
-                    D3D12_COMMAND_LIST_TYPE_DIRECT,
-                    commandAllocator.Get(),
-                    nullptr,
-                    IID_PPV_ARGS(&commandList)
-                ));
+                backend::d3d12::OpenCommandList(backendDevice, &commandList);
 
                 D3D12_RESOURCE_BARRIER resourceBarrier;
                 resourceBarrier.Transition.pResource = renderTargetResources[renderTargetIndex].Get();
@@ -162,8 +155,7 @@ class D3D12Binding : public BackendBinding {
         void SwapBuffers() override {
             // Transition current frame's render target for presenting
             {
-                ComPtr<ID3D12CommandAllocator> commandAllocator = backend::d3d12::ReserveCommandAllocator(backendDevice);
-                ASSERT_SUCCESS(commandList->Reset(commandAllocator.Get(), nullptr));
+                backend::d3d12::OpenCommandList(backendDevice, &commandList);
                 D3D12_RESOURCE_BARRIER resourceBarrier;
                 resourceBarrier.Transition.pResource = renderTargetResources[renderTargetIndex].Get();
                 resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -181,8 +173,7 @@ class D3D12Binding : public BackendBinding {
 
             // Transition last frame's render target back to being a render target
             {
-                ComPtr<ID3D12CommandAllocator> commandAllocator = backend::d3d12::ReserveCommandAllocator(backendDevice);
-                ASSERT_SUCCESS(commandList->Reset(commandAllocator.Get(), nullptr));
+                backend::d3d12::OpenCommandList(backendDevice, &commandList);
                 D3D12_RESOURCE_BARRIER resourceBarrier;
                 resourceBarrier.Transition.pResource = renderTargetResources[previousRenderTargetIndex].Get();
                 resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;

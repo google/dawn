@@ -19,8 +19,6 @@
 
 #include "common/SerialQueue.h"
 
-#include <set>
-
 namespace backend {
 namespace d3d12 {
 

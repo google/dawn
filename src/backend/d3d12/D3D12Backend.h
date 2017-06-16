@@ -113,10 +113,10 @@ namespace d3d12 {
             ComPtr<ID3D12Device> GetD3D12Device();
             ComPtr<ID3D12CommandQueue> GetCommandQueue();
 
-            CommandAllocatorManager* GetCommandAllocatorManager();
             ResourceAllocator* GetResourceAllocator();
             ResourceUploader* GetResourceUploader();
 
+            void OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList);
             ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
 
             D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetDescriptor();
@@ -145,7 +145,6 @@ namespace d3d12 {
             ResourceUploader* resourceUploader;
 
             struct PendingCommandList {
-                ComPtr<ID3D12CommandAllocator> commandAllocator;
                 ComPtr<ID3D12GraphicsCommandList> commandList;
                 bool open = false;
             } pendingCommands;

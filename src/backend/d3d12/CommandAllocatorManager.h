@@ -30,8 +30,8 @@ namespace d3d12 {
         public:
             CommandAllocatorManager(Device* device);
 
-            // A CommandAllocator that is reserved must be used before the next Device::Tick where the next serial has completed on the GPU
-            // at this time, the CommandAllocator will be reset
+            // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
+            // otherwise its commands may be reset before execution has completed on the GPU
             ComPtr<ID3D12CommandAllocator> ReserveCommandAllocator();
             void ResetCompletedAllocators(uint64_t lastCompletedSerial);
 
