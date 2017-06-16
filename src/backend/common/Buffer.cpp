@@ -188,12 +188,25 @@ namespace backend {
             return nullptr;
         }
 
+        const nxt::BufferUsageBit kMapWriteAllowedUsages = nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc;
+        if (allowedUsage & nxt::BufferUsageBit::MapWrite &&
+            (allowedUsage & kMapWriteAllowedUsages) != allowedUsage) {
+            HandleError("Only TransferSrc is allowed with MapWrite");
+            return nullptr;
+        }
+
+        const nxt::BufferUsageBit kMapReadAllowedUsages = nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst;
+        if (allowedUsage & nxt::BufferUsageBit::MapRead &&
+            (allowedUsage & kMapReadAllowedUsages) != allowedUsage) {
+            HandleError("Only TransferDst is allowed with MapRead");
+            return nullptr;
+        }
+
         if (!BufferBase::IsUsagePossible(allowedUsage, currentUsage)) {
             HandleError("Initial buffer usage is not allowed");
             return nullptr;
         }
 
-        // TODO(cwallez@chromium.org) disallow using MapRead with anything else than TransferDst
         return device->CreateBuffer(this);
     }
 

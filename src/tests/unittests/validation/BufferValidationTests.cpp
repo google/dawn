@@ -142,6 +142,41 @@ TEST_F(BufferValidationTest, CreationMissingProperties) {
     }
 }
 
+// Test restriction on usages allowed with MapRead and MapWrite
+TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
+    // MapRead with TransferDst is ok
+    {
+        nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder(), "1")
+            .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
+            .SetSize(4)
+            .GetResult();
+    }
+
+    // MapRead with something else is an error
+    {
+        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder(), "2")
+            .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::Uniform)
+            .SetSize(4)
+            .GetResult();
+    }
+
+    // MapWrite with TransferSrc is ok
+    {
+        nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder(), "3")
+            .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+            .SetSize(4)
+            .GetResult();
+    }
+
+    // MapWrite with something else is an error
+    {
+        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder(), "4")
+            .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Uniform)
+            .SetSize(4)
+            .GetResult();
+    }
+}
+
 // Test the success cause for mapping buffer for reading
 TEST_F(BufferValidationTest, MapReadSuccess) {
     nxt::Buffer buf = CreateMapReadBuffer(4);
