@@ -203,13 +203,13 @@
         "values": [
             {"value": 0, "name": "none"},
             {"value": 1, "name": "map read"},
-            {"value": 1, "name": "map write"},
-            {"value": 2, "name": "transfer src"},
-            {"value": 4, "name": "transfer dst"},
-            {"value": 8, "name": "index"},
-            {"value": 16, "name": "vertex"},
-            {"value": 32, "name": "uniform"},
-            {"value": 64, "name": "storage"}
+            {"value": 2, "name": "map write"},
+            {"value": 4, "name": "transfer src"},
+            {"value": 8, "name": "transfer dst"},
+            {"value": 16, "name": "index"},
+            {"value": 32, "name": "vertex"},
+            {"value": 64, "name": "uniform"},
+            {"value": 128, "name": "storage"}
         ]
     },
     "buffer view": {
