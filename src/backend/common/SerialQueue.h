@@ -22,8 +22,6 @@
 
 namespace backend {
 
-    using Serial = uint64_t;
-
     template<typename T>
     class SerialQueue {
         private:

@@ -63,6 +63,8 @@ namespace backend {
     template<typename T>
     class PerStage;
 
+    using Serial = uint64_t;
+
     // TODO(cwallez@chromium.org): where should constants live?
     static constexpr uint32_t kMaxPushConstants = 32u;
     static constexpr uint32_t kMaxBindGroups = 4u;
