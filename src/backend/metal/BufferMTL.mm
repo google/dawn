@@ -22,8 +22,16 @@ namespace metal {
 
     Buffer::Buffer(BufferBuilder* builder)
         : BufferBase(builder) {
+
+        MTLResourceOptions storageMode;
+        if (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
+            storageMode = MTLResourceStorageModeShared;
+        } else {
+            storageMode = MTLResourceStorageModePrivate;
+        }
+
         mtlBuffer = [ToBackend(GetDevice())->GetMTLDevice() newBufferWithLength:GetSize()
-            options:MTLResourceStorageModePrivate];
+            options:storageMode];
     }
 
     Buffer::~Buffer() {
@@ -35,17 +43,23 @@ namespace metal {
         return mtlBuffer;
     }
 
+    void Buffer::OnMapReadCommandSerialFinished(uint32_t mapSerial, uint32_t offset) {
+        const char* data = reinterpret_cast<const char*>([mtlBuffer contents]);
+        CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, data + offset);
+    }
+
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
         auto* uploader = ToBackend(GetDevice())->GetResourceUploader();
         uploader->BufferSubData(mtlBuffer, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
-        // TODO(cwallez@chromium.org): Implement Map Read for the metal backend
+        MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadTracker();
+        tracker->Track(this, serial, start);
     }
 
     void Buffer::UnmapImpl() {
-        // TODO(cwallez@chromium.org): Implement Map Read for the metal backend
+        // Nothing to do, Metal StorageModeShared buffers are always mapped.
     }
 
     void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
@@ -55,5 +69,28 @@ namespace metal {
         : BufferViewBase(builder) {
     }
 
+    MapReadRequestTracker::MapReadRequestTracker(Device* device)
+        : device(device) {
+    }
+
+    MapReadRequestTracker::~MapReadRequestTracker() {
+        ASSERT(inflightRequests.Empty());
+    }
+
+    void MapReadRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, uint32_t offset) {
+        Request request;
+        request.buffer = buffer;
+        request.mapSerial = mapSerial;
+        request.offset = offset;
+
+        inflightRequests.Enqueue(std::move(request), device->GetPendingCommandSerial());
+    }
+
+    void MapReadRequestTracker::Tick(Serial finishedSerial) {
+        for (auto& request : inflightRequests.IterateUpTo(finishedSerial)) {
+            request.buffer->OnMapReadCommandSerialFinished(request.mapSerial, request.offset);
+        }
+        inflightRequests.ClearUpTo(finishedSerial);
+    }
 }
 }

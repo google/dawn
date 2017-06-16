@@ -75,6 +75,7 @@ namespace metal {
         return ToBackendBase<MetalBackendTraits>(common);
     }
 
+    class MapReadRequestTracker;
     class ResourceUploader;
 
     class Device : public DeviceBase {
@@ -112,6 +113,7 @@ namespace metal {
             void SubmitPendingCommandBuffer();
             Serial GetPendingCommandSerial();
 
+            MapReadRequestTracker* GetMapReadTracker() const;
             ResourceUploader* GetResourceUploader() const;
 
             // NXT API
@@ -123,6 +125,7 @@ namespace metal {
 
             id<MTLDevice> mtlDevice = nil;
             id<MTLCommandQueue> commandQueue = nil;
+            MapReadRequestTracker* mapReadTracker;
             ResourceUploader* resourceUploader;
 
             id<CAMetalDrawable> currentDrawable = nil;

@@ -52,7 +52,8 @@ namespace metal {
     // Device
 
     Device::Device(id<MTLDevice> mtlDevice)
-        : mtlDevice(mtlDevice), resourceUploader(new ResourceUploader(this)) {
+        : mtlDevice(mtlDevice), mapReadTracker(new MapReadRequestTracker(this)),
+            resourceUploader(new ResourceUploader(this)) {
         [mtlDevice retain];
         commandQueue = [mtlDevice newCommandQueue];
     }
@@ -60,6 +61,9 @@ namespace metal {
     Device::~Device() {
         [pendingCommands release];
         pendingCommands = nil;
+
+        delete mapReadTracker;
+        mapReadTracker = nullptr;
 
         delete resourceUploader;
         resourceUploader = nullptr;
@@ -128,6 +132,7 @@ namespace metal {
 
     void Device::TickImpl() {
         resourceUploader->Tick(finishedCommandSerial);
+        mapReadTracker->Tick(finishedCommandSerial);
 
         // Code above might have added GPU work, submit it. This also makes sure
         // that even when no GPU work is happening, the serial number keeps incrementing.
@@ -228,6 +233,10 @@ namespace metal {
         // happens we could be waiting for this serial forever.
         GetPendingCommandBuffer();
         return pendingCommandSerial;
+    }
+
+    MapReadRequestTracker* Device::GetMapReadTracker() const {
+        return mapReadTracker;
     }
 
     ResourceUploader* Device::GetResourceUploader() const {
