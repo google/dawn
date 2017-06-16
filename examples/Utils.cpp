@@ -271,85 +271,75 @@ nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, const void* da
     return buffer;
 }
 
-extern "C" {
-    bool InitUtils(int argc, const char** argv) {
-        for (int i = 0; i < argc; i++) {
-            if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {
-                i++;
-                if (i < argc && std::string("opengl") == argv[i]) {
-                    backendType = BackendType::OpenGL;
-                    continue;
-                }
-                if (i < argc && std::string("metal") == argv[i]) {
-                    backendType = BackendType::Metal;
-                    continue;
-                }
-                if (i < argc && std::string("d3d12") == argv[i]) {
-                    backendType = BackendType::D3D12;
-                    continue;
-                }
-                if (i < argc && std::string("null") == argv[i]) {
-                    backendType = BackendType::Null;
-                    continue;
-                }
-                fprintf(stderr, "--backend expects a backend name (opengl, metal, d3d12, null)\n");
-                return false;
+bool InitUtils(int argc, const char** argv) {
+    for (int i = 0; i < argc; i++) {
+        if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {
+            i++;
+            if (i < argc && std::string("opengl") == argv[i]) {
+                backendType = BackendType::OpenGL;
+                continue;
             }
-            if (std::string("-c") == argv[i] || std::string("--comand-buffer") == argv[i]) {
-                i++;
-                if (i < argc && std::string("none") == argv[i]) {
-                    cmdBufType = CmdBufType::None;
-                    continue;
-                }
-                if (i < argc && std::string("terrible") == argv[i]) {
-                    cmdBufType = CmdBufType::Terrible;
-                    continue;
-                }
-                fprintf(stderr, "--command-buffer expects a command buffer name (none, terrible)\n");
-                return false;
+            if (i < argc && std::string("metal") == argv[i]) {
+                backendType = BackendType::Metal;
+                continue;
             }
-            if (std::string("-h") == argv[i] || std::string("--help") == argv[i]) {
-                printf("Usage: %s [-b BACKEND] [-c COMMAND_BUFFER]\n", argv[0]);
-                printf("  BACKEND is one of: opengl, metal, d3d12, null\n");
-                printf("  COMMAND_BUFFER is one of: none, terrible\n");
-                return false;
+            if (i < argc && std::string("d3d12") == argv[i]) {
+                backendType = BackendType::D3D12;
+                continue;
             }
+            if (i < argc && std::string("null") == argv[i]) {
+                backendType = BackendType::Null;
+                continue;
+            }
+            fprintf(stderr, "--backend expects a backend name (opengl, metal, d3d12, null)\n");
+            return false;
         }
-        return true;
-    }
-
-    nxtDevice CreateNXTDevice() {
-        return CreateCppNXTDevice().Release();
-    }
-
-    nxtShaderModule CreateShaderModule(nxtDevice device, nxtShaderStage stage, const char* source) {
-        return CreateShaderModule(device, static_cast<nxt::ShaderStage>(stage), source).Release();
-    }
-
-    void DoSwapBuffers() {
-        if (cmdBufType == CmdBufType::Terrible) {
-            c2sBuf->Flush();
-            s2cBuf->Flush();
+        if (std::string("-c") == argv[i] || std::string("--comand-buffer") == argv[i]) {
+            i++;
+            if (i < argc && std::string("none") == argv[i]) {
+                cmdBufType = CmdBufType::None;
+                continue;
+            }
+            if (i < argc && std::string("terrible") == argv[i]) {
+                cmdBufType = CmdBufType::Terrible;
+                continue;
+            }
+            fprintf(stderr, "--command-buffer expects a command buffer name (none, terrible)\n");
+            return false;
         }
-        glfwPollEvents();
-        binding->SwapBuffers();
+        if (std::string("-h") == argv[i] || std::string("--help") == argv[i]) {
+            printf("Usage: %s [-b BACKEND] [-c COMMAND_BUFFER]\n", argv[0]);
+            printf("  BACKEND is one of: opengl, metal, d3d12, null\n");
+            printf("  COMMAND_BUFFER is one of: none, terrible\n");
+            return false;
+        }
     }
+    return true;
+}
+
+void DoSwapBuffers() {
+    if (cmdBufType == CmdBufType::Terrible) {
+        c2sBuf->Flush();
+        s2cBuf->Flush();
+    }
+    glfwPollEvents();
+    binding->SwapBuffers();
+}
 
 #ifdef _WIN32
-    void USleep(uint64_t usecs) {
-        Sleep(usecs / 1000);
-    }
+void USleep(uint64_t usecs) {
+    Sleep(usecs / 1000);
+}
 #else
-    void USleep(uint64_t usecs) {
-        usleep(usecs);
-    }
+void USleep(uint64_t usecs) {
+    usleep(usecs);
+}
 #endif
 
-    bool ShouldQuit() {
-        return glfwWindowShouldClose(window);
-    }
+bool ShouldQuit() {
+    return glfwWindowShouldClose(window);
+}
 
-    GLFWwindow* GetGLFWWindow() {
-        return window;
-    }
+GLFWwindow* GetGLFWWindow() {
+    return window;
 }

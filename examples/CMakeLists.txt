@@ -34,8 +34,9 @@ add_library(utils STATIC ${UTILS_SOURCES})
 target_link_libraries(utils nxt_backend nxt_wire shaderc nxtcpp nxt)
 SetCXX14(utils)
 
-add_executable(CHelloTriangle HelloTriangle.c)
+add_executable(CHelloTriangle CHelloTriangle.cpp)
 target_link_libraries(CHelloTriangle utils)
+SetCXX14(CHelloTriangle)
 
 add_executable(CppHelloTriangle HelloTriangle.cpp)
 target_link_libraries(CppHelloTriangle utils)

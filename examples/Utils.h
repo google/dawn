@@ -12,30 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <nxt/nxt.h>
+#include <nxt/nxtcpp.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-    bool InitUtils(int argc, const char** argv);
-    void DoSwapBuffers();
-    bool ShouldQuit();
-    void USleep(uint64_t usecs);
+bool InitUtils(int argc, const char** argv);
+void DoSwapBuffers();
+bool ShouldQuit();
+void USleep(uint64_t usecs);
 
-    struct GLFWwindow;
-    struct GLFWwindow* GetGLFWWindow();
-#if defined(__cplusplus)
-}
-#endif
+struct GLFWwindow;
+struct GLFWwindow* GetGLFWWindow();
 
-// Yuck
-#if defined(__cplusplus)
-    #include <nxt/nxtcpp.h>
-    nxt::Device CreateCppNXTDevice();
-    nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source);
-    void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer);
-    nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, const void* data, uint32_t size, nxt::BufferUsageBit usage);
-#else
-    nxtDevice CreateNXTDevice();
-    nxtShaderModule CreateShaderModule(nxtDevice device, nxtShaderStage stage, const char* source);
-#endif
+nxt::Device CreateCppNXTDevice();
+nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source);
+void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer);
+nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, const void* data, uint32_t size, nxt::BufferUsageBit usage);

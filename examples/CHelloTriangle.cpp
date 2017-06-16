@@ -21,7 +21,7 @@ nxtRenderPass renderpass;
 nxtFramebuffer framebuffer;
 
 void init() {
-    device = CreateNXTDevice();
+    device = CreateCppNXTDevice().Release();
 
     {
         nxtQueueBuilder builder = nxtDeviceCreateQueueBuilder(device);
@@ -35,7 +35,7 @@ void init() {
         "void main() {\n"
         "   gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);\n"
         "}\n";
-    nxtShaderModule vsModule = CreateShaderModule(device, NXT_SHADER_STAGE_VERTEX, vs);
+    nxtShaderModule vsModule = CreateShaderModule(nxt::Device(device), nxt::ShaderStage::Vertex, vs).Release();
 
     const char* fs =
         "#version 450\n"
@@ -43,7 +43,7 @@ void init() {
         "void main() {\n"
         "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
         "}\n";
-    nxtShaderModule fsModule = CreateShaderModule(device, NXT_SHADER_STAGE_FRAGMENT, fs);
+    nxtShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, fs).Release();
 
     {
         nxtRenderPassBuilder builder = nxtDeviceCreateRenderPassBuilder(device);
