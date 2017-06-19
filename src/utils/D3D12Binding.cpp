@@ -19,6 +19,7 @@
 #include "GLFW/glfw3native.h"
 
 #include <assert.h>
+#include <initializer_list>
 #include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>

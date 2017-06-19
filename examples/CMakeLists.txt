@@ -60,10 +60,6 @@ add_executable(Animometer Animometer.cpp)
 target_link_libraries(Animometer sample_utils)
 SetCXX14(Animometer)
 
-add_executable(SpirvTest SpirvTest.cpp)
-target_link_libraries(SpirvTest shaderc spirv-cross nxtcpp)
-SetCXX14(SpirvTest)
-
 add_executable(CppHelloDepthStencil HelloDepthStencil.cpp)
 target_link_libraries(CppHelloDepthStencil sample_utils)
 SetCXX14(CppHelloDepthStencil)

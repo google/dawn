@@ -16,6 +16,7 @@
 
 #include <shaderc/shaderc.hpp>
 
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
