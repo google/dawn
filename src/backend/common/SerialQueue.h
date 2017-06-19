@@ -110,12 +110,14 @@ namespace backend {
 
     template<typename T>
     void SerialQueue<T>::Enqueue(const std::vector<T>& values, Serial serial) {
+        ASSERT(values.size() > 0);
         ASSERT(Empty() || storage.back().first <= serial);
         storage.emplace_back(SerialPair(serial, {values}));
     }
 
     template<typename T>
     void SerialQueue<T>::Enqueue(std::vector<T>&& values, Serial serial) {
+        ASSERT(values.size() > 0);
         ASSERT(Empty() || storage.back().first <= serial);
         storage.emplace_back(SerialPair(serial, {values}));
     }
