@@ -117,3 +117,25 @@ TEST(SerialQueue, ClearUpTo) {
     }
     ASSERT_TRUE(expectedValues.empty());
 }
+
+// Test FirstSerial
+TEST(SerialQueue, FirstSerial) {
+    SerialQueue queue;
+
+    std::vector<int> vector1 = {1, 2, 3, 4};
+    std::vector<int> vector2 = {5, 6, 7, 8};
+    std::vector<int> vector3 = {9, 0};
+
+    queue.Enqueue(vector1, 0);
+    queue.Enqueue(std::move(vector2), 1);
+    queue.Enqueue(vector3, 2);
+
+    EXPECT_EQ(queue.FirstSerial(), 0);
+
+    queue.ClearUpTo(1);
+    EXPECT_EQ(queue.FirstSerial(), 2);
+
+    queue.Clear();
+    queue.Enqueue(vector1, 6);
+    EXPECT_EQ(queue.FirstSerial(), 6);
+}
