@@ -14,12 +14,10 @@
 
 #include <nxt/nxtcpp.h>
 
-bool InitUtils(int argc, const char** argv);
-void DoSwapBuffers();
-bool ShouldQuit();
-void USleep(uint64_t usecs);
+namespace utils {
 
-struct GLFWwindow;
-struct GLFWwindow* GetGLFWWindow();
+    nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source);
+    void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer);
+    nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, const void* data, uint32_t size, nxt::BufferUsageBit usage);
 
-nxt::Device CreateCppNXTDevice();
+}

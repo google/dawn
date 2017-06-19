@@ -14,6 +14,8 @@
 
 #include "Utils.h"
 
+#include "utils/NXTHelpers.h"
+
 #include <vector>
 #include <glm/glm/glm.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
@@ -58,7 +60,7 @@ void initBuffers() {
         20, 21, 22,
         20, 22, 23
     };
-    indexBuffer = CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
+    indexBuffer = utils::CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
 
     static const float vertexData[6 * 4 * 6] = {
         -1.0, -1.0,  1.0,    1.0, 0.0, 0.0,
@@ -91,7 +93,7 @@ void initBuffers() {
         -1.0,  1.0,  1.0,    1.0, 1.0, 1.0,
         -1.0,  1.0, -1.0,    1.0, 1.0, 1.0
     };
-    vertexBuffer = CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 
     static const float planeData[6 * 4] = {
         -2.0, -1.0, -2.0,    0.5, 0.5, 0.5,
@@ -99,7 +101,7 @@ void initBuffers() {
         2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
         -2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
     };
-    planeBuffer = CreateFrozenBufferFromData(device, planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
+    planeBuffer = utils::CreateFrozenBufferFromData(device, planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
 }
 
 struct CameraData {
@@ -114,7 +116,7 @@ void init() {
 
     initBuffers();
 
-    nxt::ShaderModule vsModule = CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
         layout(set = 0, binding = 0) uniform cameraData {
             mat4 view;
@@ -132,7 +134,7 @@ void init() {
         })"
     );
 
-    nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
         out vec4 fragColor;
@@ -141,7 +143,7 @@ void init() {
         })"
     );
 
-    nxt::ShaderModule fsReflectionModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    nxt::ShaderModule fsReflectionModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
         out vec4 fragColor;
@@ -171,10 +173,10 @@ void init() {
         .GetResult();
 
     glm::mat4 transform(1.0);
-    transformBuffer[0] = CreateFrozenBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
+    transformBuffer[0] = utils::CreateFrozenBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
 
     transform = glm::translate(transform, glm::vec3(0.f, -2.f, 0.f));
-    transformBuffer[1] = CreateFrozenBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
+    transformBuffer[1] = utils::CreateFrozenBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
 
     nxt::BufferView cameraBufferView = cameraBuffer.CreateBufferViewBuilder()
         .SetExtent(0, sizeof(CameraData))
@@ -203,7 +205,7 @@ void init() {
         .SetBufferViews(1, 1, &transformBufferView[1])
         .GetResult();
 
-    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+    utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
 
     auto depthStencilState = device.CreateDepthStencilStateBuilder()
         .SetDepthCompareFunction(nxt::CompareFunction::Less)

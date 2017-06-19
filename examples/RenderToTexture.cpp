@@ -14,6 +14,8 @@
 
 #include "Utils.h"
 
+#include "utils/NXTHelpers.h"
+
 #include <vector>
 
 nxt::Device device;
@@ -38,7 +40,7 @@ void initBuffers() {
         -0.5f, -0.5f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 
     static const float vertexDataQuad[24] = {
         -1.0f, -1.0f, 0.0f, 1.0f,
@@ -48,7 +50,7 @@ void initBuffers() {
         1.0f, -1.0f, 0.0f, 1.0f,
         1.0f, 1.0f, 0.0f, 1.0f,
     };
-    vertexBufferQuad = CreateFrozenBufferFromData(device, vertexDataQuad, sizeof(vertexDataQuad), nxt::BufferUsageBit::Vertex);
+    vertexBufferQuad = utils::CreateFrozenBufferFromData(device, vertexDataQuad, sizeof(vertexDataQuad), nxt::BufferUsageBit::Vertex);
 }
 
 void initTextures() {
@@ -89,7 +91,7 @@ void initRenderPass() {
 }
 
 void initPipeline() {
-    nxt::ShaderModule vsModule = CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec4 pos;
         void main() {
@@ -97,7 +99,7 @@ void initPipeline() {
         })"
     );
 
-    nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         void main() {
@@ -119,7 +121,7 @@ void initPipeline() {
 }
 
 void initPipelinePost() {
-    nxt::ShaderModule vsModule = CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec4 pos;
         void main() {
@@ -127,7 +129,7 @@ void initPipelinePost() {
         })"
     );
 
-    nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         layout(set = 0, binding = 0) uniform sampler samp;
         layout(set = 0, binding = 1) uniform texture2D tex;

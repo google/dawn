@@ -20,6 +20,8 @@
 
 #include "Utils.h"
 
+#include "utils/NXTHelpers.h"
+
 #include <bitset>
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/mat4x4.hpp>
@@ -147,7 +149,7 @@ namespace {
             uint32_t iBufferViewSize =
                 iBufferView.byteLength ? iBufferView.byteLength :
                 (iBuffer.data.size() - iBufferView.byteOffset);
-            auto oBuffer = CreateFrozenBufferFromData(device, &iBuffer.data.at(iBufferView.byteOffset), iBufferViewSize, usage);
+            auto oBuffer = utils::CreateFrozenBufferFromData(device, &iBuffer.data.at(iBufferView.byteOffset), iBufferViewSize, usage);
             buffers[iBufferViewID] = std::move(oBuffer);
         }
     }
@@ -164,7 +166,7 @@ namespace {
         const auto& iTechnique = scene.techniques.at(iMaterial.technique);
         const auto& iProgram = scene.programs.at(iTechnique.program);
 
-        auto oVSModule = CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+        auto oVSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
             #version 450
 
             layout(set = 0, binding = 0) uniform u_transform_block {
@@ -185,7 +187,7 @@ namespace {
                 gl_Position = u_transform.modelViewProj * a_position;
             })");
 
-        auto oFSModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+        auto oFSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
             #version 450
 
             layout(set = 0, binding = 1) uniform sampler u_samp;
@@ -373,7 +375,7 @@ namespace {
                 // TODO: release this texture
 
             uint32_t white = 0xffffffff;
-            nxt::Buffer staging = CreateFrozenBufferFromData(device, &white, sizeof(white), nxt::BufferUsageBit::TransferSrc);
+            nxt::Buffer staging = utils::CreateFrozenBufferFromData(device, &white, sizeof(white), nxt::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
                 .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
                 .CopyBufferToTexture(staging, 0, oTexture, 0, 0, 0, 1, 1, 1, 0)
@@ -427,7 +429,7 @@ namespace {
                 fprintf(stderr, "unsupported image.component %d\n", iImage.component);
             }
 
-            nxt::Buffer staging = CreateFrozenBufferFromData(device, data, numPixels * 4, nxt::BufferUsageBit::TransferSrc);
+            nxt::Buffer staging = utils::CreateFrozenBufferFromData(device, data, numPixels * 4, nxt::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
                 .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
                 .CopyBufferToTexture(staging, 0, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)

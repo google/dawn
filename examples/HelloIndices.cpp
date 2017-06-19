@@ -14,6 +14,8 @@
 
 #include "Utils.h"
 
+#include "utils/NXTHelpers.h"
+
 #include <vector>
 
 nxt::Device device;
@@ -30,14 +32,14 @@ void initBuffers() {
     static const uint32_t indexData[3] = {
         0, 1, 2,
     };
-    indexBuffer = CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
+    indexBuffer = utils::CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
 
     static const float vertexData[12] = {
         0.0f, 0.5f, 0.0f, 1.0f,
         -0.5f, -0.5f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 }
 
 void init() {
@@ -47,7 +49,7 @@ void init() {
 
     initBuffers();
 
-    nxt::ShaderModule vsModule = CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec4 pos;
         void main() {
@@ -55,7 +57,7 @@ void init() {
         })"
     );
 
-    nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         out vec4 fragColor;
         void main() {
@@ -68,7 +70,7 @@ void init() {
         .SetInput(0, 4 * sizeof(float), nxt::InputStepMode::Vertex)
         .GetResult();
 
-    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+    utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
     pipeline = device.CreatePipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")

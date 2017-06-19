@@ -19,6 +19,8 @@ list(APPEND UTILS_SOURCES
     ${UTILS_DIR}/BackendBinding.h
     ${UTILS_DIR}/NullBinding.cpp
     ${UTILS_DIR}/OpenGLBinding.cpp
+    ${UTILS_DIR}/NXTHelpers.cpp
+    ${UTILS_DIR}/NXTHelpers.h
 )
 
 if (APPLE)

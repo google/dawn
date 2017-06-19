@@ -14,6 +14,8 @@
 
 #include "Utils.h"
 
+#include "utils/NXTHelpers.h"
+
 #include <string.h>
 
 nxt::Device device;
@@ -45,7 +47,7 @@ void init() {
         .GetResult();
 
     {
-        nxt::ShaderModule module = CreateShaderModule(device, nxt::ShaderStage::Compute, R"(
+        nxt::ShaderModule module = utils::CreateShaderModule(device, nxt::ShaderStage::Compute, R"(
             #version 450
             layout(set = 0, binding = 0) buffer myBlock {
                 int a;
@@ -78,7 +80,7 @@ void init() {
     }
 
     {
-        nxt::ShaderModule vsModule = CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+        nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
             #version 450
             const vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));
             void main() {
@@ -86,7 +88,7 @@ void init() {
             })"
         );
 
-        nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+        nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
             #version 450
             layout(set = 0, binding = 0) uniform myBlock {
                 int a;
@@ -106,7 +108,7 @@ void init() {
             .SetBindGroupLayout(0, bgl)
             .GetResult();
 
-        CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+        utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
         renderPipeline = device.CreatePipelineBuilder()
             .SetSubpass(renderpass, 0)
             .SetLayout(pl)

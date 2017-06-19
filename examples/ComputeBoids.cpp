@@ -14,6 +14,8 @@
 
 #include "Utils.h"
 
+#include "utils/NXTHelpers.h"
+
 #include <array>
 #include <cstring>
 #include <random>
@@ -62,10 +64,10 @@ void initBuffers() {
         {0.01, -0.02},
         {0.00, 0.02},
     };
-    modelBuffer = CreateFrozenBufferFromData(device, model, sizeof(model), nxt::BufferUsageBit::Vertex);
+    modelBuffer = utils::CreateFrozenBufferFromData(device, model, sizeof(model), nxt::BufferUsageBit::Vertex);
 
     SimParams params = { 0.04, 0.1, 0.025, 0.025, 0.02, 0.05, 0.005, kNumParticles };
-    updateParams = CreateFrozenBufferFromData(device, &params, sizeof(params), nxt::BufferUsageBit::Uniform);
+    updateParams = utils::CreateFrozenBufferFromData(device, &params, sizeof(params), nxt::BufferUsageBit::Uniform);
 
     std::vector<Particle> initialParticles(kNumParticles);
     {
@@ -92,7 +94,7 @@ void initBuffers() {
 }
 
 void initRender() {
-    nxt::ShaderModule vsModule = CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec2 a_particlePos;
         layout(location = 1) in vec2 a_particleVel;
@@ -105,7 +107,7 @@ void initRender() {
         }
     )");
 
-    nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         out vec4 fragColor;
         void main() {
@@ -121,7 +123,7 @@ void initRender() {
         .SetInput(1, sizeof(glm::vec2), nxt::InputStepMode::Vertex)
         .GetResult();
 
-    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+    utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
     renderPipeline = device.CreatePipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -131,7 +133,7 @@ void initRender() {
 }
 
 void initSim() {
-    nxt::ShaderModule module = CreateShaderModule(device, nxt::ShaderStage::Compute, R"(
+    nxt::ShaderModule module = utils::CreateShaderModule(device, nxt::ShaderStage::Compute, R"(
         #version 450
 
         struct Particle {

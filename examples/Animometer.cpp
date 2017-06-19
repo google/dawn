@@ -14,6 +14,8 @@
 
 #include "Utils.h"
 
+#include "utils/NXTHelpers.h"
+
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
@@ -45,7 +47,7 @@ void init() {
 
     queue = device.CreateQueueBuilder().GetResult();
 
-    nxt::ShaderModule vsModule = CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
 
         layout(push_constant) uniform ConstantsBlock {
@@ -93,7 +95,7 @@ void init() {
         })"
     );
 
-    nxt::ShaderModule fsModule = CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         out vec4 fragColor;
         layout(location = 0) in vec4 v_color;
@@ -102,7 +104,7 @@ void init() {
         })"
     );
 
-    CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+    utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
     pipeline = device.CreatePipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
