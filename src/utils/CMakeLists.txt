@@ -12,7 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable(glTFViewer glTFViewer.cpp)
-target_link_libraries(glTFViewer sample_utils)
-target_include_directories(glTFViewer PUBLIC ../ ${GLM_INCLUDE_DIR})
-SetCXX14(glTFViewer)
+set(UTILS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+list(APPEND UTILS_SOURCES
+    ${UTILS_DIR}/BackendBinding.cpp
+    ${UTILS_DIR}/BackendBinding.h
+    ${UTILS_DIR}/NullBinding.cpp
+    ${UTILS_DIR}/OpenGLBinding.cpp
+)
+
+if (APPLE)
+    list(APPEND UTILS_SOURCES
+        ${UTILS_DIR}/MetalBinding.mm
+    )
+endif()
+
+if (WIN32)
+    list(APPEND UTILS_SOURCES
+        ${UTILS_DIR}/D3D12Binding.cpp
+    )
+endif()
+
+add_library(utils STATIC ${UTILS_SOURCES})
+target_link_libraries(utils nxt_backend shaderc nxtcpp nxt)
+target_include_directories(utils PUBLIC ${SRC_DIR})
+SetCXX14(utils)

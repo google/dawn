@@ -79,6 +79,7 @@ set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_subdirectory(src/backend)
 add_subdirectory(src/wire)
+add_subdirectory(src/utils)
 add_subdirectory(src/tests)
 
 add_subdirectory(examples)

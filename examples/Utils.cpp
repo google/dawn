@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "utils/BackendBinding.h"
+#include "../src/wire/TerribleCommandBuffer.h"
+
 #include <nxt/nxt.h>
 #include <nxt/nxtcpp.h>
 #include <shaderc/shaderc.hpp>
 #include "GLFW/glfw3.h"
-
-#include "BackendBinding.h"
-#include "../src/wire/TerribleCommandBuffer.h"
 
 #include <cstring>
 #include <iostream>
@@ -31,68 +31,9 @@
     #include <unistd.h>
 #endif
 
-BackendBinding* CreateMetalBinding();
-BackendBinding* CreateD3D12Binding();
-
-namespace backend {
-    namespace opengl {
-        void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device);
-        void HACKCLEAR();
-    }
-}
-
-class OpenGLBinding : public BackendBinding {
-    public:
-        void SetupGLFWWindowHints() override {
-            #ifdef __APPLE__
-                glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-                glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-                glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-                glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-            #else
-                glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-                glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-                glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-                glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-            #endif
-        }
-        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
-            glfwMakeContextCurrent(window);
-            backend::opengl::Init(reinterpret_cast<void*(*)(const char*)>(glfwGetProcAddress), procs, device);
-        }
-        void SwapBuffers() override {
-            glfwSwapBuffers(window);
-            backend::opengl::HACKCLEAR();
-        }
-};
-
-namespace backend {
-    namespace null {
-        void Init(nxtProcTable* procs, nxtDevice* device);
-    }
-}
-
-class NullBinding : public BackendBinding {
-    public:
-        void SetupGLFWWindowHints() override {
-        }
-        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
-            backend::null::Init(procs, device);
-        }
-        void SwapBuffers() override {
-        }
-};
-
 void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
     std::cout << "Device error: " << message << std::endl;
 }
-
-enum class BackendType {
-    OpenGL,
-    Metal,
-    D3D12,
-    Null,
-};
 
 enum class CmdBufType {
     None,
@@ -101,15 +42,15 @@ enum class CmdBufType {
 };
 
 #if defined(__APPLE__)
-static BackendType backendType = BackendType::Metal;
+static utils::BackendType backendType = utils::BackendType::Metal;
 #elif defined(_WIN32)
-static BackendType backendType = BackendType::D3D12;
+static utils::BackendType backendType = utils::BackendType::D3D12;
 #else
-static BackendType backendType = BackendType::OpenGL;
+static utils::BackendType backendType = utils::BackendType::OpenGL;
 #endif
 
 static CmdBufType cmdBufType = CmdBufType::Terrible;
-static BackendBinding* binding = nullptr;
+static utils::BackendBinding* binding = nullptr;
 
 static GLFWwindow* window = nullptr;
 
@@ -119,27 +60,9 @@ static nxt::wire::TerribleCommandBuffer* c2sBuf = nullptr;
 static nxt::wire::TerribleCommandBuffer* s2cBuf = nullptr;
 
 nxt::Device CreateCppNXTDevice() {
-    switch (backendType) {
-        case BackendType::OpenGL:
-            binding = new OpenGLBinding;
-            break;
-        case BackendType::Metal:
-            #if defined(__APPLE__)
-                binding = CreateMetalBinding();
-            #else
-                fprintf(stderr, "Metal backend not present on this platform\n");
-            #endif
-            break;
-        case BackendType::D3D12:
-            #if defined(_WIN32)
-                binding = CreateD3D12Binding();
-            #else
-                fprintf(stderr, "D3D12 backend not present on this platform\n");
-            #endif
-            break;
-        case BackendType::Null:
-            binding = new NullBinding;
-            break;
+    binding = utils::CreateBinding(backendType);
+    if (binding == nullptr) {
+        return nxt::Device();
     }
 
     if (!glfwInit()) {
@@ -275,23 +198,27 @@ bool InitUtils(int argc, const char** argv) {
     for (int i = 0; i < argc; i++) {
         if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {
             i++;
-            if (i < argc && std::string("opengl") == argv[i]) {
-                backendType = BackendType::OpenGL;
+            if (i < argc && std::string("d3d12") == argv[i]) {
+                backendType = utils::BackendType::D3D12;
                 continue;
             }
             if (i < argc && std::string("metal") == argv[i]) {
-                backendType = BackendType::Metal;
-                continue;
-            }
-            if (i < argc && std::string("d3d12") == argv[i]) {
-                backendType = BackendType::D3D12;
+                backendType = utils::BackendType::Metal;
                 continue;
             }
             if (i < argc && std::string("null") == argv[i]) {
-                backendType = BackendType::Null;
+                backendType = utils::BackendType::Null;
                 continue;
             }
-            fprintf(stderr, "--backend expects a backend name (opengl, metal, d3d12, null)\n");
+            if (i < argc && std::string("opengl") == argv[i]) {
+                backendType = utils::BackendType::OpenGL;
+                continue;
+            }
+            if (i < argc && std::string("vulkan") == argv[i]) {
+                backendType = utils::BackendType::Vulkan;
+                continue;
+            }
+            fprintf(stderr, "--backend expects a backend name (opengl, metal, d3d12, null, vulkan)\n");
             return false;
         }
         if (std::string("-c") == argv[i] || std::string("--comand-buffer") == argv[i]) {
@@ -309,7 +236,7 @@ bool InitUtils(int argc, const char** argv) {
         }
         if (std::string("-h") == argv[i] || std::string("--help") == argv[i]) {
             printf("Usage: %s [-b BACKEND] [-c COMMAND_BUFFER]\n", argv[0]);
-            printf("  BACKEND is one of: opengl, metal, d3d12, null\n");
+            printf("  BACKEND is one of: d3d12, metal, null, opengl, vulkan\n");
             printf("  COMMAND_BUFFER is one of: none, terrible\n");
             return false;
         }

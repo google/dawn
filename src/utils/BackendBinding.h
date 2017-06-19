@@ -15,20 +15,33 @@
 #ifndef UTILS_BACKENDBINDING_H_
 #define UTILS_BACKENDBINDING_H_
 
-#include <nxt/nxt.h>
-
 struct GLFWwindow;
+typedef struct nxtProcTable_s nxtProcTable;
+typedef struct nxtDeviceImpl* nxtDevice;
 
-class BackendBinding {
-    public:
-        virtual void SetupGLFWWindowHints() = 0;
-        virtual void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) = 0;
-        virtual void SwapBuffers() = 0;
+namespace utils {
 
-        void SetWindow(GLFWwindow* window) {this->window = window;}
+    enum class BackendType {
+        D3D12,
+        Metal,
+        OpenGL,
+        Null,
+        Vulkan,
+    };
 
-    protected:
-        GLFWwindow* window = nullptr;
-};
+    class BackendBinding {
+        public:
+            virtual void SetupGLFWWindowHints() = 0;
+            virtual void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) = 0;
+            virtual void SwapBuffers() = 0;
+
+            void SetWindow(GLFWwindow* window);
+
+        protected:
+            GLFWwindow* window = nullptr;
+    };
+
+    BackendBinding* CreateBinding(BackendType type);
+}
 
 #endif // UTILS_BACKENDBINDING_H_
