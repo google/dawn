@@ -13,8 +13,8 @@
 # limitations under the License.
 
 add_library(sample_utils
-    Utils.cpp
-    Utils.h
+    SampleUtils.cpp
+    SampleUtils.h
 )
 target_link_libraries(sample_utils utils nxt_wire)
 SetCXX14(sample_utils)

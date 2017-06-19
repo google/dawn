@@ -110,7 +110,7 @@ nxt::Device CreateCppNXTDevice() {
     return nxt::Device::Acquire(cDevice);
 }
 
-bool InitUtils(int argc, const char** argv) {
+bool InitSample(int argc, const char** argv) {
     for (int i = 0; i < argc; i++) {
         if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {
             i++;

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "Utils.h"
+#include "SampleUtils.h"
 
 #include "utils/NXTHelpers.h"
 
@@ -301,7 +301,7 @@ void frame() {
 }
 
 int main(int argc, const char* argv[]) {
-    if (!InitUtils(argc, argv)) {
+    if (!InitSample(argc, argv)) {
         return 1;
     }
     init();

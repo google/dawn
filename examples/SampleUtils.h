@@ -14,7 +14,7 @@
 
 #include <nxt/nxtcpp.h>
 
-bool InitUtils(int argc, const char** argv);
+bool InitSample(int argc, const char** argv);
 void DoSwapBuffers();
 bool ShouldQuit();
 void USleep(uint64_t usecs);

@@ -18,7 +18,7 @@
 #define __STDC_FORMAT_MACROS
 #endif
 
-#include "Utils.h"
+#include "SampleUtils.h"
 
 #include "utils/NXTHelpers.h"
 
@@ -613,7 +613,7 @@ namespace {
 }
 
 int main(int argc, const char* argv[]) {
-    if (!InitUtils(argc, argv)) {
+    if (!InitSample(argc, argv)) {
         return 1;
     }
     if (argc < 2) {
