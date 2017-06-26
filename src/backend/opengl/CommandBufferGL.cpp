@@ -81,10 +81,12 @@ namespace opengl {
                 case Command::CopyBufferToBuffer:
                     {
                         CopyBufferToBufferCmd* copy = commands.NextCommand<CopyBufferToBufferCmd>();
+                        auto& src = copy->source;
+                        auto& dst = copy->destination;
 
-                        glBindBuffer(GL_PIXEL_PACK_BUFFER, ToBackend(copy->source)->GetHandle());
-                        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, ToBackend(copy->destination)->GetHandle());
-                        glCopyBufferSubData(GL_PIXEL_PACK_BUFFER, GL_PIXEL_UNPACK_BUFFER, copy->sourceOffset, copy->destinationOffset, copy->size);
+                        glBindBuffer(GL_PIXEL_PACK_BUFFER, ToBackend(src.buffer)->GetHandle());
+                        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, ToBackend(dst.buffer)->GetHandle());
+                        glCopyBufferSubData(GL_PIXEL_PACK_BUFFER, GL_PIXEL_UNPACK_BUFFER, src.offset, dst.offset, copy->size);
 
                         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
                         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -94,8 +96,10 @@ namespace opengl {
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();
-                        Buffer* buffer = ToBackend(copy->buffer.Get());
-                        Texture* texture = ToBackend(copy->texture.Get());
+                        auto& src = copy->source;
+                        auto& dst = copy->destination;
+                        Buffer* buffer = ToBackend(src.buffer.Get());
+                        Texture* texture = ToBackend(dst.texture.Get());
                         GLenum target = texture->GetGLTarget();
                         auto format = texture->GetGLFormat();
 
@@ -103,9 +107,9 @@ namespace opengl {
                         glActiveTexture(GL_TEXTURE0);
                         glBindTexture(target, texture->GetHandle());
 
-                        glTexSubImage2D(target, copy->level, copy->x, copy->y, copy->width, copy->height,
+                        glTexSubImage2D(target, dst.level, dst.x, dst.y, dst.width, dst.height,
                                         format.format, format.type,
-                                        reinterpret_cast<void*>(static_cast<uintptr_t>(copy->bufferOffset)));
+                                        reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
                         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
                     }
                     break;

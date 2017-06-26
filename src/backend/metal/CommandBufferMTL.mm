@@ -163,13 +163,15 @@ namespace metal {
                 case Command::CopyBufferToBuffer:
                     {
                         CopyBufferToBufferCmd* copy = commands.NextCommand<CopyBufferToBufferCmd>();
+                        auto& src = copy->source;
+                        auto& dst = copy->destination;
 
                         encoders.EnsureBlit(commandBuffer);
                         [encoders.blit
-                            copyFromBuffer:ToBackend(copy->source)->GetMTLBuffer()
-                            sourceOffset:copy->sourceOffset
-                            toBuffer:ToBackend(copy->destination)->GetMTLBuffer()
-                            destinationOffset:copy->destinationOffset
+                            copyFromBuffer:ToBackend(src.buffer)->GetMTLBuffer()
+                            sourceOffset:src.offset
+                            toBuffer:ToBackend(dst.buffer)->GetMTLBuffer()
+                            destinationOffset:dst.offset
                             size:copy->size];
                     }
                     break;
@@ -177,30 +179,32 @@ namespace metal {
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();
-                        Buffer* buffer = ToBackend(copy->buffer.Get());
-                        Texture* texture = ToBackend(copy->texture.Get());
+                        auto& src = copy->source;
+                        auto& dst = copy->destination;
+                        Buffer* buffer = ToBackend(src.buffer.Get());
+                        Texture* texture = ToBackend(dst.texture.Get());
 
-                        unsigned rowSize = copy->width * TextureFormatPixelSize(texture->GetFormat());
+                        unsigned rowSize = dst.width * TextureFormatPixelSize(texture->GetFormat());
                         MTLOrigin origin;
-                        origin.x = copy->x;
-                        origin.y = copy->y;
-                        origin.z = copy->z;
+                        origin.x = dst.x;
+                        origin.y = dst.y;
+                        origin.z = dst.z;
 
                         MTLSize size;
-                        size.width = copy->width;
-                        size.height = copy->height;
-                        size.depth = copy->depth;
+                        size.width = dst.width;
+                        size.height = dst.height;
+                        size.depth = dst.depth;
 
                         encoders.EnsureBlit(commandBuffer);
                         [encoders.blit
                             copyFromBuffer:buffer->GetMTLBuffer()
-                            sourceOffset:copy->bufferOffset
+                            sourceOffset:src.offset
                             sourceBytesPerRow:rowSize
-                            sourceBytesPerImage:(rowSize * copy->height)
+                            sourceBytesPerImage:(rowSize * dst.height)
                             sourceSize:size
                             toTexture:texture->GetMTLTexture()
                             destinationSlice:0
-                            destinationLevel:copy->level
+                            destinationLevel:dst.level
                             destinationOrigin:origin];
                     }
                     break;

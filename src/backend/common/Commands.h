@@ -54,21 +54,27 @@ namespace backend {
         Ref<FramebufferBase> framebuffer;
     };
 
-    struct CopyBufferToBufferCmd {
-        Ref<BufferBase> source;
-        Ref<BufferBase> destination;
-        uint32_t sourceOffset;
-        uint32_t destinationOffset;
-        uint32_t size;
+    struct BufferCopyLocation {
+        Ref<BufferBase> buffer;
+        uint32_t offset;
     };
 
-    struct CopyBufferToTextureCmd {
-        Ref<BufferBase> buffer;
-        uint32_t bufferOffset;
+    struct TextureCopyLocation {
         Ref<TextureBase> texture;
         uint32_t x, y, z;
         uint32_t width, height, depth;
         uint32_t level;
+    };
+
+    struct CopyBufferToBufferCmd {
+        BufferCopyLocation source;
+        BufferCopyLocation destination;
+        uint32_t size;
+    };
+
+    struct CopyBufferToTextureCmd {
+        BufferCopyLocation source;
+        TextureCopyLocation destination;
     };
 
     struct DispatchCmd {

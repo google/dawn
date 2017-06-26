@@ -29,6 +29,56 @@
 
 namespace backend {
 
+    namespace {
+
+        bool ValidateCopyLocationFitsInTexture(CommandBufferBuilder* builder, const TextureCopyLocation& location) {
+            const TextureBase* texture = location.texture.Get();
+            if (location.level >= texture->GetNumMipLevels()) {
+                builder->HandleError("Copy mip-level out of range");
+                return false;
+            }
+
+            // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid overflows.
+            uint64_t level = location.level;
+            if (uint64_t(location.x) + uint64_t(location.width) > (static_cast<uint64_t>(texture->GetWidth()) >> level) ||
+                uint64_t(location.y) + uint64_t(location.height) > (static_cast<uint64_t>(texture->GetHeight()) >> level)) {
+                builder->HandleError("Copy would touch outside of the texture");
+                return false;
+            }
+
+            // TODO(cwallez@chromium.org): Check the depth bound differently for 2D arrays and 3D textures
+            if (location.z != 0 || location.depth != 1) {
+                builder->HandleError("No support for z != 0 and depth != 1 for now");
+                return false;
+            }
+
+            return true;
+        }
+
+        bool FitsInBuffer(const BufferBase* buffer, uint32_t offset, uint32_t size) {
+            uint32_t bufferSize = buffer->GetSize();
+            return offset <= bufferSize && (size <= (bufferSize - offset));
+        }
+
+        bool ValidateCopySizeFitsInBuffer(CommandBufferBuilder* builder, const BufferCopyLocation& location, uint32_t dataSize) {
+            if (!FitsInBuffer(location.buffer.Get(), location.offset, dataSize)) {
+                builder->HandleError("Copy would overflow the buffer");
+                return false;
+            }
+
+            return true;
+        }
+
+        bool ComputeTextureCopyBufferSize(CommandBufferBuilder* builder, const TextureCopyLocation& location, uint32_t* bufferSize) {
+            // TODO(cwallez@chromium.org): check for overflows
+            uint32_t pixelSize = TextureFormatPixelSize(location.texture->GetFormat());
+            *bufferSize = location.width * location.height * location.depth * pixelSize;
+
+            return true;
+        }
+
+    }
+
     CommandBufferBase::CommandBufferBase(CommandBufferBuilder* builder)
         : device(builder->device),
           buffersTransitioned(std::move(builder->state->buffersTransitioned)),
@@ -210,27 +260,11 @@ namespace backend {
                 case Command::CopyBufferToBuffer:
                     {
                         CopyBufferToBufferCmd* copy = iterator.NextCommand<CopyBufferToBufferCmd>();
-                        BufferBase* source = copy->source.Get();
-                        BufferBase* destination = copy->destination.Get();
-                        uint32_t sourceOffset = copy->sourceOffset;
-                        uint32_t destinationOffset = copy->destinationOffset;
-                        uint32_t size = copy->size;
-
-                        uint64_t sourceEnd = uint64_t(sourceOffset) + uint64_t(size);
-                        if (sourceEnd > uint64_t(source->GetSize())) {
-                            HandleError("Copy would read after end of the source buffer");
-                            return false;
-                        }
-
-                        uint64_t destinationEnd = uint64_t(destinationOffset) + uint64_t(size);
-                        if (destinationEnd > uint64_t(destination->GetSize())) {
-                            HandleError("Copy would read after end of the destination buffer");
-                            return false;
-                        }
-
-                        if (!state->ValidateCanCopy() ||
-                            !state->ValidateCanUseBufferAs(source, nxt::BufferUsageBit::TransferSrc) ||
-                            !state->ValidateCanUseBufferAs(destination, nxt::BufferUsageBit::TransferDst)) {
+                        if (!ValidateCopySizeFitsInBuffer(this, copy->source, copy->size) ||
+                            !ValidateCopySizeFitsInBuffer(this, copy->destination, copy->size) ||
+                            !state->ValidateCanCopy() ||
+                            !state->ValidateCanUseBufferAs(copy->source.buffer.Get(), nxt::BufferUsageBit::TransferSrc) ||
+                            !state->ValidateCanUseBufferAs(copy->destination.buffer.Get(), nxt::BufferUsageBit::TransferDst)) {
                             return false;
                         }
                     }
@@ -239,36 +273,14 @@ namespace backend {
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = iterator.NextCommand<CopyBufferToTextureCmd>();
-                        BufferBase* buffer = copy->buffer.Get();
-                        uint32_t bufferOffset = copy->bufferOffset;
-                        TextureBase* texture = copy->texture.Get();
-                        uint64_t width = copy->width;
-                        uint64_t height = copy->height;
-                        uint64_t depth = copy->depth;
-                        uint64_t x = copy->x;
-                        uint64_t y = copy->y;
-                        uint64_t z = copy->z;
-                        uint32_t level = copy->level;
 
-                        // TODO(cwallez@chromium.org): check for overflows
-                        uint64_t pixelSize = TextureFormatPixelSize(texture->GetFormat());
-                        uint64_t dataSize = width * height * depth * pixelSize;
-                        if (dataSize + static_cast<uint64_t>(bufferOffset) > static_cast<uint64_t>(buffer->GetSize())) {
-                            HandleError("Copy would read after end of the buffer");
-                            return false;
-                        }
-
-                        if (x + width > static_cast<uint64_t>(texture->GetWidth()) ||
-                            y + height > static_cast<uint64_t>(texture->GetHeight()) ||
-                            z + depth > static_cast<uint64_t>(texture->GetDepth()) ||
-                            level > texture->GetNumMipLevels()) {
-                            HandleError("Copy would write outside of the texture");
-                            return false;
-                        }
-
-                        if (!state->ValidateCanCopy() ||
-                            !state->ValidateCanUseBufferAs(buffer, nxt::BufferUsageBit::TransferSrc) ||
-                            !state->ValidateCanUseTextureAs(texture, nxt::TextureUsageBit::TransferDst)) {
+                        uint32_t bufferCopySize = 0;
+                        if (!ComputeTextureCopyBufferSize(this, copy->destination, &bufferCopySize) ||
+                            !ValidateCopyLocationFitsInTexture(this, copy->destination) ||
+                            !ValidateCopySizeFitsInBuffer(this, copy->source, bufferCopySize) ||
+                            !state->ValidateCanCopy() ||
+                            !state->ValidateCanUseBufferAs(copy->source.buffer.Get(), nxt::BufferUsageBit::TransferSrc) ||
+                            !state->ValidateCanUseTextureAs(copy->destination.texture.Get(), nxt::TextureUsageBit::TransferDst)) {
                             return false;
                         }
                     }
@@ -424,10 +436,10 @@ namespace backend {
     void CommandBufferBuilder::CopyBufferToBuffer(BufferBase* source, uint32_t sourceOffset, BufferBase* destination, uint32_t destinationOffset, uint32_t size) {
         CopyBufferToBufferCmd* copy = allocator.Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
         new(copy) CopyBufferToBufferCmd;
-        copy->source = source;
-        copy->sourceOffset = sourceOffset;
-        copy->destination = destination;
-        copy->destinationOffset = destinationOffset;
+        copy->source.buffer = source;
+        copy->source.offset = sourceOffset;
+        copy->destination.buffer = destination;
+        copy->destination.offset = destinationOffset;
         copy->size = size;
     }
 
@@ -436,16 +448,16 @@ namespace backend {
                                                    uint32_t width, uint32_t height, uint32_t depth, uint32_t level) {
         CopyBufferToTextureCmd* copy = allocator.Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
         new(copy) CopyBufferToTextureCmd;
-        copy->buffer = buffer;
-        copy->bufferOffset = bufferOffset;
-        copy->texture = texture;
-        copy->x = x;
-        copy->y = y;
-        copy->z = z;
-        copy->width = width;
-        copy->height = height;
-        copy->depth = depth;
-        copy->level = level;
+        copy->source.buffer = buffer;
+        copy->source.offset = bufferOffset;
+        copy->destination.texture = texture;
+        copy->destination.x = x;
+        copy->destination.y = y;
+        copy->destination.z = z;
+        copy->destination.width = width;
+        copy->destination.height = height;
+        copy->destination.depth = depth;
+        copy->destination.level = level;
     }
 
     void CommandBufferBuilder::Dispatch(uint32_t x, uint32_t y, uint32_t z) {
