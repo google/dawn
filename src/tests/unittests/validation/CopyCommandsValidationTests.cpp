@@ -32,14 +32,25 @@ TEST_F(CopyCommandTest_B2B, Success) {
     destination.FreezeUsage(nxt::BufferUsageBit::TransferDst);
 
     // Copy different copies, including some that touch the OOB condition
-    nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .CopyBufferToBuffer(source, 0, destination, 0, 16)
-        .CopyBufferToBuffer(source, 8, destination, 0, 8)
-        .CopyBufferToBuffer(source, 0, destination, 8, 8)
-        .GetResult();
+    {
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            .CopyBufferToBuffer(source, 0, destination, 0, 16)
+            .CopyBufferToBuffer(source, 8, destination, 0, 8)
+            .CopyBufferToBuffer(source, 0, destination, 8, 8)
+            .GetResult();
+    }
+
+    // Empty copies are valid
+    {
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            .CopyBufferToBuffer(source, 0, destination, 0, 0)
+            .CopyBufferToBuffer(source, 0, destination, 16, 0)
+            .CopyBufferToBuffer(source, 16, destination, 0, 0)
+            .GetResult();
+    }
 }
 
-// Test B2B copies with overflows
+// Test B2B copies with OOB
 TEST_F(CopyCommandTest_B2B, OutOfBounds) {
     nxt::Buffer source = device.CreateBufferBuilder()
         .SetSize(16)
@@ -68,7 +79,7 @@ TEST_F(CopyCommandTest_B2B, OutOfBounds) {
     }
 }
 
-// Test B2B copies with overflows
+// Test B2B copies with incorrect buffer usage
 TEST_F(CopyCommandTest_B2B, BadUsage) {
     nxt::Buffer source = device.CreateBufferBuilder()
         .SetSize(16)

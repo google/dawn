@@ -250,11 +250,6 @@ namespace backend {
                         uint64_t z = copy->z;
                         uint32_t level = copy->level;
 
-                        if (width == 0 || height == 0 || depth == 0) {
-                            HandleError("Empty copy");
-                            return false;
-                        }
-
                         // TODO(cwallez@chromium.org): check for overflows
                         uint64_t pixelSize = TextureFormatPixelSize(texture->GetFormat());
                         uint64_t dataSize = width * height * depth * pixelSize;
