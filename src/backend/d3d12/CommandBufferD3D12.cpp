@@ -73,6 +73,7 @@ namespace d3d12 {
                         commandList->OMSetRenderTargets(1, &device->GetCurrentRenderTargetDescriptor(), FALSE, nullptr);
                     }
                     break;
+
                 case Command::CopyBufferToBuffer:
                     {
                         CopyBufferToBufferCmd* copy = commands.NextCommand<CopyBufferToBufferCmd>();
@@ -82,6 +83,12 @@ namespace d3d12 {
                 case Command::CopyBufferToTexture:
                     {
                         CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();
+                    }
+                    break;
+
+                case Command::CopyTextureToBuffer:
+                    {
+                        CopyTextureToBufferCmd* copy = commands.NextCommand<CopyTextureToBufferCmd>();
                     }
                     break;
 

@@ -32,6 +32,7 @@ namespace backend {
         BeginRenderPass,
         CopyBufferToBuffer,
         CopyBufferToTexture,
+        CopyTextureToBuffer,
         Dispatch,
         DrawArrays,
         DrawElements,
@@ -75,6 +76,11 @@ namespace backend {
     struct CopyBufferToTextureCmd {
         BufferCopyLocation source;
         TextureCopyLocation destination;
+    };
+
+    struct CopyTextureToBufferCmd {
+        TextureCopyLocation source;
+        BufferCopyLocation destination;
     };
 
     struct DispatchCmd {

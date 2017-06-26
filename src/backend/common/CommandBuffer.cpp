@@ -129,6 +129,12 @@ namespace backend {
                         copy->~CopyBufferToTextureCmd();
                     }
                     break;
+                case Command::CopyTextureToBuffer:
+                    {
+                        CopyTextureToBufferCmd* copy = commands->NextCommand<CopyTextureToBufferCmd>();
+                        copy->~CopyTextureToBufferCmd();
+                    }
+                    break;
                 case Command::Dispatch:
                     {
                         DispatchCmd* dispatch = commands->NextCommand<DispatchCmd>();
@@ -281,6 +287,22 @@ namespace backend {
                             !state->ValidateCanCopy() ||
                             !state->ValidateCanUseBufferAs(copy->source.buffer.Get(), nxt::BufferUsageBit::TransferSrc) ||
                             !state->ValidateCanUseTextureAs(copy->destination.texture.Get(), nxt::TextureUsageBit::TransferDst)) {
+                            return false;
+                        }
+                    }
+                    break;
+
+                case Command::CopyTextureToBuffer:
+                    {
+                        CopyTextureToBufferCmd* copy = iterator.NextCommand<CopyTextureToBufferCmd>();
+
+                        uint32_t bufferCopySize = 0;
+                        if (!ComputeTextureCopyBufferSize(this, copy->source, &bufferCopySize) ||
+                            !ValidateCopyLocationFitsInTexture(this, copy->source) ||
+                            !ValidateCopySizeFitsInBuffer(this, copy->destination, bufferCopySize) ||
+                            !state->ValidateCanCopy() ||
+                            !state->ValidateCanUseTextureAs(copy->source.texture.Get(), nxt::TextureUsageBit::TransferSrc) ||
+                            !state->ValidateCanUseBufferAs(copy->destination.buffer.Get(), nxt::BufferUsageBit::TransferDst)) {
                             return false;
                         }
                     }
@@ -458,6 +480,23 @@ namespace backend {
         copy->destination.height = height;
         copy->destination.depth = depth;
         copy->destination.level = level;
+    }
+
+    void CommandBufferBuilder::CopyTextureToBuffer(TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
+                                                  uint32_t width, uint32_t height, uint32_t depth, uint32_t level,
+                                                  BufferBase* buffer, uint32_t bufferOffset) {
+        CopyTextureToBufferCmd* copy = allocator.Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
+        new(copy) CopyTextureToBufferCmd;
+        copy->source.texture = texture;
+        copy->source.x = x;
+        copy->source.y = y;
+        copy->source.z = z;
+        copy->source.width = width;
+        copy->source.height = height;
+        copy->source.depth = depth;
+        copy->source.level = level;
+        copy->destination.buffer = buffer;
+        copy->destination.offset = bufferOffset;
     }
 
     void CommandBufferBuilder::Dispatch(uint32_t x, uint32_t y, uint32_t z) {

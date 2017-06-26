@@ -209,6 +209,39 @@ namespace metal {
                     }
                     break;
 
+                case Command::CopyTextureToBuffer:
+                    {
+                        CopyTextureToBufferCmd* copy = commands.NextCommand<CopyTextureToBufferCmd>();
+                        auto& src = copy->source;
+                        auto& dst = copy->destination;
+                        Texture* texture = ToBackend(src.texture.Get());
+                        Buffer* buffer = ToBackend(dst.buffer.Get());
+
+                        unsigned rowSize = src.width * TextureFormatPixelSize(texture->GetFormat());
+                        MTLOrigin origin;
+                        origin.x = src.x;
+                        origin.y = src.y;
+                        origin.z = src.z;
+
+                        MTLSize size;
+                        size.width = src.width;
+                        size.height = src.height;
+                        size.depth = src.depth;
+
+                        encoders.EnsureBlit(commandBuffer);
+                        [encoders.blit
+                            copyFromTexture:texture->GetMTLTexture()
+                            sourceSlice:0
+                            sourceLevel:src.level
+                            sourceOrigin:origin
+                            sourceSize:size
+                            toBuffer:buffer->GetMTLBuffer()
+                            destinationOffset:dst.offset
+                            destinationBytesPerRow:rowSize
+                            destinationBytesPerImage:rowSize * src.height];
+                    }
+                    break;
+
                 case Command::Dispatch:
                     {
                         DispatchCmd* dispatch = commands.NextCommand<DispatchCmd>();

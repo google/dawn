@@ -296,6 +296,28 @@
                 ]
             },
             {
+                "name": "copy texture to buffer",
+                "args": [
+                    {"name": "texture", "type": "texture"},
+                    {"name": "x", "type": "uint32_t"},
+                    {"name": "y", "type": "uint32_t"},
+                    {"name": "z", "type": "uint32_t"},
+                    {"name": "width", "type": "uint32_t"},
+                    {"name": "height", "type": "uint32_t"},
+                    {"name": "depth", "type": "uint32_t"},
+                    {"name": "level", "type": "uint32_t"},
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "buffer offset", "type": "uint32_t"}
+                ],
+                "TODO": [
+                    "Make pretty with Offset and Extents structures",
+                    "Allow choosing the aspect (depth vs. stencil)?",
+                    "Add these arguments too",
+                    {"name": "row length", "type": "uint32_t"},
+                    {"name": "image height", "type": "uint32_t"}
+                ]
+            },
+            {
                 "name": "dispatch",
                 "args": [
                     {"name": "x", "type": "uint32_t"},
