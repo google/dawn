@@ -14,22 +14,40 @@
 
 #include "ValidationTest.h"
 
-class CopyCommandTest_B2B : public ValidationTest {
+class CopyCommandTest : public ValidationTest {
+    protected:
+        nxt::Buffer CreateFrozenBuffer(uint32_t size, nxt::BufferUsageBit usage) {
+            nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder())
+                .SetSize(size)
+                .SetAllowedUsage(usage)
+                .GetResult();
+            buf.FreezeUsage(usage);
+            return buf;
+        }
+
+        nxt::Texture CreateFrozen2DTexture(uint32_t width, uint32_t height, uint32_t levels,
+                                         nxt::TextureFormat format, nxt::TextureUsageBit usage) {
+            nxt::Texture tex = AssertWillBeSuccess(device.CreateTextureBuilder())
+                .SetDimension(nxt::TextureDimension::e2D)
+                .SetExtent(width, height, 1)
+                .SetFormat(format)
+                .SetMipLevels(levels)
+                .SetAllowedUsage(usage)
+                .GetResult();
+            tex.FreezeUsage(usage);
+            return tex;
+        }
 };
+
+class CopyCommandTest_B2B : public CopyCommandTest {
+};
+
+// TODO(cwallez@chromium.org): Test that copies are forbidden inside renderpasses
 
 // Test a successfull B2B copy
 TEST_F(CopyCommandTest_B2B, Success) {
-    nxt::Buffer source = device.CreateBufferBuilder()
-        .SetSize(16)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc)
-        .GetResult();
-    source.FreezeUsage(nxt::BufferUsageBit::TransferSrc);
-
-    nxt::Buffer destination = device.CreateBufferBuilder()
-        .SetSize(16)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst)
-        .GetResult();
-    destination.FreezeUsage(nxt::BufferUsageBit::TransferDst);
+    nxt::Buffer source = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferSrc);
+    nxt::Buffer destination = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferDst);
 
     // Copy different copies, including some that touch the OOB condition
     {
@@ -52,17 +70,8 @@ TEST_F(CopyCommandTest_B2B, Success) {
 
 // Test B2B copies with OOB
 TEST_F(CopyCommandTest_B2B, OutOfBounds) {
-    nxt::Buffer source = device.CreateBufferBuilder()
-        .SetSize(16)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc)
-        .GetResult();
-    source.FreezeUsage(nxt::BufferUsageBit::TransferSrc);
-
-    nxt::Buffer destination = device.CreateBufferBuilder()
-        .SetSize(16)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst)
-        .GetResult();
-    destination.FreezeUsage(nxt::BufferUsageBit::TransferDst);
+    nxt::Buffer source = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferSrc);
+    nxt::Buffer destination = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferDst);
 
     // OOB on the source
     {
@@ -81,23 +90,9 @@ TEST_F(CopyCommandTest_B2B, OutOfBounds) {
 
 // Test B2B copies with incorrect buffer usage
 TEST_F(CopyCommandTest_B2B, BadUsage) {
-    nxt::Buffer source = device.CreateBufferBuilder()
-        .SetSize(16)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc)
-        .GetResult();
-    source.FreezeUsage(nxt::BufferUsageBit::TransferSrc);
-
-    nxt::Buffer destination = device.CreateBufferBuilder()
-        .SetSize(16)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst)
-        .GetResult();
-    destination.FreezeUsage(nxt::BufferUsageBit::TransferDst);
-
-    nxt::Buffer vertex = device.CreateBufferBuilder()
-        .SetSize(16)
-        .SetAllowedUsage(nxt::BufferUsageBit::Vertex)
-        .GetResult();
-    vertex.FreezeUsage(nxt::BufferUsageBit::Vertex);
+    nxt::Buffer source = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferSrc);
+    nxt::Buffer destination = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferDst);
+    nxt::Buffer vertex = CreateFrozenBuffer(16, nxt::BufferUsageBit::Vertex);
 
     // Source with incorrect usage
     {
@@ -114,4 +109,139 @@ TEST_F(CopyCommandTest_B2B, BadUsage) {
     }
 }
 
-// TODO(cwallez@chromium.org): Test that B2B copies are forbidden inside renderpasses
+class CopyCommandTest_B2T : public CopyCommandTest {
+};
+
+// Test a successfull B2T copy
+TEST_F(CopyCommandTest_B2T, Success) {
+    nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
+    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+                                                     nxt::TextureUsageBit::TransferDst);
+
+    // Different copies, including some that touch the OOB condition
+    {
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            // Copy 4x4 block in corner of first mip.
+            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 4, 4, 1, 0)
+            // Copy 4x4 block in opposite corner of first mip.
+            .CopyBufferToTexture(source, 0, destination, 12, 12, 0, 4, 4, 1, 0)
+            // Copy 4x4 block in the 4x4 mip.
+            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 4, 4, 1, 2)
+            // Copy with a buffer offset
+            .CopyBufferToTexture(source, 15 * 4, destination, 0, 0, 0, 1, 1, 1, 4)
+            .GetResult();
+    }
+
+    // Empty copies are valid
+    {
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            // An empty copy
+            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 0, 0, 1, 0)
+            // An empty copy touching the end of the buffer
+            .CopyBufferToTexture(source, 16 * 4, destination, 0, 0, 0, 0, 0, 1, 0)
+            // An empty copy touching the side of the texture
+            .CopyBufferToTexture(source, 0, destination, 16, 16, 0, 0, 0, 1, 0)
+            .GetResult();
+    }
+}
+
+// Test OOB conditions on the buffer
+TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
+    nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
+    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+                                                     nxt::TextureUsageBit::TransferDst);
+
+    // OOB on the buffer because we copy too many pixels
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 4, 5, 1, 0)
+            .GetResult();
+    }
+
+    // OOB on the buffer because of the offset
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 1, destination, 0, 0, 0, 4, 4, 1, 0)
+            .GetResult();
+    }
+}
+
+// Test OOB conditions on the texture
+TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
+    nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
+    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+                                                     nxt::TextureUsageBit::TransferDst);
+
+    // OOB on the texture because x + width overflows
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, destination, 13, 12, 0, 4, 4, 1, 0)
+            .GetResult();
+    }
+
+    // OOB on the texture because y + width overflows
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, destination, 12, 13, 0, 4, 4, 1, 0)
+            .GetResult();
+    }
+
+    // OOB on the texture because we overflow a non-zero mip
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, destination, 1, 0, 0, 4, 4, 1, 2)
+            .GetResult();
+    }
+
+    // OOB on the texture even on an empty copy when we copy to a non-existent mip.
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 0, 0, 1, 5)
+            .GetResult();
+    }
+}
+
+// Test that we force Z=0 and Depth=1 on copies to 2D textures
+TEST_F(CopyCommandTest_B2T, ZDepthConstraintFor2DTextures) {
+    nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
+    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+                                                     nxt::TextureUsageBit::TransferDst);
+
+    // Z=1 on an empty copy still errors
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, destination, 0, 0, 1, 0, 0, 1, 0)
+            .GetResult();
+    }
+
+    // Depth=0 on an empty copy still errors
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 0, 0, 0, 0)
+            .GetResult();
+    }
+}
+
+// Test B2B copies with incorrect buffer usage
+TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
+    nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
+    nxt::Buffer vertex = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::Vertex);
+    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+                                                     nxt::TextureUsageBit::TransferDst);
+    nxt::Texture sampled = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+                                                 nxt::TextureUsageBit::Sampled);
+
+    // Incorrect source usage
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(vertex, 0, destination, 0, 0, 0, 4, 4, 1, 0)
+            .GetResult();
+    }
+
+    // Incorrect destination usage
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, sampled, 0, 0, 0, 4, 4, 1, 0)
+            .GetResult();
+    }
+}
