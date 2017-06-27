@@ -22,6 +22,20 @@
 #define EXPECT_BUFFER_U32_EQ(expected, buffer, offset) \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), new detail::ExpectEq<uint32_t>(expected));
 
+// Test a pixel of the mip level 0 of a 2D texture.
+#define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected));
+
+struct RGBA8 {
+    constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a): r(r), g(g), b(b), a(a) {
+    }
+    bool operator==(const RGBA8& other) const;
+    bool operator!=(const RGBA8& other) const;
+
+    uint8_t r, g, b, a;
+};
+std::ostream& operator<< (std::ostream& stream, const RGBA8& color);
+
 // Backend types used in the NXT_INSTANTIATE_TEST
 enum BackendType {
     D3D12Backend,
@@ -52,6 +66,7 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 
         // Helper methods to implement the EXPECT_ macros
         void AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation);
+        void AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation);
 
     private:
         // MapRead buffers used to get data for the expectations
@@ -125,5 +140,6 @@ namespace detail {
             std::vector<T> expected;
     };
     extern template class ExpectEq<uint32_t>;
+    extern template class ExpectEq<RGBA8>;
 }
 

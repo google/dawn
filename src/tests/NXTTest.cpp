@@ -161,6 +161,34 @@ void NXTTest::AddBufferExpectation(const char* file, int line, const nxt::Buffer
     deferredExpectations.push_back(deferred);
 }
 
+void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation) {
+    nxt::Texture source = texture.Clone();
+    uint32_t size = width * height * pixelSize;
+
+    auto readback = ReserveReadback(size);
+
+    // We need to enqueue the copy immediately because by the time we resolve the expectation,
+    // the texture might have been modified.
+    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+        .TransitionTextureUsage(source, nxt::TextureUsageBit::TransferSrc)
+        .TransitionBufferUsage(readback.buffer, nxt::BufferUsageBit::TransferDst)
+        .CopyTextureToBuffer(source, x, y, 0, width, height, 1, 0, readback.buffer, readback.offset)
+        .GetResult();
+
+    queue.Submit(1, &commands);
+
+    DeferredExpectation deferred;
+    deferred.file = file;
+    deferred.line = line;
+    deferred.readbackSlot = readback.slot;
+    deferred.readbackOffset = readback.offset;
+    deferred.size = size;
+    deferred.expectation = expectation;
+
+    deferredExpectations.push_back(deferred);
+}
+
+
 NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {
     // For now create a new MapRead buffer for each readback
     // TODO(cwallez@chromium.org): eventually make bigger buffers and allocate linearly?
@@ -230,6 +258,22 @@ void NXTTest::ResolveExpectations() {
     }
 }
 
+bool RGBA8::operator==(const RGBA8& other) const {
+    return r == other.r && g == other.g && b == other.b && a == other.a;
+}
+
+bool RGBA8::operator!=(const RGBA8& other) const {
+    return !(*this == other);
+}
+
+std::ostream& operator<< (std::ostream& stream, const RGBA8& color) {
+    return stream << "RGBA8(" <<
+        static_cast<int>(color.r) << ", " <<
+        static_cast<int>(color.g) << ", " <<
+        static_cast<int>(color.b) << ", " <<
+        static_cast<int>(color.a) << ")";
+}
+
 namespace detail {
     bool IsBackendAvailable(BackendType type) {
         #if defined(__APPLE__)
@@ -272,4 +316,5 @@ namespace detail {
     }
 
     template class ExpectEq<uint32_t>;
+    template class ExpectEq<RGBA8>;
 }

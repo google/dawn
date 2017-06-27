@@ -14,6 +14,8 @@
 
 #include "tests/NXTTest.h"
 
+#include "utils/NXTHelpers.h"
+
 class BasicTests : public NXTTest {
 };
 
@@ -30,6 +32,28 @@ TEST_P(BasicTests, BufferSetSubData) {
     buffer.SetSubData(0, 1, &value);
 
     EXPECT_BUFFER_U32_EQ(value, buffer, 0);
+}
+
+TEST_P(BasicTests, ReadPixelsTest) {
+    RGBA8 red(255, 0, 0, 255);
+    nxt::Buffer buffer = utils::CreateFrozenBufferFromData(device, &red, sizeof(red), nxt::BufferUsageBit::TransferSrc);
+
+    nxt::Texture texture = device.CreateTextureBuilder()
+        .SetDimension(nxt::TextureDimension::e2D)
+        .SetExtent(1, 1, 1)
+        .SetMipLevels(1)
+        .SetAllowedUsage(nxt::TextureUsageBit::TransferSrc | nxt::TextureUsageBit::TransferDst)
+        .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+        .GetResult();
+
+    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+        .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
+        .CopyBufferToTexture(buffer, 0, texture, 0, 0, 0, 1, 1, 1, 0)
+        .GetResult();
+
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(red, texture, 0, 0);
 }
 
 NXT_INSTANTIATE_TEST(BasicTests, MetalBackend)
