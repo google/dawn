@@ -41,7 +41,7 @@ namespace opengl {
 
     }
 
-    Pipeline::Pipeline(Device* device, PipelineBuilder* builder) : PipelineBase(builder), device(device) {
+    Pipeline::Pipeline(PipelineBuilder* builder) : PipelineBase(builder) {
         auto CreateShader = [](GLenum type, const char* source) -> GLuint {
             GLuint shader = glCreateShader(type);
             glShaderSource(shader, 1, &source, nullptr);

@@ -26,7 +26,7 @@ namespace metal {
 
     class CommandBuffer : public CommandBufferBase {
         public:
-            CommandBuffer(Device* device, CommandBufferBuilder* builder);
+            CommandBuffer(CommandBufferBuilder* builder);
             ~CommandBuffer();
 
             void FillCommands(id<MTLCommandBuffer> commandBuffer);

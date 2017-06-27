@@ -30,7 +30,7 @@ namespace opengl {
 
     class Pipeline : public PipelineBase {
         public:
-            Pipeline(Device* device, PipelineBuilder* builder);
+            Pipeline(PipelineBuilder* builder);
 
             using GLPushConstantInfo = std::array<GLint, kMaxPushConstants>;
             using BindingLocations = std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
@@ -47,7 +47,6 @@ namespace opengl {
             PerStage<GLPushConstantInfo> glPushConstants;
             std::vector<std::vector<GLuint>> unitsForSamplers;
             std::vector<std::vector<GLuint>> unitsForTextures;
-            Device* device;
     };
 
 }

@@ -106,23 +106,17 @@ namespace opengl {
 
     class BindGroup : public BindGroupBase {
         public:
-            BindGroup(Device* device, BindGroupBuilder* builder);
-
-        private:
-            Device* device;
+            BindGroup(BindGroupBuilder* builder);
     };
 
     class BindGroupLayout : public BindGroupLayoutBase {
         public:
-            BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder);
-
-        private:
-            Device* device;
+            BindGroupLayout(BindGroupLayoutBuilder* builder);
     };
 
     class Buffer : public BufferBase {
         public:
-            Buffer(Device* device, BufferBuilder* builder);
+            Buffer(BufferBuilder* builder);
 
             GLuint GetHandle() const;
 
@@ -132,53 +126,39 @@ namespace opengl {
             void UnmapImpl() override;
             void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
-            Device* device;
             GLuint buffer = 0;
     };
 
     class BufferView : public BufferViewBase {
         public:
-            BufferView(Device* device, BufferViewBuilder* builder);
-
-        private:
-            Device* device;
+            BufferView(BufferViewBuilder* builder);
     };
 
     class Framebuffer : public FramebufferBase {
         public:
-            Framebuffer(Device* device, FramebufferBuilder* builder);
-
-        private:
-            Device* device;
+            Framebuffer(FramebufferBuilder* builder);
     };
 
     class InputState : public InputStateBase {
         public:
-            InputState(Device* device, InputStateBuilder* builder);
+            InputState(InputStateBuilder* builder);
             GLuint GetVAO();
 
         private:
-            Device* device;
             GLuint vertexArrayObject;
     };
 
     class Queue : public QueueBase {
         public:
-            Queue(Device* device, QueueBuilder* builder);
+            Queue(QueueBuilder* builder);
 
             // NXT API
             void Submit(uint32_t numCommands, CommandBuffer* const * commands);
-
-        private:
-            Device* device;
     };
 
     class RenderPass : public RenderPassBase {
         public:
-            RenderPass(Device* device, RenderPassBuilder* builder);
-
-        private:
-            Device* device;
+            RenderPass(RenderPassBuilder* builder);
     };
 
 }

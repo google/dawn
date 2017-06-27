@@ -49,52 +49,52 @@ namespace opengl {
     // Device
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
-        return new BindGroup(this, builder);
+        return new BindGroup(builder);
     }
     BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
-        return new BindGroupLayout(this, builder);
+        return new BindGroupLayout(builder);
     }
     BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
-        return new Buffer(this, builder);
+        return new Buffer(builder);
     }
     BufferViewBase* Device::CreateBufferView(BufferViewBuilder* builder) {
-        return new BufferView(this, builder);
+        return new BufferView(builder);
     }
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
-        return new CommandBuffer(this, builder);
+        return new CommandBuffer(builder);
     }
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
-        return new DepthStencilState(this, builder);
+        return new DepthStencilState(builder);
     }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
-        return new InputState(this, builder);
+        return new InputState(builder);
     }
     FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
-        return new Framebuffer(this, builder);
+        return new Framebuffer(builder);
     }
     PipelineBase* Device::CreatePipeline(PipelineBuilder* builder) {
-        return new Pipeline(this, builder);
+        return new Pipeline(builder);
     }
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
-        return new PipelineLayout(this, builder);
+        return new PipelineLayout(builder);
     }
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
-        return new Queue(this, builder);
+        return new Queue(builder);
     }
     RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
-        return new RenderPass(this, builder);
+        return new RenderPass(builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
-        return new Sampler(this, builder);
+        return new Sampler(builder);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
-        return new ShaderModule(this, builder);
+        return new ShaderModule(builder);
     }
     TextureBase* Device::CreateTexture(TextureBuilder* builder) {
-        return new Texture(this, builder);
+        return new Texture(builder);
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
-        return new TextureView(this, builder);
+        return new TextureView(builder);
     }
 
     void Device::TickImpl() {
@@ -108,20 +108,20 @@ namespace opengl {
 
     // Bind Group
 
-    BindGroup::BindGroup(Device* device, BindGroupBuilder* builder)
-        : BindGroupBase(builder), device(device) {
+    BindGroup::BindGroup(BindGroupBuilder* builder)
+        : BindGroupBase(builder) {
     }
 
     // Bind Group Layout
 
-    BindGroupLayout::BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder), device(device) {
+    BindGroupLayout::BindGroupLayout(BindGroupLayoutBuilder* builder)
+        : BindGroupLayoutBase(builder) {
     }
 
     // Buffer
 
-    Buffer::Buffer(Device* device, BufferBuilder* builder)
-        : BufferBase(builder), device(device) {
+    Buffer::Buffer(BufferBuilder* builder)
+        : BufferBase(builder) {
         glGenBuffers(1, &buffer);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
         glBufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);
@@ -149,14 +149,14 @@ namespace opengl {
 
     // BufferView
 
-    BufferView::BufferView(Device* device, BufferViewBuilder* builder)
-        : BufferViewBase(builder), device(device) {
+    BufferView::BufferView(BufferViewBuilder* builder)
+        : BufferViewBase(builder) {
     }
 
     // InputState
 
-    InputState::InputState(Device* device, InputStateBuilder* builder)
-        : InputStateBase(builder), device(device) {
+    InputState::InputState(InputStateBuilder* builder)
+        : InputStateBase(builder) {
         glGenVertexArrays(1, &vertexArrayObject);
         glBindVertexArray(vertexArrayObject);
         auto& attributesSetMask = GetAttributesSetMask();
@@ -193,14 +193,14 @@ namespace opengl {
 
     // Framebuffer
 
-    Framebuffer::Framebuffer(Device* device, FramebufferBuilder* builder)
-        : FramebufferBase(builder), device(device) {
+    Framebuffer::Framebuffer(FramebufferBuilder* builder)
+        : FramebufferBase(builder) {
     }
 
     // Queue
 
-    Queue::Queue(Device* device, QueueBuilder* builder)
-        : QueueBase(builder), device(device) {
+    Queue::Queue(QueueBuilder* builder)
+        : QueueBase(builder) {
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
@@ -211,8 +211,8 @@ namespace opengl {
 
     // RenderPass
 
-    RenderPass::RenderPass(Device* device, RenderPassBuilder* builder)
-        : RenderPassBase(builder), device(device) {
+    RenderPass::RenderPass(RenderPassBuilder* builder)
+        : RenderPassBase(builder) {
     }
 
 }

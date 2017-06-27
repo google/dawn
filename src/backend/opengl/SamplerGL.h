@@ -26,12 +26,11 @@ namespace opengl {
 
     class Sampler : public SamplerBase {
         public:
-            Sampler(Device* device, SamplerBuilder* builder);
+            Sampler(SamplerBuilder* builder);
 
             GLuint GetHandle() const;
 
         private:
-            Device* device;
             GLuint handle;
     };
 

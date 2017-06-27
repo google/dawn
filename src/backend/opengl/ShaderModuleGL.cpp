@@ -43,8 +43,8 @@ namespace opengl {
         return o.str();
     }
 
-    ShaderModule::ShaderModule(Device* device, ShaderModuleBuilder* builder)
-        : ShaderModuleBase(builder), device(device) {
+    ShaderModule::ShaderModule(ShaderModuleBuilder* builder)
+        : ShaderModuleBase(builder) {
         spirv_cross::CompilerGLSL compiler(builder->AcquireSpirv());
         spirv_cross::CompilerGLSL::Options options;
 

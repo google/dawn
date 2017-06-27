@@ -53,8 +53,6 @@ namespace backend {
             bool IsCompute() const;
 
         private:
-            DeviceBase* device;
-
             nxt::ShaderStageBit stageMask;
             Ref<PipelineLayoutBase> layout;
             Ref<RenderPassBase> renderPass;

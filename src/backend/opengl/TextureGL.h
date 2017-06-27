@@ -32,7 +32,7 @@ namespace opengl {
 
     class Texture : public TextureBase {
         public:
-            Texture(Device* device, TextureBuilder* builder);
+            Texture(TextureBuilder* builder);
 
             GLuint GetHandle() const;
             GLenum GetGLTarget() const;
@@ -41,17 +41,13 @@ namespace opengl {
         private:
             void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
 
-            Device* device;
             GLuint handle;
             GLenum target;
     };
 
     class TextureView : public TextureViewBase {
         public:
-            TextureView(Device* device, TextureViewBuilder* builder);
-
-        private:
-            Device* device;
+            TextureView(TextureViewBuilder* builder);
     };
 
 

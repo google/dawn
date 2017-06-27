@@ -47,8 +47,8 @@ namespace opengl {
         }
     }
 
-    Sampler::Sampler(Device* device, SamplerBuilder* builder)
-        : SamplerBase(builder), device(device) {
+    Sampler::Sampler(SamplerBuilder* builder)
+        : SamplerBase(builder) {
         glGenSamplers(1, &handle);
         glSamplerParameteri(handle, GL_TEXTURE_MAG_FILTER, MagFilterMode(builder->GetMagFilter()));
         glSamplerParameteri(handle, GL_TEXTURE_MIN_FILTER, MinFilterMode(builder->GetMinFilter(), builder->GetMipMapFilter()));

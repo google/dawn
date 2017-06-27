@@ -40,8 +40,8 @@ namespace opengl {
 
     // Texture
 
-    Texture::Texture(Device* device, TextureBuilder* builder)
-        : TextureBase(builder), device(device) {
+    Texture::Texture(TextureBuilder* builder)
+        : TextureBase(builder) {
         target = TargetForDimension(GetDimension());
 
         uint32_t width = GetWidth();
@@ -81,8 +81,8 @@ namespace opengl {
 
     // TextureView
 
-    TextureView::TextureView(Device* device, TextureViewBuilder* builder)
-        : TextureViewBase(builder), device(device) {
+    TextureView::TextureView(TextureViewBuilder* builder)
+        : TextureViewBase(builder) {
     }
 
 }

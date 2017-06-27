@@ -139,32 +139,23 @@ namespace metal {
 
     class BindGroup : public BindGroupBase {
         public:
-            BindGroup(Device* device, BindGroupBuilder* builder);
-
-        private:
-            Device* device;
+            BindGroup(BindGroupBuilder* builder);
     };
 
     class BindGroupLayout : public BindGroupLayoutBase {
         public:
-            BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder);
-
-        private:
-            Device* device;
+            BindGroupLayout(BindGroupLayoutBuilder* builder);
     };
 
     class Framebuffer : public FramebufferBase {
         public:
-            Framebuffer(Device* device, FramebufferBuilder* builder);
+            Framebuffer(FramebufferBuilder* builder);
             ~Framebuffer();
-
-        private:
-            Device* device;
     };
 
     class Queue : public QueueBase {
         public:
-            Queue(Device* device, QueueBuilder* builder);
+            Queue(QueueBuilder* builder);
             ~Queue();
 
             id<MTLCommandQueue> GetMTLCommandQueue();
@@ -173,17 +164,13 @@ namespace metal {
             void Submit(uint32_t numCommands, CommandBuffer* const * commands);
 
         private:
-            Device* device;
             id<MTLCommandQueue> commandQueue = nil;
     };
 
     class RenderPass : public RenderPassBase {
         public:
-            RenderPass(Device* device, RenderPassBuilder* builder);
+            RenderPass(RenderPassBuilder* builder);
             ~RenderPass();
-
-        private:
-            Device* device;
     };
 
 }

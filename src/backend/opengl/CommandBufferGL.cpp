@@ -27,8 +27,8 @@
 namespace backend {
 namespace opengl {
 
-    CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), device(device), commands(builder->AcquireCommands()) {
+    CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
+        : CommandBufferBase(builder), commands(builder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {

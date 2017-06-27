@@ -25,12 +25,9 @@ namespace opengl {
 
     class DepthStencilState : public DepthStencilStateBase {
         public:
-            DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
+            DepthStencilState(DepthStencilStateBuilder* builder);
 
             void ApplyNow(PersistentPipelineState &persistentPipelineState) const;
-
-        private:
-            Device* device;
     };
 
 }

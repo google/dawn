@@ -119,8 +119,9 @@ namespace metal {
         };
     }
 
-    CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), device(device), commands(builder->AcquireCommands()) {
+    CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
+        : CommandBufferBase(builder), device(ToBackend(builder->GetDevice())),
+          commands(builder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {

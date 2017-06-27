@@ -25,13 +25,12 @@ namespace opengl {
 
     class CommandBuffer : public CommandBufferBase {
         public:
-            CommandBuffer(Device* device, CommandBufferBuilder* builder);
+            CommandBuffer(CommandBufferBuilder* builder);
             ~CommandBuffer();
 
             void Execute();
 
         private:
-            Device* device;
             CommandIterator commands;
     };
 

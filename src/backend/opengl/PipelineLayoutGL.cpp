@@ -19,8 +19,8 @@
 namespace backend {
 namespace opengl {
 
-    PipelineLayout::PipelineLayout(Device* device, PipelineLayoutBuilder* builder)
-        : PipelineLayoutBase(builder), device(device) {
+    PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder)
+        : PipelineLayoutBase(builder) {
         GLuint uboIndex = 0;
         GLuint samplerIndex = 0;
         GLuint sampledTextureIndex = 0;

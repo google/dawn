@@ -26,7 +26,7 @@ namespace backend {
     // PipelineBase
 
     PipelineBase::PipelineBase(PipelineBuilder* builder)
-        : device(builder->device), stageMask(builder->stageMask), layout(std::move(builder->layout)),
+        : stageMask(builder->stageMask), layout(std::move(builder->layout)),
           renderPass(std::move(builder->renderPass)), subpass(builder->subpass),
           inputState(std::move(builder->inputState)), depthStencilState(std::move(builder->depthStencilState)) {
 

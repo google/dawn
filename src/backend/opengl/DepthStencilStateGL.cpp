@@ -64,8 +64,8 @@ namespace opengl {
         }
     }
 
-    DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
-        : DepthStencilStateBase(builder), device(device) {
+    DepthStencilState::DepthStencilState(DepthStencilStateBuilder* builder)
+        : DepthStencilStateBase(builder) {
     }
 
     void DepthStencilState::ApplyNow(PersistentPipelineState &persistentPipelineState) const {

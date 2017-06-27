@@ -82,10 +82,10 @@ namespace metal {
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
-        return new BindGroup(this, builder);
+        return new BindGroup(builder);
     }
     BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
-        return new BindGroupLayout(this, builder);
+        return new BindGroupLayout(builder);
     }
     BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
         return new Buffer(builder);
@@ -94,7 +94,7 @@ namespace metal {
         return new BufferView(builder);
     }
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
-        return new CommandBuffer(this, builder);
+        return new CommandBuffer(builder);
     }
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(builder);
@@ -103,7 +103,7 @@ namespace metal {
         return new InputState(builder);
     }
     FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
-        return new Framebuffer(this, builder);
+        return new Framebuffer(builder);
     }
     PipelineBase* Device::CreatePipeline(PipelineBuilder* builder) {
         return new Pipeline(builder);
@@ -112,10 +112,10 @@ namespace metal {
         return new PipelineLayout(builder);
     }
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
-        return new Queue(this, builder);
+        return new Queue(builder);
     }
     RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
-        return new RenderPass(this, builder);
+        return new RenderPass(builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
         return new Sampler(builder);
@@ -251,20 +251,20 @@ namespace metal {
 
     // Bind Group
 
-    BindGroup::BindGroup(Device* device, BindGroupBuilder* builder)
-        : BindGroupBase(builder), device(device) {
+    BindGroup::BindGroup(BindGroupBuilder* builder)
+        : BindGroupBase(builder) {
     }
 
     // Bind Group Layout
 
-    BindGroupLayout::BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder), device(device) {
+    BindGroupLayout::BindGroupLayout(BindGroupLayoutBuilder* builder)
+        : BindGroupLayoutBase(builder) {
     }
 
     // Framebuffer
 
-    Framebuffer::Framebuffer(Device* device, FramebufferBuilder* builder)
-        : FramebufferBase(builder), device(device) {
+    Framebuffer::Framebuffer(FramebufferBuilder* builder)
+        : FramebufferBase(builder) {
     }
 
     Framebuffer::~Framebuffer() {
@@ -272,8 +272,9 @@ namespace metal {
 
     // Queue
 
-    Queue::Queue(Device* device, QueueBuilder* builder)
-        : QueueBase(builder), device(device) {
+    Queue::Queue(QueueBuilder* builder)
+        : QueueBase(builder) {
+        Device* device = ToBackend(builder->GetDevice());
         commandQueue = [device->GetMTLDevice() newCommandQueue];
     }
 
@@ -299,8 +300,8 @@ namespace metal {
 
     // RenderPass
 
-    RenderPass::RenderPass(Device* device, RenderPassBuilder* builder)
-        : RenderPassBase(builder), device(device) {
+    RenderPass::RenderPass(RenderPassBuilder* builder)
+        : RenderPassBase(builder) {
     }
 
     RenderPass::~RenderPass() {

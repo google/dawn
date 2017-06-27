@@ -41,7 +41,7 @@ namespace opengl {
 
     class ShaderModule : public ShaderModuleBase {
         public:
-            ShaderModule(Device* device, ShaderModuleBuilder* builder);
+            ShaderModule(ShaderModuleBuilder* builder);
 
             using CombinedSamplerInfo = std::vector<CombinedSampler>;
 
@@ -49,7 +49,6 @@ namespace opengl {
             const CombinedSamplerInfo& GetCombinedSamplerInfo() const;
 
         private:
-            Device* device;
             CombinedSamplerInfo combinedInfo;
             std::string glslSource;
     };

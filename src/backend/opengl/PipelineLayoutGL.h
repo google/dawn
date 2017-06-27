@@ -26,7 +26,7 @@ namespace opengl {
 
     class PipelineLayout : public PipelineLayoutBase {
         public:
-            PipelineLayout(Device* device, PipelineLayoutBuilder* builder);
+            PipelineLayout(PipelineLayoutBuilder* builder);
 
             using BindingIndexInfo = std::array<std::array<GLuint, kMaxBindingsPerGroup>, kMaxBindGroups>;
             const BindingIndexInfo& GetBindingIndexInfo() const;
@@ -36,7 +36,6 @@ namespace opengl {
             size_t GetNumSampledTextures() const;
 
         private:
-            Device* device;
             BindingIndexInfo indexInfo;
             size_t numSamplers;
             size_t numSampledTextures;
