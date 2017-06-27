@@ -247,7 +247,6 @@ namespace wire {
             private:
                 nxtProcTable procs;
                 CommandSerializer* serializer = nullptr;
-                bool gotError = false;
 
                 void* GetCmdSpace(size_t size) {
                     return serializer->GetCmdSpace(size);

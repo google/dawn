@@ -139,8 +139,6 @@ namespace metal {
         encoders.device = device;
 
         uint32_t currentSubpass = 0;
-        id<MTLRenderCommandEncoder> renderEncoder = nil;
-
         while (commands.NextCommandId(&type)) {
             switch (type) {
                 case Command::AdvanceSubpass:
@@ -313,10 +311,7 @@ namespace metal {
                 case Command::SetPushConstants:
                     {
                         SetPushConstantsCmd* cmd = commands.NextCommand<SetPushConstantsCmd>();
-                        uint32_t* valuesUInt = commands.NextData<uint32_t>(cmd->count);
-                        int32_t* valuesInt = reinterpret_cast<int32_t*>(valuesUInt);
-                        float* valuesFloat = reinterpret_cast<float*>(valuesUInt);
-
+                        commands.NextData<uint32_t>(cmd->count);
                         // TODO(kainino@chromium.org): implement SetPushConstants
                     }
                     break;
@@ -463,8 +458,6 @@ namespace metal {
                         SetVertexBuffersCmd* cmd = commands.NextCommand<SetVertexBuffersCmd>();
                         auto buffers = commands.NextData<Ref<BufferBase>>(cmd->count);
                         auto offsets = commands.NextData<uint32_t>(cmd->count);
-
-                        auto inputState = lastPipeline->GetInputState();
 
                         std::array<id<MTLBuffer>, kMaxVertexInputs> mtlBuffers;
                         std::array<NSUInteger, kMaxVertexInputs> mtlOffsets;
