@@ -29,6 +29,7 @@ namespace d3d12 {
             Texture(Device* device, TextureBuilder* builder);
             ~Texture();
 
+            DXGI_FORMAT GetD3D12Format() const;
             ComPtr<ID3D12Resource> GetD3D12Resource();
             bool GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier);
 

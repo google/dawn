@@ -100,6 +100,10 @@ namespace d3d12 {
         device->GetResourceAllocator()->Release(resource);
     }
 
+    DXGI_FORMAT Texture::GetD3D12Format() const {
+        return D3D12TextureFormat(GetFormat());
+    }
+
     ComPtr<ID3D12Resource> Texture::GetD3D12Resource() {
         return resource;
     }
