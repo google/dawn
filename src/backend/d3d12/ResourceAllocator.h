@@ -31,7 +31,7 @@ namespace d3d12 {
 
             ComPtr<ID3D12Resource> Allocate(D3D12_HEAP_TYPE heapType, const D3D12_RESOURCE_DESC &resourceDescriptor, D3D12_RESOURCE_STATES initialUsage);
             void Release(ComPtr<ID3D12Resource> resource);
-            void FreeUnusedResources(uint64_t lastCompletedSerial);
+            void Tick(uint64_t lastCompletedSerial);
 
         private:
             Device* device;

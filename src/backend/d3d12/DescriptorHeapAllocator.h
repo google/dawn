@@ -49,7 +49,7 @@ namespace d3d12 {
 
             DescriptorHeapHandle AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
             DescriptorHeapHandle AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
-            void FreeDescriptorHeaps(uint64_t lastCompletedSerial);
+            void Tick(uint64_t lastCompletedSerial);
 
         private:
             static constexpr unsigned int kMaxCbvUavSrvHeapSize = 1000000;
@@ -62,7 +62,7 @@ namespace d3d12 {
             };
 
             using DescriptorHeapInfo = std::pair<ComPtr<ID3D12DescriptorHeap>, AllocationInfo>;
-            
+
             DescriptorHeapHandle Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count, uint32_t allocationSize, DescriptorHeapInfo* heapInfo, D3D12_DESCRIPTOR_HEAP_FLAGS flags);
             void Release(DescriptorHeapHandle handle);
 

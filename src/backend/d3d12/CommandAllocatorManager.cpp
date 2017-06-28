@@ -30,7 +30,7 @@ namespace d3d12 {
         if (freeAllocators.none()) {
             const uint64_t firstSerial = inFlightCommandAllocators.FirstSerial();
             device->WaitForSerial(firstSerial);
-            ResetCompletedAllocators(firstSerial);
+            Tick(firstSerial);
         }
 
         ASSERT(freeAllocators.any());
@@ -53,7 +53,7 @@ namespace d3d12 {
         return commandAllocators[firstFreeIndex];
     }
 
-    void CommandAllocatorManager::ResetCompletedAllocators(uint64_t lastCompletedSerial) {
+    void CommandAllocatorManager::Tick(uint64_t lastCompletedSerial) {
         // Reset all command allocators that are no longer in flight
         for (auto it : inFlightCommandAllocators.IterateUpTo(lastCompletedSerial)) {
             ASSERT_SUCCESS(it.commandAllocator->Reset());

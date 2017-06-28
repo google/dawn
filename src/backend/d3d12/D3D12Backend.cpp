@@ -159,9 +159,9 @@ namespace d3d12 {
     void Device::TickImpl() {
         // Perform cleanup operations to free unused objects
         const uint64_t lastCompletedSerial = fence->GetCompletedValue();
-        resourceAllocator->FreeUnusedResources(lastCompletedSerial);
-        commandAllocatorManager->ResetCompletedAllocators(lastCompletedSerial);
-        descriptorHeapAllocator->FreeDescriptorHeaps(lastCompletedSerial);
+        resourceAllocator->Tick(lastCompletedSerial);
+        commandAllocatorManager->Tick(lastCompletedSerial);
+        descriptorHeapAllocator->Tick(lastCompletedSerial);
     }
 
     uint64_t Device::GetSerial() const {

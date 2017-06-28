@@ -101,7 +101,7 @@ namespace d3d12 {
         return Allocate(type, count, heapSize, &gpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
     }
 
-    void DescriptorHeapAllocator::FreeDescriptorHeaps(uint64_t lastCompletedSerial) {
+    void DescriptorHeapAllocator::Tick(uint64_t lastCompletedSerial) {
         releasedHandles.ClearUpTo(lastCompletedSerial);
     }
 

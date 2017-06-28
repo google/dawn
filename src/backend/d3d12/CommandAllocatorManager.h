@@ -33,7 +33,7 @@ namespace d3d12 {
             // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
             // otherwise its commands may be reset before execution has completed on the GPU
             ComPtr<ID3D12CommandAllocator> ReserveCommandAllocator();
-            void ResetCompletedAllocators(uint64_t lastCompletedSerial);
+            void Tick(uint64_t lastCompletedSerial);
 
         private:
             Device* device;

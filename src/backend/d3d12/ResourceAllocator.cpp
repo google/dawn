@@ -84,7 +84,7 @@ namespace d3d12 {
         releasedResources.Enqueue(resource, device->GetSerial());
     }
 
-    void ResourceAllocator::FreeUnusedResources(uint64_t lastCompletedSerial) {
+    void ResourceAllocator::Tick(uint64_t lastCompletedSerial) {
         releasedResources.ClearUpTo(lastCompletedSerial);
     }
 
