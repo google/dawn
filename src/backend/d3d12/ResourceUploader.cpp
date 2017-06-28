@@ -23,7 +23,7 @@ namespace d3d12 {
     ResourceUploader::ResourceUploader(Device* device) : device(device) {
     }
 
-    void ResourceUploader::UploadToBuffer(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const uint8_t* data) {
+    void ResourceUploader::BufferSubData(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const void* data) {
         // TODO(enga@google.com): Use a handle to a subset of a large ring buffer. On Release, decrease reference count on the ring buffer and free when 0.
         // Alternatively, the SerialQueue could be used to track which last point of the ringbuffer is in use, and start reusing chunks of it that aren't in flight.
         UploadHandle uploadHandle = GetUploadBuffer(count);

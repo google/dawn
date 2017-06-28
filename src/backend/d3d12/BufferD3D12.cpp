@@ -100,7 +100,7 @@ namespace d3d12 {
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
-        device->GetResourceUploader()->UploadToBuffer(resource, start * sizeof(uint32_t), count * sizeof(uint32_t), reinterpret_cast<const uint8_t*>(data));
+        device->GetResourceUploader()->BufferSubData(resource, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {

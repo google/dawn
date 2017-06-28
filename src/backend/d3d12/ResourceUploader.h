@@ -28,7 +28,7 @@ namespace d3d12 {
         public:
             ResourceUploader(Device* device);
 
-            void UploadToBuffer(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const uint8_t* data);
+            void BufferSubData(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const void* data);
 
         private:
             struct UploadHandle {
