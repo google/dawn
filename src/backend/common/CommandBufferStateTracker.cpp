@@ -280,6 +280,8 @@ namespace backend {
             for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
                 if (lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
                     bindgroupsSet |= uint64_t(1) << i;
+                } else {
+                    break;
                 }
             }
         }
