@@ -155,23 +155,6 @@ namespace d3d12 {
             D3D12_CPU_DESCRIPTOR_HANDLE renderTargetDescriptor;
     };
 
-
-    class BindGroup : public BindGroupBase {
-        public:
-            BindGroup(Device* device, BindGroupBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
-    class BindGroupLayout : public BindGroupLayoutBase {
-        public:
-            BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder);
-
-        private:
-            Device* device;
-    };
-
     class Framebuffer : public FramebufferBase {
         public:
             Framebuffer(Device* device, FramebufferBuilder* builder);

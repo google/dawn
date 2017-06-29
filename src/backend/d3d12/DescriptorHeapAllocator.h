@@ -27,6 +27,7 @@ namespace d3d12 {
     class Device;
 
     class DescriptorHeapHandle {
+
         public:
             DescriptorHeapHandle();
             DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t sizeIncrement, uint32_t offset);
@@ -46,27 +47,30 @@ namespace d3d12 {
         public:
             DescriptorHeapAllocator(Device* device);
 
-            DescriptorHeapHandle Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
+            DescriptorHeapHandle AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
+            DescriptorHeapHandle AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
             void FreeDescriptorHeaps(uint64_t lastCompletedSerial);
 
         private:
+            static constexpr unsigned int kMaxCbvUavSrvHeapSize = 1000000;
+            static constexpr unsigned int kMaxSamplerHeapSize = 2048;
+            static constexpr unsigned int kDescriptorHeapTypes = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
+
+            struct AllocationInfo {
+                uint32_t size = 0;
+                uint32_t remaining = 0;
+            };
+
+            using DescriptorHeapInfo = std::pair<ComPtr<ID3D12DescriptorHeap>, AllocationInfo>;
+            
+            DescriptorHeapHandle Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count, uint32_t allocationSize, DescriptorHeapInfo* heapInfo, D3D12_DESCRIPTOR_HEAP_FLAGS flags);
             void Release(DescriptorHeapHandle handle);
 
             Device* device;
 
-            static constexpr unsigned int kDescriptorHeapTypes = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
-
-            struct AllocationInfo {
-                uint32_t size;
-                uint32_t remaining;
-            };
-
-            using DescriptorHeapPool = std::pair<ComPtr<ID3D12DescriptorHeap>, AllocationInfo>;
-
-            using DescriptorHeapPoolList = std::vector<DescriptorHeapPool>;
-
             std::array<uint32_t, kDescriptorHeapTypes> sizeIncrements;
-            std::array<DescriptorHeapPoolList, kDescriptorHeapTypes> descriptorHeapPools;
+            std::array<DescriptorHeapInfo, kDescriptorHeapTypes> cpuDescriptorHeapInfos;
+            std::array<DescriptorHeapInfo, kDescriptorHeapTypes> gpuDescriptorHeapInfos;
             SerialQueue<DescriptorHeapHandle> releasedHandles;
     };
 

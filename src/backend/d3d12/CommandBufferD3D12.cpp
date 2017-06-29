@@ -16,8 +16,10 @@
 
 #include "common/Commands.h"
 #include "D3D12Backend.h"
-#include "DescriptorHeapAllocator.h"
+#include "BindGroupD3D12.h"
+#include "BindGroupLayoutD3D12.h"
 #include "BufferD3D12.h"
+#include "DescriptorHeapAllocator.h"
 #include "InputStateD3D12.h"
 #include "PipelineD3D12.h"
 #include "PipelineLayoutD3D12.h"
@@ -40,142 +42,152 @@ namespace d3d12 {
         struct BindGroupStateTracker {
             uint32_t cbvSrvUavDescriptorIndex = 0;
             uint32_t samplerDescriptorIndex = 0;
-            DescriptorHeapHandle cbvSrvUavDescriptorHeap;
-            DescriptorHeapHandle samplerDescriptorHeap;
+            DescriptorHeapHandle cbvSrvUavCPUDescriptorHeap;
+            DescriptorHeapHandle samplerCPUDescriptorHeap;
+            DescriptorHeapHandle cbvSrvUavGPUDescriptorHeap;
+            DescriptorHeapHandle samplerGPUDescriptorHeap;
             std::array<BindGroup*, kMaxBindGroups> bindGroups = {};
+
             Device* device;
 
             BindGroupStateTracker(Device* device) : device(device) {
             }
 
-            void TrackSetBindGroup(const BindGroupLayoutBase* bindGroupLayout) {
-                const auto& layout = bindGroupLayout->GetBindingInfo();
+            void TrackSetBindGroup(BindGroup* group, uint32_t index) {
+                if (bindGroups[index] != group) {
+                    bindGroups[index] = group;
 
-                for (size_t binding = 0; binding < layout.mask.size(); ++binding) {
-                    if (!layout.mask[binding]) {
-                        continue;
-                    }
-
-                    switch (layout.types[binding]) {
-                    case nxt::BindingType::UniformBuffer:
-                    case nxt::BindingType::StorageBuffer:
-                    case nxt::BindingType::SampledTexture:
-                        cbvSrvUavDescriptorIndex++;
-                    case nxt::BindingType::Sampler:
-                        samplerDescriptorIndex++;
+                    // Descriptors don't need to be recorded if they have already been recorded in the heap. Indices are only updated when descriptors are recorded
+                    const uint64_t serial = device->GetSerial();
+                    if (group->GetHeapSerial() != serial) {
+                        group->RecordDescriptors(cbvSrvUavCPUDescriptorHeap, &cbvSrvUavDescriptorIndex, samplerCPUDescriptorHeap, &samplerDescriptorIndex, serial);
                     }
                 }
             }
 
-            void SetBindGroup(Pipeline* pipeline, BindGroup* group, uint32_t index, ComPtr<ID3D12GraphicsCommandList> commandList) {
-                const auto& layout = group->GetLayout()->GetBindingInfo();
-
-                // these indices are the beginning of the descriptor table
-                uint32_t cbvSrvUavDescriptorStart = cbvSrvUavDescriptorIndex;
-                uint32_t samplerDescriptorStart = samplerDescriptorIndex;
-
-                bindGroups[index] = group;
-
-                PipelineLayout* pipelineLayout = ToBackend(pipeline->GetLayout());
-
-                // these indices are the offsets from the start of the descriptor table
-                uint32_t cbvIndex = pipelineLayout->GetDescriptorStartingIndex(index, PipelineLayout::Descriptor::Type::CBV);
-                uint32_t uavIndex = pipelineLayout->GetDescriptorStartingIndex(index, PipelineLayout::Descriptor::Type::UAV);
-                uint32_t srvIndex = pipelineLayout->GetDescriptorStartingIndex(index, PipelineLayout::Descriptor::Type::SRV);
-                uint32_t samplerIndex = pipelineLayout->GetDescriptorStartingIndex(index, PipelineLayout::Descriptor::Type::Sampler);
-
-                for (size_t binding = 0; binding < layout.mask.size(); ++binding) {
-                    if (!layout.mask[binding]) {
-                        continue;
-                    }
-
-                    switch (layout.types[binding]) {
-                        case nxt::BindingType::UniformBuffer:
-                            {
-                                auto* view = ToBackend(group->GetBindingAsBufferView(binding));
-                                auto* buffer = ToBackend(view->GetBuffer());
-                                auto& cbvDesc = view->GetCBVDescriptor();
-                                device->GetD3D12Device()->CreateConstantBufferView(&cbvDesc, cbvSrvUavDescriptorHeap.GetCPUHandle(cbvSrvUavDescriptorStart + cbvIndex++));
-                                cbvSrvUavDescriptorIndex++;
-                            }
-                            break;
-                        case nxt::BindingType::StorageBuffer:
-                            {
-                                auto* view = ToBackend(group->GetBindingAsBufferView(binding));
-                                auto* buffer = ToBackend(view->GetBuffer());
-                                auto& uavDesc = view->GetUAVDescriptor();
-                                device->GetD3D12Device()->CreateUnorderedAccessView(buffer->GetD3D12Resource().Get(), nullptr, &uavDesc, cbvSrvUavDescriptorHeap.GetCPUHandle(cbvSrvUavDescriptorStart + uavIndex++));
-                                cbvSrvUavDescriptorIndex++;
-                            }
-                            break;
-                        case nxt::BindingType::SampledTexture:
-                            {
-                                auto* texture = ToBackend(group->GetBindingAsTextureView(binding)->GetTexture());
-                                auto& srvDesc = texture->GetSRVDescriptor();
-                                device->GetD3D12Device()->CreateShaderResourceView(texture->GetD3D12Resource().Get(), &srvDesc, cbvSrvUavDescriptorHeap.GetCPUHandle(cbvSrvUavDescriptorStart + srvIndex++));
-                                cbvSrvUavDescriptorIndex++;
-                            }
-                            break;
-                        case nxt::BindingType::Sampler:
-                            {
-                                auto* sampler = ToBackend(group->GetBindingAsSampler(binding));
-                                auto& samplerDesc = sampler->GetSamplerDescriptor();
-                                device->GetD3D12Device()->CreateSampler(&samplerDesc, samplerDescriptorHeap.GetCPUHandle(samplerDescriptorStart + samplerIndex++));
-                                samplerDescriptorIndex++;
-                            }
-                            break;
-                    }
-                }
-
-                if (cbvSrvUavDescriptorStart != cbvSrvUavDescriptorIndex) {
-                    uint32_t parameterIndex = pipelineLayout->GetCBVSRVUAVRootParameterIndex(index);
-
-                    if (pipeline->IsCompute()) {
-                        commandList->SetComputeRootDescriptorTable(parameterIndex, cbvSrvUavDescriptorHeap.GetGPUHandle(cbvSrvUavDescriptorStart));
-                    } else {
-                        commandList->SetGraphicsRootDescriptorTable(parameterIndex, cbvSrvUavDescriptorHeap.GetGPUHandle(cbvSrvUavDescriptorStart));
-                    }
-                }
-
-                if (samplerDescriptorStart != samplerDescriptorIndex) {
-                    uint32_t parameterIndex = pipelineLayout->GetSamplerRootParameterIndex(index);
-
-                    if (pipeline->IsCompute()) {
-                        commandList->SetComputeRootDescriptorTable(parameterIndex, samplerDescriptorHeap.GetGPUHandle(samplerDescriptorStart));
-                    } else {
-                        commandList->SetGraphicsRootDescriptorTable(parameterIndex, samplerDescriptorHeap.GetGPUHandle(samplerDescriptorStart));
-                    }
-                }
-            }
-
-            void SetInheritedBindGroup(Pipeline* pipeline, uint32_t index, ComPtr<ID3D12GraphicsCommandList> commandList) {
+            void TrackSetBindInheritedGroup(uint32_t index) {
                 BindGroup* group = bindGroups[index];
-                ASSERT(group != nullptr);
-                SetBindGroup(pipeline, group, index, commandList);
+                if (group != nullptr) {
+                    TrackSetBindGroup(group, index);
+                }
             }
 
-            void AllocateAndSetDescriptorHeaps(Device* device, ComPtr<ID3D12GraphicsCommandList> commandList) {
-                cbvSrvUavDescriptorHeap = device->GetDescriptorHeapAllocator()->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, cbvSrvUavDescriptorIndex);
-                samplerDescriptorHeap = device->GetDescriptorHeapAllocator()->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, samplerDescriptorIndex);
+            void SetBindGroup(ComPtr<ID3D12GraphicsCommandList> commandList, Pipeline* pipeline, BindGroup* group, uint32_t index, bool force = false) {
+                if (bindGroups[index] != group || force) {
+                    bindGroups[index] = group;
 
-                ID3D12DescriptorHeap* descriptorHeaps[2] = { cbvSrvUavDescriptorHeap.Get(), samplerDescriptorHeap.Get() };
-                if (descriptorHeaps[0] && descriptorHeaps[1]) {
-                    commandList->SetDescriptorHeaps(2, descriptorHeaps);
-                } else if (descriptorHeaps[0]) {
-                    commandList->SetDescriptorHeaps(1, descriptorHeaps);
-                } else if (descriptorHeaps[1]) {
-                    commandList->SetDescriptorHeaps(2, &descriptorHeaps[1]);
+                    PipelineLayout* pipelineLayout = ToBackend(pipeline->GetLayout());
+                    uint32_t cbvUavSrvCount = ToBackend(group->GetLayout())->GetCbvUavSrvDescriptorCount();
+                    uint32_t samplerCount = ToBackend(group->GetLayout())->GetSamplerDescriptorCount();
+
+                    if (cbvUavSrvCount > 0) {
+                        uint32_t parameterIndex = pipelineLayout->GetCbvUavSrvRootParameterIndex(index);
+
+                        if (pipeline->IsCompute()) {
+                            commandList->SetComputeRootDescriptorTable(parameterIndex, cbvSrvUavGPUDescriptorHeap.GetGPUHandle(group->GetCbvUavSrvHeapOffset()));
+                        } else {
+                            commandList->SetGraphicsRootDescriptorTable(parameterIndex, cbvSrvUavGPUDescriptorHeap.GetGPUHandle(group->GetCbvUavSrvHeapOffset()));
+                        }
+                    }
+
+                    if (samplerCount > 0) {
+                        uint32_t parameterIndex = pipelineLayout->GetSamplerRootParameterIndex(index);
+
+                        if (pipeline->IsCompute()) {
+                            commandList->SetComputeRootDescriptorTable(parameterIndex, samplerGPUDescriptorHeap.GetGPUHandle(group->GetSamplerHeapOffset()));
+                        } else {
+                            commandList->SetGraphicsRootDescriptorTable(parameterIndex, samplerGPUDescriptorHeap.GetGPUHandle(group->GetSamplerHeapOffset()));
+                        }
+                    }
+                }
+            }
+
+            void SetInheritedBindGroup(ComPtr<ID3D12GraphicsCommandList> commandList, Pipeline* pipeline, uint32_t index) {
+                BindGroup* group = bindGroups[index];
+                if (group != nullptr) {
+                    SetBindGroup(commandList, pipeline, group, index, true);
                 }
             }
 
             void Reset() {
-                cbvSrvUavDescriptorIndex = 0;
-                samplerDescriptorIndex = 0;
                 for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
                     bindGroups[i] = nullptr;
                 }
             }
         };
+
+        void AllocateAndSetDescriptorHeaps(Device* device, BindGroupStateTracker* bindingTracker, CommandIterator* commands) {
+            auto* descriptorHeapAllocator = device->GetDescriptorHeapAllocator();
+
+            // TODO(enga@google.com): This currently allocates CPU heaps of arbitrarily chosen sizes
+            // This will not work if there are too many descriptors
+            bindingTracker->cbvSrvUavCPUDescriptorHeap = descriptorHeapAllocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 8192);
+            bindingTracker->samplerCPUDescriptorHeap = descriptorHeapAllocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 2048);
+
+            {
+                Command type;
+                Pipeline* lastPipeline = nullptr;
+                PipelineLayout* lastLayout = nullptr;
+
+                while (commands->NextCommandId(&type)) {
+                    switch (type) {
+                        case Command::SetPipeline:
+                        {
+                            SetPipelineCmd* cmd = commands->NextCommand<SetPipelineCmd>();
+                            Pipeline* pipeline = ToBackend(cmd->pipeline).Get();
+                            PipelineLayout* layout = ToBackend(pipeline->GetLayout());
+
+                            if (lastLayout) {
+                                auto mask = layout->GetBindGroupsLayoutMask();
+                                for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
+                                    // matching bind groups are inherited until they differ
+                                    if (mask[i] && lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
+                                        bindingTracker->TrackSetBindInheritedGroup(i);
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            lastPipeline = pipeline;
+                            lastLayout = layout;
+                        }
+                        break;
+
+                        case Command::SetBindGroup:
+                        {
+                            SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
+                            BindGroup* group = ToBackend(cmd->group.Get());
+                            bindingTracker->TrackSetBindGroup(group, cmd->index);
+                        }
+                        break;
+                        default:
+                            SkipCommand(commands, type);
+                    }
+                }
+
+                commands->Reset();
+            }
+
+            if (bindingTracker->cbvSrvUavDescriptorIndex > 0) {
+                // Allocate a GPU-visible heap and copy from the CPU-only heap to the GPU-visible heap
+                bindingTracker->cbvSrvUavGPUDescriptorHeap = descriptorHeapAllocator->AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, bindingTracker->cbvSrvUavDescriptorIndex);
+                device->GetD3D12Device()->CopyDescriptorsSimple(
+                    bindingTracker->cbvSrvUavDescriptorIndex,
+                    bindingTracker->cbvSrvUavGPUDescriptorHeap.GetCPUHandle(0),
+                    bindingTracker->cbvSrvUavCPUDescriptorHeap.GetCPUHandle(0),
+                    D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+            }
+
+            if (bindingTracker->samplerDescriptorIndex > 0) {
+                bindingTracker->samplerGPUDescriptorHeap = descriptorHeapAllocator->AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, bindingTracker->samplerDescriptorIndex);
+                device->GetD3D12Device()->CopyDescriptorsSimple(
+                    bindingTracker->samplerDescriptorIndex,
+                    bindingTracker->samplerGPUDescriptorHeap.GetCPUHandle(0),
+                    bindingTracker->samplerCPUDescriptorHeap.GetCPUHandle(0),
+                    D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+            }
+        }
     }
 
     CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
@@ -188,54 +200,17 @@ namespace d3d12 {
 
     void CommandBuffer::FillCommands(ComPtr<ID3D12GraphicsCommandList> commandList) {
         BindGroupStateTracker bindingTracker(device);
-
-        {
-            Command type;
-            Pipeline* lastPipeline = nullptr;
-            PipelineLayout* lastLayout = nullptr;
-
-            while(commands.NextCommandId(&type)) {
-                switch (type) {
-                    case Command::SetPipeline:
-                        {
-                            SetPipelineCmd* cmd = commands.NextCommand<SetPipelineCmd>();
-                            Pipeline* pipeline = ToBackend(cmd->pipeline).Get();
-                            PipelineLayout* layout = ToBackend(pipeline->GetLayout());
-
-                            if (lastLayout) {
-                                auto mask = layout->GetBindGroupsLayoutMask();
-                                for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                                    // matching bind groups are inherited until they differ
-                                    if (mask[i] && lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
-                                        bindingTracker.TrackSetBindGroup(layout->GetBindGroupLayout(i));
-                                    } else {
-                                        break;
-                                    }
-                                }
-                            }
-
-                            lastPipeline = pipeline;
-                            lastLayout = layout;
-                        }
-                        break;
-
-                    case Command::SetBindGroup:
-                        {
-                            SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();
-                            BindGroup* group = ToBackend(cmd->group.Get());
-                            bindingTracker.TrackSetBindGroup(group->GetLayout());
-                        }
-                        break;
-                    default:
-                        SkipCommand(&commands, type);
-                }
-            }
-
-            commands.Reset();
-        }
-
-        bindingTracker.AllocateAndSetDescriptorHeaps(device, commandList);
+        AllocateAndSetDescriptorHeaps(device, &bindingTracker, &commands);
         bindingTracker.Reset();
+
+        ID3D12DescriptorHeap* descriptorHeaps[2] = { bindingTracker.cbvSrvUavGPUDescriptorHeap.Get(), bindingTracker.samplerGPUDescriptorHeap.Get() };
+        if (descriptorHeaps[0] && descriptorHeaps[1]) {
+            commandList->SetDescriptorHeaps(2, descriptorHeaps);
+        } else if (descriptorHeaps[0]) {
+            commandList->SetDescriptorHeaps(1, descriptorHeaps);
+        } else if (descriptorHeaps[1]) {
+            commandList->SetDescriptorHeaps(2, &descriptorHeaps[1]);
+        }
 
         Command type;
         Pipeline* lastPipeline = nullptr;
@@ -350,7 +325,7 @@ namespace d3d12 {
                             for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
                                 // matching bind groups are inherited until they differ
                                 if (mask[i] && lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
-                                    bindingTracker.SetInheritedBindGroup(pipeline, i, commandList);
+                                    bindingTracker.SetInheritedBindGroup(commandList, pipeline, i);
                                 } else {
                                     break;
                                 }
@@ -379,7 +354,7 @@ namespace d3d12 {
                     {
                         SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();
                         BindGroup* group = ToBackend(cmd->group.Get());
-                        bindingTracker.SetBindGroup(lastPipeline, group, cmd->index, commandList);
+                        bindingTracker.SetBindGroup(commandList, lastPipeline, group, cmd->index);
                     }
                     break;
 

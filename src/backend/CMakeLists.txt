@@ -237,6 +237,10 @@ if (WIN32)
     SetPIC(d3d12_autogen)
 
     list(APPEND BACKEND_SOURCES
+        ${D3D12_DIR}/BindGroupD3D12.cpp
+        ${D3D12_DIR}/BindGroupD3D12.h
+        ${D3D12_DIR}/BindGroupLayoutD3D12.cpp
+        ${D3D12_DIR}/BindGroupLayoutD3D12.h
         ${D3D12_DIR}/BufferD3D12.cpp
         ${D3D12_DIR}/BufferD3D12.h
         ${D3D12_DIR}/CommandAllocatorManager.cpp

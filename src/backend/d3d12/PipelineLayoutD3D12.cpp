@@ -48,14 +48,16 @@ namespace d3d12 {
             // Set the root descriptor table parameter and copy ranges. Ranges are offset by the bind group index
             // Returns whether or not the parameter was set. A root parameter is not set if the number of ranges is 0
             auto SetRootDescriptorTable = [&](uint32_t rangeCount, const D3D12_DESCRIPTOR_RANGE* descriptorRanges) -> bool {
-                if (rangeCount > 0) {
-                    auto& rootParameter = rootParameters[parameterIndex];
-                    rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-                    rootParameter.DescriptorTable = rootParameterValues[parameterIndex].DescriptorTable;
-                    rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-                    rootParameter.DescriptorTable.NumDescriptorRanges = rangeCount;
-                    rootParameter.DescriptorTable.pDescriptorRanges = &ranges[rangeIndex];
+                if (rangeCount == 0) {
+                    return false;
                 }
+
+                auto& rootParameter = rootParameters[parameterIndex];
+                rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                rootParameter.DescriptorTable = rootParameterValues[parameterIndex].DescriptorTable;
+                rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+                rootParameter.DescriptorTable.NumDescriptorRanges = rangeCount;
+                rootParameter.DescriptorTable.pDescriptorRanges = &ranges[rangeIndex];
 
                 for (uint32_t i = 0; i < rangeCount; ++i) {
                     ranges[rangeIndex] = descriptorRanges[i];
@@ -63,7 +65,7 @@ namespace d3d12 {
                     rangeIndex++;
                 }
 
-                return (rangeCount > 0);
+                return true;
             };
 
             if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorTableSize(), bindGroupLayout->GetCbvUavSrvDescriptorRanges())) {

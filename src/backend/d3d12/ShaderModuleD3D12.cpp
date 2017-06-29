@@ -40,24 +40,23 @@ namespace d3d12 {
             Count,
         };
 
-        std::array<uint32_t, RegisterType::Count * kMaxBindGroups> baseRegisters = {};
-
-        const auto& resources = compiler.get_shader_resources();
-
         // rename bindings so that each register type b/u/t/s starts at 0 and then offset by kMaxBindingsPerGroup * bindGroupIndex
-        auto RenumberBindings = [&](std::vector<spirv_cross::Resource> resources, uint32_t offset) {
+        auto RenumberBindings = [&](std::vector<spirv_cross::Resource> resources) {
+            std::array<uint32_t, kMaxBindGroups> baseRegisters = {};
+
             for (const auto& resource : resources) {
                 auto bindGroupIndex = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
-                auto& baseRegister = baseRegisters[RegisterType::Count * bindGroupIndex + offset];
+                auto& baseRegister = baseRegisters[bindGroupIndex];
                 auto bindGroupOffset = bindGroupIndex * kMaxBindingsPerGroup;
                 compiler.set_decoration(resource.id, spv::DecorationBinding, bindGroupOffset + baseRegister++);
             }
         };
 
-        RenumberBindings(resources.uniform_buffers, RegisterType::Buffer);
-        RenumberBindings(resources.storage_buffers, RegisterType::UnorderedAccess);
-        RenumberBindings(resources.separate_images, RegisterType::Texture);
-        RenumberBindings(resources.separate_samplers, RegisterType::Sampler);
+        const auto& resources = compiler.get_shader_resources();
+        RenumberBindings(resources.uniform_buffers);    // c
+        RenumberBindings(resources.storage_buffers);    // u
+        RenumberBindings(resources.separate_images);    // t
+        RenumberBindings(resources.separate_samplers);  // s
 
         hlslSource = compiler.compile();
 

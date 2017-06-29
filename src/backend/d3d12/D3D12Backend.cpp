@@ -14,6 +14,8 @@
 
 #include "D3D12Backend.h"
 
+#include "BindGroupD3D12.h"
+#include "BindGroupLayoutD3D12.h"
 #include "BufferD3D12.h"
 #include "CommandBufferD3D12.h"
 #include "InputStateD3D12.h"
@@ -246,18 +248,6 @@ namespace d3d12 {
     }
 
     void Device::Release() {
-    }
-
-    // Bind Group
-
-    BindGroup::BindGroup(Device* device, BindGroupBuilder* builder)
-        : BindGroupBase(builder), device(device) {
-    }
-
-    // Bind Group Layout
-
-    BindGroupLayout::BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder), device(device) {
     }
 
     // DepthStencilState

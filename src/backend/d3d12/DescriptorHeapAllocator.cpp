@@ -55,38 +55,50 @@ namespace d3d12 {
           } {
     }
 
-    DescriptorHeapHandle DescriptorHeapAllocator::Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count) {
+    DescriptorHeapHandle DescriptorHeapAllocator::Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count, uint32_t allocationSize, DescriptorHeapInfo* heapInfo, D3D12_DESCRIPTOR_HEAP_FLAGS flags) {
+        // TODO(enga@google.com): This is just a linear allocator so the heap will quickly run out of space causing a new one to be allocated
+        // We should reuse heap subranges that have been released
         if (count == 0) {
             return DescriptorHeapHandle();
         }
 
-        auto& pools = descriptorHeapPools[type];
-        for (auto it : pools) {
-            auto& allocationInfo = it.second;
+        {
+            // If the current pool for this type has space, linearly allocate count bytes in the pool
+            auto& allocationInfo = heapInfo->second;
             if (allocationInfo.remaining >= count) {
-                DescriptorHeapHandle handle(it.first, sizeIncrements[type], allocationInfo.size - allocationInfo.remaining);
+                DescriptorHeapHandle handle(heapInfo->first, sizeIncrements[type], allocationInfo.size - allocationInfo.remaining);
                 allocationInfo.remaining -= count;
                 Release(handle);
                 return handle;
             }
         }
 
-        ASSERT(count <= 2048); // TODO(enga@google.com): Have a very large CPU heap that's copied to GPU-visible heaps
-        uint32_t descriptorHeapSize = 2048; // TODO(enga@google.com): Allocate much more and use this as a pool
+        // If the pool has no more space, replace the pool with a new one of the specified size
 
         D3D12_DESCRIPTOR_HEAP_DESC heapDescriptor;
         heapDescriptor.Type = type;
-        heapDescriptor.NumDescriptors = descriptorHeapSize;
-        heapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        heapDescriptor.NumDescriptors = allocationSize;
+        heapDescriptor.Flags = flags;
         heapDescriptor.NodeMask = 0;
         ComPtr<ID3D12DescriptorHeap> heap;
         ASSERT_SUCCESS(device->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor, IID_PPV_ARGS(&heap)));
-        AllocationInfo allocationInfo = { descriptorHeapSize, descriptorHeapSize - count };
-        pools.emplace_back(std::make_pair(heap, allocationInfo));
+
+        AllocationInfo allocationInfo = { allocationSize, allocationSize - count };
+        *heapInfo = std::make_pair(heap, allocationInfo);
 
         DescriptorHeapHandle handle(heap, sizeIncrements[type], 0);
         Release(handle);
         return handle;
+    }
+
+    DescriptorHeapHandle DescriptorHeapAllocator::AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count) {
+        return Allocate(type, count, count, &cpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+    }
+
+    DescriptorHeapHandle DescriptorHeapAllocator::AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count) {
+        ASSERT(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+        unsigned int heapSize = (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ? kMaxCbvUavSrvHeapSize : kMaxSamplerHeapSize);
+        return Allocate(type, count, heapSize, &gpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
     }
 
     void DescriptorHeapAllocator::FreeDescriptorHeaps(uint64_t lastCompletedSerial) {

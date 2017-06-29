@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "D3D12Backend.h"
+#include "BindGroupD3D12.h"
+#include "BindGroupLayoutD3D12.h"
 #include "BufferD3D12.h"
 #include "CommandBufferD3D12.h"
 #include "InputStateD3D12.h"
