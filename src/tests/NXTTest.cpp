@@ -278,6 +278,8 @@ namespace detail {
     bool IsBackendAvailable(BackendType type) {
         #if defined(__APPLE__)
             return type == MetalBackend;
+        #elif defined(_WIN32)
+            return type == D3D12Backend;
         #else
             return false;
         #endif

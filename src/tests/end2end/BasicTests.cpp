@@ -56,4 +56,4 @@ TEST_P(BasicTests, ReadPixelsTest) {
     EXPECT_PIXEL_RGBA8_EQ(red, texture, 0, 0);
 }
 
-NXT_INSTANTIATE_TEST(BasicTests, MetalBackend)
+NXT_INSTANTIATE_TEST(BasicTests, MetalBackend, D3D12Backend)
