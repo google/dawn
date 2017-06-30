@@ -141,14 +141,6 @@ namespace metal {
         uint32_t currentSubpass = 0;
         while (commands.NextCommandId(&type)) {
             switch (type) {
-                case Command::AdvanceSubpass:
-                    {
-                        commands.NextCommand<AdvanceSubpassCmd>();
-                        currentSubpass += 1;
-                        encoders.BeginSubpass(commandBuffer, currentSubpass);
-                    }
-                    break;
-
                 case Command::BeginRenderPass:
                     {
                         BeginRenderPassCmd* beginRenderPassCmd = commands.NextCommand<BeginRenderPassCmd>();
@@ -156,6 +148,12 @@ namespace metal {
                         encoders.currentFramebuffer = ToBackend(beginRenderPassCmd->framebuffer.Get());
                         encoders.FinishEncoders();
                         currentSubpass = 0;
+                    }
+                    break;
+
+                case Command::BeginRenderSubpass:
+                    {
+                        commands.NextCommand<BeginRenderSubpassCmd>();
                         encoders.BeginSubpass(commandBuffer, currentSubpass);
                     }
                     break;
@@ -288,6 +286,13 @@ namespace metal {
                     {
                         commands.NextCommand<EndRenderPassCmd>();
                         encoders.EndRenderPass();
+                    }
+                    break;
+
+                case Command::EndRenderSubpass:
+                    {
+                        commands.NextCommand<EndRenderSubpassCmd>();
+                        currentSubpass += 1;
                     }
                     break;
 

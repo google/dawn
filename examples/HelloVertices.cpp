@@ -77,9 +77,11 @@ void frame() {
     static const uint32_t vertexBufferOffsets[1] = {0};
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderpass, framebuffer)
+        .BeginRenderSubpass()
             .SetPipeline(pipeline)
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
             .DrawArrays(3, 1, 0, 0)
+        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 

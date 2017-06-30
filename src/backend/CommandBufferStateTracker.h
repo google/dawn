@@ -41,7 +41,6 @@ namespace backend {
             bool BeginSubpass();
             bool EndSubpass();
             bool BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
-            bool AdvanceSubpass();
             bool EndRenderPass();
             bool SetPipeline(PipelineBase* pipeline);
             bool SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
@@ -63,6 +62,7 @@ namespace backend {
                 VALIDATION_ASPECT_BIND_GROUPS,
                 VALIDATION_ASPECT_VERTEX_BUFFERS,
                 VALIDATION_ASPECT_INDEX_BUFFER,
+                VALIDATION_ASPECT_RENDER_SUBPASS,
 
                 VALIDATION_ASPECT_COUNT
             };
@@ -96,7 +96,6 @@ namespace backend {
 
             RenderPassBase* currentRenderPass = nullptr;
             FramebufferBase* currentFramebuffer = nullptr;
-            bool subpassActive = false;
             uint32_t currentSubpass = 0;
     };
 }

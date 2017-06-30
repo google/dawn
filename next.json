@@ -255,10 +255,7 @@
                 ]
             },
             {
-                "name": "advance subpass"
-            },
-            {
-                "name": "end render pass"
+                "name": "begin render subpass"
             },
             {
                 "name": "copy buffer to buffer",
@@ -342,6 +339,12 @@
                     {"name": "first index", "type": "uint32_t"},
                     {"name": "first instance", "type": "uint32_t"}
                 ]
+            },
+            {
+                "name": "end render pass"
+            },
+            {
+                "name": "end render subpass"
             },
             {
                 "name": "set stencil reference",

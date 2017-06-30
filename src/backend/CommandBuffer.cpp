@@ -105,16 +105,16 @@ namespace backend {
         Command type;
         while(commands->NextCommandId(&type)) {
             switch (type) {
-                case Command::AdvanceSubpass:
-                    {
-                        AdvanceSubpassCmd* cmd = commands->NextCommand<AdvanceSubpassCmd>();
-                        cmd->~AdvanceSubpassCmd();
-                    }
-                    break;
                 case Command::BeginRenderPass:
                     {
                         BeginRenderPassCmd* begin = commands->NextCommand<BeginRenderPassCmd>();
                         begin->~BeginRenderPassCmd();
+                    }
+                    break;
+                case Command::BeginRenderSubpass:
+                    {
+                        BeginRenderSubpassCmd* begin = commands->NextCommand<BeginRenderSubpassCmd>();
+                        begin->~BeginRenderSubpassCmd();
                     }
                     break;
                 case Command::CopyBufferToBuffer:
@@ -157,6 +157,12 @@ namespace backend {
                     {
                         EndRenderPassCmd* cmd = commands->NextCommand<EndRenderPassCmd>();
                         cmd->~EndRenderPassCmd();
+                    }
+                    break;
+                case Command::EndRenderSubpass:
+                    {
+                        EndRenderSubpassCmd* cmd = commands->NextCommand<EndRenderSubpassCmd>();
+                        cmd->~EndRenderSubpassCmd();
                     }
                     break;
                 case Command::SetPipeline:
@@ -220,12 +226,12 @@ namespace backend {
 
     void SkipCommand(CommandIterator* commands, Command type) {
         switch (type) {
-            case Command::AdvanceSubpass:
-                commands->NextCommand<AdvanceSubpassCmd>();
-                break;
-
             case Command::BeginRenderPass:
                 commands->NextCommand<BeginRenderPassCmd>();
+                break;
+
+            case Command::BeginRenderSubpass:
+                commands->NextCommand<BeginRenderSubpassCmd>();
                 break;
 
             case Command::CopyBufferToBuffer:
@@ -254,6 +260,10 @@ namespace backend {
 
             case Command::EndRenderPass:
                 commands->NextCommand<EndRenderPassCmd>();
+                break;
+
+            case Command::EndRenderSubpass:
+                commands->NextCommand<EndRenderSubpassCmd>();
                 break;
 
             case Command::SetPipeline:
@@ -313,15 +323,6 @@ namespace backend {
         Command type;
         while (iterator.NextCommandId(&type)) {
             switch (type) {
-                case Command::AdvanceSubpass:
-                    {
-                        iterator.NextCommand<AdvanceSubpassCmd>();
-                        if (!state->AdvanceSubpass()) {
-                            return false;
-                        }
-                    }
-                    break;
-
                 case Command::BeginRenderPass:
                     {
                         BeginRenderPassCmd* cmd = iterator.NextCommand<BeginRenderPassCmd>();
@@ -337,6 +338,15 @@ namespace backend {
                             return false;
                         }
                         if (!state->BeginRenderPass(renderPass, framebuffer)) {
+                            return false;
+                        }
+                    }
+                    break;
+
+                case Command::BeginRenderSubpass:
+                    {
+                        iterator.NextCommand<BeginRenderSubpassCmd>();
+                        if (!state->BeginSubpass()) {
                             return false;
                         }
                     }
@@ -418,6 +428,15 @@ namespace backend {
                     {
                         iterator.NextCommand<EndRenderPassCmd>();
                         if (!state->EndRenderPass()) {
+                            return false;
+                        }
+                    }
+                    break;
+
+                case Command::EndRenderSubpass:
+                    {
+                        iterator.NextCommand<EndRenderSubpassCmd>();
+                        if (!state->EndSubpass()) {
                             return false;
                         }
                     }
@@ -523,8 +542,8 @@ namespace backend {
         return device->CreateCommandBuffer(this);
     }
 
-    void CommandBufferBuilder::AdvanceSubpass() {
-        allocator.Allocate<AdvanceSubpassCmd>(Command::AdvanceSubpass);
+    void CommandBufferBuilder::BeginRenderSubpass() {
+        allocator.Allocate<BeginRenderSubpassCmd>(Command::BeginRenderSubpass);
     }
 
     void CommandBufferBuilder::BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer) {
@@ -606,6 +625,10 @@ namespace backend {
 
     void CommandBufferBuilder::EndRenderPass() {
         allocator.Allocate<EndRenderPassCmd>(Command::EndRenderPass);
+    }
+
+    void CommandBufferBuilder::EndRenderSubpass() {
+        allocator.Allocate<EndRenderSubpassCmd>(Command::EndRenderSubpass);
     }
 
     void CommandBufferBuilder::SetPipeline(PipelineBase* pipeline) {

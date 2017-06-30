@@ -253,12 +253,6 @@ namespace d3d12 {
 
         while(commands.NextCommandId(&type)) {
             switch (type) {
-                case Command::AdvanceSubpass:
-                    {
-                        commands.NextCommand<AdvanceSubpassCmd>();
-                    }
-                    break;
-
                 case Command::BeginRenderPass:
                     {
                         BeginRenderPassCmd* beginRenderPassCmd = commands.NextCommand<BeginRenderPassCmd>();
@@ -272,6 +266,12 @@ namespace d3d12 {
                         commandList->RSSetViewports(1, &viewport);
                         commandList->RSSetScissorRects(1, &scissorRect);
                         commandList->OMSetRenderTargets(1, &device->GetCurrentRenderTargetDescriptor(), FALSE, nullptr);
+                    }
+                    break;
+
+                case Command::BeginRenderSubpass:
+                    {
+                        commands.NextCommand<BeginRenderSubpassCmd>();
                     }
                     break;
 
@@ -368,6 +368,12 @@ namespace d3d12 {
                 case Command::EndRenderPass:
                     {
                         EndRenderPassCmd* cmd = commands.NextCommand<EndRenderPassCmd>();
+                    }
+                    break;
+
+                case Command::EndRenderSubpass:
+                    {
+                        commands.NextCommand<EndRenderSubpassCmd>();
                     }
                     break;
 

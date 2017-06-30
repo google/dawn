@@ -126,7 +126,7 @@ namespace backend {
             builder->HandleError("Can't begin a subpass without an active render pass");
             return false;
         }
-        if (subpassActive) {
+        if (aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
             builder->HandleError("Can't begin a subpass without ending the previous subpass");
             return false;
         }
@@ -159,19 +159,16 @@ namespace backend {
             texturesTransitioned.insert(texture);
         }
 
-        subpassActive = true;
+        aspects.set(VALIDATION_ASPECT_RENDER_SUBPASS);
         return true;
     };
 
     bool CommandBufferStateTracker::EndSubpass() {
-        if (currentRenderPass == nullptr) {
-            builder->HandleError("Can't end a subpass without an active render pass");
-            return false;
-        }
-        if (!subpassActive) {
+        if (!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
             builder->HandleError("Can't end a subpass without beginning one");
             return false;
         }
+        ASSERT(currentRenderPass != nullptr);
 
         auto& subpassInfo = currentRenderPass->GetSubpassInfo(currentSubpass);
         for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
@@ -194,7 +191,7 @@ namespace backend {
         }
 
         currentSubpass += 1;
-        subpassActive = false;
+        aspects.reset(VALIDATION_ASPECT_RENDER_SUBPASS);
         UnsetPipeline();
         return true;
     };
@@ -204,6 +201,7 @@ namespace backend {
             builder->HandleError("A render pass is already active");
             return false;
         }
+        ASSERT(!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]);
         if (!framebuffer->GetRenderPass()->IsCompatibleWith(renderPass)) {
             builder->HandleError("Framebuffer is incompatible with this render pass");
             return false;
@@ -212,20 +210,9 @@ namespace backend {
         currentRenderPass = renderPass;
         currentFramebuffer = framebuffer;
         currentSubpass = 0;
-        subpassActive = false;
-
-        // TODO(kainino@chromium.org): remove this when AdvanceSubpass is removed.
-        if (!BeginSubpass()) {
-            return false;
-        }
 
         UnsetPipeline();
         return true;
-    }
-
-    bool CommandBufferStateTracker::AdvanceSubpass() {
-        // TODO(kainino@chromium.org): remove this function when AdvanceSubpass is removed.
-        return EndSubpass() && BeginSubpass();
     }
 
     bool CommandBufferStateTracker::EndRenderPass() {
@@ -233,11 +220,7 @@ namespace backend {
             builder->HandleError("No render pass is currently active");
             return false;
         }
-        // TODO(kainino@chromium.org): remove this when AdvanceSubpass is removed.
-        if (!EndSubpass()) {
-            return false;
-        }
-        if (subpassActive) {
+        if (aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
             builder->HandleError("Can't end a render pass while a subpass is active");
             return false;
         }
@@ -261,8 +244,8 @@ namespace backend {
             }
             aspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
         } else {
-            if (!currentRenderPass) {
-                builder->HandleError("A render pass must be active when a render pipeline is set");
+            if (!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+                builder->HandleError("A render subpass must be active when a render pipeline is set");
                 return false;
             }
             if (!pipeline->GetRenderPass()->IsCompatibleWith(currentRenderPass)) {
@@ -504,7 +487,12 @@ namespace backend {
     }
 
     void CommandBufferStateTracker::UnsetPipeline() {
-        // All of the aspects (currently) are pipeline-dependent.
-        aspects.reset();
+        constexpr ValidationAspects pipelineDependentAspectsInverse =
+            ~(1 << VALIDATION_ASPECT_RENDER_PIPELINE |
+              1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
+              1 << VALIDATION_ASPECT_BIND_GROUPS |
+              1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
+              1 << VALIDATION_ASPECT_INDEX_BUFFER);
+        aspects &= pipelineDependentAspectsInverse;
     }
 }

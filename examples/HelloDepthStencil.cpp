@@ -272,6 +272,7 @@ void frame() {
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderpass, framebuffer)
+        .BeginRenderSubpass()
             .SetPipeline(pipeline)
             .TransitionBufferUsage(cameraBuffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, bindGroup[0])
@@ -288,6 +289,7 @@ void frame() {
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
             .SetBindGroup(0, bindGroup[1])
             .DrawElements(36, 1, 0, 0)
+        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 

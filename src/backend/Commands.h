@@ -28,8 +28,8 @@ namespace backend {
     // dependencies: Ref<Object> needs Object to be defined.
 
     enum class Command {
-        AdvanceSubpass,
         BeginRenderPass,
+        BeginRenderSubpass,
         CopyBufferToBuffer,
         CopyBufferToTexture,
         CopyTextureToBuffer,
@@ -37,6 +37,7 @@ namespace backend {
         DrawArrays,
         DrawElements,
         EndRenderPass,
+        EndRenderSubpass,
         SetPipeline,
         SetPushConstants,
         SetStencilReference,
@@ -47,12 +48,12 @@ namespace backend {
         TransitionTextureUsage,
     };
 
-    struct AdvanceSubpassCmd {
-    };
-
     struct BeginRenderPassCmd {
         Ref<RenderPassBase> renderPass;
         Ref<FramebufferBase> framebuffer;
+    };
+
+    struct BeginRenderSubpassCmd {
     };
 
     struct BufferCopyLocation {
@@ -104,6 +105,9 @@ namespace backend {
     };
 
     struct EndRenderPassCmd {
+    };
+
+    struct EndRenderSubpassCmd {
     };
 
     struct SetPipelineCmd {

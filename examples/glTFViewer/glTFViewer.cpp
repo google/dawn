@@ -496,6 +496,7 @@ namespace {
                     sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));
             cmd.BeginRenderPass(renderpass, framebuffer);
+            cmd.BeginRenderSubpass();
             cmd.SetPipeline(material.pipeline);
             cmd.TransitionBufferUsage(material.uniformBuffer, nxt::BufferUsageBit::Uniform);
             cmd.SetBindGroup(0, material.bindGroup0);
@@ -539,6 +540,7 @@ namespace {
                 // DrawArrays
                 cmd.DrawArrays(vertexCount, 1, 0, 0);
             }
+            cmd.EndRenderSubpass();
             cmd.EndRenderPass();
         }
         auto commands = cmd.GetResult();

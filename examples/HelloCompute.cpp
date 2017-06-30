@@ -132,10 +132,12 @@ void frame() {
         .Dispatch(1, 1, 1)
 
         .BeginRenderPass(renderpass, framebuffer)
+        .BeginRenderSubpass()
             .SetPipeline(renderPipeline)
             .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, renderBindGroup)
             .DrawArrays(3, 1, 0, 0)
+        .EndRenderSubpass()
         .EndRenderPass()
 
         .GetResult();

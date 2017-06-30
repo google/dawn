@@ -271,11 +271,13 @@ void initCommandBuffers() {
             .Dispatch(kNumParticles, 1, 1)
 
             .BeginRenderPass(renderpass, framebuffer)
+            .BeginRenderSubpass()
                 .SetPipeline(renderPipeline)
                 .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Vertex)
                 .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
                 .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)
                 .DrawArrays(3, kNumParticles, 0, 0)
+            .EndRenderSubpass()
             .EndRenderPass()
 
             .GetResult();

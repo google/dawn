@@ -133,6 +133,7 @@ void frame() {
 
         nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
             .BeginRenderPass(renderpass, framebuffer)
+            .BeginRenderSubpass()
             .SetPipeline(pipeline)
             .Clone();
 
@@ -144,6 +145,7 @@ void frame() {
             i++;
         }
 
+        builder.EndRenderSubpass();
         builder.EndRenderPass();
         commands[j] = builder.GetResult();
     }

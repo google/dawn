@@ -94,10 +94,12 @@ void frame() {
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderpass, framebuffer)
+        .BeginRenderSubpass()
             .SetPipeline(pipeline)
             .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, bindGroup)
             .DrawArrays(3, 1, 0, 0)
+        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
