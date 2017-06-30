@@ -86,6 +86,7 @@ namespace d3d12 {
         : d3d12Device(d3d12Device),
           commandAllocatorManager(new CommandAllocatorManager(this)),
           descriptorHeapAllocator(new DescriptorHeapAllocator(this)),
+          mapReadRequestTracker(new MapReadRequestTracker(this)),
           resourceAllocator(new ResourceAllocator(this)),
           resourceUploader(new ResourceUploader(this)) {
 
@@ -112,6 +113,10 @@ namespace d3d12 {
 
     DescriptorHeapAllocator* Device::GetDescriptorHeapAllocator() {
         return descriptorHeapAllocator;
+    }
+
+    MapReadRequestTracker* Device::GetMapReadRequestTracker() const {
+        return mapReadRequestTracker;
     }
 
     ResourceAllocator* Device::GetResourceAllocator() {
@@ -162,6 +167,9 @@ namespace d3d12 {
         resourceAllocator->Tick(lastCompletedSerial);
         commandAllocatorManager->Tick(lastCompletedSerial);
         descriptorHeapAllocator->Tick(lastCompletedSerial);
+        mapReadRequestTracker->Tick(lastCompletedSerial);
+        ExecuteCommandLists({});
+        NextSerial();
     }
 
     uint64_t Device::GetSerial() const {

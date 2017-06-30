@@ -16,6 +16,7 @@
 #define BACKEND_D3D12_BUFFERD3D12_H_
 
 #include "common/Buffer.h"
+#include "common/SerialQueue.h"
 
 #include "d3d12_platform.h"
 
@@ -33,6 +34,7 @@ namespace d3d12 {
             ComPtr<ID3D12Resource> GetD3D12Resource();
             D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
             bool GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier);
+            void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
 
         private:
             Device* device;
@@ -57,6 +59,25 @@ namespace d3d12 {
         private:
             D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
             D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+    };
+
+    class MapReadRequestTracker {
+        public:
+            MapReadRequestTracker(Device* device);
+            ~MapReadRequestTracker();
+
+            void Track(Buffer* buffer, uint32_t mapSerial, const void* data);
+            void Tick(Serial finishedSerial);
+
+        private:
+            Device* device;
+
+            struct Request {
+                Ref<Buffer> buffer;
+                uint32_t mapSerial;
+                const void* data;
+            };
+            SerialQueue<Request> inflightRequests;
     };
 
 }

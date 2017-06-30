@@ -56,6 +56,7 @@ namespace d3d12 {
 
     class CommandAllocatorManager;
     class DescriptorHeapAllocator;
+    class MapReadRequestTracker;
     class ResourceAllocator;
     class ResourceUploader;
 
@@ -115,6 +116,7 @@ namespace d3d12 {
             ComPtr<ID3D12CommandQueue> GetCommandQueue();
 
             DescriptorHeapAllocator* GetDescriptorHeapAllocator();
+            MapReadRequestTracker* GetMapReadRequestTracker() const;
             ResourceAllocator* GetResourceAllocator();
             ResourceUploader* GetResourceUploader();
 
@@ -144,6 +146,7 @@ namespace d3d12 {
 
             CommandAllocatorManager* commandAllocatorManager;
             DescriptorHeapAllocator* descriptorHeapAllocator;
+            MapReadRequestTracker* mapReadRequestTracker;
             ResourceAllocator* resourceAllocator;
             ResourceUploader* resourceUploader;
 

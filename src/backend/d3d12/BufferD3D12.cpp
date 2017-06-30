@@ -43,6 +43,16 @@ namespace d3d12 {
 
             return resourceState;
         }
+
+        D3D12_HEAP_TYPE D3D12HeapType(nxt::BufferUsageBit allowedUsage) {
+            if (allowedUsage & nxt::BufferUsageBit::MapRead) {
+                return D3D12_HEAP_TYPE_READBACK;
+            } else if (allowedUsage & nxt::BufferUsageBit::MapWrite) {
+                return D3D12_HEAP_TYPE_UPLOAD;
+            } else {
+                return D3D12_HEAP_TYPE_DEFAULT;
+            }
+        }
     }
 
     Buffer::Buffer(Device* device, BufferBuilder* builder)
@@ -61,7 +71,20 @@ namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-        resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12BufferUsage(GetUsage()));
+        auto heapType = D3D12HeapType(GetAllowedUsage());
+        auto bufferUsage = D3D12BufferUsage(GetUsage());
+
+        // D3D12 requires buffers on the READBACK heap to have the D3D12_RESOURCE_STATE_COPY_DEST state
+        if (heapType == D3D12_HEAP_TYPE_READBACK) {
+            bufferUsage |= D3D12_RESOURCE_STATE_COPY_DEST;
+        }
+
+        // D3D12 requires buffers on the UPLOAD heap to have the D3D12_RESOURCE_STATE_GENERIC_READ state
+        if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
+            bufferUsage |= D3D12_RESOURCE_STATE_GENERIC_READ;
+        }
+
+        resource = device->GetResourceAllocator()->Allocate(heapType, resourceDescriptor, bufferUsage);
     }
 
     Buffer::~Buffer() {
@@ -78,6 +101,12 @@ namespace d3d12 {
     }
 
     bool Buffer::GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier) {
+        if (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
+            // Transitions are never needed for mapped buffers because they are created with and always need the Transfer(Dst|Src) state.
+            // Mapped buffers cannot have states outside of (MapRead|TransferDst) and (MapWrite|TransferSrc)
+            return false;
+        }
+
         D3D12_RESOURCE_STATES stateBefore = D3D12BufferUsage(currentUsage);
         D3D12_RESOURCE_STATES stateAfter = D3D12BufferUsage(targetUsage);
 
@@ -99,16 +128,28 @@ namespace d3d12 {
         return resource->GetGPUVirtualAddress();
     }
 
+    void Buffer::OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data) {
+        CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, data);
+    }
+
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
         device->GetResourceUploader()->BufferSubData(resource, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
-        // TODO(cwallez@chromium.org): Implement Map Read for the null backend
+        D3D12_RANGE readRange = { start, start + count };
+        char* data = nullptr;
+        ASSERT_SUCCESS(resource->Map(0, &readRange, reinterpret_cast<void**>(&data)));
+
+        MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadRequestTracker();
+        tracker->Track(this, serial, data);
     }
 
     void Buffer::UnmapImpl() {
-        // TODO(cwallez@chromium.org): Implement Map Read for the null backend
+        // TODO(enga@google.com): When MapWrite is implemented, this should state the range that was modified
+        D3D12_RANGE writeRange = {};
+        resource->Unmap(0, &writeRange);
+        device->GetResourceAllocator()->Release(resource);
     }
 
     void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
@@ -145,6 +186,30 @@ namespace d3d12 {
 
     const D3D12_UNORDERED_ACCESS_VIEW_DESC& BufferView::GetUAVDescriptor() const {
         return uavDesc;
+    }
+
+    MapReadRequestTracker::MapReadRequestTracker(Device* device)
+        : device(device) {
+    }
+
+    MapReadRequestTracker::~MapReadRequestTracker() {
+        ASSERT(inflightRequests.Empty());
+    }
+
+    void MapReadRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, const void* data) {
+        Request request;
+        request.buffer = buffer;
+        request.mapSerial = mapSerial;
+        request.data = data;
+
+        inflightRequests.Enqueue(std::move(request), device->GetSerial());
+    }
+
+    void MapReadRequestTracker::Tick(Serial finishedSerial) {
+        for (auto& request : inflightRequests.IterateUpTo(finishedSerial)) {
+            request.buffer->OnMapReadCommandSerialFinished(request.mapSerial, request.data);
+        }
+        inflightRequests.ClearUpTo(finishedSerial);
     }
 
 }
