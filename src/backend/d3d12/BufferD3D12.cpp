@@ -119,8 +119,8 @@ namespace d3d12 {
     }
 
 
-    BufferView::BufferView(Device* device, BufferViewBuilder* builder)
-        : BufferViewBase(builder), device(device) {
+    BufferView::BufferView(BufferViewBuilder* builder)
+        : BufferViewBase(builder) {
 
         cbvDesc.BufferLocation = ToBackend(GetBuffer())->GetVA() + GetOffset();
         cbvDesc.SizeInBytes = GetD3D12Size();

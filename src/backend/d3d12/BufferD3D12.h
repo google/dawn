@@ -48,14 +48,13 @@ namespace d3d12 {
 
     class BufferView : public BufferViewBase {
         public:
-            BufferView(Device* device, BufferViewBuilder* builder);
+            BufferView(BufferViewBuilder* builder);
 
             uint32_t GetD3D12Size() const;
             const D3D12_CONSTANT_BUFFER_VIEW_DESC& GetCBVDescriptor() const;
             const D3D12_UNORDERED_ACCESS_VIEW_DESC& GetUAVDescriptor() const;
 
         private:
-            Device* device;
             D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
             D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
     };

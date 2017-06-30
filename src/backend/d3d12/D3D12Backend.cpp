@@ -205,7 +205,7 @@ namespace d3d12 {
         return new Buffer(this, builder);
     }
     BufferViewBase* Device::CreateBufferView(BufferViewBuilder* builder) {
-        return new BufferView(this, builder);
+        return new BufferView(builder);
     }
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBuffer(this, builder);
@@ -241,7 +241,7 @@ namespace d3d12 {
         return new Texture(this, builder);
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
-        return new TextureView(this, builder);
+        return new TextureView(builder);
     }
 
     void Device::Reference() {

@@ -42,14 +42,13 @@ namespace d3d12 {
 
     class TextureView : public TextureViewBase {
         public:
-            TextureView(Device* device, TextureViewBuilder* builder);
+            TextureView(TextureViewBuilder* builder);
 
             const D3D12_SHADER_RESOURCE_VIEW_DESC& GetSRVDescriptor() const;
 
         private:
             D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
     };
-
 }
 }
 

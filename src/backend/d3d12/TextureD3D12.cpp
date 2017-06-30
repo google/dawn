@@ -129,7 +129,7 @@ namespace d3d12 {
         }
     }
 
-    TextureView::TextureView(Device* device, TextureViewBuilder* builder)
+    TextureView::TextureView(TextureViewBuilder* builder)
         : TextureViewBase(builder) {
 
         srvDesc.Format = D3D12TextureFormat(GetTexture()->GetFormat());
