@@ -59,18 +59,6 @@ namespace d3d12 {
         RenumberBindings(resources.separate_samplers);  // s
 
         hlslSource = compiler.compile();
-
-        {
-            // pending https://github.com/KhronosGroup/SPIRV-Cross/issues/216
-            // rename ": register(cN)" to ": register(bN)"
-            std::string::size_type pos = 0;
-            const std::string search = ": register(c";
-            const std::string replace = ": register(b";
-            while ((pos = hlslSource.find(search, pos)) != std::string::npos) {
-                hlslSource.replace(pos, search.length(), replace);
-                pos += replace.length();
-            }
-        }
     }
 
     const std::string& ShaderModule::GetHLSLSource() const {
