@@ -56,4 +56,44 @@ TEST_P(BasicTests, ReadPixelsTest) {
     EXPECT_PIXEL_RGBA8_EQ(red, texture, 0, 0);
 }
 
+TEST_P(BasicTests, Buffer2Texture2Buffer) {
+    static constexpr unsigned int kSize = 64;
+
+    uint8_t data[4 * kSize * kSize] = {};
+    for (unsigned int i = 0; i < 4 * kSize * kSize; ++i) {
+        data[i] = i % 256;
+    }
+
+    nxt::Buffer srcBuffer = utils::CreateFrozenBufferFromData(device, data, 4 * kSize * kSize, nxt::BufferUsageBit::TransferSrc);
+
+    nxt::Texture texture = device.CreateTextureBuilder()
+        .SetDimension(nxt::TextureDimension::e2D)
+        .SetExtent(kSize, kSize, 1)
+        .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+        .SetMipLevels(1)
+        .SetAllowedUsage(nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::TransferSrc)
+        .GetResult();
+
+    nxt::Buffer dstBuffer = device.CreateBufferBuilder()
+        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::TransferSrc)
+        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
+        .SetSize(4 * kSize * kSize)
+        .GetResult();
+
+    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+        .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
+        .CopyBufferToTexture(srcBuffer, 0, texture, 0, 0, 0, kSize, kSize, 1, 0)
+
+        .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferSrc)
+        .TransitionBufferUsage(dstBuffer, nxt::BufferUsageBit::TransferDst)
+        .CopyTextureToBuffer(texture, 0, 0, 0, kSize, kSize, 1, 0, dstBuffer, 0)
+
+        .GetResult();
+
+    queue.Submit(1, &commands);
+
+    const uint32_t* dataView = reinterpret_cast<uint32_t*>(data);
+    EXPECT_BUFFER_U32_RANGE_EQ(dataView, dstBuffer, 0, kSize * kSize);
+}
+
 NXT_INSTANTIATE_TEST(BasicTests, MetalBackend, D3D12Backend)
