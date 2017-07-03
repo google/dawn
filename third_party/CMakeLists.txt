@@ -41,6 +41,9 @@ set(SHADERC_SKIP_TESTS ON)
 set(SHADERC_GOOGLE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest CACHE STRING "Location of googletest source")
 set(SHADERC_GLSLANG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/glslang" CACHE STRING "Location of glslang source")
 set(SHADERC_SPIRV_TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools CACHE STRING "Location of spirv-tools source")
+# Help shaderc find the python executable when run inside VS.
+find_package(PythonInterp REQUIRED)
+set(PYTHON_EXE ${PYTHON_EXECUTABLE})
 # Need to include this for spirv-tools to find it
 add_subdirectory(spirv-headers)
 add_subdirectory(shaderc)
