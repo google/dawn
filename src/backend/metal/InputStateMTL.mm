@@ -28,6 +28,8 @@ namespace metal {
                     return MTLVertexFormatFloat3;
                 case nxt::VertexFormat::FloatR32G32:
                     return MTLVertexFormatFloat2;
+                case nxt::VertexFormat::FloatR32:
+                    return MTLVertexFormatFloat;
             }
         }
 
@@ -71,6 +73,8 @@ namespace metal {
             if (info.stride == 0) {
                 // For MTLVertexStepFunctionConstant, the stepRate must be 0,
                 // but the stride must NOT be 0, so I made up a value (256).
+                // TODO(cwallez@chromium.org): the made up value will need to be at least
+                //    max(attrib.offset + sizeof(attrib) for each attrib)
                 layoutDesc.stepFunction = MTLVertexStepFunctionConstant;
                 layoutDesc.stepRate = 0;
                 layoutDesc.stride = 256;

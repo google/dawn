@@ -37,6 +37,8 @@ namespace backend {
                 return 3;
             case nxt::VertexFormat::FloatR32G32:
                 return 2;
+            case nxt::VertexFormat::FloatR32:
+                return 1;
         }
     }
 
@@ -45,6 +47,7 @@ namespace backend {
             case nxt::VertexFormat::FloatR32G32B32A32:
             case nxt::VertexFormat::FloatR32G32B32:
             case nxt::VertexFormat::FloatR32G32:
+            case nxt::VertexFormat::FloatR32:
                 return VertexFormatNumComponents(format) * sizeof(float);
         }
     }

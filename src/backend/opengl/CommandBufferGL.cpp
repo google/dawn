@@ -49,6 +49,7 @@ namespace opengl {
             case nxt::VertexFormat::FloatR32G32B32A32:
             case nxt::VertexFormat::FloatR32G32B32:
             case nxt::VertexFormat::FloatR32G32:
+            case nxt::VertexFormat::FloatR32:
                 return GL_FLOAT;
         }
     }

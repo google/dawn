@@ -25,6 +25,8 @@ namespace d3d12 {
                 return DXGI_FORMAT_R32G32B32_FLOAT;
             case nxt::VertexFormat::FloatR32G32:
                 return DXGI_FORMAT_R32G32_FLOAT;
+            case nxt::VertexFormat::FloatR32:
+                return DXGI_FORMAT_R32_FLOAT;
         }
     }
 
