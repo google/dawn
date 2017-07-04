@@ -20,10 +20,35 @@ namespace backend {
 namespace metal {
 
     namespace {
-        MTLPixelFormat TextureFormatPixelFormat(nxt::TextureFormat format) {
+        MTLPixelFormat MetalPixelFormat(nxt::TextureFormat format) {
             switch (format) {
                 case nxt::TextureFormat::R8G8B8A8Unorm:
                     return MTLPixelFormatRGBA8Unorm;
+            }
+        }
+
+        MTLTextureUsage MetalTextureUsage(nxt::TextureUsageBit usage) {
+            MTLTextureUsage result = MTLTextureUsageUnknown; // This is 0
+
+            if (usage & (nxt::TextureUsageBit::Storage)) {
+                result |= MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
+            }
+
+            if (usage & (nxt::TextureUsageBit::Sampled)) {
+                result |= MTLTextureUsageShaderRead;
+            }
+
+            if (usage & (nxt::TextureUsageBit::ColorAttachment | nxt::TextureUsageBit::DepthStencilAttachment)) {
+                result |= MTLTextureUsageRenderTarget;
+            }
+
+            return result;
+        }
+
+        MTLTextureType MetalTextureType(nxt::TextureDimension dimension) {
+            switch (dimension) {
+                case nxt::TextureDimension::e2D:
+                    return MTLTextureType2D;
             }
         }
     }
@@ -32,13 +57,9 @@ namespace metal {
         : TextureBase(builder) {
         auto desc = [MTLTextureDescriptor new];
         [desc autorelease];
-        switch (GetDimension()) {
-            case nxt::TextureDimension::e2D:
-                desc.textureType = MTLTextureType2D;
-                break;
-        }
-        desc.usage = MTLTextureUsageShaderRead;
-        desc.pixelFormat = TextureFormatPixelFormat(GetFormat());
+        desc.textureType = MetalTextureType(GetDimension());
+        desc.usage = MetalTextureUsage(GetUsage());
+        desc.pixelFormat = MetalPixelFormat(GetFormat());
         desc.width = GetWidth();
         desc.height = GetHeight();
         desc.depth = GetDepth();
