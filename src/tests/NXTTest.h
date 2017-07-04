@@ -22,6 +22,9 @@
 #define EXPECT_BUFFER_U32_EQ(expected, buffer, offset) \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), new detail::ExpectEq<uint32_t>(expected));
 
+#define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count) \
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * count, new detail::ExpectEq<uint32_t>(expected, count));
+
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
     AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected));
@@ -133,6 +136,7 @@ namespace detail {
     class ExpectEq : public Expectation {
         public:
             ExpectEq(T singleValue);
+            ExpectEq(const T* values, const unsigned int count);
 
             testing::AssertionResult Check(const void* data, size_t size) override;
 

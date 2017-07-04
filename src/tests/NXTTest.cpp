@@ -304,6 +304,11 @@ namespace detail {
     }
 
     template<typename T>
+    ExpectEq<T>::ExpectEq(const T* values, const unsigned int count) {
+        expected.assign(values, values + count);
+    }
+
+    template<typename T>
     testing::AssertionResult ExpectEq<T>::Check(const void* data, size_t size) {
         ASSERT(size == sizeof(T) * expected.size());
 
