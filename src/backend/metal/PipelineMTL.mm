@@ -68,7 +68,8 @@ namespace metal {
                 }
             }
 
-            descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+            // TODO(cwallez@chromium.org): get the attachment formats from the subpass
+            descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
             descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
             InputState* inputState = ToBackend(GetInputState());

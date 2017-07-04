@@ -97,7 +97,8 @@ namespace metal {
                         usingBackbuffer = true;
                     }
                     descriptor.colorAttachments[index].texture = texture;
-                    descriptor.colorAttachments[index].loadAction = MTLLoadActionLoad;
+                    descriptor.colorAttachments[index].loadAction = MTLLoadActionClear;
+                    descriptor.colorAttachments[index].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0);
                     descriptor.colorAttachments[index].storeAction = MTLStoreActionStore;
                 }
                 // TODO(kainino@chromium.org): load depth attachment from subpass
