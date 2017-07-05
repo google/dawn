@@ -23,7 +23,7 @@
 
 namespace utils {
 
-    nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source) {
+    void FillShaderModuleBuilder(const nxt::ShaderModuleBuilder& builder, nxt::ShaderStage stage, const char* source) {
         shaderc::Compiler compiler;
         shaderc::CompileOptions options;
 
@@ -43,10 +43,11 @@ namespace utils {
         auto result = compiler.CompileGlslToSpv(source, strlen(source), kind, "myshader?", options);
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
             std::cerr << result.GetErrorMessage();
-            return {};
+            return;
         }
 
         size_t size = (result.cend() - result.cbegin());
+        builder.SetSource(size, result.cbegin());
 
 #ifdef DUMP_SPIRV_ASSEMBLY
         {
@@ -74,10 +75,12 @@ namespace utils {
         printf("\n");
         printf("SPIRV JS ARRAY DUMP END\n");
 #endif
+    }
 
-        return device.CreateShaderModuleBuilder()
-            .SetSource(size, result.cbegin())
-            .GetResult();
+    nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source) {
+        nxt::ShaderModuleBuilder builder = device.CreateShaderModuleBuilder();
+        FillShaderModuleBuilder(builder, stage, source);
+        return builder.GetResult();
     }
 
     void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer) {

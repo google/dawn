@@ -16,6 +16,7 @@
 
 namespace utils {
 
+    void FillShaderModuleBuilder(const nxt::ShaderModuleBuilder& builder, nxt::ShaderStage stage, const char* source);
     nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source);
     void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer);
     nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, const void* data, uint32_t size, nxt::BufferUsageBit usage);
