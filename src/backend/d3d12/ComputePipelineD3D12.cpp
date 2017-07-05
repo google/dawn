@@ -48,7 +48,7 @@ namespace d3d12 {
             { nullptr },
             nullptr,
             entryPoint.c_str(),
-            "cs_5_0",
+            "cs_5_1",
             compileFlags,
             0,
             &compiledShader,

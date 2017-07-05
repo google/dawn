@@ -25,6 +25,16 @@ namespace backend {
 namespace d3d12 {
 
     namespace {
+        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(nxt::BufferUsageBit usage) {
+            D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
+
+            if (usage & nxt::BufferUsageBit::Storage) {
+                flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+            }
+
+            return flags;
+        }
+
         D3D12_RESOURCE_STATES D3D12BufferUsage(nxt::BufferUsageBit usage) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
@@ -72,7 +82,7 @@ namespace d3d12 {
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
+        resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage());
 
         auto heapType = D3D12HeapType(GetAllowedUsage());
         auto bufferUsage = D3D12BufferUsage(GetUsage());

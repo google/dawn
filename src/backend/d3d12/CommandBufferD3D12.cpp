@@ -488,6 +488,9 @@ namespace d3d12 {
                         ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
                         PipelineLayout* layout = ToBackend(pipeline->GetLayout());
 
+                        commandList->SetComputeRootSignature(layout->GetRootSignature().Get());
+                        commandList->SetPipelineState(pipeline->GetPipelineState().Get());
+
                         // TODO(enga@google.com): Implement compute pipelines
                         bindingTracker.SetInheritedBindGroups(commandList, lastLayout, layout);
                         lastLayout = layout;
