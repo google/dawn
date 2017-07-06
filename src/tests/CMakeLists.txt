@@ -40,8 +40,7 @@ add_executable(nxt_unittests
     ${VALIDATION_TESTS_DIR}/ValidationTest.h
     ${TESTS_DIR}/UnittestsMain.cpp
 )
-target_link_libraries(nxt_unittests gtest nxt_backend mock_nxt nxt_wire utils)
-target_include_directories(nxt_unittests PRIVATE ${SRC_DIR})
+target_link_libraries(nxt_unittests nxt_common gtest nxt_backend mock_nxt nxt_wire utils)
 SetCXX14(nxt_unittests)
 
 add_executable(nxt_end2end_tests
@@ -51,6 +50,5 @@ add_executable(nxt_end2end_tests
     ${TESTS_DIR}/NXTTest.cpp
     ${TESTS_DIR}/NXTTest.h
 )
-target_link_libraries(nxt_end2end_tests gtest utils)
-target_include_directories(nxt_end2end_tests PRIVATE ${SRC_DIR})
+target_link_libraries(nxt_end2end_tests nxt_common gtest utils)
 SetCXX14(nxt_end2end_tests)

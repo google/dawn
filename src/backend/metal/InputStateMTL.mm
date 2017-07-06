@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "InputStateMTL.h"
+#include "backend/metal/InputStateMTL.h"
 
-#include "MetalBackend.h"
+#include "backend/metal/MetalBackend.h"
 
 namespace backend {
 namespace metal {

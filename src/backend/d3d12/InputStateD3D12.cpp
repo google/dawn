@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "InputStateD3D12.h"
+#include "backend/d3d12/InputStateD3D12.h"
 
 namespace backend {
 namespace d3d12 {

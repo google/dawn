@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_DEPTHSTENCILSTATEMTL_H_
 #define BACKEND_METAL_DEPTHSTENCILSTATEMTL_H_
 
-#include "common/DepthStencilState.h"
+#include "backend/DepthStencilState.h"
 
 #import <Metal/Metal.h>
 

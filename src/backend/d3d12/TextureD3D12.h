@@ -15,9 +15,9 @@
 #ifndef BACKEND_D3D12_TEXTURED3D12_H_
 #define BACKEND_D3D12_TEXTURED3D12_H_
 
-#include "common/Texture.h"
+#include "backend/Texture.h"
 
-#include "d3d12_platform.h"
+#include "backend/d3d12/d3d12_platform.h"
 
 namespace backend {
 namespace d3d12 {

@@ -17,21 +17,21 @@
 
 #include "nxt/nxtcpp.h"
 
-#include "common/Buffer.h"
-#include "common/BindGroup.h"
-#include "common/BindGroupLayout.h"
-#include "common/Device.h"
-#include "common/Framebuffer.h"
-#include "common/DepthStencilState.h"
-#include "common/InputState.h"
-#include "common/PipelineLayout.h"
-#include "common/Queue.h"
-#include "common/RenderPass.h"
-#include "common/Sampler.h"
-#include "common/Texture.h"
-#include "common/ToBackend.h"
+#include "backend/Buffer.h"
+#include "backend/BindGroup.h"
+#include "backend/BindGroupLayout.h"
+#include "backend/Device.h"
+#include "backend/Framebuffer.h"
+#include "backend/DepthStencilState.h"
+#include "backend/InputState.h"
+#include "backend/PipelineLayout.h"
+#include "backend/Queue.h"
+#include "backend/RenderPass.h"
+#include "backend/Sampler.h"
+#include "backend/Texture.h"
+#include "backend/ToBackend.h"
 
-#include "d3d12_platform.h"
+#include "backend/d3d12/d3d12_platform.h"
 
 namespace backend {
 namespace d3d12 {

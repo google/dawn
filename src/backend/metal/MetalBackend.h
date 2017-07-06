@@ -17,13 +17,14 @@
 
 #include "nxt/nxtcpp.h"
 
-#include "common/BindGroup.h"
-#include "common/BindGroupLayout.h"
-#include "common/Device.h"
-#include "common/Framebuffer.h"
-#include "common/Queue.h"
-#include "common/RenderPass.h"
-#include "common/ToBackend.h"
+#include "backend/BindGroup.h"
+#include "backend/BindGroupLayout.h"
+#include "backend/Device.h"
+#include "backend/Framebuffer.h"
+#include "backend/Queue.h"
+#include "backend/RenderPass.h"
+#include "backend/ToBackend.h"
+#include "common/Serial.h"
 
 #include <type_traits>
 #import <Metal/Metal.h>

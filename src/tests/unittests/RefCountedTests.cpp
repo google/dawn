@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "backend/common/RefCounted.h"
+#include "backend/RefCounted.h"
 
 using namespace backend;
 

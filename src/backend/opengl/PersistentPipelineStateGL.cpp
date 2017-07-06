@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "PersistentPipelineStateGL.h"
+#include "backend/opengl/PersistentPipelineStateGL.h"
 
-#include "OpenGLBackend.h"
+#include "backend/opengl/OpenGLBackend.h"
 
 namespace backend {
 namespace opengl {

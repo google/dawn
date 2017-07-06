@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "BufferMTL.h"
+#include "backend/metal/BufferMTL.h"
 
-#include "MetalBackend.h"
-#include "ResourceUploader.h"
+#include "backend/metal/MetalBackend.h"
+#include "backend/metal/ResourceUploader.h"
 
 namespace backend {
 namespace metal {

@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "Wire.h"
+#include "wire/Wire.h"
 
 namespace nxt {
 namespace wire {

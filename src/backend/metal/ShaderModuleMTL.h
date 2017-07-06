@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_SHADERMODULEMTL_H_
 #define BACKEND_METAL_SHADERMODULEMTL_H_
 
-#include "common/ShaderModule.h"
+#include "backend/ShaderModule.h"
 
 #import <Metal/Metal.h>
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "NXTTest.h"
+#include "tests/NXTTest.h"
 
 #include "utils/BackendBinding.h"
 

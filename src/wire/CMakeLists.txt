@@ -29,7 +29,7 @@ Generate(
 )
 target_include_directories(wire_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(wire_autogen PUBLIC ${GENERATED_DIR})
-target_link_libraries(wire_autogen nxt)
+target_link_libraries(wire_autogen nxt nxt_common)
 SetCXX14(wire_autogen)
 SetPic(wire_autogen)
 

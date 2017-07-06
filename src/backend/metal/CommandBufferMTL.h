@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_COMMANDBUFFERMTL_H_
 #define BACKEND_METAL_COMMANDBUFFERMTL_H_
 
-#include "common/CommandBuffer.h"
+#include "backend/CommandBuffer.h"
 
 #import <Metal/Metal.h>
 

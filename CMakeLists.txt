@@ -77,6 +77,7 @@ SetCXX14(mock_nxt)
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+add_subdirectory(src/common)
 add_subdirectory(src/backend)
 add_subdirectory(src/wire)
 add_subdirectory(src/utils)

@@ -15,10 +15,10 @@
 #ifndef BACKEND_D3D12_COMMANDBUFFERD3D12_H_
 #define BACKEND_D3D12_COMMANDBUFFERD3D12_H_
 
-#include "common/CommandAllocator.h"
-#include "common/CommandBuffer.h"
+#include "backend/CommandAllocator.h"
+#include "backend/CommandBuffer.h"
 
-#include "d3d12_platform.h"
+#include "backend/d3d12/d3d12_platform.h"
 
 namespace backend {
 namespace d3d12 {

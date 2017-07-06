@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "BackendBinding.h"
+#include "utils/BackendBinding.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
-#include <assert.h>
+#include <cassert>
 #include <initializer_list>
 #include <wrl.h>
 #include <d3d12.h>

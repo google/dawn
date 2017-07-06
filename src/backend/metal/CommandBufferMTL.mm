@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "CommandBufferMTL.h"
+#include "backend/metal/CommandBufferMTL.h"
 
-#include "common/Commands.h"
-#include "BufferMTL.h"
-#include "DepthStencilStateMTL.h"
-#include "InputStateMTL.h"
-#include "MetalBackend.h"
-#include "PipelineMTL.h"
-#include "PipelineLayoutMTL.h"
-#include "SamplerMTL.h"
-#include "TextureMTL.h"
+#include "backend/Commands.h"
+#include "backend/metal/BufferMTL.h"
+#include "backend/metal/DepthStencilStateMTL.h"
+#include "backend/metal/InputStateMTL.h"
+#include "backend/metal/MetalBackend.h"
+#include "backend/metal/PipelineMTL.h"
+#include "backend/metal/PipelineLayoutMTL.h"
+#include "backend/metal/SamplerMTL.h"
+#include "backend/metal/TextureMTL.h"
 
 namespace backend {
 namespace metal {

@@ -15,7 +15,7 @@
 #ifndef BACKEND_OPENGL_SHADERMODULEGL_H_
 #define BACKEND_OPENGL_SHADERMODULEGL_H_
 
-#include "common/ShaderModule.h"
+#include "backend/ShaderModule.h"
 
 #include "glad/glad.h"
 

@@ -15,9 +15,9 @@
 #ifndef BACKEND_METAL_PIPELINELAYOUTMTL_H_
 #define BACKEND_METAL_PIPELINELAYOUTMTL_H_
 
-#include "common/PipelineLayout.h"
+#include "backend/PipelineLayout.h"
 
-#include "common/PerStage.h"
+#include "backend/PerStage.h"
 
 #import <Metal/Metal.h>
 

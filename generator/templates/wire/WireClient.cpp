@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "Wire.h"
-#include "WireCmd.h"
+#include "wire/Wire.h"
+#include "wire/WireCmd.h"
 
 #include <cassert>
 #include <cstring>

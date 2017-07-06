@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "PipelineGL.h"
+#include "backend/opengl/PipelineGL.h"
 
-#include "DepthStencilStateGL.h"
-#include "OpenGLBackend.h"
-#include "PersistentPipelineStateGL.h"
-#include "PipelineLayoutGL.h"
-#include "ShaderModuleGL.h"
+#include "backend/opengl/DepthStencilStateGL.h"
+#include "backend/opengl/OpenGLBackend.h"
+#include "backend/opengl/PersistentPipelineStateGL.h"
+#include "backend/opengl/PipelineLayoutGL.h"
+#include "backend/opengl/ShaderModuleGL.h"
 
 #include <iostream>
 #include <set>

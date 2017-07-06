@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_TEXTUREMTL_H_
 #define BACKEND_METAL_TEXTUREMTL_H_
 
-#include "common/Texture.h"
+#include "backend/Texture.h"
 
 #import <Metal/Metal.h>
 

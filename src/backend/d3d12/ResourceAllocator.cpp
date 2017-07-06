@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ResourceAllocator.h"
+#include "backend/d3d12/ResourceAllocator.h"
 
-#include "D3D12Backend.h"
+#include "backend/d3d12/D3D12Backend.h"
 
 namespace backend {
 namespace d3d12 {

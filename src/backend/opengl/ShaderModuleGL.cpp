@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ShaderModuleGL.h"
+#include "backend/opengl/ShaderModuleGL.h"
 
 #include <spirv-cross/spirv_glsl.hpp>
 

@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_INPUTSTATEMTL_H_
 #define BACKEND_METAL_INPUTSTATEMTL_H_
 
-#include "common/InputState.h"
+#include "backend/InputState.h"
 
 #import <Metal/Metal.h>
 

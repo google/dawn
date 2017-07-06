@@ -15,7 +15,7 @@
 #ifndef BACKEND_D3D12_COMMANDALLOCATORMANAGER_H_
 #define BACKEND_D3D12_COMMANDALLOCATORMANAGER_H_
 
-#include "d3d12_platform.h"
+#include "backend/d3d12/d3d12_platform.h"
 
 #include "common/SerialQueue.h"
 

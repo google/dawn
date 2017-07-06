@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "CommandBufferD3D12.h"
+#include "backend/d3d12/CommandBufferD3D12.h"
 
-#include "common/Commands.h"
-#include "D3D12Backend.h"
-#include "BindGroupD3D12.h"
-#include "BindGroupLayoutD3D12.h"
-#include "BufferD3D12.h"
-#include "DescriptorHeapAllocator.h"
-#include "InputStateD3D12.h"
-#include "PipelineD3D12.h"
-#include "PipelineLayoutD3D12.h"
-#include "SamplerD3D12.h"
-#include "TextureD3D12.h"
+#include "backend/Commands.h"
+#include "backend/d3d12/D3D12Backend.h"
+#include "backend/d3d12/BindGroupD3D12.h"
+#include "backend/d3d12/BindGroupLayoutD3D12.h"
+#include "backend/d3d12/BufferD3D12.h"
+#include "backend/d3d12/DescriptorHeapAllocator.h"
+#include "backend/d3d12/InputStateD3D12.h"
+#include "backend/d3d12/PipelineD3D12.h"
+#include "backend/d3d12/PipelineLayoutD3D12.h"
+#include "backend/d3d12/SamplerD3D12.h"
+#include "backend/d3d12/TextureD3D12.h"
 
 #include "ResourceAllocator.h"
 

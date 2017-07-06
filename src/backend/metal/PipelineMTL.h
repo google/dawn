@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_PIPELINEMTL_H_
 #define BACKEND_METAL_PIPELINEMTL_H_
 
-#include "common/Pipeline.h"
+#include "backend/Pipeline.h"
 
 #import <Metal/Metal.h>
 

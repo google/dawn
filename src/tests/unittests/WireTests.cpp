@@ -18,8 +18,6 @@
 #include "wire/TerribleCommandBuffer.h"
 #include "wire/Wire.h"
 
-#include <iostream>
-
 using namespace testing;
 using namespace nxt::wire;
 

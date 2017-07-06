@@ -15,7 +15,7 @@
 #ifndef BACKEND_OPENGL_SAMPLERGL_H_
 #define BACKEND_OPENGL_SAMPLERGL_H_
 
-#include "common/Sampler.h"
+#include "backend/Sampler.h"
 
 #include "glad/glad.h"
 

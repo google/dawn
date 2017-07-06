@@ -15,9 +15,9 @@
 #ifndef BACKEND_D3D12_INPUTSTATED3D12_H_
 #define BACKEND_D3D12_INPUTSTATED3D12_H_
 
-#include "common/InputState.h"
+#include "backend/InputState.h"
 
-#include "d3d12_platform.h"
+#include "backend/d3d12/d3d12_platform.h"
 
 namespace backend {
 namespace d3d12 {

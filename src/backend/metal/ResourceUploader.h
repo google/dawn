@@ -15,6 +15,7 @@
 #ifndef BACKEND_METAL_RESOURCEUPLOADER_H_
 #define BACKEND_METAL_RESOURCEUPLOADER_H_
 
+#include "common/Serial.h"
 #include "common/SerialQueue.h"
 
 #import <Metal/Metal.h>

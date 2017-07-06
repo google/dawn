@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_SAMPLERMTL_H_
 #define BACKEND_METAL_SAMPLERMTL_H_
 
-#include "common/Sampler.h"
+#include "backend/Sampler.h"
 
 #import <Metal/Metal.h>
 

@@ -15,7 +15,7 @@
 #include "nxt/nxt.h"
 #include "nxt/nxtcpp.h"
 
-#include "{{namespace}}/GeneratedCodeIncludes.h"
+#include "backend/{{namespace}}/GeneratedCodeIncludes.h"
 
 namespace backend {
 namespace {{namespace}} {

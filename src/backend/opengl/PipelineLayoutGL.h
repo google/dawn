@@ -15,7 +15,7 @@
 #ifndef BACKEND_OPENGL_PIPELINELAYOUTGL_H_
 #define BACKEND_OPENGL_PIPELINELAYOUTGL_H_
 
-#include "common/PipelineLayout.h"
+#include "backend/PipelineLayout.h"
 
 #include "glad/glad.h"
 

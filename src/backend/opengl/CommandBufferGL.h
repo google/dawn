@@ -15,8 +15,8 @@
 #ifndef BACKEND_OPENGL_COMMANDBUFFERGL_H_
 #define BACKEND_OPENGL_COMMANDBUFFERGL_H_
 
-#include "common/CommandAllocator.h"
-#include "common/CommandBuffer.h"
+#include "backend/CommandAllocator.h"
+#include "backend/CommandBuffer.h"
 
 namespace backend {
 namespace opengl {

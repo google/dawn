@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/common)
+set(BACKEND_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(METAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/metal)
 set(NULL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/null)
 set(OPENGL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opengl)
@@ -20,52 +20,48 @@ set(D3D12_DIR ${CMAKE_CURRENT_SOURCE_DIR}/d3d12)
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 list(APPEND BACKEND_SOURCES
-    ${COMMON_DIR}/BindGroup.cpp
-    ${COMMON_DIR}/BindGroup.h
-    ${COMMON_DIR}/BindGroupLayout.cpp
-    ${COMMON_DIR}/BindGroupLayout.h
-    ${COMMON_DIR}/BitSetIterator.h
-    ${COMMON_DIR}/Builder.cpp
-    ${COMMON_DIR}/Builder.h
-    ${COMMON_DIR}/Buffer.cpp
-    ${COMMON_DIR}/Buffer.h
-    ${COMMON_DIR}/CommandAllocator.cpp
-    ${COMMON_DIR}/CommandAllocator.h
-    ${COMMON_DIR}/CommandBuffer.cpp
-    ${COMMON_DIR}/CommandBuffer.h
-    ${COMMON_DIR}/DepthStencilState.cpp
-    ${COMMON_DIR}/DepthStencilState.h
-    ${COMMON_DIR}/CommandBufferStateTracker.cpp
-    ${COMMON_DIR}/CommandBufferStateTracker.h
-    ${COMMON_DIR}/Device.cpp
-    ${COMMON_DIR}/Device.h
-    ${COMMON_DIR}/Forward.h
-    ${COMMON_DIR}/Framebuffer.cpp
-    ${COMMON_DIR}/Framebuffer.h
-    ${COMMON_DIR}/InputState.cpp
-    ${COMMON_DIR}/InputState.h
-    ${COMMON_DIR}/Math.cpp
-    ${COMMON_DIR}/Math.h
-    ${COMMON_DIR}/PerStage.cpp
-    ${COMMON_DIR}/PerStage.h
-    ${COMMON_DIR}/Pipeline.cpp
-    ${COMMON_DIR}/Pipeline.h
-    ${COMMON_DIR}/PipelineLayout.cpp
-    ${COMMON_DIR}/PipelineLayout.h
-    ${COMMON_DIR}/Queue.cpp
-    ${COMMON_DIR}/Queue.h
-    ${COMMON_DIR}/RenderPass.cpp
-    ${COMMON_DIR}/RenderPass.h
-    ${COMMON_DIR}/RefCounted.cpp
-    ${COMMON_DIR}/RefCounted.h
-    ${COMMON_DIR}/Sampler.cpp
-    ${COMMON_DIR}/Sampler.h
-    ${COMMON_DIR}/SerialQueue.h
-    ${COMMON_DIR}/ShaderModule.cpp
-    ${COMMON_DIR}/ShaderModule.h
-    ${COMMON_DIR}/Texture.cpp
-    ${COMMON_DIR}/Texture.h
-    ${COMMON_DIR}/ToBackend.h
+    ${BACKEND_DIR}/BindGroup.cpp
+    ${BACKEND_DIR}/BindGroup.h
+    ${BACKEND_DIR}/BindGroupLayout.cpp
+    ${BACKEND_DIR}/BindGroupLayout.h
+    ${BACKEND_DIR}/Builder.cpp
+    ${BACKEND_DIR}/Builder.h
+    ${BACKEND_DIR}/Buffer.cpp
+    ${BACKEND_DIR}/Buffer.h
+    ${BACKEND_DIR}/CommandAllocator.cpp
+    ${BACKEND_DIR}/CommandAllocator.h
+    ${BACKEND_DIR}/CommandBuffer.cpp
+    ${BACKEND_DIR}/CommandBuffer.h
+    ${BACKEND_DIR}/DepthStencilState.cpp
+    ${BACKEND_DIR}/DepthStencilState.h
+    ${BACKEND_DIR}/CommandBufferStateTracker.cpp
+    ${BACKEND_DIR}/CommandBufferStateTracker.h
+    ${BACKEND_DIR}/Device.cpp
+    ${BACKEND_DIR}/Device.h
+    ${BACKEND_DIR}/Forward.h
+    ${BACKEND_DIR}/Framebuffer.cpp
+    ${BACKEND_DIR}/Framebuffer.h
+    ${BACKEND_DIR}/InputState.cpp
+    ${BACKEND_DIR}/InputState.h
+    ${BACKEND_DIR}/PerStage.cpp
+    ${BACKEND_DIR}/PerStage.h
+    ${BACKEND_DIR}/Pipeline.cpp
+    ${BACKEND_DIR}/Pipeline.h
+    ${BACKEND_DIR}/PipelineLayout.cpp
+    ${BACKEND_DIR}/PipelineLayout.h
+    ${BACKEND_DIR}/Queue.cpp
+    ${BACKEND_DIR}/Queue.h
+    ${BACKEND_DIR}/RenderPass.cpp
+    ${BACKEND_DIR}/RenderPass.h
+    ${BACKEND_DIR}/RefCounted.cpp
+    ${BACKEND_DIR}/RefCounted.h
+    ${BACKEND_DIR}/Sampler.cpp
+    ${BACKEND_DIR}/Sampler.h
+    ${BACKEND_DIR}/ShaderModule.cpp
+    ${BACKEND_DIR}/ShaderModule.h
+    ${BACKEND_DIR}/Texture.cpp
+    ${BACKEND_DIR}/Texture.h
+    ${BACKEND_DIR}/ToBackend.h
 )
 
 # OpenGL Backend
@@ -79,7 +75,7 @@ Generate(
         -T opengl
 )
 target_link_libraries(opengl_autogen glfw glad nxtcpp)
-target_include_directories(opengl_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(opengl_autogen PRIVATE ${SRC_DIR})
 target_include_directories(opengl_autogen PUBLIC ${GENERATED_DIR})
 SetCXX14(opengl_autogen)
 SetPIC(opengl_autogen)
@@ -116,7 +112,7 @@ Generate(
 )
 target_link_libraries(null_autogen nxtcpp)
 target_include_directories(null_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(null_autogen PUBLIC ${GENERATED_DIR})
+target_include_directories(null_autogen PUBLIC ${SRC_DIR})
 SetCXX14(null_autogen)
 SetPIC(null_autogen)
 
@@ -137,7 +133,7 @@ if (APPLE)
             -T metal
     )
     target_link_libraries(metal_autogen glfw glad nxtcpp "-framework QuartzCore" "-framework Metal")
-    target_include_directories(metal_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(metal_autogen PRIVATE ${SRC_DIR})
     target_include_directories(metal_autogen PUBLIC ${GENERATED_DIR})
     SetCXX14(metal_autogen)
     SetPIC(metal_autogen)
@@ -231,7 +227,7 @@ if (WIN32)
 
     target_link_libraries(d3d12_autogen glfw nxtcpp ${D3D12_LIBRARIES})
     target_include_directories(d3d12_autogen SYSTEM PRIVATE ${D3D12_INCLUDE_DIR} ${DXGI_INCLUDE_DIR})
-    target_include_directories(d3d12_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(d3d12_autogen PRIVATE ${SRC_DIR})
     target_include_directories(d3d12_autogen PUBLIC ${GENERATED_DIR})
     SetCXX14(d3d12_autogen)
     SetPIC(d3d12_autogen)
@@ -274,12 +270,11 @@ endif()
 
 add_library(nxt_backend STATIC ${BACKEND_SOURCES})
 
-target_link_libraries(nxt_backend opengl_autogen null_autogen glfw glad spirv-cross)
+target_link_libraries(nxt_backend nxt_common opengl_autogen null_autogen glfw glad spirv-cross)
 if (APPLE)
     target_link_libraries(nxt_backend metal_autogen)
 endif()
 if (WIN32)
     target_link_libraries(nxt_backend d3d12_autogen)
 endif()
-target_include_directories(nxt_backend PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 SetCXX14(nxt_backend)

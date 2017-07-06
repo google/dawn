@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_BUFFERMTL_H_
 #define BACKEND_METAL_BUFFERMTL_H_
 
-#include "common/Buffer.h"
+#include "backend/Buffer.h"
 #include "common/SerialQueue.h"
 
 #import <Metal/Metal.h>

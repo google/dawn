@@ -15,7 +15,7 @@
 #ifndef BACKEND_D3D12_SHADERMODULED3D12_H_
 #define BACKEND_D3D12_SHADERMODULED3D12_H_
 
-#include "common/ShaderModule.h"
+#include "backend/ShaderModule.h"
 
 namespace backend {
 namespace d3d12 {

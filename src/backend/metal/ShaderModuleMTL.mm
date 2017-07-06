@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ShaderModuleMTL.h"
+#include "backend/metal/ShaderModuleMTL.h"
 
-#include "MetalBackend.h"
+#include "backend/metal/MetalBackend.h"
 
 #include <spirv-cross/spirv_msl.hpp>
 

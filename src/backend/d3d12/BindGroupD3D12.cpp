@@ -13,13 +13,13 @@
 // limitations under the License.
 
 #include "common/BitSetIterator.h"
-#include "BindGroupD3D12.h"
-#include "BindGroupLayoutD3D12.h"
-#include "BufferD3D12.h"
-#include "SamplerD3D12.h"
-#include "TextureD3D12.h"
+#include "backend/d3d12/BindGroupD3D12.h"
+#include "backend/d3d12/BindGroupLayoutD3D12.h"
+#include "backend/d3d12/BufferD3D12.h"
+#include "backend/d3d12/SamplerD3D12.h"
+#include "backend/d3d12/TextureD3D12.h"
 
-#include "D3D12Backend.h"
+#include "backend/d3d12/D3D12Backend.h"
 
 namespace backend {
 namespace d3d12 {

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "PipelineLayoutGL.h"
+#include "backend/opengl/PipelineLayoutGL.h"
 
-#include "OpenGLBackend.h"
+#include "backend/opengl/OpenGLBackend.h"
 
 namespace backend {
 namespace opengl {

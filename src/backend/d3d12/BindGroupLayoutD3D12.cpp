@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "BindGroupLayoutD3D12.h"
+#include "backend/d3d12/BindGroupLayoutD3D12.h"
 
 #include "common/BitSetIterator.h"
-#include "D3D12Backend.h"
+#include "backend/d3d12/D3D12Backend.h"
 
 namespace backend {
 namespace d3d12 {

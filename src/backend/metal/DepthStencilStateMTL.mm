@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "DepthStencilStateMTL.h"
+#include "backend/metal/DepthStencilStateMTL.h"
 
-#include "MetalBackend.h"
+#include "backend/metal/MetalBackend.h"
 
 namespace backend {
 namespace metal {

@@ -15,7 +15,7 @@
 #ifndef BACKEND_OPENGL_TEXTUREGL_H_
 #define BACKEND_OPENGL_TEXTUREGL_H_
 
-#include "common/Texture.h"
+#include "backend/Texture.h"
 
 #include "glad/glad.h"
 

@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "backend/common/SerialQueue.h"
+#include "common/SerialQueue.h"
 
 using SerialQueue = backend::SerialQueue<int>;
 

@@ -15,7 +15,7 @@
 #ifndef BACKEND_OPENGL_DEPTHSTENCILSTATEGL_H_
 #define BACKEND_OPENGL_DEPTHSTENCILSTATEGL_H_
 
-#include "common/DepthStencilState.h"
+#include "backend/DepthStencilState.h"
 
 namespace backend {
 namespace opengl {

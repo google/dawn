@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "CommandBufferGL.h"
+#include "backend/opengl/CommandBufferGL.h"
 
-#include "common/Commands.h"
-#include "OpenGLBackend.h"
-#include "PersistentPipelineStateGL.h"
-#include "PipelineGL.h"
-#include "PipelineLayoutGL.h"
-#include "SamplerGL.h"
-#include "TextureGL.h"
+#include "backend/Commands.h"
+#include "backend/opengl/OpenGLBackend.h"
+#include "backend/opengl/PersistentPipelineStateGL.h"
+#include "backend/opengl/PipelineGL.h"
+#include "backend/opengl/PipelineLayoutGL.h"
+#include "backend/opengl/SamplerGL.h"
+#include "backend/opengl/TextureGL.h"
 
 #include <cstring>
 

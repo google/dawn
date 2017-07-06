@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ValidationTest.h"
+#include "tests/unittests/validation/ValidationTest.h"
 
 class RenderPassValidationTest : public ValidationTest {
 };

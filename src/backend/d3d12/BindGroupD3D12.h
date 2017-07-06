@@ -15,11 +15,11 @@
 #ifndef BACKEND_D3D12_BINDGROUPD3D12_H_
 #define BACKEND_D3D12_BINDGROUPD3D12_H_
 
-#include "common/BindGroup.h"
+#include "backend/BindGroup.h"
 
-#include "d3d12_platform.h"
+#include "backend/d3d12/d3d12_platform.h"
 
-#include "DescriptorHeapAllocator.h"
+#include "backend/d3d12/DescriptorHeapAllocator.h"
 
 namespace backend {
 namespace d3d12 {

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "QueueD3D12.h"
+#include "backend/d3d12/QueueD3D12.h"
 
-#include "D3D12Backend.h"
-#include "CommandBufferD3D12.h"
+#include "backend/d3d12/D3D12Backend.h"
+#include "backend/d3d12/CommandBufferD3D12.h"
 
 namespace backend {
 namespace d3d12 {

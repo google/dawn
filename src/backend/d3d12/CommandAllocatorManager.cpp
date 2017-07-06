@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "CommandAllocatorManager.h"
+#include "backend/d3d12/CommandAllocatorManager.h"
 
-#include "D3D12Backend.h"
+#include "backend/d3d12/D3D12Backend.h"
 
 #include "common/BitSetIterator.h"
 
