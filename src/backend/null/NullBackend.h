@@ -41,7 +41,7 @@ namespace null {
     using BindGroupLayout = BindGroupLayoutBase;
     class Buffer;
     using BufferView = BufferViewBase;
-    using CommandBuffer = CommandBufferBase;
+    class CommandBuffer;
     using DepthStencilState = DepthStencilStateBase;
     class Device;
     using InputState = InputStateBase;
@@ -134,6 +134,17 @@ namespace null {
             void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
             std::unique_ptr<char[]> backingData;
+    };
+
+    class CommandBuffer : public CommandBufferBase {
+        public:
+            CommandBuffer(CommandBufferBuilder* builder);
+            ~CommandBuffer();
+
+            void Execute();
+
+        private:
+            CommandIterator commands;
     };
 
     class Queue : public QueueBase {

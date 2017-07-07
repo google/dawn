@@ -14,6 +14,8 @@
 
 #include "backend/null/NullBackend.h"
 
+#include "backend/Commands.h"
+
 #include <spirv-cross/spirv_cross.hpp>
 
 namespace backend {
@@ -36,46 +38,46 @@ namespace null {
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
-        return new BindGroupBase(builder);
+        return new BindGroup(builder);
     }
     BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
-        return new BindGroupLayoutBase(builder);
+        return new BindGroupLayout(builder);
     }
     BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
         return new Buffer(builder);
     }
     BufferViewBase* Device::CreateBufferView(BufferViewBuilder* builder) {
-        return new BufferViewBase(builder);
+        return new BufferView(builder);
     }
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
-        return new CommandBufferBase(builder);
+        return new CommandBuffer(builder);
     }
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
-        return new DepthStencilStateBase(builder);
+        return new DepthStencilState(builder);
     }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
-        return new InputStateBase(builder);
+        return new InputState(builder);
     }
     FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
-        return new FramebufferBase(builder);
+        return new Framebuffer(builder);
     }
     PipelineBase* Device::CreatePipeline(PipelineBuilder* builder) {
-        return new PipelineBase(builder);
+        return new Pipeline(builder);
     }
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
-        return new PipelineLayoutBase(builder);
+        return new PipelineLayout(builder);
     }
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(builder);
     }
     RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
-        return new RenderPassBase(builder);
+        return new RenderPass(builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
-        return new SamplerBase(builder);
+        return new Sampler(builder);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
-        auto module = new ShaderModuleBase(builder);
+        auto module = new ShaderModule(builder);
 
         spirv_cross::Compiler compiler(builder->AcquireSpirv());
         module->ExtractSpirvInfo(compiler);
@@ -86,7 +88,7 @@ namespace null {
         return new Texture(builder);
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
-        return new TextureViewBase(builder);
+        return new TextureView(builder);
     }
 
     void Device::TickImpl() {
@@ -155,6 +157,39 @@ namespace null {
     void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
     }
 
+    // CommandBuffer
+
+    CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
+        : CommandBufferBase(builder), commands(builder->AcquireCommands()) {
+    }
+
+    CommandBuffer::~CommandBuffer() {
+        FreeCommands(&commands);
+    }
+
+    void CommandBuffer::Execute() {
+        Command type;
+        while (commands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::TransitionBufferUsage:
+                    {
+                        TransitionBufferUsageCmd* cmd = commands.NextCommand<TransitionBufferUsageCmd>();
+                        cmd->buffer->UpdateUsageInternal(cmd->usage);
+                    }
+                    break;
+                case Command::TransitionTextureUsage:
+                    {
+                        TransitionTextureUsageCmd* cmd = commands.NextCommand<TransitionTextureUsageCmd>();
+                        cmd->texture->UpdateUsageInternal(cmd->usage);
+                    }
+                    break;
+                default:
+                    SkipCommand(&commands, type);
+                    break;
+            }
+        }
+    }
+
     // Queue
 
     Queue::Queue(QueueBuilder* builder)
@@ -169,6 +204,10 @@ namespace null {
 
         for (auto& operation : operations) {
             operation->Execute();
+        }
+
+        for (uint32_t i = 0; i < numCommands; ++i) {
+            commands[i]->Execute();
         }
 
         operations.clear();
