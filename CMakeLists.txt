@@ -15,31 +15,62 @@
 cmake_minimum_required(VERSION 2.8)
 project(nxt C CXX)
 
-function(SetCXX14 Target)
-    if(MSVC)
-        set_property(TARGET ${Target} APPEND PROPERTY COMPILE_OPTIONS "/std:c++14")
-    else()
-        set_property(TARGET ${Target} APPEND PROPERTY COMPILE_OPTIONS "-std=c++14")
-    endif()
-endfunction()
-function(SetPIC Target)
-    if(MSVC)
-    else()
-        set_property(TARGET ${Target} APPEND PROPERTY COMPILE_OPTIONS "-fPIC")
-    endif()
-endfunction()
+################################################################################
+# Configuration options
+################################################################################
+
+option(NXT_USE_WERROR "Treat warnings as error (useful for CI)" 0)
+
+################################################################################
+# Precompute compile flags and defines, functions to set them
+################################################################################
+
+set(NXT_FLAGS "")
+set(NXT_DEFS "")
+set(NXT_INTERNAL_FLAGS "")
+set(NXT_INTERNAL_DEFS "")
 
 if (WIN32)
-    # Define NOMINMAX to prevent conflics between std::min/max and the min/max macros in WinDef.h
-    add_definitions(-DNOMINMAX)
+    # Define NOMINMAX to prevent conflicts between std::min/max and the min/max macros in WinDef.h
+    list(APPEND NXT_DEFS "NOMINMAX")
     # Remove compile error where the mock NXT creates too many sections for the old obj format.
-    add_compile_options("/bigobj")
+    list(APPEND NXT_FLAGS "/bigobj")
 endif()
 
-add_subdirectory(third_party)
-add_subdirectory(generator)
+if (MSVC)
+    list(APPEND NXT_FLAGS "/std:c++14")
+else()
+    # Activate C++14 only on C++ files, not C files.
+    list(APPEND NXT_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-std=c++14>")
+    list(APPEND NXT_FLAGS "-fPIC")
+
+    list(APPEND NXT_INTERNAL_FLAGS "-Wall" "-Wextra")
+    list(APPEND NXT_GENERATED_FLAGS "-Wno-unused-variable")
+    if(NXT_USE_WERROR)
+        list(APPEND NXT_INTERNAL_FLAGS "-Werror")
+    endif()
+endif()
+
+function(NXTExternalTarget folder target)
+    set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${NXT_FLAGS})
+    set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${NXT_DEFS})
+    set_property(TARGET ${target} PROPERTY FOLDER ${folder})
+endfunction()
+
+function(NXTInternalTarget folder target)
+    NXTExternalTarget("${folder}" ${target})
+    set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${NXT_INTERNAL_FLAGS})
+    set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${NXT_INTERNAL_DEFS})
+endfunction()
+
+################################################################################
+# Generate the C and C++ NXT APIs
+################################################################################
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+add_subdirectory(generator)
 
 Generate(
     LIB_NAME nxt
@@ -61,21 +92,12 @@ Generate(
 )
 target_include_directories(nxtcpp PUBLIC ${GENERATED_DIR} PUBLIC ${INCLUDE_DIR})
 target_link_libraries(nxtcpp nxt)
-SetCXX14(nxtcpp)
 
-Generate(
-    LIB_NAME mock_nxt
-    LIB_TYPE STATIC
-    PRINT_NAME libMockNXT
-    COMMAND_LINE_ARGS
-        ${GENERATOR_COMMON_ARGS}
-        -T mock_nxt
-)
-target_include_directories(mock_nxt PUBLIC ${GENERATED_DIR})
-target_link_libraries(mock_nxt nxt gtest)
-SetCXX14(mock_nxt)
+################################################################################
+# Call to other CMakeLists.txt
+################################################################################
 
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_subdirectory(third_party)
 
 add_subdirectory(src/common)
 add_subdirectory(src/backend)

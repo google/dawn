@@ -24,4 +24,4 @@ list(APPEND COMMON_SOURCES
 
 add_library(nxt_common STATIC ${COMMON_SOURCES})
 target_include_directories(nxt_common PUBLIC ${SRC_DIR})
-SetCXX14(nxt_common)
+NXTInternalTarget("src" nxt_common)

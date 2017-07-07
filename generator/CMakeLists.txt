@@ -26,7 +26,7 @@ if (NOT RET EQUAL 0)
 endif()
 
 function(Generate)
-    set(oneValueArgs LIB_NAME LIB_TYPE PRINT_NAME EXECUTABLE)
+    set(oneValueArgs LIB_NAME LIB_TYPE PRINT_NAME EXECUTABLE FOLDER)
     set(multiValueArgs COMMAND_LINE_ARGS EXTRA_DEPS EXTRA_SOURCES)
     cmake_parse_arguments(G "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -60,6 +60,12 @@ function(Generate)
         ${G_EXTRA_SOURCES}
         ${OUTPUTS}
     )
+
+    NXTInternalTarget("${G_FOLDER}" ${G_LIB_NAME})
+    if (NOT MSVC)
+        target_compile_options(${G_LIB_NAME} PRIVATE "-Wno-unused-variable")
+        target_compile_options(${G_LIB_NAME} PRIVATE "-Wno-unused-function")
+    endif()
 endfunction()
 
 set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)

@@ -12,6 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+Generate(
+    LIB_NAME mock_nxt
+    LIB_TYPE STATIC
+    FOLDER "tests"
+    PRINT_NAME libMockNXT
+    COMMAND_LINE_ARGS
+        ${GENERATOR_COMMON_ARGS}
+        -T mock_nxt
+)
+target_include_directories(mock_nxt PUBLIC ${GENERATED_DIR})
+target_link_libraries(mock_nxt nxt gtest)
+
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UNITTESTS_DIR ${TESTS_DIR}/unittests)
 set(VALIDATION_TESTS_DIR ${UNITTESTS_DIR}/validation)
@@ -42,7 +54,7 @@ add_executable(nxt_unittests
     ${TESTS_DIR}/UnittestsMain.cpp
 )
 target_link_libraries(nxt_unittests nxt_common gtest nxt_backend mock_nxt nxt_wire utils)
-SetCXX14(nxt_unittests)
+NXTInternalTarget("tests" nxt_unittests)
 
 add_executable(nxt_end2end_tests
     ${END2END_TESTS_DIR}/BasicTests.cpp
@@ -52,4 +64,4 @@ add_executable(nxt_end2end_tests
     ${TESTS_DIR}/NXTTest.h
 )
 target_link_libraries(nxt_end2end_tests nxt_common gtest utils)
-SetCXX14(nxt_end2end_tests)
+NXTInternalTarget("tests" nxt_end2end_tests)
