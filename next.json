@@ -496,15 +496,6 @@
                 "name": "tick"
             },
             {
-                "name": "copy bind groups",
-                "args": [
-                    {"name": "start", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "source", "type": "bind group"},
-                    {"name": "target", "type": "bind group"}
-                ]
-            },
-            {
                 "name": "set error callback",
                 "args": [
                     {"name": "callback", "type": "device error callback"},

@@ -134,10 +134,6 @@ namespace backend {
         TickImpl();
     }
 
-    void DeviceBase::CopyBindGroups(uint32_t start, uint32_t count, BindGroupBase* source, BindGroupBase* target) {
-        // TODO(cwallez@chromium.org): update state tracking then call the backend
-    }
-
     void DeviceBase::Reference() {
         ASSERT(refCount != 0);
         refCount++;
