@@ -21,7 +21,7 @@ namespace backend {
 namespace d3d12 {
 
     namespace {
-        D3D12_RESOURCE_STATES D3D12TextureUsage(nxt::TextureUsageBit usage) {
+        D3D12_RESOURCE_STATES D3D12TextureUsage(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
             if (usage & nxt::TextureUsageBit::TransferSrc) {
@@ -36,27 +36,27 @@ namespace d3d12 {
             if (usage & nxt::TextureUsageBit::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
-            if (usage & nxt::TextureUsageBit::ColorAttachment) {
+            if (usage & nxt::TextureUsageBit::OutputAttachment) {
                 resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;
-            }
-            if (usage & nxt::TextureUsageBit::DepthStencilAttachment) {
-                resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
+                if (TextureBase::IsDepthFormat(format)) {
+                    resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
+                }
             }
 
             return resourceState;
         }
 
-        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(nxt::TextureUsageBit usage) {
+        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
             if (usage & nxt::TextureUsageBit::Storage) {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
             }
-            if (usage & nxt::TextureUsageBit::ColorAttachment) {
+            if (usage & nxt::TextureUsageBit::OutputAttachment) {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-            }
-            if (usage & nxt::TextureUsageBit::DepthStencilAttachment) {
-                flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+                if (TextureBase::IsDepthFormat(format)) {
+                    flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+                }
             }
 
             return flags;
@@ -91,9 +91,9 @@ namespace d3d12 {
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage());
+        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage(), GetFormat());
 
-        resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12TextureUsage(GetUsage()));
+        resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12TextureUsage(GetUsage(), GetFormat()));
     }
 
     Texture::~Texture() {
@@ -109,8 +109,8 @@ namespace d3d12 {
     }
 
     bool Texture::GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier) {
-        D3D12_RESOURCE_STATES stateBefore = D3D12TextureUsage(currentUsage);
-        D3D12_RESOURCE_STATES stateAfter = D3D12TextureUsage(targetUsage);
+        D3D12_RESOURCE_STATES stateBefore = D3D12TextureUsage(currentUsage, GetFormat());
+        D3D12_RESOURCE_STATES stateAfter = D3D12TextureUsage(targetUsage, GetFormat());
 
         if (stateBefore == stateAfter) {
             return false;

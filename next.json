@@ -921,8 +921,7 @@
             {"value": 2, "name": "transfer dst"},
             {"value": 4, "name": "sampled"},
             {"value": 8, "name": "storage"},
-            {"value": 16, "name": "color attachment"},
-            {"value": 32, "name": "depth stencil attachment"}
+            {"value": 16, "name": "output attachment"}
         ]
     },
     "texture view": {

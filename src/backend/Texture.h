@@ -43,6 +43,8 @@ namespace backend {
             bool IsTransitionPossible(nxt::TextureUsageBit usage) const;
             void UpdateUsageInternal(nxt::TextureUsageBit usage);
 
+            static bool IsDepthFormat(nxt::TextureFormat format);
+
             DeviceBase* GetDevice();
 
             // NXT API

@@ -92,6 +92,13 @@ namespace backend {
         currentUsage = usage;
     }
 
+    bool TextureBase::IsDepthFormat(nxt::TextureFormat format) {
+        switch (format) {
+            case nxt::TextureFormat::R8G8B8A8Unorm:
+                return false;
+        }
+    }
+
     void TextureBase::TransitionUsage(nxt::TextureUsageBit usage) {
         if (!IsTransitionPossible(usage)) {
             device->HandleError("Texture frozen or usage not allowed");

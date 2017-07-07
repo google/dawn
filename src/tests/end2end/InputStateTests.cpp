@@ -48,8 +48,8 @@ class InputStateTest : public NXTTest {
                 .SetExtent(kRTSize, kRTSize, 1)
                 .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
                 .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::ColorAttachment | nxt::TextureUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::TextureUsageBit::ColorAttachment)
+                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
+                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
                 .GetResult();
 
             renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
