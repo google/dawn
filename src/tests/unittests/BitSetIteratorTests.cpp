@@ -53,6 +53,7 @@ TEST_F(BitSetIteratorTest, EmptySet) {
     // causing an unreachable code warning in MSVS
     bool sawBit = false;
     for (unsigned long bit : IterateBitSet(mStateBits)) {
+        (void) bit;
         sawBit = true;
     }
     EXPECT_FALSE(sawBit);

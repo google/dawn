@@ -179,7 +179,7 @@ class InputStateTest : public NXTTest {
             uint32_t location;
             nxt::Buffer* buffer;
         };
-        void DoTestDraw(const nxt::Pipeline& pipeline, int triangles, int instances, std::vector<DrawVertexBuffer> vertexBuffers) {
+        void DoTestDraw(const nxt::Pipeline& pipeline, unsigned int triangles, unsigned int instances, std::vector<DrawVertexBuffer> vertexBuffers) {
             EXPECT_LE(triangles, 4);
             EXPECT_LE(instances, 4);
 

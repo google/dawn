@@ -78,7 +78,7 @@ namespace metal {
         return mtlTexture;
     }
 
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
     TextureView::TextureView(TextureViewBuilder* builder)

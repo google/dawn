@@ -53,7 +53,7 @@ namespace metal {
         uploader->BufferSubData(mtlBuffer, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t) {
         MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadTracker();
         tracker->Track(this, serial, start);
     }
@@ -62,7 +62,7 @@ namespace metal {
         // Nothing to do, Metal StorageModeShared buffers are always mapped.
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
     }
 
     BufferView::BufferView(BufferViewBuilder* builder)

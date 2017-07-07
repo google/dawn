@@ -280,6 +280,10 @@ namespace detail {
             return type == MetalBackend;
         #elif defined(_WIN32)
             return type == D3D12Backend;
+        #elif __linux__
+            // Temporarily silence a warning while Linux doesn't have a backend that can be tested.
+            (void) type;
+            return false;
         #else
             return false;
         #endif

@@ -148,7 +148,7 @@ namespace null {
     void Buffer::UnmapImpl() {
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
     }
 
     // CommandBuffer
@@ -193,7 +193,7 @@ namespace null {
     Queue::~Queue() {
     }
 
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
+    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
         auto operations = ToBackend(GetDevice())->AcquirePendingOperations();
 
         for (auto& operation : operations) {
@@ -216,7 +216,7 @@ namespace null {
     Texture::~Texture() {
     }
 
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
 }

@@ -20,7 +20,7 @@ namespace backend {
 
     // SamplerBase
 
-    SamplerBase::SamplerBase(SamplerBuilder* builder) {
+    SamplerBase::SamplerBase(SamplerBuilder*) {
     }
 
     // SamplerBuilder

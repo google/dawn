@@ -215,7 +215,7 @@ namespace metal {
         // so this-> works as expected. However it is unclear how members are captured, (are they
         // captured using this-> or by value?) so we make a copy of the pendingCommandSerial on the stack.
         Serial pendingSerial = pendingCommandSerial;
-        [pendingCommands addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
+        [pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
             this->finishedCommandSerial = pendingSerial;
         }];
 

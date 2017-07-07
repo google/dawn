@@ -123,7 +123,7 @@ namespace opengl {
 
                 case Command::CopyTextureToBuffer:
                     {
-                        CopyTextureToBufferCmd* copy = commands.NextCommand<CopyTextureToBufferCmd>();
+                        commands.NextCommand<CopyTextureToBufferCmd>();
                         // TODO(cwallez@chromium.org): implement using a temporary FBO and ReadPixels
                     }
                     break;

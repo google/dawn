@@ -69,7 +69,7 @@ namespace backend {
             return true;
         }
 
-        bool ComputeTextureCopyBufferSize(CommandBufferBuilder* builder, const TextureCopyLocation& location, uint32_t* bufferSize) {
+        bool ComputeTextureCopyBufferSize(CommandBufferBuilder*, const TextureCopyLocation& location, uint32_t* bufferSize) {
             // TODO(cwallez@chromium.org): check for overflows
             uint32_t pixelSize = TextureFormatPixelSize(location.texture->GetFormat());
             *bufferSize = location.width * location.height * location.depth * pixelSize;
@@ -503,7 +503,7 @@ namespace backend {
 
                 case Command::SetStencilReference:
                     {
-                        SetStencilReferenceCmd* cmd = iterator.NextCommand<SetStencilReferenceCmd>();
+                        iterator.NextCommand<SetStencilReferenceCmd>();
                         if (!state->HaveRenderPass()) {
                             HandleError("Can't set stencil reference without an active render pass");
                             return false;

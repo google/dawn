@@ -130,7 +130,7 @@ namespace opengl {
         glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+    void Buffer::MapReadAsyncImpl(uint32_t, uint32_t, uint32_t) {
         // TODO(cwallez@chromium.org): Implement Map Read for the GL backend
     }
 
@@ -138,7 +138,7 @@ namespace opengl {
         // TODO(cwallez@chromium.org): Implement Map Read for the GL backend
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
     }
 
     // BufferView

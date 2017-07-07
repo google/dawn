@@ -76,7 +76,7 @@ namespace opengl {
         return GetGLFormatInfo(GetFormat());
     }
 
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
     // TextureView

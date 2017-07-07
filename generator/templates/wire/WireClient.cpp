@@ -373,10 +373,10 @@ namespace wire {
             ClientBufferUnmap(buffer);
         }
 
-        void ClientDeviceReference(Device* self) {
+        void ClientDeviceReference(Device*) {
         }
 
-        void ClientDeviceRelease(Device* self) {
+        void ClientDeviceRelease(Device*) {
         }
 
         void ClientDeviceSetErrorCallback(Device* self, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) {

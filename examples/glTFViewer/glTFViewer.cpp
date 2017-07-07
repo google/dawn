@@ -164,7 +164,6 @@ namespace {
 
         const auto& iMaterial = scene.materials.at(iMaterialID);
         const auto& iTechnique = scene.techniques.at(iMaterial.technique);
-        const auto& iProgram = scene.programs.at(iTechnique.program);
 
         auto oVSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
             #version 450
@@ -504,7 +503,6 @@ namespace {
             uint32_t vertexCount = 0;
             for (const auto& s : slotSemantics) {
                 uint32_t slot = s.first;
-                const auto& iSemantic = s.second;
                 auto it = iPrim.attributes.find(s.second);
                 if (it == iPrim.attributes.end()) {
                     uint32_t zero = 0;
@@ -589,11 +587,11 @@ namespace {
 namespace {
     bool buttons[GLFW_MOUSE_BUTTON_LAST + 1] = {0};
 
-    void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+    void mouseButtonCallback(GLFWwindow*, int button, int action, int) {
         buttons[button] = (action == GLFW_PRESS);
     }
 
-    void cursorPosCallback(GLFWwindow *window, double mouseX, double mouseY) {
+    void cursorPosCallback(GLFWwindow*, double mouseX, double mouseY) {
         static float oldX, oldY;
         float dX = mouseX - oldX;
         float dY = mouseY - oldY;
@@ -609,7 +607,7 @@ namespace {
         }
     }
 
-    void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+    void scrollCallback(GLFWwindow*, double, double yoffset) {
         camera.zoom(yoffset * 0.04);
     }
 }

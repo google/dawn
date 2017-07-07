@@ -46,6 +46,7 @@ namespace backend {
 
             PipelineLayoutBase* GetLayout();
             RenderPassBase* GetRenderPass();
+            uint32_t GetSubPass();
             InputStateBase* GetInputState();
             DepthStencilStateBase* GetDepthStencilState();
 

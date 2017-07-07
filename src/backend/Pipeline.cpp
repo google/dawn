@@ -97,6 +97,10 @@ namespace backend {
         return renderPass.Get();
     }
 
+    uint32_t PipelineBase::GetSubPass() {
+        return subpass;
+    }
+
     InputStateBase* PipelineBase::GetInputState() {
         return inputState.Get();
     }

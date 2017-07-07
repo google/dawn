@@ -128,7 +128,7 @@ class WireTests : public WireTestsBase {
 
 // One call gets forwarded correctly.
 TEST_F(WireTests, CallForwarded) {
-    nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
+    nxtDeviceCreateCommandBufferBuilder(device);
 
     nxtCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
     EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
@@ -140,7 +140,7 @@ TEST_F(WireTests, CallForwarded) {
 // Test that calling methods on a new object works as expected.
 TEST_F(WireTests, CreateThenCall) {
     nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
-    nxtCommandBuffer cmdBuf = nxtCommandBufferBuilderGetResult(builder);
+    nxtCommandBufferBuilderGetResult(builder);
 
     nxtCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
     EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
@@ -350,7 +350,7 @@ TEST_F(WireTests, CallsSkippedAfterBuilderError) {
     // These calls will be skipped because of the error
     nxtBufferTransitionUsage(buffer, NXT_BUFFER_USAGE_BIT_UNIFORM);
     nxtCommandBufferBuilderTransitionBufferUsage(cmdBufBuilder, buffer, NXT_BUFFER_USAGE_BIT_UNIFORM);
-    nxtCommandBuffer cmdBuf = nxtCommandBufferBuilderGetResult(cmdBufBuilder);
+    nxtCommandBufferBuilderGetResult(cmdBufBuilder);
 
     nxtCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
     EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
@@ -383,7 +383,7 @@ TEST_F(WireTests, CallsSkippedAfterBuilderError) {
 TEST_F(WireTests, SuccessCallbackOnBuilderSuccess) {
     nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
     nxtBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 1, 2);
-    nxtBuffer buffer = nxtBufferBuilderGetResult(bufferBuilder);
+    nxtBufferBuilderGetResult(bufferBuilder);
 
     nxtBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
     EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
@@ -420,7 +420,7 @@ TEST_F(WireTests, UnknownBuilderErrorStatusCallback) {
     {
         nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
         nxtBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 3, 4);
-        nxtBuffer buffer = nxtBufferBuilderGetResult(bufferBuilder);
+        nxtBufferBuilderGetResult(bufferBuilder);
 
         EXPECT_CALL(*mockBuilderErrorCallback, Call(NXT_BUILDER_ERROR_STATUS_UNKNOWN, _ , 3, 4)).Times(0);
 
@@ -485,7 +485,7 @@ TEST_F(WireSetCallbackTests, BuilderErrorCallback) {
     FlushClient();
 
     // Create an object so that it is a valid case to call the error callback
-    nxtBuffer buffer = nxtBufferBuilderGetResult(bufferBuilder);
+    nxtBufferBuilderGetResult(bufferBuilder);
 
     nxtBuffer apiBuffer = api.GetNewBuffer();
     EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
