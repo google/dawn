@@ -26,7 +26,7 @@
 #include "backend/d3d12/SamplerD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
 
-#include "ResourceAllocator.h"
+#include "backend/d3d12/ResourceAllocator.h"
 
 namespace backend {
 namespace d3d12 {
