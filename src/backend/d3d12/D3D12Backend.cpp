@@ -101,6 +101,10 @@ namespace d3d12 {
     }
 
     Device::~Device() {
+        // Wait for all in-flight commands to finish exeuting
+        const uint64_t currentSerial = GetSerial();
+        NextSerial();
+        WaitForSerial(currentSerial);
     }
 
     ComPtr<ID3D12Device> Device::GetD3D12Device() {
