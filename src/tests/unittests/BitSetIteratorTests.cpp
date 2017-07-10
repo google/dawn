@@ -18,8 +18,6 @@
 
 // This is ANGLE's BitSetIterator_unittests.cpp file.
 
-using namespace backend;
-
 class BitSetIteratorTest : public testing::Test {
     protected:
         std::bitset<40> mStateBits;

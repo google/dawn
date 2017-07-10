@@ -15,7 +15,8 @@
 #include "wire/Wire.h"
 #include "wire/WireCmd.h"
 
-#include <cassert>
+#include "common/Assert.h"
+
 #include <cstring>
 #include <vector>
 
@@ -113,7 +114,7 @@ namespace wire {
 
                 //* Marks an ID as deallocated
                 void Free(uint32_t id) {
-                    assert(id < known.size());
+                    ASSERT(id < known.size());
                     known[id].allocated = false;
                 }
 
@@ -167,7 +168,7 @@ namespace wire {
                         if (status != NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
                             //* Unknown is the only status that can be returned without a call to GetResult
                             //* so we are guaranteed to have created an object.
-                            assert(builder->builtObjectId != 0);
+                            ASSERT(builder->builtObjectId != 0);
 
                             Return{{Type}}ErrorCallbackCmd cmd;
                             cmd.builtObjectId = builder->builtObjectId;

@@ -16,11 +16,11 @@
 
 #include "common/SerialQueue.h"
 
-using SerialQueue = backend::SerialQueue<int>;
+using TestSerialQueue = SerialQueue<int>;
 
 // A number of basic tests for SerialQueue that are difficult to split from one another
 TEST(SerialQueue, BasicTest) {
-    SerialQueue queue;
+    TestSerialQueue queue;
 
     // Queue starts empty
     ASSERT_TRUE(queue.Empty());
@@ -57,7 +57,7 @@ TEST(SerialQueue, BasicTest) {
 
 // Test enqueuing vectors works
 TEST(SerialQueue, EnqueueVectors) {
-    SerialQueue queue;
+    TestSerialQueue queue;
 
     std::vector<int> vector1 = {1, 2, 3, 4};
     std::vector<int> vector2 = {5, 6, 7, 8};
@@ -78,7 +78,7 @@ TEST(SerialQueue, EnqueueVectors) {
 
 // Test IterateUpTo
 TEST(SerialQueue, IterateUpTo) {
-    SerialQueue queue;
+    TestSerialQueue queue;
 
     std::vector<int> vector1 = {1, 2, 3, 4};
     std::vector<int> vector2 = {5, 6, 7, 8};
@@ -99,7 +99,7 @@ TEST(SerialQueue, IterateUpTo) {
 
 // Test ClearUpTo
 TEST(SerialQueue, ClearUpTo) {
-    SerialQueue queue;
+    TestSerialQueue queue;
 
     std::vector<int> vector1 = {1, 2, 3, 4};
     std::vector<int> vector2 = {5, 6, 7, 8};
@@ -122,7 +122,7 @@ TEST(SerialQueue, ClearUpTo) {
 
 // Test FirstSerial
 TEST(SerialQueue, FirstSerial) {
-    SerialQueue queue;
+    TestSerialQueue queue;
 
     std::vector<int> vector1 = {1, 2, 3, 4};
     std::vector<int> vector2 = {5, 6, 7, 8};

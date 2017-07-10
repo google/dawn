@@ -15,6 +15,7 @@
 #include "backend/Builder.h"
 
 #include "backend/Device.h"
+#include "common/Assert.h"
 
 namespace backend {
 

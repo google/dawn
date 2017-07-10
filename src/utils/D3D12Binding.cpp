@@ -14,17 +14,16 @@
 
 #include "utils/BackendBinding.h"
 
+#include "common/Assert.h"
+
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
-#include <cassert>
 #include <initializer_list>
 #include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
-
-#define ASSERT assert
 
 using Microsoft::WRL::ComPtr;
 
@@ -229,7 +228,7 @@ namespace utils {
             ComPtr<ID3D12GraphicsCommandList> commandList;
 
             static void ASSERT_SUCCESS(HRESULT hr) {
-                assert(SUCCEEDED(hr));
+                ASSERT(SUCCEEDED(hr));
             }
 
             static bool GetHardwareAdapter(IDXGIFactory4* factory, IDXGIAdapter1** hardwareAdapter) {

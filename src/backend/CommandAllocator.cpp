@@ -14,13 +14,12 @@
 
 #include "backend/CommandAllocator.h"
 
+#include "common/Assert.h"
 #include "common/Math.h"
 
 #include <algorithm>
-#include <cassert>
 #include <climits>
 #include <cstdlib>
-#define ASSERT assert
 
 namespace backend {
 

@@ -15,14 +15,13 @@
 #ifndef BACKEND_PERSTAGE_H_
 #define BACKEND_PERSTAGE_H_
 
+#include "common/Assert.h"
 #include "common/BitSetIterator.h"
 #include "common/Constants.h"
 
 #include "nxt/nxtcpp.h"
 
 #include <array>
-#include <cassert>
-#define ASSERT assert
 
 namespace backend {
 
@@ -43,22 +42,22 @@ namespace backend {
     class PerStage {
         public:
             T& operator[](nxt::ShaderStage stage) {
-                ASSERT(static_cast<uint32_t>(stage) < kNumStages);
+                NXT_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
                 return data[static_cast<uint32_t>(stage)];
             }
             const T& operator[](nxt::ShaderStage stage) const {
-                ASSERT(static_cast<uint32_t>(stage) < kNumStages);
+                NXT_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
                 return data[static_cast<uint32_t>(stage)];
             }
 
             T& operator[](nxt::ShaderStageBit stageBit) {
                 uint32_t bit = static_cast<uint32_t>(stageBit);
-                ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
+                NXT_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
                 return data[Log2(bit)];
             }
             const T& operator[](nxt::ShaderStageBit stageBit) const {
                 uint32_t bit = static_cast<uint32_t>(stageBit);
-                ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
+                NXT_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
                 return data[Log2(bit)];
             }
 

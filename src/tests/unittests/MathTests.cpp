@@ -16,8 +16,6 @@
 
 #include "common/Math.h"
 
-using namespace backend;
-
 // Tests for ScanForward
 TEST(Math, ScanForward) {
     // Test extrema

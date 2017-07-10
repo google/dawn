@@ -15,6 +15,7 @@
 #include "backend/Buffer.h"
 
 #include "backend/Device.h"
+#include "common/Assert.h"
 
 #include <utility>
 #include <cstdio>
@@ -146,7 +147,7 @@ namespace backend {
     }
 
     void BufferBase::UpdateUsageInternal(nxt::BufferUsageBit usage) {
-        assert(IsTransitionPossible(usage));
+        ASSERT(IsTransitionPossible(usage));
         currentUsage = usage;
     }
 

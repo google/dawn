@@ -17,6 +17,7 @@
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/ResourceUploader.h"
+#include "common/Assert.h"
 
 namespace backend {
 namespace d3d12 {

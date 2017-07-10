@@ -18,6 +18,7 @@
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/ShaderModuleD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
+#include "common/Assert.h"
 
 #include <d3dcompiler.h>
 

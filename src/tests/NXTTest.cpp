@@ -14,12 +14,10 @@
 
 #include "tests/NXTTest.h"
 
+#include "common/Assert.h"
 #include "utils/BackendBinding.h"
 
 #include "GLFW/glfw3.h"
-
-#include <cassert>
-#define ASSERT assert
 
 namespace {
 
@@ -34,7 +32,7 @@ namespace {
             case VulkanBackend:
                 return utils::BackendType::Vulkan;
             default:
-                ASSERT(false);
+                NXT_ASSERT(false);
                 return utils::BackendType::Null;
         }
     }
@@ -50,7 +48,7 @@ namespace {
             case VulkanBackend:
                 return "Vulkan";
             default:
-                ASSERT(false);
+                NXT_ASSERT(false);
                 return "";
         }
     }
@@ -107,10 +105,10 @@ NXTTest::~NXTTest() {
 
 void NXTTest::SetUp() {
     binding = utils::CreateBinding(ParamToBackendType(GetParam()));
-    ASSERT(binding != nullptr);
+    NXT_ASSERT(binding != nullptr);
 
     GLFWwindow* testWindow = GetWindowForBackend(binding, GetParam());
-    ASSERT(testWindow != nullptr);
+    NXT_ASSERT(testWindow != nullptr);
 
     binding->SetWindow(testWindow);
 
@@ -231,7 +229,7 @@ void NXTTest::MapSlotsSynchronously() {
 
 // static
 void NXTTest::SlotMapReadCallback(nxtBufferMapReadStatus status, const void* data, nxtCallbackUserdata userdata_) {
-    ASSERT(status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS);
+    NXT_ASSERT(status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS);
 
     auto userdata = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata_));
     userdata->test->readbackSlots[userdata->slot].mappedData = data;
@@ -242,7 +240,7 @@ void NXTTest::SlotMapReadCallback(nxtBufferMapReadStatus status, const void* dat
 
 void NXTTest::ResolveExpectations() {
     for(const auto& expectation : deferredExpectations) {
-        ASSERT(readbackSlots[expectation.readbackSlot].mappedData != nullptr);
+        NXT_ASSERT(readbackSlots[expectation.readbackSlot].mappedData != nullptr);
 
         // Get a pointer to the mapped copy of the data for the expectation.
         const char* data = reinterpret_cast<const char*>(readbackSlots[expectation.readbackSlot].mappedData);
@@ -314,7 +312,7 @@ namespace detail {
 
     template<typename T>
     testing::AssertionResult ExpectEq<T>::Check(const void* data, size_t size) {
-        ASSERT(size == sizeof(T) * expected.size());
+        NXT_ASSERT(size == sizeof(T) * expected.size());
 
         const T* actual = reinterpret_cast<const T*>(data);
         for (size_t i = 0; i < expected.size(); ++i) {

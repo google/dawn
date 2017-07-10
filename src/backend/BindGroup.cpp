@@ -18,6 +18,7 @@
 #include "backend/Buffer.h"
 #include "backend/Device.h"
 #include "backend/Texture.h"
+#include "common/Assert.h"
 
 namespace backend {
 

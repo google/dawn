@@ -15,7 +15,10 @@
 set(COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 list(APPEND COMMON_SOURCES
+    ${COMMON_DIR}/Assert.cpp
+    ${COMMON_DIR}/Assert.h
     ${COMMON_DIR}/BitSetIterator.h
+    ${COMMON_DIR}/Compiler.h
     ${COMMON_DIR}/Math.cpp
     ${COMMON_DIR}/Math.h
     ${COMMON_DIR}/Serial.h

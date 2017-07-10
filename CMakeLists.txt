@@ -30,6 +30,10 @@ set(NXT_DEFS "")
 set(NXT_INTERNAL_FLAGS "")
 set(NXT_INTERNAL_DEFS "")
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    list(APPEND NXT_DEFS "NXT_ENABLE_ASSERTS")
+endif()
+
 if (WIN32)
     # Define NOMINMAX to prevent conflicts between std::min/max and the min/max macros in WinDef.h
     list(APPEND NXT_DEFS "NOMINMAX")

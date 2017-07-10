@@ -15,13 +15,13 @@
 #include "wire/Wire.h"
 #include "wire/WireCmd.h"
 
-#include <cassert>
-#include <cstring>
-#include <memory>
-#include <vector>
+#include "common/Assert.h"
 
+#include <cstring>
 #include <iostream>
 #include <map>
+#include <memory>
+#include <vector>
 
 namespace nxt {
 namespace wire {
@@ -139,10 +139,10 @@ namespace wire {
                     auto object = std::unique_ptr<T>(result);
 
                     if (id >= objects.size()) {
-                        assert(id == objects.size());
+                        ASSERT(id == objects.size());
                         objects.emplace_back(std::move(object), 0);
                     } else {
-                        assert(objects[id].object == nullptr);
+                        ASSERT(objects[id].object == nullptr);
                         //* TODO(cwallez@chromium.org): investigate if overflows could cause bad things to happen
                         objects[id].serial++;
                         objects[id].object = std::move(object);
@@ -337,7 +337,7 @@ namespace wire {
 
         void ClientBufferMapReadAsync(Buffer* buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
             uint32_t serial = buffer->readRequestSerial++;
-            assert(buffer->readRequests.find(serial) == buffer->readRequests.end());
+            ASSERT(buffer->readRequests.find(serial) == buffer->readRequests.end());
 
             Buffer::MapReadRequestData request;
             request.callback = callback;

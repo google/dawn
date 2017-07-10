@@ -14,8 +14,7 @@
 
 #include "backend/RefCounted.h"
 
-#include <cassert>
-#define ASSERT assert
+#include "common/Assert.h"
 
 namespace backend {
 

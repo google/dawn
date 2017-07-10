@@ -15,6 +15,7 @@
 #include "backend/Texture.h"
 
 #include "backend/Device.h"
+#include "common/Assert.h"
 
 namespace backend {
 
@@ -88,7 +89,7 @@ namespace backend {
     }
 
     void TextureBase::UpdateUsageInternal(nxt::TextureUsageBit usage) {
-        assert(IsTransitionPossible(usage));
+        ASSERT(IsTransitionPossible(usage));
         currentUsage = usage;
     }
 

@@ -16,6 +16,7 @@
 
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
+#include "common/Assert.h"
 
 using Microsoft::WRL::ComPtr;
 

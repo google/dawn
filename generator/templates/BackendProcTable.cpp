@@ -15,6 +15,8 @@
 #include "nxt/nxt.h"
 #include "nxt/nxtcpp.h"
 
+#include "common/Assert.h"
+
 #include "backend/{{namespace}}/GeneratedCodeIncludes.h"
 
 namespace backend {
@@ -150,7 +152,7 @@ namespace {{namespace}} {
                         if (!valid) {
                             {{as_backendType(method.return_type)}} fakeResult = nullptr;
                             bool shouldBeFalse = self->HandleResult(fakeResult);
-                            assert(shouldBeFalse == false);
+                            ASSERT(shouldBeFalse == false);
                         }
                     {% endif %}
 

@@ -17,19 +17,19 @@
 #include "backend/d3d12/BindGroupD3D12.h"
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
 #include "backend/d3d12/BufferD3D12.h"
+#include "backend/d3d12/CommandAllocatorManager.h"
 #include "backend/d3d12/CommandBufferD3D12.h"
+#include "backend/d3d12/DescriptorHeapAllocator.h"
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/PipelineD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/QueueD3D12.h"
+#include "backend/d3d12/ResourceAllocator.h"
+#include "backend/d3d12/ResourceUploader.h"
 #include "backend/d3d12/SamplerD3D12.h"
 #include "backend/d3d12/ShaderModuleD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
-
-#include "backend/d3d12/CommandAllocatorManager.h"
-#include "backend/d3d12/DescriptorHeapAllocator.h"
-#include "backend/d3d12/ResourceAllocator.h"
-#include "backend/d3d12/ResourceUploader.h"
+#include "common/Assert.h"
 
 namespace backend {
 namespace d3d12 {

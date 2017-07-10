@@ -23,10 +23,10 @@
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/PipelineD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
+#include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/SamplerD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
-
-#include "backend/d3d12/ResourceAllocator.h"
+#include "common/Assert.h"
 
 namespace backend {
 namespace d3d12 {

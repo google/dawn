@@ -16,6 +16,7 @@
 
 #include "backend/d3d12/D3D12Backend.h"
 
+#include "common/Assert.h"
 #include "common/BitSetIterator.h"
 
 namespace backend {

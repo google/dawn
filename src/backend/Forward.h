@@ -15,10 +15,7 @@
 #ifndef BACKEND_FORWARD_H_
 #define BACKEND_FORWARD_H_
 
-#include <cassert>
 #include <cstdint>
-
-#define ASSERT assert
 
 namespace backend {
 
