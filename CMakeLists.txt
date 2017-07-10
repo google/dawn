@@ -58,7 +58,7 @@ endif()
 function(NXTExternalTarget folder target)
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${NXT_FLAGS})
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${NXT_DEFS})
-    set_property(TARGET ${target} PROPERTY FOLDER ${folder})
+    set_property(TARGET ${target} PROPERTY FOLDER "nxt/${folder}")
 endfunction()
 
 function(NXTInternalTarget folder target)

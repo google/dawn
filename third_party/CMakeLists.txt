@@ -40,7 +40,11 @@ target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
 NXTExternalTarget("third_party" glad)
 
 # ShaderC
+# Prevent SPIRV-Tools from using Werror as it has a warning on MSVC
+set(SPIRV_WERROR OFF)
+# Don't add unnecessary shaderc targets
 set(SHADERC_SKIP_TESTS ON)
+# Help shaderc find the non-standard paths for its dependencies
 set(SHADERC_GOOGLE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest CACHE STRING "Location of googletest source")
 set(SHADERC_GLSLANG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/glslang" CACHE STRING "Location of glslang source")
 set(SHADERC_SPIRV_TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools CACHE STRING "Location of spirv-tools source")
@@ -50,8 +54,23 @@ set(PYTHON_EXE ${PYTHON_EXECUTABLE})
 # Need to include this for spirv-tools to find it
 add_subdirectory(spirv-headers)
 add_subdirectory(shaderc)
-NXTExternalTarget("third_party" shaderc)
-NXTExternalTarget("third_party" shaderc_util)
+# Namespace the shaderc targets in a folder to avoid cluttering the
+# Visual Studio solution explorer
+set_target_properties(
+    add-copyright
+    build-version
+    check-copyright
+    glslc
+    glslc_exe
+    install-headers
+    shaderc
+    shaderc_util
+    shaderc_combined_genfile
+    shaderc-online-compile testdata
+    SPIRV-Headers-example
+    SPIRV-Headers-example-1.1
+    PROPERTIES FOLDER "third_party/shaderc"
+)
 
 # SPIRV-Cross
 add_library(spirv_cross STATIC
