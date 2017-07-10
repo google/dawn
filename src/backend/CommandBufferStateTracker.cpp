@@ -381,10 +381,10 @@ namespace backend {
         if (texture->HasFrozenUsage(nxt::TextureUsageBit::OutputAttachment)) {
             return true;
         }
-        if (!IsInternalTextureTransitionPossible(texture, nxt::TextureUsageBit::OutputAttachment)) {
+        if (!IsInternalTextureTransitionPossible(texture, usage)) {
             return false;
         }
-        mostRecentTextureUsages[texture] = nxt::TextureUsageBit::OutputAttachment;
+        mostRecentTextureUsages[texture] = usage;
         texturesTransitioned.insert(texture);
         return true;
     }
