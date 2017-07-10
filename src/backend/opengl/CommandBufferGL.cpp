@@ -65,6 +65,12 @@ namespace opengl {
 
         while(commands.NextCommandId(&type)) {
             switch (type) {
+                case Command::BeginComputePass:
+                    {
+                        commands.NextCommand<BeginComputePassCmd>();
+                    }
+                    break;
+
                 case Command::BeginRenderPass:
                     {
                         commands.NextCommand<BeginRenderPassCmd>();
@@ -163,6 +169,12 @@ namespace opengl {
                                 reinterpret_cast<void*>(draw->firstIndex * formatSize + indexBufferOffset),
                                 draw->instanceCount);
                         }
+                    }
+                    break;
+
+                case Command::EndComputePass:
+                    {
+                        commands.NextCommand<EndComputePassCmd>();
                     }
                     break;
 

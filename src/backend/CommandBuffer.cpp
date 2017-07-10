@@ -105,6 +105,12 @@ namespace backend {
         Command type;
         while(commands->NextCommandId(&type)) {
             switch (type) {
+                case Command::BeginComputePass:
+                    {
+                        BeginComputePassCmd* begin = commands->NextCommand<BeginComputePassCmd>();
+                        begin->~BeginComputePassCmd();
+                    }
+                    break;
                 case Command::BeginRenderPass:
                     {
                         BeginRenderPassCmd* begin = commands->NextCommand<BeginRenderPassCmd>();
@@ -151,6 +157,12 @@ namespace backend {
                     {
                         DrawElementsCmd* draw = commands->NextCommand<DrawElementsCmd>();
                         draw->~DrawElementsCmd();
+                    }
+                    break;
+                case Command::EndComputePass:
+                    {
+                        EndComputePassCmd* cmd = commands->NextCommand<EndComputePassCmd>();
+                        cmd->~EndComputePassCmd();
                     }
                     break;
                 case Command::EndRenderPass:
@@ -226,6 +238,10 @@ namespace backend {
 
     void SkipCommand(CommandIterator* commands, Command type) {
         switch (type) {
+            case Command::BeginComputePass:
+                commands->NextCommand<BeginComputePassCmd>();
+                break;
+
             case Command::BeginRenderPass:
                 commands->NextCommand<BeginRenderPassCmd>();
                 break;
@@ -256,6 +272,10 @@ namespace backend {
 
             case Command::DrawElements:
                 commands->NextCommand<DrawElementsCmd>();
+                break;
+
+            case Command::EndComputePass:
+                commands->NextCommand<EndComputePassCmd>();
                 break;
 
             case Command::EndRenderPass:
@@ -323,6 +343,15 @@ namespace backend {
         Command type;
         while (iterator.NextCommandId(&type)) {
             switch (type) {
+                case Command::BeginComputePass:
+                    {
+                        iterator.NextCommand<BeginComputePassCmd>();
+                        if (!state->BeginComputePass()) {
+                            return false;
+                        }
+                    }
+                    break;
+
                 case Command::BeginRenderPass:
                     {
                         BeginRenderPassCmd* cmd = iterator.NextCommand<BeginRenderPassCmd>();
@@ -419,6 +448,15 @@ namespace backend {
                     {
                         iterator.NextCommand<DrawElementsCmd>();
                         if (!state->ValidateCanDrawElements()) {
+                            return false;
+                        }
+                    }
+                    break;
+
+                case Command::EndComputePass:
+                    {
+                        iterator.NextCommand<EndComputePassCmd>();
+                        if (!state->EndComputePass()) {
                             return false;
                         }
                     }
@@ -542,8 +580,8 @@ namespace backend {
         return device->CreateCommandBuffer(this);
     }
 
-    void CommandBufferBuilder::BeginRenderSubpass() {
-        allocator.Allocate<BeginRenderSubpassCmd>(Command::BeginRenderSubpass);
+    void CommandBufferBuilder::BeginComputePass() {
+        allocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
     }
 
     void CommandBufferBuilder::BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer) {
@@ -551,6 +589,10 @@ namespace backend {
         new(cmd) BeginRenderPassCmd;
         cmd->renderPass = renderPass;
         cmd->framebuffer = framebuffer;
+    }
+
+    void CommandBufferBuilder::BeginRenderSubpass() {
+        allocator.Allocate<BeginRenderSubpassCmd>(Command::BeginRenderSubpass);
     }
 
     void CommandBufferBuilder::CopyBufferToBuffer(BufferBase* source, uint32_t sourceOffset, BufferBase* destination, uint32_t destinationOffset, uint32_t size) {
@@ -621,6 +663,10 @@ namespace backend {
         draw->instanceCount = instanceCount;
         draw->firstIndex = firstIndex;
         draw->firstInstance = firstInstance;
+    }
+
+    void CommandBufferBuilder::EndComputePass() {
+        allocator.Allocate<EndComputePassCmd>(Command::EndComputePass);
     }
 
     void CommandBufferBuilder::EndRenderPass() {

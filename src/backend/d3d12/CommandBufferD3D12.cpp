@@ -253,6 +253,12 @@ namespace d3d12 {
 
         while(commands.NextCommandId(&type)) {
             switch (type) {
+                case Command::BeginComputePass:
+                    {
+                        commands.NextCommand<BeginComputePassCmd>();
+                    }
+                    break;
+
                 case Command::BeginRenderPass:
                     {
                         BeginRenderPassCmd* beginRenderPassCmd = commands.NextCommand<BeginRenderPassCmd>();
@@ -362,6 +368,12 @@ namespace d3d12 {
                             0,
                             draw->firstInstance
                         );
+                    }
+                    break;
+
+                case Command::EndComputePass:
+                    {
+                        commands.NextCommand<EndComputePassCmd>();
                     }
                     break;
 

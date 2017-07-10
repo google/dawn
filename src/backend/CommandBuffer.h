@@ -59,6 +59,7 @@ namespace backend {
             CommandIterator AcquireCommands();
 
             // NXT API
+            void BeginComputePass();
             void BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
             void BeginRenderSubpass();
             void CopyBufferToBuffer(BufferBase* source, uint32_t sourceOffset, BufferBase* destination, uint32_t destinationOffset, uint32_t size);
@@ -71,6 +72,7 @@ namespace backend {
             void Dispatch(uint32_t x, uint32_t y, uint32_t z);
             void DrawArrays(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
             void DrawElements(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance);
+            void EndComputePass();
             void EndRenderPass();
             void EndRenderSubpass();
             void SetPushConstants(nxt::ShaderStageBit stage, uint32_t offset, uint32_t count, const void* data);

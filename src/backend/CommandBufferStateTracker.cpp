@@ -61,7 +61,7 @@ namespace backend {
 
     bool CommandBufferStateTracker::ValidateCanDispatch() {
         constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
+            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE | // implicitly requires COMPUTE_PASS
             1 << VALIDATION_ASPECT_BIND_GROUPS;
         if ((requiredAspects & ~aspects).none()) {
             // Fast return-true path if everything is good
@@ -83,7 +83,7 @@ namespace backend {
     bool CommandBufferStateTracker::ValidateCanDrawArrays() {
         // TODO(kainino@chromium.org): Check for a current render pass
         constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE |
+            1 << VALIDATION_ASPECT_RENDER_PIPELINE | // implicitly requires RENDER_SUBPASS
             1 << VALIDATION_ASPECT_BIND_GROUPS |
             1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
         if ((requiredAspects & ~aspects).none()) {
@@ -118,6 +118,29 @@ namespace backend {
             builder->HandleError("Can't end command buffer with an active render pass");
             return false;
         }
+        if (aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            builder->HandleError("Can't end command buffer with an active compute pass");
+            return false;
+        }
+        return true;
+    }
+
+    bool CommandBufferStateTracker::BeginComputePass() {
+        if (currentRenderPass != nullptr) {
+            builder->HandleError("Cannot begin a compute pass while a render pass is active");
+            return false;
+        }
+        aspects.set(VALIDATION_ASPECT_COMPUTE_PASS);
+        return true;
+    }
+
+    bool CommandBufferStateTracker::EndComputePass() {
+        if (!aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            builder->HandleError("Can't end a compute pass without beginning one");
+            return false;
+        }
+        aspects.reset(VALIDATION_ASPECT_COMPUTE_PASS);
+        UnsetPipeline();
         return true;
     }
 
@@ -193,6 +216,10 @@ namespace backend {
     };
 
     bool CommandBufferStateTracker::BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer) {
+        if (aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            builder->HandleError("Cannot begin a render pass while a compute pass is active");
+            return false;
+        }
         if (currentRenderPass != nullptr) {
             builder->HandleError("A render pass is already active");
             return false;
@@ -207,7 +234,6 @@ namespace backend {
         currentFramebuffer = framebuffer;
         currentSubpass = 0;
 
-        UnsetPipeline();
         return true;
     }
 
@@ -234,6 +260,10 @@ namespace backend {
         PipelineLayoutBase* layout = pipeline->GetLayout();
 
         if (pipeline->IsCompute()) {
+            if (!aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+                builder->HandleError("A compute pass must be active when a compute pipeline is set");
+                return false;
+            }
             if (currentRenderPass) {
                 builder->HandleError("Can't use a compute pipeline while a render pass is active");
                 return false;

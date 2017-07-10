@@ -264,11 +264,13 @@ void initCommandBuffers() {
         auto& bufferSrc = particleBuffers[i];
         auto& bufferDst = particleBuffers[(i + 1) % 2];
         commandBuffers[i] = device.CreateCommandBufferBuilder()
-            .SetPipeline(updatePipeline)
-            .TransitionBufferUsage(bufferSrc, nxt::BufferUsageBit::Storage)
-            .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Storage)
-            .SetBindGroup(0, updateBGs[i])
-            .Dispatch(kNumParticles, 1, 1)
+            .BeginComputePass()
+                .SetPipeline(updatePipeline)
+                .TransitionBufferUsage(bufferSrc, nxt::BufferUsageBit::Storage)
+                .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Storage)
+                .SetBindGroup(0, updateBGs[i])
+                .Dispatch(kNumParticles, 1, 1)
+            .EndComputePass()
 
             .BeginRenderPass(renderpass, framebuffer)
             .BeginRenderSubpass()

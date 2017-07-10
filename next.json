@@ -248,6 +248,9 @@
                 "returns": "command buffer"
             },
             {
+                "name": "begin compute pass"
+            },
+            {
                 "name": "begin render pass",
                 "args": [
                     {"name": "render pass", "type": "render pass"},
@@ -339,6 +342,9 @@
                     {"name": "first index", "type": "uint32_t"},
                     {"name": "first instance", "type": "uint32_t"}
                 ]
+            },
+            {
+                "name": "end compute pass"
             },
             {
                 "name": "end render pass"

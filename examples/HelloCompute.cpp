@@ -126,10 +126,12 @@ void init() {
 
 void frame() {
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .SetPipeline(computePipeline)
-        .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Storage)
-        .SetBindGroup(0, computeBindGroup)
-        .Dispatch(1, 1, 1)
+        .BeginComputePass()
+            .SetPipeline(computePipeline)
+            .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Storage)
+            .SetBindGroup(0, computeBindGroup)
+            .Dispatch(1, 1, 1)
+        .EndComputePass()
 
         .BeginRenderPass(renderpass, framebuffer)
         .BeginRenderSubpass()

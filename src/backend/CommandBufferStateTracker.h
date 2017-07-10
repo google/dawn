@@ -39,6 +39,8 @@ namespace backend {
             bool ValidateEndCommandBuffer() const;
 
             // State-modifying methods
+            bool BeginComputePass();
+            bool EndComputePass();
             bool BeginSubpass();
             bool EndSubpass();
             bool BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
@@ -66,6 +68,7 @@ namespace backend {
                 VALIDATION_ASPECT_VERTEX_BUFFERS,
                 VALIDATION_ASPECT_INDEX_BUFFER,
                 VALIDATION_ASPECT_RENDER_SUBPASS,
+                VALIDATION_ASPECT_COMPUTE_PASS,
 
                 VALIDATION_ASPECT_COUNT
             };

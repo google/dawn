@@ -28,6 +28,7 @@ namespace backend {
     // dependencies: Ref<Object> needs Object to be defined.
 
     enum class Command {
+        BeginComputePass,
         BeginRenderPass,
         BeginRenderSubpass,
         CopyBufferToBuffer,
@@ -36,6 +37,7 @@ namespace backend {
         Dispatch,
         DrawArrays,
         DrawElements,
+        EndComputePass,
         EndRenderPass,
         EndRenderSubpass,
         SetPipeline,
@@ -46,6 +48,9 @@ namespace backend {
         SetVertexBuffers,
         TransitionBufferUsage,
         TransitionTextureUsage,
+    };
+
+    struct BeginComputePassCmd {
     };
 
     struct BeginRenderPassCmd {
@@ -102,6 +107,9 @@ namespace backend {
         uint32_t instanceCount;
         uint32_t firstIndex;
         uint32_t firstInstance;
+    };
+
+    struct EndComputePassCmd {
     };
 
     struct EndRenderPassCmd {
