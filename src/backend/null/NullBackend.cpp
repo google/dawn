@@ -101,12 +101,6 @@ namespace null {
         return std::move(pendingOperations);
     }
 
-    void Device::Reference() {
-    }
-
-    void Device::Release() {
-    }
-
     // Buffer
 
     struct BufferMapReadOperation : PendingOperation {

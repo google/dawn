@@ -132,10 +132,6 @@ namespace d3d12 {
 
             void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
-            // NXT API
-            void Reference();
-            void Release();
-
         private:
             uint64_t serial = 0;
             ComPtr<ID3D12Fence> fence;

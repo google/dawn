@@ -252,12 +252,6 @@ namespace d3d12 {
         return new TextureView(builder);
     }
 
-    void Device::Reference() {
-    }
-
-    void Device::Release() {
-    }
-
     // DepthStencilState
 
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)

@@ -100,12 +100,6 @@ namespace opengl {
     void Device::TickImpl() {
     }
 
-    void Device::Reference() {
-    }
-
-    void Device::Release() {
-    }
-
     // Bind Group
 
     BindGroup::BindGroup(BindGroupBuilder* builder)

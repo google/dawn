@@ -138,4 +138,17 @@ namespace backend {
         // TODO(cwallez@chromium.org): update state tracking then call the backend
     }
 
+    void DeviceBase::Reference() {
+        ASSERT(refCount != 0);
+        refCount++;
+    }
+
+    void DeviceBase::Release() {
+        ASSERT(refCount != 0);
+        refCount--;
+        if (refCount == 0) {
+            delete this;
+        }
+    }
+
 }

@@ -241,12 +241,6 @@ namespace metal {
         return resourceUploader;
     }
 
-    void Device::Reference() {
-    }
-
-    void Device::Release() {
-    }
-
     // Bind Group
 
     BindGroup::BindGroup(BindGroupBuilder* builder)

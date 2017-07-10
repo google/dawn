@@ -98,10 +98,6 @@ namespace opengl {
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
             void TickImpl() override;
-
-            // NXT API
-            void Reference();
-            void Release();
     };
 
     class BindGroup : public BindGroupBase {

@@ -27,7 +27,7 @@ namespace backend {
     class DeviceBase {
         public:
             DeviceBase();
-            ~DeviceBase();
+            virtual ~DeviceBase();
 
             void HandleError(const char* message);
 
@@ -90,6 +90,8 @@ namespace backend {
             void Tick();
             void CopyBindGroups(uint32_t start, uint32_t count, BindGroupBase* source, BindGroupBase* target);
             void SetErrorCallback(nxt::DeviceErrorCallback callback, nxt::CallbackUserdata userdata);
+            void Reference();
+            void Release();
 
         private:
             // The object caches aren't exposed in the header as they would require a lot of
@@ -99,6 +101,7 @@ namespace backend {
 
             nxt::DeviceErrorCallback errorCallback = nullptr;
             nxt::CallbackUserdata errorUserdata = 0;
+            uint32_t refCount = 1;
     };
 
 }

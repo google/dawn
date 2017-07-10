@@ -117,10 +117,6 @@ namespace metal {
             MapReadRequestTracker* GetMapReadTracker() const;
             ResourceUploader* GetResourceUploader() const;
 
-            // NXT API
-            void Reference();
-            void Release();
-
         private:
             void OnCompletedHandler();
 

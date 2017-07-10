@@ -112,10 +112,6 @@ namespace null {
             void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
             std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
 
-            // NXT API
-            void Reference();
-            void Release();
-
         private:
             std::vector<std::unique_ptr<PendingOperation>> pendingOperations;
     };
