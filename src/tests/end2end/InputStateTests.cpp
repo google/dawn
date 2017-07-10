@@ -186,6 +186,7 @@ class InputStateTest : public NXTTest {
             nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
             builder.BeginRenderPass(renderpass, framebuffer)
+                .BeginRenderSubpass()
                 .SetPipeline(pipeline);
 
             uint32_t zeroOffset = 0;
@@ -195,6 +196,7 @@ class InputStateTest : public NXTTest {
 
             nxt::CommandBuffer commands = builder
                 .DrawArrays(triangles * 4, instances, 0, 0)
+                .EndRenderSubpass()
                 .EndRenderPass()
                 .GetResult();
 

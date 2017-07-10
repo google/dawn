@@ -400,14 +400,12 @@ namespace backend {
         }
         // Assumes we have a pipeline already
         if (!bindgroupsSet.all()) {
-            printf("%s:%d\n", __FUNCTION__, __LINE__);
             return false;
         }
         for (size_t i = 0; i < bindgroups.size(); ++i) {
             if (auto* bindgroup = bindgroups[i]) {
                 // TODO(kainino@chromium.org): bind group compatibility
                 if (bindgroup->GetLayout() != lastPipeline->GetLayout()->GetBindGroupLayout(i)) {
-                    printf("%s:%d: i=%zu\n", __FUNCTION__, __LINE__, i);
                     return false;
                 }
             }
