@@ -62,10 +62,7 @@ function(Generate)
     )
 
     NXTInternalTarget("${G_FOLDER}" ${G_LIB_NAME})
-    if (NOT MSVC)
-        target_compile_options(${G_LIB_NAME} PRIVATE "-Wno-unused-variable")
-        target_compile_options(${G_LIB_NAME} PRIVATE "-Wno-unused-function")
-    endif()
+    target_compile_options(${G_LIB_NAME} PRIVATE ${NXT_GENERATED_FLAGS})
 endfunction()
 
 set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)

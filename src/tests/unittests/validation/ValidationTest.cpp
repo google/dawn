@@ -85,7 +85,7 @@ void ValidationTest::OnDeviceError(const char* message, nxtCallbackUserdata user
 
 void ValidationTest::OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, nxt::CallbackUserdata userdata1, nxt::CallbackUserdata userdata2) {
     auto* self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata1));
-    size_t index = userdata2;
+    size_t index = static_cast<size_t>(userdata2);
 
     ASSERT_LT(index, self->expectations.size());
 

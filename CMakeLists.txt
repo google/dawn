@@ -29,6 +29,7 @@ set(NXT_FLAGS "")
 set(NXT_DEFS "")
 set(NXT_INTERNAL_FLAGS "")
 set(NXT_INTERNAL_DEFS "")
+set(NXT_GENERATED_FLAGS "")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     list(APPEND NXT_DEFS "NXT_ENABLE_ASSERTS")
@@ -43,13 +44,24 @@ endif()
 
 if (MSVC)
     list(APPEND NXT_FLAGS "/std:c++14")
+    list(APPEND NXT_INTERNAL_FLAGS "/W4")
+    # Allow declarations hiding members as it is used all over NXT
+    list(APPEND NXT_INTERNAL_FLAGS "/wd4458")
+    list(APPEND NXT_INTERNAL_FLAGS "/wd4996") # Allow deprecated functions like strncpy
+
+    list(APPEND NXT_GENERATED_FLAGS "/wd4702") # Allow unreachable code
+    list(APPEND NXT_GENERATED_FLAGS "/wd4189") # Allow unused variable
+    
+    if(NXT_USE_WERROR)
+        list(APPEND NXT_INTERNAL_FLAGS "/WX")
+    endif()
 else()
     # Activate C++14 only on C++ files, not C files.
     list(APPEND NXT_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-std=c++14>")
     list(APPEND NXT_FLAGS "-fPIC")
 
     list(APPEND NXT_INTERNAL_FLAGS "-Wall" "-Wextra")
-    list(APPEND NXT_GENERATED_FLAGS "-Wno-unused-variable")
+    list(APPEND NXT_GENERATED_FLAGS "-Wno-unused-variable" "-Wno-unused-function")
     if(NXT_USE_WERROR)
         list(APPEND NXT_INTERNAL_FLAGS "-Werror")
     endif()

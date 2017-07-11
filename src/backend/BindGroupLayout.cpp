@@ -35,11 +35,10 @@ namespace backend {
             return std::hash<unsigned long long>()(value.to_ullong());
         }
 
-
         // TODO(cwallez@chromium.org): see if we can use boost's hash combined or some equivalent
         // this currently assumes that size_t is 64 bits
         void CombineHashes(size_t* h1, size_t h2) {
-            *h1 ^= (h2 << 7) + (h2 >> (64 - 7)) + 0x304975;
+            *h1 ^= (h2 << 7) + (h2 >> (sizeof(size_t) * 8 - 7)) + 0x304975;
         }
 
         size_t HashBindingInfo(const BindGroupLayoutBase::LayoutBindingInfo& info) {

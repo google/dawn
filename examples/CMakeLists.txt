@@ -22,8 +22,23 @@ NXTInternalTarget("examples" sample_utils)
 function(add_nxt_sample target sources)
     add_executable(${target} ${sources})
     target_link_libraries(${target} sample_utils)
-    target_include_directories(${target} PRIVATE ${GLM_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(${target} SYSTEM PRIVATE ${GLM_INCLUDE_DIR})
+    target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     NXTInternaltarget("examples" ${target})
+
+    # Suppress some warnings in our sample dependencies
+    if (MSVC)
+        # nonstandard extension used: nameless struct/union -- for GLM
+        set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS "/wd4201")
+        # declaration hides global declaration -- for GLM
+        set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS "/wd4459")
+        # = conversion possible loss of data -- for STB image
+        set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS "/wd4244")
+        # declaration hides previous declaration -- for STB image
+        set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS "/wd4456")
+        # declaration hides previous declaration -- for picojson
+        set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS "/wd4706")
+    endif()
 endfunction()
 
 add_nxt_sample(CHelloTriangle CHelloTriangle.cpp)
