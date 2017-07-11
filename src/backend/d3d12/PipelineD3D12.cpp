@@ -92,7 +92,7 @@ namespace d3d12 {
                     compileTarget = "ps_5_1";
                     break;
                 case nxt::ShaderStage::Compute:
-                    ASSERT(false);
+                    UNREACHABLE();
                     break;
                 }
 

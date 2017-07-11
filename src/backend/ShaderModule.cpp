@@ -43,8 +43,7 @@ namespace backend {
                 executionModel = nxt::ShaderStage::Compute;
                 break;
             default:
-                ASSERT(false);
-                break;
+                UNREACHABLE();
         }
 
         // Extract push constants

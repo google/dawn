@@ -174,8 +174,7 @@ namespace opengl {
                         glVertexAttribDivisor(location, 1);
                         break;
                     default:
-                        ASSERT(false);
-                        break;
+                        UNREACHABLE();
                 }
             }
         }

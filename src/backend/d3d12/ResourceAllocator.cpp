@@ -61,7 +61,7 @@ namespace d3d12 {
                 heapProperties = &kReadbackHeapProperties;
                 break;
             default:
-                ASSERT(false);
+                UNREACHABLE();
         }
 
         ComPtr<ID3D12Resource> resource;

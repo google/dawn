@@ -32,8 +32,7 @@ namespace {
             case VulkanBackend:
                 return utils::BackendType::Vulkan;
             default:
-                NXT_ASSERT(false);
-                return utils::BackendType::Null;
+                UNREACHABLE();
         }
     }
 
@@ -48,8 +47,7 @@ namespace {
             case VulkanBackend:
                 return "Vulkan";
             default:
-                NXT_ASSERT(false);
-                return "";
+                UNREACHABLE();
         }
     }
 

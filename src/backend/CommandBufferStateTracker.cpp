@@ -477,7 +477,7 @@ namespace backend {
                 case nxt::BindingType::UniformBuffer:
                 case nxt::BindingType::StorageBuffer:
                     {
-                        nxt::BufferUsageBit requiredUsage;
+                        nxt::BufferUsageBit requiredUsage = nxt::BufferUsageBit::None;
                         switch (type) {
                             case nxt::BindingType::UniformBuffer:
                                 requiredUsage = nxt::BufferUsageBit::Uniform;

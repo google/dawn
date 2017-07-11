@@ -63,8 +63,7 @@ namespace metal {
                         descriptor.fragmentFunction = function;
                         break;
                     case nxt::ShaderStage::Compute:
-                        ASSERT(false);
-                        break;
+                        UNREACHABLE();
                 }
             }
 
