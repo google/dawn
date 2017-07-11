@@ -77,7 +77,23 @@ function(NXTInternalTarget folder target)
     NXTExternalTarget("${folder}" ${target})
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${NXT_INTERNAL_FLAGS})
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${NXT_INTERNAL_DEFS})
+
+    # Group the target sources by folder to have folders show in Visual Studio
+    if (MSVC)
+        get_target_property(targetSources ${target} SOURCES)
+        foreach(sourceFile IN ITEMS ${targetSources})
+            if (IS_ABSOLUTE "${sourceFile}")
+                file(RELATIVE_PATH sourceFile "${CMAKE_CURRENT_SOURCE_DIR}" "${sourceFile}")
+            endif()
+            get_filename_component(sourceDir "${sourceFile}" PATH)
+            string(REPLACE "/" "\\" sourceDir "${sourceDir}")
+            source_group("${sourceDir}" FILES "${sourceFile}")
+        endforeach()
+    endif()
 endfunction()
+
+# Enable the creation of folders for Visual Studio projects
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ################################################################################
 # Generate the C and C++ NXT APIs
