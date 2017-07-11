@@ -202,6 +202,7 @@ namespace metal {
     id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {
         if (pendingCommands == nil) {
             pendingCommands = [commandQueue commandBuffer];
+            [pendingCommands retain];
         }
         return pendingCommands;
     }
@@ -220,6 +221,7 @@ namespace metal {
         }];
 
         [pendingCommands commit];
+        [pendingCommands release];
         pendingCommands = nil;
         pendingCommandSerial ++;
     }
