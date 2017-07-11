@@ -14,6 +14,7 @@
 
 #include "tests/NXTTest.h"
 
+#include "common/Assert.h"
 #include "utils/NXTHelpers.h"
 
 using nxt::InputStepMode;
@@ -72,6 +73,8 @@ class InputStateTest : public NXTTest {
                     return component >= 2;
                 case VertexFormat::FloatR32:
                     return component >= 1;
+                default:
+                    NXT_UNREACHABLE();
             }
         }
 

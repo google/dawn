@@ -14,6 +14,8 @@
 
 #include "backend/opengl/TextureGL.h"
 
+#include "common/Assert.h"
+
 #include <algorithm>
 #include <vector>
 
@@ -26,6 +28,8 @@ namespace opengl {
             switch (dimension) {
                 case nxt::TextureDimension::e2D:
                     return GL_TEXTURE_2D;
+                default:
+                    UNREACHABLE();
             }
         }
 
@@ -33,6 +37,8 @@ namespace opengl {
             switch (format) {
                 case nxt::TextureFormat::R8G8B8A8Unorm:
                     return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
+                default:
+                    UNREACHABLE();
             }
         }
 

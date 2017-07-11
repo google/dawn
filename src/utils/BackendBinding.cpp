@@ -14,6 +14,8 @@
 
 #include "utils/BackendBinding.h"
 
+#include "common/Assert.h"
+
 namespace utils {
 
     BackendBinding* CreateD3D12Binding();
@@ -50,6 +52,9 @@ namespace utils {
 
             case BackendType::Vulkan:
                 return nullptr; // TODO(cwallez@chromium.org) change it to CreateVulkanBinding();
+
+            default:
+                UNREACHABLE();
         }
     }
 

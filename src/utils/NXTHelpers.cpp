@@ -14,6 +14,8 @@
 
 #include "utils/NXTHelpers.h"
 
+#include "common/Assert.h"
+
 #include <shaderc/shaderc.hpp>
 
 #include <cstring>
@@ -38,6 +40,8 @@ namespace utils {
             case nxt::ShaderStage::Compute:
                 kind = shaderc_glsl_compute_shader;
                 break;
+            default:
+                UNREACHABLE();
         }
 
         auto result = compiler.CompileGlslToSpv(source, strlen(source), kind, "myshader?", options);

@@ -23,6 +23,8 @@ namespace backend {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
                 return 4;
+            default:
+                UNREACHABLE();
         }
     }
 
@@ -97,6 +99,8 @@ namespace backend {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
                 return false;
+            default:
+                UNREACHABLE();
         }
     }
 

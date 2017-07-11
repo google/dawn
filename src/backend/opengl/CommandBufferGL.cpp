@@ -41,6 +41,8 @@ namespace opengl {
                 return GL_UNSIGNED_SHORT;
             case nxt::IndexFormat::Uint32:
                 return GL_UNSIGNED_INT;
+            default:
+                UNREACHABLE();
         }
     }
 
@@ -51,6 +53,8 @@ namespace opengl {
             case nxt::VertexFormat::FloatR32G32:
             case nxt::VertexFormat::FloatR32:
                 return GL_FLOAT;
+            default:
+                UNREACHABLE();
         }
     }
 

@@ -14,6 +14,8 @@
 
 #include "backend/opengl/SamplerGL.h"
 
+#include "common/Assert.h"
+
 namespace backend {
 namespace opengl {
 
@@ -24,6 +26,8 @@ namespace opengl {
                     return GL_NEAREST;
                 case nxt::FilterMode::Linear:
                     return GL_LINEAR;
+                default:
+                    UNREACHABLE();
             }
         }
 
@@ -35,6 +39,8 @@ namespace opengl {
                             return GL_NEAREST_MIPMAP_NEAREST;
                         case nxt::FilterMode::Linear:
                             return GL_NEAREST_MIPMAP_LINEAR;
+                        default:
+                            UNREACHABLE();
                     }
                 case nxt::FilterMode::Linear:
                     switch (mipMapFilter) {
@@ -42,7 +48,11 @@ namespace opengl {
                             return GL_LINEAR_MIPMAP_NEAREST;
                         case nxt::FilterMode::Linear:
                             return GL_LINEAR_MIPMAP_LINEAR;
+                        default:
+                            UNREACHABLE();
                     }
+                default:
+                    UNREACHABLE();
             }
         }
     }

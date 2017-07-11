@@ -38,6 +38,8 @@ namespace d3d12 {
                     return DXGI_FORMAT_R16_UINT;
                 case nxt::IndexFormat::Uint32:
                     return DXGI_FORMAT_R32_UINT;
+                default:
+                    UNREACHABLE();
             }
         }
 

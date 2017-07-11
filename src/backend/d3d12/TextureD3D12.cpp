@@ -66,6 +66,8 @@ namespace d3d12 {
             switch (dimension) {
                 case nxt::TextureDimension::e2D:
                     return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+                default:
+                    UNREACHABLE();
             }
         }
 
@@ -73,6 +75,8 @@ namespace d3d12 {
             switch (format) {
                 case nxt::TextureFormat::R8G8B8A8Unorm:
                     return DXGI_FORMAT_R8G8B8A8_UNORM;
+                default:
+                    UNREACHABLE();
             }
         }
     }

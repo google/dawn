@@ -35,7 +35,7 @@ void HandleAssertionFailure(const char* file, const char* function, int line, co
 
 // MSVC triggers a warning in /W4 for do {} while(0). SDL worked around this by using
 // // (0,0) and points out that it looks like an owl face.
-#if defined(_MSC_VER)
+#if defined(NXT_COMPILER_MSVC)
     #define NXT_ASSERT_LOOP_CONDITION (0,0)
 #else
     #define NXT_ASSERT_LOOP_CONDITION (0)
@@ -51,10 +51,10 @@ void HandleAssertionFailure(const char* file, const char* function, int line, co
             } \
         } while(NXT_ASSERT_LOOP_CONDITION)
 #else
-    #if defined(_MSC_VER)
+    #if defined(NXT_COMPILER_MSVC)
         #define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
                 __assume(condition)
-    #elif defined(__clang__) && defined(__builtin_assume)
+    #elif defined(NXT_COMPILER_CLANG) && defined(__builtin_assume)
         #define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
                 __builtin_assume(condition)
     #else
@@ -66,9 +66,14 @@ void HandleAssertionFailure(const char* file, const char* function, int line, co
 #endif
 
 #define NXT_ASSERT(condition) NXT_ASSERT_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
+#define NXT_UNREACHABLE() \
+    do { \
+        NXT_ASSERT(false && "Unreachable code hit"); NXT_BUILTIN_UNREACHABLE(); \
+    } while(NXT_ASSERT_LOOP_CONDITION)
 
 #if !defined(NXT_SKIP_ASSERT_SHORTHANDS)
     #define ASSERT NXT_ASSERT
+    #define UNREACHABLE NXT_UNREACHABLE
 #endif
 
 #endif // COMMON_ASSERT_H_

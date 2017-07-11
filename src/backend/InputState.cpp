@@ -27,6 +27,8 @@ namespace backend {
                 return sizeof(uint16_t);
             case nxt::IndexFormat::Uint32:
                 return sizeof(uint32_t);
+            default:
+                UNREACHABLE();
         }
     }
 
@@ -40,6 +42,8 @@ namespace backend {
                 return 2;
             case nxt::VertexFormat::FloatR32:
                 return 1;
+            default:
+                UNREACHABLE();
         }
     }
 
@@ -50,6 +54,8 @@ namespace backend {
             case nxt::VertexFormat::FloatR32G32:
             case nxt::VertexFormat::FloatR32:
                 return VertexFormatNumComponents(format) * sizeof(float);
+            default:
+                UNREACHABLE();
         }
     }
 

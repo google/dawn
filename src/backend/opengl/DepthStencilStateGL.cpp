@@ -16,6 +16,7 @@
 
 #include "backend/opengl/OpenGLBackend.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
+#include "common/Assert.h"
 
 namespace backend {
 namespace opengl {
@@ -39,6 +40,8 @@ namespace opengl {
                     return GL_EQUAL;
                 case nxt::CompareFunction::Always:
                     return GL_ALWAYS;
+                default:
+                    UNREACHABLE();
             }
         }
 
@@ -60,6 +63,8 @@ namespace opengl {
                     return GL_INCR_WRAP;
                 case nxt::StencilOperation::DecrementWrap:
                     return GL_DECR_WRAP;
+                default:
+                    UNREACHABLE();
             }
         }
     }

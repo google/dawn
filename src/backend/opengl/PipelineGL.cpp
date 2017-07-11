@@ -36,6 +36,8 @@ namespace opengl {
                     return GL_FRAGMENT_SHADER;
                 case nxt::ShaderStage::Compute:
                     return GL_COMPUTE_SHADER;
+                default:
+                    UNREACHABLE();
             }
         }
 
