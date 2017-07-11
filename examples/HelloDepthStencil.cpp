@@ -257,7 +257,7 @@ void init() {
 struct {uint32_t a; float b;} s;
 void frame() {
     s.a = (s.a + 1) % 256;
-    s.b += 0.01;
+    s.b += 0.01f;
     if (s.b >= 1.0f) {s.b = 0.0f;}
     static const uint32_t vertexBufferOffsets[1] = {0};
 

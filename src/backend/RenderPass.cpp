@@ -28,7 +28,7 @@ namespace backend {
     }
 
     uint32_t RenderPassBase::GetAttachmentCount() const {
-        return attachments.size();
+        return static_cast<uint32_t>(attachments.size());
     }
 
     const RenderPassBase::AttachmentInfo& RenderPassBase::GetAttachmentInfo(uint32_t attachment) const {
@@ -37,7 +37,7 @@ namespace backend {
     }
 
     uint32_t RenderPassBase::GetSubpassCount() const {
-        return subpasses.size();
+        return static_cast<uint32_t>(subpasses.size());
     }
 
     const RenderPassBase::SubpassInfo& RenderPassBase::GetSubpassInfo(uint32_t subpass) const {

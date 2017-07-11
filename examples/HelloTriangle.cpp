@@ -66,7 +66,7 @@ void initTextures() {
     }
 
 
-    nxt::Buffer stagingBuffer = utils::CreateFrozenBufferFromData(device, data.data(), data.size(), nxt::BufferUsageBit::TransferSrc);
+    nxt::Buffer stagingBuffer = utils::CreateFrozenBufferFromData(device, data.data(), static_cast<uint32_t>(data.size()), nxt::BufferUsageBit::TransferSrc);
     nxt::CommandBuffer copy = device.CreateCommandBufferBuilder()
         .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
         .CopyBufferToTexture(stagingBuffer, 0, texture, 0, 0, 0, 1024, 1024, 1, 0)
@@ -139,7 +139,7 @@ void init() {
 struct {uint32_t a; float b;} s;
 void frame() {
     s.a = (s.a + 1) % 256;
-    s.b += 0.02;
+    s.b += 0.02f;
     if (s.b >= 1.0f) {s.b = 0.0f;}
     static const uint32_t vertexBufferOffsets[1] = {0};
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()

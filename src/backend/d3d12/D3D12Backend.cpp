@@ -200,10 +200,10 @@ namespace d3d12 {
             pendingCommands.open = false;
             lists[0] = pendingCommands.commandList.Get();
             std::copy(commandLists.begin(), commandLists.end(), lists.begin() + 1);
-            commandQueue->ExecuteCommandLists(commandLists.size() + 1, lists.data());
+            commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size() + 1), lists.data());
         } else {
             std::vector<ID3D12CommandList*> lists(commandLists);
-            commandQueue->ExecuteCommandLists(commandLists.size(), lists.data());
+            commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), lists.data());
         }
     }
 

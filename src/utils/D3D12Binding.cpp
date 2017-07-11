@@ -142,7 +142,6 @@ namespace utils {
                     resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
                     commandList->ResourceBarrier(1, &resourceBarrier);
                     ASSERT_SUCCESS(commandList->Close());
-                    ID3D12CommandList* commandLists[] = { commandList.Get() };
                     backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
 
                     backend::d3d12::NextSerial(backendDevice);
@@ -166,7 +165,6 @@ namespace utils {
                     resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
                     commandList->ResourceBarrier(1, &resourceBarrier);
                     ASSERT_SUCCESS(commandList->Close());
-                    ID3D12CommandList* commandLists[] = { commandList.Get() };
                     backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
                 }
 
@@ -184,7 +182,6 @@ namespace utils {
                     resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
                     commandList->ResourceBarrier(1, &resourceBarrier);
                     ASSERT_SUCCESS(commandList->Close());
-                    ID3D12CommandList* commandLists[] = { commandList.Get() };
                     backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
                 }
 

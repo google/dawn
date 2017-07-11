@@ -71,7 +71,7 @@ namespace backend {
 
         bool ComputeTextureCopyBufferSize(CommandBufferBuilder*, const TextureCopyLocation& location, uint32_t* bufferSize) {
             // TODO(cwallez@chromium.org): check for overflows
-            uint32_t pixelSize = TextureFormatPixelSize(location.texture->GetFormat());
+            uint32_t pixelSize = static_cast<uint32_t>(TextureFormatPixelSize(location.texture->GetFormat()));
             *bufferSize = location.width * location.height * location.depth * pixelSize;
 
             return true;

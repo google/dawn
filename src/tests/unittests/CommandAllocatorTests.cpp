@@ -160,9 +160,11 @@ TEST(CommandAllocator, MultipleIterations) {
     uint32_t myFirst = 42;
     uint32_t myCount = 16;
 
-    CommandDraw* draw = allocator.Allocate<CommandDraw>(CommandType::Draw);
-    draw->first = myFirst;
-    draw->count = myCount;
+    {
+        CommandDraw* draw = allocator.Allocate<CommandDraw>(CommandType::Draw);
+        draw->first = myFirst;
+        draw->count = myCount;
+    }
 
     {
         CommandIterator iterator(std::move(allocator));
@@ -235,7 +237,7 @@ TEST(CommandAllocator, ManySmallCommands) {
     // Stay under max representable uint16_t
     const int kCommandCount = 50000;
 
-    int count = 0;
+    uint16_t count = 0;
     for (int i = 0; i < kCommandCount; i++) {
         CommandSmall* small = allocator.Allocate<CommandSmall>(CommandType::Small);
         small->data = count ++;

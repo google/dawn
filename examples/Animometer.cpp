@@ -113,12 +113,12 @@ void init() {
 
     shaderData.resize(10000);
     for (auto& data : shaderData) {
-        data.scale = RandomFloat(0.2, 0.4);
+        data.scale = RandomFloat(0.2f, 0.4f);
         data.time = 0.0;
-        data.offsetX = RandomFloat(-0.9, 0.9);
-        data.offsetY = RandomFloat(-0.9, 0.9);
-        data.scalar = RandomFloat(0.5, 2.0);
-        data.scalarOffset = RandomFloat(0.0, 10.0);
+        data.offsetX = RandomFloat(-0.9f, 0.9f);
+        data.offsetY = RandomFloat(-0.9f, 0.9f);
+        data.scalar = RandomFloat(0.5f, 2.0f);
+        data.scalarOffset = RandomFloat(0.0f, 10.0f);
     }
 }
 

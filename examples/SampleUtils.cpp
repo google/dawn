@@ -15,18 +15,19 @@
 #include "utils/BackendBinding.h"
 #include "../src/wire/TerribleCommandBuffer.h"
 
+// Include Windows.h before GLFW to avoid a redefinition of APIENTRY
+#ifdef _WIN32
+    #include <Windows.h>
+#else
+    #include <unistd.h>
+#endif
+
 #include <nxt/nxt.h>
 #include <nxt/nxtcpp.h>
 #include "GLFW/glfw3.h"
 
 #include <cstring>
 #include <iostream>
-
-#ifdef _WIN32
-    #include <Windows.h>
-#else
-    #include <unistd.h>
-#endif
 
 void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
     std::cout << "Device error: " << message << std::endl;
@@ -171,7 +172,7 @@ void DoSwapBuffers() {
 
 #ifdef _WIN32
 void USleep(uint64_t usecs) {
-    Sleep(usecs / 1000);
+    Sleep(static_cast<DWORD>(usecs / 1000));
 }
 #else
 void USleep(uint64_t usecs) {

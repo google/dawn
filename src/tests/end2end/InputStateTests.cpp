@@ -28,9 +28,9 @@ using nxt::VertexFormat;
 // The predetermined values are "K * gl_VertexID + componentIndex" for vertex-indexed buffers, and
 // "K * gl_InstanceID + componentIndex" for instance-indexed buffers.
 
-constexpr static int kRTSize = 400;
-constexpr static int kRTCellOffset = 50;
-constexpr static int kRTCellSize = 100;
+constexpr static unsigned int kRTSize = 400;
+constexpr static unsigned int kRTCellOffset = 50;
+constexpr static unsigned int kRTCellSize = 100;
 
 class InputStateTest : public NXTTest {
     protected:
@@ -175,7 +175,7 @@ class InputStateTest : public NXTTest {
 
         template<typename T>
         nxt::Buffer MakeVertexBuffer(std::vector<T> data) {
-            return utils::CreateFrozenBufferFromData(device, data.data(), data.size() * sizeof(T), nxt::BufferUsageBit::Vertex);
+            return utils::CreateFrozenBufferFromData(device, data.data(), static_cast<uint32_t>(data.size() * sizeof(T)), nxt::BufferUsageBit::Vertex);
         }
 
         struct DrawVertexBuffer {
@@ -183,8 +183,8 @@ class InputStateTest : public NXTTest {
             nxt::Buffer* buffer;
         };
         void DoTestDraw(const nxt::Pipeline& pipeline, unsigned int triangles, unsigned int instances, std::vector<DrawVertexBuffer> vertexBuffers) {
-            EXPECT_LE(triangles, 4);
-            EXPECT_LE(instances, 4);
+            EXPECT_LE(triangles, 4u);
+            EXPECT_LE(instances, 4u);
 
             nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
@@ -207,10 +207,10 @@ class InputStateTest : public NXTTest {
 
             // Check that the center of each triangle is pure green, so that if a single vertex shader
             // instance fails, linear interpolation makes the pixel check fail.
-            for (size_t triangle = 0; triangle < 4; triangle++) {
-                for (size_t instance = 0; instance < 4; instance++) {
-                    int x = kRTCellOffset + kRTCellSize * triangle;
-                    int y = kRTCellOffset + kRTCellSize * instance;
+            for (unsigned int triangle = 0; triangle < 4; triangle++) {
+                for (unsigned int instance = 0; instance < 4; instance++) {
+                    unsigned int x = kRTCellOffset + kRTCellSize * triangle;
+                    unsigned int y = kRTCellOffset + kRTCellSize * instance;
                     if (triangle < triangles && instance < instances) {
                         EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, x, y);
                     } else {

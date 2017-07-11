@@ -51,7 +51,7 @@ namespace utils {
         }
 
         size_t size = (result.cend() - result.cbegin());
-        builder.SetSource(size, result.cbegin());
+        builder.SetSource(static_cast<uint32_t>(size), result.cbegin());
 
 #ifdef DUMP_SPIRV_ASSEMBLY
         {

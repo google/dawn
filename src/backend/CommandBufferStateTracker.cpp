@@ -488,8 +488,7 @@ namespace backend {
                                 break;
 
                             default:
-                                ASSERT(false);
-                                return false;
+                                UNREACHABLE();
                         }
 
                         auto buffer = group->GetBindingAsBufferView(i)->GetBuffer();
@@ -535,13 +534,13 @@ namespace backend {
     }
 
     void CommandBufferStateTracker::UnsetPipeline() {
-        constexpr ValidationAspects pipelineDependentAspectsInverse =
-            ~(1 << VALIDATION_ASPECT_RENDER_PIPELINE |
-              1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
-              1 << VALIDATION_ASPECT_BIND_GROUPS |
-              1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
-              1 << VALIDATION_ASPECT_INDEX_BUFFER);
-        aspects &= pipelineDependentAspectsInverse;
+        constexpr ValidationAspects pipelineDependentAspects =
+            1 << VALIDATION_ASPECT_RENDER_PIPELINE |
+            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
+            1 << VALIDATION_ASPECT_BIND_GROUPS |
+            1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
+            1 << VALIDATION_ASPECT_INDEX_BUFFER;
+        aspects &= ~pipelineDependentAspects;
         bindgroups.fill(nullptr);
     }
 }

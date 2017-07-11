@@ -29,10 +29,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "GLFW/glfw3.h"
 #define TINYGLTF_LOADER_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include <tinygltfloader/tiny_gltf_loader.h>
+
+#include "GLFW/glfw3.h"
 
 #include "Camera.inl"
 
@@ -146,20 +147,20 @@ namespace {
             }
             const auto& iBuffer = scene.buffers.at(iBufferView.buffer);
 
-            uint32_t iBufferViewSize =
+            size_t iBufferViewSize =
                 iBufferView.byteLength ? iBufferView.byteLength :
                 (iBuffer.data.size() - iBufferView.byteOffset);
-            auto oBuffer = utils::CreateFrozenBufferFromData(device, &iBuffer.data.at(iBufferView.byteOffset), iBufferViewSize, usage);
+            auto oBuffer = utils::CreateFrozenBufferFromData(device, &iBuffer.data.at(iBufferView.byteOffset), static_cast<uint32_t>(iBufferViewSize), usage);
             buffers[iBufferViewID] = std::move(oBuffer);
         }
     }
 
-    const MaterialInfo& getMaterial(const std::string& iMaterialID, uint32_t stridePos, uint32_t strideNor, uint32_t strideTxc) {
-        static std::map<std::tuple<std::string, uint32_t, uint32_t, uint32_t>, MaterialInfo> materials;
+    const MaterialInfo& getMaterial(const std::string& iMaterialID, size_t stridePos, size_t strideNor, size_t strideTxc) {
+        static std::map<std::tuple<std::string, size_t, size_t, size_t>, MaterialInfo> materials;
         auto key = make_tuple(iMaterialID, stridePos, strideNor, strideTxc);
-        auto it = materials.find(key);
-        if (it != materials.end()) {
-            return it->second;
+        auto materialIterator = materials.find(key);
+        if (materialIterator != materials.end()) {
+            return materialIterator->second;
         }
 
         const auto& iMaterial = scene.materials.at(iMaterialID);
@@ -218,22 +219,22 @@ namespace {
             }
             if (iParameter.semantic == "POSITION") {
                 builder.SetAttribute(0, 0, format, 0);
-                builder.SetInput(0, stridePos, nxt::InputStepMode::Vertex);
+                builder.SetInput(0, static_cast<uint32_t>(stridePos), nxt::InputStepMode::Vertex);
                 slotsSet.set(0);
             } else if (iParameter.semantic == "NORMAL") {
                 builder.SetAttribute(1, 1, format, 0);
-                builder.SetInput(1, strideNor, nxt::InputStepMode::Vertex);
+                builder.SetInput(1, static_cast<uint32_t>(strideNor), nxt::InputStepMode::Vertex);
                 slotsSet.set(1);
             } else if (iParameter.semantic == "TEXCOORD_0") {
                 builder.SetAttribute(2, 2, format, 0);
-                builder.SetInput(2, strideTxc, nxt::InputStepMode::Vertex);
+                builder.SetInput(2, static_cast<uint32_t>(strideTxc), nxt::InputStepMode::Vertex);
                 slotsSet.set(2);
             } else {
                 fprintf(stderr, "unsupported technique attribute semantic %s\n", iParameter.semantic.c_str());
             }
             // TODO: use iAttributeParameter.node?
         }
-        for (size_t i = 0; i < slotsSet.size(); i++) {
+        for (uint32_t i = 0; i < slotsSet.size(); i++) {
             if (slotsSet[i]) {
                 continue;
             }
@@ -478,7 +479,7 @@ namespace {
                 glm::inverseTranspose(model),
             };
 
-            uint32_t strides[3] = {0};
+            size_t strides[3] = {0};
             for (const auto& s : slotSemantics) {
                 if (s.first < 3) {
                     auto it = iPrim.attributes.find(s.second);
@@ -516,11 +517,11 @@ namespace {
                     continue;
                 }
 
-                if (!vertexCount) {
-                    vertexCount = iAccessor.count;
+                if (vertexCount == 0) {
+                    vertexCount = static_cast<uint32_t>(iAccessor.count);
                 }
                 const auto& oBuffer = buffers.at(iAccessor.bufferView);
-                uint32_t iBufferOffset = iAccessor.byteOffset;
+                uint32_t iBufferOffset = static_cast<uint32_t>(iAccessor.byteOffset);
                 cmd.SetVertexBuffers(slot, 1, &oBuffer, &iBufferOffset);
             }
 
@@ -532,8 +533,8 @@ namespace {
                     continue;
                 }
                 const auto& oIndicesBuffer = buffers.at(iIndices.bufferView);
-                cmd.SetIndexBuffer(oIndicesBuffer, iIndices.byteOffset, nxt::IndexFormat::Uint16);
-                cmd.DrawElements(iIndices.count, 1, 0, 0);
+                cmd.SetIndexBuffer(oIndicesBuffer, static_cast<uint32_t>(iIndices.byteOffset), nxt::IndexFormat::Uint16);
+                cmd.DrawElements(static_cast<uint32_t>(iIndices.count), 1, 0, 0);
             } else {
                 // DrawArrays
                 cmd.DrawArrays(vertexCount, 1, 0, 0);
@@ -592,23 +593,23 @@ namespace {
     }
 
     void cursorPosCallback(GLFWwindow*, double mouseX, double mouseY) {
-        static float oldX, oldY;
-        float dX = mouseX - oldX;
-        float dY = mouseY - oldY;
+        static double oldX, oldY;
+        float dX = static_cast<float>(mouseX - oldX);
+        float dY = static_cast<float>(mouseY - oldY);
         oldX = mouseX;
         oldY = mouseY;
 
         if (buttons[2] || (buttons[0] && buttons[1])) {
-            camera.pan(-dX * 0.002, dY * 0.002);
+            camera.pan(-dX * 0.002f, dY * 0.002f);
         } else if (buttons[0]) {
-            camera.rotate(dX * -0.01, dY * 0.01);
+            camera.rotate(dX * -0.01f, dY * 0.01f);
         } else if (buttons[1]) {
-            camera.zoom(dY * -0.005);
+            camera.zoom(dY * -0.005f);
         }
     }
 
     void scrollCallback(GLFWwindow*, double, double yoffset) {
-        camera.zoom(yoffset * 0.04);
+        camera.zoom(static_cast<float>(yoffset) * 0.04f);
     }
 }
 

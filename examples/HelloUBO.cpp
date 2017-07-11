@@ -86,7 +86,7 @@ void init() {
 
 void frame() {
     s.a = (s.a + 1) % 256;
-    s.b += 0.02;
+    s.b += 0.02f;
     if (s.b >= 1.0f) {s.b = 0.0f;}
 
     buffer.TransitionUsage(nxt::BufferUsageBit::TransferDst);

@@ -243,10 +243,10 @@ namespace opengl {
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();
-                        size_t index = cmd->index;
+                        size_t groupIndex = cmd->index;
                         BindGroup* group = ToBackend(cmd->group.Get());
 
-                        const auto& indices = ToBackend(lastPipeline->GetLayout())->GetBindingIndexInfo()[index];
+                        const auto& indices = ToBackend(lastPipeline->GetLayout())->GetBindingIndexInfo()[groupIndex];
                         const auto& layout = group->GetLayout()->GetBindingInfo();
 
                         // TODO(cwallez@chromium.org): iterate over the layout bitmask instead
@@ -260,18 +260,18 @@ namespace opengl {
                                     {
                                         BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
                                         GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
-                                        GLuint index = indices[binding];
+                                        GLuint uboIndex = indices[binding];
 
-                                        glBindBufferRange(GL_UNIFORM_BUFFER, index, buffer, view->GetOffset(), view->GetSize());
+                                        glBindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer, view->GetOffset(), view->GetSize());
                                     }
                                     break;
 
                                 case nxt::BindingType::Sampler:
                                     {
                                         GLuint sampler = ToBackend(group->GetBindingAsSampler(binding))->GetHandle();
-                                        GLuint index = indices[binding];
+                                        GLuint samplerIndex = indices[binding];
 
-                                        for (auto unit : lastPipeline->GetTextureUnitsForSampler(index)) {
+                                        for (auto unit : lastPipeline->GetTextureUnitsForSampler(samplerIndex)) {
                                             glBindSampler(unit, sampler);
                                         }
                                     }
@@ -283,9 +283,9 @@ namespace opengl {
                                         Texture* texture = ToBackend(view->GetTexture());
                                         GLuint handle = texture->GetHandle();
                                         GLenum target = texture->GetGLTarget();
-                                        GLuint index = indices[binding];
+                                        GLuint textureIndex = indices[binding];
 
-                                        for (auto unit : lastPipeline->GetTextureUnitsForTexture(index)) {
+                                        for (auto unit : lastPipeline->GetTextureUnitsForTexture(textureIndex)) {
                                             glActiveTexture(GL_TEXTURE0 + unit);
                                             glBindTexture(target, handle);
                                         }
@@ -296,9 +296,9 @@ namespace opengl {
                                     {
                                         BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
                                         GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
-                                        GLuint index = indices[binding];
+                                        GLuint ssboIndex = indices[binding];
 
-                                        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, index, buffer, view->GetOffset(), view->GetSize());
+                                        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer, view->GetOffset(), view->GetSize());
                                     }
                                     break;
                             }

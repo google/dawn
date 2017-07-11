@@ -14,6 +14,8 @@
 
 #include "backend/d3d12/InputStateD3D12.h"
 
+#include "common/BitSetIterator.h"
+
 namespace backend {
 namespace d3d12 {
 
@@ -48,8 +50,8 @@ namespace d3d12 {
 
         const auto& attributesSetMask = GetAttributesSetMask();
 
-        size_t count = 0;
-        for (size_t i = 0; i < attributesSetMask.size(); ++i) {
+        unsigned int count = 0;
+        for (auto i : IterateBitSet(attributesSetMask)) {
             if (!attributesSetMask[i]) {
                 continue;
             }
@@ -60,7 +62,7 @@ namespace d3d12 {
 
             // If the HLSL semantic is TEXCOORDN the SemanticName should be "TEXCOORD" and the SemanticIndex N
             inputElementDescriptor.SemanticName = "TEXCOORD";
-            inputElementDescriptor.SemanticIndex = i;
+            inputElementDescriptor.SemanticIndex = static_cast<uint32_t>(i);
             inputElementDescriptor.Format = VertexFormatType(attribute.format);
             inputElementDescriptor.InputSlot = attribute.bindingSlot;
 

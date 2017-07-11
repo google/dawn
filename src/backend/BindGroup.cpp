@@ -110,7 +110,7 @@ namespace backend {
 
         const auto& layoutInfo = layout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
-            nxt::BufferUsageBit requiredBit;
+            nxt::BufferUsageBit requiredBit = nxt::BufferUsageBit::None;
             switch (layoutInfo.types[i]) {
                 case nxt::BindingType::UniformBuffer:
                     requiredBit = nxt::BufferUsageBit::Uniform;

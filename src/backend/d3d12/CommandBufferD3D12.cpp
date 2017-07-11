@@ -273,7 +273,8 @@ namespace d3d12 {
                         D3D12_RECT scissorRect = { 0, 0, static_cast<long>(width), static_cast<long>(height) };
                         commandList->RSSetViewports(1, &viewport);
                         commandList->RSSetScissorRects(1, &scissorRect);
-                        commandList->OMSetRenderTargets(1, &device->GetCurrentRenderTargetDescriptor(), FALSE, nullptr);
+                        D3D12_CPU_DESCRIPTOR_HANDLE rtv = device->GetCurrentRenderTargetDescriptor();
+                        commandList->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
                     }
                     break;
 
@@ -381,7 +382,7 @@ namespace d3d12 {
 
                 case Command::EndRenderPass:
                     {
-                        EndRenderPassCmd* cmd = commands.NextCommand<EndRenderPassCmd>();
+                        commands.NextCommand<EndRenderPassCmd>();
                     }
                     break;
 
@@ -426,13 +427,13 @@ namespace d3d12 {
 
                 case Command::SetPushConstants:
                     {
-                        SetPushConstantsCmd* cmd = commands.NextCommand<SetPushConstantsCmd>();
+                        commands.NextCommand<SetPushConstantsCmd>();
                     }
                     break;
 
                 case Command::SetStencilReference:
                     {
-                        SetStencilReferenceCmd* cmd = commands.NextCommand<SetStencilReferenceCmd>();
+                        commands.NextCommand<SetStencilReferenceCmd>();
                     }
                     break;
 

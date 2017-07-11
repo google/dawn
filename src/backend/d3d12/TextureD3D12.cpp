@@ -89,8 +89,8 @@ namespace d3d12 {
         resourceDescriptor.Alignment = 0;
         resourceDescriptor.Width = GetWidth();
         resourceDescriptor.Height = GetHeight();
-        resourceDescriptor.DepthOrArraySize = GetDepth();
-        resourceDescriptor.MipLevels = GetNumMipLevels();
+        resourceDescriptor.DepthOrArraySize = static_cast<UINT16>(GetDepth());
+        resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
         resourceDescriptor.Format = D3D12TextureFormat(GetFormat());
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;

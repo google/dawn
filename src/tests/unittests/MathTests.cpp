@@ -63,7 +63,7 @@ TEST(Math, Align) {
         char* aligned = Align(unaligned, kTestAlignment);
 
         ASSERT_GE(aligned - unaligned, 0);
-        ASSERT_LT(aligned - unaligned, kTestAlignment);
+        ASSERT_LT(static_cast<size_t>(aligned - unaligned), kTestAlignment);
         ASSERT_EQ(reinterpret_cast<intptr_t>(aligned) & (kTestAlignment -1), 0);
     }
 }

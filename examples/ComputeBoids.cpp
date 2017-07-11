@@ -66,7 +66,7 @@ void initBuffers() {
     };
     modelBuffer = utils::CreateFrozenBufferFromData(device, model, sizeof(model), nxt::BufferUsageBit::Vertex);
 
-    SimParams params = { 0.04, 0.1, 0.025, 0.025, 0.02, 0.05, 0.005, kNumParticles };
+    SimParams params = { 0.04f, 0.1f, 0.025f, 0.025f, 0.02f, 0.05f, 0.005f, kNumParticles };
     updateParams = utils::CreateFrozenBufferFromData(device, &params, sizeof(params), nxt::BufferUsageBit::Uniform);
 
     std::vector<Particle> initialParticles(kNumParticles);

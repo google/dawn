@@ -51,7 +51,7 @@ void ValidationTest::TearDown() {
 
         ASSERT_TRUE(expectation.gotStatus) << "Didn't get a status for " << name;
 
-        ASSERT_NE(NXT_BUILDER_ERROR_STATUS_UNKNOWN, expectation.gotStatus) << "Got unknown status for " << name;
+        ASSERT_NE(NXT_BUILDER_ERROR_STATUS_UNKNOWN, expectation.status) << "Got unknown status for " << name;
 
         bool wasSuccess = expectation.status == NXT_BUILDER_ERROR_STATUS_SUCCESS;
         ASSERT_EQ(expectation.expectSuccess, wasSuccess)
