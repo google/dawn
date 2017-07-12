@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "common/Platform.h"
 #include "utils/BackendBinding.h"
-#include "../src/wire/TerribleCommandBuffer.h"
+#include "wire/TerribleCommandBuffer.h"
 
 // Include Windows.h before GLFW to avoid a redefinition of APIENTRY
-#ifdef _WIN32
+#if defined(NXT_PLATFORM_WINDOWS)
     #include <Windows.h>
+#elif defined(NXT_PLATFORM_POSIX)
+   #include <unistd.h>
 #else
-    #include <unistd.h>
+    #error "Unsupported platform."
 #endif
 
 #include <nxt/nxt.h>
@@ -176,14 +179,16 @@ void DoSwapBuffers() {
     binding->SwapBuffers();
 }
 
-#ifdef _WIN32
-void USleep(uint64_t usecs) {
-    Sleep(static_cast<DWORD>(usecs / 1000));
-}
+#if defined(NXT_PLATFORM_WINDOWS)
+    void USleep(uint64_t usecs) {
+        Sleep(static_cast<DWORD>(usecs / 1000));
+    }
+#elif defined(NXT_PLATFORM_POSIX)
+    void USleep(uint64_t usecs) {
+        usleep(usecs);
+    }
 #else
-void USleep(uint64_t usecs) {
-    usleep(usecs);
-}
+    #error "Implement USleep for your platform."
 #endif
 
 bool ShouldQuit() {
