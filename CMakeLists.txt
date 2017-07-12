@@ -67,6 +67,8 @@ endif()
 if (WIN32)
     # Define NOMINMAX to prevent conflicts between std::min/max and the min/max macros in WinDef.h
     list(APPEND NXT_DEFS "NOMINMAX")
+    # Avoid Windows.h including a lot of headers
+    list(APPEND NXT_DEFS "WIN32_LEAN_AND_MEAN")
     # Remove compile error where the mock NXT creates too many sections for the old obj format.
     list(APPEND NXT_FLAGS "/bigobj")
 endif()
