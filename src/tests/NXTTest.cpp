@@ -188,6 +188,9 @@ void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Textu
     deferredExpectations.push_back(deferred);
 }
 
+void NXTTest::SwapBuffers() {
+    binding->SwapBuffers();
+}
 
 NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {
     // For now create a new MapRead buffer for each readback
