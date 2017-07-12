@@ -101,6 +101,10 @@ namespace backend {
         return true;
     }
 
+    DeviceBase* CommandBufferBase::GetDevice() {
+        return device;
+    }
+
     void FreeCommands(CommandIterator* commands) {
         Command type;
         while(commands->NextCommandId(&type)) {

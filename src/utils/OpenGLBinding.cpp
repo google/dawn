@@ -19,7 +19,9 @@
 namespace backend {
     namespace opengl {
         void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device);
-        void HACKCLEAR();
+        void HACKCLEAR(nxtDevice device);
+        void InitBackbuffer(nxtDevice device);
+        void CommitBackbuffer(nxtDevice device);
     }
 }
 
@@ -42,11 +44,18 @@ namespace utils {
             void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
                 glfwMakeContextCurrent(window);
                 backend::opengl::Init(reinterpret_cast<void*(*)(const char*)>(glfwGetProcAddress), procs, device);
+
+                backendDevice = *device;
+                backend::opengl::InitBackbuffer(backendDevice);
             }
             void SwapBuffers() override {
+                backend::opengl::CommitBackbuffer(backendDevice);
                 glfwSwapBuffers(window);
-                backend::opengl::HACKCLEAR();
+                backend::opengl::HACKCLEAR(backendDevice);
             }
+
+        private:
+            nxtDevice backendDevice = nullptr;
     };
 
     BackendBinding* CreateOpenGLBinding() {

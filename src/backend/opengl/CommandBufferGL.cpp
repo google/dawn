@@ -67,6 +67,11 @@ namespace opengl {
         PersistentPipelineState persistentPipelineState;
         persistentPipelineState.SetDefaultState();
 
+        RenderPass* currentRenderPass = nullptr;
+        Framebuffer* currentFramebuffer = nullptr;
+        uint32_t currentSubpass = 0;
+        GLuint currentFBO = 0;
+
         while(commands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass:
@@ -77,15 +82,50 @@ namespace opengl {
 
                 case Command::BeginRenderPass:
                     {
-                        commands.NextCommand<BeginRenderPassCmd>();
-                        // TODO(kainino@chromium.org): implement
+                        auto* cmd = commands.NextCommand<BeginRenderPassCmd>();
+                        currentRenderPass = ToBackend(cmd->renderPass.Get());
+                        currentFramebuffer = ToBackend(cmd->framebuffer.Get());
+                        currentSubpass = 0;
                     }
                     break;
 
                 case Command::BeginRenderSubpass:
                     {
                         commands.NextCommand<BeginRenderSubpassCmd>();
-                        // TODO(kainino@chromium.org): implement
+                        // TODO(kainino@chromium.org): possible future
+                        // optimization: create these framebuffers at
+                        // Framebuffer build time (or maybe CommandBuffer build
+                        // time) so they don't have to be created and destroyed
+                        // at draw time.
+                        glGenFramebuffers(1, &currentFBO);
+                        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFBO);
+
+                        auto* device = ToBackend(GetDevice());
+                        const auto& info = currentRenderPass->GetSubpassInfo(currentSubpass);
+
+                        bool usingBackbuffer = false; // HACK(kainino@chromium.org): workaround for not having depth attachments
+                        for (uint32_t index = 0; index < info.colorAttachments.size(); ++index) {
+                            uint32_t attachment = info.colorAttachments[index];
+
+                            // TODO(kainino@chromium.org): currently a 'null' texture view
+                            // falls back to the 'back buffer' but this should go away
+                            // when we have WSI.
+                            GLuint texture = 0;
+                            if (auto textureView = currentFramebuffer->GetTextureView(attachment)) {
+                                texture = ToBackend(textureView->GetTexture())->GetHandle();
+                            } else {
+                                texture = device->GetCurrentTexture();
+                                usingBackbuffer = true;
+                            }
+                            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index,
+                                    GL_TEXTURE_2D, texture, 0);
+                        }
+                        // TODO(kainino@chromium.org): load depth attachment from subpass
+                        if (usingBackbuffer) {
+                            GLuint texture = device->GetCurrentDepthTexture();
+                            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                    GL_TEXTURE_2D, texture, 0);
+                        }
                     }
                     break;
 
@@ -185,14 +225,15 @@ namespace opengl {
                 case Command::EndRenderPass:
                     {
                         commands.NextCommand<EndRenderPassCmd>();
-                        // TODO(kainino@chromium.org): implement
                     }
                     break;
 
                 case Command::EndRenderSubpass:
                     {
                         commands.NextCommand<EndRenderSubpassCmd>();
-                        // TODO(kainino@chromium.org): implement
+                        glDeleteFramebuffers(1, &currentFBO);
+                        currentFBO = 0;
+                        currentSubpass += 1;
                     }
                     break;
 

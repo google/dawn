@@ -43,6 +43,8 @@ namespace backend {
             CommandBufferBase(CommandBufferBuilder* builder);
             bool ValidateResourceUsagesImmediate();
 
+            DeviceBase* GetDevice();
+
         private:
             DeviceBase* device;
             std::set<BufferBase*> buffersTransitioned;
