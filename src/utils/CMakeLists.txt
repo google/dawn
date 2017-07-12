@@ -17,21 +17,31 @@ set(UTILS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 list(APPEND UTILS_SOURCES
     ${UTILS_DIR}/BackendBinding.cpp
     ${UTILS_DIR}/BackendBinding.h
-    ${UTILS_DIR}/NullBinding.cpp
-    ${UTILS_DIR}/OpenGLBinding.cpp
     ${UTILS_DIR}/NXTHelpers.cpp
     ${UTILS_DIR}/NXTHelpers.h
 )
 
-if (APPLE)
+if (NXT_ENABLE_D3D12)
+    list(APPEND UTILS_SOURCES
+        ${UTILS_DIR}/D3D12Binding.cpp
+    )
+endif()
+
+if (NXT_ENABLE_METAL)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/MetalBinding.mm
     )
 endif()
 
-if (WIN32)
+if (NXT_ENABLE_NULL)
     list(APPEND UTILS_SOURCES
-        ${UTILS_DIR}/D3D12Binding.cpp
+        ${UTILS_DIR}/NullBinding.cpp
+    )
+endif()
+
+if (NXT_ENABLE_OPENGL)
+    list(APPEND UTILS_SOURCES
+        ${UTILS_DIR}/OpenGLBinding.cpp
     )
 endif()
 

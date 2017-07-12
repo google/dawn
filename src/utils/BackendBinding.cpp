@@ -18,11 +18,21 @@
 
 namespace utils {
 
-    BackendBinding* CreateD3D12Binding();
-    BackendBinding* CreateMetalBinding();
-    BackendBinding* CreateOpenGLBinding();
-    BackendBinding* CreateNullBinding();
-    BackendBinding* CreateVulkanBinding();
+    #if defined(NXT_ENABLE_BACKEND_D3D12)
+        BackendBinding* CreateD3D12Binding();
+    #endif
+    #if defined(NXT_ENABLE_BACKEND_METAL)
+        BackendBinding* CreateMetalBinding();
+    #endif
+    #if defined(NXT_ENABLE_BACKEND_NULL)
+        BackendBinding* CreateNullBinding();
+    #endif
+    #if defined(NXT_ENABLE_BACKEND_OPENGL)
+        BackendBinding* CreateOpenGLBinding();
+    #endif
+    #if defined(NXT_ENABLE_BACKEND_VULKAN)
+        BackendBinding* CreateVulkanBinding();
+    #endif
 
     void BackendBinding::SetWindow(GLFWwindow* window) {
         this->window = window;
@@ -30,31 +40,33 @@ namespace utils {
 
     BackendBinding* CreateBinding(BackendType type) {
         switch (type) {
-            case BackendType::D3D12:
-                #if defined(_WIN32)
+            #if defined(NXT_ENABLE_BACKEND_D3D12)
+                case BackendType::D3D12:
                     return CreateD3D12Binding();
-                #else
-                    return nullptr;
-                #endif
+            #endif
 
-            case BackendType::OpenGL:
-                return CreateOpenGLBinding();
-
-            case BackendType::Metal:
-                #if defined(__APPLE__)
+            #if defined(NXT_ENABLE_BACKEND_METAL)
+                case BackendType::Metal:
                     return CreateMetalBinding();
-                #else
-                    return nullptr;
-                #endif
+            #endif
 
-            case BackendType::Null:
-                return CreateNullBinding();
+            #if defined(NXT_ENABLE_BACKEND_NULL)
+                case BackendType::Null:
+                    return CreateNullBinding();
+            #endif
 
-            case BackendType::Vulkan:
-                return nullptr; // TODO(cwallez@chromium.org) change it to CreateVulkanBinding();
+            #if defined(NXT_ENABLE_BACKEND_OPENGL)
+                case BackendType::OpenGL:
+                    return CreateOpenGLBinding();
+            #endif
+
+            #if defined(NXT_ENABLE_BACKEND_VULKAN)
+                case BackendType::Vulkan:
+                    return CreateVulkanBinding();
+            #endif
 
             default:
-                UNREACHABLE();
+                return nullptr;
         }
     }
 

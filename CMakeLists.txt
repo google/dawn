@@ -21,6 +21,19 @@ project(nxt C CXX)
 
 option(NXT_USE_WERROR "Treat warnings as error (useful for CI)" 0)
 
+# Default values for the backend-enabling options
+if (WIN32)
+    set(NXT_ENABLE_D3D12 ON)
+elseif(APPLE)
+    set(NXT_ENABLE_METAL ON)
+endif()
+
+option(NXT_ENABLE_D3D12 "Enable compilation of the D3D12 backend" OFF)
+option(NXT_ENABLE_METAL "Enable compilation of the Metal backend" OFF)
+option(NXT_ENABLE_NULL "Enable compilation of the Null backend" ON)
+option(NXT_ENABLE_OPENGL "Enable compilation of the OpenGL backend" ON)
+option(NXT_ENABLE_VULKAN "Enable compilation of the Vulkan backend" OFF)
+
 ################################################################################
 # Precompute compile flags and defines, functions to set them
 ################################################################################
@@ -33,6 +46,22 @@ set(NXT_GENERATED_FLAGS "")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     list(APPEND NXT_DEFS "NXT_ENABLE_ASSERTS")
+endif()
+
+if (NXT_ENABLE_D3D12)
+    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_D3D12")
+endif()
+if (NXT_ENABLE_METAL)
+    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_METAL")
+endif()
+if (NXT_ENABLE_NULL)
+    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_NULL")
+endif()
+if (NXT_ENABLE_OPENGL)
+    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_OPENGL")
+endif()
+if (NXT_ENABLE_VULKAN)
+    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_VULKAN")
 endif()
 
 if (WIN32)

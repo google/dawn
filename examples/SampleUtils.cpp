@@ -39,12 +39,18 @@ enum class CmdBufType {
     //TODO(cwallez@chromium.org) double terrible cmdbuf
 };
 
-#if defined(__APPLE__)
-static utils::BackendType backendType = utils::BackendType::Metal;
-#elif defined(_WIN32)
-static utils::BackendType backendType = utils::BackendType::D3D12;
+// Default to D3D12, Metal, Vulkan, OpenGL in that order as D3D12 and Metal are the preferred on
+// their respective platforms, and Vulkan is preferred to OpenGL
+#if defined(NXT_ENABLE_BACKEND_D3D12)
+    static utils::BackendType backendType = utils::BackendType::D3D12;
+#elif defined(NXT_ENABLE_BACKEND_METAL)
+    static utils::BackendType backendType = utils::BackendType::Metal;
+#elif defined(NXT_ENABLE_BACKEND_VULKAN)
+    static utils::BackendType backendType = utils::BackendType::OpenGL;
+#elif defined(NXT_ENABLE_BACKEND_OPENGL)
+    static utils::BackendType backendType = utils::BackendType::Vulkan;
 #else
-static utils::BackendType backendType = utils::BackendType::OpenGL;
+    #error
 #endif
 
 static CmdBufType cmdBufType = CmdBufType::Terrible;

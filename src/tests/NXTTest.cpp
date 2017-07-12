@@ -276,17 +276,24 @@ std::ostream& operator<< (std::ostream& stream, const RGBA8& color) {
 
 namespace detail {
     bool IsBackendAvailable(BackendType type) {
-        #if defined(__APPLE__)
-            return type == MetalBackend;
-        #elif defined(_WIN32)
-            return type == D3D12Backend;
-        #elif __linux__
-            // Temporarily silence a warning while Linux doesn't have a backend that can be tested.
-            (void) type;
-            return false;
-        #else
-            return false;
-        #endif
+        switch (type) {
+            #if defined(NXT_ENABLE_BACKEND_D3D12)
+                case D3D12Backend:
+            #endif
+            #if defined(NXT_ENABLE_BACKEND_METAL)
+                case MetalBackend:
+            #endif
+            #if defined(NXT_ENABLE_BACKEND_OPENGL)
+                case OpenGLBackend:
+            #endif
+            #if defined(NXT_ENABLE_BACKEND_VULKAN)
+                case VulkanBackend:
+            #endif
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     std::vector<BackendType> FilterBackends(const BackendType* types, size_t numParams) {
