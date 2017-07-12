@@ -126,7 +126,7 @@ namespace d3d12 {
         barrier->Transition.pResource = resource.Get();
         barrier->Transition.StateBefore = stateBefore;
         barrier->Transition.StateAfter = stateAfter;
-        barrier->Transition.Subresource = 0;
+        barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
         return true;
     }
