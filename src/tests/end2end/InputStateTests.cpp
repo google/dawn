@@ -58,7 +58,7 @@ class InputStateTest : public NXTTest {
             framebuffer = device.CreateFramebufferBuilder()
                 .SetRenderPass(renderpass)
                 .SetAttachment(0, renderTargetView)
-                .SetDimensions(640, 480)
+                .SetDimensions(400, 400)
                 .GetResult();
         }
 
@@ -199,7 +199,7 @@ class InputStateTest : public NXTTest {
             }
 
             nxt::CommandBuffer commands = builder
-                .DrawArrays(triangles * 4, instances, 0, 0)
+                .DrawArrays(triangles * 3, instances, 0, 0)
                 .EndRenderSubpass()
                 .EndRenderPass()
                 .GetResult();

@@ -75,6 +75,14 @@ namespace backend {
                     return nullptr;
                 }
                 usingBackbufferHack = true;
+                continue;
+            }
+
+            // TODO(cwallez@chromium.org): Adjust for the mip-level once that is supported.
+            if (textureView->GetTexture()->GetWidth() != width ||
+                textureView->GetTexture()->GetHeight() != height) {
+                HandleError("Framebuffer size doesn't match attachment size");
+                return nullptr;
             }
         }
 
