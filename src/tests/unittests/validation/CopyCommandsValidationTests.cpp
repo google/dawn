@@ -136,7 +136,19 @@ TEST_F(CopyCommandTest_B2T, Success) {
             // Copy 4x4 block in the 4x4 mip.
             .CopyBufferToTexture(source, 0, 256, destination, 0, 0, 0, 4, 4, 1, 2)
             // Copy with a buffer offset
-            .CopyBufferToTexture(source, bufferSize - 4, 256, destination, 0, 0, 0, 1, 1, 1, 4)
+            .CopyBufferToTexture(source, bufferSize - 4, 256, destination, 0, 0, 0, 1, 1, 1, 0)
+            .GetResult();
+    }
+
+    // Copies with a 256-byte aligned row pitch but unaligned texture region
+    {
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            // Unaligned region
+            .CopyBufferToTexture(source, 0, 256, destination, 0, 0, 0, 3, 4, 1, 0)
+            // Unaligned region with texture offset
+            .CopyBufferToTexture(source, 0, 256, destination, 5, 7, 0, 2, 3, 1, 0)
+            // Unaligned region, with buffer offset
+            .CopyBufferToTexture(source, 31 * 4, 256, destination, 0, 0, 0, 3, 3, 1, 0)
             .GetResult();
     }
 
@@ -170,7 +182,25 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
     // OOB on the buffer because of the offset
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 1, 256, destination, 0, 0, 0, 4, 4, 1, 0)
+            .CopyBufferToTexture(source, 4, 256, destination, 0, 0, 0, 4, 4, 1, 0)
+            .GetResult();
+    }
+
+    // OOB on the buffer because (row pitch * (height - 1) + width) * depth overflows
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, 512, destination, 0, 0, 0, 4, 3, 1, 0)
+            .GetResult();
+    }
+
+    // Not OOB on the buffer although row pitch * height overflows
+    // but (row pitch * (height - 1) + width) * depth does not overlow
+    {
+        uint32_t sourceBufferSize = BufferSizeForTextureCopy(7, 3, 1);
+        ASSERT_TRUE(256 * 3 > sourceBufferSize) << "row pitch * height should overflow buffer";
+        nxt::Buffer sourceBuffer = CreateFrozenBuffer(sourceBufferSize, nxt::BufferUsageBit::TransferSrc);
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(sourceBuffer, 0, 256, destination, 0, 0, 0, 7, 3, 1, 0)
             .GetResult();
     }
 }
@@ -256,6 +286,34 @@ TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
     }
 }
 
+TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
+    uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
+    nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
+    nxt::Texture destination = CreateFrozen2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+        nxt::TextureUsageBit::TransferDst);
+
+    // Default row pitch is not 256-byte aligned
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 3, 4, 1, 0)
+            .GetResult();
+    }
+
+    // Row pitch is not 256-byte aligned
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, 128, destination, 0, 0, 0, 4, 4, 1, 0)
+            .GetResult();
+    }
+
+    // Row pitch is less than width * bytesPerPixel
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, 0, 256, destination, 0, 0, 0, 65, 1, 1, 0)
+            .GetResult();
+    }
+}
+
 class CopyCommandTest_T2B : public CopyCommandTest {
 };
 
@@ -276,7 +334,19 @@ TEST_F(CopyCommandTest_T2B, Success) {
             // Copy from 4x4 block in the 4x4 mip.
             .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 2, destination, 0, 256)
             // Copy with a buffer offset
-            .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 4, destination, bufferSize - 4, 256)
+            .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 4, 256)
+            .GetResult();
+    }
+
+    // Copies with a 256-byte aligned row pitch but unaligned texture region
+    {
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            // Unaligned region
+            .CopyTextureToBuffer(source, 0, 0, 0, 3, 4, 1, 0, destination, 0, 256)
+            // Unaligned region with texture offset
+            .CopyTextureToBuffer(source, 5, 7, 0, 2, 3, 1, 0, destination, 0, 256)
+            // Unaligned region, with buffer offset
+            .CopyTextureToBuffer(source, 0, 0, 0, 3, 3, 1, 2, destination, 31 * 4, 256)
             .GetResult();
     }
 
@@ -346,7 +416,25 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     // OOB on the buffer because of the offset
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 1, 256)
+            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 4, 256)
+            .GetResult();
+    }
+
+    // OOB on the buffer because (row pitch * (height - 1) + width) * depth overflows
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 4, 3, 1, 0, destination, 0, 512)
+            .GetResult();
+    }
+
+    // Not OOB on the buffer although row pitch * height overflows
+    // but (row pitch * (height - 1) + width) * depth does not overlow
+    {
+        uint32_t destinationBufferSize = BufferSizeForTextureCopy(7, 3, 1);
+        ASSERT_TRUE(256 * 3 > destinationBufferSize) << "row pitch * height should overflow buffer";
+        nxt::Buffer destinationBuffer = CreateFrozenBuffer(destinationBufferSize, nxt::BufferUsageBit::TransferDst);
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 7, 3, 1, 0, destinationBuffer, 0, 256)
             .GetResult();
     }
 }
@@ -394,6 +482,34 @@ TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, vertex, 0, 256)
+            .GetResult();
+    }
+}
+
+TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
+    uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
+    nxt::Texture source = CreateFrozen2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+        nxt::TextureUsageBit::TransferDst);
+    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
+
+    // Default row pitch is not 256-byte aligned
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 3, 4, 1, 0, destination, 0, 256)
+            .GetResult();
+    }
+
+    // Row pitch is not 256-byte aligned
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 0, 257)
+            .GetResult();
+    }
+
+    // Row pitch is less than width * bytesPerPixel
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 65, 1, 1, 0, destination, 0, 256)
             .GetResult();
     }
 }
