@@ -202,7 +202,7 @@ namespace d3d12 {
             }
         }
 
-        D3D12_TEXTURE_COPY_LOCATION D3D12PlacedTextureCopyLocation(BufferCopyLocation& bufferLocation, Texture* texture, const TextureCopyLocation& textureLocation) {
+        D3D12_TEXTURE_COPY_LOCATION D3D12PlacedTextureCopyLocation(BufferCopyLocation& bufferLocation, Texture* texture, const TextureCopyLocation& textureLocation, uint32_t rowPitch) {
             D3D12_TEXTURE_COPY_LOCATION d3d12Location;
             d3d12Location.pResource = ToBackend(bufferLocation.buffer.Get())->GetD3D12Resource().Get();
             d3d12Location.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
@@ -211,10 +211,7 @@ namespace d3d12 {
             d3d12Location.PlacedFootprint.Footprint.Width = textureLocation.width;
             d3d12Location.PlacedFootprint.Footprint.Height = textureLocation.height;
             d3d12Location.PlacedFootprint.Footprint.Depth = textureLocation.depth;
-
-            size_t texelSize = TextureFormatPixelSize(texture->GetFormat());
-            uint32_t rowSize = textureLocation.width * texelSize;
-            d3d12Location.PlacedFootprint.Footprint.RowPitch = ((rowSize - 1) / D3D12_TEXTURE_DATA_PITCH_ALIGNMENT + 1) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
+            d3d12Location.PlacedFootprint.Footprint.RowPitch = rowPitch;
 
             return d3d12Location;
         }
@@ -320,12 +317,10 @@ namespace d3d12 {
                         Buffer* buffer = ToBackend(copy->source.buffer.Get());
                         Texture* texture = ToBackend(copy->destination.texture.Get());
 
-                        D3D12_TEXTURE_COPY_LOCATION srcLocation = D3D12PlacedTextureCopyLocation(copy->source, texture, copy->destination);
+                        D3D12_TEXTURE_COPY_LOCATION srcLocation = D3D12PlacedTextureCopyLocation(copy->source, texture, copy->destination, copy->rowPitch);
                         D3D12_TEXTURE_COPY_LOCATION dstLocation = D3D12TextureCopyLocation(copy->destination);
 
-                        // TODO(enga@google.com): This assertion will not be true if the number of bytes in each row of the texture is not a multiple of 256
-                        // To resolve this we would need to create an intermediate resource or force all textures to be 256-byte aligned
-                        uint64_t totalBytes = srcLocation.PlacedFootprint.Footprint.RowPitch * copy->destination.height * copy->destination.depth;
+                        uint64_t totalBytes = (copy->rowPitch * (copy->destination.height - 1) + copy->destination.width) * copy->destination.depth;
                         ASSERT(totalBytes <= buffer->GetD3D12Size());
 
                         commandList->CopyTextureRegion(&dstLocation, copy->destination.x, copy->destination.y, copy->destination.z, &srcLocation, nullptr);
@@ -339,11 +334,9 @@ namespace d3d12 {
                         Buffer* buffer = ToBackend(copy->destination.buffer.Get());
 
                         D3D12_TEXTURE_COPY_LOCATION srcLocation = D3D12TextureCopyLocation(copy->source);
-                        D3D12_TEXTURE_COPY_LOCATION dstLocation = D3D12PlacedTextureCopyLocation(copy->destination, texture, copy->source);
+                        D3D12_TEXTURE_COPY_LOCATION dstLocation = D3D12PlacedTextureCopyLocation(copy->destination, texture, copy->source, copy->rowPitch);
 
-                        // TODO(enga@google.com): This assertion will not be true if the number of bytes in each row of the texture is not a multiple of 256
-                        // To resolve this we would need to create an intermediate resource or force all textures to be 256-byte aligned
-                        uint64_t totalBytes = dstLocation.PlacedFootprint.Footprint.RowPitch * copy->source.height * copy->source.depth;
+                        uint64_t totalBytes = (copy->rowPitch * (copy->source.height - 1) + copy->source.width) * copy->source.depth;
                         ASSERT(totalBytes <= buffer->GetD3D12Size());
 
                         D3D12_BOX sourceRegion;

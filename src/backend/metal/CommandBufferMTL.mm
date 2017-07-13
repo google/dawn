@@ -207,7 +207,6 @@ namespace metal {
                         Buffer* buffer = ToBackend(src.buffer.Get());
                         Texture* texture = ToBackend(dst.texture.Get());
 
-                        unsigned rowSize = dst.width * TextureFormatPixelSize(texture->GetFormat());
                         MTLOrigin origin;
                         origin.x = dst.x;
                         origin.y = dst.y;
@@ -222,8 +221,8 @@ namespace metal {
                         [encoders.blit
                             copyFromBuffer:buffer->GetMTLBuffer()
                             sourceOffset:src.offset
-                            sourceBytesPerRow:rowSize
-                            sourceBytesPerImage:(rowSize * dst.height)
+                            sourceBytesPerRow:copy->rowPitch
+                            sourceBytesPerImage:(copy->rowPitch * dst.height)
                             sourceSize:size
                             toTexture:texture->GetMTLTexture()
                             destinationSlice:0
@@ -240,7 +239,6 @@ namespace metal {
                         Texture* texture = ToBackend(src.texture.Get());
                         Buffer* buffer = ToBackend(dst.buffer.Get());
 
-                        unsigned rowSize = src.width * TextureFormatPixelSize(texture->GetFormat());
                         MTLOrigin origin;
                         origin.x = src.x;
                         origin.y = src.y;
@@ -260,8 +258,8 @@ namespace metal {
                             sourceSize:size
                             toBuffer:buffer->GetMTLBuffer()
                             destinationOffset:dst.offset
-                            destinationBytesPerRow:rowSize
-                            destinationBytesPerImage:rowSize * src.height];
+                            destinationBytesPerRow:copy->rowPitch
+                            destinationBytesPerImage:copy->rowPitch * src.height];
                     }
                     break;
 
