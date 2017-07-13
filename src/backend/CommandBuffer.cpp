@@ -70,10 +70,29 @@ namespace backend {
             return true;
         }
 
-        bool ComputeTextureCopyBufferSize(CommandBufferBuilder*, const TextureCopyLocation& location, uint32_t* bufferSize) {
+        bool ComputeTextureCopyBufferSize(CommandBufferBuilder*, const TextureCopyLocation& location, uint32_t rowPitch, uint32_t* bufferSize) {
             // TODO(cwallez@chromium.org): check for overflows
-            uint32_t pixelSize = static_cast<uint32_t>(TextureFormatPixelSize(location.texture->GetFormat()));
-            *bufferSize = location.width * location.height * location.depth * pixelSize;
+            *bufferSize = (rowPitch * (location.height - 1) + location.width) * location.depth;
+
+            return true;
+        }
+
+        uint32_t ComputeDefaultRowPitch(TextureBase* texture, uint32_t width) {
+            uint32_t texelSize = static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat()));
+            return texelSize * width;
+        }
+
+        bool ValidateRowPitch(CommandBufferBuilder* builder, const TextureCopyLocation& location, uint32_t rowPitch) {
+            if (rowPitch % kTextureRowPitchAlignment != 0) {
+                builder->HandleError("Row pitch must be a multiple of 256");
+                return false;
+            }
+
+            uint32_t texelSize = static_cast<uint32_t>(TextureFormatPixelSize(location.texture.Get()->GetFormat()));
+            if (rowPitch < location.width * texelSize) {
+                builder->HandleError("Row pitch must not be less than the number of bytes per row");
+                return false;
+            }
 
             return true;
         }
@@ -414,7 +433,8 @@ namespace backend {
                         CopyBufferToTextureCmd* copy = iterator.NextCommand<CopyBufferToTextureCmd>();
 
                         uint32_t bufferCopySize = 0;
-                        if (!ComputeTextureCopyBufferSize(this, copy->destination, &bufferCopySize) ||
+                        if (!ValidateRowPitch(this, copy->destination, copy->rowPitch) ||
+                            !ComputeTextureCopyBufferSize(this, copy->destination, copy->rowPitch, &bufferCopySize) ||
                             !ValidateCopyLocationFitsInTexture(this, copy->destination) ||
                             !ValidateCopySizeFitsInBuffer(this, copy->source, bufferCopySize) ||
                             !state->ValidateCanCopy() ||
@@ -430,7 +450,8 @@ namespace backend {
                         CopyTextureToBufferCmd* copy = iterator.NextCommand<CopyTextureToBufferCmd>();
 
                         uint32_t bufferCopySize = 0;
-                        if (!ComputeTextureCopyBufferSize(this, copy->source, &bufferCopySize) ||
+                        if (!ValidateRowPitch(this, copy->source, copy->rowPitch) ||
+                            !ComputeTextureCopyBufferSize(this, copy->source, copy->rowPitch, &bufferCopySize) ||
                             !ValidateCopyLocationFitsInTexture(this, copy->source) ||
                             !ValidateCopySizeFitsInBuffer(this, copy->destination, bufferCopySize) ||
                             !state->ValidateCanCopy() ||
@@ -633,6 +654,9 @@ namespace backend {
     void CommandBufferBuilder::CopyBufferToTexture(BufferBase* buffer, uint32_t bufferOffset, uint32_t rowPitch,
                                                    TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
                                                    uint32_t width, uint32_t height, uint32_t depth, uint32_t level) {
+        if (rowPitch == 0) {
+            rowPitch = ComputeDefaultRowPitch(texture, width);
+        }
         CopyBufferToTextureCmd* copy = allocator.Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
         new(copy) CopyBufferToTextureCmd;
         copy->source.buffer = buffer;
@@ -651,6 +675,9 @@ namespace backend {
     void CommandBufferBuilder::CopyTextureToBuffer(TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
                                                   uint32_t width, uint32_t height, uint32_t depth, uint32_t level,
                                                   BufferBase* buffer, uint32_t bufferOffset, uint32_t rowPitch) {
+        if (rowPitch == 0) {
+            rowPitch = ComputeDefaultRowPitch(texture, width);
+        }
         CopyTextureToBufferCmd* copy = allocator.Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
         new(copy) CopyTextureToBufferCmd;
         copy->source.texture = texture;
