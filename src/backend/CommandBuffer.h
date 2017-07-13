@@ -65,12 +65,12 @@ namespace backend {
             void BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
             void BeginRenderSubpass();
             void CopyBufferToBuffer(BufferBase* source, uint32_t sourceOffset, BufferBase* destination, uint32_t destinationOffset, uint32_t size);
-            void CopyBufferToTexture(BufferBase* buffer, uint32_t bufferOffset,
+            void CopyBufferToTexture(BufferBase* buffer, uint32_t bufferOffset, uint32_t rowPitch,
                                      TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
                                      uint32_t width, uint32_t height, uint32_t depth, uint32_t level);
             void CopyTextureToBuffer(TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
                                      uint32_t width, uint32_t height, uint32_t depth, uint32_t level,
-                                     BufferBase* buffer, uint32_t bufferOffset);
+                                     BufferBase* buffer, uint32_t bufferOffset, uint32_t rowPitch);
             void Dispatch(uint32_t x, uint32_t y, uint32_t z);
             void DrawArrays(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
             void DrawElements(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance);

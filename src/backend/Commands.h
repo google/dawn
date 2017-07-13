@@ -83,11 +83,13 @@ namespace backend {
     struct CopyBufferToTextureCmd {
         BufferCopyLocation source;
         TextureCopyLocation destination;
+        uint32_t rowPitch;
     };
 
     struct CopyTextureToBufferCmd {
         TextureCopyLocation source;
         BufferCopyLocation destination;
+        uint32_t rowPitch;
     };
 
     struct DispatchCmd {

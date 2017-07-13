@@ -278,6 +278,7 @@
                 "args": [
                     {"name": "buffer", "type": "buffer"},
                     {"name": "buffer offset", "type": "uint32_t"},
+                    {"name": "row pitch", "type": "uint32_t"},
                     {"name": "texture", "type": "texture"},
                     {"name": "x", "type": "uint32_t"},
                     {"name": "y", "type": "uint32_t"},
@@ -291,7 +292,6 @@
                     "Make pretty with Offset and Extents structures",
                     "Allow choosing the aspect (depth vs. stencil)?",
                     "Add these arguments too",
-                    {"name": "row length", "type": "uint32_t"},
                     {"name": "image height", "type": "uint32_t"}
                 ]
             },
@@ -307,13 +307,13 @@
                     {"name": "depth", "type": "uint32_t"},
                     {"name": "level", "type": "uint32_t"},
                     {"name": "buffer", "type": "buffer"},
-                    {"name": "buffer offset", "type": "uint32_t"}
+                    {"name": "buffer offset", "type": "uint32_t"},
+                    {"name": "row pitch", "type": "uint32_t"}
                 ],
                 "TODO": [
                     "Make pretty with Offset and Extents structures",
                     "Allow choosing the aspect (depth vs. stencil)?",
                     "Add these arguments too",
-                    {"name": "row length", "type": "uint32_t"},
                     {"name": "image height", "type": "uint32_t"}
                 ]
             },
