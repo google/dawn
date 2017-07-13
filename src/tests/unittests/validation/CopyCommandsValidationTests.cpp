@@ -122,13 +122,13 @@ TEST_F(CopyCommandTest_B2T, Success) {
     {
         nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // Copy 4x4 block in corner of first mip.
-            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 4, 4, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 4, 4, 1, 0)
             // Copy 4x4 block in opposite corner of first mip.
-            .CopyBufferToTexture(source, 0, destination, 12, 12, 0, 4, 4, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 12, 12, 0, 4, 4, 1, 0)
             // Copy 4x4 block in the 4x4 mip.
-            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 4, 4, 1, 2)
+            .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 4, 4, 1, 2)
             // Copy with a buffer offset
-            .CopyBufferToTexture(source, 15 * 4, destination, 0, 0, 0, 1, 1, 1, 4)
+            .CopyBufferToTexture(source, 15 * 4, 0, destination, 0, 0, 0, 1, 1, 1, 4)
             .GetResult();
     }
 
@@ -136,11 +136,11 @@ TEST_F(CopyCommandTest_B2T, Success) {
     {
         nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // An empty copy
-            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 0, 0, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 0, 0, 1, 0)
             // An empty copy touching the end of the buffer
-            .CopyBufferToTexture(source, 16 * 4, destination, 0, 0, 0, 0, 0, 1, 0)
+            .CopyBufferToTexture(source, 16 * 4, 0, destination, 0, 0, 0, 0, 0, 1, 0)
             // An empty copy touching the side of the texture
-            .CopyBufferToTexture(source, 0, destination, 16, 16, 0, 0, 0, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 16, 16, 0, 0, 0, 1, 0)
             .GetResult();
     }
 }
@@ -154,14 +154,14 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
     // OOB on the buffer because we copy too many pixels
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 4, 5, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 4, 5, 1, 0)
             .GetResult();
     }
 
     // OOB on the buffer because of the offset
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 1, destination, 0, 0, 0, 4, 4, 1, 0)
+            .CopyBufferToTexture(source, 1, 0, destination, 0, 0, 0, 4, 4, 1, 0)
             .GetResult();
     }
 }
@@ -175,28 +175,28 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
     // OOB on the texture because x + width overflows
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 0, destination, 13, 12, 0, 4, 4, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 13, 12, 0, 4, 4, 1, 0)
             .GetResult();
     }
 
     // OOB on the texture because y + width overflows
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 0, destination, 12, 13, 0, 4, 4, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 12, 13, 0, 4, 4, 1, 0)
             .GetResult();
     }
 
     // OOB on the texture because we overflow a non-zero mip
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 0, destination, 1, 0, 0, 4, 4, 1, 2)
+            .CopyBufferToTexture(source, 0, 0, destination, 1, 0, 0, 4, 4, 1, 2)
             .GetResult();
     }
 
     // OOB on the texture even on an empty copy when we copy to a non-existent mip.
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 0, 0, 1, 5)
+            .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 0, 0, 1, 5)
             .GetResult();
     }
 }
@@ -210,14 +210,14 @@ TEST_F(CopyCommandTest_B2T, ZDepthConstraintFor2DTextures) {
     // Z=1 on an empty copy still errors
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 0, destination, 0, 0, 1, 0, 0, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 1, 0, 0, 1, 0)
             .GetResult();
     }
 
     // Depth=0 on an empty copy still errors
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 0, destination, 0, 0, 0, 0, 0, 0, 0)
+            .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 0, 0, 0, 0)
             .GetResult();
     }
 }
@@ -234,14 +234,14 @@ TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
     // Incorrect source usage
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(vertex, 0, destination, 0, 0, 0, 4, 4, 1, 0)
+            .CopyBufferToTexture(vertex, 0, 0, destination, 0, 0, 0, 4, 4, 1, 0)
             .GetResult();
     }
 
     // Incorrect destination usage
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToTexture(source, 0, sampled, 0, 0, 0, 4, 4, 1, 0)
+            .CopyBufferToTexture(source, 0, 0, sampled, 0, 0, 0, 4, 4, 1, 0)
             .GetResult();
     }
 }
@@ -259,13 +259,13 @@ TEST_F(CopyCommandTest_T2B, Success) {
     {
         nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // Copy from 4x4 block in corner of first mip.
-            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 0)
+            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 0, 0)
             // Copy from 4x4 block in opposite corner of first mip.
-            .CopyTextureToBuffer(source, 12, 12, 0, 4, 4, 1, 0, destination, 0)
+            .CopyTextureToBuffer(source, 12, 12, 0, 4, 4, 1, 0, destination, 0, 0)
             // Copy from 4x4 block in the 4x4 mip.
-            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 2, destination, 0)
+            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 2, destination, 0, 0)
             // Copy with a buffer offset
-            .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 4, destination, 15 * 4)
+            .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 4, destination, 15 * 4, 0)
             .GetResult();
     }
 
@@ -273,11 +273,11 @@ TEST_F(CopyCommandTest_T2B, Success) {
     {
         nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // An empty copy
-            .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 1, 0, destination, 0)
+            .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 1, 0, destination, 0, 0)
             // An empty copy touching the end of the buffer
-            .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 1, 0, destination, 16 * 4)
+            .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 1, 0, destination, 16 * 4, 0)
             // An empty copy touching the side of the texture
-            .CopyTextureToBuffer(source, 16, 16, 0, 0, 0, 1, 0, destination, 0)
+            .CopyTextureToBuffer(source, 16, 16, 0, 0, 0, 1, 0, destination, 0, 0)
             .GetResult();
     }
 }
@@ -291,28 +291,28 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
     // OOB on the texture because x + width overflows
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 13, 12, 0, 4, 4, 1, 0, destination, 0)
+            .CopyTextureToBuffer(source, 13, 12, 0, 4, 4, 1, 0, destination, 0, 0)
             .GetResult();
     }
 
     // OOB on the texture because y + width overflows
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 12, 13, 0, 4, 4, 1, 0, destination, 0)
+            .CopyTextureToBuffer(source, 12, 13, 0, 4, 4, 1, 0, destination, 0, 0)
             .GetResult();
     }
 
     // OOB on the texture because we overflow a non-zero mip
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 1, 0, 0, 4, 4, 1, 2, destination, 0)
+            .CopyTextureToBuffer(source, 1, 0, 0, 4, 4, 1, 2, destination, 0, 0)
             .GetResult();
     }
 
     // OOB on the texture even on an empty copy when we copy from a non-existent mip.
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 1, 5, destination, 0)
+            .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 1, 5, destination, 0, 0)
             .GetResult();
     }
 }
@@ -326,14 +326,14 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     // OOB on the buffer because we copy too many pixels
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 0, 0, 0, 4, 5, 1, 0, destination, 0)
+            .CopyTextureToBuffer(source, 0, 0, 0, 4, 5, 1, 0, destination, 0, 0)
             .GetResult();
     }
 
     // OOB on the buffer because of the offset
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 1)
+            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 1, 0)
             .GetResult();
     }
 }
@@ -347,14 +347,14 @@ TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
     // Z=1 on an empty copy still errors
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 0, 0, 1, 0, 0, 1, 0, destination, 0)
+            .CopyTextureToBuffer(source, 0, 0, 1, 0, 0, 1, 0, destination, 0, 0)
             .GetResult();
     }
 
     // Depth=0 on an empty copy still errors
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 0, 0, destination, 0)
+            .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 0, 0, destination, 0, 0)
             .GetResult();
     }
 }
@@ -371,14 +371,14 @@ TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
     // Incorrect source usage
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(sampled, 0, 0, 0, 4, 4, 1, 0, destination, 0)
+            .CopyTextureToBuffer(sampled, 0, 0, 0, 4, 4, 1, 0, destination, 0, 0)
             .GetResult();
     }
 
     // Incorrect destination usage
     {
         nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, vertex, 0)
+            .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, vertex, 0, 0)
             .GetResult();
     }
 }

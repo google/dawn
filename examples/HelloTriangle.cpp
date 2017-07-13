@@ -69,7 +69,7 @@ void initTextures() {
     nxt::Buffer stagingBuffer = utils::CreateFrozenBufferFromData(device, data.data(), static_cast<uint32_t>(data.size()), nxt::BufferUsageBit::TransferSrc);
     nxt::CommandBuffer copy = device.CreateCommandBufferBuilder()
         .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
-        .CopyBufferToTexture(stagingBuffer, 0, texture, 0, 0, 0, 1024, 1024, 1, 0)
+        .CopyBufferToTexture(stagingBuffer, 0, 0, texture, 0, 0, 0, 1024, 1024, 1, 0)
         .GetResult();
 
     queue.Submit(1, &copy);

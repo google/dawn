@@ -48,7 +48,7 @@ TEST_P(BasicTests, ReadPixelsTest) {
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
-        .CopyBufferToTexture(buffer, 0, texture, 0, 0, 0, 1, 1, 1, 0)
+        .CopyBufferToTexture(buffer, 0, 0, texture, 0, 0, 0, 1, 1, 1, 0)
         .GetResult();
 
     queue.Submit(1, &commands);
@@ -82,11 +82,11 @@ TEST_P(BasicTests, Buffer2Texture2Buffer) {
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
-        .CopyBufferToTexture(srcBuffer, 0, texture, 0, 0, 0, kSize, kSize, 1, 0)
+        .CopyBufferToTexture(srcBuffer, 0, 0, texture, 0, 0, 0, kSize, kSize, 1, 0)
 
         .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferSrc)
         .TransitionBufferUsage(dstBuffer, nxt::BufferUsageBit::TransferDst)
-        .CopyTextureToBuffer(texture, 0, 0, 0, kSize, kSize, 1, 0, dstBuffer, 0)
+        .CopyTextureToBuffer(texture, 0, 0, 0, kSize, kSize, 1, 0, dstBuffer, 0, 0)
 
         .GetResult();
 

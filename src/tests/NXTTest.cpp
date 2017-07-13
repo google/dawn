@@ -172,7 +172,7 @@ void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Textu
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .TransitionTextureUsage(source, nxt::TextureUsageBit::TransferSrc)
         .TransitionBufferUsage(readback.buffer, nxt::BufferUsageBit::TransferDst)
-        .CopyTextureToBuffer(source, x, y, 0, width, height, 1, 0, readback.buffer, readback.offset)
+        .CopyTextureToBuffer(source, x, y, 0, width, height, 1, 0, readback.buffer, readback.offset, 0)
         .GetResult();
 
     queue.Submit(1, &commands);

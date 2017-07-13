@@ -378,7 +378,7 @@ namespace {
             nxt::Buffer staging = utils::CreateFrozenBufferFromData(device, &white, sizeof(white), nxt::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
                 .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
-                .CopyBufferToTexture(staging, 0, oTexture, 0, 0, 0, 1, 1, 1, 0)
+                .CopyBufferToTexture(staging, 0, 0, oTexture, 0, 0, 0, 1, 1, 1, 0)
                 .GetResult();
             queue.Submit(1, &cmdbuf);
             oTexture.FreezeUsage(nxt::TextureUsageBit::Sampled);
@@ -432,7 +432,7 @@ namespace {
             nxt::Buffer staging = utils::CreateFrozenBufferFromData(device, data, numPixels * 4, nxt::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
                 .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
-                .CopyBufferToTexture(staging, 0, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)
+                .CopyBufferToTexture(staging, 0, 0, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)
                 .GetResult();
             queue.Submit(1, &cmdbuf);
             oTexture.FreezeUsage(nxt::TextureUsageBit::Sampled);
