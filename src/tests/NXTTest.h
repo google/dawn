@@ -62,6 +62,7 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 
         void SetUp() override;
         void TearDown() override;
+        bool IsD3D12() const;
 
     protected:
         nxt::Device device;

@@ -17,6 +17,7 @@
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
 #include "backend/d3d12/BufferD3D12.h"
 #include "backend/d3d12/CommandBufferD3D12.h"
+#include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/PipelineD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"

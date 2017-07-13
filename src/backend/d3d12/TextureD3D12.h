@@ -24,6 +24,8 @@ namespace d3d12 {
 
     class Device;
 
+    DXGI_FORMAT D3D12TextureFormat(nxt::TextureFormat format);
+
     class Texture : public TextureBase {
         public:
             Texture(Device* device, TextureBuilder* builder);
@@ -46,6 +48,7 @@ namespace d3d12 {
             TextureView(TextureViewBuilder* builder);
 
             const D3D12_SHADER_RESOURCE_VIEW_DESC& GetSRVDescriptor() const;
+            D3D12_RENDER_TARGET_VIEW_DESC  GetRTVDescriptor();
 
         private:
             D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;

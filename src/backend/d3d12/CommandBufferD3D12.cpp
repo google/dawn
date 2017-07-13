@@ -20,6 +20,7 @@
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
 #include "backend/d3d12/BufferD3D12.h"
 #include "backend/d3d12/DescriptorHeapAllocator.h"
+#include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/PipelineD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
@@ -192,7 +193,7 @@ namespace d3d12 {
                     D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
             }
         }
-    
+
         D3D12_TEXTURE_COPY_LOCATION D3D12PlacedTextureCopyLocation(BufferCopyLocation& bufferLocation, Texture* texture, const TextureCopyLocation& textureLocation) {
             D3D12_TEXTURE_COPY_LOCATION d3d12Location;
             d3d12Location.pResource = ToBackend(bufferLocation.buffer.Get())->GetD3D12Resource().Get();
@@ -205,9 +206,9 @@ namespace d3d12 {
 
             uint32_t texelSize = 0;
             switch (texture->GetFormat()) {
-				case nxt::TextureFormat::R8G8B8A8Unorm:
-					texelSize = 4;
-					break;
+                case nxt::TextureFormat::R8G8B8A8Unorm:
+                    texelSize = 4;
+                    break;
             }
             uint32_t rowSize = textureLocation.width * texelSize;
             d3d12Location.PlacedFootprint.Footprint.RowPitch = ((rowSize - 1) / D3D12_TEXTURE_DATA_PITCH_ALIGNMENT + 1) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
@@ -252,6 +253,7 @@ namespace d3d12 {
 
         RenderPass* currentRenderPass = nullptr;
         Framebuffer* currentFramebuffer = nullptr;
+        uint32_t currentSubpass = 0;
 
         while(commands.NextCommandId(&type)) {
             switch (type) {
@@ -266,6 +268,7 @@ namespace d3d12 {
                         BeginRenderPassCmd* beginRenderPassCmd = commands.NextCommand<BeginRenderPassCmd>();
                         currentRenderPass = ToBackend(beginRenderPassCmd->renderPass.Get());
                         currentFramebuffer = ToBackend(beginRenderPassCmd->framebuffer.Get());
+                        currentSubpass = 0;
 
                         uint32_t width = currentFramebuffer->GetWidth();
                         uint32_t height = currentFramebuffer->GetHeight();
@@ -273,14 +276,28 @@ namespace d3d12 {
                         D3D12_RECT scissorRect = { 0, 0, static_cast<long>(width), static_cast<long>(height) };
                         commandList->RSSetViewports(1, &viewport);
                         commandList->RSSetScissorRects(1, &scissorRect);
-                        D3D12_CPU_DESCRIPTOR_HANDLE rtv = device->GetCurrentRenderTargetDescriptor();
-                        commandList->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
                     }
                     break;
 
                 case Command::BeginRenderSubpass:
                     {
                         commands.NextCommand<BeginRenderSubpassCmd>();
+                        Framebuffer::OMSetRenderTargetArgs args = currentFramebuffer->GetSubpassOMSetRenderTargetArgs(currentSubpass);
+
+                        // HACK(enga@google.com): Remove when clearing is implemented
+                        for (uint32_t index = 0; index < args.numRTVs; ++index) {
+                            static const float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+                            commandList->ClearRenderTargetView(args.RTVs[index], clearColor, 0, nullptr);
+                        }
+
+                        if (args.dsv.ptr) {
+                            // HACK(enga@google.com): Remove when clearing is implemented
+                            commandList->ClearDepthStencilView(args.dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0, 0, 0, nullptr);
+
+                            commandList->OMSetRenderTargets(args.numRTVs, args.RTVs, FALSE, &args.dsv);
+                        } else {
+                            commandList->OMSetRenderTargets(args.numRTVs, args.RTVs, FALSE, nullptr);
+                        }
                     }
                     break;
 
@@ -389,6 +406,7 @@ namespace d3d12 {
                 case Command::EndRenderSubpass:
                     {
                         commands.NextCommand<EndRenderSubpassCmd>();
+                        currentSubpass += 1;
                     }
                     break;
 

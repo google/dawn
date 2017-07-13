@@ -101,6 +101,10 @@ NXTTest::~NXTTest() {
     nxtSetProcs(nullptr);
 }
 
+bool NXTTest::IsD3D12() const {
+    return GetParam() == D3D12Backend;
+}
+
 void NXTTest::SetUp() {
     binding = utils::CreateBinding(ParamToBackendType(GetParam()));
     NXT_ASSERT(binding != nullptr);

@@ -243,6 +243,8 @@ if (WIN32)
         ${D3D12_DIR}/DescriptorHeapAllocator.h
         ${D3D12_DIR}/D3D12Backend.cpp
         ${D3D12_DIR}/D3D12Backend.h
+        ${D3D12_DIR}/FramebufferD3D12.cpp
+        ${D3D12_DIR}/FramebufferD3D12.h
         ${D3D12_DIR}/InputStateD3D12.cpp
         ${D3D12_DIR}/InputStateD3D12.h
         ${D3D12_DIR}/PipelineD3D12.cpp
