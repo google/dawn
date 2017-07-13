@@ -21,6 +21,8 @@
 #include "SampleUtils.h"
 
 #include "utils/NXTHelpers.h"
+#include "common/Math.h"
+#include "common/Constants.h"
 
 #include <bitset>
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -410,29 +412,48 @@ namespace {
                 .GetResult();
                 // TODO: release this texture
 
-            uint32_t numPixels = iImage.width * iImage.height;
             const uint8_t* origData = iImage.image.data();
             const uint8_t* data = nullptr;
             std::vector<uint8_t> newData;
-            if (iImage.component == 4) {
-                data = origData;
-            } else if (iImage.component == 3) {
-                newData.resize(numPixels * 4);
-                for (size_t i = 0; i < numPixels; ++i) {
-                    newData[4 * i + 0] = origData[3 * i + 0];
-                    newData[4 * i + 1] = origData[3 * i + 1];
-                    newData[4 * i + 2] = origData[3 * i + 2];
-                    newData[4 * i + 3] = 255;
+
+            uint32_t width = static_cast<uint32_t>(iImage.width);
+            uint32_t height = static_cast<uint32_t>(iImage.height);
+            uint32_t rowSize = width * 4;
+            uint32_t rowPitch = Align(rowSize, kTextureRowPitchAlignment);
+
+            if (iImage.component == 3 || iImage.component == 4) {
+                if (rowSize != rowPitch || iImage.component == 3) {
+                    newData.resize(rowPitch * height);
+                    uint32_t pixelsPerRow = rowPitch / 4;
+                    for (uint32_t y = 0; y < height; ++y) {
+                        for (uint32_t x = 0; x < width; ++x) {
+                            size_t oldIndex = x + y * height;
+                            size_t newIndex = x + y * pixelsPerRow;
+                            if (iImage.component == 4) {
+                                newData[4 * newIndex + 0] = origData[4 * oldIndex + 0];
+                                newData[4 * newIndex + 1] = origData[4 * oldIndex + 1];
+                                newData[4 * newIndex + 2] = origData[4 * oldIndex + 2];
+                                newData[4 * newIndex + 3] = origData[4 * oldIndex + 3];
+                            } else if (iImage.component == 3) {
+                                newData[4 * newIndex + 0] = origData[3 * oldIndex + 0];
+                                newData[4 * newIndex + 1] = origData[3 * oldIndex + 1];
+                                newData[4 * newIndex + 2] = origData[3 * oldIndex + 2];
+                                newData[4 * newIndex + 3] = 255;
+                            }
+                        }
+                    }
+                    data = newData.data();
+                } else {
+                    data = origData;
                 }
-                data = newData.data();
             } else {
                 fprintf(stderr, "unsupported image.component %d\n", iImage.component);
             }
 
-            nxt::Buffer staging = utils::CreateFrozenBufferFromData(device, data, numPixels * 4, nxt::BufferUsageBit::TransferSrc);
+            nxt::Buffer staging = utils::CreateFrozenBufferFromData(device, data, rowPitch * iImage.height, nxt::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
                 .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
-                .CopyBufferToTexture(staging, 0, 0, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)
+                .CopyBufferToTexture(staging, 0, rowPitch, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)
                 .GetResult();
             queue.Submit(1, &cmdbuf);
             oTexture.FreezeUsage(nxt::TextureUsageBit::Sampled);
