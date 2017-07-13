@@ -103,6 +103,8 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
             size_t readbackSlot;
             uint32_t readbackOffset;
             uint32_t size;
+            uint32_t rowBytes;
+            uint32_t rowPitch;
             detail::Expectation* expectation;
         };
         std::vector<DeferredExpectation> deferredExpectations;

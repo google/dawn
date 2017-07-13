@@ -15,6 +15,8 @@
 #include "tests/NXTTest.h"
 
 #include "common/Assert.h"
+#include "common/Constants.h"
+#include "common/Math.h"
 #include "utils/BackendBinding.h"
 
 #include "GLFW/glfw3.h"
@@ -156,6 +158,8 @@ void NXTTest::AddBufferExpectation(const char* file, int line, const nxt::Buffer
     deferred.readbackSlot = readback.slot;
     deferred.readbackOffset = readback.offset;
     deferred.size = size;
+    deferred.rowBytes = size;
+    deferred.rowPitch = size;
     deferred.expectation = expectation;
 
     deferredExpectations.push_back(deferred);
@@ -163,7 +167,8 @@ void NXTTest::AddBufferExpectation(const char* file, int line, const nxt::Buffer
 
 void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation) {
     nxt::Texture source = texture.Clone();
-    uint32_t size = width * height * pixelSize;
+    uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
+    uint32_t size = rowPitch * (height - 1) + width * pixelSize;
 
     auto readback = ReserveReadback(size);
 
@@ -172,7 +177,7 @@ void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Textu
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .TransitionTextureUsage(source, nxt::TextureUsageBit::TransferSrc)
         .TransitionBufferUsage(readback.buffer, nxt::BufferUsageBit::TransferDst)
-        .CopyTextureToBuffer(source, x, y, 0, width, height, 1, 0, readback.buffer, readback.offset, 0)
+        .CopyTextureToBuffer(source, x, y, 0, width, height, 1, 0, readback.buffer, readback.offset, rowPitch)
         .GetResult();
 
     queue.Submit(1, &commands);
@@ -183,6 +188,8 @@ void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Textu
     deferred.readbackSlot = readback.slot;
     deferred.readbackOffset = readback.offset;
     deferred.size = size;
+    deferred.rowBytes = width * pixelSize;
+    deferred.rowPitch = rowPitch;
     deferred.expectation = expectation;
 
     deferredExpectations.push_back(deferred);
@@ -244,15 +251,33 @@ void NXTTest::SlotMapReadCallback(nxtBufferMapReadStatus status, const void* dat
 }
 
 void NXTTest::ResolveExpectations() {
-    for(const auto& expectation : deferredExpectations) {
+    for (const auto& expectation : deferredExpectations) {
         NXT_ASSERT(readbackSlots[expectation.readbackSlot].mappedData != nullptr);
 
         // Get a pointer to the mapped copy of the data for the expectation.
         const char* data = reinterpret_cast<const char*>(readbackSlots[expectation.readbackSlot].mappedData);
         data += expectation.readbackOffset;
 
+        uint32_t size;
+        std::vector<char> packedData;
+        if (expectation.rowBytes != expectation.rowPitch) {
+            NXT_ASSERT(expectation.rowPitch > expectation.rowBytes);
+            uint32_t rowCount = (expectation.size + expectation.rowPitch - 1) / expectation.rowPitch;
+            uint32_t packedSize = rowCount * expectation.rowBytes;
+            packedData.resize(packedSize);
+            for (uint32_t r = 0; r < rowCount; ++r) {
+                for (uint32_t i = 0; i < expectation.rowBytes; ++i) {
+                    packedData[i + r * expectation.rowBytes] = data[i + r * expectation.rowPitch];
+                }
+            }
+            data = packedData.data();
+            size = packedSize;
+        } else {
+            size = expectation.size;
+        }
+
         // Get the result for the expectation and add context to failures
-        testing::AssertionResult result = expectation.expectation->Check(data, expectation.size);
+        testing::AssertionResult result = expectation.expectation->Check(data, size);
         if (!result) {
             result << " Expectation created at " << expectation.file << ":" << expectation.line;
         }
