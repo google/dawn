@@ -28,12 +28,12 @@ nxt::Queue queue;
 nxt::Buffer modelBuffer;
 std::array<nxt::Buffer, 2> particleBuffers;
 
-nxt::Pipeline renderPipeline;
+nxt::RenderPipeline renderPipeline;
 nxt::RenderPass renderpass;
 nxt::Framebuffer framebuffer;
 
 nxt::Buffer updateParams;
-nxt::Pipeline updatePipeline;
+nxt::ComputePipeline updatePipeline;
 std::array<nxt::BindGroup, 2> updateBGs;
 
 std::array<nxt::CommandBuffer, 2> commandBuffers;
@@ -124,7 +124,7 @@ void initRender() {
         .GetResult();
 
     utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
-    renderPipeline = device.CreatePipelineBuilder()
+    renderPipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -231,7 +231,7 @@ void initSim() {
         .SetBindGroupLayout(0, bgl)
         .GetResult();
 
-    updatePipeline = device.CreatePipelineBuilder()
+    updatePipeline = device.CreateComputePipelineBuilder()
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Compute, module, "main")
         .GetResult();
@@ -265,7 +265,7 @@ void initCommandBuffers() {
         auto& bufferDst = particleBuffers[(i + 1) % 2];
         commandBuffers[i] = device.CreateCommandBufferBuilder()
             .BeginComputePass()
-                .SetPipeline(updatePipeline)
+                .SetComputePipeline(updatePipeline)
                 .TransitionBufferUsage(bufferSrc, nxt::BufferUsageBit::Storage)
                 .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Storage)
                 .SetBindGroup(0, updateBGs[i])
@@ -274,7 +274,7 @@ void initCommandBuffers() {
 
             .BeginRenderPass(renderpass, framebuffer)
             .BeginRenderSubpass()
-                .SetPipeline(renderPipeline)
+                .SetRenderPipeline(renderPipeline)
                 .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Vertex)
                 .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
                 .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)

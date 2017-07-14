@@ -28,8 +28,8 @@ nxt::TextureView renderTargetView;
 nxt::Sampler samplerPost;
 
 nxt::Queue queue;
-nxt::Pipeline pipeline;
-nxt::Pipeline pipelinePost;
+nxt::RenderPipeline pipeline;
+nxt::RenderPipeline pipelinePost;
 nxt::BindGroup bindGroup;
 nxt::RenderPass renderpass;
 nxt::Framebuffer framebuffer;
@@ -112,7 +112,7 @@ void initPipeline() {
         .SetInput(0, 4 * sizeof(float), nxt::InputStepMode::Vertex)
         .GetResult();
 
-    pipeline = device.CreatePipelineBuilder()
+    pipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -153,7 +153,7 @@ void initPipelinePost() {
         .SetBindGroupLayout(0, bgl)
         .GetResult();
 
-    pipelinePost = device.CreatePipelineBuilder()
+    pipelinePost = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 1)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -187,13 +187,13 @@ void frame() {
         .BeginRenderPass(renderpass, framebuffer)
             .BeginRenderSubpass()
                 // renderTarget implicitly locked to to Attachment usage (if not already frozen)
-                .SetPipeline(pipeline)
+                .SetRenderPipeline(pipeline)
                 .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
                 .DrawArrays(3, 1, 0, 0)
             .EndRenderSubpass()
             // renderTarget usage unlocked, but left in Attachment usage
             .BeginRenderSubpass()
-                .SetPipeline(pipelinePost)
+                .SetRenderPipeline(pipelinePost)
                 .SetVertexBuffers(0, 1, &vertexBufferQuad, vertexBufferOffsets)
                 .TransitionTextureUsage(renderTarget, nxt::TextureUsageBit::Sampled)
                 .SetBindGroup(0, bindGroup)

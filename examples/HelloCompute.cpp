@@ -21,11 +21,11 @@
 nxt::Device device;
 nxt::Queue queue;
 nxt::Buffer buffer;
-nxt::Pipeline renderPipeline;
+nxt::RenderPipeline renderPipeline;
 nxt::BindGroup renderBindGroup;
 nxt::RenderPass renderpass;
 nxt::Framebuffer framebuffer;
-nxt::Pipeline computePipeline;
+nxt::ComputePipeline computePipeline;
 nxt::BindGroup computeBindGroup;
 
 void init() {
@@ -67,7 +67,7 @@ void init() {
             .SetBindGroupLayout(0, bgl)
             .GetResult();
 
-        computePipeline = device.CreatePipelineBuilder()
+        computePipeline = device.CreateComputePipelineBuilder()
             .SetLayout(pl)
             .SetStage(nxt::ShaderStage::Compute, module, "main")
             .GetResult();
@@ -109,7 +109,7 @@ void init() {
             .GetResult();
 
         utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
-        renderPipeline = device.CreatePipelineBuilder()
+        renderPipeline = device.CreateRenderPipelineBuilder()
             .SetSubpass(renderpass, 0)
             .SetLayout(pl)
             .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -127,7 +127,7 @@ void init() {
 void frame() {
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginComputePass()
-            .SetPipeline(computePipeline)
+            .SetComputePipeline(computePipeline)
             .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Storage)
             .SetBindGroup(0, computeBindGroup)
             .Dispatch(1, 1, 1)
@@ -135,7 +135,7 @@ void frame() {
 
         .BeginRenderPass(renderpass, framebuffer)
         .BeginRenderSubpass()
-            .SetPipeline(renderPipeline)
+            .SetRenderPipeline(renderPipeline)
             .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, renderBindGroup)
             .DrawArrays(3, 1, 0, 0)

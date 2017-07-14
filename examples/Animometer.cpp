@@ -22,7 +22,7 @@
 
 nxt::Device device;
 nxt::Queue queue;
-nxt::Pipeline pipeline;
+nxt::RenderPipeline pipeline;
 nxt::RenderPass renderpass;
 nxt::Framebuffer framebuffer;
 
@@ -105,7 +105,7 @@ void init() {
     );
 
     utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
-    pipeline = device.CreatePipelineBuilder()
+    pipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -134,7 +134,7 @@ void frame() {
         nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
             .BeginRenderPass(renderpass, framebuffer)
             .BeginRenderSubpass()
-            .SetPipeline(pipeline)
+            .SetRenderPipeline(pipeline)
             .Clone();
 
         for (int k = 0; k < 200; k++) {

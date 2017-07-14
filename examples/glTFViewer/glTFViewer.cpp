@@ -62,7 +62,7 @@ namespace gl {
 
 struct MaterialInfo {
     nxt::Buffer uniformBuffer;
-    nxt::Pipeline pipeline;
+    nxt::RenderPipeline pipeline;
     nxt::BindGroup bindGroup0;
     std::map<uint32_t, std::string> slotSemantics;
 };
@@ -257,7 +257,7 @@ namespace {
         auto pipelineLayout = device.CreatePipelineLayoutBuilder()
             .SetBindGroupLayout(0, bindGroupLayout)
             .GetResult();
-        auto pipeline = device.CreatePipelineBuilder()
+        auto pipeline = device.CreateRenderPipelineBuilder()
             .SetSubpass(renderpass, 0)
             .SetLayout(pipelineLayout)
             .SetStage(nxt::ShaderStage::Vertex, oVSModule, "main")
@@ -486,7 +486,7 @@ namespace {
                     reinterpret_cast<const uint32_t*>(&transforms));
             cmd.BeginRenderPass(renderpass, framebuffer);
             cmd.BeginRenderSubpass();
-            cmd.SetPipeline(material.pipeline);
+            cmd.SetRenderPipeline(material.pipeline);
             cmd.TransitionBufferUsage(material.uniformBuffer, nxt::BufferUsageBit::Uniform);
             cmd.SetBindGroup(0, material.bindGroup0);
 

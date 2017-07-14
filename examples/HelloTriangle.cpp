@@ -27,7 +27,7 @@ nxt::Texture texture;
 nxt::Sampler sampler;
 
 nxt::Queue queue;
-nxt::Pipeline pipeline;
+nxt::RenderPipeline pipeline;
 nxt::RenderPass renderpass;
 nxt::Framebuffer framebuffer;
 nxt::BindGroup bindGroup;
@@ -118,7 +118,7 @@ void init() {
         .GetResult();
 
     utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
-    pipeline = device.CreatePipelineBuilder()
+    pipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -145,7 +145,7 @@ void frame() {
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderpass, framebuffer)
         .BeginRenderSubpass()
-            .SetPipeline(pipeline)
+            .SetRenderPipeline(pipeline)
             .SetBindGroup(0, bindGroup)
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
             .SetIndexBuffer(indexBuffer, 0, nxt::IndexFormat::Uint32)

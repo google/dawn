@@ -18,7 +18,7 @@
 
 nxtDevice device;
 nxtQueue queue;
-nxtPipeline pipeline;
+nxtRenderPipeline pipeline;
 nxtRenderPass renderpass;
 nxtFramebuffer framebuffer;
 
@@ -64,12 +64,12 @@ void init() {
         nxtFramebufferBuilderRelease(builder);
     }
     {
-        nxtPipelineBuilder builder = nxtDeviceCreatePipelineBuilder(device);
-        nxtPipelineBuilderSetSubpass(builder, renderpass, 0);
-        nxtPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_VERTEX, vsModule, "main");
-        nxtPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_FRAGMENT, fsModule, "main");
-        pipeline = nxtPipelineBuilderGetResult(builder);
-        nxtPipelineBuilderRelease(builder);
+        nxtRenderPipelineBuilder builder = nxtDeviceCreateRenderPipelineBuilder(device);
+        nxtRenderPipelineBuilderSetSubpass(builder, renderpass, 0);
+        nxtRenderPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_VERTEX, vsModule, "main");
+        nxtRenderPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_FRAGMENT, fsModule, "main");
+        pipeline = nxtRenderPipelineBuilderGetResult(builder);
+        nxtRenderPipelineBuilderRelease(builder);
     }
 
     nxtShaderModuleRelease(vsModule);
@@ -82,7 +82,7 @@ void frame() {
         nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
         nxtCommandBufferBuilderBeginRenderPass(builder, renderpass, framebuffer);
         nxtCommandBufferBuilderBeginRenderSubpass(builder);
-        nxtCommandBufferBuilderSetPipeline(builder, pipeline);
+        nxtCommandBufferBuilderSetRenderPipeline(builder, pipeline);
         nxtCommandBufferBuilderDrawArrays(builder, 3, 1, 0, 0);
         nxtCommandBufferBuilderEndRenderSubpass(builder);
         nxtCommandBufferBuilderEndRenderPass(builder);

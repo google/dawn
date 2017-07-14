@@ -34,9 +34,9 @@ nxt::BindGroup bindGroup[2];
 nxt::BindGroup cubeTransformBindGroup[2];
 
 nxt::Queue queue;
-nxt::Pipeline pipeline;
-nxt::Pipeline planePipeline;
-nxt::Pipeline reflectionPipeline;
+nxt::RenderPipeline pipeline;
+nxt::RenderPipeline planePipeline;
+nxt::RenderPipeline reflectionPipeline;
 nxt::RenderPass renderpass;
 nxt::Framebuffer framebuffer;
 
@@ -212,7 +212,7 @@ void init() {
         .SetDepthWriteEnabled(true)
         .GetResult();
 
-    pipeline = device.CreatePipelineBuilder()
+    pipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -227,7 +227,7 @@ void init() {
         .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
         .GetResult();
 
-    planePipeline = device.CreatePipelineBuilder()
+    planePipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -242,7 +242,7 @@ void init() {
         .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Equal, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
         .GetResult();
 
-    reflectionPipeline = device.CreatePipelineBuilder()
+    reflectionPipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -273,7 +273,7 @@ void frame() {
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderpass, framebuffer)
         .BeginRenderSubpass()
-            .SetPipeline(pipeline)
+            .SetRenderPipeline(pipeline)
             .TransitionBufferUsage(cameraBuffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, bindGroup[0])
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
@@ -281,11 +281,11 @@ void frame() {
             .DrawElements(36, 1, 0, 0)
 
             .SetStencilReference(0x1)
-            .SetPipeline(planePipeline)
+            .SetRenderPipeline(planePipeline)
             .SetVertexBuffers(0, 1, &planeBuffer, vertexBufferOffsets)
             .DrawElements(6, 1, 0, 0)
 
-            .SetPipeline(reflectionPipeline)
+            .SetRenderPipeline(reflectionPipeline)
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
             .SetBindGroup(0, bindGroup[1])
             .DrawElements(36, 1, 0, 0)
