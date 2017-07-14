@@ -12,14 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/opengl/OpenGLBackend.h"
-#include "backend/opengl/BufferGL.h"
-#include "backend/opengl/CommandBufferGL.h"
 #include "backend/opengl/ComputePipelineGL.h"
-#include "backend/opengl/DepthStencilStateGL.h"
-#include "backend/opengl/PersistentPipelineStateGL.h"
-#include "backend/opengl/PipelineLayoutGL.h"
-#include "backend/opengl/RenderPipelineGL.h"
-#include "backend/opengl/SamplerGL.h"
-#include "backend/opengl/ShaderModuleGL.h"
-#include "backend/opengl/TextureGL.h"
+
+namespace backend {
+namespace opengl {
+
+    ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
+        : ComputePipelineBase(builder), PipelineGL(this, builder) {
+    }
+
+    void ComputePipeline::ApplyNow() {
+        PipelineGL::ApplyNow();
+    }
+
+}
+}

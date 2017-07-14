@@ -28,9 +28,9 @@ namespace opengl {
     class PersistentPipelineState;
     class ShaderModule;
 
-    class Pipeline : public PipelineBase {
+    class PipelineGL {
         public:
-            Pipeline(PipelineBuilder* builder);
+            PipelineGL(PipelineBase* parent, PipelineBuilder* builder);
 
             using GLPushConstantInfo = std::array<GLint, kMaxPushConstants>;
             using BindingLocations = std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
@@ -40,7 +40,7 @@ namespace opengl {
             const std::vector<GLuint>& GetTextureUnitsForTexture(GLuint index) const;
             GLuint GetProgramHandle() const;
 
-            void ApplyNow(PersistentPipelineState &persistentPipelineState);
+            void ApplyNow();
 
         private:
             GLuint program;

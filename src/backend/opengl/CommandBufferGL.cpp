@@ -16,10 +16,11 @@
 
 #include "backend/Commands.h"
 #include "backend/opengl/BufferGL.h"
+#include "backend/opengl/ComputePipelineGL.h"
 #include "backend/opengl/OpenGLBackend.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
-#include "backend/opengl/PipelineGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
+#include "backend/opengl/RenderPipelineGL.h"
 #include "backend/opengl/SamplerGL.h"
 #include "backend/opengl/TextureGL.h"
 
@@ -61,7 +62,9 @@ namespace opengl {
 
     void CommandBuffer::Execute() {
         Command type;
-        Pipeline* lastPipeline = nullptr;
+        PipelineBase* lastPipeline = nullptr;
+        PipelineGL* lastGLPipeline = nullptr;
+        RenderPipeline* lastRenderPipeline = nullptr;
         uint32_t indexBufferOffset = 0;
         nxt::IndexFormat indexBufferFormat = nxt::IndexFormat::Uint16;
 
@@ -281,10 +284,21 @@ namespace opengl {
                     }
                     break;
 
-                case Command::SetPipeline:
+                case Command::SetComputePipeline:
                     {
-                        SetPipelineCmd* cmd = commands.NextCommand<SetPipelineCmd>();
+                        SetComputePipelineCmd* cmd = commands.NextCommand<SetComputePipelineCmd>();
+                        ToBackend(cmd->pipeline)->ApplyNow();
+                        lastGLPipeline = ToBackend(cmd->pipeline).Get();
+                        lastPipeline = ToBackend(cmd->pipeline).Get();
+                    }
+                    break;
+
+                case Command::SetRenderPipeline:
+                    {
+                        SetRenderPipelineCmd* cmd = commands.NextCommand<SetRenderPipelineCmd>();
                         ToBackend(cmd->pipeline)->ApplyNow(persistentPipelineState);
+                        lastRenderPipeline = ToBackend(cmd->pipeline).Get();
+                        lastGLPipeline = ToBackend(cmd->pipeline).Get();
                         lastPipeline = ToBackend(cmd->pipeline).Get();
                     }
                     break;
@@ -298,7 +312,7 @@ namespace opengl {
 
                         for (auto stage : IterateStages(cmd->stage)) {
                             const auto& pushConstants = lastPipeline->GetPushConstants(stage);
-                            const auto& glPushConstants = lastPipeline->GetGLPushConstants(stage);
+                            const auto& glPushConstants = lastGLPipeline->GetGLPushConstants(stage);
                             for (size_t i = 0; i < cmd->count; i++) {
                                 GLint location = glPushConstants[cmd->offset + i];
 
@@ -356,7 +370,7 @@ namespace opengl {
                                         GLuint sampler = ToBackend(group->GetBindingAsSampler(binding))->GetHandle();
                                         GLuint samplerIndex = indices[binding];
 
-                                        for (auto unit : lastPipeline->GetTextureUnitsForSampler(samplerIndex)) {
+                                        for (auto unit : lastGLPipeline->GetTextureUnitsForSampler(samplerIndex)) {
                                             glBindSampler(unit, sampler);
                                         }
                                     }
@@ -370,7 +384,7 @@ namespace opengl {
                                         GLenum target = texture->GetGLTarget();
                                         GLuint textureIndex = indices[binding];
 
-                                        for (auto unit : lastPipeline->GetTextureUnitsForTexture(textureIndex)) {
+                                        for (auto unit : lastGLPipeline->GetTextureUnitsForTexture(textureIndex)) {
                                             glActiveTexture(GL_TEXTURE0 + unit);
                                             glBindTexture(target, handle);
                                         }
@@ -408,7 +422,7 @@ namespace opengl {
                         auto buffers = commands.NextData<Ref<BufferBase>>(cmd->count);
                         auto offsets = commands.NextData<uint32_t>(cmd->count);
 
-                        auto inputState = lastPipeline->GetInputState();
+                        auto inputState = lastRenderPipeline->GetInputState();
 
                         auto& attributesSetMask = inputState->GetAttributesSetMask();
                         for (uint32_t location = 0; location < attributesSetMask.size(); ++location) {

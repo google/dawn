@@ -12,14 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/opengl/OpenGLBackend.h"
-#include "backend/opengl/BufferGL.h"
-#include "backend/opengl/CommandBufferGL.h"
-#include "backend/opengl/ComputePipelineGL.h"
-#include "backend/opengl/DepthStencilStateGL.h"
-#include "backend/opengl/PersistentPipelineStateGL.h"
-#include "backend/opengl/PipelineLayoutGL.h"
-#include "backend/opengl/RenderPipelineGL.h"
-#include "backend/opengl/SamplerGL.h"
-#include "backend/opengl/ShaderModuleGL.h"
-#include "backend/opengl/TextureGL.h"
+#ifndef BACKEND_OPENGL_RENDERPIPELINEGL_H_
+#define BACKEND_OPENGL_RENDERPIPELINEGL_H_
+
+#include "backend/RenderPipeline.h"
+
+#include "backend/opengl/PipelineGL.h"
+
+#include "glad/glad.h"
+
+#include <vector>
+
+namespace backend {
+namespace opengl {
+
+    class PersistentPipelineState;
+
+    class RenderPipeline : public RenderPipelineBase, public PipelineGL {
+        public:
+            RenderPipeline(RenderPipelineBuilder* builder);
+
+            void ApplyNow(PersistentPipelineState &persistentPipelineState);
+    };
+
+}
+}
+
+#endif // BACKEND_OPENGL_RENDERPIPELINEGL_H_

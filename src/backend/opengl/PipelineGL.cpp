@@ -14,7 +14,6 @@
 
 #include "backend/opengl/PipelineGL.h"
 
-#include "backend/opengl/DepthStencilStateGL.h"
 #include "backend/opengl/OpenGLBackend.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
@@ -43,7 +42,7 @@ namespace opengl {
 
     }
 
-    Pipeline::Pipeline(PipelineBuilder* builder) : PipelineBase(builder) {
+    PipelineGL::PipelineGL(PipelineBase* parent, PipelineBuilder* builder) {
         auto CreateShader = [](GLenum type, const char* source) -> GLuint {
             GLuint shader = glCreateShader(type);
             glShaderSource(shader, 1, &source, nullptr);
@@ -90,7 +89,7 @@ namespace opengl {
 
         program = glCreateProgram();
 
-        for (auto stage : IterateStages(GetStageMask())) {
+        for (auto stage : IterateStages(parent->GetStageMask())) {
             const ShaderModule* module = ToBackend(builder->GetStageInfo(stage).module.Get());
 
             GLuint shader = CreateShader(GLShaderType(stage), module->GetSource());
@@ -113,7 +112,7 @@ namespace opengl {
             }
         }
 
-        for (auto stage : IterateStages(GetStageMask())) {
+        for (auto stage : IterateStages(parent->GetStageMask())) {
             const ShaderModule* module = ToBackend(builder->GetStageInfo(stage).module.Get());
             FillPushConstants(module, &glPushConstants[stage], program);
         }
@@ -121,7 +120,7 @@ namespace opengl {
         glUseProgram(program);
 
         // The uniforms are part of the program state so we can pre-bind buffer units, texture units etc.
-        const auto& layout = ToBackend(GetLayout());
+        const auto& layout = ToBackend(parent->GetLayout());
         const auto& indices = layout->GetBindingIndexInfo();
 
         for (uint32_t group = 0; group < kMaxBindGroups; ++group) {
@@ -160,7 +159,7 @@ namespace opengl {
         // Compute links between stages for combined samplers, then bind them to texture units
         {
             std::set<CombinedSampler> combinedSamplersSet;
-            for (auto stage : IterateStages(GetStageMask())) {
+            for (auto stage : IterateStages(parent->GetStageMask())) {
                 const auto& module = ToBackend(builder->GetStageInfo(stage).module);
 
                 for (const auto& combined : module->GetCombinedSamplerInfo()) {
@@ -188,32 +187,26 @@ namespace opengl {
         }
     }
 
-    const Pipeline::GLPushConstantInfo& Pipeline::GetGLPushConstants(nxt::ShaderStage stage) const {
+    const PipelineGL::GLPushConstantInfo& PipelineGL::GetGLPushConstants(nxt::ShaderStage stage) const {
         return glPushConstants[stage];
     }
 
-    const std::vector<GLuint>& Pipeline::GetTextureUnitsForSampler(GLuint index) const {
+    const std::vector<GLuint>& PipelineGL::GetTextureUnitsForSampler(GLuint index) const {
         ASSERT(index >= 0 && index < unitsForSamplers.size());
         return unitsForSamplers[index];
     }
 
-    const std::vector<GLuint>& Pipeline::GetTextureUnitsForTexture(GLuint index) const {
+    const std::vector<GLuint>& PipelineGL::GetTextureUnitsForTexture(GLuint index) const {
         ASSERT(index >= 0 && index < unitsForSamplers.size());
         return unitsForTextures[index];
     }
 
-    GLuint Pipeline::GetProgramHandle() const {
+    GLuint PipelineGL::GetProgramHandle() const {
         return program;
     }
 
-    void Pipeline::ApplyNow(PersistentPipelineState &persistentPipelineState) {
+    void PipelineGL::ApplyNow() {
         glUseProgram(program);
-
-        auto inputState = ToBackend(GetInputState());
-        glBindVertexArray(inputState->GetVAO());
-
-        auto depthStencilState = ToBackend(GetDepthStencilState());
-        depthStencilState->ApplyNow(persistentPipelineState);
     }
 
 }

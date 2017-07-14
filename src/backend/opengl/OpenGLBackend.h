@@ -38,19 +38,20 @@ namespace opengl {
     class Buffer;
     class BufferView;
     class CommandBuffer;
+    class ComputePipeline;
     class DepthStencilState;
     class Device;
+    class Framebuffer;
     class InputState;
     class PersistentPipelineState;
-    class Pipeline;
     class PipelineLayout;
     class Queue;
+    class RenderPass;
+    class RenderPipeline;
     class Sampler;
     class ShaderModule;
     class Texture;
     class TextureView;
-    class Framebuffer;
-    class RenderPass;
 
     struct OpenGLBackendTraits {
         using BindGroupType = BindGroup;
@@ -58,18 +59,19 @@ namespace opengl {
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
+        using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;
         using DeviceType = Device;
+        using FramebufferType = Framebuffer;
         using InputStateType = InputState;
-        using PipelineType = Pipeline;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
+        using RenderPassType = RenderPass;
+        using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
         using TextureType = Texture;
         using TextureViewType = TextureView;
-        using FramebufferType = Framebuffer;
-        using RenderPassType = RenderPass;
     };
 
     template<typename T>
@@ -85,13 +87,14 @@ namespace opengl {
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+            ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
             DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
             InputStateBase* CreateInputState(InputStateBuilder* builder) override;
             FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
-            PipelineBase* CreatePipeline(PipelineBuilder* builder) override;
             PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
             QueueBase* CreateQueue(QueueBuilder* builder) override;
             RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+            RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
             SamplerBase* CreateSampler(SamplerBuilder* builder) override;
             ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
             TextureBase* CreateTexture(TextureBuilder* builder) override;

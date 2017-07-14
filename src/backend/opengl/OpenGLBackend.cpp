@@ -16,9 +16,10 @@
 
 #include "backend/opengl/BufferGL.h"
 #include "backend/opengl/CommandBufferGL.h"
+#include "backend/opengl/ComputePipelineGL.h"
 #include "backend/opengl/DepthStencilStateGL.h"
-#include "backend/opengl/PipelineGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
+#include "backend/opengl/RenderPipelineGL.h"
 #include "backend/opengl/ShaderModuleGL.h"
 #include "backend/opengl/SamplerGL.h"
 #include "backend/opengl/TextureGL.h"
@@ -72,6 +73,9 @@ namespace opengl {
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBuffer(builder);
     }
+    ComputePipelineBase* Device::CreateComputePipeline(ComputePipelineBuilder* builder) {
+        return new ComputePipeline(builder);
+    }
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(builder);
     }
@@ -81,9 +85,6 @@ namespace opengl {
     FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
         return new Framebuffer(builder);
     }
-    PipelineBase* Device::CreatePipeline(PipelineBuilder* builder) {
-        return new Pipeline(builder);
-    }
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
         return new PipelineLayout(builder);
     }
@@ -92,6 +93,9 @@ namespace opengl {
     }
     RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
         return new RenderPass(builder);
+    }
+    RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
+        return new RenderPipeline(builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
         return new Sampler(builder);

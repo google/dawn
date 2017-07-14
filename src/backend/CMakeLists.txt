@@ -42,6 +42,8 @@ if (NXT_ENABLE_OPENGL)
         ${OPENGL_DIR}/BufferGL.h
         ${OPENGL_DIR}/CommandBufferGL.cpp
         ${OPENGL_DIR}/CommandBufferGL.h
+        ${OPENGL_DIR}/ComputePipelineGL.cpp
+        ${OPENGL_DIR}/ComputePipelineGL.h
         ${OPENGL_DIR}/DepthStencilStateGL.cpp
         ${OPENGL_DIR}/DepthStencilStateGL.h
         ${OPENGL_DIR}/OpenGLBackend.cpp
@@ -52,6 +54,8 @@ if (NXT_ENABLE_OPENGL)
         ${OPENGL_DIR}/PipelineGL.h
         ${OPENGL_DIR}/PipelineLayoutGL.cpp
         ${OPENGL_DIR}/PipelineLayoutGL.h
+        ${OPENGL_DIR}/RenderPipelineGL.cpp
+        ${OPENGL_DIR}/RenderPipelineGL.h
         ${OPENGL_DIR}/SamplerGL.cpp
         ${OPENGL_DIR}/SamplerGL.h
         ${OPENGL_DIR}/ShaderModuleGL.cpp

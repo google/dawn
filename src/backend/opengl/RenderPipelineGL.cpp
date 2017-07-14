@@ -12,14 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/opengl/OpenGLBackend.h"
-#include "backend/opengl/BufferGL.h"
-#include "backend/opengl/CommandBufferGL.h"
-#include "backend/opengl/ComputePipelineGL.h"
+#include "backend/opengl/RenderPipelineGL.h"
+
 #include "backend/opengl/DepthStencilStateGL.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
-#include "backend/opengl/PipelineLayoutGL.h"
-#include "backend/opengl/RenderPipelineGL.h"
-#include "backend/opengl/SamplerGL.h"
-#include "backend/opengl/ShaderModuleGL.h"
-#include "backend/opengl/TextureGL.h"
+#include "backend/opengl/OpenGLBackend.h"
+
+namespace backend {
+namespace opengl {
+
+    RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
+        : RenderPipelineBase(builder), PipelineGL(this, builder) {
+    }
+
+    void RenderPipeline::ApplyNow(PersistentPipelineState &persistentPipelineState) {
+        PipelineGL::ApplyNow();
+
+        auto inputState = ToBackend(GetInputState());
+        glBindVertexArray(inputState->GetVAO());
+
+        auto depthStencilState = ToBackend(GetDepthStencilState());
+        depthStencilState->ApplyNow(persistentPipelineState);
+    }
+
+}
+}
