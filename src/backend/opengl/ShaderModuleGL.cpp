@@ -14,6 +14,8 @@
 
 #include "backend/opengl/ShaderModuleGL.h"
 
+#include "common/Platform.h"
+
 #include <spirv-cross/spirv_glsl.hpp>
 
 #include <sstream>

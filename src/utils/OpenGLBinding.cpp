@@ -14,6 +14,8 @@
 
 #include "utils/BackendBinding.h"
 
+#include "common/Platform.h"
+
 #include "GLFW/glfw3.h"
 
 namespace backend {
