@@ -37,12 +37,17 @@ namespace opengl {
         glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t, uint32_t, uint32_t) {
-        // TODO(cwallez@chromium.org): Implement Map Read for the GL backend
+    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+        // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
+        // version of OpenGL that would let us map the buffer unsynchronized.
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_READ_BIT);
+        CallMapReadCallback(serial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, data);
     }
 
     void Buffer::UnmapImpl() {
-        // TODO(cwallez@chromium.org): Implement Map Read for the GL backend
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 
     void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
