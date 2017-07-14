@@ -22,13 +22,14 @@
 #include "backend/BindGroupLayout.h"
 #include "backend/Device.h"
 #include "backend/CommandBuffer.h"
+#include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
-#include "backend/InputState.h"
 #include "backend/Framebuffer.h"
-#include "backend/Pipeline.h"
+#include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
 #include "backend/Queue.h"
 #include "backend/RenderPass.h"
+#include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
 #include "backend/Texture.h"
@@ -42,14 +43,15 @@ namespace null {
     class Buffer;
     using BufferView = BufferViewBase;
     class CommandBuffer;
+    using ComputePipeline = ComputePipelineBase;
     using DepthStencilState = DepthStencilStateBase;
     class Device;
-    using InputState = InputStateBase;
     using Framebuffer = FramebufferBase;
-    using Pipeline = PipelineBase;
+    using InputState = InputStateBase;
     using PipelineLayout = PipelineLayoutBase;
     class Queue;
     using RenderPass = RenderPassBase;
+    using RenderPipeline = RenderPipelineBase;
     using Sampler = SamplerBase;
     using ShaderModule = ShaderModuleBase;
     class Texture;
@@ -61,14 +63,15 @@ namespace null {
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
+        using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;
         using DeviceType = Device;
-        using InputStateType = InputState;
         using FramebufferType = Framebuffer;
-        using PipelineType = Pipeline;
+        using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
         using RenderPassType = RenderPass;
+        using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
         using TextureType = Texture;
@@ -95,13 +98,14 @@ namespace null {
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+            ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
             DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
             FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
-            PipelineBase* CreatePipeline(PipelineBuilder* builder) override;
+            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
             PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
             QueueBase* CreateQueue(QueueBuilder* builder) override;
             RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+            RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
             SamplerBase* CreateSampler(SamplerBuilder* builder) override;
             ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
             TextureBase* CreateTexture(TextureBuilder* builder) override;

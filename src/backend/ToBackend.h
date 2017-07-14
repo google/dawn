@@ -49,6 +49,11 @@ namespace backend {
     };
 
     template<typename BackendTraits>
+    struct ToBackendTraits<ComputePipelineBase, BackendTraits> {
+        using BackendType = typename BackendTraits::ComputePipelineType;
+    };
+
+    template<typename BackendTraits>
     struct ToBackendTraits<DepthStencilStateBase, BackendTraits> {
         using BackendType = typename BackendTraits::DepthStencilStateType;
     };
@@ -69,11 +74,6 @@ namespace backend {
     };
 
     template<typename BackendTraits>
-    struct ToBackendTraits<PipelineBase, BackendTraits> {
-        using BackendType = typename BackendTraits::PipelineType;
-    };
-
-    template<typename BackendTraits>
     struct ToBackendTraits<PipelineLayoutBase, BackendTraits> {
         using BackendType = typename BackendTraits::PipelineLayoutType;
     };
@@ -86,6 +86,11 @@ namespace backend {
     template<typename BackendTraits>
     struct ToBackendTraits<RenderPassBase, BackendTraits> {
         using BackendType = typename BackendTraits::RenderPassType;
+    };
+
+    template<typename BackendTraits>
+    struct ToBackendTraits<RenderPipelineBase, BackendTraits> {
+        using BackendType = typename BackendTraits::RenderPipelineType;
     };
 
     template<typename BackendTraits>

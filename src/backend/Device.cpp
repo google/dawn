@@ -18,13 +18,14 @@
 #include "backend/BindGroupLayout.h"
 #include "backend/Buffer.h"
 #include "backend/CommandBuffer.h"
+#include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
 #include "backend/Framebuffer.h"
 #include "backend/InputState.h"
-#include "backend/Pipeline.h"
 #include "backend/PipelineLayout.h"
 #include "backend/Queue.h"
 #include "backend/RenderPass.h"
+#include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
 #include "backend/Texture.h"
@@ -99,6 +100,9 @@ namespace backend {
     CommandBufferBuilder* DeviceBase::CreateCommandBufferBuilder() {
         return new CommandBufferBuilder(this);
     }
+    ComputePipelineBuilder* DeviceBase::CreateComputePipelineBuilder() {
+        return new ComputePipelineBuilder(this);
+    }
     DepthStencilStateBuilder* DeviceBase::CreateDepthStencilStateBuilder() {
         return new DepthStencilStateBuilder(this);
     }
@@ -108,9 +112,6 @@ namespace backend {
     InputStateBuilder* DeviceBase::CreateInputStateBuilder() {
         return new InputStateBuilder(this);
     }
-    PipelineBuilder* DeviceBase::CreatePipelineBuilder() {
-        return new PipelineBuilder(this);
-    }
     PipelineLayoutBuilder* DeviceBase::CreatePipelineLayoutBuilder() {
         return new PipelineLayoutBuilder(this);
     }
@@ -119,6 +120,9 @@ namespace backend {
     }
     RenderPassBuilder* DeviceBase::CreateRenderPassBuilder() {
         return new RenderPassBuilder(this);
+    }
+    RenderPipelineBuilder* DeviceBase::CreateRenderPipelineBuilder() {
+        return new RenderPipelineBuilder(this);
     }
     SamplerBuilder* DeviceBase::CreateSamplerBuilder() {
         return new SamplerBuilder(this);

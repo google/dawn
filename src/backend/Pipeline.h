@@ -18,7 +18,9 @@
 #include "backend/Forward.h"
 #include "backend/Builder.h"
 #include "backend/PerStage.h"
+#include "backend/PipelineLayout.h"
 #include "backend/RefCounted.h"
+#include "backend/ShaderModule.h"
 
 #include "nxt/nxtcpp.h"
 
@@ -33,7 +35,9 @@ namespace backend {
         Float,
     };
 
-    class PipelineBase : public RefCounted {
+    class PipelineBuilder;
+
+    class PipelineBase {
         public:
             PipelineBase(PipelineBuilder* builder);
 
@@ -45,55 +49,35 @@ namespace backend {
             nxt::ShaderStageBit GetStageMask() const;
 
             PipelineLayoutBase* GetLayout();
-            RenderPassBase* GetRenderPass();
-            uint32_t GetSubPass();
-            InputStateBase* GetInputState();
-            DepthStencilStateBase* GetDepthStencilState();
-
-            // TODO(cwallez@chromium.org): split compute and render pipelines
-            bool IsCompute() const;
 
         private:
             nxt::ShaderStageBit stageMask;
             Ref<PipelineLayoutBase> layout;
-            Ref<RenderPassBase> renderPass;
-            uint32_t subpass;
             PerStage<PushConstantInfo> pushConstants;
-            Ref<InputStateBase> inputState;
-            Ref<DepthStencilStateBase> depthStencilState;
     };
 
-    class PipelineBuilder : public Builder<PipelineBase> {
+    class PipelineBuilder {
         public:
-            PipelineBuilder(DeviceBase* device);
+            PipelineBuilder(BuilderBase* parentBuilder);
 
             struct StageInfo {
                 std::string entryPoint;
                 Ref<ShaderModuleBase> module;
             };
             const StageInfo& GetStageInfo(nxt::ShaderStage stage) const;
+            BuilderBase* GetParentBuilder() const;
 
             // NXT API
             void SetLayout(PipelineLayoutBase* layout);
-            void SetSubpass(RenderPassBase* renderPass, uint32_t subpass);
             void SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
-            void SetInputState(InputStateBase* inputState);
-            void SetDepthStencilState(DepthStencilStateBase* depthStencilState);
 
         private:
             friend class PipelineBase;
 
-            PipelineBase* GetResultImpl() override;
-
-            bool IsCompute() const;
-
+            BuilderBase* parentBuilder;
             Ref<PipelineLayoutBase> layout;
-            Ref<RenderPassBase> renderPass;
-            uint32_t subpass;
             nxt::ShaderStageBit stageMask;
             PerStage<StageInfo> stages;
-            Ref<InputStateBase> inputState;
-            Ref<DepthStencilStateBase> depthStencilState;
     };
 
 }

@@ -18,10 +18,11 @@
 #include "backend/Buffer.h"
 #include "backend/Commands.h"
 #include "backend/CommandBufferStateTracker.h"
+#include "backend/ComputePipeline.h"
 #include "backend/Device.h"
 #include "backend/InputState.h"
-#include "backend/Pipeline.h"
 #include "backend/PipelineLayout.h"
+#include "backend/RenderPipeline.h"
 #include "backend/Texture.h"
 
 #include <cstring>
@@ -181,10 +182,16 @@ namespace backend {
                         cmd->~EndRenderSubpassCmd();
                     }
                     break;
-                case Command::SetPipeline:
+                case Command::SetComputePipeline:
                     {
-                        SetPipelineCmd* cmd = commands->NextCommand<SetPipelineCmd>();
-                        cmd->~SetPipelineCmd();
+                        SetComputePipelineCmd* cmd = commands->NextCommand<SetComputePipelineCmd>();
+                        cmd->~SetComputePipelineCmd();
+                    }
+                    break;
+                case Command::SetRenderPipeline:
+                    {
+                        SetRenderPipelineCmd* cmd = commands->NextCommand<SetRenderPipelineCmd>();
+                        cmd->~SetRenderPipelineCmd();
                     }
                     break;
                 case Command::SetPushConstants:
@@ -290,8 +297,12 @@ namespace backend {
                 commands->NextCommand<EndRenderSubpassCmd>();
                 break;
 
-            case Command::SetPipeline:
-                commands->NextCommand<SetPipelineCmd>();
+            case Command::SetComputePipeline:
+                commands->NextCommand<SetComputePipelineCmd>();
+                break;
+
+            case Command::SetRenderPipeline:
+                commands->NextCommand<SetRenderPipelineCmd>();
                 break;
 
             case Command::SetPushConstants:
@@ -484,11 +495,21 @@ namespace backend {
                     }
                     break;
 
-                case Command::SetPipeline:
+                case Command::SetComputePipeline:
                     {
-                        SetPipelineCmd* cmd = iterator.NextCommand<SetPipelineCmd>();
-                        PipelineBase* pipeline = cmd->pipeline.Get();
-                        if (!state->SetPipeline(pipeline)) {
+                        SetComputePipelineCmd* cmd = iterator.NextCommand<SetComputePipelineCmd>();
+                        ComputePipelineBase* pipeline = cmd->pipeline.Get();
+                        if (!state->SetComputePipeline(pipeline)) {
+                            return false;
+                        }
+                    }
+                    break;
+
+                case Command::SetRenderPipeline:
+                    {
+                        SetRenderPipelineCmd* cmd = iterator.NextCommand<SetRenderPipelineCmd>();
+                        RenderPipelineBase* pipeline = cmd->pipeline.Get();
+                        if (!state->SetRenderPipeline(pipeline)) {
                             return false;
                         }
                     }
@@ -681,9 +702,15 @@ namespace backend {
         allocator.Allocate<EndRenderSubpassCmd>(Command::EndRenderSubpass);
     }
 
-    void CommandBufferBuilder::SetPipeline(PipelineBase* pipeline) {
-        SetPipelineCmd* cmd = allocator.Allocate<SetPipelineCmd>(Command::SetPipeline);
-        new(cmd) SetPipelineCmd;
+    void CommandBufferBuilder::SetComputePipeline(ComputePipelineBase* pipeline) {
+        SetComputePipelineCmd* cmd = allocator.Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);
+        new(cmd) SetComputePipelineCmd;
+        cmd->pipeline = pipeline;
+    }
+
+    void CommandBufferBuilder::SetRenderPipeline(RenderPipelineBase* pipeline) {
+        SetRenderPipelineCmd* cmd = allocator.Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
+        new(cmd) SetRenderPipelineCmd;
         cmd->pipeline = pipeline;
     }
 

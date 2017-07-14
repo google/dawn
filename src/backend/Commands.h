@@ -40,7 +40,8 @@ namespace backend {
         EndComputePass,
         EndRenderPass,
         EndRenderSubpass,
-        SetPipeline,
+        SetComputePipeline,
+        SetRenderPipeline,
         SetPushConstants,
         SetStencilReference,
         SetBindGroup,
@@ -118,8 +119,12 @@ namespace backend {
     struct EndRenderSubpassCmd {
     };
 
-    struct SetPipelineCmd {
-        Ref<PipelineBase> pipeline;
+    struct SetComputePipelineCmd {
+        Ref<ComputePipelineBase> pipeline;
+    };
+
+    struct SetRenderPipelineCmd {
+        Ref<RenderPipelineBase> pipeline;
     };
 
     struct SetPushConstantsCmd {

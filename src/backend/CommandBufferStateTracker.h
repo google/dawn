@@ -45,7 +45,8 @@ namespace backend {
             bool EndSubpass();
             bool BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
             bool EndRenderPass();
-            bool SetPipeline(PipelineBase* pipeline);
+            bool SetComputePipeline(ComputePipelineBase* pipeline);
+            bool SetRenderPipeline(RenderPipelineBase* pipeline);
             bool SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
             bool SetIndexBuffer(BufferBase* buffer);
             bool SetVertexBuffer(uint32_t index, BufferBase* buffer);
@@ -88,6 +89,7 @@ namespace backend {
             bool ValidateBindGroupUsages(BindGroupBase* group) const;
             bool RevalidateCanDraw();
 
+            bool SetPipelineCommon(PipelineBase* pipeline);
             void UnsetPipeline();
 
             CommandBufferBuilder* builder;
@@ -98,6 +100,7 @@ namespace backend {
             std::array<BindGroupBase*, kMaxBindGroups> bindgroups = {};
             std::bitset<kMaxVertexInputs> inputsSet;
             PipelineBase* lastPipeline = nullptr;
+            RenderPipelineBase* lastRenderPipeline = nullptr;
 
             std::map<BufferBase*, nxt::BufferUsageBit> mostRecentBufferUsages;
             std::map<TextureBase*, nxt::TextureUsageBit> mostRecentTextureUsages;

@@ -162,7 +162,7 @@ namespace d3d12 {
             descriptor.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
             descriptor.SampleDesc.Count = 1;
 
-            ASSERT_SUCCESS(device->GetD3D12Device()->CreateGraphicsPipelineState(&descriptor, IID_PPV_ARGS(&renderPipelineState)));
+            ASSERT_SUCCESS(device->GetD3D12Device()->CreateRenderPipelineState(&descriptor, IID_PPV_ARGS(&renderPipelineState)));
         }
     }
 

@@ -52,17 +52,17 @@ namespace null {
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBuffer(builder);
     }
+    ComputePipelineBase* Device::CreateComputePipeline(ComputePipelineBuilder* builder) {
+        return new ComputePipeline(builder);
+    }
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(builder);
-    }
-    InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
-        return new InputState(builder);
     }
     FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
         return new Framebuffer(builder);
     }
-    PipelineBase* Device::CreatePipeline(PipelineBuilder* builder) {
-        return new Pipeline(builder);
+    InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
+        return new InputState(builder);
     }
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
         return new PipelineLayout(builder);
@@ -72,6 +72,9 @@ namespace null {
     }
     RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
         return new RenderPass(builder);
+    }
+    RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
+        return new RenderPipeline(builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
         return new Sampler(builder);

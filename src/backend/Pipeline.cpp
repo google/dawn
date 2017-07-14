@@ -26,26 +26,10 @@ namespace backend {
     // PipelineBase
 
     PipelineBase::PipelineBase(PipelineBuilder* builder)
-        : stageMask(builder->stageMask), layout(std::move(builder->layout)),
-          renderPass(std::move(builder->renderPass)), subpass(builder->subpass),
-          inputState(std::move(builder->inputState)), depthStencilState(std::move(builder->depthStencilState)) {
-
-        if (stageMask != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment) &&
-            stageMask != nxt::ShaderStageBit::Compute) {
-            builder->HandleError("Wrong combination of stage for pipeline");
-            return;
+        : stageMask(builder->stageMask), layout(std::move(builder->layout)) {
+        if (!layout) {
+            layout = builder->GetParentBuilder()->GetDevice()->CreatePipelineLayoutBuilder()->GetResult();
         }
-
-        if (IsCompute() && depthStencilState) {
-            builder->HandleError("Compute pipeline cannot have depth stencil state");
-            return;
-        }
-
-        if (!IsCompute() && !renderPass) {
-            builder->HandleError("Pipeline render pass not set");
-            return;
-        }
-        // TODO(kainino@chromium.org): Need to verify the pipeline against its render subpass.
 
         auto FillPushConstants = [](const ShaderModuleBase* module, PushConstantInfo* info) {
             const auto& moduleInfo = module->GetPushConstants();
@@ -66,18 +50,11 @@ namespace backend {
 
         for (auto stageBit : IterateStages(builder->stageMask)) {
             if (!builder->stages[stageBit].module->IsCompatibleWithPipelineLayout(layout.Get())) {
-                builder->HandleError("Stage not compatible with layout");
+                builder->GetParentBuilder()->HandleError("Stage not compatible with layout");
                 return;
             }
 
             FillPushConstants(builder->stages[stageBit].module.Get(), &pushConstants[stageBit]);
-        }
-
-        if (!IsCompute()) {
-            if ((builder->stages[nxt::ShaderStage::Vertex].module->GetUsedVertexAttributes() & ~inputState->GetAttributesSetMask()).any()) {
-                builder->HandleError("Pipeline vertex stage uses inputs not in the input state");
-                return;
-            }
         }
     }
 
@@ -93,30 +70,10 @@ namespace backend {
         return layout.Get();
     }
 
-    RenderPassBase* PipelineBase::GetRenderPass() {
-        return renderPass.Get();
-    }
-
-    uint32_t PipelineBase::GetSubPass() {
-        return subpass;
-    }
-
-    InputStateBase* PipelineBase::GetInputState() {
-        return inputState.Get();
-    }
-
-    DepthStencilStateBase* PipelineBase::GetDepthStencilState() {
-        return depthStencilState.Get();
-    }
-
-    bool PipelineBase::IsCompute() const {
-        return stageMask == nxt::ShaderStageBit::Compute;
-    }
-
     // PipelineBuilder
 
-    PipelineBuilder::PipelineBuilder(DeviceBase* device)
-        : Builder(device), stageMask(static_cast<nxt::ShaderStageBit>(0)) {
+    PipelineBuilder::PipelineBuilder(BuilderBase* parentBuilder)
+        : parentBuilder(parentBuilder), stageMask(static_cast<nxt::ShaderStageBit>(0)) {
     }
 
     const PipelineBuilder::StageInfo& PipelineBuilder::GetStageInfo(nxt::ShaderStage stage) const {
@@ -124,48 +81,28 @@ namespace backend {
         return stages[stage];
     }
 
-    PipelineBase* PipelineBuilder::GetResultImpl() {
-        // TODO(cwallez@chromium.org): the layout should be required, and put the default objects in the device
-        if (!layout) {
-            layout = device->CreatePipelineLayoutBuilder()->GetResult();
-        }
-        if (!inputState && !IsCompute()) {
-            inputState = device->CreateInputStateBuilder()->GetResult();
-        }
-        if (!depthStencilState && !IsCompute()) {
-            depthStencilState = device->CreateDepthStencilStateBuilder()->GetResult();
-        }
-
-        return device->CreatePipeline(this);
-    }
-
-    bool PipelineBuilder::IsCompute() const {
-        return stageMask == nxt::ShaderStageBit::Compute;
+    BuilderBase* PipelineBuilder::GetParentBuilder() const {
+        return parentBuilder;
     }
 
     void PipelineBuilder::SetLayout(PipelineLayoutBase* layout) {
         this->layout = layout;
     }
 
-    void PipelineBuilder::SetSubpass(RenderPassBase* renderPass, uint32_t subpass) {
-        this->renderPass = renderPass;
-        this->subpass = subpass;
-    }
-
     void PipelineBuilder::SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint) {
         if (entryPoint != std::string("main")) {
-            HandleError("Currently the entry point has to be main()");
+            parentBuilder->HandleError("Currently the entry point has to be main()");
             return;
         }
 
         if (stage != module->GetExecutionModel()) {
-            HandleError("Setting module with wrong execution model");
+            parentBuilder->HandleError("Setting module with wrong execution model");
             return;
         }
 
         nxt::ShaderStageBit bit = StageBit(stage);
         if (stageMask & bit) {
-            HandleError("Setting already set stage");
+            parentBuilder->HandleError("Setting already set stage");
             return;
         }
         stageMask |= bit;
@@ -173,14 +110,5 @@ namespace backend {
         stages[stage].module = module;
         stages[stage].entryPoint = entryPoint;
     }
-
-    void PipelineBuilder::SetInputState(InputStateBase* inputState) {
-        this->inputState = inputState;
-    }
-
-    void PipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
-        this->depthStencilState = depthStencilState;
-    }
-
 
 }

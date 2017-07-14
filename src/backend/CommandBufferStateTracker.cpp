@@ -18,11 +18,12 @@
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
 #include "backend/Buffer.h"
+#include "backend/ComputePipeline.h"
 #include "backend/Framebuffer.h"
 #include "backend/InputState.h"
-#include "backend/Pipeline.h"
 #include "backend/PipelineLayout.h"
 #include "backend/RenderPass.h"
+#include "backend/RenderPipeline.h"
 #include "backend/Texture.h"
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
@@ -257,47 +258,33 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::SetPipeline(PipelineBase* pipeline) {
-        PipelineLayoutBase* layout = pipeline->GetLayout();
-
-        if (pipeline->IsCompute()) {
-            if (!aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-                builder->HandleError("A compute pass must be active when a compute pipeline is set");
-                return false;
-            }
-            if (currentRenderPass) {
-                builder->HandleError("Can't use a compute pipeline while a render pass is active");
-                return false;
-            }
-            aspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
-        } else {
-            if (!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-                builder->HandleError("A render subpass must be active when a render pipeline is set");
-                return false;
-            }
-            if (!pipeline->GetRenderPass()->IsCompatibleWith(currentRenderPass)) {
-                builder->HandleError("Pipeline is incompatible with this render pass");
-                return false;
-            }
-            aspects.set(VALIDATION_ASPECT_RENDER_PIPELINE);
+    bool CommandBufferStateTracker::SetComputePipeline(ComputePipelineBase* pipeline) {
+        if (!aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            builder->HandleError("A compute pass must be active when a compute pipeline is set");
+            return false;
         }
-        aspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
-        bindgroupsSet = ~layout->GetBindGroupsLayoutMask();
-
-        // Only bindgroups that were not the same layout in the last pipeline need to be set again.
-        if (lastPipeline) {
-            PipelineLayoutBase* lastLayout = lastPipeline->GetLayout();
-            for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                if (lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
-                    bindgroupsSet |= uint64_t(1) << i;
-                } else {
-                    break;
-                }
-            }
+        if (currentRenderPass) {
+            builder->HandleError("Can't use a compute pipeline while a render pass is active");
+            return false;
         }
+        aspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
 
-        lastPipeline = pipeline;
-        return true;
+        return SetPipelineCommon(pipeline);
+    }
+
+    bool CommandBufferStateTracker::SetRenderPipeline(RenderPipelineBase* pipeline) {
+        if (!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+            builder->HandleError("A render subpass must be active when a render pipeline is set");
+            return false;
+        }
+        if (!pipeline->GetRenderPass()->IsCompatibleWith(currentRenderPass)) {
+            builder->HandleError("Pipeline is incompatible with this render pass");
+            return false;
+        }
+        aspects.set(VALIDATION_ASPECT_RENDER_PIPELINE);
+        lastRenderPipeline = pipeline;
+
+        return SetPipelineCommon(pipeline);
     }
 
     bool CommandBufferStateTracker::SetBindGroup(uint32_t index, BindGroupBase* bindgroup) {
@@ -450,7 +437,7 @@ namespace backend {
             return true;
         }
         // Assumes we have a pipeline already
-        auto requiredInputs = lastPipeline->GetInputState()->GetInputsSetMask();
+        auto requiredInputs = lastRenderPipeline->GetInputState()->GetInputsSetMask();
         if ((inputsSet & ~requiredInputs).none()) {
             aspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
             return true;
@@ -530,6 +517,29 @@ namespace backend {
             builder->HandleError("Some vertex buffers are not set");
             return false;
         }
+        return true;
+    }
+
+
+    bool CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
+        PipelineLayoutBase* layout = pipeline->GetLayout();
+
+        aspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
+        bindgroupsSet = ~layout->GetBindGroupsLayoutMask();
+
+        // Only bindgroups that were not the same layout in the last pipeline need to be set again.
+        if (lastPipeline) {
+            PipelineLayoutBase* lastLayout = lastPipeline->GetLayout();
+            for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
+                if (lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
+                    bindgroupsSet |= uint64_t(1) << i;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        lastPipeline = pipeline;
         return true;
     }
 

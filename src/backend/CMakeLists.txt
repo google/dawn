@@ -253,6 +253,8 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/CommandAllocator.h
     ${BACKEND_DIR}/CommandBuffer.cpp
     ${BACKEND_DIR}/CommandBuffer.h
+    ${BACKEND_DIR}/ComputePipeline.cpp
+    ${BACKEND_DIR}/ComputePipeline.h
     ${BACKEND_DIR}/DepthStencilState.cpp
     ${BACKEND_DIR}/DepthStencilState.h
     ${BACKEND_DIR}/CommandBufferStateTracker.cpp
@@ -264,6 +266,8 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/Framebuffer.h
     ${BACKEND_DIR}/InputState.cpp
     ${BACKEND_DIR}/InputState.h
+    ${BACKEND_DIR}/RenderPipeline.cpp
+    ${BACKEND_DIR}/RenderPipeline.h
     ${BACKEND_DIR}/PerStage.cpp
     ${BACKEND_DIR}/PerStage.h
     ${BACKEND_DIR}/Pipeline.cpp
