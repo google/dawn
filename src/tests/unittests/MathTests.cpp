@@ -68,6 +68,32 @@ TEST(Math, AlignPtr) {
     }
 }
 
+// Tests for Align
+TEST(Math, Align) {
+    // 0 aligns to 0
+    ASSERT_EQ(Align(0, 4), 0);
+    ASSERT_EQ(Align(0, 256), 0);
+    ASSERT_EQ(Align(0, 512), 0);
+
+    // Multiples align to self
+    ASSERT_EQ(Align(8, 8), 8);
+    ASSERT_EQ(Align(16, 8), 16);
+    ASSERT_EQ(Align(24, 8), 24);
+    ASSERT_EQ(Align(256, 256), 256);
+    ASSERT_EQ(Align(512, 256), 512);
+    ASSERT_EQ(Align(768, 256), 768);
+
+    // Alignment with 1 is self
+    for (uint32_t i = 0; i < 128; ++i) {
+        ASSERT_EQ(Align(i, 1), i);
+    }
+
+    // Everything in the range (align, 2*align] aligns to 2*align
+    for (uint32_t i = 1; i <= 64; ++i) {
+        ASSERT_EQ(Align(64 + i, 64), 128);
+    }
+}
+
 // Tests for IsAligned
 TEST(Math, IsAligned) {
     constexpr size_t kTestAlignment = 8;
