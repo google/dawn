@@ -242,14 +242,14 @@ TEST_F(WireTests, CStringArgument) {
         .WillOnce(Return(apiShaderModule));
 
     // Create pipeline
-    nxtPipelineBuilder pipelineBuilder = nxtDeviceCreatePipelineBuilder(device);
-    nxtPipelineBuilderSetStage(pipelineBuilder, NXT_SHADER_STAGE_FRAGMENT, shaderModule, "my entry point");
+    nxtRenderPipelineBuilder pipelineBuilder = nxtDeviceCreateRenderPipelineBuilder(device);
+    nxtRenderPipelineBuilderSetStage(pipelineBuilder, NXT_SHADER_STAGE_FRAGMENT, shaderModule, "my entry point");
 
-    nxtPipelineBuilder apiPipelineBuilder = api.GetNewPipelineBuilder();
-    EXPECT_CALL(api, DeviceCreatePipelineBuilder(apiDevice))
+    nxtRenderPipelineBuilder apiPipelineBuilder = api.GetNewRenderPipelineBuilder();
+    EXPECT_CALL(api, DeviceCreateRenderPipelineBuilder(apiDevice))
         .WillOnce(Return(apiPipelineBuilder));
 
-    EXPECT_CALL(api, PipelineBuilderSetStage(apiPipelineBuilder, NXT_SHADER_STAGE_FRAGMENT, apiShaderModule, StrEq("my entry point")));
+    EXPECT_CALL(api, RenderPipelineBuilderSetStage(apiPipelineBuilder, NXT_SHADER_STAGE_FRAGMENT, apiShaderModule, StrEq("my entry point")));
 
     FlushClient();
 }
@@ -257,26 +257,26 @@ TEST_F(WireTests, CStringArgument) {
 // Test that the wire is able to send objects as value arguments
 TEST_F(WireTests, ObjectAsValueArgument) {
     // Create pipeline
-    nxtPipelineBuilder pipelineBuilder = nxtDeviceCreatePipelineBuilder(device);
-    nxtPipeline pipeline = nxtPipelineBuilderGetResult(pipelineBuilder);
+    nxtRenderPipelineBuilder pipelineBuilder = nxtDeviceCreateRenderPipelineBuilder(device);
+    nxtRenderPipeline pipeline = nxtRenderPipelineBuilderGetResult(pipelineBuilder);
 
-    nxtPipelineBuilder apiPipelineBuilder = api.GetNewPipelineBuilder();
-    EXPECT_CALL(api, DeviceCreatePipelineBuilder(apiDevice))
+    nxtRenderPipelineBuilder apiPipelineBuilder = api.GetNewRenderPipelineBuilder();
+    EXPECT_CALL(api, DeviceCreateRenderPipelineBuilder(apiDevice))
         .WillOnce(Return(apiPipelineBuilder));
 
-    nxtPipeline apiPipeline = api.GetNewPipeline();
-    EXPECT_CALL(api, PipelineBuilderGetResult(apiPipelineBuilder))
+    nxtRenderPipeline apiPipeline = api.GetNewRenderPipeline();
+    EXPECT_CALL(api, RenderPipelineBuilderGetResult(apiPipelineBuilder))
         .WillOnce(Return(apiPipeline));
 
     // Create command buffer builder, setting pipeline
     nxtCommandBufferBuilder cmdBufBuilder = nxtDeviceCreateCommandBufferBuilder(device);
-    nxtCommandBufferBuilderSetPipeline(cmdBufBuilder, pipeline);
+    nxtCommandBufferBuilderSetRenderPipeline(cmdBufBuilder, pipeline);
 
     nxtCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
     EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
         .WillOnce(Return(apiCmdBufBuilder));
 
-    EXPECT_CALL(api, CommandBufferBuilderSetPipeline(apiCmdBufBuilder, apiPipeline));
+    EXPECT_CALL(api, CommandBufferBuilderSetRenderPipeline(apiCmdBufBuilder, apiPipeline));
 
     FlushClient();
 }

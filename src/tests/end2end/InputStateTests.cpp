@@ -83,7 +83,7 @@ class InputStateTest : public NXTTest {
             VertexFormat format;
             InputStepMode step;
         };
-        nxt::Pipeline MakeTestPipeline(const nxt::InputState& inputState, int multiplier, std::vector<ShaderTestSpec> testSpec) {
+        nxt::RenderPipeline MakeTestPipeline(const nxt::InputState& inputState, int multiplier, std::vector<ShaderTestSpec> testSpec) {
             std::ostringstream vs;
             vs << "#version 450\n";
 
@@ -140,7 +140,7 @@ class InputStateTest : public NXTTest {
                 })"
             );
 
-            return device.CreatePipelineBuilder()
+            return device.CreateRenderPipelineBuilder()
                 .SetSubpass(renderpass, 0)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -182,7 +182,7 @@ class InputStateTest : public NXTTest {
             uint32_t location;
             nxt::Buffer* buffer;
         };
-        void DoTestDraw(const nxt::Pipeline& pipeline, unsigned int triangles, unsigned int instances, std::vector<DrawVertexBuffer> vertexBuffers) {
+        void DoTestDraw(const nxt::RenderPipeline& pipeline, unsigned int triangles, unsigned int instances, std::vector<DrawVertexBuffer> vertexBuffers) {
             EXPECT_LE(triangles, 4u);
             EXPECT_LE(instances, 4u);
 
@@ -191,7 +191,7 @@ class InputStateTest : public NXTTest {
             renderTarget.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
             builder.BeginRenderPass(renderpass, framebuffer)
                 .BeginRenderSubpass()
-                .SetPipeline(pipeline);
+                .SetRenderPipeline(pipeline);
 
             uint32_t zeroOffset = 0;
             for (const auto& buffer : vertexBuffers) {
@@ -235,7 +235,7 @@ TEST_P(InputStateTest, Basic) {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::Pipeline pipeline = MakeTestPipeline(inputState, 1, {
+    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}
     });
 
@@ -255,7 +255,7 @@ TEST_P(InputStateTest, ZeroStride) {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::Pipeline pipeline = MakeTestPipeline(inputState, 0, {
+    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}
     });
 
@@ -275,7 +275,7 @@ TEST_P(InputStateTest, AttributeExpanding) {
                 {0, 0, 0, VertexFormat::FloatR32}
             }
         );
-        nxt::Pipeline pipeline = MakeTestPipeline(inputState, 0, {
+        nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::FloatR32, InputStepMode::Vertex}
         });
 
@@ -292,7 +292,7 @@ TEST_P(InputStateTest, AttributeExpanding) {
                 {0, 0, 0, VertexFormat::FloatR32G32}
             }
         );
-        nxt::Pipeline pipeline = MakeTestPipeline(inputState, 0, {
+        nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::FloatR32G32, InputStepMode::Vertex}
         });
 
@@ -309,7 +309,7 @@ TEST_P(InputStateTest, AttributeExpanding) {
                 {0, 0, 0, VertexFormat::FloatR32G32B32}
             }
         );
-        nxt::Pipeline pipeline = MakeTestPipeline(inputState, 0, {
+        nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::FloatR32G32B32, InputStepMode::Vertex}
         });
 
@@ -328,7 +328,7 @@ TEST_P(InputStateTest, StrideLargerThanAttributes) {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::Pipeline pipeline = MakeTestPipeline(inputState, 1, {
+    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}
     });
 
@@ -349,7 +349,7 @@ TEST_P(InputStateTest, TwoAttributesAtAnOffsetVertex) {
             {1, 0, 4  * sizeof(float), VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::Pipeline pipeline = MakeTestPipeline(inputState, 1, {
+    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}
     });
 
@@ -370,7 +370,7 @@ TEST_P(InputStateTest, TwoAttributesAtAnOffsetInstance) {
             {1, 0, 4  * sizeof(float), VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::Pipeline pipeline = MakeTestPipeline(inputState, 1, {
+    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Instance}
     });
 
@@ -395,7 +395,7 @@ TEST_P(InputStateTest, PureInstance) {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::Pipeline pipeline = MakeTestPipeline(inputState, 1, {
+    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Instance}
     });
 
@@ -421,7 +421,7 @@ TEST_P(InputStateTest, MixedEverything) {
             {3, 1, 5  * sizeof(float), VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::Pipeline pipeline = MakeTestPipeline(inputState, 1, {
+    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32, InputStepMode::Vertex},
         {1, VertexFormat::FloatR32G32, InputStepMode::Vertex},
         {2, VertexFormat::FloatR32G32B32, InputStepMode::Instance},

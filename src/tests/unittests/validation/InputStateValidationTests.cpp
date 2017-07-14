@@ -22,7 +22,7 @@ static constexpr uint32_t kMaxVertexInputs = 16u;
 
 class InputStateTest : public ValidationTest {
     protected:
-        nxt::Pipeline CreatePipeline(bool success, const nxt::InputState& inputState, std::string vertexSource) {
+        nxt::RenderPipeline CreatePipeline(bool success, const nxt::InputState& inputState, std::string vertexSource) {
             nxt::RenderPass renderPass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
                 .SetAttachmentCount(1)
                 .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
@@ -44,11 +44,11 @@ class InputStateTest : public ValidationTest {
             )");
             nxt::ShaderModule fsModule = fsModuleBuilder.GetResult();
 
-            nxt::PipelineBuilder builder;
+            nxt::RenderPipelineBuilder builder;
             if (success) {
-                builder = AssertWillBeSuccess(device.CreatePipelineBuilder());
+                builder = AssertWillBeSuccess(device.CreateRenderPipelineBuilder());
             } else {
-                builder = AssertWillBeError(device.CreatePipelineBuilder());
+                builder = AssertWillBeError(device.CreateRenderPipelineBuilder());
             }
 
             return builder.SetSubpass(renderPass, 0)
