@@ -27,12 +27,12 @@ bool IsAligned(const void* ptr, size_t alignment);
 void* AlignVoidPtr(void* ptr, size_t alignment);
 
 template<typename T>
-T* Align(T* ptr, size_t alignment) {
+T* AlignPtr(T* ptr, size_t alignment) {
     return reinterpret_cast<T*>(AlignVoidPtr(ptr, alignment));
 }
 
 template<typename T>
-const T* Align(const T* ptr, size_t alignment) {
+const T* AlignPtr(const T* ptr, size_t alignment) {
     return reinterpret_cast<const T*>(AlignVoidPtr(const_cast<T*>(ptr), alignment));
 }
 

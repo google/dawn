@@ -56,6 +56,7 @@ bool IsAligned(const void* ptr, size_t alignment) {
 }
 
 void* AlignVoidPtr(void* ptr, size_t alignment) {
+    ASSERT(IsPowerOfTwo(alignment));
     ASSERT(alignment != 0);
     return reinterpret_cast<void*>((reinterpret_cast<intptr_t>(ptr) + (alignment - 1)) & ~(alignment - 1));
 }

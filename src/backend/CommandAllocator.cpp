@@ -88,7 +88,7 @@ namespace backend {
             blocks[0].size = sizeof(endOfBlock);
             blocks[0].block = currentPtr;
         } else {
-            currentPtr = Align(blocks[0].block, alignof(uint32_t));
+            currentPtr = AlignPtr(blocks[0].block, alignof(uint32_t));
         }
     }
 
@@ -101,7 +101,7 @@ namespace backend {
     }
 
     bool CommandIterator::NextCommandId(uint32_t* commandId) {
-        uint8_t* idPtr = Align(currentPtr, alignof(uint32_t));
+        uint8_t* idPtr = AlignPtr(currentPtr, alignof(uint32_t));
         ASSERT(idPtr + sizeof(uint32_t) <= blocks[currentBlock].block + blocks[currentBlock].size);
 
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
@@ -112,7 +112,7 @@ namespace backend {
                 Reset();
                 return false;
             }
-            currentPtr = Align(blocks[currentBlock].block, alignof(uint32_t));
+            currentPtr = AlignPtr(blocks[currentBlock].block, alignof(uint32_t));
             return NextCommandId(commandId);
         }
 
@@ -122,7 +122,7 @@ namespace backend {
     }
 
     void* CommandIterator::NextCommand(size_t commandSize, size_t commandAlignment) {
-        uint8_t* commandPtr = Align(currentPtr, commandAlignment);
+        uint8_t* commandPtr = AlignPtr(currentPtr, commandAlignment);
         ASSERT(commandPtr + sizeof(commandSize) <= blocks[currentBlock].block + blocks[currentBlock].size);
 
         currentPtr = commandPtr + commandSize;
@@ -173,8 +173,8 @@ namespace backend {
         ASSERT(currentPtr + sizeof(uint32_t) <= endPtr);
         uint32_t* idAlloc = reinterpret_cast<uint32_t*>(currentPtr);
 
-        uint8_t* commandAlloc = Align(currentPtr + sizeof(uint32_t), commandAlignment);
-        uint8_t* nextPtr = Align(commandAlloc + commandSize, alignof(uint32_t));
+        uint8_t* commandAlloc = AlignPtr(currentPtr + sizeof(uint32_t), commandAlignment);
+        uint8_t* nextPtr = AlignPtr(commandAlloc + commandSize, alignof(uint32_t));
 
         // When there is not enough space, we signal the EndOfBlock, so that the iterator nows to
         // move to the next one. EndOfBlock on the last block means the end of the commands.
@@ -211,7 +211,7 @@ namespace backend {
         }
 
         blocks.push_back({lastAllocationSize, block});
-        currentPtr = Align(block, alignof(uint32_t));
+        currentPtr = AlignPtr(block, alignof(uint32_t));
         endPtr = block + lastAllocationSize;
         return true;
     }

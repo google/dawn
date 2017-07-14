@@ -52,15 +52,15 @@ TEST(Math, IsPowerOfTwo) {
     ASSERT_FALSE(IsPowerOfTwo(0x8000400));
 }
 
-// Tests for Align
-TEST(Math, Align) {
+// Tests for AlignPtr
+TEST(Math, AlignPtr) {
     constexpr size_t kTestAlignment = 8;
 
     char buffer[kTestAlignment * 4];
 
     for (size_t i = 0; i < 2 * kTestAlignment; ++i) {
         char* unaligned = &buffer[i];
-        char* aligned = Align(unaligned, kTestAlignment);
+        char* aligned = AlignPtr(unaligned, kTestAlignment);
 
         ASSERT_GE(aligned - unaligned, 0);
         ASSERT_LT(static_cast<size_t>(aligned - unaligned), kTestAlignment);
@@ -76,7 +76,7 @@ TEST(Math, IsAligned) {
 
     for (size_t i = 0; i < 2 * kTestAlignment; ++i) {
         char* unaligned = &buffer[i];
-        char* aligned = Align(unaligned, kTestAlignment);
+        char* aligned = AlignPtr(unaligned, kTestAlignment);
 
         ASSERT_EQ(IsAligned(unaligned, kTestAlignment), unaligned == aligned);
     }
