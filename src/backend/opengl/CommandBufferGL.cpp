@@ -177,6 +177,7 @@ namespace opengl {
                         glActiveTexture(GL_TEXTURE0);
                         glBindTexture(target, texture->GetHandle());
 
+                        ASSERT(texture->GetDimension() == nxt::TextureDimension::e2D);
                         glTexSubImage2D(target, dst.level, dst.x, dst.y, dst.width, dst.height,
                                         format.format, format.type,
                                         reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
@@ -186,8 +187,32 @@ namespace opengl {
 
                 case Command::CopyTextureToBuffer:
                     {
-                        commands.NextCommand<CopyTextureToBufferCmd>();
-                        // TODO(cwallez@chromium.org): implement using a temporary FBO and ReadPixels
+                        CopyTextureToBufferCmd* copy = commands.NextCommand<CopyTextureToBufferCmd>();
+                        auto& src = copy->source;
+                        auto& dst = copy->destination;
+                        Texture* texture = ToBackend(src.texture.Get());
+                        Buffer* buffer = ToBackend(dst.buffer.Get());
+                        auto format = texture->GetGLFormat();
+
+                        // The only way to move data from a texture to a buffer in GL is via
+                        // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
+                        ASSERT(texture->GetDimension() == nxt::TextureDimension::e2D);
+                        glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
+
+                        GLuint readFBO = 0;
+                        glGenFramebuffers(1, &readFBO);
+                        glBindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
+
+                        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                               texture->GetHandle(), src.level);
+
+                        glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
+                        ASSERT(src.depth == 1 && src.z == 0);
+                        void* offset = reinterpret_cast<void*>(static_cast<uintptr_t>(dst.offset));
+                        glReadPixels(src.x, src.y, src.width, src.height, format.format, format.type, offset);
+
+                        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+                        glDeleteFramebuffers(1, &readFBO);
                     }
                     break;
 

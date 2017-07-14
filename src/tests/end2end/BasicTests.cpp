@@ -96,4 +96,4 @@ TEST_P(BasicTests, Buffer2Texture2Buffer) {
     EXPECT_BUFFER_U32_RANGE_EQ(dataView, dstBuffer, 0, kSize * kSize);
 }
 
-NXT_INSTANTIATE_TEST(BasicTests, MetalBackend, D3D12Backend)
+NXT_INSTANTIATE_TEST(BasicTests, D3D12Backend, MetalBackend, OpenGLBackend)
