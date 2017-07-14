@@ -18,6 +18,8 @@
 #include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/ResourceUploader.h"
 #include "common/Assert.h"
+#include "common/Constants.h"
+#include "common/Math.h"
 
 namespace backend {
 namespace d3d12 {
@@ -94,7 +96,7 @@ namespace d3d12 {
 
     uint32_t Buffer::GetD3D12Size() const {
         // TODO(enga@google.com): TODO investigate if this needs to be a constraint at the API level
-        return ((GetSize() + 256 - 1) / 256) * 256; // size is required to be 256-byte aligned.
+        return Align(GetSize(), 256);
     }
 
     ComPtr<ID3D12Resource> Buffer::GetD3D12Resource() {
@@ -178,7 +180,7 @@ namespace d3d12 {
 
     uint32_t BufferView::GetD3D12Size() const {
         // TODO(enga@google.com): TODO investigate if this needs to be a constraint at the API level
-        return ((GetSize() + 256 - 1) / 256) * 256; // size is required to be 256-byte aligned.
+        return Align(GetSize(), 256);
     }
 
     const D3D12_CONSTANT_BUFFER_VIEW_DESC& BufferView::GetCBVDescriptor() const {
