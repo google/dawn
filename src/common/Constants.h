@@ -24,5 +24,6 @@ static constexpr uint32_t kMaxVertexAttributes = 16u;
 static constexpr uint32_t kMaxVertexInputs = 16u;
 static constexpr uint32_t kNumStages = 3;
 static constexpr uint32_t kMaxColorAttachments = 4u;
+static constexpr uint32_t kTextureRowPitchAlignment = 256u;
 
 #endif // COMMON_CONSTANTS_H_

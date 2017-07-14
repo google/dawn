@@ -25,6 +25,7 @@ bool IsPowerOfTwo(size_t n);
 
 bool IsAligned(const void* ptr, size_t alignment);
 void* AlignVoidPtr(void* ptr, size_t alignment);
+uint32_t Align(uint32_t value, size_t alignment);
 
 template<typename T>
 T* AlignPtr(T* ptr, size_t alignment) {
