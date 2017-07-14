@@ -277,6 +277,10 @@ std::ostream& operator<< (std::ostream& stream, const RGBA8& color) {
         static_cast<int>(color.a) << ")";
 }
 
+std::ostream &operator<<(std::ostream& stream, BackendType backend) {
+    return stream << ParamName(backend);
+}
+
 namespace detail {
     bool IsBackendAvailable(BackendType type) {
         switch (type) {

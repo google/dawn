@@ -47,6 +47,7 @@ enum BackendType {
     VulkanBackend,
     NumBackendTypes,
 };
+std::ostream &operator<<(std::ostream& stream, BackendType backend);
 
 namespace utils {
     class BackendBinding;
