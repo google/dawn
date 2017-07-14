@@ -14,6 +14,7 @@
 
 #include "backend/opengl/OpenGLBackend.h"
 
+#include "backend/opengl/BufferGL.h"
 #include "backend/opengl/CommandBufferGL.h"
 #include "backend/opengl/DepthStencilStateGL.h"
 #include "backend/opengl/PipelineGL.h"
@@ -148,41 +149,6 @@ namespace opengl {
 
     BindGroupLayout::BindGroupLayout(BindGroupLayoutBuilder* builder)
         : BindGroupLayoutBase(builder) {
-    }
-
-    // Buffer
-
-    Buffer::Buffer(BufferBuilder* builder)
-        : BufferBase(builder) {
-        glGenBuffers(1, &buffer);
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        glBufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);
-    }
-
-    GLuint Buffer::GetHandle() const {
-        return buffer;
-    }
-
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
-    }
-
-    void Buffer::MapReadAsyncImpl(uint32_t, uint32_t, uint32_t) {
-        // TODO(cwallez@chromium.org): Implement Map Read for the GL backend
-    }
-
-    void Buffer::UnmapImpl() {
-        // TODO(cwallez@chromium.org): Implement Map Read for the GL backend
-    }
-
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
-    }
-
-    // BufferView
-
-    BufferView::BufferView(BufferViewBuilder* builder)
-        : BufferViewBase(builder) {
     }
 
     // InputState

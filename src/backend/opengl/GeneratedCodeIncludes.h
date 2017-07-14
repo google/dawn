@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "backend/opengl/OpenGLBackend.h"
+#include "backend/opengl/BufferGL.h"
 #include "backend/opengl/CommandBufferGL.h"
 #include "backend/opengl/DepthStencilStateGL.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"

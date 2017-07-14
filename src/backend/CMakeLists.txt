@@ -38,6 +38,8 @@ if (NXT_ENABLE_OPENGL)
     target_include_directories(opengl_autogen PUBLIC ${GENERATED_DIR})
 
     list(APPEND BACKEND_SOURCES
+        ${OPENGL_DIR}/BufferGL.cpp
+        ${OPENGL_DIR}/BufferGL.h
         ${OPENGL_DIR}/CommandBufferGL.cpp
         ${OPENGL_DIR}/CommandBufferGL.h
         ${OPENGL_DIR}/DepthStencilStateGL.cpp

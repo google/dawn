@@ -119,26 +119,6 @@ namespace opengl {
             BindGroupLayout(BindGroupLayoutBuilder* builder);
     };
 
-    class Buffer : public BufferBase {
-        public:
-            Buffer(BufferBuilder* builder);
-
-            GLuint GetHandle() const;
-
-        private:
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
-
-            GLuint buffer = 0;
-    };
-
-    class BufferView : public BufferViewBase {
-        public:
-            BufferView(BufferViewBuilder* builder);
-    };
-
     class Framebuffer : public FramebufferBase {
         public:
             Framebuffer(FramebufferBuilder* builder);

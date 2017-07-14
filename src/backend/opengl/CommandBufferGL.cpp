@@ -15,6 +15,7 @@
 #include "backend/opengl/CommandBufferGL.h"
 
 #include "backend/Commands.h"
+#include "backend/opengl/BufferGL.h"
 #include "backend/opengl/OpenGLBackend.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineGL.h"
