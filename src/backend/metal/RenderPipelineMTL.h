@@ -12,32 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_METAL_PIPELINEMTL_H_
-#define BACKEND_METAL_PIPELINEMTL_H_
+#ifndef BACKEND_METAL_RENDERPIPELINEMTL_H_
+#define BACKEND_METAL_RENDERPIPELINEMTL_H_
 
-#include "backend/Pipeline.h"
+#include "backend/RenderPipeline.h"
 
 #import <Metal/Metal.h>
 
 namespace backend {
 namespace metal {
 
-    class Pipeline : public PipelineBase {
+    class RenderPipeline : public RenderPipelineBase {
         public:
-            Pipeline(PipelineBuilder* builder);
-            ~Pipeline();
+            RenderPipeline(RenderPipelineBuilder* builder);
+            ~RenderPipeline();
 
             void Encode(id<MTLRenderCommandEncoder> encoder);
-            void Encode(id<MTLComputeCommandEncoder> encoder);
-            MTLSize GetLocalWorkGroupSize() const;
 
         private:
             id<MTLRenderPipelineState> mtlRenderPipelineState = nil;
-            id<MTLComputePipelineState> mtlComputePipelineState = nil;
-            MTLSize localWorkgroupSize;
     };
 
 }
 }
 
-#endif // BACKEND_METAL_PIPELINEMTL_H_
+#endif // BACKEND_METAL_RENDERPIPELINEMTL_H_

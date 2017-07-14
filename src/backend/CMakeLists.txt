@@ -108,16 +108,18 @@ if (NXT_ENABLE_METAL)
         ${METAL_DIR}/BufferMTL.h
         ${METAL_DIR}/CommandBufferMTL.mm
         ${METAL_DIR}/CommandBufferMTL.h
+        ${METAL_DIR}/ComputePipelineMTL.mm
+        ${METAL_DIR}/ComputePipelineMTL.h
         ${METAL_DIR}/DepthStencilStateMTL.mm
         ${METAL_DIR}/DepthStencilStateMTL.h
         ${METAL_DIR}/InputStateMTL.mm
         ${METAL_DIR}/InputStateMTL.h
         ${METAL_DIR}/MetalBackend.mm
         ${METAL_DIR}/MetalBackend.h
-        ${METAL_DIR}/PipelineMTL.mm
-        ${METAL_DIR}/PipelineMTL.h
         ${METAL_DIR}/PipelineLayoutMTL.mm
         ${METAL_DIR}/PipelineLayoutMTL.h
+        ${METAL_DIR}/RenderPipelineMTL.mm
+        ${METAL_DIR}/RenderPipelineMTL.h
         ${METAL_DIR}/ResourceUploader.mm
         ${METAL_DIR}/ResourceUploader.h
         ${METAL_DIR}/SamplerMTL.mm

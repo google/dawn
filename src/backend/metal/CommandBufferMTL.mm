@@ -16,11 +16,12 @@
 
 #include "backend/Commands.h"
 #include "backend/metal/BufferMTL.h"
+#include "backend/metal/ComputePipelineMTL.h"
 #include "backend/metal/DepthStencilStateMTL.h"
 #include "backend/metal/InputStateMTL.h"
 #include "backend/metal/MetalBackend.h"
-#include "backend/metal/PipelineMTL.h"
 #include "backend/metal/PipelineLayoutMTL.h"
+#include "backend/metal/RenderPipelineMTL.h"
 #include "backend/metal/SamplerMTL.h"
 #include "backend/metal/TextureMTL.h"
 
@@ -146,7 +147,8 @@ namespace metal {
 
     void CommandBuffer::FillCommands(id<MTLCommandBuffer> commandBuffer) {
         Command type;
-        Pipeline* lastPipeline = nullptr;
+        ComputePipeline* lastComputePipeline = nullptr;
+        RenderPipeline* lastRenderPipeline = nullptr;
         id<MTLBuffer> indexBuffer = nil;
         uint32_t indexBufferOffset = 0;
         MTLIndexType indexType = MTLIndexTypeUInt32;
@@ -267,10 +269,9 @@ namespace metal {
                     {
                         DispatchCmd* dispatch = commands.NextCommand<DispatchCmd>();
                         ASSERT(encoders.compute);
-                        ASSERT(lastPipeline->IsCompute());
 
                         [encoders.compute dispatchThreadgroups:MTLSizeMake(dispatch->x, dispatch->y, dispatch->z)
-                            threadsPerThreadgroup: lastPipeline->GetLocalWorkGroupSize()];
+                            threadsPerThreadgroup: lastComputePipeline->GetLocalWorkGroupSize()];
                     }
                     break;
 
@@ -326,20 +327,25 @@ namespace metal {
                     }
                     break;
 
-                case Command::SetPipeline:
+                case Command::SetComputePipeline:
                     {
-                        SetPipelineCmd* cmd = commands.NextCommand<SetPipelineCmd>();
-                        lastPipeline = ToBackend(cmd->pipeline).Get();
+                        SetComputePipelineCmd* cmd = commands.NextCommand<SetComputePipelineCmd>();
+                        lastComputePipeline = ToBackend(cmd->pipeline).Get();
 
-                        if (lastPipeline->IsCompute()) {
-                            ASSERT(encoders.compute);
-                            lastPipeline->Encode(encoders.compute);
-                        } else {
-                            ASSERT(encoders.render);
-                            DepthStencilState* depthStencilState = ToBackend(lastPipeline->GetDepthStencilState());
-                            [encoders.render setDepthStencilState:depthStencilState->GetMTLDepthStencilState()];
-                            lastPipeline->Encode(encoders.render);
-                        }
+                        ASSERT(encoders.compute);
+                        lastComputePipeline->Encode(encoders.compute);
+                    }
+                    break;
+
+                case Command::SetRenderPipeline:
+                    {
+                        SetRenderPipelineCmd* cmd = commands.NextCommand<SetRenderPipelineCmd>();
+                        lastRenderPipeline = ToBackend(cmd->pipeline).Get();
+
+                        ASSERT(encoders.render);
+                        DepthStencilState* depthStencilState = ToBackend(lastRenderPipeline->GetDepthStencilState());
+                        [encoders.render setDepthStencilState:depthStencilState->GetMTLDepthStencilState()];
+                        lastRenderPipeline->Encode(encoders.render);
                     }
                     break;
 
@@ -369,12 +375,6 @@ namespace metal {
 
                         const auto& layout = group->GetLayout()->GetBindingInfo();
 
-                        if (lastPipeline->IsCompute()) {
-                            ASSERT(encoders.compute);
-                        } else {
-                            ASSERT(encoders.render);
-                        }
-
                         // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup so that we
                         // only have to do one setVertexBuffers and one setFragmentBuffers call here.
                         for (size_t binding = 0; binding < layout.mask.size(); ++binding) {
@@ -390,15 +390,18 @@ namespace metal {
                             uint32_t fragIndex = 0;
                             uint32_t computeIndex = 0;
                             if (vertStage) {
-                                vertIndex = ToBackend(lastPipeline->GetLayout())->
+                                ASSERT(lastRenderPipeline != nullptr);
+                                vertIndex = ToBackend(lastRenderPipeline->GetLayout())->
                                     GetBindingIndexInfo(nxt::ShaderStage::Vertex)[groupIndex][binding];
                             }
                             if (fragStage) {
-                                fragIndex = ToBackend(lastPipeline->GetLayout())->
+                                ASSERT(lastRenderPipeline != nullptr);
+                                fragIndex = ToBackend(lastRenderPipeline->GetLayout())->
                                     GetBindingIndexInfo(nxt::ShaderStage::Fragment)[groupIndex][binding];
                             }
                             if (computeStage) {
-                                computeIndex = ToBackend(lastPipeline->GetLayout())->
+                                ASSERT(lastComputePipeline != nullptr);
+                                computeIndex = ToBackend(lastComputePipeline->GetLayout())->
                                     GetBindingIndexInfo(nxt::ShaderStage::Compute)[groupIndex][binding];
                             }
 
