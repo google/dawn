@@ -36,6 +36,13 @@ namespace backend {
             const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
             const std::bitset<kMaxBindGroups> GetBindGroupsLayoutMask() const;
 
+            // Utility functions to compute inherited bind groups.
+            // Returns the inherited bind groups as a mask
+            std::bitset<kMaxBindGroups> InheritedGroupsMask(const PipelineLayoutBase* other) const;
+
+            // Returns the index of the first incompatible bind group (in the range [1, kMaxBindGroups + 1])
+            uint32_t GroupsInheritUpTo(const PipelineLayoutBase* other) const;
+
         protected:
             BindGroupLayoutArray bindGroupLayouts;
             std::bitset<kMaxBindGroups> mask;

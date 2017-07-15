@@ -520,23 +520,16 @@ namespace backend {
         return true;
     }
 
-
     bool CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
         PipelineLayoutBase* layout = pipeline->GetLayout();
 
         aspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
+        // Reset bindgroups but mark unused bindgroups as valid
         bindgroupsSet = ~layout->GetBindGroupsLayoutMask();
 
         // Only bindgroups that were not the same layout in the last pipeline need to be set again.
         if (lastPipeline) {
-            PipelineLayoutBase* lastLayout = lastPipeline->GetLayout();
-            for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                if (lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
-                    bindgroupsSet |= uint64_t(1) << i;
-                } else {
-                    break;
-                }
-            }
+            bindgroupsSet |= layout->InheritedGroupsMask(lastPipeline->GetLayout());
         }
 
         lastPipeline = pipeline;

@@ -35,6 +35,19 @@ namespace backend {
         return mask;
     }
 
+    std::bitset<kMaxBindGroups> PipelineLayoutBase::InheritedGroupsMask(const PipelineLayoutBase* other) const {
+        return { GroupsInheritUpTo(other) - 1 };
+    }
+
+    uint32_t PipelineLayoutBase::GroupsInheritUpTo(const PipelineLayoutBase* other) const {
+        for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
+            if (!mask[i] || bindGroupLayouts[i].Get() != other->bindGroupLayouts[i].Get()) {
+                return i;
+            }
+        }
+        return kMaxBindGroups + 1;
+    }
+
     // PipelineLayoutBuilder
 
     PipelineLayoutBuilder::PipelineLayoutBuilder(DeviceBase* device) : Builder(device) {

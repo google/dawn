@@ -17,6 +17,8 @@
 #include "backend/Device.h"
 #include "common/Assert.h"
 
+#include <iostream>
+
 namespace backend {
 
     bool BuilderBase::CanBeUsed() const {
@@ -76,6 +78,8 @@ namespace backend {
                 result->Release();
                 result = nullptr;
             }
+
+            if (!callback) std::cout << storedMessage << std::endl;
         } else {
             ASSERT(storedStatus == nxt::BuilderErrorStatus::Success);
             ASSERT(storedMessage.empty());

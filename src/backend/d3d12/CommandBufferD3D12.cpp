@@ -81,18 +81,9 @@ namespace d3d12 {
                     return;
                 }
 
-                auto mask = newLayout->GetBindGroupsLayoutMask();
-                for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                    // matching bind groups are inherited until they differ
-                    if (mask[i] && oldLayout->GetBindGroupLayout(i) == newLayout->GetBindGroupLayout(i)) {
-                        BindGroup* group = bindGroups[i];
-                        if (group != nullptr) {
-                            TrackSetBindGroup(group, i);
-                        }
-                    }
-                    else {
-                        break;
-                    }
+                uint32_t inheritUntil = oldLayout->GroupsInheritUpTo(newLayout);
+                for (uint32_t i = 0; i < inheritUntil; ++i) {
+                    TrackSetBindGroup(bindGroups[i], i);
                 }
             }
 
@@ -130,18 +121,10 @@ namespace d3d12 {
                 if (oldLayout == nullptr) {
                     return;
                 }
-                auto mask = newLayout->GetBindGroupsLayoutMask();
-                for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                    // matching bind groups are inherited until they differ
-                    if (mask[i] && oldLayout->GetBindGroupLayout(i) == oldLayout->GetBindGroupLayout(i)) {
-                        BindGroup* group = bindGroups[i];
-                        if (group != nullptr) {
-                            SetBindGroup(commandList, newLayout, group, i, true);
-                        }
-                    }
-                    else {
-                        break;
-                    }
+
+                uint32_t inheritUntil = oldLayout->GroupsInheritUpTo(newLayout);
+                for (uint32_t i = 0; i < inheritUntil; ++i) {
+                    SetBindGroup(commandList, newLayout, bindGroups[i], i, true);
                 }
             }
 
