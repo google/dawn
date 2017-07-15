@@ -12,33 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_PIPELINED3D12_H_
-#define BACKEND_D3D12_PIPELINED3D12_H_
+#ifndef BACKEND_D3D12_RENDERPIPELINED3D12_H_
+#define BACKEND_D3D12_RENDERPIPELINED3D12_H_
 
-#include "backend/Pipeline.h"
+#include "backend/RenderPipeline.h"
 
 #include "backend/d3d12/d3d12_platform.h"
 
 namespace backend {
 namespace d3d12 {
 
-    class Device;
-    class ShaderModule;
-
-    class Pipeline : public PipelineBase {
+    class RenderPipeline : public RenderPipelineBase {
         public:
-            Pipeline(Device* device, PipelineBuilder* builder);
+            RenderPipeline(RenderPipelineBuilder* builder);
 
-            ComPtr<ID3D12PipelineState> GetRenderPipelineState();
+            ComPtr<ID3D12PipelineState> GetPipelineState();
 
         private:
-            Device* device;
-
-            ComPtr<ID3D12PipelineState> renderPipelineState;
-            ComPtr<ID3D12PipelineState> computePipelineState;
+            ComPtr<ID3D12PipelineState> pipelineState;
     };
 
 }
 }
 
-#endif // BACKEND_D3D12_PIPELINED3D12_H_
+#endif // BACKEND_D3D12_RENDERPIPELINED3D12_H_

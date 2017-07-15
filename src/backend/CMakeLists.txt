@@ -215,6 +215,8 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/CommandAllocatorManager.h
         ${D3D12_DIR}/CommandBufferD3D12.cpp
         ${D3D12_DIR}/CommandBufferD3D12.h
+        ${D3D12_DIR}/ComputePipelineD3D12.cpp
+        ${D3D12_DIR}/ComputePipelineD3D12.h
         ${D3D12_DIR}/DescriptorHeapAllocator.cpp
         ${D3D12_DIR}/DescriptorHeapAllocator.h
         ${D3D12_DIR}/D3D12Backend.cpp
@@ -223,12 +225,12 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/FramebufferD3D12.h
         ${D3D12_DIR}/InputStateD3D12.cpp
         ${D3D12_DIR}/InputStateD3D12.h
-        ${D3D12_DIR}/PipelineD3D12.cpp
-        ${D3D12_DIR}/PipelineD3D12.h
         ${D3D12_DIR}/PipelineLayoutD3D12.cpp
         ${D3D12_DIR}/PipelineLayoutD3D12.h
         ${D3D12_DIR}/QueueD3D12.cpp
         ${D3D12_DIR}/QueueD3D12.h
+        ${D3D12_DIR}/RenderPipelineD3D12.cpp
+        ${D3D12_DIR}/RenderPipelineD3D12.h
         ${D3D12_DIR}/ResourceAllocator.cpp
         ${D3D12_DIR}/ResourceAllocator.h
         ${D3D12_DIR}/ResourceUploader.cpp

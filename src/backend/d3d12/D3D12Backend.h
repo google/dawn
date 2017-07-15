@@ -17,18 +17,9 @@
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/Buffer.h"
-#include "backend/BindGroup.h"
-#include "backend/BindGroupLayout.h"
-#include "backend/Device.h"
-#include "backend/Framebuffer.h"
 #include "backend/DepthStencilState.h"
-#include "backend/InputState.h"
-#include "backend/PipelineLayout.h"
-#include "backend/Queue.h"
+#include "backend/Device.h"
 #include "backend/RenderPass.h"
-#include "backend/Sampler.h"
-#include "backend/Texture.h"
 #include "backend/ToBackend.h"
 
 #include "backend/d3d12/d3d12_platform.h"
@@ -41,18 +32,19 @@ namespace d3d12 {
     class Buffer;
     class BufferView;
     class CommandBuffer;
+    class ComputePipeline;
     class DepthStencilState;
     class Device;
+    class Framebuffer;
     class InputState;
-    class Pipeline;
     class PipelineLayout;
     class Queue;
+    class RenderPass;
+    class RenderPipeline;
     class Sampler;
     class ShaderModule;
     class Texture;
     class TextureView;
-    class Framebuffer;
-    class RenderPass;
 
     class CommandAllocatorManager;
     class DescriptorHeapAllocator;
@@ -66,18 +58,19 @@ namespace d3d12 {
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
+        using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;
         using DeviceType = Device;
+        using FramebufferType = Framebuffer;
         using InputStateType = InputState;
-        using PipelineType = Pipeline;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
+        using RenderPassType = RenderPass;
+        using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
         using TextureType = Texture;
         using TextureViewType = TextureView;
-        using FramebufferType = Framebuffer;
-        using RenderPassType = RenderPass;
     };
 
     template<typename T>
@@ -98,13 +91,14 @@ namespace d3d12 {
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+            ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
             DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
             FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
-            PipelineBase* CreatePipeline(PipelineBuilder* builder) override;
+            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
             PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
             QueueBase* CreateQueue(QueueBuilder* builder) override;
             RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+            RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
             SamplerBase* CreateSampler(SamplerBuilder* builder) override;
             ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
             TextureBase* CreateTexture(TextureBuilder* builder) override;

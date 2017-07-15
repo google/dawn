@@ -19,12 +19,13 @@
 #include "backend/d3d12/BufferD3D12.h"
 #include "backend/d3d12/CommandAllocatorManager.h"
 #include "backend/d3d12/CommandBufferD3D12.h"
+#include "backend/d3d12/ComputePipelineD3D12.h"
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 #include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
-#include "backend/d3d12/PipelineD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/QueueD3D12.h"
+#include "backend/d3d12/RenderPipelineD3D12.h"
 #include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/ResourceUploader.h"
 #include "backend/d3d12/SamplerD3D12.h"
@@ -222,17 +223,17 @@ namespace d3d12 {
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBuffer(this, builder);
     }
+    ComputePipelineBase* Device::CreateComputePipeline(ComputePipelineBuilder* builder) {
+        return new ComputePipeline(builder);
+    }
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(this, builder);
-    }
-    InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
-        return new InputState(this, builder);
     }
     FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
         return new Framebuffer(this, builder);
     }
-    PipelineBase* Device::CreatePipeline(PipelineBuilder* builder) {
-        return new Pipeline(this, builder);
+    InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
+        return new InputState(this, builder);
     }
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
         return new PipelineLayout(this, builder);
@@ -242,6 +243,9 @@ namespace d3d12 {
     }
     RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
         return new RenderPass(this, builder);
+    }
+    RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
+        return new RenderPipeline(builder);
     }
     SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
         return new Sampler(builder);

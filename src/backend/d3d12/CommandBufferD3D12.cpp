@@ -19,11 +19,12 @@
 #include "backend/d3d12/BindGroupD3D12.h"
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
 #include "backend/d3d12/BufferD3D12.h"
+#include "backend/d3d12/ComputePipelineD3D12.h"
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 #include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
-#include "backend/d3d12/PipelineD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
+#include "backend/d3d12/RenderPipelineD3D12.h"
 #include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/SamplerD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
@@ -52,10 +53,15 @@ namespace d3d12 {
             DescriptorHeapHandle cbvSrvUavGPUDescriptorHeap = {};
             DescriptorHeapHandle samplerGPUDescriptorHeap = {};
             std::array<BindGroup*, kMaxBindGroups> bindGroups = {};
+            bool inCompute = false;
 
             Device* device;
 
             BindGroupStateTracker(Device* device) : device(device) {
+            }
+
+            void SetInComputePass(bool inCompute) {
+                this->inCompute = inCompute;
             }
 
             void TrackSetBindGroup(BindGroup* group, uint32_t index) {
@@ -70,25 +76,38 @@ namespace d3d12 {
                 }
             }
 
-            void TrackSetBindInheritedGroup(uint32_t index) {
-                BindGroup* group = bindGroups[index];
-                if (group != nullptr) {
-                    TrackSetBindGroup(group, index);
+            void TrackInheritedGroups(PipelineLayout* oldLayout, PipelineLayout* newLayout) {
+                if (oldLayout == nullptr) {
+                    return;
+                }
+
+                auto mask = newLayout->GetBindGroupsLayoutMask();
+                for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
+                    // matching bind groups are inherited until they differ
+                    if (mask[i] && oldLayout->GetBindGroupLayout(i) == newLayout->GetBindGroupLayout(i)) {
+                        BindGroup* group = bindGroups[i];
+                        if (group != nullptr) {
+                            TrackSetBindGroup(group, i);
+                        }
+                    }
+                    else {
+                        break;
+                    }
                 }
             }
 
-            void SetBindGroup(ComPtr<ID3D12GraphicsCommandList> commandList, Pipeline* pipeline, BindGroup* group, uint32_t index, bool force = false) {
+            void SetBindGroup(ComPtr<ID3D12GraphicsCommandList> commandList, PipelineLayout* pipelineLayout, BindGroup* group,
+                              uint32_t index, bool force = false) {
                 if (bindGroups[index] != group || force) {
                     bindGroups[index] = group;
 
-                    PipelineLayout* pipelineLayout = ToBackend(pipeline->GetLayout());
                     uint32_t cbvUavSrvCount = ToBackend(group->GetLayout())->GetCbvUavSrvDescriptorCount();
                     uint32_t samplerCount = ToBackend(group->GetLayout())->GetSamplerDescriptorCount();
 
                     if (cbvUavSrvCount > 0) {
                         uint32_t parameterIndex = pipelineLayout->GetCbvUavSrvRootParameterIndex(index);
 
-                        if (pipeline->IsCompute()) {
+                        if (inCompute) {
                             commandList->SetComputeRootDescriptorTable(parameterIndex, cbvSrvUavGPUDescriptorHeap.GetGPUHandle(group->GetCbvUavSrvHeapOffset()));
                         } else {
                             commandList->SetGraphicsRootDescriptorTable(parameterIndex, cbvSrvUavGPUDescriptorHeap.GetGPUHandle(group->GetCbvUavSrvHeapOffset()));
@@ -98,7 +117,7 @@ namespace d3d12 {
                     if (samplerCount > 0) {
                         uint32_t parameterIndex = pipelineLayout->GetSamplerRootParameterIndex(index);
 
-                        if (pipeline->IsCompute()) {
+                        if (inCompute) {
                             commandList->SetComputeRootDescriptorTable(parameterIndex, samplerGPUDescriptorHeap.GetGPUHandle(group->GetSamplerHeapOffset()));
                         } else {
                             commandList->SetGraphicsRootDescriptorTable(parameterIndex, samplerGPUDescriptorHeap.GetGPUHandle(group->GetSamplerHeapOffset()));
@@ -107,10 +126,22 @@ namespace d3d12 {
                 }
             }
 
-            void SetInheritedBindGroup(ComPtr<ID3D12GraphicsCommandList> commandList, Pipeline* pipeline, uint32_t index) {
-                BindGroup* group = bindGroups[index];
-                if (group != nullptr) {
-                    SetBindGroup(commandList, pipeline, group, index, true);
+            void SetInheritedBindGroups(ComPtr<ID3D12GraphicsCommandList> commandList, PipelineLayout* oldLayout, PipelineLayout* newLayout) {
+                if (oldLayout == nullptr) {
+                    return;
+                }
+                auto mask = newLayout->GetBindGroupsLayoutMask();
+                for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
+                    // matching bind groups are inherited until they differ
+                    if (mask[i] && oldLayout->GetBindGroupLayout(i) == oldLayout->GetBindGroupLayout(i)) {
+                        BindGroup* group = bindGroups[i];
+                        if (group != nullptr) {
+                            SetBindGroup(commandList, newLayout, group, i, true);
+                        }
+                    }
+                    else {
+                        break;
+                    }
                 }
             }
 
@@ -131,30 +162,24 @@ namespace d3d12 {
 
             {
                 Command type;
-                Pipeline* lastPipeline = nullptr;
                 PipelineLayout* lastLayout = nullptr;
 
                 while (commands->NextCommandId(&type)) {
                     switch (type) {
-                        case Command::SetPipeline:
+                        case Command::SetComputePipeline:
                         {
-                            SetPipelineCmd* cmd = commands->NextCommand<SetPipelineCmd>();
-                            Pipeline* pipeline = ToBackend(cmd->pipeline).Get();
-                            PipelineLayout* layout = ToBackend(pipeline->GetLayout());
+                            SetComputePipelineCmd* cmd = commands->NextCommand<SetComputePipelineCmd>();
+                            PipelineLayout* layout = ToBackend(cmd->pipeline->GetLayout());
+                            bindingTracker->TrackInheritedGroups(lastLayout, layout);
+                            lastLayout = layout;
+                        }
+                        break;
 
-                            if (lastLayout) {
-                                auto mask = layout->GetBindGroupsLayoutMask();
-                                for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                                    // matching bind groups are inherited until they differ
-                                    if (mask[i] && lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
-                                        bindingTracker->TrackSetBindInheritedGroup(i);
-                                    } else {
-                                        break;
-                                    }
-                                }
-                            }
-
-                            lastPipeline = pipeline;
+                    case Command::SetRenderPipeline:
+                        {
+                            SetRenderPipelineCmd* cmd = commands->NextCommand<SetRenderPipelineCmd>();
+                            PipelineLayout* layout = ToBackend(cmd->pipeline->GetLayout());
+                            bindingTracker->TrackInheritedGroups(lastLayout, layout);
                             lastLayout = layout;
                         }
                         break;
@@ -243,7 +268,7 @@ namespace d3d12 {
         }
 
         Command type;
-        Pipeline* lastPipeline = nullptr;
+        RenderPipeline* lastRenderPipeline = nullptr;
         PipelineLayout* lastLayout = nullptr;
 
         RenderPass* currentRenderPass = nullptr;
@@ -255,6 +280,7 @@ namespace d3d12 {
                 case Command::BeginComputePass:
                     {
                         commands.NextCommand<BeginComputePassCmd>();
+                        bindingTracker.SetInComputePass(true);
                     }
                     break;
 
@@ -351,8 +377,6 @@ namespace d3d12 {
                 case Command::Dispatch:
                     {
                         DispatchCmd* dispatch = commands.NextCommand<DispatchCmd>();
-
-                        ASSERT(lastPipeline->IsCompute());
                         commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
                     }
                     break;
@@ -389,6 +413,7 @@ namespace d3d12 {
                 case Command::EndComputePass:
                     {
                         commands.NextCommand<EndComputePassCmd>();
+                        bindingTracker.SetInComputePass(false);
                     }
                     break;
 
@@ -405,35 +430,30 @@ namespace d3d12 {
                     }
                     break;
 
-                case Command::SetPipeline:
+                case Command::SetComputePipeline:
                     {
-                        SetPipelineCmd* cmd = commands.NextCommand<SetPipelineCmd>();
-
-                        Pipeline* pipeline = ToBackend(cmd->pipeline).Get();
+                        SetComputePipelineCmd* cmd = commands.NextCommand<SetComputePipelineCmd>();
+                        ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
                         PipelineLayout* layout = ToBackend(pipeline->GetLayout());
 
-                        // TODO
-                        if (pipeline->IsCompute()) {
-                        }
-                        else {
-                            commandList->SetGraphicsRootSignature(layout->GetRootSignature().Get());
-                            commandList->SetPipelineState(pipeline->GetRenderPipelineState().Get());
-                        }
+                        // TODO(enga@google.com): Implement compute pipelines
+                        bindingTracker.SetInheritedBindGroups(commandList, lastLayout, layout);
+                        lastLayout = layout;
+                    }
+                    break;
 
-                        if (lastLayout) {
-                            auto mask = layout->GetBindGroupsLayoutMask();
-                            for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                                // matching bind groups are inherited until they differ
-                                if (mask[i] && lastLayout->GetBindGroupLayout(i) == layout->GetBindGroupLayout(i)) {
-                                    bindingTracker.SetInheritedBindGroup(commandList, pipeline, i);
-                                } else {
-                                    break;
-                                }
-                            }
-                        }
+                case Command::SetRenderPipeline:
+                    {
+                        SetRenderPipelineCmd* cmd = commands.NextCommand<SetRenderPipelineCmd>();
+                        RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
+                        PipelineLayout* layout = ToBackend(pipeline->GetLayout());
 
+                        commandList->SetGraphicsRootSignature(layout->GetRootSignature().Get());
+                        commandList->SetPipelineState(pipeline->GetPipelineState().Get());
 
-                        lastPipeline = pipeline;
+                        bindingTracker.SetInheritedBindGroups(commandList, lastLayout, layout);
+
+                        lastRenderPipeline = pipeline;
                         lastLayout = layout;
                     }
                     break;
@@ -454,7 +474,7 @@ namespace d3d12 {
                     {
                         SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();
                         BindGroup* group = ToBackend(cmd->group.Get());
-                        bindingTracker.SetBindGroup(commandList, lastPipeline, group, cmd->index);
+                        bindingTracker.SetBindGroup(commandList, lastLayout, group, cmd->index);
                     }
                     break;
 
@@ -478,7 +498,7 @@ namespace d3d12 {
                         auto buffers = commands.NextData<Ref<BufferBase>>(cmd->count);
                         auto offsets = commands.NextData<uint32_t>(cmd->count);
 
-                        auto inputState = ToBackend(lastPipeline->GetInputState());
+                        auto inputState = ToBackend(lastRenderPipeline->GetInputState());
 
                         std::array<D3D12_VERTEX_BUFFER_VIEW, kMaxVertexInputs> d3d12BufferViews;
                         for (uint32_t i = 0; i < cmd->count; ++i) {
