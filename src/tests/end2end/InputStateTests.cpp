@@ -384,11 +384,6 @@ TEST_P(InputStateTest, TwoAttributesAtAnOffsetInstance) {
 
 // Test a pure-instance input state
 TEST_P(InputStateTest, PureInstance) {
-    if (IsD3D12()) {
-        printf("TODO(enga@google.com): SKIPPED. Incorrect texture copies cause this test to fail\n");
-        return;
-    }
-
     nxt::InputState inputState = MakeInputState({
             {0, 4 * sizeof(float), InputStepMode::Instance}
         }, {
