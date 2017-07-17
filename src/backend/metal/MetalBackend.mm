@@ -26,6 +26,8 @@
 #include "backend/metal/ShaderModuleMTL.h"
 #include "backend/metal/TextureMTL.h"
 
+#include <unistd.h>
+
 namespace backend {
 namespace metal {
     nxtProcTable GetNonValidatingProcs();
@@ -58,6 +60,17 @@ namespace metal {
     }
 
     Device::~Device() {
+        // Wait for all commands to be finished so we can free resources
+        // SubmitPendingCommandBuffer may not increment the pendingCommandSerial if there
+        // are no pending commands, so we can't store the pendingSerial before
+        // SubmitPendingCommandBuffer then wait for it to be passed. Instead we submit and
+        // wait for the serial before the next pendingCommandSerial.
+        SubmitPendingCommandBuffer();
+        while (finishedCommandSerial != pendingCommandSerial - 1) {
+            usleep(100);
+        }
+        Tick();
+
         [pendingCommands release];
         pendingCommands = nil;
 
