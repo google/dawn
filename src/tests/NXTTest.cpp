@@ -150,7 +150,7 @@ void NXTTest::TearDown() {
     }
 }
 
-void NXTTest::AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation) {
+std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation) {
     nxt::Buffer source = buffer.Clone();
 
     auto readback = ReserveReadback(size);
@@ -175,10 +175,12 @@ void NXTTest::AddBufferExpectation(const char* file, int line, const nxt::Buffer
     deferred.rowPitch = size;
     deferred.expectation = expectation;
 
-    deferredExpectations.push_back(deferred);
+    deferredExpectations.push_back(std::move(deferred));
+    deferredExpectations.back().message = std::make_unique<std::ostringstream>();
+    return *(deferredExpectations.back().message.get());
 }
 
-void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation) {
+std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation) {
     nxt::Texture source = texture.Clone();
     uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
     uint32_t size = rowPitch * (height - 1) + width * pixelSize;
@@ -205,7 +207,9 @@ void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Textu
     deferred.rowPitch = rowPitch;
     deferred.expectation = expectation;
 
-    deferredExpectations.push_back(deferred);
+    deferredExpectations.push_back(std::move(deferred));
+    deferredExpectations.back().message = std::make_unique<std::ostringstream>();
+    return *(deferredExpectations.back().message.get());
 }
 
 void NXTTest::WaitABit() {
@@ -296,7 +300,8 @@ void NXTTest::ResolveExpectations() {
         // Get the result for the expectation and add context to failures
         testing::AssertionResult result = expectation.expectation->Check(data, size);
         if (!result) {
-            result << " Expectation created at " << expectation.file << ":" << expectation.line;
+            result << " Expectation created at " << expectation.file << ":" << expectation.line << std::endl;
+            result << expectation.message->str();
         }
 
         EXPECT_TRUE(result);

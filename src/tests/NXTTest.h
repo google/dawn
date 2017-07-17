@@ -15,19 +15,20 @@
 #include "nxt/nxtcpp.h"
 
 #include <gtest/gtest.h>
+#include <memory>
 
 // Getting data back from NXT is done in an async manners so all expectations are "deferred"
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
 // so resources should have the TransferSrc allowed usage bit if you want to add expectations on them.
 #define EXPECT_BUFFER_U32_EQ(expected, buffer, offset) \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), new detail::ExpectEq<uint32_t>(expected));
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), new detail::ExpectEq<uint32_t>(expected))
 
 #define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count) \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * count, new detail::ExpectEq<uint32_t>(expected, count));
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * count, new detail::ExpectEq<uint32_t>(expected, count))
 
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected));
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected))
 
 struct RGBA8 {
     constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a): r(r), g(g), b(b), a(a) {
@@ -74,8 +75,8 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
         nxt::Queue queue;
 
         // Helper methods to implement the EXPECT_ macros
-        void AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation);
-        void AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation);
+        std::ostringstream& AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation);
+        std::ostringstream& AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation);
 
         void WaitABit();
         void SwapBuffers();
@@ -111,6 +112,9 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
             uint32_t rowBytes;
             uint32_t rowPitch;
             detail::Expectation* expectation;
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54316
+            // Use unique_ptr because of missing move/copy constructors on std::basic_ostringstream
+            std::unique_ptr<std::ostringstream> message;
         };
         std::vector<DeferredExpectation> deferredExpectations;
 
