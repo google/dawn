@@ -28,9 +28,13 @@
 
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected))
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected))
+
+#define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, x, y, width, height, level) \
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected, width * height))
 
 struct RGBA8 {
+    constexpr RGBA8() : RGBA8(0,0,0,0) {}
     constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a): r(r), g(g), b(b), a(a) {
     }
     bool operator==(const RGBA8& other) const;
@@ -76,7 +80,7 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 
         // Helper methods to implement the EXPECT_ macros
         std::ostringstream& AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation);
-        std::ostringstream& AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation);
+        std::ostringstream& AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t level, uint32_t pixelSize, detail::Expectation* expectation);
 
         void WaitABit();
         void SwapBuffers();

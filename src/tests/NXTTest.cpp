@@ -180,7 +180,7 @@ std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, co
     return *(deferredExpectations.back().message.get());
 }
 
-std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation) {
+std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t level, uint32_t pixelSize, detail::Expectation* expectation) {
     nxt::Texture source = texture.Clone();
     uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
     uint32_t size = rowPitch * (height - 1) + width * pixelSize;
@@ -192,7 +192,7 @@ std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, c
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .TransitionTextureUsage(source, nxt::TextureUsageBit::TransferSrc)
         .TransitionBufferUsage(readback.buffer, nxt::BufferUsageBit::TransferDst)
-        .CopyTextureToBuffer(source, x, y, 0, width, height, 1, 0, readback.buffer, readback.offset, rowPitch)
+        .CopyTextureToBuffer(source, x, y, 0, width, height, 1, level, readback.buffer, readback.offset, rowPitch)
         .GetResult();
 
     queue.Submit(1, &commands);
