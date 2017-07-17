@@ -124,8 +124,7 @@ namespace d3d12 {
             ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
 
             ComPtr<ID3D12Resource> GetCurrentTexture();
-            ComPtr<ID3D12Resource> GetCurrentDepthTexture();
-            void SetNextTexture(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> depthResource);
+            void SetNextTexture(ComPtr<ID3D12Resource> resource);
 
             uint64_t GetSerial() const;
             void NextSerial();
@@ -153,7 +152,6 @@ namespace d3d12 {
             } pendingCommands;
 
             ComPtr<ID3D12Resource> nextTexture;
-            ComPtr<ID3D12Resource> nextDepthTexture;
     };
 
     class DepthStencilState : public DepthStencilStateBase {

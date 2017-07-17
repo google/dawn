@@ -24,6 +24,8 @@ namespace metal {
             switch (format) {
                 case nxt::TextureFormat::R8G8B8A8Unorm:
                     return MTLPixelFormatRGBA8Unorm;
+                case nxt::TextureFormat::D32FloatS8Uint:
+                    return MTLPixelFormatDepth32Float_Stencil8;
             }
         }
 
@@ -65,6 +67,7 @@ namespace metal {
         desc.depth = GetDepth();
         desc.mipmapLevelCount = GetNumMipLevels();
         desc.arrayLength = 1;
+        desc.storageMode = MTLStorageModePrivate;
 
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
         mtlTexture = [mtlDevice newTextureWithDescriptor:desc];

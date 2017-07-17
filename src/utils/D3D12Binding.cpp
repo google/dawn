@@ -31,7 +31,7 @@ namespace backend {
 namespace d3d12 {
     void Init(ComPtr<ID3D12Device> d3d12Device, nxtProcTable* procs, nxtDevice* device);
     ComPtr<ID3D12CommandQueue> GetCommandQueue(nxtDevice device);
-    void SetNextTexture(nxtDevice device, ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> depthResource);
+    void SetNextTexture(nxtDevice device, ComPtr<ID3D12Resource> resource);
     uint64_t GetSerial(const nxtDevice device);
     void NextSerial(nxtDevice device);
     void ExecuteCommandLists(nxtDevice device, std::initializer_list<ID3D12CommandList*> commandLists);
@@ -100,44 +100,9 @@ namespace utils {
                     &swapChain1
                 ));
                 ASSERT_SUCCESS(swapChain1.As(&swapChain));
-              
-                // Create a render target and depth stencil resource for each frame.
-                {
-                    D3D12_HEAP_PROPERTIES dsvHeapProperties;
-                    dsvHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-                    dsvHeapProperties.CreationNodeMask = 0;
-                    dsvHeapProperties.VisibleNodeMask = 0;
-                    dsvHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-                    dsvHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
-                    D3D12_RESOURCE_DESC dsvDesc;
-                    dsvDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-                    dsvDesc.Alignment = 0;
-                    dsvDesc.Width = width;
-                    dsvDesc.Height = height;
-                    dsvDesc.DepthOrArraySize = 1;
-                    dsvDesc.MipLevels = 0;
-                    dsvDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
-                    dsvDesc.SampleDesc.Count = 1;
-                    dsvDesc.SampleDesc.Quality = 0;
-                    dsvDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-                    dsvDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-                    D3D12_CLEAR_VALUE dsvClear;
-                    dsvClear.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
-                    dsvClear.DepthStencil.Depth = 1.0f;
-                    dsvClear.DepthStencil.Stencil = 0;
-
-                    for (uint32_t n = 0; n < kFrameCount; ++n) {
-                        ASSERT_SUCCESS(swapChain->GetBuffer(n, IID_PPV_ARGS(&renderTargetResources[n])));
-                        ASSERT_SUCCESS(d3d12Device->CreateCommittedResource(
-                            &dsvHeapProperties,
-                            D3D12_HEAP_FLAG_NONE,
-                            &dsvDesc,
-                            D3D12_RESOURCE_STATE_DEPTH_WRITE,
-                            &dsvClear,
-                            IID_PPV_ARGS(&depthStencilResources[n])));
-                    }
+                for (uint32_t n = 0; n < kFrameCount; ++n) {
+                    ASSERT_SUCCESS(swapChain->GetBuffer(n, IID_PPV_ARGS(&renderTargetResources[n])));
                 }
 
                 // Get the initial render target and arbitrarily choose a "previous" render target that's different
@@ -168,7 +133,7 @@ namespace utils {
                     backend::d3d12::NextSerial(backendDevice);
                 }
 
-                backend::d3d12::SetNextTexture(backendDevice, renderTargetResources[renderTargetIndex], depthStencilResources[renderTargetIndex]);
+                backend::d3d12::SetNextTexture(backendDevice, renderTargetResources[renderTargetIndex]);
             }
 
             void SwapBuffers() override {
@@ -217,7 +182,7 @@ namespace utils {
                 lastSerialRenderTargetWasUsed[renderTargetIndex] = backend::d3d12::GetSerial(backendDevice);
 
                 // Tell the backend to render to the current render target
-                backend::d3d12::SetNextTexture(backendDevice, renderTargetResources[renderTargetIndex], depthStencilResources[renderTargetIndex]);
+                backend::d3d12::SetNextTexture(backendDevice, renderTargetResources[renderTargetIndex]);
             }
 
         private:
@@ -232,7 +197,6 @@ namespace utils {
             ComPtr<ID3D12CommandQueue> commandQueue;
             ComPtr<IDXGISwapChain3> swapChain;
             ComPtr<ID3D12Resource> renderTargetResources[kFrameCount];
-            ComPtr<ID3D12Resource> depthStencilResources[kFrameCount];
 
             // Frame synchronization. Updated every frame
             uint32_t renderTargetIndex;

@@ -49,9 +49,9 @@ namespace d3d12 {
         return backendDevice->GetCommandQueue();
     }
 
-    void SetNextTexture(nxtDevice device, ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> depthResource) {
+    void SetNextTexture(nxtDevice device, ComPtr<ID3D12Resource> resource) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
-        backendDevice->SetNextTexture(resource, depthResource);
+        backendDevice->SetNextTexture(resource);
     }
 
     uint64_t GetSerial(const nxtDevice device) {
@@ -160,14 +160,10 @@ namespace d3d12 {
         return nextTexture;
     }
 
-    ComPtr<ID3D12Resource> Device::GetCurrentDepthTexture() {
-        return nextDepthTexture;
+    void Device::SetNextTexture(ComPtr<ID3D12Resource> resource) {
+        nextTexture = resource;
     }
 
-    void Device::SetNextTexture(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> depthResource) {
-        nextTexture = resource;
-        nextDepthTexture = depthResource;
-    }
 
     void Device::TickImpl() {
         // Perform cleanup operations to free unused objects

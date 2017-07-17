@@ -21,6 +21,8 @@
 #include "backend/d3d12/d3d12_platform.h"
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 
+#include <vector>
+
 namespace backend {
 namespace d3d12 {
 
@@ -29,9 +31,9 @@ namespace d3d12 {
     class Framebuffer : public FramebufferBase {
         public:
             struct OMSetRenderTargetArgs {
-                unsigned int numRTVs;
+                unsigned int numRTVs = 0;
                 D3D12_CPU_DESCRIPTOR_HANDLE RTVs[kMaxColorAttachments] = {};
-                D3D12_CPU_DESCRIPTOR_HANDLE dsv = { 0 };
+                D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
             };
 
             Framebuffer(Device* device, FramebufferBuilder* builder);
@@ -41,6 +43,9 @@ namespace d3d12 {
             Device* device;
             DescriptorHeapHandle rtvHeap;
             DescriptorHeapHandle dsvHeap;
+
+            // Indices into either the RTV or DSV heap, depending on texture format.
+            std::vector<uint32_t> attachmentHeapIndices;
     };
 
 }

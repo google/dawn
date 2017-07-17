@@ -204,12 +204,7 @@ namespace d3d12 {
             d3d12Location.PlacedFootprint.Footprint.Height = textureLocation.height;
             d3d12Location.PlacedFootprint.Footprint.Depth = textureLocation.depth;
 
-            uint32_t texelSize = 0;
-            switch (texture->GetFormat()) {
-                case nxt::TextureFormat::R8G8B8A8Unorm:
-                    texelSize = 4;
-                    break;
-            }
+            size_t texelSize = TextureFormatPixelSize(texture->GetFormat());
             uint32_t rowSize = textureLocation.width * texelSize;
             d3d12Location.PlacedFootprint.Footprint.RowPitch = ((rowSize - 1) / D3D12_TEXTURE_DATA_PITCH_ALIGNMENT + 1) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 

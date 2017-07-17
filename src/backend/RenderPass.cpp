@@ -126,6 +126,10 @@ namespace backend {
             HandleError("Render pass subpass count not set yet");
             return;
         }
+        if ((propertiesSet & RENDERPASS_PROPERTY_ATTACHMENT_COUNT) == 0) {
+            HandleError("Render pass attachment count not set yet");
+            return;
+        }
         if (subpass >= subpasses.size()) {
             HandleError("Subpass index out of bounds");
             return;
@@ -145,6 +149,32 @@ namespace backend {
 
         subpasses[subpass].colorAttachmentsSet.set(outputAttachmentLocation);
         subpasses[subpass].colorAttachments[outputAttachmentLocation] = attachmentSlot;
+    }
+
+    void RenderPassBuilder::SubpassSetDepthStencilAttachment(uint32_t subpass, uint32_t attachmentSlot) {
+        if ((propertiesSet & RENDERPASS_PROPERTY_SUBPASS_COUNT) == 0) {
+            HandleError("Render pass subpass count not set yet");
+            return;
+        }
+        if ((propertiesSet & RENDERPASS_PROPERTY_ATTACHMENT_COUNT) == 0) {
+            HandleError("Render pass attachment count not set yet");
+            return;
+        }
+        if (subpass >= subpasses.size()) {
+            HandleError("Subpass index out of bounds");
+            return;
+        }
+        if (attachmentSlot >= attachments.size()) {
+            HandleError("Subpass attachment slot out of bounds");
+            return;
+        }
+        if (subpasses[subpass].depthStencilAttachmentSet) {
+            HandleError("Subpass depth-stencil attachment already set");
+            return;
+        }
+
+        subpasses[subpass].depthStencilAttachmentSet = true;
+        subpasses[subpass].depthStencilAttachment = attachmentSlot;
     }
 
 }

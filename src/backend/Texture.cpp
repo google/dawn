@@ -23,10 +23,35 @@ namespace backend {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
                 return 4;
+            case nxt::TextureFormat::D32FloatS8Uint:
+                return 8;
             default:
                 UNREACHABLE();
         }
     }
+
+    bool TextureFormatHasDepth(nxt::TextureFormat format) {
+        switch (format) {
+            case nxt::TextureFormat::R8G8B8A8Unorm:
+                return false;
+            case nxt::TextureFormat::D32FloatS8Uint:
+                return true;
+            default:
+                UNREACHABLE();
+        }
+    }
+
+    bool TextureFormatHasStencil(nxt::TextureFormat format) {
+        switch (format) {
+            case nxt::TextureFormat::R8G8B8A8Unorm:
+                return false;
+            case nxt::TextureFormat::D32FloatS8Uint:
+                return true;
+            default:
+                UNREACHABLE();
+        }
+    }
+
 
     // TextureBase
 
@@ -93,15 +118,6 @@ namespace backend {
     void TextureBase::UpdateUsageInternal(nxt::TextureUsageBit usage) {
         ASSERT(IsTransitionPossible(usage));
         currentUsage = usage;
-    }
-
-    bool TextureBase::IsDepthFormat(nxt::TextureFormat format) {
-        switch (format) {
-            case nxt::TextureFormat::R8G8B8A8Unorm:
-                return false;
-            default:
-                UNREACHABLE();
-        }
     }
 
     void TextureBase::TransitionUsage(nxt::TextureUsageBit usage) {

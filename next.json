@@ -591,7 +591,7 @@
                 "name": "set attachment",
                 "args": [
                     {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "texture views", "type": "texture view"}
+                    {"name": "texture view", "type": "texture view"}
                 ]
             }
         ]
@@ -760,6 +760,13 @@
                 "args": [
                     {"name": "subpass index", "type": "uint32_t"},
                     {"name": "output attachment location", "type": "uint32_t"},
+                    {"name": "attachment slot", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "subpass set depth stencil attachment",
+                "args": [
+                    {"name": "subpass index", "type": "uint32_t"},
                     {"name": "attachment slot", "type": "uint32_t"}
                 ]
             }
@@ -936,7 +943,8 @@
     "texture format": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "r8 g8 b8 a8 unorm"}
+            {"value": 0, "name": "r8 g8 b8 a8 unorm"},
+            {"value": 1, "name": "d32 float s8 uint"}
         ]
     },
     "vertex format": {

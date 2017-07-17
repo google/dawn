@@ -23,73 +23,79 @@ namespace d3d12 {
 
     Framebuffer::Framebuffer(Device* device, FramebufferBuilder* builder)
         : FramebufferBase(builder), device(device) {
-
         RenderPass* renderPass = ToBackend(GetRenderPass());
-        uint32_t attachmentCount = renderPass->GetAttachmentCount();
-        rtvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, attachmentCount);
 
-        bool usingBackbuffer = false; // HACK(enga@google.com): workaround for not having depth attachments
-        uint32_t rtvIndex = 0;
-
-        for (uint32_t attachment = 0; attachment < attachmentCount; ++attachment) {
+        uint32_t rtvCount = 0, dsvCount = 0;
+        attachmentHeapIndices.resize(renderPass->GetAttachmentCount());
+        for (uint32_t attachment = 0; attachment < renderPass->GetAttachmentCount(); ++attachment) {
             auto* textureView = GetTextureView(attachment);
-            if (textureView) {
-                ComPtr<ID3D12Resource> texture = ToBackend(textureView->GetTexture())->GetD3D12Resource();
-                D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(rtvIndex++);
-                D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = ToBackend(textureView)->GetRTVDescriptor();
-
-                device->GetD3D12Device()->CreateRenderTargetView(texture.Get(), &rtvDesc, rtvHandle);
+            if (!textureView) {
+                // TODO(kainino@chromium.org): null=backbuffer hack
+                attachmentHeapIndices[attachment] = rtvCount++;
+                continue;
+            }
+            auto format = textureView->GetTexture()->GetFormat();
+            if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
+                attachmentHeapIndices[attachment] = dsvCount++;
             } else {
-                // TODO(enga@google.com) no attachment. This will use the backbuffer. Remove when this hack is removed
-                usingBackbuffer = true;
-                rtvIndex++;
+                attachmentHeapIndices[attachment] = rtvCount++;
             }
         }
 
-        // TODO(enga@google.com): load depth attachment from subpass
-        if (usingBackbuffer) {
-            dsvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
-            D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
+        if (rtvCount) {
+            rtvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(
+                    D3D12_DESCRIPTOR_HEAP_TYPE_RTV, rtvCount);
+        }
+        if (dsvCount) {
+            dsvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(
+                    D3D12_DESCRIPTOR_HEAP_TYPE_DSV, dsvCount);
+        }
 
-            D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
-            dsvDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
-            dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-            dsvDesc.Texture2D.MipSlice = 0;
-            dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+        for (uint32_t attachment = 0; attachment < renderPass->GetAttachmentCount(); ++attachment) {
+            uint32_t heapIndex = attachmentHeapIndices[attachment];
+            auto* textureView = GetTextureView(attachment);
+            if (!textureView) {
+                continue;
+            }
 
-            device->GetD3D12Device()->CreateDepthStencilView(device->GetCurrentDepthTexture().Get(), &dsvDesc, dsvHandle);
+            ComPtr<ID3D12Resource> texture = ToBackend(textureView->GetTexture())->GetD3D12Resource();
+            auto format = textureView->GetTexture()->GetFormat();
+            if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
+                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(heapIndex);
+                D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = ToBackend(textureView)->GetDSVDescriptor();
+                device->GetD3D12Device()->CreateDepthStencilView(texture.Get(), &dsvDesc, dsvHandle);
+            } else {
+                D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(heapIndex);
+                D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = ToBackend(textureView)->GetRTVDescriptor();
+                device->GetD3D12Device()->CreateRenderTargetView(texture.Get(), &rtvDesc, rtvHandle);
+            }
         }
     }
 
     Framebuffer::OMSetRenderTargetArgs Framebuffer::GetSubpassOMSetRenderTargetArgs(uint32_t subpassIndex) {
         const auto& subpassInfo = GetRenderPass()->GetSubpassInfo(subpassIndex);
-
-        bool usingBackbuffer = false; // HACK(enga@google.com): workaround for not having depth attachments
-
-        OMSetRenderTargetArgs args;
-        args.numRTVs = 0;
+        OMSetRenderTargetArgs args = {};
 
         for (uint32_t index : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
+            uint32_t heapIndex = attachmentHeapIndices[subpassInfo.colorAttachments[index]];
+            D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(heapIndex);
+
             uint32_t attachment = subpassInfo.colorAttachments[index];
-            const auto& attachmentInfo = GetRenderPass()->GetAttachmentInfo(attachment);
-
-            D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(attachment);
-            args.RTVs[args.numRTVs++] = rtvHandle;
             if (!GetTextureView(attachment)) {
-                usingBackbuffer = true;
-
+                // TODO(kainino@chromium.org): null=backbuffer hack
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
-                rtvDesc.Format = D3D12TextureFormat(attachmentInfo.format);
+                rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
                 rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
                 rtvDesc.Texture2D.MipSlice = 0;
                 rtvDesc.Texture2D.PlaneSlice = 0;
-
                 device->GetD3D12Device()->CreateRenderTargetView(device->GetCurrentTexture().Get(), &rtvDesc, rtvHandle);
             }
-        }
 
-        if (usingBackbuffer) {
-            args.dsv = dsvHeap.GetCPUHandle(0);
+            args.RTVs[args.numRTVs++] = rtvHandle;
+        }
+        if (subpassInfo.depthStencilAttachmentSet) {
+            uint32_t heapIndex = attachmentHeapIndices[subpassInfo.depthStencilAttachment];
+            args.dsv = dsvHeap.GetCPUHandle(heapIndex);
         }
 
         return args;

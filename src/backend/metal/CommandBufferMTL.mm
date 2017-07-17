@@ -86,7 +86,6 @@ namespace metal {
                 const auto& info = currentRenderPass->GetSubpassInfo(subpass);
 
                 MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-                bool usingBackbuffer = false; // HACK(kainino@chromium.org): workaround for not having depth attachments
                 for (uint32_t index = 0; index < info.colorAttachments.size(); ++index) {
                     uint32_t attachment = info.colorAttachments[index];
 
@@ -98,18 +97,30 @@ namespace metal {
                         texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
                     } else {
                         texture = device->GetCurrentTexture();
-                        usingBackbuffer = true;
                     }
                     descriptor.colorAttachments[index].texture = texture;
-                    descriptor.colorAttachments[index].loadAction = MTLLoadActionClear;
+                    descriptor.colorAttachments[index].loadAction = MTLLoadActionLoad;
                     descriptor.colorAttachments[index].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0);
                     descriptor.colorAttachments[index].storeAction = MTLStoreActionStore;
                 }
-                // TODO(kainino@chromium.org): load depth attachment from subpass
-                if (usingBackbuffer) {
-                    descriptor.depthAttachment.texture = device->GetCurrentDepthTexture();
-                    descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
-                    descriptor.depthAttachment.storeAction = MTLStoreActionStore;
+                if (info.depthStencilAttachmentSet) {
+                    uint32_t attachment = info.depthStencilAttachment;
+
+                    auto textureView = currentFramebuffer->GetTextureView(attachment);
+                    id<MTLTexture> texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
+                    nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
+                    if (TextureFormatHasDepth(format)) {
+                        descriptor.depthAttachment.texture = texture;
+                        descriptor.depthAttachment.loadAction = MTLLoadActionClear;
+                        descriptor.depthAttachment.clearDepth = 1.0;
+                        descriptor.depthAttachment.storeAction = MTLStoreActionStore;
+                    }
+                    if (TextureFormatHasStencil(format)) {
+                        descriptor.stencilAttachment.texture = texture;
+                        descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
+                        descriptor.stencilAttachment.clearStencil = 0;
+                        descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
+                    }
                 }
 
                 render = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];

@@ -108,7 +108,6 @@ namespace metal {
 
             id<MTLDevice> GetMTLDevice();
             id<MTLTexture> GetCurrentTexture();
-            id<MTLTexture> GetCurrentDepthTexture();
 
             id<MTLCommandBuffer> GetPendingCommandBuffer();
             void SubmitPendingCommandBuffer();
@@ -127,7 +126,6 @@ namespace metal {
 
             id<CAMetalDrawable> currentDrawable = nil;
             id<MTLTexture> currentTexture = nil;
-            id<MTLTexture> currentDepthTexture = nil;
 
             Serial finishedCommandSerial = 0;
             Serial pendingCommandSerial = 1;

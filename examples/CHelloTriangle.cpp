@@ -81,8 +81,10 @@ void frame() {
     {
         nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
         nxtCommandBufferBuilderBeginRenderPass(builder, renderpass, framebuffer);
+        nxtCommandBufferBuilderBeginRenderSubpass(builder);
         nxtCommandBufferBuilderSetPipeline(builder, pipeline);
         nxtCommandBufferBuilderDrawArrays(builder, 3, 1, 0, 0);
+        nxtCommandBufferBuilderEndRenderSubpass(builder);
         nxtCommandBufferBuilderEndRenderPass(builder);
         commands = nxtCommandBufferBuilderGetResult(builder);
         nxtCommandBufferBuilderRelease(builder);

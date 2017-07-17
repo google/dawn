@@ -24,6 +24,8 @@
 namespace backend {
 
     size_t TextureFormatPixelSize(nxt::TextureFormat format);
+    bool TextureFormatHasDepth(nxt::TextureFormat format);
+    bool TextureFormatHasStencil(nxt::TextureFormat format);
 
     class TextureBase : public RefCounted {
         public:
@@ -42,8 +44,6 @@ namespace backend {
             static bool IsUsagePossible(nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit usage);
             bool IsTransitionPossible(nxt::TextureUsageBit usage) const;
             void UpdateUsageInternal(nxt::TextureUsageBit usage);
-
-            static bool IsDepthFormat(nxt::TextureFormat format);
 
             DeviceBase* GetDevice();
 

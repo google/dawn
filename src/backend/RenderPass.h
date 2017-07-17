@@ -39,6 +39,8 @@ namespace backend {
             struct SubpassInfo {
                 std::bitset<kMaxColorAttachments> colorAttachmentsSet;
                 std::array<uint32_t, kMaxColorAttachments> colorAttachments;
+                bool depthStencilAttachmentSet = false;
+                uint32_t depthStencilAttachment = 0;
             };
 
             uint32_t GetAttachmentCount() const;
@@ -64,6 +66,7 @@ namespace backend {
             void AttachmentSetFormat(uint32_t attachmentSlot, nxt::TextureFormat format);
             void SetSubpassCount(uint32_t subpassCount);
             void SubpassSetColorAttachment(uint32_t subpass, uint32_t outputAttachmentLocation, uint32_t attachmentSlot);
+            void SubpassSetDepthStencilAttachment(uint32_t subpass, uint32_t attachmentSlot);
 
         private:
             friend class RenderPassBase;

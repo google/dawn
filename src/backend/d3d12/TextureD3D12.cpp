@@ -37,9 +37,10 @@ namespace d3d12 {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
             if (usage & nxt::TextureUsageBit::OutputAttachment) {
-                resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;
-                if (TextureBase::IsDepthFormat(format)) {
+                if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
                     resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
+                } else {
+                    resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;
                 }
             }
 
@@ -53,12 +54,15 @@ namespace d3d12 {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
             }
             if (usage & nxt::TextureUsageBit::OutputAttachment) {
-                flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-                if (TextureBase::IsDepthFormat(format)) {
+                if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+                } else {
+                    flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
                 }
             }
 
+            ASSERT(!(flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) ||
+                    flags == D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
             return flags;
         }
 
@@ -77,6 +81,8 @@ namespace d3d12 {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
                 return DXGI_FORMAT_R8G8B8A8_UNORM;
+            case nxt::TextureFormat::D32FloatS8Uint:
+                return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
             default:
                 UNREACHABLE();
         }
@@ -96,7 +102,7 @@ namespace d3d12 {
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage(), GetFormat());
+        resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage(), GetFormat());
 
         resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12TextureUsage(GetUsage(), GetFormat()));
     }
@@ -165,6 +171,15 @@ namespace d3d12 {
         rtvDesc.Texture2D.MipSlice = 0;
         rtvDesc.Texture2D.PlaneSlice = 0;
         return rtvDesc;
+    }
+
+    D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor() {
+        D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+        dsvDesc.Format = ToBackend(GetTexture())->GetD3D12Format();
+        dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+        dsvDesc.Texture2D.MipSlice = 0;
+        dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+        return dsvDesc;
     }
 
 }

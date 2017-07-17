@@ -74,9 +74,6 @@ namespace metal {
 
         [currentTexture release];
         currentTexture = nil;
-
-        [currentDepthTexture release];
-        currentDepthTexture = nil;
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
@@ -146,32 +143,11 @@ namespace metal {
         currentTexture = drawable.texture;
         [currentTexture retain];
 
-        if (currentDepthTexture == nil ||
-                currentTexture.width != currentDepthTexture.width ||
-                currentTexture.height != currentDepthTexture.height) {
-            if (currentDepthTexture != nil) {
-                [currentDepthTexture release];
-            }
-            MTLTextureDescriptor* depthDescriptor = [MTLTextureDescriptor
-                texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
-                width:currentTexture.width
-                height:currentTexture.height
-                mipmapped:NO];
-            depthDescriptor.textureType = MTLTextureType2D;
-            depthDescriptor.usage = MTLTextureUsageRenderTarget;
-            depthDescriptor.storageMode = MTLStorageModePrivate;
-            currentDepthTexture = [mtlDevice newTextureWithDescriptor:depthDescriptor];
-        }
-
         MTLRenderPassDescriptor* passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
         passDescriptor.colorAttachments[0].texture = currentTexture;
         passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
         passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
         passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
-        passDescriptor.depthAttachment.texture = currentDepthTexture;
-        passDescriptor.depthAttachment.loadAction = MTLLoadActionClear;
-        passDescriptor.depthAttachment.storeAction = MTLStoreActionStore;
-        passDescriptor.depthAttachment.clearDepth = 1.0;
 
 
         id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
@@ -193,10 +169,6 @@ namespace metal {
 
     id<MTLTexture> Device::GetCurrentTexture() {
         return currentTexture;
-    }
-
-    id<MTLTexture> Device::GetCurrentDepthTexture() {
-        return currentDepthTexture;
     }
 
     id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {

@@ -103,12 +103,10 @@ namespace opengl {
             void InitBackbuffer();
             void CommitBackbuffer();
             GLuint GetCurrentTexture();
-            GLuint GetCurrentDepthTexture();
 
         private:
             GLuint backFBO = 0;
             GLuint backTexture = 0;
-            GLuint backDepthTexture = 0;
     };
 
     class BindGroup : public BindGroupBase {

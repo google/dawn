@@ -111,9 +111,7 @@ namespace opengl {
     void Device::HACKCLEAR() {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, backFBO);
         glClearColor(0, 0, 0, 1);
-        glStencilMask(0xff);
-        glClearStencil(0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
     }
 
     void Device::InitBackbuffer() {
@@ -121,16 +119,10 @@ namespace opengl {
         glBindTexture(GL_TEXTURE_2D, backTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 640, 480, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-        glGenTextures(1, &backDepthTexture);
-        glBindTexture(GL_TEXTURE_2D, backDepthTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, 640, 480, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
-
         glGenFramebuffers(1, &backFBO);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, backFBO);
         glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_2D, backTexture, 0);
-        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                GL_TEXTURE_2D, backDepthTexture, 0);
 
         HACKCLEAR();
     }
@@ -144,10 +136,6 @@ namespace opengl {
 
     GLuint Device::GetCurrentTexture() {
         return backTexture;
-    }
-
-    GLuint Device::GetCurrentDepthTexture() {
-        return backDepthTexture;
     }
 
     // Bind Group
