@@ -12,13 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <nxt/nxtcpp.h>
+namespace utils {
 
-bool InitSample(int argc, const char** argv);
-void DoSwapBuffers();
-bool ShouldQuit();
+    void USleep(int usecs);
 
-struct GLFWwindow;
-struct GLFWwindow* GetGLFWWindow();
-
-nxt::Device CreateCppNXTDevice();
+}

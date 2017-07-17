@@ -19,6 +19,8 @@ list(APPEND UTILS_SOURCES
     ${UTILS_DIR}/BackendBinding.h
     ${UTILS_DIR}/NXTHelpers.cpp
     ${UTILS_DIR}/NXTHelpers.h
+    ${UTILS_DIR}/SystemUtils.cpp
+    ${UTILS_DIR}/SystemUtils.h
 )
 
 if (NXT_ENABLE_D3D12)

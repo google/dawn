@@ -20,9 +20,10 @@
 
 #include "SampleUtils.h"
 
-#include "utils/NXTHelpers.h"
 #include "common/Math.h"
 #include "common/Constants.h"
+#include "utils/NXTHelpers.h"
+#include "utils/SystemUtils.h"
 
 #include <bitset>
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -662,7 +663,7 @@ int main(int argc, const char* argv[]) {
 
     while (!ShouldQuit()) {
         frame();
-        USleep(16000);
+        utils::USleep(16000);
     }
 
     // TODO release stuff

@@ -63,6 +63,7 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 
         void SetUp() override;
         void TearDown() override;
+
         bool IsD3D12() const;
 
     protected:
@@ -73,6 +74,7 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
         void AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation);
         void AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t pixelSize, detail::Expectation* expectation);
 
+        void WaitABit();
         void SwapBuffers();
 
     private:

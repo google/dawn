@@ -15,6 +15,7 @@
 #include "SampleUtils.h"
 
 #include "utils/NXTHelpers.h"
+#include "utils/SystemUtils.h"
 
 #include <vector>
 
@@ -214,7 +215,7 @@ int main(int argc, const char* argv[]) {
 
     while (!ShouldQuit()) {
         frame();
-        USleep(16000);
+        utils::USleep(16000);
     }
 
     // TODO release stuff

@@ -12,13 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <nxt/nxtcpp.h>
+#include "common/Platform.h"
 
-bool InitSample(int argc, const char** argv);
-void DoSwapBuffers();
-bool ShouldQuit();
+#if defined(NXT_PLATFORM_WINDOWS)
+    #include <Windows.h>
+#elif defined(NXT_PLATFORM_POSIX)
+   #include <unistd.h>
+#else
+    #error "Unsupported platform."
+#endif
 
-struct GLFWwindow;
-struct GLFWwindow* GetGLFWWindow();
+namespace utils {
 
-nxt::Device CreateCppNXTDevice();
+    #if defined(NXT_PLATFORM_WINDOWS)
+        void USleep(int usecs) {
+            Sleep(static_cast<DWORD>(usecs / 1000));
+        }
+    #elif defined(NXT_PLATFORM_POSIX)
+        void USleep(int usecs) {
+            usleep(usecs);
+        }
+    #else
+        #error "Implement USleep for your platform."
+    #endif
+
+}

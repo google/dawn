@@ -16,15 +16,6 @@
 #include "utils/BackendBinding.h"
 #include "wire/TerribleCommandBuffer.h"
 
-// Include Windows.h before GLFW to avoid a redefinition of APIENTRY
-#if defined(NXT_PLATFORM_WINDOWS)
-    #include <Windows.h>
-#elif defined(NXT_PLATFORM_POSIX)
-   #include <unistd.h>
-#else
-    #error "Unsupported platform."
-#endif
-
 #include <nxt/nxt.h>
 #include <nxt/nxtcpp.h>
 #include "GLFW/glfw3.h"
@@ -178,18 +169,6 @@ void DoSwapBuffers() {
     glfwPollEvents();
     binding->SwapBuffers();
 }
-
-#if defined(NXT_PLATFORM_WINDOWS)
-    void USleep(uint64_t usecs) {
-        Sleep(static_cast<DWORD>(usecs / 1000));
-    }
-#elif defined(NXT_PLATFORM_POSIX)
-    void USleep(uint64_t usecs) {
-        usleep(usecs);
-    }
-#else
-    #error "Implement USleep for your platform."
-#endif
 
 bool ShouldQuit() {
     return glfwWindowShouldClose(window);

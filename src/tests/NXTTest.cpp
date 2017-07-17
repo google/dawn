@@ -18,6 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/BackendBinding.h"
+#include "utils/SystemUtils.h"
 
 #include "GLFW/glfw3.h"
 
@@ -195,6 +196,11 @@ void NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Textu
     deferredExpectations.push_back(deferred);
 }
 
+void NXTTest::WaitABit() {
+    device.Tick();
+    utils::USleep(100);
+}
+
 void NXTTest::SwapBuffers() {
     binding->SwapBuffers();
 }
@@ -233,9 +239,8 @@ void NXTTest::MapSlotsSynchronously() {
     }
 
     // Busy wait until all map operations are done.
-    // TODO(cwallez@chromium.org): usleep a bit?
     while (numPendingMapOperations != 0) {
-        device.Tick();
+        WaitABit();
     }
 }
 
