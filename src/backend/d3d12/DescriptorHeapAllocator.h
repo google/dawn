@@ -37,7 +37,6 @@ namespace d3d12 {
             D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(uint32_t index) const;
 
         private:
-            Device* device;
             ComPtr<ID3D12DescriptorHeap> descriptorHeap;
             uint32_t sizeIncrement;
             uint32_t offset;

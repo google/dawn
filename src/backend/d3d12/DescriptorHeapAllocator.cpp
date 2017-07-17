@@ -20,11 +20,12 @@
 namespace backend {
 namespace d3d12 {
 
-    DescriptorHeapHandle::DescriptorHeapHandle() {
+    DescriptorHeapHandle::DescriptorHeapHandle()
+        : descriptorHeap(nullptr), sizeIncrement(0), offset(0) {
     }
 
     DescriptorHeapHandle::DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t sizeIncrement, uint32_t offset)
-        : device(device), descriptorHeap(descriptorHeap), sizeIncrement(sizeIncrement), offset(offset) {
+        : descriptorHeap(descriptorHeap), sizeIncrement(sizeIncrement), offset(offset) {
     }
 
     ID3D12DescriptorHeap* DescriptorHeapHandle::Get() const {

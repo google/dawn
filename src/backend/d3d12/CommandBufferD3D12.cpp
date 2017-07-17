@@ -47,10 +47,10 @@ namespace d3d12 {
         struct BindGroupStateTracker {
             uint32_t cbvSrvUavDescriptorIndex = 0;
             uint32_t samplerDescriptorIndex = 0;
-            DescriptorHeapHandle cbvSrvUavCPUDescriptorHeap;
-            DescriptorHeapHandle samplerCPUDescriptorHeap;
-            DescriptorHeapHandle cbvSrvUavGPUDescriptorHeap;
-            DescriptorHeapHandle samplerGPUDescriptorHeap;
+            DescriptorHeapHandle cbvSrvUavCPUDescriptorHeap = {};
+            DescriptorHeapHandle samplerCPUDescriptorHeap = {};
+            DescriptorHeapHandle cbvSrvUavGPUDescriptorHeap = {};
+            DescriptorHeapHandle samplerGPUDescriptorHeap = {};
             std::array<BindGroup*, kMaxBindGroups> bindGroups = {};
 
             Device* device;

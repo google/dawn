@@ -40,9 +40,9 @@ namespace d3d12 {
             OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs(uint32_t subpassIndex);
 
         private:
-            Device* device;
-            DescriptorHeapHandle rtvHeap;
-            DescriptorHeapHandle dsvHeap;
+            Device* device = nullptr;
+            DescriptorHeapHandle rtvHeap = {};
+            DescriptorHeapHandle dsvHeap = {};
 
             // Indices into either the RTV or DSV heap, depending on texture format.
             std::vector<uint32_t> attachmentHeapIndices;
