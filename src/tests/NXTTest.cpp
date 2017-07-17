@@ -378,9 +378,35 @@ namespace detail {
         NXT_ASSERT(size == sizeof(T) * expected.size());
 
         const T* actual = reinterpret_cast<const T*>(data);
+
+        testing::AssertionResult failure = testing::AssertionFailure();
         for (size_t i = 0; i < expected.size(); ++i) {
             if (actual[i] != expected[i]) {
-                return testing::AssertionFailure() << "Expected data[" << i << "] to be " << expected[i] << ", actual " << actual[i] << std::endl;
+                testing::AssertionResult result = testing::AssertionFailure() << "Expected data[" << i << "] to be " << expected[i] << ", actual " << actual[i] << std::endl;
+
+                auto printBuffer = [&](const T* buffer) {
+                    static constexpr unsigned int kBytes = sizeof(T);
+
+                    for (size_t index = 0; index < expected.size(); ++index) {
+                        auto byteView = reinterpret_cast<const uint8_t*>(buffer + index);
+                        for (unsigned int b = 0; b < kBytes; ++b) {
+                            char buf[4];
+                            sprintf(buf, "%02X ", byteView[b]);
+                            result << buf;
+                        }
+                    }
+                    result << std::endl;
+                };
+
+                if (expected.size() <= 1024) {
+                    result << "Expected:" << std::endl;
+                    printBuffer(expected.data());
+
+                    result << "Actual:" << std::endl;
+                    printBuffer(actual);
+                }
+
+                return result;
             }
         }
 
