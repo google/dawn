@@ -145,7 +145,7 @@ namespace d3d12 {
         ASSERT_SUCCESS(resource->Map(0, &readRange, reinterpret_cast<void**>(&data)));
 
         MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadRequestTracker();
-        tracker->Track(this, serial, data);
+        tracker->Track(this, serial, data + start);
     }
 
     void Buffer::UnmapImpl() {
