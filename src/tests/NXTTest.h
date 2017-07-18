@@ -18,7 +18,7 @@
 
 // Getting data back from NXT is done in an async manners so all expectations are "deferred"
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
-// so resources should have the TransferDst allowed usage bit if you want to add expectations on them.
+// so resources should have the TransferSrc allowed usage bit if you want to add expectations on them.
 #define EXPECT_BUFFER_U32_EQ(expected, buffer, offset) \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), new detail::ExpectEq<uint32_t>(expected));
 
@@ -65,6 +65,9 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
         void TearDown() override;
 
         bool IsD3D12() const;
+        bool IsMetal() const;
+        bool IsOpenGL() const;
+        bool IsVulkan() const;
 
     protected:
         nxt::Device device;

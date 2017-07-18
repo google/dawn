@@ -108,6 +108,18 @@ bool NXTTest::IsD3D12() const {
     return GetParam() == D3D12Backend;
 }
 
+bool NXTTest::IsMetal() const {
+    return GetParam() == MetalBackend;
+}
+
+bool NXTTest::IsOpenGL() const {
+    return GetParam() == OpenGLBackend;
+}
+
+bool NXTTest::IsVulkan() const {
+    return GetParam() == VulkanBackend;
+}
+
 void NXTTest::SetUp() {
     binding = utils::CreateBinding(ParamToBackendType(GetParam()));
     NXT_ASSERT(binding != nullptr);
