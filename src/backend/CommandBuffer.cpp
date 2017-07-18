@@ -70,6 +70,16 @@ namespace backend {
             return true;
         }
 
+        bool ValidateTexelBufferOffset(CommandBufferBuilder* builder, TextureBase* texture, const BufferCopyLocation& location) {
+            uint32_t texelSize = static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat()));
+            if (location.offset % texelSize != 0) {
+                builder->HandleError("Buffer offset must be a multiple of the texel size");
+                return false;
+            }
+
+            return true;
+        }
+
         bool ComputeTextureCopyBufferSize(CommandBufferBuilder*, const TextureCopyLocation& location, uint32_t rowPitch, uint32_t* bufferSize) {
             // TODO(cwallez@chromium.org): check for overflows
             *bufferSize = (rowPitch * (location.height - 1) + location.width) * location.depth;
@@ -437,6 +447,7 @@ namespace backend {
                             !ComputeTextureCopyBufferSize(this, copy->destination, copy->rowPitch, &bufferCopySize) ||
                             !ValidateCopyLocationFitsInTexture(this, copy->destination) ||
                             !ValidateCopySizeFitsInBuffer(this, copy->source, bufferCopySize) ||
+                            !ValidateTexelBufferOffset(this, copy->destination.texture.Get(), copy->source) ||
                             !state->ValidateCanCopy() ||
                             !state->ValidateCanUseBufferAs(copy->source.buffer.Get(), nxt::BufferUsageBit::TransferSrc) ||
                             !state->ValidateCanUseTextureAs(copy->destination.texture.Get(), nxt::TextureUsageBit::TransferDst)) {
@@ -454,6 +465,7 @@ namespace backend {
                             !ComputeTextureCopyBufferSize(this, copy->source, copy->rowPitch, &bufferCopySize) ||
                             !ValidateCopyLocationFitsInTexture(this, copy->source) ||
                             !ValidateCopySizeFitsInBuffer(this, copy->destination, bufferCopySize) ||
+                            !ValidateTexelBufferOffset(this, copy->source.texture.Get(), copy->destination) ||
                             !state->ValidateCanCopy() ||
                             !state->ValidateCanUseTextureAs(copy->source.texture.Get(), nxt::TextureUsageBit::TransferSrc) ||
                             !state->ValidateCanUseBufferAs(copy->destination.buffer.Get(), nxt::BufferUsageBit::TransferDst)) {

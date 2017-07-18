@@ -314,6 +314,37 @@ TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
     }
 }
 
+// Test B2T copies with incorrect buffer offset usage
+TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
+    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
+    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+                                                     nxt::TextureUsageBit::TransferDst);
+
+    // Correct usage
+    {
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, bufferSize - 4, 256, destination, 0, 0, 0, 1, 1, 1, 0)
+            .GetResult();
+    }
+    // Incorrect usages
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, bufferSize - 5, 256, destination, 0, 0, 0, 1, 1, 1, 0)
+            .GetResult();
+    }
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, bufferSize - 6, 256, destination, 0, 0, 0, 1, 1, 1, 0)
+            .GetResult();
+    }
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyBufferToTexture(source, bufferSize - 7, 256, destination, 0, 0, 0, 1, 1, 1, 0)
+            .GetResult();
+    }
+}
+
 class CopyCommandTest_T2B : public CopyCommandTest {
 };
 
@@ -513,3 +544,35 @@ TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
             .GetResult();
     }
 }
+
+// Test T2B copies with incorrect buffer offset usage
+TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
+    uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
+    nxt::Texture source = CreateFrozen2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+        nxt::TextureUsageBit::TransferSrc);
+    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
+
+    // Correct usage
+    {
+        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 4, 256)
+            .GetResult();
+    }
+    // Incorrect usages
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 5, 256)
+            .GetResult();
+    }
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 6, 256)
+            .GetResult();
+    }
+    {
+        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+            .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 7, 256)
+            .GetResult();
+    }
+}
+
