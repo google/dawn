@@ -32,6 +32,7 @@
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
+#include "backend/SwapChain.h"
 #include "backend/Texture.h"
 #include "backend/ToBackend.h"
 
@@ -54,6 +55,7 @@ namespace null {
     using RenderPipeline = RenderPipelineBase;
     using Sampler = SamplerBase;
     using ShaderModule = ShaderModuleBase;
+    class SwapChain;
     class Texture;
     using TextureView = TextureViewBase;
 
@@ -74,6 +76,7 @@ namespace null {
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
+        using SwapChainType = SwapChain;
         using TextureType = Texture;
         using TextureViewType = TextureView;
     };
@@ -108,6 +111,7 @@ namespace null {
             RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
             SamplerBase* CreateSampler(SamplerBuilder* builder) override;
             ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
+            SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
@@ -158,11 +162,20 @@ namespace null {
 
     class Texture : public TextureBase {
         public:
-            Texture(TextureBuilder* buidler);
+            Texture(TextureBuilder* builder);
             ~Texture();
 
         private:
             void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+    };
+
+    class SwapChain : public SwapChainBase {
+        public:
+            SwapChain(SwapChainBuilder* builder);
+            ~SwapChain();
+
+        protected:
+            TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
     };
 
 }

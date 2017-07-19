@@ -44,12 +44,22 @@ namespace opengl {
             }
         }
 
+        GLuint GenTexture() {
+            GLuint handle = 0;
+            glGenTextures(1, &handle);
+            return handle;
+        }
+
     }
 
     // Texture
 
     Texture::Texture(TextureBuilder* builder)
-        : TextureBase(builder) {
+        : Texture(builder, GenTexture()) {
+    }
+
+    Texture::Texture(TextureBuilder* builder, GLuint handle)
+        : TextureBase(builder), handle(handle) {
         target = TargetForDimension(GetDimension());
 
         uint32_t width = GetWidth();
@@ -58,7 +68,6 @@ namespace opengl {
 
         auto formatInfo = GetGLFormatInfo(GetFormat());
 
-        glGenTextures(1, &handle);
         glBindTexture(target, handle);
 
         for (uint32_t i = 0; i < levels; ++i) {
@@ -70,6 +79,10 @@ namespace opengl {
         // The texture is not complete if it uses mipmapping and not all levels up to
         // MAX_LEVEL have been defined.
         glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, levels - 1);
+    }
+
+    Texture::~Texture() {
+        // TODO(kainino@chromium.org): delete texture (but only when not using the native texture constructor?)
     }
 
     GLuint Texture::GetHandle() const {

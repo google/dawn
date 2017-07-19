@@ -28,7 +28,8 @@ namespace d3d12 {
 
     class Texture : public TextureBase {
         public:
-            Texture(Device* device, TextureBuilder* builder);
+            Texture(TextureBuilder* builder);
+            Texture(TextureBuilder* builder, ComPtr<ID3D12Resource> nativeTexture);
             ~Texture();
 
             DXGI_FORMAT GetD3D12Format() const;

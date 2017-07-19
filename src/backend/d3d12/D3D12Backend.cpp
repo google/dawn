@@ -30,6 +30,7 @@
 #include "backend/d3d12/ResourceUploader.h"
 #include "backend/d3d12/SamplerD3D12.h"
 #include "backend/d3d12/ShaderModuleD3D12.h"
+#include "backend/d3d12/SwapChainD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
 #include "common/Assert.h"
 
@@ -253,8 +254,11 @@ namespace d3d12 {
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
         return new ShaderModule(this, builder);
     }
+    SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
+        return new SwapChain(builder);
+    }
     TextureBase* Device::CreateTexture(TextureBuilder* builder) {
-        return new Texture(this, builder);
+        return new Texture(builder);
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
         return new TextureView(builder);

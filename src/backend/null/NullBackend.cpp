@@ -87,6 +87,9 @@ namespace null {
 
         return module;
     }
+    SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
+        return new SwapChain(builder);
+    }
     TextureBase* Device::CreateTexture(TextureBuilder* builder) {
         return new Texture(builder);
     }
@@ -222,5 +225,19 @@ namespace null {
     void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
+    // SwapChain
+
+    SwapChain::SwapChain(SwapChainBuilder* builder)
+        : SwapChainBase(builder) {
+        const auto& im = GetImplementation();
+        im.Init(im.userData, nullptr);
+    }
+
+    SwapChain::~SwapChain() {
+    }
+
+    TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
+        return GetDevice()->CreateTexture(builder);
+    }
 }
 }

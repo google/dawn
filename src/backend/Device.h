@@ -49,6 +49,7 @@ namespace backend {
             virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
             virtual SamplerBase* CreateSampler(SamplerBuilder* builder) = 0;
             virtual ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) = 0;
+            virtual SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) = 0;
             virtual TextureBase* CreateTexture(TextureBuilder* builder) = 0;
             virtual TextureViewBase* CreateTextureView(TextureViewBuilder* builder) = 0;
 
@@ -87,6 +88,7 @@ namespace backend {
             RenderPipelineBuilder* CreateRenderPipelineBuilder();
             SamplerBuilder* CreateSamplerBuilder();
             ShaderModuleBuilder* CreateShaderModuleBuilder();
+            SwapChainBuilder* CreateSwapChainBuilder();
             TextureBuilder* CreateTextureBuilder();
 
             void Tick();

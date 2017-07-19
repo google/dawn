@@ -12,15 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/opengl/OpenGLBackend.h"
-#include "backend/opengl/BufferGL.h"
-#include "backend/opengl/CommandBufferGL.h"
-#include "backend/opengl/ComputePipelineGL.h"
-#include "backend/opengl/DepthStencilStateGL.h"
-#include "backend/opengl/PersistentPipelineStateGL.h"
-#include "backend/opengl/PipelineLayoutGL.h"
-#include "backend/opengl/RenderPipelineGL.h"
-#include "backend/opengl/SamplerGL.h"
-#include "backend/opengl/ShaderModuleGL.h"
 #include "backend/opengl/SwapChainGL.h"
+
 #include "backend/opengl/TextureGL.h"
+
+#include <nxt/nxt_wsi.h>
+
+namespace backend {
+namespace opengl {
+
+    SwapChain::SwapChain(SwapChainBuilder* builder)
+        : SwapChainBase(builder) {
+        const auto& im = GetImplementation();
+        nxtWSIContextGL wsiContext = {};
+        // TODO(kainino@chromium.org): set up wsiContext
+        im.Init(im.userData, &wsiContext);
+
+        // TODO(kainino@chromium.org): set up FBO
+    }
+
+    SwapChain::~SwapChain() {
+        // TODO(kainino@chromium.org): clean up FBO
+    }
+
+    TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
+        return new Texture(builder, nativeTexture);
+    }
+
+}
+}

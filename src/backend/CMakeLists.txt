@@ -60,6 +60,8 @@ if (NXT_ENABLE_OPENGL)
         ${OPENGL_DIR}/SamplerGL.h
         ${OPENGL_DIR}/ShaderModuleGL.cpp
         ${OPENGL_DIR}/ShaderModuleGL.h
+        ${OPENGL_DIR}/SwapChainGL.cpp
+        ${OPENGL_DIR}/SwapChainGL.h
         ${OPENGL_DIR}/TextureGL.cpp
         ${OPENGL_DIR}/TextureGL.h
     )
@@ -130,6 +132,8 @@ if (NXT_ENABLE_METAL)
         ${METAL_DIR}/SamplerMTL.h
         ${METAL_DIR}/ShaderModuleMTL.mm
         ${METAL_DIR}/ShaderModuleMTL.h
+        ${METAL_DIR}/SwapChainMTL.mm
+        ${METAL_DIR}/SwapChainMTL.h
         ${METAL_DIR}/TextureMTL.mm
         ${METAL_DIR}/TextureMTL.h
     )
@@ -239,6 +243,8 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/SamplerD3D12.h
         ${D3D12_DIR}/ShaderModuleD3D12.cpp
         ${D3D12_DIR}/ShaderModuleD3D12.h
+        ${D3D12_DIR}/SwapChainD3D12.cpp
+        ${D3D12_DIR}/SwapChainD3D12.h
         ${D3D12_DIR}/TextureD3D12.cpp
         ${D3D12_DIR}/TextureD3D12.h
     )
@@ -292,6 +298,8 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/Sampler.h
     ${BACKEND_DIR}/ShaderModule.cpp
     ${BACKEND_DIR}/ShaderModule.h
+    ${BACKEND_DIR}/SwapChain.cpp
+    ${BACKEND_DIR}/SwapChain.h
     ${BACKEND_DIR}/Texture.cpp
     ${BACKEND_DIR}/Texture.h
     ${BACKEND_DIR}/ToBackend.h

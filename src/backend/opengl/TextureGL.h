@@ -33,6 +33,8 @@ namespace opengl {
     class Texture : public TextureBase {
         public:
             Texture(TextureBuilder* builder);
+            Texture(TextureBuilder* builder, GLuint handle);
+            ~Texture();
 
             GLuint GetHandle() const;
             GLenum GetGLTarget() const;

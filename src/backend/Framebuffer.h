@@ -46,8 +46,6 @@ namespace backend {
         public:
             FramebufferBuilder(DeviceBase* device);
 
-            bool WasConsumed() const;
-
             // NXT API
             FramebufferBase* GetResultImpl() override;
             void SetRenderPass(RenderPassBase* renderPass);

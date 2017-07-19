@@ -88,8 +88,8 @@ namespace d3d12 {
         }
     }
 
-    Texture::Texture(Device* device, TextureBuilder* builder)
-        : TextureBase(builder), device(device) {
+    Texture::Texture(TextureBuilder* builder)
+        : TextureBase(builder), device(ToBackend(builder->GetDevice())) {
 
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12TextureDimension(GetDimension());
@@ -107,7 +107,12 @@ namespace d3d12 {
         resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12TextureUsage(GetUsage(), GetFormat()));
     }
 
+    Texture::Texture(TextureBuilder* builder, ComPtr<ID3D12Resource> nativeTexture)
+        : TextureBase(builder), device(ToBackend(builder->GetDevice())), resource(nativeTexture) {
+    }
+
     Texture::~Texture() {
+        // TODO(kainino@chromium.org): Maybe don't release when using the native texture constructor?
         device->GetResourceAllocator()->Release(resource);
     }
 

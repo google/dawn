@@ -12,15 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/metal/MetalBackend.h"
-#include "backend/metal/BufferMTL.h"
-#include "backend/metal/CommandBufferMTL.h"
-#include "backend/metal/ComputePipelineMTL.h"
-#include "backend/metal/DepthStencilStateMTL.h"
-#include "backend/metal/InputStateMTL.h"
-#include "backend/metal/PipelineLayoutMTL.h"
-#include "backend/metal/RenderPipelineMTL.h"
-#include "backend/metal/SamplerMTL.h"
-#include "backend/metal/ShaderModuleMTL.h"
-#include "backend/metal/SwapChainMTL.h"
-#include "backend/metal/TextureMTL.h"
+#ifndef BACKEND_OPENGL_SWAPCHAINGL_H_
+#define BACKEND_OPENGL_SWAPCHAINGL_H_
+
+#include "backend/SwapChain.h"
+
+#include "glad/glad.h"
+
+namespace backend {
+namespace opengl {
+
+    class Device;
+
+    class SwapChain : public SwapChainBase {
+        public:
+            SwapChain(SwapChainBuilder* builder);
+            ~SwapChain();
+
+        protected:
+            TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+
+        private:
+            GLuint nativeTexture = 0;
+    };
+
+}
+}
+
+#endif // BACKEND_OPENGL_SWAPCHAINGL_H_

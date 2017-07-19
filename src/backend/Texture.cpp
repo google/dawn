@@ -112,6 +112,9 @@ namespace backend {
         if (frozen) {
             return false;
         }
+        if (currentUsage == nxt::TextureUsageBit::Present) {
+            return false;
+        }
         return IsUsagePossible(allowedUsage, usage);
     }
 

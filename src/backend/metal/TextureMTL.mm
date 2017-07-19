@@ -73,6 +73,11 @@ namespace metal {
         mtlTexture = [mtlDevice newTextureWithDescriptor:desc];
     }
 
+    Texture::Texture(TextureBuilder* builder, id<MTLTexture> mtlTexture)
+        : TextureBase(builder), mtlTexture(mtlTexture) {
+        [mtlTexture retain];
+    }
+
     Texture::~Texture() {
         [mtlTexture release];
     }

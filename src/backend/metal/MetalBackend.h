@@ -49,6 +49,7 @@ namespace metal {
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
+    class SwapChain;
     class Texture;
     class TextureView;
 
@@ -69,6 +70,7 @@ namespace metal {
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
+        using SwapChainType = SwapChain;
         using TextureType = Texture;
         using TextureViewType = TextureView;
     };
@@ -101,6 +103,7 @@ namespace metal {
             RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
             SamplerBase* CreateSampler(SamplerBuilder* builder) override;
             ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
+            SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
             TextureBase* CreateTexture(TextureBuilder* builder) override;
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 

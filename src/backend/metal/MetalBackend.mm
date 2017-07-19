@@ -24,6 +24,7 @@
 #include "backend/metal/ResourceUploader.h"
 #include "backend/metal/SamplerMTL.h"
 #include "backend/metal/ShaderModuleMTL.h"
+#include "backend/metal/SwapChainMTL.h"
 #include "backend/metal/TextureMTL.h"
 
 #include <unistd.h>
@@ -134,6 +135,9 @@ namespace metal {
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
         return new ShaderModule(builder);
+    }
+    SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
+        return new SwapChain(builder);
     }
     TextureBase* Device::CreateTexture(TextureBuilder* builder) {
         return new Texture(builder);

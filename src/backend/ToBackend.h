@@ -109,6 +109,11 @@ namespace backend {
     };
 
     template<typename BackendTraits>
+    struct ToBackendTraits<SwapChainBase, BackendTraits> {
+        using BackendType = typename BackendTraits::SwapChainType;
+    };
+
+    template<typename BackendTraits>
     struct ToBackendTraits<TextureViewBase, BackendTraits> {
         using BackendType = typename BackendTraits::TextureViewType;
     };

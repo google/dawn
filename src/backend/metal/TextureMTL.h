@@ -25,6 +25,7 @@ namespace metal {
     class Texture : public TextureBase {
         public:
             Texture(TextureBuilder* builder);
+            Texture(TextureBuilder* builder, id<MTLTexture> mtlTexture);
             ~Texture();
 
             id<MTLTexture> GetMTLTexture();

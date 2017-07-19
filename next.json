@@ -876,6 +876,44 @@
             {"value": 7, "name": "decrement wrap"}
         ]
     },
+    "swap chain": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "configure",
+                "args": [
+                    {"name": "format", "type": "texture format"},
+                    {"name": "width", "type": "uint32_t"},
+                    {"name": "height", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "get next texture",
+                "returns": "texture"
+            },
+            {
+                "name": "present",
+                "args": [
+                    {"name": "texture", "type": "texture"}
+                ]
+            }
+        ]
+    },
+    "swap chain builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "swap chain"
+            },
+            {
+                "name": "set implementation",
+                "args": [
+                    {"name": "implementation", "type": "uint64_t"}
+                ]
+            }
+        ]
+    },
     "texture": {
         "category": "object",
         "methods": [
@@ -958,7 +996,8 @@
             {"value": 2, "name": "transfer dst"},
             {"value": 4, "name": "sampled"},
             {"value": 8, "name": "storage"},
-            {"value": 16, "name": "output attachment"}
+            {"value": 16, "name": "output attachment"},
+            {"value": 32, "name": "present"}
         ]
     },
     "texture view": {
@@ -993,6 +1032,9 @@
         "category": "native"
     },
     "uint32_t": {
+        "category": "native"
+    },
+    "uint64_t": {
         "category": "native"
     }
 }

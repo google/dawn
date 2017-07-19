@@ -41,7 +41,7 @@ NXTExternalTarget("third_party" glad)
 
 # ShaderC
 # Prevent SPIRV-Tools from using Werror as it has a warning on MSVC
-set(SPIRV_WERROR OFF)
+set(SPIRV_WERROR OFF CACHE BOOL "" FORCE)
 # Don't add unnecessary shaderc targets
 set(SHADERC_SKIP_TESTS ON)
 # Help shaderc find the non-standard paths for its dependencies

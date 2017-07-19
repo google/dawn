@@ -49,6 +49,8 @@ namespace backend {
     class SamplerBuilder;
     class ShaderModuleBase;
     class ShaderModuleBuilder;
+    class SwapChainBase;
+    class SwapChainBuilder;
     class TextureBase;
     class TextureBuilder;
     class TextureViewBase;

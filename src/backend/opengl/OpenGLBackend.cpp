@@ -21,6 +21,7 @@
 #include "backend/opengl/PipelineLayoutGL.h"
 #include "backend/opengl/RenderPipelineGL.h"
 #include "backend/opengl/ShaderModuleGL.h"
+#include "backend/opengl/SwapChainGL.h"
 #include "backend/opengl/SamplerGL.h"
 #include "backend/opengl/TextureGL.h"
 
@@ -102,6 +103,9 @@ namespace opengl {
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
         return new ShaderModule(builder);
+    }
+    SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
+        return new SwapChain(builder);
     }
     TextureBase* Device::CreateTexture(TextureBuilder* builder) {
         return new Texture(builder);
