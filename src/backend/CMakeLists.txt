@@ -245,6 +245,8 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/ShaderModuleD3D12.h
         ${D3D12_DIR}/SwapChainD3D12.cpp
         ${D3D12_DIR}/SwapChainD3D12.h
+        ${D3D12_DIR}/TextureCopySplitter.cpp
+        ${D3D12_DIR}/TextureCopySplitter.h
         ${D3D12_DIR}/TextureD3D12.cpp
         ${D3D12_DIR}/TextureD3D12.h
     )

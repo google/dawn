@@ -27,6 +27,7 @@
 #include "backend/d3d12/RenderPipelineD3D12.h"
 #include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/SamplerD3D12.h"
+#include "backend/d3d12/TextureCopySplitter.h"
 #include "backend/d3d12/TextureD3D12.h"
 #include "common/Assert.h"
 
@@ -201,28 +202,6 @@ namespace d3d12 {
                     D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
             }
         }
-
-        D3D12_TEXTURE_COPY_LOCATION D3D12PlacedTextureCopyLocation(BufferCopyLocation& bufferLocation, Texture* texture, const TextureCopyLocation& textureLocation, uint32_t rowPitch) {
-            D3D12_TEXTURE_COPY_LOCATION d3d12Location;
-            d3d12Location.pResource = ToBackend(bufferLocation.buffer.Get())->GetD3D12Resource().Get();
-            d3d12Location.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-            d3d12Location.PlacedFootprint.Offset = bufferLocation.offset;
-            d3d12Location.PlacedFootprint.Footprint.Format = texture->GetD3D12Format();
-            d3d12Location.PlacedFootprint.Footprint.Width = textureLocation.width;
-            d3d12Location.PlacedFootprint.Footprint.Height = textureLocation.height;
-            d3d12Location.PlacedFootprint.Footprint.Depth = textureLocation.depth;
-            d3d12Location.PlacedFootprint.Footprint.RowPitch = rowPitch;
-
-            return d3d12Location;
-        }
-
-        D3D12_TEXTURE_COPY_LOCATION D3D12TextureCopyLocation(TextureCopyLocation& textureLocation) {
-            D3D12_TEXTURE_COPY_LOCATION d3d12Location;
-            d3d12Location.pResource = ToBackend(textureLocation.texture.Get())->GetD3D12Resource().Get();
-            d3d12Location.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-            d3d12Location.SubresourceIndex = textureLocation.level;
-            return d3d12Location;
-        }
     }
 
     CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
@@ -317,13 +296,46 @@ namespace d3d12 {
                         Buffer* buffer = ToBackend(copy->source.buffer.Get());
                         Texture* texture = ToBackend(copy->destination.texture.Get());
 
-                        D3D12_TEXTURE_COPY_LOCATION srcLocation = D3D12PlacedTextureCopyLocation(copy->source, texture, copy->destination, copy->rowPitch);
-                        D3D12_TEXTURE_COPY_LOCATION dstLocation = D3D12TextureCopyLocation(copy->destination);
+                        auto copySplit = ComputeTextureCopySplit(
+                            copy->destination.x,
+                            copy->destination.y,
+                            copy->destination.z,
+                            copy->destination.width,
+                            copy->destination.height,
+                            copy->destination.depth,
+                            static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())),
+                            copy->source.offset,
+                            copy->rowPitch
+                        );
 
-                        uint64_t totalBytes = (copy->rowPitch * (copy->destination.height - 1) + copy->destination.width) * copy->destination.depth;
-                        ASSERT(totalBytes <= buffer->GetD3D12Size());
+                        D3D12_TEXTURE_COPY_LOCATION textureLocation;
+                        textureLocation.pResource = texture->GetD3D12Resource().Get();
+                        textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+                        textureLocation.SubresourceIndex = copy->destination.level;
 
-                        commandList->CopyTextureRegion(&dstLocation, copy->destination.x, copy->destination.y, copy->destination.z, &srcLocation, nullptr);
+                        for (uint32_t i = 0; i < copySplit.count; ++i) {
+                            auto& info = copySplit.copies[i];
+
+                            D3D12_TEXTURE_COPY_LOCATION bufferLocation;
+                            bufferLocation.pResource = buffer->GetD3D12Resource().Get();
+                            bufferLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+                            bufferLocation.PlacedFootprint.Offset = copySplit.offset;
+                            bufferLocation.PlacedFootprint.Footprint.Format = texture->GetD3D12Format();
+                            bufferLocation.PlacedFootprint.Footprint.Width = info.bufferSize.width;
+                            bufferLocation.PlacedFootprint.Footprint.Height = info.bufferSize.height;
+                            bufferLocation.PlacedFootprint.Footprint.Depth = info.bufferSize.depth;
+                            bufferLocation.PlacedFootprint.Footprint.RowPitch = copy->rowPitch;
+
+                            D3D12_BOX sourceRegion;
+                            sourceRegion.left = info.bufferOffset.x;
+                            sourceRegion.top = info.bufferOffset.y;
+                            sourceRegion.front = info.bufferOffset.z;
+                            sourceRegion.right = info.bufferOffset.x + info.copySize.width;
+                            sourceRegion.bottom = info.bufferOffset.y + info.copySize.height;
+                            sourceRegion.back = info.bufferOffset.z + info.copySize.depth;
+
+                            commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x, info.textureOffset.y, info.textureOffset.z, &bufferLocation, &sourceRegion);
+                        }
                     }
                     break;
 
@@ -333,20 +345,46 @@ namespace d3d12 {
                         Texture* texture = ToBackend(copy->source.texture.Get());
                         Buffer* buffer = ToBackend(copy->destination.buffer.Get());
 
-                        D3D12_TEXTURE_COPY_LOCATION srcLocation = D3D12TextureCopyLocation(copy->source);
-                        D3D12_TEXTURE_COPY_LOCATION dstLocation = D3D12PlacedTextureCopyLocation(copy->destination, texture, copy->source, copy->rowPitch);
+                        auto copySplit = ComputeTextureCopySplit(
+                            copy->source.x,
+                            copy->source.y,
+                            copy->source.z,
+                            copy->source.width,
+                            copy->source.height,
+                            copy->source.depth,
+                            static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())),
+                            copy->destination.offset,
+                            copy->rowPitch
+                        );
 
-                        uint64_t totalBytes = (copy->rowPitch * (copy->source.height - 1) + copy->source.width) * copy->source.depth;
-                        ASSERT(totalBytes <= buffer->GetD3D12Size());
+                        D3D12_TEXTURE_COPY_LOCATION textureLocation;
+                        textureLocation.pResource = texture->GetD3D12Resource().Get();
+                        textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+                        textureLocation.SubresourceIndex = copy->source.level;
 
-                        D3D12_BOX sourceRegion;
-                        sourceRegion.left = copy->source.x;
-                        sourceRegion.top = copy->source.y;
-                        sourceRegion.front = copy->source.z;
-                        sourceRegion.right = copy->source.x + copy->source.width;
-                        sourceRegion.bottom = copy->source.y + copy->source.height;
-                        sourceRegion.back = copy->source.z + copy->source.depth;
-                        commandList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, &sourceRegion);
+                        for (uint32_t i = 0; i < copySplit.count; ++i) {
+                            auto& info = copySplit.copies[i];
+
+                            D3D12_TEXTURE_COPY_LOCATION bufferLocation;
+                            bufferLocation.pResource = buffer->GetD3D12Resource().Get();
+                            bufferLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+                            bufferLocation.PlacedFootprint.Offset = copySplit.offset;
+                            bufferLocation.PlacedFootprint.Footprint.Format = texture->GetD3D12Format();
+                            bufferLocation.PlacedFootprint.Footprint.Width = info.bufferSize.width;
+                            bufferLocation.PlacedFootprint.Footprint.Height = info.bufferSize.height;
+                            bufferLocation.PlacedFootprint.Footprint.Depth = info.bufferSize.depth;
+                            bufferLocation.PlacedFootprint.Footprint.RowPitch = copy->rowPitch;
+
+                            D3D12_BOX sourceRegion;
+                            sourceRegion.left = info.textureOffset.x;
+                            sourceRegion.top = info.textureOffset.y;
+                            sourceRegion.front = info.textureOffset.z;
+                            sourceRegion.right = info.textureOffset.x + info.copySize.width;
+                            sourceRegion.bottom = info.textureOffset.y + info.copySize.height;
+                            sourceRegion.back = info.textureOffset.z + info.copySize.depth;
+
+                            commandList->CopyTextureRegion(&bufferLocation, info.bufferOffset.x, info.bufferOffset.y, info.bufferOffset.z, &textureLocation, &sourceRegion);
+                        }
                     }
                     break;
 
