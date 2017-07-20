@@ -144,7 +144,7 @@ protected:
             data[i] = RGBA8(
                 static_cast<uint8_t>(i % 256),
                 static_cast<uint8_t>((i / 256) % 256),
-                static_cast<uint8_t>((i / 256 / 256) % 255),
+                static_cast<uint8_t>((i / 256 / 256) % 256),
                 255);
         }
     }
@@ -309,10 +309,6 @@ TEST_P(CopyTests_T2B, OffsetBufferAligned) {
 
 // Test that copying without a 512-byte aligned buffer offset works
 TEST_P(CopyTests_T2B, OffsetBufferUnaligned) {
-    if (IsD3D12()) {
-        printf("TODO(enga@google.com): Test skipped because unaligned buffer offsets not supported in D3D12\n");
-        return;
-    }
     constexpr uint32_t kWidth = 128;
     constexpr uint32_t kHeight = 128;
     for (uint32_t i = kBytesPerTexel; i < 512; i += kBytesPerTexel * 9) {
@@ -325,10 +321,6 @@ TEST_P(CopyTests_T2B, OffsetBufferUnaligned) {
 
 // Test that copying without a 512-byte aligned buffer offset that is greater than the row pitch works
 TEST_P(CopyTests_T2B, OffsetBufferUnalignedSmallRowPitch) {
-    if (IsD3D12()) {
-        printf("TODO(enga@google.com): Test skipped because unaligned buffer offsets not supported in D3D12\n");
-        return;
-    }
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 128;
     for (uint32_t i = 256 + kBytesPerTexel; i < 512; i += kBytesPerTexel * 9) {
@@ -460,10 +452,6 @@ TEST_P(CopyTests_B2T, OffsetBufferAligned) {
 
 // Test that copying without a 512-byte aligned buffer offset works
 TEST_P(CopyTests_B2T, OffsetBufferUnaligned) {
-    if (IsD3D12()) {
-        printf("TODO(enga@google.com): Test skipped because unaligned buffer offsets not supported in D3D12\n");
-        return;
-    }
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     for (uint32_t i = kBytesPerTexel; i < 512; i += kBytesPerTexel * 9) {
@@ -476,10 +464,6 @@ TEST_P(CopyTests_B2T, OffsetBufferUnaligned) {
 
 // Test that copying without a 512-byte aligned buffer offset that is greater than the row pitch works
 TEST_P(CopyTests_B2T, OffsetBufferUnalignedSmallRowPitch) {
-    if (IsD3D12()) {
-        printf("TODO(enga@google.com): Test skipped because unaligned buffer offsets not supported in D3D12\n");
-        return;
-    }
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 128;
     for (uint32_t i = 256 + kBytesPerTexel; i < 512; i += kBytesPerTexel * 9) {
