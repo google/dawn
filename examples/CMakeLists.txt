@@ -24,7 +24,7 @@ function(add_nxt_sample target sources)
     target_link_libraries(${target} sample_utils)
     target_include_directories(${target} SYSTEM PRIVATE ${GLM_INCLUDE_DIR})
     target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    NXTInternaltarget("examples" ${target})
+    NXTInternalTarget("examples" ${target})
 
     # Suppress some warnings in our sample dependencies
     if (MSVC)

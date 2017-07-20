@@ -68,7 +68,7 @@ void HandleAssertionFailure(const char* file, const char* function, int line, co
 #define NXT_ASSERT(condition) NXT_ASSERT_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
 #define NXT_UNREACHABLE() \
     do { \
-        NXT_ASSERT(false && "Unreachable code hit"); NXT_BUILTIN_UNREACHABLE(); \
+        NXT_ASSERT(NXT_ASSERT_LOOP_CONDITION && "Unreachable code hit"); NXT_BUILTIN_UNREACHABLE(); \
     } while(NXT_ASSERT_LOOP_CONDITION)
 
 #if !defined(NXT_SKIP_ASSERT_SHORTHANDS)

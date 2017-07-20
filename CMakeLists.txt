@@ -15,6 +15,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(nxt C CXX)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
+        "Build type (Debug, Release, RelWithDebInfo, MinSizeRel)" FORCE)
+endif()
+
 ################################################################################
 # Configuration options
 ################################################################################
@@ -35,6 +40,7 @@ option(NXT_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_METAL
 option(NXT_ENABLE_NULL "Enable compilation of the Null backend" ON)
 option(NXT_ENABLE_OPENGL "Enable compilation of the OpenGL backend" ON)
 option(NXT_ENABLE_VULKAN "Enable compilation of the Vulkan backend" OFF)
+option(NXT_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
 
 ################################################################################
 # Precompute compile flags and defines, functions to set them
@@ -46,9 +52,9 @@ set(NXT_INTERNAL_FLAGS "")
 set(NXT_INTERNAL_DEFS "")
 set(NXT_GENERATED_FLAGS "")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    list(APPEND NXT_DEFS "NXT_ENABLE_ASSERTS")
-endif()
+set(NXT_ENABLE_ASSERTS $<OR:$<CONFIG:Debug>,$<BOOL:${NXT_ALWAYS_ASSERT}>>)
+
+list(APPEND NXT_DEFS $<${NXT_ENABLE_ASSERTS}:NXT_ENABLE_ASSERTS>)
 
 if (NXT_ENABLE_D3D12)
     list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_D3D12")
@@ -84,7 +90,7 @@ if (MSVC)
 
     list(APPEND NXT_GENERATED_FLAGS "/wd4702") # Allow unreachable code
     list(APPEND NXT_GENERATED_FLAGS "/wd4189") # Allow unused variable
-    
+
     if(NXT_USE_WERROR)
         list(APPEND NXT_INTERNAL_FLAGS "/WX")
     endif()

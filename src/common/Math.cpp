@@ -62,7 +62,9 @@ void* AlignVoidPtr(void* ptr, size_t alignment) {
 }
 
 uint32_t Align(uint32_t value, size_t alignment) {
+    ASSERT(alignment <= UINT32_MAX);
     ASSERT(IsPowerOfTwo(alignment));
     ASSERT(alignment != 0);
-    return (value + (alignment - 1)) & ~(alignment - 1);
+    uint32_t alignment32 = static_cast<uint32_t>(alignment);
+    return (value + (alignment32 - 1)) & ~(alignment32 - 1);
 }
