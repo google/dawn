@@ -62,7 +62,6 @@ namespace backend {
                 uint32_t offset = compiler.get_member_decoration(blockType.self, i, spv::DecorationOffset);
                 ASSERT(offset % 4 == 0);
                 offset /= 4;
-                ASSERT(offset < kMaxPushConstants);
 
                 auto memberType = compiler.get_type(blockType.member_types[i]);
                 PushConstantType constantType;
@@ -75,9 +74,22 @@ namespace backend {
                     constantType = PushConstantType::Float;
                 }
 
+                // TODO(cwallez@chromium.org): check for overflows and make the logic better take into account
+                // things like the array of types with padding.
+                uint32_t size = memberType.vecsize * memberType.columns;
+                // Handle unidimensional arrays
+                if (!memberType.array.empty()) {
+                    size *= memberType.array[0];
+                }
+
+                if (offset + size > kMaxPushConstants) {
+                    device->HandleError("Push constant block too big in the SPIRV");
+                    return;
+                }
+
                 pushConstants.mask.set(offset);
                 pushConstants.names[offset] = interfaceBlock.name + "." + compiler.get_member_name(blockType.self, i);
-                pushConstants.sizes[offset] = memberType.vecsize * memberType.columns;
+                pushConstants.sizes[offset] = size;
                 pushConstants.types[offset] = constantType;
             }
         }
