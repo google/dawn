@@ -858,6 +858,7 @@
     "shader stage bit": {
         "category": "bitmask",
         "values": [
+            {"value": 0, "name": "none"},
             {"value": 1, "name": "vertex"},
             {"value": 2, "name": "fragment"},
             {"value": 4, "name": "compute"}
