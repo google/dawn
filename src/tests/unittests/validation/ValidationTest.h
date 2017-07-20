@@ -29,6 +29,8 @@ class ValidationTest : public testing::Test {
         ValidationTest();
         ~ValidationTest();
 
+        void TearDown() override;
+
         // Use these methods to add expectations on the validation of a builder. The expectations are
         // checked on test teardown. Adding an expectation is done like the following:
         //
@@ -46,7 +48,17 @@ class ValidationTest : public testing::Test {
         void StartExpectDeviceError();
         bool EndExpectDeviceError();
 
-        void TearDown() override;
+        // Helper functions to create objects to test validation.
+
+        struct DummyRenderPass {
+            nxt::RenderPass renderPass;
+            nxt::Framebuffer framebuffer;
+            nxt::Texture attachment;
+            nxt::TextureFormat attachmentFormat;
+            uint32_t width;
+            uint32_t height;
+        };
+        DummyRenderPass CreateDummyRenderPass();
 
     protected:
         nxt::Device device;
@@ -71,6 +83,8 @@ class ValidationTest : public testing::Test {
 
         static void OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, nxt::CallbackUserdata userdata1, nxt::CallbackUserdata userdata2);
 };
+
+// Template implementation details
 
 template<typename Builder>
 Builder ValidationTest::AssertWillBeSuccess(Builder builder, std::string debugName) {

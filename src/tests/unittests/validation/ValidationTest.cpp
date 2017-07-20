@@ -95,3 +95,36 @@ void ValidationTest::OnBuilderErrorStatus(nxtBuilderErrorStatus status, const ch
     expectation.status = status;
     expectation.statusMessage = message;
 }
+
+ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
+    DummyRenderPass dummy;
+    dummy.width = 400;
+    dummy.height = 400;
+    dummy.attachmentFormat = nxt::TextureFormat::R8G8B8A8Unorm;
+
+    dummy.renderPass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
+        .SetAttachmentCount(1)
+        .AttachmentSetFormat(0, dummy.attachmentFormat)
+        .SetSubpassCount(1)
+        .SubpassSetColorAttachment(0, 0, 0)
+        .GetResult();
+
+    dummy.attachment = AssertWillBeSuccess(device.CreateTextureBuilder())
+        .SetDimension(nxt::TextureDimension::e2D)
+        .SetExtent(dummy.width, dummy.height, 1)
+        .SetFormat(dummy.attachmentFormat)
+        .SetMipLevels(1)
+        .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+        .GetResult();
+    dummy.attachment.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
+
+    nxt::TextureView view = AssertWillBeSuccess(dummy.attachment.CreateTextureViewBuilder()).GetResult();
+
+    dummy.framebuffer = AssertWillBeSuccess(device.CreateFramebufferBuilder())
+        .SetRenderPass(dummy.renderPass)
+        .SetAttachment(0, view)
+        .SetDimensions(dummy.width, dummy.height)
+        .GetResult();
+
+    return dummy;
+}
