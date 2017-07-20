@@ -110,6 +110,7 @@ namespace metal {
         if (error != nil) {
             NSLog(@" error => %@", error);
             builder->HandleError("Error creating pipeline state");
+            [descriptor release];
             return;
         }
 
