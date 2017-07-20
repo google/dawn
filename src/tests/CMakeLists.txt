@@ -47,6 +47,7 @@ add_executable(nxt_unittests
     ${VALIDATION_TESTS_DIR}/DepthStencilStateValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/FramebufferValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/InputStateValidationTests.cpp
+    ${VALIDATION_TESTS_DIR}/PushConstantsValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/RenderPassValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/UsageValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/ValidationTest.cpp
