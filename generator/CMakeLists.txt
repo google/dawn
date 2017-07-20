@@ -62,7 +62,7 @@ function(Generate)
     )
 
     NXTInternalTarget("${G_FOLDER}" ${G_LIB_NAME})
-    target_compile_options(${G_LIB_NAME} PRIVATE ${NXT_GENERATED_FLAGS})
+    set_property(TARGET ${G_LIB_NAME} APPEND PROPERTY COMPILE_OPTIONS ${NXT_GENERATED_FLAGS})
 endfunction()
 
 set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
