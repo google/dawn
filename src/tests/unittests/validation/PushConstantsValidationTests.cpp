@@ -262,7 +262,7 @@ TEST_F(PushConstantTest, ShaderCompilationSuccess) {
 }
 
 // Test that shaders using a push constant block too big fail compilation
-// TODO(cwallez@chromium.org): Currently disabled because ShaderModule error handling needs refactorign
+// TODO(cwallez@chromium.org): Currently disabled because ShaderModule error handling needs refactoring
 TEST_F(PushConstantTest, ShaderCompilationOOB_DISABLED) {
     // Test one push constant over the max
     TestCreateShaderModule(false, R"(
