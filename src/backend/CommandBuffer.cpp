@@ -552,8 +552,9 @@ namespace backend {
                     {
                         SetPushConstantsCmd* cmd = iterator.NextCommand<SetPushConstantsCmd>();
                         iterator.NextData<uint32_t>(cmd->count);
-                        if (cmd->count + cmd->offset > kMaxPushConstants) {
-                            HandleError("Setting pushconstants past the limit");
+                        // Validation of count and offset has already been done when the command was recorded
+                        // because it impacts the size of an allocation in the CommandAllocator.
+                        if (!state->ValidateSetPushConstants(cmd->stages)) {
                             return false;
                         }
                     }
@@ -755,7 +756,8 @@ namespace backend {
         cmd->pipeline = pipeline;
     }
 
-    void CommandBufferBuilder::SetPushConstants(nxt::ShaderStageBit stage, uint32_t offset, uint32_t count, const void* data) {
+    void CommandBufferBuilder::SetPushConstants(nxt::ShaderStageBit stages, uint32_t offset, uint32_t count, const void* data) {
+        // TODO(cwallez@chromium.org): check for overflows
         if (offset + count > kMaxPushConstants) {
             HandleError("Setting too many push constants");
             return;
@@ -763,7 +765,7 @@ namespace backend {
 
         SetPushConstantsCmd* cmd = allocator.Allocate<SetPushConstantsCmd>(Command::SetPushConstants);
         new(cmd) SetPushConstantsCmd;
-        cmd->stage = stage;
+        cmd->stages = stages;
         cmd->offset = offset;
         cmd->count = count;
 

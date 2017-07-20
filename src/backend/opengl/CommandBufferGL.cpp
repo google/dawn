@@ -314,7 +314,7 @@ namespace opengl {
                         int32_t* valuesInt = reinterpret_cast<int32_t*>(valuesUInt);
                         float* valuesFloat = reinterpret_cast<float*>(valuesUInt);
 
-                        for (auto stage : IterateStages(cmd->stage)) {
+                        for (auto stage : IterateStages(cmd->stages)) {
                             const auto& pushConstants = lastPipeline->GetPushConstants(stage);
                             const auto& glPushConstants = lastGLPipeline->GetGLPushConstants(stage);
                             for (size_t i = 0; i < cmd->count; i++) {

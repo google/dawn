@@ -130,7 +130,7 @@ namespace backend {
     };
 
     struct SetPushConstantsCmd {
-        nxt::ShaderStageBit stage;
+        nxt::ShaderStageBit stages;
         uint32_t offset;
         uint32_t count;
     };

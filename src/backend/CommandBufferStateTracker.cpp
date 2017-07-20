@@ -127,6 +127,24 @@ namespace backend {
         return true;
     }
 
+    bool CommandBufferStateTracker::ValidateSetPushConstants(nxt::ShaderStageBit stages) {
+        if (aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            if (stages & ~nxt::ShaderStageBit::Compute) {
+                builder->HandleError("SetPushConstants stage must be compute or 0 in compute passes");
+                return false;
+            }
+        } else if (aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+            if (stages & ~(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
+                builder->HandleError("SetPushConstants stage must be a subset if (vertex|fragment) in subpasses");
+                return false;
+            }
+        } else {
+            builder->HandleError("PushConstants must be set in either compute passes or subpasses");
+            return false;
+        }
+        return true;
+    }
+
     bool CommandBufferStateTracker::BeginComputePass() {
         if (currentRenderPass != nullptr) {
             builder->HandleError("Cannot begin a compute pass while a render pass is active");

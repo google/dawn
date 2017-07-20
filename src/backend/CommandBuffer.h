@@ -77,7 +77,7 @@ namespace backend {
             void EndComputePass();
             void EndRenderPass();
             void EndRenderSubpass();
-            void SetPushConstants(nxt::ShaderStageBit stage, uint32_t offset, uint32_t count, const void* data);
+            void SetPushConstants(nxt::ShaderStageBit stages, uint32_t offset, uint32_t count, const void* data);
             void SetComputePipeline(ComputePipelineBase* pipeline);
             void SetRenderPipeline(RenderPipelineBase* pipeline);
             void SetStencilReference(uint32_t reference);

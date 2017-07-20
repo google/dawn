@@ -37,6 +37,7 @@ namespace backend {
             bool ValidateCanDrawArrays();
             bool ValidateCanDrawElements();
             bool ValidateEndCommandBuffer() const;
+            bool ValidateSetPushConstants(nxt::ShaderStageBit stages);
 
             // State-modifying methods
             bool BeginComputePass();

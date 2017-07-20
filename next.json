@@ -380,7 +380,7 @@
                     "TODO Vulkan has an additional stage mask"
                 ],
                 "args": [
-                    {"name": "stage", "type": "shader stage bit"},
+                    {"name": "stages", "type": "shader stage bit"},
                     {"name": "offset", "type": "uint32_t"},
                     {"name": "count", "type": "uint32_t"},
                     {"name": "data", "type": "uint32_t", "annotation": "const*", "length": "count"}
