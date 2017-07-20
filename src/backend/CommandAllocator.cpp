@@ -110,6 +110,7 @@ namespace backend {
             currentBlock++;
             if (currentBlock >= blocks.size()) {
                 Reset();
+                *commandId = EndOfBlock;
                 return false;
             }
             currentPtr = AlignPtr(blocks[currentBlock].block, alignof(uint32_t));
