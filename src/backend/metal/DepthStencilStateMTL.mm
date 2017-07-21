@@ -67,14 +67,11 @@ namespace metal {
         : DepthStencilStateBase(builder) {
         MTLDepthStencilDescriptor* mtlDepthStencilDescriptor = [MTLDepthStencilDescriptor new];
 
-        if (DepthTestEnabled()) {
-            auto& depth = GetDepth();
-            mtlDepthStencilDescriptor.depthCompareFunction = MetalDepthStencilCompareFunction(depth.compareFunction);
-            mtlDepthStencilDescriptor.depthWriteEnabled = depth.depthWriteEnabled;
-        }
+        auto& depth = GetDepth();
+        mtlDepthStencilDescriptor.depthCompareFunction = MetalDepthStencilCompareFunction(depth.compareFunction);
+        mtlDepthStencilDescriptor.depthWriteEnabled = depth.depthWriteEnabled;
 
         auto& stencil = GetStencil();
-
         if (StencilTestEnabled()) {
             MTLStencilDescriptor* backFaceStencil = [MTLStencilDescriptor new];
             MTLStencilDescriptor* frontFaceStencil = [MTLStencilDescriptor new];

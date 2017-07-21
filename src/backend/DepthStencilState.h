@@ -47,7 +47,6 @@ namespace backend {
                 uint32_t writeMask = 0xff;
             };
 
-            bool DepthTestEnabled() const;
             bool StencilTestEnabled() const;
             const DepthInfo& GetDepth() const;
             const StencilInfo& GetStencil() const;

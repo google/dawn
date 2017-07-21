@@ -74,13 +74,14 @@ namespace opengl {
     }
 
     void DepthStencilState::ApplyNow(PersistentPipelineState &persistentPipelineState) const {
-        if (DepthTestEnabled()) {
-            glEnable(GL_DEPTH_TEST);
-        } else {
-            glDisable(GL_DEPTH_TEST);
-        }
-
         auto& depthInfo = GetDepth();
+
+        // Depth writes only occur if depth is enabled
+        if (depthInfo.compareFunction == nxt::CompareFunction::Always && !depthInfo.depthWriteEnabled) {
+            glDisable(GL_DEPTH_TEST);
+        } else {
+            glEnable(GL_DEPTH_TEST);
+        }
 
         if (depthInfo.depthWriteEnabled) {
             glDepthMask(GL_TRUE);

@@ -24,10 +24,6 @@ namespace backend {
         : depthInfo(builder->depthInfo), stencilInfo(builder->stencilInfo) {
     }
 
-    bool DepthStencilStateBase::DepthTestEnabled() const {
-        return depthInfo.compareFunction != nxt::CompareFunction::Always;
-    }
-
     bool DepthStencilStateBase::StencilTestEnabled() const {
         return stencilInfo.back.compareFunction != nxt::CompareFunction::Always ||
             stencilInfo.back.stencilFail != nxt::StencilOperation::Keep ||
