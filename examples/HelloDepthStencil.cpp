@@ -283,6 +283,7 @@ void frame() {
 
             .SetStencilReference(0x1)
             .SetRenderPipeline(planePipeline)
+            .SetBindGroup(0, bindGroup[0])
             .SetVertexBuffers(0, 1, &planeBuffer, vertexBufferOffsets)
             .DrawElements(6, 1, 0, 0)
 
