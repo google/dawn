@@ -70,6 +70,7 @@ add_executable(nxt_end2end_tests
     ${END2END_TESTS_DIR}/BufferTests.cpp
     ${END2END_TESTS_DIR}/InputStateTests.cpp
     ${END2END_TESTS_DIR}/CopyTests.cpp
+    ${END2END_TESTS_DIR}/DepthStencilStateTests.cpp
     ${TESTS_DIR}/End2EndTestsMain.cpp
     ${TESTS_DIR}/NXTTest.cpp
     ${TESTS_DIR}/NXTTest.h
