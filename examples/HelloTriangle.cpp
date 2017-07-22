@@ -63,7 +63,7 @@ void initTextures() {
     // Initialize the texture with arbitrary data until we can load images
     std::vector<uint8_t> data(4 * 1024 * 1024, 0);
     for (size_t i = 0; i < data.size(); ++i) {
-        data[i] = i % 253;
+        data[i] = static_cast<uint8_t>(i % 253);
     }
 
 

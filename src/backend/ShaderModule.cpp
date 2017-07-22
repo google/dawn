@@ -96,7 +96,7 @@ namespace backend {
 
         // Fill in bindingInfo with the SPIRV bindings
         auto ExtractResourcesBinding = [this](const std::vector<spirv_cross::Resource>& resources,
-                                              const spirv_cross::Compiler& compiler, nxt::BindingType type) {
+                                              const spirv_cross::Compiler& compiler, nxt::BindingType bindingType) {
             constexpr uint64_t requiredBindingDecorationMask = (1ull << spv::DecorationBinding) | (1ull << spv::DecorationDescriptorSet);
 
             for (const auto& resource : resources) {
@@ -113,7 +113,7 @@ namespace backend {
                 info.used = true;
                 info.id = resource.id;
                 info.base_type_id = resource.base_type_id;
-                info.type = type;
+                info.type = bindingType;
             }
         };
 

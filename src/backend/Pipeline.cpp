@@ -36,7 +36,7 @@ namespace backend {
             info->mask = moduleInfo.mask;
 
             for (uint32_t i = 0; i < moduleInfo.names.size(); i++) {
-                unsigned int size = moduleInfo.sizes[i];
+                uint32_t size = moduleInfo.sizes[i];
                 if (size == 0) {
                     continue;
                 }

@@ -25,11 +25,11 @@
 namespace utils {
 
     #if defined(NXT_PLATFORM_WINDOWS)
-        void USleep(int usecs) {
+        void USleep(unsigned int usecs) {
             Sleep(static_cast<DWORD>(usecs / 1000));
         }
     #elif defined(NXT_PLATFORM_POSIX)
-        void USleep(int usecs) {
+        void USleep(unsigned int usecs) {
             usleep(usecs);
         }
     #else

@@ -192,12 +192,12 @@ namespace opengl {
     }
 
     const std::vector<GLuint>& PipelineGL::GetTextureUnitsForSampler(GLuint index) const {
-        ASSERT(index >= 0 && index < unitsForSamplers.size());
+        ASSERT(index < unitsForSamplers.size());
         return unitsForSamplers[index];
     }
 
     const std::vector<GLuint>& PipelineGL::GetTextureUnitsForTexture(GLuint index) const {
-        ASSERT(index >= 0 && index < unitsForSamplers.size());
+        ASSERT(index < unitsForSamplers.size());
         return unitsForTextures[index];
     }
 

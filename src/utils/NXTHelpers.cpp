@@ -50,8 +50,13 @@ namespace utils {
             return;
         }
 
-        size_t size = (result.cend() - result.cbegin());
-        builder.SetSource(static_cast<uint32_t>(size), result.cbegin());
+        // result.cend and result.cbegin return pointers to uint32_t.
+        const uint32_t* resultBegin = result.cbegin();
+        const uint32_t* resultEnd = result.cend();
+        // So this size is in units of sizeof(uint32_t).
+        ptrdiff_t resultSize = resultEnd - resultBegin;
+        // SetSource takes data as uint32_t*.
+        builder.SetSource(static_cast<uint32_t>(resultSize), result.cbegin());
 
 #ifdef DUMP_SPIRV_ASSEMBLY
         {

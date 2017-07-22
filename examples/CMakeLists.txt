@@ -38,6 +38,9 @@ function(add_nxt_sample target sources)
         set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS "/wd4456")
         # declaration hides previous declaration -- for picojson
         set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS "/wd4706")
+    else()
+        # re-enable old style casts -- for GLM
+        set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS "-Wno-old-style-cast")
     endif()
 endfunction()
 

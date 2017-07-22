@@ -28,7 +28,7 @@ uint32_t ScanForward(uint32_t bits) {
         ASSERT(ret != 0);
         return firstBitIndex;
     #else
-        return static_cast<unsigned long>(__builtin_ctz(bits));
+        return static_cast<uint32_t>(__builtin_ctz(bits));
     #endif
 }
 
@@ -40,7 +40,7 @@ uint32_t Log2(uint32_t value) {
         ASSERT(ret != 0);
         return firstBitIndex;
     #else
-        return 31 - __builtin_clz(value);
+        return 31 - static_cast<uint32_t>(__builtin_clz(value));
     #endif
 }
 
@@ -52,13 +52,13 @@ bool IsPowerOfTwo(size_t n) {
 bool IsAligned(const void* ptr, size_t alignment) {
     ASSERT(IsPowerOfTwo(alignment));
     ASSERT(alignment != 0);
-    return (reinterpret_cast<intptr_t>(ptr) & (alignment - 1)) == 0;
+    return (reinterpret_cast<size_t>(ptr) & (alignment - 1)) == 0;
 }
 
 void* AlignVoidPtr(void* ptr, size_t alignment) {
     ASSERT(IsPowerOfTwo(alignment));
     ASSERT(alignment != 0);
-    return reinterpret_cast<void*>((reinterpret_cast<intptr_t>(ptr) + (alignment - 1)) & ~(alignment - 1));
+    return reinterpret_cast<void*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) & ~(alignment - 1));
 }
 
 uint32_t Align(uint32_t value, size_t alignment) {

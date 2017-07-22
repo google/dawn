@@ -23,7 +23,7 @@
 
 namespace backend {
 
-    size_t TextureFormatPixelSize(nxt::TextureFormat format);
+    uint32_t TextureFormatPixelSize(nxt::TextureFormat format);
     bool TextureFormatHasDepth(nxt::TextureFormat format);
     bool TextureFormatHasStencil(nxt::TextureFormat format);
 

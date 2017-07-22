@@ -81,7 +81,7 @@ void initBuffers() {
         }
     }
 
-    for (int i = 0; i < 2; i++) {
+    for (size_t i = 0; i < 2; i++) {
         particleBuffers[i] = device.CreateBufferBuilder()
             .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Storage)
             .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
@@ -261,7 +261,7 @@ void initSim() {
 
 void initCommandBuffers() {
     static const uint32_t zeroOffsets[1] = {0};
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 2; ++i) {
         auto& bufferSrc = particleBuffers[i];
         auto& bufferDst = particleBuffers[(i + 1) % 2];
         commandBuffers[i] = device.CreateCommandBufferBuilder()

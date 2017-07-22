@@ -48,7 +48,7 @@ namespace metal {
         mtlVertexDescriptor = [MTLVertexDescriptor new];
 
         const auto& attributesSetMask = GetAttributesSetMask();
-        for (size_t i = 0; i < attributesSetMask.size(); ++i) {
+        for (uint32_t i = 0; i < attributesSetMask.size(); ++i) {
             if (!attributesSetMask[i]) {
                 continue;
             }
@@ -63,7 +63,7 @@ namespace metal {
         }
 
         const auto& inputsSetMask = GetInputsSetMask();
-        for (size_t i = 0; i < inputsSetMask.size(); ++i) {
+        for (uint32_t i = 0; i < inputsSetMask.size(); ++i) {
             if (!inputsSetMask[i]) {
                 continue;
             }

@@ -88,7 +88,7 @@ namespace backend {
         }
 
         uint32_t ComputeDefaultRowPitch(TextureBase* texture, uint32_t width) {
-            uint32_t texelSize = static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat()));
+            uint32_t texelSize = TextureFormatPixelSize(texture->GetFormat());
             return texelSize * width;
         }
 
@@ -98,7 +98,7 @@ namespace backend {
                 return false;
             }
 
-            uint32_t texelSize = static_cast<uint32_t>(TextureFormatPixelSize(location.texture.Get()->GetFormat()));
+            uint32_t texelSize = TextureFormatPixelSize(location.texture.Get()->GetFormat());
             if (rowPitch < location.width * texelSize) {
                 builder->HandleError("Row pitch must not be less than the number of bytes per row");
                 return false;

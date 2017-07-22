@@ -25,7 +25,7 @@ set(GTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest/googletest)
 set(GMOCK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest/googlemock)
 add_library(gtest STATIC ${GTEST_DIR}/src/gtest-all.cc ${GMOCK_DIR}/src/gmock-all.cc)
 target_include_directories(gtest SYSTEM PUBLIC ${GTEST_DIR}/include ${GMOCK_DIR}/include)
-target_include_directories(gtest PRIVATE ${GTEST_DIR} ${GMOCK_DIR})
+target_include_directories(gtest SYSTEM PRIVATE ${GTEST_DIR} ${GMOCK_DIR})
 find_package(Threads)
 target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
 NXTExternalTarget("third_party" gtest)
@@ -36,7 +36,7 @@ add_library(glad STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include/glad/glad.h
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include/KHR/khrplatform.h
 )
-target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
+target_include_directories(glad SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
 NXTExternalTarget("third_party" glad)
 
 # ShaderC
@@ -90,7 +90,7 @@ add_library(spirv_cross STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.hpp
 )
-target_include_directories(spirv_cross PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(spirv_cross SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 NXTExternalTarget("third_party" spirv_cross)
 
 # STB, used for stb_image

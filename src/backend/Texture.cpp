@@ -19,7 +19,7 @@
 
 namespace backend {
 
-    size_t TextureFormatPixelSize(nxt::TextureFormat format) {
+    uint32_t TextureFormatPixelSize(nxt::TextureFormat format) {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
                 return 4;

@@ -200,7 +200,7 @@ namespace backend {
 
         aspects.set(VALIDATION_ASPECT_RENDER_SUBPASS);
         return true;
-    };
+    }
 
     bool CommandBufferStateTracker::EndSubpass() {
         if (!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
@@ -233,7 +233,7 @@ namespace backend {
         aspects.reset(VALIDATION_ASPECT_RENDER_SUBPASS);
         UnsetPipeline();
         return true;
-    };
+    }
 
     bool CommandBufferStateTracker::BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer) {
         if (aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
@@ -402,7 +402,7 @@ namespace backend {
         }
         auto it = mostRecentBufferUsages.find(buffer);
         return it != mostRecentBufferUsages.end() && (it->second & usage);
-    };
+    }
 
     bool CommandBufferStateTracker::TextureHasGuaranteedUsageBit(TextureBase* texture, nxt::TextureUsageBit usage) const {
         ASSERT(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
@@ -411,7 +411,7 @@ namespace backend {
         }
         auto it = mostRecentTextureUsages.find(texture);
         return it != mostRecentTextureUsages.end() && (it->second & usage);
-    };
+    }
 
     bool CommandBufferStateTracker::IsInternalTextureTransitionPossible(TextureBase* texture, nxt::TextureUsageBit usage) const {
         ASSERT(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
@@ -419,7 +419,7 @@ namespace backend {
             return false;
         }
         return texture->IsTransitionPossible(usage);
-    };
+    }
 
     bool CommandBufferStateTracker::IsExplicitTextureTransitionPossible(TextureBase* texture, nxt::TextureUsageBit usage) const {
         const nxt::TextureUsageBit attachmentUsages =
@@ -519,7 +519,7 @@ namespace backend {
             }
         }
         return true;
-    };
+    }
 
     bool CommandBufferStateTracker::RevalidateCanDraw() {
         if (!aspects[VALIDATION_ASPECT_RENDER_PIPELINE]) {

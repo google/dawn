@@ -181,7 +181,7 @@ namespace opengl {
                         glBindTexture(target, texture->GetHandle());
 
                         ASSERT(texture->GetDimension() == nxt::TextureDimension::e2D);
-                        glPixelStorei(GL_UNPACK_ROW_LENGTH, copy->rowPitch / static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())));
+                        glPixelStorei(GL_UNPACK_ROW_LENGTH, copy->rowPitch / TextureFormatPixelSize(texture->GetFormat()));
                         glTexSubImage2D(target, dst.level, dst.x, dst.y, dst.width, dst.height,
                                         format.format, format.type,
                                         reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
@@ -212,7 +212,7 @@ namespace opengl {
                                                texture->GetHandle(), src.level);
 
                         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
-                        glPixelStorei(GL_PACK_ROW_LENGTH, copy->rowPitch / static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())));
+                        glPixelStorei(GL_PACK_ROW_LENGTH, copy->rowPitch / TextureFormatPixelSize(texture->GetFormat()));
                         ASSERT(src.depth == 1 && src.z == 0);
                         void* offset = reinterpret_cast<void*>(static_cast<uintptr_t>(dst.offset));
                         glReadPixels(src.x, src.y, src.width, src.height, format.format, format.type, offset);

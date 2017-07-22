@@ -130,7 +130,7 @@ void frame() {
     size_t i = 0;
 
     std::vector<nxt::CommandBuffer> commands(50);
-    for (int j = 0; j < 50; j++) {
+    for (size_t j = 0; j < 50; j++) {
 
         nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
             .BeginRenderPass(renderpass, framebuffer)

@@ -186,7 +186,8 @@ namespace backend {
 
             // Make sure we have space for current allocation, plus end of block and alignment padding
             // for the first id.
-            if (!GetNewBlock(nextPtr - currentPtr + sizeof(uint32_t) + alignof(uint32_t))) {
+            ASSERT(nextPtr > currentPtr);
+            if (!GetNewBlock(static_cast<size_t>(nextPtr - currentPtr) + sizeof(uint32_t) + alignof(uint32_t))) {
                 return nullptr;
             }
             return Allocate(commandId, commandSize, commandAlignment);

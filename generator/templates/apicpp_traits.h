@@ -38,6 +38,6 @@ namespace nxt {
     template<typename BuiltObject>
     using Builder = typename BuiltObjectTrait<BuiltObject>::Builder;
 
-};
+}
 
 #endif // NXTCPP_TRAITS_H

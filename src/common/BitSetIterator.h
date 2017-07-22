@@ -112,7 +112,7 @@ unsigned long BitSetIterator<N, T>::Iterator::getNextBit() {
     static std::bitset<N> wordMask(std::numeric_limits<uint32_t>::max());
 
     while (mOffset < N) {
-        uint32_t wordBits = (mBits & wordMask).to_ulong();
+        uint32_t wordBits = static_cast<uint32_t>((mBits & wordMask).to_ulong());
         if (wordBits != 0ul) {
             return ScanForward(wordBits) + mOffset;
         }

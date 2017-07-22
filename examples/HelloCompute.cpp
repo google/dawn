@@ -35,7 +35,7 @@ void init() {
     queue = device.CreateQueueBuilder().GetResult();
 
     struct {uint32_t a; float b;} s;
-    memset(&s, sizeof(s), 0);
+    memset(&s, 0, sizeof(s));
     buffer = device.CreateBufferBuilder()
         .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Uniform | nxt::BufferUsageBit::Storage)
         .SetInitialUsage(nxt::BufferUsageBit::TransferDst)

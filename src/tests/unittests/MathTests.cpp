@@ -64,7 +64,7 @@ TEST(Math, AlignPtr) {
 
         ASSERT_GE(aligned - unaligned, 0);
         ASSERT_LT(static_cast<size_t>(aligned - unaligned), kTestAlignment);
-        ASSERT_EQ(reinterpret_cast<intptr_t>(aligned) & (kTestAlignment -1), 0);
+        ASSERT_EQ(reinterpret_cast<uintptr_t>(aligned) & (kTestAlignment -1), 0);
     }
 }
 

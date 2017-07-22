@@ -97,10 +97,29 @@ if (MSVC)
 else()
     # Activate C++14 only on C++ files, not C files.
     list(APPEND NXT_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-std=c++14>")
+    # enable -Wold-style-cast on C++
+    list(APPEND NXT_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wold-style-cast>")
     list(APPEND NXT_FLAGS "-fPIC")
 
     list(APPEND NXT_INTERNAL_FLAGS "-Wall" "-Wextra")
+    list(APPEND NXT_INTERNAL_FLAGS "-pedantic")
     list(APPEND NXT_GENERATED_FLAGS "-Wno-unused-variable" "-Wno-unused-function")
+
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        # don't break the build on older clang versions
+        list(APPEND NXT_INTERNAL_FLAGS "-Wno-error=unknown-warning-option")
+        # GCC's conversion warnings are less useful than clang's
+        list(APPEND NXT_INTERNAL_FLAGS "-Wconversion" "-Wno-sign-conversion")
+        # disable a clang-only -pedantic warning
+        list(APPEND NXT_INTERNAL_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
+        # additional potentially useful warnings (feel free to remove if they prove un-useful)
+        list(APPEND NXT_INTERNAL_FLAGS "-Wextra-semi")
+        list(APPEND NXT_INTERNAL_FLAGS "-Wstrict-aliasing")
+        list(APPEND NXT_INTERNAL_FLAGS "-Wunreachable-code")
+        list(APPEND NXT_GENERATED_FLAGS "-Wno-unreachable-code")
+        # Probably okay to enable if we establish a field naming convention:
+        #list(APPEND NXT_INTERNAL_FLAGS "-Wshadow")
+    endif()
     if(NXT_USE_WERROR)
         list(APPEND NXT_INTERNAL_FLAGS "-Werror")
     endif()

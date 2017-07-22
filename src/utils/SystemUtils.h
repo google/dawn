@@ -14,6 +14,6 @@
 
 namespace utils {
 
-    void USleep(int usecs);
+    void USleep(unsigned int usecs);
 
 }

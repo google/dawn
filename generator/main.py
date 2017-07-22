@@ -225,7 +225,7 @@ class PreprocessingLoader(jinja2.BaseLoader):
             numstarts = (len(self.blockstart.split(line)) - 1) // 2
             indentation_level += numstarts
 
-        return '\n'.join(result)
+        return '\n'.join(result) + '\n'
 
     def remove_indentation(self, line, n):
         for _ in range(n):

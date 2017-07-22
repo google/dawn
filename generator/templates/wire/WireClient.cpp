@@ -180,7 +180,7 @@ namespace wire {
                 }
                 void FreeId(uint32_t id) {
                     freeIds.push_back(id);
-                };
+                }
 
                 // 0 is an ID reserved to represent nullptr
                 uint32_t currentId = 1;

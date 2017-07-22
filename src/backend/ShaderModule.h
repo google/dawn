@@ -42,7 +42,7 @@ namespace backend {
                 std::bitset<kMaxPushConstants> mask;
 
                 std::array<std::string, kMaxPushConstants> names;
-                std::array<int, kMaxPushConstants> sizes;
+                std::array<uint32_t, kMaxPushConstants> sizes;
                 std::array<PushConstantType, kMaxPushConstants> types;
             };
 
