@@ -691,6 +691,16 @@
             }
         ]
     },
+    "primitive topology": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "point"},
+            {"value": 1, "name": "line"},
+            {"value": 2, "name": "line strip"},
+            {"value": 3, "name": "triangle"},
+            {"value": 4, "name": "triangle strip"}
+        ]
+    },
     "queue": {
         "category": "object",
         "methods": [
@@ -774,16 +784,27 @@
                 "returns": "render pipeline"
             },
             {
+                "name": "set depth stencil state",
+                "args": [
+                    {"name": "depth stencil state", "type": "depth stencil state"}
+                ]
+            },
+            {
+                "name": "set input state",
+                "args": [
+                    {"name": "input", "type": "input state"}
+                ]
+            },
+            {
                 "name": "set layout",
                 "args": [
                     {"name": "layout", "type": "pipeline layout"}
                 ]
             },
             {
-                "name": "set subpass",
+                "name": "set primitive topology",
                 "args": [
-                    {"name": "render pass", "type": "render pass"},
-                    {"name": "subpass", "type": "uint32_t"}
+                    {"name": "primitive topology", "type": "primitive topology"}
                 ]
             },
             {
@@ -795,15 +816,10 @@
                 ]
             },
             {
-                "name": "set input state",
+                "name": "set subpass",
                 "args": [
-                    {"name": "input", "type": "input state"}
-                ]
-            },
-            {
-                "name": "set depth stencil state",
-                "args": [
-                    {"name": "depth stencil state", "type": "depth stencil state"}
+                    {"name": "render pass", "type": "render pass"},
+                    {"name": "subpass", "type": "uint32_t"}
                 ]
             }
         ]

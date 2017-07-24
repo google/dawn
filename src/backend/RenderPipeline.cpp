@@ -24,8 +24,11 @@ namespace backend {
     // RenderPipelineBase
 
     RenderPipelineBase::RenderPipelineBase(RenderPipelineBuilder* builder)
-        : PipelineBase(builder), renderPass(std::move(builder->renderPass)), subpass(builder->subpass),
-          inputState(std::move(builder->inputState)), depthStencilState(std::move(builder->depthStencilState)) {
+        : PipelineBase(builder),
+          depthStencilState(std::move(builder->depthStencilState)),
+          inputState(std::move(builder->inputState)),
+          primitiveTopology(builder->primitiveTopology),
+          renderPass(std::move(builder->renderPass)), subpass(builder->subpass) {
 
         if (GetStageMask() != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
             builder->HandleError("Render pipeline should have exactly a vertex and fragment stage");
@@ -45,20 +48,24 @@ namespace backend {
         }
     }
 
-    RenderPassBase* RenderPipelineBase::GetRenderPass() {
-        return renderPass.Get();
-    }
-
-    uint32_t RenderPipelineBase::GetSubPass() {
-        return subpass;
+    DepthStencilStateBase* RenderPipelineBase::GetDepthStencilState() {
+        return depthStencilState.Get();
     }
 
     InputStateBase* RenderPipelineBase::GetInputState() {
         return inputState.Get();
     }
 
-    DepthStencilStateBase* RenderPipelineBase::GetDepthStencilState() {
-        return depthStencilState.Get();
+    nxt::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
+        return primitiveTopology;
+    }
+
+    RenderPassBase* RenderPipelineBase::GetRenderPass() {
+        return renderPass.Get();
+    }
+
+    uint32_t RenderPipelineBase::GetSubPass() {
+        return subpass;
     }
 
     // RenderPipelineBuilder
@@ -79,17 +86,21 @@ namespace backend {
         return device->CreateRenderPipeline(this);
     }
 
-    void RenderPipelineBuilder::SetSubpass(RenderPassBase* renderPass, uint32_t subpass) {
-        this->renderPass = renderPass;
-        this->subpass = subpass;
+    void RenderPipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
+        this->depthStencilState = depthStencilState;
     }
 
     void RenderPipelineBuilder::SetInputState(InputStateBase* inputState) {
         this->inputState = inputState;
     }
 
-    void RenderPipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
-        this->depthStencilState = depthStencilState;
+    void RenderPipelineBuilder::SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
+        this->primitiveTopology = primitiveTopology;
+    }
+
+    void RenderPipelineBuilder::SetSubpass(RenderPassBase* renderPass, uint32_t subpass) {
+        this->renderPass = renderPass;
+        this->subpass = subpass;
     }
 
 }

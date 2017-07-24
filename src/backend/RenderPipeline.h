@@ -25,16 +25,18 @@ namespace backend {
         public:
             RenderPipelineBase(RenderPipelineBuilder* builder);
 
+            DepthStencilStateBase* GetDepthStencilState();
+            InputStateBase* GetInputState();
+            nxt::PrimitiveTopology GetPrimitiveTopology() const;
             RenderPassBase* GetRenderPass();
             uint32_t GetSubPass();
-            InputStateBase* GetInputState();
-            DepthStencilStateBase* GetDepthStencilState();
 
         private:
+            Ref<DepthStencilStateBase> depthStencilState;
+            Ref<InputStateBase> inputState;
+            nxt::PrimitiveTopology primitiveTopology;
             Ref<RenderPassBase> renderPass;
             uint32_t subpass;
-            Ref<InputStateBase> inputState;
-            Ref<DepthStencilStateBase> depthStencilState;
     };
 
     class RenderPipelineBuilder : public Builder<RenderPipelineBase>, public PipelineBuilder {
@@ -42,19 +44,22 @@ namespace backend {
             RenderPipelineBuilder(DeviceBase* device);
 
             // NXT API
-            void SetSubpass(RenderPassBase* renderPass, uint32_t subpass);
-            void SetInputState(InputStateBase* inputState);
             void SetDepthStencilState(DepthStencilStateBase* depthStencilState);
+            void SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology);
+            void SetInputState(InputStateBase* inputState);
+            void SetSubpass(RenderPassBase* renderPass, uint32_t subpass);
 
         private:
             friend class RenderPipelineBase;
 
             RenderPipelineBase* GetResultImpl() override;
 
+            Ref<DepthStencilStateBase> depthStencilState;
+            Ref<InputStateBase> inputState;
+            // TODO(enga@google.com): Remove default when we validate that all required properties are set
+            nxt::PrimitiveTopology primitiveTopology = nxt::PrimitiveTopology::Triangle;
             Ref<RenderPassBase> renderPass;
             uint32_t subpass;
-            Ref<InputStateBase> inputState;
-            Ref<DepthStencilStateBase> depthStencilState;
     };
 
 }
