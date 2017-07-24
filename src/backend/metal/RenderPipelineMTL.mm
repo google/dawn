@@ -23,8 +23,25 @@
 namespace backend {
 namespace metal {
 
+    namespace {
+        MTLPrimitiveType MTLPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
+            switch (primitiveTopology) {
+                case nxt::PrimitiveTopology::Point:
+                    return MTLPrimitiveTypePoint;
+                case nxt::PrimitiveTopology::Line:
+                    return MTLPrimitiveTypeLine;
+                case nxt::PrimitiveTopology::LineStrip:
+                    return MTLPrimitiveTypeLineStrip;
+                case nxt::PrimitiveTopology::Triangle:
+                    return MTLPrimitiveTypeTriangle;
+                case nxt::PrimitiveTopology::TriangleStrip:
+                    return MTLPrimitiveTypeTriangleStrip;
+            }
+        }
+    }
+
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder) {
+        : RenderPipelineBase(builder), mtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())) {
 
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
 
@@ -71,6 +88,10 @@ namespace metal {
 
     RenderPipeline::~RenderPipeline() {
         [mtlRenderPipelineState release];
+    }
+
+    MTLPrimitiveType RenderPipeline::GetMTLPrimitiveTopology() const {
+        return mtlPrimitiveTopology;
     }
 
     void RenderPipeline::Encode(id<MTLRenderCommandEncoder> encoder) {

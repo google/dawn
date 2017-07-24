@@ -25,8 +25,27 @@
 namespace backend {
 namespace d3d12 {
 
+    namespace {
+        D3D12_PRIMITIVE_TOPOLOGY D3D12PrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
+            switch (primitiveTopology) {
+                case nxt::PrimitiveTopology::Point:
+                    return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+                case nxt::PrimitiveTopology::Line:
+                    return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+                case nxt::PrimitiveTopology::LineStrip:
+                    return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+                case nxt::PrimitiveTopology::Triangle:
+                    return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+                case nxt::PrimitiveTopology::TriangleStrip:
+                    return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+                default:
+                    UNREACHABLE();
+            }
+        }
+    }
+
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder) {
+        : RenderPipelineBase(builder), d3d12PrimitiveTopology(D3D12PrimitiveTopology(GetPrimitiveTopology())) {
         uint32_t compileFlags = 0;
 #if defined(_DEBUG)
         // Enable better shader debugging with the graphics debugging tools.
@@ -130,6 +149,10 @@ namespace d3d12 {
 
         Device* device = ToBackend(builder->GetDevice());
         ASSERT_SUCCESS(device->GetD3D12Device()->CreateGraphicsPipelineState(&descriptor, IID_PPV_ARGS(&pipelineState)));
+    }
+
+    D3D12_PRIMITIVE_TOPOLOGY RenderPipeline::GetD3D12PrimitiveTopology() const {
+        return d3d12PrimitiveTopology;
     }
 
     ComPtr<ID3D12PipelineState> RenderPipeline::GetPipelineState() {

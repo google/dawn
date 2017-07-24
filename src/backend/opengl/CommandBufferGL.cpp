@@ -236,11 +236,11 @@ namespace opengl {
                     {
                         DrawArraysCmd* draw = commands.NextCommand<DrawArraysCmd>();
                         if (draw->firstInstance > 0) {
-                            glDrawArraysInstancedBaseInstance(GL_TRIANGLES,
+                            glDrawArraysInstancedBaseInstance(lastRenderPipeline->GetGLPrimitiveTopology(),
                                 draw->firstVertex, draw->vertexCount, draw->instanceCount, draw->firstInstance);
                         } else {
                             // This branch is only needed on OpenGL < 4.2
-                            glDrawArraysInstanced(GL_TRIANGLES,
+                            glDrawArraysInstanced(lastRenderPipeline->GetGLPrimitiveTopology(),
                                 draw->firstVertex, draw->vertexCount, draw->instanceCount);
                         }
                     }
@@ -253,13 +253,13 @@ namespace opengl {
                         GLenum formatType = IndexFormatType(indexBufferFormat);
 
                         if (draw->firstInstance > 0) {
-                            glDrawElementsInstancedBaseInstance(GL_TRIANGLES,
+                            glDrawElementsInstancedBaseInstance(lastRenderPipeline->GetGLPrimitiveTopology(),
                                 draw->indexCount, formatType,
                                 reinterpret_cast<void*>(draw->firstIndex * formatSize + indexBufferOffset),
                                 draw->instanceCount, draw->firstInstance);
                         } else {
                             // This branch is only needed on OpenGL < 4.2
-                            glDrawElementsInstanced(GL_TRIANGLES,
+                            glDrawElementsInstanced(lastRenderPipeline->GetGLPrimitiveTopology(),
                                 draw->indexCount, formatType,
                                 reinterpret_cast<void*>(draw->firstIndex * formatSize + indexBufferOffset),
                                 draw->instanceCount);

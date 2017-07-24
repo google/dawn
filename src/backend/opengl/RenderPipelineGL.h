@@ -32,7 +32,12 @@ namespace opengl {
         public:
             RenderPipeline(RenderPipelineBuilder* builder);
 
+            GLenum GetGLPrimitiveTopology() const;
+
             void ApplyNow(PersistentPipelineState &persistentPipelineState);
+
+        private:
+            GLenum glPrimitiveTopology;
     };
 
 }

@@ -399,7 +399,6 @@ namespace d3d12 {
                     {
                         DrawArraysCmd* draw = commands.NextCommand<DrawArraysCmd>();
 
-                        commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
                         commandList->DrawInstanced(
                             draw->vertexCount,
                             draw->instanceCount,
@@ -413,7 +412,6 @@ namespace d3d12 {
                     {
                         DrawElementsCmd* draw = commands.NextCommand<DrawElementsCmd>();
 
-                        commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
                         commandList->DrawIndexedInstanced(
                             draw->indexCount,
                             draw->instanceCount,
@@ -464,6 +462,7 @@ namespace d3d12 {
 
                         commandList->SetGraphicsRootSignature(layout->GetRootSignature().Get());
                         commandList->SetPipelineState(pipeline->GetPipelineState().Get());
+                        commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
 
                         bindingTracker.SetInheritedBindGroups(commandList, lastLayout, layout);
 
