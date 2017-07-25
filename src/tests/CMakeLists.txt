@@ -49,6 +49,7 @@ list(APPEND UNITTEST_SOURCES
     ${VALIDATION_TESTS_DIR}/InputStateValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/PushConstantsValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/RenderPassValidationTests.cpp
+    ${VALIDATION_TESTS_DIR}/RenderPipelineValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/UsageValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/ValidationTest.cpp
     ${VALIDATION_TESTS_DIR}/ValidationTest.h
