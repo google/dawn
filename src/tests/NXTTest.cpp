@@ -151,6 +151,10 @@ void NXTTest::TearDown() {
     MapSlotsSynchronously();
     ResolveExpectations();
 
+    for (size_t i = 0; i < readbackSlots.size(); ++i) {
+        readbackSlots[i].buffer.Unmap();
+    }
+
     for (auto& expectation : deferredExpectations) {
         delete expectation.expectation;
         expectation.expectation = nullptr;

@@ -40,6 +40,7 @@ namespace opengl {
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
+        // TODO(cwallez@chromium.org): this crashes on Mac NVIDIA, use GetBufferSubData there instead?
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
         void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_READ_BIT);
         CallMapReadCallback(serial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, data);
