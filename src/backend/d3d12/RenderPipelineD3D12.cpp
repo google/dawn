@@ -42,6 +42,21 @@ namespace d3d12 {
                     UNREACHABLE();
             }
         }
+
+        D3D12_PRIMITIVE_TOPOLOGY_TYPE D3D12PrimitiveTopologyType(nxt::PrimitiveTopology primitiveTopology) {
+            switch (primitiveTopology) {
+                case nxt::PrimitiveTopology::Point:
+                    return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+                case nxt::PrimitiveTopology::Line:
+                case nxt::PrimitiveTopology::LineStrip:
+                    return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+                case nxt::PrimitiveTopology::Triangle:
+                case nxt::PrimitiveTopology::TriangleStrip:
+                    return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+                default:
+                    UNREACHABLE();
+            }
+        }
     }
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
@@ -142,7 +157,7 @@ namespace d3d12 {
         descriptor.DepthStencilState.DepthEnable = false;
         descriptor.DepthStencilState.StencilEnable = false;
         descriptor.SampleMask = UINT_MAX;
-        descriptor.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        descriptor.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());
         descriptor.NumRenderTargets = 1;
         descriptor.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
         descriptor.SampleDesc.Count = 1;

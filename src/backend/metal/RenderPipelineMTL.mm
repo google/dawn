@@ -38,6 +38,19 @@ namespace metal {
                     return MTLPrimitiveTypeTriangleStrip;
             }
         }
+
+        MTLPrimitiveTopologyClass MTLInputPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
+            switch (primitiveTopology) {
+                case nxt::PrimitiveTopology::Point:
+                    return MTLPrimitiveTopologyClassPoint;
+                case nxt::PrimitiveTopology::Line:
+                case nxt::PrimitiveTopology::LineStrip:
+                    return MTLPrimitiveTopologyClassLine;
+                case nxt::PrimitiveTopology::Triangle:
+                case nxt::PrimitiveTopology::TriangleStrip:
+                    return MTLPrimitiveTopologyClassTriangle;
+            }
+        }
     }
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
@@ -68,6 +81,7 @@ namespace metal {
         // TODO(cwallez@chromium.org): get the attachment formats from the subpass
         descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
         descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+        descriptor.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());
 
         InputState* inputState = ToBackend(GetInputState());
         descriptor.vertexDescriptor = inputState->GetMTLVertexDescriptor();
