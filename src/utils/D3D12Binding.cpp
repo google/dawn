@@ -24,6 +24,9 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
+#ifdef _DEBUG
+#include <dxgidebug.h>
+#endif
 
 using Microsoft::WRL::ComPtr;
 
@@ -55,12 +58,16 @@ namespace utils {
                 // NOTE: Enabling the debug layer after device creation will invalidate the active device.
                 {
                     ComPtr<ID3D12Debug> debugController;
-                    if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-                    {
+                    if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
                         debugController->EnableDebugLayer();
 
                         // Enable additional debug layers.
                         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+                    }
+
+                    ComPtr<IDXGIDebug1> dxgiDebug;
+                    if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug)))) {
+                        dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
                     }
                 }
 #endif

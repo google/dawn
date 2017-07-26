@@ -197,11 +197,16 @@ if (NXT_ENABLE_D3D12)
     find_library(DXGI_LIBRARY NAMES dxgi.lib HINTS ${WIN10_SDK_LIB_PATH})
     find_library(D3DCOMPILER_LIBRARY NAMES d3dcompiler.lib HINTS ${WIN10_SDK_LIB_PATH})
 
-    set(D3D12_LIBRARIES
+    list(APPEND D3D12_LIBRARIES
         ${D3D12_LIBRARY}
         ${DXGI_LIBRARY}
         ${D3DCOMPILER_LIBRARY}
     )
+
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        find_library(DXGUID_LIBRARY NAMES dxguid.lib HINTS ${WIN10_SDK_LIB_PATH})
+        list(APPEND D3D12_LIBRARIES ${DXGUID_LIBRARY})
+    endif()
 
     target_link_libraries(d3d12_autogen glfw nxtcpp ${D3D12_LIBRARIES})
     target_include_directories(d3d12_autogen SYSTEM PRIVATE ${D3D12_INCLUDE_DIR} ${DXGI_INCLUDE_DIR})

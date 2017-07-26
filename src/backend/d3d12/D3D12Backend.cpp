@@ -104,10 +104,15 @@ namespace d3d12 {
     }
 
     Device::~Device() {
-        // Wait for all in-flight commands to finish exeuting
         const uint64_t currentSerial = GetSerial();
         NextSerial();
-        WaitForSerial(currentSerial);
+        WaitForSerial(currentSerial); // Wait for all in-flight commands to finish executing
+        TickImpl(); // Call tick one last time so resources are cleaned up
+        delete commandAllocatorManager;
+        delete descriptorHeapAllocator;
+        delete mapReadRequestTracker;
+        delete resourceAllocator;
+        delete resourceUploader;
     }
 
     ComPtr<ID3D12Device> Device::GetD3D12Device() {
