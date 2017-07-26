@@ -28,13 +28,13 @@ namespace d3d12 {
     namespace {
         D3D12_PRIMITIVE_TOPOLOGY D3D12PrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::Point:
+                case nxt::PrimitiveTopology::PointList:
                     return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-                case nxt::PrimitiveTopology::Line:
+                case nxt::PrimitiveTopology::LineList:
                     return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
                 case nxt::PrimitiveTopology::LineStrip:
                     return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
-                case nxt::PrimitiveTopology::Triangle:
+                case nxt::PrimitiveTopology::TriangleList:
                     return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
                 case nxt::PrimitiveTopology::TriangleStrip:
                     return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
@@ -45,12 +45,12 @@ namespace d3d12 {
 
         D3D12_PRIMITIVE_TOPOLOGY_TYPE D3D12PrimitiveTopologyType(nxt::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::Point:
+                case nxt::PrimitiveTopology::PointList:
                     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-                case nxt::PrimitiveTopology::Line:
+                case nxt::PrimitiveTopology::LineList:
                 case nxt::PrimitiveTopology::LineStrip:
                     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-                case nxt::PrimitiveTopology::Triangle:
+                case nxt::PrimitiveTopology::TriangleList:
                 case nxt::PrimitiveTopology::TriangleStrip:
                     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
                 default:

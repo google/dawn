@@ -48,7 +48,7 @@ class RenderPipelineValidationTest : public ValidationTest {
                 .SetLayout(pipelineLayout)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-                .SetPrimitiveTopology(nxt::PrimitiveTopology::Triangle);
+                .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList);
             return builder;
         }
 
@@ -74,7 +74,7 @@ TEST_F(RenderPipelineValidationTest, CreationMissingProperty) {
             .SetSubpass(renderpass, 0)
             .SetLayout(pipelineLayout)
             .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::Triangle)
+            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 
@@ -84,7 +84,7 @@ TEST_F(RenderPipelineValidationTest, CreationMissingProperty) {
             .SetSubpass(renderpass, 0)
             .SetLayout(pipelineLayout)
             .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::Triangle)
+            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 
@@ -94,7 +94,7 @@ TEST_F(RenderPipelineValidationTest, CreationMissingProperty) {
             .SetLayout(pipelineLayout)
             .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
             .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::Triangle)
+            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 }
@@ -107,7 +107,7 @@ TEST_F(RenderPipelineValidationTest, DISABLED_TodoCreationMissingProperty) {
             .SetSubpass(renderpass, 0)
             .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
             .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::Triangle)
+            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 
@@ -134,7 +134,7 @@ TEST_F(RenderPipelineValidationTest, DISABLED_CreationDuplicates) {
     // Fails because primitive topology is set twice
     {
         AddDefaultStates(AssertWillBeError(device.CreateRenderPipelineBuilder()))
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::Triangle)
+            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 

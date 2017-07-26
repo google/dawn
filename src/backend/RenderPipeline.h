@@ -57,7 +57,7 @@ namespace backend {
             Ref<DepthStencilStateBase> depthStencilState;
             Ref<InputStateBase> inputState;
             // TODO(enga@google.com): Remove default when we validate that all required properties are set
-            nxt::PrimitiveTopology primitiveTopology = nxt::PrimitiveTopology::Triangle;
+            nxt::PrimitiveTopology primitiveTopology = nxt::PrimitiveTopology::TriangleList;
             Ref<RenderPassBase> renderPass;
             uint32_t subpass;
     };

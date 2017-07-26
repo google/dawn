@@ -694,10 +694,10 @@
     "primitive topology": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "point"},
-            {"value": 1, "name": "line"},
+            {"value": 0, "name": "point list"},
+            {"value": 1, "name": "line list"},
             {"value": 2, "name": "line strip"},
-            {"value": 3, "name": "triangle"},
+            {"value": 3, "name": "triangle list"},
             {"value": 4, "name": "triangle strip"}
         ]
     },

@@ -249,8 +249,8 @@ class PrimitiveTopologyTest : public NXTTest {
 };
 
 // Test Point primitive topology
-TEST_P(PrimitiveTopologyTest, Point) {
-    DoTest(nxt::PrimitiveTopology::Point, {
+TEST_P(PrimitiveTopologyTest, PointList) {
+    DoTest(nxt::PrimitiveTopology::PointList, {
         // Check that the points are drawn
         TestPoints(kPointTestLocations, true),
 
@@ -263,8 +263,8 @@ TEST_P(PrimitiveTopologyTest, Point) {
 }
 
 // Test Line primitive topology
-TEST_P(PrimitiveTopologyTest, Line) {
-    DoTest(nxt::PrimitiveTopology::Line, {
+TEST_P(PrimitiveTopologyTest, LineList) {
+    DoTest(nxt::PrimitiveTopology::LineList, {
         // Check that lines are drawn
         TestPoints(kLineTestLocations, true),
 
@@ -289,8 +289,8 @@ TEST_P(PrimitiveTopologyTest, LineStrip) {
 }
 
 // Test Triangle primitive topology
-TEST_P(PrimitiveTopologyTest, Triangle) {
-    DoTest(nxt::PrimitiveTopology::Triangle, {
+TEST_P(PrimitiveTopologyTest, TriangleList) {
+    DoTest(nxt::PrimitiveTopology::TriangleList, {
         // Check that triangles are drawn
         TestPoints(kTriangleTestLocations, true),
 

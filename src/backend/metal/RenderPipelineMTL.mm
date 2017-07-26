@@ -26,13 +26,13 @@ namespace metal {
     namespace {
         MTLPrimitiveType MTLPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::Point:
+                case nxt::PrimitiveTopology::PointList:
                     return MTLPrimitiveTypePoint;
-                case nxt::PrimitiveTopology::Line:
+                case nxt::PrimitiveTopology::LineList:
                     return MTLPrimitiveTypeLine;
                 case nxt::PrimitiveTopology::LineStrip:
                     return MTLPrimitiveTypeLineStrip;
-                case nxt::PrimitiveTopology::Triangle:
+                case nxt::PrimitiveTopology::TriangleList:
                     return MTLPrimitiveTypeTriangle;
                 case nxt::PrimitiveTopology::TriangleStrip:
                     return MTLPrimitiveTypeTriangleStrip;
@@ -41,12 +41,12 @@ namespace metal {
 
         MTLPrimitiveTopologyClass MTLInputPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::Point:
+                case nxt::PrimitiveTopology::PointList:
                     return MTLPrimitiveTopologyClassPoint;
-                case nxt::PrimitiveTopology::Line:
+                case nxt::PrimitiveTopology::LineList:
                 case nxt::PrimitiveTopology::LineStrip:
                     return MTLPrimitiveTopologyClassLine;
-                case nxt::PrimitiveTopology::Triangle:
+                case nxt::PrimitiveTopology::TriangleList:
                 case nxt::PrimitiveTopology::TriangleStrip:
                     return MTLPrimitiveTopologyClassTriangle;
             }

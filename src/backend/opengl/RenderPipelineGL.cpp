@@ -24,13 +24,13 @@ namespace opengl {
     namespace {
         GLenum GLPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::Point:
+                case nxt::PrimitiveTopology::PointList:
                     return GL_POINTS;
-                case nxt::PrimitiveTopology::Line:
+                case nxt::PrimitiveTopology::LineList:
                     return GL_LINES;
                 case nxt::PrimitiveTopology::LineStrip:
                     return GL_LINE_STRIP;
-                case nxt::PrimitiveTopology::Triangle:
+                case nxt::PrimitiveTopology::TriangleList:
                     return GL_TRIANGLES;
                 case nxt::PrimitiveTopology::TriangleStrip:
                     return GL_TRIANGLE_STRIP;
