@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "backend/metal/MetalBackend.h"
+#include "backend/metal/BlendStateMTL.h"
 #include "backend/metal/BufferMTL.h"
 #include "backend/metal/CommandBufferMTL.h"
 #include "backend/metal/ComputePipelineMTL.h"

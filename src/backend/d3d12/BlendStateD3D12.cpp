@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/opengl/OpenGLBackend.h"
-#include "backend/opengl/BlendStateGL.h"
-#include "backend/opengl/BufferGL.h"
-#include "backend/opengl/CommandBufferGL.h"
-#include "backend/opengl/ComputePipelineGL.h"
-#include "backend/opengl/DepthStencilStateGL.h"
-#include "backend/opengl/PersistentPipelineStateGL.h"
-#include "backend/opengl/PipelineLayoutGL.h"
-#include "backend/opengl/RenderPipelineGL.h"
-#include "backend/opengl/SamplerGL.h"
-#include "backend/opengl/ShaderModuleGL.h"
-#include "backend/opengl/SwapChainGL.h"
-#include "backend/opengl/TextureGL.h"
+#include "backend/d3d12/BlendStateD3D12.h"
+
+#include "backend/d3d12/D3D12Backend.h"
+
+namespace backend {
+namespace d3d12 {
+
+    BlendState::BlendState(BlendStateBuilder* builder) : BlendStateBase(builder) {
+    }
+
+}
+}

@@ -14,10 +14,12 @@
 
 #include "backend/RenderPipeline.h"
 
+#include "backend/BlendState.h"
 #include "backend/Device.h"
 #include "backend/DepthStencilState.h"
 #include "backend/InputState.h"
 #include "backend/RenderPass.h"
+#include "common/BitSetIterator.h"
 
 namespace backend {
 
@@ -28,15 +30,11 @@ namespace backend {
           depthStencilState(std::move(builder->depthStencilState)),
           inputState(std::move(builder->inputState)),
           primitiveTopology(builder->primitiveTopology),
+          blendStates(builder->blendStates),
           renderPass(std::move(builder->renderPass)), subpass(builder->subpass) {
 
         if (GetStageMask() != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
             builder->HandleError("Render pipeline should have exactly a vertex and fragment stage");
-            return;
-        }
-
-        if (!renderPass) {
-            builder->HandleError("Pipeline render pass not set");
             return;
         }
 
@@ -46,6 +44,11 @@ namespace backend {
             builder->HandleError("Pipeline vertex stage uses inputs not in the input state");
             return;
         }
+    }
+
+    BlendStateBase* RenderPipelineBase::GetBlendState(uint32_t attachmentSlot) {
+        ASSERT(attachmentSlot < blendStates.size());
+        return blendStates[attachmentSlot].Get();
     }
 
     DepthStencilStateBase* RenderPipelineBase::GetDepthStencilState() {
@@ -82,8 +85,37 @@ namespace backend {
         if (!depthStencilState) {
             depthStencilState = device->CreateDepthStencilStateBuilder()->GetResult();
         }
+        if (!renderPass) {
+            HandleError("Pipeline render pass not set");
+            return nullptr;
+        }
+        const auto& subpassInfo = renderPass->GetSubpassInfo(subpass);
+        if ((blendStatesSet | subpassInfo.colorAttachmentsSet) != subpassInfo.colorAttachmentsSet) {
+            HandleError("Blend state set on unset color attachment");
+            return nullptr;
+        }
+
+        // Assign all color attachments without a blend state the default state
+        // TODO(enga@google.com): Put the default objects in the device
+        for (uint32_t attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet & ~blendStatesSet)) {
+            blendStates[attachmentSlot] = device->CreateBlendStateBuilder()->GetResult();
+        }
 
         return device->CreateRenderPipeline(this);
+    }
+
+    void RenderPipelineBuilder::SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState) {
+        if (attachmentSlot > blendStates.size()) {
+            HandleError("Attachment index out of bounds");
+            return;
+        }
+        if (blendStatesSet[attachmentSlot]) {
+            HandleError("Attachment blend state already set");
+            return;
+        }
+
+        blendStatesSet.set(attachmentSlot);
+        blendStates[attachmentSlot] = blendState;
     }
 
     void RenderPipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {

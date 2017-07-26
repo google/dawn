@@ -16,6 +16,7 @@
 
 #include "backend/d3d12/BindGroupD3D12.h"
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
+#include "backend/d3d12/BlendStateD3D12.h"
 #include "backend/d3d12/BufferD3D12.h"
 #include "backend/d3d12/CommandAllocatorManager.h"
 #include "backend/d3d12/CommandBufferD3D12.h"
@@ -208,6 +209,9 @@ namespace d3d12 {
     }
     BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
         return new BindGroupLayout(this, builder);
+    }
+    BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
+        return new BlendState(builder);
     }
     BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
         return new Buffer(this, builder);

@@ -43,6 +43,9 @@ namespace null {
     BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
         return new BindGroupLayout(builder);
     }
+    BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
+        return new BlendState(builder);
+    }
     BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
         return new Buffer(builder);
     }

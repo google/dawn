@@ -23,6 +23,8 @@ namespace backend {
     class BindGroupBuilder;
     class BindGroupLayoutBase;
     class BindGroupLayoutBuilder;
+    class BlendStateBase;
+    class BlendStateBuilder;
     class BufferBase;
     class BufferBuilder;
     class BufferViewBase;

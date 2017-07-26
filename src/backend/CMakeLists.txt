@@ -38,6 +38,8 @@ if (NXT_ENABLE_OPENGL)
     target_include_directories(opengl_autogen PUBLIC ${GENERATED_DIR})
 
     list(APPEND BACKEND_SOURCES
+        ${OPENGL_DIR}/BlendStateGL.cpp
+        ${OPENGL_DIR}/BlendStateGL.h
         ${OPENGL_DIR}/BufferGL.cpp
         ${OPENGL_DIR}/BufferGL.h
         ${OPENGL_DIR}/CommandBufferGL.cpp
@@ -110,6 +112,8 @@ if (NXT_ENABLE_METAL)
     target_include_directories(metal_autogen PUBLIC ${GENERATED_DIR})
 
     list(APPEND BACKEND_SOURCES
+        ${METAL_DIR}/BlendStateMTL.mm
+        ${METAL_DIR}/BlendStateMTL.h
         ${METAL_DIR}/BufferMTL.mm
         ${METAL_DIR}/BufferMTL.h
         ${METAL_DIR}/CommandBufferMTL.mm
@@ -218,6 +222,8 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/BindGroupD3D12.h
         ${D3D12_DIR}/BindGroupLayoutD3D12.cpp
         ${D3D12_DIR}/BindGroupLayoutD3D12.h
+        ${D3D12_DIR}/BlendStateD3D12.cpp
+        ${D3D12_DIR}/BlendStateD3D12.h
         ${D3D12_DIR}/BufferD3D12.cpp
         ${D3D12_DIR}/BufferD3D12.h
         ${D3D12_DIR}/CommandAllocatorManager.cpp
@@ -268,6 +274,8 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/BindGroup.h
     ${BACKEND_DIR}/BindGroupLayout.cpp
     ${BACKEND_DIR}/BindGroupLayout.h
+    ${BACKEND_DIR}/BlendState.cpp
+    ${BACKEND_DIR}/BlendState.h
     ${BACKEND_DIR}/Builder.cpp
     ${BACKEND_DIR}/Builder.h
     ${BACKEND_DIR}/Buffer.cpp

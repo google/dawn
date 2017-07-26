@@ -19,12 +19,16 @@
 
 #include "nxt/nxtcpp.h"
 
+#include <array>
+#include <bitset>
+
 namespace backend {
 
     class RenderPipelineBase : public RefCounted, public PipelineBase {
         public:
             RenderPipelineBase(RenderPipelineBuilder* builder);
 
+            BlendStateBase* GetBlendState(uint32_t attachmentSlot);
             DepthStencilStateBase* GetDepthStencilState();
             InputStateBase* GetInputState();
             nxt::PrimitiveTopology GetPrimitiveTopology() const;
@@ -35,6 +39,7 @@ namespace backend {
             Ref<DepthStencilStateBase> depthStencilState;
             Ref<InputStateBase> inputState;
             nxt::PrimitiveTopology primitiveTopology;
+            std::array<Ref<BlendStateBase>, kMaxColorAttachments> blendStates;
             Ref<RenderPassBase> renderPass;
             uint32_t subpass;
     };
@@ -44,6 +49,7 @@ namespace backend {
             RenderPipelineBuilder(DeviceBase* device);
 
             // NXT API
+            void SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState);
             void SetDepthStencilState(DepthStencilStateBase* depthStencilState);
             void SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology);
             void SetInputState(InputStateBase* inputState);
@@ -58,6 +64,8 @@ namespace backend {
             Ref<InputStateBase> inputState;
             // TODO(enga@google.com): Remove default when we validate that all required properties are set
             nxt::PrimitiveTopology primitiveTopology = nxt::PrimitiveTopology::TriangleList;
+            std::bitset<kMaxColorAttachments> blendStatesSet;
+            std::array<Ref<BlendStateBase>, kMaxColorAttachments> blendStates;
             Ref<RenderPassBase> renderPass;
             uint32_t subpass;
     };

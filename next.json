@@ -105,6 +105,78 @@
             {"value": 3, "name": "storage buffer"}
         ]
     },
+    "blend factor": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "zero"},
+            {"value": 1, "name": "one"},
+            {"value": 2, "name": "src color"},
+            {"value": 3, "name": "one minus src color"},
+            {"value": 4, "name": "src alpha"},
+            {"value": 5, "name": "one minus src alpha"},
+            {"value": 6, "name": "dst color"},
+            {"value": 7, "name": "one minus dst color"},
+            {"value": 8, "name": "dst alpha"},
+            {"value": 9, "name": "one minus dst alpha"},
+            {"value": 10, "name": "src alpha saturated"},
+            {"value": 11, "name": "blend color"},
+            {"value": 12, "name": "one minus blend color"},
+            {"value": 13, "name": "src1 color"},
+            {"value": 14, "name": "one minus src1 color"},
+            {"value": 15, "name": "src1 alpha"},
+            {"value": 16, "name": "one minus src1 alpha"}
+        ]
+    },
+    "blend operation": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "add"},
+            {"value": 1, "name": "subtract"},
+            {"value": 2, "name": "reverse subtract"},
+            {"value": 3, "name": "min"},
+            {"value": 4, "name": "max"}
+        ]
+    },
+    "blend state": {
+        "category": "object"
+    },
+    "blend state builder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get result",
+                "returns": "blend state"
+            },
+            {
+                "name": "set blend enabled",
+                "args": [
+                    {"name": "blend enabled", "type": "bool"}
+                ]
+            },
+            {
+                "name": "set alpha blend",
+                "args": [
+                    {"name": "blend operation", "type": "blend operation"},
+                    {"name": "src factor",  "type": "blend factor"},
+                    {"name": "dst factor", "type": "blend factor"}
+                ]
+            },
+            {
+                "name": "set color blend",
+                "args": [
+                    {"name": "blend operation", "type": "blend operation"},
+                    {"name": "src factor",  "type": "blend factor"},
+                    {"name": "dst factor", "type": "blend factor"}
+                ]
+            },
+            {
+                "name": "set color write mask",
+                "args": [
+                    {"name": "color write mask", "type": "color write mask"}
+                ]
+            }
+        ]
+    },
     "builder error status": {
         "category": "enum",
         "values": [
@@ -236,6 +308,17 @@
     },
     "char": {
         "category": "native"
+    },
+    "color write mask": {
+        "category": "bitmask",
+        "values": [
+            {"value": 0, "name": "none"},
+            {"value": 1, "name": "red"},
+            {"value": 2, "name": "green"},
+            {"value": 4, "name": "blue"},
+            {"value": 8, "name": "alpha"},
+            {"value": 15, "name": "all"}
+        ]
     },
     "command buffer": {
         "category": "object"
@@ -472,6 +555,10 @@
             {
                 "name": "create bind group layout builder",
                 "returns": "bind group layout builder"
+            },
+            {
+                "name": "create blend state builder",
+                "returns": "blend state builder"
             },
             {
                 "name": "create buffer builder",
@@ -786,6 +873,13 @@
             {
                 "name": "get result",
                 "returns": "render pipeline"
+            },
+            {
+                "name": "set color attachment blend state",
+                "args": [
+                    {"name": "attachment slot", "type": "uint32_t"},
+                    {"name": "blend state", "type": "blend state"}
+                ]
             },
             {
                 "name": "set depth stencil state",

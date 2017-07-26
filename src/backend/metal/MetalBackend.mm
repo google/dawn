@@ -14,6 +14,7 @@
 
 #include "backend/metal/MetalBackend.h"
 
+#include "backend/metal/BlendStateMTL.h"
 #include "backend/metal/BufferMTL.h"
 #include "backend/metal/CommandBufferMTL.h"
 #include "backend/metal/ComputePipelineMTL.h"
@@ -83,6 +84,9 @@ namespace metal {
     }
     BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
         return new BindGroupLayout(builder);
+    }
+    BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
+        return new BlendState(builder);
     }
     BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
         return new Buffer(builder);

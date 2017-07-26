@@ -14,6 +14,7 @@
 
 #include "backend/opengl/OpenGLBackend.h"
 
+#include "backend/opengl/BlendStateGL.h"
 #include "backend/opengl/BufferGL.h"
 #include "backend/opengl/CommandBufferGL.h"
 #include "backend/opengl/ComputePipelineGL.h"
@@ -48,6 +49,9 @@ namespace opengl {
     }
     BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
         return new BindGroupLayout(builder);
+    }
+    BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
+        return new BlendState(builder);
     }
     BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
         return new Buffer(builder);

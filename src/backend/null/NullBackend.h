@@ -20,6 +20,7 @@
 #include "backend/Buffer.h"
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
+#include "backend/BlendState.h"
 #include "backend/Device.h"
 #include "backend/CommandBuffer.h"
 #include "backend/ComputePipeline.h"
@@ -41,6 +42,7 @@ namespace null {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
+    using BlendState = BlendStateBase;
     class Buffer;
     using BufferView = BufferViewBase;
     class CommandBuffer;
@@ -62,6 +64,7 @@ namespace null {
     struct NullBackendTraits {
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
+        using BlendStateType = BlendState;
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
@@ -98,6 +101,7 @@ namespace null {
 
             BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
             BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
+            BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;

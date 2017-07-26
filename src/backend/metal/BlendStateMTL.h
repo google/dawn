@@ -12,16 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/opengl/OpenGLBackend.h"
-#include "backend/opengl/BlendStateGL.h"
-#include "backend/opengl/BufferGL.h"
-#include "backend/opengl/CommandBufferGL.h"
-#include "backend/opengl/ComputePipelineGL.h"
-#include "backend/opengl/DepthStencilStateGL.h"
-#include "backend/opengl/PersistentPipelineStateGL.h"
-#include "backend/opengl/PipelineLayoutGL.h"
-#include "backend/opengl/RenderPipelineGL.h"
-#include "backend/opengl/SamplerGL.h"
-#include "backend/opengl/ShaderModuleGL.h"
-#include "backend/opengl/SwapChainGL.h"
-#include "backend/opengl/TextureGL.h"
+#ifndef BACKEND_METAL_BLENDSTATEMTL_H_
+#define BACKEND_METAL_BLENDSTATEMTL_H_
+
+#include "backend/BlendState.h"
+
+namespace backend {
+namespace metal {
+
+    class BlendState : public BlendStateBase {
+        public:
+            BlendState(BlendStateBuilder* builder);
+    };
+
+}
+}
+
+#endif // BACKEND_METAL_BLENDSTATEMTL_H_

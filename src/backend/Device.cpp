@@ -16,6 +16,7 @@
 
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
+#include "backend/BlendState.h"
 #include "backend/Buffer.h"
 #include "backend/CommandBuffer.h"
 #include "backend/ComputePipeline.h"
@@ -94,6 +95,9 @@ namespace backend {
     }
     BindGroupLayoutBuilder* DeviceBase::CreateBindGroupLayoutBuilder() {
         return new BindGroupLayoutBuilder(this);
+    }
+    BlendStateBuilder* DeviceBase::CreateBlendStateBuilder() {
+        return new BlendStateBuilder(this);
     }
     BufferBuilder* DeviceBase::CreateBufferBuilder() {
         return new BufferBuilder(this);

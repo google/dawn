@@ -18,6 +18,7 @@
 #include "nxt/nxtcpp.h"
 
 #include "backend/Buffer.h"
+#include "backend/BlendState.h"
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
 #include "backend/Device.h"
@@ -35,6 +36,7 @@ namespace opengl {
 
     class BindGroup;
     class BindGroupLayout;
+    class BlendState;
     class Buffer;
     class BufferView;
     class CommandBuffer;
@@ -57,6 +59,7 @@ namespace opengl {
     struct OpenGLBackendTraits {
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
+        using BlendStateType = BlendState;
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
@@ -86,6 +89,7 @@ namespace opengl {
         public:
             BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
             BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
+            BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;

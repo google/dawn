@@ -68,12 +68,14 @@ namespace backend {
             HandleError("Render pass missing properties");
             return nullptr;
         }
+
         for (const auto& prop : attachmentProperties) {
             if (!prop.all()) {
                 HandleError("A render pass attachment is missing some property");
                 return nullptr;
             }
         }
+
         return device->CreateRenderPass(this);
     }
 
@@ -87,7 +89,6 @@ namespace backend {
         attachments.resize(attachmentCount);
         propertiesSet |= RENDERPASS_PROPERTY_ATTACHMENT_COUNT;
     }
-
 
     void RenderPassBuilder::AttachmentSetFormat(uint32_t attachmentSlot, nxt::TextureFormat format) {
         if ((propertiesSet & RENDERPASS_PROPERTY_ATTACHMENT_COUNT) == 0) {

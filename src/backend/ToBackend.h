@@ -34,6 +34,11 @@ namespace backend {
     };
 
     template<typename BackendTraits>
+    struct ToBackendTraits<BlendStateBase, BackendTraits> {
+        using BackendType = typename BackendTraits::BlendStateType;
+    };
+
+    template<typename BackendTraits>
     struct ToBackendTraits<BufferBase, BackendTraits> {
         using BackendType = typename BackendTraits::BufferType;
     };

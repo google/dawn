@@ -35,6 +35,7 @@ namespace metal {
 
     class BindGroup;
     class BindGroupLayout;
+    class BlendState;
     class Buffer;
     class BufferView;
     class CommandBuffer;
@@ -56,6 +57,7 @@ namespace metal {
     struct MetalBackendTraits {
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
+        using BlendStateType = BlendState;
         using BufferType = Buffer;
         using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
@@ -90,6 +92,7 @@ namespace metal {
 
             BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
             BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
+            BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
             BufferBase* CreateBuffer(BufferBuilder* builder) override;
             BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
             CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;

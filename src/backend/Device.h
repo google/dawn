@@ -36,6 +36,7 @@ namespace backend {
 
             virtual BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) = 0;
             virtual BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) = 0;
+            virtual BlendStateBase* CreateBlendState(BlendStateBuilder* builder) = 0;
             virtual BufferBase* CreateBuffer(BufferBuilder* builder) = 0;
             virtual BufferViewBase* CreateBufferView(BufferViewBuilder* builder) = 0;
             virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
@@ -75,6 +76,7 @@ namespace backend {
             // NXT API
             BindGroupBuilder* CreateBindGroupBuilder();
             BindGroupLayoutBuilder* CreateBindGroupLayoutBuilder();
+            BlendStateBuilder* CreateBlendStateBuilder();
             BufferBuilder* CreateBufferBuilder();
             BufferViewBuilder* CreateBufferViewBuilder();
             CommandBufferBuilder* CreateCommandBufferBuilder();
