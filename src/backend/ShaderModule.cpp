@@ -27,6 +27,10 @@ namespace backend {
         : device(builder->device) {
     }
 
+    DeviceBase* ShaderModuleBase::GetDevice() const {
+        return device;
+    }
+
     void ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
         // TODO(cwallez@chromium.org): make errors here builder-level
         // currently errors here do not prevent the shadermodule from being used

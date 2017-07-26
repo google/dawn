@@ -28,11 +28,11 @@ namespace metal {
         const auto& module = ToBackend(builder->GetStageInfo(nxt::ShaderStage::Compute).module);
         const auto& entryPoint = builder->GetStageInfo(nxt::ShaderStage::Compute).entryPoint;
 
-        id<MTLFunction> function = module->GetFunction(entryPoint.c_str());
+        auto compilationData = module->GetFunction(entryPoint.c_str(), ToBackend(GetLayout()));
 
         NSError *error = nil;
         mtlComputePipelineState = [mtlDevice
-            newComputePipelineStateWithFunction:function error:&error];
+            newComputePipelineStateWithFunction:compilationData.function error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
             builder->HandleError("Error creating pipeline state");
@@ -40,7 +40,7 @@ namespace metal {
         }
 
         // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
-        localWorkgroupSize = module->GetLocalWorkGroupSize(entryPoint);
+        localWorkgroupSize = compilationData.localWorkgroupSize;
     }
 
     ComputePipeline::~ComputePipeline() {

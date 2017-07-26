@@ -26,16 +26,20 @@ namespace spirv_cross {
 namespace backend {
 namespace metal {
 
+    class PipelineLayout;
+
     class ShaderModule : public ShaderModuleBase {
         public:
             ShaderModule(ShaderModuleBuilder* builder);
             ~ShaderModule();
 
-            id<MTLFunction> GetFunction(const char* functionName) const;
-            MTLSize GetLocalWorkGroupSize(const std::string& entryPoint) const;
+            struct MetalFunctionData {
+                id<MTLFunction> function;
+                MTLSize localWorkgroupSize;
+            };
+            MetalFunctionData GetFunction(const char* functionName, const PipelineLayout* layout) const;
 
         private:
-            id<MTLLibrary> mtlLibrary = nil;
             spirv_cross::CompilerMSL* compiler = nullptr;
     };
 

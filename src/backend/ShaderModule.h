@@ -36,6 +36,8 @@ namespace backend {
         public:
             ShaderModuleBase(ShaderModuleBuilder* builder);
 
+            DeviceBase* GetDevice() const;
+
             void ExtractSpirvInfo(const spirv_cross::Compiler& compiler);
 
             struct PushConstantInfo {

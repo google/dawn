@@ -32,14 +32,6 @@ namespace d3d12 {
 
         ExtractSpirvInfo(compiler);
 
-        enum RegisterType {
-            Buffer,
-            UnorderedAccess,
-            Texture,
-            Sampler,
-            Count,
-        };
-
         // rename bindings so that each register type b/u/t/s starts at 0 and then offset by kMaxBindingsPerGroup * bindGroupIndex
         auto RenumberBindings = [&](std::vector<spirv_cross::Resource> resources) {
             std::array<uint32_t, kMaxBindGroups> baseRegisters = {};

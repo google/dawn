@@ -15,6 +15,7 @@
 #include "backend/metal/InputStateMTL.h"
 
 #include "backend/metal/MetalBackend.h"
+#include "common/BitSetIterator.h"
 
 namespace backend {
 namespace metal {
@@ -62,11 +63,7 @@ namespace metal {
             [attribDesc release];
         }
 
-        const auto& inputsSetMask = GetInputsSetMask();
-        for (uint32_t i = 0; i < inputsSetMask.size(); ++i) {
-            if (!inputsSetMask[i]) {
-                continue;
-            }
+        for (uint32_t i : IterateBitSet(GetInputsSetMask())) {
             const InputInfo& info = GetInput(i);
 
             auto layoutDesc = [MTLVertexBufferLayoutDescriptor new];
@@ -83,6 +80,7 @@ namespace metal {
                 layoutDesc.stepRate = 1;
                 layoutDesc.stride = info.stride;
             }
+            // TODO(cwallez@chromium.org): make the offset depend on the pipeline layout
             mtlVertexDescriptor.layouts[kMaxBindingsPerGroup + i] = layoutDesc;
             [layoutDesc release];
         }
