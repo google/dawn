@@ -18,9 +18,10 @@
 #include "common/Assert.h"
 
 #include <cstring>
-#include <iostream>
+#include <cstdlib>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace nxt {
@@ -31,24 +32,19 @@ namespace wire {
 
         class Device;
 
-        void PrintBuilderError(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata, nxtCallbackUserdata) {
-            if (status == NXT_BUILDER_ERROR_STATUS_SUCCESS || status == NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
-                return;
-            }
-
-            std::cout << "Got a builder error " << status << ": " << message << std::endl;
-        }
-
         struct BuilderCallbackData {
-            void Call(nxtBuilderErrorStatus status, const char* message) {
+            bool Call(nxtBuilderErrorStatus status, const char* message) {
                 if (canCall && callback != nullptr) {
                     canCall = true;
                     callback(status, message, userdata1, userdata2);
+                    return true;
                 }
+
+                return false;
             }
 
             //* For help with development, prints all builder errors by default.
-            nxtBuilderErrorCallback callback = PrintBuilderError;
+            nxtBuilderErrorCallback callback = nullptr;
             nxtCallbackUserdata userdata1 = 0;
             nxtCallbackUserdata userdata2 = 0;
             bool canCall = true;
@@ -504,7 +500,13 @@ namespace wire {
                             return true;
                         }
 
-                        builtObject->builderCallback.Call(static_cast<nxtBuilderErrorStatus>(cmd->status), cmd->GetMessage());
+                        bool called = builtObject->builderCallback.Call(static_cast<nxtBuilderErrorStatus>(cmd->status), cmd->GetMessage());
+
+                        // Unhandled builder errors are forwarded to the device
+                        if (!called && cmd->status != NXT_BUILDER_ERROR_STATUS_SUCCESS && cmd->status != NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
+                            builtObject->device->HandleError(("Unhandled builder error: " + std::string(cmd->GetMessage())).c_str());
+                        }
+
                         return true;
                     }
                 {% endfor %}

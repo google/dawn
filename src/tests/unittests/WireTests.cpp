@@ -440,6 +440,53 @@ TEST_F(WireTests, UnknownBuilderErrorStatusCallback) {
     }
 }
 
+// Test that a builder success status doesn't get forwarded to the device
+TEST_F(WireTests, SuccessCallbackNotForwardedToDevice) {
+    nxtDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, 0);
+
+    nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+    nxtBufferBuilderGetResult(bufferBuilder);
+
+    nxtBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
+    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+        .WillOnce(Return(apiBufferBuilder));
+
+    nxtBuffer apiBuffer = api.GetNewBuffer();
+    EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
+        .WillOnce(InvokeWithoutArgs([&]() -> nxtBuffer {
+            api.CallBuilderErrorCallback(apiBufferBuilder, NXT_BUILDER_ERROR_STATUS_SUCCESS, "I like cheese");
+            return apiBuffer;
+        }));
+
+    FlushClient();
+    FlushServer();
+}
+
+// Test that a builder error status gets forwarded to the device
+TEST_F(WireTests, ErrorCallbackForwardedToDevice) {
+    uint64_t userdata = 30495;
+    nxtDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata);
+
+    nxtBufferBuilder bufferBuilder = nxtDeviceCreateBufferBuilder(device);
+    nxtBufferBuilderGetResult(bufferBuilder);
+
+    nxtBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
+    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+        .WillOnce(Return(apiBufferBuilder));
+
+    EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
+        .WillOnce(InvokeWithoutArgs([&]() -> nxtBuffer {
+            api.CallBuilderErrorCallback(apiBufferBuilder, NXT_BUILDER_ERROR_STATUS_ERROR, "Error :(");
+            return nullptr;
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(1);
+
+    FlushServer();
+}
+
 class WireSetCallbackTests : public WireTestsBase {
     public:
         WireSetCallbackTests() : WireTestsBase(false) {

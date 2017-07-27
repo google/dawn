@@ -17,8 +17,6 @@
 #include "backend/Device.h"
 #include "common/Assert.h"
 
-#include <iostream>
-
 namespace backend {
 
     bool BuilderBase::CanBeUsed() const {
@@ -79,7 +77,8 @@ namespace backend {
                 result = nullptr;
             }
 
-            if (!callback) std::cout << storedMessage << std::endl;
+            // Unhandled builder errors are promoted to device errors
+            if (!callback) device->HandleError(("Unhandled builder error: " + storedMessage).c_str());
         } else {
             ASSERT(storedStatus == nxt::BuilderErrorStatus::Success);
             ASSERT(storedMessage.empty());
