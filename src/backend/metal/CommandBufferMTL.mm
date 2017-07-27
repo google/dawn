@@ -149,6 +149,8 @@ namespace metal {
         CurrentEncoders encoders;
         encoders.device = device;
 
+        PerStage<std::array<uint32_t, kMaxPushConstants>> pushConstants;
+
         uint32_t currentSubpass = 0;
         while (commands.NextCommandId(&type)) {
             switch (type) {
@@ -156,6 +158,11 @@ namespace metal {
                     {
                         commands.NextCommand<BeginComputePassCmd>();
                         encoders.BeginCompute(commandBuffer);
+
+                        pushConstants[nxt::ShaderStage::Compute].fill(0);
+                        [encoders.compute setBytes: &pushConstants[nxt::ShaderStage::Compute]
+                                            length: sizeof(uint32_t) * kMaxPushConstants
+                                           atIndex: 0];
                     }
                     break;
 
@@ -173,6 +180,16 @@ namespace metal {
                     {
                         commands.NextCommand<BeginRenderSubpassCmd>();
                         encoders.BeginSubpass(commandBuffer, currentSubpass);
+
+                        pushConstants[nxt::ShaderStage::Vertex].fill(0);
+                        pushConstants[nxt::ShaderStage::Fragment].fill(0);
+
+                        [encoders.render setVertexBytes: &pushConstants[nxt::ShaderStage::Vertex]
+                                                 length: sizeof(uint32_t) * kMaxPushConstants
+                                                atIndex: 0];
+                        [encoders.render setFragmentBytes: &pushConstants[nxt::ShaderStage::Fragment]
+                                                   length: sizeof(uint32_t) * kMaxPushConstants
+                                                  atIndex: 0];
                     }
                     break;
 
@@ -343,8 +360,35 @@ namespace metal {
                 case Command::SetPushConstants:
                     {
                         SetPushConstantsCmd* cmd = commands.NextCommand<SetPushConstantsCmd>();
-                        commands.NextData<uint32_t>(cmd->count);
-                        // TODO(kainino@chromium.org): implement SetPushConstants
+                        uint32_t* values = commands.NextData<uint32_t>(cmd->count);
+
+                        for (auto stage : IterateStages(cmd->stages)) {
+                            memcpy(&pushConstants[stage][cmd->offset], values, cmd->count * sizeof(uint32_t));
+
+                            switch (stage) {
+                                case nxt::ShaderStage::Compute:
+                                    ASSERT(encoders.compute);
+                                    [encoders.compute setBytes: &pushConstants[nxt::ShaderStage::Compute]
+                                                        length: sizeof(uint32_t) * kMaxPushConstants
+                                                       atIndex: 0];
+                                    break;
+                                case nxt::ShaderStage::Fragment:
+                                    ASSERT(encoders.render);
+                                    [encoders.render setFragmentBytes: &pushConstants[nxt::ShaderStage::Fragment]
+                                                               length: sizeof(uint32_t) * kMaxPushConstants
+                                                              atIndex: 0];
+                                    break;
+                                case nxt::ShaderStage::Vertex:
+                                    ASSERT(encoders.render);
+                                    [encoders.render setVertexBytes: &pushConstants[nxt::ShaderStage::Vertex]
+                                                             length: sizeof(uint32_t) * kMaxPushConstants
+                                                            atIndex: 0];
+                                    break;
+                                default:
+                                    UNREACHABLE();
+                                    break;
+                            }
+                        }
                     }
                     break;
 
