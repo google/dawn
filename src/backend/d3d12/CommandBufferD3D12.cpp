@@ -309,7 +309,7 @@ namespace d3d12 {
                         );
 
                         D3D12_TEXTURE_COPY_LOCATION textureLocation;
-                        textureLocation.pResource = texture->GetD3D12Resource().Get();
+                        textureLocation.pResource = texture->GetD3D12Resource();
                         textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
                         textureLocation.SubresourceIndex = copy->destination.level;
 
@@ -358,7 +358,7 @@ namespace d3d12 {
                         );
 
                         D3D12_TEXTURE_COPY_LOCATION textureLocation;
-                        textureLocation.pResource = texture->GetD3D12Resource().Get();
+                        textureLocation.pResource = texture->GetD3D12Resource();
                         textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
                         textureLocation.SubresourceIndex = copy->source.level;
 

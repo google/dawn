@@ -41,16 +41,6 @@ namespace metal {
         *device = reinterpret_cast<nxtDevice>(new Device(metalDevice));
     }
 
-    void SetNextDrawable(nxtDevice device, id<CAMetalDrawable> drawable) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-        backendDevice->SetNextDrawable(drawable);
-    }
-
-    void Present(nxtDevice device) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-        backendDevice->Present();
-    }
-
     // Device
 
     Device::Device(id<MTLDevice> mtlDevice)
@@ -86,9 +76,6 @@ namespace metal {
 
         [commandQueue release];
         commandQueue = nil;
-
-        [currentTexture release];
-        currentTexture = nil;
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
@@ -155,41 +142,8 @@ namespace metal {
         SubmitPendingCommandBuffer();
     }
 
-    void Device::SetNextDrawable(id<CAMetalDrawable> drawable) {
-        [currentDrawable release];
-        currentDrawable = drawable;
-        [currentDrawable retain];
-
-        [currentTexture release];
-        currentTexture = drawable.texture;
-        [currentTexture retain];
-
-        MTLRenderPassDescriptor* passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-        passDescriptor.colorAttachments[0].texture = currentTexture;
-        passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-        passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-        passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
-
-
-        id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
-        id<MTLRenderCommandEncoder> commandEncoder = [commandBuffer
-            renderCommandEncoderWithDescriptor:passDescriptor];
-        [commandEncoder endEncoding];
-        [commandBuffer commit];
-    }
-
-    void Device::Present() {
-        id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
-        [commandBuffer presentDrawable: currentDrawable];
-        [commandBuffer commit];
-    }
-
     id<MTLDevice> Device::GetMTLDevice() {
         return mtlDevice;
-    }
-
-    id<MTLTexture> Device::GetCurrentTexture() {
-        return currentTexture;
     }
 
     id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {

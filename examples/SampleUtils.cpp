@@ -18,6 +18,7 @@
 
 #include <nxt/nxt.h>
 #include <nxt/nxtcpp.h>
+#include <nxt/nxt_wsi.h>
 #include "GLFW/glfw3.h"
 
 #include <cstring>
@@ -39,9 +40,9 @@ enum class CmdBufType {
     static utils::BackendType backendType = utils::BackendType::D3D12;
 #elif defined(NXT_ENABLE_BACKEND_METAL)
     static utils::BackendType backendType = utils::BackendType::Metal;
-#elif defined(NXT_ENABLE_BACKEND_VULKAN)
-    static utils::BackendType backendType = utils::BackendType::OpenGL;
 #elif defined(NXT_ENABLE_BACKEND_OPENGL)
+    static utils::BackendType backendType = utils::BackendType::OpenGL;
+#elif defined(NXT_ENABLE_BACKEND_VULKAN)
     static utils::BackendType backendType = utils::BackendType::Vulkan;
 #else
     #error
@@ -111,6 +112,56 @@ nxt::Device CreateCppNXTDevice() {
     return nxt::Device::Acquire(cDevice);
 }
 
+uint64_t GetSwapChainImplementation() {
+    return binding->GetSwapChainImplementation();
+}
+
+nxt::SwapChain GetSwapChain(const nxt::Device &device) {
+    return device.CreateSwapChainBuilder()
+        .SetImplementation(GetSwapChainImplementation())
+        .GetResult();
+}
+
+nxt::RenderPass CreateDefaultRenderPass(const nxt::Device& device) {
+    return device.CreateRenderPassBuilder()
+        .SetAttachmentCount(2)
+        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+        .AttachmentSetFormat(1, nxt::TextureFormat::D32FloatS8Uint)
+        .SetSubpassCount(1)
+        .SubpassSetColorAttachment(0, 0, 0)
+        .SubpassSetDepthStencilAttachment(0, 1)
+        .GetResult();
+}
+
+nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device) {
+    auto depthStencilTexture = device.CreateTextureBuilder()
+        .SetDimension(nxt::TextureDimension::e2D)
+        .SetExtent(640, 480, 1)
+        .SetFormat(nxt::TextureFormat::D32FloatS8Uint)
+        .SetMipLevels(1)
+        .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+        .GetResult();
+    depthStencilTexture.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
+    return depthStencilTexture.CreateTextureViewBuilder()
+        .GetResult();
+}
+
+void GetNextFramebuffer(const nxt::Device& device,
+        const nxt::RenderPass& renderpass,
+        const nxt::SwapChain& swapchain,
+        const nxt::TextureView& depthStencilView,
+        nxt::Texture* backbuffer,
+        nxt::Framebuffer* framebuffer) {
+    *backbuffer = swapchain.GetNextTexture();
+    auto backbufferView = backbuffer->CreateTextureViewBuilder().GetResult();
+    *framebuffer = device.CreateFramebufferBuilder()
+        .SetRenderPass(renderpass)
+        .SetDimensions(640, 480)
+        .SetAttachment(0, backbufferView)
+        .SetAttachment(1, depthStencilView)
+        .GetResult();
+}
+
 bool InitSample(int argc, const char** argv) {
     for (int i = 0; i < argc; i++) {
         if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {
@@ -138,7 +189,7 @@ bool InitSample(int argc, const char** argv) {
             fprintf(stderr, "--backend expects a backend name (opengl, metal, d3d12, null, vulkan)\n");
             return false;
         }
-        if (std::string("-c") == argv[i] || std::string("--comand-buffer") == argv[i]) {
+        if (std::string("-c") == argv[i] || std::string("--command-buffer") == argv[i]) {
             i++;
             if (i < argc && std::string("none") == argv[i]) {
                 cmdBufType = CmdBufType::None;
@@ -161,13 +212,12 @@ bool InitSample(int argc, const char** argv) {
     return true;
 }
 
-void DoSwapBuffers() {
+void DoFlush() {
     if (cmdBufType == CmdBufType::Terrible) {
         c2sBuf->Flush();
         s2cBuf->Flush();
     }
     glfwPollEvents();
-    binding->SwapBuffers();
 }
 
 bool ShouldQuit() {

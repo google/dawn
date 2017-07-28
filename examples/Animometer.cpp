@@ -23,9 +23,10 @@
 
 nxt::Device device;
 nxt::Queue queue;
+nxt::SwapChain swapchain;
+nxt::TextureView depthStencilView;
 nxt::RenderPipeline pipeline;
 nxt::RenderPass renderpass;
-nxt::Framebuffer framebuffer;
 
 float RandomFloat(float min, float max) {
     float zeroOne = rand() / float(RAND_MAX);
@@ -47,6 +48,8 @@ void init() {
     device = CreateCppNXTDevice();
 
     queue = device.CreateQueueBuilder().GetResult();
+    swapchain = GetSwapChain(device);
+    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, 640, 480);
 
     nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
@@ -105,7 +108,9 @@ void init() {
         })"
     );
 
-    utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+    renderpass = CreateDefaultRenderPass(device);
+    depthStencilView = CreateDefaultDepthStencilView(device);
+
     pipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -124,6 +129,10 @@ void init() {
 }
 
 void frame() {
+    nxt::Texture backbuffer;
+    nxt::Framebuffer framebuffer;
+    GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+
     static int f = 0;
     f++;
 
@@ -152,7 +161,9 @@ void frame() {
     }
 
     queue.Submit(50, commands.data());
-    DoSwapBuffers();
+    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
+    swapchain.Present(backbuffer);
+    DoFlush();
     fprintf(stderr, "frame %i\n", f);
 }
 

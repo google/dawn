@@ -26,6 +26,8 @@ namespace backend {
     }
 
     SwapChainBase::~SwapChainBase() {
+        const auto& im = GetImplementation();
+        im.Destroy(im.userData);
     }
 
     DeviceBase* SwapChainBase::GetDevice() {
@@ -41,6 +43,8 @@ namespace backend {
         this->format = format;
         this->width = width;
         this->height = height;
+        implementation.Configure(implementation.userData,
+                static_cast<nxtTextureFormat>(format), width, height);
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {
@@ -102,7 +106,7 @@ namespace backend {
 
         nxtSwapChainImplementation& impl = *reinterpret_cast<nxtSwapChainImplementation*>(implementation);
 
-        if (!impl.Init || impl.Destroy || !impl.Configure ||
+        if (!impl.Init || !impl.Destroy || !impl.Configure ||
                 !impl.GetNextTexture || !impl.Present) {
             HandleError("Implementation is incomplete");
             return;

@@ -109,11 +109,7 @@ namespace metal {
 
             void TickImpl() override;
 
-            void SetNextDrawable(id<CAMetalDrawable> drawable);
-            void Present();
-
             id<MTLDevice> GetMTLDevice();
-            id<MTLTexture> GetCurrentTexture();
 
             id<MTLCommandBuffer> GetPendingCommandBuffer();
             void SubmitPendingCommandBuffer();
@@ -129,9 +125,6 @@ namespace metal {
             id<MTLCommandQueue> commandQueue = nil;
             MapReadRequestTracker* mapReadTracker;
             ResourceUploader* resourceUploader;
-
-            id<CAMetalDrawable> currentDrawable = nil;
-            id<MTLTexture> currentTexture = nil;
 
             Serial finishedCommandSerial = 0;
             Serial pendingCommandSerial = 1;

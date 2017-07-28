@@ -14,6 +14,7 @@
 
 #include "backend/opengl/SwapChainGL.h"
 
+#include "backend/Device.h"
 #include "backend/opengl/TextureGL.h"
 
 #include <nxt/nxt_wsi.h>
@@ -24,18 +25,21 @@ namespace opengl {
     SwapChain::SwapChain(SwapChainBuilder* builder)
         : SwapChainBase(builder) {
         const auto& im = GetImplementation();
-        nxtWSIContextGL wsiContext = {};
-        // TODO(kainino@chromium.org): set up wsiContext
-        im.Init(im.userData, &wsiContext);
-
-        // TODO(kainino@chromium.org): set up FBO
+        im.Init(im.userData, nullptr);
     }
 
     SwapChain::~SwapChain() {
-        // TODO(kainino@chromium.org): clean up FBO
     }
 
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
+        const auto& im = GetImplementation();
+        nxtSwapChainNextTexture next = {};
+        nxtSwapChainError error = im.GetNextTexture(im.userData, &next);
+        if (error) {
+            GetDevice()->HandleError(error);
+            return nullptr;
+        }
+        GLuint nativeTexture = static_cast<GLuint>(reinterpret_cast<uintptr_t>(next.texture));
         return new Texture(builder, nativeTexture);
     }
 

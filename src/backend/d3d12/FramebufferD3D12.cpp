@@ -78,20 +78,7 @@ namespace d3d12 {
 
         for (uint32_t index : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
             uint32_t heapIndex = attachmentHeapIndices[subpassInfo.colorAttachments[index]];
-            D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(heapIndex);
-
-            uint32_t attachment = subpassInfo.colorAttachments[index];
-            if (!GetTextureView(attachment)) {
-                // TODO(kainino@chromium.org): null=backbuffer hack
-                D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
-                rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-                rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-                rtvDesc.Texture2D.MipSlice = 0;
-                rtvDesc.Texture2D.PlaneSlice = 0;
-                device->GetD3D12Device()->CreateRenderTargetView(device->GetCurrentTexture().Get(), &rtvDesc, rtvHandle);
-            }
-
-            args.RTVs[args.numRTVs++] = rtvHandle;
+            args.RTVs[args.numRTVs++] = rtvHeap.GetCPUHandle(heapIndex);
         }
         if (subpassInfo.depthStencilAttachmentSet) {
             uint32_t heapIndex = attachmentHeapIndices[subpassInfo.depthStencilAttachment];

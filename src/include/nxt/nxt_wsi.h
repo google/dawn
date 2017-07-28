@@ -19,6 +19,7 @@
 
 // Error message (or nullptr if there was no error)
 typedef const char* nxtSwapChainError;
+constexpr nxtSwapChainError NXT_SWAP_CHAIN_NO_ERROR = nullptr;
 
 typedef struct {
     /// Backend-specific texture id/name/pointer
@@ -46,13 +47,17 @@ typedef struct {
     void* userData = nullptr;
 } nxtSwapChainImplementation;
 
-#ifdef NXT_ENABLE_BACKEND_D3D12
+#if defined(NXT_ENABLE_BACKEND_D3D12) && defined(__cplusplus)
 typedef struct {
+    nxtDevice device = nullptr;
 } nxtWSIContextD3D12;
 #endif
 
-#ifdef NXT_ENABLE_BACKEND_METAL
+#if defined(NXT_ENABLE_BACKEND_METAL) && defined(__OBJC__)
+#import <Metal/Metal.h>
+
 typedef struct {
+    id<MTLDevice> device = nil;
 } nxtWSIContextMetal;
 #endif
 

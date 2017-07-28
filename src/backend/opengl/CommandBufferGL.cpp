@@ -104,21 +104,13 @@ namespace opengl {
                         glGenFramebuffers(1, &currentFBO);
                         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFBO);
 
-                        auto* device = ToBackend(GetDevice());
                         const auto& info = currentRenderPass->GetSubpassInfo(currentSubpass);
 
                         for (uint32_t index = 0; index < info.colorAttachments.size(); ++index) {
                             uint32_t attachment = info.colorAttachments[index];
 
-                            // TODO(kainino@chromium.org): currently a 'null' texture view
-                            // falls back to the 'back buffer' but this should go away
-                            // when we have WSI.
-                            GLuint texture = 0;
-                            if (auto textureView = currentFramebuffer->GetTextureView(attachment)) {
-                                texture = ToBackend(textureView->GetTexture())->GetHandle();
-                            } else {
-                                texture = device->GetCurrentTexture();
-                            }
+                            auto textureView = currentFramebuffer->GetTextureView(attachment);
+                            GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
                             glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
                                     GL_COLOR_ATTACHMENT0 + index,
                                     GL_TEXTURE_2D, texture, 0);
@@ -131,6 +123,7 @@ namespace opengl {
                             nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
 
                             GLenum glAttachment = 0;
+                            // TODO(kainino@chromium.org): it may be valid to just always use GL_DEPTH_STENCIL_ATTACHMENT here.
                             if (TextureFormatHasDepth(format)) {
                                 if (TextureFormatHasStencil(format)) {
                                     glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;

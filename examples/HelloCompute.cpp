@@ -21,11 +21,12 @@
 
 nxt::Device device;
 nxt::Queue queue;
+nxt::SwapChain swapchain;
+nxt::TextureView depthStencilView;
 nxt::Buffer buffer;
 nxt::RenderPipeline renderPipeline;
 nxt::BindGroup renderBindGroup;
 nxt::RenderPass renderpass;
-nxt::Framebuffer framebuffer;
 nxt::ComputePipeline computePipeline;
 nxt::BindGroup computeBindGroup;
 
@@ -33,6 +34,8 @@ void init() {
     device = CreateCppNXTDevice();
 
     queue = device.CreateQueueBuilder().GetResult();
+    swapchain = GetSwapChain(device);
+    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, 640, 480);
 
     struct {uint32_t a; float b;} s;
     memset(&s, 0, sizeof(s));
@@ -109,7 +112,9 @@ void init() {
             .SetBindGroupLayout(0, bgl)
             .GetResult();
 
-        utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+        renderpass = CreateDefaultRenderPass(device);
+        depthStencilView = CreateDefaultDepthStencilView(device);
+
         renderPipeline = device.CreateRenderPipelineBuilder()
             .SetSubpass(renderpass, 0)
             .SetLayout(pl)
@@ -126,6 +131,10 @@ void init() {
 }
 
 void frame() {
+    nxt::Texture backbuffer;
+    nxt::Framebuffer framebuffer;
+    GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginComputePass()
             .SetComputePipeline(computePipeline)
@@ -146,7 +155,9 @@ void frame() {
         .GetResult();
 
     queue.Submit(1, &commands);
-    DoSwapBuffers();
+    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
+    swapchain.Present(backbuffer);
+    DoFlush();
 }
 
 int main(int argc, const char* argv[]) {

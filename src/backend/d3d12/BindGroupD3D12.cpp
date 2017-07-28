@@ -61,7 +61,7 @@ namespace d3d12 {
                     {
                         auto* view = ToBackend(GetBindingAsTextureView(binding));
                         auto& srv = view->GetSRVDescriptor();
-                        d3d12Device->CreateShaderResourceView(ToBackend(view->GetTexture())->GetD3D12Resource().Get(), &srv, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset + bindingOffsets[binding]));
+                        d3d12Device->CreateShaderResourceView(ToBackend(view->GetTexture())->GetD3D12Resource(), &srv, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset + bindingOffsets[binding]));
                     }
                     break;
                 case nxt::BindingType::Sampler:

@@ -92,34 +92,6 @@ namespace utils {
         return builder.GetResult();
     }
 
-    void CreateDefaultRenderPass(const nxt::Device& device, nxt::RenderPass* renderPass, nxt::Framebuffer* framebuffer) {
-        auto depthStencilTexture = device.CreateTextureBuilder()
-            .SetDimension(nxt::TextureDimension::e2D)
-            .SetExtent(640, 480, 1)
-            .SetFormat(nxt::TextureFormat::D32FloatS8Uint)
-            .SetMipLevels(1)
-            .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
-            .GetResult();
-        depthStencilTexture.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
-        auto depthStencilView = depthStencilTexture.CreateTextureViewBuilder()
-            .GetResult();
-
-        *renderPass = device.CreateRenderPassBuilder()
-            .SetAttachmentCount(2)
-            .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-            .AttachmentSetFormat(1, nxt::TextureFormat::D32FloatS8Uint)
-            .SetSubpassCount(1)
-            .SubpassSetColorAttachment(0, 0, 0)
-            .SubpassSetDepthStencilAttachment(0, 1)
-            .GetResult();
-        *framebuffer = device.CreateFramebufferBuilder()
-            .SetRenderPass(*renderPass)
-            .SetDimensions(640, 480)
-            // Attachment 0 is implicit until we add WSI
-            .SetAttachment(1, depthStencilView)
-            .GetResult();
-    }
-
     nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, const void* data, uint32_t size, nxt::BufferUsageBit usage) {
         nxt::Buffer buffer = device.CreateBufferBuilder()
             .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | usage)

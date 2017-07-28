@@ -21,7 +21,7 @@ class RenderPipelineValidationTest : public ValidationTest {
         void SetUp() override {
             ValidationTest::SetUp();
 
-            utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+            CreateSimpleRenderPassAndFramebuffer(device, &renderpass, &framebuffer);
 
             pipelineLayout = device.CreatePipelineLayoutBuilder().GetResult();
 

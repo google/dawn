@@ -29,11 +29,11 @@ nxt::TextureView renderTargetView;
 nxt::Sampler samplerPost;
 
 nxt::Queue queue;
+nxt::SwapChain swapchain;
 nxt::RenderPipeline pipeline;
 nxt::RenderPipeline pipelinePost;
 nxt::BindGroup bindGroup;
 nxt::RenderPass renderpass;
-nxt::Framebuffer framebuffer;
 
 void initBuffers() {
     static const float vertexData[12] = {
@@ -80,14 +80,6 @@ void initRenderPass() {
         .SubpassSetColorAttachment(0, 0, 0) // -> render target
         // subpass 1
         .SubpassSetColorAttachment(1, 0, 1) // -> back buffer
-        .GetResult();
-    framebuffer = device.CreateFramebufferBuilder()
-        .SetRenderPass(renderpass)
-        // attachment 0 -> render target
-        .SetAttachment(0, renderTargetView)
-        // attachment 1 -> back buffer
-        // (implicit) // TODO(kainino@chromium.org): use the texture provided by WSI
-        .SetDimensions(640, 480)
         .GetResult();
 }
 
@@ -174,6 +166,8 @@ void init() {
     device = CreateCppNXTDevice();
 
     queue = device.CreateQueueBuilder().GetResult();
+    swapchain = GetSwapChain(device);
+    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, 640, 480);
 
     initBuffers();
     initTextures();
@@ -183,6 +177,15 @@ void init() {
 }
 
 void frame() {
+    nxt::Texture backbuffer = swapchain.GetNextTexture();
+    auto backbufferView = backbuffer.CreateTextureViewBuilder().GetResult();
+    auto framebuffer = device.CreateFramebufferBuilder()
+        .SetRenderPass(renderpass)
+        .SetDimensions(640, 480)
+        .SetAttachment(0, renderTargetView)
+        .SetAttachment(1, backbufferView)
+        .GetResult();
+
     static const uint32_t vertexBufferOffsets[1] = {0};
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderpass, framebuffer)
@@ -204,7 +207,9 @@ void frame() {
         .GetResult();
 
     queue.Submit(1, &commands);
-    DoSwapBuffers();
+    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
+    swapchain.Present(backbuffer);
+    DoFlush();
 }
 
 int main(int argc, const char* argv[]) {

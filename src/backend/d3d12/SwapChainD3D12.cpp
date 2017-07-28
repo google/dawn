@@ -14,6 +14,7 @@
 
 #include "backend/d3d12/SwapChainD3D12.h"
 
+#include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/TextureD3D12.h"
 
 #include <nxt/nxt_wsi.h>
@@ -25,19 +26,23 @@ namespace d3d12 {
         : SwapChainBase(builder) {
         const auto& im = GetImplementation();
         nxtWSIContextD3D12 wsiContext = {};
-        // TODO(kainino@chromium.org): set up wsiContext
+        wsiContext.device = reinterpret_cast<nxtDevice>(GetDevice());
         im.Init(im.userData, &wsiContext);
-
-        // TODO(kainino@chromium.org): set up D3D12 swapchain
     }
 
     SwapChain::~SwapChain() {
-        // TODO(kainino@chromium.org): clean up D3D12 swapchain
     }
 
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
-        ComPtr<ID3D12Resource> nativeTexture = nullptr;
-        // TODO(kainino@chromium.org): obtain native texture from D3D12 swapchain
+        const auto& im = GetImplementation();
+        nxtSwapChainNextTexture next = {};
+        nxtSwapChainError error = im.GetNextTexture(im.userData, &next);
+        if (error) {
+            GetDevice()->HandleError(error);
+            return nullptr;
+        }
+
+        ID3D12Resource* nativeTexture = reinterpret_cast<ID3D12Resource*>(next.texture);
         return new Texture(builder, nativeTexture);
     }
 

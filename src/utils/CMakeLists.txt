@@ -19,6 +19,7 @@ list(APPEND UTILS_SOURCES
     ${UTILS_DIR}/BackendBinding.h
     ${UTILS_DIR}/NXTHelpers.cpp
     ${UTILS_DIR}/NXTHelpers.h
+    ${UTILS_DIR}/SwapChainImpl.h
     ${UTILS_DIR}/SystemUtils.cpp
     ${UTILS_DIR}/SystemUtils.h
 )

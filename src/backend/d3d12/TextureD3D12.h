@@ -29,16 +29,17 @@ namespace d3d12 {
     class Texture : public TextureBase {
         public:
             Texture(TextureBuilder* builder);
-            Texture(TextureBuilder* builder, ComPtr<ID3D12Resource> nativeTexture);
+            Texture(TextureBuilder* builder, ID3D12Resource* nativeTexture);
             ~Texture();
 
             DXGI_FORMAT GetD3D12Format() const;
-            ComPtr<ID3D12Resource> GetD3D12Resource();
+            ID3D12Resource* GetD3D12Resource();
             bool GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier);
 
         private:
             Device* device;
-            ComPtr<ID3D12Resource> resource;
+            ComPtr<ID3D12Resource> resource = {};
+            ID3D12Resource* resourcePtr = nullptr;
 
             // NXT API
             void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;

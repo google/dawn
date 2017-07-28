@@ -35,11 +35,12 @@ nxt::BindGroup bindGroup[2];
 nxt::BindGroup cubeTransformBindGroup[2];
 
 nxt::Queue queue;
+nxt::SwapChain swapchain;
+nxt::TextureView depthStencilView;
 nxt::RenderPipeline pipeline;
 nxt::RenderPipeline planePipeline;
 nxt::RenderPipeline reflectionPipeline;
 nxt::RenderPass renderpass;
-nxt::Framebuffer framebuffer;
 
 void initBuffers() {
     static const uint32_t indexData[6*6] = {
@@ -114,6 +115,8 @@ void init() {
     device = CreateCppNXTDevice();
 
     queue = device.CreateQueueBuilder().GetResult();
+    swapchain = GetSwapChain(device);
+    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, 640, 480);
 
     initBuffers();
 
@@ -206,7 +209,8 @@ void init() {
         .SetBufferViews(1, 1, &transformBufferView[1])
         .GetResult();
 
-    utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+    renderpass = CreateDefaultRenderPass(device);
+    depthStencilView = CreateDefaultDepthStencilView(device);
 
     auto depthStencilState = device.CreateDepthStencilStateBuilder()
         .SetDepthCompareFunction(nxt::CompareFunction::Less)
@@ -271,6 +275,10 @@ void frame() {
     cameraBuffer.TransitionUsage(nxt::BufferUsageBit::TransferDst);
     cameraBuffer.SetSubData(0, sizeof(CameraData) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&cameraData));
 
+    nxt::Texture backbuffer;
+    nxt::Framebuffer framebuffer;
+    GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderpass, framebuffer)
         .BeginRenderSubpass()
@@ -296,7 +304,9 @@ void frame() {
         .GetResult();
 
     queue.Submit(1, &commands);
-    DoSwapBuffers();
+    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
+    swapchain.Present(backbuffer);
+    DoFlush();
 }
 
 int main(int argc, const char* argv[]) {

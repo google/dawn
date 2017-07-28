@@ -28,6 +28,7 @@
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
+#include "backend/SwapChain.h"
 #include "backend/Texture.h"
 
 #include <unordered_set>
@@ -129,6 +130,9 @@ namespace backend {
     }
     ShaderModuleBuilder* DeviceBase::CreateShaderModuleBuilder() {
         return new ShaderModuleBuilder(this);
+    }
+    SwapChainBuilder* DeviceBase::CreateSwapChainBuilder() {
+        return new SwapChainBuilder(this);
     }
     TextureBuilder* DeviceBase::CreateTextureBuilder() {
         return new TextureBuilder(this);

@@ -14,6 +14,7 @@
 
 #include "backend/metal/SwapChainMTL.h"
 
+#include "backend/metal/MetalBackend.h"
 #include "backend/metal/TextureMTL.h"
 
 #include <nxt/nxt_wsi.h>
@@ -25,19 +26,23 @@ namespace metal {
         : SwapChainBase(builder) {
         const auto& im = GetImplementation();
         nxtWSIContextMetal wsiContext = {};
-        // TODO(kainino@chromium.org): set up wsiContext
+        wsiContext.device = ToBackend(GetDevice())->GetMTLDevice();
         im.Init(im.userData, &wsiContext);
-
-        // TODO(kainino@chromium.org): set up Metal swapchain
     }
 
     SwapChain::~SwapChain() {
-        // TODO(kainino@chromium.org): clean up Metal swapchain
     }
 
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
-        id<MTLTexture> nativeTexture = nil;
-        // TODO(kainino@chromium.org): obtain MTLTexture from Metal swapchain
+        const auto& im = GetImplementation();
+        nxtSwapChainNextTexture next = {};
+        nxtSwapChainError error = im.GetNextTexture(im.userData, &next);
+        if (error) {
+            GetDevice()->HandleError(error);
+            return nullptr;
+        }
+
+        id<MTLTexture> nativeTexture = reinterpret_cast<id<MTLTexture>>(next.texture);
         return new Texture(builder, nativeTexture);
     }
 

@@ -69,6 +69,32 @@ bool ValidationTest::EndExpectDeviceError() {
     return error;
 }
 
+void ValidationTest::CreateSimpleRenderPassAndFramebuffer(const nxt::Device& device, nxt::RenderPass* renderpass, nxt::Framebuffer* framebuffer) {
+        auto colorBuffer = device.CreateTextureBuilder()
+            .SetDimension(nxt::TextureDimension::e2D)
+            .SetExtent(640, 480, 1)
+            .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetMipLevels(1)
+            .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+            .GetResult();
+        colorBuffer.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
+        auto colorView = colorBuffer.CreateTextureViewBuilder()
+            .GetResult();
+
+        *renderpass = device.CreateRenderPassBuilder()
+            .SetAttachmentCount(1)
+            .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetSubpassCount(1)
+            .SubpassSetColorAttachment(0, 0, 0)
+            .GetResult();
+
+        *framebuffer = device.CreateFramebufferBuilder()
+            .SetRenderPass(*renderpass)
+            .SetDimensions(640, 480)
+            .SetAttachment(0, colorView)
+            .GetResult();
+}
+
 void ValidationTest::OnDeviceError(const char* message, nxtCallbackUserdata userdata) {
     // Skip this one specific error that is raised when a builder is used after it got an error
     // this is important because we don't want to wrap all creation tests in ASSERT_DEVICE_ERROR.

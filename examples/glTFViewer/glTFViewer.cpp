@@ -77,8 +77,10 @@ struct u_transform_block {
 
 nxt::Device device;
 nxt::Queue queue;
+nxt::SwapChain swapchain;
+nxt::TextureView depthStencilView;
 nxt::RenderPass renderpass;
-nxt::Framebuffer framebuffer;
+nxt::Framebuffer lastFramebuffer;
 
 nxt::Buffer defaultBuffer;
 std::map<std::string, nxt::Buffer> buffers;
@@ -467,7 +469,11 @@ namespace {
         device = CreateCppNXTDevice();
 
         queue = device.CreateQueueBuilder().GetResult();
-        utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+        swapchain = GetSwapChain(device);
+        swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, 640, 480);
+
+        renderpass = CreateDefaultRenderPass(device);
+        depthStencilView = CreateDefaultDepthStencilView(device);
 
         initBuffers();
         initSamplers();
@@ -506,7 +512,7 @@ namespace {
             material.uniformBuffer.SetSubData(0,
                     sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));
-            cmd.BeginRenderPass(renderpass, framebuffer);
+            cmd.BeginRenderPass(renderpass, lastFramebuffer);
             cmd.BeginRenderSubpass();
             cmd.SetRenderPipeline(material.pipeline);
             cmd.TransitionBufferUsage(material.uniformBuffer, nxt::BufferUsageBit::Uniform);
@@ -586,12 +592,17 @@ namespace {
     }
 
     void frame() {
+        nxt::Texture backbuffer;
+        GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &lastFramebuffer);
+
         const auto& defaultSceneNodes = scene.scenes.at(scene.defaultScene);
         for (const auto& n : defaultSceneNodes) {
             const auto& node = scene.nodes.at(n);
             drawNode(node);
         }
-        DoSwapBuffers();
+        backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
+        swapchain.Present(backbuffer);
+        DoFlush();
     }
 }
 

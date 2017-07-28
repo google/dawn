@@ -15,6 +15,8 @@
 #ifndef UTILS_BACKENDBINDING_H_
 #define UTILS_BACKENDBINDING_H_
 
+#include <nxt/nxt_wsi.h>
+
 struct GLFWwindow;
 typedef struct nxtProcTable_s nxtProcTable;
 typedef struct nxtDeviceImpl* nxtDevice;
@@ -35,7 +37,7 @@ namespace utils {
 
             virtual void SetupGLFWWindowHints() = 0;
             virtual void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) = 0;
-            virtual void SwapBuffers() = 0;
+            virtual uint64_t GetSwapChainImplementation() = 0;
 
             void SetWindow(GLFWwindow* window);
 

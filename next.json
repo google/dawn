@@ -522,6 +522,10 @@
                 "returns": "shader module builder"
             },
             {
+                "name": "create swap chain builder",
+                "returns": "swap chain builder"
+            },
+            {
                 "name": "create texture builder",
                 "returns": "texture builder"
             },

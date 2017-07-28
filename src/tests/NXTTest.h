@@ -77,13 +77,15 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
     protected:
         nxt::Device device;
         nxt::Queue queue;
+        nxt::SwapChain swapchain;
 
         // Helper methods to implement the EXPECT_ macros
         std::ostringstream& AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation);
         std::ostringstream& AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t level, uint32_t pixelSize, detail::Expectation* expectation);
 
         void WaitABit();
-        void SwapBuffers();
+
+        void SwapBuffersForCapture();
 
     private:
         // MapRead buffers used to get data for the expectations

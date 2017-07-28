@@ -48,6 +48,8 @@ class ValidationTest : public testing::Test {
         void StartExpectDeviceError();
         bool EndExpectDeviceError();
 
+        void CreateSimpleRenderPassAndFramebuffer(const nxt::Device& device, nxt::RenderPass* renderpass, nxt::Framebuffer* framebuffer);
+
         // Helper functions to create objects to test validation.
 
         struct DummyRenderPass {

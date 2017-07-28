@@ -137,6 +137,10 @@ void NXTTest::SetUp() {
     device = nxt::Device::Acquire(backendDevice);
     queue = device.CreateQueueBuilder().GetResult();
 
+    swapchain = device.CreateSwapChainBuilder()
+        .SetImplementation(binding->GetSwapChainImplementation())
+        .GetResult();
+
     device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
 }
 
@@ -217,8 +221,11 @@ void NXTTest::WaitABit() {
     utils::USleep(100);
 }
 
-void NXTTest::SwapBuffers() {
-    binding->SwapBuffers();
+void NXTTest::SwapBuffersForCapture() {
+    // Insert a frame boundary for API capture tools.
+    nxt::Texture backBuffer = swapchain.GetNextTexture();
+    backBuffer.TransitionUsage(nxt::TextureUsageBit::Present);
+    swapchain.Present(backBuffer);
 }
 
 NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {

@@ -105,23 +105,28 @@ namespace d3d12 {
         resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage(), GetFormat());
 
         resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12TextureUsage(GetUsage(), GetFormat()));
+        resourcePtr = resource.Get();
     }
 
-    Texture::Texture(TextureBuilder* builder, ComPtr<ID3D12Resource> nativeTexture)
-        : TextureBase(builder), device(ToBackend(builder->GetDevice())), resource(nativeTexture) {
+    // With this constructor, the lifetime of the ID3D12Resource is externally managed.
+    Texture::Texture(TextureBuilder* builder, ID3D12Resource* nativeTexture)
+        : TextureBase(builder), device(ToBackend(builder->GetDevice())),
+        resourcePtr(nativeTexture) {
     }
 
     Texture::~Texture() {
-        // TODO(kainino@chromium.org): Maybe don't release when using the native texture constructor?
-        device->GetResourceAllocator()->Release(resource);
+        if (resource) {
+            // If we own the resource, release it.
+            device->GetResourceAllocator()->Release(resource);
+        }
     }
 
     DXGI_FORMAT Texture::GetD3D12Format() const {
         return D3D12TextureFormat(GetFormat());
     }
 
-    ComPtr<ID3D12Resource> Texture::GetD3D12Resource() {
-        return resource;
+    ID3D12Resource* Texture::GetD3D12Resource() {
+        return resourcePtr;
     }
 
     bool Texture::GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier) {
@@ -134,7 +139,7 @@ namespace d3d12 {
 
         barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier->Transition.pResource = resource.Get();
+        barrier->Transition.pResource = resourcePtr;
         barrier->Transition.StateBefore = stateBefore;
         barrier->Transition.StateAfter = stateAfter;
         barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;

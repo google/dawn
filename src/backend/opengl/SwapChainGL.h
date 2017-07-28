@@ -31,9 +31,6 @@ namespace opengl {
 
         protected:
             TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
-
-        private:
-            GLuint nativeTexture = 0;
     };
 
 }

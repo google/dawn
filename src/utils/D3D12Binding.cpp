@@ -15,6 +15,8 @@
 #include "utils/BackendBinding.h"
 
 #include "common/Assert.h"
+#include "nxt/nxt_wsi.h"
+#include "utils/SwapChainImpl.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3.h"
@@ -34,7 +36,6 @@ namespace backend {
 namespace d3d12 {
     void Init(ComPtr<ID3D12Device> d3d12Device, nxtProcTable* procs, nxtDevice* device);
     ComPtr<ID3D12CommandQueue> GetCommandQueue(nxtDevice device);
-    void SetNextTexture(nxtDevice device, ComPtr<ID3D12Resource> resource);
     uint64_t GetSerial(const nxtDevice device);
     void NextSerial(nxtDevice device);
     void ExecuteCommandLists(nxtDevice device, std::initializer_list<ID3D12CommandList*> commandLists);
@@ -44,48 +45,88 @@ namespace d3d12 {
 }
 
 namespace utils {
+    namespace {
+        void ASSERT_SUCCESS(HRESULT hr) {
+            ASSERT(SUCCEEDED(hr));
+        }
 
-    class D3D12Binding : public BackendBinding {
-        public:
-            void SetupGLFWWindowHints() override {
-                glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-            }
+        ComPtr<IDXGIFactory4> CreateFactory() {
+            ComPtr<IDXGIFactory4> factory;
 
-            void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
-                uint32_t dxgiFactoryFlags = 0;
+            uint32_t dxgiFactoryFlags = 0;
 #ifdef _DEBUG
-                // Enable the debug layer (requires the Graphics Tools "optional feature").
-                // NOTE: Enabling the debug layer after device creation will invalidate the active device.
-                {
-                    ComPtr<ID3D12Debug> debugController;
-                    if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-                        debugController->EnableDebugLayer();
+            // Enable the debug layer (requires the Graphics Tools "optional feature").
+            // NOTE: Enabling the debug layer after device creation will invalidate the active device.
+            {
+                ComPtr<ID3D12Debug> debugController;
+                if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+                    debugController->EnableDebugLayer();
 
-                        // Enable additional debug layers.
-                        dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
-                    }
-
-                    ComPtr<IDXGIDebug1> dxgiDebug;
-                    if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug)))) {
-                        dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
-                    }
+                    // Enable additional debug layers.
+                    dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
                 }
+
+                ComPtr<IDXGIDebug1> dxgiDebug;
+                if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug)))) {
+                    dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
+                }
+            }
 #endif
 
-                ASSERT_SUCCESS(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
-                ASSERT(GetHardwareAdapter(factory.Get(), &hardwareAdapter));
-                ASSERT_SUCCESS(D3D12CreateDevice(
-                    hardwareAdapter.Get(),
-                    D3D_FEATURE_LEVEL_11_0,
-                    IID_PPV_ARGS(&d3d12Device)
-                ));
+            ASSERT_SUCCESS(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
 
-                backend::d3d12::Init(d3d12Device, procs, device);
-                backendDevice = *device;
+            return factory;
+        }
+    }
+
+    class SwapChainImplD3D12 : SwapChainImpl {
+        public:
+            static nxtSwapChainImplementation Create(HWND window, const nxtProcTable& procs) {
+                auto impl = GenerateSwapChainImplementation<SwapChainImplD3D12, nxtWSIContextD3D12>();
+                impl.userData = new SwapChainImplD3D12(window, procs);
+                return impl;
+            }
+
+        private:
+            nxtDevice backendDevice = nullptr;
+            nxtProcTable procs = {};
+
+            static constexpr unsigned int kFrameCount = 2;
+
+            HWND window = 0;
+            ComPtr<IDXGIFactory4> factory = {};
+            ComPtr<ID3D12CommandQueue> commandQueue = {};
+            ComPtr<IDXGISwapChain3> swapChain = {};
+            ComPtr<ID3D12Resource> renderTargetResources[kFrameCount] = {};
+
+            // Frame synchronization. Updated every frame
+            uint32_t renderTargetIndex = 0;
+            uint32_t previousRenderTargetIndex = 0;
+            uint64_t lastSerialRenderTargetWasUsed[kFrameCount] = {};
+
+            SwapChainImplD3D12(HWND window, nxtProcTable procs)
+                : window(window), procs(procs), factory(CreateFactory()) {
+            }
+
+            ~SwapChainImplD3D12() {
+            }
+
+            // For GenerateSwapChainImplementation
+            friend class SwapChainImpl;
+
+            void Init(nxtWSIContextD3D12* ctx) {
+                backendDevice = ctx->device;
                 commandQueue = backend::d3d12::GetCommandQueue(backendDevice);
+            }
 
-                int width, height;
-                glfwGetWindowSize(window, &width, &height);
+            nxtSwapChainError Configure(nxtTextureFormat format,
+                    uint32_t width, uint32_t height) {
+                if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
+                    return "unsupported format";
+                }
+                ASSERT(width > 0);
+                ASSERT(height > 0);
+
                 DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
                 swapChainDesc.Width = width;
                 swapChainDesc.Height = height;
@@ -96,11 +137,10 @@ namespace utils {
                 swapChainDesc.SampleDesc.Count = 1;
                 swapChainDesc.SampleDesc.Quality = 0;
 
-                HWND win32Window = glfwGetWin32Window(window);
                 ComPtr<IDXGISwapChain1> swapChain1;
                 ASSERT_SUCCESS(factory->CreateSwapChainForHwnd(
                     commandQueue.Get(),
-                    win32Window,
+                    window,
                     &swapChainDesc,
                     nullptr,
                     nullptr,
@@ -122,48 +162,26 @@ namespace utils {
                     lastSerialRenderTargetWasUsed[n] = initialSerial;
                 }
 
-                // Transition the first frame to be a render target
-                {
-                    backend::d3d12::OpenCommandList(backendDevice, &commandList);
-
-                    D3D12_RESOURCE_BARRIER resourceBarrier;
-                    resourceBarrier.Transition.pResource = renderTargetResources[renderTargetIndex].Get();
-                    resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-                    resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-                    resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                    resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                    commandList->ResourceBarrier(1, &resourceBarrier);
-                    ASSERT_SUCCESS(commandList->Close());
-                    backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
-
-                    backend::d3d12::NextSerial(backendDevice);
-                }
-
-                backend::d3d12::SetNextTexture(backendDevice, renderTargetResources[renderTargetIndex]);
+                return NXT_SWAP_CHAIN_NO_ERROR;
             }
 
-            void SwapBuffers() override {
-                // Transition current frame's render target for presenting
-                {
-                    backend::d3d12::OpenCommandList(backendDevice, &commandList);
-                    D3D12_RESOURCE_BARRIER resourceBarrier;
-                    resourceBarrier.Transition.pResource = renderTargetResources[renderTargetIndex].Get();
-                    resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-                    resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-                    resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                    resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                    commandList->ResourceBarrier(1, &resourceBarrier);
-                    ASSERT_SUCCESS(commandList->Close());
-                    backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
-                }
+            nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
+                nextTexture->texture = renderTargetResources[renderTargetIndex].Get();
+                return NXT_SWAP_CHAIN_NO_ERROR;
+            }
+
+            nxtSwapChainError Present() {
+                // Current frame already transitioned to Present by the application, but
+                // we need to flush the D3D12 backend's pending transitions.
+                procs.deviceTick(backendDevice);
 
                 ASSERT_SUCCESS(swapChain->Present(1, 0));
 
                 // Transition last frame's render target back to being a render target
                 {
+                    ComPtr<ID3D12GraphicsCommandList> commandList = {};
                     backend::d3d12::OpenCommandList(backendDevice, &commandList);
+
                     D3D12_RESOURCE_BARRIER resourceBarrier;
                     resourceBarrier.Transition.pResource = renderTargetResources[previousRenderTargetIndex].Get();
                     resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
@@ -188,32 +206,47 @@ namespace utils {
 
                 lastSerialRenderTargetWasUsed[renderTargetIndex] = backend::d3d12::GetSerial(backendDevice);
 
-                // Tell the backend to render to the current render target
-                backend::d3d12::SetNextTexture(backendDevice, renderTargetResources[renderTargetIndex]);
+                return NXT_SWAP_CHAIN_NO_ERROR;
+            }
+    };
+
+    class D3D12Binding : public BackendBinding {
+        public:
+            void SetupGLFWWindowHints() override {
+                glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+            }
+
+            void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+                factory = CreateFactory();
+                ASSERT(GetHardwareAdapter(factory.Get(), &hardwareAdapter));
+                ASSERT_SUCCESS(D3D12CreateDevice(
+                    hardwareAdapter.Get(),
+                    D3D_FEATURE_LEVEL_11_0,
+                    IID_PPV_ARGS(&d3d12Device)
+                ));
+
+                backend::d3d12::Init(d3d12Device, procs, device);
+                backendDevice = *device;
+                procTable = *procs;
+            }
+
+            uint64_t GetSwapChainImplementation() override {
+                if (swapchainImpl.userData == nullptr) {
+                    HWND win32Window = glfwGetWin32Window(window);
+                    swapchainImpl = SwapChainImplD3D12::Create(win32Window, procTable);
+                }
+                return reinterpret_cast<uint64_t>(&swapchainImpl);
             }
 
         private:
             nxtDevice backendDevice = nullptr;
-
-            static constexpr unsigned int kFrameCount = 2;
+            nxtSwapChainImplementation swapchainImpl = {};
+            nxtProcTable procTable = {};
 
             // Initialization
             ComPtr<IDXGIFactory4> factory;
             ComPtr<IDXGIAdapter1> hardwareAdapter;
             ComPtr<ID3D12Device> d3d12Device;
-            ComPtr<ID3D12CommandQueue> commandQueue;
-            ComPtr<IDXGISwapChain3> swapChain;
-            ComPtr<ID3D12Resource> renderTargetResources[kFrameCount];
-
-            // Frame synchronization. Updated every frame
-            uint32_t renderTargetIndex;
-            uint32_t previousRenderTargetIndex;
-            uint64_t lastSerialRenderTargetWasUsed[kFrameCount];
-            ComPtr<ID3D12GraphicsCommandList> commandList;
-
-            static void ASSERT_SUCCESS(HRESULT hr) {
-                ASSERT(SUCCEEDED(hr));
-            }
 
             static bool GetHardwareAdapter(IDXGIFactory4* factory, IDXGIAdapter1** hardwareAdapter) {
                 *hardwareAdapter = nullptr;

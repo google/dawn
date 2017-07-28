@@ -104,15 +104,6 @@ namespace opengl {
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
             void TickImpl() override;
-
-            void HACKCLEAR();
-            void InitBackbuffer();
-            void CommitBackbuffer();
-            GLuint GetCurrentTexture();
-
-        private:
-            GLuint backFBO = 0;
-            GLuint backTexture = 0;
     };
 
     class BindGroup : public BindGroupBase {

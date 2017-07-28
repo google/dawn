@@ -90,15 +90,8 @@ namespace metal {
                 for (uint32_t index = 0; index < info.colorAttachments.size(); ++index) {
                     uint32_t attachment = info.colorAttachments[index];
 
-                    // TODO(kainino@chromium.org): currently a 'null' texture view
-                    // falls back to the 'back buffer' but this should go away
-                    // when we have WSI.
-                    id<MTLTexture> texture = nil;
-                    if (auto textureView = currentFramebuffer->GetTextureView(attachment)) {
-                        texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
-                    } else {
-                        texture = device->GetCurrentTexture();
-                    }
+                    auto textureView = currentFramebuffer->GetTextureView(attachment);
+                    auto texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
                     descriptor.colorAttachments[index].texture = texture;
                     descriptor.colorAttachments[index].loadAction = MTLLoadActionLoad;
                     descriptor.colorAttachments[index].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0);

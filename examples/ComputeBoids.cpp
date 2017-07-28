@@ -25,19 +25,18 @@
 
 nxt::Device device;
 nxt::Queue queue;
+nxt::SwapChain swapchain;
+nxt::TextureView depthStencilView;
 
 nxt::Buffer modelBuffer;
 std::array<nxt::Buffer, 2> particleBuffers;
 
 nxt::RenderPipeline renderPipeline;
 nxt::RenderPass renderpass;
-nxt::Framebuffer framebuffer;
 
 nxt::Buffer updateParams;
 nxt::ComputePipeline updatePipeline;
 std::array<nxt::BindGroup, 2> updateBGs;
-
-std::array<nxt::CommandBuffer, 2> commandBuffers;
 
 size_t pingpong = 0;
 
@@ -124,7 +123,9 @@ void initRender() {
         .SetInput(1, sizeof(glm::vec2), nxt::InputStepMode::Vertex)
         .GetResult();
 
-    utils::CreateDefaultRenderPass(device, &renderpass, &framebuffer);
+    renderpass = CreateDefaultRenderPass(device);
+    depthStencilView = CreateDefaultDepthStencilView(device);
+
     renderPipeline = device.CreateRenderPipelineBuilder()
         .SetSubpass(renderpass, 0)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
@@ -259,48 +260,54 @@ void initSim() {
     }
 }
 
-void initCommandBuffers() {
+nxt::CommandBuffer createCommandBuffer(const nxt::Framebuffer& framebuffer, size_t i) {
     static const uint32_t zeroOffsets[1] = {0};
-    for (size_t i = 0; i < 2; ++i) {
-        auto& bufferSrc = particleBuffers[i];
-        auto& bufferDst = particleBuffers[(i + 1) % 2];
-        commandBuffers[i] = device.CreateCommandBufferBuilder()
-            .BeginComputePass()
-                .SetComputePipeline(updatePipeline)
-                .TransitionBufferUsage(bufferSrc, nxt::BufferUsageBit::Storage)
-                .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Storage)
-                .SetBindGroup(0, updateBGs[i])
-                .Dispatch(kNumParticles, 1, 1)
-            .EndComputePass()
+    auto& bufferSrc = particleBuffers[i];
+    auto& bufferDst = particleBuffers[(i + 1) % 2];
+    return device.CreateCommandBufferBuilder()
+        .BeginComputePass()
+            .SetComputePipeline(updatePipeline)
+            .TransitionBufferUsage(bufferSrc, nxt::BufferUsageBit::Storage)
+            .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Storage)
+            .SetBindGroup(0, updateBGs[i])
+            .Dispatch(kNumParticles, 1, 1)
+        .EndComputePass()
 
-            .BeginRenderPass(renderpass, framebuffer)
-            .BeginRenderSubpass()
-                .SetRenderPipeline(renderPipeline)
-                .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Vertex)
-                .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
-                .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)
-                .DrawArrays(3, kNumParticles, 0, 0)
-            .EndRenderSubpass()
-            .EndRenderPass()
+        .BeginRenderPass(renderpass, framebuffer)
+        .BeginRenderSubpass()
+            .SetRenderPipeline(renderPipeline)
+            .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Vertex)
+            .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
+            .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)
+            .DrawArrays(3, kNumParticles, 0, 0)
+        .EndRenderSubpass()
+        .EndRenderPass()
 
-            .GetResult();
-    }
+        .GetResult();
 }
 
 void init() {
     device = CreateCppNXTDevice();
 
     queue = device.CreateQueueBuilder().GetResult();
+    swapchain = GetSwapChain(device);
+    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, 640, 480);
 
     initBuffers();
     initRender();
     initSim();
-    initCommandBuffers();
 }
 
 void frame() {
-    queue.Submit(1, &commandBuffers[pingpong]);
-    DoSwapBuffers();
+    nxt::Texture backbuffer;
+    nxt::Framebuffer framebuffer;
+    GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+
+    nxt::CommandBuffer commandBuffer = createCommandBuffer(framebuffer, pingpong);
+    queue.Submit(1, &commandBuffer);
+    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
+    swapchain.Present(backbuffer);
+    DoFlush();
 
     pingpong = (pingpong + 1) % 2;
 }
