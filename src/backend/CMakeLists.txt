@@ -226,6 +226,8 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/CommandBufferD3D12.h
         ${D3D12_DIR}/ComputePipelineD3D12.cpp
         ${D3D12_DIR}/ComputePipelineD3D12.h
+        ${D3D12_DIR}/DepthStencilStateD3D12.cpp
+        ${D3D12_DIR}/DepthStencilStateD3D12.h
         ${D3D12_DIR}/DescriptorHeapAllocator.cpp
         ${D3D12_DIR}/DescriptorHeapAllocator.h
         ${D3D12_DIR}/D3D12Backend.cpp

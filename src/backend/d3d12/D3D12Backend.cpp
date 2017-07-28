@@ -23,6 +23,7 @@
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 #include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
+#include "backend/d3d12/DepthStencilStateD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/QueueD3D12.h"
 #include "backend/d3d12/RenderPipelineD3D12.h"
@@ -255,12 +256,6 @@ namespace d3d12 {
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
         return new TextureView(builder);
-    }
-
-    // DepthStencilState
-
-    DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
-        : DepthStencilStateBase(builder), device(device) {
     }
 
     // RenderPass

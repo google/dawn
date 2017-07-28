@@ -20,6 +20,7 @@
 #include "backend/d3d12/ComputePipelineD3D12.h"
 #include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
+#include "backend/d3d12/DepthStencilStateD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/QueueD3D12.h"
 #include "backend/d3d12/RenderPipelineD3D12.h"
