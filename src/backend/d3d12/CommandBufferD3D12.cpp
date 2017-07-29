@@ -479,7 +479,9 @@ namespace d3d12 {
 
                 case Command::SetStencilReference:
                     {
-                        commands.NextCommand<SetStencilReferenceCmd>();
+                        SetStencilReferenceCmd *cmd = commands.NextCommand<SetStencilReferenceCmd>();
+
+                        commandList->OMSetStencilRef(cmd->reference);
                     }
                     break;
 
