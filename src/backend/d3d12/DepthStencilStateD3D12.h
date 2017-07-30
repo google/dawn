@@ -28,12 +28,12 @@ namespace d3d12 {
         public:
             DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
 
-			const D3D12_DEPTH_STENCIL_DESC& GetD3D12DepthStencilDescriptor() const;
+            const D3D12_DEPTH_STENCIL_DESC& GetD3D12DepthStencilDescriptor() const;
 
         private:
             Device* device;
-			D3D12_DEPTH_STENCIL_DESC depthStencilDescriptor;
-	};
+            D3D12_DEPTH_STENCIL_DESC depthStencilDescriptor;
+    };
 
 }
 }

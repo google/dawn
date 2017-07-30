@@ -15,8 +15,8 @@
 #include "backend/d3d12/RenderPipelineD3D12.h"
 
 #include "backend/d3d12/D3D12Backend.h"
-#include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/DepthStencilStateD3D12.h"
+#include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/ShaderModuleD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "common/Assert.h"
@@ -155,8 +155,8 @@ namespace d3d12 {
         descriptor.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
         descriptor.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-		DepthStencilState* depthStencilState = ToBackend(GetDepthStencilState());
-		descriptor.DepthStencilState = depthStencilState->GetD3D12DepthStencilDescriptor();
+        DepthStencilState* depthStencilState = ToBackend(GetDepthStencilState());
+        descriptor.DepthStencilState = depthStencilState->GetD3D12DepthStencilDescriptor();
 
         descriptor.SampleMask = UINT_MAX;
         descriptor.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());
