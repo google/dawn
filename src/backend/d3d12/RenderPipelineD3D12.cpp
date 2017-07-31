@@ -14,10 +14,12 @@
 
 #include "backend/d3d12/RenderPipelineD3D12.h"
 
+#include "backend/d3d12/BlendStateD3D12.h"
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/DepthStencilStateD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/ShaderModuleD3D12.h"
+#include "backend/d3d12/TextureD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "common/Assert.h"
 
@@ -142,27 +144,33 @@ namespace d3d12 {
         descriptor.RasterizerState.ForcedSampleCount = 0;
         descriptor.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
+        RenderPass* renderPass = ToBackend(GetRenderPass());
+        auto& subpassInfo = renderPass->GetSubpassInfo(GetSubPass());
+
+        if (subpassInfo.depthStencilAttachmentSet) {
+            const auto& attachmentInfo = renderPass->GetAttachmentInfo(subpassInfo.depthStencilAttachment);
+            descriptor.DSVFormat = D3D12TextureFormat(attachmentInfo.format);
+        }
+
+        unsigned int attachmentCount = 0;
+        for (unsigned int attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
+            uint32_t attachment = subpassInfo.colorAttachments[attachmentSlot];
+            const auto& attachmentInfo = renderPass->GetAttachmentInfo(attachment);
+
+            descriptor.RTVFormats[attachmentSlot] = D3D12TextureFormat(attachmentInfo.format);
+            descriptor.BlendState.RenderTarget[attachmentSlot] = ToBackend(GetBlendState(attachmentSlot))->GetD3D12BlendDesc();
+            attachmentCount = attachmentSlot + 1;
+        }
+        descriptor.NumRenderTargets = attachmentCount;
+
         descriptor.BlendState.AlphaToCoverageEnable = FALSE;
-        descriptor.BlendState.IndependentBlendEnable = FALSE;
-        descriptor.BlendState.RenderTarget[0].BlendEnable = FALSE;
-        descriptor.BlendState.RenderTarget[0].LogicOpEnable = FALSE;
-        descriptor.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-        descriptor.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
-        descriptor.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-        descriptor.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-        descriptor.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-        descriptor.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-        descriptor.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-        descriptor.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+        descriptor.BlendState.IndependentBlendEnable = TRUE;
 
         DepthStencilState* depthStencilState = ToBackend(GetDepthStencilState());
         descriptor.DepthStencilState = depthStencilState->GetD3D12DepthStencilDescriptor();
 
         descriptor.SampleMask = UINT_MAX;
         descriptor.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());
-        descriptor.NumRenderTargets = 1;
-        descriptor.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-        descriptor.DSVFormat = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
         descriptor.SampleDesc.Count = 1;
 
         Device* device = ToBackend(builder->GetDevice());
