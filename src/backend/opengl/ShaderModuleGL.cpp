@@ -54,7 +54,7 @@ namespace opengl {
 #if defined(NXT_PLATFORM_APPLE)
         options.version = 410;
 #else
-        options.version = 450;
+        options.version = 440;
 #endif
         compiler.set_options(options);
 

@@ -29,11 +29,6 @@ namespace d3d12 {
         attachmentHeapIndices.resize(renderPass->GetAttachmentCount());
         for (uint32_t attachment = 0; attachment < renderPass->GetAttachmentCount(); ++attachment) {
             auto* textureView = GetTextureView(attachment);
-            if (!textureView) {
-                // TODO(kainino@chromium.org): null=backbuffer hack
-                attachmentHeapIndices[attachment] = rtvCount++;
-                continue;
-            }
             auto format = textureView->GetTexture()->GetFormat();
             if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
                 attachmentHeapIndices[attachment] = dsvCount++;
@@ -54,9 +49,6 @@ namespace d3d12 {
         for (uint32_t attachment = 0; attachment < renderPass->GetAttachmentCount(); ++attachment) {
             uint32_t heapIndex = attachmentHeapIndices[attachment];
             auto* textureView = GetTextureView(attachment);
-            if (!textureView) {
-                continue;
-            }
 
             ComPtr<ID3D12Resource> texture = ToBackend(textureView->GetTexture())->GetD3D12Resource();
             auto format = textureView->GetTexture()->GetFormat();
