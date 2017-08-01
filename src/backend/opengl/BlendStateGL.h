@@ -17,12 +17,16 @@
 
 #include "backend/BlendState.h"
 
+#include "glad/glad.h"
+
 namespace backend {
 namespace opengl {
 
     class BlendState : public BlendStateBase {
         public:
             BlendState(BlendStateBuilder* builder);
+
+            void ApplyNow(uint32_t attachment);
     };
 
 }

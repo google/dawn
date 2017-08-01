@@ -14,6 +14,7 @@
 
 #include "backend/opengl/RenderPipelineGL.h"
 
+#include "backend/opengl/BlendStateGL.h"
 #include "backend/opengl/DepthStencilStateGL.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/OpenGLBackend.h"
@@ -57,6 +58,14 @@ namespace opengl {
 
         auto depthStencilState = ToBackend(GetDepthStencilState());
         depthStencilState->ApplyNow(persistentPipelineState);
+
+
+        RenderPass* renderPass = ToBackend(GetRenderPass());
+        auto& subpassInfo = renderPass->GetSubpassInfo(GetSubPass());
+
+        for (uint32_t attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
+            ToBackend(GetBlendState(attachmentSlot))->ApplyNow(attachmentSlot);
+        }
     }
 
 }

@@ -338,7 +338,8 @@ namespace opengl {
 
                 case Command::SetBlendColor:
                     {
-                        commands.NextCommand<SetBlendColorCmd>();
+                        SetBlendColorCmd* cmd = commands.NextCommand<SetBlendColorCmd>();
+                        glBlendColor(cmd->r, cmd->g, cmd->b, cmd->a);
                     }
                     break;
 
