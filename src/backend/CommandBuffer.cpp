@@ -236,6 +236,12 @@ namespace backend {
                         cmd->~SetStencilReferenceCmd();
                     }
                     break;
+                case Command::SetBlendColor:
+                    {
+                        SetBlendColorCmd* cmd = commands->NextCommand<SetBlendColorCmd>();
+                        cmd->~SetBlendColorCmd();
+                    }
+                    break;
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
@@ -343,6 +349,10 @@ namespace backend {
 
             case Command::SetStencilReference:
                 commands->NextCommand<SetStencilReferenceCmd>();
+                break;
+
+            case Command::SetBlendColor:
+                commands->NextCommand<SetBlendColorCmd>();
                 break;
 
             case Command::SetBindGroup:
@@ -570,6 +580,16 @@ namespace backend {
                     }
                     break;
 
+                case Command::SetBlendColor:
+                    {
+                        iterator.NextCommand<SetBlendColorCmd>();
+                        if (!state->HaveRenderPass()) {
+                            HandleError("Can't set blend color without an active render pass");
+                            return false;
+                        }
+                    }
+                    break;
+
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = iterator.NextCommand<SetBindGroupCmd>();
@@ -777,6 +797,15 @@ namespace backend {
         SetStencilReferenceCmd* cmd = allocator.Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
         new(cmd) SetStencilReferenceCmd;
         cmd->reference = reference;
+    }
+
+    void CommandBufferBuilder::SetBlendColor(float r, float g, float b, float a) {
+        SetBlendColorCmd* cmd = allocator.Allocate<SetBlendColorCmd>(Command::SetBlendColor);
+        new(cmd) SetBlendColorCmd;
+        cmd->r = r;
+        cmd->g = g;
+        cmd->b = b;
+        cmd->a = a;
     }
 
     void CommandBufferBuilder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {

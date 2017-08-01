@@ -485,6 +485,14 @@ namespace d3d12 {
                     }
                     break;
 
+                case Command::SetBlendColor:
+                    {
+                        SetBlendColorCmd* cmd = commands.NextCommand<SetBlendColorCmd>();
+                        ASSERT(lastRenderPipeline);
+                        commandList->OMSetBlendFactor(static_cast<const FLOAT*>(&cmd->r));
+                    }
+                    break;
+
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();

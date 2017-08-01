@@ -402,6 +402,20 @@ namespace metal {
                     }
                     break;
 
+                case Command::SetBlendColor:
+                    {
+                        SetBlendColorCmd* cmd = commands.NextCommand<SetBlendColorCmd>();
+
+                        ASSERT(encoders.render);
+
+                        [encoders.render
+                            setBlendColorRed:cmd->r
+                            green:cmd->g
+                            blue:cmd->b
+                            alpha:cmd->a ];
+                    }
+                    break;
+
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();

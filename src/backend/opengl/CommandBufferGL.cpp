@@ -336,6 +336,12 @@ namespace opengl {
                     }
                     break;
 
+                case Command::SetBlendColor:
+                    {
+                        commands.NextCommand<SetBlendColorCmd>();
+                    }
+                    break;
+
                 case Command::SetBindGroup:
                     {
                         SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();

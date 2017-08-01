@@ -442,6 +442,15 @@
                 ]
             },
             {
+                "name": "set blend color",
+                "args": [
+                    {"name": "r", "type": "float"},
+                    {"name": "g", "type": "float"},
+                    {"name": "b", "type": "float"},
+                    {"name": "a", "type": "float"}
+                ]
+            },
+            {
                 "name": "set bind group",
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
@@ -687,6 +696,9 @@
             {"value": 0, "name":"nearest"},
             {"value": 1, "name":"linear"}
         ]
+    },
+    "float": {
+        "category": "native"
     },
     "framebuffer": {
         "category": "object"
