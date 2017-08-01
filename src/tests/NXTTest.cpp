@@ -97,6 +97,7 @@ NXTTest::~NXTTest() {
     readbackSlots.clear();
     queue = nxt::Queue();
     device = nxt::Device();
+    swapchain = nxt::SwapChain();
 
     delete binding;
     binding = nullptr;
