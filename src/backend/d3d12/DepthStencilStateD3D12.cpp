@@ -80,7 +80,6 @@ namespace d3d12 {
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
         : DepthStencilStateBase(builder), device(device) {
 
-        // If you have anything other than Never, then enable depth testing
         depthStencilDescriptor.DepthEnable = TRUE;
         depthStencilDescriptor.DepthWriteMask = GetDepth().depthWriteEnabled ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
         depthStencilDescriptor.DepthFunc = ComparisonFunc(GetDepth().compareFunction);
