@@ -19,16 +19,16 @@
 namespace backend {
 namespace metal {
 
-    namespace {
-        MTLPixelFormat MetalPixelFormat(nxt::TextureFormat format) {
-            switch (format) {
-                case nxt::TextureFormat::R8G8B8A8Unorm:
-                    return MTLPixelFormatRGBA8Unorm;
-                case nxt::TextureFormat::D32FloatS8Uint:
-                    return MTLPixelFormatDepth32Float_Stencil8;
-            }
+    MTLPixelFormat MetalPixelFormat(nxt::TextureFormat format) {
+        switch (format) {
+            case nxt::TextureFormat::R8G8B8A8Unorm:
+                return MTLPixelFormatRGBA8Unorm;
+            case nxt::TextureFormat::D32FloatS8Uint:
+                return MTLPixelFormatDepth32Float_Stencil8;
         }
+    }
 
+    namespace {
         MTLTextureUsage MetalTextureUsage(nxt::TextureUsageBit usage) {
             MTLTextureUsage result = MTLTextureUsageUnknown; // This is 0
 

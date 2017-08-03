@@ -22,6 +22,8 @@
 namespace backend {
 namespace metal {
 
+    MTLPixelFormat MetalPixelFormat(nxt::TextureFormat format);
+
     class Texture : public TextureBase {
         public:
             Texture(TextureBuilder* builder);

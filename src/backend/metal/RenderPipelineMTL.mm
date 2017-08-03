@@ -14,11 +14,13 @@
 
 #include "backend/metal/RenderPipelineMTL.h"
 
+#include "backend/metal/BlendStateMTL.h"
 #include "backend/metal/DepthStencilStateMTL.h"
 #include "backend/metal/InputStateMTL.h"
 #include "backend/metal/MetalBackend.h"
 #include "backend/metal/PipelineLayoutMTL.h"
 #include "backend/metal/ShaderModuleMTL.h"
+#include "backend/metal/TextureMTL.h"
 
 namespace backend {
 namespace metal {
@@ -78,9 +80,23 @@ namespace metal {
             }
         }
 
-        // TODO(cwallez@chromium.org): get the attachment formats from the subpass
-        descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
-        descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+        RenderPass* renderPass = ToBackend(GetRenderPass());
+        auto& subpassInfo = renderPass->GetSubpassInfo(GetSubPass());
+
+        if (subpassInfo.depthStencilAttachmentSet) {
+            const auto& attachmentInfo = renderPass->GetAttachmentInfo(subpassInfo.depthStencilAttachment);
+            descriptor.depthAttachmentPixelFormat = MetalPixelFormat(attachmentInfo.format);
+            descriptor.stencilAttachmentPixelFormat = MetalPixelFormat(attachmentInfo.format);
+        }
+
+        for (unsigned int attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
+            uint32_t attachment = subpassInfo.colorAttachments[attachmentSlot];
+            const auto& attachmentInfo = renderPass->GetAttachmentInfo(attachment);
+
+            descriptor.colorAttachments[attachmentSlot].pixelFormat = MetalPixelFormat(attachmentInfo.format);
+            ToBackend(GetBlendState(attachmentSlot))->ApplyBlendState(descriptor.colorAttachments[attachmentSlot]);
+        }
+
         descriptor.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());
 
         InputState* inputState = ToBackend(GetInputState());
