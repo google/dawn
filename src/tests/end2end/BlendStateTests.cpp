@@ -108,39 +108,6 @@ class BlendStateTest : public NXTTest {
                 .GetResult();
         }
 
-        void SetupDualSourcePipelines(const nxt::BlendState &blendState) {
-            nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
-                #version 450
-                layout(set = 0, binding = 0) uniform myBlock {
-                    vec4 color0;
-                    vec4 color1;
-                } myUbo;
-
-                layout(location = 0) out vec4 fragColor0;
-                layout(location = 1) out vec4 fragColor1;
-
-                void main() {
-                    fragColor0 = myUbo.color0;
-                    fragColor1 = myUbo.color1;
-                }
-            )");
-
-            basePipeline = device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
-                .SetLayout(pipelineLayout)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-                .GetResult();
-
-            testPipeline = device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
-                .SetLayout(pipelineLayout)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-                .SetColorAttachmentBlendState(0, blendState)
-                .GetResult();
-        }
-
         // Create a bind group to set the colors as a uniform buffer
         template <size_t N>
         nxt::BindGroup MakeBindGroupForColors(std::array<RGBA8, N> colors) {
@@ -186,30 +153,6 @@ class BlendStateTest : public NXTTest {
                         .DrawArrays(3, 1, 0, 0)
                     .EndRenderSubpass()
                 .EndRenderPass()
-                .GetResult();
-
-
-            queue.Submit(1, &commands);
-
-            EXPECT_PIXEL_RGBA8_EQ(expected, renderTarget, kRTSize / 2, kRTSize / 2);
-        }
-
-        void DoDualSourceTest(RGBA8 base, const TriangleSpec& triangle, const RGBA8& color1, const RGBA8& expected) {
-            renderTarget.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
-
-            nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-                .BeginRenderPass(renderpass, framebuffer)
-                    .BeginRenderSubpass()
-                        .SetRenderPipeline(basePipeline)
-                        .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 2>({ { base, base } })))
-                        .DrawArrays(3, 1, 0, 0)
-
-                        .SetRenderPipeline(testPipeline)
-                        .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 2>({ { triangle.color, color1 } })))
-                        .SetBlendColor(triangle.blendFactor[0], triangle.blendFactor[1], triangle.blendFactor[2], triangle.blendFactor[3])
-                        .DrawArrays(3, 1, 0, 0)
-                    .EndRenderSubpass()
-                    .EndRenderPass()
                 .GetResult();
 
 
@@ -552,72 +495,6 @@ TEST_P(BlendStateTest, SrcBlendFactorOneMinusBlendColor) {
     CheckSrcBlendFactor(base, nxt::BlendFactor::OneMinusBlendColor, nxt::BlendFactor::OneMinusBlendColor, tests);
 }
 
-TEST_P(BlendStateTest, SrcBlendFactorSrc1Color) {
-    nxt::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::Src1Color, nxt::BlendFactor::One)
-        .GetResult();
-    SetupDualSourcePipelines(blendState);
-
-    RGBA8 base(0, 0, 0, 0);
-    for (auto& color : kColors) {
-        RGBA8 color1(64, 32, 192, 128);
-        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, color1);
-        expected.a = color.a;
-        DoDualSourceTest(base, { color }, color1, expected);
-    }
-}
-
-TEST_P(BlendStateTest, SrcBlendFactorOneMinusSrc1Color) {
-    nxt::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::OneMinusSrc1Color, nxt::BlendFactor::One)
-        .GetResult();
-    SetupDualSourcePipelines(blendState);
-
-    RGBA8 base(0, 0, 0, 0);
-    for (auto& color : kColors) {
-        RGBA8 color1(64, 32, 192, 128);
-        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, RGBA8(255, 255, 255, 255) - color1);
-        expected.a = color.a;
-        DoDualSourceTest(base, { color }, color1, expected);
-    }
-}
-
-TEST_P(BlendStateTest, SrcBlendFactorSrc1Alpha) {
-    nxt::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::Src1Alpha, nxt::BlendFactor::One)
-        .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::Src1Alpha, nxt::BlendFactor::One)
-        .GetResult();
-    SetupDualSourcePipelines(blendState);
-
-    RGBA8 base(0, 0, 0, 0);
-    for (auto& color : kColors) {
-        RGBA8 color1(64, 32, 192, 128);
-        RGBA8 fac(color1.a, color1.a, color1.a, color1.a);
-        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, fac);
-        DoDualSourceTest(base, { color }, color1, expected);
-    }
-}
-
-TEST_P(BlendStateTest, SrcBlendFactorOneMinusSrc1Alpha) {
-    nxt::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::OneMinusSrc1Alpha, nxt::BlendFactor::One)
-        .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::OneMinusSrc1Alpha, nxt::BlendFactor::One)
-        .GetResult();
-    SetupDualSourcePipelines(blendState);
-
-    RGBA8 base(0, 0, 0, 0);
-    for (auto& color : kColors) {
-        RGBA8 color1(64, 32, 192, 128);
-        RGBA8 fac = RGBA8(255, 255, 255, 255) - RGBA8(color1.a, color1.a, color1.a, color1.a);
-        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, fac);
-        DoDualSourceTest(base, { color }, color1, expected);
-    }
-}
-
 // The following tests check that the Destination blend factor works
 TEST_P(BlendStateTest, DstBlendFactorZero) {
     RGBA8 base(32, 64, 128, 192);
@@ -762,72 +639,6 @@ TEST_P(BlendStateTest, DstBlendFactorOneMinusBlendColor) {
         return std::make_pair(triangleSpec, expected);
     });
     CheckDstBlendFactor(base, nxt::BlendFactor::OneMinusBlendColor, nxt::BlendFactor::OneMinusBlendColor, tests);
-}
-
-TEST_P(BlendStateTest, DstBlendFactorSrc1Color) {
-    nxt::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::Src1Color)
-        .GetResult();
-    SetupDualSourcePipelines(blendState);
-
-    RGBA8 base(0, 0, 0, 0);
-    for (auto& color : kColors) {
-        RGBA8 color1(64, 32, 192, 128);
-        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, color1);
-        expected.a = color.a;
-        DoDualSourceTest(base, { color }, color1, expected);
-    }
-}
-
-TEST_P(BlendStateTest, DstBlendFactorOneMinusSrc1Color) {
-    nxt::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::OneMinusSrc1Color)
-        .GetResult();
-    SetupDualSourcePipelines(blendState);
-
-    RGBA8 base(0, 0, 0, 0);
-    for (auto& color : kColors) {
-        RGBA8 color1(64, 32, 192, 128);
-        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, RGBA8(255, 255, 255, 255) - color1);
-        expected.a = color.a;
-        DoDualSourceTest(base, { color }, color1, expected);
-    }
-}
-
-TEST_P(BlendStateTest, DstBlendFactorSrc1Alpha) {
-    nxt::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::Src1Alpha)
-        .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::Src1Alpha)
-        .GetResult();
-    SetupDualSourcePipelines(blendState);
-
-    RGBA8 base(0, 0, 0, 0);
-    for (auto& color : kColors) {
-        RGBA8 color1(64, 32, 192, 128);
-        RGBA8 fac(color1.a, color1.a, color1.a, color1.a);
-        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, fac);
-        DoDualSourceTest(base, { color }, color1, expected);
-    }
-}
-
-TEST_P(BlendStateTest, DstBlendFactorOneMinusSrc1Alpha) {
-    nxt::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::OneMinusSrc1Alpha)
-        .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::OneMinusSrc1Alpha)
-        .GetResult();
-    SetupDualSourcePipelines(blendState);
-
-    RGBA8 base(0, 0, 0, 0);
-    for (auto& color : kColors) {
-        RGBA8 color1(64, 32, 192, 128);
-        RGBA8 fac = RGBA8(255, 255, 255, 255) - RGBA8(color1.a, color1.a, color1.a, color1.a);
-        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, fac);
-        DoDualSourceTest(base, { color }, color1, expected);
-    }
 }
 
 // Check that the color write mask works

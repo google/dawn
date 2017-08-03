@@ -49,14 +49,6 @@ namespace metal {
                     return alpha ? MTLBlendFactorBlendAlpha : MTLBlendFactorBlendColor;
                 case nxt::BlendFactor::OneMinusBlendColor:
                     return alpha ? MTLBlendFactorOneMinusBlendAlpha : MTLBlendFactorOneMinusBlendColor;
-                case nxt::BlendFactor::Src1Color:
-                    return MTLBlendFactorSource1Color;
-                case nxt::BlendFactor::OneMinusSrc1Color:
-                    return MTLBlendFactorOneMinusSource1Color;
-                case nxt::BlendFactor::Src1Alpha:
-                    return MTLBlendFactorSource1Alpha;
-                case nxt::BlendFactor::OneMinusSrc1Alpha:
-                    return MTLBlendFactorOneMinusSource1Alpha;
             }
         }
 

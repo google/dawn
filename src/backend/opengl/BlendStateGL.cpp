@@ -49,14 +49,6 @@ namespace opengl {
                     return alpha ? GL_CONSTANT_ALPHA : GL_CONSTANT_COLOR;
                 case nxt::BlendFactor::OneMinusBlendColor:
                     return alpha ? GL_ONE_MINUS_CONSTANT_ALPHA : GL_ONE_MINUS_CONSTANT_COLOR;
-                case nxt::BlendFactor::Src1Color:
-                    return GL_SRC1_COLOR;
-                case nxt::BlendFactor::OneMinusSrc1Color:
-                    return GL_ONE_MINUS_SRC1_COLOR;
-                case nxt::BlendFactor::Src1Alpha:
-                    return GL_SRC1_ALPHA;
-                case nxt::BlendFactor::OneMinusSrc1Alpha:
-                    return GL_ONE_MINUS_SRC1_ALPHA;
                 default:
                     UNREACHABLE();
             }

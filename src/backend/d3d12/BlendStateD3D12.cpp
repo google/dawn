@@ -49,14 +49,6 @@ namespace d3d12 {
                     return D3D12_BLEND_BLEND_FACTOR;
                 case nxt::BlendFactor::OneMinusBlendColor:
                     return D3D12_BLEND_INV_BLEND_FACTOR;
-                case nxt::BlendFactor::Src1Color:
-                    return D3D12_BLEND_SRC1_COLOR;
-                case nxt::BlendFactor::OneMinusSrc1Color:
-                    return D3D12_BLEND_INV_SRC1_COLOR;
-                case nxt::BlendFactor::Src1Alpha:
-                    return D3D12_BLEND_SRC1_ALPHA;
-                case nxt::BlendFactor::OneMinusSrc1Alpha:
-                    return D3D12_BLEND_INV_SRC1_ALPHA;
                 default:
                     UNREACHABLE();
             }

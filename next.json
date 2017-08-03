@@ -120,11 +120,7 @@
             {"value": 9, "name": "one minus dst alpha"},
             {"value": 10, "name": "src alpha saturated"},
             {"value": 11, "name": "blend color"},
-            {"value": 12, "name": "one minus blend color"},
-            {"value": 13, "name": "src1 color"},
-            {"value": 14, "name": "one minus src1 color"},
-            {"value": 15, "name": "src1 alpha"},
-            {"value": 16, "name": "one minus src1 alpha"}
+            {"value": 12, "name": "one minus blend color"}
         ]
     },
     "blend operation": {
