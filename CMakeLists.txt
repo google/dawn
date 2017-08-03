@@ -15,6 +15,14 @@
 cmake_minimum_required(VERSION 2.8)
 project(nxt C CXX)
 
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(FATAL_ERROR
+        "In-source builds are unsupported. Use another directory, like build/, "
+        "as your CMake build directory.\n"
+        "Note: CMakeFiles/ and CMakeCache.txt may have been generated in the "
+        "source directory. These may be removed.")
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
         "Build type (Debug, Release, RelWithDebInfo, MinSizeRel)" FORCE)
