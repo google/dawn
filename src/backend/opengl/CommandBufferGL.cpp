@@ -106,15 +106,22 @@ namespace opengl {
 
                         const auto& info = currentRenderPass->GetSubpassInfo(currentSubpass);
 
-                        for (uint32_t index = 0; index < info.colorAttachments.size(); ++index) {
-                            uint32_t attachment = info.colorAttachments[index];
+                        std::array<GLenum, kMaxColorAttachments> drawBuffers;
+                        drawBuffers.fill(GL_NONE);
+                        unsigned int attachmentCount = 0;
+                        for (unsigned int attachmentSlot : IterateBitSet(info.colorAttachmentsSet)) {
+                            uint32_t attachment = info.colorAttachments[attachmentSlot];
 
                             auto textureView = currentFramebuffer->GetTextureView(attachment);
                             GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
                             glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
-                                    GL_COLOR_ATTACHMENT0 + index,
-                                    GL_TEXTURE_2D, texture, 0);
+                                GL_COLOR_ATTACHMENT0 + attachmentSlot,
+                                GL_TEXTURE_2D, texture, 0);
+                            drawBuffers[attachmentSlot] = GL_COLOR_ATTACHMENT0 + attachmentSlot;
+                            attachmentCount = attachmentSlot + 1;
                         }
+                        glDrawBuffers(attachmentCount, &drawBuffers[0]);
+
                         if (info.depthStencilAttachmentSet) {
                             uint32_t attachment = info.depthStencilAttachment;
 
