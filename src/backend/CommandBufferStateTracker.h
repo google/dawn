@@ -30,6 +30,7 @@ namespace backend {
 
             // Non-state-modifying validation functions
             bool HaveRenderPass() const;
+            bool HaveRenderSubpass() const;
             bool ValidateCanCopy() const;
             bool ValidateCanUseBufferAs(BufferBase* buffer, nxt::BufferUsageBit usage) const;
             bool ValidateCanUseTextureAs(TextureBase* texture, nxt::TextureUsageBit usage) const;

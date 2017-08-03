@@ -37,6 +37,10 @@ namespace backend {
         return currentRenderPass != nullptr;
     }
 
+    bool CommandBufferStateTracker::HaveRenderSubpass() const {
+        return aspects[VALIDATION_ASPECT_RENDER_SUBPASS];
+    }
+
     bool CommandBufferStateTracker::ValidateCanCopy() const {
         if (currentRenderPass) {
             builder->HandleError("Copy cannot occur during a render pass");

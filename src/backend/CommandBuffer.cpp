@@ -573,8 +573,8 @@ namespace backend {
                 case Command::SetStencilReference:
                     {
                         iterator.NextCommand<SetStencilReferenceCmd>();
-                        if (!state->HaveRenderPass()) {
-                            HandleError("Can't set stencil reference without an active render pass");
+                        if (!state->HaveRenderSubpass()) {
+                            HandleError("Can't set stencil reference without an active render subpass");
                             return false;
                         }
                     }
@@ -583,8 +583,8 @@ namespace backend {
                 case Command::SetBlendColor:
                     {
                         iterator.NextCommand<SetBlendColorCmd>();
-                        if (!state->HaveRenderPass()) {
-                            HandleError("Can't set blend color without an active render pass");
+                        if (!state->HaveRenderSubpass()) {
+                            HandleError("Can't set blend color without an active render subpass");
                             return false;
                         }
                     }
