@@ -27,6 +27,8 @@ class RenderPipelineValidationTest : public ValidationTest {
 
             inputState = device.CreateInputStateBuilder().GetResult();
 
+            blendState = device.CreateBlendStateBuilder().GetResult();
+
             vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
                 #version 450
                 void main() {
@@ -57,12 +59,21 @@ class RenderPipelineValidationTest : public ValidationTest {
         nxt::ShaderModule vsModule;
         nxt::ShaderModule fsModule;
         nxt::InputState inputState;
+        nxt::BlendState blendState;
         nxt::PipelineLayout pipelineLayout;
 };
 
 // Test cases where creation should succeed
 TEST_F(RenderPipelineValidationTest, CreationSuccess) {
     AddDefaultStates(AssertWillBeSuccess(device.CreateRenderPipelineBuilder()))
+        .GetResult();
+
+    AddDefaultStates(AssertWillBeSuccess(device.CreateRenderPipelineBuilder()))
+        .SetInputState(inputState)
+        .GetResult();
+
+    AddDefaultStates(AssertWillBeSuccess(device.CreateRenderPipelineBuilder()))
+        .SetColorAttachmentBlendState(0, blendState)
         .GetResult();
 }
 
@@ -95,6 +106,84 @@ TEST_F(RenderPipelineValidationTest, CreationMissingProperty) {
             .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
             .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
             .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .GetResult();
+    }
+}
+
+TEST_F(RenderPipelineValidationTest, BlendState) {
+    // Fails because blend state is set on a nonexistent color attachment
+    {
+        auto texture1 = device.CreateTextureBuilder()
+            .SetDimension(nxt::TextureDimension::e2D)
+            .SetExtent(640, 480, 1)
+            .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetMipLevels(1)
+            .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+            .GetResult();
+        texture1.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
+        auto textureView1 = texture1.CreateTextureViewBuilder()
+            .GetResult();
+
+        auto texture2 = device.CreateTextureBuilder()
+            .SetDimension(nxt::TextureDimension::e2D)
+            .SetExtent(640, 480, 1)
+            .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetMipLevels(1)
+            .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+            .GetResult();
+        texture2.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
+        auto textureView2 = texture2.CreateTextureViewBuilder()
+            .GetResult();
+
+        auto renderpass = device.CreateRenderPassBuilder()
+            .SetAttachmentCount(2)
+            .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .AttachmentSetFormat(1, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetSubpassCount(1)
+            .SubpassSetColorAttachment(0, 0, 0)
+            .GetResult();
+
+        auto framebuffer = device.CreateFramebufferBuilder()
+            .SetRenderPass(renderpass)
+            .SetDimensions(640, 480)
+            .SetAttachment(0, textureView1)
+            .SetAttachment(1, textureView2)
+            .GetResult();
+
+
+        // This one succeeds because attachment 0 is the subpass's color attachment
+        AssertWillBeSuccess(device.CreateRenderPipelineBuilder())
+            .SetSubpass(renderpass, 0)
+            .SetLayout(pipelineLayout)
+            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetColorAttachmentBlendState(0, blendState)
+            .GetResult();
+
+        // This fails because attachment 1 is not one of the subpass's color attachments
+        AssertWillBeError(device.CreateRenderPipelineBuilder())
+            .SetSubpass(renderpass, 0)
+            .SetLayout(pipelineLayout)
+            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetColorAttachmentBlendState(1, blendState)
+            .GetResult();
+    }
+
+    // Fails because color attachment is out of bounds
+    {
+        AddDefaultStates(AssertWillBeError(device.CreateRenderPipelineBuilder()))
+            .SetColorAttachmentBlendState(1, blendState)
+            .GetResult();
+    }
+
+    // Fails because color attachment blend state is set twice
+    {
+        AddDefaultStates(AssertWillBeError(device.CreateRenderPipelineBuilder()))
+            .SetColorAttachmentBlendState(0, blendState)
+            .SetColorAttachmentBlendState(0, blendState)
             .GetResult();
     }
 }
@@ -156,6 +245,13 @@ TEST_F(RenderPipelineValidationTest, DISABLED_CreationDuplicates) {
     {
         AddDefaultStates(AssertWillBeError(device.CreateRenderPipelineBuilder()))
             .SetSubpass(renderpass, 0)
+            .GetResult();
+    }
+
+    // Fails because the layout is set twice
+    {
+        AddDefaultStates(AssertWillBeError(device.CreateRenderPipelineBuilder()))
+            .SetLayout(pipelineLayout)
             .GetResult();
     }
 }

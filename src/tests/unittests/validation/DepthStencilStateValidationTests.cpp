@@ -93,5 +93,3 @@ TEST_F(DepthStencilStateValidationTest, CreationDuplicates) {
             .GetResult();
     }
 }
-
-// TODO(enga@google.com) Test failure when set in a compute pipeline

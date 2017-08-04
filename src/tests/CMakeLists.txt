@@ -40,6 +40,7 @@ list(APPEND UNITTEST_SOURCES
     ${UNITTESTS_DIR}/SerialQueueTests.cpp
     ${UNITTESTS_DIR}/ToBackendTests.cpp
     ${UNITTESTS_DIR}/WireTests.cpp
+    ${VALIDATION_TESTS_DIR}/BlendStateValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/BufferValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/CommandBufferValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/ComputeValidationTests.cpp
