@@ -837,4 +837,139 @@ TEST_P(BlendStateTest, IndependentBlendState) {
     }
 }
 
+TEST_P(BlendStateTest, DefaultBlendColor) {
+    nxt::BlendState blendState = device.CreateBlendStateBuilder()
+        .SetBlendEnabled(true)
+        .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::BlendColor, nxt::BlendFactor::One)
+        .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::BlendColor, nxt::BlendFactor::One)
+        .GetResult();
+
+    renderpass = device.CreateRenderPassBuilder()
+        .SetAttachmentCount(1)
+        .SetSubpassCount(2)
+        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+        .SubpassSetColorAttachment(0, 0, 0)
+        .SubpassSetColorAttachment(1, 0, 0)
+        .GetResult();
+
+    framebuffer = device.CreateFramebufferBuilder()
+        .SetRenderPass(renderpass)
+        .SetDimensions(kRTSize, kRTSize)
+        .SetAttachment(0, renderTargetView)
+        .GetResult();
+
+    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform myBlock {
+            vec4 color;
+        } myUbo;
+
+        layout(location = 0) out vec4 fragColor;
+
+        void main() {
+            fragColor = myUbo.color;
+        }
+    )");
+
+    basePipeline = device.CreateRenderPipelineBuilder()
+        .SetSubpass(renderpass, 0)
+        .SetLayout(pipelineLayout)
+        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+        .GetResult();
+
+    testPipeline = device.CreateRenderPipelineBuilder()
+        .SetSubpass(renderpass, 0)
+        .SetLayout(pipelineLayout)
+        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+        .SetColorAttachmentBlendState(0, blendState)
+        .GetResult();
+
+    nxt::RenderPipeline basePipeline2 = device.CreateRenderPipelineBuilder()
+        .SetSubpass(renderpass, 1)
+        .SetLayout(pipelineLayout)
+        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+        .GetResult();
+
+    nxt::RenderPipeline testPipeline2 = device.CreateRenderPipelineBuilder()
+        .SetSubpass(renderpass, 1)
+        .SetLayout(pipelineLayout)
+        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+        .SetColorAttachmentBlendState(0, blendState)
+        .GetResult();
+
+    // Check that the initial blend color is (0,0,0,0)
+    {
+        nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+            .BeginRenderPass(renderpass, framebuffer)
+            .BeginRenderSubpass()
+                .SetRenderPipeline(basePipeline)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })))
+                .DrawArrays(3, 1, 0, 0)
+                .SetRenderPipeline(testPipeline)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })))
+                .DrawArrays(3, 1, 0, 0)
+            .EndRenderSubpass()
+            .EndRenderPass()
+            .GetResult();
+
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, kRTSize / 2, kRTSize / 2);
+    }
+
+    // Check that setting the blend color works
+    {
+        nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+            .BeginRenderPass(renderpass, framebuffer)
+            .BeginRenderSubpass()
+                .SetRenderPipeline(basePipeline)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })))
+                .DrawArrays(3, 1, 0, 0)
+                .SetRenderPipeline(testPipeline)
+                .SetBlendColor(1, 1, 1, 1)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })))
+                .DrawArrays(3, 1, 0, 0)
+            .EndRenderSubpass()
+            .EndRenderPass()
+            .GetResult();
+
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(255, 255, 255, 255), renderTarget, kRTSize / 2, kRTSize / 2);
+    }
+
+    // Check that the blend color is not inherited
+    {
+        nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+            .BeginRenderPass(renderpass, framebuffer)
+            .BeginRenderSubpass()
+                .SetRenderPipeline(basePipeline)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })))
+                .DrawArrays(3, 1, 0, 0)
+                .SetRenderPipeline(testPipeline)
+                .SetBlendColor(1, 1, 1, 1)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })))
+                .DrawArrays(3, 1, 0, 0)
+            .EndRenderSubpass()
+            .BeginRenderSubpass()
+                .SetRenderPipeline(basePipeline2)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })))
+                .DrawArrays(3, 1, 0, 0)
+                .SetRenderPipeline(testPipeline2)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })))
+                .DrawArrays(3, 1, 0, 0)
+            .EndRenderSubpass()
+            .EndRenderPass()
+            .GetResult();
+
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, kRTSize / 2, kRTSize / 2);
+    }
+}
+
 NXT_INSTANTIATE_TEST(BlendStateTest, D3D12Backend, MetalBackend, OpenGLBackend)

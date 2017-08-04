@@ -148,6 +148,8 @@ namespace opengl {
                             glClearDepth(1.0);
                             glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
                         }
+
+                        glBlendColor(0, 0, 0, 0);
                     }
                     break;
 

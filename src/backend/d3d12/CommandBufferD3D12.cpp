@@ -278,6 +278,9 @@ namespace d3d12 {
                         } else {
                             commandList->OMSetRenderTargets(args.numRTVs, args.RTVs, FALSE, nullptr);
                         }
+
+                        static constexpr std::array<float, 4> defaultBlendFactor = { 0, 0, 0, 0 };
+                        commandList->OMSetBlendFactor(&defaultBlendFactor[0]);
                     }
                     break;
 
@@ -398,7 +401,6 @@ namespace d3d12 {
                 case Command::DrawArrays:
                     {
                         DrawArraysCmd* draw = commands.NextCommand<DrawArraysCmd>();
-
                         commandList->DrawInstanced(
                             draw->vertexCount,
                             draw->instanceCount,
