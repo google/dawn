@@ -87,9 +87,7 @@ std::map<std::string, nxt::Buffer> buffers;
 std::map<std::string, nxt::CommandBuffer> commandBuffers;
 std::map<uint32_t, std::string> slotSemantics = {{0, "POSITION"}, {1, "NORMAL"}, {2, "TEXCOORD_0"}};
 
-nxt::Sampler defaultSampler;
 std::map<std::string, nxt::Sampler> samplers;
-nxt::TextureView defaultTexture;
 std::map<std::string, nxt::TextureView> textures;
 
 tinygltf::Scene scene;
@@ -171,6 +169,16 @@ namespace {
         const auto& iMaterial = scene.materials.at(iMaterialID);
         const auto& iTechnique = scene.techniques.at(iMaterial.technique);
 
+        bool hasTexture = false;
+        std::string iTextureID;
+        {
+            auto it = iMaterial.values.find("diffuse");
+            if (it != iMaterial.values.end() && !it->second.string_value.empty()) {
+                hasTexture = true;
+                iTextureID = it->second.string_value;
+            }
+        }
+
         auto oVSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
             #version 450
 
@@ -192,7 +200,7 @@ namespace {
                 gl_Position = u_transform.modelViewProj * a_position;
             })");
 
-        auto oFSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+        auto oFSSourceTextured = R"(
             #version 450
 
             layout(set = 0, binding = 1) uniform sampler u_samp;
@@ -210,7 +218,24 @@ namespace {
                 float diffamb = diffuse * 0.85 + 0.15;
                 vec3 albedo = texture(sampler2D(u_tex, u_samp), v_texcoord).rgb;
                 fragcolor = vec4(diffamb * albedo, 1);
-            })");
+            })";
+        auto oFSSourceUntextured = R"(
+            #version 450
+
+            layout(location = 0) in vec3 v_normal;
+            layout(location = 1) in vec2 v_texcoord;
+
+            out vec4 fragcolor;
+
+            void main() {
+                const vec3 lightdir = normalize(vec3(-1, -2, 3));
+                vec3 normal = normalize(v_normal);
+                float diffuse = abs(dot(lightdir, normal));
+                float diffamb = diffuse * 0.85 + 0.15;
+                fragcolor = vec4(vec3(diffamb), 1);
+            })";
+
+        auto oFSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, hasTexture ? oFSSourceTextured : oFSSourceUntextured);
 
         nxt::InputStateBuilder builder = device.CreateInputStateBuilder();
         std::bitset<3> slotsSet;
@@ -248,11 +273,15 @@ namespace {
         }
         auto inputState = builder.GetResult();
 
-        auto bindGroupLayout = device.CreateBindGroupLayoutBuilder()
+        auto bindGroupLayoutBuilder = device.CreateBindGroupLayoutBuilder()
             .SetBindingsType(nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer, 0, 1)
-            .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::Sampler, 1, 1)
-            .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::SampledTexture, 2, 1)
-            .GetResult();
+            .Clone();
+        if (hasTexture) {
+            bindGroupLayoutBuilder
+                .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::Sampler, 1, 1)
+                .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::SampledTexture, 2, 1);
+        }
+        auto bindGroupLayout = bindGroupLayoutBuilder.GetResult();
 
         auto depthStencilState = device.CreateDepthStencilStateBuilder()
             .SetDepthCompareFunction(nxt::CompareFunction::Less)
@@ -285,18 +314,11 @@ namespace {
         bindGroupBuilder.SetLayout(bindGroupLayout)
             .SetUsage(nxt::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &uniformView);
-        {
-            auto it = iMaterial.values.find("diffuse");
-            if (it != iMaterial.values.end() && !it->second.string_value.empty()) {
-                const auto& iTextureID = it->second.string_value;
-                const auto& textureView = textures[iTextureID];
-                const auto& iSamplerID = scene.textures[iTextureID].sampler;
-                bindGroupBuilder.SetSamplers(1, 1, &samplers[iSamplerID]);
-                bindGroupBuilder.SetTextureViews(2, 1, &textureView);
-            } else {
-                bindGroupBuilder.SetSamplers(1, 1, &defaultSampler);
-                bindGroupBuilder.SetTextureViews(2, 1, &defaultTexture);
-            }
+        if (hasTexture) {
+            const auto& textureView = textures[iTextureID];
+            const auto& iSamplerID = scene.textures[iTextureID].sampler;
+            bindGroupBuilder.SetSamplers(1, 1, &samplers[iSamplerID]);
+            bindGroupBuilder.SetTextureViews(2, 1, &textureView);
         }
 
         MaterialInfo material = {
@@ -310,11 +332,6 @@ namespace {
     }
 
     void initSamplers() {
-        defaultSampler = device.CreateSamplerBuilder()
-            .SetFilterMode(nxt::FilterMode::Nearest, nxt::FilterMode::Nearest, nxt::FilterMode::Nearest)
-            // TODO: wrap modes
-            .GetResult();
-
         for (const auto& s : scene.samplers) {
             const auto& iSamplerID = s.first;
             const auto& iSampler = s.second;
@@ -369,28 +386,6 @@ namespace {
     }
 
     void initTextures() {
-        {
-            auto oTexture = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
-                .SetExtent(1, 1, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::Sampled)
-                .GetResult();
-                // TODO: release this texture
-
-            uint32_t white = 0xffffffff;
-            nxt::Buffer staging = utils::CreateFrozenBufferFromData(device, &white, sizeof(white), nxt::BufferUsageBit::TransferSrc);
-            auto cmdbuf = device.CreateCommandBufferBuilder()
-                .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
-                .CopyBufferToTexture(staging, 0, 0, oTexture, 0, 0, 0, 1, 1, 1, 0)
-                .GetResult();
-            queue.Submit(1, &cmdbuf);
-            oTexture.FreezeUsage(nxt::TextureUsageBit::Sampled);
-
-            defaultTexture = oTexture.CreateTextureViewBuilder().GetResult();
-        }
-
         for (const auto& t : scene.textures) {
             const auto& iTextureID = t.first;
             const auto& iTexture = t.second;
