@@ -18,6 +18,7 @@
 #include "backend/Device.h"
 #include "backend/Texture.h"
 #include "common/Assert.h"
+#include "common/BitSetIterator.h"
 
 namespace backend {
 
@@ -25,6 +26,23 @@ namespace backend {
 
     RenderPassBase::RenderPassBase(RenderPassBuilder* builder)
         : attachments(std::move(builder->attachments)), subpasses(std::move(builder->subpasses)) {
+        for (uint32_t s = 0; s < GetSubpassCount(); ++s) {
+            const auto& subpass = GetSubpassInfo(s);
+            for (auto location : IterateBitSet(subpass.colorAttachmentsSet)) {
+                auto attachmentSlot = subpass.colorAttachments[location];
+                auto& firstSubpass = attachments[attachmentSlot].firstSubpass;
+                if (firstSubpass == UINT32_MAX) {
+                    firstSubpass = s;
+                }
+            }
+            if (subpass.depthStencilAttachmentSet) {
+                auto attachmentSlot = subpass.depthStencilAttachment;
+                auto& firstSubpass = attachments[attachmentSlot].firstSubpass;
+                if (firstSubpass == UINT32_MAX) {
+                    firstSubpass = s;
+                }
+            }
+        }
     }
 
     uint32_t RenderPassBase::GetAttachmentCount() const {
@@ -95,8 +113,8 @@ namespace backend {
             HandleError("Render pass attachment count not set yet");
             return;
         }
-        if (attachmentSlot > attachments.size()) {
-            HandleError("Render pass attachment index out of bounds");
+        if (attachmentSlot >= attachments.size()) {
+            HandleError("Render pass attachment slot out of bounds");
             return;
         }
         if (attachmentProperties[attachmentSlot][ATTACHMENT_PROPERTY_FORMAT]) {
@@ -107,6 +125,34 @@ namespace backend {
         attachments[attachmentSlot].format = format;
         attachmentProperties[attachmentSlot].set(ATTACHMENT_PROPERTY_FORMAT);
     }
+
+    void RenderPassBuilder::AttachmentSetColorLoadOp(uint32_t attachmentSlot, nxt::LoadOp op) {
+        if ((propertiesSet & RENDERPASS_PROPERTY_ATTACHMENT_COUNT) == 0) {
+            HandleError("Render pass attachment count not set yet");
+            return;
+        }
+        if (attachmentSlot >= attachments.size()) {
+            HandleError("Render pass attachment slot out of bounds");
+            return;
+        }
+
+        attachments[attachmentSlot].colorLoadOp = op;
+    }
+
+    void RenderPassBuilder::AttachmentSetDepthStencilLoadOps(uint32_t attachmentSlot, nxt::LoadOp depthOp, nxt::LoadOp stencilOp) {
+        if ((propertiesSet & RENDERPASS_PROPERTY_ATTACHMENT_COUNT) == 0) {
+            HandleError("Render pass attachment count not set yet");
+            return;
+        }
+        if (attachmentSlot >= attachments.size()) {
+            HandleError("Render pass attachment slot out of bounds");
+            return;
+        }
+
+        attachments[attachmentSlot].depthLoadOp = depthOp;
+        attachments[attachmentSlot].stencilLoadOp = stencilOp;
+    }
+
 
     void RenderPassBuilder::SetSubpassCount(uint32_t subpassCount) {
         if ((propertiesSet & RENDERPASS_PROPERTY_SUBPASS_COUNT) != 0) {

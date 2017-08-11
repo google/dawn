@@ -16,8 +16,8 @@
 
 #include "backend/opengl/BlendStateGL.h"
 #include "backend/opengl/DepthStencilStateGL.h"
-#include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/OpenGLBackend.h"
+#include "backend/opengl/PersistentPipelineStateGL.h"
 
 namespace backend {
 namespace opengl {

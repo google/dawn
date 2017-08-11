@@ -68,16 +68,25 @@ namespace d3d12 {
         const auto& subpassInfo = GetRenderPass()->GetSubpassInfo(subpassIndex);
         OMSetRenderTargetArgs args = {};
 
-        for (uint32_t index : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
-            uint32_t heapIndex = attachmentHeapIndices[subpassInfo.colorAttachments[index]];
-            args.RTVs[args.numRTVs++] = rtvHeap.GetCPUHandle(heapIndex);
+        for (uint32_t location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
+            uint32_t slot = subpassInfo.colorAttachments[location];
+            args.RTVs[args.numRTVs] = GetRTVDescriptor(slot);
+            args.numRTVs++;
         }
         if (subpassInfo.depthStencilAttachmentSet) {
-            uint32_t heapIndex = attachmentHeapIndices[subpassInfo.depthStencilAttachment];
-            args.dsv = dsvHeap.GetCPUHandle(heapIndex);
+            uint32_t slot = subpassInfo.depthStencilAttachment;
+            args.dsv = GetDSVDescriptor(slot);
         }
 
         return args;
+    }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE Framebuffer::GetRTVDescriptor(uint32_t attachmentSlot) {
+        return rtvHeap.GetCPUHandle(attachmentHeapIndices[attachmentSlot]);
+    }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE Framebuffer::GetDSVDescriptor(uint32_t attachmentSlot) {
+        return dsvHeap.GetCPUHandle(attachmentHeapIndices[attachmentSlot]);
     }
 
 }

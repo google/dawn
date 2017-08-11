@@ -87,33 +87,61 @@ namespace metal {
                 const auto& info = currentRenderPass->GetSubpassInfo(subpass);
 
                 MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-                for (uint32_t index = 0; index < info.colorAttachments.size(); ++index) {
-                    uint32_t attachment = info.colorAttachments[index];
+                for (unsigned int location : IterateBitSet(info.colorAttachmentsSet)) {
+                    uint32_t attachment = info.colorAttachments[location];
+                    const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachment);
 
                     auto textureView = currentFramebuffer->GetTextureView(attachment);
                     auto texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
-                    descriptor.colorAttachments[index].texture = texture;
-                    descriptor.colorAttachments[index].loadAction = MTLLoadActionLoad;
-                    descriptor.colorAttachments[index].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0);
-                    descriptor.colorAttachments[index].storeAction = MTLStoreActionStore;
+
+                    bool isFirstUse = attachmentInfo.firstSubpass == subpass;
+                    bool shouldClearOnFirstUse = attachmentInfo.colorLoadOp == nxt::LoadOp::Clear;
+                    if (isFirstUse && shouldClearOnFirstUse) {
+                        auto clearValue = currentFramebuffer->GetClearColor(location);
+                        descriptor.colorAttachments[location].loadAction = MTLLoadActionClear;
+                        descriptor.colorAttachments[location].clearColor = MTLClearColorMake(clearValue.color[0], clearValue.color[1], clearValue.color[2], clearValue.color[3]);
+                    } else {
+                        descriptor.colorAttachments[location].loadAction = MTLLoadActionLoad;
+                    }
+
+                    descriptor.colorAttachments[location].texture = texture;
+                    descriptor.colorAttachments[location].storeAction = MTLStoreActionStore;
                 }
                 if (info.depthStencilAttachmentSet) {
                     uint32_t attachment = info.depthStencilAttachment;
+                    const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachment);
 
                     auto textureView = currentFramebuffer->GetTextureView(attachment);
                     id<MTLTexture> texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
                     nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
+
+                    bool isFirstUse = attachmentInfo.firstSubpass == subpass;
+                    const auto& clearValues = currentFramebuffer->GetClearDepthStencil(attachment);
+
                     if (TextureFormatHasDepth(format)) {
                         descriptor.depthAttachment.texture = texture;
-                        descriptor.depthAttachment.loadAction = MTLLoadActionClear;
-                        descriptor.depthAttachment.clearDepth = 1.0;
                         descriptor.depthAttachment.storeAction = MTLStoreActionStore;
+
+                        bool shouldClearDepthOnFirstUse = attachmentInfo.depthLoadOp == nxt::LoadOp::Clear;
+                        if (isFirstUse && shouldClearDepthOnFirstUse) {
+                            descriptor.depthAttachment.loadAction = MTLLoadActionClear;
+                            descriptor.depthAttachment.clearDepth = clearValues.depth;
+                        } else {
+                            descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
+                        }
                     }
+
                     if (TextureFormatHasStencil(format)) {
                         descriptor.stencilAttachment.texture = texture;
-                        descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
-                        descriptor.stencilAttachment.clearStencil = 0;
                         descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
+
+                        bool shouldClearStencilOnFirstUse = attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear;
+                        if (isFirstUse && shouldClearStencilOnFirstUse) {
+                            descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
+                            descriptor.stencilAttachment.clearStencil = clearValues.stencil;
+                        } else {
+                            descriptor.stencilAttachment.loadAction = MTLLoadActionLoad;
+                        }
                     }
                 }
 

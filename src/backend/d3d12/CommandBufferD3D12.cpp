@@ -262,21 +262,59 @@ namespace d3d12 {
                 case Command::BeginRenderSubpass:
                     {
                         commands.NextCommand<BeginRenderSubpassCmd>();
-                        Framebuffer::OMSetRenderTargetArgs args = currentFramebuffer->GetSubpassOMSetRenderTargetArgs(currentSubpass);
+                        const auto& subpass = currentRenderPass->GetSubpassInfo(currentSubpass);
 
-                        // HACK(enga@google.com): Remove when clearing is implemented
-                        for (uint32_t index = 0; index < args.numRTVs; ++index) {
-                            static const float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-                            commandList->ClearRenderTargetView(args.RTVs[index], clearColor, 0, nullptr);
+                        Framebuffer::OMSetRenderTargetArgs args = currentFramebuffer->GetSubpassOMSetRenderTargetArgs(currentSubpass);
+                        if (args.dsv.ptr) {
+                            commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE, &args.dsv);
+                        } else {
+                            commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE, nullptr);
                         }
 
-                        if (args.dsv.ptr) {
-                            // HACK(enga@google.com): Remove when clearing is implemented
-                            commandList->ClearDepthStencilView(args.dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0, 0, 0, nullptr);
+                        // Clear framebuffer attachments as needed
 
-                            commandList->OMSetRenderTargets(args.numRTVs, args.RTVs, FALSE, &args.dsv);
-                        } else {
-                            commandList->OMSetRenderTargets(args.numRTVs, args.RTVs, FALSE, nullptr);
+                        for (unsigned int location : IterateBitSet(subpass.colorAttachmentsSet)) {
+                            uint32_t attachmentSlot = subpass.colorAttachments[location];
+                            const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachmentSlot);
+
+                            // Only perform load op on first use
+                            if (attachmentInfo.firstSubpass == currentSubpass) {
+                                // Load op - color
+                                if (attachmentInfo.colorLoadOp == nxt::LoadOp::Clear) {
+                                    auto handle = currentFramebuffer->GetDSVDescriptor(attachmentSlot);
+                                    const auto& clear = currentFramebuffer->GetClearColor(attachmentSlot);
+                                    commandList->ClearRenderTargetView(handle, clear.color, 0, nullptr);
+                                }
+                            }
+                        }
+
+                        if (subpass.depthStencilAttachmentSet) {
+                            uint32_t attachmentSlot = subpass.depthStencilAttachment;
+                            const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachmentSlot);
+
+                            // Only perform load op on first use
+                            if (attachmentInfo.firstSubpass == currentSubpass) {
+                                // Load op - depth/stencil
+                                bool doDepthClear = TextureFormatHasDepth(attachmentInfo.format) &&
+                                    (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
+                                bool doStencilClear = TextureFormatHasStencil(attachmentInfo.format) &&
+                                    (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+
+                                D3D12_CLEAR_FLAGS clearFlags = {};
+                                if (doDepthClear) {
+                                    clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+                                }
+                                if (doStencilClear) {
+                                    clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+                                }
+                                if (clearFlags) {
+                                    auto handle = currentFramebuffer->GetRTVDescriptor(attachmentSlot);
+                                    const auto& clear = currentFramebuffer->GetClearDepthStencil(attachmentSlot);
+                                    // TODO(kainino@chromium.org): investigate: should the NXT clear stencil type be uint8_t?
+                                    uint8_t clearStencil = static_cast<uint8_t>(clear.stencil);
+                                    commandList->ClearDepthStencilView(handle, clearFlags, clear.depth, clearStencil, 0, nullptr);
+                                }
+                            }
                         }
 
                         static constexpr std::array<float, 4> defaultBlendFactor = { 0, 0, 0, 0 };

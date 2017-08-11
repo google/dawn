@@ -96,6 +96,8 @@ namespace opengl {
                 case Command::BeginRenderSubpass:
                     {
                         commands.NextCommand<BeginRenderSubpassCmd>();
+
+                        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
                         // TODO(kainino@chromium.org): possible future
                         // optimization: create these framebuffers at
                         // Framebuffer build time (or maybe CommandBuffer build
@@ -104,31 +106,42 @@ namespace opengl {
                         glGenFramebuffers(1, &currentFBO);
                         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFBO);
 
-                        const auto& info = currentRenderPass->GetSubpassInfo(currentSubpass);
+                        const auto& subpass = currentRenderPass->GetSubpassInfo(currentSubpass);
 
-                        std::array<GLenum, kMaxColorAttachments> drawBuffers;
-                        drawBuffers.fill(GL_NONE);
+                        // Mapping from attachmentSlot to GL framebuffer
+                        // attachment points. Defaults to zero (GL_NONE).
+                        std::array<GLenum, kMaxColorAttachments> drawBuffers = {};
+
+                        // Construct GL framebuffer
+
                         unsigned int attachmentCount = 0;
-                        for (unsigned int attachmentSlot : IterateBitSet(info.colorAttachmentsSet)) {
-                            uint32_t attachment = info.colorAttachments[attachmentSlot];
+                        for (unsigned int location : IterateBitSet(subpass.colorAttachmentsSet)) {
+                            uint32_t attachment = subpass.colorAttachments[location];
 
                             auto textureView = currentFramebuffer->GetTextureView(attachment);
                             GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
+
+                            // Attach color buffers.
                             glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
-                                GL_COLOR_ATTACHMENT0 + attachmentSlot,
-                                GL_TEXTURE_2D, texture, 0);
-                            drawBuffers[attachmentSlot] = GL_COLOR_ATTACHMENT0 + attachmentSlot;
-                            attachmentCount = attachmentSlot + 1;
+                                    GL_COLOR_ATTACHMENT0 + location,
+                                    GL_TEXTURE_2D, texture, 0);
+                            drawBuffers[location] = GL_COLOR_ATTACHMENT0 + location;
+                            attachmentCount = location + 1;
+
+                            // TODO(kainino@chromium.org): the color clears (later in
+                            // this function) may be undefined for other texture formats.
+                            ASSERT(textureView->GetTexture()->GetFormat() == nxt::TextureFormat::R8G8B8A8Unorm);
                         }
-                        glDrawBuffers(attachmentCount, &drawBuffers[0]);
+                        glDrawBuffers(attachmentCount, drawBuffers.data());
 
-                        if (info.depthStencilAttachmentSet) {
-                            uint32_t attachment = info.depthStencilAttachment;
+                        if (subpass.depthStencilAttachmentSet) {
+                            uint32_t attachmentSlot = subpass.depthStencilAttachment;
 
-                            auto textureView = currentFramebuffer->GetTextureView(attachment);
+                            auto textureView = currentFramebuffer->GetTextureView(attachmentSlot);
                             GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
                             nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
 
+                            // Attach depth/stencil buffer.
                             GLenum glAttachment = 0;
                             // TODO(kainino@chromium.org): it may be valid to just always use GL_DEPTH_STENCIL_ATTACHMENT here.
                             if (TextureFormatHasDepth(format)) {
@@ -141,12 +154,50 @@ namespace opengl {
                                 glAttachment = GL_STENCIL_ATTACHMENT;
                             }
 
-                            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
-                                    glAttachment, GL_TEXTURE_2D, texture, 0);
-                            // Load action
-                            glClearStencil(0);
-                            glClearDepth(1.0);
-                            glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+                            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, GL_TEXTURE_2D, texture, 0);
+
+                            // TODO(kainino@chromium.org): the depth/stencil clears (later in
+                            // this function) may be undefined for other texture formats.
+                            ASSERT(format == nxt::TextureFormat::D32FloatS8Uint);
+                        }
+
+                        // Clear framebuffer attachments as needed
+
+                        for (unsigned int location : IterateBitSet(subpass.colorAttachmentsSet)) {
+                            uint32_t attachmentSlot = subpass.colorAttachments[location];
+                            const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachmentSlot);
+
+                            // Only perform load op on first use
+                            if (attachmentInfo.firstSubpass == currentSubpass) {
+                                // Load op - color
+                                if (attachmentInfo.colorLoadOp == nxt::LoadOp::Clear) {
+                                    const auto& clear = currentFramebuffer->GetClearColor(location);
+                                    glClearBufferfv(GL_COLOR, location, clear.color);
+                                }
+                            }
+                        }
+
+                        if (subpass.depthStencilAttachmentSet) {
+                            uint32_t attachmentSlot = subpass.depthStencilAttachment;
+                            const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachmentSlot);
+
+                            // Only perform load op on first use
+                            if (attachmentInfo.firstSubpass == currentSubpass) {
+                                // Load op - depth/stencil
+                                const auto& clear = currentFramebuffer->GetClearDepthStencil(subpass.depthStencilAttachment);
+                                bool doDepthClear = TextureFormatHasDepth(attachmentInfo.format) &&
+                                    (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
+                                bool doStencilClear = TextureFormatHasStencil(attachmentInfo.format) &&
+                                    (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+                                if (doDepthClear && doStencilClear) {
+                                    glClearBufferfi(GL_DEPTH_STENCIL, 0, clear.depth, clear.stencil);
+                                } else if (doDepthClear) {
+                                    glClearBufferfv(GL_DEPTH, 0, &clear.depth);
+                                } else if (doStencilClear) {
+                                    const GLint clearStencil = clear.stencil;
+                                    glClearBufferiv(GL_STENCIL, 0, &clearStencil);
+                                }
+                            }
                         }
 
                         glBlendColor(0, 0, 0, 0);

@@ -138,17 +138,15 @@ void frame() {
 
     size_t i = 0;
 
-    std::vector<nxt::CommandBuffer> commands(50);
-    for (size_t j = 0; j < 50; j++) {
-
+    nxt::CommandBuffer commands;
+    {
         nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
             .BeginRenderPass(renderpass, framebuffer)
             .BeginRenderSubpass()
             .SetRenderPipeline(pipeline)
             .Clone();
 
-        for (int k = 0; k < 200; k++) {
-
+        for (int k = 0; k < 10000; k++) {
             shaderData[i].time = f / 60.0f;
             builder.SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 6, reinterpret_cast<uint32_t*>(&shaderData[i]))
                    .DrawArrays(3, 1, 0, 0);
@@ -157,10 +155,10 @@ void frame() {
 
         builder.EndRenderSubpass();
         builder.EndRenderPass();
-        commands[j] = builder.GetResult();
+        commands = builder.GetResult();
     }
 
-    queue.Submit(50, commands.data());
+    queue.Submit(1, &commands);
     backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
     swapchain.Present(backbuffer);
     DoFlush();

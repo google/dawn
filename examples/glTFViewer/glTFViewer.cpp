@@ -80,7 +80,6 @@ nxt::Queue queue;
 nxt::SwapChain swapchain;
 nxt::TextureView depthStencilView;
 nxt::RenderPass renderpass;
-nxt::Framebuffer lastFramebuffer;
 
 nxt::Buffer defaultBuffer;
 std::map<std::string, nxt::Buffer> buffers;
@@ -478,8 +477,7 @@ namespace {
 
 // Drawing
 namespace {
-    void drawMesh(const tinygltf::Mesh& iMesh, const glm::mat4& model) {
-        nxt::CommandBufferBuilder cmd = device.CreateCommandBufferBuilder();
+    void drawMesh(nxt::CommandBufferBuilder& cmd, const tinygltf::Mesh& iMesh, const glm::mat4& model) {
         for (const auto& iPrim : iMesh.primitives) {
             if (iPrim.mode != gl::Triangles) {
                 fprintf(stderr, "unsupported primitive mode %d\n", iPrim.mode);
@@ -507,8 +505,6 @@ namespace {
             material.uniformBuffer.SetSubData(0,
                     sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));
-            cmd.BeginRenderPass(renderpass, lastFramebuffer);
-            cmd.BeginRenderSubpass();
             cmd.SetRenderPipeline(material.pipeline);
             cmd.TransitionBufferUsage(material.uniformBuffer, nxt::BufferUsageBit::Uniform);
             cmd.SetBindGroup(0, material.bindGroup0);
@@ -551,14 +547,10 @@ namespace {
                 // DrawArrays
                 cmd.DrawArrays(vertexCount, 1, 0, 0);
             }
-            cmd.EndRenderSubpass();
-            cmd.EndRenderPass();
         }
-        auto commands = cmd.GetResult();
-        queue.Submit(1, &commands);
     }
 
-    void drawNode(const tinygltf::Node& node, const glm::mat4& parent = glm::mat4()) {
+    void drawNode(nxt::CommandBufferBuilder& cmd, const tinygltf::Node& node, const glm::mat4& parent = glm::mat4()) {
         glm::mat4 model;
         if (node.matrix.size() == 16) {
             model = glm::make_mat4(node.matrix.data());
@@ -579,22 +571,33 @@ namespace {
         model = parent * model;
 
         for (const auto& meshID : node.meshes) {
-            drawMesh(scene.meshes[meshID], model);
+            drawMesh(cmd, scene.meshes[meshID], model);
         }
         for (const auto& child : node.children) {
-            drawNode(scene.nodes.at(child), model);
+            drawNode(cmd, scene.nodes.at(child), model);
         }
     }
 
     void frame() {
         nxt::Texture backbuffer;
-        GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &lastFramebuffer);
+        nxt::Framebuffer framebuffer;
+        GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+        framebuffer.AttachmentSetClearColor(0, 0.3f, 0.4f, 0.5f, 1);
 
         const auto& defaultSceneNodes = scene.scenes.at(scene.defaultScene);
+        nxt::CommandBufferBuilder cmd = device.CreateCommandBufferBuilder()
+            .BeginRenderPass(renderpass, framebuffer)
+            .BeginRenderSubpass()
+            .Clone();
         for (const auto& n : defaultSceneNodes) {
             const auto& node = scene.nodes.at(n);
-            drawNode(node);
+            drawNode(cmd, node);
         }
+        auto commands = cmd.EndRenderSubpass()
+            .EndRenderPass()
+            .GetResult();
+        queue.Submit(1, &commands);
+
         backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
         swapchain.Present(backbuffer);
         DoFlush();

@@ -26,6 +26,7 @@ namespace backend {
     uint32_t TextureFormatPixelSize(nxt::TextureFormat format);
     bool TextureFormatHasDepth(nxt::TextureFormat format);
     bool TextureFormatHasStencil(nxt::TextureFormat format);
+    bool TextureFormatHasDepthOrStencil(nxt::TextureFormat format);
 
     class TextureBase : public RefCounted {
         public:

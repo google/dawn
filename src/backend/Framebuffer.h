@@ -28,18 +28,37 @@ namespace backend {
 
     class FramebufferBase : public RefCounted {
         public:
+            struct ClearColor {
+                float color[4] = {};
+            };
+
+            struct ClearDepthStencil {
+                float depth = 1.0f;
+                uint32_t stencil = 0;
+            };
+
             FramebufferBase(FramebufferBuilder* builder);
 
+            DeviceBase* GetDevice();
             RenderPassBase* GetRenderPass();
-            TextureViewBase* GetTextureView(uint32_t index);
+            TextureViewBase* GetTextureView(uint32_t attachmentSlot);
+            ClearColor GetClearColor(uint32_t attachmentSlot);
+            ClearDepthStencil GetClearDepthStencil(uint32_t attachmentSlot);
             uint32_t GetWidth() const;
             uint32_t GetHeight() const;
 
+            // NXT API
+            void AttachmentSetClearColor(uint32_t attachmentSlot, float clearR, float clearG, float clearB, float clearA);
+            void AttachmentSetClearDepthStencil(uint32_t attachmentSlot, float clearDepth, uint32_t clearStencil);
+
         private:
+            DeviceBase* device;
             Ref<RenderPassBase> renderPass;
             uint32_t width = 0;
             uint32_t height = 0;
             std::vector<Ref<TextureViewBase>> textureViews;
+            std::vector<ClearColor> clearColors;
+            std::vector<ClearDepthStencil> clearDepthStencils;
     };
 
     class FramebufferBuilder : public Builder<FramebufferBase> {

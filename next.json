@@ -697,7 +697,29 @@
         "category": "native"
     },
     "framebuffer": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "attachment set clear color",
+                "TODO": "determine where to put these methods (probably BeginRenderPass?)",
+                "args": [
+                    {"name": "attachment slot", "type": "uint32_t"},
+                    {"name": "clear r", "type": "float"},
+                    {"name": "clear g", "type": "float"},
+                    {"name": "clear b", "type": "float"},
+                    {"name": "clear a", "type": "float"}
+                ]
+            },
+            {
+                "name": "attachment set clear depth stencil",
+                "TODO": "determine where to put these methods (probably BeginRenderPass?)",
+                "args": [
+                    {"name": "attachment slot", "type": "uint32_t"},
+                    {"name": "clear depth", "type": "float"},
+                    {"name": "clear stencil", "type": "uint32_t"}
+                ]
+            }
+        ]
     },
     "framebuffer builder": {
         "category": "object",
@@ -769,6 +791,13 @@
         "values": [
             {"value": 0, "name": "vertex"},
             {"value": 1, "name": "instance"}
+        ]
+    },
+    "load op": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "clear"},
+            {"value": 1, "name": "load"}
         ]
     },
     "pipeline layout": {
@@ -844,6 +873,21 @@
                 "args": [
                     {"name": "attachment slot", "type": "uint32_t"},
                     {"name": "format", "type": "texture format"}
+                ]
+            },
+            {
+                "name": "attachment set color load op",
+                "args": [
+                    {"name": "attachment slot", "type": "uint32_t"},
+                    {"name": "op", "type": "load op"}
+                ]
+            },
+            {
+                "name": "attachment set depth stencil load ops",
+                "args": [
+                    {"name": "attachment slot", "type": "uint32_t"},
+                    {"name": "depth op", "type": "load op"},
+                    {"name": "stencil op", "type": "load op"}
                 ]
             },
             {

@@ -21,6 +21,7 @@
 #include "backend/d3d12/d3d12_platform.h"
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 
+#include <array>
 #include <vector>
 
 namespace backend {
@@ -32,12 +33,14 @@ namespace d3d12 {
         public:
             struct OMSetRenderTargetArgs {
                 unsigned int numRTVs = 0;
-                D3D12_CPU_DESCRIPTOR_HANDLE RTVs[kMaxColorAttachments] = {};
+                std::array<D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments> RTVs = {};
                 D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
             };
 
             Framebuffer(Device* device, FramebufferBuilder* builder);
             OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs(uint32_t subpassIndex);
+            D3D12_CPU_DESCRIPTOR_HANDLE GetRTVDescriptor(uint32_t attachmentSlot);
+            D3D12_CPU_DESCRIPTOR_HANDLE GetDSVDescriptor(uint32_t attachmentSlot);
 
         private:
             Device* device = nullptr;

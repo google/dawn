@@ -34,10 +34,19 @@ namespace backend {
 
             struct AttachmentInfo {
                 nxt::TextureFormat format;
+                nxt::LoadOp colorLoadOp = nxt::LoadOp::Load;
+                nxt::LoadOp depthLoadOp = nxt::LoadOp::Load;
+                nxt::LoadOp stencilLoadOp = nxt::LoadOp::Load;
+                // The first subpass that this attachment is used in.
+                // This is used to determine, for each subpass, whether each
+                // of its attachments is being used for the first time.
+                uint32_t firstSubpass = UINT32_MAX;
             };
 
             struct SubpassInfo {
+                // Set of locations which are set
                 std::bitset<kMaxColorAttachments> colorAttachmentsSet;
+                // Mapping from location to attachment slot
                 std::array<uint32_t, kMaxColorAttachments> colorAttachments;
                 bool depthStencilAttachmentSet = false;
                 uint32_t depthStencilAttachment = 0;
@@ -58,12 +67,12 @@ namespace backend {
         public:
             RenderPassBuilder(DeviceBase* device);
 
-            bool WasConsumed() const;
-
             // NXT API
             RenderPassBase* GetResultImpl() override;
             void SetAttachmentCount(uint32_t attachmentCount);
             void AttachmentSetFormat(uint32_t attachmentSlot, nxt::TextureFormat format);
+            void AttachmentSetColorLoadOp(uint32_t attachmentSlot, nxt::LoadOp op);
+            void AttachmentSetDepthStencilLoadOps(uint32_t attachmentSlot, nxt::LoadOp depthOp, nxt::LoadOp stencilOp);
             void SetSubpassCount(uint32_t subpassCount);
             void SubpassSetColorAttachment(uint32_t subpass, uint32_t outputAttachmentLocation, uint32_t attachmentSlot);
             void SubpassSetDepthStencilAttachment(uint32_t subpass, uint32_t attachmentSlot);

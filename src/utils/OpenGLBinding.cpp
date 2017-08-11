@@ -54,12 +54,6 @@ namespace utils {
                 glDeleteFramebuffers(1, &backFBO);
             }
 
-            void HACKCLEAR() {
-                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, backFBO);
-                glClearColor(0, 0, 0, 1);
-                glClear(GL_COLOR_BUFFER_BIT);
-            }
-
             // For GenerateSwapChainImplementation
             friend class SwapChainImpl;
 
@@ -89,8 +83,6 @@ namespace utils {
                 // Reallocate the texture
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
                         GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-                // Clear the newly (re-)allocated texture
-                HACKCLEAR();
 
                 return NXT_SWAP_CHAIN_NO_ERROR;
             }
@@ -106,7 +98,6 @@ namespace utils {
                 glBlitFramebuffer(0, 0, cfgWidth, cfgHeight, 0, 0, cfgWidth, cfgHeight,
                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
                 glfwSwapBuffers(window);
-                HACKCLEAR();
 
                 return NXT_SWAP_CHAIN_NO_ERROR;
             }

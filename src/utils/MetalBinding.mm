@@ -103,21 +103,6 @@ namespace utils {
                 currentTexture = currentDrawable.texture;
                 [currentTexture retain];
 
-                // Clear initial contents of the texture
-                {
-                    MTLRenderPassDescriptor* passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-                    passDescriptor.colorAttachments[0].texture = currentTexture;
-                    passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-                    passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-                    passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
-
-                    id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
-                    id<MTLRenderCommandEncoder> commandEncoder = [commandBuffer
-                        renderCommandEncoderWithDescriptor:passDescriptor];
-                    [commandEncoder endEncoding];
-                    [commandBuffer commit];
-                }
-
                 nextTexture->texture = reinterpret_cast<void*>(currentTexture);
 
                 return NXT_SWAP_CHAIN_NO_ERROR;
