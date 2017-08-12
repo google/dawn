@@ -281,7 +281,7 @@ namespace d3d12 {
                             if (attachmentInfo.firstSubpass == currentSubpass) {
                                 // Load op - color
                                 if (attachmentInfo.colorLoadOp == nxt::LoadOp::Clear) {
-                                    auto handle = currentFramebuffer->GetDSVDescriptor(attachmentSlot);
+                                    auto handle = currentFramebuffer->GetRTVDescriptor(attachmentSlot);
                                     const auto& clear = currentFramebuffer->GetClearColor(attachmentSlot);
                                     commandList->ClearRenderTargetView(handle, clear.color, 0, nullptr);
                                 }
@@ -308,7 +308,7 @@ namespace d3d12 {
                                     clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
                                 }
                                 if (clearFlags) {
-                                    auto handle = currentFramebuffer->GetRTVDescriptor(attachmentSlot);
+                                    auto handle = currentFramebuffer->GetDSVDescriptor(attachmentSlot);
                                     const auto& clear = currentFramebuffer->GetClearDepthStencil(attachmentSlot);
                                     // TODO(kainino@chromium.org): investigate: should the NXT clear stencil type be uint8_t?
                                     uint8_t clearStencil = static_cast<uint8_t>(clear.stencil);
