@@ -388,7 +388,7 @@ namespace backend {
     }
 
     bool CommandBufferStateTracker::EnsureTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage) {
-        if (texture->HasFrozenUsage(nxt::TextureUsageBit::OutputAttachment)) {
+        if (texture->HasFrozenUsage(usage)) {
             return true;
         }
         if (!IsInternalTextureTransitionPossible(texture, usage)) {
