@@ -460,7 +460,7 @@ namespace backend {
         }
         // Assumes we have a pipeline already
         auto requiredInputs = lastRenderPipeline->GetInputState()->GetInputsSetMask();
-        if ((inputsSet & ~requiredInputs).none()) {
+        if ((inputsSet & requiredInputs) == requiredInputs) {
             aspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
             return true;
         }
