@@ -59,7 +59,6 @@ namespace opengl {
         auto depthStencilState = ToBackend(GetDepthStencilState());
         depthStencilState->ApplyNow(persistentPipelineState);
 
-
         RenderPass* renderPass = ToBackend(GetRenderPass());
         auto& subpassInfo = renderPass->GetSubpassInfo(GetSubPass());
 

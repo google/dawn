@@ -29,6 +29,69 @@
 namespace backend {
 namespace opengl {
 
+    namespace {
+
+        // Push constants are implemented using OpenGL uniforms, however they aren't part of the global
+        // OpenGL state but are part of the program state instead. This means that we have to reapply
+        // push constants on pipeline change.
+        //
+        // This structure tracks the current values of push constants as well as dirty bits for push constants
+        // that should be applied before the next draw or dispatch.
+        struct PushConstantTracker {
+            PerStage<std::array<uint32_t, kMaxPushConstants>> values;
+            PerStage<std::bitset<kMaxPushConstants>> dirtyBits;
+
+            void OnBeginPass() {
+                for (auto stage : IterateStages(kAllStages)) {
+                    values[stage].fill(0);
+                    // No need to set dirty bits are a pipeline will be set before the next operation
+                    // using push constants.
+                }
+            }
+
+            void OnSetPushConstants(nxt::ShaderStageBit stages, uint32_t count,
+                                    uint32_t offset, const uint32_t* data) {
+                for (auto stage : IterateStages(stages)) {
+                    memcpy(&values[stage][offset], data, count * sizeof(uint32_t));
+
+                    // Use 64 bit masks and make sure there are no shift UB
+                    static_assert(kMaxPushConstants <= 8 * sizeof(unsigned long long) - 1, "");
+                    dirtyBits[stage] |= ((1ull << count) - 1ull) << offset;
+                }
+            }
+
+            void OnSetPipeline(PipelineBase* pipeline) {
+                for (auto stage : IterateStages(kAllStages)) {
+                    dirtyBits[stage] = pipeline->GetPushConstants(stage).mask;
+                }
+            }
+
+            void Apply(PipelineBase* pipeline, PipelineGL* glPipeline) {
+                for (auto stage : IterateStages(kAllStages)) {
+                    const auto& pushConstants = pipeline->GetPushConstants(stage);
+                    const auto& glPushConstants = glPipeline->GetGLPushConstants(stage);
+
+                    for (uint32_t constant : IterateBitSet(dirtyBits[stage] & pushConstants.mask)) {
+                        GLint location = glPushConstants[constant];
+                        switch (pushConstants.types[constant]) {
+                            case PushConstantType::Int:
+                                glUniform1i(location, *reinterpret_cast<GLint*>(&values[stage][constant]));
+                                break;
+                            case PushConstantType::UInt:
+                                glUniform1ui(location, *reinterpret_cast<GLuint*>(&values[stage][constant]));
+                                break;
+                            case PushConstantType::Float:
+                                glUniform1f(location, *reinterpret_cast<GLfloat*>(&values[stage][constant]));
+                                break;
+                        }
+                    }
+                }
+            }
+
+        };
+
+    }
+
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
         : CommandBufferBase(builder), commands(builder->AcquireCommands()) {
     }
@@ -71,6 +134,8 @@ namespace opengl {
         PersistentPipelineState persistentPipelineState;
         persistentPipelineState.SetDefaultState();
 
+        PushConstantTracker pushConstants;
+
         RenderPass* currentRenderPass = nullptr;
         Framebuffer* currentFramebuffer = nullptr;
         uint32_t currentSubpass = 0;
@@ -81,6 +146,7 @@ namespace opengl {
                 case Command::BeginComputePass:
                     {
                         commands.NextCommand<BeginComputePassCmd>();
+                        pushConstants.OnBeginPass();
                     }
                     break;
 
@@ -96,6 +162,7 @@ namespace opengl {
                 case Command::BeginRenderSubpass:
                     {
                         commands.NextCommand<BeginRenderSubpassCmd>();
+                        pushConstants.OnBeginPass();
 
                         // TODO(kainino@chromium.org): This is added to possibly
                         // work around an issue seen on Windows/Intel. It should
@@ -284,6 +351,7 @@ namespace opengl {
                 case Command::Dispatch:
                     {
                         DispatchCmd* dispatch = commands.NextCommand<DispatchCmd>();
+                        pushConstants.Apply(lastPipeline, lastGLPipeline);
                         glDispatchCompute(dispatch->x, dispatch->y, dispatch->z);
                         // TODO(cwallez@chromium.org): add barriers to the API
                         glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -293,6 +361,8 @@ namespace opengl {
                 case Command::DrawArrays:
                     {
                         DrawArraysCmd* draw = commands.NextCommand<DrawArraysCmd>();
+                        pushConstants.Apply(lastPipeline, lastGLPipeline);
+
                         if (draw->firstInstance > 0) {
                             glDrawArraysInstancedBaseInstance(lastRenderPipeline->GetGLPrimitiveTopology(),
                                 draw->firstVertex, draw->vertexCount, draw->instanceCount, draw->firstInstance);
@@ -307,6 +377,8 @@ namespace opengl {
                 case Command::DrawElements:
                     {
                         DrawElementsCmd* draw = commands.NextCommand<DrawElementsCmd>();
+                        pushConstants.Apply(lastPipeline, lastGLPipeline);
+
                         size_t formatSize = IndexFormatSize(indexBufferFormat);
                         GLenum formatType = IndexFormatType(indexBufferFormat);
 
@@ -352,6 +424,7 @@ namespace opengl {
                         ToBackend(cmd->pipeline)->ApplyNow();
                         lastGLPipeline = ToBackend(cmd->pipeline).Get();
                         lastPipeline = ToBackend(cmd->pipeline).Get();
+                        pushConstants.OnSetPipeline(lastPipeline);
                     }
                     break;
 
@@ -362,35 +435,15 @@ namespace opengl {
                         lastRenderPipeline = ToBackend(cmd->pipeline).Get();
                         lastGLPipeline = ToBackend(cmd->pipeline).Get();
                         lastPipeline = ToBackend(cmd->pipeline).Get();
+                        pushConstants.OnSetPipeline(lastPipeline);
                     }
                     break;
 
                 case Command::SetPushConstants:
                     {
                         SetPushConstantsCmd* cmd = commands.NextCommand<SetPushConstantsCmd>();
-                        uint32_t* valuesUInt = commands.NextData<uint32_t>(cmd->count);
-                        int32_t* valuesInt = reinterpret_cast<int32_t*>(valuesUInt);
-                        float* valuesFloat = reinterpret_cast<float*>(valuesUInt);
-
-                        for (auto stage : IterateStages(cmd->stages)) {
-                            const auto& pushConstants = lastPipeline->GetPushConstants(stage);
-                            const auto& glPushConstants = lastGLPipeline->GetGLPushConstants(stage);
-                            for (size_t i = 0; i < cmd->count; i++) {
-                                GLint location = glPushConstants[cmd->offset + i];
-
-                                switch (pushConstants.types[cmd->offset + i]) {
-                                    case PushConstantType::Int:
-                                        glUniform1i(location, valuesInt[i]);
-                                        break;
-                                    case PushConstantType::UInt:
-                                        glUniform1ui(location, valuesUInt[i]);
-                                        break;
-                                    case PushConstantType::Float:
-                                        glUniform1f(location, valuesFloat[i]);
-                                        break;
-                                }
-                            }
-                        }
+                        uint32_t* data = commands.NextData<uint32_t>(cmd->count);
+                        pushConstants.OnSetPushConstants(cmd->stages, cmd->count, cmd->offset, data);
                     }
                     break;
 
@@ -418,11 +471,7 @@ namespace opengl {
                         const auto& layout = group->GetLayout()->GetBindingInfo();
 
                         // TODO(cwallez@chromium.org): iterate over the layout bitmask instead
-                        for (size_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
-                            if (!layout.mask[binding]) {
-                                continue;
-                            }
-
+                        for (uint32_t binding : IterateBitSet(layout.mask)) {
                             switch (layout.types[binding]) {
                                 case nxt::BindingType::UniformBuffer:
                                     {
