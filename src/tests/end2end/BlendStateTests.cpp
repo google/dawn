@@ -62,6 +62,7 @@ class BlendStateTest : public NXTTest {
                 .SetAttachmentCount(1)
                 .SetSubpassCount(1)
                 .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
                 .SubpassSetColorAttachment(0, 0, 0)
                 .GetResult();
 

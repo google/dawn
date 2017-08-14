@@ -40,6 +40,7 @@ class InputStateTest : public NXTTest {
             renderpass = device.CreateRenderPassBuilder()
                 .SetAttachmentCount(1)
                 .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
                 .SetSubpassCount(1)
                 .SubpassSetColorAttachment(0, 0, 0)
                 .GetResult();
