@@ -23,6 +23,8 @@ namespace metal {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
                 return MTLPixelFormatRGBA8Unorm;
+            case nxt::TextureFormat::R8G8B8A8Uint:
+                return MTLPixelFormatRGBA8Uint;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return MTLPixelFormatDepth32Float_Stencil8;
         }

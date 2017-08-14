@@ -22,6 +22,7 @@ namespace backend {
     uint32_t TextureFormatPixelSize(nxt::TextureFormat format) {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
+            case nxt::TextureFormat::R8G8B8A8Uint:
                 return 4;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return 8;
@@ -33,6 +34,7 @@ namespace backend {
     bool TextureFormatHasDepth(nxt::TextureFormat format) {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
+            case nxt::TextureFormat::R8G8B8A8Uint:
                 return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;
@@ -44,6 +46,7 @@ namespace backend {
     bool TextureFormatHasStencil(nxt::TextureFormat format) {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
+            case nxt::TextureFormat::R8G8B8A8Uint:
                 return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;

@@ -81,6 +81,8 @@ namespace d3d12 {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
                 return DXGI_FORMAT_R8G8B8A8_UNORM;
+            case nxt::TextureFormat::R8G8B8A8Uint:
+                return DXGI_FORMAT_R8G8B8A8_UINT;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
             default:
