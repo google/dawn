@@ -31,7 +31,7 @@
     AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected))
 
 #define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, x, y, width, height, level) \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected, width * height))
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected, (width) * (height)))
 
 struct RGBA8 {
     constexpr RGBA8() : RGBA8(0,0,0,0) {}

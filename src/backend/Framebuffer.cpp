@@ -103,19 +103,10 @@ namespace backend {
             return nullptr;
         }
 
-        // TODO(kainino@chromium.org): Remove this flag when the
-        // null=backbuffer hack is removed. Then, using null texture views can
-        // be completely disallowed.
-        bool usingBackbufferHack = false;
         for (auto& textureView : textureViews) {
             if (!textureView) {
-                if (usingBackbufferHack) {
-                    // TODO(kainino@chromium.org) update this too
-                    HandleError("Framebuffer has more than one null attachment");
-                    return nullptr;
-                }
-                usingBackbufferHack = true;
-                continue;
+                HandleError("Framebuffer attachment not set");
+                return nullptr;
             }
 
             // TODO(cwallez@chromium.org): Adjust for the mip-level once that is supported.

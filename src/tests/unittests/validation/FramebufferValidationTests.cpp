@@ -29,6 +29,21 @@ class FramebufferValidationTest : public ValidationTest {
             return attachment.CreateTextureViewBuilder()
                 .GetResult();
         }
+
+        nxt::Framebuffer CreateFramebufferWithAttachment(uint32_t width, uint32_t height, nxt::TextureFormat format) {
+            auto renderpass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
+                .SetAttachmentCount(1)
+                .AttachmentSetFormat(0, format)
+                .SetSubpassCount(1)
+                .SubpassSetColorAttachment(0, 0, 0)
+                .GetResult();
+            nxt::TextureView attachment = Create2DAttachment(width, height, format);
+            return AssertWillBeSuccess(device.CreateFramebufferBuilder())
+                .SetRenderPass(renderpass)
+                .SetAttachment(0, attachment)
+                .SetDimensions(100, 100)
+                .GetResult();
+        }
 };
 
 // Test for an empty framebuffer builder
@@ -73,10 +88,27 @@ TEST_F(FramebufferValidationTest, BasicWithEmptyAttachment) {
         .SetSubpassCount(1)
         .SubpassSetColorAttachment(0, 0, 0)
         .GetResult();
-    auto framebuffer = AssertWillBeSuccess(device.CreateFramebufferBuilder())
+    AssertWillBeError(device.CreateFramebufferBuilder())
         .SetRenderPass(renderpass)
         .SetDimensions(100, 100)
         .GetResult();
+}
+
+// Test for a basic framebuffer with one attachment
+TEST_F(FramebufferValidationTest, BasicWithOneAttachment) {
+    CreateFramebufferWithAttachment(100, 100, nxt::TextureFormat::R8G8B8A8Unorm);
+}
+
+// Tests for setting clear values
+TEST_F(FramebufferValidationTest, ClearValues) {
+    auto framebuffer = CreateFramebufferWithAttachment(100, 100, nxt::TextureFormat::R8G8B8A8Unorm);
+
+    // Set clear color value for attachment 0
+    framebuffer.AttachmentSetClearColor(0, 0.0f, 0.0f, 0.0f, 0.0f);
+    // Set clear depth/stencil values for attachment 0 - ok, but ignored, since it's a color attachment
+    framebuffer.AttachmentSetClearDepthStencil(0, 0.0f, 0);
+    // Set clear color value for attachment 1 - should fail
+    ASSERT_DEVICE_ERROR(framebuffer.AttachmentSetClearColor(1, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 // Check validation that the attachment size must be the same as the framebuffer size.
@@ -120,4 +152,76 @@ TEST_F(FramebufferValidationTest, AttachmentSizeMatchFramebufferSize) {
     }
 
     // TODO(cwallez@chromium.org): also test with a mismatches depth / stencil
+}
+
+TEST_F(FramebufferValidationTest, AttachmentFormatMatchTextureFormat) {
+    // Control case: attach color attachment to color slot
+    {
+        auto renderpass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
+            .SetAttachmentCount(1)
+            .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetSubpassCount(1)
+            .SubpassSetColorAttachment(0, 0, 0)
+            .GetResult();
+
+        nxt::TextureView attachment = Create2DAttachment(100, 100, nxt::TextureFormat::R8G8B8A8Unorm);
+        auto framebuffer = AssertWillBeSuccess(device.CreateFramebufferBuilder())
+            .SetRenderPass(renderpass)
+            .SetAttachment(0, attachment)
+            .SetDimensions(100, 100)
+            .GetResult();
+    }
+
+    // Error: attach color attachment to depth slot, setting the attachment format first
+    {
+        auto renderpass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
+            .SetAttachmentCount(1)
+            .SetSubpassCount(1)
+            .AttachmentSetFormat(0, nxt::TextureFormat::D32FloatS8Uint)
+            .SubpassSetDepthStencilAttachment(0, 0)
+            .GetResult();
+
+        nxt::TextureView attachment = Create2DAttachment(100, 100, nxt::TextureFormat::R8G8B8A8Unorm);
+        auto framebuffer = AssertWillBeError(device.CreateFramebufferBuilder())
+            .SetRenderPass(renderpass)
+            .SetAttachment(0, attachment)
+            .SetDimensions(100, 100)
+            .GetResult();
+    }
+
+    // Error: attach color attachment to depth slot, but setting the attachment format last
+    {
+        auto renderpass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
+            .SetSubpassCount(1)
+            .SetAttachmentCount(1)
+            .SubpassSetDepthStencilAttachment(0, 0)
+            .AttachmentSetFormat(0, nxt::TextureFormat::D32FloatS8Uint)
+            .GetResult();
+
+        nxt::TextureView attachment = Create2DAttachment(100, 100, nxt::TextureFormat::R8G8B8A8Unorm);
+        auto framebuffer = AssertWillBeError(device.CreateFramebufferBuilder())
+            .SetRenderPass(renderpass)
+            .SetAttachment(0, attachment)
+            .SetDimensions(100, 100)
+            .GetResult();
+    }
+
+    // Error: attach depth texture to color slot
+    {
+        auto renderpass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
+            .SetAttachmentCount(1)
+            .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetSubpassCount(1)
+            .SubpassSetColorAttachment(0, 0, 0)
+            .GetResult();
+
+        nxt::TextureView attachment = Create2DAttachment(100, 100, nxt::TextureFormat::D32FloatS8Uint);
+        auto framebuffer = AssertWillBeError(device.CreateFramebufferBuilder())
+            .SetRenderPass(renderpass)
+            .SetAttachment(0, attachment)
+            .SetDimensions(100, 100)
+            .GetResult();
+    }
+
+    // TODO(kainino@chromium.org): also check attachment samples, etc.
 }

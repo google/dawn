@@ -94,6 +94,23 @@ namespace backend {
             }
         }
 
+        for (const auto& subpass : subpasses) {
+            for (unsigned int location : IterateBitSet(subpass.colorAttachmentsSet)) {
+                uint32_t slot = subpass.colorAttachments[location];
+                if (TextureFormatHasDepthOrStencil(attachments[slot].format)) {
+                    HandleError("Render pass color attachment is not of a color format");
+                    return nullptr;
+                }
+            }
+            if (subpass.depthStencilAttachmentSet) {
+                uint32_t slot = subpass.depthStencilAttachment;
+                if (!TextureFormatHasDepthOrStencil(attachments[slot].format)) {
+                    HandleError("Render pass depth/stencil attachment is not of a depth/stencil format");
+                    return nullptr;
+                }
+            }
+        }
+
         return device->CreateRenderPass(this);
     }
 

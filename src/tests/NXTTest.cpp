@@ -18,6 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/BackendBinding.h"
+#include "utils/NXTHelpers.h"
 #include "utils/SystemUtils.h"
 
 #include "GLFW/glfw3.h"

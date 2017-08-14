@@ -97,6 +97,11 @@ namespace opengl {
                     {
                         commands.NextCommand<BeginRenderSubpassCmd>();
 
+                        // TODO(kainino@chromium.org): This is added to possibly
+                        // work around an issue seen on Windows/Intel. It should
+                        // break any feedback loop before the clears, even if
+                        // there shouldn't be any negative effects from this.
+                        // Investigate whether it's actually needed.
                         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
                         // TODO(kainino@chromium.org): possible future
                         // optimization: create these framebuffers at
