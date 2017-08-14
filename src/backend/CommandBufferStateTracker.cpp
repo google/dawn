@@ -234,6 +234,7 @@ namespace backend {
         texturesAttached.clear();
 
         currentSubpass += 1;
+        inputsSet.reset();
         aspects.reset(VALIDATION_ASPECT_RENDER_SUBPASS);
         UnsetPipeline();
         return true;
@@ -290,7 +291,6 @@ namespace backend {
             return false;
         }
         aspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
-
         return SetPipelineCommon(pipeline);
     }
 
@@ -546,6 +546,7 @@ namespace backend {
         PipelineLayoutBase* layout = pipeline->GetLayout();
 
         aspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
+        aspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
         // Reset bindgroups but mark unused bindgroups as valid
         bindgroupsSet = ~layout->GetBindGroupsLayoutMask();
 
