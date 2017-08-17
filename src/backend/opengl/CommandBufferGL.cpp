@@ -273,6 +273,7 @@ namespace opengl {
                         }
 
                         glBlendColor(0, 0, 0, 0);
+                        glViewport(0, 0, currentFramebuffer->GetWidth(), currentFramebuffer->GetHeight());
                     }
                     break;
 
