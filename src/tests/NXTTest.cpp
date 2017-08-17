@@ -142,6 +142,7 @@ void NXTTest::SetUp() {
     swapchain = device.CreateSwapChainBuilder()
         .SetImplementation(binding->GetSwapChainImplementation())
         .GetResult();
+    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, 400, 400);
 
     device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
 }
