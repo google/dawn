@@ -19,6 +19,7 @@
 #include "backend/Device.h"
 #include "backend/Texture.h"
 #include "common/Assert.h"
+#include "common/Math.h"
 
 namespace backend {
 
@@ -128,6 +129,11 @@ namespace backend {
 
             if (!(bufferViews[j]->GetBuffer()->GetAllowedUsage() & requiredBit)) {
                 HandleError("Buffer needs to allow the correct usage bit");
+                return;
+            }
+
+            if (!IsAligned(bufferViews[i]->GetOffset(), 256)) {
+                HandleError("Buffer view offset for bind group needs to be 256-byte aligned");
                 return;
             }
         }
