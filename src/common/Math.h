@@ -23,8 +23,9 @@ uint32_t ScanForward(uint32_t bits);
 uint32_t Log2(uint32_t value);
 bool IsPowerOfTwo(size_t n);
 
-bool IsAligned(const void* ptr, size_t alignment);
+bool IsPtrAligned(const void* ptr, size_t alignment);
 void* AlignVoidPtr(void* ptr, size_t alignment);
+bool IsAligned(uint32_t value, size_t alignment);
 uint32_t Align(uint32_t value, size_t alignment);
 
 template<typename T>

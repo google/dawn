@@ -154,7 +154,7 @@ namespace backend {
 
     CommandBlocks&& CommandAllocator::AcquireBlocks() {
         ASSERT(currentPtr != nullptr && endPtr != nullptr);
-        ASSERT(IsAligned(currentPtr, alignof(uint32_t)));
+        ASSERT(IsPtrAligned(currentPtr, alignof(uint32_t)));
         ASSERT(currentPtr + sizeof(uint32_t) <= endPtr);
         *reinterpret_cast<uint32_t*>(currentPtr) = EndOfBlock;
 
@@ -169,7 +169,7 @@ namespace backend {
         ASSERT(commandId != EndOfBlock);
 
         // It should always be possible to allocate one id, for EndOfBlock tagging,
-        ASSERT(IsAligned(currentPtr, alignof(uint32_t)));
+        ASSERT(IsPtrAligned(currentPtr, alignof(uint32_t)));
         ASSERT(currentPtr + sizeof(uint32_t) <= endPtr);
         uint32_t* idAlloc = reinterpret_cast<uint32_t*>(currentPtr);
 

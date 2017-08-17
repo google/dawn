@@ -49,7 +49,7 @@ bool IsPowerOfTwo(size_t n) {
     return (n & (n - 1)) == 0;
 }
 
-bool IsAligned(const void* ptr, size_t alignment) {
+bool IsPtrAligned(const void* ptr, size_t alignment) {
     ASSERT(IsPowerOfTwo(alignment));
     ASSERT(alignment != 0);
     return (reinterpret_cast<size_t>(ptr) & (alignment - 1)) == 0;
@@ -59,6 +59,14 @@ void* AlignVoidPtr(void* ptr, size_t alignment) {
     ASSERT(IsPowerOfTwo(alignment));
     ASSERT(alignment != 0);
     return reinterpret_cast<void*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) & ~(alignment - 1));
+}
+
+bool IsAligned(uint32_t value, size_t alignment) {
+    ASSERT(alignment <= UINT32_MAX);
+    ASSERT(IsPowerOfTwo(alignment));
+    ASSERT(alignment != 0);
+    uint32_t alignment32 = static_cast<uint32_t>(alignment);
+    return (value & (alignment32 - 1)) == 0;
 }
 
 uint32_t Align(uint32_t value, size_t alignment) {

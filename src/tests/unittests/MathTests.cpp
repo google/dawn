@@ -94,8 +94,8 @@ TEST(Math, Align) {
     }
 }
 
-// Tests for IsAligned
-TEST(Math, IsAligned) {
+// Tests for IsPtrAligned
+TEST(Math, IsPtrAligned) {
     constexpr size_t kTestAlignment = 8;
 
     char buffer[kTestAlignment * 4];
@@ -104,6 +104,32 @@ TEST(Math, IsAligned) {
         char* unaligned = &buffer[i];
         char* aligned = AlignPtr(unaligned, kTestAlignment);
 
-        ASSERT_EQ(IsAligned(unaligned, kTestAlignment), unaligned == aligned);
+        ASSERT_EQ(IsPtrAligned(unaligned, kTestAlignment), unaligned == aligned);
+    }
+}
+
+// Tests for IsAligned
+TEST(Math, IsAligned) {
+    // 0 is aligned
+    ASSERT_TRUE(IsAligned(0, 4));
+    ASSERT_TRUE(IsAligned(0, 256));
+    ASSERT_TRUE(IsAligned(0, 512));
+
+    // Multiples are aligned
+    ASSERT_TRUE(IsAligned(8, 8));
+    ASSERT_TRUE(IsAligned(16, 8));
+    ASSERT_TRUE(IsAligned(24, 8));
+    ASSERT_TRUE(IsAligned(256, 256));
+    ASSERT_TRUE(IsAligned(512, 256));
+    ASSERT_TRUE(IsAligned(768, 256));
+
+    // Alignment with 1 is always aligned
+    for (uint32_t i = 0; i < 128; ++i) {
+        ASSERT_TRUE(IsAligned(i, 1));
+    }
+
+    // Everything in the range (align, 2*align) is not aligned
+    for (uint32_t i = 1; i < 64; ++i) {
+        ASSERT_FALSE(IsAligned(64 + i, 64));
     }
 }
