@@ -42,17 +42,15 @@ namespace metal {
     }
 
     ShaderModule::ShaderModule(ShaderModuleBuilder* builder)
-        : ShaderModuleBase(builder) {
-        compiler = new spirv_cross::CompilerMSL(builder->AcquireSpirv());
-        ExtractSpirvInfo(*compiler);
-    }
-
-    ShaderModule::~ShaderModule() {
-        delete compiler;
+        : ShaderModuleBase(builder), spirv(builder->AcquireSpirv()) {
+        spirv_cross::CompilerMSL compiler(spirv);
+        ExtractSpirvInfo(compiler);
     }
 
     ShaderModule::MetalFunctionData ShaderModule::GetFunction(const char* functionName,
                                                               const PipelineLayout* layout) const {
+        spirv_cross::CompilerMSL compiler(spirv);
+
         // By default SPIRV-Cross will give MSL resources indices in increasing order.
         // To make the MSL indices match the indices chosen in the PipelineLayout, we build
         // a table of MSLResourceBinding to give to SPIRV-Cross
@@ -92,14 +90,14 @@ namespace metal {
         MetalFunctionData result;
 
         {
-            auto size = compiler->get_entry_point(functionName).workgroup_size;
+            auto size = compiler.get_entry_point(functionName).workgroup_size;
             result.localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
         }
 
         {
             // SPIRV-Cross also supports re-ordering attributes but it seems to do the correct thing
             // by default.
-            std::string msl = compiler->compile(nullptr, &mslBindings);
+            std::string msl = compiler.compile(nullptr, &mslBindings);
             NSString* mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];
 
             auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();

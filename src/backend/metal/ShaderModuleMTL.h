@@ -31,7 +31,6 @@ namespace metal {
     class ShaderModule : public ShaderModuleBase {
         public:
             ShaderModule(ShaderModuleBuilder* builder);
-            ~ShaderModule();
 
             struct MetalFunctionData {
                 id<MTLFunction> function;
@@ -40,7 +39,10 @@ namespace metal {
             MetalFunctionData GetFunction(const char* functionName, const PipelineLayout* layout) const;
 
         private:
-            spirv_cross::CompilerMSL* compiler = nullptr;
+            // Calling compile on CompilerMSL somehow changes internal state that makes subsequent
+            // compiles return invalid MSL. We keep the spirv around and recreate the compiler everytime
+            // we need to use it.
+            std::vector<uint32_t> spirv;
     };
 
 }
