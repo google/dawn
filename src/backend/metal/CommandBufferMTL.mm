@@ -460,9 +460,9 @@ namespace metal {
                             }
 
                             auto stage = layout.visibilities[binding];
-                            bool vertStage = stage & nxt::ShaderStageBit::Vertex;
-                            bool fragStage = stage & nxt::ShaderStageBit::Fragment;
-                            bool computeStage = stage & nxt::ShaderStageBit::Compute;
+                            bool vertStage = stage & nxt::ShaderStageBit::Vertex && lastRenderPipeline != nullptr;
+                            bool fragStage = stage & nxt::ShaderStageBit::Fragment && lastRenderPipeline != nullptr;
+                            bool computeStage = stage & nxt::ShaderStageBit::Compute && lastComputePipeline != nullptr;
                             uint32_t vertIndex = 0;
                             uint32_t fragIndex = 0;
                             uint32_t computeIndex = 0;
