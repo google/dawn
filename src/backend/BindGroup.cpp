@@ -132,7 +132,7 @@ namespace backend {
                 return;
             }
 
-            if (!IsAligned(bufferViews[i]->GetOffset(), 256)) {
+            if (!IsAligned(bufferViews[j]->GetOffset(), 256)) {
                 HandleError("Buffer view offset for bind group needs to be 256-byte aligned");
                 return;
             }
