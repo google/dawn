@@ -48,6 +48,12 @@ if (NXT_ENABLE_OPENGL)
     )
 endif()
 
+if (NXT_ENABLE_VULKAN)
+    list(APPEND UTILS_SOURCES
+        ${UTILS_DIR}/VulkanBinding.cpp
+    )
+endif()
+
 add_library(utils STATIC ${UTILS_SOURCES})
 target_link_libraries(utils nxt_backend shaderc nxtcpp nxt)
 target_include_directories(utils PUBLIC ${SRC_DIR})

@@ -420,30 +420,18 @@ def main():
         }
     ]
 
-    if 'opengl' in targets:
-        opengl_params = {
-            'namespace': 'opengl',
-        }
-        renders.append(FileRender('BackendProcTable.cpp', 'opengl/ProcTable.cpp', base_backend_params + [opengl_params]))
+    for backend in ['d3d12', 'metal', 'null', 'opengl', 'vulkan']:
+        if not backend in targets:
+            continue
 
-    if 'metal' in targets:
-        metal_params = {
-            'namespace': 'metal',
-        }
-        renders.append(FileRender('BackendProcTable.cpp', 'metal/ProcTable.mm', base_backend_params + [metal_params]))
+        extension = 'cpp'
+        if backend == 'metal':
+            extension = 'mm'
 
-    if 'd3d12' in targets:
-        d3d12_params = {
-            'namespace': 'd3d12',
+        backend_params = {
+            'namespace': backend,
         }
-        renders.append(FileRender('BackendProcTable.cpp', 'd3d12/ProcTable.cpp', base_backend_params + [d3d12_params]))
-
-    if 'null' in targets:
-        null_params = {
-            'namespace': 'null',
-        }
-
-        renders.append(FileRender('BackendProcTable.cpp', 'null/ProcTable.cpp', base_backend_params + [null_params]))
+        renders.append(FileRender('BackendProcTable.cpp', backend + '/ProcTable.' + extension, base_backend_params + [backend_params]))
 
     if 'wire' in targets:
         renders.append(FileRender('wire/WireCmd.h', 'wire/WireCmd_autogen.h', base_backend_params))
