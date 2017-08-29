@@ -180,11 +180,10 @@ class PrimitiveTopologyTest : public NXTTest {
 
             fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
                 #version 450
-                out vec4 fragColor;
+                layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-                })"
-            );
+                })");
 
             inputState = device.CreateInputStateBuilder()
                 .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32A32, 0)

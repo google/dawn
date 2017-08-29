@@ -109,7 +109,7 @@ void initRender() {
 
     nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
-        out vec4 fragColor;
+        layout(location = 0) out vec4 fragColor;
         void main() {
             fragColor = vec4(1.0);
         }

@@ -50,11 +50,10 @@ void init() {
             int a;
             float b;
         } myUbo;
-        out vec4 fragColor;
+        layout(location = 0) out vec4 fragColor;
         void main() {
             fragColor = vec4(1.0, myUbo.a / 255.0, myUbo.b, 1.0);
-        })"
-    );
+        })");
 
     nxt::BindGroupLayout bgl = device.CreateBindGroupLayoutBuilder()
         .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::UniformBuffer, 0, 1)

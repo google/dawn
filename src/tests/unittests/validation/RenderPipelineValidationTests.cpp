@@ -38,11 +38,10 @@ class RenderPipelineValidationTest : public ValidationTest {
 
             fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
                 #version 450
-                out vec4 fragColor;
+                layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-                })"
-            );
+                })");
         }
 
         nxt::RenderPipelineBuilder& AddDefaultStates(nxt::RenderPipelineBuilder&& builder) {

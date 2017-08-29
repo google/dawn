@@ -32,7 +32,7 @@ class InputStateTest : public ValidationTest {
             nxt::ShaderModuleBuilder fsModuleBuilder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
             utils::FillShaderModuleBuilder(fsModuleBuilder, nxt::ShaderStage::Fragment, R"(
                 #version 450
-                out vec4 fragColor;
+                layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(1.0, 0.0, 0.0, 1.0);
                 }

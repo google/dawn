@@ -142,20 +142,19 @@ void init() {
     nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
-        out vec4 fragColor;
+        layout(location = 0) out vec4 fragColor;
         void main() {
             fragColor = vec4(f_col, 1.0);
-        })"
-    );
+        })");
 
-    nxt::ShaderModule fsReflectionModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    nxt::ShaderModule fsReflectionModule =
+        utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
-        out vec4 fragColor;
+        layout(location = 0) out vec4 fragColor;
         void main() {
             fragColor = vec4(mix(f_col, vec3(0.5, 0.5, 0.5), 0.5), 1.0);
-        })"
-    );
+        })");
 
     auto inputState = device.CreateInputStateBuilder()
         .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32, 0)

@@ -102,11 +102,10 @@ void init() {
         layout(set = 0, binding = 0) uniform sampler mySampler;
         layout(set = 0, binding = 1) uniform texture2D myTexture;
 
-        out vec4 fragColor;
+        layout(location = 0) out vec4 fragColor;
         void main() {
             fragColor = texture(sampler2D(myTexture, mySampler), gl_FragCoord.xy / vec2(640.0, 480.0));
-        })"
-    );
+        })");
 
     auto inputState = device.CreateInputStateBuilder()
         .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32A32, 0)
