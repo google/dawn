@@ -28,9 +28,9 @@ namespace utils {
                 impl.Destroy = [](void* userData) {
                     delete reinterpret_cast<TImpl*>(userData);
                 };
-                impl.Configure = [](void* userData, nxtTextureFormat format, uint32_t width, uint32_t height) {
+                impl.Configure = [](void* userData, nxtTextureFormat format, nxtTextureUsageBit allowedUsage, nxtTextureUsageBit initialUsage, uint32_t width, uint32_t height) {
                     return reinterpret_cast<TImpl*>(userData)->Configure(
-                        format, width, height);
+                        format, allowedUsage, initialUsage, width, height);
                 };
                 impl.GetNextTexture = [](void* userData, nxtSwapChainNextTexture* nextTexture) {
                     return reinterpret_cast<TImpl*>(userData)->GetNextTexture(

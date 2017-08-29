@@ -58,6 +58,7 @@ namespace backend {
     bool TextureFormatHasDepthOrStencil(nxt::TextureFormat format) {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
+            case nxt::TextureFormat::R8G8B8A8Uint:
                 return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;

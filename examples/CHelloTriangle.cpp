@@ -39,7 +39,7 @@ void init() {
         swapchain = nxtSwapChainBuilderGetResult(builder);
         nxtSwapChainBuilderRelease(builder);
     }
-    nxtSwapChainConfigure(swapchain, NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM, 640, 480);
+    nxtSwapChainConfigure(swapchain, NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM, NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT, NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT, 640, 480);
 
     const char* vs =
         "#version 450\n"

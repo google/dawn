@@ -77,6 +77,41 @@ namespace utils {
 
             return factory;
         }
+
+        DXGI_USAGE D3D12SwapChainBufferUsage(nxtTextureUsageBit allowedUsages) {
+            DXGI_USAGE usage = DXGI_CPU_ACCESS_NONE;
+            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_SAMPLED) {
+                usage |= DXGI_USAGE_SHADER_INPUT;
+            }
+            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_STORAGE) {
+                usage |= DXGI_USAGE_UNORDERED_ACCESS;
+            }
+            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT) {
+                usage |= DXGI_USAGE_RENDER_TARGET_OUTPUT;
+            }
+            return usage;
+        }
+
+        D3D12_RESOURCE_STATES D3D12ResourceState(nxtTextureUsageBit usage) {
+            D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
+            if (usage & NXT_TEXTURE_USAGE_BIT_TRANSFER_SRC) {
+                resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
+            }
+            if (usage & NXT_TEXTURE_USAGE_BIT_TRANSFER_DST) {
+                resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
+            }
+            if (usage & NXT_TEXTURE_USAGE_BIT_SAMPLED) {
+                resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+            }
+            if (usage & NXT_TEXTURE_USAGE_BIT_STORAGE) {
+                resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+            }
+            if (usage & NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT) {
+                resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;
+            }
+
+            return resourceState;
+        }
     }
 
     class SwapChainImplD3D12 : SwapChainImpl {
@@ -104,6 +139,8 @@ namespace utils {
             uint32_t previousRenderTargetIndex = 0;
             uint64_t lastSerialRenderTargetWasUsed[kFrameCount] = {};
 
+            D3D12_RESOURCE_STATES renderTargetResourceState;
+
             SwapChainImplD3D12(HWND window, nxtProcTable procs)
                 : window(window), procs(procs), factory(CreateFactory()) {
             }
@@ -119,7 +156,7 @@ namespace utils {
                 commandQueue = backend::d3d12::GetCommandQueue(backendDevice);
             }
 
-            nxtSwapChainError Configure(nxtTextureFormat format,
+            nxtSwapChainError Configure(nxtTextureFormat format, nxtTextureUsageBit allowedUsage, nxtTextureUsageBit initialUsage,
                     uint32_t width, uint32_t height) {
                 if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
                     return "unsupported format";
@@ -131,7 +168,7 @@ namespace utils {
                 swapChainDesc.Width = width;
                 swapChainDesc.Height = height;
                 swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-                swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+                swapChainDesc.BufferUsage = D3D12SwapChainBufferUsage(allowedUsage);
                 swapChainDesc.BufferCount = kFrameCount;
                 swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
                 swapChainDesc.SampleDesc.Count = 1;
@@ -162,6 +199,25 @@ namespace utils {
                     lastSerialRenderTargetWasUsed[n] = initialSerial;
                 }
 
+                renderTargetResourceState = D3D12ResourceState(initialUsage);
+
+                // Transition the first frame. Resources are initially created in PRESENT state
+                if (renderTargetResourceState != D3D12_RESOURCE_STATE_PRESENT) {
+                    ComPtr<ID3D12GraphicsCommandList> commandList = {};
+                    backend::d3d12::OpenCommandList(backendDevice, &commandList);
+
+                    D3D12_RESOURCE_BARRIER resourceBarrier;
+                    resourceBarrier.Transition.pResource = renderTargetResources[renderTargetIndex].Get();
+                    resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+                    resourceBarrier.Transition.StateAfter = renderTargetResourceState;
+                    resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+                    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                    resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+                    commandList->ResourceBarrier(1, &resourceBarrier);
+                    ASSERT_SUCCESS(commandList->Close());
+                    backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
+                }
+
                 return NXT_SWAP_CHAIN_NO_ERROR;
             }
 
@@ -178,14 +234,14 @@ namespace utils {
                 ASSERT_SUCCESS(swapChain->Present(1, 0));
 
                 // Transition last frame's render target back to being a render target
-                {
+                if (renderTargetResourceState != D3D12_RESOURCE_STATE_PRESENT) {
                     ComPtr<ID3D12GraphicsCommandList> commandList = {};
                     backend::d3d12::OpenCommandList(backendDevice, &commandList);
 
                     D3D12_RESOURCE_BARRIER resourceBarrier;
                     resourceBarrier.Transition.pResource = renderTargetResources[previousRenderTargetIndex].Get();
                     resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-                    resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+                    resourceBarrier.Transition.StateAfter = renderTargetResourceState;
                     resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
                     resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
                     resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;

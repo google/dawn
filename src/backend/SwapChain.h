@@ -32,7 +32,7 @@ namespace backend {
             DeviceBase* GetDevice();
 
             // NXT API
-            void Configure(nxt::TextureFormat format, uint32_t width, uint32_t height);
+            void Configure(nxt::TextureFormat format, nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit initialUsage, uint32_t width, uint32_t height);
             TextureBase* GetNextTexture();
             void Present(TextureBase* texture);
 
@@ -44,6 +44,8 @@ namespace backend {
             DeviceBase* device = nullptr;
             nxtSwapChainImplementation implementation = {};
             nxt::TextureFormat format = {};
+            nxt::TextureUsageBit allowedUsage;
+            nxt::TextureUsageBit initialUsage;
             uint32_t width = 0;
             uint32_t height = 0;
             TextureBase* lastNextTexture = nullptr;

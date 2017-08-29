@@ -52,7 +52,7 @@ void init() {
 
     queue = device.CreateQueueBuilder().GetResult();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, 640, 480);
+    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, nxt::TextureUsageBit::OutputAttachment, nxt::TextureUsageBit::OutputAttachment, 640, 480);
 
     initBuffers();
 

@@ -69,7 +69,7 @@ namespace utils {
                         GL_TEXTURE_2D, backTexture, 0);
             }
 
-            nxtSwapChainError Configure(nxtTextureFormat format,
+            nxtSwapChainError Configure(nxtTextureFormat format, nxtTextureUsageBit, nxtTextureUsageBit,
                     uint32_t width, uint32_t height) {
                 if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
                     return "unsupported format";
