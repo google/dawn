@@ -73,23 +73,41 @@ set_target_properties(
 )
 
 # SPIRV-Cross
-add_library(spirv_cross STATIC
+set(SPIRV_CROSS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/GLSL.std.450.h
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_common.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_cfg.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_cfg.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_cpp.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_cpp.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_cross.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_cross.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_glsl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_glsl.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_msl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_msl.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.hpp
 )
+
+set(NEED_SPIRV_CROSS_GLSL OFF)
+if (NXT_ENABLE_D3D12)
+    list(APPEND SPIRV_CROSS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.hpp
+    )
+    set(NEED_SPIRV_CROSS_GLSL ON)
+endif()
+
+if (NXT_ENABLE_METAL)
+    list(APPEND SPIRV_CROSS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_msl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_msl.hpp
+    )
+    set(NEED_SPIRV_CROSS_GLSL ON)
+endif()
+
+if (NXT_ENABLE_OPENGL OR NEED_SPIRV_CROSS_GLSL)
+    list(APPEND SPIRV_CROSS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_glsl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_glsl.hpp
+    )
+endif()
+
+add_library(spirv_cross STATIC ${SPIRV_CROSS_SOURCES})
 target_include_directories(spirv_cross SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 NXTExternalTarget("third_party" spirv_cross)
 
