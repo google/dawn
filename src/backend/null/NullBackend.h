@@ -169,7 +169,6 @@ namespace null {
             Texture(TextureBuilder* builder);
             ~Texture();
 
-        private:
             void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
     };
 

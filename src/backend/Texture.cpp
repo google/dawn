@@ -144,7 +144,7 @@ namespace backend {
             return;
         }
         TransitionUsageImpl(currentUsage, usage);
-        currentUsage = usage;
+        UpdateUsageInternal(usage);
     }
 
     void TextureBase::FreezeUsage(nxt::TextureUsageBit usage) {
@@ -154,7 +154,7 @@ namespace backend {
         }
         allowedUsage = usage;
         TransitionUsageImpl(currentUsage, usage);
-        currentUsage = usage;
+        UpdateUsageInternal(usage);
         frozen = true;
     }
 

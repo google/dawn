@@ -53,9 +53,9 @@ namespace backend {
             void TransitionUsage(nxt::TextureUsageBit usage);
             void FreezeUsage(nxt::TextureUsageBit usage);
 
-        private:
             virtual void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) = 0;
 
+        private:
             DeviceBase* device;
 
             nxt::TextureDimension dimension;

@@ -40,9 +40,9 @@ namespace opengl {
             GLenum GetGLTarget() const;
             TextureFormatInfo GetGLFormat() const;
 
-        private:
             void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
 
+        private:
             GLuint handle;
             GLenum target;
     };

@@ -279,11 +279,9 @@ namespace d3d12 {
 
                             Texture* texture = ToBackend(currentFramebuffer->GetTextureView(attachmentSlot)->GetTexture());
                             constexpr auto usage = nxt::TextureUsageBit::OutputAttachment;
+                            // It's already validated that this texture is either frozen to the correct usage, or not frozen.
                             if (!texture->IsFrozen()) {
-                                D3D12_RESOURCE_BARRIER barrier;
-                                if (texture->GetResourceTransitionBarrier(texture->GetUsage(), usage, &barrier)) {
-                                    commandList->ResourceBarrier(1, &barrier);
-                                }
+                                texture->TransitionUsageImpl(texture->GetUsage(), usage);
                                 texture->UpdateUsageInternal(usage);
                             }
 

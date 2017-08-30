@@ -36,13 +36,12 @@ namespace d3d12 {
             ID3D12Resource* GetD3D12Resource();
             bool GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier);
 
+            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+
         private:
             Device* device;
             ComPtr<ID3D12Resource> resource = {};
             ID3D12Resource* resourcePtr = nullptr;
-
-            // NXT API
-            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
     };
 
     class TextureView : public TextureViewBase {
