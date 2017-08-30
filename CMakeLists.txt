@@ -91,6 +91,7 @@ endif()
 
 if (MSVC)
     list(APPEND NXT_FLAGS "/std:c++14")
+    list(APPEND NXT_FLAGS "/EHsc")
     list(APPEND NXT_INTERNAL_FLAGS "/W4")
     # Allow declarations hiding members as it is used all over NXT
     list(APPEND NXT_INTERNAL_FLAGS "/wd4458")
