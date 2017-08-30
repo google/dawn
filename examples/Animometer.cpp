@@ -49,7 +49,7 @@ void init() {
 
     queue = device.CreateQueueBuilder().GetResult();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, nxt::TextureUsageBit::OutputAttachment, nxt::TextureUsageBit::OutputAttachment, 640, 480);
+    swapchain.Configure(nxt::TextureFormat::R8G8B8A8Unorm, nxt::TextureUsageBit::OutputAttachment, 640, 480);
 
     nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450

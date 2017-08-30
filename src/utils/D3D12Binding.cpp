@@ -156,7 +156,7 @@ namespace utils {
                 commandQueue = backend::d3d12::GetCommandQueue(backendDevice);
             }
 
-            nxtSwapChainError Configure(nxtTextureFormat format, nxtTextureUsageBit allowedUsage, nxtTextureUsageBit initialUsage,
+            nxtSwapChainError Configure(nxtTextureFormat format, nxtTextureUsageBit allowedUsage,
                     uint32_t width, uint32_t height) {
                 if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
                     return "unsupported format";
@@ -197,25 +197,6 @@ namespace utils {
                 const uint64_t initialSerial = backend::d3d12::GetSerial(backendDevice);
                 for (uint32_t n = 0; n < kFrameCount; ++n) {
                     lastSerialRenderTargetWasUsed[n] = initialSerial;
-                }
-
-                renderTargetResourceState = D3D12ResourceState(initialUsage);
-
-                // Transition the first frame. Resources are initially created in PRESENT state
-                if (renderTargetResourceState != D3D12_RESOURCE_STATE_PRESENT) {
-                    ComPtr<ID3D12GraphicsCommandList> commandList = {};
-                    backend::d3d12::OpenCommandList(backendDevice, &commandList);
-
-                    D3D12_RESOURCE_BARRIER resourceBarrier;
-                    resourceBarrier.Transition.pResource = renderTargetResources[renderTargetIndex].Get();
-                    resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-                    resourceBarrier.Transition.StateAfter = renderTargetResourceState;
-                    resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                    resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                    resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                    commandList->ResourceBarrier(1, &resourceBarrier);
-                    ASSERT_SUCCESS(commandList->Close());
-                    backend::d3d12::ExecuteCommandLists(backendDevice, { commandList.Get() });
                 }
 
                 return NXT_SWAP_CHAIN_NO_ERROR;

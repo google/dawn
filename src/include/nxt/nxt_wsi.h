@@ -35,7 +35,7 @@ typedef struct {
     void (*Destroy)(void* userData);
 
     /// Configure/reconfigure the swap chain.
-    nxtSwapChainError (*Configure)(void* userData, nxtTextureFormat format, nxtTextureUsageBit allowedUsage, nxtTextureUsageBit initialUsage, uint32_t width, uint32_t height);
+    nxtSwapChainError (*Configure)(void* userData, nxtTextureFormat format, nxtTextureUsageBit allowedUsage, uint32_t width, uint32_t height);
 
     /// Acquire the next texture from the swap chain.
     nxtSwapChainError (*GetNextTexture)(void* userData, nxtSwapChainNextTexture* nextTexture);

@@ -34,24 +34,19 @@ namespace backend {
         return device;
     }
 
-    void SwapChainBase::Configure(nxt::TextureFormat format, nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit initialUsage, uint32_t width, uint32_t height) {
+    void SwapChainBase::Configure(nxt::TextureFormat format, nxt::TextureUsageBit allowedUsage, uint32_t width, uint32_t height) {
         if (width == 0 || height == 0) {
             device->HandleError("Swap chain cannot be configured to zero size");
             return;
         }
         allowedUsage |= nxt::TextureUsageBit::Present;
-        if (!(HasZeroOrOneBits(initialUsage) && (initialUsage & allowedUsage))) {
-            device->HandleError("Swap chain configured with invalid texture usage");
-            return;
-        }
 
         this->format = format;
         this->allowedUsage = allowedUsage;
-        this->initialUsage = initialUsage;
         this->width = width;
         this->height = height;
         implementation.Configure(implementation.userData,
-                static_cast<nxtTextureFormat>(format), static_cast<nxtTextureUsageBit>(allowedUsage), static_cast<nxtTextureUsageBit>(initialUsage), width, height);
+                static_cast<nxtTextureFormat>(format), static_cast<nxtTextureUsageBit>(allowedUsage), width, height);
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {
@@ -67,7 +62,6 @@ namespace backend {
         builder->SetFormat(format);
         builder->SetMipLevels(1);
         builder->SetAllowedUsage(allowedUsage);
-        builder->SetInitialUsage(initialUsage);
 
         auto* texture = GetNextTextureImpl(builder);
         lastNextTexture = texture;

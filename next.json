@@ -1051,7 +1051,6 @@
                 "args": [
                     {"name": "format", "type": "texture format"},
                     {"name": "allowedUsage", "type": "texture usage bit"},
-                    {"name": "initialUsage", "type": "texture usage bit"},
                     {"name": "width", "type": "uint32_t"},
                     {"name": "height", "type": "uint32_t"}
                 ]
