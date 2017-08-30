@@ -277,6 +277,16 @@ namespace d3d12 {
                             uint32_t attachmentSlot = subpass.colorAttachments[location];
                             const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachmentSlot);
 
+                            Texture* texture = ToBackend(currentFramebuffer->GetTextureView(attachmentSlot)->GetTexture());
+                            constexpr auto usage = nxt::TextureUsageBit::OutputAttachment;
+                            if (!texture->IsFrozen()) {
+                                D3D12_RESOURCE_BARRIER barrier;
+                                if (texture->GetResourceTransitionBarrier(texture->GetUsage(), usage, &barrier)) {
+                                    commandList->ResourceBarrier(1, &barrier);
+                                }
+                                texture->UpdateUsageInternal(usage);
+                            }
+
                             // Only perform load op on first use
                             if (attachmentInfo.firstSubpass == currentSubpass) {
                                 // Load op - color
