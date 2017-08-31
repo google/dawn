@@ -186,14 +186,6 @@ namespace backend {
         for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
             auto attachmentSlot = subpassInfo.colorAttachments[location];
             auto* tv = currentFramebuffer->GetTextureView(attachmentSlot);
-            // TODO(kainino@chromium.org): the TextureView can only be null
-            // because of the null=backbuffer hack (null representing the
-            // backbuffer). Once that hack is removed (once we have WSI)
-            // this check isn't needed.
-            if (tv == nullptr) {
-                continue;
-            }
-
             auto* texture = tv->GetTexture();
             if (!EnsureTextureUsage(texture, nxt::TextureUsageBit::OutputAttachment)) {
                 builder->HandleError("Unable to ensure texture has OutputAttachment usage");
@@ -217,14 +209,6 @@ namespace backend {
         for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
             auto attachmentSlot = subpassInfo.colorAttachments[location];
             auto* tv = currentFramebuffer->GetTextureView(attachmentSlot);
-            // TODO(kainino@chromium.org): the TextureView can only be null
-            // because of the null=backbuffer hack (null representing the
-            // backbuffer). Once that hack is removed (once we have WSI)
-            // this check isn't needed.
-            if (tv == nullptr) {
-                continue;
-            }
-
             auto* texture = tv->GetTexture();
             if (texture->IsFrozen()) {
                 continue;
