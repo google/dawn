@@ -91,7 +91,7 @@ namespace backend {
             bool ValidateBindGroupUsages(BindGroupBase* group) const;
             bool RevalidateCanDraw();
 
-            bool SetPipelineCommon(PipelineBase* pipeline);
+            void SetPipelineCommon(PipelineBase* pipeline);
             void UnsetPipeline();
 
             CommandBufferBuilder* builder;

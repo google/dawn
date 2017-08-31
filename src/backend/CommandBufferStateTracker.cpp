@@ -274,8 +274,10 @@ namespace backend {
             builder->HandleError("Can't use a compute pipeline while a render pass is active");
             return false;
         }
+
         aspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
-        return SetPipelineCommon(pipeline);
+        SetPipelineCommon(pipeline);
+        return true;
     }
 
     bool CommandBufferStateTracker::SetRenderPipeline(RenderPipelineBase* pipeline) {
@@ -287,10 +289,11 @@ namespace backend {
             builder->HandleError("Pipeline is incompatible with this render pass");
             return false;
         }
+
         aspects.set(VALIDATION_ASPECT_RENDER_PIPELINE);
         lastRenderPipeline = pipeline;
-
-        return SetPipelineCommon(pipeline);
+        SetPipelineCommon(pipeline);
+        return true;
     }
 
     bool CommandBufferStateTracker::SetBindGroup(uint32_t index, BindGroupBase* bindgroup) {
@@ -526,7 +529,7 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
+    void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
         PipelineLayoutBase* layout = pipeline->GetLayout();
 
         aspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
@@ -540,7 +543,6 @@ namespace backend {
         }
 
         lastPipeline = pipeline;
-        return true;
     }
 
     void CommandBufferStateTracker::UnsetPipeline() {
