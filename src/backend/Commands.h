@@ -152,7 +152,6 @@ namespace backend {
     struct SetIndexBufferCmd {
         Ref<BufferBase> buffer;
         uint32_t offset;
-        nxt::IndexFormat format;
     };
 
     struct SetVertexBuffersCmd {

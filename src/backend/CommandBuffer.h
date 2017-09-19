@@ -83,7 +83,7 @@ namespace backend {
             void SetStencilReference(uint32_t reference);
             void SetBlendColor(float r, float g, float b, float a);
             void SetBindGroup(uint32_t groupIndex, BindGroupBase* group);
-            void SetIndexBuffer(BufferBase* buffer, uint32_t offset, nxt::IndexFormat format);
+            void SetIndexBuffer(BufferBase* buffer, uint32_t offset);
 
             template<typename T>
             void SetVertexBuffers(uint32_t startSlot, uint32_t count, T* const* buffers, uint32_t const* offsets) {

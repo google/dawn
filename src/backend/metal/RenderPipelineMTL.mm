@@ -53,10 +53,21 @@ namespace metal {
                     return MTLPrimitiveTopologyClassTriangle;
             }
         }
+
+        MTLIndexType MTLIndexFormat(nxt::IndexFormat format) {
+            switch (format) {
+                case nxt::IndexFormat::Uint16:
+                    return MTLIndexTypeUInt16;
+                case nxt::IndexFormat::Uint32:
+                    return MTLIndexTypeUInt32;
+            }
+        }
     }
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder), mtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())) {
+        : RenderPipelineBase(builder),
+          mtlIndexType(MTLIndexFormat(GetIndexFormat())),
+          mtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())) {
 
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
 
@@ -119,6 +130,10 @@ namespace metal {
 
     RenderPipeline::~RenderPipeline() {
         [mtlRenderPipelineState release];
+    }
+
+    MTLIndexType RenderPipeline::GetMTLIndexType() const {
+        return mtlIndexType;
     }
 
     MTLPrimitiveType RenderPipeline::GetMTLPrimitiveTopology() const {

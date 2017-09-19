@@ -29,15 +29,6 @@ namespace backend {
 namespace metal {
 
     namespace {
-        MTLIndexType IndexFormatType(nxt::IndexFormat format) {
-            switch (format) {
-                case nxt::IndexFormat::Uint16:
-                    return MTLIndexTypeUInt16;
-                case nxt::IndexFormat::Uint32:
-                    return MTLIndexTypeUInt32;
-            }
-        }
-
         struct CurrentEncoders {
             Device* device;
 
@@ -172,7 +163,6 @@ namespace metal {
         RenderPipeline* lastRenderPipeline = nullptr;
         id<MTLBuffer> indexBuffer = nil;
         uint32_t indexBufferOffset = 0;
-        MTLIndexType indexType = MTLIndexTypeUInt32;
 
         CurrentEncoders encoders;
         encoders.device = device;
@@ -333,7 +323,7 @@ namespace metal {
                         [encoders.render
                             drawIndexedPrimitives:lastRenderPipeline->GetMTLPrimitiveTopology()
                             indexCount:draw->indexCount
-                            indexType:indexType
+                            indexType:lastRenderPipeline->GetMTLIndexType()
                             indexBuffer:indexBuffer
                             indexBufferOffset:indexBufferOffset
                             instanceCount:draw->instanceCount
@@ -564,7 +554,6 @@ namespace metal {
                         auto b = ToBackend(cmd->buffer.Get());
                         indexBuffer = b->GetMTLBuffer();
                         indexBufferOffset = cmd->offset;
-                        indexType = IndexFormatType(cmd->format);
                     }
                     break;
 

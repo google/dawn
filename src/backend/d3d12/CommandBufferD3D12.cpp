@@ -560,7 +560,10 @@ namespace d3d12 {
                         D3D12_INDEX_BUFFER_VIEW bufferView;
                         bufferView.BufferLocation = buffer->GetVA() + cmd->offset;
                         bufferView.SizeInBytes = buffer->GetSize() - cmd->offset;
-                        bufferView.Format = DXGIIndexFormat(cmd->format);
+                        //TODO(cwallez@chromium.org): Make index buffers lazily applied, right now
+                        //this will break if the pipeline is changed for one with a different index
+                        //format after SetIndexBuffer
+                        bufferView.Format = DXGIIndexFormat(lastRenderPipeline->GetIndexFormat());
 
                         commandList->IASetIndexBuffer(&bufferView);
                     }

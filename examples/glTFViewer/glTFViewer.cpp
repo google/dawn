@@ -295,6 +295,7 @@ namespace {
             .SetLayout(pipelineLayout)
             .SetStage(nxt::ShaderStage::Vertex, oVSModule, "main")
             .SetStage(nxt::ShaderStage::Fragment, oFSModule, "main")
+            .SetIndexFormat(nxt::IndexFormat::Uint16)
             .SetInputState(inputState)
             .SetDepthStencilState(depthStencilState)
             .GetResult();
@@ -544,7 +545,7 @@ namespace {
                     continue;
                 }
                 const auto& oIndicesBuffer = buffers.at(iIndices.bufferView);
-                cmd.SetIndexBuffer(oIndicesBuffer, static_cast<uint32_t>(iIndices.byteOffset), nxt::IndexFormat::Uint16);
+                cmd.SetIndexBuffer(oIndicesBuffer, static_cast<uint32_t>(iIndices.byteOffset));
                 cmd.DrawElements(static_cast<uint32_t>(iIndices.count), 1, 0, 0);
             } else {
                 // DrawArrays

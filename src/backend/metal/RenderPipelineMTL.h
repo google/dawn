@@ -27,11 +27,13 @@ namespace metal {
             RenderPipeline(RenderPipelineBuilder* builder);
             ~RenderPipeline();
 
+            MTLIndexType GetMTLIndexType() const;
             MTLPrimitiveType GetMTLPrimitiveTopology() const;
 
             void Encode(id<MTLRenderCommandEncoder> encoder);
 
         private:
+            MTLIndexType mtlIndexType;
             MTLPrimitiveType mtlPrimitiveTopology;
             id<MTLRenderPipelineState> mtlRenderPipelineState = nil;
     };

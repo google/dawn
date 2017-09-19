@@ -222,6 +222,7 @@ void init() {
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+        .SetIndexFormat(nxt::IndexFormat::Uint32)
         .SetInputState(inputState)
         .SetDepthStencilState(depthStencilState)
         .GetResult();
@@ -286,7 +287,7 @@ void frame() {
             .TransitionBufferUsage(cameraBuffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, bindGroup[0])
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
-            .SetIndexBuffer(indexBuffer, 0, nxt::IndexFormat::Uint32)
+            .SetIndexBuffer(indexBuffer, 0)
             .DrawElements(36, 1, 0, 0)
 
             .SetStencilReference(0x1)

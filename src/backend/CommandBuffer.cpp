@@ -820,14 +820,13 @@ namespace backend {
         cmd->group = group;
     }
 
-    void CommandBufferBuilder::SetIndexBuffer(BufferBase* buffer, uint32_t offset, nxt::IndexFormat format) {
+    void CommandBufferBuilder::SetIndexBuffer(BufferBase* buffer, uint32_t offset) {
         // TODO(kainino@chromium.org): validation
 
         SetIndexBufferCmd* cmd = allocator.Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
         new(cmd) SetIndexBufferCmd;
         cmd->buffer = buffer;
         cmd->offset = offset;
-        cmd->format = format;
     }
 
     void CommandBufferBuilder::SetVertexBuffers(uint32_t startSlot, uint32_t count, BufferBase* const* buffers, uint32_t const* offsets){

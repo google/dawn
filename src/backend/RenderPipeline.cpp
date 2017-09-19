@@ -28,6 +28,7 @@ namespace backend {
     RenderPipelineBase::RenderPipelineBase(RenderPipelineBuilder* builder)
         : PipelineBase(builder),
           depthStencilState(std::move(builder->depthStencilState)),
+          indexFormat(builder->indexFormat),
           inputState(std::move(builder->inputState)),
           primitiveTopology(builder->primitiveTopology),
           blendStates(builder->blendStates),
@@ -53,6 +54,10 @@ namespace backend {
 
     DepthStencilStateBase* RenderPipelineBase::GetDepthStencilState() {
         return depthStencilState.Get();
+    }
+
+    nxt::IndexFormat RenderPipelineBase::GetIndexFormat() const {
+        return indexFormat;
     }
 
     InputStateBase* RenderPipelineBase::GetInputState() {
@@ -120,6 +125,10 @@ namespace backend {
 
     void RenderPipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
         this->depthStencilState = depthStencilState;
+    }
+
+    void RenderPipelineBuilder::SetIndexFormat(nxt::IndexFormat format) {
+        this->indexFormat = format;
     }
 
     void RenderPipelineBuilder::SetInputState(InputStateBase* inputState) {

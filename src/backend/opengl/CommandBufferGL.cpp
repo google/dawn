@@ -129,7 +129,6 @@ namespace opengl {
         PipelineGL* lastGLPipeline = nullptr;
         RenderPipeline* lastRenderPipeline = nullptr;
         uint32_t indexBufferOffset = 0;
-        nxt::IndexFormat indexBufferFormat = nxt::IndexFormat::Uint16;
 
         PersistentPipelineState persistentPipelineState;
         persistentPipelineState.SetDefaultState();
@@ -380,8 +379,9 @@ namespace opengl {
                         DrawElementsCmd* draw = commands.NextCommand<DrawElementsCmd>();
                         pushConstants.Apply(lastPipeline, lastGLPipeline);
 
-                        size_t formatSize = IndexFormatSize(indexBufferFormat);
-                        GLenum formatType = IndexFormatType(indexBufferFormat);
+                        nxt::IndexFormat indexFormat = lastRenderPipeline->GetIndexFormat();
+                        size_t formatSize = IndexFormatSize(indexFormat);
+                        GLenum formatType = IndexFormatType(indexFormat);
 
                         if (draw->firstInstance > 0) {
                             glDrawElementsInstancedBaseInstance(lastRenderPipeline->GetGLPrimitiveTopology(),
@@ -530,7 +530,6 @@ namespace opengl {
 
                         GLuint buffer = ToBackend(cmd->buffer.Get())->GetHandle();
                         indexBufferOffset = cmd->offset;
-                        indexBufferFormat = cmd->format;
                         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
                     }
                     break;
