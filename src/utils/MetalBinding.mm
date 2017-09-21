@@ -70,7 +70,7 @@ namespace utils {
 
             nxtSwapChainError Configure(nxtTextureFormat format, nxtTextureUsageBit,
                     uint32_t width, uint32_t height) {
-                if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
+                if (format != NXT_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM) {
                     return "unsupported format";
                 }
                 ASSERT(width > 0);
@@ -137,7 +137,7 @@ namespace utils {
             }
 
             nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-                return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+                return NXT_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM;
             }
 
         private:
