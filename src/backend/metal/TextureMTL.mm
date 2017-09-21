@@ -25,6 +25,8 @@ namespace metal {
                 return MTLPixelFormatRGBA8Unorm;
             case nxt::TextureFormat::R8G8B8A8Uint:
                 return MTLPixelFormatRGBA8Uint;
+            case nxt::TextureFormat::B8G8R8A8Unorm:
+                return MTLPixelFormatBGRA8Unorm;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return MTLPixelFormatDepth32Float_Stencil8;
         }

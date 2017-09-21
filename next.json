@@ -1190,7 +1190,8 @@
         "values": [
             {"value": 0, "name": "r8 g8 b8 a8 unorm"},
             {"value": 1, "name": "r8 g8 b8 a8 uint"},
-            {"value": 2, "name": "d32 float s8 uint"}
+            {"value": 2, "name": "b8 g8 r8 a8 unorm"},
+            {"value": 3, "name": "d32 float s8 uint"}
         ]
     },
     "vertex format": {

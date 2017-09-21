@@ -23,6 +23,7 @@ namespace backend {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
             case nxt::TextureFormat::R8G8B8A8Uint:
+            case nxt::TextureFormat::B8G8R8A8Unorm:
                 return 4;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return 8;
@@ -35,6 +36,7 @@ namespace backend {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
             case nxt::TextureFormat::R8G8B8A8Uint:
+            case nxt::TextureFormat::B8G8R8A8Unorm:
                 return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;
@@ -47,6 +49,7 @@ namespace backend {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
             case nxt::TextureFormat::R8G8B8A8Uint:
+            case nxt::TextureFormat::B8G8R8A8Unorm:
                 return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;
@@ -59,6 +62,7 @@ namespace backend {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
             case nxt::TextureFormat::R8G8B8A8Uint:
+            case nxt::TextureFormat::B8G8R8A8Unorm:
                 return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;

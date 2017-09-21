@@ -38,7 +38,10 @@ namespace opengl {
                 case nxt::TextureFormat::R8G8B8A8Unorm:
                     return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
                 case nxt::TextureFormat::R8G8B8A8Uint:
-                    return { GL_RGBA8UI, GL_RGBA, GL_UNSIGNED_INT };
+                    return {GL_RGBA8UI, GL_RGBA, GL_UNSIGNED_INT};
+                case nxt::TextureFormat::B8G8R8A8Unorm:
+                    // This doesn't have an enum for the internal format in OpenGL.
+                    return {GL_NONE, GL_BGRA, GL_UNSIGNED_BYTE};
                 case nxt::TextureFormat::D32FloatS8Uint:
                     return {GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV};
                 default:
