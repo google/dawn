@@ -116,6 +116,10 @@ uint64_t GetSwapChainImplementation() {
     return binding->GetSwapChainImplementation();
 }
 
+nxt::TextureFormat GetPreferredSwapChainTextureFormat() {
+    return static_cast<nxt::TextureFormat>(binding->GetPreferredSwapChainTextureFormat());
+}
+
 nxt::SwapChain GetSwapChain(const nxt::Device &device) {
     return device.CreateSwapChainBuilder()
         .SetImplementation(GetSwapChainImplementation())
@@ -125,7 +129,7 @@ nxt::SwapChain GetSwapChain(const nxt::Device &device) {
 nxt::RenderPass CreateDefaultRenderPass(const nxt::Device& device) {
     return device.CreateRenderPassBuilder()
         .SetAttachmentCount(2)
-        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+        .AttachmentSetFormat(0, GetPreferredSwapChainTextureFormat())
         .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
         .AttachmentSetFormat(1, nxt::TextureFormat::D32FloatS8Uint)
         .AttachmentSetDepthStencilLoadOps(1, nxt::LoadOp::Clear, nxt::LoadOp::Clear)

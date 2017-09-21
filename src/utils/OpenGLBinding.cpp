@@ -132,6 +132,10 @@ namespace utils {
                 return reinterpret_cast<uint64_t>(&swapchainImpl);
             }
 
+            nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
+                return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+            }
+
         private:
             nxtDevice backendDevice = nullptr;
             nxtSwapChainImplementation swapchainImpl = {};

@@ -32,6 +32,9 @@ namespace utils {
             uint64_t GetSwapChainImplementation() override {
                 return 0;
             }
+            nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
+                return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+            }
     };
 
 

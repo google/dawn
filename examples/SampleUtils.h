@@ -24,6 +24,7 @@ struct GLFWwindow* GetGLFWWindow();
 
 nxt::Device CreateCppNXTDevice();
 uint64_t GetSwapChainImplementation();
+nxt::TextureFormat GetPreferredSwapChainTextureFormat();
 nxt::SwapChain GetSwapChain(const nxt::Device& device);
 nxt::RenderPass CreateDefaultRenderPass(const nxt::Device& device);
 nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device);
