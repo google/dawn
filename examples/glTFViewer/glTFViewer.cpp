@@ -502,6 +502,9 @@ namespace {
             }
             const MaterialInfo& material = getMaterial(iPrim.material, strides[0], strides[1], strides[2]);
             material.uniformBuffer.TransitionUsage(nxt::BufferUsageBit::TransferDst);
+            // TODO(cwallez@google.com): This is updating the uniform buffer with a device-level command
+            // but the draw is queue level command that is pipelined. This causes bad rendering for models
+            // that use the same part multiple time.
             material.uniformBuffer.SetSubData(0,
                     sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));
