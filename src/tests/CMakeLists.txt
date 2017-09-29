@@ -75,6 +75,7 @@ add_executable(nxt_end2end_tests
     ${END2END_TESTS_DIR}/BlendStateTests.cpp
     ${END2END_TESTS_DIR}/CopyTests.cpp
     ${END2END_TESTS_DIR}/DepthStencilStateTests.cpp
+    ${END2END_TESTS_DIR}/IndexFormatTests.cpp
     ${END2END_TESTS_DIR}/InputStateTests.cpp
     ${END2END_TESTS_DIR}/PrimitiveTopologyTests.cpp
     ${END2END_TESTS_DIR}/PushConstantTests.cpp
