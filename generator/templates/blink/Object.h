@@ -17,6 +17,8 @@
         NXT{{type.name.CamelCase()}}*
     {%- elif type.category == "enum" or type.category == "bitmask" -%}
         uint32_t
+    {%- elif type.category == "natively defined" -%}
+        NXT{{type.name.CamelCase()}}
     {%- else -%}
         {{as_cType(type.name)}}
     {%- endif -%}
@@ -27,7 +29,7 @@
 #ifndef {{Class}}_H
 #define {{Class}}_H
 
-#include "bindings/core/v8/ScriptWrappable.h"
+#include "platform/bindings/ScriptWrappable.h"
 #include "platform/heap/GarbageCollected.h"
 #include "platform/wtf/text/WTFString.h"
 
@@ -54,7 +56,7 @@ class {{Class}} final :
         {{Class}}({{as_cType(type.name)}} self, Member<NXTState> state);
         void Dispose();
 
-        {% for method in type.methods %}
+        {% for method in native_methods(type) %}
             {% if method.return_type.name.concatcase() == "void" %}
                 {{Class}}*
             {%- else %}

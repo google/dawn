@@ -13,12 +13,21 @@
 //* limitations under the License.
 
 typedef unsigned long uint32_t;
+typedef unsigned long long uint64_t;
+typedef boolean bool;
+
+typedef unsigned long long NXTCallbackUserdata;
+callback NXTDeviceErrorCallback = void(DOMString message);
+callback NXTBuilderErrorCallback = void(uint32_t status, DOMString message);
+callback NXTBufferMapReadCallback = void(uint32_t status, ArrayBufferView data);
 
 {% macro idlType(type) -%}
     {%- if type.category == "object" -%}
         NXT{{type.name.CamelCase()}}
     {%- elif type.category == "enum" or type.category == "bitmask" -%}
         uint32_t
+    {%- elif type.category == "natively defined" -%}
+        NXT{{type.name.CamelCase()}}
     {%- else -%}
         {{as_cType(type.name)}}
     {%- endif -%}
@@ -33,7 +42,7 @@ interface {{idlType(type)}} {
         {% endfor %}
     {% endif %}
 
-    {% for method in type.methods %}
+    {% for method in native_methods(type) %}
         {% if method.return_type.name.concatcase() == "void" %}
             {{idlType(type)}}
         {%- else %}
@@ -47,7 +56,7 @@ interface {{idlType(type)}} {
                 {%- elif arg.annotation == "const*" and arg.length == "strlen" -%}
                     DOMString {{as_varName(arg.name)}}
                 {%- else -%}
-                    {{idlType(arg.type)}}[] {{as_varName(arg.name)}}
+                    sequence<{{idlType(arg.type)}}> {{as_varName(arg.name)}}
                 {%- endif -%}
             {%- endfor -%}
         );

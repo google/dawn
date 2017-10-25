@@ -17,6 +17,8 @@
         NXT{{type.name.CamelCase()}}*
     {%- elif type.category == "enum" or type.category == "bitmask" -%}
         uint32_t
+    {%- elif type.category == "natively defined" -%}
+        NXT{{type.name.CamelCase()}}
     {%- else -%}
         {{as_cType(type.name)}}
     {%- endif -%}
@@ -110,8 +112,25 @@ namespace blink {
             }
         {% endfor %}
 
+        {% if type.is_builder %}
+            {{Class}}* {{Class}}::setErrorCallback(V8NXTBuilderErrorCallback*, unsigned long, unsigned long) {
+                //TODO
+                return this;
+            }
+        {% endif %}
+
         {{as_cType(type.name)}} {{Class}}::GetNXT() {
             return self_;
         }
+
     {% endfor %}
+
+    NXTDevice* NXTDevice::setErrorCallback(V8NXTDeviceErrorCallback*, unsigned long) {
+        return this;
+    }
+
+    NXTBuffer* NXTBuffer::mapReadAsync(unsigned int, unsigned int, V8NXTBufferMapReadCallback*, unsigned long) {
+        return this;
+    }
+
 }

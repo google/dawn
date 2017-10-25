@@ -21,6 +21,16 @@ namespace blink {
         class NXT{{other_type.name.CamelCase()}};
     {% endfor %}
 
+    class V8NXTDeviceErrorCallback;
+    using NXTDeviceErrorCallback = V8NXTDeviceErrorCallback*;
+
+    class V8NXTBuilderErrorCallback;
+    using NXTBuilderErrorCallback = V8NXTBuilderErrorCallback*;
+
+    class V8NXTBufferMapReadCallback;
+    using NXTBufferMapReadCallback = V8NXTBufferMapReadCallback*;
+
+    using NXTCallbackUserdata = uint64_t;
 }
 
 struct nxtProcTable_s;

@@ -343,6 +343,9 @@ def c_native_methods(types, typ):
         Method(Name('release'), types['void'], []),
     ]
 
+def js_native_methods(types, typ):
+    return cpp_native_methods(types, typ)
+
 def debug(text):
     print(text)
 
@@ -435,18 +438,19 @@ def main():
 
     if 'wire' in targets:
         renders.append(FileRender('wire/WireCmd.h', 'wire/WireCmd_autogen.h', base_backend_params))
-        renders.append(FileRender('wire/WireCmd.cpp', 'wire/WireCmd.cpp', base_backend_params))
+        renders.append(FileRender('wire/WireCmd.cpp', 'wire/WireCmd_autogen.cpp', base_backend_params))
         renders.append(FileRender('wire/WireClient.cpp', 'wire/WireClient.cpp', base_backend_params))
         renders.append(FileRender('wire/WireServer.cpp', 'wire/WireServer.cpp', base_backend_params))
 
     if 'blink' in targets:
-        renders.append(FileRender('blink/autogen.gni', 'autogen.gni', [base_params, api_params]))
-        renders.append(FileRender('blink/Objects.cpp', 'NXT.cpp', [base_params, api_params]))
-        renders.append(FileRender('blink/Forward.h', 'Forward.h', [base_params, api_params]))
+        js_params = {'native_methods': lambda typ: js_native_methods(api_params['types'], typ)}
+        renders.append(FileRender('blink/autogen.gni', 'autogen.gni', [base_params, api_params, js_params]))
+        renders.append(FileRender('blink/Objects.cpp', 'NXT.cpp', [base_params, api_params, js_params]))
+        renders.append(FileRender('blink/Forward.h', 'Forward.h', [base_params, api_params, js_params]))
 
         for typ in api_params['by_category']['object']:
             file_prefix = 'NXT' + typ.name.CamelCase()
-            params = [base_params, api_params, {'type': typ}]
+            params = [base_params, api_params, js_params, {'type': typ}]
 
             renders.append(FileRender('blink/Object.h', file_prefix + '.h', params))
             renders.append(FileRender('blink/Object.idl', file_prefix + '.idl', params))
