@@ -37,6 +37,9 @@ addons:
    # Required dependency for GLFW on Linux
    - xorg-dev
 
+before_install:
+ - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+
 install:
  # Install dependencies required on OSX
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install ninja; fi
