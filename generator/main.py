@@ -444,16 +444,16 @@ def main():
 
     if 'blink' in targets:
         js_params = {'native_methods': lambda typ: js_native_methods(api_params['types'], typ)}
-        renders.append(FileRender('blink/autogen.gni', 'autogen.gni', [base_params, api_params, js_params]))
-        renders.append(FileRender('blink/Objects.cpp', 'NXT.cpp', [base_params, api_params, js_params]))
-        renders.append(FileRender('blink/Forward.h', 'Forward.h', [base_params, api_params, js_params]))
+        renders.append(FileRender('autogen.gni', 'autogen.gni', [base_params, api_params, js_params]))
+        renders.append(FileRender('Objects.cpp', 'NXT.cpp', [base_params, api_params, js_params]))
+        renders.append(FileRender('Forward.h', 'Forward.h', [base_params, api_params, js_params]))
 
         for typ in api_params['by_category']['object']:
             file_prefix = 'NXT' + typ.name.CamelCase()
             params = [base_params, api_params, js_params, {'type': typ}]
 
-            renders.append(FileRender('blink/Object.h', file_prefix + '.h', params))
-            renders.append(FileRender('blink/Object.idl', file_prefix + '.idl', params))
+            renders.append(FileRender('Object.h', file_prefix + '.h', params))
+            renders.append(FileRender('Object.idl', file_prefix + '.idl', params))
 
     output_separator = '\n' if args.gn else ';'
     if args.print_dependencies:
