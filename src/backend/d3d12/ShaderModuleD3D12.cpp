@@ -23,12 +23,14 @@ namespace d3d12 {
         : ShaderModuleBase(builder), device(device) {
         spirv_cross::CompilerHLSL compiler(builder->AcquireSpirv());
 
-        spirv_cross::CompilerHLSL::Options options;
-        options.shader_model = 51;
-        options.flip_vert_y = false;
-        options.fixup_clipspace = true;
+        spirv_cross::CompilerGLSL::Options options_glsl;
+        options_glsl.vertex.flip_vert_y = false;
+        options_glsl.vertex.fixup_clipspace = true;
+        compiler.spirv_cross::CompilerGLSL::set_options(options_glsl);
 
-        compiler.set_options(options);
+        spirv_cross::CompilerHLSL::Options options_hlsl;
+        options_hlsl.shader_model = 51;
+        compiler.spirv_cross::CompilerHLSL::set_options(options_hlsl);
 
         ExtractSpirvInfo(compiler);
 
