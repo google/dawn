@@ -218,6 +218,7 @@ if (NXT_ENABLE_D3D12)
     target_include_directories(d3d12_autogen PUBLIC ${GENERATED_DIR})
 
     list(APPEND BACKEND_SOURCES
+        ${D3D12_DIR}/d3d12_platform.h
         ${D3D12_DIR}/BindGroupD3D12.cpp
         ${D3D12_DIR}/BindGroupD3D12.h
         ${D3D12_DIR}/BindGroupLayoutD3D12.cpp

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_D3D12_H_
-#define BACKEND_D3D12_D3D12_H_
+#ifndef BACKEND_D3D12_D3D12PLATFORM_H_
+#define BACKEND_D3D12_D3D12PLATFORM_H_
 
 #include <wrl.h>
 #include <d3d12.h>
@@ -21,4 +21,4 @@
 
 using Microsoft::WRL::ComPtr;
 
-#endif // BACKEND_D3D12_D3D12_H_
+#endif // BACKEND_D3D12_D3D12PLATFORM_H_
