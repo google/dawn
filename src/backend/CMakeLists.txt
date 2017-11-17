@@ -282,11 +282,17 @@ if (NXT_ENABLE_VULKAN)
     )
     target_link_libraries(vulkan_autogen nxtcpp)
     target_include_directories(vulkan_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(vulkan_autogen PUBLIC ${VULKAN_HEADERS_INCLUDE_DIR})
     target_include_directories(vulkan_autogen PUBLIC ${SRC_DIR})
 
     list(APPEND BACKEND_SOURCES
+        ${VULKAN_DIR}/vulkan_platform.h
         ${VULKAN_DIR}/VulkanBackend.cpp
         ${VULKAN_DIR}/VulkanBackend.h
+        ${VULKAN_DIR}/VulkanFunctions.cpp
+        ${VULKAN_DIR}/VulkanFunctions.h
+        ${VULKAN_DIR}/VulkanInfo.cpp
+        ${VULKAN_DIR}/VulkanInfo.h
     )
 endif()
 

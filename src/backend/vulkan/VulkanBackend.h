@@ -17,6 +17,8 @@
 
 #include "nxt/nxtcpp.h"
 
+#include "backend/vulkan/VulkanFunctions.h"
+#include "backend/vulkan/VulkanInfo.h"
 #include "backend/Buffer.h"
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
@@ -36,6 +38,7 @@
 #include "backend/SwapChain.h"
 #include "backend/Texture.h"
 #include "backend/ToBackend.h"
+#include "common/DynamicLib.h"
 
 namespace backend {
 namespace vulkan {
@@ -115,6 +118,19 @@ namespace vulkan {
             TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
             void TickImpl() override;
+
+            // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
+            const VulkanFunctions fn;
+            // All the information queried about this Vulkan system
+            const VulkanInfo info;
+
+        private:
+            // To make it easier to use fn it is a public const member. However
+            // the Device is allowed to mutate them through these private methods.
+            VulkanFunctions* GetMutableFunctions();
+            VulkanInfo* GetMutableInfo();
+
+            DynamicLib vulkanLib;
     };
 
     class Buffer : public BufferBase {

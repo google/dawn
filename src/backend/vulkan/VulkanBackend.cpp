@@ -15,8 +15,17 @@
 #include "backend/vulkan/VulkanBackend.h"
 
 #include "backend/Commands.h"
+#include "common/Platform.h"
 
 #include <spirv-cross/spirv_cross.hpp>
+
+#if NXT_PLATFORM_LINUX
+    const char kVulkanLibName[] = "libvulkan.so.1";
+#elif NXT_PLATFORM_WINDOWS
+    const char kVulkanLibName[] = "vulkan-1.dll";
+#else
+    #error "Unimplemented Vulkan backend platform"
+#endif
 
 namespace backend {
 namespace vulkan {
@@ -32,6 +41,23 @@ namespace vulkan {
     // Device
 
     Device::Device() {
+        if (!vulkanLib.Open(kVulkanLibName)) {
+            ASSERT(false);
+            return;
+        }
+
+        VulkanFunctions* functions = GetMutableFunctions();
+        VulkanInfo* vulkanInfo = GetMutableInfo();
+
+        if (!functions->LoadGlobalProcs(vulkanLib)) {
+            ASSERT(false);
+            return;
+        }
+
+        if (!vulkanInfo->GatherGlobalInfo(*this)) {
+            ASSERT(false);
+            return;
+        }
     }
 
     Device::~Device() {
@@ -101,6 +127,14 @@ namespace vulkan {
     }
 
     void Device::TickImpl() {
+    }
+
+    VulkanFunctions* Device::GetMutableFunctions() {
+        return const_cast<VulkanFunctions*>(&fn);
+    }
+
+    VulkanInfo* Device::GetMutableInfo() {
+        return const_cast<VulkanInfo*>(&info);
     }
 
     // Buffer
