@@ -16,7 +16,6 @@
 #define BACKEND_OPENGL_BUFFERGL_H_
 
 #include "backend/Buffer.h"
-#include "common/SerialQueue.h"
 
 #include "glad/glad.h"
 

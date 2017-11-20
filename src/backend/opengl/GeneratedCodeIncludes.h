@@ -18,6 +18,7 @@
 #include "backend/opengl/CommandBufferGL.h"
 #include "backend/opengl/ComputePipelineGL.h"
 #include "backend/opengl/DepthStencilStateGL.h"
+#include "backend/opengl/InputStateGL.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
 #include "backend/opengl/RenderPipelineGL.h"

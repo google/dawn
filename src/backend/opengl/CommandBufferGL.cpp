@@ -17,6 +17,7 @@
 #include "backend/Commands.h"
 #include "backend/opengl/BufferGL.h"
 #include "backend/opengl/ComputePipelineGL.h"
+#include "backend/opengl/InputStateGL.h"
 #include "backend/opengl/OpenGLBackend.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
@@ -31,6 +32,29 @@ namespace opengl {
 
     namespace {
 
+        GLenum IndexFormatType(nxt::IndexFormat format) {
+            switch (format) {
+                case nxt::IndexFormat::Uint16:
+                    return GL_UNSIGNED_SHORT;
+                case nxt::IndexFormat::Uint32:
+                    return GL_UNSIGNED_INT;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        GLenum VertexFormatType(nxt::VertexFormat format) {
+            switch (format) {
+                case nxt::VertexFormat::FloatR32G32B32A32:
+                case nxt::VertexFormat::FloatR32G32B32:
+                case nxt::VertexFormat::FloatR32G32:
+                case nxt::VertexFormat::FloatR32:
+                    return GL_FLOAT;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
         // Push constants are implemented using OpenGL uniforms, however they aren't part of the global
         // OpenGL state but are part of the program state instead. This means that we have to reapply
         // push constants on pipeline change.
@@ -44,7 +68,7 @@ namespace opengl {
             void OnBeginPass() {
                 for (auto stage : IterateStages(kAllStages)) {
                     values[stage].fill(0);
-                    // No need to set dirty bits are a pipeline will be set before the next operation
+                    // No need to set dirty bits as a pipeline will be set before the next operation
                     // using push constants.
                 }
             }
@@ -85,9 +109,87 @@ namespace opengl {
                                 break;
                         }
                     }
+
+                    dirtyBits[stage].reset();
                 }
             }
+        };
 
+        // Vertex buffers and index buffers are implemented as part of an OpenGL VAO that corresponds to an
+        // InputState. On the contrary in NXT they are part of the global state. This means that we have to
+        // re-apply these buffers on an InputState change.
+        struct InputBufferTracker {
+            bool indexBufferDirty = false;
+            Buffer* indexBuffer = nullptr;
+
+            std::bitset<kMaxVertexInputs> dirtyVertexBuffers;
+            std::array<Buffer*, kMaxVertexInputs> vertexBuffers;
+            std::array<uint32_t, kMaxVertexInputs> vertexBufferOffsets;
+
+            InputState* lastInputState = nullptr;
+
+            void OnBeginPass() {
+                // We don't know what happened between this pass and the last one, just reset the
+                // input state so everything gets reapplied.
+                lastInputState = nullptr;
+            }
+
+            void OnSetIndexBuffer(BufferBase* buffer) {
+                indexBufferDirty = true;
+                indexBuffer = ToBackend(buffer);
+            }
+
+            void OnSetVertexBuffers(uint32_t startSlot, uint32_t count, Ref<BufferBase>* buffers, uint32_t* offsets) {
+                for (uint32_t i = 0; i < count; ++i) {
+                    uint32_t slot = startSlot + i;
+                    vertexBuffers[slot] = ToBackend(buffers[i].Get());
+                    vertexBufferOffsets[slot] = offsets[i];
+                }
+
+                // Use 64 bit masks and make sure there are no shift UB
+                static_assert(kMaxVertexInputs <= 8 * sizeof(unsigned long long) - 1, "");
+                dirtyVertexBuffers |= ((1ull << count) - 1ull) << startSlot;
+            }
+
+            void OnSetPipeline(RenderPipelineBase* pipeline) {
+                InputStateBase* inputState = pipeline->GetInputState();
+                if (lastInputState == inputState) {
+                    return;
+                }
+
+                indexBufferDirty = true;
+                dirtyVertexBuffers |= inputState->GetInputsSetMask();
+
+                lastInputState = ToBackend(inputState);
+            }
+
+            void Apply() {
+                if (indexBufferDirty && indexBuffer != nullptr) {
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->GetHandle());
+                    indexBufferDirty = false;
+                }
+
+                for (uint32_t slot : IterateBitSet(dirtyVertexBuffers & lastInputState->GetInputsSetMask())) {
+                    for (uint32_t location : IterateBitSet(lastInputState->GetAttributesUsingInput(slot))) {
+                        auto attribute = lastInputState->GetAttribute(location);
+
+                        GLuint buffer = vertexBuffers[slot]->GetHandle();
+                        uint32_t offset = vertexBufferOffsets[slot];
+
+                        auto input = lastInputState->GetInput(slot);
+                        auto components = VertexFormatNumComponents(attribute.format);
+                        auto formatType = VertexFormatType(attribute.format);
+
+                        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+                        glVertexAttribPointer(
+                                location, components, formatType, GL_FALSE,
+                                input.stride,
+                                reinterpret_cast<void*>(static_cast<intptr_t>(offset + attribute.offset)));
+                    }
+                }
+
+                dirtyVertexBuffers.reset();
+            }
         };
 
     }
@@ -98,29 +200,6 @@ namespace opengl {
 
     CommandBuffer::~CommandBuffer() {
         FreeCommands(&commands);
-    }
-
-    static GLenum IndexFormatType(nxt::IndexFormat format) {
-        switch (format) {
-            case nxt::IndexFormat::Uint16:
-                return GL_UNSIGNED_SHORT;
-            case nxt::IndexFormat::Uint32:
-                return GL_UNSIGNED_INT;
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    static GLenum VertexFormatType(nxt::VertexFormat format) {
-        switch (format) {
-            case nxt::VertexFormat::FloatR32G32B32A32:
-            case nxt::VertexFormat::FloatR32G32B32:
-            case nxt::VertexFormat::FloatR32G32:
-            case nxt::VertexFormat::FloatR32:
-                return GL_FLOAT;
-            default:
-                UNREACHABLE();
-        }
     }
 
     void CommandBuffer::Execute() {
@@ -134,6 +213,7 @@ namespace opengl {
         persistentPipelineState.SetDefaultState();
 
         PushConstantTracker pushConstants;
+        InputBufferTracker inputBuffers;
 
         RenderPass* currentRenderPass = nullptr;
         Framebuffer* currentFramebuffer = nullptr;
@@ -162,6 +242,7 @@ namespace opengl {
                     {
                         commands.NextCommand<BeginRenderSubpassCmd>();
                         pushConstants.OnBeginPass();
+                        inputBuffers.OnBeginPass();
 
                         // TODO(kainino@chromium.org): This is added to possibly
                         // work around an issue seen on Windows/Intel. It should
@@ -362,6 +443,7 @@ namespace opengl {
                     {
                         DrawArraysCmd* draw = commands.NextCommand<DrawArraysCmd>();
                         pushConstants.Apply(lastPipeline, lastGLPipeline);
+                        inputBuffers.Apply();
 
                         if (draw->firstInstance > 0) {
                             glDrawArraysInstancedBaseInstance(lastRenderPipeline->GetGLPrimitiveTopology(),
@@ -378,6 +460,7 @@ namespace opengl {
                     {
                         DrawElementsCmd* draw = commands.NextCommand<DrawElementsCmd>();
                         pushConstants.Apply(lastPipeline, lastGLPipeline);
+                        inputBuffers.Apply();
 
                         nxt::IndexFormat indexFormat = lastRenderPipeline->GetIndexFormat();
                         size_t formatSize = IndexFormatSize(indexFormat);
@@ -436,7 +519,9 @@ namespace opengl {
                         lastRenderPipeline = ToBackend(cmd->pipeline).Get();
                         lastGLPipeline = ToBackend(cmd->pipeline).Get();
                         lastPipeline = ToBackend(cmd->pipeline).Get();
+
                         pushConstants.OnSetPipeline(lastPipeline);
+                        inputBuffers.OnSetPipeline(lastRenderPipeline);
                     }
                     break;
 
@@ -471,7 +556,6 @@ namespace opengl {
                         const auto& indices = ToBackend(lastPipeline->GetLayout())->GetBindingIndexInfo()[groupIndex];
                         const auto& layout = group->GetLayout()->GetBindingInfo();
 
-                        // TODO(cwallez@chromium.org): iterate over the layout bitmask instead
                         for (uint32_t binding : IterateBitSet(layout.mask)) {
                             switch (layout.types[binding]) {
                                 case nxt::BindingType::UniformBuffer:
@@ -527,10 +611,8 @@ namespace opengl {
                 case Command::SetIndexBuffer:
                     {
                         SetIndexBufferCmd* cmd = commands.NextCommand<SetIndexBufferCmd>();
-
-                        GLuint buffer = ToBackend(cmd->buffer.Get())->GetHandle();
                         indexBufferOffset = cmd->offset;
-                        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+                        inputBuffers.OnSetIndexBuffer(cmd->buffer.Get());
                     }
                     break;
 
@@ -539,37 +621,7 @@ namespace opengl {
                         SetVertexBuffersCmd* cmd = commands.NextCommand<SetVertexBuffersCmd>();
                         auto buffers = commands.NextData<Ref<BufferBase>>(cmd->count);
                         auto offsets = commands.NextData<uint32_t>(cmd->count);
-
-                        auto inputState = lastRenderPipeline->GetInputState();
-
-                        auto& attributesSetMask = inputState->GetAttributesSetMask();
-                        for (uint32_t location = 0; location < attributesSetMask.size(); ++location) {
-                            if (!attributesSetMask[location]) {
-                                // This slot is not used in the input state
-                                continue;
-                            }
-                            auto attribute = inputState->GetAttribute(location);
-                            auto slot = attribute.bindingSlot;
-                            ASSERT(slot < kMaxVertexInputs);
-                            if (slot < cmd->startSlot || slot >= cmd->startSlot + cmd->count) {
-                                // This slot is not affected by this call
-                                continue;
-                            }
-                            size_t bufferIndex = slot - cmd->startSlot;
-                            GLuint buffer = ToBackend(buffers[bufferIndex])->GetHandle();
-                            uint32_t bufferOffset = offsets[bufferIndex];
-
-                            auto input = inputState->GetInput(slot);
-
-                            auto components = VertexFormatNumComponents(attribute.format);
-                            auto formatType = VertexFormatType(attribute.format);
-
-                            glBindBuffer(GL_ARRAY_BUFFER, buffer);
-                            glVertexAttribPointer(
-                                    location, components, formatType, GL_FALSE,
-                                    input.stride,
-                                    reinterpret_cast<void*>(static_cast<intptr_t>(bufferOffset + attribute.offset)));
-                        }
+                        inputBuffers.OnSetVertexBuffers(cmd->startSlot, cmd->count, buffers, offsets);
                     }
                     break;
 

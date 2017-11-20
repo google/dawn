@@ -19,6 +19,7 @@
 #include "backend/opengl/CommandBufferGL.h"
 #include "backend/opengl/ComputePipelineGL.h"
 #include "backend/opengl/DepthStencilStateGL.h"
+#include "backend/opengl/InputStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
 #include "backend/opengl/RenderPipelineGL.h"
 #include "backend/opengl/ShaderModuleGL.h"
@@ -40,6 +41,7 @@ namespace opengl {
         *device = reinterpret_cast<nxtDevice>(new Device);
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
     }
 
     // Device
@@ -115,43 +117,6 @@ namespace opengl {
 
     BindGroupLayout::BindGroupLayout(BindGroupLayoutBuilder* builder)
         : BindGroupLayoutBase(builder) {
-    }
-
-    // InputState
-
-    InputState::InputState(InputStateBuilder* builder)
-        : InputStateBase(builder) {
-        glGenVertexArrays(1, &vertexArrayObject);
-        glBindVertexArray(vertexArrayObject);
-        auto& attributesSetMask = GetAttributesSetMask();
-        for (uint32_t location = 0; location < attributesSetMask.size(); ++location) {
-            if (!attributesSetMask[location]) {
-                continue;
-            }
-            auto attribute = GetAttribute(location);
-            glEnableVertexAttribArray(location);
-
-            auto input = GetInput(attribute.bindingSlot);
-            if (input.stride == 0) {
-                // Emulate a stride of zero (constant vertex attribute) by
-                // setting the attribute instance divisor to a huge number.
-                glVertexAttribDivisor(location, 0xffffffff);
-            } else {
-                switch (input.stepMode) {
-                    case nxt::InputStepMode::Vertex:
-                        break;
-                    case nxt::InputStepMode::Instance:
-                        glVertexAttribDivisor(location, 1);
-                        break;
-                    default:
-                        UNREACHABLE();
-                }
-            }
-        }
-    }
-
-    GLuint InputState::GetVAO() {
-        return vertexArrayObject;
     }
 
     // Framebuffer

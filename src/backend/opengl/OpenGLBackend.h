@@ -125,15 +125,6 @@ namespace opengl {
             Framebuffer(FramebufferBuilder* builder);
     };
 
-    class InputState : public InputStateBase {
-        public:
-            InputState(InputStateBuilder* builder);
-            GLuint GetVAO();
-
-        private:
-            GLuint vertexArrayObject;
-    };
-
     class Queue : public QueueBase {
         public:
             Queue(QueueBuilder* builder);
