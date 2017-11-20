@@ -131,7 +131,7 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 };
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
-//     NXT_INSTANTIATE_TEST(MyTestFixture, OpenGLBackend, MetalBackend)
+//     NXT_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
 #define NXT_INSTANTIATE_TEST(testName, firstParam, ...) \
     const decltype(firstParam) testName##params[] = { firstParam, ##__VA_ARGS__ }; \
     INSTANTIATE_TEST_CASE_P(, testName, \

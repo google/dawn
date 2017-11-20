@@ -153,13 +153,15 @@ TEST_P(IndexFormatTest, Uint16) {
 
 // Test for primitive restart use vertices like in the drawing and draw the following
 // indices: 0 1 2 PRIM_RESTART 3 4 2. Then A and B should be written but not C.
-//             0
-//             |\
-//             |B \
-//             2---1
-//            /| C
-//          / A|
-//         4---3
+//      |--------------|
+//      |      0       |
+//      |      |\      |
+//      |      |B \    |
+//      |      2---1   |
+//      |     /| C     |
+//      |   / A|       |
+//      |  4---3       |
+//      |--------------|
 
 // Test use of primitive restart with an Uint32 index format
 TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
@@ -265,4 +267,4 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 100);
 }
 
-NXT_INSTANTIATE_TEST(IndexFormatTest, MetalBackend)
+NXT_INSTANTIATE_TEST(IndexFormatTest, MetalBackend, OpenGLBackend)
