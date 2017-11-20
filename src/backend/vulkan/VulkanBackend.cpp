@@ -19,6 +19,8 @@
 
 #include <spirv-cross/spirv_cross.hpp>
 
+#include <iostream>
+
 #if NXT_PLATFORM_LINUX
     const char kVulkanLibName[] = "libvulkan.so.1";
 #elif NXT_PLATFORM_WINDOWS
@@ -58,9 +60,38 @@ namespace vulkan {
             ASSERT(false);
             return;
         }
+
+        KnownGlobalVulkanExtensions usedGlobals;
+        if (!CreateInstance(&usedGlobals)) {
+            ASSERT(false);
+            return;
+        }
+
+        if (!functions->LoadInstanceProcs(instance, usedGlobals)) {
+            ASSERT(false);
+            return;
+        }
+
+        vulkanInfo->SetUsedGlobals(usedGlobals);
+
+        if(usedGlobals.debugReport) {
+            if (!RegisterDebugReport()) {
+                ASSERT(false);
+                return;
+            }
+        }
     }
 
     Device::~Device() {
+        if (debugReportCallback != VK_NULL_HANDLE) {
+            fn.DestroyDebugReportCallbackEXT(instance, debugReportCallback, nullptr);
+            debugReportCallback = VK_NULL_HANDLE;
+        }
+
+        if (instance != VK_NULL_HANDLE) {
+            fn.DestroyInstance(instance, nullptr);
+            instance = VK_NULL_HANDLE;
+        }
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
@@ -127,6 +158,76 @@ namespace vulkan {
     }
 
     void Device::TickImpl() {
+    }
+
+    bool Device::CreateInstance(KnownGlobalVulkanExtensions* usedGlobals) {
+        std::vector<const char*> layersToRequest;
+        std::vector<const char*> extensionsToRequest;
+
+        #if defined(NXT_ENABLE_ASSERTS)
+            if (info.global.standardValidation) {
+                layersToRequest.push_back(kLayerNameLunargStandardValidation);
+                usedGlobals->standardValidation = true;
+            }
+            if (info.global.debugReport) {
+                extensionsToRequest.push_back(kExtensionNameExtDebugReport);
+                usedGlobals->debugReport = true;
+            }
+        #endif
+
+        VkApplicationInfo appInfo;
+        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        appInfo.pNext = nullptr;
+        appInfo.pApplicationName = nullptr;
+        appInfo.applicationVersion = 0;
+        appInfo.pEngineName = nullptr;
+        appInfo.engineVersion = 0;
+        appInfo.apiVersion = VK_API_VERSION_1_0;
+
+        VkInstanceCreateInfo createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = 0;
+        createInfo.pApplicationInfo = &appInfo;
+        createInfo.enabledLayerCount = static_cast<uint32_t>(layersToRequest.size());
+        createInfo.ppEnabledLayerNames = layersToRequest.data();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
+        createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
+
+        if (fn.CreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool Device::RegisterDebugReport() {
+        VkDebugReportCallbackCreateInfoEXT createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+        createInfo.pNext = nullptr;
+        createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+        createInfo.pfnCallback = Device::OnDebugReportCallback;
+        createInfo.pUserData = this;
+
+        if (fn.CreateDebugReportCallbackEXT(instance, &createInfo, nullptr, &debugReportCallback) != VK_SUCCESS) {
+            return false;
+        }
+
+        return true;
+    }
+
+    VkBool32 Device::OnDebugReportCallback(VkDebugReportFlagsEXT flags,
+                                           VkDebugReportObjectTypeEXT /*objectType*/,
+                                           uint64_t /*object*/,
+                                           size_t /*location*/,
+                                           int32_t /*messageCode*/,
+                                           const char* /*pLayerPrefix*/,
+                                           const char* pMessage,
+                                           void* /*pUserdata*/) {
+        std::cout << pMessage << std::endl;
+        ASSERT((flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) == 0);
+
+        return VK_FALSE;
     }
 
     VulkanFunctions* Device::GetMutableFunctions() {

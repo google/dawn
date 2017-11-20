@@ -16,8 +16,24 @@
 
 #include "backend/vulkan/VulkanBackend.h"
 
+#include <cstring>
+
+namespace {
+    bool IsLayerName(const VkLayerProperties& layer, const char* name) {
+        return strncmp(layer.layerName, name, VK_MAX_EXTENSION_NAME_SIZE) == 0;
+    }
+
+    bool IsExtensionName(const VkExtensionProperties& extension, const char* name) {
+        return strncmp(extension.extensionName, name, VK_MAX_EXTENSION_NAME_SIZE) == 0;
+    }
+}
+
 namespace backend {
 namespace vulkan {
+
+    const char kLayerNameLunargStandardValidation[] = "VK_LAYER_LUNARG_standard_validation";
+
+    const char kExtensionNameExtDebugReport[] = "VK_EXT_debug_report";
 
     bool VulkanInfo::GatherGlobalInfo(const Device& device) {
         // Gather the info about the instance layers
@@ -36,6 +52,12 @@ namespace vulkan {
             if (result != VK_SUCCESS) {
                 return false;
             }
+
+            for (const auto& layer : global.layers) {
+                if (IsLayerName(layer, kLayerNameLunargStandardValidation)) {
+                    global.standardValidation = true;
+                }
+            }
         }
 
         // Gather the info about the instance extensions
@@ -51,11 +73,21 @@ namespace vulkan {
             if (result != VK_SUCCESS) {
                 return false;
             }
+
+            for (const auto& extension : global.extensions) {
+                if (IsExtensionName(extension, kExtensionNameExtDebugReport)) {
+                    global.debugReport = true;
+                }
+            }
         }
 
         // TODO(cwallez@chromium:org): Each layer can expose additional extensions, query them?
 
         return true;
+    }
+
+    void VulkanInfo::SetUsedGlobals(const KnownGlobalVulkanExtensions& usedGlobals) {
+        *static_cast<KnownGlobalVulkanExtensions*>(&global) = usedGlobals;
     }
 }
 }

@@ -24,18 +24,30 @@ namespace vulkan {
 
     class Device;
 
+    extern const char kLayerNameLunargStandardValidation[];
+
+    extern const char kExtensionNameExtDebugReport[];
+
+    struct KnownGlobalVulkanExtensions {
+        // Layers
+        bool standardValidation = false;
+
+        // Extensions
+        bool debugReport = false;
+    };
+
     // Stores the information about the Vulkan system that are required to use Vulkan.
     // Also does the querying of the information.
     struct VulkanInfo {
-
         // Global information - gathered before the instance is created
-        struct {
+        struct : KnownGlobalVulkanExtensions {
             std::vector<VkLayerProperties> layers;
             std::vector<VkExtensionProperties> extensions;
             // TODO(cwallez@chromium.org): layer instance extensions
         } global;
 
         bool GatherGlobalInfo(const Device& device);
+        void SetUsedGlobals(const KnownGlobalVulkanExtensions& usedGlobals);
     };
 
 }

@@ -14,6 +14,7 @@
 
 #include "backend/vulkan/VulkanFunctions.h"
 
+#include "backend/vulkan/VulkanInfo.h"
 #include "common/DynamicLib.h"
 
 namespace backend {
@@ -34,6 +35,35 @@ namespace vulkan {
         GET_GLOBAL_PROC(DestroyInstance);
         GET_GLOBAL_PROC(EnumerateInstanceExtensionProperties);
         GET_GLOBAL_PROC(EnumerateInstanceLayerProperties);
+
+        return true;
+    }
+
+    #define GET_INSTANCE_PROC(name) \
+        name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(instance, "vk" #name)); \
+        if (name == nullptr) { \
+            return false; \
+        }
+
+    bool VulkanFunctions::LoadInstanceProcs(VkInstance instance, const KnownGlobalVulkanExtensions& usedGlobals) {
+        GET_INSTANCE_PROC(CreateDevice);
+        GET_INSTANCE_PROC(DestroyDevice);
+        GET_INSTANCE_PROC(EnumerateDeviceExtensionProperties);
+        GET_INSTANCE_PROC(EnumerateDeviceLayerProperties);
+        GET_INSTANCE_PROC(EnumeratePhysicalDevices);
+        GET_INSTANCE_PROC(GetPhysicalDeviceFeatures);
+        GET_INSTANCE_PROC(GetPhysicalDeviceFormatProperties);
+        GET_INSTANCE_PROC(GetPhysicalDeviceImageFormatProperties);
+        GET_INSTANCE_PROC(GetPhysicalDeviceMemoryProperties);
+        GET_INSTANCE_PROC(GetPhysicalDeviceProperties);
+        GET_INSTANCE_PROC(GetPhysicalDeviceQueueFamilyProperties);
+        GET_INSTANCE_PROC(GetPhysicalDeviceSparseImageFormatProperties);
+
+        if (usedGlobals.debugReport) {
+            GET_INSTANCE_PROC(CreateDebugReportCallbackEXT);
+            GET_INSTANCE_PROC(DebugReportMessageEXT);
+            GET_INSTANCE_PROC(DestroyDebugReportCallbackEXT);
+        }
 
         return true;
     }

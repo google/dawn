@@ -125,12 +125,27 @@ namespace vulkan {
             const VulkanInfo info;
 
         private:
+            bool CreateInstance(KnownGlobalVulkanExtensions* usedGlobals);
+            bool RegisterDebugReport();
+
+            static VkBool32 OnDebugReportCallback(VkDebugReportFlagsEXT flags,
+                                                  VkDebugReportObjectTypeEXT objectType,
+                                                  uint64_t object,
+                                                  size_t location,
+                                                  int32_t messageCode,
+                                                  const char* pLayerPrefix,
+                                                  const char* pMessage,
+                                                  void* pUserdata);
+
             // To make it easier to use fn it is a public const member. However
             // the Device is allowed to mutate them through these private methods.
             VulkanFunctions* GetMutableFunctions();
             VulkanInfo* GetMutableInfo();
 
             DynamicLib vulkanLib;
+
+            VkInstance instance = VK_NULL_HANDLE;
+            VkDebugReportCallbackEXT debugReportCallback = VK_NULL_HANDLE;
     };
 
     class Buffer : public BufferBase {
