@@ -27,29 +27,48 @@ namespace vulkan {
     extern const char kLayerNameLunargStandardValidation[];
 
     extern const char kExtensionNameExtDebugReport[];
+    extern const char kExtensionNameKhrSurface[];
+    extern const char kExtensionNameKhrSwapchain[];
 
-    struct KnownGlobalVulkanExtensions {
+    // Global information - gathered before the instance is created
+    struct VulkanGlobalKnobs {
         // Layers
         bool standardValidation = false;
 
         // Extensions
         bool debugReport = false;
+        bool surface = false;
     };
 
-    // Stores the information about the Vulkan system that are required to use Vulkan.
-    // Also does the querying of the information.
-    struct VulkanInfo {
-        // Global information - gathered before the instance is created
-        struct : KnownGlobalVulkanExtensions {
-            std::vector<VkLayerProperties> layers;
-            std::vector<VkExtensionProperties> extensions;
-            // TODO(cwallez@chromium.org): layer instance extensions
-        } global;
-
-        bool GatherGlobalInfo(const Device& device);
-        void SetUsedGlobals(const KnownGlobalVulkanExtensions& usedGlobals);
+    struct VulkanGlobalInfo : VulkanGlobalKnobs {
+        std::vector<VkLayerProperties> layers;
+        std::vector<VkExtensionProperties> extensions;
+        // TODO(cwallez@chromium.org): layer instance extensions
     };
 
+    // Device information - gathered before the device is created.
+    struct VulkanDeviceKnobs {
+        VkPhysicalDeviceFeatures features;
+
+        // Extensions
+        bool swapchain = false;
+    };
+
+    struct VulkanDeviceInfo : VulkanDeviceKnobs {
+        VkPhysicalDeviceProperties properties;
+        std::vector<VkQueueFamilyProperties> queueFamilies;
+
+        std::vector<VkMemoryType> memoryTypes;
+        std::vector<VkMemoryHeap> memoryHeaps;
+
+        std::vector<VkLayerProperties> layers;
+        std::vector<VkExtensionProperties> extensions;
+        // TODO(cwallez@chromium.org): layer instance extensions
+    };
+
+    bool GatherGlobalInfo(const Device& device, VulkanGlobalInfo* info);
+    bool GetPhysicalDevices(const Device& device, std::vector<VkPhysicalDevice>* physicalDevices);
+    bool GatherDeviceInfo(const Device& device, VkPhysicalDevice physicalDevice, VulkanDeviceInfo* info);
 }
 }
 

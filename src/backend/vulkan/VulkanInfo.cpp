@@ -34,8 +34,10 @@ namespace vulkan {
     const char kLayerNameLunargStandardValidation[] = "VK_LAYER_LUNARG_standard_validation";
 
     const char kExtensionNameExtDebugReport[] = "VK_EXT_debug_report";
+    const char kExtensionNameKhrSurface[] = "VK_KHR_surface";
+    const char kExtensionNameKhrSwapchain[] = "VK_KHR_swapchain";
 
-    bool VulkanInfo::GatherGlobalInfo(const Device& device) {
+    bool GatherGlobalInfo(const Device& device, VulkanGlobalInfo* info) {
         // Gather the info about the instance layers
         {
             uint32_t count = 0;
@@ -47,15 +49,15 @@ namespace vulkan {
                 return false;
             }
 
-            global.layers.resize(count);
-            result = device.fn.EnumerateInstanceLayerProperties(&count, global.layers.data());
+            info->layers.resize(count);
+            result = device.fn.EnumerateInstanceLayerProperties(&count, info->layers.data());
             if (result != VK_SUCCESS) {
                 return false;
             }
 
-            for (const auto& layer : global.layers) {
+            for (const auto& layer : info->layers) {
                 if (IsLayerName(layer, kLayerNameLunargStandardValidation)) {
-                    global.standardValidation = true;
+                    info->standardValidation = true;
                 }
             }
         }
@@ -68,15 +70,18 @@ namespace vulkan {
                 return false;
             }
 
-            global.extensions.resize(count);
-            result = device.fn.EnumerateInstanceExtensionProperties(nullptr, &count, global.extensions.data());
+            info->extensions.resize(count);
+            result = device.fn.EnumerateInstanceExtensionProperties(nullptr, &count, info->extensions.data());
             if (result != VK_SUCCESS) {
                 return false;
             }
 
-            for (const auto& extension : global.extensions) {
+            for (const auto& extension : info->extensions) {
                 if (IsExtensionName(extension, kExtensionNameExtDebugReport)) {
-                    global.debugReport = true;
+                    info->debugReport = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrSurface)) {
+                    info->surface = true;
                 }
             }
         }
@@ -86,8 +91,87 @@ namespace vulkan {
         return true;
     }
 
-    void VulkanInfo::SetUsedGlobals(const KnownGlobalVulkanExtensions& usedGlobals) {
-        *static_cast<KnownGlobalVulkanExtensions*>(&global) = usedGlobals;
+    bool GetPhysicalDevices(const Device& device, std::vector<VkPhysicalDevice>* physicalDevices) {
+        VkInstance instance = device.GetInstance();
+
+        uint32_t count = 0;
+        VkResult result = device.fn.EnumeratePhysicalDevices(instance, &count, nullptr);
+        if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
+            return false;
+        }
+
+        physicalDevices->resize(count);
+        result = device.fn.EnumeratePhysicalDevices(instance, &count, physicalDevices->data());
+        if (result != VK_SUCCESS) {
+            return false;
+        }
+
+        return true;
     }
+
+    bool GatherDeviceInfo(const Device& device, VkPhysicalDevice physicalDevice, VulkanDeviceInfo* info) {
+        // Gather general info about the device
+        device.fn.GetPhysicalDeviceProperties(physicalDevice, &info->properties);
+        device.fn.GetPhysicalDeviceFeatures(physicalDevice, &info->features);
+
+        // Gather info about device memory.
+        {
+            VkPhysicalDeviceMemoryProperties memory;
+            device.fn.GetPhysicalDeviceMemoryProperties(physicalDevice, &memory);
+
+            info->memoryTypes.assign(memory.memoryTypes, memory.memoryTypes + memory.memoryTypeCount);
+            info->memoryHeaps.assign(memory.memoryHeaps, memory.memoryHeaps + memory.memoryHeapCount);
+        }
+
+        // Gather info about device queue families
+        {
+            uint32_t count = 0;
+            device.fn.GetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, nullptr);
+
+            info->queueFamilies.resize(count);
+            device.fn.GetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, info->queueFamilies.data());
+        }
+
+        // Gather the info about the device layers
+        {
+            uint32_t count = 0;
+            VkResult result = device.fn.EnumerateDeviceLayerProperties(physicalDevice, &count, nullptr);
+            if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
+                return false;
+            }
+
+            info->layers.resize(count);
+            result = device.fn.EnumerateDeviceLayerProperties(physicalDevice, &count, info->layers.data());
+            if (result != VK_SUCCESS) {
+                return false;
+            }
+        }
+
+        // Gather the info about the device extensions
+        {
+            uint32_t count = 0;
+            VkResult result = device.fn.EnumerateDeviceExtensionProperties(physicalDevice, nullptr, &count, nullptr);
+            if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
+                return false;
+            }
+
+            info->extensions.resize(count);
+            result = device.fn.EnumerateDeviceExtensionProperties(physicalDevice, nullptr, &count, info->extensions.data());
+            if (result != VK_SUCCESS) {
+                return false;
+            }
+
+            for (const auto& extension : info->extensions) {
+                if (IsExtensionName(extension, kExtensionNameKhrSwapchain)) {
+                    info->swapchain = true;
+                }
+            }
+        }
+
+        // TODO(cwallez@chromium.org): gather info about formats
+
+        return true;
+    }
+
 }
 }

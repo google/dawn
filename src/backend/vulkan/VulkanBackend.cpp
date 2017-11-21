@@ -49,40 +49,68 @@ namespace vulkan {
         }
 
         VulkanFunctions* functions = GetMutableFunctions();
-        VulkanInfo* vulkanInfo = GetMutableInfo();
 
         if (!functions->LoadGlobalProcs(vulkanLib)) {
             ASSERT(false);
             return;
         }
 
-        if (!vulkanInfo->GatherGlobalInfo(*this)) {
+        if (!GatherGlobalInfo(*this, &globalInfo)) {
             ASSERT(false);
             return;
         }
 
-        KnownGlobalVulkanExtensions usedGlobals;
-        if (!CreateInstance(&usedGlobals)) {
+        VulkanGlobalKnobs usedGlobalKnobs = {};
+        if (!CreateInstance(&usedGlobalKnobs)) {
+            ASSERT(false);
+            return;
+        }
+        *static_cast<VulkanGlobalKnobs*>(&globalInfo) = usedGlobalKnobs;
+
+        if (!functions->LoadInstanceProcs(instance, usedGlobalKnobs)) {
             ASSERT(false);
             return;
         }
 
-        if (!functions->LoadInstanceProcs(instance, usedGlobals)) {
-            ASSERT(false);
-            return;
-        }
-
-        vulkanInfo->SetUsedGlobals(usedGlobals);
-
-        if(usedGlobals.debugReport) {
+        if (usedGlobalKnobs.debugReport) {
             if (!RegisterDebugReport()) {
                 ASSERT(false);
                 return;
             }
         }
+
+        std::vector<VkPhysicalDevice> physicalDevices;
+        if (!GetPhysicalDevices(*this, &physicalDevices) || physicalDevices.empty()) {
+            ASSERT(false);
+            return;
+        }
+        // TODO(cwallez@chromium.org): Choose the physical device based on ???
+        physicalDevice = physicalDevices[0];
+
+        if (!GatherDeviceInfo(*this, physicalDevice, &deviceInfo)) {
+            ASSERT(false);
+            return;
+        }
+
+        VulkanDeviceKnobs usedDeviceKnobs = {};
+        if (!CreateDevice(&usedDeviceKnobs)) {
+            ASSERT(false);
+            return;
+        }
+        *static_cast<VulkanDeviceKnobs*>(&deviceInfo) = usedDeviceKnobs;
+
+        if (!functions->LoadDeviceProcs(vkDevice, usedDeviceKnobs)) {
+            ASSERT(false);
+            return;
+        }
     }
 
     Device::~Device() {
+        if (vkDevice != VK_NULL_HANDLE) {
+            fn.DestroyDevice(vkDevice, nullptr);
+            vkDevice = VK_NULL_HANDLE;
+        }
+
         if (debugReportCallback != VK_NULL_HANDLE) {
             fn.DestroyDebugReportCallbackEXT(instance, debugReportCallback, nullptr);
             debugReportCallback = VK_NULL_HANDLE;
@@ -160,18 +188,22 @@ namespace vulkan {
     void Device::TickImpl() {
     }
 
-    bool Device::CreateInstance(KnownGlobalVulkanExtensions* usedGlobals) {
+    VkInstance Device::GetInstance() const {
+        return instance;
+    }
+
+    bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs) {
         std::vector<const char*> layersToRequest;
         std::vector<const char*> extensionsToRequest;
 
         #if defined(NXT_ENABLE_ASSERTS)
-            if (info.global.standardValidation) {
+            if (globalInfo.standardValidation) {
                 layersToRequest.push_back(kLayerNameLunargStandardValidation);
-                usedGlobals->standardValidation = true;
+                usedKnobs->standardValidation = true;
             }
-            if (info.global.debugReport) {
+            if (globalInfo.debugReport) {
                 extensionsToRequest.push_back(kExtensionNameExtDebugReport);
-                usedGlobals->debugReport = true;
+                usedKnobs->debugReport = true;
             }
         #endif
 
@@ -195,6 +227,66 @@ namespace vulkan {
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
 
         if (fn.CreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool Device::CreateDevice(VulkanDeviceKnobs* usedKnobs) {
+        float zero = 0.0f;
+        std::vector<const char*> layersToRequest;
+        std::vector<const char*> extensionsToRequest;
+        std::vector<VkDeviceQueueCreateInfo> queuesToRequest;
+
+        if (deviceInfo.swapchain) {
+            extensionsToRequest.push_back(kExtensionNameKhrSwapchain);
+            usedKnobs->swapchain = true;
+        }
+
+        // Find a universal queue family
+        {
+            constexpr uint32_t kUniversalFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
+            ssize_t universalQueueFamily = -1;
+            for (size_t i = 0; i < deviceInfo.queueFamilies.size(); ++i) {
+                if ((deviceInfo.queueFamilies[i].queueFlags & kUniversalFlags) == kUniversalFlags) {
+                    universalQueueFamily = i;
+                    break;
+                }
+            }
+
+            if (universalQueueFamily == -1) {
+                return false;
+            }
+            queueFamily = static_cast<uint32_t>(universalQueueFamily);
+        }
+
+        // Choose to create a single universal queue
+        {
+            VkDeviceQueueCreateInfo queueCreateInfo;
+            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queueCreateInfo.pNext = nullptr;
+            queueCreateInfo.flags = 0;
+            queueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(queueFamily);
+            queueCreateInfo.queueCount = 1;
+            queueCreateInfo.pQueuePriorities = &zero;
+
+            queuesToRequest.push_back(queueCreateInfo);
+        }
+
+        VkDeviceCreateInfo createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = 0;
+        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queuesToRequest.size());
+        createInfo.pQueueCreateInfos = queuesToRequest.data();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(layersToRequest.size());
+        createInfo.ppEnabledLayerNames = layersToRequest.data();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
+        createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
+        createInfo.pEnabledFeatures = &usedKnobs->features;
+
+        if (fn.CreateDevice(physicalDevice, &createInfo, nullptr, &vkDevice) != VK_SUCCESS) {
             return false;
         }
 
@@ -232,10 +324,6 @@ namespace vulkan {
 
     VulkanFunctions* Device::GetMutableFunctions() {
         return const_cast<VulkanFunctions*>(&fn);
-    }
-
-    VulkanInfo* Device::GetMutableInfo() {
-        return const_cast<VulkanInfo*>(&info);
     }
 
     // Buffer

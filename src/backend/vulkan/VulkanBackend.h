@@ -121,13 +121,14 @@ namespace vulkan {
 
             // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
             const VulkanFunctions fn;
-            // All the information queried about this Vulkan system
-            const VulkanInfo info;
+
+            VkInstance GetInstance() const;
 
         private:
-            bool CreateInstance(KnownGlobalVulkanExtensions* usedGlobals);
-            bool RegisterDebugReport();
+            bool CreateInstance(VulkanGlobalKnobs* usedKnobs);
+            bool CreateDevice(VulkanDeviceKnobs* usedKnobs);
 
+            bool RegisterDebugReport();
             static VkBool32 OnDebugReportCallback(VkDebugReportFlagsEXT flags,
                                                   VkDebugReportObjectTypeEXT objectType,
                                                   uint64_t object,
@@ -140,11 +141,16 @@ namespace vulkan {
             // To make it easier to use fn it is a public const member. However
             // the Device is allowed to mutate them through these private methods.
             VulkanFunctions* GetMutableFunctions();
-            VulkanInfo* GetMutableInfo();
+
+            VulkanGlobalInfo globalInfo;
+            VulkanDeviceInfo deviceInfo;
 
             DynamicLib vulkanLib;
 
             VkInstance instance = VK_NULL_HANDLE;
+            VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+            VkDevice vkDevice = VK_NULL_HANDLE;
+            uint32_t queueFamily = 0;
             VkDebugReportCallbackEXT debugReportCallback = VK_NULL_HANDLE;
     };
 
