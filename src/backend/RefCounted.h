@@ -48,7 +48,7 @@ namespace backend {
                 Reference();
             }
 
-            Ref(Ref<T>& other): pointee(other.pointee) {
+            Ref(const Ref<T>& other): pointee(other.pointee) {
                 Reference();
             }
             Ref<T>& operator=(const Ref<T>& other) {
