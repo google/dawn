@@ -15,6 +15,7 @@
 #include "backend/vulkan/VulkanBackend.h"
 
 #include "backend/Commands.h"
+#include "backend/vulkan/BufferVk.h"
 #include "common/Platform.h"
 
 #include <spirv-cross/spirv_cross.hpp>
@@ -103,9 +104,28 @@ namespace vulkan {
             ASSERT(false);
             return;
         }
+
+        GatherQueueFromDevice();
+
+        mapReadRequestTracker = new MapReadRequestTracker(this);
+        memoryAllocator = new MemoryAllocator(this);
     }
 
     Device::~Device() {
+        // TODO(cwallez@chromium.org): properly wait on everything to be finished
+        Tick();
+
+        if (memoryAllocator) {
+            delete memoryAllocator;
+            memoryAllocator = nullptr;
+        }
+
+        if (mapReadRequestTracker) {
+            delete mapReadRequestTracker;
+            mapReadRequestTracker = nullptr;
+        }
+
+        // VkQueues are destroyed when the VkDevice is destroyed
         if (vkDevice != VK_NULL_HANDLE) {
             fn.DestroyDevice(vkDevice, nullptr);
             vkDevice = VK_NULL_HANDLE;
@@ -116,6 +136,7 @@ namespace vulkan {
             debugReportCallback = VK_NULL_HANDLE;
         }
 
+        // VkPhysicalDevices are destroyed when the VkInstance is destroyed
         if (instance != VK_NULL_HANDLE) {
             fn.DestroyInstance(instance, nullptr);
             instance = VK_NULL_HANDLE;
@@ -186,10 +207,37 @@ namespace vulkan {
     }
 
     void Device::TickImpl() {
+        // TODO(cwallez@chromium.org): Correctly track the serial with Semaphores
+        fn.QueueWaitIdle(queue);
+        completedSerial = nextSerial;
+        nextSerial++;
+
+        mapReadRequestTracker->Tick(completedSerial);
+        memoryAllocator->Tick(completedSerial);
+    }
+
+    const VulkanDeviceInfo& Device::GetDeviceInfo() const {
+        return deviceInfo;
+    }
+
+    MapReadRequestTracker* Device::GetMapReadRequestTracker() const {
+        return mapReadRequestTracker;
+    }
+
+    MemoryAllocator* Device::GetMemoryAllocator() const {
+        return memoryAllocator;
+    }
+
+    Serial Device::GetSerial() const {
+        return nextSerial;
     }
 
     VkInstance Device::GetInstance() const {
         return instance;
+    }
+
+    VkDevice Device::GetVkDevice() const {
+        return vkDevice;
     }
 
     bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs) {
@@ -293,6 +341,10 @@ namespace vulkan {
         return true;
     }
 
+    void Device::GatherQueueFromDevice() {
+        fn.GetDeviceQueue(vkDevice, queueFamily, 0, &queue);
+    }
+
     bool Device::RegisterDebugReport() {
         VkDebugReportCallbackCreateInfoEXT createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
@@ -324,27 +376,6 @@ namespace vulkan {
 
     VulkanFunctions* Device::GetMutableFunctions() {
         return const_cast<VulkanFunctions*>(&fn);
-    }
-
-    // Buffer
-
-    Buffer::Buffer(BufferBuilder* builder)
-        : BufferBase(builder) {
-    }
-
-    Buffer::~Buffer() {
-    }
-
-    void Buffer::SetSubDataImpl(uint32_t, uint32_t, const uint32_t*) {
-    }
-
-    void Buffer::MapReadAsyncImpl(uint32_t, uint32_t, uint32_t) {
-    }
-
-    void Buffer::UnmapImpl() {
-    }
-
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
     }
 
     // Queue

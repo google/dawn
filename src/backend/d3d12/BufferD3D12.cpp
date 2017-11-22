@@ -172,7 +172,6 @@ namespace d3d12 {
         }
     }
 
-
     BufferView::BufferView(BufferViewBuilder* builder)
         : BufferViewBase(builder) {
 

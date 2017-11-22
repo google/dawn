@@ -19,7 +19,6 @@
 
 #include "backend/vulkan/VulkanFunctions.h"
 #include "backend/vulkan/VulkanInfo.h"
-#include "backend/Buffer.h"
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
 #include "backend/BlendState.h"
@@ -39,6 +38,7 @@
 #include "backend/Texture.h"
 #include "backend/ToBackend.h"
 #include "common/DynamicLib.h"
+#include "common/Serial.h"
 
 namespace backend {
 namespace vulkan {
@@ -63,6 +63,9 @@ namespace vulkan {
     class SwapChain;
     class Texture;
     using TextureView = TextureViewBase;
+
+    class MapReadRequestTracker;
+    class MemoryAllocator;
 
     struct VulkanBackendTraits {
         using BindGroupType = BindGroup;
@@ -119,14 +122,21 @@ namespace vulkan {
 
             void TickImpl() override;
 
+            const VulkanDeviceInfo& GetDeviceInfo() const;
+            MapReadRequestTracker* GetMapReadRequestTracker() const;
+            MemoryAllocator* GetMemoryAllocator() const;
+            Serial GetSerial() const;
+
             // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
             const VulkanFunctions fn;
 
             VkInstance GetInstance() const;
+            VkDevice GetVkDevice() const;
 
         private:
             bool CreateInstance(VulkanGlobalKnobs* usedKnobs);
             bool CreateDevice(VulkanDeviceKnobs* usedKnobs);
+            void GatherQueueFromDevice();
 
             bool RegisterDebugReport();
             static VkBool32 OnDebugReportCallback(VkDebugReportFlagsEXT flags,
@@ -151,19 +161,13 @@ namespace vulkan {
             VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
             VkDevice vkDevice = VK_NULL_HANDLE;
             uint32_t queueFamily = 0;
+            VkQueue queue = VK_NULL_HANDLE;
             VkDebugReportCallbackEXT debugReportCallback = VK_NULL_HANDLE;
-    };
 
-    class Buffer : public BufferBase {
-        public:
-            Buffer(BufferBuilder* builder);
-            ~Buffer();
-
-        private:
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
+            Serial nextSerial = 1;
+            Serial completedSerial = 0;
+            MapReadRequestTracker* mapReadRequestTracker = nullptr;
+            MemoryAllocator* memoryAllocator = nullptr;
     };
 
     class Queue : public QueueBase {
