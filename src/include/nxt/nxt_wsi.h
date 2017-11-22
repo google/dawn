@@ -66,4 +66,9 @@ typedef struct {
 } nxtWSIContextGL;
 #endif
 
+#ifdef NXT_ENABLE_BACKEND_VULKAN
+typedef struct {
+} nxtWSIContextVulkan;
+#endif
+
 #endif // NXT_WSI_H
