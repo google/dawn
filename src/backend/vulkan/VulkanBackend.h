@@ -40,6 +40,8 @@
 #include "common/DynamicLib.h"
 #include "common/Serial.h"
 
+#include <queue>
+
 namespace backend {
 namespace vulkan {
 
@@ -133,6 +135,8 @@ namespace vulkan {
             VkInstance GetInstance() const;
             VkDevice GetVkDevice() const;
 
+            void FakeSubmit();
+
         private:
             bool CreateInstance(VulkanGlobalKnobs* usedKnobs);
             bool CreateDevice(VulkanDeviceKnobs* usedKnobs);
@@ -164,10 +168,20 @@ namespace vulkan {
             VkQueue queue = VK_NULL_HANDLE;
             VkDebugReportCallbackEXT debugReportCallback = VK_NULL_HANDLE;
 
-            Serial nextSerial = 1;
-            Serial completedSerial = 0;
             MapReadRequestTracker* mapReadRequestTracker = nullptr;
             MemoryAllocator* memoryAllocator = nullptr;
+
+            VkFence GetUnusedFence();
+            void CheckPassedFences();
+
+            // We track which operations are in flight on the GPU with an increasing serial.
+            // This works only because we have a single queue. Each submit to a queue is associated
+            // to a serial and a fence, such that when the fence is "ready" we know the operations
+            // have finished.
+            std::queue<std::pair<VkFence, Serial>> fencesInFlight;
+            std::vector<VkFence> unusedFences;
+            Serial nextSerial = 1;
+            Serial completedSerial = 0;
     };
 
     class Queue : public QueueBase {

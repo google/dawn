@@ -112,8 +112,22 @@ namespace vulkan {
     }
 
     Device::~Device() {
-        // TODO(cwallez@chromium.org): properly wait on everything to be finished
+        if (fn.QueueWaitIdle(queue) != VK_SUCCESS) {
+            ASSERT(false);
+        }
+        CheckPassedFences();
+        ASSERT(fencesInFlight.empty());
+
+        // Some operations might have been started since the last submit and waiting
+        // on a serial that doesn't have a corresponding fence enqueued. Force all
+        // operations to look as if they were completed (because they were).
+        completedSerial = nextSerial;
         Tick();
+
+        for (VkFence fence : unusedFences) {
+            fn.DestroyFence(vkDevice, fence, nullptr);
+        }
+        unusedFences.clear();
 
         if (memoryAllocator) {
             delete memoryAllocator;
@@ -207,10 +221,7 @@ namespace vulkan {
     }
 
     void Device::TickImpl() {
-        // TODO(cwallez@chromium.org): Correctly track the serial with Semaphores
-        fn.QueueWaitIdle(queue);
-        completedSerial = nextSerial;
-        nextSerial++;
+        CheckPassedFences();
 
         mapReadRequestTracker->Tick(completedSerial);
         memoryAllocator->Tick(completedSerial);
@@ -238,6 +249,27 @@ namespace vulkan {
 
     VkDevice Device::GetVkDevice() const {
         return vkDevice;
+    }
+
+    void Device::FakeSubmit() {
+        VkSubmitInfo submitInfo;
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.pNext = nullptr;
+        submitInfo.waitSemaphoreCount = 0;
+        submitInfo.pWaitSemaphores = nullptr;
+        submitInfo.pWaitDstStageMask = 0;
+        submitInfo.commandBufferCount = 0;
+        submitInfo.pCommandBuffers = 0;
+        submitInfo.signalSemaphoreCount = 0;
+        submitInfo.pSignalSemaphores = 0;
+
+        VkFence fence = GetUnusedFence();
+        if (fn.QueueSubmit(queue, 1, &submitInfo, fence) != VK_SUCCESS) {
+            ASSERT(false);
+        }
+
+        fencesInFlight.emplace(fence, nextSerial);
+        nextSerial++;
     }
 
     bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs) {
@@ -376,6 +408,52 @@ namespace vulkan {
 
     VulkanFunctions* Device::GetMutableFunctions() {
         return const_cast<VulkanFunctions*>(&fn);
+    }
+
+    VkFence Device::GetUnusedFence() {
+        if (!unusedFences.empty()) {
+            VkFence fence = unusedFences.back();
+            unusedFences.pop_back();
+            return fence;
+        }
+
+        VkFenceCreateInfo createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = 0;
+
+        VkFence fence = VK_NULL_HANDLE;
+        if (fn.CreateFence(vkDevice, &createInfo, nullptr, &fence) != VK_SUCCESS) {
+            ASSERT(false);
+        }
+
+        return fence;
+    }
+
+    void Device::CheckPassedFences() {
+        while (!fencesInFlight.empty()) {
+            VkFence fence = fencesInFlight.front().first;
+            Serial fenceSerial = fencesInFlight.front().second;
+
+            VkResult result = fn.GetFenceStatus(vkDevice, fence);
+            ASSERT(result == VK_SUCCESS || result == VK_NOT_READY);
+
+            // Fence are added in order, so we can stop searching as soon
+            // as we see one that's not ready.
+            if (result == VK_NOT_READY) {
+                return;
+            }
+
+            if (fn.ResetFences(vkDevice, 1, &fence) != VK_SUCCESS) {
+                ASSERT(false);
+            }
+            unusedFences.push_back(fence);
+
+            fencesInFlight.pop();
+
+            ASSERT(fenceSerial > completedSerial);
+            completedSerial = fenceSerial;
+        }
     }
 
     // Queue
