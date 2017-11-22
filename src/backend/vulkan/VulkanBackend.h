@@ -69,6 +69,7 @@ namespace vulkan {
 
     class MapReadRequestTracker;
     class MemoryAllocator;
+    class BufferUploader;
 
     struct VulkanBackendTraits {
         using BindGroupType = BindGroup;
@@ -128,6 +129,7 @@ namespace vulkan {
             const VulkanDeviceInfo& GetDeviceInfo() const;
             MapReadRequestTracker* GetMapReadRequestTracker() const;
             MemoryAllocator* GetMemoryAllocator() const;
+            BufferUploader* GetBufferUploader() const;
 
             Serial GetSerial() const;
 
@@ -175,6 +177,7 @@ namespace vulkan {
 
             MapReadRequestTracker* mapReadRequestTracker = nullptr;
             MemoryAllocator* memoryAllocator = nullptr;
+            BufferUploader* bufferUploader = nullptr;
 
             VkFence GetUnusedFence();
             void CheckPassedFences();

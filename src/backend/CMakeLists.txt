@@ -289,6 +289,8 @@ if (NXT_ENABLE_VULKAN)
 
     list(APPEND BACKEND_SOURCES
         ${VULKAN_DIR}/vulkan_platform.h
+        ${VULKAN_DIR}/BufferUploader.cpp
+        ${VULKAN_DIR}/BufferUploader.h
         ${VULKAN_DIR}/BufferVk.cpp
         ${VULKAN_DIR}/BufferVk.h
         ${VULKAN_DIR}/MemoryAllocator.cpp

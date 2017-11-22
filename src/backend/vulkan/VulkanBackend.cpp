@@ -16,6 +16,7 @@
 
 #include "backend/Commands.h"
 #include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/BufferUploader.h"
 #include "common/Platform.h"
 
 #include <spirv-cross/spirv_cross.hpp>
@@ -109,6 +110,7 @@ namespace vulkan {
 
         mapReadRequestTracker = new MapReadRequestTracker(this);
         memoryAllocator = new MemoryAllocator(this);
+        bufferUploader = new BufferUploader(this);
     }
 
     Device::~Device() {
@@ -137,6 +139,11 @@ namespace vulkan {
             fn.DestroyFence(vkDevice, fence, nullptr);
         }
         unusedFences.clear();
+
+        if (bufferUploader) {
+            delete bufferUploader;
+            bufferUploader = nullptr;
+        }
 
         if (memoryAllocator) {
             delete memoryAllocator;
@@ -234,6 +241,7 @@ namespace vulkan {
         RecycleCompletedCommands();
 
         mapReadRequestTracker->Tick(completedSerial);
+        bufferUploader->Tick(completedSerial);
         memoryAllocator->Tick(completedSerial);
 
         if (pendingCommands.pool != VK_NULL_HANDLE) {
@@ -251,6 +259,10 @@ namespace vulkan {
 
     MemoryAllocator* Device::GetMemoryAllocator() const {
         return memoryAllocator;
+    }
+
+    BufferUploader* Device::GetBufferUploader() const {
+        return bufferUploader;
     }
 
     Serial Device::GetSerial() const {

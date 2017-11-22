@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "backend/vulkan/BufferVk.h"
+
+#include "backend/vulkan/BufferUploader.h"
 #include "backend/vulkan/VulkanBackend.h"
 
 #include <cstring>
@@ -97,14 +99,8 @@ namespace vulkan {
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
-        // TODO(cwallez@chromium.org): Make a proper resource uploader. Not all resources
-        // can be directly mapped.
-        uint8_t* memory = memoryAllocation.GetMappedPointer();
-        ASSERT(memory != nullptr);
-
-        memcpy(memory + start * sizeof(uint32_t), data, count * sizeof(uint32_t));
-
-        ToBackend(GetDevice())->GetPendingCommandBuffer();
+        BufferUploader* uploader = ToBackend(GetDevice())->GetBufferUploader();
+        uploader->BufferSubData(handle, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
@@ -113,8 +109,6 @@ namespace vulkan {
 
         MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadRequestTracker();
         tracker->Track(this, serial, memory + start);
-
-        ToBackend(GetDevice())->GetPendingCommandBuffer();
     }
 
     void Buffer::UnmapImpl() {
