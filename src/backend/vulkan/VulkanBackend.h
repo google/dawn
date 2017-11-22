@@ -39,6 +39,7 @@
 #include "backend/ToBackend.h"
 #include "common/DynamicLib.h"
 #include "common/Serial.h"
+#include "common/SerialQueue.h"
 
 #include <queue>
 
@@ -127,7 +128,11 @@ namespace vulkan {
             const VulkanDeviceInfo& GetDeviceInfo() const;
             MapReadRequestTracker* GetMapReadRequestTracker() const;
             MemoryAllocator* GetMemoryAllocator() const;
+
             Serial GetSerial() const;
+
+            VkCommandBuffer GetPendingCommandBuffer();
+            void SubmitPendingCommands();
 
             // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
             const VulkanFunctions fn;
@@ -182,6 +187,19 @@ namespace vulkan {
             std::vector<VkFence> unusedFences;
             Serial nextSerial = 1;
             Serial completedSerial = 0;
+
+            struct CommandPoolAndBuffer {
+                VkCommandPool pool = VK_NULL_HANDLE;
+                VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+            };
+
+            CommandPoolAndBuffer GetUnusedCommands();
+            void RecycleCompletedCommands();
+            void FreeCommands(CommandPoolAndBuffer* commands);
+
+            SerialQueue<CommandPoolAndBuffer> commandsInFlight;
+            std::vector<CommandPoolAndBuffer> unusedCommands;
+            CommandPoolAndBuffer pendingCommands;
     };
 
     class Queue : public QueueBase {

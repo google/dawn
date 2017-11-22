@@ -112,6 +112,9 @@ namespace vulkan {
     }
 
     Device::~Device() {
+        // Immediately forget about all pending commands so we don't try to submit them in Tick
+        FreeCommands(&pendingCommands);
+
         if (fn.QueueWaitIdle(queue) != VK_SUCCESS) {
             ASSERT(false);
         }
@@ -123,6 +126,12 @@ namespace vulkan {
         // operations to look as if they were completed (because they were).
         completedSerial = nextSerial;
         Tick();
+
+        ASSERT(commandsInFlight.Empty());
+        for (auto& commands : unusedCommands) {
+            FreeCommands(&commands);
+        }
+        unusedCommands.clear();
 
         for (VkFence fence : unusedFences) {
             fn.DestroyFence(vkDevice, fence, nullptr);
@@ -222,9 +231,14 @@ namespace vulkan {
 
     void Device::TickImpl() {
         CheckPassedFences();
+        RecycleCompletedCommands();
 
         mapReadRequestTracker->Tick(completedSerial);
         memoryAllocator->Tick(completedSerial);
+
+        if (pendingCommands.pool != VK_NULL_HANDLE) {
+            SubmitPendingCommands();
+        }
     }
 
     const VulkanDeviceInfo& Device::GetDeviceInfo() const {
@@ -243,23 +257,41 @@ namespace vulkan {
         return nextSerial;
     }
 
-    VkInstance Device::GetInstance() const {
-        return instance;
+    VkCommandBuffer Device::GetPendingCommandBuffer() {
+        if (pendingCommands.pool == VK_NULL_HANDLE) {
+            pendingCommands = GetUnusedCommands();
+
+            VkCommandBufferBeginInfo beginInfo;
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            beginInfo.pNext = nullptr;
+            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+            beginInfo.pInheritanceInfo = nullptr;
+
+            if (fn.BeginCommandBuffer(pendingCommands.commandBuffer, &beginInfo) != VK_SUCCESS) {
+                ASSERT(false);
+            }
+        }
+
+        return pendingCommands.commandBuffer;
     }
 
-    VkDevice Device::GetVkDevice() const {
-        return vkDevice;
-    }
+    void Device::SubmitPendingCommands() {
+        if (pendingCommands.pool == VK_NULL_HANDLE) {
+            return;
+        }
 
-    void Device::FakeSubmit() {
+        if (fn.EndCommandBuffer(pendingCommands.commandBuffer) != VK_SUCCESS) {
+            ASSERT(false);
+        }
+
         VkSubmitInfo submitInfo;
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.pNext = nullptr;
         submitInfo.waitSemaphoreCount = 0;
         submitInfo.pWaitSemaphores = nullptr;
         submitInfo.pWaitDstStageMask = 0;
-        submitInfo.commandBufferCount = 0;
-        submitInfo.pCommandBuffers = 0;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &pendingCommands.commandBuffer;
         submitInfo.signalSemaphoreCount = 0;
         submitInfo.pSignalSemaphores = 0;
 
@@ -268,8 +300,18 @@ namespace vulkan {
             ASSERT(false);
         }
 
+        commandsInFlight.Enqueue(pendingCommands, nextSerial);
+        pendingCommands = CommandPoolAndBuffer();
         fencesInFlight.emplace(fence, nextSerial);
         nextSerial++;
+    }
+
+    VkInstance Device::GetInstance() const {
+        return instance;
+    }
+
+    VkDevice Device::GetVkDevice() const {
+        return vkDevice;
     }
 
     bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs) {
@@ -454,6 +496,59 @@ namespace vulkan {
             ASSERT(fenceSerial > completedSerial);
             completedSerial = fenceSerial;
         }
+    }
+
+    Device::CommandPoolAndBuffer Device::GetUnusedCommands() {
+        if (!unusedCommands.empty()) {
+            CommandPoolAndBuffer commands = unusedCommands.back();
+            unusedCommands.pop_back();
+            return commands;
+        }
+
+        CommandPoolAndBuffer commands;
+
+        VkCommandPoolCreateInfo createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+        createInfo.queueFamilyIndex = queueFamily;
+
+        if (fn.CreateCommandPool(vkDevice, &createInfo, nullptr, &commands.pool) != VK_SUCCESS) {
+            ASSERT(false);
+        }
+
+        VkCommandBufferAllocateInfo allocateInfo;
+        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocateInfo.pNext = nullptr;
+        allocateInfo.commandPool = commands.pool;
+        allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocateInfo.commandBufferCount = 1;
+
+        if (fn.AllocateCommandBuffers(vkDevice, &allocateInfo, &commands.commandBuffer) != VK_SUCCESS) {
+            ASSERT(false);
+        }
+
+        return commands;
+    }
+
+    void Device::RecycleCompletedCommands() {
+        for (auto& commands : commandsInFlight.IterateUpTo(completedSerial)) {
+            if (fn.ResetCommandPool(vkDevice, commands.pool, 0) != VK_SUCCESS) {
+                ASSERT(false);
+            }
+            unusedCommands.push_back(commands);
+        }
+        commandsInFlight.ClearUpTo(completedSerial);
+    }
+
+    void Device::FreeCommands(CommandPoolAndBuffer* commands) {
+        if (commands->pool != VK_NULL_HANDLE) {
+            fn.DestroyCommandPool(vkDevice, commands->pool, nullptr);
+            commands->pool = VK_NULL_HANDLE;
+        }
+
+        // Command buffers are implicitly destroyed when the command pool is.
+        commands->commandBuffer = VK_NULL_HANDLE;
     }
 
     // Queue

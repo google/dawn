@@ -104,7 +104,7 @@ namespace vulkan {
 
         memcpy(memory + start * sizeof(uint32_t), data, count * sizeof(uint32_t));
 
-        ToBackend(GetDevice())->FakeSubmit();
+        ToBackend(GetDevice())->GetPendingCommandBuffer();
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
@@ -114,7 +114,7 @@ namespace vulkan {
         MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadRequestTracker();
         tracker->Track(this, serial, memory + start);
 
-        ToBackend(GetDevice())->FakeSubmit();
+        ToBackend(GetDevice())->GetPendingCommandBuffer();
     }
 
     void Buffer::UnmapImpl() {
