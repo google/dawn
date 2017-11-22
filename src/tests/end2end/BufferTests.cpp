@@ -100,7 +100,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
     buffer.Unmap();
 }
 
-NXT_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend)
+NXT_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
 
 class BufferSetSubDataTests : public NXTTest {
 };
