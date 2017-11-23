@@ -95,13 +95,13 @@ namespace {
 
 NXTTest::~NXTTest() {
     // We need to destroy child objects before the Device
-    readbackSlots.clear();
+    mReadbackSlots.clear();
     queue = nxt::Queue();
     device = nxt::Device();
     swapchain = nxt::SwapChain();
 
-    delete binding;
-    binding = nullptr;
+    delete mBinding;
+    mBinding = nullptr;
 
     nxtSetProcs(nullptr);
 }
@@ -123,26 +123,26 @@ bool NXTTest::IsVulkan() const {
 }
 
 void NXTTest::SetUp() {
-    binding = utils::CreateBinding(ParamToBackendType(GetParam()));
-    NXT_ASSERT(binding != nullptr);
+    mBinding = utils::CreateBinding(ParamToBackendType(GetParam()));
+    NXT_ASSERT(mBinding != nullptr);
 
-    GLFWwindow* testWindow = GetWindowForBackend(binding, GetParam());
+    GLFWwindow* testWindow = GetWindowForBackend(mBinding, GetParam());
     NXT_ASSERT(testWindow != nullptr);
 
-    binding->SetWindow(testWindow);
+    mBinding->SetWindow(testWindow);
 
     nxtDevice backendDevice;
     nxtProcTable backendProcs;
-    binding->GetProcAndDevice(&backendProcs, &backendDevice);
+    mBinding->GetProcAndDevice(&backendProcs, &backendDevice);
 
     nxtSetProcs(&backendProcs);
     device = nxt::Device::Acquire(backendDevice);
     queue = device.CreateQueueBuilder().GetResult();
 
     swapchain = device.CreateSwapChainBuilder()
-        .SetImplementation(binding->GetSwapChainImplementation())
+        .SetImplementation(mBinding->GetSwapChainImplementation())
         .GetResult();
-    swapchain.Configure(static_cast<nxt::TextureFormat>(binding->GetPreferredSwapChainTextureFormat()),
+    swapchain.Configure(static_cast<nxt::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
                         nxt::TextureUsageBit::OutputAttachment, 400, 400);
 
     device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
@@ -152,11 +152,11 @@ void NXTTest::TearDown() {
     MapSlotsSynchronously();
     ResolveExpectations();
 
-    for (size_t i = 0; i < readbackSlots.size(); ++i) {
-        readbackSlots[i].buffer.Unmap();
+    for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
+        mReadbackSlots[i].buffer.Unmap();
     }
 
-    for (auto& expectation : deferredExpectations) {
+    for (auto& expectation : mDeferredExpectations) {
         delete expectation.expectation;
         expectation.expectation = nullptr;
     }
@@ -187,9 +187,9 @@ std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, co
     deferred.rowPitch = size;
     deferred.expectation = expectation;
 
-    deferredExpectations.push_back(std::move(deferred));
-    deferredExpectations.back().message = std::make_unique<std::ostringstream>();
-    return *(deferredExpectations.back().message.get());
+    mDeferredExpectations.push_back(std::move(deferred));
+    mDeferredExpectations.back().message = std::make_unique<std::ostringstream>();
+    return *(mDeferredExpectations.back().message.get());
 }
 
 std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t level, uint32_t pixelSize, detail::Expectation* expectation) {
@@ -219,9 +219,9 @@ std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, c
     deferred.rowPitch = rowPitch;
     deferred.expectation = expectation;
 
-    deferredExpectations.push_back(std::move(deferred));
-    deferredExpectations.back().message = std::make_unique<std::ostringstream>();
-    return *(deferredExpectations.back().message.get());
+    mDeferredExpectations.push_back(std::move(deferred));
+    mDeferredExpectations.back().message = std::make_unique<std::ostringstream>();
+    return *(mDeferredExpectations.back().message.get());
 }
 
 void NXTTest::WaitABit() {
@@ -249,28 +249,28 @@ NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {
 
     ReadbackReservation reservation;
     reservation.buffer = slot.buffer.Clone();
-    reservation.slot = readbackSlots.size();
+    reservation.slot = mReadbackSlots.size();
     reservation.offset = 0;
 
-    readbackSlots.push_back(std::move(slot));
+    mReadbackSlots.push_back(std::move(slot));
     return reservation;
 }
 
 void NXTTest::MapSlotsSynchronously() {
     // Initialize numPendingMapOperations before mapping, just in case the callback is called immediately.
-    numPendingMapOperations = readbackSlots.size();
+    mNumPendingMapOperations = mReadbackSlots.size();
 
     // Map all readback slots
-    for (size_t i = 0; i < readbackSlots.size(); ++i) {
+    for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         auto userdata = new MapReadUserdata{this, i};
 
-        auto& slot = readbackSlots[i];
+        auto& slot = mReadbackSlots[i];
         slot.buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
         slot.buffer.MapReadAsync(0, slot.bufferSize, SlotMapReadCallback, static_cast<nxt::CallbackUserdata>(reinterpret_cast<uintptr_t>(userdata)));
     }
 
     // Busy wait until all map operations are done.
-    while (numPendingMapOperations != 0) {
+    while (mNumPendingMapOperations != 0) {
         WaitABit();
     }
 }
@@ -280,18 +280,18 @@ void NXTTest::SlotMapReadCallback(nxtBufferMapReadStatus status, const void* dat
     NXT_ASSERT(status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS);
 
     auto userdata = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata_));
-    userdata->test->readbackSlots[userdata->slot].mappedData = data;
-    userdata->test->numPendingMapOperations --;
+    userdata->test->mReadbackSlots[userdata->slot].mappedData = data;
+    userdata->test->mNumPendingMapOperations --;
 
     delete userdata;
 }
 
 void NXTTest::ResolveExpectations() {
-    for (const auto& expectation : deferredExpectations) {
-        NXT_ASSERT(readbackSlots[expectation.readbackSlot].mappedData != nullptr);
+    for (const auto& expectation : mDeferredExpectations) {
+        NXT_ASSERT(mReadbackSlots[expectation.readbackSlot].mappedData != nullptr);
 
         // Get a pointer to the mapped copy of the data for the expectation.
-        const char* data = reinterpret_cast<const char*>(readbackSlots[expectation.readbackSlot].mappedData);
+        const char* data = reinterpret_cast<const char*>(mReadbackSlots[expectation.readbackSlot].mappedData);
         data += expectation.readbackOffset;
 
         uint32_t size;
@@ -380,29 +380,29 @@ namespace detail {
 
     template<typename T>
     ExpectEq<T>::ExpectEq(T singleValue) {
-        expected.push_back(singleValue);
+        mExpected.push_back(singleValue);
     }
 
     template<typename T>
     ExpectEq<T>::ExpectEq(const T* values, const unsigned int count) {
-        expected.assign(values, values + count);
+        mExpected.assign(values, values + count);
     }
 
     template<typename T>
     testing::AssertionResult ExpectEq<T>::Check(const void* data, size_t size) {
-        NXT_ASSERT(size == sizeof(T) * expected.size());
+        NXT_ASSERT(size == sizeof(T) * mExpected.size());
 
         const T* actual = reinterpret_cast<const T*>(data);
 
         testing::AssertionResult failure = testing::AssertionFailure();
-        for (size_t i = 0; i < expected.size(); ++i) {
-            if (actual[i] != expected[i]) {
-                testing::AssertionResult result = testing::AssertionFailure() << "Expected data[" << i << "] to be " << expected[i] << ", actual " << actual[i] << std::endl;
+        for (size_t i = 0; i < mExpected.size(); ++i) {
+            if (actual[i] != mExpected[i]) {
+                testing::AssertionResult result = testing::AssertionFailure() << "Expected data[" << i << "] to be " << mExpected[i] << ", actual " << actual[i] << std::endl;
 
                 auto printBuffer = [&](const T* buffer) {
                     static constexpr unsigned int kBytes = sizeof(T);
 
-                    for (size_t index = 0; index < expected.size(); ++index) {
+                    for (size_t index = 0; index < mExpected.size(); ++index) {
                         auto byteView = reinterpret_cast<const uint8_t*>(buffer + index);
                         for (unsigned int b = 0; b < kBytes; ++b) {
                             char buf[4];
@@ -413,9 +413,9 @@ namespace detail {
                     result << std::endl;
                 };
 
-                if (expected.size() <= 1024) {
+                if (mExpected.size() <= 1024) {
                     result << "Expected:" << std::endl;
-                    printBuffer(expected.data());
+                    printBuffer(mExpected.data());
 
                     result << "Actual:" << std::endl;
                     printBuffer(actual);

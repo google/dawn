@@ -41,9 +41,9 @@ ValidationTest::~ValidationTest() {
 }
 
 void ValidationTest::TearDown() {
-    ASSERT_FALSE(expectError);
+    ASSERT_FALSE(mExpectError);
 
-    for (auto& expectation : expectations) {
+    for (auto& expectation : mExpectations) {
         std::string name = expectation.debugName;
         if (name.empty()) {
             name = "<no debug name set>";
@@ -61,12 +61,12 @@ void ValidationTest::TearDown() {
 }
 
 void ValidationTest::StartExpectDeviceError() {
-    expectError = true;
-    error = false;
+    mExpectError = true;
+    mError = false;
 }
 bool ValidationTest::EndExpectDeviceError() {
-    expectError = false;
-    return error;
+    mExpectError = false;
+    return mError;
 }
 
 void ValidationTest::CreateSimpleRenderPassAndFramebuffer(const nxt::Device& device, nxt::RenderPass* renderpass, nxt::Framebuffer* framebuffer) {
@@ -104,18 +104,18 @@ void ValidationTest::OnDeviceError(const char* message, nxtCallbackUserdata user
     }
 
     auto self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata));
-    ASSERT_TRUE(self->expectError) << "Got unexpected device error: " << message;
-    ASSERT_FALSE(self->error) << "Got two errors in expect block";
-    self->error = true;
+    ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
+    ASSERT_FALSE(self->mError) << "Got two errors in expect block";
+    self->mError = true;
 }
 
 void ValidationTest::OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, nxt::CallbackUserdata userdata1, nxt::CallbackUserdata userdata2) {
     auto* self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata1));
     size_t index = static_cast<size_t>(userdata2);
 
-    ASSERT_LT(index, self->expectations.size());
+    ASSERT_LT(index, self->mExpectations.size());
 
-    auto& expectation = self->expectations[index];
+    auto& expectation = self->mExpectations[index];
     ASSERT_FALSE(expectation.gotStatus);
     expectation.gotStatus = true;
     expectation.status = status;

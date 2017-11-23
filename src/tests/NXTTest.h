@@ -94,12 +94,12 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
             uint32_t bufferSize;
             const void* mappedData = nullptr;
         };
-        std::vector<ReadbackSlot> readbackSlots;
+        std::vector<ReadbackSlot> mReadbackSlots;
 
         // Maps all the buffers and fill ReadbackSlot::mappedData
         void MapSlotsSynchronously();
         static void SlotMapReadCallback(nxtBufferMapReadStatus status, const void* data, nxtCallbackUserdata userdata);
-        size_t numPendingMapOperations = 0;
+        size_t mNumPendingMapOperations = 0;
 
         // Reserve space where the data for an expectation can be copied
         struct ReadbackReservation {
@@ -122,12 +122,12 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
             // Use unique_ptr because of missing move/copy constructors on std::basic_ostringstream
             std::unique_ptr<std::ostringstream> message;
         };
-        std::vector<DeferredExpectation> deferredExpectations;
+        std::vector<DeferredExpectation> mDeferredExpectations;
 
         // Assuming the data is mapped, checks all expectations
         void ResolveExpectations();
 
-        utils::BackendBinding* binding = nullptr;
+        utils::BackendBinding* mBinding = nullptr;
 };
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
@@ -162,7 +162,7 @@ namespace detail {
             testing::AssertionResult Check(const void* data, size_t size) override;
 
         private:
-            std::vector<T> expected;
+            std::vector<T> mExpected;
     };
     extern template class ExpectEq<uint32_t>;
     extern template class ExpectEq<RGBA8>;

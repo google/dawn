@@ -67,8 +67,8 @@ class ValidationTest : public testing::Test {
 
     private:
         static void OnDeviceError(const char* message, nxtCallbackUserdata userdata);
-        bool expectError = false;
-        bool error = false;
+        bool mExpectError = false;
+        bool mError = false;
 
         struct BuilderStatusExpectations {
             bool expectSuccess;
@@ -78,7 +78,7 @@ class ValidationTest : public testing::Test {
             std::string statusMessage;
             nxtBuilderErrorStatus status;
         };
-        std::vector<BuilderStatusExpectations> expectations;
+        std::vector<BuilderStatusExpectations> mExpectations;
 
         template<typename Builder>
         Builder AddExpectation(Builder& builder, std::string debugName, bool expectSuccess);
@@ -101,11 +101,11 @@ Builder ValidationTest::AssertWillBeError(Builder builder, std::string debugName
 template<typename Builder>
 Builder ValidationTest::AddExpectation(Builder& builder, std::string debugName, bool expectSuccess) {
     uint64_t userdata1 = reinterpret_cast<uintptr_t>(this);
-    uint64_t userdata2 = expectations.size();
+    uint64_t userdata2 = mExpectations.size();
     builder.SetErrorCallback(OnBuilderErrorStatus, userdata1, userdata2);
 
-    expectations.emplace_back();
-    auto& expectation = expectations.back();
+    mExpectations.emplace_back();
+    auto& expectation = mExpectations.back();
     expectation.expectSuccess = expectSuccess;
     expectation.debugName = debugName;
 

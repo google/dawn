@@ -55,7 +55,7 @@ static void ToMockBufferMapReadCallback(nxtBufferMapReadStatus status, const voi
 class WireTestsBase : public Test {
     protected:
         WireTestsBase(bool ignoreSetCallbackCalls)
-            : ignoreSetCallbackCalls(ignoreSetCallbackCalls) {
+            : mIgnoreSetCallbackCalls(ignoreSetCallbackCalls) {
         }
 
         void SetUp() override {
@@ -69,42 +69,42 @@ class WireTestsBase : public Test {
 
             // This SetCallback call cannot be ignored because it is done as soon as we start the server
             EXPECT_CALL(api, OnDeviceSetErrorCallback(_, _, _)).Times(Exactly(1));
-            if (ignoreSetCallbackCalls) {
+            if (mIgnoreSetCallbackCalls) {
                 EXPECT_CALL(api, OnBuilderSetErrorCallback(_, _, _, _)).Times(AnyNumber());
             }
             EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
 
-            s2cBuf = new TerribleCommandBuffer();
-            c2sBuf = new TerribleCommandBuffer(wireServer);
+            mS2cBuf = new TerribleCommandBuffer();
+            mC2sBuf = new TerribleCommandBuffer(mWireServer);
 
-            wireServer = NewServerCommandHandler(mockDevice, mockProcs, s2cBuf);
-            c2sBuf->SetHandler(wireServer);
+            mWireServer = NewServerCommandHandler(mockDevice, mockProcs, mS2cBuf);
+            mC2sBuf->SetHandler(mWireServer);
 
             nxtProcTable clientProcs;
-            wireClient = NewClientDevice(&clientProcs, &device, c2sBuf);
+            mWireClient = NewClientDevice(&clientProcs, &device, mC2sBuf);
             nxtSetProcs(&clientProcs);
-            s2cBuf->SetHandler(wireClient);
+            mS2cBuf->SetHandler(mWireClient);
 
             apiDevice = mockDevice;
         }
 
         void TearDown() override {
             nxtSetProcs(nullptr);
-            delete wireServer;
-            delete wireClient;
-            delete c2sBuf;
-            delete s2cBuf;
+            delete mWireServer;
+            delete mWireClient;
+            delete mC2sBuf;
+            delete mS2cBuf;
             delete mockDeviceErrorCallback;
             delete mockBuilderErrorCallback;
             delete mockBufferMapReadCallback;
         }
 
         void FlushClient() {
-            c2sBuf->Flush();
+            mC2sBuf->Flush();
         }
 
         void FlushServer() {
-            s2cBuf->Flush();
+            mS2cBuf->Flush();
         }
 
         MockProcTable api;
@@ -112,12 +112,12 @@ class WireTestsBase : public Test {
         nxtDevice device;
 
     private:
-        bool ignoreSetCallbackCalls = false;
+        bool mIgnoreSetCallbackCalls = false;
 
-        CommandHandler* wireServer = nullptr;
-        CommandHandler* wireClient = nullptr;
-        TerribleCommandBuffer* s2cBuf = nullptr;
-        TerribleCommandBuffer* c2sBuf = nullptr;
+        CommandHandler* mWireServer = nullptr;
+        CommandHandler* mWireClient = nullptr;
+        TerribleCommandBuffer* mS2cBuf = nullptr;
+        TerribleCommandBuffer* mC2sBuf = nullptr;
 };
 
 class WireTests : public WireTestsBase {
