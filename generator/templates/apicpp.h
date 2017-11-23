@@ -59,52 +59,52 @@ namespace nxt {
     class ObjectBase {
         public:
             ObjectBase() = default;
-            ObjectBase(CType handle): handle(handle) {
-                if (handle) Derived::NxtReference(handle);
+            ObjectBase(CType handle): mHandle(handle) {
+                if (mHandle) Derived::NxtReference(mHandle);
             }
             ~ObjectBase() {
-                if (handle) Derived::NxtRelease(handle);
+                if (mHandle) Derived::NxtRelease(mHandle);
             }
 
             ObjectBase(ObjectBase const& other) = delete;
             Derived& operator=(ObjectBase const& other) = delete;
 
             ObjectBase(ObjectBase&& other) {
-                handle = other.handle;
-                other.handle = 0;
+                mHandle = other.mHandle;
+                other.mHandle = 0;
             }
             Derived& operator=(ObjectBase&& other) {
                 if (&other == this) return static_cast<Derived&>(*this);
 
-                if (handle) Derived::NxtRelease(handle);
-                handle = other.handle;
-                other.handle = 0;
+                if (mHandle) Derived::NxtRelease(mHandle);
+                mHandle = other.mHandle;
+                other.mHandle = 0;
 
                 return static_cast<Derived&>(*this);
             }
 
             explicit operator bool() const {
-                return handle != nullptr;
+                return mHandle != nullptr;
             }
             CType Get() const {
-                return handle;
+                return mHandle;
             }
             CType Release() {
-                CType result = handle;
-                handle = 0;
+                CType result = mHandle;
+                mHandle = 0;
                 return result;
             }
             Derived Clone() const {
-                return Derived(handle);
+                return Derived(mHandle);
             }
             static Derived Acquire(CType handle) {
                 Derived result;
-                result.handle = handle;
+                result.mHandle = handle;
                 return result;
             }
 
         protected:
-            CType handle = nullptr;
+            CType mHandle = nullptr;
     };
 
     {% macro render_cpp_method_declaration(type, method) %}

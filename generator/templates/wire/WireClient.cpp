@@ -124,65 +124,65 @@ namespace wire {
                     uint32_t serial;
                 };
 
-                ObjectAllocator(Device* device) : device(device) {
+                ObjectAllocator(Device* device) : mDevice(device) {
                     // ID 0 is nullptr
-                    objects.emplace_back(nullptr, 0);
+                    mObjects.emplace_back(nullptr, 0);
                 }
 
                 ObjectAndSerial* New() {
                     uint32_t id = GetNewId();
-                    T* result = new T(device, 1, id);
+                    T* result = new T(mDevice, 1, id);
                     auto object = std::unique_ptr<T>(result);
 
-                    if (id >= objects.size()) {
-                        ASSERT(id == objects.size());
-                        objects.emplace_back(std::move(object), 0);
+                    if (id >= mObjects.size()) {
+                        ASSERT(id == mObjects.size());
+                        mObjects.emplace_back(std::move(object), 0);
                     } else {
-                        ASSERT(objects[id].object == nullptr);
+                        ASSERT(mObjects[id].object == nullptr);
                         //* TODO(cwallez@chromium.org): investigate if overflows could cause bad things to happen
-                        objects[id].serial++;
-                        objects[id].object = std::move(object);
+                        mObjects[id].serial++;
+                        mObjects[id].object = std::move(object);
                     }
 
-                    return &objects[id];
+                    return &mObjects[id];
                 }
                 void Free(T* obj) {
                     FreeId(obj->id);
-                    objects[obj->id].object = nullptr;
+                    mObjects[obj->id].object = nullptr;
                 }
 
                 T* GetObject(uint32_t id) {
-                    if (id >= objects.size()) {
+                    if (id >= mObjects.size()) {
                         return nullptr;
                     }
-                    return objects[id].object.get();
+                    return mObjects[id].object.get();
                 }
 
                 uint32_t GetSerial(uint32_t id) {
-                    if (id >= objects.size()) {
+                    if (id >= mObjects.size()) {
                         return 0;
                     }
-                    return objects[id].serial;
+                    return mObjects[id].serial;
                 }
 
             private:
                 uint32_t GetNewId() {
-                    if (freeIds.empty()) {
-                        return currentId ++;
+                    if (mFreeIds.empty()) {
+                        return mCurrentId ++;
                     }
-                    uint32_t id = freeIds.back();
-                    freeIds.pop_back();
+                    uint32_t id = mFreeIds.back();
+                    mFreeIds.pop_back();
                     return id;
                 }
                 void FreeId(uint32_t id) {
-                    freeIds.push_back(id);
+                    mFreeIds.push_back(id);
                 }
 
                 // 0 is an ID reserved to represent nullptr
-                uint32_t currentId = 1;
-                std::vector<uint32_t> freeIds;
-                std::vector<ObjectAndSerial> objects;
-                Device* device;
+                uint32_t mCurrentId = 1;
+                std::vector<uint32_t> mFreeIds;
+                std::vector<ObjectAndSerial> mObjects;
+                Device* mDevice;
         };
 
         //* The client wire uses the global NXT device to store its global data such as the serializer
@@ -194,11 +194,11 @@ namespace wire {
                     {% for type in by_category["object"] if not type.name.canonical_case() == "device" %}
                         {{type.name.camelCase()}}(this),
                     {% endfor %}
-                    serializer(serializer) {
+                    mSerializer(serializer) {
                 }
 
                 void* GetCmdSpace(size_t size) {
-                    return serializer->GetCmdSpace(size);
+                    return mSerializer->GetCmdSpace(size);
                 }
 
                 {% for type in by_category["object"] if not type.name.canonical_case() == "device" %}
@@ -215,7 +215,7 @@ namespace wire {
                 nxtCallbackUserdata errorUserdata;
 
             private:
-               CommandSerializer* serializer = nullptr;
+               CommandSerializer* mSerializer = nullptr;
         };
 
         //* Implementation of the client API functions.
@@ -404,7 +404,7 @@ namespace wire {
 
         class Client : public CommandHandler {
             public:
-                Client(Device* device) : device(device) {
+                Client(Device* device) : mDevice(device) {
                 }
 
                 const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
@@ -441,7 +441,7 @@ namespace wire {
                 }
 
             private:
-                Device* device = nullptr;
+                Device* mDevice = nullptr;
 
                 //* Helper function for the getting of the command data in command handlers.
                 //* Checks there is enough data left, updates the buffer / size and returns
@@ -475,7 +475,7 @@ namespace wire {
                         return false;
                     }
 
-                    device->HandleError(cmd->GetMessage());
+                    mDevice->HandleError(cmd->GetMessage());
 
                     return true;
                 }
@@ -492,8 +492,8 @@ namespace wire {
                             return false;
                         }
 
-                        auto* builtObject = device->{{type.built_type.name.camelCase()}}.GetObject(cmd->builtObjectId);
-                        uint32_t objectSerial = device->{{type.built_type.name.camelCase()}}.GetSerial(cmd->builtObjectId);
+                        auto* builtObject = mDevice->{{type.built_type.name.camelCase()}}.GetObject(cmd->builtObjectId);
+                        uint32_t objectSerial = mDevice->{{type.built_type.name.camelCase()}}.GetSerial(cmd->builtObjectId);
 
                         //* The object might have been deleted or a new object created with the same ID.
                         if (builtObject == nullptr || objectSerial != cmd->builtObjectSerial) {
@@ -504,7 +504,7 @@ namespace wire {
 
                         // Unhandled builder errors are forwarded to the device
                         if (!called && cmd->status != NXT_BUILDER_ERROR_STATUS_SUCCESS && cmd->status != NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
-                            builtObject->device->HandleError(("Unhandled builder error: " + std::string(cmd->GetMessage())).c_str());
+                            mDevice->HandleError(("Unhandled builder error: " + std::string(cmd->GetMessage())).c_str());
                         }
 
                         return true;
@@ -517,8 +517,8 @@ namespace wire {
                         return false;
                     }
 
-                    auto* buffer = device->buffer.GetObject(cmd->bufferId);
-                    uint32_t bufferSerial = device->buffer.GetSerial(cmd->bufferId);
+                    auto* buffer = mDevice->buffer.GetObject(cmd->bufferId);
+                    uint32_t bufferSerial = mDevice->buffer.GetSerial(cmd->bufferId);
 
                     //* The buffer might have been deleted or recreated so this isn't an error.
                     if (buffer == nullptr || bufferSerial != cmd->bufferSerial) {

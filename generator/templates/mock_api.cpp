@@ -53,7 +53,7 @@ void ProcTableAsClass::DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCall
     object->deviceErrorCallback = callback;
     object->userdata1 = userdata;
 
-    this->OnDeviceSetErrorCallback(self, callback, userdata);
+    OnDeviceSetErrorCallback(self, callback, userdata);
 }
 
 void ProcTableAsClass::BufferMapReadAsync(nxtBuffer self, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
@@ -61,7 +61,7 @@ void ProcTableAsClass::BufferMapReadAsync(nxtBuffer self, uint32_t start, uint32
     object->mapReadCallback = callback;
     object->userdata1 = userdata;
 
-    this->OnBufferMapReadAsyncCallback(self, start, size, callback, userdata);
+    OnBufferMapReadAsyncCallback(self, start, size, callback, userdata);
 }
 
 void ProcTableAsClass::CallDeviceErrorCallback(nxtDevice device, const char* message) {
@@ -84,14 +84,14 @@ void ProcTableAsClass::CallMapReadCallback(nxtBuffer buffer, nxtBufferMapReadSta
         object->userdata1 = userdata1;
         object->userdata2 = userdata2;
 
-        this->OnBuilderSetErrorCallback(reinterpret_cast<nxtBufferBuilder>(self), callback, userdata1, userdata2);
+        OnBuilderSetErrorCallback(reinterpret_cast<nxtBufferBuilder>(self), callback, userdata1, userdata2);
     }
 {% endfor %}
 
 {% for type in by_category["object"] %}
     {{as_cType(type.name)}} ProcTableAsClass::GetNew{{type.name.CamelCase()}}() {
-        objects.emplace_back(new Object);
-        objects.back()->procs = this;
-        return reinterpret_cast<{{as_cType(type.name)}}>(objects.back().get());
+        mObjects.emplace_back(new Object);
+        mObjects.back()->procs = this;
+        return reinterpret_cast<{{as_cType(type.name)}}>(mObjects.back().get());
     }
 {% endfor %}

@@ -67,17 +67,17 @@ namespace wire {
                     nullObject.handle = nullptr;
                     nullObject.valid = true;
                     nullObject.allocated = true;
-                    known.push_back(nullObject);
+                    mKnown.push_back(nullObject);
                 }
 
                 //* Get a backend objects for a given client ID.
                 //* Returns nullptr if the ID hasn't previously been allocated.
                 Data* Get(uint32_t id) {
-                    if (id >= known.size()) {
+                    if (id >= mKnown.size()) {
                         return nullptr;
                     }
 
-                    Data* data = &known[id];
+                    Data* data = &mKnown[id];
 
                     if (!data->allocated) {
                         return nullptr;
@@ -90,7 +90,7 @@ namespace wire {
                 //* Returns nullptr if the ID is already allocated, or too far ahead.
                 //* Invalidates all the Data*
                 Data* Allocate(uint32_t id) {
-                    if (id > known.size()) {
+                    if (id > mKnown.size()) {
                         return nullptr;
                     }
 
@@ -99,27 +99,27 @@ namespace wire {
                     data.valid = false;
                     data.handle = nullptr;
 
-                    if (id >= known.size()) {
-                        known.push_back(data);
-                        return &known.back();
+                    if (id >= mKnown.size()) {
+                        mKnown.push_back(data);
+                        return &mKnown.back();
                     }
 
-                    if (known[id].allocated) {
+                    if (mKnown[id].allocated) {
                         return nullptr;
                     }
 
-                    known[id] = data;
-                    return &known[id];
+                    mKnown[id] = data;
+                    return &mKnown[id];
                 }
 
                 //* Marks an ID as deallocated
                 void Free(uint32_t id) {
-                    ASSERT(id < known.size());
-                    known[id].allocated = false;
+                    ASSERT(id < mKnown.size());
+                    mKnown[id].allocated = false;
                 }
 
             private:
-                std::vector<Data> known;
+                std::vector<Data> mKnown;
         };
 
         void ForwardDeviceErrorToServer(const char* message, nxtCallbackUserdata userdata);
@@ -133,9 +133,9 @@ namespace wire {
         class Server : public CommandHandler {
             public:
                 Server(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer)
-                    : procs(procs), serializer(serializer) {
+                    : mProcs(procs), mSerializer(serializer) {
                     //* The client-server knowledge is bootstrapped with device 1.
-                    auto* deviceData = knownDevice.Allocate(1);
+                    auto* deviceData = mKnownDevice.Allocate(1);
                     deviceData->handle = device;
                     deviceData->valid = true;
 
@@ -155,7 +155,7 @@ namespace wire {
                 {% for type in by_category["object"] if type.is_builder%}
                     {% set Type = type.name.CamelCase() %}
                     void On{{Type}}Error(nxtBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial) {
-                        auto* builder = known{{Type}}.Get(id);
+                        auto* builder = mKnown{{Type}}.Get(id);
 
                         if (builder == nullptr || builder->serial != serial) {
                             return;
@@ -206,7 +206,7 @@ namespace wire {
                 }
 
                 const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
-                    procs.deviceTick(knownDevice.Get(1)->handle);
+                    mProcs.deviceTick(mKnownDevice.Get(1)->handle);
 
                     while (size > sizeof(WireCmd)) {
                         WireCmd cmdId = *reinterpret_cast<const WireCmd*>(commands);
@@ -246,16 +246,16 @@ namespace wire {
                 }
 
             private:
-                nxtProcTable procs;
-                CommandSerializer* serializer = nullptr;
+                nxtProcTable mProcs;
+                CommandSerializer* mSerializer = nullptr;
 
                 void* GetCmdSpace(size_t size) {
-                    return serializer->GetCmdSpace(size);
+                    return mSerializer->GetCmdSpace(size);
                 }
 
                 //* The list of known IDs for each object type.
                 {% for type in by_category["object"] %}
-                    KnownObjects<{{as_cType(type.name)}}> known{{type.name.CamelCase()}};
+                    KnownObjects<{{as_cType(type.name)}}> mKnown{{type.name.CamelCase()}};
                 {% endfor %}
 
                 //* Helper function for the getting of the command data in command handlers.
@@ -300,7 +300,7 @@ namespace wire {
                             //* Unpack 'self'
                             {% set Type = type.name.CamelCase() %}
                             {{as_cType(type.name)}} self;
-                            auto* selfData = known{{Type}}.Get(cmd->self);
+                            auto* selfData = mKnown{{Type}}.Get(cmd->self);
                             {
                                 if (selfData == nullptr) {
                                     return false;
@@ -314,7 +314,7 @@ namespace wire {
                                 {% set Type = arg.type.name.CamelCase() %}
                                 {{as_cType(arg.type.name)}} arg_{{as_varName(arg.name)}};
                                 {
-                                    auto* data = known{{Type}}.Get(cmd->{{as_varName(arg.name)}});
+                                    auto* data = mKnown{{Type}}.Get(cmd->{{as_varName(arg.name)}});
                                     if (data == nullptr) {
                                         return false;
                                     }
@@ -340,7 +340,7 @@ namespace wire {
                                     auto {{argName}}Ids = reinterpret_cast<const uint32_t*>(cmd->GetPtr_{{argName}}());
                                     for (size_t i = 0; i < cmd->{{as_varName(arg.length.name)}}; i++) {
                                         {% set Type = arg.type.name.CamelCase() %}
-                                        auto* data = known{{Type}}.Get({{argName}}Ids[i]);
+                                        auto* data = mKnown{{Type}}.Get({{argName}}Ids[i]);
                                         if (data == nullptr) {
                                             return false;
                                         }
@@ -361,7 +361,7 @@ namespace wire {
                             {% set returns = return_type.name.canonical_case() != "void" %}
                             {% if returns %}
                                 {% set Type = method.return_type.name.CamelCase() %}
-                                auto* resultData = known{{Type}}.Allocate(cmd->resultId);
+                                auto* resultData = mKnown{{Type}}.Allocate(cmd->resultId);
                                 if (resultData == nullptr) {
                                     return false;
                                 }
@@ -388,7 +388,7 @@ namespace wire {
                             {% if returns %}
                                 auto result ={{" "}}
                             {%- endif %}
-                            procs.{{as_varName(type.name, method.name)}}(self
+                            mProcs.{{as_varName(type.name, method.name)}}(self
                                 {%- for arg in method.arguments -%}
                                     {%- if arg.annotation == "value" and arg.type.category != "object" -%}
                                         , cmd->{{as_varName(arg.name)}}
@@ -408,7 +408,7 @@ namespace wire {
                                     if (result != nullptr) {
                                         uint64_t userdata1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
                                         uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd->resultId;
-                                        procs.{{as_varName(return_type.name, Name("set error callback"))}}(result, Forward{{return_type.name.CamelCase()}}ToClient, userdata1, userdata2);
+                                        mProcs.{{as_varName(return_type.name, Name("set error callback"))}}(result, Forward{{return_type.name.CamelCase()}}ToClient, userdata1, userdata2);
                                     }
                                 {% endif %}
                             {% endif %}
@@ -431,16 +431,16 @@ namespace wire {
                             return false;
                         }
 
-                        auto* data = known{{type.name.CamelCase()}}.Get(cmd->objectId);
+                        auto* data = mKnown{{type.name.CamelCase()}}.Get(cmd->objectId);
                         if (data == nullptr) {
                             return false;
                         }
 
                         if (data->valid) {
-                            procs.{{as_varName(type.name, Name("release"))}}(data->handle);
+                            mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
                         }
 
-                        known{{type.name.CamelCase()}}.Free(cmd->objectId);
+                        mKnown{{type.name.CamelCase()}}.Free(cmd->objectId);
                         return true;
                     }
                 {% endfor %}
@@ -453,7 +453,7 @@ namespace wire {
                         return false;
                     }
 
-                    auto* buffer = knownBuffer.Get(cmd->bufferId);
+                    auto* buffer = mKnownBuffer.Get(cmd->bufferId);
                     if (buffer == nullptr) {
                         return false;
                     }
@@ -473,7 +473,7 @@ namespace wire {
                         return true;
                     }
 
-                    procs.bufferMapReadAsync(buffer->handle, cmd->start, cmd->size, ForwardBufferMapReadAsync, userdata);
+                    mProcs.bufferMapReadAsync(buffer->handle, cmd->start, cmd->size, ForwardBufferMapReadAsync, userdata);
 
                     return true;
                 }

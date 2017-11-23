@@ -80,7 +80,7 @@ class ProcTableAsClass {
 
     private:
         // Remembers the values returned by GetNew* so they can be freed.
-        std::vector<std::unique_ptr<Object>> objects;
+        std::vector<std::unique_ptr<Object>> mObjects;
 };
 
 class MockProcTable : public ProcTableAsClass {
