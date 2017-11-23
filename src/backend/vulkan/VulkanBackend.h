@@ -147,14 +147,15 @@ namespace backend { namespace vulkan {
         void GatherQueueFromDevice();
 
         bool RegisterDebugReport();
-        static VkBool32 OnDebugReportCallback(VkDebugReportFlagsEXT flags,
-                                              VkDebugReportObjectTypeEXT objectType,
-                                              uint64_t object,
-                                              size_t location,
-                                              int32_t messageCode,
-                                              const char* pLayerPrefix,
-                                              const char* pMessage,
-                                              void* pUserdata);
+        static VKAPI_ATTR VkBool32 VKAPI_CALL
+        OnDebugReportCallback(VkDebugReportFlagsEXT flags,
+                              VkDebugReportObjectTypeEXT objectType,
+                              uint64_t object,
+                              size_t location,
+                              int32_t messageCode,
+                              const char* pLayerPrefix,
+                              const char* pMessage,
+                              void* pUserdata);
 
         // To make it easier to use fn it is a public const member. However
         // the Device is allowed to mutate them through these private methods.

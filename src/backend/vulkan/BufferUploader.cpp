@@ -69,7 +69,7 @@ namespace backend { namespace vulkan {
 
         // Write to the staging buffer
         ASSERT(allocation.GetMappedPointer() != nullptr);
-        memcpy(allocation.GetMappedPointer(), data, size);
+        memcpy(allocation.GetMappedPointer(), data, static_cast<size_t>(size));
 
         // Enqueue host write -> transfer src barrier and copy command
         VkCommandBuffer commands = mDevice->GetPendingCommandBuffer();

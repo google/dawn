@@ -339,6 +339,10 @@ namespace backend { namespace vulkan {
             usedKnobs->debugReport = true;
         }
 #endif
+        if (mGlobalInfo.surface) {
+            extensionsToRequest.push_back(kExtensionNameKhrSurface);
+            usedKnobs->surface = true;
+        }
 
         VkApplicationInfo appInfo;
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -448,14 +452,15 @@ namespace backend { namespace vulkan {
         return true;
     }
 
-    VkBool32 Device::OnDebugReportCallback(VkDebugReportFlagsEXT flags,
-                                           VkDebugReportObjectTypeEXT /*objectType*/,
-                                           uint64_t /*object*/,
-                                           size_t /*location*/,
-                                           int32_t /*messageCode*/,
-                                           const char* /*pLayerPrefix*/,
-                                           const char* pMessage,
-                                           void* /*pUserdata*/) {
+    VKAPI_ATTR VkBool32 VKAPI_CALL
+    Device::OnDebugReportCallback(VkDebugReportFlagsEXT flags,
+                                  VkDebugReportObjectTypeEXT /*objectType*/,
+                                  uint64_t /*object*/,
+                                  size_t /*location*/,
+                                  int32_t /*messageCode*/,
+                                  const char* /*pLayerPrefix*/,
+                                  const char* pMessage,
+                                  void* /*pUserdata*/) {
         std::cout << pMessage << std::endl;
         ASSERT((flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) == 0);
 

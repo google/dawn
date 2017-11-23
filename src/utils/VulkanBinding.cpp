@@ -32,9 +32,7 @@ namespace utils {
         }
 
       private:
-        GLFWwindow* window = nullptr;
-
-        SwapChainImplVulkan(GLFWwindow* window) : window(window) {
+        SwapChainImplVulkan(GLFWwindow* /*window*/) {
         }
 
         ~SwapChainImplVulkan() {

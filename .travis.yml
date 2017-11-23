@@ -53,11 +53,14 @@ script:
  # Use the more recent compilers we just installed
  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$CXX" == "clang++" ]; then export CXX="clang++-5.0" CC="clang-5.0"; fi
 
+ # Build the Vulkan backend on Linux
+ - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export BUILD_VULKAN=1; else export BUILD_VULKAN=0; fi
+
  # Build
  - mkdir -p build
  - cd build
  - cmake --version
- - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DNXT_USE_WERROR=1 ..
+ - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DNXT_USE_WERROR=1 -DNXT_ENABLE_VULKAN=$BUILD_VULKAN ..
  - cmake --build .
 
  # Test
