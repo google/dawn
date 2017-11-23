@@ -34,8 +34,8 @@ namespace metal {
             void Tick(Serial finishedSerial);
 
         private:
-            Device* device;
-            SerialQueue<id<MTLBuffer>> inflightUploadBuffers;
+            Device* mDevice;
+            SerialQueue<id<MTLBuffer>> mInflightUploadBuffers;
     };
 
 

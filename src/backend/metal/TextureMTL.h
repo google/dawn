@@ -35,7 +35,7 @@ namespace metal {
             void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
 
         private:
-            id<MTLTexture> mtlTexture = nil;
+            id<MTLTexture> mMtlTexture = nil;
     };
 
     class TextureView : public TextureViewBase {

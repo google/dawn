@@ -49,15 +49,15 @@ namespace metal {
 
         // TODO(kainino@chromium.org): wrap modes
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
-        mtlSamplerState = [mtlDevice newSamplerStateWithDescriptor:desc];
+        mMtlSamplerState = [mtlDevice newSamplerStateWithDescriptor:desc];
     }
 
     Sampler::~Sampler() {
-        [mtlSamplerState release];
+        [mMtlSamplerState release];
     }
 
     id<MTLSamplerState> Sampler::GetMTLSamplerState() {
-        return mtlSamplerState;
+        return mMtlSamplerState;
     }
 
 }

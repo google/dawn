@@ -74,20 +74,20 @@ namespace metal {
         desc.storageMode = MTLStorageModePrivate;
 
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
-        mtlTexture = [mtlDevice newTextureWithDescriptor:desc];
+        mMtlTexture = [mtlDevice newTextureWithDescriptor:desc];
     }
 
     Texture::Texture(TextureBuilder* builder, id<MTLTexture> mtlTexture)
-        : TextureBase(builder), mtlTexture(mtlTexture) {
-        [mtlTexture retain];
+        : TextureBase(builder), mMtlTexture(mtlTexture) {
+        [mMtlTexture retain];
     }
 
     Texture::~Texture() {
-        [mtlTexture release];
+        [mMtlTexture release];
     }
 
     id<MTLTexture> Texture::GetMTLTexture() {
-        return mtlTexture;
+        return mMtlTexture;
     }
 
     void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {

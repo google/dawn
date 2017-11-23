@@ -32,7 +32,7 @@ namespace metal {
             id<MTLDepthStencilState> GetMTLDepthStencilState();
 
         private:
-            id<MTLDepthStencilState> mtlDepthStencilState = nil;
+            id<MTLDepthStencilState> mMtlDepthStencilState = nil;
     };
 
 }

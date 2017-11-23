@@ -30,7 +30,7 @@ namespace metal {
             MTLVertexDescriptor* GetMTLVertexDescriptor();
 
         private:
-            MTLVertexDescriptor* mtlVertexDescriptor = nil;
+            MTLVertexDescriptor* mMtlVertexDescriptor = nil;
     };
 
 }

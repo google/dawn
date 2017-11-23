@@ -42,14 +42,14 @@ namespace metal {
     }
 
     ShaderModule::ShaderModule(ShaderModuleBuilder* builder)
-        : ShaderModuleBase(builder), spirv(builder->AcquireSpirv()) {
-        spirv_cross::CompilerMSL compiler(spirv);
+        : ShaderModuleBase(builder), mSpirv(builder->AcquireSpirv()) {
+        spirv_cross::CompilerMSL compiler(mSpirv);
         ExtractSpirvInfo(compiler);
     }
 
     ShaderModule::MetalFunctionData ShaderModule::GetFunction(const char* functionName,
                                                               const PipelineLayout* layout) const {
-        spirv_cross::CompilerMSL compiler(spirv);
+        spirv_cross::CompilerMSL compiler(mSpirv);
 
         // By default SPIRV-Cross will give MSL resources indices in increasing order.
         // To make the MSL indices match the indices chosen in the PipelineLayout, we build

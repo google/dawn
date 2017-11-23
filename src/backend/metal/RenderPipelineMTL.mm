@@ -66,8 +66,8 @@ namespace metal {
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
         : RenderPipelineBase(builder),
-          mtlIndexType(MTLIndexFormat(GetIndexFormat())),
-          mtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())) {
+          mMtlIndexType(MTLIndexFormat(GetIndexFormat())),
+          mMtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())) {
 
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
 
@@ -116,7 +116,7 @@ namespace metal {
         // TODO(kainino@chromium.org): push constants, textures, samplers
 
         NSError *error = nil;
-        mtlRenderPipelineState = [mtlDevice
+        mMtlRenderPipelineState = [mtlDevice
             newRenderPipelineStateWithDescriptor:descriptor error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
@@ -129,19 +129,19 @@ namespace metal {
     }
 
     RenderPipeline::~RenderPipeline() {
-        [mtlRenderPipelineState release];
+        [mMtlRenderPipelineState release];
     }
 
     MTLIndexType RenderPipeline::GetMTLIndexType() const {
-        return mtlIndexType;
+        return mMtlIndexType;
     }
 
     MTLPrimitiveType RenderPipeline::GetMTLPrimitiveTopology() const {
-        return mtlPrimitiveTopology;
+        return mMtlPrimitiveTopology;
     }
 
     void RenderPipeline::Encode(id<MTLRenderCommandEncoder> encoder) {
-        [encoder setRenderPipelineState:mtlRenderPipelineState];
+        [encoder setRenderPipelineState:mMtlRenderPipelineState];
     }
 
 }

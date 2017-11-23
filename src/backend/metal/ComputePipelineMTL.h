@@ -31,8 +31,8 @@ namespace metal {
             MTLSize GetLocalWorkGroupSize() const;
 
         private:
-            id<MTLComputePipelineState> mtlComputePipelineState = nil;
-            MTLSize localWorkgroupSize;
+            id<MTLComputePipelineState> mMtlComputePipelineState = nil;
+            MTLSize mLocalWorkgroupSize;
     };
 
 }

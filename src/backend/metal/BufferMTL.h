@@ -40,7 +40,7 @@ namespace metal {
             void UnmapImpl() override;
             void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
-            id<MTLBuffer> mtlBuffer = nil;
+            id<MTLBuffer> mMtlBuffer = nil;
     };
 
     class BufferView : public BufferViewBase {
@@ -57,14 +57,14 @@ namespace metal {
             void Tick(Serial finishedSerial);
 
         private:
-            Device* device;
+            Device* mDevice;
 
             struct Request {
                 Ref<Buffer> buffer;
                 uint32_t mapSerial;
                 uint32_t offset;
             };
-            SerialQueue<Request> inflightRequests;
+            SerialQueue<Request> mInflightRequests;
     };
 
 }

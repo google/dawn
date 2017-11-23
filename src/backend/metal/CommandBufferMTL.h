@@ -32,8 +32,8 @@ namespace metal {
             void FillCommands(id<MTLCommandBuffer> commandBuffer);
 
         private:
-            Device* device;
-            CommandIterator commands;
+            Device* mDevice;
+            CommandIterator mCommands;
     };
 
 }

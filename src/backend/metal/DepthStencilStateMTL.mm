@@ -97,17 +97,17 @@ namespace metal {
         }
 
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
-        mtlDepthStencilState = [mtlDevice newDepthStencilStateWithDescriptor:mtlDepthStencilDescriptor];
+        mMtlDepthStencilState = [mtlDevice newDepthStencilStateWithDescriptor:mtlDepthStencilDescriptor];
         [mtlDepthStencilDescriptor release];
     }
 
     DepthStencilState::~DepthStencilState() {
-        [mtlDepthStencilState release];
-        mtlDepthStencilState = nil;
+        [mMtlDepthStencilState release];
+        mMtlDepthStencilState = nil;
     }
 
     id<MTLDepthStencilState> DepthStencilState::GetMTLDepthStencilState() {
-        return mtlDepthStencilState;
+        return mMtlDepthStencilState;
     }
 
 }

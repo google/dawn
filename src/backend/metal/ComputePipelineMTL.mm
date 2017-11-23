@@ -31,7 +31,7 @@ namespace metal {
         auto compilationData = module->GetFunction(entryPoint.c_str(), ToBackend(GetLayout()));
 
         NSError *error = nil;
-        mtlComputePipelineState = [mtlDevice
+        mMtlComputePipelineState = [mtlDevice
             newComputePipelineStateWithFunction:compilationData.function error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
@@ -40,19 +40,19 @@ namespace metal {
         }
 
         // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
-        localWorkgroupSize = compilationData.localWorkgroupSize;
+        mLocalWorkgroupSize = compilationData.localWorkgroupSize;
     }
 
     ComputePipeline::~ComputePipeline() {
-        [mtlComputePipelineState release];
+        [mMtlComputePipelineState release];
     }
 
     void ComputePipeline::Encode(id<MTLComputeCommandEncoder> encoder) {
-        [encoder setComputePipelineState:mtlComputePipelineState];
+        [encoder setComputePipelineState:mMtlComputePipelineState];
     }
 
     MTLSize ComputePipeline::GetLocalWorkGroupSize() const {
-        return localWorkgroupSize;
+        return mLocalWorkgroupSize;
     }
 
 }

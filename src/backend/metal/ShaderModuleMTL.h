@@ -42,7 +42,7 @@ namespace metal {
             // Calling compile on CompilerMSL somehow changes internal state that makes subsequent
             // compiles return invalid MSL. We keep the spirv around and recreate the compiler everytime
             // we need to use it.
-            std::vector<uint32_t> spirv;
+            std::vector<uint32_t> mSpirv;
     };
 
 }

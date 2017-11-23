@@ -149,12 +149,12 @@ namespace metal {
     }
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), device(ToBackend(builder->GetDevice())),
-          commands(builder->AcquireCommands()) {
+        : CommandBufferBase(builder), mDevice(ToBackend(builder->GetDevice())),
+          mCommands(builder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {
-        FreeCommands(&commands);
+        FreeCommands(&mCommands);
     }
 
     void CommandBuffer::FillCommands(id<MTLCommandBuffer> commandBuffer) {
@@ -165,16 +165,16 @@ namespace metal {
         uint32_t indexBufferOffset = 0;
 
         CurrentEncoders encoders;
-        encoders.device = device;
+        encoders.device = mDevice;
 
         PerStage<std::array<uint32_t, kMaxPushConstants>> pushConstants;
 
         uint32_t currentSubpass = 0;
-        while (commands.NextCommandId(&type)) {
+        while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass:
                     {
-                        commands.NextCommand<BeginComputePassCmd>();
+                        mCommands.NextCommand<BeginComputePassCmd>();
                         encoders.BeginCompute(commandBuffer);
 
                         pushConstants[nxt::ShaderStage::Compute].fill(0);
@@ -186,7 +186,7 @@ namespace metal {
 
                 case Command::BeginRenderPass:
                     {
-                        BeginRenderPassCmd* beginRenderPassCmd = commands.NextCommand<BeginRenderPassCmd>();
+                        BeginRenderPassCmd* beginRenderPassCmd = mCommands.NextCommand<BeginRenderPassCmd>();
                         encoders.currentRenderPass = ToBackend(beginRenderPassCmd->renderPass.Get());
                         encoders.currentFramebuffer = ToBackend(beginRenderPassCmd->framebuffer.Get());
                         encoders.EnsureNoBlitEncoder();
@@ -196,7 +196,7 @@ namespace metal {
 
                 case Command::BeginRenderSubpass:
                     {
-                        commands.NextCommand<BeginRenderSubpassCmd>();
+                        mCommands.NextCommand<BeginRenderSubpassCmd>();
                         encoders.BeginSubpass(commandBuffer, currentSubpass);
 
                         pushConstants[nxt::ShaderStage::Vertex].fill(0);
@@ -213,7 +213,7 @@ namespace metal {
 
                 case Command::CopyBufferToBuffer:
                     {
-                        CopyBufferToBufferCmd* copy = commands.NextCommand<CopyBufferToBufferCmd>();
+                        CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
                         auto& src = copy->source;
                         auto& dst = copy->destination;
 
@@ -229,7 +229,7 @@ namespace metal {
 
                 case Command::CopyBufferToTexture:
                     {
-                        CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();
+                        CopyBufferToTextureCmd* copy = mCommands.NextCommand<CopyBufferToTextureCmd>();
                         auto& src = copy->source;
                         auto& dst = copy->destination;
                         Buffer* buffer = ToBackend(src.buffer.Get());
@@ -261,7 +261,7 @@ namespace metal {
 
                 case Command::CopyTextureToBuffer:
                     {
-                        CopyTextureToBufferCmd* copy = commands.NextCommand<CopyTextureToBufferCmd>();
+                        CopyTextureToBufferCmd* copy = mCommands.NextCommand<CopyTextureToBufferCmd>();
                         auto& src = copy->source;
                         auto& dst = copy->destination;
                         Texture* texture = ToBackend(src.texture.Get());
@@ -293,7 +293,7 @@ namespace metal {
 
                 case Command::Dispatch:
                     {
-                        DispatchCmd* dispatch = commands.NextCommand<DispatchCmd>();
+                        DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
                         ASSERT(encoders.compute);
 
                         [encoders.compute dispatchThreadgroups:MTLSizeMake(dispatch->x, dispatch->y, dispatch->z)
@@ -303,7 +303,7 @@ namespace metal {
 
                 case Command::DrawArrays:
                     {
-                        DrawArraysCmd* draw = commands.NextCommand<DrawArraysCmd>();
+                        DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
 
                         ASSERT(encoders.render);
                         [encoders.render
@@ -317,7 +317,7 @@ namespace metal {
 
                 case Command::DrawElements:
                     {
-                        DrawElementsCmd* draw = commands.NextCommand<DrawElementsCmd>();
+                        DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
 
                         ASSERT(encoders.render);
                         [encoders.render
@@ -334,20 +334,20 @@ namespace metal {
 
                 case Command::EndComputePass:
                     {
-                        commands.NextCommand<EndComputePassCmd>();
+                        mCommands.NextCommand<EndComputePassCmd>();
                         encoders.EndCompute();
                     }
                     break;
 
                 case Command::EndRenderPass:
                     {
-                        commands.NextCommand<EndRenderPassCmd>();
+                        mCommands.NextCommand<EndRenderPassCmd>();
                     }
                     break;
 
                 case Command::EndRenderSubpass:
                     {
-                        commands.NextCommand<EndRenderSubpassCmd>();
+                        mCommands.NextCommand<EndRenderSubpassCmd>();
                         encoders.EndSubpass();
                         currentSubpass += 1;
                     }
@@ -355,7 +355,7 @@ namespace metal {
 
                 case Command::SetComputePipeline:
                     {
-                        SetComputePipelineCmd* cmd = commands.NextCommand<SetComputePipelineCmd>();
+                        SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
                         lastComputePipeline = ToBackend(cmd->pipeline).Get();
 
                         ASSERT(encoders.compute);
@@ -365,7 +365,7 @@ namespace metal {
 
                 case Command::SetRenderPipeline:
                     {
-                        SetRenderPipelineCmd* cmd = commands.NextCommand<SetRenderPipelineCmd>();
+                        SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
                         lastRenderPipeline = ToBackend(cmd->pipeline).Get();
 
                         ASSERT(encoders.render);
@@ -377,8 +377,8 @@ namespace metal {
 
                 case Command::SetPushConstants:
                     {
-                        SetPushConstantsCmd* cmd = commands.NextCommand<SetPushConstantsCmd>();
-                        uint32_t* values = commands.NextData<uint32_t>(cmd->count);
+                        SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
+                        uint32_t* values = mCommands.NextData<uint32_t>(cmd->count);
 
                         for (auto stage : IterateStages(cmd->stages)) {
                             memcpy(&pushConstants[stage][cmd->offset], values, cmd->count * sizeof(uint32_t));
@@ -412,7 +412,7 @@ namespace metal {
 
                 case Command::SetStencilReference:
                     {
-                        SetStencilReferenceCmd* cmd = commands.NextCommand<SetStencilReferenceCmd>();
+                        SetStencilReferenceCmd* cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
 
                         ASSERT(encoders.render);
 
@@ -422,7 +422,7 @@ namespace metal {
 
                 case Command::SetBlendColor:
                     {
-                        SetBlendColorCmd* cmd = commands.NextCommand<SetBlendColorCmd>();
+                        SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
 
                         ASSERT(encoders.render);
 
@@ -436,7 +436,7 @@ namespace metal {
 
                 case Command::SetBindGroup:
                     {
-                        SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();
+                        SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                         BindGroup* group = ToBackend(cmd->group.Get());
                         uint32_t groupIndex = cmd->index;
 
@@ -550,7 +550,7 @@ namespace metal {
 
                 case Command::SetIndexBuffer:
                     {
-                        SetIndexBufferCmd* cmd = commands.NextCommand<SetIndexBufferCmd>();
+                        SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
                         auto b = ToBackend(cmd->buffer.Get());
                         indexBuffer = b->GetMTLBuffer();
                         indexBufferOffset = cmd->offset;
@@ -559,9 +559,9 @@ namespace metal {
 
                 case Command::SetVertexBuffers:
                     {
-                        SetVertexBuffersCmd* cmd = commands.NextCommand<SetVertexBuffersCmd>();
-                        auto buffers = commands.NextData<Ref<BufferBase>>(cmd->count);
-                        auto offsets = commands.NextData<uint32_t>(cmd->count);
+                        SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
+                        auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
+                        auto offsets = mCommands.NextData<uint32_t>(cmd->count);
 
                         std::array<id<MTLBuffer>, kMaxVertexInputs> mtlBuffers;
                         std::array<NSUInteger, kMaxVertexInputs> mtlOffsets;
@@ -584,7 +584,7 @@ namespace metal {
 
                 case Command::TransitionBufferUsage:
                     {
-                        TransitionBufferUsageCmd* cmd = commands.NextCommand<TransitionBufferUsageCmd>();
+                        TransitionBufferUsageCmd* cmd = mCommands.NextCommand<TransitionBufferUsageCmd>();
 
                         cmd->buffer->UpdateUsageInternal(cmd->usage);
                     }
@@ -592,7 +592,7 @@ namespace metal {
 
                 case Command::TransitionTextureUsage:
                     {
-                        TransitionTextureUsageCmd* cmd = commands.NextCommand<TransitionTextureUsageCmd>();
+                        TransitionTextureUsageCmd* cmd = mCommands.NextCommand<TransitionTextureUsageCmd>();
 
                         cmd->texture->UpdateUsageInternal(cmd->usage);
                     }

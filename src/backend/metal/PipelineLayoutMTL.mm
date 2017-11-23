@@ -41,15 +41,15 @@ namespace metal {
                     switch (groupInfo.types[binding]) {
                         case nxt::BindingType::UniformBuffer:
                         case nxt::BindingType::StorageBuffer:
-                            indexInfo[stage][group][binding] = bufferIndex;
+                            mIndexInfo[stage][group][binding] = bufferIndex;
                             bufferIndex++;
                             break;
                         case nxt::BindingType::Sampler:
-                            indexInfo[stage][group][binding] = samplerIndex;
+                            mIndexInfo[stage][group][binding] = samplerIndex;
                             samplerIndex++;
                             break;
                         case nxt::BindingType::SampledTexture:
-                            indexInfo[stage][group][binding] = textureIndex;
+                            mIndexInfo[stage][group][binding] = textureIndex;
                             textureIndex++;
                             break;
                     }
@@ -59,7 +59,7 @@ namespace metal {
     }
 
     const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(nxt::ShaderStage stage) const {
-        return indexInfo[stage];
+        return mIndexInfo[stage];
     }
 
 }

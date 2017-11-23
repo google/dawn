@@ -45,10 +45,10 @@ namespace metal {
     // Device
 
     Device::Device(id<MTLDevice> mtlDevice)
-        : mtlDevice(mtlDevice), mapReadTracker(new MapReadRequestTracker(this)),
-            resourceUploader(new ResourceUploader(this)) {
-        [mtlDevice retain];
-        commandQueue = [mtlDevice newCommandQueue];
+        : mMtlDevice(mtlDevice), mMapReadTracker(new MapReadRequestTracker(this)),
+            mResourceUploader(new ResourceUploader(this)) {
+        [mMtlDevice retain];
+        mCommandQueue = [mMtlDevice newCommandQueue];
     }
 
     Device::~Device() {
@@ -58,25 +58,25 @@ namespace metal {
         // SubmitPendingCommandBuffer then wait for it to be passed. Instead we submit and
         // wait for the serial before the next pendingCommandSerial.
         SubmitPendingCommandBuffer();
-        while (finishedCommandSerial != pendingCommandSerial - 1) {
+        while (mFinishedCommandSerial != mPendingCommandSerial - 1) {
             usleep(100);
         }
         Tick();
 
-        [pendingCommands release];
-        pendingCommands = nil;
+        [mPendingCommands release];
+        mPendingCommands = nil;
 
-        delete mapReadTracker;
-        mapReadTracker = nullptr;
+        delete mMapReadTracker;
+        mMapReadTracker = nullptr;
 
-        delete resourceUploader;
-        resourceUploader = nullptr;
+        delete mResourceUploader;
+        mResourceUploader = nullptr;
 
-        [mtlDevice release];
-        mtlDevice = nil;
+        [mMtlDevice release];
+        mMtlDevice = nil;
 
-        [commandQueue release];
-        commandQueue = nil;
+        [mCommandQueue release];
+        mCommandQueue = nil;
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
@@ -138,8 +138,8 @@ namespace metal {
     }
 
     void Device::TickImpl() {
-        resourceUploader->Tick(finishedCommandSerial);
-        mapReadTracker->Tick(finishedCommandSerial);
+        mResourceUploader->Tick(mFinishedCommandSerial);
+        mMapReadTracker->Tick(mFinishedCommandSerial);
 
         // Code above might have added GPU work, submit it. This also makes sure
         // that even when no GPU work is happening, the serial number keeps incrementing.
@@ -147,34 +147,34 @@ namespace metal {
     }
 
     id<MTLDevice> Device::GetMTLDevice() {
-        return mtlDevice;
+        return mMtlDevice;
     }
 
     id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {
-        if (pendingCommands == nil) {
-            pendingCommands = [commandQueue commandBuffer];
-            [pendingCommands retain];
+        if (mPendingCommands == nil) {
+            mPendingCommands = [mCommandQueue commandBuffer];
+            [mPendingCommands retain];
         }
-        return pendingCommands;
+        return mPendingCommands;
     }
 
     void Device::SubmitPendingCommandBuffer() {
-        if (pendingCommands == nil) {
+        if (mPendingCommands == nil) {
             return;
         }
 
         // Ok, ObjC blocks are weird. My understanding is that local variables are captured by value
         // so this-> works as expected. However it is unclear how members are captured, (are they
         // captured using this-> or by value?) so we make a copy of the pendingCommandSerial on the stack.
-        Serial pendingSerial = pendingCommandSerial;
-        [pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
-            this->finishedCommandSerial = pendingSerial;
+        Serial pendingSerial = mPendingCommandSerial;
+        [mPendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
+            this->mFinishedCommandSerial = pendingSerial;
         }];
 
-        [pendingCommands commit];
-        [pendingCommands release];
-        pendingCommands = nil;
-        pendingCommandSerial ++;
+        [mPendingCommands commit];
+        [mPendingCommands release];
+        mPendingCommands = nil;
+        mPendingCommandSerial ++;
     }
 
     uint64_t Device::GetPendingCommandSerial() {
@@ -183,15 +183,15 @@ namespace metal {
         // enqueued on the next Tick() and eventually increments the serial. Otherwise if no GPU work
         // happens we could be waiting for this serial forever.
         GetPendingCommandBuffer();
-        return pendingCommandSerial;
+        return mPendingCommandSerial;
     }
 
     MapReadRequestTracker* Device::GetMapReadTracker() const {
-        return mapReadTracker;
+        return mMapReadTracker;
     }
 
     ResourceUploader* Device::GetResourceUploader() const {
-        return resourceUploader;
+        return mResourceUploader;
     }
 
     // Bind Group
@@ -220,16 +220,16 @@ namespace metal {
     Queue::Queue(QueueBuilder* builder)
         : QueueBase(builder) {
         Device* device = ToBackend(builder->GetDevice());
-        commandQueue = [device->GetMTLDevice() newCommandQueue];
+        mCommandQueue = [device->GetMTLDevice() newCommandQueue];
     }
 
     Queue::~Queue() {
-        [commandQueue release];
-        commandQueue = nil;
+        [mCommandQueue release];
+        mCommandQueue = nil;
     }
 
     id<MTLCommandQueue> Queue::GetMTLCommandQueue() {
-        return commandQueue;
+        return mCommandQueue;
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {

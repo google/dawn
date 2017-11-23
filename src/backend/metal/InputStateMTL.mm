@@ -46,7 +46,7 @@ namespace metal {
 
     InputState::InputState(InputStateBuilder* builder)
         : InputStateBase(builder) {
-        mtlVertexDescriptor = [MTLVertexDescriptor new];
+        mMtlVertexDescriptor = [MTLVertexDescriptor new];
 
         const auto& attributesSetMask = GetAttributesSetMask();
         for (uint32_t i = 0; i < attributesSetMask.size(); ++i) {
@@ -59,7 +59,7 @@ namespace metal {
             attribDesc.format = VertexFormatType(info.format);
             attribDesc.offset = info.offset;
             attribDesc.bufferIndex = kMaxBindingsPerGroup + info.bindingSlot;
-            mtlVertexDescriptor.attributes[i] = attribDesc;
+            mMtlVertexDescriptor.attributes[i] = attribDesc;
             [attribDesc release];
         }
 
@@ -81,18 +81,18 @@ namespace metal {
                 layoutDesc.stride = info.stride;
             }
             // TODO(cwallez@chromium.org): make the offset depend on the pipeline layout
-            mtlVertexDescriptor.layouts[kMaxBindingsPerGroup + i] = layoutDesc;
+            mMtlVertexDescriptor.layouts[kMaxBindingsPerGroup + i] = layoutDesc;
             [layoutDesc release];
         }
     }
 
     InputState::~InputState() {
-        [mtlVertexDescriptor release];
-        mtlVertexDescriptor = nil;
+        [mMtlVertexDescriptor release];
+        mMtlVertexDescriptor = nil;
     }
 
     MTLVertexDescriptor* InputState::GetMTLVertexDescriptor() {
-        return mtlVertexDescriptor;
+        return mMtlVertexDescriptor;
     }
 
 }

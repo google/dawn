@@ -33,9 +33,9 @@ namespace metal {
             void Encode(id<MTLRenderCommandEncoder> encoder);
 
         private:
-            MTLIndexType mtlIndexType;
-            MTLPrimitiveType mtlPrimitiveTopology;
-            id<MTLRenderPipelineState> mtlRenderPipelineState = nil;
+            MTLIndexType mMtlIndexType;
+            MTLPrimitiveType mMtlPrimitiveTopology;
+            id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;
     };
 
 }

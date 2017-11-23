@@ -124,14 +124,14 @@ namespace metal {
         private:
             void OnCompletedHandler();
 
-            id<MTLDevice> mtlDevice = nil;
-            id<MTLCommandQueue> commandQueue = nil;
-            MapReadRequestTracker* mapReadTracker;
-            ResourceUploader* resourceUploader;
+            id<MTLDevice> mMtlDevice = nil;
+            id<MTLCommandQueue> mCommandQueue = nil;
+            MapReadRequestTracker* mMapReadTracker;
+            ResourceUploader* mResourceUploader;
 
-            Serial finishedCommandSerial = 0;
-            Serial pendingCommandSerial = 1;
-            id<MTLCommandBuffer> pendingCommands = nil;
+            Serial mFinishedCommandSerial = 0;
+            Serial mPendingCommandSerial = 1;
+            id<MTLCommandBuffer> mPendingCommands = nil;
     };
 
     class BindGroup : public BindGroupBase {
@@ -161,7 +161,7 @@ namespace metal {
             void Submit(uint32_t numCommands, CommandBuffer* const * commands);
 
         private:
-            id<MTLCommandQueue> commandQueue = nil;
+            id<MTLCommandQueue> mCommandQueue = nil;
     };
 
     class RenderPass : public RenderPassBase {

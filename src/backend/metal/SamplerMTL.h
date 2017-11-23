@@ -30,7 +30,7 @@ namespace metal {
             id<MTLSamplerState> GetMTLSamplerState();
 
         private:
-            id<MTLSamplerState> mtlSamplerState = nil;
+            id<MTLSamplerState> mMtlSamplerState = nil;
     };
 
 }

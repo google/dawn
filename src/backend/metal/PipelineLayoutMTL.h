@@ -36,7 +36,7 @@ namespace metal {
             const BindingIndexInfo& GetBindingIndexInfo(nxt::ShaderStage stage) const;
 
         private:
-            PerStage<BindingIndexInfo> indexInfo;
+            PerStage<BindingIndexInfo> mIndexInfo;
     };
 
 }
