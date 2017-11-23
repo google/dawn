@@ -31,9 +31,9 @@ namespace d3d12 {
             const D3D12_INPUT_LAYOUT_DESC& GetD3D12InputLayoutDescriptor() const;
 
         private:
-            Device* device;
-            D3D12_INPUT_LAYOUT_DESC inputLayoutDescriptor;
-            D3D12_INPUT_ELEMENT_DESC inputElementDescriptors[kMaxVertexAttributes];
+            Device* mDevice;
+            D3D12_INPUT_LAYOUT_DESC mInputLayoutDescriptor;
+            D3D12_INPUT_ELEMENT_DESC mInputElementDescriptors[kMaxVertexAttributes];
     };
 
 }

@@ -39,7 +39,7 @@ namespace d3d12 {
             UploadHandle GetUploadBuffer(uint32_t requiredSize);
             void Release(UploadHandle uploadHandle);
 
-            Device* device;
+            Device* mDevice;
     };
 }
 }

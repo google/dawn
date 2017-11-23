@@ -69,7 +69,7 @@ namespace d3d12 {
     }
 
     Buffer::Buffer(Device* device, BufferBuilder* builder)
-        : BufferBase(builder), device(device) {
+        : BufferBase(builder), mDevice(device) {
 
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
@@ -97,11 +97,11 @@ namespace d3d12 {
             bufferUsage |= D3D12_RESOURCE_STATE_GENERIC_READ;
         }
 
-        resource = device->GetResourceAllocator()->Allocate(heapType, resourceDescriptor, bufferUsage);
+        mResource = device->GetResourceAllocator()->Allocate(heapType, resourceDescriptor, bufferUsage);
     }
 
     Buffer::~Buffer() {
-        device->GetResourceAllocator()->Release(resource);
+        mDevice->GetResourceAllocator()->Release(mResource);
     }
 
     uint32_t Buffer::GetD3D12Size() const {
@@ -110,7 +110,7 @@ namespace d3d12 {
     }
 
     ComPtr<ID3D12Resource> Buffer::GetD3D12Resource() {
-        return resource;
+        return mResource;
     }
 
     bool Buffer::GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier) {
@@ -129,7 +129,7 @@ namespace d3d12 {
 
         barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier->Transition.pResource = resource.Get();
+        barrier->Transition.pResource = mResource.Get();
         barrier->Transition.StateBefore = stateBefore;
         barrier->Transition.StateAfter = stateAfter;
         barrier->Transition.Subresource = 0;
@@ -138,7 +138,7 @@ namespace d3d12 {
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS Buffer::GetVA() const {
-        return resource->GetGPUVirtualAddress();
+        return mResource->GetGPUVirtualAddress();
     }
 
     void Buffer::OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data) {
@@ -146,13 +146,13 @@ namespace d3d12 {
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
-        device->GetResourceUploader()->BufferSubData(resource, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
+        mDevice->GetResourceUploader()->BufferSubData(mResource, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
         D3D12_RANGE readRange = { start, start + count };
         char* data = nullptr;
-        ASSERT_SUCCESS(resource->Map(0, &readRange, reinterpret_cast<void**>(&data)));
+        ASSERT_SUCCESS(mResource->Map(0, &readRange, reinterpret_cast<void**>(&data)));
 
         MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadRequestTracker();
         tracker->Track(this, serial, data + start);
@@ -161,30 +161,30 @@ namespace d3d12 {
     void Buffer::UnmapImpl() {
         // TODO(enga@google.com): When MapWrite is implemented, this should state the range that was modified
         D3D12_RANGE writeRange = {};
-        resource->Unmap(0, &writeRange);
-        device->GetResourceAllocator()->Release(resource);
+        mResource->Unmap(0, &writeRange);
+        mDevice->GetResourceAllocator()->Release(mResource);
     }
 
     void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) {
         D3D12_RESOURCE_BARRIER barrier;
         if (GetResourceTransitionBarrier(currentUsage, targetUsage, &barrier)) {
-            device->GetPendingCommandList()->ResourceBarrier(1, &barrier);
+            mDevice->GetPendingCommandList()->ResourceBarrier(1, &barrier);
         }
     }
 
     BufferView::BufferView(BufferViewBuilder* builder)
         : BufferViewBase(builder) {
 
-        cbvDesc.BufferLocation = ToBackend(GetBuffer())->GetVA() + GetOffset();
-        cbvDesc.SizeInBytes = GetD3D12Size();
+        mCbvDesc.BufferLocation = ToBackend(GetBuffer())->GetVA() + GetOffset();
+        mCbvDesc.SizeInBytes = GetD3D12Size();
 
-        uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-        uavDesc.Buffer.FirstElement = GetOffset();
-        uavDesc.Buffer.NumElements = GetD3D12Size();
-        uavDesc.Buffer.StructureByteStride = 1;
-        uavDesc.Buffer.CounterOffsetInBytes = 0;
-        uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+        mUavDesc.Format = DXGI_FORMAT_UNKNOWN;
+        mUavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+        mUavDesc.Buffer.FirstElement = GetOffset();
+        mUavDesc.Buffer.NumElements = GetD3D12Size();
+        mUavDesc.Buffer.StructureByteStride = 1;
+        mUavDesc.Buffer.CounterOffsetInBytes = 0;
+        mUavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
     }
 
     uint32_t BufferView::GetD3D12Size() const {
@@ -193,19 +193,19 @@ namespace d3d12 {
     }
 
     const D3D12_CONSTANT_BUFFER_VIEW_DESC& BufferView::GetCBVDescriptor() const {
-        return cbvDesc;
+        return mCbvDesc;
     }
 
     const D3D12_UNORDERED_ACCESS_VIEW_DESC& BufferView::GetUAVDescriptor() const {
-        return uavDesc;
+        return mUavDesc;
     }
 
     MapReadRequestTracker::MapReadRequestTracker(Device* device)
-        : device(device) {
+        : mDevice(device) {
     }
 
     MapReadRequestTracker::~MapReadRequestTracker() {
-        ASSERT(inflightRequests.Empty());
+        ASSERT(mInflightRequests.Empty());
     }
 
     void MapReadRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, const void* data) {
@@ -214,14 +214,14 @@ namespace d3d12 {
         request.mapSerial = mapSerial;
         request.data = data;
 
-        inflightRequests.Enqueue(std::move(request), device->GetSerial());
+        mInflightRequests.Enqueue(std::move(request), mDevice->GetSerial());
     }
 
     void MapReadRequestTracker::Tick(Serial finishedSerial) {
-        for (auto& request : inflightRequests.IterateUpTo(finishedSerial)) {
+        for (auto& request : mInflightRequests.IterateUpTo(finishedSerial)) {
             request.buffer->OnMapReadCommandSerialFinished(request.mapSerial, request.data);
         }
-        inflightRequests.ClearUpTo(finishedSerial);
+        mInflightRequests.ClearUpTo(finishedSerial);
     }
 
 }

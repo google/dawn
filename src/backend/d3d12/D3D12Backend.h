@@ -130,23 +130,23 @@ namespace d3d12 {
             void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
         private:
-            uint64_t serial = 0;
-            ComPtr<ID3D12Fence> fence;
-            HANDLE fenceEvent;
+            uint64_t mSerial = 0;
+            ComPtr<ID3D12Fence> mFence;
+            HANDLE mFenceEvent;
 
-            ComPtr<ID3D12Device> d3d12Device;
-            ComPtr<ID3D12CommandQueue> commandQueue;
+            ComPtr<ID3D12Device> mD3d12Device;
+            ComPtr<ID3D12CommandQueue> mCommandQueue;
 
-            CommandAllocatorManager* commandAllocatorManager;
-            DescriptorHeapAllocator* descriptorHeapAllocator;
-            MapReadRequestTracker* mapReadRequestTracker;
-            ResourceAllocator* resourceAllocator;
-            ResourceUploader* resourceUploader;
+            CommandAllocatorManager* mCommandAllocatorManager;
+            DescriptorHeapAllocator* mDescriptorHeapAllocator;
+            MapReadRequestTracker* mMapReadRequestTracker;
+            ResourceAllocator* mResourceAllocator;
+            ResourceUploader* mResourceUploader;
 
             struct PendingCommandList {
                 ComPtr<ID3D12GraphicsCommandList> commandList;
                 bool open = false;
-            } pendingCommands;
+            } mPendingCommands;
     };
 
     class RenderPass : public RenderPassBase {
@@ -154,7 +154,7 @@ namespace d3d12 {
             RenderPass(Device* device, RenderPassBuilder* builder);
 
         private:
-            Device* device;
+            Device* mDevice;
     };
 
 }

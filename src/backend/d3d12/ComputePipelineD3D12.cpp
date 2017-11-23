@@ -64,11 +64,11 @@ namespace d3d12 {
         descriptor.CS.BytecodeLength = compiledShader->GetBufferSize();
 
         Device* device = ToBackend(builder->GetDevice());
-        device->GetD3D12Device()->CreateComputePipelineState(&descriptor, IID_PPV_ARGS(&pipelineState));
+        device->GetD3D12Device()->CreateComputePipelineState(&descriptor, IID_PPV_ARGS(&mPipelineState));
     }
 
     ComPtr<ID3D12PipelineState> ComputePipeline::GetPipelineState() {
-        return pipelineState;
+        return mPipelineState;
     }
 
 }

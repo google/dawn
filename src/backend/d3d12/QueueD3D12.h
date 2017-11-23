@@ -33,9 +33,9 @@ namespace d3d12 {
             void Submit(uint32_t numCommands, CommandBuffer* const * commands);
 
         private:
-            Device* device;
+            Device* mDevice;
 
-            ComPtr<ID3D12GraphicsCommandList> commandList;
+            ComPtr<ID3D12GraphicsCommandList> mCommandList;
     };
 
 }

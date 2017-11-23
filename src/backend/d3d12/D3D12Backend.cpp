@@ -83,21 +83,21 @@ namespace d3d12 {
     }
 
     Device::Device(ComPtr<ID3D12Device> d3d12Device)
-        : d3d12Device(d3d12Device),
-          commandAllocatorManager(new CommandAllocatorManager(this)),
-          descriptorHeapAllocator(new DescriptorHeapAllocator(this)),
-          mapReadRequestTracker(new MapReadRequestTracker(this)),
-          resourceAllocator(new ResourceAllocator(this)),
-          resourceUploader(new ResourceUploader(this)) {
+        : mD3d12Device(d3d12Device),
+          mCommandAllocatorManager(new CommandAllocatorManager(this)),
+          mDescriptorHeapAllocator(new DescriptorHeapAllocator(this)),
+          mMapReadRequestTracker(new MapReadRequestTracker(this)),
+          mResourceAllocator(new ResourceAllocator(this)),
+          mResourceUploader(new ResourceUploader(this)) {
 
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-        ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+        ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)));
 
-        ASSERT_SUCCESS(d3d12Device->CreateFence(serial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-        fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        ASSERT(fenceEvent != nullptr);
+        ASSERT_SUCCESS(d3d12Device->CreateFence(mSerial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
+        mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+        ASSERT(mFenceEvent != nullptr);
 
         NextSerial();
     }
@@ -107,100 +107,100 @@ namespace d3d12 {
         NextSerial();
         WaitForSerial(currentSerial); // Wait for all in-flight commands to finish executing
         TickImpl(); // Call tick one last time so resources are cleaned up
-        delete commandAllocatorManager;
-        delete descriptorHeapAllocator;
-        delete mapReadRequestTracker;
-        delete resourceAllocator;
-        delete resourceUploader;
+        delete mCommandAllocatorManager;
+        delete mDescriptorHeapAllocator;
+        delete mMapReadRequestTracker;
+        delete mResourceAllocator;
+        delete mResourceUploader;
     }
 
     ComPtr<ID3D12Device> Device::GetD3D12Device() {
-        return d3d12Device;
+        return mD3d12Device;
     }
 
     ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() {
-        return commandQueue;
+        return mCommandQueue;
     }
 
     DescriptorHeapAllocator* Device::GetDescriptorHeapAllocator() {
-        return descriptorHeapAllocator;
+        return mDescriptorHeapAllocator;
     }
 
     MapReadRequestTracker* Device::GetMapReadRequestTracker() const {
-        return mapReadRequestTracker;
+        return mMapReadRequestTracker;
     }
 
     ResourceAllocator* Device::GetResourceAllocator() {
-        return resourceAllocator;
+        return mResourceAllocator;
     }
 
     ResourceUploader* Device::GetResourceUploader() {
-        return resourceUploader;
+        return mResourceUploader;
     }
 
     void Device::OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList) {
         ComPtr<ID3D12GraphicsCommandList> &cmdList = *commandList;
         if (!cmdList) {
-            ASSERT_SUCCESS(d3d12Device->CreateCommandList(
+            ASSERT_SUCCESS(mD3d12Device->CreateCommandList(
                 0,
                 D3D12_COMMAND_LIST_TYPE_DIRECT,
-                commandAllocatorManager->ReserveCommandAllocator().Get(),
+                mCommandAllocatorManager->ReserveCommandAllocator().Get(),
                 nullptr,
                 IID_PPV_ARGS(&cmdList)
             ));
         } else {
-            ASSERT_SUCCESS(cmdList->Reset(commandAllocatorManager->ReserveCommandAllocator().Get(), nullptr));
+            ASSERT_SUCCESS(cmdList->Reset(mCommandAllocatorManager->ReserveCommandAllocator().Get(), nullptr));
         }
     }
 
     ComPtr<ID3D12GraphicsCommandList> Device::GetPendingCommandList() {
         // Callers of GetPendingCommandList do so to record commands. Only reserve a command allocator when it is needed so we don't submit empty command lists
-        if (!pendingCommands.open) {
-            OpenCommandList(&pendingCommands.commandList);
-            pendingCommands.open = true;
+        if (!mPendingCommands.open) {
+            OpenCommandList(&mPendingCommands.commandList);
+            mPendingCommands.open = true;
         }
-        return pendingCommands.commandList;
+        return mPendingCommands.commandList;
     }
 
     void Device::TickImpl() {
         // Perform cleanup operations to free unused objects
-        const uint64_t lastCompletedSerial = fence->GetCompletedValue();
-        resourceAllocator->Tick(lastCompletedSerial);
-        commandAllocatorManager->Tick(lastCompletedSerial);
-        descriptorHeapAllocator->Tick(lastCompletedSerial);
-        mapReadRequestTracker->Tick(lastCompletedSerial);
+        const uint64_t lastCompletedSerial = mFence->GetCompletedValue();
+        mResourceAllocator->Tick(lastCompletedSerial);
+        mCommandAllocatorManager->Tick(lastCompletedSerial);
+        mDescriptorHeapAllocator->Tick(lastCompletedSerial);
+        mMapReadRequestTracker->Tick(lastCompletedSerial);
         ExecuteCommandLists({});
         NextSerial();
     }
 
     uint64_t Device::GetSerial() const {
-        return serial;
+        return mSerial;
     }
 
     void Device::NextSerial() {
-        ASSERT_SUCCESS(commandQueue->Signal(fence.Get(), serial++));
+        ASSERT_SUCCESS(mCommandQueue->Signal(mFence.Get(), mSerial++));
     }
 
     void Device::WaitForSerial(uint64_t serial) {
-        const uint64_t lastCompletedSerial = fence->GetCompletedValue();
+        const uint64_t lastCompletedSerial = mFence->GetCompletedValue();
         if (lastCompletedSerial < serial) {
-            ASSERT_SUCCESS(fence->SetEventOnCompletion(serial, fenceEvent));
-            WaitForSingleObject(fenceEvent, INFINITE);
+            ASSERT_SUCCESS(mFence->SetEventOnCompletion(serial, mFenceEvent));
+            WaitForSingleObject(mFenceEvent, INFINITE);
         }
     }
 
     void Device::ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists) {
         // If there are pending commands, prepend them to ExecuteCommandLists
-        if (pendingCommands.open) {
+        if (mPendingCommands.open) {
             std::vector<ID3D12CommandList*> lists(commandLists.size() + 1);
-            pendingCommands.commandList->Close();
-            pendingCommands.open = false;
-            lists[0] = pendingCommands.commandList.Get();
+            mPendingCommands.commandList->Close();
+            mPendingCommands.open = false;
+            lists[0] = mPendingCommands.commandList.Get();
             std::copy(commandLists.begin(), commandLists.end(), lists.begin() + 1);
-            commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size() + 1), lists.data());
+            mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size() + 1), lists.data());
         } else {
             std::vector<ID3D12CommandList*> lists(commandLists);
-            commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), lists.data());
+            mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), lists.data());
         }
     }
 
@@ -265,7 +265,7 @@ namespace d3d12 {
     // RenderPass
 
     RenderPass::RenderPass(Device* device, RenderPassBuilder* builder)
-        : RenderPassBase(builder), device(device) {
+        : RenderPassBase(builder), mDevice(device) {
     }
 
 }

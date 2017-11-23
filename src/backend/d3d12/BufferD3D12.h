@@ -37,8 +37,8 @@ namespace d3d12 {
             void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
 
         private:
-            Device* device;
-            ComPtr<ID3D12Resource> resource;
+            Device* mDevice;
+            ComPtr<ID3D12Resource> mResource;
 
             // NXT API
             void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
@@ -57,8 +57,8 @@ namespace d3d12 {
             const D3D12_UNORDERED_ACCESS_VIEW_DESC& GetUAVDescriptor() const;
 
         private:
-            D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-            D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+            D3D12_CONSTANT_BUFFER_VIEW_DESC mCbvDesc;
+            D3D12_UNORDERED_ACCESS_VIEW_DESC mUavDesc;
     };
 
     class MapReadRequestTracker {
@@ -70,14 +70,14 @@ namespace d3d12 {
             void Tick(Serial finishedSerial);
 
         private:
-            Device* device;
+            Device* mDevice;
 
             struct Request {
                 Ref<Buffer> buffer;
                 uint32_t mapSerial;
                 const void* data;
             };
-            SerialQueue<Request> inflightRequests;
+            SerialQueue<Request> mInflightRequests;
     };
 
 }

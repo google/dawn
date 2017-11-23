@@ -82,20 +82,20 @@ namespace d3d12 {
 
     BlendState::BlendState(BlendStateBuilder* builder) : BlendStateBase(builder) {
         auto& info = GetBlendInfo();
-        blendDesc.BlendEnable = info.blendEnabled;
-        blendDesc.SrcBlend = D3D12Blend(info.colorBlend.srcFactor);
-        blendDesc.DestBlend = D3D12Blend(info.colorBlend.dstFactor);
-        blendDesc.BlendOp = D3D12BlendOperation(info.colorBlend.operation);
-        blendDesc.SrcBlendAlpha = D3D12Blend(info.alphaBlend.srcFactor);
-        blendDesc.DestBlendAlpha = D3D12Blend(info.alphaBlend.dstFactor);
-        blendDesc.BlendOpAlpha = D3D12BlendOperation(info.alphaBlend.operation);
-        blendDesc.RenderTargetWriteMask = D3D12RenderTargetWriteMask(info.colorWriteMask);
-        blendDesc.LogicOpEnable = false;
-        blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+        mBlendDesc.BlendEnable = info.blendEnabled;
+        mBlendDesc.SrcBlend = D3D12Blend(info.colorBlend.srcFactor);
+        mBlendDesc.DestBlend = D3D12Blend(info.colorBlend.dstFactor);
+        mBlendDesc.BlendOp = D3D12BlendOperation(info.colorBlend.operation);
+        mBlendDesc.SrcBlendAlpha = D3D12Blend(info.alphaBlend.srcFactor);
+        mBlendDesc.DestBlendAlpha = D3D12Blend(info.alphaBlend.dstFactor);
+        mBlendDesc.BlendOpAlpha = D3D12BlendOperation(info.alphaBlend.operation);
+        mBlendDesc.RenderTargetWriteMask = D3D12RenderTargetWriteMask(info.colorWriteMask);
+        mBlendDesc.LogicOpEnable = false;
+        mBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
     }
 
     const D3D12_RENDER_TARGET_BLEND_DESC& BlendState::GetD3D12BlendDesc() const {
-        return blendDesc;
+        return mBlendDesc;
     }
 
 }

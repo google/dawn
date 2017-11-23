@@ -46,7 +46,7 @@ namespace d3d12 {
     }
 
     InputState::InputState(Device* device, InputStateBuilder* builder)
-        : InputStateBase(builder), device(device) {
+        : InputStateBase(builder), mDevice(device) {
 
         const auto& attributesSetMask = GetAttributesSetMask();
 
@@ -56,7 +56,7 @@ namespace d3d12 {
                 continue;
             }
 
-            D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[count++];
+            D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = mInputElementDescriptors[count++];
 
             const AttributeInfo& attribute = GetAttribute(i);
 
@@ -77,13 +77,13 @@ namespace d3d12 {
             }
         }
 
-        inputLayoutDescriptor.pInputElementDescs = inputElementDescriptors;
-        inputLayoutDescriptor.NumElements = count;
+        mInputLayoutDescriptor.pInputElementDescs = mInputElementDescriptors;
+        mInputLayoutDescriptor.NumElements = count;
 
     }
 
     const D3D12_INPUT_LAYOUT_DESC& InputState::GetD3D12InputLayoutDescriptor() const {
-        return inputLayoutDescriptor;
+        return mInputLayoutDescriptor;
     }
 
 }

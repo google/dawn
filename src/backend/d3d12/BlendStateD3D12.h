@@ -29,7 +29,7 @@ namespace d3d12 {
             const D3D12_RENDER_TARGET_BLEND_DESC& GetD3D12BlendDesc() const;
 
         private:
-            D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
+            D3D12_RENDER_TARGET_BLEND_DESC mBlendDesc;
     };
 
 }

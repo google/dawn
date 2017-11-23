@@ -62,21 +62,21 @@ namespace d3d12 {
                 break;
         }
 
-        samplerDesc.Filter = static_cast<D3D12_FILTER>(mode);
-        samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-        samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-        samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-        samplerDesc.MipLODBias = 0.f;
-        samplerDesc.MaxAnisotropy = 1;
-        samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-        samplerDesc.BorderColor[0] = samplerDesc.BorderColor[1] = samplerDesc.BorderColor[2] = samplerDesc.BorderColor[3] = 0;
-        samplerDesc.MinLOD = 0;
-        samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+        mSamplerDesc.Filter = static_cast<D3D12_FILTER>(mode);
+        mSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        mSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        mSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        mSamplerDesc.MipLODBias = 0.f;
+        mSamplerDesc.MaxAnisotropy = 1;
+        mSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+        mSamplerDesc.BorderColor[0] = mSamplerDesc.BorderColor[1] = mSamplerDesc.BorderColor[2] = mSamplerDesc.BorderColor[3] = 0;
+        mSamplerDesc.MinLOD = 0;
+        mSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 
     }
 
     const D3D12_SAMPLER_DESC& Sampler::GetSamplerDescriptor() const {
-        return samplerDesc;
+        return mSamplerDesc;
     }
 
 }

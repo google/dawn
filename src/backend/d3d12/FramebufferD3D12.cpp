@@ -22,42 +22,42 @@ namespace backend {
 namespace d3d12 {
 
     Framebuffer::Framebuffer(Device* device, FramebufferBuilder* builder)
-        : FramebufferBase(builder), device(device) {
+        : FramebufferBase(builder), mDevice(device) {
         RenderPass* renderPass = ToBackend(GetRenderPass());
 
         uint32_t rtvCount = 0, dsvCount = 0;
-        attachmentHeapIndices.resize(renderPass->GetAttachmentCount());
+        mAttachmentHeapIndices.resize(renderPass->GetAttachmentCount());
         for (uint32_t attachment = 0; attachment < renderPass->GetAttachmentCount(); ++attachment) {
             auto* textureView = GetTextureView(attachment);
             auto format = textureView->GetTexture()->GetFormat();
             if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
-                attachmentHeapIndices[attachment] = dsvCount++;
+                mAttachmentHeapIndices[attachment] = dsvCount++;
             } else {
-                attachmentHeapIndices[attachment] = rtvCount++;
+                mAttachmentHeapIndices[attachment] = rtvCount++;
             }
         }
 
         if (rtvCount) {
-            rtvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(
+            mRtvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(
                     D3D12_DESCRIPTOR_HEAP_TYPE_RTV, rtvCount);
         }
         if (dsvCount) {
-            dsvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(
+            mDsvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(
                     D3D12_DESCRIPTOR_HEAP_TYPE_DSV, dsvCount);
         }
 
         for (uint32_t attachment = 0; attachment < renderPass->GetAttachmentCount(); ++attachment) {
-            uint32_t heapIndex = attachmentHeapIndices[attachment];
+            uint32_t heapIndex = mAttachmentHeapIndices[attachment];
             auto* textureView = GetTextureView(attachment);
 
             ComPtr<ID3D12Resource> texture = ToBackend(textureView->GetTexture())->GetD3D12Resource();
             auto format = textureView->GetTexture()->GetFormat();
             if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
-                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(heapIndex);
+                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDsvHeap.GetCPUHandle(heapIndex);
                 D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = ToBackend(textureView)->GetDSVDescriptor();
                 device->GetD3D12Device()->CreateDepthStencilView(texture.Get(), &dsvDesc, dsvHandle);
             } else {
-                D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(heapIndex);
+                D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = mRtvHeap.GetCPUHandle(heapIndex);
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = ToBackend(textureView)->GetRTVDescriptor();
                 device->GetD3D12Device()->CreateRenderTargetView(texture.Get(), &rtvDesc, rtvHandle);
             }
@@ -82,11 +82,11 @@ namespace d3d12 {
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE Framebuffer::GetRTVDescriptor(uint32_t attachmentSlot) {
-        return rtvHeap.GetCPUHandle(attachmentHeapIndices[attachmentSlot]);
+        return mRtvHeap.GetCPUHandle(mAttachmentHeapIndices[attachmentSlot]);
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE Framebuffer::GetDSVDescriptor(uint32_t attachmentSlot) {
-        return dsvHeap.GetCPUHandle(attachmentHeapIndices[attachmentSlot]);
+        return mDsvHeap.GetCPUHandle(mAttachmentHeapIndices[attachmentSlot]);
     }
 
 }

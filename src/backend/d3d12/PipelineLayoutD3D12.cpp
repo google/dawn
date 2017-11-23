@@ -24,7 +24,7 @@ namespace backend {
 namespace d3d12 {
 
     PipelineLayout::PipelineLayout(Device* device, PipelineLayoutBuilder* builder)
-        : PipelineLayoutBase(builder), device(device) {
+        : PipelineLayoutBase(builder), mDevice(device) {
 
         D3D12_ROOT_PARAMETER rootParameters[kMaxBindGroups * 2];
 
@@ -70,11 +70,11 @@ namespace d3d12 {
             };
 
             if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorTableSize(), bindGroupLayout->GetCbvUavSrvDescriptorRanges())) {
-                cbvUavSrvRootParameterInfo[group] = parameterIndex++;
+                mCbvUavSrvRootParameterInfo[group] = parameterIndex++;
             }
 
             if (SetRootDescriptorTable(bindGroupLayout->GetSamplerDescriptorTableSize(), bindGroupLayout->GetSamplerDescriptorRanges())) {
-                samplerRootParameterInfo[group] = parameterIndex++;
+                mSamplerRootParameterInfo[group] = parameterIndex++;
             }
         }
 
@@ -88,22 +88,22 @@ namespace d3d12 {
         ComPtr<ID3DBlob> signature;
         ComPtr<ID3DBlob> error;
         ASSERT_SUCCESS(D3D12SerializeRootSignature(&rootSignatureDescriptor, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+        ASSERT_SUCCESS(device->GetD3D12Device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)));
     }
 
 
     uint32_t PipelineLayout::GetCbvUavSrvRootParameterIndex(uint32_t group) const {
         ASSERT(group < kMaxBindGroups);
-        return cbvUavSrvRootParameterInfo[group];
+        return mCbvUavSrvRootParameterInfo[group];
     }
 
     uint32_t PipelineLayout::GetSamplerRootParameterIndex(uint32_t group) const {
         ASSERT(group < kMaxBindGroups);
-        return samplerRootParameterInfo[group];
+        return mSamplerRootParameterInfo[group];
     }
 
     ComPtr<ID3D12RootSignature> PipelineLayout::GetRootSignature() {
-        return rootSignature;
+        return mRootSignature;
     }
 }
 }

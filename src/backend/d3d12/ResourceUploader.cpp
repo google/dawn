@@ -20,7 +20,7 @@
 namespace backend {
 namespace d3d12 {
 
-    ResourceUploader::ResourceUploader(Device* device) : device(device) {
+    ResourceUploader::ResourceUploader(Device* device) : mDevice(device) {
     }
 
     void ResourceUploader::BufferSubData(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const void* data) {
@@ -28,7 +28,7 @@ namespace d3d12 {
         // Alternatively, the SerialQueue could be used to track which last point of the ringbuffer is in use, and start reusing chunks of it that aren't in flight.
         UploadHandle uploadHandle = GetUploadBuffer(count);
         memcpy(uploadHandle.mappedBuffer, data, count);
-        device->GetPendingCommandList()->CopyBufferRegion(resource.Get(), start, uploadHandle.resource.Get(), 0, count);
+        mDevice->GetPendingCommandList()->CopyBufferRegion(resource.Get(), start, uploadHandle.resource.Get(), 0, count);
         Release(uploadHandle);
     }
 
@@ -48,7 +48,7 @@ namespace d3d12 {
         resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
         UploadHandle uploadHandle;
-        uploadHandle.resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor, D3D12_RESOURCE_STATE_GENERIC_READ);
+        uploadHandle.resource = mDevice->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor, D3D12_RESOURCE_STATE_GENERIC_READ);
         D3D12_RANGE readRange;
         readRange.Begin = 0;
         readRange.End = 0;
@@ -59,7 +59,7 @@ namespace d3d12 {
 
     void ResourceUploader::Release(UploadHandle uploadHandle) {
         uploadHandle.resource->Unmap(0, nullptr);
-        device->GetResourceAllocator()->Release(uploadHandle.resource);
+        mDevice->GetResourceAllocator()->Release(uploadHandle.resource);
     }
 
 }

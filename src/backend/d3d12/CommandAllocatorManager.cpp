@@ -22,45 +22,45 @@
 namespace backend {
 namespace d3d12 {
 
-    CommandAllocatorManager::CommandAllocatorManager(Device* device) : device(device), allocatorCount(0) {
-        freeAllocators.set();
+    CommandAllocatorManager::CommandAllocatorManager(Device* device) : device(device), mAllocatorCount(0) {
+        mFreeAllocators.set();
     }
 
     ComPtr<ID3D12CommandAllocator> CommandAllocatorManager::ReserveCommandAllocator() {
         // If there are no free allocators, get the oldest serial in flight and wait on it
-        if (freeAllocators.none()) {
-            const uint64_t firstSerial = inFlightCommandAllocators.FirstSerial();
+        if (mFreeAllocators.none()) {
+            const uint64_t firstSerial = mInFlightCommandAllocators.FirstSerial();
             device->WaitForSerial(firstSerial);
             Tick(firstSerial);
         }
 
-        ASSERT(freeAllocators.any());
+        ASSERT(mFreeAllocators.any());
 
         // Get the index of the first free allocator from the bitset
-        unsigned int firstFreeIndex = *(IterateBitSet(freeAllocators).begin());
+        unsigned int firstFreeIndex = *(IterateBitSet(mFreeAllocators).begin());
 
-        if (firstFreeIndex >= allocatorCount) {
-            ASSERT(firstFreeIndex == allocatorCount);
-            allocatorCount++;
-            ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocators[firstFreeIndex])));
+        if (firstFreeIndex >= mAllocatorCount) {
+            ASSERT(firstFreeIndex == mAllocatorCount);
+            mAllocatorCount++;
+            ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAllocators[firstFreeIndex])));
         }
 
         // Mark the command allocator as used
-        freeAllocators.reset(firstFreeIndex);
+        mFreeAllocators.reset(firstFreeIndex);
 
         // Enqueue the command allocator. It will be scheduled for reset after the next ExecuteCommandLists
-        inFlightCommandAllocators.Enqueue({commandAllocators[firstFreeIndex], firstFreeIndex}, device->GetSerial());
+        mInFlightCommandAllocators.Enqueue({mCommandAllocators[firstFreeIndex], firstFreeIndex}, device->GetSerial());
 
-        return commandAllocators[firstFreeIndex];
+        return mCommandAllocators[firstFreeIndex];
     }
 
     void CommandAllocatorManager::Tick(uint64_t lastCompletedSerial) {
         // Reset all command allocators that are no longer in flight
-        for (auto it : inFlightCommandAllocators.IterateUpTo(lastCompletedSerial)) {
+        for (auto it : mInFlightCommandAllocators.IterateUpTo(lastCompletedSerial)) {
             ASSERT_SUCCESS(it.commandAllocator->Reset());
-            freeAllocators.set(it.index);
+            mFreeAllocators.set(it.index);
         }
-        inFlightCommandAllocators.ClearUpTo(lastCompletedSerial);
+        mInFlightCommandAllocators.ClearUpTo(lastCompletedSerial);
     }
 
 }

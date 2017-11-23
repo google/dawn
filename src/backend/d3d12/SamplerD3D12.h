@@ -29,7 +29,7 @@ namespace d3d12 {
             const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
 
         private:
-            D3D12_SAMPLER_DESC samplerDesc;
+            D3D12_SAMPLER_DESC mSamplerDesc;
     };
 
 }

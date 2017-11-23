@@ -45,10 +45,10 @@ namespace d3d12 {
             const D3D12_DESCRIPTOR_RANGE* GetSamplerDescriptorRanges() const;
 
         private:
-            Device* device;
-            std::array<uint32_t, kMaxBindingsPerGroup> bindingOffsets;
-            std::array<uint32_t, DescriptorType::Count> descriptorCounts;
-            D3D12_DESCRIPTOR_RANGE ranges[DescriptorType::Count];
+            Device* mDevice;
+            std::array<uint32_t, kMaxBindingsPerGroup> mBindingOffsets;
+            std::array<uint32_t, DescriptorType::Count> mDescriptorCounts;
+            D3D12_DESCRIPTOR_RANGE mRanges[DescriptorType::Count];
     };
 
 }

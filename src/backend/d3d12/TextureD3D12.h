@@ -39,9 +39,9 @@ namespace d3d12 {
             void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
 
         private:
-            Device* device;
-            ComPtr<ID3D12Resource> resource = {};
-            ID3D12Resource* resourcePtr = nullptr;
+            Device* mDevice;
+            ComPtr<ID3D12Resource> mResource = {};
+            ID3D12Resource* mResourcePtr = nullptr;
     };
 
     class TextureView : public TextureViewBase {
@@ -53,7 +53,7 @@ namespace d3d12 {
             D3D12_DEPTH_STENCIL_VIEW_DESC  GetDSVDescriptor();
 
         private:
-            D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+            D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;
     };
 }
 }

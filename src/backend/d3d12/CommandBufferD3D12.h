@@ -33,8 +33,8 @@ namespace d3d12 {
             void FillCommands(ComPtr<ID3D12GraphicsCommandList> commandList);
 
         private:
-            Device* device;
-            CommandIterator commands;
+            Device* mDevice;
+            CommandIterator mCommands;
     };
 }
 }

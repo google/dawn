@@ -45,7 +45,7 @@ namespace d3d12 {
         };
     }
 
-    ResourceAllocator::ResourceAllocator(Device* device) : device(device) {
+    ResourceAllocator::ResourceAllocator(Device* device) : mDevice(device) {
     }
 
     ComPtr<ID3D12Resource> ResourceAllocator::Allocate(D3D12_HEAP_TYPE heapType, const D3D12_RESOURCE_DESC &resourceDescriptor, D3D12_RESOURCE_STATES initialUsage) {
@@ -67,7 +67,7 @@ namespace d3d12 {
         ComPtr<ID3D12Resource> resource;
 
         // TODO(enga@google.com): Use CreatePlacedResource
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommittedResource(
+        ASSERT_SUCCESS(mDevice->GetD3D12Device()->CreateCommittedResource(
             heapProperties,
             D3D12_HEAP_FLAG_NONE,
             &resourceDescriptor,
@@ -81,11 +81,11 @@ namespace d3d12 {
 
     void ResourceAllocator::Release(ComPtr<ID3D12Resource> resource) {
         // Resources may still be in use on the GPU. Enqueue them so that we hold onto them until GPU execution has completed
-        releasedResources.Enqueue(resource, device->GetSerial());
+        mReleasedResources.Enqueue(resource, mDevice->GetSerial());
     }
 
     void ResourceAllocator::Tick(uint64_t lastCompletedSerial) {
-        releasedResources.ClearUpTo(lastCompletedSerial);
+        mReleasedResources.ClearUpTo(lastCompletedSerial);
     }
 
 }

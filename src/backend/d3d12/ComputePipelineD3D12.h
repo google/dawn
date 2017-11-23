@@ -29,7 +29,7 @@ namespace backend {
             ComPtr<ID3D12PipelineState> GetPipelineState();
 
         private:
-            ComPtr<ID3D12PipelineState> pipelineState;
+            ComPtr<ID3D12PipelineState> mPipelineState;
         };
 
     }

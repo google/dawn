@@ -31,8 +31,8 @@ namespace d3d12 {
             const D3D12_DEPTH_STENCIL_DESC& GetD3D12DepthStencilDescriptor() const;
 
         private:
-            Device* device;
-            D3D12_DEPTH_STENCIL_DESC depthStencilDescriptor;
+            Device* mDevice;
+            D3D12_DEPTH_STENCIL_DESC mDepthStencilDescriptor;
     };
 
 }

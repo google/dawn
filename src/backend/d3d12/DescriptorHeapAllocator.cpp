@@ -21,35 +21,35 @@ namespace backend {
 namespace d3d12 {
 
     DescriptorHeapHandle::DescriptorHeapHandle()
-        : descriptorHeap(nullptr), sizeIncrement(0), offset(0) {
+        : mDescriptorHeap(nullptr), mSizeIncrement(0), mOffset(0) {
     }
 
     DescriptorHeapHandle::DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t sizeIncrement, uint32_t offset)
-        : descriptorHeap(descriptorHeap), sizeIncrement(sizeIncrement), offset(offset) {
+        : mDescriptorHeap(descriptorHeap), mSizeIncrement(sizeIncrement), mOffset(offset) {
     }
 
     ID3D12DescriptorHeap* DescriptorHeapHandle::Get() const {
-        return descriptorHeap.Get();
+        return mDescriptorHeap.Get();
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeapHandle::GetCPUHandle(uint32_t index) const {
-        ASSERT(descriptorHeap);
-        auto handle = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-        handle.ptr += sizeIncrement * (index + offset);
+        ASSERT(mDescriptorHeap);
+        auto handle = mDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+        handle.ptr += mSizeIncrement * (index + mOffset);
         return handle;
     }
 
     D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeapHandle::GetGPUHandle(uint32_t index) const {
-        ASSERT(descriptorHeap);
-        auto handle = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
-        handle.ptr += sizeIncrement * (index + offset);
+        ASSERT(mDescriptorHeap);
+        auto handle = mDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+        handle.ptr += mSizeIncrement * (index + mOffset);
         return handle;
     }
 
 
     DescriptorHeapAllocator::DescriptorHeapAllocator(Device* device)
-        : device(device),
-          sizeIncrements {
+        : mDevice(device),
+          mSizeIncrements {
             device->GetD3D12Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV),
             device->GetD3D12Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER),
             device->GetD3D12Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV),
@@ -68,7 +68,7 @@ namespace d3d12 {
             // If the current pool for this type has space, linearly allocate count bytes in the pool
             auto& allocationInfo = heapInfo->second;
             if (allocationInfo.remaining >= count) {
-                DescriptorHeapHandle handle(heapInfo->first, sizeIncrements[type], allocationInfo.size - allocationInfo.remaining);
+                DescriptorHeapHandle handle(heapInfo->first, mSizeIncrements[type], allocationInfo.size - allocationInfo.remaining);
                 allocationInfo.remaining -= count;
                 Release(handle);
                 return handle;
@@ -83,32 +83,32 @@ namespace d3d12 {
         heapDescriptor.Flags = flags;
         heapDescriptor.NodeMask = 0;
         ComPtr<ID3D12DescriptorHeap> heap;
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor, IID_PPV_ARGS(&heap)));
+        ASSERT_SUCCESS(mDevice->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor, IID_PPV_ARGS(&heap)));
 
         AllocationInfo allocationInfo = { allocationSize, allocationSize - count };
         *heapInfo = std::make_pair(heap, allocationInfo);
 
-        DescriptorHeapHandle handle(heap, sizeIncrements[type], 0);
+        DescriptorHeapHandle handle(heap, mSizeIncrements[type], 0);
         Release(handle);
         return handle;
     }
 
     DescriptorHeapHandle DescriptorHeapAllocator::AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count) {
-        return Allocate(type, count, count, &cpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+        return Allocate(type, count, count, &mCpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
     }
 
     DescriptorHeapHandle DescriptorHeapAllocator::AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count) {
         ASSERT(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
         unsigned int heapSize = (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ? kMaxCbvUavSrvHeapSize : kMaxSamplerHeapSize);
-        return Allocate(type, count, heapSize, &gpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+        return Allocate(type, count, heapSize, &mGpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
     }
 
     void DescriptorHeapAllocator::Tick(uint64_t lastCompletedSerial) {
-        releasedHandles.ClearUpTo(lastCompletedSerial);
+        mReleasedHandles.ClearUpTo(lastCompletedSerial);
     }
 
     void DescriptorHeapAllocator::Release(DescriptorHeapHandle handle) {
-        releasedHandles.Enqueue(handle, device->GetSerial());
+        mReleasedHandles.Enqueue(handle, mDevice->GetSerial());
     }
 }
 }

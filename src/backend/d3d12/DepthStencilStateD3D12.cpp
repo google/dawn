@@ -78,22 +78,22 @@ namespace d3d12 {
     }
 
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
-        : DepthStencilStateBase(builder), device(device) {
+        : DepthStencilStateBase(builder), mDevice(device) {
 
-        depthStencilDescriptor.DepthEnable = TRUE;
-        depthStencilDescriptor.DepthWriteMask = GetDepth().depthWriteEnabled ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
-        depthStencilDescriptor.DepthFunc = ComparisonFunc(GetDepth().compareFunction);
+        mDepthStencilDescriptor.DepthEnable = TRUE;
+        mDepthStencilDescriptor.DepthWriteMask = GetDepth().depthWriteEnabled ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+        mDepthStencilDescriptor.DepthFunc = ComparisonFunc(GetDepth().compareFunction);
 
-        depthStencilDescriptor.StencilEnable = StencilTestEnabled() ? TRUE : FALSE;
-        depthStencilDescriptor.StencilReadMask = static_cast<UINT8>(GetStencil().readMask);
-        depthStencilDescriptor.StencilWriteMask = static_cast<UINT8>(GetStencil().writeMask);
+        mDepthStencilDescriptor.StencilEnable = StencilTestEnabled() ? TRUE : FALSE;
+        mDepthStencilDescriptor.StencilReadMask = static_cast<UINT8>(GetStencil().readMask);
+        mDepthStencilDescriptor.StencilWriteMask = static_cast<UINT8>(GetStencil().writeMask);
 
-        depthStencilDescriptor.FrontFace = StencilOpDesc(GetStencil().front);
-        depthStencilDescriptor.BackFace = StencilOpDesc(GetStencil().back);
+        mDepthStencilDescriptor.FrontFace = StencilOpDesc(GetStencil().front);
+        mDepthStencilDescriptor.BackFace = StencilOpDesc(GetStencil().back);
 	}
 
     const D3D12_DEPTH_STENCIL_DESC& DepthStencilState::GetD3D12DepthStencilDescriptor() const {
-        return depthStencilDescriptor;
+        return mDepthStencilDescriptor;
     }
 
 }

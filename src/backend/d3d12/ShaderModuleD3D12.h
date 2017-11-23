@@ -29,9 +29,9 @@ namespace d3d12 {
             const std::string& GetHLSLSource() const;
 
         private:
-            Device* device;
+            Device* mDevice;
 
-            std::string hlslSource;
+            std::string mHlslSource;
     };
 
 }

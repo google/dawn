@@ -40,16 +40,16 @@ namespace d3d12 {
 
             // This must be at least 2 because the Device and Queue use separate command allocators
             static constexpr unsigned int kMaxCommandAllocators = 32;
-            unsigned int allocatorCount;
+            unsigned int mAllocatorCount;
 
             struct IndexedCommandAllocator {
                 ComPtr<ID3D12CommandAllocator> commandAllocator;
                 unsigned int index;
             };
 
-            ComPtr<ID3D12CommandAllocator> commandAllocators[kMaxCommandAllocators];
-            std::bitset<kMaxCommandAllocators> freeAllocators;
-            SerialQueue<IndexedCommandAllocator> inFlightCommandAllocators;
+            ComPtr<ID3D12CommandAllocator> mCommandAllocators[kMaxCommandAllocators];
+            std::bitset<kMaxCommandAllocators> mFreeAllocators;
+            SerialQueue<IndexedCommandAllocator> mInFlightCommandAllocators;
     };
 
 }

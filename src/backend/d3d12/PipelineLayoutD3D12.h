@@ -34,12 +34,12 @@ namespace d3d12 {
             ComPtr<ID3D12RootSignature> GetRootSignature();
 
         private:
-            Device* device;
+            Device* mDevice;
 
-            std::array<uint32_t, kMaxBindGroups> cbvUavSrvRootParameterInfo;
-            std::array<uint32_t, kMaxBindGroups> samplerRootParameterInfo;
+            std::array<uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
+            std::array<uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
 
-            ComPtr<ID3D12RootSignature> rootSignature;
+            ComPtr<ID3D12RootSignature> mRootSignature;
     };
 
 }

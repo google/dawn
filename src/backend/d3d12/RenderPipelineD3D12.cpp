@@ -63,7 +63,7 @@ namespace d3d12 {
     }
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder), d3d12PrimitiveTopology(D3D12PrimitiveTopology(GetPrimitiveTopology())) {
+        : RenderPipelineBase(builder), mD3d12PrimitiveTopology(D3D12PrimitiveTopology(GetPrimitiveTopology())) {
         uint32_t compileFlags = 0;
 #if defined(_DEBUG)
         // Enable better shader debugging with the graphics debugging tools.
@@ -174,15 +174,15 @@ namespace d3d12 {
         descriptor.SampleDesc.Count = 1;
 
         Device* device = ToBackend(builder->GetDevice());
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateGraphicsPipelineState(&descriptor, IID_PPV_ARGS(&pipelineState)));
+        ASSERT_SUCCESS(device->GetD3D12Device()->CreateGraphicsPipelineState(&descriptor, IID_PPV_ARGS(&mPipelineState)));
     }
 
     D3D12_PRIMITIVE_TOPOLOGY RenderPipeline::GetD3D12PrimitiveTopology() const {
-        return d3d12PrimitiveTopology;
+        return mD3d12PrimitiveTopology;
     }
 
     ComPtr<ID3D12PipelineState> RenderPipeline::GetPipelineState() {
-        return pipelineState;
+        return mPipelineState;
     }
 
 }

@@ -34,9 +34,9 @@ namespace d3d12 {
             void Tick(uint64_t lastCompletedSerial);
 
         private:
-            Device* device;
+            Device* mDevice;
 
-            SerialQueue<ComPtr<ID3D12Resource>> releasedResources;
+            SerialQueue<ComPtr<ID3D12Resource>> mReleasedResources;
     };
 
 }

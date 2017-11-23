@@ -21,23 +21,23 @@ namespace backend {
 namespace d3d12 {
 
     BindGroupLayout::BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder), device(device), descriptorCounts {}  {
+        : BindGroupLayoutBase(builder), mDevice(device), mDescriptorCounts {}  {
 
         const auto& groupInfo = GetBindingInfo();
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
             switch (groupInfo.types[binding]) {
                 case nxt::BindingType::UniformBuffer:
-                    bindingOffsets[binding] = descriptorCounts[CBV]++;
+                    mBindingOffsets[binding] = mDescriptorCounts[CBV]++;
                     break;
                 case nxt::BindingType::StorageBuffer:
-                    bindingOffsets[binding] = descriptorCounts[UAV]++;
+                    mBindingOffsets[binding] = mDescriptorCounts[UAV]++;
                     break;
                 case nxt::BindingType::SampledTexture:
-                    bindingOffsets[binding] = descriptorCounts[SRV]++;
+                    mBindingOffsets[binding] = mDescriptorCounts[SRV]++;
                     break;
                 case nxt::BindingType::Sampler:
-                    bindingOffsets[binding] = descriptorCounts[Sampler]++;
+                    mBindingOffsets[binding] = mDescriptorCounts[Sampler]++;
                     break;
             }
         }
@@ -47,7 +47,7 @@ namespace d3d12 {
                 return false;
             }
 
-            auto& range = ranges[index];
+            auto& range = mRanges[index];
             range.RangeType = type;
             range.NumDescriptors = count;
             range.RegisterSpace = 0;
@@ -60,72 +60,72 @@ namespace d3d12 {
 
         // Ranges 0-2 contain the CBV, UAV, and SRV ranges, if they exist, tightly packed
         // Range 3 contains the Sampler range, if there is one
-        if (SetDescriptorRange(rangeIndex, descriptorCounts[CBV], D3D12_DESCRIPTOR_RANGE_TYPE_CBV)) {
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[CBV], D3D12_DESCRIPTOR_RANGE_TYPE_CBV)) {
             rangeIndex++;
         }
-        if (SetDescriptorRange(rangeIndex, descriptorCounts[UAV], D3D12_DESCRIPTOR_RANGE_TYPE_UAV)) {
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[UAV], D3D12_DESCRIPTOR_RANGE_TYPE_UAV)) {
             rangeIndex++;
         }
-        if (SetDescriptorRange(rangeIndex, descriptorCounts[SRV], D3D12_DESCRIPTOR_RANGE_TYPE_SRV)) {
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[SRV], D3D12_DESCRIPTOR_RANGE_TYPE_SRV)) {
             rangeIndex++;
         }
-        SetDescriptorRange(Sampler, descriptorCounts[Sampler], D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
+        SetDescriptorRange(Sampler, mDescriptorCounts[Sampler], D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
 
         // descriptors ranges are offset by the offset + size of the previous range
         std::array<uint32_t, DescriptorType::Count> descriptorOffsets;
         descriptorOffsets[CBV] = 0;
-        descriptorOffsets[UAV] = descriptorOffsets[CBV] + descriptorCounts[CBV];
-        descriptorOffsets[SRV] = descriptorOffsets[UAV] + descriptorCounts[UAV];
+        descriptorOffsets[UAV] = descriptorOffsets[CBV] + mDescriptorCounts[CBV];
+        descriptorOffsets[SRV] = descriptorOffsets[UAV] + mDescriptorCounts[UAV];
         descriptorOffsets[Sampler] = 0; // samplers are in a different heap
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
             switch (groupInfo.types[binding]) {
                 case nxt::BindingType::UniformBuffer:
-                    bindingOffsets[binding] += descriptorOffsets[CBV];
+                    mBindingOffsets[binding] += descriptorOffsets[CBV];
                     break;
                 case nxt::BindingType::StorageBuffer:
-                    bindingOffsets[binding] += descriptorOffsets[UAV];
+                    mBindingOffsets[binding] += descriptorOffsets[UAV];
                     break;
                 case nxt::BindingType::SampledTexture:
-                    bindingOffsets[binding] += descriptorOffsets[SRV];
+                    mBindingOffsets[binding] += descriptorOffsets[SRV];
                     break;
                 case nxt::BindingType::Sampler:
-                    bindingOffsets[binding] += descriptorOffsets[Sampler];
+                    mBindingOffsets[binding] += descriptorOffsets[Sampler];
                     break;
             }
         }
     }
 
     const std::array<uint32_t, kMaxBindingsPerGroup>& BindGroupLayout::GetBindingOffsets() const {
-        return bindingOffsets;
+        return mBindingOffsets;
     }
 
     uint32_t BindGroupLayout::GetCbvUavSrvDescriptorTableSize() const {
         return (
-            static_cast<uint32_t>(descriptorCounts[CBV] > 0) +
-            static_cast<uint32_t>(descriptorCounts[UAV] > 0) +
-            static_cast<uint32_t>(descriptorCounts[SRV] > 0)
+            static_cast<uint32_t>(mDescriptorCounts[CBV] > 0) +
+            static_cast<uint32_t>(mDescriptorCounts[UAV] > 0) +
+            static_cast<uint32_t>(mDescriptorCounts[SRV] > 0)
         );
     }
 
     uint32_t BindGroupLayout::GetSamplerDescriptorTableSize() const {
-        return descriptorCounts[Sampler] > 0;
+        return mDescriptorCounts[Sampler] > 0;
     }
 
     uint32_t BindGroupLayout::GetCbvUavSrvDescriptorCount() const {
-        return descriptorCounts[CBV] + descriptorCounts[UAV] + descriptorCounts[SRV];
+        return mDescriptorCounts[CBV] + mDescriptorCounts[UAV] + mDescriptorCounts[SRV];
     }
 
     uint32_t BindGroupLayout::GetSamplerDescriptorCount() const {
-        return descriptorCounts[Sampler];
+        return mDescriptorCounts[Sampler];
     }
 
     const D3D12_DESCRIPTOR_RANGE* BindGroupLayout::GetCbvUavSrvDescriptorRanges() const {
-        return ranges;
+        return mRanges;
     }
 
     const D3D12_DESCRIPTOR_RANGE* BindGroupLayout::GetSamplerDescriptorRanges() const {
-        return &ranges[Sampler];
+        return &mRanges[Sampler];
     }
 
 }

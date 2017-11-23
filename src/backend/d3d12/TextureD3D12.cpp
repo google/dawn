@@ -93,7 +93,7 @@ namespace d3d12 {
     }
 
     Texture::Texture(TextureBuilder* builder)
-        : TextureBase(builder), device(ToBackend(builder->GetDevice())) {
+        : TextureBase(builder), mDevice(ToBackend(builder->GetDevice())) {
 
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12TextureDimension(GetDimension());
@@ -108,20 +108,20 @@ namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage(), GetFormat());
 
-        resource = device->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12TextureUsage(GetUsage(), GetFormat()));
-        resourcePtr = resource.Get();
+        mResource = mDevice->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12TextureUsage(GetUsage(), GetFormat()));
+        mResourcePtr = mResource.Get();
     }
 
     // With this constructor, the lifetime of the ID3D12Resource is externally managed.
     Texture::Texture(TextureBuilder* builder, ID3D12Resource* nativeTexture)
-        : TextureBase(builder), device(ToBackend(builder->GetDevice())),
-        resourcePtr(nativeTexture) {
+        : TextureBase(builder), mDevice(ToBackend(builder->GetDevice())),
+        mResourcePtr(nativeTexture) {
     }
 
     Texture::~Texture() {
-        if (resource) {
+        if (mResource) {
             // If we own the resource, release it.
-            device->GetResourceAllocator()->Release(resource);
+            mDevice->GetResourceAllocator()->Release(mResource);
         }
     }
 
@@ -130,7 +130,7 @@ namespace d3d12 {
     }
 
     ID3D12Resource* Texture::GetD3D12Resource() {
-        return resourcePtr;
+        return mResourcePtr;
     }
 
     bool Texture::GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier) {
@@ -143,7 +143,7 @@ namespace d3d12 {
 
         barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier->Transition.pResource = resourcePtr;
+        barrier->Transition.pResource = mResourcePtr;
         barrier->Transition.StateBefore = stateBefore;
         barrier->Transition.StateAfter = stateAfter;
         barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -154,28 +154,28 @@ namespace d3d12 {
     void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
         D3D12_RESOURCE_BARRIER barrier;
         if (GetResourceTransitionBarrier(currentUsage, targetUsage, &barrier)) {
-            device->GetPendingCommandList()->ResourceBarrier(1, &barrier);
+            mDevice->GetPendingCommandList()->ResourceBarrier(1, &barrier);
         }
     }
 
     TextureView::TextureView(TextureViewBuilder* builder)
         : TextureViewBase(builder) {
 
-        srvDesc.Format = D3D12TextureFormat(GetTexture()->GetFormat());
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        mSrvDesc.Format = D3D12TextureFormat(GetTexture()->GetFormat());
+        mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         switch (GetTexture()->GetDimension()) {
             case nxt::TextureDimension::e2D:
-                srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-                srvDesc.Texture2D.MostDetailedMip = 0;
-                srvDesc.Texture2D.MipLevels = GetTexture()->GetNumMipLevels();
-                srvDesc.Texture2D.PlaneSlice = 0;
-                srvDesc.Texture2D.ResourceMinLODClamp = 0;
+                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+                mSrvDesc.Texture2D.MostDetailedMip = 0;
+                mSrvDesc.Texture2D.MipLevels = GetTexture()->GetNumMipLevels();
+                mSrvDesc.Texture2D.PlaneSlice = 0;
+                mSrvDesc.Texture2D.ResourceMinLODClamp = 0;
                 break;
         }
     }
 
     const D3D12_SHADER_RESOURCE_VIEW_DESC& TextureView::GetSRVDescriptor() const {
-        return srvDesc;
+        return mSrvDesc;
     }
 
     D3D12_RENDER_TARGET_VIEW_DESC TextureView::GetRTVDescriptor() {

@@ -20,7 +20,7 @@ namespace backend {
 namespace d3d12 {
 
     ShaderModule::ShaderModule(Device* device, ShaderModuleBuilder* builder)
-        : ShaderModuleBase(builder), device(device) {
+        : ShaderModuleBase(builder), mDevice(device) {
         spirv_cross::CompilerHLSL compiler(builder->AcquireSpirv());
 
         spirv_cross::CompilerGLSL::Options options_glsl;
@@ -52,11 +52,11 @@ namespace d3d12 {
         RenumberBindings(resources.separate_images);    // t
         RenumberBindings(resources.separate_samplers);  // s
 
-        hlslSource = compiler.compile();
+        mHlslSource = compiler.compile();
     }
 
     const std::string& ShaderModule::GetHLSLSource() const {
-        return hlslSource;
+        return mHlslSource;
     }
 
 }

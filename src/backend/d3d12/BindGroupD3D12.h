@@ -36,12 +36,12 @@ namespace d3d12 {
             uint64_t GetHeapSerial() const;
 
         private:
-            Device* device;
-            uint32_t cbvUavSrvHeapOffset;
-            uint32_t samplerHeapOffset;
-            uint32_t cbvUavSrvCount = 0;
-            uint32_t samplerCount = 0;
-            uint64_t heapSerial = 0;
+            Device* mDevice;
+            uint32_t mCbvUavSrvHeapOffset;
+            uint32_t mSamplerHeapOffset;
+            uint32_t mCbvUavSrvCount = 0;
+            uint32_t mSamplerCount = 0;
+            uint64_t mHeapSerial = 0;
     };
 
 }

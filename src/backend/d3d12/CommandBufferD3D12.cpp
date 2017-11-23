@@ -61,8 +61,8 @@ namespace d3d12 {
             BindGroupStateTracker(Device* device) : device(device) {
             }
 
-            void SetInComputePass(bool inCompute) {
-                this->inCompute = inCompute;
+            void SetInComputePass(bool inCompute_) {
+                inCompute = inCompute_;
             }
 
             void TrackSetBindGroup(BindGroup* group, uint32_t index) {
@@ -205,16 +205,16 @@ namespace d3d12 {
     }
 
     CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), device(device), commands(builder->AcquireCommands()) {
+        : CommandBufferBase(builder), mDevice(device), mCommands(builder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {
-        FreeCommands(&commands);
+        FreeCommands(&mCommands);
     }
 
     void CommandBuffer::FillCommands(ComPtr<ID3D12GraphicsCommandList> commandList) {
-        BindGroupStateTracker bindingTracker(device);
-        AllocateAndSetDescriptorHeaps(device, &bindingTracker, &commands);
+        BindGroupStateTracker bindingTracker(mDevice);
+        AllocateAndSetDescriptorHeaps(mDevice, &bindingTracker, &mCommands);
         bindingTracker.Reset();
 
         ID3D12DescriptorHeap* descriptorHeaps[2] = { bindingTracker.cbvSrvUavGPUDescriptorHeap.Get(), bindingTracker.samplerGPUDescriptorHeap.Get() };
@@ -234,18 +234,18 @@ namespace d3d12 {
         Framebuffer* currentFramebuffer = nullptr;
         uint32_t currentSubpass = 0;
 
-        while(commands.NextCommandId(&type)) {
+        while(mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass:
                     {
-                        commands.NextCommand<BeginComputePassCmd>();
+                        mCommands.NextCommand<BeginComputePassCmd>();
                         bindingTracker.SetInComputePass(true);
                     }
                     break;
 
                 case Command::BeginRenderPass:
                     {
-                        BeginRenderPassCmd* beginRenderPassCmd = commands.NextCommand<BeginRenderPassCmd>();
+                        BeginRenderPassCmd* beginRenderPassCmd = mCommands.NextCommand<BeginRenderPassCmd>();
                         currentRenderPass = ToBackend(beginRenderPassCmd->renderPass.Get());
                         currentFramebuffer = ToBackend(beginRenderPassCmd->framebuffer.Get());
                         currentSubpass = 0;
@@ -261,7 +261,7 @@ namespace d3d12 {
 
                 case Command::BeginRenderSubpass:
                     {
-                        commands.NextCommand<BeginRenderSubpassCmd>();
+                        mCommands.NextCommand<BeginRenderSubpassCmd>();
                         const auto& subpass = currentRenderPass->GetSubpassInfo(currentSubpass);
 
                         Framebuffer::OMSetRenderTargetArgs args = currentFramebuffer->GetSubpassOMSetRenderTargetArgs(currentSubpass);
@@ -332,7 +332,7 @@ namespace d3d12 {
 
                 case Command::CopyBufferToBuffer:
                     {
-                        CopyBufferToBufferCmd* copy = commands.NextCommand<CopyBufferToBufferCmd>();
+                        CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
                         auto src = ToBackend(copy->source.buffer.Get())->GetD3D12Resource();
                         auto dst = ToBackend(copy->destination.buffer.Get())->GetD3D12Resource();
                         commandList->CopyBufferRegion(dst.Get(), copy->destination.offset, src.Get(), copy->source.offset, copy->size);
@@ -341,7 +341,7 @@ namespace d3d12 {
 
                 case Command::CopyBufferToTexture:
                     {
-                        CopyBufferToTextureCmd* copy = commands.NextCommand<CopyBufferToTextureCmd>();
+                        CopyBufferToTextureCmd* copy = mCommands.NextCommand<CopyBufferToTextureCmd>();
                         Buffer* buffer = ToBackend(copy->source.buffer.Get());
                         Texture* texture = ToBackend(copy->destination.texture.Get());
 
@@ -390,7 +390,7 @@ namespace d3d12 {
 
                 case Command::CopyTextureToBuffer:
                     {
-                        CopyTextureToBufferCmd* copy = commands.NextCommand<CopyTextureToBufferCmd>();
+                        CopyTextureToBufferCmd* copy = mCommands.NextCommand<CopyTextureToBufferCmd>();
                         Texture* texture = ToBackend(copy->source.texture.Get());
                         Buffer* buffer = ToBackend(copy->destination.buffer.Get());
 
@@ -439,14 +439,14 @@ namespace d3d12 {
 
                 case Command::Dispatch:
                     {
-                        DispatchCmd* dispatch = commands.NextCommand<DispatchCmd>();
+                        DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
                         commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
                     }
                     break;
 
                 case Command::DrawArrays:
                     {
-                        DrawArraysCmd* draw = commands.NextCommand<DrawArraysCmd>();
+                        DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
                         commandList->DrawInstanced(
                             draw->vertexCount,
                             draw->instanceCount,
@@ -458,7 +458,7 @@ namespace d3d12 {
 
                 case Command::DrawElements:
                     {
-                        DrawElementsCmd* draw = commands.NextCommand<DrawElementsCmd>();
+                        DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
 
                         commandList->DrawIndexedInstanced(
                             draw->indexCount,
@@ -472,27 +472,27 @@ namespace d3d12 {
 
                 case Command::EndComputePass:
                     {
-                        commands.NextCommand<EndComputePassCmd>();
+                        mCommands.NextCommand<EndComputePassCmd>();
                         bindingTracker.SetInComputePass(false);
                     }
                     break;
 
                 case Command::EndRenderPass:
                     {
-                        commands.NextCommand<EndRenderPassCmd>();
+                        mCommands.NextCommand<EndRenderPassCmd>();
                     }
                     break;
 
                 case Command::EndRenderSubpass:
                     {
-                        commands.NextCommand<EndRenderSubpassCmd>();
+                        mCommands.NextCommand<EndRenderSubpassCmd>();
                         currentSubpass += 1;
                     }
                     break;
 
                 case Command::SetComputePipeline:
                     {
-                        SetComputePipelineCmd* cmd = commands.NextCommand<SetComputePipelineCmd>();
+                        SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
                         ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
                         PipelineLayout* layout = ToBackend(pipeline->GetLayout());
 
@@ -507,7 +507,7 @@ namespace d3d12 {
 
                 case Command::SetRenderPipeline:
                     {
-                        SetRenderPipelineCmd* cmd = commands.NextCommand<SetRenderPipelineCmd>();
+                        SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
                         RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
                         PipelineLayout* layout = ToBackend(pipeline->GetLayout());
 
@@ -524,13 +524,13 @@ namespace d3d12 {
 
                 case Command::SetPushConstants:
                     {
-                        commands.NextCommand<SetPushConstantsCmd>();
+                        mCommands.NextCommand<SetPushConstantsCmd>();
                     }
                     break;
 
                 case Command::SetStencilReference:
                     {
-                        SetStencilReferenceCmd *cmd = commands.NextCommand<SetStencilReferenceCmd>();
+                        SetStencilReferenceCmd *cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
 
                         commandList->OMSetStencilRef(cmd->reference);
                     }
@@ -538,7 +538,7 @@ namespace d3d12 {
 
                 case Command::SetBlendColor:
                     {
-                        SetBlendColorCmd* cmd = commands.NextCommand<SetBlendColorCmd>();
+                        SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
                         ASSERT(lastRenderPipeline);
                         commandList->OMSetBlendFactor(static_cast<const FLOAT*>(&cmd->r));
                     }
@@ -546,7 +546,7 @@ namespace d3d12 {
 
                 case Command::SetBindGroup:
                     {
-                        SetBindGroupCmd* cmd = commands.NextCommand<SetBindGroupCmd>();
+                        SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                         BindGroup* group = ToBackend(cmd->group.Get());
                         bindingTracker.SetBindGroup(commandList, lastLayout, group, cmd->index);
                     }
@@ -554,7 +554,7 @@ namespace d3d12 {
 
                 case Command::SetIndexBuffer:
                     {
-                        SetIndexBufferCmd* cmd = commands.NextCommand<SetIndexBufferCmd>();
+                        SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
 
                         Buffer* buffer = ToBackend(cmd->buffer.Get());
                         D3D12_INDEX_BUFFER_VIEW bufferView;
@@ -571,9 +571,9 @@ namespace d3d12 {
 
                 case Command::SetVertexBuffers:
                     {
-                        SetVertexBuffersCmd* cmd = commands.NextCommand<SetVertexBuffersCmd>();
-                        auto buffers = commands.NextData<Ref<BufferBase>>(cmd->count);
-                        auto offsets = commands.NextData<uint32_t>(cmd->count);
+                        SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
+                        auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
+                        auto offsets = mCommands.NextData<uint32_t>(cmd->count);
 
                         auto inputState = ToBackend(lastRenderPipeline->GetInputState());
 
@@ -592,7 +592,7 @@ namespace d3d12 {
 
                 case Command::TransitionBufferUsage:
                     {
-                        TransitionBufferUsageCmd* cmd = commands.NextCommand<TransitionBufferUsageCmd>();
+                        TransitionBufferUsageCmd* cmd = mCommands.NextCommand<TransitionBufferUsageCmd>();
 
                         Buffer* buffer = ToBackend(cmd->buffer.Get());
 
@@ -607,7 +607,7 @@ namespace d3d12 {
 
                 case Command::TransitionTextureUsage:
                     {
-                        TransitionTextureUsageCmd* cmd = commands.NextCommand<TransitionTextureUsageCmd>();
+                        TransitionTextureUsageCmd* cmd = mCommands.NextCommand<TransitionTextureUsageCmd>();
 
                         Texture* texture = ToBackend(cmd->texture.Get());
 

@@ -37,9 +37,9 @@ namespace d3d12 {
             D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(uint32_t index) const;
 
         private:
-            ComPtr<ID3D12DescriptorHeap> descriptorHeap;
-            uint32_t sizeIncrement;
-            uint32_t offset;
+            ComPtr<ID3D12DescriptorHeap> mDescriptorHeap;
+            uint32_t mSizeIncrement;
+            uint32_t mOffset;
     };
 
     class DescriptorHeapAllocator {
@@ -65,12 +65,12 @@ namespace d3d12 {
             DescriptorHeapHandle Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count, uint32_t allocationSize, DescriptorHeapInfo* heapInfo, D3D12_DESCRIPTOR_HEAP_FLAGS flags);
             void Release(DescriptorHeapHandle handle);
 
-            Device* device;
+            Device* mDevice;
 
-            std::array<uint32_t, kDescriptorHeapTypes> sizeIncrements;
-            std::array<DescriptorHeapInfo, kDescriptorHeapTypes> cpuDescriptorHeapInfos;
-            std::array<DescriptorHeapInfo, kDescriptorHeapTypes> gpuDescriptorHeapInfos;
-            SerialQueue<DescriptorHeapHandle> releasedHandles;
+            std::array<uint32_t, kDescriptorHeapTypes> mSizeIncrements;
+            std::array<DescriptorHeapInfo, kDescriptorHeapTypes> mCpuDescriptorHeapInfos;
+            std::array<DescriptorHeapInfo, kDescriptorHeapTypes> mGpuDescriptorHeapInfos;
+            SerialQueue<DescriptorHeapHandle> mReleasedHandles;
     };
 
 }

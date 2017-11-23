@@ -25,22 +25,22 @@ namespace backend {
 namespace d3d12 {
 
     BindGroup::BindGroup(Device* device, BindGroupBuilder* builder)
-        : BindGroupBase(builder), device(device) {
+        : BindGroupBase(builder), mDevice(device) {
     }
 
     void BindGroup::RecordDescriptors(const DescriptorHeapHandle &cbvUavSrvHeapStart, uint32_t* cbvUavSrvHeapOffset, const DescriptorHeapHandle &samplerHeapStart, uint32_t* samplerHeapOffset, uint64_t serial) {
-        heapSerial = serial;
+        mHeapSerial = serial;
 
         const auto* bgl = ToBackend(GetLayout());
         const auto& layout = bgl->GetBindingInfo();
 
         // Save the offset to the start of the descriptor table in the heap
-        this->cbvUavSrvHeapOffset = *cbvUavSrvHeapOffset;
-        this->samplerHeapOffset = *samplerHeapOffset;
+        mCbvUavSrvHeapOffset = *cbvUavSrvHeapOffset;
+        mSamplerHeapOffset = *samplerHeapOffset;
 
         const auto& bindingOffsets = bgl->GetBindingOffsets();
 
-        auto d3d12Device = device->GetD3D12Device();
+        auto d3d12Device = mDevice->GetD3D12Device();
         for (uint32_t binding : IterateBitSet(layout.mask)) {
             switch (layout.types[binding]) {
                 case nxt::BindingType::UniformBuffer:
@@ -80,15 +80,15 @@ namespace d3d12 {
     }
 
     uint32_t BindGroup::GetCbvUavSrvHeapOffset() const {
-        return cbvUavSrvHeapOffset;
+        return mCbvUavSrvHeapOffset;
     }
 
     uint32_t BindGroup::GetSamplerHeapOffset() const {
-        return samplerHeapOffset;
+        return mSamplerHeapOffset;
     }
 
     uint64_t BindGroup::GetHeapSerial() const {
-        return heapSerial;
+        return mHeapSerial;
     }
 
 }
