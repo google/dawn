@@ -25,49 +25,49 @@ namespace backend {
     // Framebuffer
 
     FramebufferBase::FramebufferBase(FramebufferBuilder* builder)
-        : device(builder->device), renderPass(std::move(builder->renderPass)),
-        width(builder->width), height(builder->height), textureViews(std::move(builder->textureViews)),
-        clearColors(textureViews.size()), clearDepthStencils(textureViews.size()) {
+        : mDevice(builder->mDevice), mRenderPass(std::move(builder->mRenderPass)),
+        mWidth(builder->mWidth), mHeight(builder->mHeight), mTextureViews(std::move(builder->mTextureViews)),
+        mClearColors(mTextureViews.size()), mClearDepthStencils(mTextureViews.size()) {
     }
 
     DeviceBase* FramebufferBase::GetDevice() {
-        return device;
+        return mDevice;
     }
 
     RenderPassBase* FramebufferBase::GetRenderPass() {
-        return renderPass.Get();
+        return mRenderPass.Get();
     }
 
     TextureViewBase* FramebufferBase::GetTextureView(uint32_t attachmentSlot) {
-        ASSERT(attachmentSlot < textureViews.size());
-        return textureViews[attachmentSlot].Get();
+        ASSERT(attachmentSlot < mTextureViews.size());
+        return mTextureViews[attachmentSlot].Get();
     }
 
     FramebufferBase::ClearColor FramebufferBase::GetClearColor(uint32_t attachmentSlot) {
-        ASSERT(attachmentSlot < clearColors.size());
-        return clearColors[attachmentSlot];
+        ASSERT(attachmentSlot < mClearColors.size());
+        return mClearColors[attachmentSlot];
     }
 
     FramebufferBase::ClearDepthStencil FramebufferBase::GetClearDepthStencil(uint32_t attachmentSlot) {
-        ASSERT(attachmentSlot < clearDepthStencils.size());
-        return clearDepthStencils[attachmentSlot];
+        ASSERT(attachmentSlot < mClearDepthStencils.size());
+        return mClearDepthStencils[attachmentSlot];
     }
 
     uint32_t FramebufferBase::GetWidth() const {
-        return width;
+        return mWidth;
     }
 
     uint32_t FramebufferBase::GetHeight() const {
-        return height;
+        return mHeight;
     }
 
     void FramebufferBase::AttachmentSetClearColor(uint32_t attachmentSlot, float clearR, float clearG, float clearB, float clearA) {
-        if (attachmentSlot >= renderPass->GetAttachmentCount()) {
-            device->HandleError("Framebuffer attachment out of bounds");
+        if (attachmentSlot >= mRenderPass->GetAttachmentCount()) {
+            mDevice->HandleError("Framebuffer attachment out of bounds");
             return;
         }
-        ASSERT(attachmentSlot < clearColors.size());
-        auto& c = clearColors[attachmentSlot];
+        ASSERT(attachmentSlot < mClearColors.size());
+        auto& c = mClearColors[attachmentSlot];
         c.color[0] = clearR;
         c.color[1] = clearG;
         c.color[2] = clearB;
@@ -75,12 +75,12 @@ namespace backend {
     }
 
     void FramebufferBase::AttachmentSetClearDepthStencil(uint32_t attachmentSlot, float clearDepth, uint32_t clearStencil) {
-        if (attachmentSlot >= renderPass->GetAttachmentCount()) {
-            device->HandleError("Framebuffer attachment out of bounds");
+        if (attachmentSlot >= mRenderPass->GetAttachmentCount()) {
+            mDevice->HandleError("Framebuffer attachment out of bounds");
             return;
         }
-        ASSERT(attachmentSlot < clearDepthStencils.size());
-        auto& c = clearDepthStencils[attachmentSlot];
+        ASSERT(attachmentSlot < mClearDepthStencils.size());
+        auto& c = mClearDepthStencils[attachmentSlot];
         c.depth = clearDepth;
         c.stencil = clearStencil;
     }
@@ -98,30 +98,30 @@ namespace backend {
 
     FramebufferBase* FramebufferBuilder::GetResultImpl() {
         constexpr int requiredProperties = FRAMEBUFFER_PROPERTY_RENDER_PASS | FRAMEBUFFER_PROPERTY_DIMENSIONS;
-        if ((propertiesSet & requiredProperties) != requiredProperties) {
+        if ((mPropertiesSet & requiredProperties) != requiredProperties) {
             HandleError("Framebuffer missing properties");
             return nullptr;
         }
 
-        for (auto& textureView : textureViews) {
+        for (auto& textureView : mTextureViews) {
             if (!textureView) {
                 HandleError("Framebuffer attachment not set");
                 return nullptr;
             }
 
             // TODO(cwallez@chromium.org): Adjust for the mip-level once that is supported.
-            if (textureView->GetTexture()->GetWidth() != width ||
-                textureView->GetTexture()->GetHeight() != height) {
+            if (textureView->GetTexture()->GetWidth() != mWidth ||
+                textureView->GetTexture()->GetHeight() != mHeight) {
                 HandleError("Framebuffer size doesn't match attachment size");
                 return nullptr;
             }
         }
 
-        return device->CreateFramebuffer(this);
+        return mDevice->CreateFramebuffer(this);
     }
 
     void FramebufferBuilder::SetRenderPass(RenderPassBase* renderPass) {
-        if ((propertiesSet & FRAMEBUFFER_PROPERTY_RENDER_PASS) != 0) {
+        if ((mPropertiesSet & FRAMEBUFFER_PROPERTY_RENDER_PASS) != 0) {
             HandleError("Framebuffer render pass property set multiple times");
             return;
         }
@@ -131,36 +131,36 @@ namespace backend {
             return;
         }
 
-        this->renderPass = renderPass;
-        this->textureViews.resize(renderPass->GetAttachmentCount());
-        propertiesSet |= FRAMEBUFFER_PROPERTY_RENDER_PASS;
+        mRenderPass = renderPass;
+        mTextureViews.resize(renderPass->GetAttachmentCount());
+        mPropertiesSet |= FRAMEBUFFER_PROPERTY_RENDER_PASS;
     }
 
     void FramebufferBuilder::SetDimensions(uint32_t width, uint32_t height) {
-        if ((propertiesSet & FRAMEBUFFER_PROPERTY_DIMENSIONS) != 0) {
+        if ((mPropertiesSet & FRAMEBUFFER_PROPERTY_DIMENSIONS) != 0) {
             HandleError("Framebuffer dimensions property set multiple times");
             return;
         }
 
-        this->width = width;
-        this->height = height;
-        propertiesSet |= FRAMEBUFFER_PROPERTY_DIMENSIONS;
+        mWidth = width;
+        mHeight = height;
+        mPropertiesSet |= FRAMEBUFFER_PROPERTY_DIMENSIONS;
     }
 
     void FramebufferBuilder::SetAttachment(uint32_t attachmentSlot, TextureViewBase* textureView) {
-        if ((propertiesSet & FRAMEBUFFER_PROPERTY_RENDER_PASS) == 0) {
+        if ((mPropertiesSet & FRAMEBUFFER_PROPERTY_RENDER_PASS) == 0) {
             HandleError("Render pass must be set before framebuffer attachments");
             return;
         }
-        if (attachmentSlot >= textureViews.size()) {
+        if (attachmentSlot >= mTextureViews.size()) {
             HandleError("Attachment slot out of bounds");
             return;
         }
-        if (textureViews[attachmentSlot]) {
+        if (mTextureViews[attachmentSlot]) {
             HandleError("Framebuffer attachment[i] set multiple times");
             return;
         }
-        const auto& attachmentInfo = renderPass->GetAttachmentInfo(attachmentSlot);
+        const auto& attachmentInfo = mRenderPass->GetAttachmentInfo(attachmentSlot);
         const auto* texture = textureView->GetTexture();
         if (attachmentInfo.format != texture->GetFormat()) {
             HandleError("Texture format does not match attachment format");
@@ -168,6 +168,6 @@ namespace backend {
         }
         // TODO(kainino@chromium.org): also check attachment samples, etc.
 
-        textureViews[attachmentSlot] = textureView;
+        mTextureViews[attachmentSlot] = textureView;
     }
 }

@@ -77,18 +77,18 @@ namespace backend {
     // BindGroupLayoutBase
 
     BindGroupLayoutBase::BindGroupLayoutBase(BindGroupLayoutBuilder* builder, bool blueprint)
-        : device(builder->device), bindingInfo(builder->bindingInfo), blueprint(blueprint) {
+        : mDevice(builder->mDevice), mBindingInfo(builder->mBindingInfo), mIsBlueprint(blueprint) {
     }
 
     BindGroupLayoutBase::~BindGroupLayoutBase() {
         // Do not register the actual cached object if we are a blueprint
-        if (!blueprint) {
-            device->UncacheBindGroupLayout(this);
+        if (!mIsBlueprint) {
+            mDevice->UncacheBindGroupLayout(this);
         }
     }
 
     const BindGroupLayoutBase::LayoutBindingInfo& BindGroupLayoutBase::GetBindingInfo() const {
-        return bindingInfo;
+        return mBindingInfo;
     }
 
     // BindGroupLayoutBuilder
@@ -97,13 +97,13 @@ namespace backend {
     }
 
     const BindGroupLayoutBase::LayoutBindingInfo& BindGroupLayoutBuilder::GetBindingInfo() const {
-        return bindingInfo;
+        return mBindingInfo;
     }
 
     BindGroupLayoutBase* BindGroupLayoutBuilder::GetResultImpl() {
         BindGroupLayoutBase blueprint(this, true);
 
-        auto* result = device->GetOrCreateBindGroupLayout(&blueprint, this);
+        auto* result = mDevice->GetOrCreateBindGroupLayout(&blueprint, this);
         result->Reference();
         return result;
     }
@@ -114,16 +114,16 @@ namespace backend {
             return;
         }
         for (size_t i = start; i < start + count; i++) {
-            if (bindingInfo.mask[i]) {
+            if (mBindingInfo.mask[i]) {
                 HandleError("Setting already set binding type");
                 return;
             }
         }
 
         for (size_t i = start; i < start + count; i++) {
-            bindingInfo.mask.set(i);
-            bindingInfo.visibilities[i] = visibility;
-            bindingInfo.types[i] = bindingType;
+            mBindingInfo.mask.set(i);
+            mBindingInfo.visibilities[i] = visibility;
+            mBindingInfo.types[i] = bindingType;
         }
     }
 

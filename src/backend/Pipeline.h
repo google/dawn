@@ -51,9 +51,9 @@ namespace backend {
             PipelineLayoutBase* GetLayout();
 
         private:
-            nxt::ShaderStageBit stageMask;
-            Ref<PipelineLayoutBase> layout;
-            PerStage<PushConstantInfo> pushConstants;
+            nxt::ShaderStageBit mStageMask;
+            Ref<PipelineLayoutBase> mLayout;
+            PerStage<PushConstantInfo> mPushConstants;
     };
 
     class PipelineBuilder {
@@ -74,10 +74,10 @@ namespace backend {
         private:
             friend class PipelineBase;
 
-            BuilderBase* parentBuilder;
-            Ref<PipelineLayoutBase> layout;
-            nxt::ShaderStageBit stageMask;
-            PerStage<StageInfo> stages;
+            BuilderBase* mParentBuilder;
+            Ref<PipelineLayoutBase> mLayout;
+            nxt::ShaderStageBit mStageMask;
+            PerStage<StageInfo> mStages;
     };
 
 }

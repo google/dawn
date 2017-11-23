@@ -44,7 +44,7 @@ namespace backend {
         private:
             bool ValidateSubmitCommand(CommandBufferBase* command);
 
-            DeviceBase* device;
+            DeviceBase* mDevice;
     };
 
     class QueueBuilder : public Builder<QueueBase> {

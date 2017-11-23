@@ -26,37 +26,37 @@ namespace backend {
     // BindGroup
 
     BindGroupBase::BindGroupBase(BindGroupBuilder* builder)
-        : layout(std::move(builder->layout)), usage(builder->usage), bindings(std::move(builder->bindings)) {
+        : mLayout(std::move(builder->mLayout)), mUsage(builder->mUsage), mBindings(std::move(builder->mBindings)) {
     }
 
     const BindGroupLayoutBase* BindGroupBase::GetLayout() const {
-        return layout.Get();
+        return mLayout.Get();
     }
 
     nxt::BindGroupUsage BindGroupBase::GetUsage() const {
-        return usage;
+        return mUsage;
     }
 
     BufferViewBase* BindGroupBase::GetBindingAsBufferView(size_t binding) {
         ASSERT(binding < kMaxBindingsPerGroup);
-        ASSERT(layout->GetBindingInfo().mask[binding]);
-        ASSERT(layout->GetBindingInfo().types[binding] == nxt::BindingType::UniformBuffer ||
-              layout->GetBindingInfo().types[binding] == nxt::BindingType::StorageBuffer);
-        return reinterpret_cast<BufferViewBase*>(bindings[binding].Get());
+        ASSERT(mLayout->GetBindingInfo().mask[binding]);
+        ASSERT(mLayout->GetBindingInfo().types[binding] == nxt::BindingType::UniformBuffer ||
+              mLayout->GetBindingInfo().types[binding] == nxt::BindingType::StorageBuffer);
+        return reinterpret_cast<BufferViewBase*>(mBindings[binding].Get());
     }
 
     SamplerBase* BindGroupBase::GetBindingAsSampler(size_t binding) {
         ASSERT(binding < kMaxBindingsPerGroup);
-        ASSERT(layout->GetBindingInfo().mask[binding]);
-        ASSERT(layout->GetBindingInfo().types[binding] == nxt::BindingType::Sampler);
-        return reinterpret_cast<SamplerBase*>(bindings[binding].Get());
+        ASSERT(mLayout->GetBindingInfo().mask[binding]);
+        ASSERT(mLayout->GetBindingInfo().types[binding] == nxt::BindingType::Sampler);
+        return reinterpret_cast<SamplerBase*>(mBindings[binding].Get());
     }
 
     TextureViewBase* BindGroupBase::GetBindingAsTextureView(size_t binding) {
         ASSERT(binding < kMaxBindingsPerGroup);
-        ASSERT(layout->GetBindingInfo().mask[binding]);
-        ASSERT(layout->GetBindingInfo().types[binding] == nxt::BindingType::SampledTexture);
-        return reinterpret_cast<TextureViewBase*>(bindings[binding].Get());
+        ASSERT(mLayout->GetBindingInfo().mask[binding]);
+        ASSERT(mLayout->GetBindingInfo().types[binding] == nxt::BindingType::SampledTexture);
+        return reinterpret_cast<TextureViewBase*>(mBindings[binding].Get());
     }
 
     // BindGroupBuilder
@@ -71,37 +71,37 @@ namespace backend {
 
     BindGroupBase* BindGroupBuilder::GetResultImpl() {
         constexpr int allProperties = BINDGROUP_PROPERTY_USAGE | BINDGROUP_PROPERTY_LAYOUT;
-        if ((propertiesSet & allProperties) != allProperties) {
+        if ((mPropertiesSet & allProperties) != allProperties) {
             HandleError("Bindgroup missing properties");
             return nullptr;
         }
 
-        if (setMask != layout->GetBindingInfo().mask) {
+        if (mSetMask != mLayout->GetBindingInfo().mask) {
             HandleError("Bindgroup missing bindings");
             return nullptr;
         }
 
-        return device->CreateBindGroup(this);
+        return mDevice->CreateBindGroup(this);
     }
 
     void BindGroupBuilder::SetLayout(BindGroupLayoutBase* layout) {
-        if ((propertiesSet & BINDGROUP_PROPERTY_LAYOUT) != 0) {
+        if ((mPropertiesSet & BINDGROUP_PROPERTY_LAYOUT) != 0) {
             HandleError("Bindgroup layout property set multiple times");
             return;
         }
 
-        this->layout = layout;
-        propertiesSet |= BINDGROUP_PROPERTY_LAYOUT;
+        mLayout = layout;
+        mPropertiesSet |= BINDGROUP_PROPERTY_LAYOUT;
     }
 
     void BindGroupBuilder::SetUsage(nxt::BindGroupUsage usage) {
-        if ((propertiesSet & BINDGROUP_PROPERTY_USAGE) != 0) {
+        if ((mPropertiesSet & BINDGROUP_PROPERTY_USAGE) != 0) {
             HandleError("Bindgroup usage property set multiple times");
             return;
         }
 
-        this->usage = usage;
-        propertiesSet |= BINDGROUP_PROPERTY_USAGE;
+        mUsage = usage;
+        mPropertiesSet |= BINDGROUP_PROPERTY_USAGE;
     }
 
     void BindGroupBuilder::SetBufferViews(uint32_t start, uint32_t count, BufferViewBase* const * bufferViews) {
@@ -109,7 +109,7 @@ namespace backend {
             return;
         }
 
-        const auto& layoutInfo = layout->GetBindingInfo();
+        const auto& layoutInfo = mLayout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
             nxt::BufferUsageBit requiredBit = nxt::BufferUsageBit::None;
             switch (layoutInfo.types[i]) {
@@ -146,7 +146,7 @@ namespace backend {
             return;
         }
 
-        const auto& layoutInfo = layout->GetBindingInfo();
+        const auto& layoutInfo = mLayout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
             if (layoutInfo.types[i] != nxt::BindingType::Sampler) {
                 HandleError("Setting binding for a wrong layout binding type");
@@ -162,7 +162,7 @@ namespace backend {
             return;
         }
 
-        const auto& layoutInfo = layout->GetBindingInfo();
+        const auto& layoutInfo = mLayout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
             if (layoutInfo.types[i] != nxt::BindingType::SampledTexture) {
                 HandleError("Setting binding for a wrong layout binding type");
@@ -180,8 +180,8 @@ namespace backend {
 
     void BindGroupBuilder::SetBindingsBase(uint32_t start, uint32_t count, RefCounted* const * objects) {
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
-            setMask.set(i);
-            bindings[i] = objects[j];
+            mSetMask.set(i);
+            mBindings[i] = objects[j];
         }
     }
 
@@ -191,14 +191,14 @@ namespace backend {
             return false;
         }
 
-        if ((propertiesSet & BINDGROUP_PROPERTY_LAYOUT) == 0) {
+        if ((mPropertiesSet & BINDGROUP_PROPERTY_LAYOUT) == 0) {
             HandleError("Bindgroup layout must be set before views");
             return false;
         }
 
-        const auto& layoutInfo = layout->GetBindingInfo();
+        const auto& layoutInfo = mLayout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
-            if (setMask[i]) {
+            if (mSetMask[i]) {
                 HandleError("Setting already set binding");
                 return false;
             }

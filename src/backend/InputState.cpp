@@ -62,28 +62,28 @@ namespace backend {
     // InputStateBase
 
     InputStateBase::InputStateBase(InputStateBuilder* builder) {
-        attributesSetMask = builder->attributesSetMask;
-        attributeInfos = builder->attributeInfos;
-        inputsSetMask = builder->inputsSetMask;
-        inputInfos = builder->inputInfos;
+        mAttributesSetMask = builder->mAttributesSetMask;
+        mAttributeInfos = builder->mAttributeInfos;
+        mInputsSetMask = builder->mInputsSetMask;
+        mInputInfos = builder->mInputInfos;
     }
 
     const std::bitset<kMaxVertexAttributes>& InputStateBase::GetAttributesSetMask() const {
-        return attributesSetMask;
+        return mAttributesSetMask;
     }
 
     const InputStateBase::AttributeInfo& InputStateBase::GetAttribute(uint32_t location) const {
-        ASSERT(attributesSetMask[location]);
-        return attributeInfos[location];
+        ASSERT(mAttributesSetMask[location]);
+        return mAttributeInfos[location];
     }
 
     const std::bitset<kMaxVertexInputs>& InputStateBase::GetInputsSetMask() const {
-        return inputsSetMask;
+        return mInputsSetMask;
     }
 
     const InputStateBase::InputInfo& InputStateBase::GetInput(uint32_t slot) const {
-        ASSERT(inputsSetMask[slot]);
-        return inputInfos[slot];
+        ASSERT(mInputsSetMask[slot]);
+        return mInputInfos[slot];
     }
 
     // InputStateBuilder
@@ -93,14 +93,14 @@ namespace backend {
 
     InputStateBase* InputStateBuilder::GetResultImpl() {
         for (uint32_t location = 0; location < kMaxVertexAttributes; ++location) {
-            if (attributesSetMask[location] &&
-                    !inputsSetMask[attributeInfos[location].bindingSlot]) {
+            if (mAttributesSetMask[location] &&
+                    !mInputsSetMask[mAttributeInfos[location].bindingSlot]) {
                 HandleError("Attribute uses unset input");
                 return nullptr;
             }
         }
 
-        return device->CreateInputState(this);
+        return mDevice->CreateInputState(this);
     }
 
     void InputStateBuilder::SetAttribute(uint32_t shaderLocation,
@@ -113,13 +113,13 @@ namespace backend {
             HandleError("Binding slot out of bounds");
             return;
         }
-        if (attributesSetMask[shaderLocation]) {
+        if (mAttributesSetMask[shaderLocation]) {
             HandleError("Setting already set attribute");
             return;
         }
 
-        attributesSetMask.set(shaderLocation);
-        auto& info = attributeInfos[shaderLocation];
+        mAttributesSetMask.set(shaderLocation);
+        auto& info = mAttributeInfos[shaderLocation];
         info.bindingSlot = bindingSlot;
         info.format = format;
         info.offset = offset;
@@ -131,13 +131,13 @@ namespace backend {
             HandleError("Setting input out of bounds");
             return;
         }
-        if (inputsSetMask[bindingSlot]) {
+        if (mInputsSetMask[bindingSlot]) {
             HandleError("Setting already set input");
             return;
         }
 
-        inputsSetMask.set(bindingSlot);
-        auto& info = inputInfos[bindingSlot];
+        mInputsSetMask.set(bindingSlot);
+        auto& info = mInputInfos[bindingSlot];
         info.stride = stride;
         info.stepMode = stepMode;
     }

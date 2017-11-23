@@ -29,24 +29,24 @@ namespace backend {
     // TODO(cwallez@chromium.org): figure out a way to have more type safety for the iterator
 
     CommandIterator::CommandIterator()
-        : endOfBlock(EndOfBlock) {
+        : mEndOfBlock(EndOfBlock) {
         Reset();
     }
 
     CommandIterator::~CommandIterator() {
-        ASSERT(dataWasDestroyed);
+        ASSERT(mDataWasDestroyed);
 
         if (!IsEmpty()) {
-            for (auto& block : blocks) {
+            for (auto& block : mBlocks) {
                 free(block.block);
             }
         }
     }
 
     CommandIterator::CommandIterator(CommandIterator&& other)
-        : endOfBlock(EndOfBlock) {
+        : mEndOfBlock(EndOfBlock) {
         if (!other.IsEmpty()) {
-            blocks = std::move(other.blocks);
+            mBlocks = std::move(other.mBlocks);
             other.Reset();
         }
         other.DataWasDestroyed();
@@ -55,10 +55,10 @@ namespace backend {
 
     CommandIterator& CommandIterator::operator=(CommandIterator&& other) {
         if (!other.IsEmpty()) {
-            blocks = std::move(other.blocks);
+            mBlocks = std::move(other.mBlocks);
             other.Reset();
         } else {
-            blocks.clear();
+            mBlocks.clear();
         }
         other.DataWasDestroyed();
         Reset();
@@ -66,67 +66,67 @@ namespace backend {
     }
 
     CommandIterator::CommandIterator(CommandAllocator&& allocator)
-        : blocks(allocator.AcquireBlocks()), endOfBlock(EndOfBlock) {
+        : mBlocks(allocator.AcquireBlocks()), mEndOfBlock(EndOfBlock) {
         Reset();
     }
 
     CommandIterator& CommandIterator::operator=(CommandAllocator&& allocator) {
-        blocks = allocator.AcquireBlocks();
+        mBlocks = allocator.AcquireBlocks();
         Reset();
         return *this;
     }
 
     void CommandIterator::Reset() {
-        currentBlock = 0;
+        mCurrentBlock = 0;
 
-        if (blocks.empty()) {
+        if (mBlocks.empty()) {
             // This will case the first NextCommandId call to try to move to the next
             // block and stop the iteration immediately, without special casing the
             // initialization.
-            currentPtr = reinterpret_cast<uint8_t*>(&endOfBlock);
-            blocks.emplace_back();
-            blocks[0].size = sizeof(endOfBlock);
-            blocks[0].block = currentPtr;
+            mCurrentPtr = reinterpret_cast<uint8_t*>(&mEndOfBlock);
+            mBlocks.emplace_back();
+            mBlocks[0].size = sizeof(mEndOfBlock);
+            mBlocks[0].block = mCurrentPtr;
         } else {
-            currentPtr = AlignPtr(blocks[0].block, alignof(uint32_t));
+            mCurrentPtr = AlignPtr(mBlocks[0].block, alignof(uint32_t));
         }
     }
 
     void CommandIterator::DataWasDestroyed() {
-        dataWasDestroyed = true;
+        mDataWasDestroyed = true;
     }
 
     bool CommandIterator::IsEmpty() const {
-        return blocks[0].block == reinterpret_cast<const uint8_t*>(&endOfBlock);
+        return mBlocks[0].block == reinterpret_cast<const uint8_t*>(&mEndOfBlock);
     }
 
     bool CommandIterator::NextCommandId(uint32_t* commandId) {
-        uint8_t* idPtr = AlignPtr(currentPtr, alignof(uint32_t));
-        ASSERT(idPtr + sizeof(uint32_t) <= blocks[currentBlock].block + blocks[currentBlock].size);
+        uint8_t* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
+        ASSERT(idPtr + sizeof(uint32_t) <= mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
 
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
         if (id == EndOfBlock) {
-            currentBlock++;
-            if (currentBlock >= blocks.size()) {
+            mCurrentBlock++;
+            if (mCurrentBlock >= mBlocks.size()) {
                 Reset();
                 *commandId = EndOfBlock;
                 return false;
             }
-            currentPtr = AlignPtr(blocks[currentBlock].block, alignof(uint32_t));
+            mCurrentPtr = AlignPtr(mBlocks[mCurrentBlock].block, alignof(uint32_t));
             return NextCommandId(commandId);
         }
 
-        currentPtr = idPtr + sizeof(uint32_t);
+        mCurrentPtr = idPtr + sizeof(uint32_t);
         *commandId = id;
         return true;
     }
 
     void* CommandIterator::NextCommand(size_t commandSize, size_t commandAlignment) {
-        uint8_t* commandPtr = AlignPtr(currentPtr, commandAlignment);
-        ASSERT(commandPtr + sizeof(commandSize) <= blocks[currentBlock].block + blocks[currentBlock].size);
+        uint8_t* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
+        ASSERT(commandPtr + sizeof(commandSize) <= mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
 
-        currentPtr = commandPtr + commandSize;
+        mCurrentPtr = commandPtr + commandSize;
         return commandPtr;
     }
 
@@ -146,40 +146,40 @@ namespace backend {
     //  - Better block allocation, maybe have NXT API to say command buffer is going to have size close to another
 
     CommandAllocator::CommandAllocator()
-        : currentPtr(reinterpret_cast<uint8_t*>(&dummyEnum[0])), endPtr(reinterpret_cast<uint8_t*>(&dummyEnum[1])) {
+        : mCurrentPtr(reinterpret_cast<uint8_t*>(&mDummyEnum[0])), mEndPtr(reinterpret_cast<uint8_t*>(&mDummyEnum[1])) {
     }
 
     CommandAllocator::~CommandAllocator() {
-        ASSERT(blocks.empty());
+        ASSERT(mBlocks.empty());
     }
 
     CommandBlocks&& CommandAllocator::AcquireBlocks() {
-        ASSERT(currentPtr != nullptr && endPtr != nullptr);
-        ASSERT(IsPtrAligned(currentPtr, alignof(uint32_t)));
-        ASSERT(currentPtr + sizeof(uint32_t) <= endPtr);
-        *reinterpret_cast<uint32_t*>(currentPtr) = EndOfBlock;
+        ASSERT(mCurrentPtr != nullptr && mEndPtr != nullptr);
+        ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
+        ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr);
+        *reinterpret_cast<uint32_t*>(mCurrentPtr) = EndOfBlock;
 
-        currentPtr = nullptr;
-        endPtr = nullptr;
-        return std::move(blocks);
+        mCurrentPtr = nullptr;
+        mEndPtr = nullptr;
+        return std::move(mBlocks);
     }
 
     uint8_t* CommandAllocator::Allocate(uint32_t commandId, size_t commandSize, size_t commandAlignment) {
-        ASSERT(currentPtr != nullptr);
-        ASSERT(endPtr != nullptr);
+        ASSERT(mCurrentPtr != nullptr);
+        ASSERT(mEndPtr != nullptr);
         ASSERT(commandId != EndOfBlock);
 
         // It should always be possible to allocate one id, for EndOfBlock tagging,
-        ASSERT(IsPtrAligned(currentPtr, alignof(uint32_t)));
-        ASSERT(currentPtr + sizeof(uint32_t) <= endPtr);
-        uint32_t* idAlloc = reinterpret_cast<uint32_t*>(currentPtr);
+        ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
+        ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr);
+        uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
 
-        uint8_t* commandAlloc = AlignPtr(currentPtr + sizeof(uint32_t), commandAlignment);
+        uint8_t* commandAlloc = AlignPtr(mCurrentPtr + sizeof(uint32_t), commandAlignment);
         uint8_t* nextPtr = AlignPtr(commandAlloc + commandSize, alignof(uint32_t));
 
         // When there is not enough space, we signal the EndOfBlock, so that the iterator nows to
         // move to the next one. EndOfBlock on the last block means the end of the commands.
-        if (nextPtr + sizeof(uint32_t) > endPtr) {
+        if (nextPtr + sizeof(uint32_t) > mEndPtr) {
 
             // Even if we are not able to get another block, the list of commands will be well-formed
             // and iterable as this block will be that last one.
@@ -187,15 +187,15 @@ namespace backend {
 
             // Make sure we have space for current allocation, plus end of block and alignment padding
             // for the first id.
-            ASSERT(nextPtr > currentPtr);
-            if (!GetNewBlock(static_cast<size_t>(nextPtr - currentPtr) + sizeof(uint32_t) + alignof(uint32_t))) {
+            ASSERT(nextPtr > mCurrentPtr);
+            if (!GetNewBlock(static_cast<size_t>(nextPtr - mCurrentPtr) + sizeof(uint32_t) + alignof(uint32_t))) {
                 return nullptr;
             }
             return Allocate(commandId, commandSize, commandAlignment);
         }
 
         *idAlloc = commandId;
-        currentPtr = nextPtr;
+        mCurrentPtr = nextPtr;
         return commandAlloc;
     }
 
@@ -205,16 +205,16 @@ namespace backend {
 
     bool CommandAllocator::GetNewBlock(size_t minimumSize) {
         // Allocate blocks doubling sizes each time, to a maximum of 16k (or at least minimumSize).
-        lastAllocationSize = std::max(minimumSize, std::min(lastAllocationSize * 2, size_t(16384)));
+        mLastAllocationSize = std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
 
-        uint8_t* block = reinterpret_cast<uint8_t*>(malloc(lastAllocationSize));
+        uint8_t* block = reinterpret_cast<uint8_t*>(malloc(mLastAllocationSize));
         if (block == nullptr) {
             return false;
         }
 
-        blocks.push_back({lastAllocationSize, block});
-        currentPtr = AlignPtr(block, alignof(uint32_t));
-        endPtr = block + lastAllocationSize;
+        mBlocks.push_back({mLastAllocationSize, block});
+        mCurrentPtr = AlignPtr(block, alignof(uint32_t));
+        mEndPtr = block + mLastAllocationSize;
         return true;
     }
 

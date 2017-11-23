@@ -60,20 +60,20 @@ namespace backend {
             BuilderBase(DeviceBase* device);
             ~BuilderBase();
 
-            DeviceBase* const device;
-            bool gotStatus = false;
+            DeviceBase* const mDevice;
+            bool mGotStatus = false;
 
         private:
             void SetStatus(nxt::BuilderErrorStatus status, const char* message);
 
-            nxt::BuilderErrorCallback callback = nullptr;
-            nxt::CallbackUserdata userdata1 = 0;
-            nxt::CallbackUserdata userdata2 = 0;
+            nxt::BuilderErrorCallback mCallback = nullptr;
+            nxt::CallbackUserdata mUserdata1 = 0;
+            nxt::CallbackUserdata mUserdata2 = 0;
 
-            nxt::BuilderErrorStatus storedStatus = nxt::BuilderErrorStatus::Success;
-            std::string storedMessage;
+            nxt::BuilderErrorStatus mStoredStatus = nxt::BuilderErrorStatus::Success;
+            std::string mStoredMessage;
 
-            bool consumed = false;
+            bool mIsConsumed = false;
     };
 
     // This builder base class is used to capture the calls to GetResult and make sure

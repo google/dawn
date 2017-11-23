@@ -21,26 +21,26 @@ namespace backend {
     // DepthStencilStateBase
 
     DepthStencilStateBase::DepthStencilStateBase(DepthStencilStateBuilder* builder)
-        : depthInfo(builder->depthInfo), stencilInfo(builder->stencilInfo) {
+        : mDepthInfo(builder->mDepthInfo), mStencilInfo(builder->mStencilInfo) {
     }
 
     bool DepthStencilStateBase::StencilTestEnabled() const {
-        return stencilInfo.back.compareFunction != nxt::CompareFunction::Always ||
-            stencilInfo.back.stencilFail != nxt::StencilOperation::Keep ||
-            stencilInfo.back.depthFail != nxt::StencilOperation::Keep ||
-            stencilInfo.back.depthStencilPass != nxt::StencilOperation::Keep ||
-            stencilInfo.front.compareFunction != nxt::CompareFunction::Always ||
-            stencilInfo.front.stencilFail != nxt::StencilOperation::Keep ||
-            stencilInfo.front.depthFail != nxt::StencilOperation::Keep ||
-            stencilInfo.front.depthStencilPass != nxt::StencilOperation::Keep;
+        return mStencilInfo.back.compareFunction != nxt::CompareFunction::Always ||
+            mStencilInfo.back.stencilFail != nxt::StencilOperation::Keep ||
+            mStencilInfo.back.depthFail != nxt::StencilOperation::Keep ||
+            mStencilInfo.back.depthStencilPass != nxt::StencilOperation::Keep ||
+            mStencilInfo.front.compareFunction != nxt::CompareFunction::Always ||
+            mStencilInfo.front.stencilFail != nxt::StencilOperation::Keep ||
+            mStencilInfo.front.depthFail != nxt::StencilOperation::Keep ||
+            mStencilInfo.front.depthStencilPass != nxt::StencilOperation::Keep;
     }
 
     const DepthStencilStateBase::DepthInfo& DepthStencilStateBase::GetDepth() const {
-        return depthInfo;
+        return mDepthInfo;
     }
 
     const DepthStencilStateBase::StencilInfo& DepthStencilStateBase::GetStencil() const {
-        return stencilInfo;
+        return mStencilInfo;
     }
 
     // DepthStencilStateBuilder
@@ -57,29 +57,29 @@ namespace backend {
     }
 
     DepthStencilStateBase* DepthStencilStateBuilder::GetResultImpl() {
-        return device->CreateDepthStencilState(this);
+        return mDevice->CreateDepthStencilState(this);
     }
 
     void DepthStencilStateBuilder::SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction) {
-        if ((propertiesSet & DEPTH_STENCIL_STATE_PROPERTY_DEPTH_COMPARE_FUNCTION) != 0) {
+        if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_DEPTH_COMPARE_FUNCTION) != 0) {
             HandleError("Depth compare property set multiple times");
             return;
         }
 
-        propertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_DEPTH_COMPARE_FUNCTION;
+        mPropertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_DEPTH_COMPARE_FUNCTION;
 
-        depthInfo.compareFunction = depthCompareFunction;
+        mDepthInfo.compareFunction = depthCompareFunction;
     }
 
     void DepthStencilStateBuilder::SetDepthWriteEnabled(bool enabled) {
-        if ((propertiesSet & DEPTH_STENCIL_STATE_PROPERTY_DEPTH_WRITE_ENABLED) != 0) {
+        if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_DEPTH_WRITE_ENABLED) != 0) {
             HandleError("Depth write enabled property set multiple times");
             return;
         }
 
-        propertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_DEPTH_WRITE_ENABLED;
+        mPropertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_DEPTH_WRITE_ENABLED;
 
-        depthInfo.depthWriteEnabled = enabled;
+        mDepthInfo.depthWriteEnabled = enabled;
     }
 
     void DepthStencilStateBuilder::SetStencilFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction,
@@ -90,42 +90,42 @@ namespace backend {
         }
 
         if (face & nxt::Face::Back) {
-            if ((propertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_BACK_FUNCTION) != 0) {
+            if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_BACK_FUNCTION) != 0) {
                 HandleError("Stencil back function property set multiple times");
                 return;
             }
 
-            propertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_STENCIL_BACK_FUNCTION;
+            mPropertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_STENCIL_BACK_FUNCTION;
 
-            stencilInfo.back.compareFunction = stencilCompareFunction;
-            stencilInfo.back.stencilFail = stencilFail;
-            stencilInfo.back.depthFail = depthFail;
-            stencilInfo.back.depthStencilPass = depthStencilPass;
+            mStencilInfo.back.compareFunction = stencilCompareFunction;
+            mStencilInfo.back.stencilFail = stencilFail;
+            mStencilInfo.back.depthFail = depthFail;
+            mStencilInfo.back.depthStencilPass = depthStencilPass;
         }
         if (face & nxt::Face::Front) {
-            if ((propertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_FRONT_FUNCTION) != 0) {
+            if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_FRONT_FUNCTION) != 0) {
                 HandleError("Stencil front function property set multiple times");
                 return;
             }
 
-            propertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_STENCIL_FRONT_FUNCTION;
+            mPropertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_STENCIL_FRONT_FUNCTION;
 
-            stencilInfo.front.compareFunction = stencilCompareFunction;
-            stencilInfo.front.stencilFail = stencilFail;
-            stencilInfo.front.depthFail = depthFail;
-            stencilInfo.front.depthStencilPass = depthStencilPass;
+            mStencilInfo.front.compareFunction = stencilCompareFunction;
+            mStencilInfo.front.stencilFail = stencilFail;
+            mStencilInfo.front.depthFail = depthFail;
+            mStencilInfo.front.depthStencilPass = depthStencilPass;
         }
     }
 
     void DepthStencilStateBuilder::SetStencilMask(uint32_t readMask, uint32_t writeMask) {
-         if ((propertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_MASK) != 0) {
+         if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_MASK) != 0) {
             HandleError("Stencilmask property set multiple times");
             return;
         }
 
-        propertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_STENCIL_MASK;
-        stencilInfo.readMask = readMask;
-        stencilInfo.writeMask = writeMask;
+        mPropertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_STENCIL_MASK;
+        mStencilInfo.readMask = readMask;
+        mStencilInfo.writeMask = writeMask;
     }
 
 }

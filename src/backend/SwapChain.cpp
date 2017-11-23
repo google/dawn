@@ -22,7 +22,7 @@ namespace backend {
     // SwapChain
 
     SwapChainBase::SwapChainBase(SwapChainBuilder* builder)
-            : device(builder->device), implementation(builder->implementation) {
+            : mDevice(builder->mDevice), mImplementation(builder->mImplementation) {
     }
 
     SwapChainBase::~SwapChainBase() {
@@ -31,58 +31,58 @@ namespace backend {
     }
 
     DeviceBase* SwapChainBase::GetDevice() {
-        return device;
+        return mDevice;
     }
 
     void SwapChainBase::Configure(nxt::TextureFormat format, nxt::TextureUsageBit allowedUsage, uint32_t width, uint32_t height) {
         if (width == 0 || height == 0) {
-            device->HandleError("Swap chain cannot be configured to zero size");
+            mDevice->HandleError("Swap chain cannot be configured to zero size");
             return;
         }
         allowedUsage |= nxt::TextureUsageBit::Present;
 
-        this->format = format;
-        this->allowedUsage = allowedUsage;
-        this->width = width;
-        this->height = height;
-        implementation.Configure(implementation.userData,
+        mFormat = format;
+        mAllowedUsage = allowedUsage;
+        mWidth = width;
+        mHeight = height;
+        mImplementation.Configure(mImplementation.userData,
                 static_cast<nxtTextureFormat>(format), static_cast<nxtTextureUsageBit>(allowedUsage), width, height);
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {
-        if (width == 0) {
+        if (mWidth == 0) {
             // If width is 0, it implies swap chain has never been configured
-            device->HandleError("Swap chain needs to be configured before GetNextTexture");
+            mDevice->HandleError("Swap chain needs to be configured before GetNextTexture");
             return nullptr;
         }
 
-        auto* builder = device->CreateTextureBuilder();
+        auto* builder = mDevice->CreateTextureBuilder();
         builder->SetDimension(nxt::TextureDimension::e2D);
-        builder->SetExtent(width, height, 1);
-        builder->SetFormat(format);
+        builder->SetExtent(mWidth, mHeight, 1);
+        builder->SetFormat(mFormat);
         builder->SetMipLevels(1);
-        builder->SetAllowedUsage(allowedUsage);
+        builder->SetAllowedUsage(mAllowedUsage);
 
         auto* texture = GetNextTextureImpl(builder);
-        lastNextTexture = texture;
+        mLastNextTexture = texture;
         return texture;
     }
 
     void SwapChainBase::Present(TextureBase* texture) {
-        if (texture != lastNextTexture) {
-            device->HandleError("Tried to present something other than the last NextTexture");
+        if (texture != mLastNextTexture) {
+            mDevice->HandleError("Tried to present something other than the last NextTexture");
             return;
         }
         if (texture->GetUsage() != nxt::TextureUsageBit::Present) {
-            device->HandleError("Texture has not been transitioned to the Present usage");
+            mDevice->HandleError("Texture has not been transitioned to the Present usage");
             return;
         }
 
-        implementation.Present(implementation.userData);
+        mImplementation.Present(mImplementation.userData);
     }
 
     const nxtSwapChainImplementation& SwapChainBase::GetImplementation() {
-        return implementation;
+        return mImplementation;
     }
 
     // SwapChain Builder
@@ -92,11 +92,11 @@ namespace backend {
     }
 
     SwapChainBase* SwapChainBuilder::GetResultImpl() {
-        if (!implementation.Init) {
+        if (!mImplementation.Init) {
             HandleError("Implementation not set");
             return nullptr;
         }
-        return device->CreateSwapChain(this);
+        return mDevice->CreateSwapChain(this);
     }
 
     void SwapChainBuilder::SetImplementation(uint64_t implementation) {
@@ -113,6 +113,6 @@ namespace backend {
             return;
         }
 
-        this->implementation = impl;
+        mImplementation = impl;
     }
 }

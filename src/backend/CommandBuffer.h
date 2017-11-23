@@ -46,9 +46,9 @@ namespace backend {
             DeviceBase* GetDevice();
 
         private:
-            DeviceBase* device;
-            std::set<BufferBase*> buffersTransitioned;
-            std::set<TextureBase*> texturesTransitioned;
+            DeviceBase* mDevice;
+            std::set<BufferBase*> mBuffersTransitioned;
+            std::set<TextureBase*> mTexturesTransitioned;
     };
 
     class CommandBufferBuilder : public Builder<CommandBufferBase> {
@@ -101,11 +101,11 @@ namespace backend {
             CommandBufferBase* GetResultImpl() override;
             void MoveToIterator();
 
-            std::unique_ptr<CommandBufferStateTracker> state;
-            CommandAllocator allocator;
-            CommandIterator iterator;
-            bool movedToIterator = false;
-            bool commandsAcquired = false;
+            std::unique_ptr<CommandBufferStateTracker> mState;
+            CommandAllocator mAllocator;
+            CommandIterator mIterator;
+            bool mWasMovedToIterator = false;
+            bool mWereCommandsAcquired = false;
     };
 
 }

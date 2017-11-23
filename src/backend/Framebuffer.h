@@ -52,13 +52,13 @@ namespace backend {
             void AttachmentSetClearDepthStencil(uint32_t attachmentSlot, float clearDepth, uint32_t clearStencil);
 
         private:
-            DeviceBase* device;
-            Ref<RenderPassBase> renderPass;
-            uint32_t width = 0;
-            uint32_t height = 0;
-            std::vector<Ref<TextureViewBase>> textureViews;
-            std::vector<ClearColor> clearColors;
-            std::vector<ClearDepthStencil> clearDepthStencils;
+            DeviceBase* mDevice;
+            Ref<RenderPassBase> mRenderPass;
+            uint32_t mWidth = 0;
+            uint32_t mHeight = 0;
+            std::vector<Ref<TextureViewBase>> mTextureViews;
+            std::vector<ClearColor> mClearColors;
+            std::vector<ClearDepthStencil> mClearDepthStencils;
     };
 
     class FramebufferBuilder : public Builder<FramebufferBase> {
@@ -74,11 +74,11 @@ namespace backend {
         private:
             friend class FramebufferBase;
 
-            Ref<RenderPassBase> renderPass;
-            uint32_t width = 0;
-            uint32_t height = 0;
-            std::vector<Ref<TextureViewBase>> textureViews;
-            int propertiesSet = 0;
+            Ref<RenderPassBase> mRenderPass;
+            uint32_t mWidth = 0;
+            uint32_t mHeight = 0;
+            std::vector<Ref<TextureViewBase>> mTextureViews;
+            int mPropertiesSet = 0;
     };
 
 }

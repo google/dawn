@@ -75,50 +75,50 @@ namespace backend {
     // TextureBase
 
     TextureBase::TextureBase(TextureBuilder* builder)
-        : device(builder->device), dimension(builder->dimension), format(builder->format), width(builder->width),
-        height(builder->height), depth(builder->depth), numMipLevels(builder->numMipLevels),
-        allowedUsage(builder->allowedUsage), currentUsage(builder->currentUsage) {
+        : mDevice(builder->mDevice), mDimension(builder->mDimension), mFormat(builder->mFormat), mWidth(builder->mWidth),
+        mHeight(builder->mHeight), mDepth(builder->mDepth), mNumMipLevels(builder->mNumMipLevels),
+        mAllowedUsage(builder->mAllowedUsage), mCurrentUsage(builder->mCurrentUsage) {
     }
 
     DeviceBase* TextureBase::GetDevice() {
-        return device;
+        return mDevice;
     }
 
     nxt::TextureDimension TextureBase::GetDimension() const {
-        return dimension;
+        return mDimension;
     }
     nxt::TextureFormat TextureBase::GetFormat() const {
-        return format;
+        return mFormat;
     }
     uint32_t TextureBase::GetWidth() const {
-        return width;
+        return mWidth;
     }
     uint32_t TextureBase::GetHeight() const {
-        return height;
+        return mHeight;
     }
     uint32_t TextureBase::GetDepth() const {
-        return depth;
+        return mDepth;
     }
     uint32_t TextureBase::GetNumMipLevels() const {
-        return numMipLevels;
+        return mNumMipLevels;
     }
     nxt::TextureUsageBit TextureBase::GetAllowedUsage() const {
-        return allowedUsage;
+        return mAllowedUsage;
     }
     nxt::TextureUsageBit TextureBase::GetUsage() const {
-        return currentUsage;
+        return mCurrentUsage;
     }
 
     TextureViewBuilder* TextureBase::CreateTextureViewBuilder() {
-        return new TextureViewBuilder(device, this);
+        return new TextureViewBuilder(mDevice, this);
     }
 
     bool TextureBase::IsFrozen() const {
-        return frozen;
+        return mIsFrozen;
     }
 
     bool TextureBase::HasFrozenUsage(nxt::TextureUsageBit usage) const {
-        return frozen && (usage & allowedUsage);
+        return mIsFrozen && (usage & mAllowedUsage);
     }
 
     bool TextureBase::IsUsagePossible(nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit usage) {
@@ -128,38 +128,38 @@ namespace backend {
     }
 
     bool TextureBase::IsTransitionPossible(nxt::TextureUsageBit usage) const {
-        if (frozen) {
+        if (mIsFrozen) {
             return false;
         }
-        if (currentUsage == nxt::TextureUsageBit::Present) {
+        if (mCurrentUsage == nxt::TextureUsageBit::Present) {
             return false;
         }
-        return IsUsagePossible(allowedUsage, usage);
+        return IsUsagePossible(mAllowedUsage, usage);
     }
 
     void TextureBase::UpdateUsageInternal(nxt::TextureUsageBit usage) {
         ASSERT(IsTransitionPossible(usage));
-        currentUsage = usage;
+        mCurrentUsage = usage;
     }
 
     void TextureBase::TransitionUsage(nxt::TextureUsageBit usage) {
         if (!IsTransitionPossible(usage)) {
-            device->HandleError("Texture frozen or usage not allowed");
+            mDevice->HandleError("Texture frozen or usage not allowed");
             return;
         }
-        TransitionUsageImpl(currentUsage, usage);
+        TransitionUsageImpl(mCurrentUsage, usage);
         UpdateUsageInternal(usage);
     }
 
     void TextureBase::FreezeUsage(nxt::TextureUsageBit usage) {
         if (!IsTransitionPossible(usage)) {
-            device->HandleError("Texture frozen or usage not allowed");
+            mDevice->HandleError("Texture frozen or usage not allowed");
             return;
         }
-        allowedUsage = usage;
-        TransitionUsageImpl(currentUsage, usage);
+        mAllowedUsage = usage;
+        TransitionUsageImpl(mCurrentUsage, usage);
         UpdateUsageInternal(usage);
-        frozen = true;
+        mIsFrozen = true;
     }
 
     // TextureBuilder
@@ -180,33 +180,33 @@ namespace backend {
     TextureBase* TextureBuilder::GetResultImpl() {
         constexpr int allProperties = TEXTURE_PROPERTY_DIMENSION | TEXTURE_PROPERTY_EXTENT |
             TEXTURE_PROPERTY_FORMAT | TEXTURE_PROPERTY_MIP_LEVELS | TEXTURE_PROPERTY_ALLOWED_USAGE;
-        if ((propertiesSet & allProperties) != allProperties) {
+        if ((mPropertiesSet & allProperties) != allProperties) {
             HandleError("Texture missing properties");
             return nullptr;
         }
 
-        if (!TextureBase::IsUsagePossible(allowedUsage, currentUsage)) {
+        if (!TextureBase::IsUsagePossible(mAllowedUsage, mCurrentUsage)) {
             HandleError("Initial texture usage is not allowed");
             return nullptr;
         }
 
         // TODO(cwallez@chromium.org): check stuff based on the dimension
 
-        return device->CreateTexture(this);
+        return mDevice->CreateTexture(this);
     }
 
     void TextureBuilder::SetDimension(nxt::TextureDimension dimension) {
-        if ((propertiesSet & TEXTURE_PROPERTY_DIMENSION) != 0) {
+        if ((mPropertiesSet & TEXTURE_PROPERTY_DIMENSION) != 0) {
             HandleError("Texture dimension property set multiple times");
             return;
         }
 
-        propertiesSet |= TEXTURE_PROPERTY_DIMENSION;
-        this->dimension = dimension;
+        mPropertiesSet |= TEXTURE_PROPERTY_DIMENSION;
+        mDimension = dimension;
     }
 
     void TextureBuilder::SetExtent(uint32_t width, uint32_t height, uint32_t depth) {
-        if ((propertiesSet & TEXTURE_PROPERTY_EXTENT) != 0) {
+        if ((mPropertiesSet & TEXTURE_PROPERTY_EXTENT) != 0) {
             HandleError("Texture extent property set multiple times");
             return;
         }
@@ -216,70 +216,70 @@ namespace backend {
             return;
         }
 
-        propertiesSet |= TEXTURE_PROPERTY_EXTENT;
-        this->width = width;
-        this->height = height;
-        this->depth = depth;
+        mPropertiesSet |= TEXTURE_PROPERTY_EXTENT;
+        mWidth = width;
+        mHeight = height;
+        mDepth = depth;
     }
 
     void TextureBuilder::SetFormat(nxt::TextureFormat format) {
-        if ((propertiesSet & TEXTURE_PROPERTY_FORMAT) != 0) {
+        if ((mPropertiesSet & TEXTURE_PROPERTY_FORMAT) != 0) {
             HandleError("Texture format property set multiple times");
             return;
         }
 
-        propertiesSet |= TEXTURE_PROPERTY_FORMAT;
-        this->format = format;
+        mPropertiesSet |= TEXTURE_PROPERTY_FORMAT;
+        mFormat = format;
     }
 
     void TextureBuilder::SetMipLevels(uint32_t numMipLevels) {
-        if ((propertiesSet & TEXTURE_PROPERTY_MIP_LEVELS) != 0) {
+        if ((mPropertiesSet & TEXTURE_PROPERTY_MIP_LEVELS) != 0) {
             HandleError("Texture mip levels property set multiple times");
             return;
         }
 
-        propertiesSet |= TEXTURE_PROPERTY_MIP_LEVELS;
-        this->numMipLevels = numMipLevels;
+        mPropertiesSet |= TEXTURE_PROPERTY_MIP_LEVELS;
+        mNumMipLevels = numMipLevels;
     }
 
     void TextureBuilder::SetAllowedUsage(nxt::TextureUsageBit usage) {
-        if ((propertiesSet & TEXTURE_PROPERTY_ALLOWED_USAGE) != 0) {
+        if ((mPropertiesSet & TEXTURE_PROPERTY_ALLOWED_USAGE) != 0) {
             HandleError("Texture allowed usage property set multiple times");
             return;
         }
 
-        propertiesSet |= TEXTURE_PROPERTY_ALLOWED_USAGE;
-        this->allowedUsage = usage;
+        mPropertiesSet |= TEXTURE_PROPERTY_ALLOWED_USAGE;
+        mAllowedUsage = usage;
     }
 
     void TextureBuilder::SetInitialUsage(nxt::TextureUsageBit usage) {
-        if ((propertiesSet & TEXTURE_PROPERTY_INITIAL_USAGE) != 0) {
+        if ((mPropertiesSet & TEXTURE_PROPERTY_INITIAL_USAGE) != 0) {
             HandleError("Texture initial usage property set multiple times");
             return;
         }
 
-        propertiesSet |= TEXTURE_PROPERTY_INITIAL_USAGE;
-        this->currentUsage = usage;
+        mPropertiesSet |= TEXTURE_PROPERTY_INITIAL_USAGE;
+        mCurrentUsage = usage;
     }
 
     // TextureViewBase
 
     TextureViewBase::TextureViewBase(TextureViewBuilder* builder)
-        : texture(builder->texture) {
+        : mTexture(builder->mTexture) {
     }
 
     TextureBase* TextureViewBase::GetTexture() {
-        return texture.Get();
+        return mTexture.Get();
     }
 
     // TextureViewBuilder
 
     TextureViewBuilder::TextureViewBuilder(DeviceBase* device, TextureBase* texture)
-        : Builder(device), texture(texture) {
+        : Builder(device), mTexture(texture) {
     }
 
     TextureViewBase* TextureViewBuilder::GetResultImpl() {
-        return device->CreateTextureView(this);
+        return mDevice->CreateTextureView(this);
     }
 
 }

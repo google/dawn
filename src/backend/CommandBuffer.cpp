@@ -110,21 +110,21 @@ namespace backend {
     }
 
     CommandBufferBase::CommandBufferBase(CommandBufferBuilder* builder)
-        : device(builder->device),
-          buffersTransitioned(std::move(builder->state->buffersTransitioned)),
-          texturesTransitioned(std::move(builder->state->texturesTransitioned)) {
+        : mDevice(builder->mDevice),
+          mBuffersTransitioned(std::move(builder->mState->mBuffersTransitioned)),
+          mTexturesTransitioned(std::move(builder->mState->mTexturesTransitioned)) {
     }
 
     bool CommandBufferBase::ValidateResourceUsagesImmediate() {
-        for (auto buffer : buffersTransitioned) {
+        for (auto buffer : mBuffersTransitioned) {
             if (buffer->IsFrozen()) {
-                device->HandleError("Command buffer: cannot transition buffer with frozen usage");
+                mDevice->HandleError("Command buffer: cannot transition buffer with frozen usage");
                 return false;
             }
         }
-        for (auto texture : texturesTransitioned) {
+        for (auto texture : mTexturesTransitioned) {
             if (texture->IsFrozen()) {
-                device->HandleError("Command buffer: cannot transition texture with frozen usage");
+                mDevice->HandleError("Command buffer: cannot transition texture with frozen usage");
                 return false;
             }
         }
@@ -132,7 +132,7 @@ namespace backend {
     }
 
     DeviceBase* CommandBufferBase::GetDevice() {
-        return device;
+        return mDevice;
     }
 
     void FreeCommands(CommandIterator* commands) {
@@ -381,13 +381,13 @@ namespace backend {
         }
     }
 
-    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : Builder(device), state(std::make_unique<CommandBufferStateTracker>(this)) {
+    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : Builder(device), mState(std::make_unique<CommandBufferStateTracker>(this)) {
     }
 
     CommandBufferBuilder::~CommandBufferBuilder() {
-        if (!commandsAcquired) {
+        if (!mWereCommandsAcquired) {
             MoveToIterator();
-            FreeCommands(&iterator);
+            FreeCommands(&mIterator);
         }
     }
 
@@ -395,12 +395,12 @@ namespace backend {
         MoveToIterator();
 
         Command type;
-        while (iterator.NextCommandId(&type)) {
+        while (mIterator.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass:
                     {
-                        iterator.NextCommand<BeginComputePassCmd>();
-                        if (!state->BeginComputePass()) {
+                        mIterator.NextCommand<BeginComputePassCmd>();
+                        if (!mState->BeginComputePass()) {
                             return false;
                         }
                     }
@@ -408,7 +408,7 @@ namespace backend {
 
                 case Command::BeginRenderPass:
                     {
-                        BeginRenderPassCmd* cmd = iterator.NextCommand<BeginRenderPassCmd>();
+                        BeginRenderPassCmd* cmd = mIterator.NextCommand<BeginRenderPassCmd>();
                         auto* renderPass = cmd->renderPass.Get();
                         auto* framebuffer = cmd->framebuffer.Get();
                         // TODO(kainino@chromium.org): null checks should not be necessary
@@ -420,7 +420,7 @@ namespace backend {
                             HandleError("Framebuffer is invalid");
                             return false;
                         }
-                        if (!state->BeginRenderPass(renderPass, framebuffer)) {
+                        if (!mState->BeginRenderPass(renderPass, framebuffer)) {
                             return false;
                         }
                     }
@@ -428,8 +428,8 @@ namespace backend {
 
                 case Command::BeginRenderSubpass:
                     {
-                        iterator.NextCommand<BeginRenderSubpassCmd>();
-                        if (!state->BeginSubpass()) {
+                        mIterator.NextCommand<BeginRenderSubpassCmd>();
+                        if (!mState->BeginSubpass()) {
                             return false;
                         }
                     }
@@ -437,12 +437,12 @@ namespace backend {
 
                 case Command::CopyBufferToBuffer:
                     {
-                        CopyBufferToBufferCmd* copy = iterator.NextCommand<CopyBufferToBufferCmd>();
+                        CopyBufferToBufferCmd* copy = mIterator.NextCommand<CopyBufferToBufferCmd>();
                         if (!ValidateCopySizeFitsInBuffer(this, copy->source, copy->size) ||
                             !ValidateCopySizeFitsInBuffer(this, copy->destination, copy->size) ||
-                            !state->ValidateCanCopy() ||
-                            !state->ValidateCanUseBufferAs(copy->source.buffer.Get(), nxt::BufferUsageBit::TransferSrc) ||
-                            !state->ValidateCanUseBufferAs(copy->destination.buffer.Get(), nxt::BufferUsageBit::TransferDst)) {
+                            !mState->ValidateCanCopy() ||
+                            !mState->ValidateCanUseBufferAs(copy->source.buffer.Get(), nxt::BufferUsageBit::TransferSrc) ||
+                            !mState->ValidateCanUseBufferAs(copy->destination.buffer.Get(), nxt::BufferUsageBit::TransferDst)) {
                             return false;
                         }
                     }
@@ -450,7 +450,7 @@ namespace backend {
 
                 case Command::CopyBufferToTexture:
                     {
-                        CopyBufferToTextureCmd* copy = iterator.NextCommand<CopyBufferToTextureCmd>();
+                        CopyBufferToTextureCmd* copy = mIterator.NextCommand<CopyBufferToTextureCmd>();
 
                         uint32_t bufferCopySize = 0;
                         if (!ValidateRowPitch(this, copy->destination, copy->rowPitch) ||
@@ -458,9 +458,9 @@ namespace backend {
                             !ValidateCopyLocationFitsInTexture(this, copy->destination) ||
                             !ValidateCopySizeFitsInBuffer(this, copy->source, bufferCopySize) ||
                             !ValidateTexelBufferOffset(this, copy->destination.texture.Get(), copy->source) ||
-                            !state->ValidateCanCopy() ||
-                            !state->ValidateCanUseBufferAs(copy->source.buffer.Get(), nxt::BufferUsageBit::TransferSrc) ||
-                            !state->ValidateCanUseTextureAs(copy->destination.texture.Get(), nxt::TextureUsageBit::TransferDst)) {
+                            !mState->ValidateCanCopy() ||
+                            !mState->ValidateCanUseBufferAs(copy->source.buffer.Get(), nxt::BufferUsageBit::TransferSrc) ||
+                            !mState->ValidateCanUseTextureAs(copy->destination.texture.Get(), nxt::TextureUsageBit::TransferDst)) {
                             return false;
                         }
                     }
@@ -468,7 +468,7 @@ namespace backend {
 
                 case Command::CopyTextureToBuffer:
                     {
-                        CopyTextureToBufferCmd* copy = iterator.NextCommand<CopyTextureToBufferCmd>();
+                        CopyTextureToBufferCmd* copy = mIterator.NextCommand<CopyTextureToBufferCmd>();
 
                         uint32_t bufferCopySize = 0;
                         if (!ValidateRowPitch(this, copy->source, copy->rowPitch) ||
@@ -476,9 +476,9 @@ namespace backend {
                             !ValidateCopyLocationFitsInTexture(this, copy->source) ||
                             !ValidateCopySizeFitsInBuffer(this, copy->destination, bufferCopySize) ||
                             !ValidateTexelBufferOffset(this, copy->source.texture.Get(), copy->destination) ||
-                            !state->ValidateCanCopy() ||
-                            !state->ValidateCanUseTextureAs(copy->source.texture.Get(), nxt::TextureUsageBit::TransferSrc) ||
-                            !state->ValidateCanUseBufferAs(copy->destination.buffer.Get(), nxt::BufferUsageBit::TransferDst)) {
+                            !mState->ValidateCanCopy() ||
+                            !mState->ValidateCanUseTextureAs(copy->source.texture.Get(), nxt::TextureUsageBit::TransferSrc) ||
+                            !mState->ValidateCanUseBufferAs(copy->destination.buffer.Get(), nxt::BufferUsageBit::TransferDst)) {
                             return false;
                         }
                     }
@@ -486,8 +486,8 @@ namespace backend {
 
                 case Command::Dispatch:
                     {
-                        iterator.NextCommand<DispatchCmd>();
-                        if (!state->ValidateCanDispatch()) {
+                        mIterator.NextCommand<DispatchCmd>();
+                        if (!mState->ValidateCanDispatch()) {
                             return false;
                         }
                     }
@@ -495,8 +495,8 @@ namespace backend {
 
                 case Command::DrawArrays:
                     {
-                        iterator.NextCommand<DrawArraysCmd>();
-                        if (!state->ValidateCanDrawArrays()) {
+                        mIterator.NextCommand<DrawArraysCmd>();
+                        if (!mState->ValidateCanDrawArrays()) {
                             return false;
                         }
                     }
@@ -504,8 +504,8 @@ namespace backend {
 
                 case Command::DrawElements:
                     {
-                        iterator.NextCommand<DrawElementsCmd>();
-                        if (!state->ValidateCanDrawElements()) {
+                        mIterator.NextCommand<DrawElementsCmd>();
+                        if (!mState->ValidateCanDrawElements()) {
                             return false;
                         }
                     }
@@ -513,8 +513,8 @@ namespace backend {
 
                 case Command::EndComputePass:
                     {
-                        iterator.NextCommand<EndComputePassCmd>();
-                        if (!state->EndComputePass()) {
+                        mIterator.NextCommand<EndComputePassCmd>();
+                        if (!mState->EndComputePass()) {
                             return false;
                         }
                     }
@@ -522,8 +522,8 @@ namespace backend {
 
                 case Command::EndRenderPass:
                     {
-                        iterator.NextCommand<EndRenderPassCmd>();
-                        if (!state->EndRenderPass()) {
+                        mIterator.NextCommand<EndRenderPassCmd>();
+                        if (!mState->EndRenderPass()) {
                             return false;
                         }
                     }
@@ -531,8 +531,8 @@ namespace backend {
 
                 case Command::EndRenderSubpass:
                     {
-                        iterator.NextCommand<EndRenderSubpassCmd>();
-                        if (!state->EndSubpass()) {
+                        mIterator.NextCommand<EndRenderSubpassCmd>();
+                        if (!mState->EndSubpass()) {
                             return false;
                         }
                     }
@@ -540,9 +540,9 @@ namespace backend {
 
                 case Command::SetComputePipeline:
                     {
-                        SetComputePipelineCmd* cmd = iterator.NextCommand<SetComputePipelineCmd>();
+                        SetComputePipelineCmd* cmd = mIterator.NextCommand<SetComputePipelineCmd>();
                         ComputePipelineBase* pipeline = cmd->pipeline.Get();
-                        if (!state->SetComputePipeline(pipeline)) {
+                        if (!mState->SetComputePipeline(pipeline)) {
                             return false;
                         }
                     }
@@ -550,9 +550,9 @@ namespace backend {
 
                 case Command::SetRenderPipeline:
                     {
-                        SetRenderPipelineCmd* cmd = iterator.NextCommand<SetRenderPipelineCmd>();
+                        SetRenderPipelineCmd* cmd = mIterator.NextCommand<SetRenderPipelineCmd>();
                         RenderPipelineBase* pipeline = cmd->pipeline.Get();
-                        if (!state->SetRenderPipeline(pipeline)) {
+                        if (!mState->SetRenderPipeline(pipeline)) {
                             return false;
                         }
                     }
@@ -560,11 +560,11 @@ namespace backend {
 
                 case Command::SetPushConstants:
                     {
-                        SetPushConstantsCmd* cmd = iterator.NextCommand<SetPushConstantsCmd>();
-                        iterator.NextData<uint32_t>(cmd->count);
+                        SetPushConstantsCmd* cmd = mIterator.NextCommand<SetPushConstantsCmd>();
+                        mIterator.NextData<uint32_t>(cmd->count);
                         // Validation of count and offset has already been done when the command was recorded
                         // because it impacts the size of an allocation in the CommandAllocator.
-                        if (!state->ValidateSetPushConstants(cmd->stages)) {
+                        if (!mState->ValidateSetPushConstants(cmd->stages)) {
                             return false;
                         }
                     }
@@ -572,8 +572,8 @@ namespace backend {
 
                 case Command::SetStencilReference:
                     {
-                        iterator.NextCommand<SetStencilReferenceCmd>();
-                        if (!state->HaveRenderSubpass()) {
+                        mIterator.NextCommand<SetStencilReferenceCmd>();
+                        if (!mState->HaveRenderSubpass()) {
                             HandleError("Can't set stencil reference without an active render subpass");
                             return false;
                         }
@@ -582,8 +582,8 @@ namespace backend {
 
                 case Command::SetBlendColor:
                     {
-                        iterator.NextCommand<SetBlendColorCmd>();
-                        if (!state->HaveRenderSubpass()) {
+                        mIterator.NextCommand<SetBlendColorCmd>();
+                        if (!mState->HaveRenderSubpass()) {
                             HandleError("Can't set blend color without an active render subpass");
                             return false;
                         }
@@ -592,8 +592,8 @@ namespace backend {
 
                 case Command::SetBindGroup:
                     {
-                        SetBindGroupCmd* cmd = iterator.NextCommand<SetBindGroupCmd>();
-                        if (!state->SetBindGroup(cmd->index, cmd->group.Get())) {
+                        SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
+                        if (!mState->SetBindGroup(cmd->index, cmd->group.Get())) {
                             return false;
                         }
                     }
@@ -601,8 +601,8 @@ namespace backend {
 
                 case Command::SetIndexBuffer:
                     {
-                        SetIndexBufferCmd* cmd = iterator.NextCommand<SetIndexBufferCmd>();
-                        if (!state->SetIndexBuffer(cmd->buffer.Get())) {
+                        SetIndexBufferCmd* cmd = mIterator.NextCommand<SetIndexBufferCmd>();
+                        if (!mState->SetIndexBuffer(cmd->buffer.Get())) {
                             return false;
                         }
                     }
@@ -610,20 +610,20 @@ namespace backend {
 
                 case Command::SetVertexBuffers:
                     {
-                        SetVertexBuffersCmd* cmd = iterator.NextCommand<SetVertexBuffersCmd>();
-                        auto buffers = iterator.NextData<Ref<BufferBase>>(cmd->count);
-                        iterator.NextData<uint32_t>(cmd->count);
+                        SetVertexBuffersCmd* cmd = mIterator.NextCommand<SetVertexBuffersCmd>();
+                        auto buffers = mIterator.NextData<Ref<BufferBase>>(cmd->count);
+                        mIterator.NextData<uint32_t>(cmd->count);
 
                         for (uint32_t i = 0; i < cmd->count; ++i) {
-                            state->SetVertexBuffer(cmd->startSlot + i, buffers[i].Get());
+                            mState->SetVertexBuffer(cmd->startSlot + i, buffers[i].Get());
                         }
                     }
                     break;
 
                 case Command::TransitionBufferUsage:
                     {
-                        TransitionBufferUsageCmd* cmd = iterator.NextCommand<TransitionBufferUsageCmd>();
-                        if (!state->TransitionBufferUsage(cmd->buffer.Get(), cmd->usage)) {
+                        TransitionBufferUsageCmd* cmd = mIterator.NextCommand<TransitionBufferUsageCmd>();
+                        if (!mState->TransitionBufferUsage(cmd->buffer.Get(), cmd->usage)) {
                             return false;
                         }
                     }
@@ -631,8 +631,8 @@ namespace backend {
 
                 case Command::TransitionTextureUsage:
                     {
-                        TransitionTextureUsageCmd* cmd = iterator.NextCommand<TransitionTextureUsageCmd>();
-                        if (!state->TransitionTextureUsage(cmd->texture.Get(), cmd->usage)) {
+                        TransitionTextureUsageCmd* cmd = mIterator.NextCommand<TransitionTextureUsageCmd>();
+                        if (!mState->TransitionTextureUsage(cmd->texture.Get(), cmd->usage)) {
                             return false;
                         }
 
@@ -641,7 +641,7 @@ namespace backend {
             }
         }
 
-        if (!state->ValidateEndCommandBuffer()) {
+        if (!mState->ValidateEndCommandBuffer()) {
             return false;
         }
 
@@ -649,33 +649,33 @@ namespace backend {
     }
 
     CommandIterator CommandBufferBuilder::AcquireCommands() {
-        ASSERT(!commandsAcquired);
-        commandsAcquired = true;
-        return std::move(iterator);
+        ASSERT(!mWereCommandsAcquired);
+        mWereCommandsAcquired = true;
+        return std::move(mIterator);
     }
 
     CommandBufferBase* CommandBufferBuilder::GetResultImpl() {
         MoveToIterator();
-        return device->CreateCommandBuffer(this);
+        return mDevice->CreateCommandBuffer(this);
     }
 
     void CommandBufferBuilder::BeginComputePass() {
-        allocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
+        mAllocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
     }
 
     void CommandBufferBuilder::BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer) {
-        BeginRenderPassCmd* cmd = allocator.Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
+        BeginRenderPassCmd* cmd = mAllocator.Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
         new(cmd) BeginRenderPassCmd;
         cmd->renderPass = renderPass;
         cmd->framebuffer = framebuffer;
     }
 
     void CommandBufferBuilder::BeginRenderSubpass() {
-        allocator.Allocate<BeginRenderSubpassCmd>(Command::BeginRenderSubpass);
+        mAllocator.Allocate<BeginRenderSubpassCmd>(Command::BeginRenderSubpass);
     }
 
     void CommandBufferBuilder::CopyBufferToBuffer(BufferBase* source, uint32_t sourceOffset, BufferBase* destination, uint32_t destinationOffset, uint32_t size) {
-        CopyBufferToBufferCmd* copy = allocator.Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
+        CopyBufferToBufferCmd* copy = mAllocator.Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
         new(copy) CopyBufferToBufferCmd;
         copy->source.buffer = source;
         copy->source.offset = sourceOffset;
@@ -690,7 +690,7 @@ namespace backend {
         if (rowPitch == 0) {
             rowPitch = ComputeDefaultRowPitch(texture, width);
         }
-        CopyBufferToTextureCmd* copy = allocator.Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
+        CopyBufferToTextureCmd* copy = mAllocator.Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
         new(copy) CopyBufferToTextureCmd;
         copy->source.buffer = buffer;
         copy->source.offset = bufferOffset;
@@ -711,7 +711,7 @@ namespace backend {
         if (rowPitch == 0) {
             rowPitch = ComputeDefaultRowPitch(texture, width);
         }
-        CopyTextureToBufferCmd* copy = allocator.Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
+        CopyTextureToBufferCmd* copy = mAllocator.Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
         new(copy) CopyTextureToBufferCmd;
         copy->source.texture = texture;
         copy->source.x = x;
@@ -727,7 +727,7 @@ namespace backend {
     }
 
     void CommandBufferBuilder::Dispatch(uint32_t x, uint32_t y, uint32_t z) {
-        DispatchCmd* dispatch = allocator.Allocate<DispatchCmd>(Command::Dispatch);
+        DispatchCmd* dispatch = mAllocator.Allocate<DispatchCmd>(Command::Dispatch);
         new(dispatch) DispatchCmd;
         dispatch->x = x;
         dispatch->y = y;
@@ -735,7 +735,7 @@ namespace backend {
     }
 
     void CommandBufferBuilder::DrawArrays(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) {
-        DrawArraysCmd* draw = allocator.Allocate<DrawArraysCmd>(Command::DrawArrays);
+        DrawArraysCmd* draw = mAllocator.Allocate<DrawArraysCmd>(Command::DrawArrays);
         new(draw) DrawArraysCmd;
         draw->vertexCount = vertexCount;
         draw->instanceCount = instanceCount;
@@ -744,7 +744,7 @@ namespace backend {
     }
 
     void CommandBufferBuilder::DrawElements(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance) {
-        DrawElementsCmd* draw = allocator.Allocate<DrawElementsCmd>(Command::DrawElements);
+        DrawElementsCmd* draw = mAllocator.Allocate<DrawElementsCmd>(Command::DrawElements);
         new(draw) DrawElementsCmd;
         draw->indexCount = indexCount;
         draw->instanceCount = instanceCount;
@@ -753,25 +753,25 @@ namespace backend {
     }
 
     void CommandBufferBuilder::EndComputePass() {
-        allocator.Allocate<EndComputePassCmd>(Command::EndComputePass);
+        mAllocator.Allocate<EndComputePassCmd>(Command::EndComputePass);
     }
 
     void CommandBufferBuilder::EndRenderPass() {
-        allocator.Allocate<EndRenderPassCmd>(Command::EndRenderPass);
+        mAllocator.Allocate<EndRenderPassCmd>(Command::EndRenderPass);
     }
 
     void CommandBufferBuilder::EndRenderSubpass() {
-        allocator.Allocate<EndRenderSubpassCmd>(Command::EndRenderSubpass);
+        mAllocator.Allocate<EndRenderSubpassCmd>(Command::EndRenderSubpass);
     }
 
     void CommandBufferBuilder::SetComputePipeline(ComputePipelineBase* pipeline) {
-        SetComputePipelineCmd* cmd = allocator.Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);
+        SetComputePipelineCmd* cmd = mAllocator.Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);
         new(cmd) SetComputePipelineCmd;
         cmd->pipeline = pipeline;
     }
 
     void CommandBufferBuilder::SetRenderPipeline(RenderPipelineBase* pipeline) {
-        SetRenderPipelineCmd* cmd = allocator.Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
+        SetRenderPipelineCmd* cmd = mAllocator.Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
         new(cmd) SetRenderPipelineCmd;
         cmd->pipeline = pipeline;
     }
@@ -783,24 +783,24 @@ namespace backend {
             return;
         }
 
-        SetPushConstantsCmd* cmd = allocator.Allocate<SetPushConstantsCmd>(Command::SetPushConstants);
+        SetPushConstantsCmd* cmd = mAllocator.Allocate<SetPushConstantsCmd>(Command::SetPushConstants);
         new(cmd) SetPushConstantsCmd;
         cmd->stages = stages;
         cmd->offset = offset;
         cmd->count = count;
 
-        uint32_t* values = allocator.AllocateData<uint32_t>(count);
+        uint32_t* values = mAllocator.AllocateData<uint32_t>(count);
         memcpy(values, data, count * sizeof(uint32_t));
     }
 
     void CommandBufferBuilder::SetStencilReference(uint32_t reference) {
-        SetStencilReferenceCmd* cmd = allocator.Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
+        SetStencilReferenceCmd* cmd = mAllocator.Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
         new(cmd) SetStencilReferenceCmd;
         cmd->reference = reference;
     }
 
     void CommandBufferBuilder::SetBlendColor(float r, float g, float b, float a) {
-        SetBlendColorCmd* cmd = allocator.Allocate<SetBlendColorCmd>(Command::SetBlendColor);
+        SetBlendColorCmd* cmd = mAllocator.Allocate<SetBlendColorCmd>(Command::SetBlendColor);
         new(cmd) SetBlendColorCmd;
         cmd->r = r;
         cmd->g = g;
@@ -814,7 +814,7 @@ namespace backend {
             return;
         }
 
-        SetBindGroupCmd* cmd = allocator.Allocate<SetBindGroupCmd>(Command::SetBindGroup);
+        SetBindGroupCmd* cmd = mAllocator.Allocate<SetBindGroupCmd>(Command::SetBindGroup);
         new(cmd) SetBindGroupCmd;
         cmd->index = groupIndex;
         cmd->group = group;
@@ -823,7 +823,7 @@ namespace backend {
     void CommandBufferBuilder::SetIndexBuffer(BufferBase* buffer, uint32_t offset) {
         // TODO(kainino@chromium.org): validation
 
-        SetIndexBufferCmd* cmd = allocator.Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
+        SetIndexBufferCmd* cmd = mAllocator.Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
         new(cmd) SetIndexBufferCmd;
         cmd->buffer = buffer;
         cmd->offset = offset;
@@ -832,38 +832,38 @@ namespace backend {
     void CommandBufferBuilder::SetVertexBuffers(uint32_t startSlot, uint32_t count, BufferBase* const* buffers, uint32_t const* offsets){
         // TODO(kainino@chromium.org): validation
 
-        SetVertexBuffersCmd* cmd = allocator.Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);
+        SetVertexBuffersCmd* cmd = mAllocator.Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);
         new(cmd) SetVertexBuffersCmd;
         cmd->startSlot = startSlot;
         cmd->count = count;
 
-        Ref<BufferBase>* cmdBuffers = allocator.AllocateData<Ref<BufferBase>>(count);
+        Ref<BufferBase>* cmdBuffers = mAllocator.AllocateData<Ref<BufferBase>>(count);
         for (size_t i = 0; i < count; ++i) {
             new(&cmdBuffers[i]) Ref<BufferBase>(buffers[i]);
         }
 
-        uint32_t* cmdOffsets = allocator.AllocateData<uint32_t>(count);
+        uint32_t* cmdOffsets = mAllocator.AllocateData<uint32_t>(count);
         memcpy(cmdOffsets, offsets, count * sizeof(uint32_t));
     }
 
     void CommandBufferBuilder::TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage) {
-        TransitionBufferUsageCmd* cmd = allocator.Allocate<TransitionBufferUsageCmd>(Command::TransitionBufferUsage);
+        TransitionBufferUsageCmd* cmd = mAllocator.Allocate<TransitionBufferUsageCmd>(Command::TransitionBufferUsage);
         new(cmd) TransitionBufferUsageCmd;
         cmd->buffer = buffer;
         cmd->usage = usage;
     }
 
     void CommandBufferBuilder::TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage) {
-        TransitionTextureUsageCmd* cmd = allocator.Allocate<TransitionTextureUsageCmd>(Command::TransitionTextureUsage);
+        TransitionTextureUsageCmd* cmd = mAllocator.Allocate<TransitionTextureUsageCmd>(Command::TransitionTextureUsage);
         new(cmd) TransitionTextureUsageCmd;
         cmd->texture = texture;
         cmd->usage = usage;
     }
 
     void CommandBufferBuilder::MoveToIterator() {
-        if (!movedToIterator) {
-            iterator = std::move(allocator);
-            movedToIterator = true;
+        if (!mWasMovedToIterator) {
+            mIterator = std::move(mAllocator);
+            mWasMovedToIterator = true;
         }
     }
 

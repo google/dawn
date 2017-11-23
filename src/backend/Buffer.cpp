@@ -25,53 +25,53 @@ namespace backend {
     // Buffer
 
     BufferBase::BufferBase(BufferBuilder* builder)
-        : device(builder->device),
-          size(builder->size),
-          allowedUsage(builder->allowedUsage),
-          currentUsage(builder->currentUsage) {
+        : mDevice(builder->mDevice),
+          mSize(builder->mSize),
+          mAllowedUsage(builder->mAllowedUsage),
+          mCurrentUsage(builder->mCurrentUsage) {
     }
 
     BufferBase::~BufferBase() {
-        if (mapped) {
-            CallMapReadCallback(mapReadSerial, NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr);
+        if (mIsMapped) {
+            CallMapReadCallback(mMapReadSerial, NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr);
         }
     }
 
     BufferViewBuilder* BufferBase::CreateBufferViewBuilder() {
-        return new BufferViewBuilder(device, this);
+        return new BufferViewBuilder(mDevice, this);
     }
 
     DeviceBase* BufferBase::GetDevice() {
-        return device;
+        return mDevice;
     }
 
     uint32_t BufferBase::GetSize() const {
-        return size;
+        return mSize;
     }
 
     nxt::BufferUsageBit BufferBase::GetAllowedUsage() const {
-        return allowedUsage;
+        return mAllowedUsage;
     }
 
     nxt::BufferUsageBit BufferBase::GetUsage() const {
-        return currentUsage;
+        return mCurrentUsage;
     }
 
     void BufferBase::CallMapReadCallback(uint32_t serial, nxtBufferMapReadStatus status, const void* pointer) {
-        if (mapReadCallback && serial == mapReadSerial) {
-            mapReadCallback(status, pointer, mapReadUserdata);
-            mapReadCallback = nullptr;
+        if (mMapReadCallback && serial == mMapReadSerial) {
+            mMapReadCallback(status, pointer, mMapReadUserdata);
+            mMapReadCallback = nullptr;
         }
     }
 
     void BufferBase::SetSubData(uint32_t start, uint32_t count, const uint32_t* data) {
         if ((start + count) * sizeof(uint32_t) > GetSize()) {
-            device->HandleError("Buffer subdata out of range");
+            mDevice->HandleError("Buffer subdata out of range");
             return;
         }
 
-        if (!(currentUsage & nxt::BufferUsageBit::TransferDst)) {
-            device->HandleError("Buffer needs the transfer dst usage bit");
+        if (!(mCurrentUsage & nxt::BufferUsageBit::TransferDst)) {
+            mDevice->HandleError("Buffer needs the transfer dst usage bit");
             return;
         }
 
@@ -80,50 +80,50 @@ namespace backend {
 
     void BufferBase::MapReadAsync(uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
         if (start + size > GetSize()) {
-            device->HandleError("Buffer map read out of range");
+            mDevice->HandleError("Buffer map read out of range");
             callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
-        if (!(currentUsage & nxt::BufferUsageBit::MapRead)) {
-            device->HandleError("Buffer needs the map read usage bit");
+        if (!(mCurrentUsage & nxt::BufferUsageBit::MapRead)) {
+            mDevice->HandleError("Buffer needs the map read usage bit");
             callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
-        if (mapped) {
-            device->HandleError("Buffer already mapped");
+        if (mIsMapped) {
+            mDevice->HandleError("Buffer already mapped");
             callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
         // TODO(cwallez@chromium.org): what to do on wraparound? Could cause crashes.
-        mapReadSerial ++;
-        mapReadCallback = callback;
-        mapReadUserdata = userdata;
-        MapReadAsyncImpl(mapReadSerial, start, size);
-        mapped = true;
+        mMapReadSerial ++;
+        mMapReadCallback = callback;
+        mMapReadUserdata = userdata;
+        MapReadAsyncImpl(mMapReadSerial, start, size);
+        mIsMapped = true;
     }
 
     void BufferBase::Unmap() {
-        if (!mapped) {
-            device->HandleError("Buffer wasn't mapped");
+        if (!mIsMapped) {
+            mDevice->HandleError("Buffer wasn't mapped");
             return;
         }
 
         // A map request can only be called once, so this will fire only if the request wasn't
         // completed before the Unmap
-        CallMapReadCallback(mapReadSerial, NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr);
+        CallMapReadCallback(mMapReadSerial, NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr);
         UnmapImpl();
-        mapped = false;
+        mIsMapped = false;
     }
 
     bool BufferBase::IsFrozen() const {
-        return frozen;
+        return mIsFrozen;
     }
 
     bool BufferBase::HasFrozenUsage(nxt::BufferUsageBit usage) const {
-        return frozen && (usage & allowedUsage);
+        return mIsFrozen && (usage & mAllowedUsage);
     }
 
     bool BufferBase::IsUsagePossible(nxt::BufferUsageBit allowedUsage, nxt::BufferUsageBit usage) {
@@ -140,35 +140,35 @@ namespace backend {
     }
 
     bool BufferBase::IsTransitionPossible(nxt::BufferUsageBit usage) const {
-        if (frozen || mapped) {
+        if (mIsFrozen || mIsMapped) {
             return false;
         }
-        return IsUsagePossible(allowedUsage, usage);
+        return IsUsagePossible(mAllowedUsage, usage);
     }
 
     void BufferBase::UpdateUsageInternal(nxt::BufferUsageBit usage) {
         ASSERT(IsTransitionPossible(usage));
-        currentUsage = usage;
+        mCurrentUsage = usage;
     }
 
     void BufferBase::TransitionUsage(nxt::BufferUsageBit usage) {
         if (!IsTransitionPossible(usage)) {
-            device->HandleError("Buffer frozen or usage not allowed");
+            mDevice->HandleError("Buffer frozen or usage not allowed");
             return;
         }
-        TransitionUsageImpl(currentUsage, usage);
-        currentUsage = usage;
+        TransitionUsageImpl(mCurrentUsage, usage);
+        mCurrentUsage = usage;
     }
 
     void BufferBase::FreezeUsage(nxt::BufferUsageBit usage) {
         if (!IsTransitionPossible(usage)) {
-            device->HandleError("Buffer frozen or usage not allowed");
+            mDevice->HandleError("Buffer frozen or usage not allowed");
             return;
         }
-        allowedUsage = usage;
-        TransitionUsageImpl(currentUsage, usage);
-        currentUsage = usage;
-        frozen = true;
+        mAllowedUsage = usage;
+        TransitionUsageImpl(mCurrentUsage, usage);
+        mCurrentUsage = usage;
+        mIsFrozen = true;
     }
 
     // BufferBuilder
@@ -184,79 +184,79 @@ namespace backend {
 
     BufferBase* BufferBuilder::GetResultImpl() {
         constexpr int allProperties = BUFFER_PROPERTY_ALLOWED_USAGE | BUFFER_PROPERTY_SIZE;
-        if ((propertiesSet & allProperties) != allProperties) {
+        if ((mPropertiesSet & allProperties) != allProperties) {
             HandleError("Buffer missing properties");
             return nullptr;
         }
 
         const nxt::BufferUsageBit kMapWriteAllowedUsages = nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc;
-        if (allowedUsage & nxt::BufferUsageBit::MapWrite &&
-            (allowedUsage & kMapWriteAllowedUsages) != allowedUsage) {
+        if (mAllowedUsage & nxt::BufferUsageBit::MapWrite &&
+            (mAllowedUsage & kMapWriteAllowedUsages) != mAllowedUsage) {
             HandleError("Only TransferSrc is allowed with MapWrite");
             return nullptr;
         }
 
         const nxt::BufferUsageBit kMapReadAllowedUsages = nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst;
-        if (allowedUsage & nxt::BufferUsageBit::MapRead &&
-            (allowedUsage & kMapReadAllowedUsages) != allowedUsage) {
+        if (mAllowedUsage & nxt::BufferUsageBit::MapRead &&
+            (mAllowedUsage & kMapReadAllowedUsages) != mAllowedUsage) {
             HandleError("Only TransferDst is allowed with MapRead");
             return nullptr;
         }
 
-        if (!BufferBase::IsUsagePossible(allowedUsage, currentUsage)) {
+        if (!BufferBase::IsUsagePossible(mAllowedUsage, mCurrentUsage)) {
             HandleError("Initial buffer usage is not allowed");
             return nullptr;
         }
 
-        return device->CreateBuffer(this);
+        return mDevice->CreateBuffer(this);
     }
 
     void BufferBuilder::SetAllowedUsage(nxt::BufferUsageBit usage) {
-        if ((propertiesSet & BUFFER_PROPERTY_ALLOWED_USAGE) != 0) {
+        if ((mPropertiesSet & BUFFER_PROPERTY_ALLOWED_USAGE) != 0) {
             HandleError("Buffer allowedUsage property set multiple times");
             return;
         }
 
-        this->allowedUsage = usage;
-        propertiesSet |= BUFFER_PROPERTY_ALLOWED_USAGE;
+        mAllowedUsage = usage;
+        mPropertiesSet |= BUFFER_PROPERTY_ALLOWED_USAGE;
     }
 
     void BufferBuilder::SetInitialUsage(nxt::BufferUsageBit usage) {
-        if ((propertiesSet & BUFFER_PROPERTY_INITIAL_USAGE) != 0) {
+        if ((mPropertiesSet & BUFFER_PROPERTY_INITIAL_USAGE) != 0) {
             HandleError("Buffer initialUsage property set multiple times");
             return;
         }
 
-        this->currentUsage = usage;
-        propertiesSet |= BUFFER_PROPERTY_INITIAL_USAGE;
+        mCurrentUsage = usage;
+        mPropertiesSet |= BUFFER_PROPERTY_INITIAL_USAGE;
     }
 
     void BufferBuilder::SetSize(uint32_t size) {
-        if ((propertiesSet & BUFFER_PROPERTY_SIZE) != 0) {
+        if ((mPropertiesSet & BUFFER_PROPERTY_SIZE) != 0) {
             HandleError("Buffer size property set multiple times");
             return;
         }
 
-        this->size = size;
-        propertiesSet |= BUFFER_PROPERTY_SIZE;
+        mSize = size;
+        mPropertiesSet |= BUFFER_PROPERTY_SIZE;
     }
 
     // BufferViewBase
 
     BufferViewBase::BufferViewBase(BufferViewBuilder* builder)
-        : buffer(std::move(builder->buffer)), size(builder->size), offset(builder->offset) {
+        : mBuffer(std::move(builder->mBuffer)), mSize(builder->mSize), mOffset(builder->mOffset) {
     }
 
     BufferBase* BufferViewBase::GetBuffer() {
-        return buffer.Get();
+        return mBuffer.Get();
     }
 
     uint32_t BufferViewBase::GetSize() const {
-        return size;
+        return mSize;
     }
 
     uint32_t BufferViewBase::GetOffset() const {
-        return offset;
+        return mOffset;
     }
 
     // BufferViewBuilder
@@ -266,34 +266,34 @@ namespace backend {
     };
 
     BufferViewBuilder::BufferViewBuilder(DeviceBase* device, BufferBase* buffer)
-        : Builder(device), buffer(buffer) {
+        : Builder(device), mBuffer(buffer) {
     }
 
     BufferViewBase* BufferViewBuilder::GetResultImpl() {
         constexpr int allProperties = BUFFER_VIEW_PROPERTY_EXTENT;
-        if ((propertiesSet & allProperties) != allProperties) {
+        if ((mPropertiesSet & allProperties) != allProperties) {
             HandleError("Buffer view missing properties");
             return nullptr;
         }
 
-        return device->CreateBufferView(this);
+        return mDevice->CreateBufferView(this);
     }
 
     void BufferViewBuilder::SetExtent(uint32_t offset, uint32_t size) {
-        if ((propertiesSet & BUFFER_VIEW_PROPERTY_EXTENT) != 0) {
+        if ((mPropertiesSet & BUFFER_VIEW_PROPERTY_EXTENT) != 0) {
             HandleError("Buffer view extent property set multiple times");
             return;
         }
 
         uint64_t viewEnd = static_cast<uint64_t>(offset) + static_cast<uint64_t>(size);
-        if (viewEnd > static_cast<uint64_t>(buffer->GetSize())) {
+        if (viewEnd > static_cast<uint64_t>(mBuffer->GetSize())) {
             HandleError("Buffer view end is OOB");
             return;
         }
 
-        this->offset = offset;
-        this->size = size;
-        propertiesSet |= BUFFER_VIEW_PROPERTY_EXTENT;
+        mOffset = offset;
+        mSize = size;
+        mPropertiesSet |= BUFFER_VIEW_PROPERTY_EXTENT;
     }
 
 }

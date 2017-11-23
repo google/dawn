@@ -20,11 +20,11 @@
 namespace backend {
 
     bool BuilderBase::CanBeUsed() const {
-        return !consumed && !gotStatus;
+        return !mIsConsumed && !mGotStatus;
     }
 
     DeviceBase* BuilderBase::GetDevice() {
-        return device;
+        return mDevice;
     }
 
     void BuilderBase::HandleError(const char* message) {
@@ -34,41 +34,41 @@ namespace backend {
     void BuilderBase::SetErrorCallback(nxt::BuilderErrorCallback callback,
                                    nxt::CallbackUserdata userdata1,
                                    nxt::CallbackUserdata userdata2) {
-        this->callback = callback;
-        this->userdata1 = userdata1;
-        this->userdata2 = userdata2;
+        mCallback = callback;
+        mUserdata1 = userdata1;
+        mUserdata2 = userdata2;
     }
 
-    BuilderBase::BuilderBase(DeviceBase* device) : device(device) {
+    BuilderBase::BuilderBase(DeviceBase* device) : mDevice(device) {
     }
 
     BuilderBase::~BuilderBase() {
-        if (!consumed && callback != nullptr) {
-            callback(NXT_BUILDER_ERROR_STATUS_UNKNOWN, "Builder destroyed before GetResult", userdata1, userdata2);
+        if (!mIsConsumed && mCallback != nullptr) {
+            mCallback(NXT_BUILDER_ERROR_STATUS_UNKNOWN, "Builder destroyed before GetResult", mUserdata1, mUserdata2);
         }
     }
 
     void BuilderBase::SetStatus(nxt::BuilderErrorStatus status, const char* message) {
         ASSERT(status != nxt::BuilderErrorStatus::Success);
         ASSERT(status != nxt::BuilderErrorStatus::Unknown);
-        ASSERT(!gotStatus); // This is not strictly necessary but something to strive for.
-        gotStatus = true;
+        ASSERT(!mGotStatus); // This is not strictly necessary but something to strive for.
+        mGotStatus = true;
 
-        storedStatus = status;
-        storedMessage = message;
+        mStoredStatus = status;
+        mStoredMessage = message;
     }
 
     bool BuilderBase::HandleResult(RefCounted* result) {
         // GetResult can only be called once.
-        ASSERT(!consumed);
-        consumed = true;
+        ASSERT(!mIsConsumed);
+        mIsConsumed = true;
 
         // result == nullptr implies there was an error which implies we should have a status set.
-        ASSERT(result != nullptr || gotStatus);
+        ASSERT(result != nullptr || mGotStatus);
 
         // If we have any error, then we have to return nullptr
-        if (gotStatus) {
-            ASSERT(storedStatus != nxt::BuilderErrorStatus::Success);
+        if (mGotStatus) {
+            ASSERT(mStoredStatus != nxt::BuilderErrorStatus::Success);
 
             // The application will never see "result" so we need to remove the
             // external ref here.
@@ -78,14 +78,14 @@ namespace backend {
             }
 
             // Unhandled builder errors are promoted to device errors
-            if (!callback) device->HandleError(("Unhandled builder error: " + storedMessage).c_str());
+            if (!mCallback) mDevice->HandleError(("Unhandled builder error: " + mStoredMessage).c_str());
         } else {
-            ASSERT(storedStatus == nxt::BuilderErrorStatus::Success);
-            ASSERT(storedMessage.empty());
+            ASSERT(mStoredStatus == nxt::BuilderErrorStatus::Success);
+            ASSERT(mStoredMessage.empty());
         }
 
-        if (callback) {
-            callback(static_cast<nxtBuilderErrorStatus>(storedStatus), storedMessage.c_str(), userdata1, userdata2);
+        if (mCallback != nullptr) {
+            mCallback(static_cast<nxtBuilderErrorStatus>(mStoredStatus), mStoredMessage.c_str(), mUserdata1, mUserdata2);
         }
 
         return result != nullptr;

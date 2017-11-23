@@ -32,31 +32,31 @@ namespace backend {
     }
 
     nxt::FilterMode SamplerBuilder::GetMagFilter() const {
-        return magFilter;
+        return mMagFilter;
     }
 
     nxt::FilterMode SamplerBuilder::GetMinFilter() const {
-        return minFilter;
+        return mMinFilter;
     }
 
     nxt::FilterMode SamplerBuilder::GetMipMapFilter() const {
-        return mipMapFilter;
+        return mMipMapFilter;
     }
 
     void SamplerBuilder::SetFilterMode(nxt::FilterMode magFilter, nxt::FilterMode minFilter, nxt::FilterMode mipMapFilter) {
-        if ((propertiesSet & SAMPLER_PROPERTY_FILTER) != 0) {
+        if ((mPropertiesSet & SAMPLER_PROPERTY_FILTER) != 0) {
             HandleError("Sampler filter property set multiple times");
             return;
         }
 
-        this->magFilter = magFilter;
-        this->minFilter = minFilter;
-        this->mipMapFilter = mipMapFilter;
-        propertiesSet |= SAMPLER_PROPERTY_FILTER;
+        mMagFilter = magFilter;
+        mMinFilter = minFilter;
+        mMipMapFilter = mipMapFilter;
+        mPropertiesSet |= SAMPLER_PROPERTY_FILTER;
     }
 
     SamplerBase* SamplerBuilder::GetResultImpl() {
-        return device->CreateSampler(this);
+        return mDevice->CreateSampler(this);
     }
 
 }

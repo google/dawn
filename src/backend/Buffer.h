@@ -56,17 +56,17 @@ namespace backend {
             virtual void UnmapImpl() = 0;
             virtual void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) = 0;
 
-            DeviceBase* device;
-            uint32_t size;
-            nxt::BufferUsageBit allowedUsage = nxt::BufferUsageBit::None;
-            nxt::BufferUsageBit currentUsage = nxt::BufferUsageBit::None;
+            DeviceBase* mDevice;
+            uint32_t mSize;
+            nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
+            nxt::BufferUsageBit mCurrentUsage = nxt::BufferUsageBit::None;
 
-            nxtBufferMapReadCallback mapReadCallback = nullptr;
-            nxtCallbackUserdata mapReadUserdata = 0;
-            uint32_t mapReadSerial = 0;
+            nxtBufferMapReadCallback mMapReadCallback = nullptr;
+            nxtCallbackUserdata mMapReadUserdata = 0;
+            uint32_t mMapReadSerial = 0;
 
-            bool frozen = false;
-            bool mapped = false;
+            bool mIsFrozen = false;
+            bool mIsMapped = false;
     };
 
     class BufferBuilder : public Builder<BufferBase> {
@@ -83,10 +83,10 @@ namespace backend {
 
             BufferBase* GetResultImpl() override;
 
-            uint32_t size;
-            nxt::BufferUsageBit allowedUsage = nxt::BufferUsageBit::None;
-            nxt::BufferUsageBit currentUsage = nxt::BufferUsageBit::None;
-            int propertiesSet = 0;
+            uint32_t mSize;
+            nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
+            nxt::BufferUsageBit mCurrentUsage = nxt::BufferUsageBit::None;
+            int mPropertiesSet = 0;
     };
 
     class BufferViewBase : public RefCounted {
@@ -98,9 +98,9 @@ namespace backend {
             uint32_t GetOffset() const;
 
         private:
-            Ref<BufferBase> buffer;
-            uint32_t size;
-            uint32_t offset;
+            Ref<BufferBase> mBuffer;
+            uint32_t mSize;
+            uint32_t mOffset;
     };
 
     class BufferViewBuilder : public Builder<BufferViewBase> {
@@ -115,10 +115,10 @@ namespace backend {
 
             BufferViewBase* GetResultImpl() override;
 
-            Ref<BufferBase> buffer;
-            uint32_t offset = 0;
-            uint32_t size = 0;
-            int propertiesSet = 0;
+            Ref<BufferBase> mBuffer;
+            uint32_t mOffset = 0;
+            uint32_t mSize = 0;
+            int mPropertiesSet = 0;
     };
 
 }

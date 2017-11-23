@@ -44,11 +44,11 @@ namespace backend {
 
             SamplerBase* GetResultImpl() override;
 
-            int propertiesSet = 0;
+            int mPropertiesSet = 0;
 
-            nxt::FilterMode magFilter = nxt::FilterMode::Nearest;
-            nxt::FilterMode minFilter = nxt::FilterMode::Nearest;
-            nxt::FilterMode mipMapFilter = nxt::FilterMode::Nearest;
+            nxt::FilterMode mMagFilter = nxt::FilterMode::Nearest;
+            nxt::FilterMode mMinFilter = nxt::FilterMode::Nearest;
+            nxt::FilterMode mMipMapFilter = nxt::FilterMode::Nearest;
     };
 
 }

@@ -96,12 +96,12 @@ namespace backend {
             void* NextCommand(size_t commandSize, size_t commandAlignment);
             void* NextData(size_t dataSize, size_t dataAlignment);
 
-            CommandBlocks blocks;
-            uint8_t* currentPtr = nullptr;
-            size_t currentBlock = 0;
+            CommandBlocks mBlocks;
+            uint8_t* mCurrentPtr = nullptr;
+            size_t mCurrentBlock = 0;
             // Used to avoid a special case for empty iterators.
-            uint32_t endOfBlock;
-            bool dataWasDestroyed = false;
+            uint32_t mEndOfBlock;
+            bool mDataWasDestroyed = false;
     };
 
     class CommandAllocator {
@@ -129,20 +129,20 @@ namespace backend {
             uint8_t* AllocateData(size_t dataSize, size_t dataAlignment);
             bool GetNewBlock(size_t minimumSize);
 
-            CommandBlocks blocks;
-            size_t lastAllocationSize = 2048;
+            CommandBlocks mBlocks;
+            size_t mLastAllocationSize = 2048;
 
             // Pointers to the current range of allocation in the block. Guaranteed to allow
             // for at least one uint32_t is not nullptr, so that the special EndOfBlock command id
             // can always be written.
             // Nullptr iff the blocks were moved out.
-            uint8_t* currentPtr = nullptr;
-            uint8_t* endPtr = nullptr;
+            uint8_t* mCurrentPtr = nullptr;
+            uint8_t* mEndPtr = nullptr;
 
             // Data used for the block range at initialization so that the first call to Allocate
             // sees there is not enough space and calls GetNewBlock. This avoids having to special
             // case the initialization in Allocate.
-            uint32_t dummyEnum[1] = {0};
+            uint32_t mDummyEnum[1] = {0};
     };
 
 }

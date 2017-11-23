@@ -41,13 +41,13 @@ namespace backend {
             virtual TextureBase* GetNextTextureImpl(TextureBuilder* builder) = 0;
 
         private:
-            DeviceBase* device = nullptr;
-            nxtSwapChainImplementation implementation = {};
-            nxt::TextureFormat format = {};
-            nxt::TextureUsageBit allowedUsage;
-            uint32_t width = 0;
-            uint32_t height = 0;
-            TextureBase* lastNextTexture = nullptr;
+            DeviceBase* mDevice = nullptr;
+            nxtSwapChainImplementation mImplementation = {};
+            nxt::TextureFormat mFormat = {};
+            nxt::TextureUsageBit mAllowedUsage;
+            uint32_t mWidth = 0;
+            uint32_t mHeight = 0;
+            TextureBase* mLastNextTexture = nullptr;
     };
 
     class SwapChainBuilder : public Builder<SwapChainBase> {
@@ -61,7 +61,7 @@ namespace backend {
         private:
             friend class SwapChainBase;
 
-            nxtSwapChainImplementation implementation = {};
+            nxtSwapChainImplementation mImplementation = {};
     };
 
 }

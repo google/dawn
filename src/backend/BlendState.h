@@ -43,7 +43,7 @@ namespace backend {
             const BlendInfo& GetBlendInfo() const;
 
             private:
-                BlendInfo blendInfo;
+                BlendInfo mBlendInfo;
 
     };
 
@@ -62,9 +62,9 @@ namespace backend {
 
             BlendStateBase* GetResultImpl() override;
 
-            int propertiesSet = 0;
+            int mPropertiesSet = 0;
 
-            BlendStateBase::BlendInfo blendInfo;
+            BlendStateBase::BlendInfo mBlendInfo;
     };
 
 }

@@ -49,22 +49,22 @@ namespace backend {
     // DeviceBase
 
     DeviceBase::DeviceBase() {
-        caches = new DeviceBase::Caches();
+        mCaches = new DeviceBase::Caches();
     }
 
     DeviceBase::~DeviceBase() {
-        delete caches;
+        delete mCaches;
     }
 
     void DeviceBase::HandleError(const char* message) {
-        if (errorCallback) {
-            errorCallback(message, errorUserdata);
+        if (mErrorCallback) {
+            mErrorCallback(message, mErrorUserdata);
         }
     }
 
     void DeviceBase::SetErrorCallback(nxt::DeviceErrorCallback callback, nxt::CallbackUserdata userdata) {
-        this->errorCallback = callback;
-        this->errorUserdata = userdata;
+        mErrorCallback = callback;
+        mErrorUserdata = userdata;
     }
 
     DeviceBase* DeviceBase::GetDevice() {
@@ -76,18 +76,18 @@ namespace backend {
         // objects can be modified, and unordered_set cannot search for a const pointer in a non
         // const pointer set. That's why we do a const_cast here, but the blueprint won't be
         // modified.
-        auto iter = caches->bindGroupLayouts.find(const_cast<BindGroupLayoutBase*>(blueprint));
-        if (iter != caches->bindGroupLayouts.end()) {
+        auto iter = mCaches->bindGroupLayouts.find(const_cast<BindGroupLayoutBase*>(blueprint));
+        if (iter != mCaches->bindGroupLayouts.end()) {
             return *iter;
         }
 
         BindGroupLayoutBase* backendObj = CreateBindGroupLayout(builder);
-        caches->bindGroupLayouts.insert(backendObj);
+        mCaches->bindGroupLayouts.insert(backendObj);
         return backendObj;
     }
 
     void DeviceBase::UncacheBindGroupLayout(BindGroupLayoutBase* obj) {
-        caches->bindGroupLayouts.erase(obj);
+        mCaches->bindGroupLayouts.erase(obj);
     }
 
     BindGroupBuilder* DeviceBase::CreateBindGroupBuilder() {
@@ -147,14 +147,14 @@ namespace backend {
     }
 
     void DeviceBase::Reference() {
-        ASSERT(refCount != 0);
-        refCount++;
+        ASSERT(mRefCount != 0);
+        mRefCount++;
     }
 
     void DeviceBase::Release() {
-        ASSERT(refCount != 0);
-        refCount--;
-        if (refCount == 0) {
+        ASSERT(mRefCount != 0);
+        mRefCount--;
+        if (mRefCount == 0) {
             delete this;
         }
     }

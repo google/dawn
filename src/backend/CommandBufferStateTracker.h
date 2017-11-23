@@ -59,9 +59,9 @@ namespace backend {
             // These collections are copied to the CommandBuffer at build time.
             // These pointers will remain valid since they are referenced by
             // the bind groups which are referenced by this command buffer.
-            std::set<BufferBase*> buffersTransitioned;
-            std::set<TextureBase*> texturesTransitioned;
-            std::set<TextureBase*> texturesAttached;
+            std::set<BufferBase*> mBuffersTransitioned;
+            std::set<TextureBase*> mTexturesTransitioned;
+            std::set<TextureBase*> mTexturesAttached;
 
         private:
             enum ValidationAspect {
@@ -94,22 +94,22 @@ namespace backend {
             void SetPipelineCommon(PipelineBase* pipeline);
             void UnsetPipeline();
 
-            CommandBufferBuilder* builder;
+            CommandBufferBuilder* mBuilder;
 
-            ValidationAspects aspects;
+            ValidationAspects mAspects;
 
-            std::bitset<kMaxBindGroups> bindgroupsSet;
-            std::array<BindGroupBase*, kMaxBindGroups> bindgroups = {};
-            std::bitset<kMaxVertexInputs> inputsSet;
-            PipelineBase* lastPipeline = nullptr;
-            RenderPipelineBase* lastRenderPipeline = nullptr;
+            std::bitset<kMaxBindGroups> mBindgroupsSet;
+            std::array<BindGroupBase*, kMaxBindGroups> mBindgroups = {};
+            std::bitset<kMaxVertexInputs> mInputsSet;
+            PipelineBase* mLastPipeline = nullptr;
+            RenderPipelineBase* mLastRenderPipeline = nullptr;
 
-            std::map<BufferBase*, nxt::BufferUsageBit> mostRecentBufferUsages;
-            std::map<TextureBase*, nxt::TextureUsageBit> mostRecentTextureUsages;
+            std::map<BufferBase*, nxt::BufferUsageBit> mMostRecentBufferUsages;
+            std::map<TextureBase*, nxt::TextureUsageBit> mMostRecentTextureUsages;
 
-            RenderPassBase* currentRenderPass = nullptr;
-            FramebufferBase* currentFramebuffer = nullptr;
-            uint32_t currentSubpass = 0;
+            RenderPassBase* mCurrentRenderPass = nullptr;
+            FramebufferBase* mCurrentFramebuffer = nullptr;
+            uint32_t mCurrentSubpass = 0;
     };
 }
 

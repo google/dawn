@@ -52,8 +52,8 @@ namespace backend {
             const StencilInfo& GetStencil() const;
 
         private:
-            DepthInfo depthInfo;
-            StencilInfo stencilInfo;
+            DepthInfo mDepthInfo;
+            StencilInfo mStencilInfo;
     };
 
     class DepthStencilStateBuilder : public Builder<DepthStencilStateBase> {
@@ -72,10 +72,10 @@ namespace backend {
 
             DepthStencilStateBase* GetResultImpl() override;
 
-            int propertiesSet = 0;
+            int mPropertiesSet = 0;
 
-            DepthStencilStateBase::DepthInfo depthInfo;
-            DepthStencilStateBase::StencilInfo stencilInfo;
+            DepthStencilStateBase::DepthInfo mDepthInfo;
+            DepthStencilStateBase::StencilInfo mStencilInfo;
     };
 
 }

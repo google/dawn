@@ -25,39 +25,39 @@ namespace backend {
     }
 
     void RefCounted::ReferenceInternal() {
-        ASSERT(internalRefs != 0);
+        ASSERT(mInternalRefs != 0);
         // TODO(cwallez@chromium.org): what to do on overflow?
-        internalRefs ++;
+        mInternalRefs ++;
     }
 
     void RefCounted::ReleaseInternal() {
-        ASSERT(internalRefs != 0);
-        internalRefs --;
-        if (internalRefs == 0) {
-            ASSERT(externalRefs == 0);
+        ASSERT(mInternalRefs != 0);
+        mInternalRefs --;
+        if (mInternalRefs == 0) {
+            ASSERT(mExternalRefs == 0);
             // TODO(cwallez@chromium.org): would this work with custom allocators?
             delete this;
         }
     }
 
     uint32_t RefCounted::GetExternalRefs() const {
-        return externalRefs;
+        return mExternalRefs;
     }
 
     uint32_t RefCounted::GetInternalRefs() const {
-        return internalRefs;
+        return mInternalRefs;
     }
 
     void RefCounted::Reference() {
-        ASSERT(externalRefs != 0);
+        ASSERT(mExternalRefs != 0);
         // TODO(cwallez@chromium.org): what to do on overflow?
-        externalRefs ++;
+        mExternalRefs ++;
     }
 
     void RefCounted::Release() {
-        ASSERT(externalRefs != 0);
-        externalRefs --;
-        if (externalRefs == 0) {
+        ASSERT(mExternalRefs != 0);
+        mExternalRefs --;
+        if (mExternalRefs == 0) {
             ReleaseInternal();
         }
     }

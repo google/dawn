@@ -56,15 +56,15 @@ namespace backend {
             virtual void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) = 0;
 
         private:
-            DeviceBase* device;
+            DeviceBase* mDevice;
 
-            nxt::TextureDimension dimension;
-            nxt::TextureFormat format;
-            uint32_t width, height, depth;
-            uint32_t numMipLevels;
-            nxt::TextureUsageBit allowedUsage = nxt::TextureUsageBit::None;
-            nxt::TextureUsageBit currentUsage = nxt::TextureUsageBit::None;
-            bool frozen = false;
+            nxt::TextureDimension mDimension;
+            nxt::TextureFormat mFormat;
+            uint32_t mWidth, mHeight, mDepth;
+            uint32_t mNumMipLevels;
+            nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
+            nxt::TextureUsageBit mCurrentUsage = nxt::TextureUsageBit::None;
+            bool mIsFrozen = false;
     };
 
     class TextureBuilder : public Builder<TextureBase> {
@@ -84,14 +84,14 @@ namespace backend {
 
             TextureBase* GetResultImpl() override;
 
-            int propertiesSet = 0;
+            int mPropertiesSet = 0;
 
-            nxt::TextureDimension dimension;
-            uint32_t width, height, depth;
-            nxt::TextureFormat format;
-            uint32_t numMipLevels;
-            nxt::TextureUsageBit allowedUsage = nxt::TextureUsageBit::None;
-            nxt::TextureUsageBit currentUsage = nxt::TextureUsageBit::None;
+            nxt::TextureDimension mDimension;
+            uint32_t mWidth, mHeight, mDepth;
+            nxt::TextureFormat mFormat;
+            uint32_t mNumMipLevels;
+            nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
+            nxt::TextureUsageBit mCurrentUsage = nxt::TextureUsageBit::None;
     };
 
     class TextureViewBase : public RefCounted {
@@ -101,7 +101,7 @@ namespace backend {
             TextureBase* GetTexture();
 
         private:
-            Ref<TextureBase> texture;
+            Ref<TextureBase> mTexture;
     };
 
     class TextureViewBuilder : public Builder<TextureViewBase> {
@@ -113,7 +113,7 @@ namespace backend {
 
             TextureViewBase* GetResultImpl() override;
 
-            Ref<TextureBase> texture;
+            Ref<TextureBase> mTexture;
     };
 
 }

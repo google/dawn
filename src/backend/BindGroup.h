@@ -39,9 +39,9 @@ namespace backend {
             TextureViewBase* GetBindingAsTextureView(size_t binding);
 
         private:
-            Ref<BindGroupLayoutBase> layout;
-            nxt::BindGroupUsage usage;
-            std::array<Ref<RefCounted>, kMaxBindingsPerGroup> bindings;
+            Ref<BindGroupLayoutBase> mLayout;
+            nxt::BindGroupUsage mUsage;
+            std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 
     class BindGroupBuilder : public Builder<BindGroupBase> {
@@ -80,12 +80,12 @@ namespace backend {
             void SetBindingsBase(uint32_t start, uint32_t count, RefCounted* const * objects);
             bool SetBindingsValidationBase(uint32_t start, uint32_t count);
 
-            std::bitset<kMaxBindingsPerGroup> setMask;
-            int propertiesSet = 0;
+            std::bitset<kMaxBindingsPerGroup> mSetMask;
+            int mPropertiesSet = 0;
 
-            Ref<BindGroupLayoutBase> layout;
-            nxt::BindGroupUsage usage;
-            std::array<Ref<RefCounted>, kMaxBindingsPerGroup> bindings;
+            Ref<BindGroupLayoutBase> mLayout;
+            nxt::BindGroupUsage mUsage;
+            std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 
 }

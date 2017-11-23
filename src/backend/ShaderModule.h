@@ -67,11 +67,11 @@ namespace backend {
         private:
             bool IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout);
 
-            DeviceBase* device;
-            PushConstantInfo pushConstants = {};
-            ModuleBindingInfo bindingInfo;
-            std::bitset<kMaxVertexAttributes> usedVertexAttributes;
-            nxt::ShaderStage executionModel;
+            DeviceBase* mDevice;
+            PushConstantInfo mPushConstants = {};
+            ModuleBindingInfo mBindingInfo;
+            std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
+            nxt::ShaderStage mExecutionModel;
     };
 
     class ShaderModuleBuilder : public Builder<ShaderModuleBase> {
@@ -88,7 +88,7 @@ namespace backend {
 
             ShaderModuleBase* GetResultImpl() override;
 
-            std::vector<uint32_t> spirv;
+            std::vector<uint32_t> mSpirv;
     };
 
 }

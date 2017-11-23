@@ -29,21 +29,21 @@
 #include "common/BitSetIterator.h"
 
 namespace backend {
-    CommandBufferStateTracker::CommandBufferStateTracker(CommandBufferBuilder* builder)
-        : builder(builder) {
+    CommandBufferStateTracker::CommandBufferStateTracker(CommandBufferBuilder* mBuilder)
+        : mBuilder(mBuilder) {
     }
 
     bool CommandBufferStateTracker::HaveRenderPass() const {
-        return currentRenderPass != nullptr;
+        return mCurrentRenderPass != nullptr;
     }
 
     bool CommandBufferStateTracker::HaveRenderSubpass() const {
-        return aspects[VALIDATION_ASPECT_RENDER_SUBPASS];
+        return mAspects[VALIDATION_ASPECT_RENDER_SUBPASS];
     }
 
     bool CommandBufferStateTracker::ValidateCanCopy() const {
-        if (currentRenderPass) {
-            builder->HandleError("Copy cannot occur during a render pass");
+        if (mCurrentRenderPass) {
+            mBuilder->HandleError("Copy cannot occur during a render pass");
             return false;
         }
         return true;
@@ -51,7 +51,7 @@ namespace backend {
 
     bool CommandBufferStateTracker::ValidateCanUseBufferAs(BufferBase* buffer, nxt::BufferUsageBit usage) const {
         if (!BufferHasGuaranteedUsageBit(buffer, usage)) {
-            builder->HandleError("Buffer is not in the necessary usage");
+            mBuilder->HandleError("Buffer is not in the necessary usage");
             return false;
         }
         return true;
@@ -59,7 +59,7 @@ namespace backend {
 
     bool CommandBufferStateTracker::ValidateCanUseTextureAs(TextureBase* texture, nxt::TextureUsageBit usage) const {
         if (!TextureHasGuaranteedUsageBit(texture, usage)) {
-            builder->HandleError("Texture is not in the necessary usage");
+            mBuilder->HandleError("Texture is not in the necessary usage");
             return false;
         }
         return true;
@@ -69,18 +69,18 @@ namespace backend {
         constexpr ValidationAspects requiredAspects =
             1 << VALIDATION_ASPECT_COMPUTE_PIPELINE | // implicitly requires COMPUTE_PASS
             1 << VALIDATION_ASPECT_BIND_GROUPS;
-        if ((requiredAspects & ~aspects).none()) {
+        if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
             return true;
         }
 
-        if (!aspects[VALIDATION_ASPECT_COMPUTE_PIPELINE]) {
-            builder->HandleError("No active compute pipeline");
+        if (!mAspects[VALIDATION_ASPECT_COMPUTE_PIPELINE]) {
+            mBuilder->HandleError("No active compute pipeline");
             return false;
         }
-        // Compute the lazily computed aspects
+        // Compute the lazily computed mAspects
         if (!RecomputeHaveAspectBindGroups()) {
-            builder->HandleError("Bind group state not valid");
+            mBuilder->HandleError("Bind group state not valid");
             return false;
         }
         return true;
@@ -92,7 +92,7 @@ namespace backend {
             1 << VALIDATION_ASPECT_RENDER_PIPELINE | // implicitly requires RENDER_SUBPASS
             1 << VALIDATION_ASPECT_BIND_GROUPS |
             1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
-        if ((requiredAspects & ~aspects).none()) {
+        if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
             return true;
         }
@@ -107,191 +107,191 @@ namespace backend {
             1 << VALIDATION_ASPECT_BIND_GROUPS |
             1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
             1 << VALIDATION_ASPECT_INDEX_BUFFER;
-        if ((requiredAspects & ~aspects).none()) {
+        if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
             return true;
         }
 
-        if (!aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-            builder->HandleError("Cannot DrawElements without index buffer set");
+        if (!mAspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
+            mBuilder->HandleError("Cannot DrawElements without index buffer set");
             return false;
         }
         return RevalidateCanDraw();
     }
 
     bool CommandBufferStateTracker::ValidateEndCommandBuffer() const {
-        if (currentRenderPass != nullptr) {
-            builder->HandleError("Can't end command buffer with an active render pass");
+        if (mCurrentRenderPass != nullptr) {
+            mBuilder->HandleError("Can't end command buffer with an active render pass");
             return false;
         }
-        if (aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            builder->HandleError("Can't end command buffer with an active compute pass");
+        if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            mBuilder->HandleError("Can't end command buffer with an active compute pass");
             return false;
         }
         return true;
     }
 
     bool CommandBufferStateTracker::ValidateSetPushConstants(nxt::ShaderStageBit stages) {
-        if (aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+        if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
             if (stages & ~nxt::ShaderStageBit::Compute) {
-                builder->HandleError("SetPushConstants stage must be compute or 0 in compute passes");
+                mBuilder->HandleError("SetPushConstants stage must be compute or 0 in compute passes");
                 return false;
             }
-        } else if (aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+        } else if (mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
             if (stages & ~(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
-                builder->HandleError("SetPushConstants stage must be a subset if (vertex|fragment) in subpasses");
+                mBuilder->HandleError("SetPushConstants stage must be a subset if (vertex|fragment) in subpasses");
                 return false;
             }
         } else {
-            builder->HandleError("PushConstants must be set in either compute passes or subpasses");
+            mBuilder->HandleError("PushConstants must be set in either compute passes or subpasses");
             return false;
         }
         return true;
     }
 
     bool CommandBufferStateTracker::BeginComputePass() {
-        if (currentRenderPass != nullptr) {
-            builder->HandleError("Cannot begin a compute pass while a render pass is active");
+        if (mCurrentRenderPass != nullptr) {
+            mBuilder->HandleError("Cannot begin a compute pass while a render pass is active");
             return false;
         }
-        aspects.set(VALIDATION_ASPECT_COMPUTE_PASS);
+        mAspects.set(VALIDATION_ASPECT_COMPUTE_PASS);
         return true;
     }
 
     bool CommandBufferStateTracker::EndComputePass() {
-        if (!aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            builder->HandleError("Can't end a compute pass without beginning one");
+        if (!mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            mBuilder->HandleError("Can't end a compute pass without beginning one");
             return false;
         }
-        aspects.reset(VALIDATION_ASPECT_COMPUTE_PASS);
+        mAspects.reset(VALIDATION_ASPECT_COMPUTE_PASS);
         UnsetPipeline();
         return true;
     }
 
     bool CommandBufferStateTracker::BeginSubpass() {
-        if (currentRenderPass == nullptr) {
-            builder->HandleError("Can't begin a subpass without an active render pass");
+        if (mCurrentRenderPass == nullptr) {
+            mBuilder->HandleError("Can't begin a subpass without an active render pass");
             return false;
         }
-        if (aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-            builder->HandleError("Can't begin a subpass without ending the previous subpass");
+        if (mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+            mBuilder->HandleError("Can't begin a subpass without ending the previous subpass");
             return false;
         }
-        if (currentSubpass >= currentRenderPass->GetSubpassCount()) {
-            builder->HandleError("Can't begin a subpass beyond the last subpass");
+        if (mCurrentSubpass >= mCurrentRenderPass->GetSubpassCount()) {
+            mBuilder->HandleError("Can't begin a subpass beyond the last subpass");
             return false;
         }
 
-        auto& subpassInfo = currentRenderPass->GetSubpassInfo(currentSubpass);
+        auto& subpassInfo = mCurrentRenderPass->GetSubpassInfo(mCurrentSubpass);
         for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
             auto attachmentSlot = subpassInfo.colorAttachments[location];
-            auto* tv = currentFramebuffer->GetTextureView(attachmentSlot);
+            auto* tv = mCurrentFramebuffer->GetTextureView(attachmentSlot);
             auto* texture = tv->GetTexture();
             if (!EnsureTextureUsage(texture, nxt::TextureUsageBit::OutputAttachment)) {
-                builder->HandleError("Unable to ensure texture has OutputAttachment usage");
+                mBuilder->HandleError("Unable to ensure texture has OutputAttachment usage");
                 return false;
             }
-            texturesAttached.insert(texture);
+            mTexturesAttached.insert(texture);
         }
 
-        aspects.set(VALIDATION_ASPECT_RENDER_SUBPASS);
+        mAspects.set(VALIDATION_ASPECT_RENDER_SUBPASS);
         return true;
     }
 
     bool CommandBufferStateTracker::EndSubpass() {
-        if (!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-            builder->HandleError("Can't end a subpass without beginning one");
+        if (!mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+            mBuilder->HandleError("Can't end a subpass without beginning one");
             return false;
         }
-        ASSERT(currentRenderPass != nullptr);
+        ASSERT(mCurrentRenderPass != nullptr);
 
-        auto& subpassInfo = currentRenderPass->GetSubpassInfo(currentSubpass);
+        auto& subpassInfo = mCurrentRenderPass->GetSubpassInfo(mCurrentSubpass);
         for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
             auto attachmentSlot = subpassInfo.colorAttachments[location];
-            auto* tv = currentFramebuffer->GetTextureView(attachmentSlot);
+            auto* tv = mCurrentFramebuffer->GetTextureView(attachmentSlot);
             auto* texture = tv->GetTexture();
             if (texture->IsFrozen()) {
                 continue;
             }
         }
-        // Everything in texturesAttached should be for the current render subpass.
-        texturesAttached.clear();
+        // Everything in mTexturesAttached should be for the current render subpass.
+        mTexturesAttached.clear();
 
-        currentSubpass += 1;
-        inputsSet.reset();
-        aspects.reset(VALIDATION_ASPECT_RENDER_SUBPASS);
+        mCurrentSubpass += 1;
+        mInputsSet.reset();
+        mAspects.reset(VALIDATION_ASPECT_RENDER_SUBPASS);
         UnsetPipeline();
         return true;
     }
 
     bool CommandBufferStateTracker::BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer) {
-        if (aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            builder->HandleError("Cannot begin a render pass while a compute pass is active");
+        if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            mBuilder->HandleError("Cannot begin a render pass while a compute pass is active");
             return false;
         }
-        if (currentRenderPass != nullptr) {
-            builder->HandleError("A render pass is already active");
+        if (mCurrentRenderPass != nullptr) {
+            mBuilder->HandleError("A render pass is already active");
             return false;
         }
-        ASSERT(!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]);
+        ASSERT(!mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]);
         if (!framebuffer->GetRenderPass()->IsCompatibleWith(renderPass)) {
-            builder->HandleError("Framebuffer is incompatible with this render pass");
+            mBuilder->HandleError("Framebuffer is incompatible with this render pass");
             return false;
         }
 
-        currentRenderPass = renderPass;
-        currentFramebuffer = framebuffer;
-        currentSubpass = 0;
+        mCurrentRenderPass = renderPass;
+        mCurrentFramebuffer = framebuffer;
+        mCurrentSubpass = 0;
 
         return true;
     }
 
     bool CommandBufferStateTracker::EndRenderPass() {
-        if (currentRenderPass == nullptr) {
-            builder->HandleError("No render pass is currently active");
+        if (mCurrentRenderPass == nullptr) {
+            mBuilder->HandleError("No render pass is currently active");
             return false;
         }
-        if (aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-            builder->HandleError("Can't end a render pass while a subpass is active");
+        if (mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+            mBuilder->HandleError("Can't end a render pass while a subpass is active");
             return false;
         }
-        if (currentSubpass < currentRenderPass->GetSubpassCount() - 1) {
-            builder->HandleError("Can't end a render pass before the last subpass");
+        if (mCurrentSubpass < mCurrentRenderPass->GetSubpassCount() - 1) {
+            mBuilder->HandleError("Can't end a render pass before the last subpass");
             return false;
         }
-        currentRenderPass = nullptr;
-        currentFramebuffer = nullptr;
+        mCurrentRenderPass = nullptr;
+        mCurrentFramebuffer = nullptr;
 
         return true;
     }
 
     bool CommandBufferStateTracker::SetComputePipeline(ComputePipelineBase* pipeline) {
-        if (!aspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            builder->HandleError("A compute pass must be active when a compute pipeline is set");
+        if (!mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
+            mBuilder->HandleError("A compute pass must be active when a compute pipeline is set");
             return false;
         }
-        if (currentRenderPass) {
-            builder->HandleError("Can't use a compute pipeline while a render pass is active");
+        if (mCurrentRenderPass) {
+            mBuilder->HandleError("Can't use a compute pipeline while a render pass is active");
             return false;
         }
 
-        aspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
+        mAspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
         SetPipelineCommon(pipeline);
         return true;
     }
 
     bool CommandBufferStateTracker::SetRenderPipeline(RenderPipelineBase* pipeline) {
-        if (!aspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-            builder->HandleError("A render subpass must be active when a render pipeline is set");
+        if (!mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+            mBuilder->HandleError("A render subpass must be active when a render pipeline is set");
             return false;
         }
-        if (!pipeline->GetRenderPass()->IsCompatibleWith(currentRenderPass)) {
-            builder->HandleError("Pipeline is incompatible with this render pass");
+        if (!pipeline->GetRenderPass()->IsCompatibleWith(mCurrentRenderPass)) {
+            mBuilder->HandleError("Pipeline is incompatible with this render pass");
             return false;
         }
 
-        aspects.set(VALIDATION_ASPECT_RENDER_PIPELINE);
-        lastRenderPipeline = pipeline;
+        mAspects.set(VALIDATION_ASPECT_RENDER_PIPELINE);
+        mLastRenderPipeline = pipeline;
         SetPipelineCommon(pipeline);
         return true;
     }
@@ -300,77 +300,77 @@ namespace backend {
         if (!ValidateBindGroupUsages(bindgroup)) {
             return false;
         }
-        bindgroupsSet.set(index);
-        bindgroups[index] = bindgroup;
+        mBindgroupsSet.set(index);
+        mBindgroups[index] = bindgroup;
 
         return true;
     }
 
     bool CommandBufferStateTracker::SetIndexBuffer(BufferBase* buffer) {
         if (!HavePipeline()) {
-            builder->HandleError("Can't set the index buffer without a pipeline");
+            mBuilder->HandleError("Can't set the index buffer without a pipeline");
             return false;
         }
 
         auto usage = nxt::BufferUsageBit::Index;
         if (!BufferHasGuaranteedUsageBit(buffer, usage)) {
-            builder->HandleError("Buffer needs the index usage bit to be guaranteed");
+            mBuilder->HandleError("Buffer needs the index usage bit to be guaranteed");
             return false;
         }
 
-        aspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
+        mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
         return true;
     }
 
     bool CommandBufferStateTracker::SetVertexBuffer(uint32_t index, BufferBase* buffer) {
         if (!HavePipeline()) {
-            builder->HandleError("Can't set vertex buffers without a pipeline");
+            mBuilder->HandleError("Can't set vertex buffers without a pipeline");
             return false;
         }
 
         auto usage = nxt::BufferUsageBit::Vertex;
         if (!BufferHasGuaranteedUsageBit(buffer, usage)) {
-            builder->HandleError("Buffer needs vertex usage bit to be guaranteed");
+            mBuilder->HandleError("Buffer needs vertex usage bit to be guaranteed");
             return false;
         }
 
-        inputsSet.set(index);
+        mInputsSet.set(index);
         return true;
     }
 
     bool CommandBufferStateTracker::TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage) {
         if (!buffer->IsTransitionPossible(usage)) {
             if (buffer->IsFrozen()) {
-                builder->HandleError("Buffer transition not possible (usage is frozen)");
+                mBuilder->HandleError("Buffer transition not possible (usage is frozen)");
             } else if (!BufferBase::IsUsagePossible(buffer->GetAllowedUsage(), usage)) {
-                builder->HandleError("Buffer transition not possible (usage not allowed)");
+                mBuilder->HandleError("Buffer transition not possible (usage not allowed)");
             } else {
-                builder->HandleError("Buffer transition not possible");
+                mBuilder->HandleError("Buffer transition not possible");
             }
             return false;
         }
 
-        mostRecentBufferUsages[buffer] = usage;
-        buffersTransitioned.insert(buffer);
+        mMostRecentBufferUsages[buffer] = usage;
+        mBuffersTransitioned.insert(buffer);
         return true;
     }
 
     bool CommandBufferStateTracker::TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage) {
         if (!IsExplicitTextureTransitionPossible(texture, usage)) {
             if (texture->IsFrozen()) {
-                builder->HandleError("Texture transition not possible (usage is frozen)");
+                mBuilder->HandleError("Texture transition not possible (usage is frozen)");
             } else if (!TextureBase::IsUsagePossible(texture->GetAllowedUsage(), usage)) {
-                builder->HandleError("Texture transition not possible (usage not allowed)");
-            } else if (texturesAttached.find(texture) != texturesAttached.end()) {
-                builder->HandleError("Texture transition not possible (texture is in use as a framebuffer attachment)");
+                mBuilder->HandleError("Texture transition not possible (usage not allowed)");
+            } else if (mTexturesAttached.find(texture) != mTexturesAttached.end()) {
+                mBuilder->HandleError("Texture transition not possible (texture is in use as a framebuffer attachment)");
             } else {
-                builder->HandleError("Texture transition not possible");
+                mBuilder->HandleError("Texture transition not possible");
             }
             return false;
         }
 
-        mostRecentTextureUsages[texture] = usage;
-        texturesTransitioned.insert(texture);
+        mMostRecentTextureUsages[texture] = usage;
+        mTexturesTransitioned.insert(texture);
         return true;
     }
 
@@ -381,8 +381,8 @@ namespace backend {
         if (!IsInternalTextureTransitionPossible(texture, usage)) {
             return false;
         }
-        mostRecentTextureUsages[texture] = usage;
-        texturesTransitioned.insert(texture);
+        mMostRecentTextureUsages[texture] = usage;
+        mTexturesTransitioned.insert(texture);
         return true;
     }
 
@@ -391,8 +391,8 @@ namespace backend {
         if (buffer->HasFrozenUsage(usage)) {
             return true;
         }
-        auto it = mostRecentBufferUsages.find(buffer);
-        return it != mostRecentBufferUsages.end() && (it->second & usage);
+        auto it = mMostRecentBufferUsages.find(buffer);
+        return it != mMostRecentBufferUsages.end() && (it->second & usage);
     }
 
     bool CommandBufferStateTracker::TextureHasGuaranteedUsageBit(TextureBase* texture, nxt::TextureUsageBit usage) const {
@@ -400,13 +400,13 @@ namespace backend {
         if (texture->HasFrozenUsage(usage)) {
             return true;
         }
-        auto it = mostRecentTextureUsages.find(texture);
-        return it != mostRecentTextureUsages.end() && (it->second & usage);
+        auto it = mMostRecentTextureUsages.find(texture);
+        return it != mMostRecentTextureUsages.end() && (it->second & usage);
     }
 
     bool CommandBufferStateTracker::IsInternalTextureTransitionPossible(TextureBase* texture, nxt::TextureUsageBit usage) const {
         ASSERT(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
-        if (texturesAttached.find(texture) != texturesAttached.end()) {
+        if (mTexturesAttached.find(texture) != mTexturesAttached.end()) {
             return false;
         }
         return texture->IsTransitionPossible(usage);
@@ -422,33 +422,33 @@ namespace backend {
     }
 
     bool CommandBufferStateTracker::RecomputeHaveAspectBindGroups() {
-        if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
+        if (mAspects[VALIDATION_ASPECT_BIND_GROUPS]) {
             return true;
         }
         // Assumes we have a pipeline already
-        if (!bindgroupsSet.all()) {
+        if (!mBindgroupsSet.all()) {
             return false;
         }
-        for (size_t i = 0; i < bindgroups.size(); ++i) {
-            if (auto* bindgroup = bindgroups[i]) {
+        for (size_t i = 0; i < mBindgroups.size(); ++i) {
+            if (auto* bindgroup = mBindgroups[i]) {
                 // TODO(kainino@chromium.org): bind group compatibility
-                if (bindgroup->GetLayout() != lastPipeline->GetLayout()->GetBindGroupLayout(i)) {
+                if (bindgroup->GetLayout() != mLastPipeline->GetLayout()->GetBindGroupLayout(i)) {
                     return false;
                 }
             }
         }
-        aspects.set(VALIDATION_ASPECT_BIND_GROUPS);
+        mAspects.set(VALIDATION_ASPECT_BIND_GROUPS);
         return true;
     }
 
     bool CommandBufferStateTracker::RecomputeHaveAspectVertexBuffers() {
-        if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
+        if (mAspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
             return true;
         }
         // Assumes we have a pipeline already
-        auto requiredInputs = lastRenderPipeline->GetInputState()->GetInputsSetMask();
-        if ((inputsSet & requiredInputs) == requiredInputs) {
-            aspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
+        auto requiredInputs = mLastRenderPipeline->GetInputState()->GetInputsSetMask();
+        if ((mInputsSet & requiredInputs) == requiredInputs) {
+            mAspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
             return true;
         }
         return false;
@@ -458,7 +458,7 @@ namespace backend {
         constexpr ValidationAspects pipelineAspects =
             1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
             1 << VALIDATION_ASPECT_RENDER_PIPELINE;
-        return (aspects & pipelineAspects).any();
+        return (mAspects & pipelineAspects).any();
     }
 
     bool CommandBufferStateTracker::ValidateBindGroupUsages(BindGroupBase* group) const {
@@ -489,7 +489,7 @@ namespace backend {
 
                         auto buffer = group->GetBindingAsBufferView(i)->GetBuffer();
                         if (!BufferHasGuaranteedUsageBit(buffer, requiredUsage)) {
-                            builder->HandleError("Can't guarantee buffer usage needed by bind group");
+                            mBuilder->HandleError("Can't guarantee buffer usage needed by bind group");
                             return false;
                         }
                     }
@@ -500,7 +500,7 @@ namespace backend {
 
                         auto texture = group->GetBindingAsTextureView(i)->GetTexture();
                         if (!TextureHasGuaranteedUsageBit(texture, requiredUsage)) {
-                            builder->HandleError("Can't guarantee texture usage needed by bind group");
+                            mBuilder->HandleError("Can't guarantee texture usage needed by bind group");
                             return false;
                         }
                     }
@@ -513,17 +513,17 @@ namespace backend {
     }
 
     bool CommandBufferStateTracker::RevalidateCanDraw() {
-        if (!aspects[VALIDATION_ASPECT_RENDER_PIPELINE]) {
-            builder->HandleError("No active render pipeline");
+        if (!mAspects[VALIDATION_ASPECT_RENDER_PIPELINE]) {
+            mBuilder->HandleError("No active render pipeline");
             return false;
         }
-        // Compute the lazily computed aspects
+        // Compute the lazily computed mAspects
         if (!RecomputeHaveAspectBindGroups()) {
-            builder->HandleError("Bind group state not valid");
+            mBuilder->HandleError("Bind group state not valid");
             return false;
         }
         if (!RecomputeHaveAspectVertexBuffers()) {
-            builder->HandleError("Some vertex buffers are not set");
+            mBuilder->HandleError("Some vertex buffers are not set");
             return false;
         }
         return true;
@@ -532,17 +532,17 @@ namespace backend {
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
         PipelineLayoutBase* layout = pipeline->GetLayout();
 
-        aspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
-        aspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
+        mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
+        mAspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
         // Reset bindgroups but mark unused bindgroups as valid
-        bindgroupsSet = ~layout->GetBindGroupsLayoutMask();
+        mBindgroupsSet = ~layout->GetBindGroupsLayoutMask();
 
         // Only bindgroups that were not the same layout in the last pipeline need to be set again.
-        if (lastPipeline) {
-            bindgroupsSet |= layout->InheritedGroupsMask(lastPipeline->GetLayout());
+        if (mLastPipeline) {
+            mBindgroupsSet |= layout->InheritedGroupsMask(mLastPipeline->GetLayout());
         }
 
-        lastPipeline = pipeline;
+        mLastPipeline = pipeline;
     }
 
     void CommandBufferStateTracker::UnsetPipeline() {
@@ -552,7 +552,7 @@ namespace backend {
             1 << VALIDATION_ASPECT_BIND_GROUPS |
             1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
             1 << VALIDATION_ASPECT_INDEX_BUFFER;
-        aspects &= ~pipelineDependentAspects;
-        bindgroups.fill(nullptr);
+        mAspects &= ~pipelineDependentAspects;
+        mBindgroups.fill(nullptr);
     }
 }

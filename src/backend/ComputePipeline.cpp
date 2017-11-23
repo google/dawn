@@ -35,7 +35,7 @@ namespace backend {
     }
 
     ComputePipelineBase* ComputePipelineBuilder::GetResultImpl() {
-        return device->CreateComputePipeline(this);
+        return mDevice->CreateComputePipeline(this);
     }
 
 }

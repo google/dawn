@@ -23,16 +23,16 @@ namespace backend {
     // PipelineLayoutBase
 
     PipelineLayoutBase::PipelineLayoutBase(PipelineLayoutBuilder* builder)
-        : bindGroupLayouts(std::move(builder->bindGroupLayouts)), mask(builder->mask) {
+        : mBindGroupLayouts(std::move(builder->mBindGroupLayouts)), mMask(builder->mMask) {
     }
 
     const BindGroupLayoutBase* PipelineLayoutBase::GetBindGroupLayout(size_t group) const {
         ASSERT(group < kMaxBindGroups);
-        return bindGroupLayouts[group].Get();
+        return mBindGroupLayouts[group].Get();
     }
 
     const std::bitset<kMaxBindGroups> PipelineLayoutBase::GetBindGroupsLayoutMask() const {
-        return mask;
+        return mMask;
     }
 
     std::bitset<kMaxBindGroups> PipelineLayoutBase::InheritedGroupsMask(const PipelineLayoutBase* other) const {
@@ -41,7 +41,7 @@ namespace backend {
 
     uint32_t PipelineLayoutBase::GroupsInheritUpTo(const PipelineLayoutBase* other) const {
         for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-            if (!mask[i] || bindGroupLayouts[i].Get() != other->bindGroupLayouts[i].Get()) {
+            if (!mMask[i] || mBindGroupLayouts[i].Get() != other->mBindGroupLayouts[i].Get()) {
                 return i;
             }
         }
@@ -57,12 +57,12 @@ namespace backend {
         // TODO(cwallez@chromium.org): this is a hack, have the null bind group layout somewhere in the device
         // once we have a cache of BGL
         for (size_t group = 0; group < kMaxBindGroups; ++group) {
-            if (!bindGroupLayouts[group]) {
-                bindGroupLayouts[group] = device->CreateBindGroupLayoutBuilder()->GetResult();
+            if (!mBindGroupLayouts[group]) {
+                mBindGroupLayouts[group] = mDevice->CreateBindGroupLayoutBuilder()->GetResult();
             }
         }
 
-        return device->CreatePipelineLayout(this);
+        return mDevice->CreatePipelineLayout(this);
     }
 
     void PipelineLayoutBuilder::SetBindGroupLayout(uint32_t groupIndex, BindGroupLayoutBase* layout) {
@@ -70,13 +70,13 @@ namespace backend {
             HandleError("groupIndex is over the maximum allowed");
             return;
         }
-        if (mask[groupIndex]) {
+        if (mMask[groupIndex]) {
             HandleError("Bind group layout already specified");
             return;
         }
 
-        bindGroupLayouts[groupIndex] = layout;
-        mask.set(groupIndex);
+        mBindGroupLayouts[groupIndex] = layout;
+        mMask.set(groupIndex);
     }
 
 }

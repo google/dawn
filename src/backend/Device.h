@@ -78,7 +78,6 @@ namespace backend {
             BindGroupLayoutBuilder* CreateBindGroupLayoutBuilder();
             BlendStateBuilder* CreateBlendStateBuilder();
             BufferBuilder* CreateBufferBuilder();
-            BufferViewBuilder* CreateBufferViewBuilder();
             CommandBufferBuilder* CreateCommandBufferBuilder();
             ComputePipelineBuilder* CreateComputePipelineBuilder();
             DepthStencilStateBuilder* CreateDepthStencilStateBuilder();
@@ -94,7 +93,6 @@ namespace backend {
             TextureBuilder* CreateTextureBuilder();
 
             void Tick();
-            void CopyBindGroups(uint32_t start, uint32_t count, BindGroupBase* source, BindGroupBase* target);
             void SetErrorCallback(nxt::DeviceErrorCallback callback, nxt::CallbackUserdata userdata);
             void Reference();
             void Release();
@@ -103,11 +101,11 @@ namespace backend {
             // The object caches aren't exposed in the header as they would require a lot of
             // additional includes.
             struct Caches;
-            Caches* caches = nullptr;
+            Caches* mCaches = nullptr;
 
-            nxt::DeviceErrorCallback errorCallback = nullptr;
-            nxt::CallbackUserdata errorUserdata = 0;
-            uint32_t refCount = 1;
+            nxt::DeviceErrorCallback mErrorCallback = nullptr;
+            nxt::CallbackUserdata mErrorUserdata = 0;
+            uint32_t mRefCount = 1;
     };
 
 }

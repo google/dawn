@@ -44,8 +44,8 @@ namespace backend {
             uint32_t GroupsInheritUpTo(const PipelineLayoutBase* other) const;
 
         protected:
-            BindGroupLayoutArray bindGroupLayouts;
-            std::bitset<kMaxBindGroups> mask;
+            BindGroupLayoutArray mBindGroupLayouts;
+            std::bitset<kMaxBindGroups> mMask;
     };
 
     class PipelineLayoutBuilder : public Builder<PipelineLayoutBase> {
@@ -60,8 +60,8 @@ namespace backend {
 
             PipelineLayoutBase* GetResultImpl() override;
 
-            BindGroupLayoutArray bindGroupLayouts;
-            std::bitset<kMaxBindGroups> mask;
+            BindGroupLayoutArray mBindGroupLayouts;
+            std::bitset<kMaxBindGroups> mMask;
     };
 
 }

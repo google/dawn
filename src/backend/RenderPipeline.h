@@ -37,13 +37,13 @@ namespace backend {
             uint32_t GetSubPass();
 
         private:
-            Ref<DepthStencilStateBase> depthStencilState;
-            nxt::IndexFormat indexFormat;
-            Ref<InputStateBase> inputState;
-            nxt::PrimitiveTopology primitiveTopology;
-            std::array<Ref<BlendStateBase>, kMaxColorAttachments> blendStates;
-            Ref<RenderPassBase> renderPass;
-            uint32_t subpass;
+            Ref<DepthStencilStateBase> mDepthStencilState;
+            nxt::IndexFormat mIndexFormat;
+            Ref<InputStateBase> mInputState;
+            nxt::PrimitiveTopology mPrimitiveTopology;
+            std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
+            Ref<RenderPassBase> mRenderPass;
+            uint32_t mSubpass;
     };
 
     class RenderPipelineBuilder : public Builder<RenderPipelineBase>, public PipelineBuilder {
@@ -63,15 +63,15 @@ namespace backend {
 
             RenderPipelineBase* GetResultImpl() override;
 
-            Ref<DepthStencilStateBase> depthStencilState;
-            Ref<InputStateBase> inputState;
+            Ref<DepthStencilStateBase> mDepthStencilState;
+            Ref<InputStateBase> mInputState;
             // TODO(enga@google.com): Remove default when we validate that all required properties are set
-            nxt::PrimitiveTopology primitiveTopology = nxt::PrimitiveTopology::TriangleList;
-            nxt::IndexFormat indexFormat = nxt::IndexFormat::Uint32;
-            std::bitset<kMaxColorAttachments> blendStatesSet;
-            std::array<Ref<BlendStateBase>, kMaxColorAttachments> blendStates;
-            Ref<RenderPassBase> renderPass;
-            uint32_t subpass;
+            nxt::PrimitiveTopology mPrimitiveTopology = nxt::PrimitiveTopology::TriangleList;
+            nxt::IndexFormat mIndexFormat = nxt::IndexFormat::Uint32;
+            std::bitset<kMaxColorAttachments> mBlendStatesSet;
+            std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
+            Ref<RenderPassBase> mRenderPass;
+            uint32_t mSubpass;
     };
 
 }

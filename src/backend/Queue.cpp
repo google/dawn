@@ -21,11 +21,11 @@ namespace backend {
 
     // QueueBase
 
-    QueueBase::QueueBase(QueueBuilder* builder) : device(builder->device) {
+    QueueBase::QueueBase(QueueBuilder* builder) : mDevice(builder->mDevice) {
     }
 
     DeviceBase* QueueBase::GetDevice() {
-        return device;
+        return mDevice;
     }
 
     bool QueueBase::ValidateSubmitCommand(CommandBufferBase* command) {
@@ -38,7 +38,7 @@ namespace backend {
     }
 
     QueueBase* QueueBuilder::GetResultImpl() {
-        return device->CreateQueue(this);
+        return mDevice->CreateQueue(this);
     }
 
 }

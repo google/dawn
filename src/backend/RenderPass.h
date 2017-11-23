@@ -59,8 +59,8 @@ namespace backend {
             bool IsCompatibleWith(const RenderPassBase* other) const;
 
         private:
-            std::vector<AttachmentInfo> attachments;
-            std::vector<SubpassInfo> subpasses;
+            std::vector<AttachmentInfo> mAttachments;
+            std::vector<SubpassInfo> mSubpasses;
     };
 
     class RenderPassBuilder : public Builder<RenderPassBase> {
@@ -85,10 +85,10 @@ namespace backend {
                 ATTACHMENT_PROPERTY_COUNT
             };
 
-            std::vector<std::bitset<ATTACHMENT_PROPERTY_COUNT>> attachmentProperties;
-            std::vector<RenderPassBase::AttachmentInfo> attachments;
-            std::vector<RenderPassBase::SubpassInfo> subpasses;
-            int propertiesSet = 0;
+            std::vector<std::bitset<ATTACHMENT_PROPERTY_COUNT>> mAttachmentProperties;
+            std::vector<RenderPassBase::AttachmentInfo> mAttachments;
+            std::vector<RenderPassBase::SubpassInfo> mSubpasses;
+            int mPropertiesSet = 0;
     };
 
 }

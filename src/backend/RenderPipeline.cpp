@@ -27,12 +27,12 @@ namespace backend {
 
     RenderPipelineBase::RenderPipelineBase(RenderPipelineBuilder* builder)
         : PipelineBase(builder),
-          depthStencilState(std::move(builder->depthStencilState)),
-          indexFormat(builder->indexFormat),
-          inputState(std::move(builder->inputState)),
-          primitiveTopology(builder->primitiveTopology),
-          blendStates(builder->blendStates),
-          renderPass(std::move(builder->renderPass)), subpass(builder->subpass) {
+          mDepthStencilState(std::move(builder->mDepthStencilState)),
+          mIndexFormat(builder->mIndexFormat),
+          mInputState(std::move(builder->mInputState)),
+          mPrimitiveTopology(builder->mPrimitiveTopology),
+          mBlendStates(builder->mBlendStates),
+          mRenderPass(std::move(builder->mRenderPass)), mSubpass(builder->mSubpass) {
 
         if (GetStageMask() != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
             builder->HandleError("Render pipeline should have exactly a vertex and fragment stage");
@@ -41,39 +41,39 @@ namespace backend {
 
         // TODO(kainino@chromium.org): Need to verify the pipeline against its render subpass.
 
-        if ((builder->GetStageInfo(nxt::ShaderStage::Vertex).module->GetUsedVertexAttributes() & ~inputState->GetAttributesSetMask()).any()) {
+        if ((builder->GetStageInfo(nxt::ShaderStage::Vertex).module->GetUsedVertexAttributes() & ~mInputState->GetAttributesSetMask()).any()) {
             builder->HandleError("Pipeline vertex stage uses inputs not in the input state");
             return;
         }
     }
 
     BlendStateBase* RenderPipelineBase::GetBlendState(uint32_t attachmentSlot) {
-        ASSERT(attachmentSlot < blendStates.size());
-        return blendStates[attachmentSlot].Get();
+        ASSERT(attachmentSlot < mBlendStates.size());
+        return mBlendStates[attachmentSlot].Get();
     }
 
     DepthStencilStateBase* RenderPipelineBase::GetDepthStencilState() {
-        return depthStencilState.Get();
+        return mDepthStencilState.Get();
     }
 
     nxt::IndexFormat RenderPipelineBase::GetIndexFormat() const {
-        return indexFormat;
+        return mIndexFormat;
     }
 
     InputStateBase* RenderPipelineBase::GetInputState() {
-        return inputState.Get();
+        return mInputState.Get();
     }
 
     nxt::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
-        return primitiveTopology;
+        return mPrimitiveTopology;
     }
 
     RenderPassBase* RenderPipelineBase::GetRenderPass() {
-        return renderPass.Get();
+        return mRenderPass.Get();
     }
 
     uint32_t RenderPipelineBase::GetSubPass() {
-        return subpass;
+        return mSubpass;
     }
 
     // RenderPipelineBuilder
@@ -84,64 +84,64 @@ namespace backend {
 
     RenderPipelineBase* RenderPipelineBuilder::GetResultImpl() {
         // TODO(cwallez@chromium.org): the layout should be required, and put the default objects in the device
-        if (!inputState) {
-            inputState = device->CreateInputStateBuilder()->GetResult();
+        if (!mInputState) {
+            mInputState = mDevice->CreateInputStateBuilder()->GetResult();
         }
-        if (!depthStencilState) {
-            depthStencilState = device->CreateDepthStencilStateBuilder()->GetResult();
+        if (!mDepthStencilState) {
+            mDepthStencilState = mDevice->CreateDepthStencilStateBuilder()->GetResult();
         }
-        if (!renderPass) {
+        if (!mRenderPass) {
             HandleError("Pipeline render pass not set");
             return nullptr;
         }
-        const auto& subpassInfo = renderPass->GetSubpassInfo(subpass);
-        if ((blendStatesSet | subpassInfo.colorAttachmentsSet) != subpassInfo.colorAttachmentsSet) {
+        const auto& subpassInfo = mRenderPass->GetSubpassInfo(mSubpass);
+        if ((mBlendStatesSet | subpassInfo.colorAttachmentsSet) != subpassInfo.colorAttachmentsSet) {
             HandleError("Blend state set on unset color attachment");
             return nullptr;
         }
 
         // Assign all color attachments without a blend state the default state
         // TODO(enga@google.com): Put the default objects in the device
-        for (uint32_t attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet & ~blendStatesSet)) {
-            blendStates[attachmentSlot] = device->CreateBlendStateBuilder()->GetResult();
+        for (uint32_t attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet & ~mBlendStatesSet)) {
+            mBlendStates[attachmentSlot] = mDevice->CreateBlendStateBuilder()->GetResult();
         }
 
-        return device->CreateRenderPipeline(this);
+        return mDevice->CreateRenderPipeline(this);
     }
 
     void RenderPipelineBuilder::SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState) {
-        if (attachmentSlot > blendStates.size()) {
+        if (attachmentSlot > mBlendStates.size()) {
             HandleError("Attachment index out of bounds");
             return;
         }
-        if (blendStatesSet[attachmentSlot]) {
+        if (mBlendStatesSet[attachmentSlot]) {
             HandleError("Attachment blend state already set");
             return;
         }
 
-        blendStatesSet.set(attachmentSlot);
-        blendStates[attachmentSlot] = blendState;
+        mBlendStatesSet.set(attachmentSlot);
+        mBlendStates[attachmentSlot] = blendState;
     }
 
     void RenderPipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
-        this->depthStencilState = depthStencilState;
+        mDepthStencilState = depthStencilState;
     }
 
     void RenderPipelineBuilder::SetIndexFormat(nxt::IndexFormat format) {
-        this->indexFormat = format;
+        mIndexFormat = format;
     }
 
     void RenderPipelineBuilder::SetInputState(InputStateBase* inputState) {
-        this->inputState = inputState;
+        mInputState = inputState;
     }
 
     void RenderPipelineBuilder::SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
-        this->primitiveTopology = primitiveTopology;
+        mPrimitiveTopology = primitiveTopology;
     }
 
     void RenderPipelineBuilder::SetSubpass(RenderPassBase* renderPass, uint32_t subpass) {
-        this->renderPass = renderPass;
-        this->subpass = subpass;
+        mRenderPass = renderPass;
+        mSubpass = subpass;
     }
 
 }

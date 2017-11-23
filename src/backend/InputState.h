@@ -52,10 +52,10 @@ namespace backend {
             const InputInfo& GetInput(uint32_t slot) const;
 
         private:
-            std::bitset<kMaxVertexAttributes> attributesSetMask;
-            std::array<AttributeInfo, kMaxVertexAttributes> attributeInfos;
-            std::bitset<kMaxVertexInputs> inputsSetMask;
-            std::array<InputInfo, kMaxVertexInputs> inputInfos;
+            std::bitset<kMaxVertexAttributes> mAttributesSetMask;
+            std::array<AttributeInfo, kMaxVertexAttributes> mAttributeInfos;
+            std::bitset<kMaxVertexInputs> mInputsSetMask;
+            std::array<InputInfo, kMaxVertexInputs> mInputInfos;
     };
 
     class InputStateBuilder : public Builder<InputStateBase> {
@@ -73,10 +73,10 @@ namespace backend {
 
             InputStateBase* GetResultImpl() override;
 
-            std::bitset<kMaxVertexAttributes> attributesSetMask;
-            std::array<InputStateBase::AttributeInfo, kMaxVertexAttributes> attributeInfos;
-            std::bitset<kMaxVertexInputs> inputsSetMask;
-            std::array<InputStateBase::InputInfo, kMaxVertexInputs> inputInfos;
+            std::bitset<kMaxVertexAttributes> mAttributesSetMask;
+            std::array<InputStateBase::AttributeInfo, kMaxVertexAttributes> mAttributeInfos;
+            std::bitset<kMaxVertexInputs> mInputsSetMask;
+            std::array<InputStateBase::InputInfo, kMaxVertexInputs> mInputInfos;
     };
 
 }

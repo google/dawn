@@ -40,9 +40,9 @@ namespace backend {
             const LayoutBindingInfo& GetBindingInfo() const;
 
         private:
-            DeviceBase* device;
-            LayoutBindingInfo bindingInfo;
-            bool blueprint = false;
+            DeviceBase* mDevice;
+            LayoutBindingInfo mBindingInfo;
+            bool mIsBlueprint = false;
     };
 
     class BindGroupLayoutBuilder : public Builder<BindGroupLayoutBase> {
@@ -59,7 +59,7 @@ namespace backend {
 
             BindGroupLayoutBase* GetResultImpl() override;
 
-            BindGroupLayoutBase::LayoutBindingInfo bindingInfo;
+            BindGroupLayoutBase::LayoutBindingInfo mBindingInfo;
     };
 
     // Implements the functors necessary for the unordered_set<BGL*>-based cache.

@@ -43,26 +43,26 @@ namespace backend {
         public:
             T& operator[](nxt::ShaderStage stage) {
                 NXT_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
-                return data[static_cast<uint32_t>(stage)];
+                return mData[static_cast<uint32_t>(stage)];
             }
             const T& operator[](nxt::ShaderStage stage) const {
                 NXT_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
-                return data[static_cast<uint32_t>(stage)];
+                return mData[static_cast<uint32_t>(stage)];
             }
 
             T& operator[](nxt::ShaderStageBit stageBit) {
                 uint32_t bit = static_cast<uint32_t>(stageBit);
                 NXT_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
-                return data[Log2(bit)];
+                return mData[Log2(bit)];
             }
             const T& operator[](nxt::ShaderStageBit stageBit) const {
                 uint32_t bit = static_cast<uint32_t>(stageBit);
                 NXT_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
-                return data[Log2(bit)];
+                return mData[Log2(bit)];
             }
 
         private:
-            std::array<T, kNumStages> data;
+            std::array<T, kNumStages> mData;
     };
 
 }

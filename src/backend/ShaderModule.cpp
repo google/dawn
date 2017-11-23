@@ -24,11 +24,11 @@
 namespace backend {
 
     ShaderModuleBase::ShaderModuleBase(ShaderModuleBuilder* builder)
-        : device(builder->device) {
+        : mDevice(builder->mDevice) {
     }
 
     DeviceBase* ShaderModuleBase::GetDevice() const {
-        return device;
+        return mDevice;
     }
 
     void ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
@@ -38,22 +38,22 @@ namespace backend {
 
         switch (compiler.get_execution_model()) {
             case spv::ExecutionModelVertex:
-                executionModel = nxt::ShaderStage::Vertex;
+                mExecutionModel = nxt::ShaderStage::Vertex;
                 break;
             case spv::ExecutionModelFragment:
-                executionModel = nxt::ShaderStage::Fragment;
+                mExecutionModel = nxt::ShaderStage::Fragment;
                 break;
             case spv::ExecutionModelGLCompute:
-                executionModel = nxt::ShaderStage::Compute;
+                mExecutionModel = nxt::ShaderStage::Compute;
                 break;
             default:
                 UNREACHABLE();
         }
 
         // Extract push constants
-        pushConstants.mask.reset();
-        pushConstants.sizes.fill(0);
-        pushConstants.types.fill(PushConstantType::Int);
+        mPushConstants.mask.reset();
+        mPushConstants.sizes.fill(0);
+        mPushConstants.types.fill(PushConstantType::Int);
 
         if (resources.push_constant_buffers.size() > 0) {
             auto interfaceBlock = resources.push_constant_buffers[0];
@@ -87,14 +87,14 @@ namespace backend {
                 }
 
                 if (offset + size > kMaxPushConstants) {
-                    device->HandleError("Push constant block too big in the SPIRV");
+                    mDevice->HandleError("Push constant block too big in the SPIRV");
                     return;
                 }
 
-                pushConstants.mask.set(offset);
-                pushConstants.names[offset] = interfaceBlock.name + "." + compiler.get_member_name(blockType.self, i);
-                pushConstants.sizes[offset] = size;
-                pushConstants.types[offset] = constantType;
+                mPushConstants.mask.set(offset);
+                mPushConstants.names[offset] = interfaceBlock.name + "." + compiler.get_member_name(blockType.self, i);
+                mPushConstants.sizes[offset] = size;
+                mPushConstants.types[offset] = constantType;
             }
         }
 
@@ -109,11 +109,11 @@ namespace backend {
                 uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 
                 if (binding >= kMaxBindingsPerGroup || set >= kMaxBindGroups) {
-                    device->HandleError("Binding over limits in the SPIRV");
+                    mDevice->HandleError("Binding over limits in the SPIRV");
                     continue;
                 }
 
-                auto& info = bindingInfo[set][binding];
+                auto& info = mBindingInfo[set][binding];
                 info.used = true;
                 info.id = resource.id;
                 info.base_type_id = resource.base_type_id;
@@ -127,35 +127,35 @@ namespace backend {
         ExtractResourcesBinding(resources.storage_buffers, compiler, nxt::BindingType::StorageBuffer);
 
         // Extract the vertex attributes
-        if (executionModel == nxt::ShaderStage::Vertex) {
+        if (mExecutionModel == nxt::ShaderStage::Vertex) {
             for (const auto& attrib : resources.stage_inputs) {
                 ASSERT(compiler.get_decoration_mask(attrib.id) & (1ull << spv::DecorationLocation));
                 uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
 
                 if (location >= kMaxVertexAttributes) {
-                    device->HandleError("Attribute location over limits in the SPIRV");
+                    mDevice->HandleError("Attribute location over limits in the SPIRV");
                     return;
                 }
 
-                usedVertexAttributes.set(location);
+                mUsedVertexAttributes.set(location);
             }
 
             // Without a location qualifier on vertex outputs, spirv_cross::CompilerMSL gives them all
             // the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_outputs) {
                 if (!(compiler.get_decoration_mask(attrib.id) & (1ull << spv::DecorationLocation))) {
-                    device->HandleError("Need location qualifier on vertex output");
+                    mDevice->HandleError("Need location qualifier on vertex output");
                     return;
                 }
             }
         }
 
-        if (executionModel == nxt::ShaderStage::Fragment) {
+        if (mExecutionModel == nxt::ShaderStage::Fragment) {
             // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives them all
             // the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
                 if (!(compiler.get_decoration_mask(attrib.id) & (1ull << spv::DecorationLocation))) {
-                    device->HandleError("Need location qualifier on fragment input");
+                    mDevice->HandleError("Need location qualifier on fragment input");
                     return;
                 }
             }
@@ -163,19 +163,19 @@ namespace backend {
     }
 
     const ShaderModuleBase::PushConstantInfo& ShaderModuleBase::GetPushConstants() const {
-        return pushConstants;
+        return mPushConstants;
     }
 
     const ShaderModuleBase::ModuleBindingInfo& ShaderModuleBase::GetBindingInfo() const {
-        return bindingInfo;
+        return mBindingInfo;
     }
 
     const std::bitset<kMaxVertexAttributes>& ShaderModuleBase::GetUsedVertexAttributes() const {
-        return usedVertexAttributes;
+        return mUsedVertexAttributes;
     }
 
     nxt::ShaderStage ShaderModuleBase::GetExecutionModel() const {
-        return executionModel;
+        return mExecutionModel;
     }
 
     bool ShaderModuleBase::IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout) {
@@ -190,7 +190,7 @@ namespace backend {
     bool ShaderModuleBase::IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout) {
         const auto& layoutInfo = layout->GetBindingInfo();
         for (size_t i = 0; i < kMaxBindingsPerGroup; ++i) {
-            const auto& moduleInfo = bindingInfo[group][i];
+            const auto& moduleInfo = mBindingInfo[group][i];
 
             if (!moduleInfo.used) {
                 continue;
@@ -199,7 +199,7 @@ namespace backend {
             if (moduleInfo.type != layoutInfo.types[i]) {
                 return false;
             }
-            if ((layoutInfo.visibilities[i] & StageBit(executionModel)) == 0) {
+            if ((layoutInfo.visibilities[i] & StageBit(mExecutionModel)) == 0) {
                 return false;
             }
         }
@@ -211,20 +211,20 @@ namespace backend {
     }
 
     std::vector<uint32_t> ShaderModuleBuilder::AcquireSpirv() {
-        return std::move(spirv);
+        return std::move(mSpirv);
     }
 
     ShaderModuleBase* ShaderModuleBuilder::GetResultImpl() {
-        if (spirv.size() == 0) {
+        if (mSpirv.size() == 0) {
             HandleError("Shader module needs to have the source set");
             return nullptr;
         }
 
-        return device->CreateShaderModule(this);
+        return mDevice->CreateShaderModule(this);
     }
 
     void ShaderModuleBuilder::SetSource(uint32_t codeSize, const uint32_t* code) {
-        spirv.assign(code, code + codeSize);
+        mSpirv.assign(code, code + codeSize);
     }
 
 }
