@@ -45,19 +45,19 @@ namespace vulkan {
     // Device
 
     Device::Device() {
-        if (!vulkanLib.Open(kVulkanLibName)) {
+        if (!mVulkanLib.Open(kVulkanLibName)) {
             ASSERT(false);
             return;
         }
 
         VulkanFunctions* functions = GetMutableFunctions();
 
-        if (!functions->LoadGlobalProcs(vulkanLib)) {
+        if (!functions->LoadGlobalProcs(mVulkanLib)) {
             ASSERT(false);
             return;
         }
 
-        if (!GatherGlobalInfo(*this, &globalInfo)) {
+        if (!GatherGlobalInfo(*this, &mGlobalInfo)) {
             ASSERT(false);
             return;
         }
@@ -67,9 +67,9 @@ namespace vulkan {
             ASSERT(false);
             return;
         }
-        *static_cast<VulkanGlobalKnobs*>(&globalInfo) = usedGlobalKnobs;
+        *static_cast<VulkanGlobalKnobs*>(&mGlobalInfo) = usedGlobalKnobs;
 
-        if (!functions->LoadInstanceProcs(instance, usedGlobalKnobs)) {
+        if (!functions->LoadInstanceProcs(mInstance, usedGlobalKnobs)) {
             ASSERT(false);
             return;
         }
@@ -87,9 +87,9 @@ namespace vulkan {
             return;
         }
         // TODO(cwallez@chromium.org): Choose the physical device based on ???
-        physicalDevice = physicalDevices[0];
+        mPhysicalDevice = physicalDevices[0];
 
-        if (!GatherDeviceInfo(*this, physicalDevice, &deviceInfo)) {
+        if (!GatherDeviceInfo(*this, mPhysicalDevice, &mDeviceInfo)) {
             ASSERT(false);
             return;
         }
@@ -99,77 +99,77 @@ namespace vulkan {
             ASSERT(false);
             return;
         }
-        *static_cast<VulkanDeviceKnobs*>(&deviceInfo) = usedDeviceKnobs;
+        *static_cast<VulkanDeviceKnobs*>(&mDeviceInfo) = usedDeviceKnobs;
 
-        if (!functions->LoadDeviceProcs(vkDevice, usedDeviceKnobs)) {
+        if (!functions->LoadDeviceProcs(mVkDevice, usedDeviceKnobs)) {
             ASSERT(false);
             return;
         }
 
         GatherQueueFromDevice();
 
-        mapReadRequestTracker = new MapReadRequestTracker(this);
-        memoryAllocator = new MemoryAllocator(this);
-        bufferUploader = new BufferUploader(this);
+        mMapReadRequestTracker = new MapReadRequestTracker(this);
+        mMemoryAllocator = new MemoryAllocator(this);
+        mBufferUploader = new BufferUploader(this);
     }
 
     Device::~Device() {
         // Immediately forget about all pending commands so we don't try to submit them in Tick
-        FreeCommands(&pendingCommands);
+        FreeCommands(&mPendingCommands);
 
-        if (fn.QueueWaitIdle(queue) != VK_SUCCESS) {
+        if (fn.QueueWaitIdle(mQueue) != VK_SUCCESS) {
             ASSERT(false);
         }
         CheckPassedFences();
-        ASSERT(fencesInFlight.empty());
+        ASSERT(mFencesInFlight.empty());
 
         // Some operations might have been started since the last submit and waiting
         // on a serial that doesn't have a corresponding fence enqueued. Force all
         // operations to look as if they were completed (because they were).
-        completedSerial = nextSerial;
+        mCompletedSerial = mNextSerial;
         Tick();
 
-        ASSERT(commandsInFlight.Empty());
-        for (auto& commands : unusedCommands) {
+        ASSERT(mCommandsInFlight.Empty());
+        for (auto& commands : mUnusedCommands) {
             FreeCommands(&commands);
         }
-        unusedCommands.clear();
+        mUnusedCommands.clear();
 
-        for (VkFence fence : unusedFences) {
-            fn.DestroyFence(vkDevice, fence, nullptr);
+        for (VkFence fence : mUnusedFences) {
+            fn.DestroyFence(mVkDevice, fence, nullptr);
         }
-        unusedFences.clear();
+        mUnusedFences.clear();
 
-        if (bufferUploader) {
-            delete bufferUploader;
-            bufferUploader = nullptr;
-        }
-
-        if (memoryAllocator) {
-            delete memoryAllocator;
-            memoryAllocator = nullptr;
+        if (mBufferUploader) {
+            delete mBufferUploader;
+            mBufferUploader = nullptr;
         }
 
-        if (mapReadRequestTracker) {
-            delete mapReadRequestTracker;
-            mapReadRequestTracker = nullptr;
+        if (mMemoryAllocator) {
+            delete mMemoryAllocator;
+            mMemoryAllocator = nullptr;
+        }
+
+        if (mMapReadRequestTracker) {
+            delete mMapReadRequestTracker;
+            mMapReadRequestTracker = nullptr;
         }
 
         // VkQueues are destroyed when the VkDevice is destroyed
-        if (vkDevice != VK_NULL_HANDLE) {
-            fn.DestroyDevice(vkDevice, nullptr);
-            vkDevice = VK_NULL_HANDLE;
+        if (mVkDevice != VK_NULL_HANDLE) {
+            fn.DestroyDevice(mVkDevice, nullptr);
+            mVkDevice = VK_NULL_HANDLE;
         }
 
-        if (debugReportCallback != VK_NULL_HANDLE) {
-            fn.DestroyDebugReportCallbackEXT(instance, debugReportCallback, nullptr);
-            debugReportCallback = VK_NULL_HANDLE;
+        if (mDebugReportCallback != VK_NULL_HANDLE) {
+            fn.DestroyDebugReportCallbackEXT(mInstance, mDebugReportCallback, nullptr);
+            mDebugReportCallback = VK_NULL_HANDLE;
         }
 
         // VkPhysicalDevices are destroyed when the VkInstance is destroyed
-        if (instance != VK_NULL_HANDLE) {
-            fn.DestroyInstance(instance, nullptr);
-            instance = VK_NULL_HANDLE;
+        if (mInstance != VK_NULL_HANDLE) {
+            fn.DestroyInstance(mInstance, nullptr);
+            mInstance = VK_NULL_HANDLE;
         }
     }
 
@@ -240,38 +240,38 @@ namespace vulkan {
         CheckPassedFences();
         RecycleCompletedCommands();
 
-        mapReadRequestTracker->Tick(completedSerial);
-        bufferUploader->Tick(completedSerial);
-        memoryAllocator->Tick(completedSerial);
+        mMapReadRequestTracker->Tick(mCompletedSerial);
+        mBufferUploader->Tick(mCompletedSerial);
+        mMemoryAllocator->Tick(mCompletedSerial);
 
-        if (pendingCommands.pool != VK_NULL_HANDLE) {
+        if (mPendingCommands.pool != VK_NULL_HANDLE) {
             SubmitPendingCommands();
         }
     }
 
     const VulkanDeviceInfo& Device::GetDeviceInfo() const {
-        return deviceInfo;
+        return mDeviceInfo;
     }
 
     MapReadRequestTracker* Device::GetMapReadRequestTracker() const {
-        return mapReadRequestTracker;
+        return mMapReadRequestTracker;
     }
 
     MemoryAllocator* Device::GetMemoryAllocator() const {
-        return memoryAllocator;
+        return mMemoryAllocator;
     }
 
     BufferUploader* Device::GetBufferUploader() const {
-        return bufferUploader;
+        return mBufferUploader;
     }
 
     Serial Device::GetSerial() const {
-        return nextSerial;
+        return mNextSerial;
     }
 
     VkCommandBuffer Device::GetPendingCommandBuffer() {
-        if (pendingCommands.pool == VK_NULL_HANDLE) {
-            pendingCommands = GetUnusedCommands();
+        if (mPendingCommands.pool == VK_NULL_HANDLE) {
+            mPendingCommands = GetUnusedCommands();
 
             VkCommandBufferBeginInfo beginInfo;
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -279,20 +279,20 @@ namespace vulkan {
             beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
             beginInfo.pInheritanceInfo = nullptr;
 
-            if (fn.BeginCommandBuffer(pendingCommands.commandBuffer, &beginInfo) != VK_SUCCESS) {
+            if (fn.BeginCommandBuffer(mPendingCommands.commandBuffer, &beginInfo) != VK_SUCCESS) {
                 ASSERT(false);
             }
         }
 
-        return pendingCommands.commandBuffer;
+        return mPendingCommands.commandBuffer;
     }
 
     void Device::SubmitPendingCommands() {
-        if (pendingCommands.pool == VK_NULL_HANDLE) {
+        if (mPendingCommands.pool == VK_NULL_HANDLE) {
             return;
         }
 
-        if (fn.EndCommandBuffer(pendingCommands.commandBuffer) != VK_SUCCESS) {
+        if (fn.EndCommandBuffer(mPendingCommands.commandBuffer) != VK_SUCCESS) {
             ASSERT(false);
         }
 
@@ -303,27 +303,27 @@ namespace vulkan {
         submitInfo.pWaitSemaphores = nullptr;
         submitInfo.pWaitDstStageMask = 0;
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &pendingCommands.commandBuffer;
+        submitInfo.pCommandBuffers = &mPendingCommands.commandBuffer;
         submitInfo.signalSemaphoreCount = 0;
         submitInfo.pSignalSemaphores = 0;
 
         VkFence fence = GetUnusedFence();
-        if (fn.QueueSubmit(queue, 1, &submitInfo, fence) != VK_SUCCESS) {
+        if (fn.QueueSubmit(mQueue, 1, &submitInfo, fence) != VK_SUCCESS) {
             ASSERT(false);
         }
 
-        commandsInFlight.Enqueue(pendingCommands, nextSerial);
-        pendingCommands = CommandPoolAndBuffer();
-        fencesInFlight.emplace(fence, nextSerial);
-        nextSerial++;
+        mCommandsInFlight.Enqueue(mPendingCommands, mNextSerial);
+        mPendingCommands = CommandPoolAndBuffer();
+        mFencesInFlight.emplace(fence, mNextSerial);
+        mNextSerial++;
     }
 
     VkInstance Device::GetInstance() const {
-        return instance;
+        return mInstance;
     }
 
     VkDevice Device::GetVkDevice() const {
-        return vkDevice;
+        return mVkDevice;
     }
 
     bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs) {
@@ -331,11 +331,11 @@ namespace vulkan {
         std::vector<const char*> extensionsToRequest;
 
         #if defined(NXT_ENABLE_ASSERTS)
-            if (globalInfo.standardValidation) {
+            if (mGlobalInfo.standardValidation) {
                 layersToRequest.push_back(kLayerNameLunargStandardValidation);
                 usedKnobs->standardValidation = true;
             }
-            if (globalInfo.debugReport) {
+            if (mGlobalInfo.debugReport) {
                 extensionsToRequest.push_back(kExtensionNameExtDebugReport);
                 usedKnobs->debugReport = true;
             }
@@ -360,7 +360,7 @@ namespace vulkan {
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
 
-        if (fn.CreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+        if (fn.CreateInstance(&createInfo, nullptr, &mInstance) != VK_SUCCESS) {
             return false;
         }
 
@@ -373,7 +373,7 @@ namespace vulkan {
         std::vector<const char*> extensionsToRequest;
         std::vector<VkDeviceQueueCreateInfo> queuesToRequest;
 
-        if (deviceInfo.swapchain) {
+        if (mDeviceInfo.swapchain) {
             extensionsToRequest.push_back(kExtensionNameKhrSwapchain);
             usedKnobs->swapchain = true;
         }
@@ -382,8 +382,8 @@ namespace vulkan {
         {
             constexpr uint32_t kUniversalFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
             int universalQueueFamily = -1;
-            for (unsigned int i = 0; i < deviceInfo.queueFamilies.size(); ++i) {
-                if ((deviceInfo.queueFamilies[i].queueFlags & kUniversalFlags) == kUniversalFlags) {
+            for (unsigned int i = 0; i < mDeviceInfo.queueFamilies.size(); ++i) {
+                if ((mDeviceInfo.queueFamilies[i].queueFlags & kUniversalFlags) == kUniversalFlags) {
                     universalQueueFamily = i;
                     break;
                 }
@@ -392,7 +392,7 @@ namespace vulkan {
             if (universalQueueFamily == -1) {
                 return false;
             }
-            queueFamily = static_cast<uint32_t>(universalQueueFamily);
+            mQueueFamily = static_cast<uint32_t>(universalQueueFamily);
         }
 
         // Choose to create a single universal queue
@@ -401,7 +401,7 @@ namespace vulkan {
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queueCreateInfo.pNext = nullptr;
             queueCreateInfo.flags = 0;
-            queueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(queueFamily);
+            queueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(mQueueFamily);
             queueCreateInfo.queueCount = 1;
             queueCreateInfo.pQueuePriorities = &zero;
 
@@ -420,7 +420,7 @@ namespace vulkan {
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
         createInfo.pEnabledFeatures = &usedKnobs->features;
 
-        if (fn.CreateDevice(physicalDevice, &createInfo, nullptr, &vkDevice) != VK_SUCCESS) {
+        if (fn.CreateDevice(mPhysicalDevice, &createInfo, nullptr, &mVkDevice) != VK_SUCCESS) {
             return false;
         }
 
@@ -428,7 +428,7 @@ namespace vulkan {
     }
 
     void Device::GatherQueueFromDevice() {
-        fn.GetDeviceQueue(vkDevice, queueFamily, 0, &queue);
+        fn.GetDeviceQueue(mVkDevice, mQueueFamily, 0, &mQueue);
     }
 
     bool Device::RegisterDebugReport() {
@@ -439,7 +439,7 @@ namespace vulkan {
         createInfo.pfnCallback = Device::OnDebugReportCallback;
         createInfo.pUserData = this;
 
-        if (fn.CreateDebugReportCallbackEXT(instance, &createInfo, nullptr, &debugReportCallback) != VK_SUCCESS) {
+        if (fn.CreateDebugReportCallbackEXT(mInstance, &createInfo, nullptr, &mDebugReportCallback) != VK_SUCCESS) {
             return false;
         }
 
@@ -465,9 +465,9 @@ namespace vulkan {
     }
 
     VkFence Device::GetUnusedFence() {
-        if (!unusedFences.empty()) {
-            VkFence fence = unusedFences.back();
-            unusedFences.pop_back();
+        if (!mUnusedFences.empty()) {
+            VkFence fence = mUnusedFences.back();
+            mUnusedFences.pop_back();
             return fence;
         }
 
@@ -477,7 +477,7 @@ namespace vulkan {
         createInfo.flags = 0;
 
         VkFence fence = VK_NULL_HANDLE;
-        if (fn.CreateFence(vkDevice, &createInfo, nullptr, &fence) != VK_SUCCESS) {
+        if (fn.CreateFence(mVkDevice, &createInfo, nullptr, &fence) != VK_SUCCESS) {
             ASSERT(false);
         }
 
@@ -485,11 +485,11 @@ namespace vulkan {
     }
 
     void Device::CheckPassedFences() {
-        while (!fencesInFlight.empty()) {
-            VkFence fence = fencesInFlight.front().first;
-            Serial fenceSerial = fencesInFlight.front().second;
+        while (!mFencesInFlight.empty()) {
+            VkFence fence = mFencesInFlight.front().first;
+            Serial fenceSerial = mFencesInFlight.front().second;
 
-            VkResult result = fn.GetFenceStatus(vkDevice, fence);
+            VkResult result = fn.GetFenceStatus(mVkDevice, fence);
             ASSERT(result == VK_SUCCESS || result == VK_NOT_READY);
 
             // Fence are added in order, so we can stop searching as soon
@@ -498,22 +498,22 @@ namespace vulkan {
                 return;
             }
 
-            if (fn.ResetFences(vkDevice, 1, &fence) != VK_SUCCESS) {
+            if (fn.ResetFences(mVkDevice, 1, &fence) != VK_SUCCESS) {
                 ASSERT(false);
             }
-            unusedFences.push_back(fence);
+            mUnusedFences.push_back(fence);
 
-            fencesInFlight.pop();
+            mFencesInFlight.pop();
 
-            ASSERT(fenceSerial > completedSerial);
-            completedSerial = fenceSerial;
+            ASSERT(fenceSerial > mCompletedSerial);
+            mCompletedSerial = fenceSerial;
         }
     }
 
     Device::CommandPoolAndBuffer Device::GetUnusedCommands() {
-        if (!unusedCommands.empty()) {
-            CommandPoolAndBuffer commands = unusedCommands.back();
-            unusedCommands.pop_back();
+        if (!mUnusedCommands.empty()) {
+            CommandPoolAndBuffer commands = mUnusedCommands.back();
+            mUnusedCommands.pop_back();
             return commands;
         }
 
@@ -523,9 +523,9 @@ namespace vulkan {
         createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-        createInfo.queueFamilyIndex = queueFamily;
+        createInfo.queueFamilyIndex = mQueueFamily;
 
-        if (fn.CreateCommandPool(vkDevice, &createInfo, nullptr, &commands.pool) != VK_SUCCESS) {
+        if (fn.CreateCommandPool(mVkDevice, &createInfo, nullptr, &commands.pool) != VK_SUCCESS) {
             ASSERT(false);
         }
 
@@ -536,7 +536,7 @@ namespace vulkan {
         allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocateInfo.commandBufferCount = 1;
 
-        if (fn.AllocateCommandBuffers(vkDevice, &allocateInfo, &commands.commandBuffer) != VK_SUCCESS) {
+        if (fn.AllocateCommandBuffers(mVkDevice, &allocateInfo, &commands.commandBuffer) != VK_SUCCESS) {
             ASSERT(false);
         }
 
@@ -544,18 +544,18 @@ namespace vulkan {
     }
 
     void Device::RecycleCompletedCommands() {
-        for (auto& commands : commandsInFlight.IterateUpTo(completedSerial)) {
-            if (fn.ResetCommandPool(vkDevice, commands.pool, 0) != VK_SUCCESS) {
+        for (auto& commands : mCommandsInFlight.IterateUpTo(mCompletedSerial)) {
+            if (fn.ResetCommandPool(mVkDevice, commands.pool, 0) != VK_SUCCESS) {
                 ASSERT(false);
             }
-            unusedCommands.push_back(commands);
+            mUnusedCommands.push_back(commands);
         }
-        commandsInFlight.ClearUpTo(completedSerial);
+        mCommandsInFlight.ClearUpTo(mCompletedSerial);
     }
 
     void Device::FreeCommands(CommandPoolAndBuffer* commands) {
         if (commands->pool != VK_NULL_HANDLE) {
-            fn.DestroyCommandPool(vkDevice, commands->pool, nullptr);
+            fn.DestroyCommandPool(mVkDevice, commands->pool, nullptr);
             commands->pool = VK_NULL_HANDLE;
         }
 

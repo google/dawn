@@ -39,8 +39,8 @@ namespace vulkan {
             void UnmapImpl() override;
             void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
-            VkBuffer handle = VK_NULL_HANDLE;
-            DeviceMemoryAllocation memoryAllocation;
+            VkBuffer mHandle = VK_NULL_HANDLE;
+            DeviceMemoryAllocation mMemoryAllocation;
     };
 
     class MapReadRequestTracker {
@@ -52,14 +52,14 @@ namespace vulkan {
             void Tick(Serial finishedSerial);
 
         private:
-            Device* device;
+            Device* mDevice;
 
             struct Request {
                 Ref<Buffer> buffer;
                 uint32_t mapSerial;
                 const void* data;
             };
-            SerialQueue<Request> inflightRequests;
+            SerialQueue<Request> mInflightRequests;
     };
 
 }

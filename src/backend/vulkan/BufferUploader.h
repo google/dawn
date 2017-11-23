@@ -33,8 +33,8 @@ namespace vulkan {
             void Tick(Serial completedSerial);
 
         private:
-            Device* device = nullptr;
-            SerialQueue<VkBuffer> buffersToDelete;
+            Device* mDevice = nullptr;
+            SerialQueue<VkBuffer> mBuffersToDelete;
     };
 
 }

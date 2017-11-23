@@ -23,11 +23,11 @@ namespace backend {
 namespace vulkan {
 
     BufferUploader::BufferUploader(Device* device)
-        : device(device) {
+        : mDevice(device) {
     }
 
     BufferUploader::~BufferUploader() {
-        ASSERT(buffersToDelete.Empty());
+        ASSERT(mBuffersToDelete.Empty());
     }
 
     void BufferUploader::BufferSubData(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size, const void* data) {
@@ -45,19 +45,19 @@ namespace vulkan {
         createInfo.pQueueFamilyIndices = 0;
 
         VkBuffer stagingBuffer = VK_NULL_HANDLE;
-        if (device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &stagingBuffer) != VK_SUCCESS) {
+        if (mDevice->fn.CreateBuffer(mDevice->GetVkDevice(), &createInfo, nullptr, &stagingBuffer) != VK_SUCCESS) {
             ASSERT(false);
         }
 
         VkMemoryRequirements requirements;
-        device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), stagingBuffer, &requirements);
+        mDevice->fn.GetBufferMemoryRequirements(mDevice->GetVkDevice(), stagingBuffer, &requirements);
 
         DeviceMemoryAllocation allocation;
-        if (!device->GetMemoryAllocator()->Allocate(requirements, true, &allocation)) {
+        if (!mDevice->GetMemoryAllocator()->Allocate(requirements, true, &allocation)) {
             ASSERT(false);
         }
 
-        if (device->fn.BindBufferMemory(device->GetVkDevice(), stagingBuffer, allocation.GetMemory(),
+        if (mDevice->fn.BindBufferMemory(mDevice->GetVkDevice(), stagingBuffer, allocation.GetMemory(),
                                         allocation.GetMemoryOffset()) != VK_SUCCESS) {
             ASSERT(false);
         }
@@ -67,7 +67,7 @@ namespace vulkan {
         memcpy(allocation.GetMappedPointer(), data, size);
 
         // Enqueue host write -> transfer src barrier and copy command
-        VkCommandBuffer commands = device->GetPendingCommandBuffer();
+        VkCommandBuffer commands = mDevice->GetPendingCommandBuffer();
 
         VkMemoryBarrier barrier;
         barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -75,7 +75,7 @@ namespace vulkan {
         barrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
-        device->fn.CmdPipelineBarrier(commands,
+        mDevice->fn.CmdPipelineBarrier(commands,
                 VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
                 1, &barrier,
                 0, nullptr,
@@ -85,19 +85,19 @@ namespace vulkan {
         copy.srcOffset = 0;
         copy.dstOffset = offset;
         copy.size = size;
-        device->fn.CmdCopyBuffer(commands, stagingBuffer, buffer, 1, &copy);
+        mDevice->fn.CmdCopyBuffer(commands, stagingBuffer, buffer, 1, &copy);
 
         // TODO(cwallez@chromium.org): Buffers must be deleted before the memory.
         // This happens to work for now, but is fragile.
-        device->GetMemoryAllocator()->Free(&allocation);
-        buffersToDelete.Enqueue(stagingBuffer, device->GetSerial());
+        mDevice->GetMemoryAllocator()->Free(&allocation);
+        mBuffersToDelete.Enqueue(stagingBuffer, mDevice->GetSerial());
     }
 
     void BufferUploader::Tick(Serial completedSerial) {
-        for (VkBuffer buffer : buffersToDelete.IterateUpTo(completedSerial)) {
-            device->fn.DestroyBuffer(device->GetVkDevice(), buffer, nullptr);
+        for (VkBuffer buffer : mBuffersToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroyBuffer(mDevice->GetVkDevice(), buffer, nullptr);
         }
-        buffersToDelete.ClearUpTo(completedSerial);
+        mBuffersToDelete.ClearUpTo(completedSerial);
     }
 
 }

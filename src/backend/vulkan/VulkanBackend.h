@@ -142,8 +142,6 @@ namespace vulkan {
             VkInstance GetInstance() const;
             VkDevice GetVkDevice() const;
 
-            void FakeSubmit();
-
         private:
             bool CreateInstance(VulkanGlobalKnobs* usedKnobs);
             bool CreateDevice(VulkanDeviceKnobs* usedKnobs);
@@ -163,21 +161,21 @@ namespace vulkan {
             // the Device is allowed to mutate them through these private methods.
             VulkanFunctions* GetMutableFunctions();
 
-            VulkanGlobalInfo globalInfo;
-            VulkanDeviceInfo deviceInfo;
+            VulkanGlobalInfo mGlobalInfo;
+            VulkanDeviceInfo mDeviceInfo;
 
-            DynamicLib vulkanLib;
+            DynamicLib mVulkanLib;
 
-            VkInstance instance = VK_NULL_HANDLE;
-            VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-            VkDevice vkDevice = VK_NULL_HANDLE;
-            uint32_t queueFamily = 0;
-            VkQueue queue = VK_NULL_HANDLE;
-            VkDebugReportCallbackEXT debugReportCallback = VK_NULL_HANDLE;
+            VkInstance mInstance = VK_NULL_HANDLE;
+            VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
+            VkDevice mVkDevice = VK_NULL_HANDLE;
+            uint32_t mQueueFamily = 0;
+            VkQueue mQueue = VK_NULL_HANDLE;
+            VkDebugReportCallbackEXT mDebugReportCallback = VK_NULL_HANDLE;
 
-            MapReadRequestTracker* mapReadRequestTracker = nullptr;
-            MemoryAllocator* memoryAllocator = nullptr;
-            BufferUploader* bufferUploader = nullptr;
+            MapReadRequestTracker* mMapReadRequestTracker = nullptr;
+            MemoryAllocator* mMemoryAllocator = nullptr;
+            BufferUploader* mBufferUploader = nullptr;
 
             VkFence GetUnusedFence();
             void CheckPassedFences();
@@ -186,10 +184,10 @@ namespace vulkan {
             // This works only because we have a single queue. Each submit to a queue is associated
             // to a serial and a fence, such that when the fence is "ready" we know the operations
             // have finished.
-            std::queue<std::pair<VkFence, Serial>> fencesInFlight;
-            std::vector<VkFence> unusedFences;
-            Serial nextSerial = 1;
-            Serial completedSerial = 0;
+            std::queue<std::pair<VkFence, Serial>> mFencesInFlight;
+            std::vector<VkFence> mUnusedFences;
+            Serial mNextSerial = 1;
+            Serial mCompletedSerial = 0;
 
             struct CommandPoolAndBuffer {
                 VkCommandPool pool = VK_NULL_HANDLE;
@@ -200,9 +198,9 @@ namespace vulkan {
             void RecycleCompletedCommands();
             void FreeCommands(CommandPoolAndBuffer* commands);
 
-            SerialQueue<CommandPoolAndBuffer> commandsInFlight;
-            std::vector<CommandPoolAndBuffer> unusedCommands;
-            CommandPoolAndBuffer pendingCommands;
+            SerialQueue<CommandPoolAndBuffer> mCommandsInFlight;
+            std::vector<CommandPoolAndBuffer> mUnusedCommands;
+            CommandPoolAndBuffer mPendingCommands;
     };
 
     class Queue : public QueueBase {

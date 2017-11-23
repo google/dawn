@@ -65,20 +65,20 @@ namespace vulkan {
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = 0;
 
-        if (device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &handle) != VK_SUCCESS) {
+        if (device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &mHandle) != VK_SUCCESS) {
             ASSERT(false);
         }
 
         VkMemoryRequirements requirements;
-        device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), handle, &requirements);
+        device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
         bool requestMappable = (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) != 0;
-        if (!device->GetMemoryAllocator()->Allocate(requirements, requestMappable, &memoryAllocation)) {
+        if (!device->GetMemoryAllocator()->Allocate(requirements, requestMappable, &mMemoryAllocation)) {
             ASSERT(false);
         }
 
-        if (device->fn.BindBufferMemory(device->GetVkDevice(), handle, memoryAllocation.GetMemory(),
-                                        memoryAllocation.GetMemoryOffset()) != VK_SUCCESS) {
+        if (device->fn.BindBufferMemory(device->GetVkDevice(), mHandle, mMemoryAllocation.GetMemory(),
+                                        mMemoryAllocation.GetMemoryOffset()) != VK_SUCCESS) {
             ASSERT(false);
         }
     }
@@ -86,11 +86,11 @@ namespace vulkan {
     Buffer::~Buffer() {
         Device* device = ToBackend(GetDevice());
 
-        device->GetMemoryAllocator()->Free(&memoryAllocation);
+        device->GetMemoryAllocator()->Free(&mMemoryAllocation);
 
-        if (handle != VK_NULL_HANDLE) {
-            device->fn.DestroyBuffer(device->GetVkDevice(), handle, nullptr);
-            handle = VK_NULL_HANDLE;
+        if (mHandle != VK_NULL_HANDLE) {
+            device->fn.DestroyBuffer(device->GetVkDevice(), mHandle, nullptr);
+            mHandle = VK_NULL_HANDLE;
         }
     }
 
@@ -100,11 +100,11 @@ namespace vulkan {
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
         BufferUploader* uploader = ToBackend(GetDevice())->GetBufferUploader();
-        uploader->BufferSubData(handle, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
+        uploader->BufferSubData(mHandle, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
-        const uint8_t* memory = memoryAllocation.GetMappedPointer();
+        const uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);
 
         MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadRequestTracker();
@@ -119,11 +119,11 @@ namespace vulkan {
     }
 
     MapReadRequestTracker::MapReadRequestTracker(Device* device)
-        : device(device) {
+        : mDevice(device) {
     }
 
     MapReadRequestTracker::~MapReadRequestTracker() {
-        ASSERT(inflightRequests.Empty());
+        ASSERT(mInflightRequests.Empty());
     }
 
     void MapReadRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, const void* data) {
@@ -132,14 +132,14 @@ namespace vulkan {
         request.mapSerial = mapSerial;
         request.data = data;
 
-        inflightRequests.Enqueue(std::move(request), device->GetSerial());
+        mInflightRequests.Enqueue(std::move(request), mDevice->GetSerial());
     }
 
     void MapReadRequestTracker::Tick(Serial finishedSerial) {
-        for (auto& request : inflightRequests.IterateUpTo(finishedSerial)) {
+        for (auto& request : mInflightRequests.IterateUpTo(finishedSerial)) {
             request.buffer->OnMapReadCommandSerialFinished(request.mapSerial, request.data);
         }
-        inflightRequests.ClearUpTo(finishedSerial);
+        mInflightRequests.ClearUpTo(finishedSerial);
     }
 
 }

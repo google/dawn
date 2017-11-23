@@ -19,31 +19,31 @@ namespace backend {
 namespace vulkan {
 
     DeviceMemoryAllocation::~DeviceMemoryAllocation() {
-        ASSERT(memory == VK_NULL_HANDLE);
+        ASSERT(mMemory == VK_NULL_HANDLE);
     }
 
     VkDeviceMemory DeviceMemoryAllocation::GetMemory() const {
-        return memory;
+        return mMemory;
     }
 
     size_t DeviceMemoryAllocation::GetMemoryOffset() const {
-        return offset;
+        return mOffset;
     }
 
     uint8_t* DeviceMemoryAllocation::GetMappedPointer() const {
-        return mappedPointer;
+        return mMappedPointer;
     }
 
     MemoryAllocator::MemoryAllocator(Device* device)
-        :device(device) {
+        :mDevice(device) {
     }
 
     MemoryAllocator::~MemoryAllocator() {
-        ASSERT(releasedMemory.Empty());
+        ASSERT(mReleasedMemory.Empty());
     }
 
     bool MemoryAllocator::Allocate(VkMemoryRequirements requirements, bool mappable, DeviceMemoryAllocation* allocation) {
-        const VulkanDeviceInfo& info = device->GetDeviceInfo();
+        const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
 
         // Find a suitable memory type for this allocation
         int bestType = -1;
@@ -95,37 +95,37 @@ namespace vulkan {
         allocateInfo.memoryTypeIndex = static_cast<uint32_t>(bestType);
 
         VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
-        if (device->fn.AllocateMemory(device->GetVkDevice(), &allocateInfo, nullptr, &allocatedMemory) != VK_SUCCESS) {
+        if (mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo, nullptr, &allocatedMemory) != VK_SUCCESS) {
             return false;
         }
 
         void* mappedPointer = nullptr;
         if (mappable) {
-            if (device->fn.MapMemory(device->GetVkDevice(), allocatedMemory, 0, requirements.size, 0,
+            if (mDevice->fn.MapMemory(mDevice->GetVkDevice(), allocatedMemory, 0, requirements.size, 0,
                                      &mappedPointer) != VK_SUCCESS) {
                 return false;
             }
         }
 
-        allocation->memory = allocatedMemory;
-        allocation->offset = 0;
-        allocation->mappedPointer = reinterpret_cast<uint8_t*>(mappedPointer);
+        allocation->mMemory = allocatedMemory;
+        allocation->mOffset = 0;
+        allocation->mMappedPointer = reinterpret_cast<uint8_t*>(mappedPointer);
 
         return true;
     }
 
     void MemoryAllocator::Free(DeviceMemoryAllocation* allocation) {
-        releasedMemory.Enqueue(allocation->memory, device->GetSerial());
-        allocation->memory = VK_NULL_HANDLE;
-        allocation->offset = 0;
-        allocation->mappedPointer = nullptr;
+        mReleasedMemory.Enqueue(allocation->mMemory, mDevice->GetSerial());
+        allocation->mMemory = VK_NULL_HANDLE;
+        allocation->mOffset = 0;
+        allocation->mMappedPointer = nullptr;
     }
 
     void MemoryAllocator::Tick(Serial finishedSerial) {
-        for (auto memory : releasedMemory.IterateUpTo(finishedSerial)) {
-            device->fn.FreeMemory(device->GetVkDevice(), memory, nullptr);
+        for (auto memory : mReleasedMemory.IterateUpTo(finishedSerial)) {
+            mDevice->fn.FreeMemory(mDevice->GetVkDevice(), memory, nullptr);
         }
-        releasedMemory.ClearUpTo(finishedSerial);
+        mReleasedMemory.ClearUpTo(finishedSerial);
     }
 }
 }

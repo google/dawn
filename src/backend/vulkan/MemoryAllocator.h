@@ -33,9 +33,9 @@ namespace vulkan {
 
         private:
             friend class MemoryAllocator;
-            VkDeviceMemory memory = VK_NULL_HANDLE;
-            size_t offset = 0;
-            uint8_t* mappedPointer = nullptr;
+            VkDeviceMemory mMemory = VK_NULL_HANDLE;
+            size_t mOffset = 0;
+            uint8_t* mMappedPointer = nullptr;
     };
 
     class MemoryAllocator {
@@ -49,8 +49,8 @@ namespace vulkan {
             void Tick(Serial finishedSerial);
 
         private:
-            Device* device = nullptr;
-            SerialQueue<VkDeviceMemory> releasedMemory;
+            Device* mDevice = nullptr;
+            SerialQueue<VkDeviceMemory> mReleasedMemory;
     };
 
 }
