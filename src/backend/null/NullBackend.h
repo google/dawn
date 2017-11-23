@@ -125,7 +125,7 @@ namespace null {
             std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
 
         private:
-            std::vector<std::unique_ptr<PendingOperation>> pendingOperations;
+            std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
     };
 
     class Buffer : public BufferBase {
@@ -141,7 +141,7 @@ namespace null {
             void UnmapImpl() override;
             void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
-            std::unique_ptr<char[]> backingData;
+            std::unique_ptr<char[]> mBackingData;
     };
 
     class CommandBuffer : public CommandBufferBase {
@@ -152,7 +152,7 @@ namespace null {
             void Execute();
 
         private:
-            CommandIterator commands;
+            CommandIterator mCommands;
     };
 
     class Queue : public QueueBase {

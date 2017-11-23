@@ -104,10 +104,10 @@ namespace null {
     }
 
     void Device::AddPendingOperation(std::unique_ptr<PendingOperation> operation) {
-        pendingOperations.emplace_back(std::move(operation));
+        mPendingOperations.emplace_back(std::move(operation));
     }
     std::vector<std::unique_ptr<PendingOperation>> Device::AcquirePendingOperations() {
-        return std::move(pendingOperations);
+        return std::move(mPendingOperations);
     }
 
     // Buffer
@@ -125,7 +125,7 @@ namespace null {
     Buffer::Buffer(BufferBuilder* builder)
         : BufferBase(builder) {
         if (GetAllowedUsage() & (nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
-            backingData = std::unique_ptr<char[]>(new char[GetSize()]);
+            mBackingData = std::unique_ptr<char[]>(new char[GetSize()]);
         }
     }
 
@@ -138,17 +138,17 @@ namespace null {
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
         ASSERT(start + count <= GetSize());
-        ASSERT(backingData);
-        memcpy(backingData.get() + start, data, count);
+        ASSERT(mBackingData);
+        memcpy(mBackingData.get() + start, data, count);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
         ASSERT(start + count <= GetSize());
-        ASSERT(backingData);
+        ASSERT(mBackingData);
 
         auto operation = new BufferMapReadOperation;
         operation->buffer = this;
-        operation->ptr = backingData.get() + start;
+        operation->ptr = mBackingData.get() + start;
         operation->serial = serial;
 
         ToBackend(GetDevice())->AddPendingOperation(std::unique_ptr<PendingOperation>(operation));
@@ -163,31 +163,31 @@ namespace null {
     // CommandBuffer
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), commands(builder->AcquireCommands()) {
+        : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {
-        FreeCommands(&commands);
+        FreeCommands(&mCommands);
     }
 
     void CommandBuffer::Execute() {
         Command type;
-        while (commands.NextCommandId(&type)) {
+        while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::TransitionBufferUsage:
                     {
-                        TransitionBufferUsageCmd* cmd = commands.NextCommand<TransitionBufferUsageCmd>();
+                        TransitionBufferUsageCmd* cmd = mCommands.NextCommand<TransitionBufferUsageCmd>();
                         cmd->buffer->UpdateUsageInternal(cmd->usage);
                     }
                     break;
                 case Command::TransitionTextureUsage:
                     {
-                        TransitionTextureUsageCmd* cmd = commands.NextCommand<TransitionTextureUsageCmd>();
+                        TransitionTextureUsageCmd* cmd = mCommands.NextCommand<TransitionTextureUsageCmd>();
                         cmd->texture->UpdateUsageInternal(cmd->usage);
                     }
                     break;
                 default:
-                    SkipCommand(&commands, type);
+                    SkipCommand(&mCommands, type);
                     break;
             }
         }
