@@ -32,7 +32,7 @@ namespace opengl {
             GLuint GetVAO();
 
         private:
-            GLuint vertexArrayObject;
+            GLuint mVertexArrayObject;
             std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexInputs> attributesUsingInput;
     };
 

@@ -31,7 +31,7 @@ namespace opengl {
             GLuint GetHandle() const;
 
         private:
-            GLuint handle;
+            GLuint mHandle;
     };
 
 }

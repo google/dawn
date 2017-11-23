@@ -31,10 +31,10 @@ namespace opengl {
         private:
             void CallGLStencilFunc();
 
-            GLenum stencilBackCompareFunction = GL_ALWAYS;
-            GLenum stencilFrontCompareFunction = GL_ALWAYS;
-            GLuint stencilReadMask = 0xffffffff;
-            GLuint stencilReference = 0;
+            GLenum mStencilBackCompareFunction = GL_ALWAYS;
+            GLenum mStencilFrontCompareFunction = GL_ALWAYS;
+            GLuint mStencilReadMask = 0xffffffff;
+            GLuint mStencilReference = 0;
     };
 
 }

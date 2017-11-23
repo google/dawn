@@ -44,11 +44,11 @@ namespace opengl {
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
         : RenderPipelineBase(builder), PipelineGL(this, builder),
-          glPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {
+          mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {
     }
 
     GLenum RenderPipeline::GetGLPrimitiveTopology() const {
-        return glPrimitiveTopology;
+        return mGlPrimitiveTopology;
     }
 
     void RenderPipeline::ApplyNow(PersistentPipelineState &persistentPipelineState) {

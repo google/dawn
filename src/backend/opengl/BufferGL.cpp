@@ -23,17 +23,17 @@ namespace opengl {
 
     Buffer::Buffer(BufferBuilder* builder)
         : BufferBase(builder) {
-        glGenBuffers(1, &buffer);
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glGenBuffers(1, &mBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glBufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);
     }
 
     GLuint Buffer::GetHandle() const {
-        return buffer;
+        return mBuffer;
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
     }
 
@@ -41,13 +41,13 @@ namespace opengl {
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
         // TODO(cwallez@chromium.org): this crashes on Mac NVIDIA, use GetBufferSubData there instead?
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_READ_BIT);
         CallMapReadCallback(serial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, data);
     }
 
     void Buffer::UnmapImpl() {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 

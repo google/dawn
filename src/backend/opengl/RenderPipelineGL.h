@@ -37,7 +37,7 @@ namespace opengl {
             void ApplyNow(PersistentPipelineState &persistentPipelineState);
 
         private:
-            GLenum glPrimitiveTopology;
+            GLenum mGlPrimitiveTopology;
     };
 
 }

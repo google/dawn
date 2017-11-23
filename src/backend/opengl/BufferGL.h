@@ -36,7 +36,7 @@ namespace opengl {
             void UnmapImpl() override;
             void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
 
-            GLuint buffer = 0;
+            GLuint mBuffer = 0;
     };
 
     class BufferView : public BufferViewBase {

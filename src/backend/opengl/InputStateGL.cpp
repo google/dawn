@@ -22,8 +22,8 @@ namespace opengl {
 
     InputState::InputState(InputStateBuilder* builder)
         : InputStateBase(builder) {
-        glGenVertexArrays(1, &vertexArrayObject);
-        glBindVertexArray(vertexArrayObject);
+        glGenVertexArrays(1, &mVertexArrayObject);
+        glBindVertexArray(mVertexArrayObject);
         auto& attributesSetMask = GetAttributesSetMask();
         for (uint32_t location = 0; location < attributesSetMask.size(); ++location) {
             if (!attributesSetMask[location]) {
@@ -58,7 +58,7 @@ namespace opengl {
     }
 
     GLuint InputState::GetVAO() {
-        return vertexArrayObject;
+        return mVertexArrayObject;
     }
 
 }

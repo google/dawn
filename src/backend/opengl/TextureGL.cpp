@@ -64,8 +64,8 @@ namespace opengl {
     }
 
     Texture::Texture(TextureBuilder* builder, GLuint handle)
-        : TextureBase(builder), handle(handle) {
-        target = TargetForDimension(GetDimension());
+        : TextureBase(builder), mHandle(handle) {
+        mTarget = TargetForDimension(GetDimension());
 
         uint32_t width = GetWidth();
         uint32_t height = GetHeight();
@@ -73,17 +73,17 @@ namespace opengl {
 
         auto formatInfo = GetGLFormatInfo(GetFormat());
 
-        glBindTexture(target, handle);
+        glBindTexture(mTarget, handle);
 
         for (uint32_t i = 0; i < levels; ++i) {
-            glTexImage2D(target, i, formatInfo.internalFormat, width, height, 0, formatInfo.format, formatInfo.type, nullptr);
+            glTexImage2D(mTarget, i, formatInfo.internalFormat, width, height, 0, formatInfo.format, formatInfo.type, nullptr);
             width = std::max(uint32_t(1), width / 2);
             height = std::max(uint32_t(1), height / 2);
         }
 
         // The texture is not complete if it uses mipmapping and not all levels up to
         // MAX_LEVEL have been defined.
-        glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, levels - 1);
+        glTexParameteri(mTarget, GL_TEXTURE_MAX_LEVEL, levels - 1);
     }
 
     Texture::~Texture() {
@@ -91,11 +91,11 @@ namespace opengl {
     }
 
     GLuint Texture::GetHandle() const {
-        return handle;
+        return mHandle;
     }
 
     GLenum Texture::GetGLTarget() const {
-        return target;
+        return mTarget;
     }
 
     TextureFormatInfo Texture::GetGLFormat() const {

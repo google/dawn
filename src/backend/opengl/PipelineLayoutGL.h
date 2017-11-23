@@ -36,9 +36,9 @@ namespace opengl {
             size_t GetNumSampledTextures() const;
 
         private:
-            BindingIndexInfo indexInfo;
-            size_t numSamplers;
-            size_t numSampledTextures;
+            BindingIndexInfo mIndexInfo;
+            size_t mNumSamplers;
+            size_t mNumSampledTextures;
     };
 
 }

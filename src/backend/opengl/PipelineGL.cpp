@@ -87,26 +87,26 @@ namespace opengl {
             }
         };
 
-        program = glCreateProgram();
+        mProgram = glCreateProgram();
 
         for (auto stage : IterateStages(parent->GetStageMask())) {
             const ShaderModule* module = ToBackend(builder->GetStageInfo(stage).module.Get());
 
             GLuint shader = CreateShader(GLShaderType(stage), module->GetSource());
-            glAttachShader(program, shader);
+            glAttachShader(mProgram, shader);
         }
 
-        glLinkProgram(program);
+        glLinkProgram(mProgram);
 
         GLint linkStatus = GL_FALSE;
-        glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+        glGetProgramiv(mProgram, GL_LINK_STATUS, &linkStatus);
         if (linkStatus == GL_FALSE) {
             GLint infoLogLength = 0;
-            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+            glGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
 
             if (infoLogLength > 1) {
                 std::vector<char> buffer(infoLogLength);
-                glGetProgramInfoLog(program, infoLogLength, nullptr, &buffer[0]);
+                glGetProgramInfoLog(mProgram, infoLogLength, nullptr, &buffer[0]);
                 std::cout << "Program link failed:\n";
                 std::cout << buffer.data() << std::endl;
             }
@@ -114,10 +114,10 @@ namespace opengl {
 
         for (auto stage : IterateStages(parent->GetStageMask())) {
             const ShaderModule* module = ToBackend(builder->GetStageInfo(stage).module.Get());
-            FillPushConstants(module, &glPushConstants[stage], program);
+            FillPushConstants(module, &mGlPushConstants[stage], mProgram);
         }
 
-        glUseProgram(program);
+        glUseProgram(mProgram);
 
         // The uniforms are part of the program state so we can pre-bind buffer units, texture units etc.
         const auto& layout = ToBackend(parent->GetLayout());
@@ -135,15 +135,15 @@ namespace opengl {
                 switch (groupInfo.types[binding]) {
                     case nxt::BindingType::UniformBuffer:
                         {
-                            GLint location = glGetUniformBlockIndex(program, name.c_str());
-                            glUniformBlockBinding(program, location, indices[group][binding]);
+                            GLint location = glGetUniformBlockIndex(mProgram, name.c_str());
+                            glUniformBlockBinding(mProgram, location, indices[group][binding]);
                         }
                         break;
 
                     case nxt::BindingType::StorageBuffer:
                         {
-                            GLuint location = glGetProgramResourceIndex(program, GL_SHADER_STORAGE_BLOCK, name.c_str());
-                            glShaderStorageBlockBinding(program, location, indices[group][binding]);
+                            GLuint location = glGetProgramResourceIndex(mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
+                            glShaderStorageBlockBinding(mProgram, location, indices[group][binding]);
                         }
                         break;
 
@@ -167,20 +167,20 @@ namespace opengl {
                 }
             }
 
-            unitsForSamplers.resize(layout->GetNumSamplers());
-            unitsForTextures.resize(layout->GetNumSampledTextures());
+            mUnitsForSamplers.resize(layout->GetNumSamplers());
+            mUnitsForTextures.resize(layout->GetNumSampledTextures());
 
             GLuint textureUnit = layout->GetTextureUnitsUsed();
             for (const auto& combined : combinedSamplersSet) {
                 std::string name = combined.GetName();
-                GLint location = glGetUniformLocation(program, name.c_str());
+                GLint location = glGetUniformLocation(mProgram, name.c_str());
                 glUniform1i(location, textureUnit);
 
                 GLuint samplerIndex = indices[combined.samplerLocation.group][combined.samplerLocation.binding];
-                unitsForSamplers[samplerIndex].push_back(textureUnit);
+                mUnitsForSamplers[samplerIndex].push_back(textureUnit);
 
                 GLuint textureIndex = indices[combined.textureLocation.group][combined.textureLocation.binding];
-                unitsForTextures[textureIndex].push_back(textureUnit);
+                mUnitsForTextures[textureIndex].push_back(textureUnit);
 
                 textureUnit ++;
             }
@@ -188,25 +188,25 @@ namespace opengl {
     }
 
     const PipelineGL::GLPushConstantInfo& PipelineGL::GetGLPushConstants(nxt::ShaderStage stage) const {
-        return glPushConstants[stage];
+        return mGlPushConstants[stage];
     }
 
     const std::vector<GLuint>& PipelineGL::GetTextureUnitsForSampler(GLuint index) const {
-        ASSERT(index < unitsForSamplers.size());
-        return unitsForSamplers[index];
+        ASSERT(index < mUnitsForSamplers.size());
+        return mUnitsForSamplers[index];
     }
 
     const std::vector<GLuint>& PipelineGL::GetTextureUnitsForTexture(GLuint index) const {
-        ASSERT(index < unitsForSamplers.size());
-        return unitsForTextures[index];
+        ASSERT(index < mUnitsForSamplers.size());
+        return mUnitsForTextures[index];
     }
 
     GLuint PipelineGL::GetProgramHandle() const {
-        return program;
+        return mProgram;
     }
 
     void PipelineGL::ApplyNow() {
-        glUseProgram(program);
+        glUseProgram(mProgram);
     }
 
 }

@@ -49,8 +49,8 @@ namespace opengl {
             const CombinedSamplerInfo& GetCombinedSamplerInfo() const;
 
         private:
-            CombinedSamplerInfo combinedInfo;
-            std::string glslSource;
+            CombinedSamplerInfo mCombinedInfo;
+            std::string mGlslSource;
     };
 
 }

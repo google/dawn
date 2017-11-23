@@ -24,36 +24,36 @@ namespace opengl {
     }
 
     void PersistentPipelineState::SetStencilFuncsAndMask(GLenum stencilBackCompareFunction, GLenum stencilFrontCompareFunction, uint32_t stencilReadMask) {
-        if (this->stencilBackCompareFunction == stencilBackCompareFunction &&
-            this->stencilFrontCompareFunction == stencilFrontCompareFunction &&
-            this->stencilReadMask == stencilReadMask) {
+        if (mStencilBackCompareFunction == stencilBackCompareFunction &&
+            mStencilFrontCompareFunction == stencilFrontCompareFunction &&
+            mStencilReadMask == stencilReadMask) {
             return;
         }
 
-        this->stencilBackCompareFunction = stencilBackCompareFunction;
-        this->stencilFrontCompareFunction = stencilFrontCompareFunction;
-        this->stencilReadMask = stencilReadMask;
+        mStencilBackCompareFunction = stencilBackCompareFunction;
+        mStencilFrontCompareFunction = stencilFrontCompareFunction;
+        mStencilReadMask = stencilReadMask;
         CallGLStencilFunc();
     }
 
     void PersistentPipelineState::SetStencilReference(uint32_t stencilReference) {
-        if (this->stencilReference == stencilReference) {
+        if (mStencilReference == stencilReference) {
             return;
         }
 
-        this->stencilReference = stencilReference;
+        mStencilReference = stencilReference;
         CallGLStencilFunc();
     }
 
     void PersistentPipelineState::CallGLStencilFunc() {
         glStencilFuncSeparate(GL_BACK,
-                stencilBackCompareFunction,
-                stencilReference,
-                stencilReadMask);
+                mStencilBackCompareFunction,
+                mStencilReference,
+                mStencilReadMask);
         glStencilFuncSeparate(GL_FRONT,
-                stencilFrontCompareFunction,
-                stencilReference,
-                stencilReadMask);
+                mStencilFrontCompareFunction,
+                mStencilReference,
+                mStencilReadMask);
     }
 
 }

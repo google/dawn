@@ -59,13 +59,13 @@ namespace opengl {
 
     Sampler::Sampler(SamplerBuilder* builder)
         : SamplerBase(builder) {
-        glGenSamplers(1, &handle);
-        glSamplerParameteri(handle, GL_TEXTURE_MAG_FILTER, MagFilterMode(builder->GetMagFilter()));
-        glSamplerParameteri(handle, GL_TEXTURE_MIN_FILTER, MinFilterMode(builder->GetMinFilter(), builder->GetMipMapFilter()));
+        glGenSamplers(1, &mHandle);
+        glSamplerParameteri(mHandle, GL_TEXTURE_MAG_FILTER, MagFilterMode(builder->GetMagFilter()));
+        glSamplerParameteri(mHandle, GL_TEXTURE_MIN_FILTER, MinFilterMode(builder->GetMinFilter(), builder->GetMipMapFilter()));
     }
 
     GLuint Sampler::GetHandle() const {
-        return handle;
+        return mHandle;
     }
 
 }

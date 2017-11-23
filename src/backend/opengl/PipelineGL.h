@@ -43,10 +43,10 @@ namespace opengl {
             void ApplyNow();
 
         private:
-            GLuint program;
-            PerStage<GLPushConstantInfo> glPushConstants;
-            std::vector<std::vector<GLuint>> unitsForSamplers;
-            std::vector<std::vector<GLuint>> unitsForTextures;
+            GLuint mProgram;
+            PerStage<GLPushConstantInfo> mGlPushConstants;
+            std::vector<std::vector<GLuint>> mUnitsForSamplers;
+            std::vector<std::vector<GLuint>> mUnitsForTextures;
     };
 
 }

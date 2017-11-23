@@ -43,8 +43,8 @@ namespace opengl {
             void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
 
         private:
-            GLuint handle;
-            GLenum target;
+            GLuint mHandle;
+            GLenum mTarget;
     };
 
     class TextureView : public TextureViewBase {

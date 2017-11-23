@@ -36,32 +36,32 @@ namespace opengl {
 
                 switch (groupInfo.types[binding]) {
                     case nxt::BindingType::UniformBuffer:
-                        indexInfo[group][binding] = uboIndex;
+                        mIndexInfo[group][binding] = uboIndex;
                         uboIndex ++;
                         break;
                     case nxt::BindingType::Sampler:
-                        indexInfo[group][binding] = samplerIndex;
+                        mIndexInfo[group][binding] = samplerIndex;
                         samplerIndex ++;
                         break;
                     case nxt::BindingType::SampledTexture:
-                        indexInfo[group][binding] = sampledTextureIndex;
+                        mIndexInfo[group][binding] = sampledTextureIndex;
                         sampledTextureIndex ++;
                         break;
 
                     case nxt::BindingType::StorageBuffer:
-                        indexInfo[group][binding] = ssboIndex;
+                        mIndexInfo[group][binding] = ssboIndex;
                         ssboIndex ++;
                         break;
                 }
             }
         }
 
-        numSamplers = samplerIndex;
-        numSampledTextures = sampledTextureIndex;
+        mNumSamplers = samplerIndex;
+        mNumSampledTextures = sampledTextureIndex;
     }
 
     const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo() const {
-        return indexInfo;
+        return mIndexInfo;
     }
 
     GLuint PipelineLayout::GetTextureUnitsUsed() const {
@@ -69,11 +69,11 @@ namespace opengl {
     }
 
     size_t PipelineLayout::GetNumSamplers() const {
-        return numSamplers;
+        return mNumSamplers;
     }
 
     size_t PipelineLayout::GetNumSampledTextures() const {
-        return numSampledTextures;
+        return mNumSampledTextures;
     }
 
 }

@@ -92,9 +92,9 @@ namespace opengl {
         compiler.build_combined_image_samplers();
 
         for (const auto& combined : compiler.get_combined_image_samplers()) {
-            combinedInfo.emplace_back();
+            mCombinedInfo.emplace_back();
 
-            auto& info = combinedInfo.back();
+            auto& info = mCombinedInfo.back();
             info.samplerLocation.group = compiler.get_decoration(combined.sampler_id, spv::DecorationDescriptorSet);
             info.samplerLocation.binding = compiler.get_decoration(combined.sampler_id, spv::DecorationBinding);
             info.textureLocation.group = compiler.get_decoration(combined.image_id, spv::DecorationDescriptorSet);
@@ -116,15 +116,15 @@ namespace opengl {
             }
         }
 
-        glslSource = compiler.compile();
+        mGlslSource = compiler.compile();
     }
 
     const char* ShaderModule::GetSource() const {
-        return reinterpret_cast<const char*>(glslSource.data());
+        return reinterpret_cast<const char*>(mGlslSource.data());
     }
 
     const ShaderModule::CombinedSamplerInfo& ShaderModule::GetCombinedSamplerInfo() const {
-        return combinedInfo;
+        return mCombinedInfo;
     }
 
 }

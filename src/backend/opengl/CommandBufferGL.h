@@ -31,7 +31,7 @@ namespace opengl {
             void Execute();
 
         private:
-            CommandIterator commands;
+            CommandIterator mCommands;
     };
 
 }
