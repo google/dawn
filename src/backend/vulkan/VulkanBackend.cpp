@@ -381,8 +381,8 @@ namespace vulkan {
         // Find a universal queue family
         {
             constexpr uint32_t kUniversalFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
-            ssize_t universalQueueFamily = -1;
-            for (size_t i = 0; i < deviceInfo.queueFamilies.size(); ++i) {
+            int universalQueueFamily = -1;
+            for (unsigned int i = 0; i < deviceInfo.queueFamilies.size(); ++i) {
                 if ((deviceInfo.queueFamilies[i].queueFlags & kUniversalFlags) == kUniversalFlags) {
                     universalQueueFamily = i;
                     break;
