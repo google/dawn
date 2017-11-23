@@ -48,7 +48,7 @@ class DynamicLib {
         }
 
     private:
-        void* handle = nullptr;
+        void* mHandle = nullptr;
 };
 
 #endif // COMMON_DYNAMICLIB_H_

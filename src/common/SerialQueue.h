@@ -40,11 +40,11 @@ class SerialQueue {
                 T& operator*() const;
 
             private:
-                StorageIterator storageIterator;
-                // Special case the serialIterator when it should be equal to storageIterator.begin()
-                // otherwise we could ask storageIterator.begin() when storageIterator is storage.end()
-                // which is invalid. storageIterator.begin() is tagged with a nullptr.
-                T* serialIterator;
+                StorageIterator mStorageIterator;
+                // Special case the mSerialIterator when it should be equal to mStorageIterator.begin()
+                // otherwise we could ask mStorageIterator.begin() when mStorageIterator is mStorage.end()
+                // which is invalid. mStorageIterator.begin() is tagged with a nullptr.
+                T* mSerialIterator;
         };
 
         class ConstIterator {
@@ -57,8 +57,8 @@ class SerialQueue {
                 const T& operator*() const;
 
             private:
-                ConstStorageIterator storageIterator;
-                const T* serialIterator;
+                ConstStorageIterator mStorageIterator;
+                const T* mSerialIterator;
         };
 
         class BeginEnd {
@@ -69,8 +69,8 @@ class SerialQueue {
                 Iterator end() const;
 
             private:
-                StorageIterator startIt;
-                StorageIterator endIt;
+                StorageIterator mStartIt;
+                StorageIterator mEndIt;
         };
 
         class ConstBeginEnd {
@@ -81,8 +81,8 @@ class SerialQueue {
                 ConstIterator end() const;
 
             private:
-                ConstStorageIterator startIt;
-                ConstStorageIterator endIt;
+                ConstStorageIterator mStartIt;
+                ConstStorageIterator mEndIt;
         };
 
         // The serial must be given in (not strictly) increasing order.
@@ -110,90 +110,90 @@ class SerialQueue {
         // Returns the first StorageIterator that a serial bigger than serial.
         ConstStorageIterator FindUpTo(Serial serial) const;
         StorageIterator FindUpTo(Serial serial);
-        Storage storage;
+        Storage mStorage;
 };
 
 // SerialQueue
 
 template<typename T>
 void SerialQueue<T>::Enqueue(const T& value, Serial serial) {
-    NXT_ASSERT(Empty() || storage.back().first <= serial);
+    NXT_ASSERT(Empty() || mStorage.back().first <= serial);
 
-    if (Empty() || storage.back().first < serial) {
-        storage.emplace_back(SerialPair(serial, {}));
+    if (Empty() || mStorage.back().first < serial) {
+        mStorage.emplace_back(SerialPair(serial, {}));
     }
-    storage.back().second.emplace_back(value);
+    mStorage.back().second.emplace_back(value);
 }
 
 template<typename T>
 void SerialQueue<T>::Enqueue(T&& value, Serial serial) {
-    NXT_ASSERT(Empty() || storage.back().first <= serial);
+    NXT_ASSERT(Empty() || mStorage.back().first <= serial);
 
-    if (Empty() || storage.back().first < serial) {
-        storage.emplace_back(SerialPair(serial, {}));
+    if (Empty() || mStorage.back().first < serial) {
+        mStorage.emplace_back(SerialPair(serial, {}));
     }
-    storage.back().second.emplace_back(value);
+    mStorage.back().second.emplace_back(value);
 }
 
 template<typename T>
 void SerialQueue<T>::Enqueue(const std::vector<T>& values, Serial serial) {
     NXT_ASSERT(values.size() > 0);
-    NXT_ASSERT(Empty() || storage.back().first <= serial);
-    storage.emplace_back(SerialPair(serial, {values}));
+    NXT_ASSERT(Empty() || mStorage.back().first <= serial);
+    mStorage.emplace_back(SerialPair(serial, {values}));
 }
 
 template<typename T>
 void SerialQueue<T>::Enqueue(std::vector<T>&& values, Serial serial) {
     NXT_ASSERT(values.size() > 0);
-    NXT_ASSERT(Empty() || storage.back().first <= serial);
-    storage.emplace_back(SerialPair(serial, {values}));
+    NXT_ASSERT(Empty() || mStorage.back().first <= serial);
+    mStorage.emplace_back(SerialPair(serial, {values}));
 }
 
 template<typename T>
 bool SerialQueue<T>::Empty() const {
-    return storage.empty();
+    return mStorage.empty();
 }
 
 template<typename T>
 typename SerialQueue<T>::ConstBeginEnd SerialQueue<T>::IterateAll() const {
-    return {storage.begin(), storage.end()};
+    return {mStorage.begin(), mStorage.end()};
 }
 
 template<typename T>
 typename SerialQueue<T>::ConstBeginEnd SerialQueue<T>::IterateUpTo(Serial serial) const {
-    return {storage.begin(), FindUpTo(serial)};
+    return {mStorage.begin(), FindUpTo(serial)};
 }
 
 template<typename T>
 typename SerialQueue<T>::BeginEnd SerialQueue<T>::IterateAll() {
-    return {storage.begin(), storage.end()};
+    return {mStorage.begin(), mStorage.end()};
 }
 
 template<typename T>
 typename SerialQueue<T>::BeginEnd SerialQueue<T>::IterateUpTo(Serial serial) {
-    return {storage.begin(), FindUpTo(serial)};
+    return {mStorage.begin(), FindUpTo(serial)};
 }
 
 template<typename T>
 void SerialQueue<T>::Clear() {
-    storage.clear();
+    mStorage.clear();
 }
 
 template<typename T>
 void SerialQueue<T>::ClearUpTo(Serial serial) {
-    storage.erase(storage.begin(), FindUpTo(serial));
+    mStorage.erase(mStorage.begin(), FindUpTo(serial));
 }
 
 template<typename T>
 Serial SerialQueue<T>::FirstSerial() const {
     NXT_ASSERT(!Empty());
-    return storage.front().first;
+    return mStorage.front().first;
 }
 
 template<typename T>
 typename SerialQueue<T>::ConstStorageIterator SerialQueue<T>::FindUpTo(Serial serial) const {
-    auto it = storage.begin();
-    while (it != storage.end() && it->first <= serial) {
+    auto it = mStorage.begin();
+    while (it != mStorage.end() && it->first <= serial) {
         it ++;
     }
     return it;
@@ -201,8 +201,8 @@ typename SerialQueue<T>::ConstStorageIterator SerialQueue<T>::FindUpTo(Serial se
 
 template<typename T>
 typename SerialQueue<T>::StorageIterator SerialQueue<T>::FindUpTo(Serial serial) {
-    auto it = storage.begin();
-    while (it != storage.end() && it->first <= serial) {
+    auto it = mStorage.begin();
+    while (it != mStorage.end() && it->first <= serial) {
         it ++;
     }
     return it;
@@ -212,39 +212,39 @@ typename SerialQueue<T>::StorageIterator SerialQueue<T>::FindUpTo(Serial serial)
 
 template<typename T>
 SerialQueue<T>::BeginEnd::BeginEnd(typename SerialQueue<T>::StorageIterator start, typename SerialQueue<T>::StorageIterator end)
-    : startIt(start), endIt(end) {
+    : mStartIt(start), mEndIt(end) {
 }
 
 template<typename T>
 typename SerialQueue<T>::Iterator SerialQueue<T>::BeginEnd::begin() const {
-    return {startIt};
+    return {mStartIt};
 }
 
 template<typename T>
 typename SerialQueue<T>::Iterator SerialQueue<T>::BeginEnd::end() const {
-    return {endIt};
+    return {mEndIt};
 }
 
 // SerialQueue::Iterator
 
 template<typename T>
 SerialQueue<T>::Iterator::Iterator(typename SerialQueue<T>::StorageIterator start)
-    : storageIterator(start), serialIterator(nullptr) {
+    : mStorageIterator(start), mSerialIterator(nullptr) {
 }
 
 template<typename T>
 typename SerialQueue<T>::Iterator& SerialQueue<T>::Iterator::operator++() {
-    T* vectorData = storageIterator->second.data();
+    T* vectorData = mStorageIterator->second.data();
 
-    if (serialIterator == nullptr) {
-        serialIterator = vectorData + 1;
+    if (mSerialIterator == nullptr) {
+        mSerialIterator = vectorData + 1;
     } else {
-        serialIterator ++;
+        mSerialIterator ++;
     }
 
-    if (serialIterator >= vectorData + storageIterator->second.size()) {
-        serialIterator = nullptr;
-        storageIterator ++;
+    if (mSerialIterator >= vectorData + mStorageIterator->second.size()) {
+        mSerialIterator = nullptr;
+        mStorageIterator ++;
     }
 
     return *this;
@@ -252,7 +252,7 @@ typename SerialQueue<T>::Iterator& SerialQueue<T>::Iterator::operator++() {
 
 template<typename T>
 bool SerialQueue<T>::Iterator::operator==(const typename SerialQueue<T>::Iterator& other) const {
-    return other.storageIterator == storageIterator && other.serialIterator == serialIterator;
+    return other.mStorageIterator == mStorageIterator && other.mSerialIterator == mSerialIterator;
 }
 
 template<typename T>
@@ -262,49 +262,49 @@ bool SerialQueue<T>::Iterator::operator!=(const typename SerialQueue<T>::Iterato
 
 template<typename T>
 T& SerialQueue<T>::Iterator::operator*() const {
-    if (serialIterator == nullptr) {
-        return *storageIterator->second.begin();
+    if (mSerialIterator == nullptr) {
+        return *mStorageIterator->second.begin();
     }
-    return *serialIterator;
+    return *mSerialIterator;
 }
 
 // SerialQueue::ConstBeginEnd
 
 template<typename T>
 SerialQueue<T>::ConstBeginEnd::ConstBeginEnd(typename SerialQueue<T>::ConstStorageIterator start, typename SerialQueue<T>::ConstStorageIterator end)
-    : startIt(start), endIt(end) {
+    : mStartIt(start), mEndIt(end) {
 }
 
 template<typename T>
 typename SerialQueue<T>::ConstIterator SerialQueue<T>::ConstBeginEnd::begin() const {
-    return {startIt};
+    return {mStartIt};
 }
 
 template<typename T>
 typename SerialQueue<T>::ConstIterator SerialQueue<T>::ConstBeginEnd::end() const {
-    return {endIt};
+    return {mEndIt};
 }
 
 // SerialQueue::ConstIterator
 
 template<typename T>
 SerialQueue<T>::ConstIterator::ConstIterator(typename SerialQueue<T>::ConstStorageIterator start)
-    : storageIterator(start), serialIterator(nullptr) {
+    : mStorageIterator(start), mSerialIterator(nullptr) {
 }
 
 template<typename T>
 typename SerialQueue<T>::ConstIterator& SerialQueue<T>::ConstIterator::operator++() {
-    const T* vectorData = storageIterator->second.data();
+    const T* vectorData = mStorageIterator->second.data();
 
-    if (serialIterator == nullptr) {
-        serialIterator = vectorData + 1;
+    if (mSerialIterator == nullptr) {
+        mSerialIterator = vectorData + 1;
     } else {
-        serialIterator ++;
+        mSerialIterator ++;
     }
 
-    if (serialIterator >= vectorData + storageIterator->second.size()) {
-        serialIterator = nullptr;
-        storageIterator ++;
+    if (mSerialIterator >= vectorData + mStorageIterator->second.size()) {
+        mSerialIterator = nullptr;
+        mStorageIterator ++;
     }
 
     return *this;
@@ -312,7 +312,7 @@ typename SerialQueue<T>::ConstIterator& SerialQueue<T>::ConstIterator::operator+
 
 template<typename T>
 bool SerialQueue<T>::ConstIterator::operator==(const typename SerialQueue<T>::ConstIterator& other) const {
-    return other.storageIterator == storageIterator && other.serialIterator == serialIterator;
+    return other.mStorageIterator == mStorageIterator && other.mSerialIterator == mSerialIterator;
 }
 
 template<typename T>
@@ -322,10 +322,10 @@ bool SerialQueue<T>::ConstIterator::operator!=(const typename SerialQueue<T>::Co
 
 template<typename T>
 const T& SerialQueue<T>::ConstIterator::operator*() const {
-    if (serialIterator == nullptr) {
-        return *storageIterator->second.begin();
+    if (mSerialIterator == nullptr) {
+        return *mStorageIterator->second.begin();
     }
-    return *serialIterator;
+    return *mSerialIterator;
 }
 
 #endif // COMMON_SERIALQUEUE_H_

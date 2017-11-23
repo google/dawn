@@ -35,7 +35,7 @@ namespace utils {
     #endif
 
     void BackendBinding::SetWindow(GLFWwindow* window) {
-        this->window = window;
+        mWindow = window;
     }
 
     BackendBinding* CreateBinding(BackendType type) {

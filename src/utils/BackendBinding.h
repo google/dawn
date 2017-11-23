@@ -43,7 +43,7 @@ namespace utils {
             void SetWindow(GLFWwindow* window);
 
         protected:
-            GLFWwindow* window = nullptr;
+            GLFWwindow* mWindow = nullptr;
     };
 
     BackendBinding* CreateBinding(BackendType type);

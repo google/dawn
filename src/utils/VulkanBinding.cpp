@@ -70,17 +70,17 @@ namespace utils {
                 backend::vulkan::Init(procs, device);
             }
             uint64_t GetSwapChainImplementation() override {
-                if (swapchainImpl.userData == nullptr) {
-                    swapchainImpl = SwapChainImplVulkan::Create(window);
+                if (mSwapchainImpl.userData == nullptr) {
+                    mSwapchainImpl = SwapChainImplVulkan::Create(mWindow);
                 }
-                return reinterpret_cast<uint64_t>(&swapchainImpl);
+                return reinterpret_cast<uint64_t>(&mSwapchainImpl);
             }
             nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
                 return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
             }
 
         private:
-            nxtSwapChainImplementation swapchainImpl = {};
+            nxtSwapChainImplementation mSwapchainImpl = {};
     };
 
 

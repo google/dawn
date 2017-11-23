@@ -33,9 +33,9 @@ class TerribleCommandBuffer : public CommandSerializer {
         void Flush() override;
 
     private:
-        CommandHandler* handler = nullptr;
-        size_t offset = 0;
-        uint8_t buffer[10000000];
+        CommandHandler* mHandler = nullptr;
+        size_t mOffset = 0;
+        uint8_t mBuffer[10000000];
 };
 
 }

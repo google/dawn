@@ -29,65 +29,65 @@ DynamicLib::~DynamicLib() {
 }
 
 DynamicLib::DynamicLib(DynamicLib&& other) {
-    std::swap(this->handle, other.handle);
+    std::swap(mHandle, other.mHandle);
 }
 
 DynamicLib& DynamicLib::operator=(DynamicLib&& other) {
-    std::swap(this->handle, other.handle);
+    std::swap(mHandle, other.mHandle);
     return *this;
 }
 
 bool DynamicLib::Valid() const {
-    return handle != nullptr;
+    return mHandle != nullptr;
 }
 
 bool DynamicLib::Open(const std::string& filename, std::string* error) {
     #if NXT_PLATFORM_WINDOWS
-        handle = LoadLibraryA(filename.c_str());
+        mHandle = LoadLibraryA(filename.c_str());
 
-        if (handle == nullptr && error != nullptr) {
+        if (mHandle == nullptr && error != nullptr) {
             *error = "Windows Error: " + std::to_string(GetLastError());
         }
     #elif NXT_PLATFORM_POSIX
-        handle = dlopen(filename.c_str(), RTLD_NOW);
+        mHandle = dlopen(filename.c_str(), RTLD_NOW);
 
-        if (handle == nullptr && error != nullptr) {
+        if (mHandle == nullptr && error != nullptr) {
             *error = dlerror();
         }
     #else
         #error "Unsupported platform for DynamicLib"
     #endif
 
-    return handle != nullptr;
+    return mHandle != nullptr;
 }
 
 void DynamicLib::Close() {
-    if (handle == nullptr) {
+    if (mHandle == nullptr) {
         return;
     }
 
     #if NXT_PLATFORM_WINDOWS
-        FreeLibrary(static_cast<HMODULE>(handle));
+        FreeLibrary(static_cast<HMODULE>(mHandle));
     #elif NXT_PLATFORM_POSIX
-        dlclose(handle);
+        dlclose(mHandle);
     #else
         #error "Unsupported platform for DynamicLib"
     #endif
 
-    handle = nullptr;
+    mHandle = nullptr;
 }
 
 void* DynamicLib::GetProc(const std::string& procName, std::string* error) const {
     void* proc = nullptr;
 
     #if NXT_PLATFORM_WINDOWS
-        proc = reinterpret_cast<void*>(GetProcAddress(static_cast<HMODULE>(handle), procName.c_str()));
+        proc = reinterpret_cast<void*>(GetProcAddress(static_cast<HMODULE>(mHandle), procName.c_str()));
 
         if (proc == nullptr && error != nullptr) {
             *error = "Windows Error: " + std::to_string(GetLastError());
         }
     #elif NXT_PLATFORM_POSIX
-        proc = reinterpret_cast<void*>(dlsym(handle, procName.c_str()));
+        proc = reinterpret_cast<void*>(dlsym(mHandle, procName.c_str()));
 
         if (proc == nullptr && error != nullptr) {
             *error = dlerror();

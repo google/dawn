@@ -39,34 +39,34 @@ namespace utils {
             }
 
         private:
-            GLFWwindow* window = nullptr;
-            uint32_t cfgWidth = 0;
-            uint32_t cfgHeight = 0;
-            GLuint backFBO = 0;
-            GLuint backTexture = 0;
+            GLFWwindow* mWindow = nullptr;
+            uint32_t mWidth = 0;
+            uint32_t mHeight = 0;
+            GLuint mBackFBO = 0;
+            GLuint mBackTexture = 0;
 
             SwapChainImplGL(GLFWwindow* window)
-                : window(window) {
+                : mWindow(window) {
             }
 
             ~SwapChainImplGL() {
-                glDeleteTextures(1, &backTexture);
-                glDeleteFramebuffers(1, &backFBO);
+                glDeleteTextures(1, &mBackTexture);
+                glDeleteFramebuffers(1, &mBackFBO);
             }
 
             // For GenerateSwapChainImplementation
             friend class SwapChainImpl;
 
             void Init(nxtWSIContextGL*) {
-                glGenTextures(1, &backTexture);
-                glBindTexture(GL_TEXTURE_2D, backTexture);
+                glGenTextures(1, &mBackTexture);
+                glBindTexture(GL_TEXTURE_2D, mBackTexture);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, 0,
                         GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-                glGenFramebuffers(1, &backFBO);
-                glBindFramebuffer(GL_READ_FRAMEBUFFER, backFBO);
+                glGenFramebuffers(1, &mBackFBO);
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
                 glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                        GL_TEXTURE_2D, backTexture, 0);
+                        GL_TEXTURE_2D, mBackTexture, 0);
             }
 
             nxtSwapChainError Configure(nxtTextureFormat format, nxtTextureUsageBit,
@@ -76,10 +76,10 @@ namespace utils {
                 }
                 ASSERT(width > 0);
                 ASSERT(height > 0);
-                cfgWidth = width;
-                cfgHeight = height;
+                mWidth = width;
+                mHeight = height;
 
-                glBindTexture(GL_TEXTURE_2D, backTexture);
+                glBindTexture(GL_TEXTURE_2D, mBackTexture);
                 // Reallocate the texture
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
                         GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -88,16 +88,16 @@ namespace utils {
             }
 
             nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
-                nextTexture->texture = reinterpret_cast<void*>(static_cast<size_t>(backTexture));
+                nextTexture->texture = reinterpret_cast<void*>(static_cast<size_t>(mBackTexture));
                 return NXT_SWAP_CHAIN_NO_ERROR;
             }
 
             nxtSwapChainError Present() {
-                glBindFramebuffer(GL_READ_FRAMEBUFFER, backFBO);
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
                 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-                glBlitFramebuffer(0, 0, cfgWidth, cfgHeight, 0, 0, cfgWidth, cfgHeight,
+                glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, mWidth, mHeight,
                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
-                glfwSwapBuffers(window);
+                glfwSwapBuffers(mWindow);
 
                 return NXT_SWAP_CHAIN_NO_ERROR;
             }
@@ -119,17 +119,17 @@ namespace utils {
                 #endif
             }
             void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
-                glfwMakeContextCurrent(window);
+                glfwMakeContextCurrent(mWindow);
                 backend::opengl::Init(reinterpret_cast<void*(*)(const char*)>(glfwGetProcAddress), procs, device);
 
-                backendDevice = *device;
+                mBackendDevice = *device;
             }
 
             uint64_t GetSwapChainImplementation() override {
-                if (swapchainImpl.userData == nullptr) {
-                    swapchainImpl = SwapChainImplGL::Create(window);
+                if (mSwapchainImpl.userData == nullptr) {
+                    mSwapchainImpl = SwapChainImplGL::Create(mWindow);
                 }
-                return reinterpret_cast<uint64_t>(&swapchainImpl);
+                return reinterpret_cast<uint64_t>(&mSwapchainImpl);
             }
 
             nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
@@ -137,8 +137,8 @@ namespace utils {
             }
 
         private:
-            nxtDevice backendDevice = nullptr;
-            nxtSwapChainImplementation swapchainImpl = {};
+            nxtDevice mBackendDevice = nullptr;
+            nxtSwapChainImplementation mSwapchainImpl = {};
     };
 
     BackendBinding* CreateOpenGLBinding() {

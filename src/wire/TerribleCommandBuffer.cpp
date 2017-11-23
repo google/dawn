@@ -20,22 +20,22 @@ namespace wire {
     TerribleCommandBuffer::TerribleCommandBuffer() {
     }
 
-    TerribleCommandBuffer::TerribleCommandBuffer(CommandHandler* handler) : handler(handler) {
+    TerribleCommandBuffer::TerribleCommandBuffer(CommandHandler* handler) : mHandler(handler) {
     }
 
     void TerribleCommandBuffer::SetHandler(CommandHandler* handler) {
-        this->handler = handler;
+        mHandler = handler;
     }
 
     void* TerribleCommandBuffer::GetCmdSpace(size_t size) {
-        if (size > sizeof(buffer)) {
+        if (size > sizeof(mBuffer)) {
             return nullptr;
         }
 
-        uint8_t* result = &buffer[offset];
-        offset += size;
+        uint8_t* result = &mBuffer[mOffset];
+        mOffset += size;
 
-        if (offset > sizeof(buffer)) {
+        if (mOffset > sizeof(mBuffer)) {
             Flush();
             return GetCmdSpace(size);
         }
@@ -44,8 +44,8 @@ namespace wire {
     }
 
     void TerribleCommandBuffer::Flush() {
-        handler->HandleCommands(buffer, offset);
-        offset = 0;
+        mHandler->HandleCommands(mBuffer, mOffset);
+        mOffset = 0;
     }
 
 }
