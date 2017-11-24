@@ -17,11 +17,11 @@
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/ResourceAllocator.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     namespace {
-        D3D12_RESOURCE_STATES D3D12TextureUsage(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
+        D3D12_RESOURCE_STATES D3D12TextureUsage(nxt::TextureUsageBit usage,
+                                                nxt::TextureFormat format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
             if (usage & nxt::TextureUsageBit::TransferSrc) {
@@ -31,7 +31,8 @@ namespace d3d12 {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
             if (usage & nxt::TextureUsageBit::Sampled) {
-                resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+                resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
+                                  D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
             }
             if (usage & nxt::TextureUsageBit::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
@@ -47,7 +48,8 @@ namespace d3d12 {
             return resourceState;
         }
 
-        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
+        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(nxt::TextureUsageBit usage,
+                                                nxt::TextureFormat format) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
             if (usage & nxt::TextureUsageBit::Storage) {
@@ -62,7 +64,7 @@ namespace d3d12 {
             }
 
             ASSERT(!(flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) ||
-                    flags == D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+                   flags == D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
             return flags;
         }
 
@@ -75,7 +77,7 @@ namespace d3d12 {
             }
         }
 
-    }
+    }  // namespace
 
     DXGI_FORMAT D3D12TextureFormat(nxt::TextureFormat format) {
         switch (format) {
@@ -94,7 +96,6 @@ namespace d3d12 {
 
     Texture::Texture(TextureBuilder* builder)
         : TextureBase(builder), mDevice(ToBackend(builder->GetDevice())) {
-
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12TextureDimension(GetDimension());
         resourceDescriptor.Alignment = 0;
@@ -108,14 +109,17 @@ namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage(), GetFormat());
 
-        mResource = mDevice->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12TextureUsage(GetUsage(), GetFormat()));
+        mResource =
+            mDevice->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
+                                                      D3D12TextureUsage(GetUsage(), GetFormat()));
         mResourcePtr = mResource.Get();
     }
 
     // With this constructor, the lifetime of the ID3D12Resource is externally managed.
     Texture::Texture(TextureBuilder* builder, ID3D12Resource* nativeTexture)
-        : TextureBase(builder), mDevice(ToBackend(builder->GetDevice())),
-        mResourcePtr(nativeTexture) {
+        : TextureBase(builder),
+          mDevice(ToBackend(builder->GetDevice())),
+          mResourcePtr(nativeTexture) {
     }
 
     Texture::~Texture() {
@@ -133,7 +137,9 @@ namespace d3d12 {
         return mResourcePtr;
     }
 
-    bool Texture::GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier) {
+    bool Texture::GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage,
+                                               nxt::TextureUsageBit targetUsage,
+                                               D3D12_RESOURCE_BARRIER* barrier) {
         D3D12_RESOURCE_STATES stateBefore = D3D12TextureUsage(currentUsage, GetFormat());
         D3D12_RESOURCE_STATES stateAfter = D3D12TextureUsage(targetUsage, GetFormat());
 
@@ -151,16 +157,15 @@ namespace d3d12 {
         return true;
     }
 
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) {
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
+                                      nxt::TextureUsageBit targetUsage) {
         D3D12_RESOURCE_BARRIER barrier;
         if (GetResourceTransitionBarrier(currentUsage, targetUsage, &barrier)) {
             mDevice->GetPendingCommandList()->ResourceBarrier(1, &barrier);
         }
     }
 
-    TextureView::TextureView(TextureViewBuilder* builder)
-        : TextureViewBase(builder) {
-
+    TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
         mSrvDesc.Format = D3D12TextureFormat(GetTexture()->GetFormat());
         mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         switch (GetTexture()->GetDimension()) {
@@ -196,5 +201,4 @@ namespace d3d12 {
         return dsvDesc;
     }
 
-}
-}
+}}  // namespace backend::d3d12

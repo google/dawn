@@ -19,11 +19,9 @@
 
 #include <nxt/nxt_wsi.h>
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
-    SwapChain::SwapChain(SwapChainBuilder* builder)
-        : SwapChainBase(builder) {
+    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
         nxtWSIContextD3D12 wsiContext = {};
         wsiContext.device = reinterpret_cast<nxtDevice>(GetDevice());
@@ -46,6 +44,4 @@ namespace d3d12 {
         return new Texture(builder, nativeTexture);
     }
 
-}
-}
-
+}}  // namespace backend::d3d12

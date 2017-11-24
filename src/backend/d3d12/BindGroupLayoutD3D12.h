@@ -19,39 +19,37 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class BindGroupLayout : public BindGroupLayoutBase {
-        public:
-            BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder);
+      public:
+        BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder);
 
-            enum DescriptorType {
-                CBV,
-                UAV,
-                SRV,
-                Sampler,
-                Count,
-            };
+        enum DescriptorType {
+            CBV,
+            UAV,
+            SRV,
+            Sampler,
+            Count,
+        };
 
-            const std::array<uint32_t, kMaxBindingsPerGroup>& GetBindingOffsets() const;
-            uint32_t GetCbvUavSrvDescriptorTableSize() const;
-            uint32_t GetSamplerDescriptorTableSize() const;
-            uint32_t GetCbvUavSrvDescriptorCount() const;
-            uint32_t GetSamplerDescriptorCount() const;
-            const D3D12_DESCRIPTOR_RANGE* GetCbvUavSrvDescriptorRanges() const;
-            const D3D12_DESCRIPTOR_RANGE* GetSamplerDescriptorRanges() const;
+        const std::array<uint32_t, kMaxBindingsPerGroup>& GetBindingOffsets() const;
+        uint32_t GetCbvUavSrvDescriptorTableSize() const;
+        uint32_t GetSamplerDescriptorTableSize() const;
+        uint32_t GetCbvUavSrvDescriptorCount() const;
+        uint32_t GetSamplerDescriptorCount() const;
+        const D3D12_DESCRIPTOR_RANGE* GetCbvUavSrvDescriptorRanges() const;
+        const D3D12_DESCRIPTOR_RANGE* GetSamplerDescriptorRanges() const;
 
-        private:
-            Device* mDevice;
-            std::array<uint32_t, kMaxBindingsPerGroup> mBindingOffsets;
-            std::array<uint32_t, DescriptorType::Count> mDescriptorCounts;
-            D3D12_DESCRIPTOR_RANGE mRanges[DescriptorType::Count];
+      private:
+        Device* mDevice;
+        std::array<uint32_t, kMaxBindingsPerGroup> mBindingOffsets;
+        std::array<uint32_t, DescriptorType::Count> mDescriptorCounts;
+        D3D12_DESCRIPTOR_RANGE mRanges[DescriptorType::Count];
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_BINDGROUPLAYOUTD3D12_H_
+#endif  // BACKEND_D3D12_BINDGROUPLAYOUTD3D12_H_

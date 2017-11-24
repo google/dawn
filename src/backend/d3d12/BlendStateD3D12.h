@@ -19,20 +19,18 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class BlendState : public BlendStateBase {
-        public:
-            BlendState(BlendStateBuilder* builder);
+      public:
+        BlendState(BlendStateBuilder* builder);
 
-            const D3D12_RENDER_TARGET_BLEND_DESC& GetD3D12BlendDesc() const;
+        const D3D12_RENDER_TARGET_BLEND_DESC& GetD3D12BlendDesc() const;
 
-        private:
-            D3D12_RENDER_TARGET_BLEND_DESC mBlendDesc;
+      private:
+        D3D12_RENDER_TARGET_BLEND_DESC mBlendDesc;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_BLENDSTATED3D12_H_
+#endif  // BACKEND_D3D12_BLENDSTATED3D12_H_

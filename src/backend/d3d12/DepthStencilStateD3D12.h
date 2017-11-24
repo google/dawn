@@ -19,23 +19,21 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class DepthStencilState : public DepthStencilStateBase {
-        public:
-            DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
+      public:
+        DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
 
-            const D3D12_DEPTH_STENCIL_DESC& GetD3D12DepthStencilDescriptor() const;
+        const D3D12_DEPTH_STENCIL_DESC& GetD3D12DepthStencilDescriptor() const;
 
-        private:
-            Device* mDevice;
-            D3D12_DEPTH_STENCIL_DESC mDepthStencilDescriptor;
+      private:
+        Device* mDevice;
+        D3D12_DEPTH_STENCIL_DESC mDepthStencilDescriptor;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_DEPTHSTENCILSTATED3D12_H_
+#endif  // BACKEND_D3D12_DEPTHSTENCILSTATED3D12_H_

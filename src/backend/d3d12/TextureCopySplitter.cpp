@@ -17,11 +17,16 @@
 #include "backend/d3d12/d3d12_platform.h"
 #include "common/Assert.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     namespace {
-        void ComputeTexelOffsets(uint32_t offset, uint32_t rowPitch, uint32_t slicePitch, uint32_t texelSize, uint32_t* texelOffsetX, uint32_t* texelOffsetY, uint32_t* texelOffsetZ) {		
+        void ComputeTexelOffsets(uint32_t offset,
+                                 uint32_t rowPitch,
+                                 uint32_t slicePitch,
+                                 uint32_t texelSize,
+                                 uint32_t* texelOffsetX,
+                                 uint32_t* texelOffsetY,
+                                 uint32_t* texelOffsetZ) {
             uint32_t byteOffsetX = offset % rowPitch;
             offset -= byteOffsetX;
             uint32_t byteOffsetY = offset % slicePitch;
@@ -31,10 +36,17 @@ namespace d3d12 {
             *texelOffsetY = byteOffsetY / rowPitch;
             *texelOffsetZ = byteOffsetZ / slicePitch;
         }
-    }
+    }  // namespace
 
-    TextureCopySplit ComputeTextureCopySplit(uint32_t x, uint32_t y, uint32_t z, uint32_t width, uint32_t height, uint32_t depth, uint32_t texelSize, uint32_t offset, uint32_t rowPitch) {
-
+    TextureCopySplit ComputeTextureCopySplit(uint32_t x,
+                                             uint32_t y,
+                                             uint32_t z,
+                                             uint32_t width,
+                                             uint32_t height,
+                                             uint32_t depth,
+                                             uint32_t texelSize,
+                                             uint32_t offset,
+                                             uint32_t rowPitch) {
         TextureCopySplit copy;
 
         if (z != 0 || depth > 1) {
@@ -58,27 +70,30 @@ namespace d3d12 {
             copy.copies[0].copySize.width = width;
             copy.copies[0].copySize.height = height;
             copy.copies[0].copySize.depth = depth;
-            
+
             copy.copies[0].bufferOffset.x = 0;
             copy.copies[0].bufferOffset.y = 0;
             copy.copies[0].bufferOffset.z = 0;
             copy.copies[0].bufferSize.width = width;
             copy.copies[0].bufferSize.height = height;
             copy.copies[0].bufferSize.depth = depth;
-            
-            // Return early. There is only one copy needed because the offset is already 512-byte aligned
+
+            // Return early. There is only one copy needed because the offset is already 512-byte
+            // aligned
             return copy;
         }
 
         ASSERT(alignedOffset < offset);
 
         uint32_t texelOffsetX, texelOffsetY, texelOffsetZ;
-        ComputeTexelOffsets(offset - alignedOffset, rowPitch, rowPitch * height, texelSize, &texelOffsetX, &texelOffsetY, &texelOffsetZ);
+        ComputeTexelOffsets(offset - alignedOffset, rowPitch, rowPitch * height, texelSize,
+                            &texelOffsetX, &texelOffsetY, &texelOffsetZ);
 
         uint32_t rowPitchInTexels = rowPitch / texelSize;
 
         if (width + texelOffsetX <= rowPitchInTexels) {
-            // The region's rows fit inside the row pitch. In this case, extend the width of the PlacedFootprint and copy the buffer with an offset location
+            // The region's rows fit inside the row pitch. In this case, extend the width of the
+            // PlacedFootprint and copy the buffer with an offset location
             //  |<--------------- row pitch --------------->|
             //
             //  |-------------------------------------------|
@@ -133,7 +148,6 @@ namespace d3d12 {
         //  |+++++++++                                  |
         //  |-------------------------------------------|
 
-
         //  Copy 0:
         //  |-------------------------------------------|
         //  |                                           |
@@ -173,7 +187,6 @@ namespace d3d12 {
         copy.copies[0].bufferSize.height = height + texelOffsetY;
         copy.copies[0].bufferSize.depth = depth + texelOffsetZ;
 
-
         copy.copies[1].textureOffset.x = x + copy.copies[0].copySize.width;
         copy.copies[1].textureOffset.y = y;
         copy.copies[1].textureOffset.z = z;
@@ -190,10 +203,7 @@ namespace d3d12 {
         copy.copies[1].bufferSize.height = height + texelOffsetY + 1;
         copy.copies[1].bufferSize.depth = depth + texelOffsetZ;
 
-
         return copy;
-
     }
 
-}
-}
+}}  // namespace backend::d3d12

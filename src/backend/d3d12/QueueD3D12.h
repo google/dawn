@@ -19,26 +19,24 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
     class CommandBuffer;
 
     class Queue : public QueueBase {
-        public:
-            Queue(Device* device, QueueBuilder* builder);
+      public:
+        Queue(Device* device, QueueBuilder* builder);
 
-            // NXT API
-            void Submit(uint32_t numCommands, CommandBuffer* const * commands);
+        // NXT API
+        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
 
-        private:
-            Device* mDevice;
+      private:
+        Device* mDevice;
 
-            ComPtr<ID3D12GraphicsCommandList> mCommandList;
+        ComPtr<ID3D12GraphicsCommandList> mCommandList;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_QUEUED3D12_H_
+#endif  // BACKEND_D3D12_QUEUED3D12_H_

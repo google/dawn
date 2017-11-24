@@ -14,17 +14,15 @@
 
 #include "backend/d3d12/QueueD3D12.h"
 
-#include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/CommandBufferD3D12.h"
+#include "backend/d3d12/D3D12Backend.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
-    Queue::Queue(Device* device, QueueBuilder* builder)
-        : QueueBase(builder), mDevice(device) {
+    Queue::Queue(Device* device, QueueBuilder* builder) : QueueBase(builder), mDevice(device) {
     }
 
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
+    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
         mDevice->Tick();
 
         mDevice->OpenCommandList(&mCommandList);
@@ -33,10 +31,9 @@ namespace d3d12 {
         }
         ASSERT_SUCCESS(mCommandList->Close());
 
-        mDevice->ExecuteCommandLists({ mCommandList.Get() });
+        mDevice->ExecuteCommandLists({mCommandList.Get()});
 
         mDevice->NextSerial();
     }
 
-}
-}
+}}  // namespace backend::d3d12

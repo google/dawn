@@ -16,8 +16,7 @@
 
 #include "common/BitSetIterator.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     static DXGI_FORMAT VertexFormatType(nxt::VertexFormat format) {
         switch (format) {
@@ -47,7 +46,6 @@ namespace d3d12 {
 
     InputState::InputState(Device* device, InputStateBuilder* builder)
         : InputStateBase(builder), mDevice(device) {
-
         const auto& attributesSetMask = GetAttributesSetMask();
 
         unsigned int count = 0;
@@ -60,7 +58,8 @@ namespace d3d12 {
 
             const AttributeInfo& attribute = GetAttribute(i);
 
-            // If the HLSL semantic is TEXCOORDN the SemanticName should be "TEXCOORD" and the SemanticIndex N
+            // If the HLSL semantic is TEXCOORDN the SemanticName should be "TEXCOORD" and the
+            // SemanticIndex N
             inputElementDescriptor.SemanticName = "TEXCOORD";
             inputElementDescriptor.SemanticIndex = static_cast<uint32_t>(i);
             inputElementDescriptor.Format = VertexFormatType(attribute.format);
@@ -70,7 +69,8 @@ namespace d3d12 {
 
             inputElementDescriptor.AlignedByteOffset = attribute.offset;
             inputElementDescriptor.InputSlotClass = InputStepModeFunction(input.stepMode);
-            if (inputElementDescriptor.InputSlotClass == D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA) {
+            if (inputElementDescriptor.InputSlotClass ==
+                D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA) {
                 inputElementDescriptor.InstanceDataStepRate = 0;
             } else {
                 inputElementDescriptor.InstanceDataStepRate = 1;
@@ -79,12 +79,10 @@ namespace d3d12 {
 
         mInputLayoutDescriptor.pInputElementDescs = mInputElementDescriptors;
         mInputLayoutDescriptor.NumElements = count;
-
     }
 
     const D3D12_INPUT_LAYOUT_DESC& InputState::GetD3D12InputLayoutDescriptor() const {
         return mInputLayoutDescriptor;
     }
 
-}
-}
+}}  // namespace backend::d3d12

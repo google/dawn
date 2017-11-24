@@ -16,8 +16,7 @@
 
 #include "common/BitSetIterator.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     static D3D12_STENCIL_OP StencilOp(nxt::StencilOperation op) {
         switch (op) {
@@ -43,8 +42,7 @@ namespace d3d12 {
     }
 
     static D3D12_COMPARISON_FUNC ComparisonFunc(nxt::CompareFunction func) {
-        switch (func)
-        {
+        switch (func) {
             case nxt::CompareFunction::Always:
                 return D3D12_COMPARISON_FUNC_ALWAYS;
             case nxt::CompareFunction::Equal:
@@ -66,7 +64,8 @@ namespace d3d12 {
         }
     }
 
-    static D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(backend::DepthStencilStateBase::StencilFaceInfo faceInfo) {
+    static D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(
+        backend::DepthStencilStateBase::StencilFaceInfo faceInfo) {
         D3D12_DEPTH_STENCILOP_DESC desc;
 
         desc.StencilFailOp = StencilOp(faceInfo.stencilFail);
@@ -79,9 +78,9 @@ namespace d3d12 {
 
     DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
         : DepthStencilStateBase(builder), mDevice(device) {
-
         mDepthStencilDescriptor.DepthEnable = TRUE;
-        mDepthStencilDescriptor.DepthWriteMask = GetDepth().depthWriteEnabled ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+        mDepthStencilDescriptor.DepthWriteMask =
+            GetDepth().depthWriteEnabled ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
         mDepthStencilDescriptor.DepthFunc = ComparisonFunc(GetDepth().compareFunction);
 
         mDepthStencilDescriptor.StencilEnable = StencilTestEnabled() ? TRUE : FALSE;
@@ -90,11 +89,10 @@ namespace d3d12 {
 
         mDepthStencilDescriptor.FrontFace = StencilOpDesc(GetStencil().front);
         mDepthStencilDescriptor.BackFace = StencilOpDesc(GetStencil().back);
-	}
+    }
 
     const D3D12_DEPTH_STENCIL_DESC& DepthStencilState::GetD3D12DepthStencilDescriptor() const {
         return mDepthStencilDescriptor;
     }
 
-}
-}
+}}  // namespace backend::d3d12

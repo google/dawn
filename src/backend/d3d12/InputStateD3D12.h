@@ -19,24 +19,22 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class InputState : public InputStateBase {
-        public:
-            InputState(Device* device, InputStateBuilder* builder);
+      public:
+        InputState(Device* device, InputStateBuilder* builder);
 
-            const D3D12_INPUT_LAYOUT_DESC& GetD3D12InputLayoutDescriptor() const;
+        const D3D12_INPUT_LAYOUT_DESC& GetD3D12InputLayoutDescriptor() const;
 
-        private:
-            Device* mDevice;
-            D3D12_INPUT_LAYOUT_DESC mInputLayoutDescriptor;
-            D3D12_INPUT_ELEMENT_DESC mInputElementDescriptors[kMaxVertexAttributes];
+      private:
+        Device* mDevice;
+        D3D12_INPUT_LAYOUT_DESC mInputLayoutDescriptor;
+        D3D12_INPUT_ELEMENT_DESC mInputElementDescriptors[kMaxVertexAttributes];
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_INPUTSTATED3D12_H_
+#endif  // BACKEND_D3D12_INPUTSTATED3D12_H_

@@ -19,14 +19,11 @@
 
 #include <array>
 
-namespace backend {
-namespace d3d12 {
-
+namespace backend { namespace d3d12 {
 
     struct TextureCopySplit {
-
         static constexpr unsigned int kMaxTextureCopyRegions = 2;
-        
+
         struct Extent {
             uint32_t width = 0;
             uint32_t height = 0;
@@ -52,9 +49,16 @@ namespace d3d12 {
         std::array<CopyInfo, kMaxTextureCopyRegions> copies;
     };
 
-    TextureCopySplit ComputeTextureCopySplit(uint32_t x, uint32_t y, uint32_t z, uint32_t width, uint32_t height, uint32_t depth, uint32_t texelSize, uint32_t offset, uint32_t rowPitch);
+    TextureCopySplit ComputeTextureCopySplit(uint32_t x,
+                                             uint32_t y,
+                                             uint32_t z,
+                                             uint32_t width,
+                                             uint32_t height,
+                                             uint32_t depth,
+                                             uint32_t texelSize,
+                                             uint32_t offset,
+                                             uint32_t rowPitch);
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_TEXTURECOPYSPLITTER_H_
+#endif  // BACKEND_D3D12_TEXTURECOPYSPLITTER_H_

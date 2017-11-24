@@ -19,43 +19,44 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     DXGI_FORMAT D3D12TextureFormat(nxt::TextureFormat format);
 
     class Texture : public TextureBase {
-        public:
-            Texture(TextureBuilder* builder);
-            Texture(TextureBuilder* builder, ID3D12Resource* nativeTexture);
-            ~Texture();
+      public:
+        Texture(TextureBuilder* builder);
+        Texture(TextureBuilder* builder, ID3D12Resource* nativeTexture);
+        ~Texture();
 
-            DXGI_FORMAT GetD3D12Format() const;
-            ID3D12Resource* GetD3D12Resource();
-            bool GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier);
+        DXGI_FORMAT GetD3D12Format() const;
+        ID3D12Resource* GetD3D12Resource();
+        bool GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage,
+                                          nxt::TextureUsageBit targetUsage,
+                                          D3D12_RESOURCE_BARRIER* barrier);
 
-            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
+                                 nxt::TextureUsageBit targetUsage) override;
 
-        private:
-            Device* mDevice;
-            ComPtr<ID3D12Resource> mResource = {};
-            ID3D12Resource* mResourcePtr = nullptr;
+      private:
+        Device* mDevice;
+        ComPtr<ID3D12Resource> mResource = {};
+        ID3D12Resource* mResourcePtr = nullptr;
     };
 
     class TextureView : public TextureViewBase {
-        public:
-            TextureView(TextureViewBuilder* builder);
+      public:
+        TextureView(TextureViewBuilder* builder);
 
-            const D3D12_SHADER_RESOURCE_VIEW_DESC& GetSRVDescriptor() const;
-            D3D12_RENDER_TARGET_VIEW_DESC  GetRTVDescriptor();
-            D3D12_DEPTH_STENCIL_VIEW_DESC  GetDSVDescriptor();
+        const D3D12_SHADER_RESOURCE_VIEW_DESC& GetSRVDescriptor() const;
+        D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor();
+        D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor();
 
-        private:
-            D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;
+      private:
+        D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;
     };
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_TEXTURED3D12_H_
+#endif  // BACKEND_D3D12_TEXTURED3D12_H_

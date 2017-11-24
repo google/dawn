@@ -21,30 +21,32 @@
 
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class BindGroup : public BindGroupBase {
-        public:
-            BindGroup(Device* device, BindGroupBuilder* builder);
+      public:
+        BindGroup(Device* device, BindGroupBuilder* builder);
 
-            void RecordDescriptors(const DescriptorHeapHandle &cbvSrvUavHeapStart, uint32_t* cbvUavSrvHeapOffset, const DescriptorHeapHandle &samplerHeapStart, uint32_t* samplerHeapOffset, uint64_t serial);
-            uint32_t GetCbvUavSrvHeapOffset() const;
-            uint32_t GetSamplerHeapOffset() const;
-            uint64_t GetHeapSerial() const;
+        void RecordDescriptors(const DescriptorHeapHandle& cbvSrvUavHeapStart,
+                               uint32_t* cbvUavSrvHeapOffset,
+                               const DescriptorHeapHandle& samplerHeapStart,
+                               uint32_t* samplerHeapOffset,
+                               uint64_t serial);
+        uint32_t GetCbvUavSrvHeapOffset() const;
+        uint32_t GetSamplerHeapOffset() const;
+        uint64_t GetHeapSerial() const;
 
-        private:
-            Device* mDevice;
-            uint32_t mCbvUavSrvHeapOffset;
-            uint32_t mSamplerHeapOffset;
-            uint32_t mCbvUavSrvCount = 0;
-            uint32_t mSamplerCount = 0;
-            uint64_t mHeapSerial = 0;
+      private:
+        Device* mDevice;
+        uint32_t mCbvUavSrvHeapOffset;
+        uint32_t mSamplerHeapOffset;
+        uint32_t mCbvUavSrvCount = 0;
+        uint32_t mSamplerCount = 0;
+        uint64_t mHeapSerial = 0;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_BINDGROUPD3D12_H_
+#endif  // BACKEND_D3D12_BINDGROUPD3D12_H_

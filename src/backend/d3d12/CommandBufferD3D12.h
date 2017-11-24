@@ -20,23 +20,21 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class CommandBuffer : public CommandBufferBase {
-        public:
-            CommandBuffer(Device* device, CommandBufferBuilder* builder);
-            ~CommandBuffer();
+      public:
+        CommandBuffer(Device* device, CommandBufferBuilder* builder);
+        ~CommandBuffer();
 
-            void FillCommands(ComPtr<ID3D12GraphicsCommandList> commandList);
+        void FillCommands(ComPtr<ID3D12GraphicsCommandList> commandList);
 
-        private:
-            Device* mDevice;
-            CommandIterator mCommands;
+      private:
+        Device* mDevice;
+        CommandIterator mCommands;
     };
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_COMMANDBUFFERD3D12_H_
+#endif  // BACKEND_D3D12_COMMANDBUFFERD3D12_H_

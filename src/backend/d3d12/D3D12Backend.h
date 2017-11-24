@@ -24,8 +24,7 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class BindGroup;
     class BindGroupLayout;
@@ -77,7 +76,7 @@ namespace d3d12 {
         using TextureViewType = TextureView;
     };
 
-    template<typename T>
+    template <typename T>
     auto ToBackend(T&& common) -> decltype(ToBackendBase<D3D12BackendTraits>(common)) {
         return ToBackendBase<D3D12BackendTraits>(common);
     }
@@ -86,78 +85,77 @@ namespace d3d12 {
 
     // Definition of backend types
     class Device : public DeviceBase {
-        public:
-            Device(ComPtr<ID3D12Device> d3d12Device);
-            ~Device();
+      public:
+        Device(ComPtr<ID3D12Device> d3d12Device);
+        ~Device();
 
-            BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
-            BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
-            BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
-            BufferBase* CreateBuffer(BufferBuilder* builder) override;
-            BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
-            CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-            ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
-            DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-            FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
-            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-            PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
-            QueueBase* CreateQueue(QueueBuilder* builder) override;
-            RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
-            RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-            SamplerBase* CreateSampler(SamplerBuilder* builder) override;
-            ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
-            SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-            TextureBase* CreateTexture(TextureBuilder* builder) override;
-            TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
+        BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
+        BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
+        BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
+        BufferBase* CreateBuffer(BufferBuilder* builder) override;
+        BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
+        CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+        ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
+        DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
+        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
+        InputStateBase* CreateInputState(InputStateBuilder* builder) override;
+        PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
+        QueueBase* CreateQueue(QueueBuilder* builder) override;
+        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
+        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
+        ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
+        SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
+        TextureBase* CreateTexture(TextureBuilder* builder) override;
+        TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
-            void TickImpl() override;
+        void TickImpl() override;
 
-            ComPtr<ID3D12Device> GetD3D12Device();
-            ComPtr<ID3D12CommandQueue> GetCommandQueue();
+        ComPtr<ID3D12Device> GetD3D12Device();
+        ComPtr<ID3D12CommandQueue> GetCommandQueue();
 
-            DescriptorHeapAllocator* GetDescriptorHeapAllocator();
-            MapReadRequestTracker* GetMapReadRequestTracker() const;
-            ResourceAllocator* GetResourceAllocator();
-            ResourceUploader* GetResourceUploader();
+        DescriptorHeapAllocator* GetDescriptorHeapAllocator();
+        MapReadRequestTracker* GetMapReadRequestTracker() const;
+        ResourceAllocator* GetResourceAllocator();
+        ResourceUploader* GetResourceUploader();
 
-            void OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList);
-            ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
+        void OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList);
+        ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
 
-            uint64_t GetSerial() const;
-            void NextSerial();
-            void WaitForSerial(uint64_t serial);
+        uint64_t GetSerial() const;
+        void NextSerial();
+        void WaitForSerial(uint64_t serial);
 
-            void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
+        void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
-        private:
-            uint64_t mSerial = 0;
-            ComPtr<ID3D12Fence> mFence;
-            HANDLE mFenceEvent;
+      private:
+        uint64_t mSerial = 0;
+        ComPtr<ID3D12Fence> mFence;
+        HANDLE mFenceEvent;
 
-            ComPtr<ID3D12Device> mD3d12Device;
-            ComPtr<ID3D12CommandQueue> mCommandQueue;
+        ComPtr<ID3D12Device> mD3d12Device;
+        ComPtr<ID3D12CommandQueue> mCommandQueue;
 
-            CommandAllocatorManager* mCommandAllocatorManager;
-            DescriptorHeapAllocator* mDescriptorHeapAllocator;
-            MapReadRequestTracker* mMapReadRequestTracker;
-            ResourceAllocator* mResourceAllocator;
-            ResourceUploader* mResourceUploader;
+        CommandAllocatorManager* mCommandAllocatorManager;
+        DescriptorHeapAllocator* mDescriptorHeapAllocator;
+        MapReadRequestTracker* mMapReadRequestTracker;
+        ResourceAllocator* mResourceAllocator;
+        ResourceUploader* mResourceUploader;
 
-            struct PendingCommandList {
-                ComPtr<ID3D12GraphicsCommandList> commandList;
-                bool open = false;
-            } mPendingCommands;
+        struct PendingCommandList {
+            ComPtr<ID3D12GraphicsCommandList> commandList;
+            bool open = false;
+        } mPendingCommands;
     };
 
     class RenderPass : public RenderPassBase {
-        public:
-            RenderPass(Device* device, RenderPassBuilder* builder);
+      public:
+        RenderPass(Device* device, RenderPassBuilder* builder);
 
-        private:
-            Device* mDevice;
+      private:
+        Device* mDevice;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_D3D12BACKEND_H_
+#endif  // BACKEND_D3D12_D3D12BACKEND_H_

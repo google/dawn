@@ -16,8 +16,7 @@
 
 #include <spirv-cross/spirv_hlsl.hpp>
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     ShaderModule::ShaderModule(Device* device, ShaderModuleBuilder* builder)
         : ShaderModuleBase(builder), mDevice(device) {
@@ -34,15 +33,18 @@ namespace d3d12 {
 
         ExtractSpirvInfo(compiler);
 
-        // rename bindings so that each register type b/u/t/s starts at 0 and then offset by kMaxBindingsPerGroup * bindGroupIndex
+        // rename bindings so that each register type b/u/t/s starts at 0 and then offset by
+        // kMaxBindingsPerGroup * bindGroupIndex
         auto RenumberBindings = [&](std::vector<spirv_cross::Resource> resources) {
             std::array<uint32_t, kMaxBindGroups> baseRegisters = {};
 
             for (const auto& resource : resources) {
-                auto bindGroupIndex = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+                auto bindGroupIndex =
+                    compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
                 auto& baseRegister = baseRegisters[bindGroupIndex];
                 auto bindGroupOffset = bindGroupIndex * kMaxBindingsPerGroup;
-                compiler.set_decoration(resource.id, spv::DecorationBinding, bindGroupOffset + baseRegister++);
+                compiler.set_decoration(resource.id, spv::DecorationBinding,
+                                        bindGroupOffset + baseRegister++);
             }
         };
 
@@ -59,5 +61,4 @@ namespace d3d12 {
         return mHlslSource;
     }
 
-}
-}
+}}  // namespace backend::d3d12

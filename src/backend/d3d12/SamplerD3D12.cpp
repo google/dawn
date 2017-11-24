@@ -16,14 +16,12 @@
 
 #include "backend/d3d12/D3D12Backend.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
-    Sampler::Sampler(SamplerBuilder* builder)
-        : SamplerBase(builder) {
-
+    Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dn770367(v=vs.85).aspx
-        // D3D12_FILTER_MIN_MAG_MIP_POINT                       = 0       0     0 0 0   // hex value, decimal value, min linear, mag linear, mip linear
+        // hex value, decimal value, min linear, mag linear, mip linear
+        // D3D12_FILTER_MIN_MAG_MIP_POINT                       = 0       0     0 0 0
         // D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR                = 0x1     1     0 0 1
         // D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT          = 0x4     4     0 1 0
         // D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR                = 0x5     5     0 1 1
@@ -69,15 +67,14 @@ namespace d3d12 {
         mSamplerDesc.MipLODBias = 0.f;
         mSamplerDesc.MaxAnisotropy = 1;
         mSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-        mSamplerDesc.BorderColor[0] = mSamplerDesc.BorderColor[1] = mSamplerDesc.BorderColor[2] = mSamplerDesc.BorderColor[3] = 0;
+        mSamplerDesc.BorderColor[0] = mSamplerDesc.BorderColor[1] = mSamplerDesc.BorderColor[2] =
+            mSamplerDesc.BorderColor[3] = 0;
         mSamplerDesc.MinLOD = 0;
         mSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
-
     }
 
     const D3D12_SAMPLER_DESC& Sampler::GetSamplerDescriptor() const {
         return mSamplerDesc;
     }
 
-}
-}
+}}  // namespace backend::d3d12

@@ -17,19 +17,17 @@
 
 #include "backend/SwapChain.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class SwapChain : public SwapChainBase {
-        public:
-            SwapChain(SwapChainBuilder* builder);
-            ~SwapChain();
+      public:
+        SwapChain(SwapChainBuilder* builder);
+        ~SwapChain();
 
-        protected:
-            TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+      protected:
+        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_SWAPCHAIN_D3D12_H_
+#endif  // BACKEND_D3D12_SWAPCHAIN_D3D12_H_

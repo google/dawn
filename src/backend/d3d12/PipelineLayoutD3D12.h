@@ -19,30 +19,28 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class PipelineLayout : public PipelineLayoutBase {
-        public:
-            PipelineLayout(Device* device, PipelineLayoutBuilder* builder);
+      public:
+        PipelineLayout(Device* device, PipelineLayoutBuilder* builder);
 
-            uint32_t GetCbvUavSrvRootParameterIndex(uint32_t group) const;
-            uint32_t GetSamplerRootParameterIndex(uint32_t group) const;
+        uint32_t GetCbvUavSrvRootParameterIndex(uint32_t group) const;
+        uint32_t GetSamplerRootParameterIndex(uint32_t group) const;
 
-            ComPtr<ID3D12RootSignature> GetRootSignature();
+        ComPtr<ID3D12RootSignature> GetRootSignature();
 
-        private:
-            Device* mDevice;
+      private:
+        Device* mDevice;
 
-            std::array<uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
-            std::array<uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
+        std::array<uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
+        std::array<uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
 
-            ComPtr<ID3D12RootSignature> mRootSignature;
+        ComPtr<ID3D12RootSignature> mRootSignature;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_PIPELINELAYOUTD3D12_H_
+#endif  // BACKEND_D3D12_PIPELINELAYOUTD3D12_H_

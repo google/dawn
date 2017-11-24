@@ -15,14 +15,13 @@
 #include "backend/d3d12/ComputePipelineD3D12.h"
 
 #include "backend/d3d12/D3D12Backend.h"
-#include "backend/d3d12/ShaderModuleD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
+#include "backend/d3d12/ShaderModuleD3D12.h"
 #include "common/Assert.h"
 
 #include <d3dcompiler.h>
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
         : ComputePipelineBase(builder) {
@@ -41,19 +40,9 @@ namespace d3d12 {
         ComPtr<ID3DBlob> compiledShader;
         ComPtr<ID3DBlob> errors;
 
-        if (FAILED(D3DCompile(
-            hlslSource.c_str(),
-            hlslSource.length(),
-            nullptr,
-            { nullptr },
-            nullptr,
-            entryPoint.c_str(),
-            "cs_5_1",
-            compileFlags,
-            0,
-            &compiledShader,
-            &errors
-        ))) {
+        if (FAILED(D3DCompile(hlslSource.c_str(), hlslSource.length(), nullptr, {nullptr}, nullptr,
+                              entryPoint.c_str(), "cs_5_1", compileFlags, 0, &compiledShader,
+                              &errors))) {
             printf("%s\n", reinterpret_cast<char*>(errors->GetBufferPointer()));
             ASSERT(false);
         }
@@ -64,12 +53,12 @@ namespace d3d12 {
         descriptor.CS.BytecodeLength = compiledShader->GetBufferSize();
 
         Device* device = ToBackend(builder->GetDevice());
-        device->GetD3D12Device()->CreateComputePipelineState(&descriptor, IID_PPV_ARGS(&mPipelineState));
+        device->GetD3D12Device()->CreateComputePipelineState(&descriptor,
+                                                             IID_PPV_ARGS(&mPipelineState));
     }
 
     ComPtr<ID3D12PipelineState> ComputePipeline::GetPipelineState() {
         return mPipelineState;
     }
 
-}
-}
+}}  // namespace backend::d3d12

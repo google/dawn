@@ -17,12 +17,11 @@
 #include "backend/d3d12/D3D12Backend.h"
 #include "common/Assert.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     namespace {
         D3D12_BLEND D3D12Blend(nxt::BlendFactor factor) {
-            switch(factor) {
+            switch (factor) {
                 case nxt::BlendFactor::Zero:
                     return D3D12_BLEND_ZERO;
                 case nxt::BlendFactor::One:
@@ -55,7 +54,7 @@ namespace d3d12 {
         }
 
         D3D12_BLEND_OP D3D12BlendOperation(nxt::BlendOperation operation) {
-            switch(operation) {
+            switch (operation) {
                 case nxt::BlendOperation::Add:
                     return D3D12_BLEND_OP_ADD;
                 case nxt::BlendOperation::Subtract:
@@ -72,13 +71,21 @@ namespace d3d12 {
         }
 
         uint8_t D3D12RenderTargetWriteMask(nxt::ColorWriteMask colorWriteMask) {
-            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Red) == D3D12_COLOR_WRITE_ENABLE_RED, "ColorWriteMask values must match");
-            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Green) == D3D12_COLOR_WRITE_ENABLE_GREEN, "ColorWriteMask values must match");
-            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Blue) == D3D12_COLOR_WRITE_ENABLE_BLUE, "ColorWriteMask values must match");
-            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Alpha) == D3D12_COLOR_WRITE_ENABLE_ALPHA, "ColorWriteMask values must match");
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Red) ==
+                              D3D12_COLOR_WRITE_ENABLE_RED,
+                          "ColorWriteMask values must match");
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Green) ==
+                              D3D12_COLOR_WRITE_ENABLE_GREEN,
+                          "ColorWriteMask values must match");
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Blue) ==
+                              D3D12_COLOR_WRITE_ENABLE_BLUE,
+                          "ColorWriteMask values must match");
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Alpha) ==
+                              D3D12_COLOR_WRITE_ENABLE_ALPHA,
+                          "ColorWriteMask values must match");
             return static_cast<uint8_t>(colorWriteMask);
         }
-    }
+    }  // namespace
 
     BlendState::BlendState(BlendStateBuilder* builder) : BlendStateBase(builder) {
         auto& info = GetBlendInfo();
@@ -98,5 +105,4 @@ namespace d3d12 {
         return mBlendDesc;
     }
 
-}
-}
+}}  // namespace backend::d3d12

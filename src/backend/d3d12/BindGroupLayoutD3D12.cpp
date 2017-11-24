@@ -14,15 +14,13 @@
 
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
 
-#include "common/BitSetIterator.h"
 #include "backend/d3d12/D3D12Backend.h"
+#include "common/BitSetIterator.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     BindGroupLayout::BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder), mDevice(device), mDescriptorCounts {}  {
-
+        : BindGroupLayoutBase(builder), mDevice(device), mDescriptorCounts{} {
         const auto& groupInfo = GetBindingInfo();
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
@@ -42,7 +40,8 @@ namespace d3d12 {
             }
         }
 
-        auto SetDescriptorRange = [&](uint32_t index, uint32_t count, D3D12_DESCRIPTOR_RANGE_TYPE type) -> bool {
+        auto SetDescriptorRange = [&](uint32_t index, uint32_t count,
+                                      D3D12_DESCRIPTOR_RANGE_TYPE type) -> bool {
             if (count == 0) {
                 return false;
             }
@@ -52,7 +51,8 @@ namespace d3d12 {
             range.NumDescriptors = count;
             range.RegisterSpace = 0;
             range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            // These ranges will be copied and range.BaseShaderRegister will be set in d3d12::PipelineLayout to account for bind group register offsets
+            // These ranges will be copied and range.BaseShaderRegister will be set in
+            // d3d12::PipelineLayout to account for bind group register offsets
             return true;
         };
 
@@ -60,23 +60,27 @@ namespace d3d12 {
 
         // Ranges 0-2 contain the CBV, UAV, and SRV ranges, if they exist, tightly packed
         // Range 3 contains the Sampler range, if there is one
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[CBV], D3D12_DESCRIPTOR_RANGE_TYPE_CBV)) {
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[CBV],
+                               D3D12_DESCRIPTOR_RANGE_TYPE_CBV)) {
             rangeIndex++;
         }
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[UAV], D3D12_DESCRIPTOR_RANGE_TYPE_UAV)) {
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[UAV],
+                               D3D12_DESCRIPTOR_RANGE_TYPE_UAV)) {
             rangeIndex++;
         }
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[SRV], D3D12_DESCRIPTOR_RANGE_TYPE_SRV)) {
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[SRV],
+                               D3D12_DESCRIPTOR_RANGE_TYPE_SRV)) {
             rangeIndex++;
         }
-        SetDescriptorRange(Sampler, mDescriptorCounts[Sampler], D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
+        SetDescriptorRange(Sampler, mDescriptorCounts[Sampler],
+                           D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
 
         // descriptors ranges are offset by the offset + size of the previous range
         std::array<uint32_t, DescriptorType::Count> descriptorOffsets;
         descriptorOffsets[CBV] = 0;
         descriptorOffsets[UAV] = descriptorOffsets[CBV] + mDescriptorCounts[CBV];
         descriptorOffsets[SRV] = descriptorOffsets[UAV] + mDescriptorCounts[UAV];
-        descriptorOffsets[Sampler] = 0; // samplers are in a different heap
+        descriptorOffsets[Sampler] = 0;  // samplers are in a different heap
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
             switch (groupInfo.types[binding]) {
@@ -101,11 +105,9 @@ namespace d3d12 {
     }
 
     uint32_t BindGroupLayout::GetCbvUavSrvDescriptorTableSize() const {
-        return (
-            static_cast<uint32_t>(mDescriptorCounts[CBV] > 0) +
-            static_cast<uint32_t>(mDescriptorCounts[UAV] > 0) +
-            static_cast<uint32_t>(mDescriptorCounts[SRV] > 0)
-        );
+        return (static_cast<uint32_t>(mDescriptorCounts[CBV] > 0) +
+                static_cast<uint32_t>(mDescriptorCounts[UAV] > 0) +
+                static_cast<uint32_t>(mDescriptorCounts[SRV] > 0));
     }
 
     uint32_t BindGroupLayout::GetSamplerDescriptorTableSize() const {
@@ -128,5 +130,4 @@ namespace d3d12 {
         return &mRanges[Sampler];
     }
 
-}
-}
+}}  // namespace backend::d3d12

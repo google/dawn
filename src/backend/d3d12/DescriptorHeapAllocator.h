@@ -17,63 +17,67 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-#include "common/SerialQueue.h"
 #include <array>
 #include <vector>
+#include "common/SerialQueue.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class DescriptorHeapHandle {
+      public:
+        DescriptorHeapHandle();
+        DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap,
+                             uint32_t sizeIncrement,
+                             uint32_t offset);
 
-        public:
-            DescriptorHeapHandle();
-            DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t sizeIncrement, uint32_t offset);
+        ID3D12DescriptorHeap* Get() const;
+        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(uint32_t index) const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(uint32_t index) const;
 
-            ID3D12DescriptorHeap* Get() const;
-            D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(uint32_t index) const;
-            D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(uint32_t index) const;
-
-        private:
-            ComPtr<ID3D12DescriptorHeap> mDescriptorHeap;
-            uint32_t mSizeIncrement;
-            uint32_t mOffset;
+      private:
+        ComPtr<ID3D12DescriptorHeap> mDescriptorHeap;
+        uint32_t mSizeIncrement;
+        uint32_t mOffset;
     };
 
     class DescriptorHeapAllocator {
-        public:
-            DescriptorHeapAllocator(Device* device);
+      public:
+        DescriptorHeapAllocator(Device* device);
 
-            DescriptorHeapHandle AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
-            DescriptorHeapHandle AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
-            void Tick(uint64_t lastCompletedSerial);
+        DescriptorHeapHandle AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
+        DescriptorHeapHandle AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
+        void Tick(uint64_t lastCompletedSerial);
 
-        private:
-            static constexpr unsigned int kMaxCbvUavSrvHeapSize = 1000000;
-            static constexpr unsigned int kMaxSamplerHeapSize = 2048;
-            static constexpr unsigned int kDescriptorHeapTypes = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
+      private:
+        static constexpr unsigned int kMaxCbvUavSrvHeapSize = 1000000;
+        static constexpr unsigned int kMaxSamplerHeapSize = 2048;
+        static constexpr unsigned int kDescriptorHeapTypes =
+            D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
 
-            struct AllocationInfo {
-                uint32_t size = 0;
-                uint32_t remaining = 0;
-            };
+        struct AllocationInfo {
+            uint32_t size = 0;
+            uint32_t remaining = 0;
+        };
 
-            using DescriptorHeapInfo = std::pair<ComPtr<ID3D12DescriptorHeap>, AllocationInfo>;
+        using DescriptorHeapInfo = std::pair<ComPtr<ID3D12DescriptorHeap>, AllocationInfo>;
 
-            DescriptorHeapHandle Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count, uint32_t allocationSize, DescriptorHeapInfo* heapInfo, D3D12_DESCRIPTOR_HEAP_FLAGS flags);
-            void Release(DescriptorHeapHandle handle);
+        DescriptorHeapHandle Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type,
+                                      uint32_t count,
+                                      uint32_t allocationSize,
+                                      DescriptorHeapInfo* heapInfo,
+                                      D3D12_DESCRIPTOR_HEAP_FLAGS flags);
+        void Release(DescriptorHeapHandle handle);
 
-            Device* mDevice;
+        Device* mDevice;
 
-            std::array<uint32_t, kDescriptorHeapTypes> mSizeIncrements;
-            std::array<DescriptorHeapInfo, kDescriptorHeapTypes> mCpuDescriptorHeapInfos;
-            std::array<DescriptorHeapInfo, kDescriptorHeapTypes> mGpuDescriptorHeapInfos;
-            SerialQueue<DescriptorHeapHandle> mReleasedHandles;
+        std::array<uint32_t, kDescriptorHeapTypes> mSizeIncrements;
+        std::array<DescriptorHeapInfo, kDescriptorHeapTypes> mCpuDescriptorHeapInfos;
+        std::array<DescriptorHeapInfo, kDescriptorHeapTypes> mGpuDescriptorHeapInfos;
+        SerialQueue<DescriptorHeapHandle> mReleasedHandles;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_DESCRIPTORHEAPALLOCATOR_H_
+#endif  // BACKEND_D3D12_DESCRIPTORHEAPALLOCATOR_H_

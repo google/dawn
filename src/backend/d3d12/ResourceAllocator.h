@@ -19,27 +19,26 @@
 
 #include "common/SerialQueue.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class ResourceAllocator {
+      public:
+        ResourceAllocator(Device* device);
 
-        public:
-            ResourceAllocator(Device* device);
+        ComPtr<ID3D12Resource> Allocate(D3D12_HEAP_TYPE heapType,
+                                        const D3D12_RESOURCE_DESC& resourceDescriptor,
+                                        D3D12_RESOURCE_STATES initialUsage);
+        void Release(ComPtr<ID3D12Resource> resource);
+        void Tick(uint64_t lastCompletedSerial);
 
-            ComPtr<ID3D12Resource> Allocate(D3D12_HEAP_TYPE heapType, const D3D12_RESOURCE_DESC &resourceDescriptor, D3D12_RESOURCE_STATES initialUsage);
-            void Release(ComPtr<ID3D12Resource> resource);
-            void Tick(uint64_t lastCompletedSerial);
+      private:
+        Device* mDevice;
 
-        private:
-            Device* mDevice;
-
-            SerialQueue<ComPtr<ID3D12Resource>> mReleasedResources;
+        SerialQueue<ComPtr<ID3D12Resource>> mReleasedResources;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_RESOURCEALLOCATIONMANAGER_H_
+#endif  // BACKEND_D3D12_RESOURCEALLOCATIONMANAGER_H_

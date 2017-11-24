@@ -19,20 +19,18 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Sampler : public SamplerBase {
-        public:
-            Sampler(SamplerBuilder* builder);
+      public:
+        Sampler(SamplerBuilder* builder);
 
-            const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
+        const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
 
-        private:
-            D3D12_SAMPLER_DESC mSamplerDesc;
+      private:
+        D3D12_SAMPLER_DESC mSamplerDesc;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_SAMPLERD3D12_H_
+#endif  // BACKEND_D3D12_SAMPLERD3D12_H_

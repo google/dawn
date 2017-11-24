@@ -17,24 +17,22 @@
 
 #include "backend/ShaderModule.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class ShaderModule : public ShaderModuleBase {
-        public:
-            ShaderModule(Device* device, ShaderModuleBuilder* builder);
+      public:
+        ShaderModule(Device* device, ShaderModuleBuilder* builder);
 
-            const std::string& GetHLSLSource() const;
+        const std::string& GetHLSLSource() const;
 
-        private:
-            Device* mDevice;
+      private:
+        Device* mDevice;
 
-            std::string mHlslSource;
+        std::string mHlslSource;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_SHADERMODULED3D12_H_
+#endif  // BACKEND_D3D12_SHADERMODULED3D12_H_

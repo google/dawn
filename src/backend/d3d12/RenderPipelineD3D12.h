@@ -19,22 +19,20 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class RenderPipeline : public RenderPipelineBase {
-        public:
-            RenderPipeline(RenderPipelineBuilder* builder);
+      public:
+        RenderPipeline(RenderPipelineBuilder* builder);
 
-            D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
-            ComPtr<ID3D12PipelineState> GetPipelineState();
+        D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
+        ComPtr<ID3D12PipelineState> GetPipelineState();
 
-        private:
-            D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
-            ComPtr<ID3D12PipelineState> mPipelineState;
+      private:
+        D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
+        ComPtr<ID3D12PipelineState> mPipelineState;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_RENDERPIPELINED3D12_H_
+#endif  // BACKEND_D3D12_RENDERPIPELINED3D12_H_

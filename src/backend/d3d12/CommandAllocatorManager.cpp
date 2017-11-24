@@ -19,10 +19,10 @@
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
-    CommandAllocatorManager::CommandAllocatorManager(Device* device) : device(device), mAllocatorCount(0) {
+    CommandAllocatorManager::CommandAllocatorManager(Device* device)
+        : device(device), mAllocatorCount(0) {
         mFreeAllocators.set();
     }
 
@@ -42,14 +42,17 @@ namespace d3d12 {
         if (firstFreeIndex >= mAllocatorCount) {
             ASSERT(firstFreeIndex == mAllocatorCount);
             mAllocatorCount++;
-            ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAllocators[firstFreeIndex])));
+            ASSERT_SUCCESS(device->GetD3D12Device()->CreateCommandAllocator(
+                D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAllocators[firstFreeIndex])));
         }
 
         // Mark the command allocator as used
         mFreeAllocators.reset(firstFreeIndex);
 
-        // Enqueue the command allocator. It will be scheduled for reset after the next ExecuteCommandLists
-        mInFlightCommandAllocators.Enqueue({mCommandAllocators[firstFreeIndex], firstFreeIndex}, device->GetSerial());
+        // Enqueue the command allocator. It will be scheduled for reset after the next
+        // ExecuteCommandLists
+        mInFlightCommandAllocators.Enqueue({mCommandAllocators[firstFreeIndex], firstFreeIndex},
+                                           device->GetSerial());
 
         return mCommandAllocators[firstFreeIndex];
     }
@@ -63,5 +66,4 @@ namespace d3d12 {
         mInFlightCommandAllocators.ClearUpTo(lastCompletedSerial);
     }
 
-}
-}
+}}  // namespace backend::d3d12

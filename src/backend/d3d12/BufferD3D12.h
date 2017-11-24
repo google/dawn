@@ -20,67 +20,67 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class Buffer : public BufferBase {
-        public:
-            Buffer(Device* device, BufferBuilder* builder);
-            ~Buffer();
+      public:
+        Buffer(Device* device, BufferBuilder* builder);
+        ~Buffer();
 
-            uint32_t GetD3D12Size() const;
-            ComPtr<ID3D12Resource> GetD3D12Resource();
-            D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
-            bool GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage, D3D12_RESOURCE_BARRIER* barrier);
-            void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
+        uint32_t GetD3D12Size() const;
+        ComPtr<ID3D12Resource> GetD3D12Resource();
+        D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
+        bool GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage,
+                                          nxt::BufferUsageBit targetUsage,
+                                          D3D12_RESOURCE_BARRIER* barrier);
+        void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
 
-        private:
-            Device* mDevice;
-            ComPtr<ID3D12Resource> mResource;
+      private:
+        Device* mDevice;
+        ComPtr<ID3D12Resource> mResource;
 
-            // NXT API
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
-
+        // NXT API
+        void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
+        void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void UnmapImpl() override;
+        void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
+                                 nxt::BufferUsageBit targetUsage) override;
     };
 
     class BufferView : public BufferViewBase {
-        public:
-            BufferView(BufferViewBuilder* builder);
+      public:
+        BufferView(BufferViewBuilder* builder);
 
-            uint32_t GetD3D12Size() const;
-            const D3D12_CONSTANT_BUFFER_VIEW_DESC& GetCBVDescriptor() const;
-            const D3D12_UNORDERED_ACCESS_VIEW_DESC& GetUAVDescriptor() const;
+        uint32_t GetD3D12Size() const;
+        const D3D12_CONSTANT_BUFFER_VIEW_DESC& GetCBVDescriptor() const;
+        const D3D12_UNORDERED_ACCESS_VIEW_DESC& GetUAVDescriptor() const;
 
-        private:
-            D3D12_CONSTANT_BUFFER_VIEW_DESC mCbvDesc;
-            D3D12_UNORDERED_ACCESS_VIEW_DESC mUavDesc;
+      private:
+        D3D12_CONSTANT_BUFFER_VIEW_DESC mCbvDesc;
+        D3D12_UNORDERED_ACCESS_VIEW_DESC mUavDesc;
     };
 
     class MapReadRequestTracker {
-        public:
-            MapReadRequestTracker(Device* device);
-            ~MapReadRequestTracker();
+      public:
+        MapReadRequestTracker(Device* device);
+        ~MapReadRequestTracker();
 
-            void Track(Buffer* buffer, uint32_t mapSerial, const void* data);
-            void Tick(Serial finishedSerial);
+        void Track(Buffer* buffer, uint32_t mapSerial, const void* data);
+        void Tick(Serial finishedSerial);
 
-        private:
-            Device* mDevice;
+      private:
+        Device* mDevice;
 
-            struct Request {
-                Ref<Buffer> buffer;
-                uint32_t mapSerial;
-                const void* data;
-            };
-            SerialQueue<Request> mInflightRequests;
+        struct Request {
+            Ref<Buffer> buffer;
+            uint32_t mapSerial;
+            const void* data;
+        };
+        SerialQueue<Request> mInflightRequests;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_BUFFERD3D12_H_
+#endif  // BACKEND_D3D12_BUFFERD3D12_H_

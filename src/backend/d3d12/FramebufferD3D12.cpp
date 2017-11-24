@@ -14,12 +14,11 @@
 
 #include "backend/d3d12/FramebufferD3D12.h"
 
-#include "common/BitSetIterator.h"
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/TextureD3D12.h"
+#include "common/BitSetIterator.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     Framebuffer::Framebuffer(Device* device, FramebufferBuilder* builder)
         : FramebufferBase(builder), mDevice(device) {
@@ -39,32 +38,36 @@ namespace d3d12 {
 
         if (rtvCount) {
             mRtvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(
-                    D3D12_DESCRIPTOR_HEAP_TYPE_RTV, rtvCount);
+                D3D12_DESCRIPTOR_HEAP_TYPE_RTV, rtvCount);
         }
         if (dsvCount) {
             mDsvHeap = device->GetDescriptorHeapAllocator()->AllocateCPUHeap(
-                    D3D12_DESCRIPTOR_HEAP_TYPE_DSV, dsvCount);
+                D3D12_DESCRIPTOR_HEAP_TYPE_DSV, dsvCount);
         }
 
         for (uint32_t attachment = 0; attachment < renderPass->GetAttachmentCount(); ++attachment) {
             uint32_t heapIndex = mAttachmentHeapIndices[attachment];
             auto* textureView = GetTextureView(attachment);
 
-            ComPtr<ID3D12Resource> texture = ToBackend(textureView->GetTexture())->GetD3D12Resource();
+            ComPtr<ID3D12Resource> texture =
+                ToBackend(textureView->GetTexture())->GetD3D12Resource();
             auto format = textureView->GetTexture()->GetFormat();
             if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
                 D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDsvHeap.GetCPUHandle(heapIndex);
                 D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = ToBackend(textureView)->GetDSVDescriptor();
-                device->GetD3D12Device()->CreateDepthStencilView(texture.Get(), &dsvDesc, dsvHandle);
+                device->GetD3D12Device()->CreateDepthStencilView(texture.Get(), &dsvDesc,
+                                                                 dsvHandle);
             } else {
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = mRtvHeap.GetCPUHandle(heapIndex);
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = ToBackend(textureView)->GetRTVDescriptor();
-                device->GetD3D12Device()->CreateRenderTargetView(texture.Get(), &rtvDesc, rtvHandle);
+                device->GetD3D12Device()->CreateRenderTargetView(texture.Get(), &rtvDesc,
+                                                                 rtvHandle);
             }
         }
     }
 
-    Framebuffer::OMSetRenderTargetArgs Framebuffer::GetSubpassOMSetRenderTargetArgs(uint32_t subpassIndex) {
+    Framebuffer::OMSetRenderTargetArgs Framebuffer::GetSubpassOMSetRenderTargetArgs(
+        uint32_t subpassIndex) {
         const auto& subpassInfo = GetRenderPass()->GetSubpassInfo(subpassIndex);
         OMSetRenderTargetArgs args = {};
 
@@ -89,5 +92,4 @@ namespace d3d12 {
         return mDsvHeap.GetCPUHandle(mAttachmentHeapIndices[attachmentSlot]);
     }
 
-}
-}
+}}  // namespace backend::d3d12

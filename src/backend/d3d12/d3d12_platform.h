@@ -15,10 +15,10 @@
 #ifndef BACKEND_D3D12_D3D12PLATFORM_H_
 #define BACKEND_D3D12_D3D12PLATFORM_H_
 
-#include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
+#include <wrl.h>
 
 using Microsoft::WRL::ComPtr;
 
-#endif // BACKEND_D3D12_D3D12PLATFORM_H_
+#endif  // BACKEND_D3D12_D3D12PLATFORM_H_

@@ -12,23 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "common/BitSetIterator.h"
 #include "backend/d3d12/BindGroupD3D12.h"
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
 #include "backend/d3d12/BufferD3D12.h"
 #include "backend/d3d12/SamplerD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
+#include "common/BitSetIterator.h"
 
 #include "backend/d3d12/D3D12Backend.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     BindGroup::BindGroup(Device* device, BindGroupBuilder* builder)
         : BindGroupBase(builder), mDevice(device) {
     }
 
-    void BindGroup::RecordDescriptors(const DescriptorHeapHandle &cbvUavSrvHeapStart, uint32_t* cbvUavSrvHeapOffset, const DescriptorHeapHandle &samplerHeapStart, uint32_t* samplerHeapOffset, uint64_t serial) {
+    void BindGroup::RecordDescriptors(const DescriptorHeapHandle& cbvUavSrvHeapStart,
+                                      uint32_t* cbvUavSrvHeapOffset,
+                                      const DescriptorHeapHandle& samplerHeapStart,
+                                      uint32_t* samplerHeapOffset,
+                                      uint64_t serial) {
         mHeapSerial = serial;
 
         const auto* bgl = ToBackend(GetLayout());
@@ -43,34 +46,36 @@ namespace d3d12 {
         auto d3d12Device = mDevice->GetD3D12Device();
         for (uint32_t binding : IterateBitSet(layout.mask)) {
             switch (layout.types[binding]) {
-                case nxt::BindingType::UniformBuffer:
-                    {
-                        auto* view = ToBackend(GetBindingAsBufferView(binding));
-                        auto& cbv = view->GetCBVDescriptor();
-                        d3d12Device->CreateConstantBufferView(&cbv, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset + bindingOffsets[binding]));
-                    }
-                    break;
-                case nxt::BindingType::StorageBuffer:
-                    {
-                        auto* view = ToBackend(GetBindingAsBufferView(binding));
-                        auto& uav = view->GetUAVDescriptor();
-                        d3d12Device->CreateUnorderedAccessView(ToBackend(view->GetBuffer())->GetD3D12Resource().Get(), nullptr, &uav, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset + bindingOffsets[binding]));
-                    }
-                    break;
-                case nxt::BindingType::SampledTexture:
-                    {
-                        auto* view = ToBackend(GetBindingAsTextureView(binding));
-                        auto& srv = view->GetSRVDescriptor();
-                        d3d12Device->CreateShaderResourceView(ToBackend(view->GetTexture())->GetD3D12Resource(), &srv, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset + bindingOffsets[binding]));
-                    }
-                    break;
-                case nxt::BindingType::Sampler:
-                    {
-                        auto* sampler = ToBackend(GetBindingAsSampler(binding));
-                        auto& samplerDesc = sampler->GetSamplerDescriptor();
-                        d3d12Device->CreateSampler(&samplerDesc, samplerHeapStart.GetCPUHandle(*samplerHeapOffset + bindingOffsets[binding]));
-                    }
-                    break;
+                case nxt::BindingType::UniformBuffer: {
+                    auto* view = ToBackend(GetBindingAsBufferView(binding));
+                    auto& cbv = view->GetCBVDescriptor();
+                    d3d12Device->CreateConstantBufferView(
+                        &cbv, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
+                                                              bindingOffsets[binding]));
+                } break;
+                case nxt::BindingType::StorageBuffer: {
+                    auto* view = ToBackend(GetBindingAsBufferView(binding));
+                    auto& uav = view->GetUAVDescriptor();
+                    d3d12Device->CreateUnorderedAccessView(
+                        ToBackend(view->GetBuffer())->GetD3D12Resource().Get(), nullptr, &uav,
+                        cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
+                                                        bindingOffsets[binding]));
+                } break;
+                case nxt::BindingType::SampledTexture: {
+                    auto* view = ToBackend(GetBindingAsTextureView(binding));
+                    auto& srv = view->GetSRVDescriptor();
+                    d3d12Device->CreateShaderResourceView(
+                        ToBackend(view->GetTexture())->GetD3D12Resource(), &srv,
+                        cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
+                                                        bindingOffsets[binding]));
+                } break;
+                case nxt::BindingType::Sampler: {
+                    auto* sampler = ToBackend(GetBindingAsSampler(binding));
+                    auto& samplerDesc = sampler->GetSamplerDescriptor();
+                    d3d12Device->CreateSampler(
+                        &samplerDesc, samplerHeapStart.GetCPUHandle(*samplerHeapOffset +
+                                                                    bindingOffsets[binding]));
+                } break;
             }
         }
 
@@ -91,5 +96,4 @@ namespace d3d12 {
         return mHeapSerial;
     }
 
-}
-}
+}}  // namespace backend::d3d12

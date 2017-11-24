@@ -17,14 +17,15 @@
 #include "backend/d3d12/D3D12Backend.h"
 #include "common/Assert.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     DescriptorHeapHandle::DescriptorHeapHandle()
         : mDescriptorHeap(nullptr), mSizeIncrement(0), mOffset(0) {
     }
 
-    DescriptorHeapHandle::DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t sizeIncrement, uint32_t offset)
+    DescriptorHeapHandle::DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap,
+                                               uint32_t sizeIncrement,
+                                               uint32_t offset)
         : mDescriptorHeap(descriptorHeap), mSizeIncrement(sizeIncrement), mOffset(offset) {
     }
 
@@ -46,29 +47,39 @@ namespace d3d12 {
         return handle;
     }
 
-
     DescriptorHeapAllocator::DescriptorHeapAllocator(Device* device)
         : mDevice(device),
-          mSizeIncrements {
-            device->GetD3D12Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV),
-            device->GetD3D12Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER),
-            device->GetD3D12Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV),
-            device->GetD3D12Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV),
+          mSizeIncrements{
+              device->GetD3D12Device()->GetDescriptorHandleIncrementSize(
+                  D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV),
+              device->GetD3D12Device()->GetDescriptorHandleIncrementSize(
+                  D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER),
+              device->GetD3D12Device()->GetDescriptorHandleIncrementSize(
+                  D3D12_DESCRIPTOR_HEAP_TYPE_RTV),
+              device->GetD3D12Device()->GetDescriptorHandleIncrementSize(
+                  D3D12_DESCRIPTOR_HEAP_TYPE_DSV),
           } {
     }
 
-    DescriptorHeapHandle DescriptorHeapAllocator::Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count, uint32_t allocationSize, DescriptorHeapInfo* heapInfo, D3D12_DESCRIPTOR_HEAP_FLAGS flags) {
-        // TODO(enga@google.com): This is just a linear allocator so the heap will quickly run out of space causing a new one to be allocated
-        // We should reuse heap subranges that have been released
+    DescriptorHeapHandle DescriptorHeapAllocator::Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type,
+                                                           uint32_t count,
+                                                           uint32_t allocationSize,
+                                                           DescriptorHeapInfo* heapInfo,
+                                                           D3D12_DESCRIPTOR_HEAP_FLAGS flags) {
+        // TODO(enga@google.com): This is just a linear allocator so the heap will quickly run out
+        // of space causing a new one to be allocated We should reuse heap subranges that have been
+        // released
         if (count == 0) {
             return DescriptorHeapHandle();
         }
 
         {
-            // If the current pool for this type has space, linearly allocate count bytes in the pool
+            // If the current pool for this type has space, linearly allocate count bytes in the
+            // pool
             auto& allocationInfo = heapInfo->second;
             if (allocationInfo.remaining >= count) {
-                DescriptorHeapHandle handle(heapInfo->first, mSizeIncrements[type], allocationInfo.size - allocationInfo.remaining);
+                DescriptorHeapHandle handle(heapInfo->first, mSizeIncrements[type],
+                                            allocationInfo.size - allocationInfo.remaining);
                 allocationInfo.remaining -= count;
                 Release(handle);
                 return handle;
@@ -83,9 +94,10 @@ namespace d3d12 {
         heapDescriptor.Flags = flags;
         heapDescriptor.NodeMask = 0;
         ComPtr<ID3D12DescriptorHeap> heap;
-        ASSERT_SUCCESS(mDevice->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor, IID_PPV_ARGS(&heap)));
+        ASSERT_SUCCESS(
+            mDevice->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor, IID_PPV_ARGS(&heap)));
 
-        AllocationInfo allocationInfo = { allocationSize, allocationSize - count };
+        AllocationInfo allocationInfo = {allocationSize, allocationSize - count};
         *heapInfo = std::make_pair(heap, allocationInfo);
 
         DescriptorHeapHandle handle(heap, mSizeIncrements[type], 0);
@@ -93,14 +105,21 @@ namespace d3d12 {
         return handle;
     }
 
-    DescriptorHeapHandle DescriptorHeapAllocator::AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count) {
-        return Allocate(type, count, count, &mCpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+    DescriptorHeapHandle DescriptorHeapAllocator::AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type,
+                                                                  uint32_t count) {
+        return Allocate(type, count, count, &mCpuDescriptorHeapInfos[type],
+                        D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
     }
 
-    DescriptorHeapHandle DescriptorHeapAllocator::AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count) {
-        ASSERT(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-        unsigned int heapSize = (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ? kMaxCbvUavSrvHeapSize : kMaxSamplerHeapSize);
-        return Allocate(type, count, heapSize, &mGpuDescriptorHeapInfos[type], D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+    DescriptorHeapHandle DescriptorHeapAllocator::AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type,
+                                                                  uint32_t count) {
+        ASSERT(type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ||
+               type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+        unsigned int heapSize =
+            (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ? kMaxCbvUavSrvHeapSize
+                                                            : kMaxSamplerHeapSize);
+        return Allocate(type, count, heapSize, &mGpuDescriptorHeapInfos[type],
+                        D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
     }
 
     void DescriptorHeapAllocator::Tick(uint64_t lastCompletedSerial) {
@@ -110,5 +129,4 @@ namespace d3d12 {
     void DescriptorHeapAllocator::Release(DescriptorHeapHandle handle) {
         mReleasedHandles.Enqueue(handle, mDevice->GetSerial());
     }
-}
-}
+}}  // namespace backend::d3d12

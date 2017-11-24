@@ -19,20 +19,18 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-namespace backend {
-    namespace d3d12 {
+namespace backend { namespace d3d12 {
 
-        class ComputePipeline : public ComputePipelineBase {
-        public:
-            ComputePipeline(ComputePipelineBuilder* builder);
+    class ComputePipeline : public ComputePipelineBase {
+      public:
+        ComputePipeline(ComputePipelineBuilder* builder);
 
-            ComPtr<ID3D12PipelineState> GetPipelineState();
+        ComPtr<ID3D12PipelineState> GetPipelineState();
 
-        private:
-            ComPtr<ID3D12PipelineState> mPipelineState;
-        };
+      private:
+        ComPtr<ID3D12PipelineState> mPipelineState;
+    };
 
-    }
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_COMPUTEPIPELINED3D12_H_
+#endif  // BACKEND_D3D12_COMPUTEPIPELINED3D12_H_

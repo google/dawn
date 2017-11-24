@@ -18,15 +18,14 @@
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/DepthStencilStateD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
+#include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/ShaderModuleD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
-#include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "common/Assert.h"
 
 #include <d3dcompiler.h>
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     namespace {
         D3D12_PRIMITIVE_TOPOLOGY D3D12PrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
@@ -46,7 +45,8 @@ namespace d3d12 {
             }
         }
 
-        D3D12_PRIMITIVE_TOPOLOGY_TYPE D3D12PrimitiveTopologyType(nxt::PrimitiveTopology primitiveTopology) {
+        D3D12_PRIMITIVE_TOPOLOGY_TYPE D3D12PrimitiveTopologyType(
+            nxt::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
                 case nxt::PrimitiveTopology::PointList:
                     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
@@ -60,10 +60,11 @@ namespace d3d12 {
                     UNREACHABLE();
             }
         }
-    }
+    }  // namespace
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder), mD3d12PrimitiveTopology(D3D12PrimitiveTopology(GetPrimitiveTopology())) {
+        : RenderPipelineBase(builder),
+          mD3d12PrimitiveTopology(D3D12PrimitiveTopology(GetPrimitiveTopology())) {
         uint32_t compileFlags = 0;
 #if defined(_DEBUG)
         // Enable better shader debugging with the graphics debugging tools.
@@ -86,32 +87,22 @@ namespace d3d12 {
 
             D3D12_SHADER_BYTECODE* shader = nullptr;
             switch (stage) {
-            case nxt::ShaderStage::Vertex:
-                shader = &descriptor.VS;
-                compileTarget = "vs_5_1";
-                break;
-            case nxt::ShaderStage::Fragment:
-                shader = &descriptor.PS;
-                compileTarget = "ps_5_1";
-                break;
-            case nxt::ShaderStage::Compute:
-                UNREACHABLE();
-                break;
+                case nxt::ShaderStage::Vertex:
+                    shader = &descriptor.VS;
+                    compileTarget = "vs_5_1";
+                    break;
+                case nxt::ShaderStage::Fragment:
+                    shader = &descriptor.PS;
+                    compileTarget = "ps_5_1";
+                    break;
+                case nxt::ShaderStage::Compute:
+                    UNREACHABLE();
+                    break;
             }
 
-            if(FAILED(D3DCompile(
-                hlslSource.c_str(),
-                hlslSource.length(),
-                nullptr,
-                nullptr,
-                nullptr,
-                entryPoint.c_str(),
-                compileTarget,
-                compileFlags,
-                0,
-                &compiledShader[stage],
-                &errors
-            ))) {
+            if (FAILED(D3DCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr,
+                                  nullptr, entryPoint.c_str(), compileTarget, compileFlags, 0,
+                                  &compiledShader[stage], &errors))) {
                 printf("%s\n", reinterpret_cast<char*>(errors->GetBufferPointer()));
                 ASSERT(false);
             }
@@ -148,7 +139,8 @@ namespace d3d12 {
         auto& subpassInfo = renderPass->GetSubpassInfo(GetSubPass());
 
         if (subpassInfo.depthStencilAttachmentSet) {
-            const auto& attachmentInfo = renderPass->GetAttachmentInfo(subpassInfo.depthStencilAttachment);
+            const auto& attachmentInfo =
+                renderPass->GetAttachmentInfo(subpassInfo.depthStencilAttachment);
             descriptor.DSVFormat = D3D12TextureFormat(attachmentInfo.format);
         }
 
@@ -158,7 +150,8 @@ namespace d3d12 {
             const auto& attachmentInfo = renderPass->GetAttachmentInfo(attachment);
 
             descriptor.RTVFormats[attachmentSlot] = D3D12TextureFormat(attachmentInfo.format);
-            descriptor.BlendState.RenderTarget[attachmentSlot] = ToBackend(GetBlendState(attachmentSlot))->GetD3D12BlendDesc();
+            descriptor.BlendState.RenderTarget[attachmentSlot] =
+                ToBackend(GetBlendState(attachmentSlot))->GetD3D12BlendDesc();
             attachmentCount = attachmentSlot + 1;
         }
         descriptor.NumRenderTargets = attachmentCount;
@@ -174,7 +167,8 @@ namespace d3d12 {
         descriptor.SampleDesc.Count = 1;
 
         Device* device = ToBackend(builder->GetDevice());
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateGraphicsPipelineState(&descriptor, IID_PPV_ARGS(&mPipelineState)));
+        ASSERT_SUCCESS(device->GetD3D12Device()->CreateGraphicsPipelineState(
+            &descriptor, IID_PPV_ARGS(&mPipelineState)));
     }
 
     D3D12_PRIMITIVE_TOPOLOGY RenderPipeline::GetD3D12PrimitiveTopology() const {
@@ -185,5 +179,4 @@ namespace d3d12 {
         return mPipelineState;
     }
 
-}
-}
+}}  // namespace backend::d3d12

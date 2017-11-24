@@ -36,8 +36,7 @@
 #include "backend/d3d12/TextureD3D12.h"
 #include "common/Assert.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
@@ -63,7 +62,8 @@ namespace d3d12 {
         backendDevice->NextSerial();
     }
 
-    void ExecuteCommandLists(nxtDevice device, std::initializer_list<ID3D12CommandList*> commandLists) {
+    void ExecuteCommandLists(nxtDevice device,
+                             std::initializer_list<ID3D12CommandList*> commandLists) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         backendDevice->ExecuteCommandLists(commandLists);
     }
@@ -89,13 +89,13 @@ namespace d3d12 {
           mMapReadRequestTracker(new MapReadRequestTracker(this)),
           mResourceAllocator(new ResourceAllocator(this)),
           mResourceUploader(new ResourceUploader(this)) {
-
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
         ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)));
 
-        ASSERT_SUCCESS(d3d12Device->CreateFence(mSerial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
+        ASSERT_SUCCESS(
+            d3d12Device->CreateFence(mSerial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
         mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         ASSERT(mFenceEvent != nullptr);
 
@@ -105,8 +105,8 @@ namespace d3d12 {
     Device::~Device() {
         const uint64_t currentSerial = GetSerial();
         NextSerial();
-        WaitForSerial(currentSerial); // Wait for all in-flight commands to finish executing
-        TickImpl(); // Call tick one last time so resources are cleaned up
+        WaitForSerial(currentSerial);  // Wait for all in-flight commands to finish executing
+        TickImpl();                    // Call tick one last time so resources are cleaned up
         delete mCommandAllocatorManager;
         delete mDescriptorHeapAllocator;
         delete mMapReadRequestTracker;
@@ -139,22 +139,21 @@ namespace d3d12 {
     }
 
     void Device::OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList) {
-        ComPtr<ID3D12GraphicsCommandList> &cmdList = *commandList;
+        ComPtr<ID3D12GraphicsCommandList>& cmdList = *commandList;
         if (!cmdList) {
             ASSERT_SUCCESS(mD3d12Device->CreateCommandList(
-                0,
-                D3D12_COMMAND_LIST_TYPE_DIRECT,
-                mCommandAllocatorManager->ReserveCommandAllocator().Get(),
-                nullptr,
-                IID_PPV_ARGS(&cmdList)
-            ));
+                0, D3D12_COMMAND_LIST_TYPE_DIRECT,
+                mCommandAllocatorManager->ReserveCommandAllocator().Get(), nullptr,
+                IID_PPV_ARGS(&cmdList)));
         } else {
-            ASSERT_SUCCESS(cmdList->Reset(mCommandAllocatorManager->ReserveCommandAllocator().Get(), nullptr));
+            ASSERT_SUCCESS(
+                cmdList->Reset(mCommandAllocatorManager->ReserveCommandAllocator().Get(), nullptr));
         }
     }
 
     ComPtr<ID3D12GraphicsCommandList> Device::GetPendingCommandList() {
-        // Callers of GetPendingCommandList do so to record commands. Only reserve a command allocator when it is needed so we don't submit empty command lists
+        // Callers of GetPendingCommandList do so to record commands. Only reserve a command
+        // allocator when it is needed so we don't submit empty command lists
         if (!mPendingCommands.open) {
             OpenCommandList(&mPendingCommands.commandList);
             mPendingCommands.open = true;
@@ -197,10 +196,12 @@ namespace d3d12 {
             mPendingCommands.open = false;
             lists[0] = mPendingCommands.commandList.Get();
             std::copy(commandLists.begin(), commandLists.end(), lists.begin() + 1);
-            mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size() + 1), lists.data());
+            mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size() + 1),
+                                               lists.data());
         } else {
             std::vector<ID3D12CommandList*> lists(commandLists);
-            mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), lists.data());
+            mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()),
+                                               lists.data());
         }
     }
 
@@ -268,5 +269,4 @@ namespace d3d12 {
         : RenderPassBase(builder), mDevice(device) {
     }
 
-}
-}
+}}  // namespace backend::d3d12

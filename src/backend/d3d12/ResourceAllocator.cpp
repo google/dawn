@@ -16,41 +16,31 @@
 
 #include "backend/d3d12/D3D12Backend.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     namespace {
         static constexpr D3D12_HEAP_PROPERTIES kDefaultHeapProperties = {
-            D3D12_HEAP_TYPE_DEFAULT,
-            D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-            D3D12_MEMORY_POOL_UNKNOWN,
-            0,
-            0
-        };
+            D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 0,
+            0};
 
         static constexpr D3D12_HEAP_PROPERTIES kUploadHeapProperties = {
-            D3D12_HEAP_TYPE_UPLOAD,
-            D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-            D3D12_MEMORY_POOL_UNKNOWN,
-            0,
-            0
-        };
+            D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 0,
+            0};
 
         static constexpr D3D12_HEAP_PROPERTIES kReadbackHeapProperties = {
-            D3D12_HEAP_TYPE_READBACK,
-            D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-            D3D12_MEMORY_POOL_UNKNOWN,
-            0,
-            0
-        };
-    }
+            D3D12_HEAP_TYPE_READBACK, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 0,
+            0};
+    }  // namespace
 
     ResourceAllocator::ResourceAllocator(Device* device) : mDevice(device) {
     }
 
-    ComPtr<ID3D12Resource> ResourceAllocator::Allocate(D3D12_HEAP_TYPE heapType, const D3D12_RESOURCE_DESC &resourceDescriptor, D3D12_RESOURCE_STATES initialUsage) {
+    ComPtr<ID3D12Resource> ResourceAllocator::Allocate(
+        D3D12_HEAP_TYPE heapType,
+        const D3D12_RESOURCE_DESC& resourceDescriptor,
+        D3D12_RESOURCE_STATES initialUsage) {
         const D3D12_HEAP_PROPERTIES* heapProperties = nullptr;
-        switch(heapType) {
+        switch (heapType) {
             case D3D12_HEAP_TYPE_DEFAULT:
                 heapProperties = &kDefaultHeapProperties;
                 break;
@@ -68,19 +58,15 @@ namespace d3d12 {
 
         // TODO(enga@google.com): Use CreatePlacedResource
         ASSERT_SUCCESS(mDevice->GetD3D12Device()->CreateCommittedResource(
-            heapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDescriptor,
-            initialUsage,
-            nullptr,
-            IID_PPV_ARGS(&resource)
-        ));
+            heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDescriptor, initialUsage, nullptr,
+            IID_PPV_ARGS(&resource)));
 
         return resource;
     }
 
     void ResourceAllocator::Release(ComPtr<ID3D12Resource> resource) {
-        // Resources may still be in use on the GPU. Enqueue them so that we hold onto them until GPU execution has completed
+        // Resources may still be in use on the GPU. Enqueue them so that we hold onto them until
+        // GPU execution has completed
         mReleasedResources.Enqueue(resource, mDevice->GetSerial());
     }
 
@@ -88,5 +74,4 @@ namespace d3d12 {
         mReleasedResources.ClearUpTo(lastCompletedSerial);
     }
 
-}
-}
+}}  // namespace backend::d3d12

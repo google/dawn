@@ -17,23 +17,29 @@
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/ResourceAllocator.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     ResourceUploader::ResourceUploader(Device* device) : mDevice(device) {
     }
 
-    void ResourceUploader::BufferSubData(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const void* data) {
-        // TODO(enga@google.com): Use a handle to a subset of a large ring buffer. On Release, decrease reference count on the ring buffer and free when 0.
-        // Alternatively, the SerialQueue could be used to track which last point of the ringbuffer is in use, and start reusing chunks of it that aren't in flight.
+    void ResourceUploader::BufferSubData(ComPtr<ID3D12Resource> resource,
+                                         uint32_t start,
+                                         uint32_t count,
+                                         const void* data) {
+        // TODO(enga@google.com): Use a handle to a subset of a large ring buffer. On Release,
+        // decrease reference count on the ring buffer and free when 0. Alternatively, the
+        // SerialQueue could be used to track which last point of the ringbuffer is in use, and
+        // start reusing chunks of it that aren't in flight.
         UploadHandle uploadHandle = GetUploadBuffer(count);
         memcpy(uploadHandle.mappedBuffer, data, count);
-        mDevice->GetPendingCommandList()->CopyBufferRegion(resource.Get(), start, uploadHandle.resource.Get(), 0, count);
+        mDevice->GetPendingCommandList()->CopyBufferRegion(resource.Get(), start,
+                                                           uploadHandle.resource.Get(), 0, count);
         Release(uploadHandle);
     }
 
     ResourceUploader::UploadHandle ResourceUploader::GetUploadBuffer(uint32_t requiredSize) {
-        // TODO(enga@google.com): This will find or create a mapped buffer of sufficient size and return a handle to a mapped range
+        // TODO(enga@google.com): This will find or create a mapped buffer of sufficient size and
+        // return a handle to a mapped range
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         resourceDescriptor.Alignment = 0;
@@ -48,12 +54,14 @@ namespace d3d12 {
         resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
         UploadHandle uploadHandle;
-        uploadHandle.resource = mDevice->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor, D3D12_RESOURCE_STATE_GENERIC_READ);
+        uploadHandle.resource = mDevice->GetResourceAllocator()->Allocate(
+            D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor, D3D12_RESOURCE_STATE_GENERIC_READ);
         D3D12_RANGE readRange;
         readRange.Begin = 0;
         readRange.End = 0;
 
-        uploadHandle.resource->Map(0, &readRange, reinterpret_cast<void**>(&uploadHandle.mappedBuffer));
+        uploadHandle.resource->Map(0, &readRange,
+                                   reinterpret_cast<void**>(&uploadHandle.mappedBuffer));
         return uploadHandle;
     }
 
@@ -62,5 +70,4 @@ namespace d3d12 {
         mDevice->GetResourceAllocator()->Release(uploadHandle.resource);
     }
 
-}
-}
+}}  // namespace backend::d3d12

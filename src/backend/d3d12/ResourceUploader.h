@@ -19,29 +19,30 @@
 
 #include "backend/Forward.h"
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class ResourceUploader {
-        public:
-            ResourceUploader(Device* device);
+      public:
+        ResourceUploader(Device* device);
 
-            void BufferSubData(ComPtr<ID3D12Resource> resource, uint32_t start, uint32_t count, const void* data);
+        void BufferSubData(ComPtr<ID3D12Resource> resource,
+                           uint32_t start,
+                           uint32_t count,
+                           const void* data);
 
-        private:
-            struct UploadHandle {
-                ComPtr<ID3D12Resource> resource;
-                uint8_t* mappedBuffer;
-            };
+      private:
+        struct UploadHandle {
+            ComPtr<ID3D12Resource> resource;
+            uint8_t* mappedBuffer;
+        };
 
-            UploadHandle GetUploadBuffer(uint32_t requiredSize);
-            void Release(UploadHandle uploadHandle);
+        UploadHandle GetUploadBuffer(uint32_t requiredSize);
+        void Release(UploadHandle uploadHandle);
 
-            Device* mDevice;
+        Device* mDevice;
     };
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_RESOURCEUPLOADER_H_
+#endif  // BACKEND_D3D12_RESOURCEUPLOADER_H_

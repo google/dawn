@@ -17,41 +17,39 @@
 
 #include "backend/Framebuffer.h"
 
-#include "common/Constants.h"
-#include "backend/d3d12/d3d12_platform.h"
 #include "backend/d3d12/DescriptorHeapAllocator.h"
+#include "backend/d3d12/d3d12_platform.h"
+#include "common/Constants.h"
 
 #include <array>
 #include <vector>
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class Framebuffer : public FramebufferBase {
-        public:
-            struct OMSetRenderTargetArgs {
-                unsigned int numRTVs = 0;
-                std::array<D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments> RTVs = {};
-                D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
-            };
+      public:
+        struct OMSetRenderTargetArgs {
+            unsigned int numRTVs = 0;
+            std::array<D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments> RTVs = {};
+            D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
+        };
 
-            Framebuffer(Device* device, FramebufferBuilder* builder);
-            OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs(uint32_t subpassIndex);
-            D3D12_CPU_DESCRIPTOR_HANDLE GetRTVDescriptor(uint32_t attachmentSlot);
-            D3D12_CPU_DESCRIPTOR_HANDLE GetDSVDescriptor(uint32_t attachmentSlot);
+        Framebuffer(Device* device, FramebufferBuilder* builder);
+        OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs(uint32_t subpassIndex);
+        D3D12_CPU_DESCRIPTOR_HANDLE GetRTVDescriptor(uint32_t attachmentSlot);
+        D3D12_CPU_DESCRIPTOR_HANDLE GetDSVDescriptor(uint32_t attachmentSlot);
 
-        private:
-            Device* mDevice = nullptr;
-            DescriptorHeapHandle mRtvHeap = {};
-            DescriptorHeapHandle mDsvHeap = {};
+      private:
+        Device* mDevice = nullptr;
+        DescriptorHeapHandle mRtvHeap = {};
+        DescriptorHeapHandle mDsvHeap = {};
 
-            // Indices into either the RTV or DSV heap, depending on texture format.
-            std::vector<uint32_t> mAttachmentHeapIndices;
+        // Indices into either the RTV or DSV heap, depending on texture format.
+        std::vector<uint32_t> mAttachmentHeapIndices;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_FRAMEBUFFERD3D12_H_
+#endif  // BACKEND_D3D12_FRAMEBUFFERD3D12_H_

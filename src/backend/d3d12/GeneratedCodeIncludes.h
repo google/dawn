@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/BindGroupD3D12.h"
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
 #include "backend/d3d12/BlendStateD3D12.h"
 #include "backend/d3d12/BufferD3D12.h"
 #include "backend/d3d12/CommandBufferD3D12.h"
 #include "backend/d3d12/ComputePipelineD3D12.h"
+#include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/DepthStencilStateD3D12.h"
 #include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"

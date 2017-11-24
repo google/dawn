@@ -21,38 +21,36 @@
 
 #include <bitset>
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     class Device;
 
     class CommandAllocatorManager {
-        public:
-            CommandAllocatorManager(Device* device);
+      public:
+        CommandAllocatorManager(Device* device);
 
-            // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
-            // otherwise its commands may be reset before execution has completed on the GPU
-            ComPtr<ID3D12CommandAllocator> ReserveCommandAllocator();
-            void Tick(uint64_t lastCompletedSerial);
+        // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
+        // otherwise its commands may be reset before execution has completed on the GPU
+        ComPtr<ID3D12CommandAllocator> ReserveCommandAllocator();
+        void Tick(uint64_t lastCompletedSerial);
 
-        private:
-            Device* device;
+      private:
+        Device* device;
 
-            // This must be at least 2 because the Device and Queue use separate command allocators
-            static constexpr unsigned int kMaxCommandAllocators = 32;
-            unsigned int mAllocatorCount;
+        // This must be at least 2 because the Device and Queue use separate command allocators
+        static constexpr unsigned int kMaxCommandAllocators = 32;
+        unsigned int mAllocatorCount;
 
-            struct IndexedCommandAllocator {
-                ComPtr<ID3D12CommandAllocator> commandAllocator;
-                unsigned int index;
-            };
+        struct IndexedCommandAllocator {
+            ComPtr<ID3D12CommandAllocator> commandAllocator;
+            unsigned int index;
+        };
 
-            ComPtr<ID3D12CommandAllocator> mCommandAllocators[kMaxCommandAllocators];
-            std::bitset<kMaxCommandAllocators> mFreeAllocators;
-            SerialQueue<IndexedCommandAllocator> mInFlightCommandAllocators;
+        ComPtr<ID3D12CommandAllocator> mCommandAllocators[kMaxCommandAllocators];
+        std::bitset<kMaxCommandAllocators> mFreeAllocators;
+        SerialQueue<IndexedCommandAllocator> mInFlightCommandAllocators;
     };
 
-}
-}
+}}  // namespace backend::d3d12
 
-#endif // BACKEND_D3D12_COMMANDALLOCATORMANAGER_H_
+#endif  // BACKEND_D3D12_COMMANDALLOCATORMANAGER_H_

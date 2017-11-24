@@ -14,18 +14,16 @@
 
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 
-#include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/BindGroupLayoutD3D12.h"
+#include "backend/d3d12/D3D12Backend.h"
 #include "common/Assert.h"
 
 using Microsoft::WRL::ComPtr;
 
-namespace backend {
-namespace d3d12 {
+namespace backend { namespace d3d12 {
 
     PipelineLayout::PipelineLayout(Device* device, PipelineLayoutBuilder* builder)
         : PipelineLayoutBase(builder), mDevice(device) {
-
         D3D12_ROOT_PARAMETER rootParameters[kMaxBindGroups * 2];
 
         // A root parameter is one of these types
@@ -34,7 +32,8 @@ namespace d3d12 {
             D3D12_ROOT_CONSTANTS Constants;
             D3D12_ROOT_DESCRIPTOR Descriptor;
         } rootParameterValues[kMaxBindGroups * 2];
-        // samplers must be in a separate descriptor table so we need at most twice as many tables as bind groups
+        // samplers must be in a separate descriptor table so we need at most twice as many tables
+        // as bind groups
 
         // Ranges are D3D12_DESCRIPTOR_RANGE_TYPE_(SRV|UAV|CBV|SAMPLER)
         // They are grouped together so each bind group has at most 4 ranges
@@ -46,9 +45,11 @@ namespace d3d12 {
         for (uint32_t group = 0; group < kMaxBindGroups; ++group) {
             const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
 
-            // Set the root descriptor table parameter and copy ranges. Ranges are offset by the bind group index
-            // Returns whether or not the parameter was set. A root parameter is not set if the number of ranges is 0
-            auto SetRootDescriptorTable = [&](uint32_t rangeCount, const D3D12_DESCRIPTOR_RANGE* descriptorRanges) -> bool {
+            // Set the root descriptor table parameter and copy ranges. Ranges are offset by the
+            // bind group index Returns whether or not the parameter was set. A root parameter is
+            // not set if the number of ranges is 0
+            auto SetRootDescriptorTable =
+                [&](uint32_t rangeCount, const D3D12_DESCRIPTOR_RANGE* descriptorRanges) -> bool {
                 if (rangeCount == 0) {
                     return false;
                 }
@@ -69,11 +70,13 @@ namespace d3d12 {
                 return true;
             };
 
-            if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorTableSize(), bindGroupLayout->GetCbvUavSrvDescriptorRanges())) {
+            if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorTableSize(),
+                                       bindGroupLayout->GetCbvUavSrvDescriptorRanges())) {
                 mCbvUavSrvRootParameterInfo[group] = parameterIndex++;
             }
 
-            if (SetRootDescriptorTable(bindGroupLayout->GetSamplerDescriptorTableSize(), bindGroupLayout->GetSamplerDescriptorRanges())) {
+            if (SetRootDescriptorTable(bindGroupLayout->GetSamplerDescriptorTableSize(),
+                                       bindGroupLayout->GetSamplerDescriptorRanges())) {
                 mSamplerRootParameterInfo[group] = parameterIndex++;
             }
         }
@@ -83,14 +86,17 @@ namespace d3d12 {
         rootSignatureDescriptor.pParameters = rootParameters;
         rootSignatureDescriptor.NumStaticSamplers = 0;
         rootSignatureDescriptor.pStaticSamplers = nullptr;
-        rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+        rootSignatureDescriptor.Flags =
+            D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
         ComPtr<ID3DBlob> signature;
         ComPtr<ID3DBlob> error;
-        ASSERT_SUCCESS(D3D12SerializeRootSignature(&rootSignatureDescriptor, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-        ASSERT_SUCCESS(device->GetD3D12Device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)));
+        ASSERT_SUCCESS(D3D12SerializeRootSignature(
+            &rootSignatureDescriptor, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+        ASSERT_SUCCESS(device->GetD3D12Device()->CreateRootSignature(
+            0, signature->GetBufferPointer(), signature->GetBufferSize(),
+            IID_PPV_ARGS(&mRootSignature)));
     }
-
 
     uint32_t PipelineLayout::GetCbvUavSrvRootParameterIndex(uint32_t group) const {
         ASSERT(group < kMaxBindGroups);
@@ -105,5 +111,4 @@ namespace d3d12 {
     ComPtr<ID3D12RootSignature> PipelineLayout::GetRootSignature() {
         return mRootSignature;
     }
-}
-}
+}}  // namespace backend::d3d12
