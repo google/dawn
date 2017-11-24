@@ -19,32 +19,31 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
 
     class Buffer : public BufferBase {
-        public:
-            Buffer(BufferBuilder* builder);
+      public:
+        Buffer(BufferBuilder* builder);
 
-            GLuint GetHandle() const;
+        GLuint GetHandle() const;
 
-        private:
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
+      private:
+        void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
+        void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void UnmapImpl() override;
+        void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
+                                 nxt::BufferUsageBit targetUsage) override;
 
-            GLuint mBuffer = 0;
+        GLuint mBuffer = 0;
     };
 
     class BufferView : public BufferViewBase {
-        public:
-            BufferView(BufferViewBuilder* builder);
+      public:
+        BufferView(BufferViewBuilder* builder);
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_BUFFERGL_H_
+#endif  // BACKEND_OPENGL_BUFFERGL_H_

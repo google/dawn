@@ -17,20 +17,18 @@
 
 #include "backend/DepthStencilState.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
     class PersistentPipelineState;
 
     class DepthStencilState : public DepthStencilStateBase {
-        public:
-            DepthStencilState(DepthStencilStateBuilder* builder);
+      public:
+        DepthStencilState(DepthStencilStateBuilder* builder);
 
-            void ApplyNow(PersistentPipelineState &persistentPipelineState) const;
+        void ApplyNow(PersistentPipelineState& persistentPipelineState) const;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_DEPTHSTENCILSTATEGL_H_
+#endif  // BACKEND_OPENGL_DEPTHSTENCILSTATEGL_H_

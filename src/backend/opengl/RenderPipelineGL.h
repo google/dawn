@@ -23,24 +23,22 @@
 
 #include <vector>
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class PersistentPipelineState;
 
     class RenderPipeline : public RenderPipelineBase, public PipelineGL {
-        public:
-            RenderPipeline(RenderPipelineBuilder* builder);
+      public:
+        RenderPipeline(RenderPipelineBuilder* builder);
 
-            GLenum GetGLPrimitiveTopology() const;
+        GLenum GetGLPrimitiveTopology() const;
 
-            void ApplyNow(PersistentPipelineState &persistentPipelineState);
+        void ApplyNow(PersistentPipelineState& persistentPipelineState);
 
-        private:
-            GLenum mGlPrimitiveTopology;
+      private:
+        GLenum mGlPrimitiveTopology;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_RENDERPIPELINEGL_H_
+#endif  // BACKEND_OPENGL_RENDERPIPELINEGL_H_

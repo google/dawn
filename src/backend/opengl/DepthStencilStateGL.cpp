@@ -18,8 +18,7 @@
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "common/Assert.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     namespace {
         GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction) {
@@ -67,17 +66,18 @@ namespace opengl {
                     UNREACHABLE();
             }
         }
-    }
+    }  // namespace
 
     DepthStencilState::DepthStencilState(DepthStencilStateBuilder* builder)
         : DepthStencilStateBase(builder) {
     }
 
-    void DepthStencilState::ApplyNow(PersistentPipelineState &persistentPipelineState) const {
+    void DepthStencilState::ApplyNow(PersistentPipelineState& persistentPipelineState) const {
         auto& depthInfo = GetDepth();
 
         // Depth writes only occur if depth is enabled
-        if (depthInfo.compareFunction == nxt::CompareFunction::Always && !depthInfo.depthWriteEnabled) {
+        if (depthInfo.compareFunction == nxt::CompareFunction::Always &&
+            !depthInfo.depthWriteEnabled) {
             glDisable(GL_DEPTH_TEST);
         } else {
             glEnable(GL_DEPTH_TEST);
@@ -101,22 +101,17 @@ namespace opengl {
 
         GLenum backCompareFunction = OpenGLCompareFunction(stencilInfo.back.compareFunction);
         GLenum frontCompareFunction = OpenGLCompareFunction(stencilInfo.front.compareFunction);
-        persistentPipelineState.SetStencilFuncsAndMask(backCompareFunction, frontCompareFunction, stencilInfo.readMask);
+        persistentPipelineState.SetStencilFuncsAndMask(backCompareFunction, frontCompareFunction,
+                                                       stencilInfo.readMask);
 
-        glStencilOpSeparate(GL_BACK,
-            OpenGLStencilOperation(stencilInfo.back.stencilFail),
-            OpenGLStencilOperation(stencilInfo.back.depthFail),
-            OpenGLStencilOperation(stencilInfo.back.depthStencilPass)
-        );
-        glStencilOpSeparate(GL_FRONT,
-            OpenGLStencilOperation(stencilInfo.front.stencilFail),
-            OpenGLStencilOperation(stencilInfo.front.depthFail),
-            OpenGLStencilOperation(stencilInfo.front.depthStencilPass)
-        );
+        glStencilOpSeparate(GL_BACK, OpenGLStencilOperation(stencilInfo.back.stencilFail),
+                            OpenGLStencilOperation(stencilInfo.back.depthFail),
+                            OpenGLStencilOperation(stencilInfo.back.depthStencilPass));
+        glStencilOpSeparate(GL_FRONT, OpenGLStencilOperation(stencilInfo.front.stencilFail),
+                            OpenGLStencilOperation(stencilInfo.front.depthFail),
+                            OpenGLStencilOperation(stencilInfo.front.depthStencilPass));
 
         glStencilMask(stencilInfo.writeMask);
-
     }
 
-}
-}
+}}  // namespace backend::opengl

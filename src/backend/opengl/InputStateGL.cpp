@@ -17,11 +17,9 @@
 #include "backend/opengl/OpenGLBackend.h"
 #include "common/Assert.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
-    InputState::InputState(InputStateBuilder* builder)
-        : InputStateBase(builder) {
+    InputState::InputState(InputStateBuilder* builder) : InputStateBase(builder) {
         glGenVertexArrays(1, &mVertexArrayObject);
         glBindVertexArray(mVertexArrayObject);
         auto& attributesSetMask = GetAttributesSetMask();
@@ -61,5 +59,4 @@ namespace opengl {
         return mVertexArrayObject;
     }
 
-}
-}
+}}  // namespace backend::opengl

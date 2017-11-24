@@ -19,21 +19,19 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
 
     class SwapChain : public SwapChainBase {
-        public:
-            SwapChain(SwapChainBuilder* builder);
-            ~SwapChain();
+      public:
+        SwapChain(SwapChainBuilder* builder);
+        ~SwapChain();
 
-        protected:
-            TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+      protected:
+        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_SWAPCHAINGL_H_
+#endif  // BACKEND_OPENGL_SWAPCHAINGL_H_

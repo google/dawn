@@ -18,23 +18,21 @@
 #include "backend/CommandAllocator.h"
 #include "backend/CommandBuffer.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
 
     class CommandBuffer : public CommandBufferBase {
-        public:
-            CommandBuffer(CommandBufferBuilder* builder);
-            ~CommandBuffer();
+      public:
+        CommandBuffer(CommandBufferBuilder* builder);
+        ~CommandBuffer();
 
-            void Execute();
+        void Execute();
 
-        private:
-            CommandIterator mCommands;
+      private:
+        CommandIterator mCommands;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_COMMANDBUFFERGL_H_
+#endif  // BACKEND_OPENGL_COMMANDBUFFERGL_H_

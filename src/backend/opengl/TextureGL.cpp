@@ -19,8 +19,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     namespace {
 
@@ -43,7 +42,8 @@ namespace opengl {
                     // This doesn't have an enum for the internal format in OpenGL.
                     return {GL_NONE, GL_BGRA, GL_UNSIGNED_BYTE};
                 case nxt::TextureFormat::D32FloatS8Uint:
-                    return {GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV};
+                    return {GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL,
+                            GL_FLOAT_32_UNSIGNED_INT_24_8_REV};
                 default:
                     UNREACHABLE();
             }
@@ -55,12 +55,11 @@ namespace opengl {
             return handle;
         }
 
-    }
+    }  // namespace
 
     // Texture
 
-    Texture::Texture(TextureBuilder* builder)
-        : Texture(builder, GenTexture()) {
+    Texture::Texture(TextureBuilder* builder) : Texture(builder, GenTexture()) {
     }
 
     Texture::Texture(TextureBuilder* builder, GLuint handle)
@@ -76,7 +75,8 @@ namespace opengl {
         glBindTexture(mTarget, handle);
 
         for (uint32_t i = 0; i < levels; ++i) {
-            glTexImage2D(mTarget, i, formatInfo.internalFormat, width, height, 0, formatInfo.format, formatInfo.type, nullptr);
+            glTexImage2D(mTarget, i, formatInfo.internalFormat, width, height, 0, formatInfo.format,
+                         formatInfo.type, nullptr);
             width = std::max(uint32_t(1), width / 2);
             height = std::max(uint32_t(1), height / 2);
         }
@@ -87,7 +87,8 @@ namespace opengl {
     }
 
     Texture::~Texture() {
-        // TODO(kainino@chromium.org): delete texture (but only when not using the native texture constructor?)
+        // TODO(kainino@chromium.org): delete texture (but only when not using the native texture
+        // constructor?)
     }
 
     GLuint Texture::GetHandle() const {
@@ -107,9 +108,7 @@ namespace opengl {
 
     // TextureView
 
-    TextureView::TextureView(TextureViewBuilder* builder)
-        : TextureViewBase(builder) {
+    TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
     }
 
-}
-}
+}}  // namespace backend::opengl

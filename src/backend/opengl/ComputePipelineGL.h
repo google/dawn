@@ -21,17 +21,15 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class ComputePipeline : public ComputePipelineBase, public PipelineGL {
-        public:
-            ComputePipeline(ComputePipelineBuilder* builder);
+      public:
+        ComputePipeline(ComputePipelineBuilder* builder);
 
-            void ApplyNow();
+        void ApplyNow();
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_COMPUTEPIPELINEGL_H_
+#endif  // BACKEND_OPENGL_COMPUTEPIPELINEGL_H_

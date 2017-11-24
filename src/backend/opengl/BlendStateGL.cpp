@@ -17,8 +17,7 @@
 #include "backend/opengl/OpenGLBackend.h"
 #include "common/Assert.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     namespace {
         GLenum GLBlendFactor(nxt::BlendFactor factor, bool alpha) {
@@ -70,7 +69,7 @@ namespace opengl {
                     UNREACHABLE();
             }
         }
-    }
+    }  // namespace
 
     BlendState::BlendState(BlendStateBuilder* builder) : BlendStateBase(builder) {
     }
@@ -80,17 +79,19 @@ namespace opengl {
 
         if (info.blendEnabled) {
             glEnablei(GL_BLEND, attachment);
-            glBlendEquationSeparatei(attachment, GLBlendMode(info.colorBlend.operation), GLBlendMode(info.alphaBlend.operation));
-            glBlendFuncSeparatei(attachment, GLBlendFactor(info.colorBlend.srcFactor, false), GLBlendFactor(info.colorBlend.dstFactor, false), GLBlendFactor(info.alphaBlend.srcFactor, true), GLBlendFactor(info.alphaBlend.dstFactor, true));
-            glColorMaski(attachment,
-                info.colorWriteMask & nxt::ColorWriteMask::Red,
-                info.colorWriteMask & nxt::ColorWriteMask::Green,
-                info.colorWriteMask & nxt::ColorWriteMask::Blue,
-                info.colorWriteMask & nxt::ColorWriteMask::Alpha);
+            glBlendEquationSeparatei(attachment, GLBlendMode(info.colorBlend.operation),
+                                     GLBlendMode(info.alphaBlend.operation));
+            glBlendFuncSeparatei(attachment, GLBlendFactor(info.colorBlend.srcFactor, false),
+                                 GLBlendFactor(info.colorBlend.dstFactor, false),
+                                 GLBlendFactor(info.alphaBlend.srcFactor, true),
+                                 GLBlendFactor(info.alphaBlend.dstFactor, true));
+            glColorMaski(attachment, info.colorWriteMask & nxt::ColorWriteMask::Red,
+                         info.colorWriteMask & nxt::ColorWriteMask::Green,
+                         info.colorWriteMask & nxt::ColorWriteMask::Blue,
+                         info.colorWriteMask & nxt::ColorWriteMask::Alpha);
         } else {
             glDisablei(GL_BLEND, attachment);
         }
     }
 
-}
-}
+}}  // namespace backend::opengl

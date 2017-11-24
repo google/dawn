@@ -19,8 +19,7 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
 
@@ -30,30 +29,29 @@ namespace opengl {
         uint32_t group;
         uint32_t binding;
     };
-    bool operator < (const BindingLocation& a, const BindingLocation& b);
+    bool operator<(const BindingLocation& a, const BindingLocation& b);
 
     struct CombinedSampler {
         BindingLocation samplerLocation;
         BindingLocation textureLocation;
         std::string GetName() const;
     };
-    bool operator < (const CombinedSampler& a, const CombinedSampler& b);
+    bool operator<(const CombinedSampler& a, const CombinedSampler& b);
 
     class ShaderModule : public ShaderModuleBase {
-        public:
-            ShaderModule(ShaderModuleBuilder* builder);
+      public:
+        ShaderModule(ShaderModuleBuilder* builder);
 
-            using CombinedSamplerInfo = std::vector<CombinedSampler>;
+        using CombinedSamplerInfo = std::vector<CombinedSampler>;
 
-            const char* GetSource() const;
-            const CombinedSamplerInfo& GetCombinedSamplerInfo() const;
+        const char* GetSource() const;
+        const CombinedSamplerInfo& GetCombinedSamplerInfo() const;
 
-        private:
-            CombinedSamplerInfo mCombinedInfo;
-            std::string mGlslSource;
+      private:
+        CombinedSamplerInfo mCombinedInfo;
+        std::string mGlslSource;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_SHADERMODULEGL_H_
+#endif  // BACKEND_OPENGL_SHADERMODULEGL_H_

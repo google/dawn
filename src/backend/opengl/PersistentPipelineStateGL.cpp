@@ -16,14 +16,15 @@
 
 #include "backend/opengl/OpenGLBackend.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     void PersistentPipelineState::SetDefaultState() {
         CallGLStencilFunc();
     }
 
-    void PersistentPipelineState::SetStencilFuncsAndMask(GLenum stencilBackCompareFunction, GLenum stencilFrontCompareFunction, uint32_t stencilReadMask) {
+    void PersistentPipelineState::SetStencilFuncsAndMask(GLenum stencilBackCompareFunction,
+                                                         GLenum stencilFrontCompareFunction,
+                                                         uint32_t stencilReadMask) {
         if (mStencilBackCompareFunction == stencilBackCompareFunction &&
             mStencilFrontCompareFunction == stencilFrontCompareFunction &&
             mStencilReadMask == stencilReadMask) {
@@ -46,15 +47,10 @@ namespace opengl {
     }
 
     void PersistentPipelineState::CallGLStencilFunc() {
-        glStencilFuncSeparate(GL_BACK,
-                mStencilBackCompareFunction,
-                mStencilReference,
-                mStencilReadMask);
-        glStencilFuncSeparate(GL_FRONT,
-                mStencilFrontCompareFunction,
-                mStencilReference,
-                mStencilReadMask);
+        glStencilFuncSeparate(GL_BACK, mStencilBackCompareFunction, mStencilReference,
+                              mStencilReadMask);
+        glStencilFuncSeparate(GL_FRONT, mStencilFrontCompareFunction, mStencilReference,
+                              mStencilReadMask);
     }
 
-}
-}
+}}  // namespace backend::opengl

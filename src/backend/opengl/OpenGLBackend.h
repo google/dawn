@@ -17,12 +17,12 @@
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/Buffer.h"
-#include "backend/BlendState.h"
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
-#include "backend/Device.h"
+#include "backend/BlendState.h"
+#include "backend/Buffer.h"
 #include "backend/DepthStencilState.h"
+#include "backend/Device.h"
 #include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/Queue.h"
@@ -31,8 +31,7 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class BindGroup;
     class BindGroupLayout;
@@ -79,66 +78,65 @@ namespace opengl {
         using TextureViewType = TextureView;
     };
 
-    template<typename T>
+    template <typename T>
     auto ToBackend(T&& common) -> decltype(ToBackendBase<OpenGLBackendTraits>(common)) {
         return ToBackendBase<OpenGLBackendTraits>(common);
     }
 
     // Definition of backend types
     class Device : public DeviceBase {
-        public:
-            BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
-            BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
-            BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
-            BufferBase* CreateBuffer(BufferBuilder* builder) override;
-            BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
-            CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-            ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
-            DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-            FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
-            PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
-            QueueBase* CreateQueue(QueueBuilder* builder) override;
-            RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
-            RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-            SamplerBase* CreateSampler(SamplerBuilder* builder) override;
-            ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
-            SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-            TextureBase* CreateTexture(TextureBuilder* builder) override;
-            TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
+      public:
+        BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
+        BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
+        BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
+        BufferBase* CreateBuffer(BufferBuilder* builder) override;
+        BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
+        CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+        ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
+        DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
+        InputStateBase* CreateInputState(InputStateBuilder* builder) override;
+        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
+        PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
+        QueueBase* CreateQueue(QueueBuilder* builder) override;
+        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
+        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
+        ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
+        SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
+        TextureBase* CreateTexture(TextureBuilder* builder) override;
+        TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
-            void TickImpl() override;
+        void TickImpl() override;
     };
 
     class BindGroup : public BindGroupBase {
-        public:
-            BindGroup(BindGroupBuilder* builder);
+      public:
+        BindGroup(BindGroupBuilder* builder);
     };
 
     class BindGroupLayout : public BindGroupLayoutBase {
-        public:
-            BindGroupLayout(BindGroupLayoutBuilder* builder);
+      public:
+        BindGroupLayout(BindGroupLayoutBuilder* builder);
     };
 
     class Framebuffer : public FramebufferBase {
-        public:
-            Framebuffer(FramebufferBuilder* builder);
+      public:
+        Framebuffer(FramebufferBuilder* builder);
     };
 
     class Queue : public QueueBase {
-        public:
-            Queue(QueueBuilder* builder);
+      public:
+        Queue(QueueBuilder* builder);
 
-            // NXT API
-            void Submit(uint32_t numCommands, CommandBuffer* const * commands);
+        // NXT API
+        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
     class RenderPass : public RenderPassBase {
-        public:
-            RenderPass(RenderPassBuilder* builder);
+      public:
+        RenderPass(RenderPassBuilder* builder);
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_OPENGLBACKEND_H_
+#endif  // BACKEND_OPENGL_OPENGLBACKEND_H_

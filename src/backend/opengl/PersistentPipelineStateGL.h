@@ -19,25 +19,25 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class PersistentPipelineState {
-        public:
-            void SetDefaultState();
-            void SetStencilFuncsAndMask(GLenum stencilBackCompareFunction, GLenum stencilFrontCompareFunction, uint32_t stencilReadMask);
-            void SetStencilReference(uint32_t stencilReference);
+      public:
+        void SetDefaultState();
+        void SetStencilFuncsAndMask(GLenum stencilBackCompareFunction,
+                                    GLenum stencilFrontCompareFunction,
+                                    uint32_t stencilReadMask);
+        void SetStencilReference(uint32_t stencilReference);
 
-        private:
-            void CallGLStencilFunc();
+      private:
+        void CallGLStencilFunc();
 
-            GLenum mStencilBackCompareFunction = GL_ALWAYS;
-            GLenum mStencilFrontCompareFunction = GL_ALWAYS;
-            GLuint mStencilReadMask = 0xffffffff;
-            GLuint mStencilReference = 0;
+        GLenum mStencilBackCompareFunction = GL_ALWAYS;
+        GLenum mStencilFrontCompareFunction = GL_ALWAYS;
+        GLuint mStencilReadMask = 0xffffffff;
+        GLuint mStencilReference = 0;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_PERSISTENTPIPELINESTATE_H_
+#endif  // BACKEND_OPENGL_PERSISTENTPIPELINESTATE_H_

@@ -14,8 +14,7 @@
 
 #include "backend/opengl/ComputePipelineGL.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
         : ComputePipelineBase(builder), PipelineGL(this, builder) {
@@ -25,5 +24,4 @@ namespace opengl {
         PipelineGL::ApplyNow();
     }
 
-}
-}
+}}  // namespace backend::opengl

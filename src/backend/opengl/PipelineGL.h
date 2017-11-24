@@ -21,35 +21,34 @@
 
 #include <vector>
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
     class PersistentPipelineState;
     class ShaderModule;
 
     class PipelineGL {
-        public:
-            PipelineGL(PipelineBase* parent, PipelineBuilder* builder);
+      public:
+        PipelineGL(PipelineBase* parent, PipelineBuilder* builder);
 
-            using GLPushConstantInfo = std::array<GLint, kMaxPushConstants>;
-            using BindingLocations = std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
+        using GLPushConstantInfo = std::array<GLint, kMaxPushConstants>;
+        using BindingLocations =
+            std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
 
-            const GLPushConstantInfo& GetGLPushConstants(nxt::ShaderStage stage) const;
-            const std::vector<GLuint>& GetTextureUnitsForSampler(GLuint index) const;
-            const std::vector<GLuint>& GetTextureUnitsForTexture(GLuint index) const;
-            GLuint GetProgramHandle() const;
+        const GLPushConstantInfo& GetGLPushConstants(nxt::ShaderStage stage) const;
+        const std::vector<GLuint>& GetTextureUnitsForSampler(GLuint index) const;
+        const std::vector<GLuint>& GetTextureUnitsForTexture(GLuint index) const;
+        GLuint GetProgramHandle() const;
 
-            void ApplyNow();
+        void ApplyNow();
 
-        private:
-            GLuint mProgram;
-            PerStage<GLPushConstantInfo> mGlPushConstants;
-            std::vector<std::vector<GLuint>> mUnitsForSamplers;
-            std::vector<std::vector<GLuint>> mUnitsForTextures;
+      private:
+        GLuint mProgram;
+        PerStage<GLPushConstantInfo> mGlPushConstants;
+        std::vector<std::vector<GLuint>> mUnitsForSamplers;
+        std::vector<std::vector<GLuint>> mUnitsForTextures;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_PIPELINEGL_H_
+#endif  // BACKEND_OPENGL_PIPELINEGL_H_

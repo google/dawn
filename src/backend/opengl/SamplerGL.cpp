@@ -16,8 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     namespace {
         GLenum MagFilterMode(nxt::FilterMode filter) {
@@ -55,18 +54,17 @@ namespace opengl {
                     UNREACHABLE();
             }
         }
-    }
+    }  // namespace
 
-    Sampler::Sampler(SamplerBuilder* builder)
-        : SamplerBase(builder) {
+    Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
         glGenSamplers(1, &mHandle);
         glSamplerParameteri(mHandle, GL_TEXTURE_MAG_FILTER, MagFilterMode(builder->GetMagFilter()));
-        glSamplerParameteri(mHandle, GL_TEXTURE_MIN_FILTER, MinFilterMode(builder->GetMinFilter(), builder->GetMipMapFilter()));
+        glSamplerParameteri(mHandle, GL_TEXTURE_MIN_FILTER,
+                            MinFilterMode(builder->GetMinFilter(), builder->GetMipMapFilter()));
     }
 
     GLuint Sampler::GetHandle() const {
         return mHandle;
     }
 
-}
-}
+}}  // namespace backend::opengl

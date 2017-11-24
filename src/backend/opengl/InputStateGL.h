@@ -19,24 +19,22 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
 
     class InputState : public InputStateBase {
-        public:
-            InputState(InputStateBuilder* builder);
+      public:
+        InputState(InputStateBuilder* builder);
 
-            std::bitset<kMaxVertexAttributes> GetAttributesUsingInput(uint32_t slot) const;
-            GLuint GetVAO();
+        std::bitset<kMaxVertexAttributes> GetAttributesUsingInput(uint32_t slot) const;
+        GLuint GetVAO();
 
-        private:
-            GLuint mVertexArrayObject;
-            std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexInputs> attributesUsingInput;
+      private:
+        GLuint mVertexArrayObject;
+        std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexInputs> attributesUsingInput;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_INPUTSTATEGL_H_
+#endif  // BACKEND_OPENGL_INPUTSTATEGL_H_

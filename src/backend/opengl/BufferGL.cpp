@@ -16,13 +16,11 @@
 
 #include "backend/opengl/OpenGLBackend.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     // Buffer
 
-    Buffer::Buffer(BufferBuilder* builder)
-        : BufferBase(builder) {
+    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
         glGenBuffers(1, &mBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glBufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);
@@ -40,7 +38,8 @@ namespace opengl {
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
-        // TODO(cwallez@chromium.org): this crashes on Mac NVIDIA, use GetBufferSubData there instead?
+        // TODO(cwallez@chromium.org): this crashes on Mac NVIDIA, use GetBufferSubData there
+        // instead?
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_READ_BIT);
         CallMapReadCallback(serial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, data);
@@ -56,9 +55,7 @@ namespace opengl {
 
     // BufferView
 
-    BufferView::BufferView(BufferViewBuilder* builder)
-        : BufferViewBase(builder) {
+    BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
     }
 
-}
-}
+}}  // namespace backend::opengl

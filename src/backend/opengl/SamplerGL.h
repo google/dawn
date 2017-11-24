@@ -19,22 +19,20 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
 
     class Sampler : public SamplerBase {
-        public:
-            Sampler(SamplerBuilder* builder);
+      public:
+        Sampler(SamplerBuilder* builder);
 
-            GLuint GetHandle() const;
+        GLuint GetHandle() const;
 
-        private:
-            GLuint mHandle;
+      private:
+        GLuint mHandle;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_SAMPLERGL_H_
+#endif  // BACKEND_OPENGL_SAMPLERGL_H_

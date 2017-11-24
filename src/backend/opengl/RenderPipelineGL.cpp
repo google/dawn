@@ -20,8 +20,7 @@
 #include "backend/opengl/OpenGLBackend.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     namespace {
         GLenum GLPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
@@ -40,10 +39,11 @@ namespace opengl {
                     UNREACHABLE();
             }
         }
-    }
+    }  // namespace
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder), PipelineGL(this, builder),
+        : RenderPipelineBase(builder),
+          PipelineGL(this, builder),
           mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {
     }
 
@@ -51,7 +51,7 @@ namespace opengl {
         return mGlPrimitiveTopology;
     }
 
-    void RenderPipeline::ApplyNow(PersistentPipelineState &persistentPipelineState) {
+    void RenderPipeline::ApplyNow(PersistentPipelineState& persistentPipelineState) {
         PipelineGL::ApplyNow();
 
         auto inputState = ToBackend(GetInputState());
@@ -68,5 +68,4 @@ namespace opengl {
         }
     }
 
-}
-}
+}}  // namespace backend::opengl

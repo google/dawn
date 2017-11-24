@@ -19,17 +19,15 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class BlendState : public BlendStateBase {
-        public:
-            BlendState(BlendStateBuilder* builder);
+      public:
+        BlendState(BlendStateBuilder* builder);
 
-            void ApplyNow(uint32_t attachment);
+        void ApplyNow(uint32_t attachment);
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_BLENDSTATED3D12_H_
+#endif  // BACKEND_OPENGL_BLENDSTATED3D12_H_

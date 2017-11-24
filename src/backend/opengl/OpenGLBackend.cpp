@@ -22,13 +22,12 @@
 #include "backend/opengl/InputStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
 #include "backend/opengl/RenderPipelineGL.h"
+#include "backend/opengl/SamplerGL.h"
 #include "backend/opengl/ShaderModuleGL.h"
 #include "backend/opengl/SwapChainGL.h"
-#include "backend/opengl/SamplerGL.h"
 #include "backend/opengl/TextureGL.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
@@ -109,8 +108,7 @@ namespace opengl {
 
     // Bind Group
 
-    BindGroup::BindGroup(BindGroupBuilder* builder)
-        : BindGroupBase(builder) {
+    BindGroup::BindGroup(BindGroupBuilder* builder) : BindGroupBase(builder) {
     }
 
     // Bind Group Layout
@@ -121,17 +119,15 @@ namespace opengl {
 
     // Framebuffer
 
-    Framebuffer::Framebuffer(FramebufferBuilder* builder)
-        : FramebufferBase(builder) {
+    Framebuffer::Framebuffer(FramebufferBuilder* builder) : FramebufferBase(builder) {
     }
 
     // Queue
 
-    Queue::Queue(QueueBuilder* builder)
-        : QueueBase(builder) {
+    Queue::Queue(QueueBuilder* builder) : QueueBase(builder) {
     }
 
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
+    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
         for (uint32_t i = 0; i < numCommands; ++i) {
             commands[i]->Execute();
         }
@@ -139,9 +135,7 @@ namespace opengl {
 
     // RenderPass
 
-    RenderPass::RenderPass(RenderPassBuilder* builder)
-        : RenderPassBase(builder) {
+    RenderPass::RenderPass(RenderPassBuilder* builder) : RenderPassBase(builder) {
     }
 
-}
-}
+}}  // namespace backend::opengl

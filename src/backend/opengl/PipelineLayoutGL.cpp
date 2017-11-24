@@ -16,11 +16,9 @@
 
 #include "backend/opengl/OpenGLBackend.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
-    PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder)
-        : PipelineLayoutBase(builder) {
+    PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder) : PipelineLayoutBase(builder) {
         GLuint uboIndex = 0;
         GLuint samplerIndex = 0;
         GLuint sampledTextureIndex = 0;
@@ -37,20 +35,20 @@ namespace opengl {
                 switch (groupInfo.types[binding]) {
                     case nxt::BindingType::UniformBuffer:
                         mIndexInfo[group][binding] = uboIndex;
-                        uboIndex ++;
+                        uboIndex++;
                         break;
                     case nxt::BindingType::Sampler:
                         mIndexInfo[group][binding] = samplerIndex;
-                        samplerIndex ++;
+                        samplerIndex++;
                         break;
                     case nxt::BindingType::SampledTexture:
                         mIndexInfo[group][binding] = sampledTextureIndex;
-                        sampledTextureIndex ++;
+                        sampledTextureIndex++;
                         break;
 
                     case nxt::BindingType::StorageBuffer:
                         mIndexInfo[group][binding] = ssboIndex;
-                        ssboIndex ++;
+                        ssboIndex++;
                         break;
                 }
             }
@@ -76,5 +74,4 @@ namespace opengl {
         return mNumSampledTextures;
     }
 
-}
-}
+}}  // namespace backend::opengl

@@ -22,8 +22,7 @@
 #include <iostream>
 #include <set>
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     namespace {
 
@@ -40,7 +39,7 @@ namespace opengl {
             }
         }
 
-    }
+    }  // namespace
 
     PipelineGL::PipelineGL(PipelineBase* parent, PipelineBuilder* builder) {
         auto CreateShader = [](GLenum type, const char* source) -> GLuint {
@@ -65,7 +64,8 @@ namespace opengl {
             return shader;
         };
 
-        auto FillPushConstants = [](const ShaderModule* module, GLPushConstantInfo* info, GLuint program) {
+        auto FillPushConstants = [](const ShaderModule* module, GLPushConstantInfo* info,
+                                    GLuint program) {
             const auto& moduleInfo = module->GetPushConstants();
             for (uint32_t i = 0; i < moduleInfo.names.size(); i++) {
                 (*info)[i] = -1;
@@ -119,7 +119,8 @@ namespace opengl {
 
         glUseProgram(mProgram);
 
-        // The uniforms are part of the program state so we can pre-bind buffer units, texture units etc.
+        // The uniforms are part of the program state so we can pre-bind buffer units, texture units
+        // etc.
         const auto& layout = ToBackend(parent->GetLayout());
         const auto& indices = layout->GetBindingIndexInfo();
 
@@ -133,25 +134,22 @@ namespace opengl {
 
                 std::string name = GetBindingName(group, binding);
                 switch (groupInfo.types[binding]) {
-                    case nxt::BindingType::UniformBuffer:
-                        {
-                            GLint location = glGetUniformBlockIndex(mProgram, name.c_str());
-                            glUniformBlockBinding(mProgram, location, indices[group][binding]);
-                        }
-                        break;
+                    case nxt::BindingType::UniformBuffer: {
+                        GLint location = glGetUniformBlockIndex(mProgram, name.c_str());
+                        glUniformBlockBinding(mProgram, location, indices[group][binding]);
+                    } break;
 
-                    case nxt::BindingType::StorageBuffer:
-                        {
-                            GLuint location = glGetProgramResourceIndex(mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
-                            glShaderStorageBlockBinding(mProgram, location, indices[group][binding]);
-                        }
-                        break;
+                    case nxt::BindingType::StorageBuffer: {
+                        GLuint location = glGetProgramResourceIndex(
+                            mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
+                        glShaderStorageBlockBinding(mProgram, location, indices[group][binding]);
+                    } break;
 
                     case nxt::BindingType::Sampler:
                     case nxt::BindingType::SampledTexture:
-                        // These binding types are handled in the separate sampler and texture emulation
+                        // These binding types are handled in the separate sampler and texture
+                        // emulation
                         break;
-
                 }
             }
         }
@@ -176,18 +174,21 @@ namespace opengl {
                 GLint location = glGetUniformLocation(mProgram, name.c_str());
                 glUniform1i(location, textureUnit);
 
-                GLuint samplerIndex = indices[combined.samplerLocation.group][combined.samplerLocation.binding];
+                GLuint samplerIndex =
+                    indices[combined.samplerLocation.group][combined.samplerLocation.binding];
                 mUnitsForSamplers[samplerIndex].push_back(textureUnit);
 
-                GLuint textureIndex = indices[combined.textureLocation.group][combined.textureLocation.binding];
+                GLuint textureIndex =
+                    indices[combined.textureLocation.group][combined.textureLocation.binding];
                 mUnitsForTextures[textureIndex].push_back(textureUnit);
 
-                textureUnit ++;
+                textureUnit++;
             }
         }
     }
 
-    const PipelineGL::GLPushConstantInfo& PipelineGL::GetGLPushConstants(nxt::ShaderStage stage) const {
+    const PipelineGL::GLPushConstantInfo& PipelineGL::GetGLPushConstants(
+        nxt::ShaderStage stage) const {
         return mGlPushConstants[stage];
     }
 
@@ -209,5 +210,4 @@ namespace opengl {
         glUseProgram(mProgram);
     }
 
-}
-}
+}}  // namespace backend::opengl

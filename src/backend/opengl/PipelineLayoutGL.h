@@ -19,29 +19,28 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
 
     class PipelineLayout : public PipelineLayoutBase {
-        public:
-            PipelineLayout(PipelineLayoutBuilder* builder);
+      public:
+        PipelineLayout(PipelineLayoutBuilder* builder);
 
-            using BindingIndexInfo = std::array<std::array<GLuint, kMaxBindingsPerGroup>, kMaxBindGroups>;
-            const BindingIndexInfo& GetBindingIndexInfo() const;
+        using BindingIndexInfo =
+            std::array<std::array<GLuint, kMaxBindingsPerGroup>, kMaxBindGroups>;
+        const BindingIndexInfo& GetBindingIndexInfo() const;
 
-            GLuint GetTextureUnitsUsed() const;
-            size_t GetNumSamplers() const;
-            size_t GetNumSampledTextures() const;
+        GLuint GetTextureUnitsUsed() const;
+        size_t GetNumSamplers() const;
+        size_t GetNumSampledTextures() const;
 
-        private:
-            BindingIndexInfo mIndexInfo;
-            size_t mNumSamplers;
-            size_t mNumSampledTextures;
+      private:
+        BindingIndexInfo mIndexInfo;
+        size_t mNumSamplers;
+        size_t mNumSampledTextures;
     };
 
-}
-}
+}}  // namespace backend::opengl
 
-#endif // BACKEND_OPENGL_PIPELINELAYOUTGL_H_
+#endif  // BACKEND_OPENGL_PIPELINELAYOUTGL_H_

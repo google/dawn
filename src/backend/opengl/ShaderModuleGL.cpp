@@ -21,8 +21,7 @@
 
 #include <sstream>
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     std::string GetBindingName(uint32_t group, uint32_t binding) {
         std::ostringstream o;
@@ -30,12 +29,13 @@ namespace opengl {
         return o.str();
     }
 
-    bool operator < (const BindingLocation& a, const BindingLocation& b) {
+    bool operator<(const BindingLocation& a, const BindingLocation& b) {
         return std::tie(a.group, a.binding) < std::tie(b.group, b.binding);
     }
 
-    bool operator < (const CombinedSampler& a, const CombinedSampler& b) {
-        return std::tie(a.samplerLocation, a.textureLocation) < std::tie(b.samplerLocation, b.textureLocation);
+    bool operator<(const CombinedSampler& a, const CombinedSampler& b) {
+        return std::tie(a.samplerLocation, a.textureLocation) <
+               std::tie(b.samplerLocation, b.textureLocation);
     }
 
     std::string CombinedSampler::GetName() const {
@@ -46,8 +46,7 @@ namespace opengl {
         return o.str();
     }
 
-    ShaderModule::ShaderModule(ShaderModuleBuilder* builder)
-        : ShaderModuleBase(builder) {
+    ShaderModule::ShaderModule(ShaderModuleBuilder* builder) : ShaderModuleBase(builder) {
         spirv_cross::CompilerGLSL compiler(builder->AcquireSpirv());
         spirv_cross::CompilerGLSL::Options options;
 
@@ -60,8 +59,8 @@ namespace opengl {
         options.vertex.flip_vert_y = true;
         compiler.set_options(options);
 
-        // Rename the push constant block to be prefixed with the shader stage type so that uniform names
-        // don't match between the FS and the VS.
+        // Rename the push constant block to be prefixed with the shader stage type so that uniform
+        // names don't match between the FS and the VS.
         const auto& resources = compiler.get_shader_resources();
         if (resources.push_constant_buffers.size() > 0) {
             const char* prefix = nullptr;
@@ -95,10 +94,14 @@ namespace opengl {
             mCombinedInfo.emplace_back();
 
             auto& info = mCombinedInfo.back();
-            info.samplerLocation.group = compiler.get_decoration(combined.sampler_id, spv::DecorationDescriptorSet);
-            info.samplerLocation.binding = compiler.get_decoration(combined.sampler_id, spv::DecorationBinding);
-            info.textureLocation.group = compiler.get_decoration(combined.image_id, spv::DecorationDescriptorSet);
-            info.textureLocation.binding = compiler.get_decoration(combined.image_id, spv::DecorationBinding);
+            info.samplerLocation.group =
+                compiler.get_decoration(combined.sampler_id, spv::DecorationDescriptorSet);
+            info.samplerLocation.binding =
+                compiler.get_decoration(combined.sampler_id, spv::DecorationBinding);
+            info.textureLocation.group =
+                compiler.get_decoration(combined.image_id, spv::DecorationDescriptorSet);
+            info.textureLocation.binding =
+                compiler.get_decoration(combined.image_id, spv::DecorationBinding);
             compiler.set_name(combined.combined_id, info.GetName());
         }
 
@@ -127,5 +130,4 @@ namespace opengl {
         return mCombinedInfo;
     }
 
-}
-}
+}}  // namespace backend::opengl

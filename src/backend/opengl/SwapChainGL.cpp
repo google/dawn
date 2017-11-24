@@ -19,11 +19,9 @@
 
 #include <nxt/nxt_wsi.h>
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
-    SwapChain::SwapChain(SwapChainBuilder* builder)
-        : SwapChainBase(builder) {
+    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
         im.Init(im.userData, nullptr);
     }
@@ -43,5 +41,4 @@ namespace opengl {
         return new Texture(builder, nativeTexture);
     }
 
-}
-}
+}}  // namespace backend::opengl

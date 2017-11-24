@@ -19,8 +19,7 @@
 
 #include "glad/glad.h"
 
-namespace backend {
-namespace opengl {
+namespace backend { namespace opengl {
 
     class Device;
 
@@ -31,29 +30,28 @@ namespace opengl {
     };
 
     class Texture : public TextureBase {
-        public:
-            Texture(TextureBuilder* builder);
-            Texture(TextureBuilder* builder, GLuint handle);
-            ~Texture();
+      public:
+        Texture(TextureBuilder* builder);
+        Texture(TextureBuilder* builder, GLuint handle);
+        ~Texture();
 
-            GLuint GetHandle() const;
-            GLenum GetGLTarget() const;
-            TextureFormatInfo GetGLFormat() const;
+        GLuint GetHandle() const;
+        GLenum GetGLTarget() const;
+        TextureFormatInfo GetGLFormat() const;
 
-            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
+                                 nxt::TextureUsageBit targetUsage) override;
 
-        private:
-            GLuint mHandle;
-            GLenum mTarget;
+      private:
+        GLuint mHandle;
+        GLenum mTarget;
     };
 
     class TextureView : public TextureViewBase {
-        public:
-            TextureView(TextureViewBuilder* builder);
+      public:
+        TextureView(TextureViewBuilder* builder);
     };
 
+}}  // namespace backend::opengl
 
-}
-}
-
-#endif // BACKEND_OPENGL_TEXTUREGL_H_
+#endif  // BACKEND_OPENGL_TEXTUREGL_H_
