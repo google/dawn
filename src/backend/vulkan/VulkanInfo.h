@@ -19,8 +19,7 @@
 
 #include <vector>
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     class Device;
 
@@ -68,8 +67,9 @@ namespace vulkan {
 
     bool GatherGlobalInfo(const Device& device, VulkanGlobalInfo* info);
     bool GetPhysicalDevices(const Device& device, std::vector<VkPhysicalDevice>* physicalDevices);
-    bool GatherDeviceInfo(const Device& device, VkPhysicalDevice physicalDevice, VulkanDeviceInfo* info);
-}
-}
+    bool GatherDeviceInfo(const Device& device,
+                          VkPhysicalDevice physicalDevice,
+                          VulkanDeviceInfo* info);
+}}  // namespace backend::vulkan
 
-#endif // BACKEND_VULKAN_VULKANINFO_H_
+#endif  // BACKEND_VULKAN_VULKANINFO_H_

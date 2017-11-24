@@ -19,19 +19,21 @@
 
 #include <cstring>
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
-    BufferUploader::BufferUploader(Device* device)
-        : mDevice(device) {
+    BufferUploader::BufferUploader(Device* device) : mDevice(device) {
     }
 
     BufferUploader::~BufferUploader() {
         ASSERT(mBuffersToDelete.Empty());
     }
 
-    void BufferUploader::BufferSubData(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size, const void* data) {
-        // TODO(cwallez@chromium.org): this is soooooo bad. We should use some sort of ring buffer for this.
+    void BufferUploader::BufferSubData(VkBuffer buffer,
+                                       VkDeviceSize offset,
+                                       VkDeviceSize size,
+                                       const void* data) {
+        // TODO(cwallez@chromium.org): this is soooooo bad. We should use some sort of ring buffer
+        // for this.
 
         // Create a staging buffer
         VkBufferCreateInfo createInfo;
@@ -45,20 +47,23 @@ namespace vulkan {
         createInfo.pQueueFamilyIndices = 0;
 
         VkBuffer stagingBuffer = VK_NULL_HANDLE;
-        if (mDevice->fn.CreateBuffer(mDevice->GetVkDevice(), &createInfo, nullptr, &stagingBuffer) != VK_SUCCESS) {
+        if (mDevice->fn.CreateBuffer(mDevice->GetVkDevice(), &createInfo, nullptr,
+                                     &stagingBuffer) != VK_SUCCESS) {
             ASSERT(false);
         }
 
         VkMemoryRequirements requirements;
-        mDevice->fn.GetBufferMemoryRequirements(mDevice->GetVkDevice(), stagingBuffer, &requirements);
+        mDevice->fn.GetBufferMemoryRequirements(mDevice->GetVkDevice(), stagingBuffer,
+                                                &requirements);
 
         DeviceMemoryAllocation allocation;
         if (!mDevice->GetMemoryAllocator()->Allocate(requirements, true, &allocation)) {
             ASSERT(false);
         }
 
-        if (mDevice->fn.BindBufferMemory(mDevice->GetVkDevice(), stagingBuffer, allocation.GetMemory(),
-                                        allocation.GetMemoryOffset()) != VK_SUCCESS) {
+        if (mDevice->fn.BindBufferMemory(mDevice->GetVkDevice(), stagingBuffer,
+                                         allocation.GetMemory(),
+                                         allocation.GetMemoryOffset()) != VK_SUCCESS) {
             ASSERT(false);
         }
 
@@ -75,11 +80,9 @@ namespace vulkan {
         barrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
-        mDevice->fn.CmdPipelineBarrier(commands,
-                VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
-                1, &barrier,
-                0, nullptr,
-                0, nullptr);
+        mDevice->fn.CmdPipelineBarrier(commands, VK_PIPELINE_STAGE_HOST_BIT,
+                                       VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &barrier, 0, nullptr,
+                                       0, nullptr);
 
         VkBufferCopy copy;
         copy.srcOffset = 0;
@@ -100,5 +103,4 @@ namespace vulkan {
         mBuffersToDelete.ClearUpTo(completedSerial);
     }
 
-}
-}
+}}  // namespace backend::vulkan

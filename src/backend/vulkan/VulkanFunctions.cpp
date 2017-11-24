@@ -17,14 +17,13 @@
 #include "backend/vulkan/VulkanInfo.h"
 #include "common/DynamicLib.h"
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
-    #define GET_GLOBAL_PROC(name) \
-        name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(nullptr, "vk" #name)); \
-        if (name == nullptr) { \
-            return false; \
-        }
+#define GET_GLOBAL_PROC(name)                                                          \
+    name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(nullptr, "vk" #name)); \
+    if (name == nullptr) {                                                             \
+        return false;                                                                  \
+    }
 
     bool VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
         if (!vulkanLib.GetProc(&GetInstanceProcAddr, "vkGetInstanceProcAddr")) {
@@ -38,14 +37,16 @@ namespace vulkan {
         return true;
     }
 
-    #define GET_INSTANCE_PROC(name) \
-        name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(instance, "vk" #name)); \
-        if (name == nullptr) { \
-            return false; \
-        }
+#define GET_INSTANCE_PROC(name)                                                         \
+    name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(instance, "vk" #name)); \
+    if (name == nullptr) {                                                              \
+        return false;                                                                   \
+    }
 
-    bool VulkanFunctions::LoadInstanceProcs(VkInstance instance, const VulkanGlobalKnobs& usedKnobs) {
-        // Load this proc first so that we can destroy the instance even if some other GET_INSTANCE_PROC fails
+    bool VulkanFunctions::LoadInstanceProcs(VkInstance instance,
+                                            const VulkanGlobalKnobs& usedKnobs) {
+        // Load this proc first so that we can destroy the instance even if some other
+        // GET_INSTANCE_PROC fails
         GET_INSTANCE_PROC(DestroyInstance);
 
         GET_INSTANCE_PROC(CreateDevice);
@@ -79,11 +80,11 @@ namespace vulkan {
         return true;
     }
 
-    #define GET_DEVICE_PROC(name) \
-        name = reinterpret_cast<decltype(name)>(GetDeviceProcAddr(device, "vk" #name)); \
-        if (name == nullptr) { \
-            return false; \
-        }
+#define GET_DEVICE_PROC(name)                                                       \
+    name = reinterpret_cast<decltype(name)>(GetDeviceProcAddr(device, "vk" #name)); \
+    if (name == nullptr) {                                                          \
+        return false;                                                               \
+    }
 
     bool VulkanFunctions::LoadDeviceProcs(VkDevice device, const VulkanDeviceKnobs& usedKnobs) {
         GET_DEVICE_PROC(AllocateCommandBuffers);
@@ -217,5 +218,4 @@ namespace vulkan {
         return true;
     }
 
-}
-}
+}}  // namespace backend::vulkan

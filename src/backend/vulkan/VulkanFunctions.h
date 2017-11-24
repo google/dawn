@@ -19,8 +19,7 @@
 
 class DynamicLib;
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     struct VulkanGlobalKnobs;
     struct VulkanDeviceKnobs;
@@ -54,11 +53,14 @@ namespace vulkan {
         PFN_vkGetDeviceProcAddr GetDeviceProcAddr = nullptr;
         PFN_vkGetPhysicalDeviceFeatures GetPhysicalDeviceFeatures = nullptr;
         PFN_vkGetPhysicalDeviceFormatProperties GetPhysicalDeviceFormatProperties = nullptr;
-        PFN_vkGetPhysicalDeviceImageFormatProperties GetPhysicalDeviceImageFormatProperties = nullptr;
+        PFN_vkGetPhysicalDeviceImageFormatProperties GetPhysicalDeviceImageFormatProperties =
+            nullptr;
         PFN_vkGetPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties = nullptr;
         PFN_vkGetPhysicalDeviceProperties GetPhysicalDeviceProperties = nullptr;
-        PFN_vkGetPhysicalDeviceQueueFamilyProperties GetPhysicalDeviceQueueFamilyProperties = nullptr;
-        PFN_vkGetPhysicalDeviceSparseImageFormatProperties GetPhysicalDeviceSparseImageFormatProperties = nullptr;
+        PFN_vkGetPhysicalDeviceQueueFamilyProperties GetPhysicalDeviceQueueFamilyProperties =
+            nullptr;
+        PFN_vkGetPhysicalDeviceSparseImageFormatProperties
+            GetPhysicalDeviceSparseImageFormatProperties = nullptr;
         // Not technically an instance proc but we want to be able to use it as soon as the
         // device is created.
         PFN_vkDestroyDevice DestroyDevice = nullptr;
@@ -71,9 +73,11 @@ namespace vulkan {
         // VK_KHR_surface
         PFN_vkDestroySurfaceKHR DestroySurfaceKHR = nullptr;
         PFN_vkGetPhysicalDeviceSurfaceSupportKHR GetPhysicalDeviceSurfaceSupportKHR = nullptr;
-        PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR GetPhysicalDeviceSurfaceCapabilitiesKHR = nullptr;
+        PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR GetPhysicalDeviceSurfaceCapabilitiesKHR =
+            nullptr;
         PFN_vkGetPhysicalDeviceSurfaceFormatsKHR GetPhysicalDeviceSurfaceFormatsKHR = nullptr;
-        PFN_vkGetPhysicalDeviceSurfacePresentModesKHR GetPhysicalDeviceSurfacePresentModesKHR = nullptr;
+        PFN_vkGetPhysicalDeviceSurfacePresentModesKHR GetPhysicalDeviceSurfacePresentModesKHR =
+            nullptr;
 
         // ---------- Device procs
 
@@ -206,7 +210,6 @@ namespace vulkan {
         PFN_vkQueuePresentKHR QueuePresentKHR = nullptr;
     };
 
-}
-}
+}}  // namespace backend::vulkan
 
-#endif // BACKEND_VULKAN_VULKANFUNCTIONS_H_
+#endif  // BACKEND_VULKAN_VULKANFUNCTIONS_H_

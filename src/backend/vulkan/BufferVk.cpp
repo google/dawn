@@ -19,8 +19,7 @@
 
 #include <cstring>
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     namespace {
 
@@ -49,10 +48,9 @@ namespace vulkan {
             return flags;
         }
 
-    }
+    }  // namespace
 
-    Buffer::Buffer(BufferBuilder* builder)
-        : BufferBase(builder) {
+    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
         Device* device = ToBackend(GetDevice());
 
         VkBufferCreateInfo createInfo;
@@ -65,19 +63,24 @@ namespace vulkan {
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = 0;
 
-        if (device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &mHandle) != VK_SUCCESS) {
+        if (device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
+            VK_SUCCESS) {
             ASSERT(false);
         }
 
         VkMemoryRequirements requirements;
         device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
-        bool requestMappable = (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) != 0;
-        if (!device->GetMemoryAllocator()->Allocate(requirements, requestMappable, &mMemoryAllocation)) {
+        bool requestMappable =
+            (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) !=
+            0;
+        if (!device->GetMemoryAllocator()->Allocate(requirements, requestMappable,
+                                                    &mMemoryAllocation)) {
             ASSERT(false);
         }
 
-        if (device->fn.BindBufferMemory(device->GetVkDevice(), mHandle, mMemoryAllocation.GetMemory(),
+        if (device->fn.BindBufferMemory(device->GetVkDevice(), mHandle,
+                                        mMemoryAllocation.GetMemory(),
                                         mMemoryAllocation.GetMemoryOffset()) != VK_SUCCESS) {
             ASSERT(false);
         }
@@ -118,8 +121,7 @@ namespace vulkan {
     void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
     }
 
-    MapReadRequestTracker::MapReadRequestTracker(Device* device)
-        : mDevice(device) {
+    MapReadRequestTracker::MapReadRequestTracker(Device* device) : mDevice(device) {
     }
 
     MapReadRequestTracker::~MapReadRequestTracker() {
@@ -142,5 +144,4 @@ namespace vulkan {
         mInflightRequests.ClearUpTo(finishedSerial);
     }
 
-}
-}
+}}  // namespace backend::vulkan

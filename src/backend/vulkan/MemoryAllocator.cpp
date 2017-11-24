@@ -15,8 +15,7 @@
 #include "backend/vulkan/MemoryAllocator.h"
 #include "backend/vulkan/VulkanBackend.h"
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     DeviceMemoryAllocation::~DeviceMemoryAllocation() {
         ASSERT(mMemory == VK_NULL_HANDLE);
@@ -34,15 +33,16 @@ namespace vulkan {
         return mMappedPointer;
     }
 
-    MemoryAllocator::MemoryAllocator(Device* device)
-        :mDevice(device) {
+    MemoryAllocator::MemoryAllocator(Device* device) : mDevice(device) {
     }
 
     MemoryAllocator::~MemoryAllocator() {
         ASSERT(mReleasedMemory.Empty());
     }
 
-    bool MemoryAllocator::Allocate(VkMemoryRequirements requirements, bool mappable, DeviceMemoryAllocation* allocation) {
+    bool MemoryAllocator::Allocate(VkMemoryRequirements requirements,
+                                   bool mappable,
+                                   DeviceMemoryAllocation* allocation) {
         const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
 
         // Find a suitable memory type for this allocation
@@ -54,7 +54,8 @@ namespace vulkan {
             }
 
             // Mappable resource must be host visible
-            if (mappable && (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == 0) {
+            if (mappable &&
+                (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == 0) {
                 continue;
             }
 
@@ -66,16 +67,20 @@ namespace vulkan {
 
             // For non-mappable resources, favor device local memory.
             if (!mappable) {
-                if ((info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == 0 &&
-                    (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) != 0) {
+                if ((info.memoryTypes[bestType].propertyFlags &
+                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == 0 &&
+                    (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) !=
+                        0) {
                     bestType = static_cast<int>(i);
                     continue;
                 }
             }
 
             // All things equal favor the memory in the biggest heap
-            VkDeviceSize bestTypeHeapSize = info.memoryHeaps[info.memoryTypes[bestType].heapIndex].size;
-            VkDeviceSize candidateHeapSize = info.memoryHeaps[info.memoryTypes[bestType].heapIndex].size;
+            VkDeviceSize bestTypeHeapSize =
+                info.memoryHeaps[info.memoryTypes[bestType].heapIndex].size;
+            VkDeviceSize candidateHeapSize =
+                info.memoryHeaps[info.memoryTypes[bestType].heapIndex].size;
             if (candidateHeapSize > bestTypeHeapSize) {
                 bestType = static_cast<int>(i);
                 continue;
@@ -95,14 +100,15 @@ namespace vulkan {
         allocateInfo.memoryTypeIndex = static_cast<uint32_t>(bestType);
 
         VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
-        if (mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo, nullptr, &allocatedMemory) != VK_SUCCESS) {
+        if (mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo, nullptr,
+                                       &allocatedMemory) != VK_SUCCESS) {
             return false;
         }
 
         void* mappedPointer = nullptr;
         if (mappable) {
-            if (mDevice->fn.MapMemory(mDevice->GetVkDevice(), allocatedMemory, 0, requirements.size, 0,
-                                     &mappedPointer) != VK_SUCCESS) {
+            if (mDevice->fn.MapMemory(mDevice->GetVkDevice(), allocatedMemory, 0, requirements.size,
+                                      0, &mappedPointer) != VK_SUCCESS) {
                 return false;
             }
         }
@@ -127,5 +133,4 @@ namespace vulkan {
         }
         mReleasedMemory.ClearUpTo(finishedSerial);
     }
-}
-}
+}}  // namespace backend::vulkan

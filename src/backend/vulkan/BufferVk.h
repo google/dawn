@@ -17,52 +17,51 @@
 
 #include "backend/Buffer.h"
 
-#include "backend/vulkan/vulkan_platform.h"
 #include "backend/vulkan/MemoryAllocator.h"
+#include "backend/vulkan/vulkan_platform.h"
 #include "common/SerialQueue.h"
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     class Device;
 
     class Buffer : public BufferBase {
-        public:
-            Buffer(BufferBuilder* builder);
-            ~Buffer();
+      public:
+        Buffer(BufferBuilder* builder);
+        ~Buffer();
 
-            void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
+        void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
 
-        private:
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
+      private:
+        void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
+        void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void UnmapImpl() override;
+        void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
+                                 nxt::BufferUsageBit targetUsage) override;
 
-            VkBuffer mHandle = VK_NULL_HANDLE;
-            DeviceMemoryAllocation mMemoryAllocation;
+        VkBuffer mHandle = VK_NULL_HANDLE;
+        DeviceMemoryAllocation mMemoryAllocation;
     };
 
     class MapReadRequestTracker {
-        public:
-            MapReadRequestTracker(Device* device);
-            ~MapReadRequestTracker();
+      public:
+        MapReadRequestTracker(Device* device);
+        ~MapReadRequestTracker();
 
-            void Track(Buffer* buffer, uint32_t mapSerial, const void* data);
-            void Tick(Serial finishedSerial);
+        void Track(Buffer* buffer, uint32_t mapSerial, const void* data);
+        void Tick(Serial finishedSerial);
 
-        private:
-            Device* mDevice;
+      private:
+        Device* mDevice;
 
-            struct Request {
-                Ref<Buffer> buffer;
-                uint32_t mapSerial;
-                const void* data;
-            };
-            SerialQueue<Request> mInflightRequests;
+        struct Request {
+            Ref<Buffer> buffer;
+            uint32_t mapSerial;
+            const void* data;
+        };
+        SerialQueue<Request> mInflightRequests;
     };
 
-}
-}
+}}  // namespace backend::vulkan
 
-#endif // BACKEND_VULKAN_BUFFERVK_H_
+#endif  // BACKEND_VULKAN_BUFFERVK_H_

@@ -17,4 +17,4 @@
 
 #include <vulkan/vulkan.h>
 
-#endif // BACKEND_VULKAN_VULKANPLATFORM_H_
+#endif  // BACKEND_VULKAN_VULKANPLATFORM_H_

@@ -17,15 +17,13 @@
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/vulkan/VulkanFunctions.h"
-#include "backend/vulkan/VulkanInfo.h"
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
 #include "backend/BlendState.h"
-#include "backend/Device.h"
 #include "backend/CommandBuffer.h"
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
+#include "backend/Device.h"
 #include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
@@ -37,14 +35,15 @@
 #include "backend/SwapChain.h"
 #include "backend/Texture.h"
 #include "backend/ToBackend.h"
+#include "backend/vulkan/VulkanFunctions.h"
+#include "backend/vulkan/VulkanInfo.h"
 #include "common/DynamicLib.h"
 #include "common/Serial.h"
 #include "common/SerialQueue.h"
 
 #include <queue>
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
@@ -94,143 +93,143 @@ namespace vulkan {
         using TextureViewType = TextureView;
     };
 
-    template<typename T>
+    template <typename T>
     auto ToBackend(T&& common) -> decltype(ToBackendBase<VulkanBackendTraits>(common)) {
         return ToBackendBase<VulkanBackendTraits>(common);
     }
 
     class Device : public DeviceBase {
-        public:
-            Device();
-            ~Device();
+      public:
+        Device();
+        ~Device();
 
-            BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
-            BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
-            BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
-            BufferBase* CreateBuffer(BufferBuilder* builder) override;
-            BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
-            CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-            ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
-            DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-            FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
-            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-            PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
-            QueueBase* CreateQueue(QueueBuilder* builder) override;
-            RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
-            RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-            SamplerBase* CreateSampler(SamplerBuilder* builder) override;
-            ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
-            SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-            TextureBase* CreateTexture(TextureBuilder* builder) override;
-            TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
+        BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
+        BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
+        BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
+        BufferBase* CreateBuffer(BufferBuilder* builder) override;
+        BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
+        CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+        ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
+        DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
+        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
+        InputStateBase* CreateInputState(InputStateBuilder* builder) override;
+        PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
+        QueueBase* CreateQueue(QueueBuilder* builder) override;
+        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
+        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
+        ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
+        SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
+        TextureBase* CreateTexture(TextureBuilder* builder) override;
+        TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
-            void TickImpl() override;
+        void TickImpl() override;
 
-            const VulkanDeviceInfo& GetDeviceInfo() const;
-            MapReadRequestTracker* GetMapReadRequestTracker() const;
-            MemoryAllocator* GetMemoryAllocator() const;
-            BufferUploader* GetBufferUploader() const;
+        const VulkanDeviceInfo& GetDeviceInfo() const;
+        MapReadRequestTracker* GetMapReadRequestTracker() const;
+        MemoryAllocator* GetMemoryAllocator() const;
+        BufferUploader* GetBufferUploader() const;
 
-            Serial GetSerial() const;
+        Serial GetSerial() const;
 
-            VkCommandBuffer GetPendingCommandBuffer();
-            void SubmitPendingCommands();
+        VkCommandBuffer GetPendingCommandBuffer();
+        void SubmitPendingCommands();
 
-            // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
-            const VulkanFunctions fn;
+        // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
+        const VulkanFunctions fn;
 
-            VkInstance GetInstance() const;
-            VkDevice GetVkDevice() const;
+        VkInstance GetInstance() const;
+        VkDevice GetVkDevice() const;
 
-        private:
-            bool CreateInstance(VulkanGlobalKnobs* usedKnobs);
-            bool CreateDevice(VulkanDeviceKnobs* usedKnobs);
-            void GatherQueueFromDevice();
+      private:
+        bool CreateInstance(VulkanGlobalKnobs* usedKnobs);
+        bool CreateDevice(VulkanDeviceKnobs* usedKnobs);
+        void GatherQueueFromDevice();
 
-            bool RegisterDebugReport();
-            static VkBool32 OnDebugReportCallback(VkDebugReportFlagsEXT flags,
-                                                  VkDebugReportObjectTypeEXT objectType,
-                                                  uint64_t object,
-                                                  size_t location,
-                                                  int32_t messageCode,
-                                                  const char* pLayerPrefix,
-                                                  const char* pMessage,
-                                                  void* pUserdata);
+        bool RegisterDebugReport();
+        static VkBool32 OnDebugReportCallback(VkDebugReportFlagsEXT flags,
+                                              VkDebugReportObjectTypeEXT objectType,
+                                              uint64_t object,
+                                              size_t location,
+                                              int32_t messageCode,
+                                              const char* pLayerPrefix,
+                                              const char* pMessage,
+                                              void* pUserdata);
 
-            // To make it easier to use fn it is a public const member. However
-            // the Device is allowed to mutate them through these private methods.
-            VulkanFunctions* GetMutableFunctions();
+        // To make it easier to use fn it is a public const member. However
+        // the Device is allowed to mutate them through these private methods.
+        VulkanFunctions* GetMutableFunctions();
 
-            VulkanGlobalInfo mGlobalInfo;
-            VulkanDeviceInfo mDeviceInfo;
+        VulkanGlobalInfo mGlobalInfo;
+        VulkanDeviceInfo mDeviceInfo;
 
-            DynamicLib mVulkanLib;
+        DynamicLib mVulkanLib;
 
-            VkInstance mInstance = VK_NULL_HANDLE;
-            VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
-            VkDevice mVkDevice = VK_NULL_HANDLE;
-            uint32_t mQueueFamily = 0;
-            VkQueue mQueue = VK_NULL_HANDLE;
-            VkDebugReportCallbackEXT mDebugReportCallback = VK_NULL_HANDLE;
+        VkInstance mInstance = VK_NULL_HANDLE;
+        VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
+        VkDevice mVkDevice = VK_NULL_HANDLE;
+        uint32_t mQueueFamily = 0;
+        VkQueue mQueue = VK_NULL_HANDLE;
+        VkDebugReportCallbackEXT mDebugReportCallback = VK_NULL_HANDLE;
 
-            MapReadRequestTracker* mMapReadRequestTracker = nullptr;
-            MemoryAllocator* mMemoryAllocator = nullptr;
-            BufferUploader* mBufferUploader = nullptr;
+        MapReadRequestTracker* mMapReadRequestTracker = nullptr;
+        MemoryAllocator* mMemoryAllocator = nullptr;
+        BufferUploader* mBufferUploader = nullptr;
 
-            VkFence GetUnusedFence();
-            void CheckPassedFences();
+        VkFence GetUnusedFence();
+        void CheckPassedFences();
 
-            // We track which operations are in flight on the GPU with an increasing serial.
-            // This works only because we have a single queue. Each submit to a queue is associated
-            // to a serial and a fence, such that when the fence is "ready" we know the operations
-            // have finished.
-            std::queue<std::pair<VkFence, Serial>> mFencesInFlight;
-            std::vector<VkFence> mUnusedFences;
-            Serial mNextSerial = 1;
-            Serial mCompletedSerial = 0;
+        // We track which operations are in flight on the GPU with an increasing serial.
+        // This works only because we have a single queue. Each submit to a queue is associated
+        // to a serial and a fence, such that when the fence is "ready" we know the operations
+        // have finished.
+        std::queue<std::pair<VkFence, Serial>> mFencesInFlight;
+        std::vector<VkFence> mUnusedFences;
+        Serial mNextSerial = 1;
+        Serial mCompletedSerial = 0;
 
-            struct CommandPoolAndBuffer {
-                VkCommandPool pool = VK_NULL_HANDLE;
-                VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
-            };
+        struct CommandPoolAndBuffer {
+            VkCommandPool pool = VK_NULL_HANDLE;
+            VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+        };
 
-            CommandPoolAndBuffer GetUnusedCommands();
-            void RecycleCompletedCommands();
-            void FreeCommands(CommandPoolAndBuffer* commands);
+        CommandPoolAndBuffer GetUnusedCommands();
+        void RecycleCompletedCommands();
+        void FreeCommands(CommandPoolAndBuffer* commands);
 
-            SerialQueue<CommandPoolAndBuffer> mCommandsInFlight;
-            std::vector<CommandPoolAndBuffer> mUnusedCommands;
-            CommandPoolAndBuffer mPendingCommands;
+        SerialQueue<CommandPoolAndBuffer> mCommandsInFlight;
+        std::vector<CommandPoolAndBuffer> mUnusedCommands;
+        CommandPoolAndBuffer mPendingCommands;
     };
 
     class Queue : public QueueBase {
-        public:
-            Queue(QueueBuilder* builder);
-            ~Queue();
+      public:
+        Queue(QueueBuilder* builder);
+        ~Queue();
 
-            // NXT API
-            void Submit(uint32_t numCommands, CommandBuffer* const * commands);
+        // NXT API
+        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
     class Texture : public TextureBase {
-        public:
-            Texture(TextureBuilder* builder);
-            ~Texture();
+      public:
+        Texture(TextureBuilder* builder);
+        ~Texture();
 
-        private:
-            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+      private:
+        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
+                                 nxt::TextureUsageBit targetUsage) override;
     };
 
     class SwapChain : public SwapChainBase {
-        public:
-            SwapChain(SwapChainBuilder* builder);
-            ~SwapChain();
+      public:
+        SwapChain(SwapChainBuilder* builder);
+        ~SwapChain();
 
-        protected:
-            TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+      protected:
+        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
     };
 
-}
-}
+}}  // namespace backend::vulkan
 
-#endif // BACKEND_VULKAN_VULKANBACKEND_H_
+#endif  // BACKEND_VULKAN_VULKANBACKEND_H_

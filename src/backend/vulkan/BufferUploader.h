@@ -18,26 +18,27 @@
 #include "backend/vulkan/vulkan_platform.h"
 #include "common/SerialQueue.h"
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     class Device;
 
     class BufferUploader {
-        public:
-            BufferUploader(Device* device);
-            ~BufferUploader();
+      public:
+        BufferUploader(Device* device);
+        ~BufferUploader();
 
-            void BufferSubData(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size, const void* data);
+        void BufferSubData(VkBuffer buffer,
+                           VkDeviceSize offset,
+                           VkDeviceSize size,
+                           const void* data);
 
-            void Tick(Serial completedSerial);
+        void Tick(Serial completedSerial);
 
-        private:
-            Device* mDevice = nullptr;
-            SerialQueue<VkBuffer> mBuffersToDelete;
+      private:
+        Device* mDevice = nullptr;
+        SerialQueue<VkBuffer> mBuffersToDelete;
     };
 
-}
-}
+}}  // namespace backend::vulkan
 
-#endif // BACKEND_VULKAN_BUFFERUPLOADER_H_
+#endif  // BACKEND_VULKAN_BUFFERUPLOADER_H_

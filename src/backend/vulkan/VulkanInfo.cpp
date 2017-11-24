@@ -26,10 +26,9 @@ namespace {
     bool IsExtensionName(const VkExtensionProperties& extension, const char* name) {
         return strncmp(extension.extensionName, name, VK_MAX_EXTENSION_NAME_SIZE) == 0;
     }
-}
+}  // namespace
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     const char kLayerNameLunargStandardValidation[] = "VK_LAYER_LUNARG_standard_validation";
 
@@ -65,13 +64,15 @@ namespace vulkan {
         // Gather the info about the instance extensions
         {
             uint32_t count = 0;
-            VkResult result = device.fn.EnumerateInstanceExtensionProperties(nullptr, &count, nullptr);
+            VkResult result =
+                device.fn.EnumerateInstanceExtensionProperties(nullptr, &count, nullptr);
             if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
                 return false;
             }
 
             info->extensions.resize(count);
-            result = device.fn.EnumerateInstanceExtensionProperties(nullptr, &count, info->extensions.data());
+            result = device.fn.EnumerateInstanceExtensionProperties(nullptr, &count,
+                                                                    info->extensions.data());
             if (result != VK_SUCCESS) {
                 return false;
             }
@@ -109,7 +110,9 @@ namespace vulkan {
         return true;
     }
 
-    bool GatherDeviceInfo(const Device& device, VkPhysicalDevice physicalDevice, VulkanDeviceInfo* info) {
+    bool GatherDeviceInfo(const Device& device,
+                          VkPhysicalDevice physicalDevice,
+                          VulkanDeviceInfo* info) {
         // Gather general info about the device
         device.fn.GetPhysicalDeviceProperties(physicalDevice, &info->properties);
         device.fn.GetPhysicalDeviceFeatures(physicalDevice, &info->features);
@@ -119,8 +122,10 @@ namespace vulkan {
             VkPhysicalDeviceMemoryProperties memory;
             device.fn.GetPhysicalDeviceMemoryProperties(physicalDevice, &memory);
 
-            info->memoryTypes.assign(memory.memoryTypes, memory.memoryTypes + memory.memoryTypeCount);
-            info->memoryHeaps.assign(memory.memoryHeaps, memory.memoryHeaps + memory.memoryHeapCount);
+            info->memoryTypes.assign(memory.memoryTypes,
+                                     memory.memoryTypes + memory.memoryTypeCount);
+            info->memoryHeaps.assign(memory.memoryHeaps,
+                                     memory.memoryHeaps + memory.memoryHeapCount);
         }
 
         // Gather info about device queue families
@@ -129,19 +134,22 @@ namespace vulkan {
             device.fn.GetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, nullptr);
 
             info->queueFamilies.resize(count);
-            device.fn.GetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, info->queueFamilies.data());
+            device.fn.GetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count,
+                                                             info->queueFamilies.data());
         }
 
         // Gather the info about the device layers
         {
             uint32_t count = 0;
-            VkResult result = device.fn.EnumerateDeviceLayerProperties(physicalDevice, &count, nullptr);
+            VkResult result =
+                device.fn.EnumerateDeviceLayerProperties(physicalDevice, &count, nullptr);
             if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
                 return false;
             }
 
             info->layers.resize(count);
-            result = device.fn.EnumerateDeviceLayerProperties(physicalDevice, &count, info->layers.data());
+            result = device.fn.EnumerateDeviceLayerProperties(physicalDevice, &count,
+                                                              info->layers.data());
             if (result != VK_SUCCESS) {
                 return false;
             }
@@ -150,13 +158,15 @@ namespace vulkan {
         // Gather the info about the device extensions
         {
             uint32_t count = 0;
-            VkResult result = device.fn.EnumerateDeviceExtensionProperties(physicalDevice, nullptr, &count, nullptr);
+            VkResult result = device.fn.EnumerateDeviceExtensionProperties(physicalDevice, nullptr,
+                                                                           &count, nullptr);
             if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
                 return false;
             }
 
             info->extensions.resize(count);
-            result = device.fn.EnumerateDeviceExtensionProperties(physicalDevice, nullptr, &count, info->extensions.data());
+            result = device.fn.EnumerateDeviceExtensionProperties(physicalDevice, nullptr, &count,
+                                                                  info->extensions.data());
             if (result != VK_SUCCESS) {
                 return false;
             }
@@ -173,5 +183,4 @@ namespace vulkan {
         return true;
     }
 
-}
-}
+}}  // namespace backend::vulkan

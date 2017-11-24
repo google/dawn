@@ -18,42 +18,42 @@
 #include "backend/vulkan/vulkan_platform.h"
 #include "common/SerialQueue.h"
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     class Device;
     class MemoryAllocator;
 
     class DeviceMemoryAllocation {
-        public:
-            ~DeviceMemoryAllocation();
-            VkDeviceMemory GetMemory() const;
-            size_t GetMemoryOffset() const;
-            uint8_t* GetMappedPointer() const;
+      public:
+        ~DeviceMemoryAllocation();
+        VkDeviceMemory GetMemory() const;
+        size_t GetMemoryOffset() const;
+        uint8_t* GetMappedPointer() const;
 
-        private:
-            friend class MemoryAllocator;
-            VkDeviceMemory mMemory = VK_NULL_HANDLE;
-            size_t mOffset = 0;
-            uint8_t* mMappedPointer = nullptr;
+      private:
+        friend class MemoryAllocator;
+        VkDeviceMemory mMemory = VK_NULL_HANDLE;
+        size_t mOffset = 0;
+        uint8_t* mMappedPointer = nullptr;
     };
 
     class MemoryAllocator {
-        public:
-            MemoryAllocator(Device* device);
-            ~MemoryAllocator();
+      public:
+        MemoryAllocator(Device* device);
+        ~MemoryAllocator();
 
-            bool Allocate(VkMemoryRequirements requirements, bool mappable, DeviceMemoryAllocation* allocation);
-            void Free(DeviceMemoryAllocation* allocation);
+        bool Allocate(VkMemoryRequirements requirements,
+                      bool mappable,
+                      DeviceMemoryAllocation* allocation);
+        void Free(DeviceMemoryAllocation* allocation);
 
-            void Tick(Serial finishedSerial);
+        void Tick(Serial finishedSerial);
 
-        private:
-            Device* mDevice = nullptr;
-            SerialQueue<VkDeviceMemory> mReleasedMemory;
+      private:
+        Device* mDevice = nullptr;
+        SerialQueue<VkDeviceMemory> mReleasedMemory;
     };
 
-}
-}
+}}  // namespace backend::vulkan
 
-#endif // BACKEND_VULKAN_MEMORYALLOCATOR_H_
+#endif  // BACKEND_VULKAN_MEMORYALLOCATOR_H_

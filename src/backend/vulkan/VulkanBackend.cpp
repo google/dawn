@@ -15,8 +15,8 @@
 #include "backend/vulkan/VulkanBackend.h"
 
 #include "backend/Commands.h"
-#include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/BufferUploader.h"
+#include "backend/vulkan/BufferVk.h"
 #include "common/Platform.h"
 
 #include <spirv-cross/spirv_cross.hpp>
@@ -24,15 +24,14 @@
 #include <iostream>
 
 #if NXT_PLATFORM_LINUX
-    const char kVulkanLibName[] = "libvulkan.so.1";
+const char kVulkanLibName[] = "libvulkan.so.1";
 #elif NXT_PLATFORM_WINDOWS
-    const char kVulkanLibName[] = "vulkan-1.dll";
+const char kVulkanLibName[] = "vulkan-1.dll";
 #else
-    #error "Unimplemented Vulkan backend platform"
+#    error "Unimplemented Vulkan backend platform"
 #endif
 
-namespace backend {
-namespace vulkan {
+namespace backend { namespace vulkan {
 
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
@@ -330,16 +329,16 @@ namespace vulkan {
         std::vector<const char*> layersToRequest;
         std::vector<const char*> extensionsToRequest;
 
-        #if defined(NXT_ENABLE_ASSERTS)
-            if (mGlobalInfo.standardValidation) {
-                layersToRequest.push_back(kLayerNameLunargStandardValidation);
-                usedKnobs->standardValidation = true;
-            }
-            if (mGlobalInfo.debugReport) {
-                extensionsToRequest.push_back(kExtensionNameExtDebugReport);
-                usedKnobs->debugReport = true;
-            }
-        #endif
+#if defined(NXT_ENABLE_ASSERTS)
+        if (mGlobalInfo.standardValidation) {
+            layersToRequest.push_back(kLayerNameLunargStandardValidation);
+            usedKnobs->standardValidation = true;
+        }
+        if (mGlobalInfo.debugReport) {
+            extensionsToRequest.push_back(kExtensionNameExtDebugReport);
+            usedKnobs->debugReport = true;
+        }
+#endif
 
         VkApplicationInfo appInfo;
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -380,10 +379,12 @@ namespace vulkan {
 
         // Find a universal queue family
         {
-            constexpr uint32_t kUniversalFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
+            constexpr uint32_t kUniversalFlags =
+                VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
             int universalQueueFamily = -1;
             for (unsigned int i = 0; i < mDeviceInfo.queueFamilies.size(); ++i) {
-                if ((mDeviceInfo.queueFamilies[i].queueFlags & kUniversalFlags) == kUniversalFlags) {
+                if ((mDeviceInfo.queueFamilies[i].queueFlags & kUniversalFlags) ==
+                    kUniversalFlags) {
                     universalQueueFamily = i;
                     break;
                 }
@@ -439,7 +440,8 @@ namespace vulkan {
         createInfo.pfnCallback = Device::OnDebugReportCallback;
         createInfo.pUserData = this;
 
-        if (fn.CreateDebugReportCallbackEXT(mInstance, &createInfo, nullptr, &mDebugReportCallback) != VK_SUCCESS) {
+        if (fn.CreateDebugReportCallbackEXT(mInstance, &createInfo, nullptr,
+                                            &mDebugReportCallback) != VK_SUCCESS) {
             return false;
         }
 
@@ -536,7 +538,8 @@ namespace vulkan {
         allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocateInfo.commandBufferCount = 1;
 
-        if (fn.AllocateCommandBuffers(mVkDevice, &allocateInfo, &commands.commandBuffer) != VK_SUCCESS) {
+        if (fn.AllocateCommandBuffers(mVkDevice, &allocateInfo, &commands.commandBuffer) !=
+            VK_SUCCESS) {
             ASSERT(false);
         }
 
@@ -565,8 +568,7 @@ namespace vulkan {
 
     // Queue
 
-    Queue::Queue(QueueBuilder* builder)
-        : QueueBase(builder) {
+    Queue::Queue(QueueBuilder* builder) : QueueBase(builder) {
     }
 
     Queue::~Queue() {
@@ -577,8 +579,7 @@ namespace vulkan {
 
     // Texture
 
-    Texture::Texture(TextureBuilder* builder)
-        : TextureBase(builder) {
+    Texture::Texture(TextureBuilder* builder) : TextureBase(builder) {
     }
 
     Texture::~Texture() {
@@ -589,8 +590,7 @@ namespace vulkan {
 
     // SwapChain
 
-    SwapChain::SwapChain(SwapChainBuilder* builder)
-        : SwapChainBase(builder) {
+    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
         im.Init(im.userData, nullptr);
     }
@@ -601,5 +601,4 @@ namespace vulkan {
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
         return GetDevice()->CreateTexture(builder);
     }
-}
-}
+}}  // namespace backend::vulkan
