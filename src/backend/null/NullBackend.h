@@ -17,14 +17,14 @@
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/Buffer.h"
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
 #include "backend/BlendState.h"
-#include "backend/Device.h"
+#include "backend/Buffer.h"
 #include "backend/CommandBuffer.h"
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
+#include "backend/Device.h"
 #include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
@@ -37,8 +37,7 @@
 #include "backend/Texture.h"
 #include "backend/ToBackend.h"
 
-namespace backend {
-namespace null {
+namespace backend { namespace null {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
@@ -84,7 +83,7 @@ namespace null {
         using TextureViewType = TextureView;
     };
 
-    template<typename T>
+    template <typename T>
     auto ToBackend(T&& common) -> decltype(ToBackendBase<NullBackendTraits>(common)) {
         return ToBackendBase<NullBackendTraits>(common);
     }
@@ -95,93 +94,94 @@ namespace null {
     };
 
     class Device : public DeviceBase {
-        public:
-            Device();
-            ~Device();
+      public:
+        Device();
+        ~Device();
 
-            BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
-            BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
-            BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
-            BufferBase* CreateBuffer(BufferBuilder* builder) override;
-            BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
-            CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-            ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
-            DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-            FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
-            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-            PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
-            QueueBase* CreateQueue(QueueBuilder* builder) override;
-            RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
-            RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-            SamplerBase* CreateSampler(SamplerBuilder* builder) override;
-            ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
-            SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-            TextureBase* CreateTexture(TextureBuilder* builder) override;
-            TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
+        BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
+        BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
+        BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
+        BufferBase* CreateBuffer(BufferBuilder* builder) override;
+        BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
+        CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+        ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
+        DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
+        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
+        InputStateBase* CreateInputState(InputStateBuilder* builder) override;
+        PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
+        QueueBase* CreateQueue(QueueBuilder* builder) override;
+        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
+        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
+        ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
+        SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
+        TextureBase* CreateTexture(TextureBuilder* builder) override;
+        TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
-            void TickImpl() override;
+        void TickImpl() override;
 
-            void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
-            std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
+        void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
+        std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
 
-        private:
-            std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
+      private:
+        std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
     };
 
     class Buffer : public BufferBase {
-        public:
-            Buffer(BufferBuilder* builder);
-            ~Buffer();
+      public:
+        Buffer(BufferBuilder* builder);
+        ~Buffer();
 
-            void MapReadOperationCompleted(uint32_t serial, const void* ptr);
+        void MapReadOperationCompleted(uint32_t serial, const void* ptr);
 
-        private:
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
+      private:
+        void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
+        void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void UnmapImpl() override;
+        void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
+                                 nxt::BufferUsageBit targetUsage) override;
 
-            std::unique_ptr<char[]> mBackingData;
+        std::unique_ptr<char[]> mBackingData;
     };
 
     class CommandBuffer : public CommandBufferBase {
-        public:
-            CommandBuffer(CommandBufferBuilder* builder);
-            ~CommandBuffer();
+      public:
+        CommandBuffer(CommandBufferBuilder* builder);
+        ~CommandBuffer();
 
-            void Execute();
+        void Execute();
 
-        private:
-            CommandIterator mCommands;
+      private:
+        CommandIterator mCommands;
     };
 
     class Queue : public QueueBase {
-        public:
-            Queue(QueueBuilder* builder);
-            ~Queue();
+      public:
+        Queue(QueueBuilder* builder);
+        ~Queue();
 
-            // NXT API
-            void Submit(uint32_t numCommands, CommandBuffer* const * commands);
+        // NXT API
+        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
     class Texture : public TextureBase {
-        public:
-            Texture(TextureBuilder* builder);
-            ~Texture();
+      public:
+        Texture(TextureBuilder* builder);
+        ~Texture();
 
-            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
+                                 nxt::TextureUsageBit targetUsage) override;
     };
 
     class SwapChain : public SwapChainBase {
-        public:
-            SwapChain(SwapChainBuilder* builder);
-            ~SwapChain();
+      public:
+        SwapChain(SwapChainBuilder* builder);
+        ~SwapChain();
 
-        protected:
-            TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+      protected:
+        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
     };
 
-}
-}
+}}  // namespace backend::null
 
-#endif // BACKEND_NULL_NULLBACKEND_H_
+#endif  // BACKEND_NULL_NULLBACKEND_H_

@@ -18,8 +18,7 @@
 
 #include <spirv-cross/spirv_cross.hpp>
 
-namespace backend {
-namespace null {
+namespace backend { namespace null {
 
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
@@ -122,9 +121,9 @@ namespace null {
         uint32_t serial;
     };
 
-    Buffer::Buffer(BufferBuilder* builder)
-        : BufferBase(builder) {
-        if (GetAllowedUsage() & (nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
+    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
+        if (GetAllowedUsage() & (nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::MapRead |
+                                 nxt::BufferUsageBit::MapWrite)) {
             mBackingData = std::unique_ptr<char[]>(new char[GetSize()]);
         }
     }
@@ -174,18 +173,16 @@ namespace null {
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
-                case Command::TransitionBufferUsage:
-                    {
-                        TransitionBufferUsageCmd* cmd = mCommands.NextCommand<TransitionBufferUsageCmd>();
-                        cmd->buffer->UpdateUsageInternal(cmd->usage);
-                    }
-                    break;
-                case Command::TransitionTextureUsage:
-                    {
-                        TransitionTextureUsageCmd* cmd = mCommands.NextCommand<TransitionTextureUsageCmd>();
-                        cmd->texture->UpdateUsageInternal(cmd->usage);
-                    }
-                    break;
+                case Command::TransitionBufferUsage: {
+                    TransitionBufferUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionBufferUsageCmd>();
+                    cmd->buffer->UpdateUsageInternal(cmd->usage);
+                } break;
+                case Command::TransitionTextureUsage: {
+                    TransitionTextureUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionTextureUsageCmd>();
+                    cmd->texture->UpdateUsageInternal(cmd->usage);
+                } break;
                 default:
                     SkipCommand(&mCommands, type);
                     break;
@@ -195,8 +192,7 @@ namespace null {
 
     // Queue
 
-    Queue::Queue(QueueBuilder* builder)
-        : QueueBase(builder) {
+    Queue::Queue(QueueBuilder* builder) : QueueBase(builder) {
     }
 
     Queue::~Queue() {
@@ -218,8 +214,7 @@ namespace null {
 
     // Texture
 
-    Texture::Texture(TextureBuilder* builder)
-        : TextureBase(builder) {
+    Texture::Texture(TextureBuilder* builder) : TextureBase(builder) {
     }
 
     Texture::~Texture() {
@@ -230,8 +225,7 @@ namespace null {
 
     // SwapChain
 
-    SwapChain::SwapChain(SwapChainBuilder* builder)
-        : SwapChainBase(builder) {
+    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
         im.Init(im.userData, nullptr);
     }
@@ -242,5 +236,4 @@ namespace null {
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
         return GetDevice()->CreateTexture(builder);
     }
-}
-}
+}}  // namespace backend::null
