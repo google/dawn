@@ -14,11 +14,11 @@
 
 #include "backend/CommandBufferStateTracker.h"
 
-#include "backend/Forward.h"
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
 #include "backend/Buffer.h"
 #include "backend/ComputePipeline.h"
+#include "backend/Forward.h"
 #include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
@@ -49,7 +49,8 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::ValidateCanUseBufferAs(BufferBase* buffer, nxt::BufferUsageBit usage) const {
+    bool CommandBufferStateTracker::ValidateCanUseBufferAs(BufferBase* buffer,
+                                                           nxt::BufferUsageBit usage) const {
         if (!BufferHasGuaranteedUsageBit(buffer, usage)) {
             mBuilder->HandleError("Buffer is not in the necessary usage");
             return false;
@@ -57,7 +58,8 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::ValidateCanUseTextureAs(TextureBase* texture, nxt::TextureUsageBit usage) const {
+    bool CommandBufferStateTracker::ValidateCanUseTextureAs(TextureBase* texture,
+                                                            nxt::TextureUsageBit usage) const {
         if (!TextureHasGuaranteedUsageBit(texture, usage)) {
             mBuilder->HandleError("Texture is not in the necessary usage");
             return false;
@@ -67,7 +69,7 @@ namespace backend {
 
     bool CommandBufferStateTracker::ValidateCanDispatch() {
         constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE | // implicitly requires COMPUTE_PASS
+            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |  // implicitly requires COMPUTE_PASS
             1 << VALIDATION_ASPECT_BIND_GROUPS;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
@@ -89,9 +91,8 @@ namespace backend {
     bool CommandBufferStateTracker::ValidateCanDrawArrays() {
         // TODO(kainino@chromium.org): Check for a current render pass
         constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE | // implicitly requires RENDER_SUBPASS
-            1 << VALIDATION_ASPECT_BIND_GROUPS |
-            1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
+            1 << VALIDATION_ASPECT_RENDER_PIPELINE |  // implicitly requires RENDER_SUBPASS
+            1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
             return true;
@@ -103,10 +104,8 @@ namespace backend {
     bool CommandBufferStateTracker::ValidateCanDrawElements() {
         // TODO(kainino@chromium.org): Check for a current render pass
         constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE |
-            1 << VALIDATION_ASPECT_BIND_GROUPS |
-            1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
-            1 << VALIDATION_ASPECT_INDEX_BUFFER;
+            1 << VALIDATION_ASPECT_RENDER_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
+            1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
             return true;
@@ -134,16 +133,19 @@ namespace backend {
     bool CommandBufferStateTracker::ValidateSetPushConstants(nxt::ShaderStageBit stages) {
         if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
             if (stages & ~nxt::ShaderStageBit::Compute) {
-                mBuilder->HandleError("SetPushConstants stage must be compute or 0 in compute passes");
+                mBuilder->HandleError(
+                    "SetPushConstants stage must be compute or 0 in compute passes");
                 return false;
             }
         } else if (mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
             if (stages & ~(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
-                mBuilder->HandleError("SetPushConstants stage must be a subset if (vertex|fragment) in subpasses");
+                mBuilder->HandleError(
+                    "SetPushConstants stage must be a subset if (vertex|fragment) in subpasses");
                 return false;
             }
         } else {
-            mBuilder->HandleError("PushConstants must be set in either compute passes or subpasses");
+            mBuilder->HandleError(
+                "PushConstants must be set in either compute passes or subpasses");
             return false;
         }
         return true;
@@ -224,7 +226,8 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer) {
+    bool CommandBufferStateTracker::BeginRenderPass(RenderPassBase* renderPass,
+                                                    FramebufferBase* framebuffer) {
         if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
             mBuilder->HandleError("Cannot begin a render pass while a compute pass is active");
             return false;
@@ -338,7 +341,8 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage) {
+    bool CommandBufferStateTracker::TransitionBufferUsage(BufferBase* buffer,
+                                                          nxt::BufferUsageBit usage) {
         if (!buffer->IsTransitionPossible(usage)) {
             if (buffer->IsFrozen()) {
                 mBuilder->HandleError("Buffer transition not possible (usage is frozen)");
@@ -355,14 +359,17 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage) {
+    bool CommandBufferStateTracker::TransitionTextureUsage(TextureBase* texture,
+                                                           nxt::TextureUsageBit usage) {
         if (!IsExplicitTextureTransitionPossible(texture, usage)) {
             if (texture->IsFrozen()) {
                 mBuilder->HandleError("Texture transition not possible (usage is frozen)");
             } else if (!TextureBase::IsUsagePossible(texture->GetAllowedUsage(), usage)) {
                 mBuilder->HandleError("Texture transition not possible (usage not allowed)");
             } else if (mTexturesAttached.find(texture) != mTexturesAttached.end()) {
-                mBuilder->HandleError("Texture transition not possible (texture is in use as a framebuffer attachment)");
+                mBuilder->HandleError(
+                    "Texture transition not possible (texture is in use as a framebuffer "
+                    "attachment)");
             } else {
                 mBuilder->HandleError("Texture transition not possible");
             }
@@ -374,7 +381,8 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::EnsureTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage) {
+    bool CommandBufferStateTracker::EnsureTextureUsage(TextureBase* texture,
+                                                       nxt::TextureUsageBit usage) {
         if (texture->HasFrozenUsage(usage)) {
             return true;
         }
@@ -386,7 +394,8 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::BufferHasGuaranteedUsageBit(BufferBase* buffer, nxt::BufferUsageBit usage) const {
+    bool CommandBufferStateTracker::BufferHasGuaranteedUsageBit(BufferBase* buffer,
+                                                                nxt::BufferUsageBit usage) const {
         ASSERT(usage != nxt::BufferUsageBit::None && nxt::HasZeroOrOneBits(usage));
         if (buffer->HasFrozenUsage(usage)) {
             return true;
@@ -395,7 +404,8 @@ namespace backend {
         return it != mMostRecentBufferUsages.end() && (it->second & usage);
     }
 
-    bool CommandBufferStateTracker::TextureHasGuaranteedUsageBit(TextureBase* texture, nxt::TextureUsageBit usage) const {
+    bool CommandBufferStateTracker::TextureHasGuaranteedUsageBit(TextureBase* texture,
+                                                                 nxt::TextureUsageBit usage) const {
         ASSERT(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
         if (texture->HasFrozenUsage(usage)) {
             return true;
@@ -404,7 +414,9 @@ namespace backend {
         return it != mMostRecentTextureUsages.end() && (it->second & usage);
     }
 
-    bool CommandBufferStateTracker::IsInternalTextureTransitionPossible(TextureBase* texture, nxt::TextureUsageBit usage) const {
+    bool CommandBufferStateTracker::IsInternalTextureTransitionPossible(
+        TextureBase* texture,
+        nxt::TextureUsageBit usage) const {
         ASSERT(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
         if (mTexturesAttached.find(texture) != mTexturesAttached.end()) {
             return false;
@@ -412,9 +424,10 @@ namespace backend {
         return texture->IsTransitionPossible(usage);
     }
 
-    bool CommandBufferStateTracker::IsExplicitTextureTransitionPossible(TextureBase* texture, nxt::TextureUsageBit usage) const {
-        const nxt::TextureUsageBit attachmentUsages =
-            nxt::TextureUsageBit::OutputAttachment;
+    bool CommandBufferStateTracker::IsExplicitTextureTransitionPossible(
+        TextureBase* texture,
+        nxt::TextureUsageBit usage) const {
+        const nxt::TextureUsageBit attachmentUsages = nxt::TextureUsageBit::OutputAttachment;
         if (usage & attachmentUsages) {
             return false;
         }
@@ -456,8 +469,7 @@ namespace backend {
 
     bool CommandBufferStateTracker::HavePipeline() const {
         constexpr ValidationAspects pipelineAspects =
-            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE;
+            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE | 1 << VALIDATION_ASPECT_RENDER_PIPELINE;
         return (mAspects & pipelineAspects).any();
     }
 
@@ -471,40 +483,36 @@ namespace backend {
             nxt::BindingType type = layoutInfo.types[i];
             switch (type) {
                 case nxt::BindingType::UniformBuffer:
-                case nxt::BindingType::StorageBuffer:
-                    {
-                        nxt::BufferUsageBit requiredUsage = nxt::BufferUsageBit::None;
-                        switch (type) {
-                            case nxt::BindingType::UniformBuffer:
-                                requiredUsage = nxt::BufferUsageBit::Uniform;
-                                break;
+                case nxt::BindingType::StorageBuffer: {
+                    nxt::BufferUsageBit requiredUsage = nxt::BufferUsageBit::None;
+                    switch (type) {
+                        case nxt::BindingType::UniformBuffer:
+                            requiredUsage = nxt::BufferUsageBit::Uniform;
+                            break;
 
-                            case nxt::BindingType::StorageBuffer:
-                                requiredUsage = nxt::BufferUsageBit::Storage;
-                                break;
+                        case nxt::BindingType::StorageBuffer:
+                            requiredUsage = nxt::BufferUsageBit::Storage;
+                            break;
 
-                            default:
-                                UNREACHABLE();
-                        }
-
-                        auto buffer = group->GetBindingAsBufferView(i)->GetBuffer();
-                        if (!BufferHasGuaranteedUsageBit(buffer, requiredUsage)) {
-                            mBuilder->HandleError("Can't guarantee buffer usage needed by bind group");
-                            return false;
-                        }
+                        default:
+                            UNREACHABLE();
                     }
-                    break;
-                case nxt::BindingType::SampledTexture:
-                    {
-                        auto requiredUsage = nxt::TextureUsageBit::Sampled;
 
-                        auto texture = group->GetBindingAsTextureView(i)->GetTexture();
-                        if (!TextureHasGuaranteedUsageBit(texture, requiredUsage)) {
-                            mBuilder->HandleError("Can't guarantee texture usage needed by bind group");
-                            return false;
-                        }
+                    auto buffer = group->GetBindingAsBufferView(i)->GetBuffer();
+                    if (!BufferHasGuaranteedUsageBit(buffer, requiredUsage)) {
+                        mBuilder->HandleError("Can't guarantee buffer usage needed by bind group");
+                        return false;
                     }
-                    break;
+                } break;
+                case nxt::BindingType::SampledTexture: {
+                    auto requiredUsage = nxt::TextureUsageBit::Sampled;
+
+                    auto texture = group->GetBindingAsTextureView(i)->GetTexture();
+                    if (!TextureHasGuaranteedUsageBit(texture, requiredUsage)) {
+                        mBuilder->HandleError("Can't guarantee texture usage needed by bind group");
+                        return false;
+                    }
+                } break;
                 case nxt::BindingType::Sampler:
                     continue;
             }
@@ -547,12 +555,10 @@ namespace backend {
 
     void CommandBufferStateTracker::UnsetPipeline() {
         constexpr ValidationAspects pipelineDependentAspects =
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE |
-            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
-            1 << VALIDATION_ASPECT_BIND_GROUPS |
-            1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
+            1 << VALIDATION_ASPECT_RENDER_PIPELINE | 1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
+            1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
             1 << VALIDATION_ASPECT_INDEX_BUFFER;
         mAspects &= ~pipelineDependentAspects;
         mBindgroups.fill(nullptr);
     }
-}
+}  // namespace backend

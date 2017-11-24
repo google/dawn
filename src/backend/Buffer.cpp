@@ -17,8 +17,8 @@
 #include "backend/Device.h"
 #include "common/Assert.h"
 
-#include <utility>
 #include <cstdio>
+#include <utility>
 
 namespace backend {
 
@@ -57,7 +57,9 @@ namespace backend {
         return mCurrentUsage;
     }
 
-    void BufferBase::CallMapReadCallback(uint32_t serial, nxtBufferMapReadStatus status, const void* pointer) {
+    void BufferBase::CallMapReadCallback(uint32_t serial,
+                                         nxtBufferMapReadStatus status,
+                                         const void* pointer) {
         if (mMapReadCallback && serial == mMapReadSerial) {
             mMapReadCallback(status, pointer, mMapReadUserdata);
             mMapReadCallback = nullptr;
@@ -78,7 +80,10 @@ namespace backend {
         SetSubDataImpl(start, count, data);
     }
 
-    void BufferBase::MapReadAsync(uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
+    void BufferBase::MapReadAsync(uint32_t start,
+                                  uint32_t size,
+                                  nxtBufferMapReadCallback callback,
+                                  nxtCallbackUserdata userdata) {
         if (start + size > GetSize()) {
             mDevice->HandleError("Buffer map read out of range");
             callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
@@ -98,7 +103,7 @@ namespace backend {
         }
 
         // TODO(cwallez@chromium.org): what to do on wraparound? Could cause crashes.
-        mMapReadSerial ++;
+        mMapReadSerial++;
         mMapReadCallback = callback;
         mMapReadUserdata = userdata;
         MapReadAsyncImpl(mMapReadSerial, start, size);
@@ -128,11 +133,8 @@ namespace backend {
 
     bool BufferBase::IsUsagePossible(nxt::BufferUsageBit allowedUsage, nxt::BufferUsageBit usage) {
         const nxt::BufferUsageBit allReadBits =
-            nxt::BufferUsageBit::MapRead |
-            nxt::BufferUsageBit::TransferSrc |
-            nxt::BufferUsageBit::Index |
-            nxt::BufferUsageBit::Vertex |
-            nxt::BufferUsageBit::Uniform;
+            nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferSrc |
+            nxt::BufferUsageBit::Index | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Uniform;
         bool allowed = (usage & allowedUsage) == usage;
         bool readOnly = (usage & allReadBits) == usage;
         bool singleUse = nxt::HasZeroOrOneBits(usage);
@@ -189,14 +191,16 @@ namespace backend {
             return nullptr;
         }
 
-        const nxt::BufferUsageBit kMapWriteAllowedUsages = nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc;
+        const nxt::BufferUsageBit kMapWriteAllowedUsages =
+            nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc;
         if (mAllowedUsage & nxt::BufferUsageBit::MapWrite &&
             (mAllowedUsage & kMapWriteAllowedUsages) != mAllowedUsage) {
             HandleError("Only TransferSrc is allowed with MapWrite");
             return nullptr;
         }
 
-        const nxt::BufferUsageBit kMapReadAllowedUsages = nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst;
+        const nxt::BufferUsageBit kMapReadAllowedUsages =
+            nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst;
         if (mAllowedUsage & nxt::BufferUsageBit::MapRead &&
             (mAllowedUsage & kMapReadAllowedUsages) != mAllowedUsage) {
             HandleError("Only TransferDst is allowed with MapRead");
@@ -296,4 +300,4 @@ namespace backend {
         mPropertiesSet |= BUFFER_VIEW_PROPERTY_EXTENT;
     }
 
-}
+}  // namespace backend

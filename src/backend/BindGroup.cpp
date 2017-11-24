@@ -26,7 +26,9 @@ namespace backend {
     // BindGroup
 
     BindGroupBase::BindGroupBase(BindGroupBuilder* builder)
-        : mLayout(std::move(builder->mLayout)), mUsage(builder->mUsage), mBindings(std::move(builder->mBindings)) {
+        : mLayout(std::move(builder->mLayout)),
+          mUsage(builder->mUsage),
+          mBindings(std::move(builder->mBindings)) {
     }
 
     const BindGroupLayoutBase* BindGroupBase::GetLayout() const {
@@ -41,7 +43,7 @@ namespace backend {
         ASSERT(binding < kMaxBindingsPerGroup);
         ASSERT(mLayout->GetBindingInfo().mask[binding]);
         ASSERT(mLayout->GetBindingInfo().types[binding] == nxt::BindingType::UniformBuffer ||
-              mLayout->GetBindingInfo().types[binding] == nxt::BindingType::StorageBuffer);
+               mLayout->GetBindingInfo().types[binding] == nxt::BindingType::StorageBuffer);
         return reinterpret_cast<BufferViewBase*>(mBindings[binding].Get());
     }
 
@@ -104,7 +106,9 @@ namespace backend {
         mPropertiesSet |= BINDGROUP_PROPERTY_USAGE;
     }
 
-    void BindGroupBuilder::SetBufferViews(uint32_t start, uint32_t count, BufferViewBase* const * bufferViews) {
+    void BindGroupBuilder::SetBufferViews(uint32_t start,
+                                          uint32_t count,
+                                          BufferViewBase* const* bufferViews) {
         if (!SetBindingsValidationBase(start, count)) {
             return;
         }
@@ -138,10 +142,12 @@ namespace backend {
             }
         }
 
-        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const *>(bufferViews));
+        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const*>(bufferViews));
     }
 
-    void BindGroupBuilder::SetSamplers(uint32_t start, uint32_t count, SamplerBase* const * samplers) {
+    void BindGroupBuilder::SetSamplers(uint32_t start,
+                                       uint32_t count,
+                                       SamplerBase* const* samplers) {
         if (!SetBindingsValidationBase(start, count)) {
             return;
         }
@@ -154,10 +160,12 @@ namespace backend {
             }
         }
 
-        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const *>(samplers));
+        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const*>(samplers));
     }
 
-    void BindGroupBuilder::SetTextureViews(uint32_t start, uint32_t count, TextureViewBase* const * textureViews) {
+    void BindGroupBuilder::SetTextureViews(uint32_t start,
+                                           uint32_t count,
+                                           TextureViewBase* const* textureViews) {
         if (!SetBindingsValidationBase(start, count)) {
             return;
         }
@@ -169,16 +177,19 @@ namespace backend {
                 return;
             }
 
-            if (!(textureViews[j]->GetTexture()->GetAllowedUsage() & nxt::TextureUsageBit::Sampled)) {
+            if (!(textureViews[j]->GetTexture()->GetAllowedUsage() &
+                  nxt::TextureUsageBit::Sampled)) {
                 HandleError("Texture needs to allow the sampled usage bit");
                 return;
             }
         }
 
-        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const *>(textureViews));
+        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const*>(textureViews));
     }
 
-    void BindGroupBuilder::SetBindingsBase(uint32_t start, uint32_t count, RefCounted* const * objects) {
+    void BindGroupBuilder::SetBindingsBase(uint32_t start,
+                                           uint32_t count,
+                                           RefCounted* const* objects) {
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
             mSetMask.set(i);
             mBindings[i] = objects[j];
@@ -211,4 +222,4 @@ namespace backend {
 
         return true;
     }
-}
+}  // namespace backend

@@ -20,105 +20,105 @@
 namespace backend {
 
     // ToBackendTraits implements the mapping from base type to member type of BackendTraits
-    template<typename T, typename BackendTraits>
+    template <typename T, typename BackendTraits>
     struct ToBackendTraits;
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<BindGroupBase, BackendTraits> {
         using BackendType = typename BackendTraits::BindGroupType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<BindGroupLayoutBase, BackendTraits> {
         using BackendType = typename BackendTraits::BindGroupLayoutType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<BlendStateBase, BackendTraits> {
         using BackendType = typename BackendTraits::BlendStateType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<BufferBase, BackendTraits> {
         using BackendType = typename BackendTraits::BufferType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<BufferViewBase, BackendTraits> {
         using BackendType = typename BackendTraits::BufferViewType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<CommandBufferBase, BackendTraits> {
         using BackendType = typename BackendTraits::CommandBufferType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<ComputePipelineBase, BackendTraits> {
         using BackendType = typename BackendTraits::ComputePipelineType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<DepthStencilStateBase, BackendTraits> {
         using BackendType = typename BackendTraits::DepthStencilStateType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<DeviceBase, BackendTraits> {
         using BackendType = typename BackendTraits::DeviceType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<FramebufferBase, BackendTraits> {
         using BackendType = typename BackendTraits::FramebufferType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<InputStateBase, BackendTraits> {
         using BackendType = typename BackendTraits::InputStateType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<PipelineLayoutBase, BackendTraits> {
         using BackendType = typename BackendTraits::PipelineLayoutType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<QueueBase, BackendTraits> {
         using BackendType = typename BackendTraits::QueueType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<RenderPassBase, BackendTraits> {
         using BackendType = typename BackendTraits::RenderPassType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<RenderPipelineBase, BackendTraits> {
         using BackendType = typename BackendTraits::RenderPipelineType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<SamplerBase, BackendTraits> {
         using BackendType = typename BackendTraits::SamplerType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<ShaderModuleBase, BackendTraits> {
         using BackendType = typename BackendTraits::ShaderModuleType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<TextureBase, BackendTraits> {
         using BackendType = typename BackendTraits::TextureType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<SwapChainBase, BackendTraits> {
         using BackendType = typename BackendTraits::SwapChainType;
     };
 
-    template<typename BackendTraits>
+    template <typename BackendTraits>
     struct ToBackendTraits<TextureViewBase, BackendTraits> {
         using BackendType = typename BackendTraits::TextureViewType;
     };
@@ -130,26 +130,30 @@ namespace backend {
     //       return ToBackendBase<MyBackendTraits>(common);
     //   }
 
-    template<typename BackendTraits, typename T>
+    template <typename BackendTraits, typename T>
     Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>& ToBackendBase(Ref<T>& common) {
-        return reinterpret_cast<Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>&>(common);
+        return reinterpret_cast<Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>&>(
+            common);
     }
 
-    template<typename BackendTraits, typename T>
-    const Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>& ToBackendBase(const Ref<T>& common) {
-        return reinterpret_cast<const Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>&>(common);
+    template <typename BackendTraits, typename T>
+    const Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>& ToBackendBase(
+        const Ref<T>& common) {
+        return reinterpret_cast<
+            const Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>&>(common);
     }
 
-    template<typename BackendTraits, typename T>
+    template <typename BackendTraits, typename T>
     typename ToBackendTraits<T, BackendTraits>::BackendType* ToBackendBase(T* common) {
         return reinterpret_cast<typename ToBackendTraits<T, BackendTraits>::BackendType*>(common);
     }
 
-    template<typename BackendTraits, typename T>
+    template <typename BackendTraits, typename T>
     const typename ToBackendTraits<T, BackendTraits>::BackendType* ToBackendBase(const T* common) {
-        return reinterpret_cast<const typename ToBackendTraits<T, BackendTraits>::BackendType*>(common);
+        return reinterpret_cast<const typename ToBackendTraits<T, BackendTraits>::BackendType*>(
+            common);
     }
 
-}
+}  // namespace backend
 
-#endif // BACKEND_TOBACKEND_H_
+#endif  // BACKEND_TOBACKEND_H_

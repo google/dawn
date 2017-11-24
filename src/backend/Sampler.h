@@ -15,8 +15,8 @@
 #ifndef BACKEND_SAMPLER_H_
 #define BACKEND_SAMPLER_H_
 
-#include "backend/Forward.h"
 #include "backend/Buffer.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -24,33 +24,35 @@
 namespace backend {
 
     class SamplerBase : public RefCounted {
-        public:
-            SamplerBase(SamplerBuilder* builder);
+      public:
+        SamplerBase(SamplerBuilder* builder);
     };
 
     class SamplerBuilder : public Builder<SamplerBase> {
-        public:
-            SamplerBuilder(DeviceBase* device);
+      public:
+        SamplerBuilder(DeviceBase* device);
 
-            nxt::FilterMode GetMagFilter() const;
-            nxt::FilterMode GetMinFilter() const;
-            nxt::FilterMode GetMipMapFilter() const;
+        nxt::FilterMode GetMagFilter() const;
+        nxt::FilterMode GetMinFilter() const;
+        nxt::FilterMode GetMipMapFilter() const;
 
-            // NXT API
-            void SetFilterMode(nxt::FilterMode magFilter, nxt::FilterMode minFilter, nxt::FilterMode mipMapFilter);
+        // NXT API
+        void SetFilterMode(nxt::FilterMode magFilter,
+                           nxt::FilterMode minFilter,
+                           nxt::FilterMode mipMapFilter);
 
-        private:
-            friend class SamplerBase;
+      private:
+        friend class SamplerBase;
 
-            SamplerBase* GetResultImpl() override;
+        SamplerBase* GetResultImpl() override;
 
-            int mPropertiesSet = 0;
+        int mPropertiesSet = 0;
 
-            nxt::FilterMode mMagFilter = nxt::FilterMode::Nearest;
-            nxt::FilterMode mMinFilter = nxt::FilterMode::Nearest;
-            nxt::FilterMode mMipMapFilter = nxt::FilterMode::Nearest;
+        nxt::FilterMode mMagFilter = nxt::FilterMode::Nearest;
+        nxt::FilterMode mMinFilter = nxt::FilterMode::Nearest;
+        nxt::FilterMode mMipMapFilter = nxt::FilterMode::Nearest;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_SAMPLER_H_
+#endif  // BACKEND_SAMPLER_H_

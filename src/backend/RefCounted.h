@@ -20,107 +20,110 @@
 namespace backend {
 
     class RefCounted {
-        public:
-            RefCounted();
-            virtual ~RefCounted();
+      public:
+        RefCounted();
+        virtual ~RefCounted();
 
-            void ReferenceInternal();
-            void ReleaseInternal();
+        void ReferenceInternal();
+        void ReleaseInternal();
 
-            uint32_t GetExternalRefs() const;
-            uint32_t GetInternalRefs() const;
+        uint32_t GetExternalRefs() const;
+        uint32_t GetInternalRefs() const;
 
-            // NXT API
-            void Reference();
-            void Release();
+        // NXT API
+        void Reference();
+        void Release();
 
-        protected:
-            uint32_t mExternalRefs = 1;
-            uint32_t mInternalRefs = 1;
+      protected:
+        uint32_t mExternalRefs = 1;
+        uint32_t mInternalRefs = 1;
     };
 
-    template<typename T>
+    template <typename T>
     class Ref {
-        public:
-            Ref() {}
+      public:
+        Ref() {
+        }
 
-            Ref(T* p): mPointee(p) {
-                Reference();
-            }
+        Ref(T* p) : mPointee(p) {
+            Reference();
+        }
 
-            Ref(const Ref<T>& other): mPointee(other.mPointee) {
-                Reference();
-            }
-            Ref<T>& operator=(const Ref<T>& other) {
-                if (&other == this) return *this;
-
-                other.Reference();
-                Release();
-                mPointee = other.mPointee;
-
+        Ref(const Ref<T>& other) : mPointee(other.mPointee) {
+            Reference();
+        }
+        Ref<T>& operator=(const Ref<T>& other) {
+            if (&other == this)
                 return *this;
-            }
 
-            Ref(Ref<T>&& other) {
-                mPointee = other.mPointee;
-                other.mPointee = nullptr;
-            }
-            Ref<T>& operator=(Ref<T>&& other) {
-                if (&other == this) return *this;
+            other.Reference();
+            Release();
+            mPointee = other.mPointee;
 
-                Release();
-                mPointee = other.mPointee;
-                other.mPointee = nullptr;
+            return *this;
+        }
 
+        Ref(Ref<T>&& other) {
+            mPointee = other.mPointee;
+            other.mPointee = nullptr;
+        }
+        Ref<T>& operator=(Ref<T>&& other) {
+            if (&other == this)
                 return *this;
-            }
 
-            ~Ref() {
-                Release();
-                mPointee = nullptr;
-            }
+            Release();
+            mPointee = other.mPointee;
+            other.mPointee = nullptr;
 
-            operator bool() {
-                return mPointee != nullptr;
-            }
+            return *this;
+        }
 
-            const T& operator*() const {
-                return *mPointee;
-            }
-            T& operator*() {
-                return *mPointee;
-            }
+        ~Ref() {
+            Release();
+            mPointee = nullptr;
+        }
 
-            const T* operator->() const {
-                return mPointee;
-            }
-            T* operator->() {
-                return mPointee;
-            }
+        operator bool() {
+            return mPointee != nullptr;
+        }
 
-            const T* Get() const {
-                return mPointee;
-            }
-            T* Get() {
-                return mPointee;
-            }
+        const T& operator*() const {
+            return *mPointee;
+        }
+        T& operator*() {
+            return *mPointee;
+        }
 
-        private:
-            void Reference() const {
-                if (mPointee != nullptr) {
-                    mPointee->ReferenceInternal();
-                }
-            }
-            void Release() const {
-                if (mPointee != nullptr) {
-                    mPointee->ReleaseInternal();
-                }
-            }
+        const T* operator->() const {
+            return mPointee;
+        }
+        T* operator->() {
+            return mPointee;
+        }
 
-            //static_assert(std::is_base_of<RefCounted, T>::value, "");
-            T* mPointee = nullptr;
+        const T* Get() const {
+            return mPointee;
+        }
+        T* Get() {
+            return mPointee;
+        }
+
+      private:
+        void Reference() const {
+            if (mPointee != nullptr) {
+                mPointee->ReferenceInternal();
+            }
+        }
+        void Release() const {
+            if (mPointee != nullptr) {
+                mPointee->ReleaseInternal();
+            }
+        }
+
+        // static_assert(std::is_base_of<RefCounted, T>::value, "");
+        T* mPointee = nullptr;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_REFCOUNTED_H_
+#endif  // BACKEND_REFCOUNTED_H_

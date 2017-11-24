@@ -26,4 +26,4 @@ namespace backend {
         return static_cast<nxt::ShaderStageBit>(1 << static_cast<uint32_t>(stage));
     }
 
-}
+}  // namespace backend

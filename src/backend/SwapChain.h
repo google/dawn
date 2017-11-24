@@ -15,55 +15,58 @@
 #ifndef BACKEND_SWAPCHAIN_H_
 #define BACKEND_SWAPCHAIN_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
-#include "nxt/nxtcpp.h"
 #include "nxt/nxt_wsi.h"
+#include "nxt/nxtcpp.h"
 
 namespace backend {
 
     class SwapChainBase : public RefCounted {
-        public:
-            SwapChainBase(SwapChainBuilder* builder);
-            ~SwapChainBase();
+      public:
+        SwapChainBase(SwapChainBuilder* builder);
+        ~SwapChainBase();
 
-            DeviceBase* GetDevice();
+        DeviceBase* GetDevice();
 
-            // NXT API
-            void Configure(nxt::TextureFormat format, nxt::TextureUsageBit allowedUsage, uint32_t width, uint32_t height);
-            TextureBase* GetNextTexture();
-            void Present(TextureBase* texture);
+        // NXT API
+        void Configure(nxt::TextureFormat format,
+                       nxt::TextureUsageBit allowedUsage,
+                       uint32_t width,
+                       uint32_t height);
+        TextureBase* GetNextTexture();
+        void Present(TextureBase* texture);
 
-        protected:
-            const nxtSwapChainImplementation& GetImplementation();
-            virtual TextureBase* GetNextTextureImpl(TextureBuilder* builder) = 0;
+      protected:
+        const nxtSwapChainImplementation& GetImplementation();
+        virtual TextureBase* GetNextTextureImpl(TextureBuilder* builder) = 0;
 
-        private:
-            DeviceBase* mDevice = nullptr;
-            nxtSwapChainImplementation mImplementation = {};
-            nxt::TextureFormat mFormat = {};
-            nxt::TextureUsageBit mAllowedUsage;
-            uint32_t mWidth = 0;
-            uint32_t mHeight = 0;
-            TextureBase* mLastNextTexture = nullptr;
+      private:
+        DeviceBase* mDevice = nullptr;
+        nxtSwapChainImplementation mImplementation = {};
+        nxt::TextureFormat mFormat = {};
+        nxt::TextureUsageBit mAllowedUsage;
+        uint32_t mWidth = 0;
+        uint32_t mHeight = 0;
+        TextureBase* mLastNextTexture = nullptr;
     };
 
     class SwapChainBuilder : public Builder<SwapChainBase> {
-        public:
-            SwapChainBuilder(DeviceBase* device);
+      public:
+        SwapChainBuilder(DeviceBase* device);
 
-            // NXT API
-            SwapChainBase* GetResultImpl() override;
-            void SetImplementation(uint64_t implementation);
+        // NXT API
+        SwapChainBase* GetResultImpl() override;
+        void SetImplementation(uint64_t implementation);
 
-        private:
-            friend class SwapChainBase;
+      private:
+        friend class SwapChainBase;
 
-            nxtSwapChainImplementation mImplementation = {};
+        nxtSwapChainImplementation mImplementation = {};
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_SWAPCHAIN_H_
+#endif  // BACKEND_SWAPCHAIN_H_

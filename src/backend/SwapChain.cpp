@@ -22,7 +22,7 @@ namespace backend {
     // SwapChain
 
     SwapChainBase::SwapChainBase(SwapChainBuilder* builder)
-            : mDevice(builder->mDevice), mImplementation(builder->mImplementation) {
+        : mDevice(builder->mDevice), mImplementation(builder->mImplementation) {
     }
 
     SwapChainBase::~SwapChainBase() {
@@ -34,7 +34,10 @@ namespace backend {
         return mDevice;
     }
 
-    void SwapChainBase::Configure(nxt::TextureFormat format, nxt::TextureUsageBit allowedUsage, uint32_t width, uint32_t height) {
+    void SwapChainBase::Configure(nxt::TextureFormat format,
+                                  nxt::TextureUsageBit allowedUsage,
+                                  uint32_t width,
+                                  uint32_t height) {
         if (width == 0 || height == 0) {
             mDevice->HandleError("Swap chain cannot be configured to zero size");
             return;
@@ -45,8 +48,8 @@ namespace backend {
         mAllowedUsage = allowedUsage;
         mWidth = width;
         mHeight = height;
-        mImplementation.Configure(mImplementation.userData,
-                static_cast<nxtTextureFormat>(format), static_cast<nxtTextureUsageBit>(allowedUsage), width, height);
+        mImplementation.Configure(mImplementation.userData, static_cast<nxtTextureFormat>(format),
+                                  static_cast<nxtTextureUsageBit>(allowedUsage), width, height);
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {
@@ -87,8 +90,7 @@ namespace backend {
 
     // SwapChain Builder
 
-    SwapChainBuilder::SwapChainBuilder(DeviceBase* device)
-        : Builder(device) {
+    SwapChainBuilder::SwapChainBuilder(DeviceBase* device) : Builder(device) {
     }
 
     SwapChainBase* SwapChainBuilder::GetResultImpl() {
@@ -105,14 +107,15 @@ namespace backend {
             return;
         }
 
-        nxtSwapChainImplementation& impl = *reinterpret_cast<nxtSwapChainImplementation*>(implementation);
+        nxtSwapChainImplementation& impl =
+            *reinterpret_cast<nxtSwapChainImplementation*>(implementation);
 
-        if (!impl.Init || !impl.Destroy || !impl.Configure ||
-                !impl.GetNextTexture || !impl.Present) {
+        if (!impl.Init || !impl.Destroy || !impl.Configure || !impl.GetNextTexture ||
+            !impl.Present) {
             HandleError("Implementation is incomplete");
             return;
         }
 
         mImplementation = impl;
     }
-}
+}  // namespace backend

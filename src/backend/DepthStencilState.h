@@ -15,69 +15,71 @@
 #ifndef BACKEND_DEPTHSTENCILSTATE_H_
 #define BACKEND_DEPTHSTENCILSTATE_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
 #include "nxt/nxtcpp.h"
 
 namespace backend {
 
-
     class DepthStencilStateBase : public RefCounted {
-        public:
-            DepthStencilStateBase(DepthStencilStateBuilder* builder);
+      public:
+        DepthStencilStateBase(DepthStencilStateBuilder* builder);
 
-            struct DepthInfo {
-                nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
-                bool depthWriteEnabled = false;
-            };
+        struct DepthInfo {
+            nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
+            bool depthWriteEnabled = false;
+        };
 
-            struct StencilFaceInfo {
-                nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
-                nxt::StencilOperation stencilFail = nxt::StencilOperation::Keep;
-                nxt::StencilOperation depthFail = nxt::StencilOperation::Keep;
-                nxt::StencilOperation depthStencilPass = nxt::StencilOperation::Keep;
-            };
+        struct StencilFaceInfo {
+            nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
+            nxt::StencilOperation stencilFail = nxt::StencilOperation::Keep;
+            nxt::StencilOperation depthFail = nxt::StencilOperation::Keep;
+            nxt::StencilOperation depthStencilPass = nxt::StencilOperation::Keep;
+        };
 
-            struct StencilInfo {
-                StencilFaceInfo back;
-                StencilFaceInfo front;
-                uint32_t readMask = 0xff;
-                uint32_t writeMask = 0xff;
-            };
+        struct StencilInfo {
+            StencilFaceInfo back;
+            StencilFaceInfo front;
+            uint32_t readMask = 0xff;
+            uint32_t writeMask = 0xff;
+        };
 
-            bool StencilTestEnabled() const;
-            const DepthInfo& GetDepth() const;
-            const StencilInfo& GetStencil() const;
+        bool StencilTestEnabled() const;
+        const DepthInfo& GetDepth() const;
+        const StencilInfo& GetStencil() const;
 
-        private:
-            DepthInfo mDepthInfo;
-            StencilInfo mStencilInfo;
+      private:
+        DepthInfo mDepthInfo;
+        StencilInfo mStencilInfo;
     };
 
     class DepthStencilStateBuilder : public Builder<DepthStencilStateBase> {
-        public:
-            DepthStencilStateBuilder(DeviceBase* device);
+      public:
+        DepthStencilStateBuilder(DeviceBase* device);
 
-            // NXT API
-            void SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction);
-            void SetDepthWriteEnabled(bool enabled);
-            void SetStencilFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction,
-                nxt::StencilOperation stencilFail, nxt::StencilOperation depthFail, nxt::StencilOperation depthStencilPass);
-            void SetStencilMask(uint32_t readMask, uint32_t writeMask);
+        // NXT API
+        void SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction);
+        void SetDepthWriteEnabled(bool enabled);
+        void SetStencilFunction(nxt::Face face,
+                                nxt::CompareFunction stencilCompareFunction,
+                                nxt::StencilOperation stencilFail,
+                                nxt::StencilOperation depthFail,
+                                nxt::StencilOperation depthStencilPass);
+        void SetStencilMask(uint32_t readMask, uint32_t writeMask);
 
-        private:
-            friend class DepthStencilStateBase;
+      private:
+        friend class DepthStencilStateBase;
 
-            DepthStencilStateBase* GetResultImpl() override;
+        DepthStencilStateBase* GetResultImpl() override;
 
-            int mPropertiesSet = 0;
+        int mPropertiesSet = 0;
 
-            DepthStencilStateBase::DepthInfo mDepthInfo;
-            DepthStencilStateBase::StencilInfo mStencilInfo;
+        DepthStencilStateBase::DepthInfo mDepthInfo;
+        DepthStencilStateBase::StencilInfo mStencilInfo;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_DEPTHSTENCILSTATE_H_
+#endif  // BACKEND_DEPTHSTENCILSTATE_H_

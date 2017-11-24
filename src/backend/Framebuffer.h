@@ -27,60 +27,66 @@
 namespace backend {
 
     class FramebufferBase : public RefCounted {
-        public:
-            struct ClearColor {
-                float color[4] = {};
-            };
+      public:
+        struct ClearColor {
+            float color[4] = {};
+        };
 
-            struct ClearDepthStencil {
-                float depth = 1.0f;
-                uint32_t stencil = 0;
-            };
+        struct ClearDepthStencil {
+            float depth = 1.0f;
+            uint32_t stencil = 0;
+        };
 
-            FramebufferBase(FramebufferBuilder* builder);
+        FramebufferBase(FramebufferBuilder* builder);
 
-            DeviceBase* GetDevice();
-            RenderPassBase* GetRenderPass();
-            TextureViewBase* GetTextureView(uint32_t attachmentSlot);
-            ClearColor GetClearColor(uint32_t attachmentSlot);
-            ClearDepthStencil GetClearDepthStencil(uint32_t attachmentSlot);
-            uint32_t GetWidth() const;
-            uint32_t GetHeight() const;
+        DeviceBase* GetDevice();
+        RenderPassBase* GetRenderPass();
+        TextureViewBase* GetTextureView(uint32_t attachmentSlot);
+        ClearColor GetClearColor(uint32_t attachmentSlot);
+        ClearDepthStencil GetClearDepthStencil(uint32_t attachmentSlot);
+        uint32_t GetWidth() const;
+        uint32_t GetHeight() const;
 
-            // NXT API
-            void AttachmentSetClearColor(uint32_t attachmentSlot, float clearR, float clearG, float clearB, float clearA);
-            void AttachmentSetClearDepthStencil(uint32_t attachmentSlot, float clearDepth, uint32_t clearStencil);
+        // NXT API
+        void AttachmentSetClearColor(uint32_t attachmentSlot,
+                                     float clearR,
+                                     float clearG,
+                                     float clearB,
+                                     float clearA);
+        void AttachmentSetClearDepthStencil(uint32_t attachmentSlot,
+                                            float clearDepth,
+                                            uint32_t clearStencil);
 
-        private:
-            DeviceBase* mDevice;
-            Ref<RenderPassBase> mRenderPass;
-            uint32_t mWidth = 0;
-            uint32_t mHeight = 0;
-            std::vector<Ref<TextureViewBase>> mTextureViews;
-            std::vector<ClearColor> mClearColors;
-            std::vector<ClearDepthStencil> mClearDepthStencils;
+      private:
+        DeviceBase* mDevice;
+        Ref<RenderPassBase> mRenderPass;
+        uint32_t mWidth = 0;
+        uint32_t mHeight = 0;
+        std::vector<Ref<TextureViewBase>> mTextureViews;
+        std::vector<ClearColor> mClearColors;
+        std::vector<ClearDepthStencil> mClearDepthStencils;
     };
 
     class FramebufferBuilder : public Builder<FramebufferBase> {
-        public:
-            FramebufferBuilder(DeviceBase* device);
+      public:
+        FramebufferBuilder(DeviceBase* device);
 
-            // NXT API
-            FramebufferBase* GetResultImpl() override;
-            void SetRenderPass(RenderPassBase* renderPass);
-            void SetDimensions(uint32_t width, uint32_t height);
-            void SetAttachment(uint32_t attachmentSlot, TextureViewBase* textureView);
+        // NXT API
+        FramebufferBase* GetResultImpl() override;
+        void SetRenderPass(RenderPassBase* renderPass);
+        void SetDimensions(uint32_t width, uint32_t height);
+        void SetAttachment(uint32_t attachmentSlot, TextureViewBase* textureView);
 
-        private:
-            friend class FramebufferBase;
+      private:
+        friend class FramebufferBase;
 
-            Ref<RenderPassBase> mRenderPass;
-            uint32_t mWidth = 0;
-            uint32_t mHeight = 0;
-            std::vector<Ref<TextureViewBase>> mTextureViews;
-            int mPropertiesSet = 0;
+        Ref<RenderPassBase> mRenderPass;
+        uint32_t mWidth = 0;
+        uint32_t mHeight = 0;
+        std::vector<Ref<TextureViewBase>> mTextureViews;
+        int mPropertiesSet = 0;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_FRAMEBUFFER_H_
+#endif  // BACKEND_FRAMEBUFFER_H_

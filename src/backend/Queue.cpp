@@ -14,8 +14,8 @@
 
 #include "backend/Queue.h"
 
-#include "backend/Device.h"
 #include "backend/CommandBuffer.h"
+#include "backend/Device.h"
 
 namespace backend {
 
@@ -41,4 +41,4 @@ namespace backend {
         return mDevice->CreateQueue(this);
     }
 
-}
+}  // namespace backend

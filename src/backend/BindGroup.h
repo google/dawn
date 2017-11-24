@@ -29,65 +29,65 @@
 namespace backend {
 
     class BindGroupBase : public RefCounted {
-        public:
-            BindGroupBase(BindGroupBuilder* builder);
+      public:
+        BindGroupBase(BindGroupBuilder* builder);
 
-            const BindGroupLayoutBase* GetLayout() const;
-            nxt::BindGroupUsage GetUsage() const;
-            BufferViewBase* GetBindingAsBufferView(size_t binding);
-            SamplerBase* GetBindingAsSampler(size_t binding);
-            TextureViewBase* GetBindingAsTextureView(size_t binding);
+        const BindGroupLayoutBase* GetLayout() const;
+        nxt::BindGroupUsage GetUsage() const;
+        BufferViewBase* GetBindingAsBufferView(size_t binding);
+        SamplerBase* GetBindingAsSampler(size_t binding);
+        TextureViewBase* GetBindingAsTextureView(size_t binding);
 
-        private:
-            Ref<BindGroupLayoutBase> mLayout;
-            nxt::BindGroupUsage mUsage;
-            std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
+      private:
+        Ref<BindGroupLayoutBase> mLayout;
+        nxt::BindGroupUsage mUsage;
+        std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 
     class BindGroupBuilder : public Builder<BindGroupBase> {
-        public:
-            BindGroupBuilder(DeviceBase* device);
+      public:
+        BindGroupBuilder(DeviceBase* device);
 
-            // NXT API
-            void SetLayout(BindGroupLayoutBase* layout);
-            void SetUsage(nxt::BindGroupUsage usage);
+        // NXT API
+        void SetLayout(BindGroupLayoutBase* layout);
+        void SetUsage(nxt::BindGroupUsage usage);
 
-            template<typename T>
-            void SetBufferViews(uint32_t start, uint32_t count, T* const* bufferViews) {
-                static_assert(std::is_base_of<BufferViewBase, T>::value, "");
-                SetBufferViews(start, count, reinterpret_cast<BufferViewBase* const*>(bufferViews));
-            }
-            void SetBufferViews(uint32_t start, uint32_t count, BufferViewBase* const * bufferViews);
+        template <typename T>
+        void SetBufferViews(uint32_t start, uint32_t count, T* const* bufferViews) {
+            static_assert(std::is_base_of<BufferViewBase, T>::value, "");
+            SetBufferViews(start, count, reinterpret_cast<BufferViewBase* const*>(bufferViews));
+        }
+        void SetBufferViews(uint32_t start, uint32_t count, BufferViewBase* const* bufferViews);
 
-            template<typename T>
-            void SetSamplers(uint32_t start, uint32_t count, T* const* samplers) {
-                static_assert(std::is_base_of<SamplerBase, T>::value, "");
-                SetSamplers(start, count, reinterpret_cast<SamplerBase* const*>(samplers));
-            }
-            void SetSamplers(uint32_t start, uint32_t count, SamplerBase* const * samplers);
+        template <typename T>
+        void SetSamplers(uint32_t start, uint32_t count, T* const* samplers) {
+            static_assert(std::is_base_of<SamplerBase, T>::value, "");
+            SetSamplers(start, count, reinterpret_cast<SamplerBase* const*>(samplers));
+        }
+        void SetSamplers(uint32_t start, uint32_t count, SamplerBase* const* samplers);
 
-            template<typename T>
-            void SetTextureViews(uint32_t start, uint32_t count, T* const* textureViews) {
-                static_assert(std::is_base_of<TextureViewBase, T>::value, "");
-                SetTextureViews(start, count, reinterpret_cast<TextureViewBase* const*>(textureViews));
-            }
-            void SetTextureViews(uint32_t start, uint32_t count, TextureViewBase* const * textureViews);
+        template <typename T>
+        void SetTextureViews(uint32_t start, uint32_t count, T* const* textureViews) {
+            static_assert(std::is_base_of<TextureViewBase, T>::value, "");
+            SetTextureViews(start, count, reinterpret_cast<TextureViewBase* const*>(textureViews));
+        }
+        void SetTextureViews(uint32_t start, uint32_t count, TextureViewBase* const* textureViews);
 
-        private:
-            friend class BindGroupBase;
+      private:
+        friend class BindGroupBase;
 
-            BindGroupBase* GetResultImpl() override;
-            void SetBindingsBase(uint32_t start, uint32_t count, RefCounted* const * objects);
-            bool SetBindingsValidationBase(uint32_t start, uint32_t count);
+        BindGroupBase* GetResultImpl() override;
+        void SetBindingsBase(uint32_t start, uint32_t count, RefCounted* const* objects);
+        bool SetBindingsValidationBase(uint32_t start, uint32_t count);
 
-            std::bitset<kMaxBindingsPerGroup> mSetMask;
-            int mPropertiesSet = 0;
+        std::bitset<kMaxBindingsPerGroup> mSetMask;
+        int mPropertiesSet = 0;
 
-            Ref<BindGroupLayoutBase> mLayout;
-            nxt::BindGroupUsage mUsage;
-            std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
+        Ref<BindGroupLayoutBase> mLayout;
+        nxt::BindGroupUsage mUsage;
+        std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_BINDGROUP_H_
+#endif  // BACKEND_BINDGROUP_H_

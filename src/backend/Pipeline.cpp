@@ -14,8 +14,8 @@
 
 #include "backend/Pipeline.h"
 
-#include "backend/Device.h"
 #include "backend/DepthStencilState.h"
+#include "backend/Device.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
 #include "backend/RenderPass.h"
@@ -28,7 +28,10 @@ namespace backend {
     PipelineBase::PipelineBase(PipelineBuilder* builder)
         : mStageMask(builder->mStageMask), mLayout(std::move(builder->mLayout)) {
         if (!mLayout) {
-            mLayout = builder->GetParentBuilder()->GetDevice()->CreatePipelineLayoutBuilder()->GetResult();
+            mLayout = builder->GetParentBuilder()
+                          ->GetDevice()
+                          ->CreatePipelineLayoutBuilder()
+                          ->GetResult();
         }
 
         auto FillPushConstants = [](const ShaderModuleBase* module, PushConstantInfo* info) {
@@ -58,7 +61,8 @@ namespace backend {
         }
     }
 
-    const PipelineBase::PushConstantInfo& PipelineBase::GetPushConstants(nxt::ShaderStage stage) const {
+    const PipelineBase::PushConstantInfo& PipelineBase::GetPushConstants(
+        nxt::ShaderStage stage) const {
         return mPushConstants[stage];
     }
 
@@ -89,7 +93,9 @@ namespace backend {
         mLayout = layout;
     }
 
-    void PipelineBuilder::SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint) {
+    void PipelineBuilder::SetStage(nxt::ShaderStage stage,
+                                   ShaderModuleBase* module,
+                                   const char* entryPoint) {
         if (entryPoint != std::string("main")) {
             mParentBuilder->HandleError("Currently the entry point has to be main()");
             return;
@@ -111,4 +117,4 @@ namespace backend {
         mStages[stage].entryPoint = entryPoint;
     }
 
-}
+}  // namespace backend

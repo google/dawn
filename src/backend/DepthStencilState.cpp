@@ -26,13 +26,13 @@ namespace backend {
 
     bool DepthStencilStateBase::StencilTestEnabled() const {
         return mStencilInfo.back.compareFunction != nxt::CompareFunction::Always ||
-            mStencilInfo.back.stencilFail != nxt::StencilOperation::Keep ||
-            mStencilInfo.back.depthFail != nxt::StencilOperation::Keep ||
-            mStencilInfo.back.depthStencilPass != nxt::StencilOperation::Keep ||
-            mStencilInfo.front.compareFunction != nxt::CompareFunction::Always ||
-            mStencilInfo.front.stencilFail != nxt::StencilOperation::Keep ||
-            mStencilInfo.front.depthFail != nxt::StencilOperation::Keep ||
-            mStencilInfo.front.depthStencilPass != nxt::StencilOperation::Keep;
+               mStencilInfo.back.stencilFail != nxt::StencilOperation::Keep ||
+               mStencilInfo.back.depthFail != nxt::StencilOperation::Keep ||
+               mStencilInfo.back.depthStencilPass != nxt::StencilOperation::Keep ||
+               mStencilInfo.front.compareFunction != nxt::CompareFunction::Always ||
+               mStencilInfo.front.stencilFail != nxt::StencilOperation::Keep ||
+               mStencilInfo.front.depthFail != nxt::StencilOperation::Keep ||
+               mStencilInfo.front.depthStencilPass != nxt::StencilOperation::Keep;
     }
 
     const DepthStencilStateBase::DepthInfo& DepthStencilStateBase::GetDepth() const {
@@ -60,7 +60,8 @@ namespace backend {
         return mDevice->CreateDepthStencilState(this);
     }
 
-    void DepthStencilStateBuilder::SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction) {
+    void DepthStencilStateBuilder::SetDepthCompareFunction(
+        nxt::CompareFunction depthCompareFunction) {
         if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_DEPTH_COMPARE_FUNCTION) != 0) {
             HandleError("Depth compare property set multiple times");
             return;
@@ -82,8 +83,11 @@ namespace backend {
         mDepthInfo.depthWriteEnabled = enabled;
     }
 
-    void DepthStencilStateBuilder::SetStencilFunction(nxt::Face face, nxt::CompareFunction stencilCompareFunction,
-            nxt::StencilOperation stencilFail, nxt::StencilOperation depthFail, nxt::StencilOperation depthStencilPass) {\
+    void DepthStencilStateBuilder::SetStencilFunction(nxt::Face face,
+                                                      nxt::CompareFunction stencilCompareFunction,
+                                                      nxt::StencilOperation stencilFail,
+                                                      nxt::StencilOperation depthFail,
+                                                      nxt::StencilOperation depthStencilPass) {
         if (face == nxt::Face::None) {
             HandleError("Can't set stencil function of None face");
             return;
@@ -118,7 +122,7 @@ namespace backend {
     }
 
     void DepthStencilStateBuilder::SetStencilMask(uint32_t readMask, uint32_t writeMask) {
-         if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_MASK) != 0) {
+        if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_MASK) != 0) {
             HandleError("Stencilmask property set multiple times");
             return;
         }
@@ -128,4 +132,4 @@ namespace backend {
         mStencilInfo.writeMask = writeMask;
     }
 
-}
+}  // namespace backend

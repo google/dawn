@@ -60,13 +60,13 @@ namespace backend {
 
     class DeviceBase;
 
-    template<typename T>
+    template <typename T>
     class Ref;
 
-    template<typename T>
+    template <typename T>
     class PerStage;
 
     enum PushConstantType : uint8_t;
-}
+}  // namespace backend
 
-#endif // BACKEND_FORWARD_H_
+#endif  // BACKEND_FORWARD_H_

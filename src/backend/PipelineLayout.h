@@ -15,8 +15,8 @@
 #ifndef BACKEND_PIPELINELAYOUT_H_
 #define BACKEND_PIPELINELAYOUT_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 #include "common/Constants.h"
 
@@ -30,40 +30,41 @@ namespace backend {
     using BindGroupLayoutArray = std::array<Ref<BindGroupLayoutBase>, kMaxBindGroups>;
 
     class PipelineLayoutBase : public RefCounted {
-        public:
-            PipelineLayoutBase(PipelineLayoutBuilder* builder);
+      public:
+        PipelineLayoutBase(PipelineLayoutBuilder* builder);
 
-            const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
-            const std::bitset<kMaxBindGroups> GetBindGroupsLayoutMask() const;
+        const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
+        const std::bitset<kMaxBindGroups> GetBindGroupsLayoutMask() const;
 
-            // Utility functions to compute inherited bind groups.
-            // Returns the inherited bind groups as a mask
-            std::bitset<kMaxBindGroups> InheritedGroupsMask(const PipelineLayoutBase* other) const;
+        // Utility functions to compute inherited bind groups.
+        // Returns the inherited bind groups as a mask.
+        std::bitset<kMaxBindGroups> InheritedGroupsMask(const PipelineLayoutBase* other) const;
 
-            // Returns the index of the first incompatible bind group (in the range [1, kMaxBindGroups + 1])
-            uint32_t GroupsInheritUpTo(const PipelineLayoutBase* other) const;
+        // Returns the index of the first incompatible bind group in the range
+        // [1, kMaxBindGroups + 1]
+        uint32_t GroupsInheritUpTo(const PipelineLayoutBase* other) const;
 
-        protected:
-            BindGroupLayoutArray mBindGroupLayouts;
-            std::bitset<kMaxBindGroups> mMask;
+      protected:
+        BindGroupLayoutArray mBindGroupLayouts;
+        std::bitset<kMaxBindGroups> mMask;
     };
 
     class PipelineLayoutBuilder : public Builder<PipelineLayoutBase> {
-        public:
-            PipelineLayoutBuilder(DeviceBase* device);
+      public:
+        PipelineLayoutBuilder(DeviceBase* device);
 
-            // NXT API
-            void SetBindGroupLayout(uint32_t groupIndex, BindGroupLayoutBase* layout);
+        // NXT API
+        void SetBindGroupLayout(uint32_t groupIndex, BindGroupLayoutBase* layout);
 
-        private:
-            friend class PipelineLayoutBase;
+      private:
+        friend class PipelineLayoutBase;
 
-            PipelineLayoutBase* GetResultImpl() override;
+        PipelineLayoutBase* GetResultImpl() override;
 
-            BindGroupLayoutArray mBindGroupLayouts;
-            std::bitset<kMaxBindGroups> mMask;
+        BindGroupLayoutArray mBindGroupLayouts;
+        std::bitset<kMaxBindGroups> mMask;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_PIPELINELAYOUT_H_
+#endif  // BACKEND_PIPELINELAYOUT_H_

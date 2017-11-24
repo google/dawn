@@ -29,68 +29,68 @@
 namespace backend {
 
     class RenderPassBase : public RefCounted {
-        public:
-            RenderPassBase(RenderPassBuilder* builder);
+      public:
+        RenderPassBase(RenderPassBuilder* builder);
 
-            struct AttachmentInfo {
-                nxt::TextureFormat format;
-                nxt::LoadOp colorLoadOp = nxt::LoadOp::Load;
-                nxt::LoadOp depthLoadOp = nxt::LoadOp::Load;
-                nxt::LoadOp stencilLoadOp = nxt::LoadOp::Load;
-                // The first subpass that this attachment is used in.
-                // This is used to determine, for each subpass, whether each
-                // of its attachments is being used for the first time.
-                uint32_t firstSubpass = UINT32_MAX;
-            };
+        struct AttachmentInfo {
+            nxt::TextureFormat format;
+            nxt::LoadOp colorLoadOp = nxt::LoadOp::Load;
+            nxt::LoadOp depthLoadOp = nxt::LoadOp::Load;
+            nxt::LoadOp stencilLoadOp = nxt::LoadOp::Load;
+            // The first subpass that this attachment is used in. This is used to determine, for
+            // each subpass, whether each of its attachments is being used for the first time.
+            uint32_t firstSubpass = UINT32_MAX;
+        };
 
-            struct SubpassInfo {
-                // Set of locations which are set
-                std::bitset<kMaxColorAttachments> colorAttachmentsSet;
-                // Mapping from location to attachment slot
-                std::array<uint32_t, kMaxColorAttachments> colorAttachments;
-                bool depthStencilAttachmentSet = false;
-                uint32_t depthStencilAttachment = 0;
-            };
+        struct SubpassInfo {
+            // Set of locations which are set
+            std::bitset<kMaxColorAttachments> colorAttachmentsSet;
+            // Mapping from location to attachment slot
+            std::array<uint32_t, kMaxColorAttachments> colorAttachments;
+            bool depthStencilAttachmentSet = false;
+            uint32_t depthStencilAttachment = 0;
+        };
 
-            uint32_t GetAttachmentCount() const;
-            const AttachmentInfo& GetAttachmentInfo(uint32_t attachment) const;
-            uint32_t GetSubpassCount() const;
-            const SubpassInfo& GetSubpassInfo(uint32_t subpass) const;
-            bool IsCompatibleWith(const RenderPassBase* other) const;
+        uint32_t GetAttachmentCount() const;
+        const AttachmentInfo& GetAttachmentInfo(uint32_t attachment) const;
+        uint32_t GetSubpassCount() const;
+        const SubpassInfo& GetSubpassInfo(uint32_t subpass) const;
+        bool IsCompatibleWith(const RenderPassBase* other) const;
 
-        private:
-            std::vector<AttachmentInfo> mAttachments;
-            std::vector<SubpassInfo> mSubpasses;
+      private:
+        std::vector<AttachmentInfo> mAttachments;
+        std::vector<SubpassInfo> mSubpasses;
     };
 
     class RenderPassBuilder : public Builder<RenderPassBase> {
-        public:
-            RenderPassBuilder(DeviceBase* device);
+      public:
+        RenderPassBuilder(DeviceBase* device);
 
-            // NXT API
-            RenderPassBase* GetResultImpl() override;
-            void SetAttachmentCount(uint32_t attachmentCount);
-            void AttachmentSetFormat(uint32_t attachmentSlot, nxt::TextureFormat format);
-            void AttachmentSetColorLoadOp(uint32_t attachmentSlot, nxt::LoadOp op);
-            void AttachmentSetDepthStencilLoadOps(uint32_t attachmentSlot, nxt::LoadOp depthOp, nxt::LoadOp stencilOp);
-            void SetSubpassCount(uint32_t subpassCount);
-            void SubpassSetColorAttachment(uint32_t subpass, uint32_t outputAttachmentLocation, uint32_t attachmentSlot);
-            void SubpassSetDepthStencilAttachment(uint32_t subpass, uint32_t attachmentSlot);
+        // NXT API
+        RenderPassBase* GetResultImpl() override;
+        void SetAttachmentCount(uint32_t attachmentCount);
+        void AttachmentSetFormat(uint32_t attachmentSlot, nxt::TextureFormat format);
+        void AttachmentSetColorLoadOp(uint32_t attachmentSlot, nxt::LoadOp op);
+        void AttachmentSetDepthStencilLoadOps(uint32_t attachmentSlot,
+                                              nxt::LoadOp depthOp,
+                                              nxt::LoadOp stencilOp);
+        void SetSubpassCount(uint32_t subpassCount);
+        void SubpassSetColorAttachment(uint32_t subpass,
+                                       uint32_t outputAttachmentLocation,
+                                       uint32_t attachmentSlot);
+        void SubpassSetDepthStencilAttachment(uint32_t subpass, uint32_t attachmentSlot);
 
-        private:
-            friend class RenderPassBase;
+      private:
+        friend class RenderPassBase;
 
-            enum AttachmentProperty {
-                ATTACHMENT_PROPERTY_FORMAT,
-                ATTACHMENT_PROPERTY_COUNT
-            };
+        enum AttachmentProperty { ATTACHMENT_PROPERTY_FORMAT, ATTACHMENT_PROPERTY_COUNT };
 
-            std::vector<std::bitset<ATTACHMENT_PROPERTY_COUNT>> mAttachmentProperties;
-            std::vector<RenderPassBase::AttachmentInfo> mAttachments;
-            std::vector<RenderPassBase::SubpassInfo> mSubpasses;
-            int mPropertiesSet = 0;
+        std::vector<std::bitset<ATTACHMENT_PROPERTY_COUNT>> mAttachmentProperties;
+        std::vector<RenderPassBase::AttachmentInfo> mAttachments;
+        std::vector<RenderPassBase::SubpassInfo> mSubpasses;
+        int mPropertiesSet = 0;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_RENDERPASS_H_
+#endif  // BACKEND_RENDERPASS_H_

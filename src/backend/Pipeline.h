@@ -15,8 +15,8 @@
 #ifndef BACKEND_PIPELINE_H_
 #define BACKEND_PIPELINE_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/PerStage.h"
 #include "backend/PipelineLayout.h"
 #include "backend/RefCounted.h"
@@ -38,48 +38,48 @@ namespace backend {
     class PipelineBuilder;
 
     class PipelineBase {
-        public:
-            PipelineBase(PipelineBuilder* builder);
+      public:
+        PipelineBase(PipelineBuilder* builder);
 
-            struct PushConstantInfo {
-                std::bitset<kMaxPushConstants> mask;
-                std::array<PushConstantType, kMaxPushConstants> types;
-            };
-            const PushConstantInfo& GetPushConstants(nxt::ShaderStage stage) const;
-            nxt::ShaderStageBit GetStageMask() const;
+        struct PushConstantInfo {
+            std::bitset<kMaxPushConstants> mask;
+            std::array<PushConstantType, kMaxPushConstants> types;
+        };
+        const PushConstantInfo& GetPushConstants(nxt::ShaderStage stage) const;
+        nxt::ShaderStageBit GetStageMask() const;
 
-            PipelineLayoutBase* GetLayout();
+        PipelineLayoutBase* GetLayout();
 
-        private:
-            nxt::ShaderStageBit mStageMask;
-            Ref<PipelineLayoutBase> mLayout;
-            PerStage<PushConstantInfo> mPushConstants;
+      private:
+        nxt::ShaderStageBit mStageMask;
+        Ref<PipelineLayoutBase> mLayout;
+        PerStage<PushConstantInfo> mPushConstants;
     };
 
     class PipelineBuilder {
-        public:
-            PipelineBuilder(BuilderBase* parentBuilder);
+      public:
+        PipelineBuilder(BuilderBase* parentBuilder);
 
-            struct StageInfo {
-                std::string entryPoint;
-                Ref<ShaderModuleBase> module;
-            };
-            const StageInfo& GetStageInfo(nxt::ShaderStage stage) const;
-            BuilderBase* GetParentBuilder() const;
+        struct StageInfo {
+            std::string entryPoint;
+            Ref<ShaderModuleBase> module;
+        };
+        const StageInfo& GetStageInfo(nxt::ShaderStage stage) const;
+        BuilderBase* GetParentBuilder() const;
 
-            // NXT API
-            void SetLayout(PipelineLayoutBase* layout);
-            void SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
+        // NXT API
+        void SetLayout(PipelineLayoutBase* layout);
+        void SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
 
-        private:
-            friend class PipelineBase;
+      private:
+        friend class PipelineBase;
 
-            BuilderBase* mParentBuilder;
-            Ref<PipelineLayoutBase> mLayout;
-            nxt::ShaderStageBit mStageMask;
-            PerStage<StageInfo> mStages;
+        BuilderBase* mParentBuilder;
+        Ref<PipelineLayoutBase> mLayout;
+        nxt::ShaderStageBit mStageMask;
+        PerStage<StageInfo> mStages;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_PIPELINE_H_
+#endif  // BACKEND_PIPELINE_H_

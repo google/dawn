@@ -15,8 +15,8 @@
 #ifndef BACKEND_SHADERMODULE_H_
 #define BACKEND_SHADERMODULE_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 #include "common/Constants.h"
 
@@ -33,64 +33,65 @@ namespace spirv_cross {
 namespace backend {
 
     class ShaderModuleBase : public RefCounted {
-        public:
-            ShaderModuleBase(ShaderModuleBuilder* builder);
+      public:
+        ShaderModuleBase(ShaderModuleBuilder* builder);
 
-            DeviceBase* GetDevice() const;
+        DeviceBase* GetDevice() const;
 
-            void ExtractSpirvInfo(const spirv_cross::Compiler& compiler);
+        void ExtractSpirvInfo(const spirv_cross::Compiler& compiler);
 
-            struct PushConstantInfo {
-                std::bitset<kMaxPushConstants> mask;
+        struct PushConstantInfo {
+            std::bitset<kMaxPushConstants> mask;
 
-                std::array<std::string, kMaxPushConstants> names;
-                std::array<uint32_t, kMaxPushConstants> sizes;
-                std::array<PushConstantType, kMaxPushConstants> types;
-            };
+            std::array<std::string, kMaxPushConstants> names;
+            std::array<uint32_t, kMaxPushConstants> sizes;
+            std::array<PushConstantType, kMaxPushConstants> types;
+        };
 
-            struct BindingInfo {
-                // The SPIRV ID of the resource.
-                uint32_t id;
-                uint32_t base_type_id;
-                nxt::BindingType type;
-                bool used = false;
-            };
-            using ModuleBindingInfo = std::array<std::array<BindingInfo, kMaxBindingsPerGroup>, kMaxBindGroups>;
+        struct BindingInfo {
+            // The SPIRV ID of the resource.
+            uint32_t id;
+            uint32_t base_type_id;
+            nxt::BindingType type;
+            bool used = false;
+        };
+        using ModuleBindingInfo =
+            std::array<std::array<BindingInfo, kMaxBindingsPerGroup>, kMaxBindGroups>;
 
-            const PushConstantInfo& GetPushConstants() const;
-            const ModuleBindingInfo& GetBindingInfo() const;
-            const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
-            nxt::ShaderStage GetExecutionModel() const;
+        const PushConstantInfo& GetPushConstants() const;
+        const ModuleBindingInfo& GetBindingInfo() const;
+        const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
+        nxt::ShaderStage GetExecutionModel() const;
 
-            bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout);
+        bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout);
 
-        private:
-            bool IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout);
+      private:
+        bool IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout);
 
-            DeviceBase* mDevice;
-            PushConstantInfo mPushConstants = {};
-            ModuleBindingInfo mBindingInfo;
-            std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
-            nxt::ShaderStage mExecutionModel;
+        DeviceBase* mDevice;
+        PushConstantInfo mPushConstants = {};
+        ModuleBindingInfo mBindingInfo;
+        std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
+        nxt::ShaderStage mExecutionModel;
     };
 
     class ShaderModuleBuilder : public Builder<ShaderModuleBase> {
-        public:
-            ShaderModuleBuilder(DeviceBase* device);
+      public:
+        ShaderModuleBuilder(DeviceBase* device);
 
-            std::vector<uint32_t> AcquireSpirv();
+        std::vector<uint32_t> AcquireSpirv();
 
-            // NXT API
-            void SetSource(uint32_t codeSize, const uint32_t* code);
+        // NXT API
+        void SetSource(uint32_t codeSize, const uint32_t* code);
 
-        private:
-            friend class ShaderModuleBase;
+      private:
+        friend class ShaderModuleBase;
 
-            ShaderModuleBase* GetResultImpl() override;
+        ShaderModuleBase* GetResultImpl() override;
 
-            std::vector<uint32_t> mSpirv;
+        std::vector<uint32_t> mSpirv;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_SHADERMODULE_H_
+#endif  // BACKEND_SHADERMODULE_H_

@@ -15,8 +15,8 @@
 #ifndef BACKEND_BLENDSTATE_H_
 #define BACKEND_BLENDSTATE_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -24,49 +24,52 @@
 namespace backend {
 
     class BlendStateBase : public RefCounted {
-        public:
-            BlendStateBase(BlendStateBuilder* builder);
+      public:
+        BlendStateBase(BlendStateBuilder* builder);
 
-            struct BlendInfo {
-                struct BlendOpFactor {
-                    nxt::BlendOperation operation = nxt::BlendOperation::Add;
-                    nxt::BlendFactor srcFactor = nxt::BlendFactor::One;
-                    nxt::BlendFactor dstFactor = nxt::BlendFactor::Zero;
-                };
-
-                bool blendEnabled = false;
-                BlendOpFactor alphaBlend;
-                BlendOpFactor colorBlend;
-                nxt::ColorWriteMask colorWriteMask = nxt::ColorWriteMask::All;
+        struct BlendInfo {
+            struct BlendOpFactor {
+                nxt::BlendOperation operation = nxt::BlendOperation::Add;
+                nxt::BlendFactor srcFactor = nxt::BlendFactor::One;
+                nxt::BlendFactor dstFactor = nxt::BlendFactor::Zero;
             };
 
-            const BlendInfo& GetBlendInfo() const;
+            bool blendEnabled = false;
+            BlendOpFactor alphaBlend;
+            BlendOpFactor colorBlend;
+            nxt::ColorWriteMask colorWriteMask = nxt::ColorWriteMask::All;
+        };
 
-            private:
-                BlendInfo mBlendInfo;
+        const BlendInfo& GetBlendInfo() const;
 
+      private:
+        BlendInfo mBlendInfo;
     };
 
     class BlendStateBuilder : public Builder<BlendStateBase> {
-        public:
-            BlendStateBuilder(DeviceBase* device);
+      public:
+        BlendStateBuilder(DeviceBase* device);
 
-            // NXT API
-            void SetBlendEnabled(bool blendEnabled);
-            void SetAlphaBlend(nxt::BlendOperation blendOperation, nxt::BlendFactor srcFactor, nxt::BlendFactor dstFactor);
-            void SetColorBlend(nxt::BlendOperation blendOperation, nxt::BlendFactor srcFactor, nxt::BlendFactor dstFactor);
-            void SetColorWriteMask(nxt::ColorWriteMask colorWriteMask);
+        // NXT API
+        void SetBlendEnabled(bool blendEnabled);
+        void SetAlphaBlend(nxt::BlendOperation blendOperation,
+                           nxt::BlendFactor srcFactor,
+                           nxt::BlendFactor dstFactor);
+        void SetColorBlend(nxt::BlendOperation blendOperation,
+                           nxt::BlendFactor srcFactor,
+                           nxt::BlendFactor dstFactor);
+        void SetColorWriteMask(nxt::ColorWriteMask colorWriteMask);
 
-        private:
-            friend class BlendStateBase;
+      private:
+        friend class BlendStateBase;
 
-            BlendStateBase* GetResultImpl() override;
+        BlendStateBase* GetResultImpl() override;
 
-            int mPropertiesSet = 0;
+        int mPropertiesSet = 0;
 
-            BlendStateBase::BlendInfo mBlendInfo;
+        BlendStateBase::BlendInfo mBlendInfo;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_BLENDSTATE_H_
+#endif  // BACKEND_BLENDSTATE_H_

@@ -71,13 +71,18 @@ namespace backend {
         }
     }
 
-
     // TextureBase
 
     TextureBase::TextureBase(TextureBuilder* builder)
-        : mDevice(builder->mDevice), mDimension(builder->mDimension), mFormat(builder->mFormat), mWidth(builder->mWidth),
-        mHeight(builder->mHeight), mDepth(builder->mDepth), mNumMipLevels(builder->mNumMipLevels),
-        mAllowedUsage(builder->mAllowedUsage), mCurrentUsage(builder->mCurrentUsage) {
+        : mDevice(builder->mDevice),
+          mDimension(builder->mDimension),
+          mFormat(builder->mFormat),
+          mWidth(builder->mWidth),
+          mHeight(builder->mHeight),
+          mDepth(builder->mDepth),
+          mNumMipLevels(builder->mNumMipLevels),
+          mAllowedUsage(builder->mAllowedUsage),
+          mCurrentUsage(builder->mCurrentUsage) {
     }
 
     DeviceBase* TextureBase::GetDevice() {
@@ -121,7 +126,8 @@ namespace backend {
         return mIsFrozen && (usage & mAllowedUsage);
     }
 
-    bool TextureBase::IsUsagePossible(nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit usage) {
+    bool TextureBase::IsUsagePossible(nxt::TextureUsageBit allowedUsage,
+                                      nxt::TextureUsageBit usage) {
         bool allowed = (usage & allowedUsage) == usage;
         bool singleUse = nxt::HasZeroOrOneBits(usage);
         return allowed && singleUse;
@@ -173,13 +179,13 @@ namespace backend {
         TEXTURE_PROPERTY_INITIAL_USAGE = 0x20,
     };
 
-    TextureBuilder::TextureBuilder(DeviceBase* device)
-        : Builder(device) {
+    TextureBuilder::TextureBuilder(DeviceBase* device) : Builder(device) {
     }
 
     TextureBase* TextureBuilder::GetResultImpl() {
         constexpr int allProperties = TEXTURE_PROPERTY_DIMENSION | TEXTURE_PROPERTY_EXTENT |
-            TEXTURE_PROPERTY_FORMAT | TEXTURE_PROPERTY_MIP_LEVELS | TEXTURE_PROPERTY_ALLOWED_USAGE;
+                                      TEXTURE_PROPERTY_FORMAT | TEXTURE_PROPERTY_MIP_LEVELS |
+                                      TEXTURE_PROPERTY_ALLOWED_USAGE;
         if ((mPropertiesSet & allProperties) != allProperties) {
             HandleError("Texture missing properties");
             return nullptr;
@@ -264,8 +270,7 @@ namespace backend {
 
     // TextureViewBase
 
-    TextureViewBase::TextureViewBase(TextureViewBuilder* builder)
-        : mTexture(builder->mTexture) {
+    TextureViewBase::TextureViewBase(TextureViewBuilder* builder) : mTexture(builder->mTexture) {
     }
 
     TextureBase* TextureViewBase::GetTexture() {
@@ -282,4 +287,4 @@ namespace backend {
         return mDevice->CreateTextureView(this);
     }
 
-}
+}  // namespace backend

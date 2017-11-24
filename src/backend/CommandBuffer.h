@@ -17,8 +17,8 @@
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/CommandAllocator.h"
 #include "backend/Builder.h"
+#include "backend/CommandAllocator.h"
 #include "backend/RefCounted.h"
 
 #include <memory>
@@ -39,75 +39,111 @@ namespace backend {
     class CommandBufferBuilder;
 
     class CommandBufferBase : public RefCounted {
-        public:
-            CommandBufferBase(CommandBufferBuilder* builder);
-            bool ValidateResourceUsagesImmediate();
+      public:
+        CommandBufferBase(CommandBufferBuilder* builder);
+        bool ValidateResourceUsagesImmediate();
 
-            DeviceBase* GetDevice();
+        DeviceBase* GetDevice();
 
-        private:
-            DeviceBase* mDevice;
-            std::set<BufferBase*> mBuffersTransitioned;
-            std::set<TextureBase*> mTexturesTransitioned;
+      private:
+        DeviceBase* mDevice;
+        std::set<BufferBase*> mBuffersTransitioned;
+        std::set<TextureBase*> mTexturesTransitioned;
     };
 
     class CommandBufferBuilder : public Builder<CommandBufferBase> {
-        public:
-            CommandBufferBuilder(DeviceBase* device);
-            ~CommandBufferBuilder();
+      public:
+        CommandBufferBuilder(DeviceBase* device);
+        ~CommandBufferBuilder();
 
-            bool ValidateGetResult();
+        bool ValidateGetResult();
 
-            CommandIterator AcquireCommands();
+        CommandIterator AcquireCommands();
 
-            // NXT API
-            void BeginComputePass();
-            void BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
-            void BeginRenderSubpass();
-            void CopyBufferToBuffer(BufferBase* source, uint32_t sourceOffset, BufferBase* destination, uint32_t destinationOffset, uint32_t size);
-            void CopyBufferToTexture(BufferBase* buffer, uint32_t bufferOffset, uint32_t rowPitch,
-                                     TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
-                                     uint32_t width, uint32_t height, uint32_t depth, uint32_t level);
-            void CopyTextureToBuffer(TextureBase* texture, uint32_t x, uint32_t y, uint32_t z,
-                                     uint32_t width, uint32_t height, uint32_t depth, uint32_t level,
-                                     BufferBase* buffer, uint32_t bufferOffset, uint32_t rowPitch);
-            void Dispatch(uint32_t x, uint32_t y, uint32_t z);
-            void DrawArrays(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
-            void DrawElements(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance);
-            void EndComputePass();
-            void EndRenderPass();
-            void EndRenderSubpass();
-            void SetPushConstants(nxt::ShaderStageBit stages, uint32_t offset, uint32_t count, const void* data);
-            void SetComputePipeline(ComputePipelineBase* pipeline);
-            void SetRenderPipeline(RenderPipelineBase* pipeline);
-            void SetStencilReference(uint32_t reference);
-            void SetBlendColor(float r, float g, float b, float a);
-            void SetBindGroup(uint32_t groupIndex, BindGroupBase* group);
-            void SetIndexBuffer(BufferBase* buffer, uint32_t offset);
+        // NXT API
+        void BeginComputePass();
+        void BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
+        void BeginRenderSubpass();
+        void CopyBufferToBuffer(BufferBase* source,
+                                uint32_t sourceOffset,
+                                BufferBase* destination,
+                                uint32_t destinationOffset,
+                                uint32_t size);
+        void CopyBufferToTexture(BufferBase* buffer,
+                                 uint32_t bufferOffset,
+                                 uint32_t rowPitch,
+                                 TextureBase* texture,
+                                 uint32_t x,
+                                 uint32_t y,
+                                 uint32_t z,
+                                 uint32_t width,
+                                 uint32_t height,
+                                 uint32_t depth,
+                                 uint32_t level);
+        void CopyTextureToBuffer(TextureBase* texture,
+                                 uint32_t x,
+                                 uint32_t y,
+                                 uint32_t z,
+                                 uint32_t width,
+                                 uint32_t height,
+                                 uint32_t depth,
+                                 uint32_t level,
+                                 BufferBase* buffer,
+                                 uint32_t bufferOffset,
+                                 uint32_t rowPitch);
+        void Dispatch(uint32_t x, uint32_t y, uint32_t z);
+        void DrawArrays(uint32_t vertexCount,
+                        uint32_t instanceCount,
+                        uint32_t firstVertex,
+                        uint32_t firstInstance);
+        void DrawElements(uint32_t vertexCount,
+                          uint32_t instanceCount,
+                          uint32_t firstIndex,
+                          uint32_t firstInstance);
+        void EndComputePass();
+        void EndRenderPass();
+        void EndRenderSubpass();
+        void SetPushConstants(nxt::ShaderStageBit stages,
+                              uint32_t offset,
+                              uint32_t count,
+                              const void* data);
+        void SetComputePipeline(ComputePipelineBase* pipeline);
+        void SetRenderPipeline(RenderPipelineBase* pipeline);
+        void SetStencilReference(uint32_t reference);
+        void SetBlendColor(float r, float g, float b, float a);
+        void SetBindGroup(uint32_t groupIndex, BindGroupBase* group);
+        void SetIndexBuffer(BufferBase* buffer, uint32_t offset);
 
-            template<typename T>
-            void SetVertexBuffers(uint32_t startSlot, uint32_t count, T* const* buffers, uint32_t const* offsets) {
-                static_assert(std::is_base_of<BufferBase, T>::value, "");
-                SetVertexBuffers(startSlot, count, reinterpret_cast<BufferBase* const*>(buffers), offsets);
-            }
-            void SetVertexBuffers(uint32_t startSlot, uint32_t count, BufferBase* const* buffers, uint32_t const* offsets);
+        template <typename T>
+        void SetVertexBuffers(uint32_t startSlot,
+                              uint32_t count,
+                              T* const* buffers,
+                              uint32_t const* offsets) {
+            static_assert(std::is_base_of<BufferBase, T>::value, "");
+            SetVertexBuffers(startSlot, count, reinterpret_cast<BufferBase* const*>(buffers),
+                             offsets);
+        }
+        void SetVertexBuffers(uint32_t startSlot,
+                              uint32_t count,
+                              BufferBase* const* buffers,
+                              uint32_t const* offsets);
 
-            void TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage);
-            void TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
+        void TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage);
+        void TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
 
-        private:
-            friend class CommandBufferBase;
+      private:
+        friend class CommandBufferBase;
 
-            CommandBufferBase* GetResultImpl() override;
-            void MoveToIterator();
+        CommandBufferBase* GetResultImpl() override;
+        void MoveToIterator();
 
-            std::unique_ptr<CommandBufferStateTracker> mState;
-            CommandAllocator mAllocator;
-            CommandIterator mIterator;
-            bool mWasMovedToIterator = false;
-            bool mWereCommandsAcquired = false;
+        std::unique_ptr<CommandBufferStateTracker> mState;
+        CommandAllocator mAllocator;
+        CommandIterator mIterator;
+        bool mWasMovedToIterator = false;
+        bool mWereCommandsAcquired = false;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_COMMANDBUFFER_H_
+#endif  // BACKEND_COMMANDBUFFER_H_

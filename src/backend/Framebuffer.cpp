@@ -25,9 +25,13 @@ namespace backend {
     // Framebuffer
 
     FramebufferBase::FramebufferBase(FramebufferBuilder* builder)
-        : mDevice(builder->mDevice), mRenderPass(std::move(builder->mRenderPass)),
-        mWidth(builder->mWidth), mHeight(builder->mHeight), mTextureViews(std::move(builder->mTextureViews)),
-        mClearColors(mTextureViews.size()), mClearDepthStencils(mTextureViews.size()) {
+        : mDevice(builder->mDevice),
+          mRenderPass(std::move(builder->mRenderPass)),
+          mWidth(builder->mWidth),
+          mHeight(builder->mHeight),
+          mTextureViews(std::move(builder->mTextureViews)),
+          mClearColors(mTextureViews.size()),
+          mClearDepthStencils(mTextureViews.size()) {
     }
 
     DeviceBase* FramebufferBase::GetDevice() {
@@ -48,7 +52,8 @@ namespace backend {
         return mClearColors[attachmentSlot];
     }
 
-    FramebufferBase::ClearDepthStencil FramebufferBase::GetClearDepthStencil(uint32_t attachmentSlot) {
+    FramebufferBase::ClearDepthStencil FramebufferBase::GetClearDepthStencil(
+        uint32_t attachmentSlot) {
         ASSERT(attachmentSlot < mClearDepthStencils.size());
         return mClearDepthStencils[attachmentSlot];
     }
@@ -61,7 +66,11 @@ namespace backend {
         return mHeight;
     }
 
-    void FramebufferBase::AttachmentSetClearColor(uint32_t attachmentSlot, float clearR, float clearG, float clearB, float clearA) {
+    void FramebufferBase::AttachmentSetClearColor(uint32_t attachmentSlot,
+                                                  float clearR,
+                                                  float clearG,
+                                                  float clearB,
+                                                  float clearA) {
         if (attachmentSlot >= mRenderPass->GetAttachmentCount()) {
             mDevice->HandleError("Framebuffer attachment out of bounds");
             return;
@@ -74,7 +83,9 @@ namespace backend {
         c.color[3] = clearA;
     }
 
-    void FramebufferBase::AttachmentSetClearDepthStencil(uint32_t attachmentSlot, float clearDepth, uint32_t clearStencil) {
+    void FramebufferBase::AttachmentSetClearDepthStencil(uint32_t attachmentSlot,
+                                                         float clearDepth,
+                                                         uint32_t clearStencil) {
         if (attachmentSlot >= mRenderPass->GetAttachmentCount()) {
             mDevice->HandleError("Framebuffer attachment out of bounds");
             return;
@@ -92,12 +103,12 @@ namespace backend {
         FRAMEBUFFER_PROPERTY_DIMENSIONS = 0x2,
     };
 
-    FramebufferBuilder::FramebufferBuilder(DeviceBase* device)
-        : Builder(device) {
+    FramebufferBuilder::FramebufferBuilder(DeviceBase* device) : Builder(device) {
     }
 
     FramebufferBase* FramebufferBuilder::GetResultImpl() {
-        constexpr int requiredProperties = FRAMEBUFFER_PROPERTY_RENDER_PASS | FRAMEBUFFER_PROPERTY_DIMENSIONS;
+        constexpr int requiredProperties =
+            FRAMEBUFFER_PROPERTY_RENDER_PASS | FRAMEBUFFER_PROPERTY_DIMENSIONS;
         if ((mPropertiesSet & requiredProperties) != requiredProperties) {
             HandleError("Framebuffer missing properties");
             return nullptr;
@@ -170,4 +181,4 @@ namespace backend {
 
         mTextureViews[attachmentSlot] = textureView;
     }
-}
+}  // namespace backend

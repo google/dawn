@@ -94,7 +94,7 @@ namespace backend {
     InputStateBase* InputStateBuilder::GetResultImpl() {
         for (uint32_t location = 0; location < kMaxVertexAttributes; ++location) {
             if (mAttributesSetMask[location] &&
-                    !mInputsSetMask[mAttributeInfos[location].bindingSlot]) {
+                !mInputsSetMask[mAttributeInfos[location].bindingSlot]) {
                 HandleError("Attribute uses unset input");
                 return nullptr;
             }
@@ -104,7 +104,9 @@ namespace backend {
     }
 
     void InputStateBuilder::SetAttribute(uint32_t shaderLocation,
-            uint32_t bindingSlot, nxt::VertexFormat format, uint32_t offset) {
+                                         uint32_t bindingSlot,
+                                         nxt::VertexFormat format,
+                                         uint32_t offset) {
         if (shaderLocation >= kMaxVertexAttributes) {
             HandleError("Setting attribute out of bounds");
             return;
@@ -125,8 +127,9 @@ namespace backend {
         info.offset = offset;
     }
 
-    void InputStateBuilder::SetInput(uint32_t bindingSlot, uint32_t stride,
-            nxt::InputStepMode stepMode) {
+    void InputStateBuilder::SetInput(uint32_t bindingSlot,
+                                     uint32_t stride,
+                                     nxt::InputStepMode stepMode) {
         if (bindingSlot >= kMaxVertexInputs) {
             HandleError("Setting input out of bounds");
             return;
@@ -142,4 +145,4 @@ namespace backend {
         info.stepMode = stepMode;
     }
 
-}
+}  // namespace backend

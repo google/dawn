@@ -15,8 +15,8 @@
 #include "backend/RenderPipeline.h"
 
 #include "backend/BlendState.h"
-#include "backend/Device.h"
 #include "backend/DepthStencilState.h"
+#include "backend/Device.h"
 #include "backend/InputState.h"
 #include "backend/RenderPass.h"
 #include "common/BitSetIterator.h"
@@ -32,8 +32,8 @@ namespace backend {
           mInputState(std::move(builder->mInputState)),
           mPrimitiveTopology(builder->mPrimitiveTopology),
           mBlendStates(builder->mBlendStates),
-          mRenderPass(std::move(builder->mRenderPass)), mSubpass(builder->mSubpass) {
-
+          mRenderPass(std::move(builder->mRenderPass)),
+          mSubpass(builder->mSubpass) {
         if (GetStageMask() != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
             builder->HandleError("Render pipeline should have exactly a vertex and fragment stage");
             return;
@@ -41,7 +41,9 @@ namespace backend {
 
         // TODO(kainino@chromium.org): Need to verify the pipeline against its render subpass.
 
-        if ((builder->GetStageInfo(nxt::ShaderStage::Vertex).module->GetUsedVertexAttributes() & ~mInputState->GetAttributesSetMask()).any()) {
+        if ((builder->GetStageInfo(nxt::ShaderStage::Vertex).module->GetUsedVertexAttributes() &
+             ~mInputState->GetAttributesSetMask())
+                .any()) {
             builder->HandleError("Pipeline vertex stage uses inputs not in the input state");
             return;
         }
@@ -83,7 +85,8 @@ namespace backend {
     }
 
     RenderPipelineBase* RenderPipelineBuilder::GetResultImpl() {
-        // TODO(cwallez@chromium.org): the layout should be required, and put the default objects in the device
+        // TODO(cwallez@chromium.org): the layout should be required, and put the default objects in
+        // the device
         if (!mInputState) {
             mInputState = mDevice->CreateInputStateBuilder()->GetResult();
         }
@@ -95,21 +98,24 @@ namespace backend {
             return nullptr;
         }
         const auto& subpassInfo = mRenderPass->GetSubpassInfo(mSubpass);
-        if ((mBlendStatesSet | subpassInfo.colorAttachmentsSet) != subpassInfo.colorAttachmentsSet) {
+        if ((mBlendStatesSet | subpassInfo.colorAttachmentsSet) !=
+            subpassInfo.colorAttachmentsSet) {
             HandleError("Blend state set on unset color attachment");
             return nullptr;
         }
 
         // Assign all color attachments without a blend state the default state
         // TODO(enga@google.com): Put the default objects in the device
-        for (uint32_t attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet & ~mBlendStatesSet)) {
+        for (uint32_t attachmentSlot :
+             IterateBitSet(subpassInfo.colorAttachmentsSet & ~mBlendStatesSet)) {
             mBlendStates[attachmentSlot] = mDevice->CreateBlendStateBuilder()->GetResult();
         }
 
         return mDevice->CreateRenderPipeline(this);
     }
 
-    void RenderPipelineBuilder::SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState) {
+    void RenderPipelineBuilder::SetColorAttachmentBlendState(uint32_t attachmentSlot,
+                                                             BlendStateBase* blendState) {
         if (attachmentSlot > mBlendStates.size()) {
             HandleError("Attachment index out of bounds");
             return;
@@ -144,4 +150,4 @@ namespace backend {
         mSubpass = subpass;
     }
 
-}
+}  // namespace backend

@@ -23,8 +23,7 @@
 
 namespace backend {
 
-    ShaderModuleBase::ShaderModuleBase(ShaderModuleBuilder* builder)
-        : mDevice(builder->mDevice) {
+    ShaderModuleBase::ShaderModuleBase(ShaderModuleBuilder* builder) : mDevice(builder->mDevice) {
     }
 
     DeviceBase* ShaderModuleBase::GetDevice() const {
@@ -62,8 +61,10 @@ namespace backend {
             ASSERT(blockType.basetype == spirv_cross::SPIRType::Struct);
 
             for (uint32_t i = 0; i < blockType.member_types.size(); i++) {
-                ASSERT(compiler.get_member_decoration_mask(blockType.self, i) & 1ull << spv::DecorationOffset);
-                uint32_t offset = compiler.get_member_decoration(blockType.self, i, spv::DecorationOffset);
+                ASSERT(compiler.get_member_decoration_mask(blockType.self, i) &
+                       1ull << spv::DecorationOffset);
+                uint32_t offset =
+                    compiler.get_member_decoration(blockType.self, i, spv::DecorationOffset);
                 ASSERT(offset % 4 == 0);
                 offset /= 4;
 
@@ -78,8 +79,8 @@ namespace backend {
                     constantType = PushConstantType::Float;
                 }
 
-                // TODO(cwallez@chromium.org): check for overflows and make the logic better take into account
-                // things like the array of types with padding.
+                // TODO(cwallez@chromium.org): check for overflows and make the logic better take
+                // into account things like the array of types with padding.
                 uint32_t size = memberType.vecsize * memberType.columns;
                 // Handle unidimensional arrays
                 if (!memberType.array.empty()) {
@@ -92,7 +93,8 @@ namespace backend {
                 }
 
                 mPushConstants.mask.set(offset);
-                mPushConstants.names[offset] = interfaceBlock.name + "." + compiler.get_member_name(blockType.self, i);
+                mPushConstants.names[offset] =
+                    interfaceBlock.name + "." + compiler.get_member_name(blockType.self, i);
                 mPushConstants.sizes[offset] = size;
                 mPushConstants.types[offset] = constantType;
             }
@@ -100,11 +102,14 @@ namespace backend {
 
         // Fill in bindingInfo with the SPIRV bindings
         auto ExtractResourcesBinding = [this](const std::vector<spirv_cross::Resource>& resources,
-                                              const spirv_cross::Compiler& compiler, nxt::BindingType bindingType) {
-            constexpr uint64_t requiredBindingDecorationMask = (1ull << spv::DecorationBinding) | (1ull << spv::DecorationDescriptorSet);
+                                              const spirv_cross::Compiler& compiler,
+                                              nxt::BindingType bindingType) {
+            constexpr uint64_t requiredBindingDecorationMask =
+                (1ull << spv::DecorationBinding) | (1ull << spv::DecorationDescriptorSet);
 
             for (const auto& resource : resources) {
-                ASSERT((compiler.get_decoration_mask(resource.id) & requiredBindingDecorationMask) == requiredBindingDecorationMask);
+                ASSERT((compiler.get_decoration_mask(resource.id) &
+                        requiredBindingDecorationMask) == requiredBindingDecorationMask);
                 uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
                 uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 
@@ -121,10 +126,13 @@ namespace backend {
             }
         };
 
-        ExtractResourcesBinding(resources.uniform_buffers, compiler, nxt::BindingType::UniformBuffer);
-        ExtractResourcesBinding(resources.separate_images, compiler, nxt::BindingType::SampledTexture);
+        ExtractResourcesBinding(resources.uniform_buffers, compiler,
+                                nxt::BindingType::UniformBuffer);
+        ExtractResourcesBinding(resources.separate_images, compiler,
+                                nxt::BindingType::SampledTexture);
         ExtractResourcesBinding(resources.separate_samplers, compiler, nxt::BindingType::Sampler);
-        ExtractResourcesBinding(resources.storage_buffers, compiler, nxt::BindingType::StorageBuffer);
+        ExtractResourcesBinding(resources.storage_buffers, compiler,
+                                nxt::BindingType::StorageBuffer);
 
         // Extract the vertex attributes
         if (mExecutionModel == nxt::ShaderStage::Vertex) {
@@ -140,10 +148,11 @@ namespace backend {
                 mUsedVertexAttributes.set(location);
             }
 
-            // Without a location qualifier on vertex outputs, spirv_cross::CompilerMSL gives them all
-            // the location 0, causing a compile error.
+            // Without a location qualifier on vertex outputs, spirv_cross::CompilerMSL gives them
+            // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_outputs) {
-                if (!(compiler.get_decoration_mask(attrib.id) & (1ull << spv::DecorationLocation))) {
+                if (!(compiler.get_decoration_mask(attrib.id) &
+                      (1ull << spv::DecorationLocation))) {
                     mDevice->HandleError("Need location qualifier on vertex output");
                     return;
                 }
@@ -151,10 +160,11 @@ namespace backend {
         }
 
         if (mExecutionModel == nxt::ShaderStage::Fragment) {
-            // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives them all
-            // the location 0, causing a compile error.
+            // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives them
+            // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
-                if (!(compiler.get_decoration_mask(attrib.id) & (1ull << spv::DecorationLocation))) {
+                if (!(compiler.get_decoration_mask(attrib.id) &
+                      (1ull << spv::DecorationLocation))) {
                     mDevice->HandleError("Need location qualifier on fragment input");
                     return;
                 }
@@ -187,7 +197,8 @@ namespace backend {
         return true;
     }
 
-    bool ShaderModuleBase::IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout) {
+    bool ShaderModuleBase::IsCompatibleWithBindGroupLayout(size_t group,
+                                                           const BindGroupLayoutBase* layout) {
         const auto& layoutInfo = layout->GetBindingInfo();
         for (size_t i = 0; i < kMaxBindingsPerGroup; ++i) {
             const auto& moduleInfo = mBindingInfo[group][i];
@@ -227,4 +238,4 @@ namespace backend {
         mSpirv.assign(code, code + codeSize);
     }
 
-}
+}  // namespace backend

@@ -15,8 +15,8 @@
 #ifndef BACKEND_TEXTURE_H_
 #define BACKEND_TEXTURE_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -29,93 +29,94 @@ namespace backend {
     bool TextureFormatHasDepthOrStencil(nxt::TextureFormat format);
 
     class TextureBase : public RefCounted {
-        public:
-            TextureBase(TextureBuilder* builder);
+      public:
+        TextureBase(TextureBuilder* builder);
 
-            nxt::TextureDimension GetDimension() const;
-            nxt::TextureFormat GetFormat() const;
-            uint32_t GetWidth() const;
-            uint32_t GetHeight() const;
-            uint32_t GetDepth() const;
-            uint32_t GetNumMipLevels() const;
-            nxt::TextureUsageBit GetAllowedUsage() const;
-            nxt::TextureUsageBit GetUsage() const;
-            bool IsFrozen() const;
-            bool HasFrozenUsage(nxt::TextureUsageBit usage) const;
-            static bool IsUsagePossible(nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit usage);
-            bool IsTransitionPossible(nxt::TextureUsageBit usage) const;
-            void UpdateUsageInternal(nxt::TextureUsageBit usage);
+        nxt::TextureDimension GetDimension() const;
+        nxt::TextureFormat GetFormat() const;
+        uint32_t GetWidth() const;
+        uint32_t GetHeight() const;
+        uint32_t GetDepth() const;
+        uint32_t GetNumMipLevels() const;
+        nxt::TextureUsageBit GetAllowedUsage() const;
+        nxt::TextureUsageBit GetUsage() const;
+        bool IsFrozen() const;
+        bool HasFrozenUsage(nxt::TextureUsageBit usage) const;
+        static bool IsUsagePossible(nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit usage);
+        bool IsTransitionPossible(nxt::TextureUsageBit usage) const;
+        void UpdateUsageInternal(nxt::TextureUsageBit usage);
 
-            DeviceBase* GetDevice();
+        DeviceBase* GetDevice();
 
-            // NXT API
-            TextureViewBuilder* CreateTextureViewBuilder();
-            void TransitionUsage(nxt::TextureUsageBit usage);
-            void FreezeUsage(nxt::TextureUsageBit usage);
+        // NXT API
+        TextureViewBuilder* CreateTextureViewBuilder();
+        void TransitionUsage(nxt::TextureUsageBit usage);
+        void FreezeUsage(nxt::TextureUsageBit usage);
 
-            virtual void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) = 0;
+        virtual void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
+                                         nxt::TextureUsageBit targetUsage) = 0;
 
-        private:
-            DeviceBase* mDevice;
+      private:
+        DeviceBase* mDevice;
 
-            nxt::TextureDimension mDimension;
-            nxt::TextureFormat mFormat;
-            uint32_t mWidth, mHeight, mDepth;
-            uint32_t mNumMipLevels;
-            nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
-            nxt::TextureUsageBit mCurrentUsage = nxt::TextureUsageBit::None;
-            bool mIsFrozen = false;
+        nxt::TextureDimension mDimension;
+        nxt::TextureFormat mFormat;
+        uint32_t mWidth, mHeight, mDepth;
+        uint32_t mNumMipLevels;
+        nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
+        nxt::TextureUsageBit mCurrentUsage = nxt::TextureUsageBit::None;
+        bool mIsFrozen = false;
     };
 
     class TextureBuilder : public Builder<TextureBase> {
-        public:
-            TextureBuilder(DeviceBase* device);
+      public:
+        TextureBuilder(DeviceBase* device);
 
-            // NXT API
-            void SetDimension(nxt::TextureDimension dimension);
-            void SetExtent(uint32_t width, uint32_t height, uint32_t depth);
-            void SetFormat(nxt::TextureFormat format);
-            void SetMipLevels(uint32_t numMipLevels);
-            void SetAllowedUsage(nxt::TextureUsageBit usage);
-            void SetInitialUsage(nxt::TextureUsageBit usage);
+        // NXT API
+        void SetDimension(nxt::TextureDimension dimension);
+        void SetExtent(uint32_t width, uint32_t height, uint32_t depth);
+        void SetFormat(nxt::TextureFormat format);
+        void SetMipLevels(uint32_t numMipLevels);
+        void SetAllowedUsage(nxt::TextureUsageBit usage);
+        void SetInitialUsage(nxt::TextureUsageBit usage);
 
-        private:
-            friend class TextureBase;
+      private:
+        friend class TextureBase;
 
-            TextureBase* GetResultImpl() override;
+        TextureBase* GetResultImpl() override;
 
-            int mPropertiesSet = 0;
+        int mPropertiesSet = 0;
 
-            nxt::TextureDimension mDimension;
-            uint32_t mWidth, mHeight, mDepth;
-            nxt::TextureFormat mFormat;
-            uint32_t mNumMipLevels;
-            nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
-            nxt::TextureUsageBit mCurrentUsage = nxt::TextureUsageBit::None;
+        nxt::TextureDimension mDimension;
+        uint32_t mWidth, mHeight, mDepth;
+        nxt::TextureFormat mFormat;
+        uint32_t mNumMipLevels;
+        nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
+        nxt::TextureUsageBit mCurrentUsage = nxt::TextureUsageBit::None;
     };
 
     class TextureViewBase : public RefCounted {
-        public:
-            TextureViewBase(TextureViewBuilder* builder);
+      public:
+        TextureViewBase(TextureViewBuilder* builder);
 
-            TextureBase* GetTexture();
+        TextureBase* GetTexture();
 
-        private:
-            Ref<TextureBase> mTexture;
+      private:
+        Ref<TextureBase> mTexture;
     };
 
     class TextureViewBuilder : public Builder<TextureViewBase> {
-        public:
-            TextureViewBuilder(DeviceBase* device, TextureBase* texture);
+      public:
+        TextureViewBuilder(DeviceBase* device, TextureBase* texture);
 
-        private:
-            friend class TextureViewBase;
+      private:
+        friend class TextureViewBase;
 
-            TextureViewBase* GetResultImpl() override;
+        TextureViewBase* GetResultImpl() override;
 
-            Ref<TextureBase> mTexture;
+        Ref<TextureBase> mTexture;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_TEXTURE_H_
+#endif  // BACKEND_TEXTURE_H_

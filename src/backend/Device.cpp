@@ -40,7 +40,8 @@ namespace backend {
 
     // The caches are unordered_sets of pointers with special hash and compare functions
     // to compare the value of the objects, instead of the pointers.
-    using BindGroupLayoutCache = std::unordered_set<BindGroupLayoutBase*, BindGroupLayoutCacheFuncs, BindGroupLayoutCacheFuncs>;
+    using BindGroupLayoutCache = std::
+        unordered_set<BindGroupLayoutBase*, BindGroupLayoutCacheFuncs, BindGroupLayoutCacheFuncs>;
 
     struct DeviceBase::Caches {
         BindGroupLayoutCache bindGroupLayouts;
@@ -62,7 +63,8 @@ namespace backend {
         }
     }
 
-    void DeviceBase::SetErrorCallback(nxt::DeviceErrorCallback callback, nxt::CallbackUserdata userdata) {
+    void DeviceBase::SetErrorCallback(nxt::DeviceErrorCallback callback,
+                                      nxt::CallbackUserdata userdata) {
         mErrorCallback = callback;
         mErrorUserdata = userdata;
     }
@@ -71,7 +73,9 @@ namespace backend {
         return this;
     }
 
-    BindGroupLayoutBase* DeviceBase::GetOrCreateBindGroupLayout(const BindGroupLayoutBase* blueprint, BindGroupLayoutBuilder* builder) {
+    BindGroupLayoutBase* DeviceBase::GetOrCreateBindGroupLayout(
+        const BindGroupLayoutBase* blueprint,
+        BindGroupLayoutBuilder* builder) {
         // The blueprint is only used to search in the cache and is not modified. However cached
         // objects can be modified, and unordered_set cannot search for a const pointer in a non
         // const pointer set. That's why we do a const_cast here, but the blueprint won't be
@@ -159,4 +163,4 @@ namespace backend {
         }
     }
 
-}
+}  // namespace backend

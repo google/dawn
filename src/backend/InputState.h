@@ -15,8 +15,8 @@
 #ifndef BACKEND_INPUTSTATE_H_
 #define BACKEND_INPUTSTATE_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 #include "common/Constants.h"
 
@@ -32,53 +32,54 @@ namespace backend {
     size_t VertexFormatSize(nxt::VertexFormat format);
 
     class InputStateBase : public RefCounted {
-        public:
-            InputStateBase(InputStateBuilder* builder);
+      public:
+        InputStateBase(InputStateBuilder* builder);
 
-            struct AttributeInfo {
-                uint32_t bindingSlot;
-                nxt::VertexFormat format;
-                uint32_t offset;
-            };
+        struct AttributeInfo {
+            uint32_t bindingSlot;
+            nxt::VertexFormat format;
+            uint32_t offset;
+        };
 
-            struct InputInfo {
-                uint32_t stride;
-                nxt::InputStepMode stepMode;
-            };
+        struct InputInfo {
+            uint32_t stride;
+            nxt::InputStepMode stepMode;
+        };
 
-            const std::bitset<kMaxVertexAttributes>& GetAttributesSetMask() const;
-            const AttributeInfo& GetAttribute(uint32_t location) const;
-            const std::bitset<kMaxVertexInputs>& GetInputsSetMask() const;
-            const InputInfo& GetInput(uint32_t slot) const;
+        const std::bitset<kMaxVertexAttributes>& GetAttributesSetMask() const;
+        const AttributeInfo& GetAttribute(uint32_t location) const;
+        const std::bitset<kMaxVertexInputs>& GetInputsSetMask() const;
+        const InputInfo& GetInput(uint32_t slot) const;
 
-        private:
-            std::bitset<kMaxVertexAttributes> mAttributesSetMask;
-            std::array<AttributeInfo, kMaxVertexAttributes> mAttributeInfos;
-            std::bitset<kMaxVertexInputs> mInputsSetMask;
-            std::array<InputInfo, kMaxVertexInputs> mInputInfos;
+      private:
+        std::bitset<kMaxVertexAttributes> mAttributesSetMask;
+        std::array<AttributeInfo, kMaxVertexAttributes> mAttributeInfos;
+        std::bitset<kMaxVertexInputs> mInputsSetMask;
+        std::array<InputInfo, kMaxVertexInputs> mInputInfos;
     };
 
     class InputStateBuilder : public Builder<InputStateBase> {
-        public:
-            InputStateBuilder(DeviceBase* device);
+      public:
+        InputStateBuilder(DeviceBase* device);
 
-            // NXT API
-            void SetAttribute(uint32_t shaderLocation, uint32_t bindingSlot,
-                    nxt::VertexFormat format, uint32_t offset);
-            void SetInput(uint32_t bindingSlot, uint32_t stride,
-                    nxt::InputStepMode stepMode);
+        // NXT API
+        void SetAttribute(uint32_t shaderLocation,
+                          uint32_t bindingSlot,
+                          nxt::VertexFormat format,
+                          uint32_t offset);
+        void SetInput(uint32_t bindingSlot, uint32_t stride, nxt::InputStepMode stepMode);
 
-        private:
-            friend class InputStateBase;
+      private:
+        friend class InputStateBase;
 
-            InputStateBase* GetResultImpl() override;
+        InputStateBase* GetResultImpl() override;
 
-            std::bitset<kMaxVertexAttributes> mAttributesSetMask;
-            std::array<InputStateBase::AttributeInfo, kMaxVertexAttributes> mAttributeInfos;
-            std::bitset<kMaxVertexInputs> mInputsSetMask;
-            std::array<InputStateBase::InputInfo, kMaxVertexInputs> mInputInfos;
+        std::bitset<kMaxVertexAttributes> mAttributesSetMask;
+        std::array<InputStateBase::AttributeInfo, kMaxVertexAttributes> mAttributeInfos;
+        std::bitset<kMaxVertexInputs> mInputsSetMask;
+        std::array<InputStateBase::InputInfo, kMaxVertexInputs> mInputInfos;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_INPUTSTATE_H_
+#endif  // BACKEND_INPUTSTATE_H_

@@ -15,8 +15,8 @@
 #ifndef BACKEND_COMMAND_ALLOCATOR_H_
 #define BACKEND_COMMAND_ALLOCATOR_H_
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 namespace backend {
@@ -61,90 +61,90 @@ namespace backend {
 
     // TODO(cwallez@chromium.org): prevent copy for both iterator and allocator
     class CommandIterator {
-        public:
-            CommandIterator();
-            ~CommandIterator();
+      public:
+        CommandIterator();
+        ~CommandIterator();
 
-            CommandIterator(CommandIterator&& other);
-            CommandIterator& operator=(CommandIterator&& other);
+        CommandIterator(CommandIterator&& other);
+        CommandIterator& operator=(CommandIterator&& other);
 
-            CommandIterator(CommandAllocator&& allocator);
-            CommandIterator& operator=(CommandAllocator&& allocator);
+        CommandIterator(CommandAllocator&& allocator);
+        CommandIterator& operator=(CommandAllocator&& allocator);
 
-            template<typename E>
-            bool NextCommandId(E* commandId) {
-                return NextCommandId(reinterpret_cast<uint32_t*>(commandId));
-            }
-            template<typename T>
-            T* NextCommand() {
-                return reinterpret_cast<T*>(NextCommand(sizeof(T), alignof(T)));
-            }
-            template<typename T>
-            T* NextData(size_t count) {
-                return reinterpret_cast<T*>(NextData(sizeof(T) * count, alignof(T)));
-            }
+        template <typename E>
+        bool NextCommandId(E* commandId) {
+            return NextCommandId(reinterpret_cast<uint32_t*>(commandId));
+        }
+        template <typename T>
+        T* NextCommand() {
+            return reinterpret_cast<T*>(NextCommand(sizeof(T), alignof(T)));
+        }
+        template <typename T>
+        T* NextData(size_t count) {
+            return reinterpret_cast<T*>(NextData(sizeof(T) * count, alignof(T)));
+        }
 
-            // Needs to be called if iteration was stopped early.
-            void Reset();
+        // Needs to be called if iteration was stopped early.
+        void Reset();
 
-            void DataWasDestroyed();
+        void DataWasDestroyed();
 
-        private:
-            bool IsEmpty() const;
+      private:
+        bool IsEmpty() const;
 
-            bool NextCommandId(uint32_t* commandId);
-            void* NextCommand(size_t commandSize, size_t commandAlignment);
-            void* NextData(size_t dataSize, size_t dataAlignment);
+        bool NextCommandId(uint32_t* commandId);
+        void* NextCommand(size_t commandSize, size_t commandAlignment);
+        void* NextData(size_t dataSize, size_t dataAlignment);
 
-            CommandBlocks mBlocks;
-            uint8_t* mCurrentPtr = nullptr;
-            size_t mCurrentBlock = 0;
-            // Used to avoid a special case for empty iterators.
-            uint32_t mEndOfBlock;
-            bool mDataWasDestroyed = false;
+        CommandBlocks mBlocks;
+        uint8_t* mCurrentPtr = nullptr;
+        size_t mCurrentBlock = 0;
+        // Used to avoid a special case for empty iterators.
+        uint32_t mEndOfBlock;
+        bool mDataWasDestroyed = false;
     };
 
     class CommandAllocator {
-        public:
-            CommandAllocator();
-            ~CommandAllocator();
+      public:
+        CommandAllocator();
+        ~CommandAllocator();
 
-            template<typename T, typename E>
-            T* Allocate(E commandId) {
-                static_assert(sizeof(E) == sizeof(uint32_t), "");
-                static_assert(alignof(E) == alignof(uint32_t), "");
-                return reinterpret_cast<T*>(Allocate(static_cast<uint32_t>(commandId), sizeof(T), alignof(T)));
-            }
+        template <typename T, typename E>
+        T* Allocate(E commandId) {
+            static_assert(sizeof(E) == sizeof(uint32_t), "");
+            static_assert(alignof(E) == alignof(uint32_t), "");
+            return reinterpret_cast<T*>(
+                Allocate(static_cast<uint32_t>(commandId), sizeof(T), alignof(T)));
+        }
 
-            template<typename T>
-            T* AllocateData(size_t count) {
-                return reinterpret_cast<T*>(AllocateData(sizeof(T) * count, alignof(T)));
-            }
+        template <typename T>
+        T* AllocateData(size_t count) {
+            return reinterpret_cast<T*>(AllocateData(sizeof(T) * count, alignof(T)));
+        }
 
-        private:
-            friend CommandIterator;
-            CommandBlocks&& AcquireBlocks();
+      private:
+        friend CommandIterator;
+        CommandBlocks&& AcquireBlocks();
 
-            uint8_t* Allocate(uint32_t commandId, size_t commandSize, size_t commandAlignment);
-            uint8_t* AllocateData(size_t dataSize, size_t dataAlignment);
-            bool GetNewBlock(size_t minimumSize);
+        uint8_t* Allocate(uint32_t commandId, size_t commandSize, size_t commandAlignment);
+        uint8_t* AllocateData(size_t dataSize, size_t dataAlignment);
+        bool GetNewBlock(size_t minimumSize);
 
-            CommandBlocks mBlocks;
-            size_t mLastAllocationSize = 2048;
+        CommandBlocks mBlocks;
+        size_t mLastAllocationSize = 2048;
 
-            // Pointers to the current range of allocation in the block. Guaranteed to allow
-            // for at least one uint32_t is not nullptr, so that the special EndOfBlock command id
-            // can always be written.
-            // Nullptr iff the blocks were moved out.
-            uint8_t* mCurrentPtr = nullptr;
-            uint8_t* mEndPtr = nullptr;
+        // Pointers to the current range of allocation in the block. Guaranteed to allow for at
+        // least one uint32_t is not nullptr, so that the special EndOfBlock command id can always
+        // be written. Nullptr iff the blocks were moved out.
+        uint8_t* mCurrentPtr = nullptr;
+        uint8_t* mEndPtr = nullptr;
 
-            // Data used for the block range at initialization so that the first call to Allocate
-            // sees there is not enough space and calls GetNewBlock. This avoids having to special
-            // case the initialization in Allocate.
-            uint32_t mDummyEnum[1] = {0};
+        // Data used for the block range at initialization so that the first call to Allocate sees
+        // there is not enough space and calls GetNewBlock. This avoids having to special case the
+        // initialization in Allocate.
+        uint32_t mDummyEnum[1] = {0};
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_COMMAND_ALLOCATOR_H_
+#endif  // BACKEND_COMMAND_ALLOCATOR_H_

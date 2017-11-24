@@ -15,8 +15,8 @@
 #ifndef BACKEND_BINDGROUPLAYOUT_H_
 #define BACKEND_BINDGROUPLAYOUT_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 #include "common/Constants.h"
 
@@ -28,49 +28,52 @@
 namespace backend {
 
     class BindGroupLayoutBase : public RefCounted {
-        public:
-            BindGroupLayoutBase(BindGroupLayoutBuilder* builder, bool blueprint = false);
-            ~BindGroupLayoutBase() override;
+      public:
+        BindGroupLayoutBase(BindGroupLayoutBuilder* builder, bool blueprint = false);
+        ~BindGroupLayoutBase() override;
 
-            struct LayoutBindingInfo {
-                std::array<nxt::ShaderStageBit, kMaxBindingsPerGroup> visibilities;
-                std::array<nxt::BindingType, kMaxBindingsPerGroup> types;
-                std::bitset<kMaxBindingsPerGroup> mask;
-            };
-            const LayoutBindingInfo& GetBindingInfo() const;
+        struct LayoutBindingInfo {
+            std::array<nxt::ShaderStageBit, kMaxBindingsPerGroup> visibilities;
+            std::array<nxt::BindingType, kMaxBindingsPerGroup> types;
+            std::bitset<kMaxBindingsPerGroup> mask;
+        };
+        const LayoutBindingInfo& GetBindingInfo() const;
 
-        private:
-            DeviceBase* mDevice;
-            LayoutBindingInfo mBindingInfo;
-            bool mIsBlueprint = false;
+      private:
+        DeviceBase* mDevice;
+        LayoutBindingInfo mBindingInfo;
+        bool mIsBlueprint = false;
     };
 
     class BindGroupLayoutBuilder : public Builder<BindGroupLayoutBase> {
-        public:
-            BindGroupLayoutBuilder(DeviceBase* device);
+      public:
+        BindGroupLayoutBuilder(DeviceBase* device);
 
-            const BindGroupLayoutBase::LayoutBindingInfo& GetBindingInfo() const;
+        const BindGroupLayoutBase::LayoutBindingInfo& GetBindingInfo() const;
 
-            // NXT API
-            void SetBindingsType(nxt::ShaderStageBit visibility, nxt::BindingType bindingType, uint32_t start, uint32_t count);
+        // NXT API
+        void SetBindingsType(nxt::ShaderStageBit visibility,
+                             nxt::BindingType bindingType,
+                             uint32_t start,
+                             uint32_t count);
 
-        private:
-            friend class BindGroupLayoutBase;
+      private:
+        friend class BindGroupLayoutBase;
 
-            BindGroupLayoutBase* GetResultImpl() override;
+        BindGroupLayoutBase* GetResultImpl() override;
 
-            BindGroupLayoutBase::LayoutBindingInfo mBindingInfo;
+        BindGroupLayoutBase::LayoutBindingInfo mBindingInfo;
     };
 
     // Implements the functors necessary for the unordered_set<BGL*>-based cache.
     struct BindGroupLayoutCacheFuncs {
         // The hash function
-        size_t operator() (const BindGroupLayoutBase* bgl) const;
+        size_t operator()(const BindGroupLayoutBase* bgl) const;
 
         // The equality predicate
-        bool operator() (const BindGroupLayoutBase* a, const BindGroupLayoutBase* b) const;
+        bool operator()(const BindGroupLayoutBase* a, const BindGroupLayoutBase* b) const;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_BINDGROUPLAYOUT_H_
+#endif  // BACKEND_BINDGROUPLAYOUT_H_

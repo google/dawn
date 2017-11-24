@@ -38,4 +38,4 @@ namespace backend {
         return mDevice->CreateComputePipeline(this);
     }
 
-}
+}  // namespace backend

@@ -52,16 +52,14 @@ namespace backend {
         TransitionTextureUsage,
     };
 
-    struct BeginComputePassCmd {
-    };
+    struct BeginComputePassCmd {};
 
     struct BeginRenderPassCmd {
         Ref<RenderPassBase> renderPass;
         Ref<FramebufferBase> framebuffer;
     };
 
-    struct BeginRenderSubpassCmd {
-    };
+    struct BeginRenderSubpassCmd {};
 
     struct BufferCopyLocation {
         Ref<BufferBase> buffer;
@@ -113,14 +111,11 @@ namespace backend {
         uint32_t firstInstance;
     };
 
-    struct EndComputePassCmd {
-    };
+    struct EndComputePassCmd {};
 
-    struct EndRenderPassCmd {
-    };
+    struct EndRenderPassCmd {};
 
-    struct EndRenderSubpassCmd {
-    };
+    struct EndRenderSubpassCmd {};
 
     struct SetComputePipelineCmd {
         Ref<ComputePipelineBase> pipeline;
@@ -176,6 +171,6 @@ namespace backend {
     void FreeCommands(CommandIterator* commands);
     void SkipCommand(CommandIterator* commands, Command type);
 
-}
+}  // namespace backend
 
-#endif // BACKEND_COMMANDS_H_
+#endif  // BACKEND_COMMANDS_H_

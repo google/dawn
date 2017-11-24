@@ -15,8 +15,8 @@
 #ifndef BACKEND_QUEUE_H_
 #define BACKEND_QUEUE_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -24,38 +24,39 @@
 namespace backend {
 
     class QueueBase : public RefCounted {
-        public:
-            QueueBase(QueueBuilder* builder);
+      public:
+        QueueBase(QueueBuilder* builder);
 
-            DeviceBase* GetDevice();
+        DeviceBase* GetDevice();
 
-            template<typename T>
-            bool ValidateSubmit(uint32_t numCommands, T* const * commands) {
-                static_assert(std::is_base_of<CommandBufferBase, T>::value, "invalid command buffer type");
+        template <typename T>
+        bool ValidateSubmit(uint32_t numCommands, T* const* commands) {
+            static_assert(std::is_base_of<CommandBufferBase, T>::value,
+                          "invalid command buffer type");
 
-                for (uint32_t i = 0; i < numCommands; ++i) {
-                    if (!ValidateSubmitCommand(commands[i])) {
-                        return false;
-                    }
+            for (uint32_t i = 0; i < numCommands; ++i) {
+                if (!ValidateSubmitCommand(commands[i])) {
+                    return false;
                 }
-                return true;
             }
+            return true;
+        }
 
-        private:
-            bool ValidateSubmitCommand(CommandBufferBase* command);
+      private:
+        bool ValidateSubmitCommand(CommandBufferBase* command);
 
-            DeviceBase* mDevice;
+        DeviceBase* mDevice;
     };
 
     class QueueBuilder : public Builder<QueueBase> {
-        public:
-            QueueBuilder(DeviceBase* device);
+      public:
+        QueueBuilder(DeviceBase* device);
 
-        private:
-            friend class QueueBase;
-            QueueBase* GetResultImpl() override;
+      private:
+        friend class QueueBase;
+        QueueBase* GetResultImpl() override;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_QUEUE_H_
+#endif  // BACKEND_QUEUE_H_

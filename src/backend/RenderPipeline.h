@@ -25,55 +25,56 @@
 namespace backend {
 
     class RenderPipelineBase : public RefCounted, public PipelineBase {
-        public:
-            RenderPipelineBase(RenderPipelineBuilder* builder);
+      public:
+        RenderPipelineBase(RenderPipelineBuilder* builder);
 
-            BlendStateBase* GetBlendState(uint32_t attachmentSlot);
-            DepthStencilStateBase* GetDepthStencilState();
-            nxt::IndexFormat GetIndexFormat() const;
-            InputStateBase* GetInputState();
-            nxt::PrimitiveTopology GetPrimitiveTopology() const;
-            RenderPassBase* GetRenderPass();
-            uint32_t GetSubPass();
+        BlendStateBase* GetBlendState(uint32_t attachmentSlot);
+        DepthStencilStateBase* GetDepthStencilState();
+        nxt::IndexFormat GetIndexFormat() const;
+        InputStateBase* GetInputState();
+        nxt::PrimitiveTopology GetPrimitiveTopology() const;
+        RenderPassBase* GetRenderPass();
+        uint32_t GetSubPass();
 
-        private:
-            Ref<DepthStencilStateBase> mDepthStencilState;
-            nxt::IndexFormat mIndexFormat;
-            Ref<InputStateBase> mInputState;
-            nxt::PrimitiveTopology mPrimitiveTopology;
-            std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
-            Ref<RenderPassBase> mRenderPass;
-            uint32_t mSubpass;
+      private:
+        Ref<DepthStencilStateBase> mDepthStencilState;
+        nxt::IndexFormat mIndexFormat;
+        Ref<InputStateBase> mInputState;
+        nxt::PrimitiveTopology mPrimitiveTopology;
+        std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
+        Ref<RenderPassBase> mRenderPass;
+        uint32_t mSubpass;
     };
 
     class RenderPipelineBuilder : public Builder<RenderPipelineBase>, public PipelineBuilder {
-        public:
-            RenderPipelineBuilder(DeviceBase* device);
+      public:
+        RenderPipelineBuilder(DeviceBase* device);
 
-            // NXT API
-            void SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState);
-            void SetDepthStencilState(DepthStencilStateBase* depthStencilState);
-            void SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology);
-            void SetIndexFormat(nxt::IndexFormat format);
-            void SetInputState(InputStateBase* inputState);
-            void SetSubpass(RenderPassBase* renderPass, uint32_t subpass);
+        // NXT API
+        void SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState);
+        void SetDepthStencilState(DepthStencilStateBase* depthStencilState);
+        void SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology);
+        void SetIndexFormat(nxt::IndexFormat format);
+        void SetInputState(InputStateBase* inputState);
+        void SetSubpass(RenderPassBase* renderPass, uint32_t subpass);
 
-        private:
-            friend class RenderPipelineBase;
+      private:
+        friend class RenderPipelineBase;
 
-            RenderPipelineBase* GetResultImpl() override;
+        RenderPipelineBase* GetResultImpl() override;
 
-            Ref<DepthStencilStateBase> mDepthStencilState;
-            Ref<InputStateBase> mInputState;
-            // TODO(enga@google.com): Remove default when we validate that all required properties are set
-            nxt::PrimitiveTopology mPrimitiveTopology = nxt::PrimitiveTopology::TriangleList;
-            nxt::IndexFormat mIndexFormat = nxt::IndexFormat::Uint32;
-            std::bitset<kMaxColorAttachments> mBlendStatesSet;
-            std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
-            Ref<RenderPassBase> mRenderPass;
-            uint32_t mSubpass;
+        Ref<DepthStencilStateBase> mDepthStencilState;
+        Ref<InputStateBase> mInputState;
+        // TODO(enga@google.com): Remove default when we validate that all required properties are
+        // set
+        nxt::PrimitiveTopology mPrimitiveTopology = nxt::PrimitiveTopology::TriangleList;
+        nxt::IndexFormat mIndexFormat = nxt::IndexFormat::Uint32;
+        std::bitset<kMaxColorAttachments> mBlendStatesSet;
+        std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
+        Ref<RenderPassBase> mRenderPass;
+        uint32_t mSubpass;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_RENDERPIPELINE_H_
+#endif  // BACKEND_RENDERPIPELINE_H_

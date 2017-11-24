@@ -20,19 +20,18 @@
 namespace backend {
 
     class ComputePipelineBase : public RefCounted, public PipelineBase {
-        public:
-            ComputePipelineBase(ComputePipelineBuilder* builder);
-
+      public:
+        ComputePipelineBase(ComputePipelineBuilder* builder);
     };
 
     class ComputePipelineBuilder : public Builder<ComputePipelineBase>, public PipelineBuilder {
-        public:
-            ComputePipelineBuilder(DeviceBase* device);
+      public:
+        ComputePipelineBuilder(DeviceBase* device);
 
-        private:
-            ComputePipelineBase* GetResultImpl() override;
+      private:
+        ComputePipelineBase* GetResultImpl() override;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_COMPUTEPIPELINE_H_
+#endif  // BACKEND_COMPUTEPIPELINE_H_

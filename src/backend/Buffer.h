@@ -15,8 +15,8 @@
 #ifndef BACKEND_BUFFER_H_
 #define BACKEND_BUFFER_H_
 
-#include "backend/Forward.h"
 #include "backend/Builder.h"
+#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -24,103 +24,109 @@
 namespace backend {
 
     class BufferBase : public RefCounted {
-        public:
-            BufferBase(BufferBuilder* builder);
-            ~BufferBase();
+      public:
+        BufferBase(BufferBuilder* builder);
+        ~BufferBase();
 
-            uint32_t GetSize() const;
-            nxt::BufferUsageBit GetAllowedUsage() const;
-            nxt::BufferUsageBit GetUsage() const;
-            static bool IsUsagePossible(nxt::BufferUsageBit allowedUsage, nxt::BufferUsageBit usage);
-            bool IsTransitionPossible(nxt::BufferUsageBit usage) const;
-            bool IsFrozen() const;
-            bool HasFrozenUsage(nxt::BufferUsageBit usage) const;
-            void UpdateUsageInternal(nxt::BufferUsageBit usage);
+        uint32_t GetSize() const;
+        nxt::BufferUsageBit GetAllowedUsage() const;
+        nxt::BufferUsageBit GetUsage() const;
+        static bool IsUsagePossible(nxt::BufferUsageBit allowedUsage, nxt::BufferUsageBit usage);
+        bool IsTransitionPossible(nxt::BufferUsageBit usage) const;
+        bool IsFrozen() const;
+        bool HasFrozenUsage(nxt::BufferUsageBit usage) const;
+        void UpdateUsageInternal(nxt::BufferUsageBit usage);
 
-            DeviceBase* GetDevice();
+        DeviceBase* GetDevice();
 
-            // NXT API
-            BufferViewBuilder* CreateBufferViewBuilder();
-            void SetSubData(uint32_t start, uint32_t count, const uint32_t* data);
-            void MapReadAsync(uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata);
-            void Unmap();
-            void TransitionUsage(nxt::BufferUsageBit usage);
-            void FreezeUsage(nxt::BufferUsageBit usage);
+        // NXT API
+        BufferViewBuilder* CreateBufferViewBuilder();
+        void SetSubData(uint32_t start, uint32_t count, const uint32_t* data);
+        void MapReadAsync(uint32_t start,
+                          uint32_t size,
+                          nxtBufferMapReadCallback callback,
+                          nxtCallbackUserdata userdata);
+        void Unmap();
+        void TransitionUsage(nxt::BufferUsageBit usage);
+        void FreezeUsage(nxt::BufferUsageBit usage);
 
-        protected:
-            void CallMapReadCallback(uint32_t serial, nxtBufferMapReadStatus status, const void* pointer);
+      protected:
+        void CallMapReadCallback(uint32_t serial,
+                                 nxtBufferMapReadStatus status,
+                                 const void* pointer);
 
-        private:
-            virtual void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) = 0;
-            virtual void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
-            virtual void UnmapImpl() = 0;
-            virtual void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) = 0;
+      private:
+        virtual void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) = 0;
+        virtual void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
+        virtual void UnmapImpl() = 0;
+        virtual void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
+                                         nxt::BufferUsageBit targetUsage) = 0;
 
-            DeviceBase* mDevice;
-            uint32_t mSize;
-            nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
-            nxt::BufferUsageBit mCurrentUsage = nxt::BufferUsageBit::None;
+        DeviceBase* mDevice;
+        uint32_t mSize;
+        nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
+        nxt::BufferUsageBit mCurrentUsage = nxt::BufferUsageBit::None;
 
-            nxtBufferMapReadCallback mMapReadCallback = nullptr;
-            nxtCallbackUserdata mMapReadUserdata = 0;
-            uint32_t mMapReadSerial = 0;
+        nxtBufferMapReadCallback mMapReadCallback = nullptr;
+        nxtCallbackUserdata mMapReadUserdata = 0;
+        uint32_t mMapReadSerial = 0;
 
-            bool mIsFrozen = false;
-            bool mIsMapped = false;
+        bool mIsFrozen = false;
+        bool mIsMapped = false;
     };
 
     class BufferBuilder : public Builder<BufferBase> {
-        public:
-            BufferBuilder(DeviceBase* device);
+      public:
+        BufferBuilder(DeviceBase* device);
 
-            // NXT API
-            void SetAllowedUsage(nxt::BufferUsageBit usage);
-            void SetInitialUsage(nxt::BufferUsageBit usage);
-            void SetSize(uint32_t size);
+        // NXT API
+        void SetAllowedUsage(nxt::BufferUsageBit usage);
+        void SetInitialUsage(nxt::BufferUsageBit usage);
+        void SetSize(uint32_t size);
 
-        private:
-            friend class BufferBase;
+      private:
+        friend class BufferBase;
 
-            BufferBase* GetResultImpl() override;
+        BufferBase* GetResultImpl() override;
 
-            uint32_t mSize;
-            nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
-            nxt::BufferUsageBit mCurrentUsage = nxt::BufferUsageBit::None;
-            int mPropertiesSet = 0;
+        uint32_t mSize;
+        nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
+        nxt::BufferUsageBit mCurrentUsage = nxt::BufferUsageBit::None;
+        int mPropertiesSet = 0;
     };
 
     class BufferViewBase : public RefCounted {
-        public:
-            BufferViewBase(BufferViewBuilder* builder);
+      public:
+        BufferViewBase(BufferViewBuilder* builder);
 
-            BufferBase* GetBuffer();
-            uint32_t GetSize() const;
-            uint32_t GetOffset() const;
+        BufferBase* GetBuffer();
+        uint32_t GetSize() const;
+        uint32_t GetOffset() const;
 
-        private:
-            Ref<BufferBase> mBuffer;
-            uint32_t mSize;
-            uint32_t mOffset;
+      private:
+        Ref<BufferBase> mBuffer;
+        uint32_t mSize;
+        uint32_t mOffset;
     };
 
     class BufferViewBuilder : public Builder<BufferViewBase> {
-        public:
-            BufferViewBuilder(DeviceBase* device, BufferBase* buffer);
+      public:
+        BufferViewBuilder(DeviceBase* device, BufferBase* buffer);
 
-            // NXT API
-            void SetExtent(uint32_t offset, uint32_t size);
+        // NXT API
+        void SetExtent(uint32_t offset, uint32_t size);
 
-        private:
-            friend class BufferViewBase;
+      private:
+        friend class BufferViewBase;
 
-            BufferViewBase* GetResultImpl() override;
+        BufferViewBase* GetResultImpl() override;
 
-            Ref<BufferBase> mBuffer;
-            uint32_t mOffset = 0;
-            uint32_t mSize = 0;
-            int mPropertiesSet = 0;
+        Ref<BufferBase> mBuffer;
+        uint32_t mOffset = 0;
+        uint32_t mSize = 0;
+        int mPropertiesSet = 0;
     };
 
-}
+}  // namespace backend
 
-#endif // BACKEND_BUFFER_H_
+#endif  // BACKEND_BUFFER_H_

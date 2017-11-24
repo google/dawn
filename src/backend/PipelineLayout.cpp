@@ -35,8 +35,9 @@ namespace backend {
         return mMask;
     }
 
-    std::bitset<kMaxBindGroups> PipelineLayoutBase::InheritedGroupsMask(const PipelineLayoutBase* other) const {
-        return { GroupsInheritUpTo(other) - 1 };
+    std::bitset<kMaxBindGroups> PipelineLayoutBase::InheritedGroupsMask(
+        const PipelineLayoutBase* other) const {
+        return {GroupsInheritUpTo(other) - 1};
     }
 
     uint32_t PipelineLayoutBase::GroupsInheritUpTo(const PipelineLayoutBase* other) const {
@@ -54,8 +55,8 @@ namespace backend {
     }
 
     PipelineLayoutBase* PipelineLayoutBuilder::GetResultImpl() {
-        // TODO(cwallez@chromium.org): this is a hack, have the null bind group layout somewhere in the device
-        // once we have a cache of BGL
+        // TODO(cwallez@chromium.org): this is a hack, have the null bind group layout somewhere in
+        // the device once we have a cache of BGL
         for (size_t group = 0; group < kMaxBindGroups; ++group) {
             if (!mBindGroupLayouts[group]) {
                 mBindGroupLayouts[group] = mDevice->CreateBindGroupLayoutBuilder()->GetResult();
@@ -65,7 +66,8 @@ namespace backend {
         return mDevice->CreatePipelineLayout(this);
     }
 
-    void PipelineLayoutBuilder::SetBindGroupLayout(uint32_t groupIndex, BindGroupLayoutBase* layout) {
+    void PipelineLayoutBuilder::SetBindGroupLayout(uint32_t groupIndex,
+                                                   BindGroupLayoutBase* layout) {
         if (groupIndex >= kMaxBindGroups) {
             HandleError("groupIndex is over the maximum allowed");
             return;
@@ -79,4 +81,4 @@ namespace backend {
         mMask.set(groupIndex);
     }
 
-}
+}  // namespace backend

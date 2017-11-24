@@ -25,7 +25,8 @@ namespace backend {
     // RenderPass
 
     RenderPassBase::RenderPassBase(RenderPassBuilder* builder)
-        : mAttachments(std::move(builder->mAttachments)), mSubpasses(std::move(builder->mSubpasses)) {
+        : mAttachments(std::move(builder->mAttachments)),
+          mSubpasses(std::move(builder->mSubpasses)) {
         for (uint32_t s = 0; s < GetSubpassCount(); ++s) {
             const auto& subpass = GetSubpassInfo(s);
             for (auto location : IterateBitSet(subpass.colorAttachmentsSet)) {
@@ -49,7 +50,8 @@ namespace backend {
         return static_cast<uint32_t>(mAttachments.size());
     }
 
-    const RenderPassBase::AttachmentInfo& RenderPassBase::GetAttachmentInfo(uint32_t attachment) const {
+    const RenderPassBase::AttachmentInfo& RenderPassBase::GetAttachmentInfo(
+        uint32_t attachment) const {
         ASSERT(attachment < mAttachments.size());
         return mAttachments[attachment];
     }
@@ -76,12 +78,12 @@ namespace backend {
         RENDERPASS_PROPERTY_SUBPASS_COUNT = 0x2,
     };
 
-    RenderPassBuilder::RenderPassBuilder(DeviceBase* device)
-        : Builder(device), mSubpasses(1) {
+    RenderPassBuilder::RenderPassBuilder(DeviceBase* device) : Builder(device), mSubpasses(1) {
     }
 
     RenderPassBase* RenderPassBuilder::GetResultImpl() {
-        constexpr int requiredProperties = RENDERPASS_PROPERTY_ATTACHMENT_COUNT | RENDERPASS_PROPERTY_SUBPASS_COUNT;
+        constexpr int requiredProperties =
+            RENDERPASS_PROPERTY_ATTACHMENT_COUNT | RENDERPASS_PROPERTY_SUBPASS_COUNT;
         if ((mPropertiesSet & requiredProperties) != requiredProperties) {
             HandleError("Render pass missing properties");
             return nullptr;
@@ -105,7 +107,8 @@ namespace backend {
             if (subpass.depthStencilAttachmentSet) {
                 uint32_t slot = subpass.depthStencilAttachment;
                 if (!TextureFormatHasDepthOrStencil(mAttachments[slot].format)) {
-                    HandleError("Render pass depth/stencil attachment is not of a depth/stencil format");
+                    HandleError(
+                        "Render pass depth/stencil attachment is not of a depth/stencil format");
                     return nullptr;
                 }
             }
@@ -125,7 +128,8 @@ namespace backend {
         mPropertiesSet |= RENDERPASS_PROPERTY_ATTACHMENT_COUNT;
     }
 
-    void RenderPassBuilder::AttachmentSetFormat(uint32_t attachmentSlot, nxt::TextureFormat format) {
+    void RenderPassBuilder::AttachmentSetFormat(uint32_t attachmentSlot,
+                                                nxt::TextureFormat format) {
         if ((mPropertiesSet & RENDERPASS_PROPERTY_ATTACHMENT_COUNT) == 0) {
             HandleError("Render pass attachment count not set yet");
             return;
@@ -156,7 +160,9 @@ namespace backend {
         mAttachments[attachmentSlot].colorLoadOp = op;
     }
 
-    void RenderPassBuilder::AttachmentSetDepthStencilLoadOps(uint32_t attachmentSlot, nxt::LoadOp depthOp, nxt::LoadOp stencilOp) {
+    void RenderPassBuilder::AttachmentSetDepthStencilLoadOps(uint32_t attachmentSlot,
+                                                             nxt::LoadOp depthOp,
+                                                             nxt::LoadOp stencilOp) {
         if ((mPropertiesSet & RENDERPASS_PROPERTY_ATTACHMENT_COUNT) == 0) {
             HandleError("Render pass attachment count not set yet");
             return;
@@ -169,7 +175,6 @@ namespace backend {
         mAttachments[attachmentSlot].depthLoadOp = depthOp;
         mAttachments[attachmentSlot].stencilLoadOp = stencilOp;
     }
-
 
     void RenderPassBuilder::SetSubpassCount(uint32_t subpassCount) {
         if ((mPropertiesSet & RENDERPASS_PROPERTY_SUBPASS_COUNT) != 0) {
@@ -185,7 +190,9 @@ namespace backend {
         mPropertiesSet |= RENDERPASS_PROPERTY_SUBPASS_COUNT;
     }
 
-    void RenderPassBuilder::SubpassSetColorAttachment(uint32_t subpass, uint32_t outputAttachmentLocation, uint32_t attachmentSlot) {
+    void RenderPassBuilder::SubpassSetColorAttachment(uint32_t subpass,
+                                                      uint32_t outputAttachmentLocation,
+                                                      uint32_t attachmentSlot) {
         if ((mPropertiesSet & RENDERPASS_PROPERTY_SUBPASS_COUNT) == 0) {
             HandleError("Render pass subpass count not set yet");
             return;
@@ -215,7 +222,8 @@ namespace backend {
         mSubpasses[subpass].colorAttachments[outputAttachmentLocation] = attachmentSlot;
     }
 
-    void RenderPassBuilder::SubpassSetDepthStencilAttachment(uint32_t subpass, uint32_t attachmentSlot) {
+    void RenderPassBuilder::SubpassSetDepthStencilAttachment(uint32_t subpass,
+                                                             uint32_t attachmentSlot) {
         if ((mPropertiesSet & RENDERPASS_PROPERTY_SUBPASS_COUNT) == 0) {
             HandleError("Render pass subpass count not set yet");
             return;
@@ -241,4 +249,4 @@ namespace backend {
         mSubpasses[subpass].depthStencilAttachment = attachmentSlot;
     }
 
-}
+}  // namespace backend

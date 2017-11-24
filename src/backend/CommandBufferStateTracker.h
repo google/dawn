@@ -25,92 +25,94 @@
 
 namespace backend {
     class CommandBufferStateTracker {
-        public:
-            explicit CommandBufferStateTracker(CommandBufferBuilder* builder);
+      public:
+        explicit CommandBufferStateTracker(CommandBufferBuilder* builder);
 
-            // Non-state-modifying validation functions
-            bool HaveRenderPass() const;
-            bool HaveRenderSubpass() const;
-            bool ValidateCanCopy() const;
-            bool ValidateCanUseBufferAs(BufferBase* buffer, nxt::BufferUsageBit usage) const;
-            bool ValidateCanUseTextureAs(TextureBase* texture, nxt::TextureUsageBit usage) const;
-            bool ValidateCanDispatch();
-            bool ValidateCanDrawArrays();
-            bool ValidateCanDrawElements();
-            bool ValidateEndCommandBuffer() const;
-            bool ValidateSetPushConstants(nxt::ShaderStageBit stages);
+        // Non-state-modifying validation functions
+        bool HaveRenderPass() const;
+        bool HaveRenderSubpass() const;
+        bool ValidateCanCopy() const;
+        bool ValidateCanUseBufferAs(BufferBase* buffer, nxt::BufferUsageBit usage) const;
+        bool ValidateCanUseTextureAs(TextureBase* texture, nxt::TextureUsageBit usage) const;
+        bool ValidateCanDispatch();
+        bool ValidateCanDrawArrays();
+        bool ValidateCanDrawElements();
+        bool ValidateEndCommandBuffer() const;
+        bool ValidateSetPushConstants(nxt::ShaderStageBit stages);
 
-            // State-modifying methods
-            bool BeginComputePass();
-            bool EndComputePass();
-            bool BeginSubpass();
-            bool EndSubpass();
-            bool BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
-            bool EndRenderPass();
-            bool SetComputePipeline(ComputePipelineBase* pipeline);
-            bool SetRenderPipeline(RenderPipelineBase* pipeline);
-            bool SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
-            bool SetIndexBuffer(BufferBase* buffer);
-            bool SetVertexBuffer(uint32_t index, BufferBase* buffer);
-            bool TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage);
-            bool TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
-            bool EnsureTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
+        // State-modifying methods
+        bool BeginComputePass();
+        bool EndComputePass();
+        bool BeginSubpass();
+        bool EndSubpass();
+        bool BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
+        bool EndRenderPass();
+        bool SetComputePipeline(ComputePipelineBase* pipeline);
+        bool SetRenderPipeline(RenderPipelineBase* pipeline);
+        bool SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
+        bool SetIndexBuffer(BufferBase* buffer);
+        bool SetVertexBuffer(uint32_t index, BufferBase* buffer);
+        bool TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage);
+        bool TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
+        bool EnsureTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
 
-            // These collections are copied to the CommandBuffer at build time.
-            // These pointers will remain valid since they are referenced by
-            // the bind groups which are referenced by this command buffer.
-            std::set<BufferBase*> mBuffersTransitioned;
-            std::set<TextureBase*> mTexturesTransitioned;
-            std::set<TextureBase*> mTexturesAttached;
+        // These collections are copied to the CommandBuffer at build time. These pointers will
+        // remain valid since they are referenced by the bind groups which are referenced by this
+        // command buffer.
+        std::set<BufferBase*> mBuffersTransitioned;
+        std::set<TextureBase*> mTexturesTransitioned;
+        std::set<TextureBase*> mTexturesAttached;
 
-        private:
-            enum ValidationAspect {
-                VALIDATION_ASPECT_RENDER_PIPELINE,
-                VALIDATION_ASPECT_COMPUTE_PIPELINE,
-                VALIDATION_ASPECT_BIND_GROUPS,
-                VALIDATION_ASPECT_VERTEX_BUFFERS,
-                VALIDATION_ASPECT_INDEX_BUFFER,
-                VALIDATION_ASPECT_RENDER_SUBPASS,
-                VALIDATION_ASPECT_COMPUTE_PASS,
+      private:
+        enum ValidationAspect {
+            VALIDATION_ASPECT_RENDER_PIPELINE,
+            VALIDATION_ASPECT_COMPUTE_PIPELINE,
+            VALIDATION_ASPECT_BIND_GROUPS,
+            VALIDATION_ASPECT_VERTEX_BUFFERS,
+            VALIDATION_ASPECT_INDEX_BUFFER,
+            VALIDATION_ASPECT_RENDER_SUBPASS,
+            VALIDATION_ASPECT_COMPUTE_PASS,
 
-                VALIDATION_ASPECT_COUNT
-            };
-            using ValidationAspects = std::bitset<VALIDATION_ASPECT_COUNT>;
+            VALIDATION_ASPECT_COUNT
+        };
+        using ValidationAspects = std::bitset<VALIDATION_ASPECT_COUNT>;
 
-            // Usage helper functions
-            bool BufferHasGuaranteedUsageBit(BufferBase* buffer, nxt::BufferUsageBit usage) const;
-            bool TextureHasGuaranteedUsageBit(TextureBase* texture, nxt::TextureUsageBit usage) const;
-            bool IsInternalTextureTransitionPossible(TextureBase* texture, nxt::TextureUsageBit usage) const;
-            bool IsExplicitTextureTransitionPossible(TextureBase* texture, nxt::TextureUsageBit usage) const;
+        // Usage helper functions
+        bool BufferHasGuaranteedUsageBit(BufferBase* buffer, nxt::BufferUsageBit usage) const;
+        bool TextureHasGuaranteedUsageBit(TextureBase* texture, nxt::TextureUsageBit usage) const;
+        bool IsInternalTextureTransitionPossible(TextureBase* texture,
+                                                 nxt::TextureUsageBit usage) const;
+        bool IsExplicitTextureTransitionPossible(TextureBase* texture,
+                                                 nxt::TextureUsageBit usage) const;
 
-            // Queries for lazily evaluated aspects
-            bool RecomputeHaveAspectBindGroups();
-            bool RecomputeHaveAspectVertexBuffers();
+        // Queries for lazily evaluated aspects
+        bool RecomputeHaveAspectBindGroups();
+        bool RecomputeHaveAspectVertexBuffers();
 
-            bool HavePipeline() const;
-            bool ValidateBindGroupUsages(BindGroupBase* group) const;
-            bool RevalidateCanDraw();
+        bool HavePipeline() const;
+        bool ValidateBindGroupUsages(BindGroupBase* group) const;
+        bool RevalidateCanDraw();
 
-            void SetPipelineCommon(PipelineBase* pipeline);
-            void UnsetPipeline();
+        void SetPipelineCommon(PipelineBase* pipeline);
+        void UnsetPipeline();
 
-            CommandBufferBuilder* mBuilder;
+        CommandBufferBuilder* mBuilder;
 
-            ValidationAspects mAspects;
+        ValidationAspects mAspects;
 
-            std::bitset<kMaxBindGroups> mBindgroupsSet;
-            std::array<BindGroupBase*, kMaxBindGroups> mBindgroups = {};
-            std::bitset<kMaxVertexInputs> mInputsSet;
-            PipelineBase* mLastPipeline = nullptr;
-            RenderPipelineBase* mLastRenderPipeline = nullptr;
+        std::bitset<kMaxBindGroups> mBindgroupsSet;
+        std::array<BindGroupBase*, kMaxBindGroups> mBindgroups = {};
+        std::bitset<kMaxVertexInputs> mInputsSet;
+        PipelineBase* mLastPipeline = nullptr;
+        RenderPipelineBase* mLastRenderPipeline = nullptr;
 
-            std::map<BufferBase*, nxt::BufferUsageBit> mMostRecentBufferUsages;
-            std::map<TextureBase*, nxt::TextureUsageBit> mMostRecentTextureUsages;
+        std::map<BufferBase*, nxt::BufferUsageBit> mMostRecentBufferUsages;
+        std::map<TextureBase*, nxt::TextureUsageBit> mMostRecentTextureUsages;
 
-            RenderPassBase* mCurrentRenderPass = nullptr;
-            FramebufferBase* mCurrentFramebuffer = nullptr;
-            uint32_t mCurrentSubpass = 0;
+        RenderPassBase* mCurrentRenderPass = nullptr;
+        FramebufferBase* mCurrentFramebuffer = nullptr;
+        uint32_t mCurrentSubpass = 0;
     };
-}
+}  // namespace backend
 
-#endif // BACKEND_COMMANDBUFFERSTATETRACKER_H
+#endif  // BACKEND_COMMANDBUFFERSTATETRACKER_H

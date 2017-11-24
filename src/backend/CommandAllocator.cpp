@@ -23,13 +23,12 @@
 
 namespace backend {
 
-    constexpr uint32_t EndOfBlock = UINT_MAX;//std::numeric_limits<uint32_t>::max();
-    constexpr uint32_t AdditionalData = UINT_MAX - 1;//std::numeric_limits<uint32_t>::max();
+    constexpr uint32_t EndOfBlock = UINT_MAX;          // std::numeric_limits<uint32_t>::max();
+    constexpr uint32_t AdditionalData = UINT_MAX - 1;  // std::numeric_limits<uint32_t>::max() - 1;
 
     // TODO(cwallez@chromium.org): figure out a way to have more type safety for the iterator
 
-    CommandIterator::CommandIterator()
-        : mEndOfBlock(EndOfBlock) {
+    CommandIterator::CommandIterator() : mEndOfBlock(EndOfBlock) {
         Reset();
     }
 
@@ -43,8 +42,7 @@ namespace backend {
         }
     }
 
-    CommandIterator::CommandIterator(CommandIterator&& other)
-        : mEndOfBlock(EndOfBlock) {
+    CommandIterator::CommandIterator(CommandIterator&& other) : mEndOfBlock(EndOfBlock) {
         if (!other.IsEmpty()) {
             mBlocks = std::move(other.mBlocks);
             other.Reset();
@@ -80,9 +78,8 @@ namespace backend {
         mCurrentBlock = 0;
 
         if (mBlocks.empty()) {
-            // This will case the first NextCommandId call to try to move to the next
-            // block and stop the iteration immediately, without special casing the
-            // initialization.
+            // This will case the first NextCommandId call to try to move to the next block and stop
+            // the iteration immediately, without special casing the initialization.
             mCurrentPtr = reinterpret_cast<uint8_t*>(&mEndOfBlock);
             mBlocks.emplace_back();
             mBlocks[0].size = sizeof(mEndOfBlock);
@@ -102,7 +99,8 @@ namespace backend {
 
     bool CommandIterator::NextCommandId(uint32_t* commandId) {
         uint8_t* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
-        ASSERT(idPtr + sizeof(uint32_t) <= mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
+        ASSERT(idPtr + sizeof(uint32_t) <=
+               mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
 
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
@@ -124,7 +122,8 @@ namespace backend {
 
     void* CommandIterator::NextCommand(size_t commandSize, size_t commandAlignment) {
         uint8_t* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
-        ASSERT(commandPtr + sizeof(commandSize) <= mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
+        ASSERT(commandPtr + sizeof(commandSize) <=
+               mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
 
         mCurrentPtr = commandPtr + commandSize;
         return commandPtr;
@@ -140,13 +139,18 @@ namespace backend {
     }
 
     // Potential TODO(cwallez@chromium.org):
-    //  - Host the size and pointer to next block in the block itself to avoid having an allocation in the vector
-    //  - Assume T's alignof is, say 64bits, static assert it, and make commandAlignment a constant in Allocate
-    //  - Be able to optimize allocation to one block, for command buffers expected to live long to avoid cache misses
-    //  - Better block allocation, maybe have NXT API to say command buffer is going to have size close to another
+    //  - Host the size and pointer to next block in the block itself to avoid having an allocation
+    //    in the vector
+    //  - Assume T's alignof is, say 64bits, static assert it, and make commandAlignment a constant
+    //    in Allocate
+    //  - Be able to optimize allocation to one block, for command buffers expected to live long to
+    //    avoid cache misses
+    //  - Better block allocation, maybe have NXT API to say command buffer is going to have size
+    //    close to another
 
     CommandAllocator::CommandAllocator()
-        : mCurrentPtr(reinterpret_cast<uint8_t*>(&mDummyEnum[0])), mEndPtr(reinterpret_cast<uint8_t*>(&mDummyEnum[1])) {
+        : mCurrentPtr(reinterpret_cast<uint8_t*>(&mDummyEnum[0])),
+          mEndPtr(reinterpret_cast<uint8_t*>(&mDummyEnum[1])) {
     }
 
     CommandAllocator::~CommandAllocator() {
@@ -164,7 +168,9 @@ namespace backend {
         return std::move(mBlocks);
     }
 
-    uint8_t* CommandAllocator::Allocate(uint32_t commandId, size_t commandSize, size_t commandAlignment) {
+    uint8_t* CommandAllocator::Allocate(uint32_t commandId,
+                                        size_t commandSize,
+                                        size_t commandAlignment) {
         ASSERT(mCurrentPtr != nullptr);
         ASSERT(mEndPtr != nullptr);
         ASSERT(commandId != EndOfBlock);
@@ -180,15 +186,15 @@ namespace backend {
         // When there is not enough space, we signal the EndOfBlock, so that the iterator nows to
         // move to the next one. EndOfBlock on the last block means the end of the commands.
         if (nextPtr + sizeof(uint32_t) > mEndPtr) {
-
-            // Even if we are not able to get another block, the list of commands will be well-formed
-            // and iterable as this block will be that last one.
+            // Even if we are not able to get another block, the list of commands will be
+            // well-formed and iterable as this block will be that last one.
             *idAlloc = EndOfBlock;
 
-            // Make sure we have space for current allocation, plus end of block and alignment padding
-            // for the first id.
+            // Make sure we have space for current allocation, plus end of block and alignment
+            // padding for the first id.
             ASSERT(nextPtr > mCurrentPtr);
-            if (!GetNewBlock(static_cast<size_t>(nextPtr - mCurrentPtr) + sizeof(uint32_t) + alignof(uint32_t))) {
+            if (!GetNewBlock(static_cast<size_t>(nextPtr - mCurrentPtr) + sizeof(uint32_t) +
+                             alignof(uint32_t))) {
                 return nullptr;
             }
             return Allocate(commandId, commandSize, commandAlignment);
@@ -205,7 +211,8 @@ namespace backend {
 
     bool CommandAllocator::GetNewBlock(size_t minimumSize) {
         // Allocate blocks doubling sizes each time, to a maximum of 16k (or at least minimumSize).
-        mLastAllocationSize = std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
+        mLastAllocationSize =
+            std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
 
         uint8_t* block = reinterpret_cast<uint8_t*>(malloc(mLastAllocationSize));
         if (block == nullptr) {
@@ -218,4 +225,4 @@ namespace backend {
         return true;
     }
 
-}
+}  // namespace backend
