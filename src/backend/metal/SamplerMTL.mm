@@ -16,8 +16,7 @@
 
 #include "backend/metal/MetalBackend.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     namespace {
         MTLSamplerMinMagFilter FilterModeToMinMagFilter(nxt::FilterMode mode) {
@@ -39,8 +38,7 @@ namespace metal {
         }
     }
 
-    Sampler::Sampler(SamplerBuilder* builder)
-        : SamplerBase(builder) {
+    Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
         auto desc = [MTLSamplerDescriptor new];
         [desc autorelease];
         desc.minFilter = FilterModeToMinMagFilter(builder->GetMinFilter());
@@ -60,5 +58,4 @@ namespace metal {
         return mMtlSamplerState;
     }
 
-}
-}
+}}  // namespace backend::metal

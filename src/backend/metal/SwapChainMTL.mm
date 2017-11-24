@@ -19,11 +19,9 @@
 
 #include <nxt/nxt_wsi.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
-    SwapChain::SwapChain(SwapChainBuilder* builder)
-        : SwapChainBase(builder) {
+    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
         nxtWSIContextMetal wsiContext = {};
         wsiContext.device = ToBackend(GetDevice())->GetMTLDevice();
@@ -46,5 +44,4 @@ namespace metal {
         return new Texture(builder, nativeTexture);
     }
 
-}
-}
+}}  // namespace backend::metal

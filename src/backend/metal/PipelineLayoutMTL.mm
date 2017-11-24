@@ -16,11 +16,9 @@
 
 #include "backend/metal/MetalBackend.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
-    PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder)
-        : PipelineLayoutBase(builder) {
+    PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder) : PipelineLayoutBase(builder) {
         // Each stage has its own numbering namespace in CompilerMSL.
         for (auto stage : IterateStages(kAllStages)) {
             // Buffer number 0 is reserved for push constants
@@ -58,9 +56,9 @@ namespace metal {
         }
     }
 
-    const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(nxt::ShaderStage stage) const {
+    const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
+        nxt::ShaderStage stage) const {
         return mIndexInfo[stage];
     }
 
-}
-}
+}}  // namespace backend::metal

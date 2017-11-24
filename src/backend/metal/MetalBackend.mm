@@ -20,8 +20,8 @@
 #include "backend/metal/ComputePipelineMTL.h"
 #include "backend/metal/DepthStencilStateMTL.h"
 #include "backend/metal/InputStateMTL.h"
-#include "backend/metal/RenderPipelineMTL.h"
 #include "backend/metal/PipelineLayoutMTL.h"
+#include "backend/metal/RenderPipelineMTL.h"
 #include "backend/metal/ResourceUploader.h"
 #include "backend/metal/SamplerMTL.h"
 #include "backend/metal/ShaderModuleMTL.h"
@@ -30,8 +30,7 @@
 
 #include <unistd.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
@@ -45,18 +44,18 @@ namespace metal {
     // Device
 
     Device::Device(id<MTLDevice> mtlDevice)
-        : mMtlDevice(mtlDevice), mMapReadTracker(new MapReadRequestTracker(this)),
-            mResourceUploader(new ResourceUploader(this)) {
+        : mMtlDevice(mtlDevice),
+          mMapReadTracker(new MapReadRequestTracker(this)),
+          mResourceUploader(new ResourceUploader(this)) {
         [mMtlDevice retain];
         mCommandQueue = [mMtlDevice newCommandQueue];
     }
 
     Device::~Device() {
-        // Wait for all commands to be finished so we can free resources
-        // SubmitPendingCommandBuffer may not increment the pendingCommandSerial if there
-        // are no pending commands, so we can't store the pendingSerial before
-        // SubmitPendingCommandBuffer then wait for it to be passed. Instead we submit and
-        // wait for the serial before the next pendingCommandSerial.
+        // Wait for all commands to be finished so we can free resources SubmitPendingCommandBuffer
+        // may not increment the pendingCommandSerial if there are no pending commands, so we can't
+        // store the pendingSerial before SubmitPendingCommandBuffer then wait for it to be passed.
+        // Instead we submit and wait for the serial before the next pendingCommandSerial.
         SubmitPendingCommandBuffer();
         while (mFinishedCommandSerial != mPendingCommandSerial - 1) {
             usleep(100);
@@ -165,7 +164,8 @@ namespace metal {
 
         // Ok, ObjC blocks are weird. My understanding is that local variables are captured by value
         // so this-> works as expected. However it is unclear how members are captured, (are they
-        // captured using this-> or by value?) so we make a copy of the pendingCommandSerial on the stack.
+        // captured using this-> or by value?) so we make a copy of the pendingCommandSerial on the
+        // stack.
         Serial pendingSerial = mPendingCommandSerial;
         [mPendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
             this->mFinishedCommandSerial = pendingSerial;
@@ -174,14 +174,14 @@ namespace metal {
         [mPendingCommands commit];
         [mPendingCommands release];
         mPendingCommands = nil;
-        mPendingCommandSerial ++;
+        mPendingCommandSerial++;
     }
 
     uint64_t Device::GetPendingCommandSerial() {
-        // If this is called, then it means some piece of code somewhere will wait for this serial to
-        // complete. Make sure the pending command buffer is created so that it is on the worst case
-        // enqueued on the next Tick() and eventually increments the serial. Otherwise if no GPU work
-        // happens we could be waiting for this serial forever.
+        // If this is called, then it means some piece of code somewhere will wait for this serial
+        // to complete. Make sure the pending command buffer is created so that it is on the worst
+        // case enqueued on the next Tick() and eventually increments the serial. Otherwise if no
+        // GPU work happens we could be waiting for this serial forever.
         GetPendingCommandBuffer();
         return mPendingCommandSerial;
     }
@@ -196,8 +196,7 @@ namespace metal {
 
     // Bind Group
 
-    BindGroup::BindGroup(BindGroupBuilder* builder)
-        : BindGroupBase(builder) {
+    BindGroup::BindGroup(BindGroupBuilder* builder) : BindGroupBase(builder) {
     }
 
     // Bind Group Layout
@@ -208,8 +207,7 @@ namespace metal {
 
     // Framebuffer
 
-    Framebuffer::Framebuffer(FramebufferBuilder* builder)
-        : FramebufferBase(builder) {
+    Framebuffer::Framebuffer(FramebufferBuilder* builder) : FramebufferBase(builder) {
     }
 
     Framebuffer::~Framebuffer() {
@@ -217,8 +215,7 @@ namespace metal {
 
     // Queue
 
-    Queue::Queue(QueueBuilder* builder)
-        : QueueBase(builder) {
+    Queue::Queue(QueueBuilder* builder) : QueueBase(builder) {
         Device* device = ToBackend(builder->GetDevice());
         mCommandQueue = [device->GetMTLDevice() newCommandQueue];
     }
@@ -232,7 +229,7 @@ namespace metal {
         return mCommandQueue;
     }
 
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const * commands) {
+    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
         Device* device = ToBackend(GetDevice());
         id<MTLCommandBuffer> commandBuffer = device->GetPendingCommandBuffer();
 
@@ -245,12 +242,10 @@ namespace metal {
 
     // RenderPass
 
-    RenderPass::RenderPass(RenderPassBuilder* builder)
-        : RenderPassBase(builder) {
+    RenderPass::RenderPass(RenderPassBuilder* builder) : RenderPassBase(builder) {
     }
 
     RenderPass::~RenderPass() {
     }
 
-}
-}
+}}  // namespace backend::metal

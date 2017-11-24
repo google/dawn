@@ -20,26 +20,23 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class Device;
 
     class ResourceUploader {
-        public:
-            ResourceUploader(Device* device);
-            ~ResourceUploader();
+      public:
+        ResourceUploader(Device* device);
+        ~ResourceUploader();
 
-            void BufferSubData(id<MTLBuffer> buffer, uint32_t start, uint32_t size, const void* data);
-            void Tick(Serial finishedSerial);
+        void BufferSubData(id<MTLBuffer> buffer, uint32_t start, uint32_t size, const void* data);
+        void Tick(Serial finishedSerial);
 
-        private:
-            Device* mDevice;
-            SerialQueue<id<MTLBuffer>> mInflightUploadBuffers;
+      private:
+        Device* mDevice;
+        SerialQueue<id<MTLBuffer>> mInflightUploadBuffers;
     };
 
+}}  // namespace backend::metal
 
-}
-}
-
-#endif // BACKEND_METAL_RESOURCEUPLOADER_H_
+#endif  // BACKEND_METAL_RESOURCEUPLOADER_H_

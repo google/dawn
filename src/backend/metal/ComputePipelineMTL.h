@@ -19,23 +19,21 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class ComputePipeline : public ComputePipelineBase {
-        public:
-            ComputePipeline(ComputePipelineBuilder* builder);
-            ~ComputePipeline();
+      public:
+        ComputePipeline(ComputePipelineBuilder* builder);
+        ~ComputePipeline();
 
-            void Encode(id<MTLComputeCommandEncoder> encoder);
-            MTLSize GetLocalWorkGroupSize() const;
+        void Encode(id<MTLComputeCommandEncoder> encoder);
+        MTLSize GetLocalWorkGroupSize() const;
 
-        private:
-            id<MTLComputePipelineState> mMtlComputePipelineState = nil;
-            MTLSize mLocalWorkgroupSize;
+      private:
+        id<MTLComputePipelineState> mMtlComputePipelineState = nil;
+        MTLSize mLocalWorkgroupSize;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_COMPUTEPIPELINEMTL_H_
+#endif  // BACKEND_METAL_COMPUTEPIPELINEMTL_H_

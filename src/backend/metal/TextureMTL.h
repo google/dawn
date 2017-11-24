@@ -19,31 +19,30 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     MTLPixelFormat MetalPixelFormat(nxt::TextureFormat format);
 
     class Texture : public TextureBase {
-        public:
-            Texture(TextureBuilder* builder);
-            Texture(TextureBuilder* builder, id<MTLTexture> mtlTexture);
-            ~Texture();
+      public:
+        Texture(TextureBuilder* builder);
+        Texture(TextureBuilder* builder, id<MTLTexture> mtlTexture);
+        ~Texture();
 
-            id<MTLTexture> GetMTLTexture();
+        id<MTLTexture> GetMTLTexture();
 
-            void TransitionUsageImpl(nxt::TextureUsageBit currentUsage, nxt::TextureUsageBit targetUsage) override;
+        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
+                                 nxt::TextureUsageBit targetUsage) override;
 
-        private:
-            id<MTLTexture> mMtlTexture = nil;
+      private:
+        id<MTLTexture> mMtlTexture = nil;
     };
 
     class TextureView : public TextureViewBase {
-        public:
-            TextureView(TextureViewBuilder* builder);
+      public:
+        TextureView(TextureViewBuilder* builder);
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_TEXTUREMTL_H_
+#endif  // BACKEND_METAL_TEXTUREMTL_H_

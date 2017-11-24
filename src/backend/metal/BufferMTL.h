@@ -20,54 +20,53 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class Device;
 
     class Buffer : public BufferBase {
-        public:
-            Buffer(BufferBuilder* builder);
-            ~Buffer();
+      public:
+        Buffer(BufferBuilder* builder);
+        ~Buffer();
 
-            id<MTLBuffer> GetMTLBuffer();
+        id<MTLBuffer> GetMTLBuffer();
 
-            void OnMapReadCommandSerialFinished(uint32_t mapSerial, uint32_t offset);
+        void OnMapReadCommandSerialFinished(uint32_t mapSerial, uint32_t offset);
 
-        private:
-            void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
-            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-            void UnmapImpl() override;
-            void TransitionUsageImpl(nxt::BufferUsageBit currentUsage, nxt::BufferUsageBit targetUsage) override;
+      private:
+        void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
+        void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void UnmapImpl() override;
+        void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
+                                 nxt::BufferUsageBit targetUsage) override;
 
-            id<MTLBuffer> mMtlBuffer = nil;
+        id<MTLBuffer> mMtlBuffer = nil;
     };
 
     class BufferView : public BufferViewBase {
-        public:
-            BufferView(BufferViewBuilder* builder);
+      public:
+        BufferView(BufferViewBuilder* builder);
     };
 
     class MapReadRequestTracker {
-        public:
-            MapReadRequestTracker(Device* device);
-            ~MapReadRequestTracker();
+      public:
+        MapReadRequestTracker(Device* device);
+        ~MapReadRequestTracker();
 
-            void Track(Buffer* buffer, uint32_t mapSerial, uint32_t offset);
-            void Tick(Serial finishedSerial);
+        void Track(Buffer* buffer, uint32_t mapSerial, uint32_t offset);
+        void Tick(Serial finishedSerial);
 
-        private:
-            Device* mDevice;
+      private:
+        Device* mDevice;
 
-            struct Request {
-                Ref<Buffer> buffer;
-                uint32_t mapSerial;
-                uint32_t offset;
-            };
-            SerialQueue<Request> mInflightRequests;
+        struct Request {
+            Ref<Buffer> buffer;
+            uint32_t mapSerial;
+            uint32_t offset;
+        };
+        SerialQueue<Request> mInflightRequests;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_BUFFERMTL_H_
+#endif  // BACKEND_METAL_BUFFERMTL_H_

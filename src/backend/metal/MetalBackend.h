@@ -26,12 +26,11 @@
 #include "backend/ToBackend.h"
 #include "common/Serial.h"
 
-#include <type_traits>
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
+#include <type_traits>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class BindGroup;
     class BindGroupLayout;
@@ -77,7 +76,7 @@ namespace metal {
         using TextureViewType = TextureView;
     };
 
-    template<typename T>
+    template <typename T>
     auto ToBackend(T&& common) -> decltype(ToBackendBase<MetalBackendTraits>(common)) {
         return ToBackendBase<MetalBackendTraits>(common);
     }
@@ -86,91 +85,90 @@ namespace metal {
     class ResourceUploader;
 
     class Device : public DeviceBase {
-        public:
-            Device(id<MTLDevice> mtlDevice);
-            ~Device();
+      public:
+        Device(id<MTLDevice> mtlDevice);
+        ~Device();
 
-            BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
-            BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
-            BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
-            BufferBase* CreateBuffer(BufferBuilder* builder) override;
-            BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
-            CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-            ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
-            DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-            InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-            FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
-            PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
-            QueueBase* CreateQueue(QueueBuilder* builder) override;
-            RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
-            RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-            SamplerBase* CreateSampler(SamplerBuilder* builder) override;
-            ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
-            SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-            TextureBase* CreateTexture(TextureBuilder* builder) override;
-            TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
+        BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
+        BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
+        BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
+        BufferBase* CreateBuffer(BufferBuilder* builder) override;
+        BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
+        CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+        ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
+        DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
+        InputStateBase* CreateInputState(InputStateBuilder* builder) override;
+        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
+        PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
+        QueueBase* CreateQueue(QueueBuilder* builder) override;
+        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
+        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
+        ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
+        SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
+        TextureBase* CreateTexture(TextureBuilder* builder) override;
+        TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
-            void TickImpl() override;
+        void TickImpl() override;
 
-            id<MTLDevice> GetMTLDevice();
+        id<MTLDevice> GetMTLDevice();
 
-            id<MTLCommandBuffer> GetPendingCommandBuffer();
-            void SubmitPendingCommandBuffer();
-            Serial GetPendingCommandSerial();
+        id<MTLCommandBuffer> GetPendingCommandBuffer();
+        void SubmitPendingCommandBuffer();
+        Serial GetPendingCommandSerial();
 
-            MapReadRequestTracker* GetMapReadTracker() const;
-            ResourceUploader* GetResourceUploader() const;
+        MapReadRequestTracker* GetMapReadTracker() const;
+        ResourceUploader* GetResourceUploader() const;
 
-        private:
-            void OnCompletedHandler();
+      private:
+        void OnCompletedHandler();
 
-            id<MTLDevice> mMtlDevice = nil;
-            id<MTLCommandQueue> mCommandQueue = nil;
-            MapReadRequestTracker* mMapReadTracker;
-            ResourceUploader* mResourceUploader;
+        id<MTLDevice> mMtlDevice = nil;
+        id<MTLCommandQueue> mCommandQueue = nil;
+        MapReadRequestTracker* mMapReadTracker;
+        ResourceUploader* mResourceUploader;
 
-            Serial mFinishedCommandSerial = 0;
-            Serial mPendingCommandSerial = 1;
-            id<MTLCommandBuffer> mPendingCommands = nil;
+        Serial mFinishedCommandSerial = 0;
+        Serial mPendingCommandSerial = 1;
+        id<MTLCommandBuffer> mPendingCommands = nil;
     };
 
     class BindGroup : public BindGroupBase {
-        public:
-            BindGroup(BindGroupBuilder* builder);
+      public:
+        BindGroup(BindGroupBuilder* builder);
     };
 
     class BindGroupLayout : public BindGroupLayoutBase {
-        public:
-            BindGroupLayout(BindGroupLayoutBuilder* builder);
+      public:
+        BindGroupLayout(BindGroupLayoutBuilder* builder);
     };
 
     class Framebuffer : public FramebufferBase {
-        public:
-            Framebuffer(FramebufferBuilder* builder);
-            ~Framebuffer();
+      public:
+        Framebuffer(FramebufferBuilder* builder);
+        ~Framebuffer();
     };
 
     class Queue : public QueueBase {
-        public:
-            Queue(QueueBuilder* builder);
-            ~Queue();
+      public:
+        Queue(QueueBuilder* builder);
+        ~Queue();
 
-            id<MTLCommandQueue> GetMTLCommandQueue();
+        id<MTLCommandQueue> GetMTLCommandQueue();
 
-            // NXT API
-            void Submit(uint32_t numCommands, CommandBuffer* const * commands);
+        // NXT API
+        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
 
-        private:
-            id<MTLCommandQueue> mCommandQueue = nil;
+      private:
+        id<MTLCommandQueue> mCommandQueue = nil;
     };
 
     class RenderPass : public RenderPassBase {
-        public:
-            RenderPass(RenderPassBuilder* builder);
-            ~RenderPass();
+      public:
+        RenderPass(RenderPassBuilder* builder);
+        ~RenderPass();
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_METALBACKEND_H_
+#endif  // BACKEND_METAL_METALBACKEND_H_

@@ -16,8 +16,7 @@
 
 #include "backend/metal/MetalBackend.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     MTLPixelFormat MetalPixelFormat(nxt::TextureFormat format) {
         switch (format) {
@@ -34,7 +33,7 @@ namespace metal {
 
     namespace {
         MTLTextureUsage MetalTextureUsage(nxt::TextureUsageBit usage) {
-            MTLTextureUsage result = MTLTextureUsageUnknown; // This is 0
+            MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
             if (usage & (nxt::TextureUsageBit::Storage)) {
                 result |= MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
@@ -59,8 +58,7 @@ namespace metal {
         }
     }
 
-    Texture::Texture(TextureBuilder* builder)
-        : TextureBase(builder) {
+    Texture::Texture(TextureBuilder* builder) : TextureBase(builder) {
         auto desc = [MTLTextureDescriptor new];
         [desc autorelease];
         desc.textureType = MetalTextureType(GetDimension());
@@ -93,8 +91,7 @@ namespace metal {
     void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
-    TextureView::TextureView(TextureViewBuilder* builder)
-        : TextureViewBase(builder) {
+    TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
     }
-}
-}
+
+}}  // namespace backend::metal

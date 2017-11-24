@@ -25,21 +25,20 @@ namespace spirv_cross {
     class CompilerMSL;
 }
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class PipelineLayout : public PipelineLayoutBase {
-        public:
-            PipelineLayout(PipelineLayoutBuilder* builder);
+      public:
+        PipelineLayout(PipelineLayoutBuilder* builder);
 
-            using BindingIndexInfo = std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;
-            const BindingIndexInfo& GetBindingIndexInfo(nxt::ShaderStage stage) const;
+        using BindingIndexInfo =
+            std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;
+        const BindingIndexInfo& GetBindingIndexInfo(nxt::ShaderStage stage) const;
 
-        private:
-            PerStage<BindingIndexInfo> mIndexInfo;
+      private:
+        PerStage<BindingIndexInfo> mIndexInfo;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_PIPELINELAYOUTMTL_H_
+#endif  // BACKEND_METAL_PIPELINELAYOUTMTL_H_

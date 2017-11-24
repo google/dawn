@@ -19,21 +19,19 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class Sampler : public SamplerBase {
-        public:
-            Sampler(SamplerBuilder* builder);
-            ~Sampler();
+      public:
+        Sampler(SamplerBuilder* builder);
+        ~Sampler();
 
-            id<MTLSamplerState> GetMTLSamplerState();
+        id<MTLSamplerState> GetMTLSamplerState();
 
-        private:
-            id<MTLSamplerState> mMtlSamplerState = nil;
+      private:
+        id<MTLSamplerState> mMtlSamplerState = nil;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_SAMPLERMTL_H_
+#endif  // BACKEND_METAL_SAMPLERMTL_H_

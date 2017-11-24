@@ -18,17 +18,15 @@
 #include "backend/BlendState.h"
 
 #import <Metal/Metal.h>
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class BlendState : public BlendStateBase {
-        public:
-            BlendState(BlendStateBuilder* builder);
+      public:
+        BlendState(BlendStateBuilder* builder);
 
-            void ApplyBlendState(MTLRenderPipelineColorAttachmentDescriptor* descriptor) const;
+        void ApplyBlendState(MTLRenderPipelineColorAttachmentDescriptor* descriptor) const;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_BLENDSTATEMTL_H_
+#endif  // BACKEND_METAL_BLENDSTATEMTL_H_

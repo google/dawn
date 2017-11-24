@@ -19,21 +19,19 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class InputState : public InputStateBase {
-        public:
-            InputState(InputStateBuilder* builder);
-            ~InputState();
+      public:
+        InputState(InputStateBuilder* builder);
+        ~InputState();
 
-            MTLVertexDescriptor* GetMTLVertexDescriptor();
+        MTLVertexDescriptor* GetMTLVertexDescriptor();
 
-        private:
-            MTLVertexDescriptor* mMtlVertexDescriptor = nil;
+      private:
+        MTLVertexDescriptor* mMtlVertexDescriptor = nil;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_COMMANDINPUTSTATEMTL_H_
+#endif  // BACKEND_METAL_COMMANDINPUTSTATEMTL_H_

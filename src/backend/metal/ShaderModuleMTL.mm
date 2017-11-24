@@ -21,13 +21,12 @@
 
 #include <sstream>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     namespace {
 
         spv::ExecutionModel SpirvExecutionModelForStage(nxt::ShaderStage stage) {
-            switch(stage) {
+            switch (stage) {
                 case nxt::ShaderStage::Vertex:
                     return spv::ExecutionModelVertex;
                 case nxt::ShaderStage::Fragment:
@@ -38,7 +37,6 @@ namespace metal {
                     UNREACHABLE();
             }
         }
-
     }
 
     ShaderModule::ShaderModule(ShaderModuleBuilder* builder)
@@ -69,10 +67,8 @@ namespace metal {
 
         // Create one resource binding entry per stage per binding.
         for (uint32_t group : IterateBitSet(layout->GetBindGroupsLayoutMask())) {
-
             const auto& bgInfo = layout->GetBindGroupLayout(group)->GetBindingInfo();
             for (uint32_t binding : IterateBitSet(bgInfo.mask)) {
-
                 for (auto stage : IterateStages(bgInfo.visibilities[binding])) {
                     uint32_t index = layout->GetBindingIndexInfo(stage)[group][binding];
 
@@ -101,13 +97,15 @@ namespace metal {
             NSString* mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];
 
             auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
-            NSError *error = nil;
-            id<MTLLibrary> library = [mtlDevice newLibraryWithSource:mslSource options:nil error:&error];
+            NSError* error = nil;
+            id<MTLLibrary> library =
+                [mtlDevice newLibraryWithSource:mslSource options:nil error:&error];
             if (error != nil) {
                 // TODO(cwallez@chromium.org): forward errors to caller
                 NSLog(@"MTLDevice newLibraryWithSource => %@", error);
             }
-            // TODO(kainino@chromium.org): make this somehow more robust; it needs to behave like clean_func_name:
+            // TODO(kainino@chromium.org): make this somehow more robust; it needs to behave like
+            // clean_func_name:
             // https://github.com/KhronosGroup/SPIRV-Cross/blob/4e915e8c483e319d0dd7a1fa22318bef28f8cca3/spirv_msl.cpp#L1213
             if (strcmp(functionName, "main") == 0) {
                 functionName = "main0";
@@ -121,5 +119,4 @@ namespace metal {
         return result;
     }
 
-}
-}
+}}  // namespace backend::metal

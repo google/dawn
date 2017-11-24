@@ -19,26 +19,24 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class RenderPipeline : public RenderPipelineBase {
-        public:
-            RenderPipeline(RenderPipelineBuilder* builder);
-            ~RenderPipeline();
+      public:
+        RenderPipeline(RenderPipelineBuilder* builder);
+        ~RenderPipeline();
 
-            MTLIndexType GetMTLIndexType() const;
-            MTLPrimitiveType GetMTLPrimitiveTopology() const;
+        MTLIndexType GetMTLIndexType() const;
+        MTLPrimitiveType GetMTLPrimitiveTopology() const;
 
-            void Encode(id<MTLRenderCommandEncoder> encoder);
+        void Encode(id<MTLRenderCommandEncoder> encoder);
 
-        private:
-            MTLIndexType mMtlIndexType;
-            MTLPrimitiveType mMtlPrimitiveTopology;
-            id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;
+      private:
+        MTLIndexType mMtlIndexType;
+        MTLPrimitiveType mMtlPrimitiveTopology;
+        id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_RENDERPIPELINEMTL_H_
+#endif  // BACKEND_METAL_RENDERPIPELINEMTL_H_

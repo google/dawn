@@ -16,13 +16,12 @@
 
 #include "backend/metal/MetalBackend.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     namespace {
 
         MTLBlendFactor MetalBlendFactor(nxt::BlendFactor factor, bool alpha) {
-            switch(factor) {
+            switch (factor) {
                 case nxt::BlendFactor::Zero:
                     return MTLBlendFactorZero;
                 case nxt::BlendFactor::One:
@@ -48,12 +47,13 @@ namespace metal {
                 case nxt::BlendFactor::BlendColor:
                     return alpha ? MTLBlendFactorBlendAlpha : MTLBlendFactorBlendColor;
                 case nxt::BlendFactor::OneMinusBlendColor:
-                    return alpha ? MTLBlendFactorOneMinusBlendAlpha : MTLBlendFactorOneMinusBlendColor;
+                    return alpha ? MTLBlendFactorOneMinusBlendAlpha
+                                 : MTLBlendFactorOneMinusBlendColor;
             }
         }
 
         MTLBlendOperation MetalBlendOperation(nxt::BlendOperation operation) {
-            switch(operation) {
+            switch (operation) {
                 case nxt::BlendOperation::Add:
                     return MTLBlendOperationAdd;
                 case nxt::BlendOperation::Subtract:
@@ -68,14 +68,19 @@ namespace metal {
         }
 
         MTLColorWriteMask MetalColorWriteMask(nxt::ColorWriteMask colorWriteMask) {
-            return (
-                ((colorWriteMask & nxt::ColorWriteMask::Red) != nxt::ColorWriteMask::None ? MTLColorWriteMaskRed : MTLColorWriteMaskNone) |
-                ((colorWriteMask & nxt::ColorWriteMask::Green) != nxt::ColorWriteMask::None ? MTLColorWriteMaskGreen : MTLColorWriteMaskNone) |
-                ((colorWriteMask & nxt::ColorWriteMask::Blue) != nxt::ColorWriteMask::None ? MTLColorWriteMaskBlue : MTLColorWriteMaskNone) |
-                ((colorWriteMask & nxt::ColorWriteMask::Alpha) != nxt::ColorWriteMask::None ? MTLColorWriteMaskAlpha : MTLColorWriteMaskNone)
-            );
+            return (((colorWriteMask & nxt::ColorWriteMask::Red) != nxt::ColorWriteMask::None
+                         ? MTLColorWriteMaskRed
+                         : MTLColorWriteMaskNone) |
+                    ((colorWriteMask & nxt::ColorWriteMask::Green) != nxt::ColorWriteMask::None
+                         ? MTLColorWriteMaskGreen
+                         : MTLColorWriteMaskNone) |
+                    ((colorWriteMask & nxt::ColorWriteMask::Blue) != nxt::ColorWriteMask::None
+                         ? MTLColorWriteMaskBlue
+                         : MTLColorWriteMaskNone) |
+                    ((colorWriteMask & nxt::ColorWriteMask::Alpha) != nxt::ColorWriteMask::None
+                         ? MTLColorWriteMaskAlpha
+                         : MTLColorWriteMaskNone));
         }
-
     }
 
     BlendState::BlendState(BlendStateBuilder* builder) : BlendStateBase(builder) {
@@ -92,5 +97,5 @@ namespace metal {
         descriptor.alphaBlendOperation = MetalBlendOperation(info.alphaBlend.operation);
         descriptor.writeMask = MetalColorWriteMask(info.colorWriteMask);
     }
-}
-}
+
+}}  // namespace backend::metal

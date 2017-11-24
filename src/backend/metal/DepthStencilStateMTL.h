@@ -19,23 +19,21 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class Device;
 
     class DepthStencilState : public DepthStencilStateBase {
-        public:
-            DepthStencilState(DepthStencilStateBuilder* builder);
-            ~DepthStencilState();
+      public:
+        DepthStencilState(DepthStencilStateBuilder* builder);
+        ~DepthStencilState();
 
-            id<MTLDepthStencilState> GetMTLDepthStencilState();
+        id<MTLDepthStencilState> GetMTLDepthStencilState();
 
-        private:
-            id<MTLDepthStencilState> mMtlDepthStencilState = nil;
+      private:
+        id<MTLDepthStencilState> mMtlDepthStencilState = nil;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_DEPTHSTENCILSTATEMTL_H_
+#endif  // BACKEND_METAL_DEPTHSTENCILSTATEMTL_H_

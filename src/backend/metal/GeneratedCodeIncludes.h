@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/metal/MetalBackend.h"
 #include "backend/metal/BlendStateMTL.h"
 #include "backend/metal/BufferMTL.h"
 #include "backend/metal/CommandBufferMTL.h"
 #include "backend/metal/ComputePipelineMTL.h"
 #include "backend/metal/DepthStencilStateMTL.h"
 #include "backend/metal/InputStateMTL.h"
+#include "backend/metal/MetalBackend.h"
 #include "backend/metal/PipelineLayoutMTL.h"
 #include "backend/metal/RenderPipelineMTL.h"
 #include "backend/metal/SamplerMTL.h"

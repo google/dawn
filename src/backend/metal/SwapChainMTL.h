@@ -17,21 +17,19 @@
 
 #include "backend/SwapChain.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class Device;
 
     class SwapChain : public SwapChainBase {
-        public:
-            SwapChain(SwapChainBuilder* builder);
-            ~SwapChain();
+      public:
+        SwapChain(SwapChainBuilder* builder);
+        ~SwapChain();
 
-        protected:
-            TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+      protected:
+        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_SWAPCHAINGL_H_
+#endif  // BACKEND_METAL_SWAPCHAINGL_H_

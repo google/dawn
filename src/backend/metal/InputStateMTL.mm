@@ -17,8 +17,7 @@
 #include "backend/metal/MetalBackend.h"
 #include "common/BitSetIterator.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     namespace {
         MTLVertexFormat VertexFormatType(nxt::VertexFormat format) {
@@ -44,8 +43,7 @@ namespace metal {
         }
     }
 
-    InputState::InputState(InputStateBuilder* builder)
-        : InputStateBase(builder) {
+    InputState::InputState(InputStateBuilder* builder) : InputStateBase(builder) {
         mMtlVertexDescriptor = [MTLVertexDescriptor new];
 
         const auto& attributesSetMask = GetAttributesSetMask();
@@ -95,5 +93,4 @@ namespace metal {
         return mMtlVertexDescriptor;
     }
 
-}
-}
+}}  // namespace backend::metal

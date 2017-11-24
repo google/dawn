@@ -23,29 +23,27 @@ namespace spirv_cross {
     class CompilerMSL;
 }
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class PipelineLayout;
 
     class ShaderModule : public ShaderModuleBase {
-        public:
-            ShaderModule(ShaderModuleBuilder* builder);
+      public:
+        ShaderModule(ShaderModuleBuilder* builder);
 
-            struct MetalFunctionData {
-                id<MTLFunction> function;
-                MTLSize localWorkgroupSize;
-            };
-            MetalFunctionData GetFunction(const char* functionName, const PipelineLayout* layout) const;
+        struct MetalFunctionData {
+            id<MTLFunction> function;
+            MTLSize localWorkgroupSize;
+        };
+        MetalFunctionData GetFunction(const char* functionName, const PipelineLayout* layout) const;
 
-        private:
-            // Calling compile on CompilerMSL somehow changes internal state that makes subsequent
-            // compiles return invalid MSL. We keep the spirv around and recreate the compiler everytime
-            // we need to use it.
-            std::vector<uint32_t> mSpirv;
+      private:
+        // Calling compile on CompilerMSL somehow changes internal state that makes subsequent
+        // compiles return invalid MSL. We keep the spirv around and recreate the compiler everytime
+        // we need to use it.
+        std::vector<uint32_t> mSpirv;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_SHADERMODULEMTL_H_
+#endif  // BACKEND_METAL_SHADERMODULEMTL_H_

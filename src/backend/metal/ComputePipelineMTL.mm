@@ -17,12 +17,10 @@
 #include "backend/metal/MetalBackend.h"
 #include "backend/metal/ShaderModuleMTL.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
         : ComputePipelineBase(builder) {
-
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
 
         const auto& module = ToBackend(builder->GetStageInfo(nxt::ShaderStage::Compute).module);
@@ -30,9 +28,9 @@ namespace metal {
 
         auto compilationData = module->GetFunction(entryPoint.c_str(), ToBackend(GetLayout()));
 
-        NSError *error = nil;
-        mMtlComputePipelineState = [mtlDevice
-            newComputePipelineStateWithFunction:compilationData.function error:&error];
+        NSError* error = nil;
+        mMtlComputePipelineState =
+            [mtlDevice newComputePipelineStateWithFunction:compilationData.function error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
             builder->HandleError("Error creating pipeline state");
@@ -55,5 +53,4 @@ namespace metal {
         return mLocalWorkgroupSize;
     }
 
-}
-}
+}}  // namespace backend::metal

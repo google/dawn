@@ -19,24 +19,22 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
     class Device;
 
     class CommandBuffer : public CommandBufferBase {
-        public:
-            CommandBuffer(CommandBufferBuilder* builder);
-            ~CommandBuffer();
+      public:
+        CommandBuffer(CommandBufferBuilder* builder);
+        ~CommandBuffer();
 
-            void FillCommands(id<MTLCommandBuffer> commandBuffer);
+        void FillCommands(id<MTLCommandBuffer> commandBuffer);
 
-        private:
-            Device* mDevice;
-            CommandIterator mCommands;
+      private:
+        Device* mDevice;
+        CommandIterator mCommands;
     };
 
-}
-}
+}}  // namespace backend::metal
 
-#endif // BACKEND_METAL_COMMANDBUFFERMTL_H_
+#endif  // BACKEND_METAL_COMMANDBUFFERMTL_H_

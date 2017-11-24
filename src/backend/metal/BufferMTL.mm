@@ -17,12 +17,9 @@
 #include "backend/metal/MetalBackend.h"
 #include "backend/metal/ResourceUploader.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
-    Buffer::Buffer(BufferBuilder* builder)
-        : BufferBase(builder) {
-
+    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
         MTLResourceOptions storageMode;
         if (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
             storageMode = MTLResourceStorageModeShared;
@@ -31,7 +28,7 @@ namespace metal {
         }
 
         mMtlBuffer = [ToBackend(GetDevice())->GetMTLDevice() newBufferWithLength:GetSize()
-            options:storageMode];
+                                                                         options:storageMode];
     }
 
     Buffer::~Buffer() {
@@ -50,7 +47,8 @@ namespace metal {
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
         auto* uploader = ToBackend(GetDevice())->GetResourceUploader();
-        uploader->BufferSubData(mMtlBuffer, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
+        uploader->BufferSubData(mMtlBuffer, start * sizeof(uint32_t), count * sizeof(uint32_t),
+                                data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t) {
@@ -65,12 +63,10 @@ namespace metal {
     void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
     }
 
-    BufferView::BufferView(BufferViewBuilder* builder)
-        : BufferViewBase(builder) {
+    BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
     }
 
-    MapReadRequestTracker::MapReadRequestTracker(Device* device)
-        : mDevice(device) {
+    MapReadRequestTracker::MapReadRequestTracker(Device* device) : mDevice(device) {
     }
 
     MapReadRequestTracker::~MapReadRequestTracker() {
@@ -92,5 +88,5 @@ namespace metal {
         }
         mInflightRequests.ClearUpTo(finishedSerial);
     }
-}
-}
+
+}}  // namespace backend::metal

@@ -16,30 +16,32 @@
 
 #include "backend/metal/MetalBackend.h"
 
-namespace backend {
-namespace metal {
+namespace backend { namespace metal {
 
-    ResourceUploader::ResourceUploader(Device* device)
-        : mDevice(device) {
+    ResourceUploader::ResourceUploader(Device* device) : mDevice(device) {
     }
 
     ResourceUploader::~ResourceUploader() {
         ASSERT(mInflightUploadBuffers.Empty());
     }
 
-    void ResourceUploader::BufferSubData(id<MTLBuffer> buffer, uint32_t start, uint32_t size, const void* data) {
-        // TODO(cwallez@chromium.org) use a ringbuffer instead of creating a small buffer for each update
-        id<MTLBuffer> uploadBuffer = [mDevice->GetMTLDevice() newBufferWithLength:size
-            options:MTLResourceStorageModeShared];
+    void ResourceUploader::BufferSubData(id<MTLBuffer> buffer,
+                                         uint32_t start,
+                                         uint32_t size,
+                                         const void* data) {
+        // TODO(cwallez@chromium.org) use a ringbuffer instead of creating a small buffer for each
+        // update
+        id<MTLBuffer> uploadBuffer =
+            [mDevice->GetMTLDevice() newBufferWithLength:size options:MTLResourceStorageModeShared];
         memcpy([uploadBuffer contents], data, size);
 
         id<MTLCommandBuffer> commandBuffer = mDevice->GetPendingCommandBuffer();
         id<MTLBlitCommandEncoder> encoder = [commandBuffer blitCommandEncoder];
         [encoder copyFromBuffer:uploadBuffer
-                sourceOffset:0
-                toBuffer:buffer
-                destinationOffset:start
-                size:size];
+                   sourceOffset:0
+                       toBuffer:buffer
+              destinationOffset:start
+                           size:size];
         [encoder endEncoding];
 
         mInflightUploadBuffers.Enqueue(uploadBuffer, mDevice->GetPendingCommandSerial());
@@ -52,5 +54,4 @@ namespace metal {
         mInflightUploadBuffers.ClearUpTo(finishedSerial);
     }
 
-}
-}
+}}  // namespace backend::metal
