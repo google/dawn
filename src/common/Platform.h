@@ -16,15 +16,15 @@
 #define COMMON_PLATFORM_H_
 
 #if defined(_WIN32) || defined(_WIN64)
-    #define NXT_PLATFORM_WINDOWS 1
+#    define NXT_PLATFORM_WINDOWS 1
 #elif defined(__linux__)
-    #define NXT_PLATFORM_LINUX 1
-    #define NXT_PLATFORM_POSIX 1
+#    define NXT_PLATFORM_LINUX 1
+#    define NXT_PLATFORM_POSIX 1
 #elif defined(__APPLE__)
-    #define NXT_PLATFORM_APPLE 1
-    #define NXT_PLATFORM_POSIX 1
+#    define NXT_PLATFORM_APPLE 1
+#    define NXT_PLATFORM_POSIX 1
 #else
-    #error "Unsupported platform."
+#    error "Unsupported platform."
 #endif
 
-#endif // COMMON_PLATFORM_H_
+#endif  // COMMON_PLATFORM_H_

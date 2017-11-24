@@ -19,26 +19,28 @@
 
 #include "nxt/nxt.h"
 
-namespace nxt {
-namespace wire {
+namespace nxt { namespace wire {
 
     class CommandSerializer {
-        public:
-            virtual ~CommandSerializer() = default;
-            virtual void* GetCmdSpace(size_t size) = 0;
-            virtual void Flush() = 0;
+      public:
+        virtual ~CommandSerializer() = default;
+        virtual void* GetCmdSpace(size_t size) = 0;
+        virtual void Flush() = 0;
     };
 
     class CommandHandler {
-        public:
-            virtual ~CommandHandler() = default;
-            virtual const uint8_t* HandleCommands(const uint8_t* commands, size_t size) = 0;
+      public:
+        virtual ~CommandHandler() = default;
+        virtual const uint8_t* HandleCommands(const uint8_t* commands, size_t size) = 0;
     };
 
-    CommandHandler* NewClientDevice(nxtProcTable* procs, nxtDevice* device, CommandSerializer* serializer);
-    CommandHandler* NewServerCommandHandler(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer);
+    CommandHandler* NewClientDevice(nxtProcTable* procs,
+                                    nxtDevice* device,
+                                    CommandSerializer* serializer);
+    CommandHandler* NewServerCommandHandler(nxtDevice device,
+                                            const nxtProcTable& procs,
+                                            CommandSerializer* serializer);
 
-}
-}
+}}  // namespace nxt::wire
 
-#endif // WIRE_WIRE_H_
+#endif  // WIRE_WIRE_H_

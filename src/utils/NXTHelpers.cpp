@@ -25,7 +25,9 @@
 
 namespace utils {
 
-    void FillShaderModuleBuilder(const nxt::ShaderModuleBuilder& builder, nxt::ShaderStage stage, const char* source) {
+    void FillShaderModuleBuilder(const nxt::ShaderModuleBuilder& builder,
+                                 nxt::ShaderStage stage,
+                                 const char* source) {
         shaderc::Compiler compiler;
         shaderc::CompileOptions options;
 
@@ -60,7 +62,8 @@ namespace utils {
 
 #ifdef DUMP_SPIRV_ASSEMBLY
         {
-            auto resultAsm = compiler.CompileGlslToSpvAssembly(source, strlen(source), kind, "myshader?", options);
+            auto resultAsm = compiler.CompileGlslToSpvAssembly(source, strlen(source), kind,
+                                                               "myshader?", options);
             size_t sizeAsm = (resultAsm.cend() - resultAsm.cbegin());
 
             char* buffer = reinterpret_cast<char*>(malloc(sizeAsm + 1));
@@ -86,21 +89,26 @@ namespace utils {
 #endif
     }
 
-    nxt::ShaderModule CreateShaderModule(const nxt::Device& device, nxt::ShaderStage stage, const char* source) {
+    nxt::ShaderModule CreateShaderModule(const nxt::Device& device,
+                                         nxt::ShaderStage stage,
+                                         const char* source) {
         nxt::ShaderModuleBuilder builder = device.CreateShaderModuleBuilder();
         FillShaderModuleBuilder(builder, stage, source);
         return builder.GetResult();
     }
 
-    nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device, const void* data, uint32_t size, nxt::BufferUsageBit usage) {
+    nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device,
+                                           const void* data,
+                                           uint32_t size,
+                                           nxt::BufferUsageBit usage) {
         nxt::Buffer buffer = device.CreateBufferBuilder()
-            .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | usage)
-            .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
-            .SetSize(size)
-            .GetResult();
+                                 .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | usage)
+                                 .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
+                                 .SetSize(size)
+                                 .GetResult();
         buffer.SetSubData(0, size / sizeof(uint32_t), reinterpret_cast<const uint32_t*>(data));
         buffer.FreezeUsage(usage);
         return buffer;
     }
 
-}
+}  // namespace utils

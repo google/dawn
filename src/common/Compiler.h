@@ -21,32 +21,32 @@
 //  - NXT_BUILTIN_UNREACHABLE(): Hints the compiler that a code path is unreachable
 
 // Clang and GCC
-#ifdef __GNUC__
-    #if defined(__clang__)
-        #define NXT_COMPILER_CLANG
-    #else
-        #define NXT_COMPILER_GCC
-    #endif
+#if defined(__GNUC__)
+#    if defined(__clang__)
+#        define NXT_COMPILER_CLANG
+#    else
+#        define NXT_COMPILER_GCC
+#    endif
 
-    #if defined(__i386__) || defined(__x86_64__)
-        #define NXT_BREAKPOINT() __asm__ __volatile__("int $3\n\t")
-    #else
-        #error "Implement BREAKPOINT on your platform"
-    #endif
+#    if defined(__i386__) || defined(__x86_64__)
+#        define NXT_BREAKPOINT() __asm__ __volatile__("int $3\n\t")
+#    else
+#        error "Implement BREAKPOINT on your platform"
+#    endif
 
-    #define NXT_BUILTIN_UNREACHABLE() __builtin_unreachable()
+#    define NXT_BUILTIN_UNREACHABLE() __builtin_unreachable()
 
 // MSVC
 #elif defined(_MSC_VER)
-    #define NXT_COMPILER_MSVC
+#    define NXT_COMPILER_MSVC
 
-    extern void __cdecl __debugbreak(void);
-    #define NXT_BREAKPOINT() __debugbreak()
+extern void __cdecl __debugbreak(void);
+#    define NXT_BREAKPOINT() __debugbreak()
 
-    #define NXT_BUILTIN_UNREACHABLE() __assume(false)
+#    define NXT_BUILTIN_UNREACHABLE() __assume(false)
 
 #else
-    #error "Unsupported compiler"
+#    error "Unsupported compiler"
 #endif
 
-#endif // COMMON_COMPILER_H_
+#endif  // COMMON_COMPILER_H_

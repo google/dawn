@@ -15,25 +15,25 @@
 #include "common/Platform.h"
 
 #if defined(NXT_PLATFORM_WINDOWS)
-    #include <Windows.h>
+#    include <Windows.h>
 #elif defined(NXT_PLATFORM_POSIX)
-   #include <unistd.h>
+#    include <unistd.h>
 #else
-    #error "Unsupported platform."
+#    error "Unsupported platform."
 #endif
 
 namespace utils {
 
-    #if defined(NXT_PLATFORM_WINDOWS)
-        void USleep(unsigned int usecs) {
-            Sleep(static_cast<DWORD>(usecs / 1000));
-        }
-    #elif defined(NXT_PLATFORM_POSIX)
-        void USleep(unsigned int usecs) {
-            usleep(usecs);
-        }
-    #else
-        #error "Implement USleep for your platform."
-    #endif
+#if defined(NXT_PLATFORM_WINDOWS)
+    void USleep(unsigned int usecs) {
+        Sleep(static_cast<DWORD>(usecs / 1000));
+    }
+#elif defined(NXT_PLATFORM_POSIX)
+    void USleep(unsigned int usecs) {
+        usleep(usecs);
+    }
+#else
+#    error "Implement USleep for your platform."
+#endif
 
-}
+}  // namespace utils

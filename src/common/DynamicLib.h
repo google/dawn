@@ -21,34 +21,34 @@
 #include <type_traits>
 
 class DynamicLib {
-    public:
-        DynamicLib() = default;
-        ~DynamicLib();
+  public:
+    DynamicLib() = default;
+    ~DynamicLib();
 
-        DynamicLib(const DynamicLib&) = delete;
-        DynamicLib& operator=(const DynamicLib&) = delete;
+    DynamicLib(const DynamicLib&) = delete;
+    DynamicLib& operator=(const DynamicLib&) = delete;
 
-        DynamicLib(DynamicLib&& other);
-        DynamicLib& operator=(DynamicLib&& other);
+    DynamicLib(DynamicLib&& other);
+    DynamicLib& operator=(DynamicLib&& other);
 
-        bool Valid() const;
+    bool Valid() const;
 
-        bool Open(const std::string& filename, std::string* error = nullptr);
-        void Close();
+    bool Open(const std::string& filename, std::string* error = nullptr);
+    void Close();
 
-        void* GetProc(const std::string& procName, std::string* error = nullptr) const;
+    void* GetProc(const std::string& procName, std::string* error = nullptr) const;
 
-        template<typename T>
-        bool GetProc(T** proc, const std::string& procName, std::string* error = nullptr) const {
-            ASSERT(proc != nullptr);
-            static_assert(std::is_function<T>::value, "");
+    template <typename T>
+    bool GetProc(T** proc, const std::string& procName, std::string* error = nullptr) const {
+        ASSERT(proc != nullptr);
+        static_assert(std::is_function<T>::value, "");
 
-            *proc = reinterpret_cast<T*>(GetProc(procName, error));
-            return *proc != nullptr;
-        }
+        *proc = reinterpret_cast<T*>(GetProc(procName, error));
+        return *proc != nullptr;
+    }
 
-    private:
-        void* mHandle = nullptr;
+  private:
+    void* mHandle = nullptr;
 };
 
-#endif // COMMON_DYNAMICLIB_H_
+#endif  // COMMON_DYNAMICLIB_H_

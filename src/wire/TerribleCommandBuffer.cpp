@@ -14,8 +14,7 @@
 
 #include "wire/TerribleCommandBuffer.h"
 
-namespace nxt {
-namespace wire {
+namespace nxt { namespace wire {
 
     TerribleCommandBuffer::TerribleCommandBuffer() {
     }
@@ -48,5 +47,4 @@ namespace wire {
         mOffset = 0;
     }
 
-}
-}
+}}  // namespace nxt::wire

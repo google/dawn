@@ -14,32 +14,29 @@
 
 #include "utils/BackendBinding.h"
 
-namespace backend {
-    namespace null {
-        void Init(nxtProcTable* procs, nxtDevice* device);
-    }
-}
+namespace backend { namespace null {
+    void Init(nxtProcTable* procs, nxtDevice* device);
+}}  // namespace backend::null
 
 namespace utils {
 
     class NullBinding : public BackendBinding {
-        public:
-            void SetupGLFWWindowHints() override {
-            }
-            void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
-                backend::null::Init(procs, device);
-            }
-            uint64_t GetSwapChainImplementation() override {
-                return 0;
-            }
-            nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-                return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
-            }
+      public:
+        void SetupGLFWWindowHints() override {
+        }
+        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+            backend::null::Init(procs, device);
+        }
+        uint64_t GetSwapChainImplementation() override {
+            return 0;
+        }
+        nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
+            return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+        }
     };
-
 
     BackendBinding* CreateNullBinding() {
         return new NullBinding;
     }
 
-}
+}  // namespace utils

@@ -19,11 +19,10 @@
 
 #include "wire/Wire.h"
 
-namespace nxt {
-namespace wire {
+namespace nxt { namespace wire {
 
-class TerribleCommandBuffer : public CommandSerializer {
-    public:
+    class TerribleCommandBuffer : public CommandSerializer {
+      public:
         TerribleCommandBuffer();
         TerribleCommandBuffer(CommandHandler* handler);
 
@@ -32,13 +31,12 @@ class TerribleCommandBuffer : public CommandSerializer {
         void* GetCmdSpace(size_t size) override;
         void Flush() override;
 
-    private:
+      private:
         CommandHandler* mHandler = nullptr;
         size_t mOffset = 0;
         uint8_t mBuffer[10000000];
-};
+    };
 
-}
-}
+}}  // namespace nxt::wire
 
-#endif // WIRE_TERRIBLE_COMMAND_BUFFER_H_
+#endif  // WIRE_TERRIBLE_COMMAND_BUFFER_H_

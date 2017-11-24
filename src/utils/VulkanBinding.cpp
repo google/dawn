@@ -17,75 +17,71 @@
 #include "nxt/nxt_wsi.h"
 #include "utils/SwapChainImpl.h"
 
-namespace backend {
-    namespace vulkan {
-        void Init(nxtProcTable* procs, nxtDevice* device);
-    }
-}
+namespace backend { namespace vulkan {
+    void Init(nxtProcTable* procs, nxtDevice* device);
+}}  // namespace backend::vulkan
 
 namespace utils {
 
     class SwapChainImplVulkan : SwapChainImpl {
-        public:
-            static nxtSwapChainImplementation Create(GLFWwindow* window) {
-                auto impl = GenerateSwapChainImplementation<SwapChainImplVulkan, nxtWSIContextVulkan>();
-                impl.userData = new SwapChainImplVulkan(window);
-                return impl;
-            }
+      public:
+        static nxtSwapChainImplementation Create(GLFWwindow* window) {
+            auto impl = GenerateSwapChainImplementation<SwapChainImplVulkan, nxtWSIContextVulkan>();
+            impl.userData = new SwapChainImplVulkan(window);
+            return impl;
+        }
 
-        private:
-            GLFWwindow* window = nullptr;
+      private:
+        GLFWwindow* window = nullptr;
 
-            SwapChainImplVulkan(GLFWwindow* window)
-                : window(window) {
-            }
+        SwapChainImplVulkan(GLFWwindow* window) : window(window) {
+        }
 
-            ~SwapChainImplVulkan() {
-            }
+        ~SwapChainImplVulkan() {
+        }
 
-            // For GenerateSwapChainImplementation
-            friend class SwapChainImpl;
+        // For GenerateSwapChainImplementation
+        friend class SwapChainImpl;
 
-            void Init(nxtWSIContextVulkan*) {
-            }
+        void Init(nxtWSIContextVulkan*) {
+        }
 
-            nxtSwapChainError Configure(nxtTextureFormat, nxtTextureUsageBit, uint32_t, uint32_t) {
-                return NXT_SWAP_CHAIN_NO_ERROR;
-            }
+        nxtSwapChainError Configure(nxtTextureFormat, nxtTextureUsageBit, uint32_t, uint32_t) {
+            return NXT_SWAP_CHAIN_NO_ERROR;
+        }
 
-            nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture*) {
-                return NXT_SWAP_CHAIN_NO_ERROR;
-            }
+        nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture*) {
+            return NXT_SWAP_CHAIN_NO_ERROR;
+        }
 
-            nxtSwapChainError Present() {
-                return NXT_SWAP_CHAIN_NO_ERROR;
-            }
+        nxtSwapChainError Present() {
+            return NXT_SWAP_CHAIN_NO_ERROR;
+        }
     };
 
     class VulkanBinding : public BackendBinding {
-        public:
-            void SetupGLFWWindowHints() override {
+      public:
+        void SetupGLFWWindowHints() override {
+        }
+        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+            backend::vulkan::Init(procs, device);
+        }
+        uint64_t GetSwapChainImplementation() override {
+            if (mSwapchainImpl.userData == nullptr) {
+                mSwapchainImpl = SwapChainImplVulkan::Create(mWindow);
             }
-            void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
-                backend::vulkan::Init(procs, device);
-            }
-            uint64_t GetSwapChainImplementation() override {
-                if (mSwapchainImpl.userData == nullptr) {
-                    mSwapchainImpl = SwapChainImplVulkan::Create(mWindow);
-                }
-                return reinterpret_cast<uint64_t>(&mSwapchainImpl);
-            }
-            nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-                return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
-            }
+            return reinterpret_cast<uint64_t>(&mSwapchainImpl);
+        }
+        nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
+            return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+        }
 
-        private:
-            nxtSwapChainImplementation mSwapchainImpl = {};
+      private:
+        nxtSwapChainImplementation mSwapchainImpl = {};
     };
-
 
     BackendBinding* CreateVulkanBinding() {
         return new VulkanBinding;
     }
 
-}
+}  // namespace utils

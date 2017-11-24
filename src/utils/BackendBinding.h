@@ -32,21 +32,22 @@ namespace utils {
     };
 
     class BackendBinding {
-        public:
-            virtual ~BackendBinding() = default;
+      public:
+        virtual ~BackendBinding() = default;
 
-            virtual void SetupGLFWWindowHints() = 0;
-            virtual void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) = 0;
-            virtual uint64_t GetSwapChainImplementation() = 0;
-            virtual nxtTextureFormat GetPreferredSwapChainTextureFormat() = 0;
+        virtual void SetupGLFWWindowHints() = 0;
+        virtual void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) = 0;
+        virtual uint64_t GetSwapChainImplementation() = 0;
+        virtual nxtTextureFormat GetPreferredSwapChainTextureFormat() = 0;
 
-            void SetWindow(GLFWwindow* window);
+        void SetWindow(GLFWwindow* window);
 
-        protected:
-            GLFWwindow* mWindow = nullptr;
+      protected:
+        GLFWwindow* mWindow = nullptr;
     };
 
     BackendBinding* CreateBinding(BackendType type);
-}
 
-#endif // UTILS_BACKENDBINDING_H_
+}  // namespace utils
+
+#endif  // UTILS_BACKENDBINDING_H_

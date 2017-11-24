@@ -21,7 +21,6 @@
 #include <bitset>
 #include <limits>
 
-
 // This is ANGLE's BitSetIterator class with a customizable return type
 // TODO(cwallez@chromium.org): it could be optimized, in particular when N <= 64
 
@@ -33,44 +32,48 @@ T roundUp(const T value, const T alignment) {
 
 template <size_t N, typename T>
 class BitSetIterator final {
-    public:
-        BitSetIterator(const std::bitset<N>& bitset);
-        BitSetIterator(const BitSetIterator& other);
-        BitSetIterator &operator=(const BitSetIterator& other);
+  public:
+    BitSetIterator(const std::bitset<N>& bitset);
+    BitSetIterator(const BitSetIterator& other);
+    BitSetIterator& operator=(const BitSetIterator& other);
 
-        class Iterator final {
-            public:
-                Iterator(const std::bitset<N>& bits);
-                Iterator& operator++();
+    class Iterator final {
+      public:
+        Iterator(const std::bitset<N>& bits);
+        Iterator& operator++();
 
-                bool operator==(const Iterator& other) const;
-                bool operator!=(const Iterator& other) const;
-                T operator*() const { return static_cast<T>(mCurrentBit); }
+        bool operator==(const Iterator& other) const;
+        bool operator!=(const Iterator& other) const;
+        T operator*() const {
+            return static_cast<T>(mCurrentBit);
+        }
 
-            private:
-                unsigned long getNextBit();
+      private:
+        unsigned long getNextBit();
 
-                static const size_t BitsPerWord = sizeof(uint32_t) * 8;
-                std::bitset<N> mBits;
-                unsigned long mCurrentBit;
-                unsigned long mOffset;
-        };
+        static const size_t BitsPerWord = sizeof(uint32_t) * 8;
+        std::bitset<N> mBits;
+        unsigned long mCurrentBit;
+        unsigned long mOffset;
+    };
 
-        Iterator begin() const { return Iterator(mBits); }
-        Iterator end() const { return Iterator(std::bitset<N>(0)); }
+    Iterator begin() const {
+        return Iterator(mBits);
+    }
+    Iterator end() const {
+        return Iterator(std::bitset<N>(0));
+    }
 
-    private:
-        const std::bitset<N> mBits;
+  private:
+    const std::bitset<N> mBits;
 };
 
 template <size_t N, typename T>
-BitSetIterator<N, T>::BitSetIterator(const std::bitset<N>& bitset)
-    : mBits(bitset) {
+BitSetIterator<N, T>::BitSetIterator(const std::bitset<N>& bitset) : mBits(bitset) {
 }
 
 template <size_t N, typename T>
-BitSetIterator<N, T>::BitSetIterator(const BitSetIterator& other)
-    : mBits(other.mBits) {
+BitSetIterator<N, T>::BitSetIterator(const BitSetIterator& other) : mBits(other.mBits) {
 }
 
 template <size_t N, typename T>

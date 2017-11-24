@@ -16,7 +16,11 @@
 
 #include <iostream>
 
-void HandleAssertionFailure(const char* file, const char* function, int line, const char* condition) {
-    std::cerr << "Assertion failure at " << file << ":" << line << " (" << function << "): " << condition << std::endl;
+void HandleAssertionFailure(const char* file,
+                            const char* function,
+                            int line,
+                            const char* condition) {
+    std::cerr << "Assertion failure at " << file << ":" << line << " (" << function
+              << "): " << condition << std::endl;
     NXT_BREAKPOINT();
 }

@@ -28,14 +28,14 @@ void* AlignVoidPtr(void* ptr, size_t alignment);
 bool IsAligned(uint32_t value, size_t alignment);
 uint32_t Align(uint32_t value, size_t alignment);
 
-template<typename T>
+template <typename T>
 T* AlignPtr(T* ptr, size_t alignment) {
     return reinterpret_cast<T*>(AlignVoidPtr(ptr, alignment));
 }
 
-template<typename T>
+template <typename T>
 const T* AlignPtr(const T* ptr, size_t alignment) {
     return reinterpret_cast<const T*>(AlignVoidPtr(const_cast<T*>(ptr), alignment));
 }
 
-#endif // COMMON_MATH_H_
+#endif  // COMMON_MATH_H_

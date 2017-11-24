@@ -17,8 +17,7 @@
 
 #include "wire/WireCmd_autogen.h"
 
-namespace nxt {
-namespace wire {
+namespace nxt { namespace wire {
 
     struct ReturnDeviceErrorCallbackCmd {
         wire::ReturnWireCmd commandId = ReturnWireCmd::DeviceErrorCallback;
@@ -55,7 +54,6 @@ namespace wire {
         const void* GetData() const;
     };
 
-}
-}
+}}  // namespace nxt::wire
 
-#endif // WIRE_WIRECMD_H_
+#endif  // WIRE_WIRECMD_H_

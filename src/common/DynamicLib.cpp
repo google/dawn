@@ -17,11 +17,11 @@
 #include "common/Platform.h"
 
 #if NXT_PLATFORM_WINDOWS
-    #include <windows.h>
+#    include <windows.h>
 #elif NXT_PLATFORM_POSIX
-    #include <dlfcn.h>
+#    include <dlfcn.h>
 #else
-    #error "Unsupported platform for DynamicLib"
+#    error "Unsupported platform for DynamicLib"
 #endif
 
 DynamicLib::~DynamicLib() {
@@ -42,21 +42,21 @@ bool DynamicLib::Valid() const {
 }
 
 bool DynamicLib::Open(const std::string& filename, std::string* error) {
-    #if NXT_PLATFORM_WINDOWS
-        mHandle = LoadLibraryA(filename.c_str());
+#if NXT_PLATFORM_WINDOWS
+    mHandle = LoadLibraryA(filename.c_str());
 
-        if (mHandle == nullptr && error != nullptr) {
-            *error = "Windows Error: " + std::to_string(GetLastError());
-        }
-    #elif NXT_PLATFORM_POSIX
-        mHandle = dlopen(filename.c_str(), RTLD_NOW);
+    if (mHandle == nullptr && error != nullptr) {
+        *error = "Windows Error: " + std::to_string(GetLastError());
+    }
+#elif NXT_PLATFORM_POSIX
+    mHandle = dlopen(filename.c_str(), RTLD_NOW);
 
-        if (mHandle == nullptr && error != nullptr) {
-            *error = dlerror();
-        }
-    #else
-        #error "Unsupported platform for DynamicLib"
-    #endif
+    if (mHandle == nullptr && error != nullptr) {
+        *error = dlerror();
+    }
+#else
+#    error "Unsupported platform for DynamicLib"
+#endif
 
     return mHandle != nullptr;
 }
@@ -66,13 +66,13 @@ void DynamicLib::Close() {
         return;
     }
 
-    #if NXT_PLATFORM_WINDOWS
-        FreeLibrary(static_cast<HMODULE>(mHandle));
-    #elif NXT_PLATFORM_POSIX
-        dlclose(mHandle);
-    #else
-        #error "Unsupported platform for DynamicLib"
-    #endif
+#if NXT_PLATFORM_WINDOWS
+    FreeLibrary(static_cast<HMODULE>(mHandle));
+#elif NXT_PLATFORM_POSIX
+    dlclose(mHandle);
+#else
+#    error "Unsupported platform for DynamicLib"
+#endif
 
     mHandle = nullptr;
 }
@@ -80,21 +80,21 @@ void DynamicLib::Close() {
 void* DynamicLib::GetProc(const std::string& procName, std::string* error) const {
     void* proc = nullptr;
 
-    #if NXT_PLATFORM_WINDOWS
-        proc = reinterpret_cast<void*>(GetProcAddress(static_cast<HMODULE>(mHandle), procName.c_str()));
+#if NXT_PLATFORM_WINDOWS
+    proc = reinterpret_cast<void*>(GetProcAddress(static_cast<HMODULE>(mHandle), procName.c_str()));
 
-        if (proc == nullptr && error != nullptr) {
-            *error = "Windows Error: " + std::to_string(GetLastError());
-        }
-    #elif NXT_PLATFORM_POSIX
-        proc = reinterpret_cast<void*>(dlsym(mHandle, procName.c_str()));
+    if (proc == nullptr && error != nullptr) {
+        *error = "Windows Error: " + std::to_string(GetLastError());
+    }
+#elif NXT_PLATFORM_POSIX
+    proc = reinterpret_cast<void*>(dlsym(mHandle, procName.c_str()));
 
-        if (proc == nullptr && error != nullptr) {
-            *error = dlerror();
-        }
-    #else
-        #error "Unsupported platform for DynamicLib"
-    #endif
+    if (proc == nullptr && error != nullptr) {
+        *error = dlerror();
+    }
+#else
+#    error "Unsupported platform for DynamicLib"
+#endif
 
     return proc;
 }

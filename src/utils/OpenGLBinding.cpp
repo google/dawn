@@ -19,130 +19,131 @@
 #include "nxt/nxt_wsi.h"
 #include "utils/SwapChainImpl.h"
 
-#include <cstdio>
+// Glad needs to be included before GLFW otherwise it complain that GL.h was already included
 #include "glad/glad.h"
+
+#include <cstdio>
 #include "GLFW/glfw3.h"
 
-namespace backend {
-    namespace opengl {
-        void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device);
-    }
-}
+namespace backend { namespace opengl {
+    void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device);
+}}  // namespace backend::opengl
 
 namespace utils {
     class SwapChainImplGL : SwapChainImpl {
-        public:
-            static nxtSwapChainImplementation Create(GLFWwindow* window) {
-                auto impl = GenerateSwapChainImplementation<SwapChainImplGL, nxtWSIContextGL>();
-                impl.userData = new SwapChainImplGL(window);
-                return impl;
+      public:
+        static nxtSwapChainImplementation Create(GLFWwindow* window) {
+            auto impl = GenerateSwapChainImplementation<SwapChainImplGL, nxtWSIContextGL>();
+            impl.userData = new SwapChainImplGL(window);
+            return impl;
+        }
+
+      private:
+        GLFWwindow* mWindow = nullptr;
+        uint32_t mWidth = 0;
+        uint32_t mHeight = 0;
+        GLuint mBackFBO = 0;
+        GLuint mBackTexture = 0;
+
+        SwapChainImplGL(GLFWwindow* window) : mWindow(window) {
+        }
+
+        ~SwapChainImplGL() {
+            glDeleteTextures(1, &mBackTexture);
+            glDeleteFramebuffers(1, &mBackFBO);
+        }
+
+        // For GenerateSwapChainImplementation
+        friend class SwapChainImpl;
+
+        void Init(nxtWSIContextGL*) {
+            glGenTextures(1, &mBackTexture);
+            glBindTexture(GL_TEXTURE_2D, mBackTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+            glGenFramebuffers(1, &mBackFBO);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
+            glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                   mBackTexture, 0);
+        }
+
+        nxtSwapChainError Configure(nxtTextureFormat format,
+                                    nxtTextureUsageBit,
+                                    uint32_t width,
+                                    uint32_t height) {
+            if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
+                return "unsupported format";
             }
+            ASSERT(width > 0);
+            ASSERT(height > 0);
+            mWidth = width;
+            mHeight = height;
 
-        private:
-            GLFWwindow* mWindow = nullptr;
-            uint32_t mWidth = 0;
-            uint32_t mHeight = 0;
-            GLuint mBackFBO = 0;
-            GLuint mBackTexture = 0;
+            glBindTexture(GL_TEXTURE_2D, mBackTexture);
+            // Reallocate the texture
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                         nullptr);
 
-            SwapChainImplGL(GLFWwindow* window)
-                : mWindow(window) {
-            }
+            return NXT_SWAP_CHAIN_NO_ERROR;
+        }
 
-            ~SwapChainImplGL() {
-                glDeleteTextures(1, &mBackTexture);
-                glDeleteFramebuffers(1, &mBackFBO);
-            }
+        nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
+            nextTexture->texture = reinterpret_cast<void*>(static_cast<size_t>(mBackTexture));
+            return NXT_SWAP_CHAIN_NO_ERROR;
+        }
 
-            // For GenerateSwapChainImplementation
-            friend class SwapChainImpl;
+        nxtSwapChainError Present() {
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, mWidth, mHeight, GL_COLOR_BUFFER_BIT,
+                              GL_NEAREST);
+            glfwSwapBuffers(mWindow);
 
-            void Init(nxtWSIContextGL*) {
-                glGenTextures(1, &mBackTexture);
-                glBindTexture(GL_TEXTURE_2D, mBackTexture);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, 0,
-                        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-                glGenFramebuffers(1, &mBackFBO);
-                glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
-                glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                        GL_TEXTURE_2D, mBackTexture, 0);
-            }
-
-            nxtSwapChainError Configure(nxtTextureFormat format, nxtTextureUsageBit,
-                    uint32_t width, uint32_t height) {
-                if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
-                    return "unsupported format";
-                }
-                ASSERT(width > 0);
-                ASSERT(height > 0);
-                mWidth = width;
-                mHeight = height;
-
-                glBindTexture(GL_TEXTURE_2D, mBackTexture);
-                // Reallocate the texture
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
-                        GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-                return NXT_SWAP_CHAIN_NO_ERROR;
-            }
-
-            nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
-                nextTexture->texture = reinterpret_cast<void*>(static_cast<size_t>(mBackTexture));
-                return NXT_SWAP_CHAIN_NO_ERROR;
-            }
-
-            nxtSwapChainError Present() {
-                glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
-                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-                glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, mWidth, mHeight,
-                        GL_COLOR_BUFFER_BIT, GL_NEAREST);
-                glfwSwapBuffers(mWindow);
-
-                return NXT_SWAP_CHAIN_NO_ERROR;
-            }
+            return NXT_SWAP_CHAIN_NO_ERROR;
+        }
     };
 
     class OpenGLBinding : public BackendBinding {
-        public:
-            void SetupGLFWWindowHints() override {
-                #if defined(NXT_PLATFORM_APPLE)
-                    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-                    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-                    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-                    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-                #else
-                    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-                    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-                    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-                    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-                #endif
-            }
-            void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
-                glfwMakeContextCurrent(mWindow);
-                backend::opengl::Init(reinterpret_cast<void*(*)(const char*)>(glfwGetProcAddress), procs, device);
+      public:
+        void SetupGLFWWindowHints() override {
+#if defined(NXT_PLATFORM_APPLE)
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#else
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#endif
+        }
+        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+            glfwMakeContextCurrent(mWindow);
+            backend::opengl::Init(reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress),
+                                  procs, device);
 
-                mBackendDevice = *device;
-            }
+            mBackendDevice = *device;
+        }
 
-            uint64_t GetSwapChainImplementation() override {
-                if (mSwapchainImpl.userData == nullptr) {
-                    mSwapchainImpl = SwapChainImplGL::Create(mWindow);
-                }
-                return reinterpret_cast<uint64_t>(&mSwapchainImpl);
+        uint64_t GetSwapChainImplementation() override {
+            if (mSwapchainImpl.userData == nullptr) {
+                mSwapchainImpl = SwapChainImplGL::Create(mWindow);
             }
+            return reinterpret_cast<uint64_t>(&mSwapchainImpl);
+        }
 
-            nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-                return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
-            }
+        nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
+            return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+        }
 
-        private:
-            nxtDevice mBackendDevice = nullptr;
-            nxtSwapChainImplementation mSwapchainImpl = {};
+      private:
+        nxtDevice mBackendDevice = nullptr;
+        nxtSwapChainImplementation mSwapchainImpl = {};
     };
 
     BackendBinding* CreateOpenGLBinding() {
         return new OpenGLBinding;
     }
 
-}
+}  // namespace utils

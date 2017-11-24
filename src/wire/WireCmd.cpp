@@ -14,8 +14,7 @@
 
 #include "wire/WireCmd.h"
 
-namespace nxt {
-namespace wire {
+namespace nxt { namespace wire {
 
     size_t ReturnDeviceErrorCallbackCmd::GetRequiredSize() const {
         return sizeof(*this) + messageStrlen + 1;
@@ -45,5 +44,4 @@ namespace wire {
         return this + 1;
     }
 
-}
-}
+}}  // namespace nxt::wire

@@ -17,63 +17,64 @@
 
 #include "common/Compiler.h"
 
-void HandleAssertionFailure(const char* file, const char* function, int line, const char* condition);
+// NXT asserts to be used instead of the regular C stdlib assert function (if you don't use assert
+// yet, you should start now!). In debug ASSERT(condition) will trigger an error, otherwise in
+// release it does nothing at runtime.
+//
+// In case of name clashes (with for example a testing library), you can define the
+// NXT_SKIP_ASSERT_SHORTHANDS to only define the NXT_ prefixed macros.
+//
+// These asserts feature:
+//     - Logging of the error with file, line and function information.
+//     - Breaking in the debugger when an assert is triggered and a debugger is attached.
+//     - Use the assert information to help the compiler optimizer in release builds.
 
-/*
- * NXT asserts to be used instead of the regular C stdlib assert function (if you don't
- * use assert yet, you should start now!). In debug ASSERT(condition) will trigger an error,
- * otherwise in release it does nothing at runtime.
- *
- * In case of name clashes (with for example a testing library), you can define the
- * NXT_SKIP_ASSERT_SHORTHANDS to only define the NXT_ prefixed macros.
- *
- * These asserts feature:
- *     - Logging of the error with file, line and function information.
- *     - Breaking in the debugger when an assert is triggered and a debugger is attached.
- *     - Use the assert information to help the compiler optimizer in release builds.
- */
-
-// MSVC triggers a warning in /W4 for do {} while(0). SDL worked around this by using
-// // (0,0) and points out that it looks like an owl face.
+// MSVC triggers a warning in /W4 for do {} while(0). SDL worked around this by using (0,0) and
+// points out that it looks like an owl face.
 #if defined(NXT_COMPILER_MSVC)
-    #define NXT_ASSERT_LOOP_CONDITION (0,0)
+#    define NXT_ASSERT_LOOP_CONDITION (0, 0)
 #else
-    #define NXT_ASSERT_LOOP_CONDITION (0)
+#    define NXT_ASSERT_LOOP_CONDITION (0)
 #endif
 
 // NXT_ASSERT_CALLSITE_HELPER generates the actual assert code. In Debug it does what you would
-// expect of an assert and in release it tries to give hints to make the compiler generate better code.
+// expect of an assert and in release it tries to give hints to make the compiler generate better
+// code.
 #if defined(NXT_ENABLE_ASSERTS)
-    #define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
-        do { \
-            if (!(condition)) { \
+#    define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition)   \
+        do {                                                          \
+            if (!(condition)) {                                       \
                 HandleAssertionFailure(file, func, line, #condition); \
-            } \
-        } while(NXT_ASSERT_LOOP_CONDITION)
+            }                                                         \
+        } while (NXT_ASSERT_LOOP_CONDITION)
 #else
-    #if defined(NXT_COMPILER_MSVC)
-        #define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
-                __assume(condition)
-    #elif defined(NXT_COMPILER_CLANG) && defined(__builtin_assume)
-        #define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
-                __builtin_assume(condition)
-    #else
-        #define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
-            do { \
-                (void) sizeof(condition); \
-            } while(NXT_ASSERT_LOOP_CONDITION)
-    #endif
+#    if defined(NXT_COMPILER_MSVC)
+#        define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) __assume(condition)
+#    elif defined(NXT_COMPILER_CLANG) && defined(__builtin_assume)
+#        define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) __builtin_assume(condition)
+#    else
+#        define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
+            do {                                                        \
+                (void)sizeof(condition);                                \
+            } while (NXT_ASSERT_LOOP_CONDITION)
+#    endif
 #endif
 
 #define NXT_ASSERT(condition) NXT_ASSERT_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
-#define NXT_UNREACHABLE() \
-    do { \
-        NXT_ASSERT(NXT_ASSERT_LOOP_CONDITION && "Unreachable code hit"); NXT_BUILTIN_UNREACHABLE(); \
-    } while(NXT_ASSERT_LOOP_CONDITION)
+#define NXT_UNREACHABLE()                                                \
+    do {                                                                 \
+        NXT_ASSERT(NXT_ASSERT_LOOP_CONDITION && "Unreachable code hit"); \
+        NXT_BUILTIN_UNREACHABLE();                                       \
+    } while (NXT_ASSERT_LOOP_CONDITION)
 
 #if !defined(NXT_SKIP_ASSERT_SHORTHANDS)
-    #define ASSERT NXT_ASSERT
-    #define UNREACHABLE NXT_UNREACHABLE
+#    define ASSERT NXT_ASSERT
+#    define UNREACHABLE NXT_UNREACHABLE
 #endif
 
-#endif // COMMON_ASSERT_H_
+void HandleAssertionFailure(const char* file,
+                            const char* function,
+                            int line,
+                            const char* condition);
+
+#endif  // COMMON_ASSERT_H_

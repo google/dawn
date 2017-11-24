@@ -17,31 +17,31 @@
 #include "common/Assert.h"
 
 #if defined(NXT_COMPILER_MSVC)
-    #include <intrin.h>
+#    include <intrin.h>
 #endif
 
 uint32_t ScanForward(uint32_t bits) {
     ASSERT(bits != 0);
-    #if defined(NXT_COMPILER_MSVC)
-        unsigned long firstBitIndex = 0ul;
-        unsigned char ret = _BitScanForward(&firstBitIndex, bits);
-        ASSERT(ret != 0);
-        return firstBitIndex;
-    #else
-        return static_cast<uint32_t>(__builtin_ctz(bits));
-    #endif
+#if defined(NXT_COMPILER_MSVC)
+    unsigned long firstBitIndex = 0ul;
+    unsigned char ret = _BitScanForward(&firstBitIndex, bits);
+    ASSERT(ret != 0);
+    return firstBitIndex;
+#else
+    return static_cast<uint32_t>(__builtin_ctz(bits));
+#endif
 }
 
 uint32_t Log2(uint32_t value) {
     ASSERT(value != 0);
-    #if defined(NXT_COMPILER_MSVC)
-        unsigned long firstBitIndex = 0ul;
-        unsigned char ret = _BitScanReverse(&firstBitIndex, value);
-        ASSERT(ret != 0);
-        return firstBitIndex;
-    #else
-        return 31 - static_cast<uint32_t>(__builtin_clz(value));
-    #endif
+#if defined(NXT_COMPILER_MSVC)
+    unsigned long firstBitIndex = 0ul;
+    unsigned char ret = _BitScanReverse(&firstBitIndex, value);
+    ASSERT(ret != 0);
+    return firstBitIndex;
+#else
+    return 31 - static_cast<uint32_t>(__builtin_clz(value));
+#endif
 }
 
 bool IsPowerOfTwo(size_t n) {
@@ -58,7 +58,8 @@ bool IsPtrAligned(const void* ptr, size_t alignment) {
 void* AlignVoidPtr(void* ptr, size_t alignment) {
     ASSERT(IsPowerOfTwo(alignment));
     ASSERT(alignment != 0);
-    return reinterpret_cast<void*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) & ~(alignment - 1));
+    return reinterpret_cast<void*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) &
+                                   ~(alignment - 1));
 }
 
 bool IsAligned(uint32_t value, size_t alignment) {

@@ -19,4 +19,4 @@
 
 using Serial = uint64_t;
 
-#endif // COMMON_SERIAL_H_
+#endif  // COMMON_SERIAL_H_

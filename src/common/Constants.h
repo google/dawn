@@ -19,11 +19,12 @@
 
 static constexpr uint32_t kMaxPushConstants = 32u;
 static constexpr uint32_t kMaxBindGroups = 4u;
-static constexpr uint32_t kMaxBindingsPerGroup = 16u; // TODO(cwallez@chromium.org): investigate bindgroup limits
+// TODO(cwallez@chromium.org): investigate bindgroup limits
+static constexpr uint32_t kMaxBindingsPerGroup = 16u;
 static constexpr uint32_t kMaxVertexAttributes = 16u;
 static constexpr uint32_t kMaxVertexInputs = 16u;
 static constexpr uint32_t kNumStages = 3;
 static constexpr uint32_t kMaxColorAttachments = 4u;
 static constexpr uint32_t kTextureRowPitchAlignment = 256u;
 
-#endif // COMMON_CONSTANTS_H_
+#endif  // COMMON_CONSTANTS_H_
