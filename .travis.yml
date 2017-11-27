@@ -20,8 +20,11 @@ addons:
  # Everything under apt is only used on linux
  apt:
   sources:
-   # PPAs to get newer toolchains
+   # PPA for clang 5.0
    - llvm-toolchain-trusty-5.0
+   # PPA for clang-format 6.0
+   - llvm-toolchain-trusty
+   # PPA for a more recen libstdc++
    - ubuntu-toolchain-r-test
   packages:
    # Get recent compilers
@@ -34,6 +37,8 @@ addons:
    - python-jinja2
    # Required dependency for GLFW on Linux
    - xorg-dev
+   # Format using the latest and greatest
+   - clang-format-6.0
 
 before_install:
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
@@ -56,3 +61,9 @@ script:
 
  # Test
  - ./src/tests/nxt_unittests
+
+ # Get out of the build dir
+ - cd ..
+
+ # Lint
+ - if [ "$TRAVIS_OS_NAME" == "linux" ]; then ./scripts/travis_lint_format.sh clang-format-6.0; fi
