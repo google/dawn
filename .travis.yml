@@ -3,7 +3,8 @@ os:
  - osx
 
 # If linux, use precise
-dist: precise
+dist: trusty
+sudo: false
 
 language:
  - cpp
@@ -20,16 +21,13 @@ addons:
  apt:
   sources:
    # PPAs to get newer toolchains
-   - llvm-toolchain-precise
+   - llvm-toolchain-trusty-5.0
    - ubuntu-toolchain-r-test
-   # PPA to get a semi-recent cmake (3.2)
-   - george-edison55-precise-backports
   packages:
    # Get recent compilers
    - clang-5.0
-   # Get a newer CMake than the 2.8 default
-   - cmake
-   - cmake-data
+   # Pull a recent version of libstdc++
+   - libstdc++-6-dev
    # Ninja builds are faster
    - ninja-build
    # Required for the code generator, unfortunately this is jinja2 2.6 which lacks some of the options we use
