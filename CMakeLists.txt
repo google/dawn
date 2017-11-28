@@ -162,6 +162,10 @@ endfunction()
 # Enable the creation of folders for Visual Studio projects
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Output shared libs and executables directly in the build directory
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 ################################################################################
 # Generate the C and C++ NXT APIs
 ################################################################################

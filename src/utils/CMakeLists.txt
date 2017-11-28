@@ -55,7 +55,7 @@ if (NXT_ENABLE_VULKAN)
 endif()
 
 add_library(utils STATIC ${UTILS_SOURCES})
-target_link_libraries(utils nxt_backend shaderc nxtcpp nxt)
+target_link_libraries(utils nxt_backend shaderc_shared nxtcpp nxt)
 target_include_directories(utils PUBLIC ${SRC_DIR})
 NXTInternalTarget("" utils)
 if(NOT MSVC)

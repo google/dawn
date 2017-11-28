@@ -17,4 +17,4 @@ build_script:
  - cmake --build .
 
  # TODO(cwallez@chromium.org) test on more than Debug.
- - src\tests\Debug\nxt_unittests.exe
+ - Debug\nxt_unittests.exe

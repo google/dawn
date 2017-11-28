@@ -64,7 +64,7 @@ script:
  - cmake --build .
 
  # Test
- - ./src/tests/nxt_unittests
+ - ./nxt_unittests
 
  # Get out of the build dir
  - cd ..

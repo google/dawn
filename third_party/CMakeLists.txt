@@ -44,6 +44,14 @@ NXTExternalTarget("third_party" glad)
 set(SPIRV_WERROR OFF CACHE BOOL "" FORCE)
 # Don't add unnecessary shaderc targets
 set(SHADERC_SKIP_TESTS ON)
+set(SHADERC_SKIP_INSTALL ON)
+# Remove unused glslang and spirv-tools parts
+# set(ENABLE_HLSL OFF CACHE BOOL "")
+set(ENABLE_OPT OFF CACHE BOOL "")
+set(ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "")
+set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "")
+set(SKIP_SPIRV_TOOLS_INSTALL ON CACHE BOOL "")
+set(SPIRV_SKIP_EXECUTABLES ON CACHE BOOL "")
 # Help shaderc find the non-standard paths for its dependencies
 set(SHADERC_GOOGLE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest CACHE STRING "Location of googletest source")
 set(SHADERC_GLSLANG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/glslang" CACHE STRING "Location of glslang source")
@@ -64,12 +72,25 @@ set_target_properties(
     glslc_exe
     install-headers
     shaderc
+    shaderc_shared
     shaderc_util
     shaderc_combined_genfile
     shaderc-online-compile testdata
     SPIRV-Headers-example
     SPIRV-Headers-example-1.1
     PROPERTIES FOLDER "third_party/shaderc"
+)
+# Remove a bunch of targets we don't need that are pulled by shaderc and glslang
+set_target_properties(
+    SPIRV-Headers-example-1.1
+    SPIRV-Headers-example
+    glslc_exe
+    SPIRV-Tools-link
+    SPVRemapper
+    shaderc
+    shaderc-online-compile
+    shaderc_combined_genfile
+    PROPERTIES EXCLUDE_FROM_ALL true
 )
 
 # SPIRV-Cross
