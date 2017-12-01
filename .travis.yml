@@ -42,11 +42,12 @@ addons:
 
 before_install:
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+ - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo easy_install pip; fi
 
 install:
  # Install dependencies required on OSX
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install ninja; fi
- - if [ "$TRAVIS_OS_NAME" == "osx" ]; then pip install jinja2; fi
+ - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo python -m pip install jinja2; fi
 
 script:
  # Use the more recent compilers we just installed
