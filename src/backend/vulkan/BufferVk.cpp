@@ -49,6 +49,58 @@ namespace backend { namespace vulkan {
             return flags;
         }
 
+        VkPipelineStageFlags VulkanPipelineStage(nxt::BufferUsageBit usage) {
+            VkPipelineStageFlags flags = 0;
+
+            if (usage & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
+                flags |= VK_PIPELINE_STAGE_HOST_BIT;
+            }
+            if (usage & (nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)) {
+                flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
+            }
+            if (usage & (nxt::BufferUsageBit::Index | nxt::BufferUsageBit::Vertex)) {
+                flags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+            }
+            if (usage & (nxt::BufferUsageBit::Uniform | nxt::BufferUsageBit::Storage)) {
+                flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+            }
+
+            return flags;
+        }
+
+        VkAccessFlags VulkanAccessFlags(nxt::BufferUsageBit usage) {
+            VkAccessFlags flags = 0;
+
+            if (usage & nxt::BufferUsageBit::MapRead) {
+                flags |= VK_ACCESS_HOST_READ_BIT;
+            }
+            if (usage & nxt::BufferUsageBit::MapWrite) {
+                flags |= VK_ACCESS_HOST_WRITE_BIT;
+            }
+            if (usage & nxt::BufferUsageBit::TransferSrc) {
+                flags |= VK_ACCESS_TRANSFER_READ_BIT;
+            }
+            if (usage & nxt::BufferUsageBit::TransferDst) {
+                flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
+            }
+            if (usage & nxt::BufferUsageBit::Index) {
+                flags |= VK_ACCESS_INDEX_READ_BIT;
+            }
+            if (usage & nxt::BufferUsageBit::Vertex) {
+                flags |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+            }
+            if (usage & nxt::BufferUsageBit::Uniform) {
+                flags |= VK_ACCESS_UNIFORM_READ_BIT;
+            }
+            if (usage & nxt::BufferUsageBit::Storage) {
+                flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            }
+
+            return flags;
+        }
+
     }  // namespace
 
     Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
@@ -106,6 +158,28 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
+    void Buffer::RecordBarrier(VkCommandBuffer commands,
+                               nxt::BufferUsageBit currentUsage,
+                               nxt::BufferUsageBit targetUsage) const {
+        VkPipelineStageFlags srcStages = VulkanPipelineStage(currentUsage);
+        VkPipelineStageFlags dstStages = VulkanPipelineStage(targetUsage);
+
+        VkBufferMemoryBarrier barrier;
+        barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        barrier.pNext = nullptr;
+        barrier.srcAccessMask = VulkanAccessFlags(currentUsage);
+        barrier.dstAccessMask = VulkanAccessFlags(targetUsage);
+        barrier.srcQueueFamilyIndex = 0;
+        barrier.dstQueueFamilyIndex = 0;
+        barrier.buffer = mHandle;
+        barrier.offset = 0;
+        barrier.size = GetSize();
+
+        ToBackend(GetDevice())
+            ->fn.CmdPipelineBarrier(commands, srcStages, dstStages, 0, 0, nullptr, 1, &barrier, 0,
+                                    nullptr);
+    }
+
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
         BufferUploader* uploader = ToBackend(GetDevice())->GetBufferUploader();
         uploader->BufferSubData(mHandle, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
@@ -123,7 +197,10 @@ namespace backend { namespace vulkan {
         // No need to do anything, we keep CPU-visible memory mapped at all time.
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
+                                     nxt::BufferUsageBit targetUsage) {
+        VkCommandBuffer commands = ToBackend(GetDevice())->GetPendingCommandBuffer();
+        RecordBarrier(commands, currentUsage, targetUsage);
     }
 
     MapReadRequestTracker::MapReadRequestTracker(Device* device) : mDevice(device) {

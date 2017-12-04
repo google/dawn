@@ -34,6 +34,10 @@ namespace backend { namespace vulkan {
 
         VkBuffer GetHandle() const;
 
+        void RecordBarrier(VkCommandBuffer commands,
+                           nxt::BufferUsageBit currentUsage,
+                           nxt::BufferUsageBit targetUsage) const;
+
       private:
         void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;

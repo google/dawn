@@ -52,7 +52,12 @@ namespace backend { namespace vulkan {
                 } break;
 
                 case Command::TransitionBufferUsage: {
-                    SkipCommand(&mCommands, type);
+                    TransitionBufferUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionBufferUsageCmd>();
+
+                    Buffer* buffer = ToBackend(cmd->buffer.Get());
+                    buffer->RecordBarrier(commands, buffer->GetUsage(), cmd->usage);
+                    buffer->UpdateUsageInternal(cmd->usage);
                 } break;
 
                 default: { UNREACHABLE(); } break;

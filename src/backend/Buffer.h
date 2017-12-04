@@ -37,7 +37,7 @@ namespace backend {
         bool HasFrozenUsage(nxt::BufferUsageBit usage) const;
         void UpdateUsageInternal(nxt::BufferUsageBit usage);
 
-        DeviceBase* GetDevice();
+        DeviceBase* GetDevice() const;
 
         // NXT API
         BufferViewBuilder* CreateBufferViewBuilder();

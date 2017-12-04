@@ -41,7 +41,7 @@ namespace backend {
         return new BufferViewBuilder(mDevice, this);
     }
 
-    DeviceBase* BufferBase::GetDevice() {
+    DeviceBase* BufferBase::GetDevice() const {
         return mDevice;
     }
 
