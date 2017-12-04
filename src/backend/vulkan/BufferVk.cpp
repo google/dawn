@@ -15,6 +15,7 @@
 #include "backend/vulkan/BufferVk.h"
 
 #include "backend/vulkan/BufferUploader.h"
+#include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/VulkanBackend.h"
 
 #include <cstring>
@@ -92,7 +93,7 @@ namespace backend { namespace vulkan {
         device->GetMemoryAllocator()->Free(&mMemoryAllocation);
 
         if (mHandle != VK_NULL_HANDLE) {
-            device->fn.DestroyBuffer(device->GetVkDevice(), mHandle, nullptr);
+            device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;
         }
     }

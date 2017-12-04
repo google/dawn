@@ -14,6 +14,7 @@
 
 #include "backend/vulkan/BufferUploader.h"
 
+#include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/MemoryAllocator.h"
 #include "backend/vulkan/VulkanBackend.h"
 
@@ -25,7 +26,6 @@ namespace backend { namespace vulkan {
     }
 
     BufferUploader::~BufferUploader() {
-        ASSERT(mBuffersToDelete.Empty());
     }
 
     void BufferUploader::BufferSubData(VkBuffer buffer,
@@ -93,14 +93,10 @@ namespace backend { namespace vulkan {
         // TODO(cwallez@chromium.org): Buffers must be deleted before the memory.
         // This happens to work for now, but is fragile.
         mDevice->GetMemoryAllocator()->Free(&allocation);
-        mBuffersToDelete.Enqueue(stagingBuffer, mDevice->GetSerial());
+        mDevice->GetFencedDeleter()->DeleteWhenUnused(stagingBuffer);
     }
 
-    void BufferUploader::Tick(Serial completedSerial) {
-        for (VkBuffer buffer : mBuffersToDelete.IterateUpTo(completedSerial)) {
-            mDevice->fn.DestroyBuffer(mDevice->GetVkDevice(), buffer, nullptr);
-        }
-        mBuffersToDelete.ClearUpTo(completedSerial);
+    void BufferUploader::Tick(Serial) {
     }
 
 }}  // namespace backend::vulkan

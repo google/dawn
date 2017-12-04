@@ -51,7 +51,6 @@ namespace backend { namespace vulkan {
 
       private:
         Device* mDevice = nullptr;
-        SerialQueue<VkDeviceMemory> mReleasedMemory;
     };
 
 }}  // namespace backend::vulkan

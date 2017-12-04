@@ -66,9 +66,10 @@ namespace backend { namespace vulkan {
     class Texture;
     using TextureView = TextureViewBase;
 
+    class BufferUploader;
+    class FencedDeleter;
     class MapReadRequestTracker;
     class MemoryAllocator;
-    class BufferUploader;
 
     struct VulkanBackendTraits {
         using BindGroupType = BindGroup;
@@ -103,6 +104,24 @@ namespace backend { namespace vulkan {
         Device();
         ~Device();
 
+        // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
+        const VulkanFunctions fn;
+
+        const VulkanDeviceInfo& GetDeviceInfo() const;
+        VkInstance GetInstance() const;
+        VkDevice GetVkDevice() const;
+
+        BufferUploader* GetBufferUploader() const;
+        FencedDeleter* GetFencedDeleter() const;
+        MapReadRequestTracker* GetMapReadRequestTracker() const;
+        MemoryAllocator* GetMemoryAllocator() const;
+
+        Serial GetSerial() const;
+
+        VkCommandBuffer GetPendingCommandBuffer();
+        void SubmitPendingCommands();
+
+        // NXT API
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
         BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
@@ -124,22 +143,6 @@ namespace backend { namespace vulkan {
         TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
         void TickImpl() override;
-
-        const VulkanDeviceInfo& GetDeviceInfo() const;
-        MapReadRequestTracker* GetMapReadRequestTracker() const;
-        MemoryAllocator* GetMemoryAllocator() const;
-        BufferUploader* GetBufferUploader() const;
-
-        Serial GetSerial() const;
-
-        VkCommandBuffer GetPendingCommandBuffer();
-        void SubmitPendingCommands();
-
-        // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
-        const VulkanFunctions fn;
-
-        VkInstance GetInstance() const;
-        VkDevice GetVkDevice() const;
 
       private:
         bool CreateInstance(VulkanGlobalKnobs* usedKnobs);
@@ -173,9 +176,10 @@ namespace backend { namespace vulkan {
         VkQueue mQueue = VK_NULL_HANDLE;
         VkDebugReportCallbackEXT mDebugReportCallback = VK_NULL_HANDLE;
 
+        BufferUploader* mBufferUploader = nullptr;
+        FencedDeleter* mDeleter = nullptr;
         MapReadRequestTracker* mMapReadRequestTracker = nullptr;
         MemoryAllocator* mMemoryAllocator = nullptr;
-        BufferUploader* mBufferUploader = nullptr;
 
         VkFence GetUnusedFence();
         void CheckPassedFences();

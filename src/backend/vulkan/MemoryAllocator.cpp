@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "backend/vulkan/MemoryAllocator.h"
+
+#include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/VulkanBackend.h"
 
 namespace backend { namespace vulkan {
@@ -37,7 +39,6 @@ namespace backend { namespace vulkan {
     }
 
     MemoryAllocator::~MemoryAllocator() {
-        ASSERT(mReleasedMemory.Empty());
     }
 
     bool MemoryAllocator::Allocate(VkMemoryRequirements requirements,
@@ -121,16 +122,12 @@ namespace backend { namespace vulkan {
     }
 
     void MemoryAllocator::Free(DeviceMemoryAllocation* allocation) {
-        mReleasedMemory.Enqueue(allocation->mMemory, mDevice->GetSerial());
+        mDevice->GetFencedDeleter()->DeleteWhenUnused(allocation->mMemory);
         allocation->mMemory = VK_NULL_HANDLE;
         allocation->mOffset = 0;
         allocation->mMappedPointer = nullptr;
     }
 
-    void MemoryAllocator::Tick(Serial finishedSerial) {
-        for (auto memory : mReleasedMemory.IterateUpTo(finishedSerial)) {
-            mDevice->fn.FreeMemory(mDevice->GetVkDevice(), memory, nullptr);
-        }
-        mReleasedMemory.ClearUpTo(finishedSerial);
+    void MemoryAllocator::Tick(Serial) {
     }
 }}  // namespace backend::vulkan

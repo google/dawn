@@ -17,6 +17,7 @@
 #include "backend/Commands.h"
 #include "backend/vulkan/BufferUploader.h"
 #include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/FencedDeleter.h"
 #include "common/Platform.h"
 
 #include <spirv-cross/spirv_cross.hpp>
@@ -107,9 +108,10 @@ namespace backend { namespace vulkan {
 
         GatherQueueFromDevice();
 
+        mBufferUploader = new BufferUploader(this);
+        mDeleter = new FencedDeleter(this);
         mMapReadRequestTracker = new MapReadRequestTracker(this);
         mMemoryAllocator = new MemoryAllocator(this);
-        mBufferUploader = new BufferUploader(this);
     }
 
     Device::~Device() {
@@ -139,20 +141,17 @@ namespace backend { namespace vulkan {
         }
         mUnusedFences.clear();
 
-        if (mBufferUploader) {
-            delete mBufferUploader;
-            mBufferUploader = nullptr;
-        }
+        delete mBufferUploader;
+        mBufferUploader = nullptr;
 
-        if (mMemoryAllocator) {
-            delete mMemoryAllocator;
-            mMemoryAllocator = nullptr;
-        }
+        delete mDeleter;
+        mDeleter = nullptr;
 
-        if (mMapReadRequestTracker) {
-            delete mMapReadRequestTracker;
-            mMapReadRequestTracker = nullptr;
-        }
+        delete mMapReadRequestTracker;
+        mMapReadRequestTracker = nullptr;
+
+        delete mMemoryAllocator;
+        mMemoryAllocator = nullptr;
 
         // VkQueues are destroyed when the VkDevice is destroyed
         if (mVkDevice != VK_NULL_HANDLE) {
@@ -243,6 +242,8 @@ namespace backend { namespace vulkan {
         mBufferUploader->Tick(mCompletedSerial);
         mMemoryAllocator->Tick(mCompletedSerial);
 
+        mDeleter->Tick(mCompletedSerial);
+
         if (mPendingCommands.pool != VK_NULL_HANDLE) {
             SubmitPendingCommands();
         }
@@ -262,6 +263,10 @@ namespace backend { namespace vulkan {
 
     BufferUploader* Device::GetBufferUploader() const {
         return mBufferUploader;
+    }
+
+    FencedDeleter* Device::GetFencedDeleter() const {
+        return mDeleter;
     }
 
     Serial Device::GetSerial() const {

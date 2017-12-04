@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_BUFFERUPLOADER_H_
-#define BACKEND_VULKAN_BUFFERUPLOADER_H_
+#ifndef BACKEND_VULKAN_FENCEDDELETER_H_
+#define BACKEND_VULKAN_FENCEDDELETER_H_
 
 #include "backend/vulkan/vulkan_platform.h"
 #include "common/SerialQueue.h"
@@ -22,22 +22,22 @@ namespace backend { namespace vulkan {
 
     class Device;
 
-    class BufferUploader {
+    class FencedDeleter {
       public:
-        BufferUploader(Device* device);
-        ~BufferUploader();
+        FencedDeleter(Device* device);
+        ~FencedDeleter();
 
-        void BufferSubData(VkBuffer buffer,
-                           VkDeviceSize offset,
-                           VkDeviceSize size,
-                           const void* data);
+        void DeleteWhenUnused(VkBuffer buffer);
+        void DeleteWhenUnused(VkDeviceMemory memory);
 
         void Tick(Serial completedSerial);
 
       private:
         Device* mDevice = nullptr;
+        SerialQueue<VkBuffer> mBuffersToDelete;
+        SerialQueue<VkDeviceMemory> mMemoriesToDelete;
     };
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_BUFFERUPLOADER_H_
+#endif  // BACKEND_VULKAN_FENCEDDELETER_H_
