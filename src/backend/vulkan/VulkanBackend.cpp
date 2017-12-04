@@ -17,6 +17,7 @@
 #include "backend/Commands.h"
 #include "backend/vulkan/BufferUploader.h"
 #include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/CommandBufferVk.h"
 #include "backend/vulkan/FencedDeleter.h"
 #include "common/Platform.h"
 
@@ -246,6 +247,11 @@ namespace backend { namespace vulkan {
 
         if (mPendingCommands.pool != VK_NULL_HANDLE) {
             SubmitPendingCommands();
+        } else if (mCompletedSerial == mNextSerial - 1) {
+            // If there's no GPU work in flight we still need to artificially increment the serial
+            // so that CPU operations waiting on GPU completion can know they don't have to wait.
+            mCompletedSerial++;
+            mNextSerial++;
         }
     }
 
@@ -584,7 +590,15 @@ namespace backend { namespace vulkan {
     Queue::~Queue() {
     }
 
-    void Queue::Submit(uint32_t, CommandBuffer* const*) {
+    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
+        Device* device = ToBackend(GetDevice());
+
+        VkCommandBuffer commandBuffer = device->GetPendingCommandBuffer();
+        for (uint32_t i = 0; i < numCommands; ++i) {
+            commands[i]->RecordCommands(commandBuffer);
+        }
+
+        device->SubmitPendingCommands();
     }
 
     // Texture

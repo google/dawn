@@ -13,4 +13,5 @@
 // limitations under the License.
 
 #include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/CommandBufferVk.h"
 #include "backend/vulkan/VulkanBackend.h"

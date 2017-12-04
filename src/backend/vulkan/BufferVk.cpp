@@ -102,6 +102,10 @@ namespace backend { namespace vulkan {
         CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, data);
     }
 
+    VkBuffer Buffer::GetHandle() const {
+        return mHandle;
+    }
+
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
         BufferUploader* uploader = ToBackend(GetDevice())->GetBufferUploader();
         uploader->BufferSubData(mHandle, start * sizeof(uint32_t), count * sizeof(uint32_t), data);

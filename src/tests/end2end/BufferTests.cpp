@@ -136,10 +136,10 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
 
 // Stress test for many calls to SetSubData
 TEST_P(BufferSetSubDataTests, ManySetSubData) {
-    if (IsD3D12() || IsMetal()) {
+    if (IsD3D12() || IsMetal() || IsVulkan()) {
         // TODO(cwallez@chromium.org): Use ringbuffers for SetSubData on explicit APIs.
         // otherwise this creates too many resources and can take freeze the driver(?)
-        std::cout << "Test skipped on D3D12 and Metal" << std::endl;
+        std::cout << "Test skipped on D3D12, Metal and Vulkan" << std::endl;
         return;
     }
 
@@ -180,4 +180,8 @@ TEST_P(BufferSetSubDataTests, LargeSetSubData) {
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
 }
 
-NXT_INSTANTIATE_TEST(BufferSetSubDataTests, D3D12Backend, MetalBackend, OpenGLBackend)
+NXT_INSTANTIATE_TEST(BufferSetSubDataTests,
+                     D3D12Backend,
+                     MetalBackend,
+                     OpenGLBackend,
+                     VulkanBackend)

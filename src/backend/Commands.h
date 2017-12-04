@@ -168,6 +168,7 @@ namespace backend {
 
     // This needs to be called before the CommandIterator is freed so that the Ref<> present in
     // the commands have a chance to run their destructor and remove internal references.
+    class CommandIterator;
     void FreeCommands(CommandIterator* commands);
     void SkipCommand(CommandIterator* commands, Command type);
 

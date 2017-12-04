@@ -32,6 +32,8 @@ namespace backend { namespace vulkan {
 
         void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
 
+        VkBuffer GetHandle() const;
+
       private:
         void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;

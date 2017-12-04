@@ -293,6 +293,8 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/BufferUploader.h
         ${VULKAN_DIR}/BufferVk.cpp
         ${VULKAN_DIR}/BufferVk.h
+        ${VULKAN_DIR}/CommandBufferVk.cpp
+        ${VULKAN_DIR}/CommandBufferVk.h
         ${VULKAN_DIR}/FencedDeleter.cpp
         ${VULKAN_DIR}/FencedDeleter.h
         ${VULKAN_DIR}/MemoryAllocator.cpp

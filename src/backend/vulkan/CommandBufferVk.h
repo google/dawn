@@ -12,30 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_COMMANDBUFFERD3D12_H_
-#define BACKEND_D3D12_COMMANDBUFFERD3D12_H_
+#ifndef BACKEND_VULKAN_COMMANDBUFFERVK_H_
+#define BACKEND_VULKAN_COMMANDBUFFERVK_H_
 
-#include "backend/CommandAllocator.h"
 #include "backend/CommandBuffer.h"
 
-#include "backend/d3d12/d3d12_platform.h"
+#include "backend/vulkan/vulkan_platform.h"
 
-namespace backend { namespace d3d12 {
-
-    class Device;
+namespace backend { namespace vulkan {
 
     class CommandBuffer : public CommandBufferBase {
       public:
-        CommandBuffer(Device* device, CommandBufferBuilder* builder);
+        CommandBuffer(CommandBufferBuilder* builder);
         ~CommandBuffer();
 
-        void FillCommands(ComPtr<ID3D12GraphicsCommandList> commandList);
+        void RecordCommands(VkCommandBuffer commands);
 
       private:
-        Device* mDevice;
         CommandIterator mCommands;
     };
 
-}}  // namespace backend::d3d12
+}}  // namespace backend::vulkan
 
-#endif  // BACKEND_D3D12_COMMANDBUFFERD3D12_H_
+#endif  // BACKEND_VULKAN_COMMANDBUFFERVK_H_

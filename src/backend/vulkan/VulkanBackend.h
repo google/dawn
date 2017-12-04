@@ -20,7 +20,6 @@
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
 #include "backend/BlendState.h"
-#include "backend/CommandBuffer.h"
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
@@ -50,7 +49,7 @@ namespace backend { namespace vulkan {
     using BlendState = BlendStateBase;
     class Buffer;
     using BufferView = BufferViewBase;
-    using CommandBuffer = CommandBufferBase;
+    class CommandBuffer;
     using ComputePipeline = ComputePipelineBase;
     using DepthStencilState = DepthStencilStateBase;
     class Device;
