@@ -16,6 +16,7 @@
 
 #include "backend/Commands.h"
 #include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/TextureVk.h"
 #include "backend/vulkan/VulkanBackend.h"
 
 namespace backend { namespace vulkan {
@@ -56,6 +57,15 @@ namespace backend { namespace vulkan {
                     Buffer* buffer = ToBackend(cmd->buffer.Get());
                     buffer->RecordBarrier(commands, buffer->GetUsage(), cmd->usage);
                     buffer->UpdateUsageInternal(cmd->usage);
+                } break;
+
+                case Command::TransitionTextureUsage: {
+                    TransitionTextureUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionTextureUsageCmd>();
+
+                    Texture* texture = ToBackend(cmd->texture.Get());
+                    texture->RecordBarrier(commands, texture->GetUsage(), cmd->usage);
+                    texture->UpdateUsageInternal(cmd->usage);
                 } break;
 
                 default: { UNREACHABLE(); } break;
