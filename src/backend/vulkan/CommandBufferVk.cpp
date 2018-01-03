@@ -18,8 +18,6 @@
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/VulkanBackend.h"
 
-#include <iostream>
-
 namespace backend { namespace vulkan {
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)

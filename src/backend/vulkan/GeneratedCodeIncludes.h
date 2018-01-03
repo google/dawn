@@ -14,4 +14,5 @@
 
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/CommandBufferVk.h"
+#include "backend/vulkan/TextureVk.h"
 #include "backend/vulkan/VulkanBackend.h"

@@ -34,13 +34,21 @@ namespace backend { namespace vulkan {
         mMemoriesToDelete.Enqueue(memory, mDevice->GetSerial());
     }
 
+    void FencedDeleter::DeleteWhenUnused(VkImage image) {
+        mImagesToDelete.Enqueue(image, mDevice->GetSerial());
+    }
+
     void FencedDeleter::Tick(Serial completedSerial) {
-        // Buffers and textures must be deleted before memories because it is invalid to free memory
+        // Buffers and images must be deleted before memories because it is invalid to free memory
         // that still have resources bound to it.
         for (VkBuffer buffer : mBuffersToDelete.IterateUpTo(completedSerial)) {
             mDevice->fn.DestroyBuffer(mDevice->GetVkDevice(), buffer, nullptr);
         }
         mBuffersToDelete.ClearUpTo(completedSerial);
+        for (VkImage image : mImagesToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroyImage(mDevice->GetVkDevice(), image, nullptr);
+        }
+        mImagesToDelete.ClearUpTo(completedSerial);
 
         for (VkDeviceMemory memory : mMemoriesToDelete.IterateUpTo(completedSerial)) {
             mDevice->fn.FreeMemory(mDevice->GetVkDevice(), memory, nullptr);

@@ -29,6 +29,7 @@ namespace backend { namespace vulkan {
 
         void DeleteWhenUnused(VkBuffer buffer);
         void DeleteWhenUnused(VkDeviceMemory memory);
+        void DeleteWhenUnused(VkImage image);
 
         void Tick(Serial completedSerial);
 
@@ -36,6 +37,7 @@ namespace backend { namespace vulkan {
         Device* mDevice = nullptr;
         SerialQueue<VkBuffer> mBuffersToDelete;
         SerialQueue<VkDeviceMemory> mMemoriesToDelete;
+        SerialQueue<VkImage> mImagesToDelete;
     };
 
 }}  // namespace backend::vulkan

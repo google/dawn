@@ -19,6 +19,7 @@
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/CommandBufferVk.h"
 #include "backend/vulkan/FencedDeleter.h"
+#include "backend/vulkan/TextureVk.h"
 #include "common/Platform.h"
 
 #include <spirv-cross/spirv_cross.hpp>
@@ -599,17 +600,6 @@ namespace backend { namespace vulkan {
         }
 
         device->SubmitPendingCommands();
-    }
-
-    // Texture
-
-    Texture::Texture(TextureBuilder* builder) : TextureBase(builder) {
-    }
-
-    Texture::~Texture() {
-    }
-
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
     // SwapChain

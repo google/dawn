@@ -215,16 +215,6 @@ namespace backend { namespace vulkan {
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
-    class Texture : public TextureBase {
-      public:
-        Texture(TextureBuilder* builder);
-        ~Texture();
-
-      private:
-        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                 nxt::TextureUsageBit targetUsage) override;
-    };
-
     class SwapChain : public SwapChainBase {
       public:
         SwapChain(SwapChainBuilder* builder);
