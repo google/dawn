@@ -85,7 +85,7 @@ namespace backend {
           mCurrentUsage(builder->mCurrentUsage) {
     }
 
-    DeviceBase* TextureBase::GetDevice() {
+    DeviceBase* TextureBase::GetDevice() const {
         return mDevice;
     }
 
