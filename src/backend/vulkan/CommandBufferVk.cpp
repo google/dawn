@@ -21,6 +21,38 @@
 
 namespace backend { namespace vulkan {
 
+    namespace {
+
+        VkBufferImageCopy ComputeBufferImageCopyRegion(uint32_t rowPitch,
+                                                       const BufferCopyLocation& bufferLocation,
+                                                       const TextureCopyLocation& textureLocation) {
+            const Texture* texture = ToBackend(textureLocation.texture).Get();
+
+            VkBufferImageCopy region;
+
+            region.bufferOffset = bufferLocation.offset;
+            // In Vulkan the row length is in texels while it is in bytes for NXT
+            region.bufferRowLength = rowPitch / TextureFormatPixelSize(texture->GetFormat());
+            region.bufferImageHeight = rowPitch * textureLocation.height;
+
+            region.imageSubresource.aspectMask = texture->GetVkAspectMask();
+            region.imageSubresource.mipLevel = textureLocation.level;
+            region.imageSubresource.baseArrayLayer = 0;
+            region.imageSubresource.layerCount = 1;
+
+            region.imageOffset.x = textureLocation.x;
+            region.imageOffset.y = textureLocation.y;
+            region.imageOffset.z = textureLocation.z;
+
+            region.imageExtent.width = textureLocation.width;
+            region.imageExtent.height = textureLocation.height;
+            region.imageExtent.depth = textureLocation.depth;
+
+            return region;
+        }
+
+    }  // anonymous namespace
+
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
         : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
     }
@@ -48,6 +80,38 @@ namespace backend { namespace vulkan {
                     VkBuffer srcHandle = ToBackend(src.buffer)->GetHandle();
                     VkBuffer dstHandle = ToBackend(dst.buffer)->GetHandle();
                     device->fn.CmdCopyBuffer(commands, srcHandle, dstHandle, 1, &region);
+                } break;
+
+                case Command::CopyBufferToTexture: {
+                    CopyBufferToTextureCmd* copy = mCommands.NextCommand<CopyBufferToTextureCmd>();
+                    auto& src = copy->source;
+                    auto& dst = copy->destination;
+
+                    VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
+                    VkImage dstImage = ToBackend(dst.texture)->GetHandle();
+                    VkBufferImageCopy region =
+                        ComputeBufferImageCopyRegion(copy->rowPitch, src, dst);
+
+                    // The image is written to so the NXT guarantees make sure it is in the
+                    // TRANSFER_DST_OPTIMAL layout
+                    device->fn.CmdCopyBufferToImage(commands, srcBuffer, dstImage,
+                                                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+                                                    &region);
+                } break;
+
+                case Command::CopyTextureToBuffer: {
+                    CopyTextureToBufferCmd* copy = mCommands.NextCommand<CopyTextureToBufferCmd>();
+                    auto& src = copy->source;
+                    auto& dst = copy->destination;
+
+                    VkImage srcImage = ToBackend(src.texture)->GetHandle();
+                    VkBuffer dstBuffer = ToBackend(dst.buffer)->GetHandle();
+                    VkBufferImageCopy region =
+                        ComputeBufferImageCopyRegion(copy->rowPitch, dst, src);
+
+                    // The NXT TransferSrc usage is always mapped to GENERAL
+                    device->fn.CmdCopyImageToBuffer(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
+                                                    dstBuffer, 1, &region);
                 } break;
 
                 case Command::TransitionBufferUsage: {

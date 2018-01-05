@@ -260,6 +260,10 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
+    VkImageAspectFlags Texture::GetVkAspectMask() const {
+        return VulkanAspectMask(GetFormat());
+    }
+
     // Helper function to add a texture barrier to a command buffer. This is inefficient because we
     // should be coalescing barriers as much as possible.
     void Texture::RecordBarrier(VkCommandBuffer commands,

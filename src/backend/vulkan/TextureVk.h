@@ -28,6 +28,7 @@ namespace backend { namespace vulkan {
         ~Texture();
 
         VkImage GetHandle() const;
+        VkImageAspectFlags GetVkAspectMask() const;
 
         void RecordBarrier(VkCommandBuffer commands,
                            nxt::TextureUsageBit currentUsage,
