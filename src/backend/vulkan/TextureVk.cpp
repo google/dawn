@@ -32,22 +32,6 @@ namespace backend { namespace vulkan {
             }
         }
 
-        // Converts NXT texture format to Vulkan formats.
-        VkFormat VulkanImageFormat(nxt::TextureFormat format) {
-            switch (format) {
-                case nxt::TextureFormat::R8G8B8A8Unorm:
-                    return VK_FORMAT_R8G8B8A8_UNORM;
-                case nxt::TextureFormat::R8G8B8A8Uint:
-                    return VK_FORMAT_R8G8B8A8_UINT;
-                case nxt::TextureFormat::B8G8R8A8Unorm:
-                    return VK_FORMAT_B8G8R8A8_UNORM;
-                case nxt::TextureFormat::D32FloatS8Uint:
-                    return VK_FORMAT_D32_SFLOAT_S8_UINT;
-                default:
-                    UNREACHABLE();
-            }
-        }
-
         // Converts the NXT usage flags to Vulkan usage flags. Also needs the format to choose
         // between color and depth attachment usages.
         VkImageUsageFlags VulkanImageUsage(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
@@ -199,6 +183,22 @@ namespace backend { namespace vulkan {
         }
 
     }  // namespace
+
+    // Converts NXT texture format to Vulkan formats.
+    VkFormat VulkanImageFormat(nxt::TextureFormat format) {
+        switch (format) {
+            case nxt::TextureFormat::R8G8B8A8Unorm:
+                return VK_FORMAT_R8G8B8A8_UNORM;
+            case nxt::TextureFormat::R8G8B8A8Uint:
+                return VK_FORMAT_R8G8B8A8_UINT;
+            case nxt::TextureFormat::B8G8R8A8Unorm:
+                return VK_FORMAT_B8G8R8A8_UNORM;
+            case nxt::TextureFormat::D32FloatS8Uint:
+                return VK_FORMAT_D32_SFLOAT_S8_UINT;
+            default:
+                UNREACHABLE();
+        }
+    }
 
     Texture::Texture(TextureBuilder* builder) : TextureBase(builder) {
         Device* device = ToBackend(GetDevice());

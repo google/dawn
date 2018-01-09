@@ -22,6 +22,8 @@
 
 namespace backend { namespace vulkan {
 
+    VkFormat VulkanImageFormat(nxt::TextureFormat format);
+
     class Texture : public TextureBase {
       public:
         Texture(TextureBuilder* builder);

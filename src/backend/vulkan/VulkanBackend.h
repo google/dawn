@@ -26,7 +26,6 @@
 #include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/Queue.h"
-#include "backend/RenderPass.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
@@ -55,7 +54,7 @@ namespace backend { namespace vulkan {
     using InputState = InputStateBase;
     class PipelineLayout;
     class Queue;
-    using RenderPass = RenderPassBase;
+    class RenderPass;
     using RenderPipeline = RenderPipelineBase;
     using Sampler = SamplerBase;
     using ShaderModule = ShaderModuleBase;

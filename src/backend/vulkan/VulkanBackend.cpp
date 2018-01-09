@@ -20,6 +20,7 @@
 #include "backend/vulkan/CommandBufferVk.h"
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
+#include "backend/vulkan/RenderPassVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "common/Platform.h"
 
