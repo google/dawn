@@ -44,6 +44,17 @@ namespace backend { namespace vulkan {
         DeviceMemoryAllocation mMemoryAllocation;
     };
 
+    class TextureView : public TextureViewBase {
+      public:
+        TextureView(TextureViewBuilder* builder);
+        ~TextureView();
+
+        VkImageView GetHandle() const;
+
+      private:
+        VkImageView mHandle = VK_NULL_HANDLE;
+    };
+
 }}  // namespace backend::vulkan
 
 #endif  // BACKEND_VULKAN_TEXTUREVK_H_

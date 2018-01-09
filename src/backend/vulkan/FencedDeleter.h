@@ -29,7 +29,9 @@ namespace backend { namespace vulkan {
 
         void DeleteWhenUnused(VkBuffer buffer);
         void DeleteWhenUnused(VkDeviceMemory memory);
+        void DeleteWhenUnused(VkFramebuffer framebuffer);
         void DeleteWhenUnused(VkImage image);
+        void DeleteWhenUnused(VkImageView view);
         void DeleteWhenUnused(VkPipelineLayout layout);
         void DeleteWhenUnused(VkRenderPass renderPass);
 
@@ -38,8 +40,10 @@ namespace backend { namespace vulkan {
       private:
         Device* mDevice = nullptr;
         SerialQueue<VkBuffer> mBuffersToDelete;
+        SerialQueue<VkFramebuffer> mFramebuffersToDelete;
         SerialQueue<VkDeviceMemory> mMemoriesToDelete;
         SerialQueue<VkImage> mImagesToDelete;
+        SerialQueue<VkImageView> mImageViewsToDelete;
         SerialQueue<VkPipelineLayout> mPipelineLayoutsToDelete;
         SerialQueue<VkRenderPass> mRenderPassesToDelete;
     };

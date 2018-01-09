@@ -18,6 +18,7 @@
 #include "backend/Builder.h"
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
+#include "backend/Texture.h"
 
 #include "nxt/nxtcpp.h"
 

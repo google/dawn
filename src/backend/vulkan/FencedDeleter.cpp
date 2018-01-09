@@ -23,7 +23,9 @@ namespace backend { namespace vulkan {
 
     FencedDeleter::~FencedDeleter() {
         ASSERT(mBuffersToDelete.Empty());
+        ASSERT(mFramebuffersToDelete.Empty());
         ASSERT(mImagesToDelete.Empty());
+        ASSERT(mImageViewsToDelete.Empty());
         ASSERT(mMemoriesToDelete.Empty());
         ASSERT(mPipelineLayoutsToDelete.Empty());
         ASSERT(mRenderPassesToDelete.Empty());
@@ -37,8 +39,16 @@ namespace backend { namespace vulkan {
         mMemoriesToDelete.Enqueue(memory, mDevice->GetSerial());
     }
 
+    void FencedDeleter::DeleteWhenUnused(VkFramebuffer framebuffer) {
+        mFramebuffersToDelete.Enqueue(framebuffer, mDevice->GetSerial());
+    }
+
     void FencedDeleter::DeleteWhenUnused(VkImage image) {
         mImagesToDelete.Enqueue(image, mDevice->GetSerial());
+    }
+
+    void FencedDeleter::DeleteWhenUnused(VkImageView view) {
+        mImageViewsToDelete.Enqueue(view, mDevice->GetSerial());
     }
 
     void FencedDeleter::DeleteWhenUnused(VkPipelineLayout layout) {
@@ -77,6 +87,17 @@ namespace backend { namespace vulkan {
             mDevice->fn.DestroyRenderPass(vkDevice, renderPass, nullptr);
         }
         mRenderPassesToDelete.ClearUpTo(completedSerial);
+
+        for (VkFramebuffer framebuffer : mFramebuffersToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroyFramebuffer(vkDevice, framebuffer, nullptr);
+        }
+        mFramebuffersToDelete.ClearUpTo(completedSerial);
+
+        for (VkImageView view : mImageViewsToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroyImageView(vkDevice, view, nullptr);
+        }
+        mImageViewsToDelete.ClearUpTo(completedSerial);
+
     }
 
 }}  // namespace backend::vulkan

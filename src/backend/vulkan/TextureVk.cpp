@@ -32,6 +32,17 @@ namespace backend { namespace vulkan {
             }
         }
 
+        // Converts an NXT texture dimension to a Vulkan image view type.
+        // Contrary to image types, image view types include arrayness and cubemapness
+        VkImageViewType VulkanImageViewType(nxt::TextureDimension dimension) {
+            switch (dimension) {
+                case nxt::TextureDimension::e2D:
+                    return VK_IMAGE_VIEW_TYPE_2D;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
         // Converts the NXT usage flags to Vulkan usage flags. Also needs the format to choose
         // between color and depth attachment usages.
         VkImageUsageFlags VulkanImageUsage(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
@@ -300,6 +311,43 @@ namespace backend { namespace vulkan {
                                       nxt::TextureUsageBit targetUsage) {
         VkCommandBuffer commands = ToBackend(GetDevice())->GetPendingCommandBuffer();
         RecordBarrier(commands, currentUsage, targetUsage);
+    }
+
+    TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
+        Device* device = ToBackend(builder->GetDevice());
+
+        VkImageViewCreateInfo createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = 0;
+        createInfo.image = ToBackend(GetTexture())->GetHandle();
+        createInfo.viewType = VulkanImageViewType(GetTexture()->GetDimension());
+        createInfo.format = VulkanImageFormat(GetTexture()->GetFormat());
+        createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
+                                                   VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
+        createInfo.subresourceRange.aspectMask = VulkanAspectMask(GetTexture()->GetFormat());
+        createInfo.subresourceRange.baseMipLevel = 0;
+        createInfo.subresourceRange.levelCount = GetTexture()->GetNumMipLevels();
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount = 1;
+
+        if (device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
+            VK_SUCCESS) {
+            ASSERT(false);
+        }
+    }
+
+    TextureView::~TextureView() {
+        Device* device = ToBackend(GetTexture()->GetDevice());
+
+        if (mHandle != VK_NULL_HANDLE) {
+            device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+            mHandle = VK_NULL_HANDLE;
+        }
+    }
+
+    VkImageView TextureView::GetHandle() const {
+        return mHandle;
     }
 
 }}  // namespace backend::vulkan

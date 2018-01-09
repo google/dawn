@@ -14,6 +14,7 @@
 
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/CommandBufferVk.h"
+#include "backend/vulkan/FramebufferVk.h"
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/RenderPassVk.h"

@@ -23,7 +23,6 @@
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
-#include "backend/Framebuffer.h"
 #include "backend/Queue.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
@@ -49,7 +48,7 @@ namespace backend { namespace vulkan {
     using ComputePipeline = ComputePipelineBase;
     using DepthStencilState = DepthStencilStateBase;
     class Device;
-    using Framebuffer = FramebufferBase;
+    class Framebuffer;
     class InputState;
     class PipelineLayout;
     class Queue;
@@ -59,7 +58,7 @@ namespace backend { namespace vulkan {
     using ShaderModule = ShaderModuleBase;
     class SwapChain;
     class Texture;
-    using TextureView = TextureViewBase;
+    class TextureView;
 
     class BufferUploader;
     class FencedDeleter;
