@@ -18,5 +18,7 @@
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/RenderPassVk.h"
+#include "backend/vulkan/RenderPipelineVk.h"
+#include "backend/vulkan/ShaderModuleVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "backend/vulkan/VulkanBackend.h"

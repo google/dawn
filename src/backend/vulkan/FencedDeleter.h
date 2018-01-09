@@ -34,6 +34,8 @@ namespace backend { namespace vulkan {
         void DeleteWhenUnused(VkImageView view);
         void DeleteWhenUnused(VkPipelineLayout layout);
         void DeleteWhenUnused(VkRenderPass renderPass);
+        void DeleteWhenUnused(VkPipeline pipeline);
+        void DeleteWhenUnused(VkShaderModule module);
 
         void Tick(Serial completedSerial);
 
@@ -44,8 +46,10 @@ namespace backend { namespace vulkan {
         SerialQueue<VkDeviceMemory> mMemoriesToDelete;
         SerialQueue<VkImage> mImagesToDelete;
         SerialQueue<VkImageView> mImageViewsToDelete;
+        SerialQueue<VkPipeline> mPipelinesToDelete;
         SerialQueue<VkPipelineLayout> mPipelineLayoutsToDelete;
         SerialQueue<VkRenderPass> mRenderPassesToDelete;
+        SerialQueue<VkShaderModule> mShaderModulesToDelete;
     };
 
 }}  // namespace backend::vulkan

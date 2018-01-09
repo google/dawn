@@ -24,9 +24,7 @@
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
 #include "backend/Queue.h"
-#include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
-#include "backend/ShaderModule.h"
 #include "backend/SwapChain.h"
 #include "backend/ToBackend.h"
 #include "backend/vulkan/VulkanFunctions.h"
@@ -53,9 +51,9 @@ namespace backend { namespace vulkan {
     class PipelineLayout;
     class Queue;
     class RenderPass;
-    using RenderPipeline = RenderPipelineBase;
+    class RenderPipeline;
     using Sampler = SamplerBase;
-    using ShaderModule = ShaderModuleBase;
+    class ShaderModule;
     class SwapChain;
     class Texture;
     class TextureView;

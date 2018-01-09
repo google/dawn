@@ -18,6 +18,7 @@
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/FramebufferVk.h"
 #include "backend/vulkan/RenderPassVk.h"
+#include "backend/vulkan/RenderPipelineVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "backend/vulkan/VulkanBackend.h"
 
@@ -69,7 +70,6 @@ namespace backend { namespace vulkan {
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
-
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
                     auto& src = copy->source;
@@ -140,8 +140,40 @@ namespace backend { namespace vulkan {
                     beginInfo.clearValueCount = renderPass->GetAttachmentCount();
                     beginInfo.pClearValues = clearValues.data();
 
-
                     device->fn.CmdBeginRenderPass(commands, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+                    // Set all the dynamic state just in case.
+                    device->fn.CmdSetLineWidth(commands, 1.0f);
+                    device->fn.CmdSetDepthBounds(commands, 0.0f, 1.0f);
+
+                    float blendConstants[4] = {
+                        1.0f,
+                        1.0f,
+                        1.0f,
+                        1.0f,
+                    };
+                    device->fn.CmdSetBlendConstants(commands, blendConstants);
+
+                    device->fn.CmdSetStencilCompareMask(commands, VK_STENCIL_FRONT_AND_BACK, 0);
+                    device->fn.CmdSetStencilWriteMask(commands, VK_STENCIL_FRONT_AND_BACK, 0);
+                    device->fn.CmdSetStencilReference(commands, VK_STENCIL_FRONT_AND_BACK, 0);
+
+                    // The viewport and scissor default to cover all of the attachments
+                    VkViewport viewport;
+                    viewport.x = 0.0f;
+                    viewport.y = 0.0f;
+                    viewport.width = static_cast<float>(framebuffer->GetWidth());
+                    viewport.height = static_cast<float>(framebuffer->GetHeight());
+                    viewport.minDepth = 0.0f;
+                    viewport.maxDepth = 1.0f;
+                    device->fn.CmdSetViewport(commands, 0, 1, &viewport);
+
+                    VkRect2D scissorRect;
+                    scissorRect.offset.x = 0;
+                    scissorRect.offset.y = 0;
+                    scissorRect.extent.width = framebuffer->GetWidth();
+                    scissorRect.extent.height = framebuffer->GetHeight();
+                    device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
                 } break;
 
                 case Command::BeginRenderSubpass: {
@@ -183,6 +215,14 @@ namespace backend { namespace vulkan {
                     device->fn.CmdBindIndexBuffer(commands, indexBuffer,
                                                   static_cast<VkDeviceSize>(cmd->offset),
                                                   VK_INDEX_TYPE_UINT16);
+                } break;
+
+                case Command::SetRenderPipeline: {
+                    SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
+                    RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
+
+                    device->fn.CmdBindPipeline(commands, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                               pipeline->GetHandle());
                 } break;
 
                 case Command::SetVertexBuffers: {

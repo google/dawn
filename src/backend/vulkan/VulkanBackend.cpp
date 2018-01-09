@@ -23,6 +23,8 @@
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/RenderPassVk.h"
+#include "backend/vulkan/RenderPipelineVk.h"
+#include "backend/vulkan/ShaderModuleVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "common/Platform.h"
 
@@ -223,12 +225,7 @@ namespace backend { namespace vulkan {
         return new Sampler(builder);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
-        auto module = new ShaderModule(builder);
-
-        spirv_cross::Compiler compiler(builder->AcquireSpirv());
-        module->ExtractSpirvInfo(compiler);
-
-        return module;
+        return new ShaderModule(builder);
     }
     SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
         return new SwapChain(builder);

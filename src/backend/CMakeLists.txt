@@ -307,6 +307,10 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/PipelineLayoutVk.h
         ${VULKAN_DIR}/RenderPassVk.cpp
         ${VULKAN_DIR}/RenderPassVk.h
+        ${VULKAN_DIR}/RenderPipelineVk.cpp
+        ${VULKAN_DIR}/RenderPipelineVk.h
+        ${VULKAN_DIR}/ShaderModuleVk.cpp
+        ${VULKAN_DIR}/ShaderModuleVk.h
         ${VULKAN_DIR}/TextureVk.cpp
         ${VULKAN_DIR}/TextureVk.h
         ${VULKAN_DIR}/VulkanBackend.cpp

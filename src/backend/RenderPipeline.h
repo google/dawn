@@ -15,7 +15,11 @@
 #ifndef BACKEND_RENDERPIPELINE_H_
 #define BACKEND_RENDERPIPELINE_H_
 
+#include "backend/BlendState.h"
+#include "backend/DepthStencilState.h"
+#include "backend/InputState.h"
 #include "backend/Pipeline.h"
+#include "backend/RenderPass.h"
 
 #include "nxt/nxtcpp.h"
 
