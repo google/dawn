@@ -25,14 +25,12 @@
 #include "backend/Device.h"
 #include "backend/Framebuffer.h"
 #include "backend/InputState.h"
-#include "backend/PipelineLayout.h"
 #include "backend/Queue.h"
 #include "backend/RenderPass.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
 #include "backend/SwapChain.h"
-#include "backend/Texture.h"
 #include "backend/ToBackend.h"
 #include "backend/vulkan/VulkanFunctions.h"
 #include "backend/vulkan/VulkanInfo.h"
@@ -55,7 +53,7 @@ namespace backend { namespace vulkan {
     class Device;
     using Framebuffer = FramebufferBase;
     using InputState = InputStateBase;
-    using PipelineLayout = PipelineLayoutBase;
+    class PipelineLayout;
     class Queue;
     using RenderPass = RenderPassBase;
     using RenderPipeline = RenderPipelineBase;

@@ -38,22 +38,33 @@ namespace backend { namespace vulkan {
         mImagesToDelete.Enqueue(image, mDevice->GetSerial());
     }
 
+    void FencedDeleter::DeleteWhenUnused(VkPipelineLayout layout) {
+        mPipelineLayoutsToDelete.Enqueue(layout, mDevice->GetSerial());
+    }
+
     void FencedDeleter::Tick(Serial completedSerial) {
+        VkDevice vkDevice = mDevice->GetVkDevice();
+
         // Buffers and images must be deleted before memories because it is invalid to free memory
         // that still have resources bound to it.
         for (VkBuffer buffer : mBuffersToDelete.IterateUpTo(completedSerial)) {
-            mDevice->fn.DestroyBuffer(mDevice->GetVkDevice(), buffer, nullptr);
+            mDevice->fn.DestroyBuffer(vkDevice, buffer, nullptr);
         }
         mBuffersToDelete.ClearUpTo(completedSerial);
         for (VkImage image : mImagesToDelete.IterateUpTo(completedSerial)) {
-            mDevice->fn.DestroyImage(mDevice->GetVkDevice(), image, nullptr);
+            mDevice->fn.DestroyImage(vkDevice, image, nullptr);
         }
         mImagesToDelete.ClearUpTo(completedSerial);
 
         for (VkDeviceMemory memory : mMemoriesToDelete.IterateUpTo(completedSerial)) {
-            mDevice->fn.FreeMemory(mDevice->GetVkDevice(), memory, nullptr);
+            mDevice->fn.FreeMemory(vkDevice, memory, nullptr);
         }
         mMemoriesToDelete.ClearUpTo(completedSerial);
+
+        for (VkPipelineLayout layout : mPipelineLayoutsToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroyPipelineLayout(vkDevice, layout, nullptr);
+        }
+        mPipelineLayoutsToDelete.ClearUpTo(completedSerial);
     }
 
 }}  // namespace backend::vulkan

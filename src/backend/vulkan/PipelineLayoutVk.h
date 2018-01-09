@@ -1,4 +1,4 @@
-// Copyright 2017 The NXT Authors
+// Copyright 2018 The NXT Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,36 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_FENCEDDELETER_H_
-#define BACKEND_VULKAN_FENCEDDELETER_H_
+#ifndef BACKEND_VULKAN_PIPELINELAYOUTVK_H_
+#define BACKEND_VULKAN_PIPELINELAYOUTVK_H_
+
+#include "backend/PipelineLayout.h"
 
 #include "backend/vulkan/vulkan_platform.h"
-#include "common/SerialQueue.h"
 
 namespace backend { namespace vulkan {
 
     class Device;
 
-    class FencedDeleter {
+    class PipelineLayout : public PipelineLayoutBase {
       public:
-        FencedDeleter(Device* device);
-        ~FencedDeleter();
+        PipelineLayout(PipelineLayoutBuilder* builder);
+        ~PipelineLayout();
 
-        void DeleteWhenUnused(VkBuffer buffer);
-        void DeleteWhenUnused(VkDeviceMemory memory);
-        void DeleteWhenUnused(VkImage image);
-        void DeleteWhenUnused(VkPipelineLayout layout);
-
-        void Tick(Serial completedSerial);
+        VkPipelineLayout GetHandle() const;
 
       private:
+        VkPipelineLayout mHandle = VK_NULL_HANDLE;
+
         Device* mDevice = nullptr;
-        SerialQueue<VkBuffer> mBuffersToDelete;
-        SerialQueue<VkDeviceMemory> mMemoriesToDelete;
-        SerialQueue<VkImage> mImagesToDelete;
-        SerialQueue<VkPipelineLayout> mPipelineLayoutsToDelete;
     };
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_FENCEDDELETER_H_
+#endif  // BACKEND_VULKAN_PIPELINELAYOUTVK_H_
