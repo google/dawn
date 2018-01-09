@@ -24,7 +24,6 @@
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
 #include "backend/Framebuffer.h"
-#include "backend/InputState.h"
 #include "backend/Queue.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
@@ -51,7 +50,7 @@ namespace backend { namespace vulkan {
     using DepthStencilState = DepthStencilStateBase;
     class Device;
     using Framebuffer = FramebufferBase;
-    using InputState = InputStateBase;
+    class InputState;
     class PipelineLayout;
     class Queue;
     class RenderPass;

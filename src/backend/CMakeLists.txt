@@ -297,6 +297,8 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/CommandBufferVk.h
         ${VULKAN_DIR}/FencedDeleter.cpp
         ${VULKAN_DIR}/FencedDeleter.h
+        ${VULKAN_DIR}/InputStateVk.cpp
+        ${VULKAN_DIR}/InputStateVk.h
         ${VULKAN_DIR}/MemoryAllocator.cpp
         ${VULKAN_DIR}/MemoryAllocator.h
         ${VULKAN_DIR}/PipelineLayoutVk.cpp
