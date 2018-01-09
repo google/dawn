@@ -114,6 +114,35 @@ namespace backend { namespace vulkan {
                                                     dstBuffer, 1, &region);
                 } break;
 
+                case Command::SetIndexBuffer: {
+                    SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
+                    VkBuffer indexBuffer = ToBackend(cmd->buffer)->GetHandle();
+
+                    // TODO(cwallez@chromium.org): get the index type from the last render pipeline
+                    // and rebind if needed on pipeline change
+                    device->fn.CmdBindIndexBuffer(commands, indexBuffer,
+                                                  static_cast<VkDeviceSize>(cmd->offset),
+                                                  VK_INDEX_TYPE_UINT16);
+                } break;
+
+                case Command::SetVertexBuffers: {
+                    SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
+                    auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
+                    auto offsets = mCommands.NextData<uint32_t>(cmd->count);
+
+                    std::array<VkBuffer, kMaxVertexInputs> vkBuffers;
+                    std::array<VkDeviceSize, kMaxVertexInputs> vkOffsets;
+
+                    for (uint32_t i = 0; i < cmd->count; ++i) {
+                        Buffer* buffer = ToBackend(buffers[i].Get());
+                        vkBuffers[i] = buffer->GetHandle();
+                        vkOffsets[i] = static_cast<VkDeviceSize>(offsets[i]);
+                    }
+
+                    device->fn.CmdBindVertexBuffers(commands, cmd->startSlot, cmd->count,
+                                                    vkBuffers.data(), vkOffsets.data());
+                } break;
+
                 case Command::TransitionBufferUsage: {
                     TransitionBufferUsageCmd* cmd =
                         mCommands.NextCommand<TransitionBufferUsageCmd>();
