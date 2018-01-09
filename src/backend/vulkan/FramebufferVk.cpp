@@ -63,4 +63,23 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
+    void Framebuffer::FillClearValues(VkClearValue* values) {
+        const RenderPassBase* renderPass = GetRenderPass();
+        for (uint32_t i = 0; i < renderPass->GetAttachmentCount(); ++i) {
+            if (TextureFormatHasDepthOrStencil(renderPass->GetAttachmentInfo(i).format)) {
+                const auto& clearValues = GetClearDepthStencil(i);
+
+                values[i].depthStencil.depth = clearValues.depth;
+                values[i].depthStencil.stencil = clearValues.stencil;
+            } else {
+                const auto& clearValues = GetClearColor(i);
+
+                values[i].color.float32[0] = clearValues.color[0];
+                values[i].color.float32[1] = clearValues.color[1];
+                values[i].color.float32[2] = clearValues.color[2];
+                values[i].color.float32[3] = clearValues.color[3];
+            }
+        }
+    }
+
 }}  // namespace backend::vulkan

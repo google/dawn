@@ -16,6 +16,8 @@
 
 #include "backend/Commands.h"
 #include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/FramebufferVk.h"
+#include "backend/vulkan/RenderPassVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "backend/vulkan/VulkanBackend.h"
 
@@ -67,6 +69,7 @@ namespace backend { namespace vulkan {
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
+
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
                     auto& src = copy->source;
@@ -114,6 +117,38 @@ namespace backend { namespace vulkan {
                                                     dstBuffer, 1, &region);
                 } break;
 
+                case Command::BeginRenderPass: {
+                    BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
+                    Framebuffer* framebuffer = ToBackend(cmd->framebuffer.Get());
+                    RenderPass* renderPass = ToBackend(cmd->renderPass.Get());
+
+                    ASSERT(renderPass->GetSubpassCount() == 1);
+                    ASSERT(renderPass->GetAttachmentCount() <= kMaxColorAttachments + 1);
+
+                    std::array<VkClearValue, kMaxColorAttachments + 1> clearValues;
+                    framebuffer->FillClearValues(clearValues.data());
+
+                    VkRenderPassBeginInfo beginInfo;
+                    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+                    beginInfo.pNext = nullptr;
+                    beginInfo.renderPass = renderPass->GetHandle();
+                    beginInfo.framebuffer = framebuffer->GetHandle();
+                    beginInfo.renderArea.offset.x = 0;
+                    beginInfo.renderArea.offset.y = 0;
+                    beginInfo.renderArea.extent.width = framebuffer->GetWidth();
+                    beginInfo.renderArea.extent.height = framebuffer->GetHeight();
+                    beginInfo.clearValueCount = renderPass->GetAttachmentCount();
+                    beginInfo.pClearValues = clearValues.data();
+
+
+                    device->fn.CmdBeginRenderPass(commands, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+                } break;
+
+                case Command::BeginRenderSubpass: {
+                    mCommands.NextCommand<BeginRenderSubpassCmd>();
+                    // Do nothing because the single subpass is started in vkBeginRenderPass
+                } break;
+
                 case Command::DrawArrays: {
                     DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
 
@@ -127,6 +162,16 @@ namespace backend { namespace vulkan {
                     uint32_t vertexOffset = 0;
                     device->fn.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
                                               draw->firstIndex, vertexOffset, draw->firstInstance);
+                } break;
+
+                case Command::EndRenderPass: {
+                    mCommands.NextCommand<EndRenderPassCmd>();
+                    device->fn.CmdEndRenderPass(commands);
+                } break;
+
+                case Command::EndRenderSubpass: {
+                    mCommands.NextCommand<EndRenderSubpassCmd>();
+                    // Do nothing because the single subpass is ended in vkEndRenderPass
                 } break;
 
                 case Command::SetIndexBuffer: {

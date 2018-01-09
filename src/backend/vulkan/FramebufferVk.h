@@ -27,6 +27,7 @@ namespace backend { namespace vulkan {
         ~Framebuffer();
 
         VkFramebuffer GetHandle() const;
+        void FillClearValues(VkClearValue* values);
 
       private:
         VkFramebuffer mHandle = VK_NULL_HANDLE;
