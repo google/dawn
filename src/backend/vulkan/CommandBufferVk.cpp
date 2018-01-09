@@ -114,6 +114,21 @@ namespace backend { namespace vulkan {
                                                     dstBuffer, 1, &region);
                 } break;
 
+                case Command::DrawArrays: {
+                    DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
+
+                    device->fn.CmdDraw(commands, draw->vertexCount, draw->instanceCount,
+                                       draw->firstVertex, draw->firstInstance);
+                } break;
+
+                case Command::DrawElements: {
+                    DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
+
+                    uint32_t vertexOffset = 0;
+                    device->fn.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
+                                              draw->firstIndex, vertexOffset, draw->firstInstance);
+                } break;
+
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
                     VkBuffer indexBuffer = ToBackend(cmd->buffer)->GetHandle();
