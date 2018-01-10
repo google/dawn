@@ -252,6 +252,12 @@ namespace backend { namespace vulkan {
                                        mMemoryAllocation.GetMemoryOffset()) != VK_SUCCESS) {
             ASSERT(false);
         }
+
+        // Vulkan requires images to be transitioned to their first usage. Do the transition if the
+        // texture has an initial usage.
+        if (GetUsage() != nxt::TextureUsageBit::None) {
+            TransitionUsageImpl(nxt::TextureUsageBit::None, GetUsage());
+        }
     }
 
     Texture::~Texture() {
