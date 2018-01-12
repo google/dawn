@@ -208,7 +208,7 @@ namespace {
             layout(location = 0) in vec3 v_normal;
             layout(location = 1) in vec2 v_texcoord;
 
-            out vec4 fragcolor;
+            layout(location = 0) out vec4 fragcolor;
 
             void main() {
                 const vec3 lightdir = normalize(vec3(-1, -2, 3));
@@ -224,7 +224,7 @@ namespace {
             layout(location = 0) in vec3 v_normal;
             layout(location = 1) in vec2 v_texcoord;
 
-            out vec4 fragcolor;
+            layout(location = 0) out vec4 fragcolor;
 
             void main() {
                 const vec3 lightdir = normalize(vec3(-1, -2, 3));
