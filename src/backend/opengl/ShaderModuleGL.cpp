@@ -56,7 +56,6 @@ namespace backend { namespace opengl {
 #else
         options.version = 440;
 #endif
-        options.vertex.flip_vert_y = true;
         compiler.set_options(options);
 
         // Rename the push constant block to be prefixed with the shader stage type so that uniform

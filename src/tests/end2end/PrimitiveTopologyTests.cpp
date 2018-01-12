@@ -97,6 +97,7 @@ constexpr TestLocation GetCentroid(const TestLocation& a, const TestLocation& b,
     return { (a.x + b.x + c.x) / 3, (a.y + b.y + c.y) / 3 };
 }
 
+// clang-format off
 // Offset towards one corner to avoid x or y symmetry false positives
 constexpr static unsigned int kOffset = kRTSize / 8;
 
@@ -132,13 +133,14 @@ constexpr static TestLocation kTriangleStripTestLocations[] = {
 
 constexpr static float kRTSizef = static_cast<float>(kRTSize);
 constexpr static float kVertices[] = {
-    2.f * (kPointTestLocations[0].x + 0.5f) / kRTSizef - 1.f, 1.f - 2.f * (kPointTestLocations[0].y + 0.5f) / kRTSizef, 0.f, 1.f,
-    2.f * (kPointTestLocations[1].x + 0.5f) / kRTSizef - 1.f, 1.f - 2.f * (kPointTestLocations[1].y + 0.5f) / kRTSizef, 0.f, 1.f,
-    2.f * (kPointTestLocations[2].x + 0.5f) / kRTSizef - 1.f, 1.f - 2.f * (kPointTestLocations[2].y + 0.5f) / kRTSizef, 0.f, 1.f,
-    2.f * (kPointTestLocations[3].x + 0.5f) / kRTSizef - 1.f, 1.f - 2.f * (kPointTestLocations[3].y + 0.5f) / kRTSizef, 0.f, 1.f,
-    2.f * (kPointTestLocations[4].x + 0.5f) / kRTSizef - 1.f, 1.f - 2.f * (kPointTestLocations[4].y + 0.5f) / kRTSizef, 0.f, 1.f,
-    2.f * (kPointTestLocations[5].x + 0.5f) / kRTSizef - 1.f, 1.f - 2.f * (kPointTestLocations[5].y + 0.5f) / kRTSizef, 0.f, 1.f,
+    2.f * (kPointTestLocations[0].x + 0.5f) / kRTSizef - 1.f, 2.f * (kPointTestLocations[0].y + 0.5f) / kRTSizef - 1.0f, 0.f, 1.f,
+    2.f * (kPointTestLocations[1].x + 0.5f) / kRTSizef - 1.f, 2.f * (kPointTestLocations[1].y + 0.5f) / kRTSizef - 1.0f, 0.f, 1.f,
+    2.f * (kPointTestLocations[2].x + 0.5f) / kRTSizef - 1.f, 2.f * (kPointTestLocations[2].y + 0.5f) / kRTSizef - 1.0f, 0.f, 1.f,
+    2.f * (kPointTestLocations[3].x + 0.5f) / kRTSizef - 1.f, 2.f * (kPointTestLocations[3].y + 0.5f) / kRTSizef - 1.0f, 0.f, 1.f,
+    2.f * (kPointTestLocations[4].x + 0.5f) / kRTSizef - 1.f, 2.f * (kPointTestLocations[4].y + 0.5f) / kRTSizef - 1.0f, 0.f, 1.f,
+    2.f * (kPointTestLocations[5].x + 0.5f) / kRTSizef - 1.f, 2.f * (kPointTestLocations[5].y + 0.5f) / kRTSizef - 1.0f, 0.f, 1.f,
 };
+// clang-format on
 
 class PrimitiveTopologyTest : public NXTTest {
     protected:

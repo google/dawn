@@ -117,7 +117,7 @@ TEST_P(IndexFormatTest, Uint32) {
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 100);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
 }
 
 // Test that the Uint16 index format is correctly interpreted
@@ -148,7 +148,7 @@ TEST_P(IndexFormatTest, Uint16) {
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 100);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
 }
 
 // Test for primitive restart use vertices like in the drawing and draw the following
@@ -192,9 +192,9 @@ TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 190, 210); // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 210, 190); // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, 210, 210); // C
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 190, 190);  // A
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 210, 210);  // B
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, 210, 190);      // C
 }
 
 // Test use of primitive restart with an Uint16 index format
@@ -226,9 +226,9 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 190, 210); // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 210, 190); // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, 210, 210); // C
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 190, 190);  // A
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 210, 210);  // B
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, 210, 190);      // C
 }
 
 // Test that the index format used is the format of the last set pipeline. This is to
@@ -264,7 +264,7 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 100);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
 }
 
 NXT_INSTANTIATE_TEST(IndexFormatTest, MetalBackend, OpenGLBackend)

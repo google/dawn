@@ -23,7 +23,6 @@ namespace backend { namespace d3d12 {
         spirv_cross::CompilerHLSL compiler(builder->AcquireSpirv());
 
         spirv_cross::CompilerGLSL::Options options_glsl;
-        options_glsl.vertex.flip_vert_y = false;
         options_glsl.vertex.fixup_clipspace = true;
         compiler.spirv_cross::CompilerGLSL::set_options(options_glsl);
 

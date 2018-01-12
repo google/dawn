@@ -101,7 +101,7 @@ class InputStateTest : public NXTTest {
             // Hard code the triangle in the shader so that we don't have to add a vertex input for it.
             // Also this places the triangle in the grid based on its VertexID and InstanceID
             vs << "    const vec2 pos[3] = vec2[3](vec2(0.5f, 1.0f), vec2(0.0f, 0.0f), vec2(1.0f, 0.0f));\n";
-            vs << "    vec2 offset = vec2(float(gl_VertexIndex / 3), 3 - float(gl_InstanceIndex));\n";
+            vs << "    vec2 offset = vec2(float(gl_VertexIndex / 3), float(gl_InstanceIndex));\n";
             vs << "    vec2 worldPos = pos[gl_VertexIndex % 3] + offset;\n";
             vs << "    gl_Position = vec4(worldPos / 2 - vec2(1.0f), 0.0f, 1.0f);\n";
 
