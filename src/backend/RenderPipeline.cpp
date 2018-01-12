@@ -89,9 +89,13 @@ namespace backend {
         // the device
         if (!mInputState) {
             mInputState = mDevice->CreateInputStateBuilder()->GetResult();
+            // Remove the external ref objects are created with
+            mInputState->Release();
         }
         if (!mDepthStencilState) {
             mDepthStencilState = mDevice->CreateDepthStencilStateBuilder()->GetResult();
+            // Remove the external ref objects are created with
+            mDepthStencilState->Release();
         }
         if (!mRenderPass) {
             HandleError("Pipeline render pass not set");
@@ -109,6 +113,8 @@ namespace backend {
         for (uint32_t attachmentSlot :
              IterateBitSet(subpassInfo.colorAttachmentsSet & ~mBlendStatesSet)) {
             mBlendStates[attachmentSlot] = mDevice->CreateBlendStateBuilder()->GetResult();
+            // Remove the external ref objects are created with
+            mBlendStates[attachmentSlot]->Release();
         }
 
         return mDevice->CreateRenderPipeline(this);

@@ -32,6 +32,8 @@ namespace backend {
                           ->GetDevice()
                           ->CreatePipelineLayoutBuilder()
                           ->GetResult();
+            // Remove the external ref objects are created with
+            mLayout->Release();
         }
 
         auto FillPushConstants = [](const ShaderModuleBase* module, PushConstantInfo* info) {
