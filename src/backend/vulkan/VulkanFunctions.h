@@ -15,7 +15,7 @@
 #ifndef BACKEND_VULKAN_VULKANFUNCTIONS_H_
 #define BACKEND_VULKAN_VULKANFUNCTIONS_H_
 
-#include "backend/vulkan/vulkan_platform.h"
+#include "common/vulkan_platform.h"
 
 class DynamicLib;
 

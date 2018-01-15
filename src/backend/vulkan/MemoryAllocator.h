@@ -15,8 +15,8 @@
 #ifndef BACKEND_VULKAN_MEMORYALLOCATOR_H_
 #define BACKEND_VULKAN_MEMORYALLOCATOR_H_
 
-#include "backend/vulkan/vulkan_platform.h"
 #include "common/SerialQueue.h"
+#include "common/vulkan_platform.h"
 
 namespace backend { namespace vulkan {
 

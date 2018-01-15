@@ -17,7 +17,7 @@
 
 #include "backend/RenderPass.h"
 
-#include "backend/vulkan/vulkan_platform.h"
+#include "common/vulkan_platform.h"
 
 namespace backend { namespace vulkan {
 

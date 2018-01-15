@@ -288,7 +288,6 @@ if (NXT_ENABLE_VULKAN)
     target_include_directories(vulkan_autogen PUBLIC ${SRC_DIR})
 
     list(APPEND BACKEND_SOURCES
-        ${VULKAN_DIR}/vulkan_platform.h
         ${VULKAN_DIR}/BufferUploader.cpp
         ${VULKAN_DIR}/BufferUploader.h
         ${VULKAN_DIR}/BufferVk.cpp

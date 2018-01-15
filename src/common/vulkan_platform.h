@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_VULKANPLATFORM_H_
-#define BACKEND_VULKAN_VULKANPLATFORM_H_
+#ifndef COMMON_VULKANPLATFORM_H_
+#define COMMON_VULKANPLATFORM_H_
+
+#if !defined(NXT_ENABLE_BACKEND_VULKAN)
+#    error "vulkan_platform.h included without the Vulkan backend enabled"
+#endif
 
 #include <cstddef>
 #include <cstdint>
@@ -72,4 +76,4 @@ class VkNonDispatchableHandle {
 #    undef VK_NULL_HANDLE
 #    define VK_NULL_HANDLE nullptr
 
-#endif  // BACKEND_VULKAN_VULKANPLATFORM_H_
+#endif  // COMMON_VULKANPLATFORM_H_

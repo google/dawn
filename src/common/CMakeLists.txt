@@ -27,6 +27,7 @@ list(APPEND COMMON_SOURCES
     ${COMMON_DIR}/Serial.h
     ${COMMON_DIR}/SerialQueue.h
     ${COMMON_DIR}/SwapChainUtils.h
+    ${COMMON_DIR}/vulkan_platform.h
 )
 
 add_library(nxt_common STATIC ${COMMON_SOURCES})
