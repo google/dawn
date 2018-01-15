@@ -16,8 +16,8 @@
 
 #include "common/Assert.h"
 #include "common/Platform.h"
+#include "common/SwapChainUtils.h"
 #include "nxt/nxt_wsi.h"
-#include "utils/SwapChainImpl.h"
 
 // Glad needs to be included before GLFW otherwise it complain that GL.h was already included
 #include "glad/glad.h"
@@ -30,20 +30,9 @@ namespace backend { namespace opengl {
 }}  // namespace backend::opengl
 
 namespace utils {
-    class SwapChainImplGL : SwapChainImpl {
+    class SwapChainImplGL {
       public:
-        static nxtSwapChainImplementation Create(GLFWwindow* window) {
-            auto impl = GenerateSwapChainImplementation<SwapChainImplGL, nxtWSIContextGL>();
-            impl.userData = new SwapChainImplGL(window);
-            return impl;
-        }
-
-      private:
-        GLFWwindow* mWindow = nullptr;
-        uint32_t mWidth = 0;
-        uint32_t mHeight = 0;
-        GLuint mBackFBO = 0;
-        GLuint mBackTexture = 0;
+        using WSIContext = nxtWSIContextGL;
 
         SwapChainImplGL(GLFWwindow* window) : mWindow(window) {
         }
@@ -52,9 +41,6 @@ namespace utils {
             glDeleteTextures(1, &mBackTexture);
             glDeleteFramebuffers(1, &mBackFBO);
         }
-
-        // For GenerateSwapChainImplementation
-        friend class SwapChainImpl;
 
         void Init(nxtWSIContextGL*) {
             glGenTextures(1, &mBackTexture);
@@ -101,6 +87,13 @@ namespace utils {
 
             return NXT_SWAP_CHAIN_NO_ERROR;
         }
+
+      private:
+        GLFWwindow* mWindow = nullptr;
+        uint32_t mWidth = 0;
+        uint32_t mHeight = 0;
+        GLuint mBackFBO = 0;
+        GLuint mBackTexture = 0;
     };
 
     class OpenGLBinding : public BackendBinding {
@@ -128,7 +121,7 @@ namespace utils {
 
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                mSwapchainImpl = SwapChainImplGL::Create(mWindow);
+                mSwapchainImpl = CreateSwapChainImplementation(new SwapChainImplGL(mWindow));
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }

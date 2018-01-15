@@ -15,8 +15,8 @@
 #include "utils/BackendBinding.h"
 
 #include "common/Assert.h"
+#include "common/SwapChainUtils.h"
 #include "nxt/nxt_wsi.h"
-#include "utils/SwapChainImpl.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3.h"
@@ -116,32 +116,9 @@ namespace utils {
         }
     }  // namespace
 
-    class SwapChainImplD3D12 : SwapChainImpl {
+    class SwapChainImplD3D12 {
       public:
-        static nxtSwapChainImplementation Create(HWND window, const nxtProcTable& procs) {
-            auto impl = GenerateSwapChainImplementation<SwapChainImplD3D12, nxtWSIContextD3D12>();
-            impl.userData = new SwapChainImplD3D12(window, procs);
-            return impl;
-        }
-
-      private:
-        nxtDevice mBackendDevice = nullptr;
-        nxtProcTable mProcs = {};
-
-        static constexpr unsigned int kFrameCount = 2;
-
-        HWND mWindow = 0;
-        ComPtr<IDXGIFactory4> mFactory = {};
-        ComPtr<ID3D12CommandQueue> mCommandQueue = {};
-        ComPtr<IDXGISwapChain3> mSwapChain = {};
-        ComPtr<ID3D12Resource> mRenderTargetResources[kFrameCount] = {};
-
-        // Frame synchronization. Updated every frame
-        uint32_t mRenderTargetIndex = 0;
-        uint32_t mPreviousRenderTargetIndex = 0;
-        uint64_t mLastSerialRenderTargetWasUsed[kFrameCount] = {};
-
-        D3D12_RESOURCE_STATES mRenderTargetResourceState;
+        using WSIContext = nxtWSIContextD3D12;
 
         SwapChainImplD3D12(HWND window, nxtProcTable procs)
             : mWindow(window), mProcs(procs), mFactory(CreateFactory()) {
@@ -149,9 +126,6 @@ namespace utils {
 
         ~SwapChainImplD3D12() {
         }
-
-        // For GenerateSwapChainImplementation
-        friend class SwapChainImpl;
 
         void Init(nxtWSIContextD3D12* ctx) {
             mBackendDevice = ctx->device;
@@ -249,6 +223,25 @@ namespace utils {
 
             return NXT_SWAP_CHAIN_NO_ERROR;
         }
+
+      private:
+        nxtDevice mBackendDevice = nullptr;
+        nxtProcTable mProcs = {};
+
+        static constexpr unsigned int kFrameCount = 2;
+
+        HWND mWindow = 0;
+        ComPtr<IDXGIFactory4> mFactory = {};
+        ComPtr<ID3D12CommandQueue> mCommandQueue = {};
+        ComPtr<IDXGISwapChain3> mSwapChain = {};
+        ComPtr<ID3D12Resource> mRenderTargetResources[kFrameCount] = {};
+
+        // Frame synchronization. Updated every frame
+        uint32_t mRenderTargetIndex = 0;
+        uint32_t mPreviousRenderTargetIndex = 0;
+        uint64_t mLastSerialRenderTargetWasUsed[kFrameCount] = {};
+
+        D3D12_RESOURCE_STATES mRenderTargetResourceState;
     };
 
     class D3D12Binding : public BackendBinding {
@@ -271,7 +264,8 @@ namespace utils {
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
                 HWND win32Window = glfwGetWin32Window(mWindow);
-                mSwapchainImpl = SwapChainImplD3D12::Create(win32Window, mProcTable);
+                mSwapchainImpl =
+                    CreateSwapChainImplementation(new SwapChainImplD3D12(win32Window, mProcTable));
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }

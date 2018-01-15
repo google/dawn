@@ -15,8 +15,8 @@
 #include "utils/BackendBinding.h"
 
 #include "common/Assert.h"
+#include "common/SwapChainUtils.h"
 #include "nxt/nxt_wsi.h"
-#include "utils/SwapChainImpl.h"
 
 #define GLFW_EXPOSE_NATIVE_COCOA
 #include "GLFW/glfw3.h"
@@ -32,22 +32,9 @@ namespace backend { namespace metal {
 }}
 
 namespace utils {
-    class SwapChainImplMTL : SwapChainImpl {
+    class SwapChainImplMTL {
       public:
-        static nxtSwapChainImplementation Create(id nswindow) {
-            auto impl = GenerateSwapChainImplementation<SwapChainImplMTL, nxtWSIContextMetal>();
-            impl.userData = new SwapChainImplMTL(nswindow);
-            return impl;
-        }
-
-      private:
-        id mNsWindow = nil;
-        id<MTLDevice> mMtlDevice = nil;
-        id<MTLCommandQueue> mCommandQueue = nil;
-
-        CAMetalLayer* mLayer = nullptr;
-        id<CAMetalDrawable> mCurrentDrawable = nil;
-        id<MTLTexture> mCurrentTexture = nil;
+        using WSIContext = nxtWSIContextMetal;
 
         SwapChainImplMTL(id nsWindow) : mNsWindow(nsWindow) {
         }
@@ -56,9 +43,6 @@ namespace utils {
             [mCurrentTexture release];
             [mCurrentDrawable release];
         }
-
-        // For GenerateSwapChainImplementation
-        friend class SwapChainImpl;
 
         void Init(nxtWSIContextMetal* ctx) {
             mMtlDevice = ctx->device;
@@ -114,6 +98,15 @@ namespace utils {
 
             return NXT_SWAP_CHAIN_NO_ERROR;
         }
+
+      private:
+        id mNsWindow = nil;
+        id<MTLDevice> mMtlDevice = nil;
+        id<MTLCommandQueue> mCommandQueue = nil;
+
+        CAMetalLayer* mLayer = nullptr;
+        id<CAMetalDrawable> mCurrentDrawable = nil;
+        id<MTLTexture> mCurrentTexture = nil;
     };
 
     class MetalBinding : public BackendBinding {
@@ -130,7 +123,8 @@ namespace utils {
 
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                mSwapchainImpl = SwapChainImplMTL::Create(glfwGetCocoaWindow(mWindow));
+                mSwapchainImpl = CreateSwapChainImplementation(
+                    new SwapChainImplMTL(glfwGetCocoaWindow(mWindow)));
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }

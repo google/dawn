@@ -14,8 +14,8 @@
 
 #include "utils/BackendBinding.h"
 
+#include "common/SwapChainUtils.h"
 #include "nxt/nxt_wsi.h"
-#include "utils/SwapChainImpl.h"
 
 namespace backend { namespace vulkan {
     void Init(nxtProcTable* procs, nxtDevice* device);
@@ -23,23 +23,15 @@ namespace backend { namespace vulkan {
 
 namespace utils {
 
-    class SwapChainImplVulkan : SwapChainImpl {
+    class SwapChainImplVulkan {
       public:
-        static nxtSwapChainImplementation Create(GLFWwindow* window) {
-            auto impl = GenerateSwapChainImplementation<SwapChainImplVulkan, nxtWSIContextVulkan>();
-            impl.userData = new SwapChainImplVulkan(window);
-            return impl;
-        }
+        using WSIContext = nxtWSIContextVulkan;
 
-      private:
         SwapChainImplVulkan(GLFWwindow* /*window*/) {
         }
 
         ~SwapChainImplVulkan() {
         }
-
-        // For GenerateSwapChainImplementation
-        friend class SwapChainImpl;
 
         void Init(nxtWSIContextVulkan*) {
         }
@@ -66,7 +58,7 @@ namespace utils {
         }
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                mSwapchainImpl = SwapChainImplVulkan::Create(mWindow);
+                mSwapchainImpl = CreateSwapChainImplementation(new SwapChainImplVulkan(mWindow));
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
