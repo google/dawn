@@ -86,7 +86,7 @@ namespace utils {
             mCurrentTexture = mCurrentDrawable.texture;
             [mCurrentTexture retain];
 
-            nextTexture->texture = reinterpret_cast<void*>(mCurrentTexture);
+            nextTexture->texture.ptr = reinterpret_cast<void*>(mCurrentTexture);
 
             return NXT_SWAP_CHAIN_NO_ERROR;
         }

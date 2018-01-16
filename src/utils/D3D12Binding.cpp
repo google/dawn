@@ -177,7 +177,7 @@ namespace utils {
         }
 
         nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
-            nextTexture->texture = mRenderTargetResources[mRenderTargetIndex].Get();
+            nextTexture->texture.ptr = mRenderTargetResources[mRenderTargetIndex].Get();
             return NXT_SWAP_CHAIN_NO_ERROR;
         }
 

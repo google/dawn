@@ -40,7 +40,7 @@ namespace backend { namespace metal {
             return nullptr;
         }
 
-        id<MTLTexture> nativeTexture = reinterpret_cast<id<MTLTexture>>(next.texture);
+        id<MTLTexture> nativeTexture = reinterpret_cast<id<MTLTexture>>(next.texture.ptr);
         return new Texture(builder, nativeTexture);
     }
 

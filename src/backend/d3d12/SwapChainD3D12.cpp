@@ -40,7 +40,7 @@ namespace backend { namespace d3d12 {
             return nullptr;
         }
 
-        ID3D12Resource* nativeTexture = reinterpret_cast<ID3D12Resource*>(next.texture);
+        ID3D12Resource* nativeTexture = reinterpret_cast<ID3D12Resource*>(next.texture.ptr);
         return new Texture(builder, nativeTexture);
     }
 

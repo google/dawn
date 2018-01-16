@@ -23,7 +23,11 @@ constexpr nxtSwapChainError NXT_SWAP_CHAIN_NO_ERROR = nullptr;
 
 typedef struct {
     /// Backend-specific texture id/name/pointer
-    void* texture = nullptr;
+    union {
+        void* ptr;
+        uint64_t u64;
+        uint32_t u32;
+    } texture;
 } nxtSwapChainNextTexture;
 
 typedef struct {

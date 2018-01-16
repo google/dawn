@@ -37,7 +37,7 @@ namespace backend { namespace opengl {
             GetDevice()->HandleError(error);
             return nullptr;
         }
-        GLuint nativeTexture = static_cast<GLuint>(reinterpret_cast<uintptr_t>(next.texture));
+        GLuint nativeTexture = next.texture.u32;
         return new Texture(builder, nativeTexture);
     }
 

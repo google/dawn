@@ -74,7 +74,7 @@ namespace utils {
         }
 
         nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
-            nextTexture->texture = reinterpret_cast<void*>(static_cast<size_t>(mBackTexture));
+            nextTexture->texture.u32 = mBackTexture;
             return NXT_SWAP_CHAIN_NO_ERROR;
         }
 
