@@ -25,7 +25,6 @@
 #include "backend/Device.h"
 #include "backend/Queue.h"
 #include "backend/Sampler.h"
-#include "backend/SwapChain.h"
 #include "backend/ToBackend.h"
 #include "backend/vulkan/VulkanFunctions.h"
 #include "backend/vulkan/VulkanInfo.h"
@@ -206,15 +205,6 @@ namespace backend { namespace vulkan {
 
         // NXT API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
-    };
-
-    class SwapChain : public SwapChainBase {
-      public:
-        SwapChain(SwapChainBuilder* builder);
-        ~SwapChain();
-
-      protected:
-        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
     };
 
 }}  // namespace backend::vulkan

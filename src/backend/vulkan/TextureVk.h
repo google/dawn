@@ -27,6 +27,7 @@ namespace backend { namespace vulkan {
     class Texture : public TextureBase {
       public:
         Texture(TextureBuilder* builder);
+        Texture(TextureBuilder* builder, VkImage nativeImage);
         ~Texture();
 
         VkImage GetHandle() const;

@@ -1,4 +1,4 @@
-// Copyright 2017 The NXT Authors
+// Copyright 2018 The NXT Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/vulkan/BufferVk.h"
-#include "backend/vulkan/CommandBufferVk.h"
-#include "backend/vulkan/FramebufferVk.h"
-#include "backend/vulkan/InputStateVk.h"
-#include "backend/vulkan/PipelineLayoutVk.h"
-#include "backend/vulkan/RenderPassVk.h"
-#include "backend/vulkan/RenderPipelineVk.h"
-#include "backend/vulkan/ShaderModuleVk.h"
-#include "backend/vulkan/SwapChainVk.h"
-#include "backend/vulkan/TextureVk.h"
-#include "backend/vulkan/VulkanBackend.h"
+#ifndef BACKEND_VULKAN_SWAPCHAINVK_H_
+#define BACKEND_VULKAN_SWAPCHAINVK_H_
+
+#include "backend/SwapChain.h"
+
+#include "common/vulkan_platform.h"
+
+namespace backend { namespace vulkan {
+
+    class SwapChain : public SwapChainBase {
+      public:
+        SwapChain(SwapChainBuilder* builder);
+        ~SwapChain();
+
+      protected:
+        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+    };
+
+}}  // namespace backend::vulkan
+
+#endif  // BACKEND_VULKAN_SWAPCHAINVK_H_

@@ -260,6 +260,10 @@ namespace backend { namespace vulkan {
         }
     }
 
+    Texture::Texture(TextureBuilder* builder, VkImage nativeImage)
+        : TextureBase(builder), mHandle(nativeImage) {
+    }
+
     Texture::~Texture() {
         Device* device = ToBackend(GetDevice());
 
@@ -267,6 +271,7 @@ namespace backend { namespace vulkan {
         // after the VkImage is destroyed and this is taken care of by the FencedDeleter.
         device->GetMemoryAllocator()->Free(&mMemoryAllocation);
 
+        // If we own the resource, release it.
         if (mHandle != VK_NULL_HANDLE) {
             device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;

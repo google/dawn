@@ -59,7 +59,14 @@ class VkNonDispatchableHandle {
         return mHandle != 0;
     }
 
+    static VkNonDispatchableHandle<Tag> CreateFromHandle(uint64_t handle) {
+        return {handle};
+    }
+
   private:
+    VkNonDispatchableHandle(uint64_t handle) : mHandle(handle) {
+    }
+
     uint64_t mHandle = 0;
 };
 

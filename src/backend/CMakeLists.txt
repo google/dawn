@@ -310,6 +310,8 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/RenderPipelineVk.h
         ${VULKAN_DIR}/ShaderModuleVk.cpp
         ${VULKAN_DIR}/ShaderModuleVk.h
+        ${VULKAN_DIR}/SwapChainVk.cpp
+        ${VULKAN_DIR}/SwapChainVk.h
         ${VULKAN_DIR}/TextureVk.cpp
         ${VULKAN_DIR}/TextureVk.h
         ${VULKAN_DIR}/VulkanBackend.cpp

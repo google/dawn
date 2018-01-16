@@ -25,6 +25,7 @@
 #include "backend/vulkan/RenderPassVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
 #include "backend/vulkan/ShaderModuleVk.h"
+#include "backend/vulkan/SwapChainVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "common/Platform.h"
 
@@ -603,17 +604,4 @@ namespace backend { namespace vulkan {
         device->SubmitPendingCommands();
     }
 
-    // SwapChain
-
-    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
-        const auto& im = GetImplementation();
-        im.Init(im.userData, nullptr);
-    }
-
-    SwapChain::~SwapChain() {
-    }
-
-    TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
-        return GetDevice()->CreateTexture(builder);
-    }
 }}  // namespace backend::vulkan
