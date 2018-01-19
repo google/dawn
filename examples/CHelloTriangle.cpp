@@ -23,6 +23,8 @@ nxtSwapChain swapchain;
 nxtRenderPipeline pipeline;
 nxtRenderPass renderpass;
 
+nxtTextureFormat swapChainFormat;
+
 void init() {
     device = CreateCppNXTDevice().Release();
 
@@ -39,8 +41,9 @@ void init() {
         swapchain = nxtSwapChainBuilderGetResult(builder);
         nxtSwapChainBuilderRelease(builder);
     }
-    nxtSwapChainConfigure(swapchain, static_cast<nxtTextureFormat>(GetPreferredSwapChainTextureFormat()),
-                          NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT, 640, 480);
+    swapChainFormat = static_cast<nxtTextureFormat>(GetPreferredSwapChainTextureFormat());
+    nxtSwapChainConfigure(swapchain, swapChainFormat, NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT, 640,
+                          480);
 
     const char* vs =
         "#version 450\n"
@@ -61,7 +64,7 @@ void init() {
     {
         nxtRenderPassBuilder builder = nxtDeviceCreateRenderPassBuilder(device);
         nxtRenderPassBuilderSetAttachmentCount(builder, 1);
-        nxtRenderPassBuilderAttachmentSetFormat(builder, 0, NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM);
+        nxtRenderPassBuilderAttachmentSetFormat(builder, 0, swapChainFormat);
         nxtRenderPassBuilderSetSubpassCount(builder, 1);
         nxtRenderPassBuilderSubpassSetColorAttachment(builder, 0, 0, 0);
         renderpass = nxtRenderPassBuilderGetResult(builder);
