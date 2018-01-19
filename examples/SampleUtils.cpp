@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "SampleUtils.h"
+
 #include "common/Platform.h"
 #include "utils/BackendBinding.h"
 #include "wire/TerribleCommandBuffer.h"
@@ -122,6 +124,7 @@ uint64_t GetSwapChainImplementation() {
 }
 
 nxt::TextureFormat GetPreferredSwapChainTextureFormat() {
+    DoFlush();
     return static_cast<nxt::TextureFormat>(binding->GetPreferredSwapChainTextureFormat());
 }
 
