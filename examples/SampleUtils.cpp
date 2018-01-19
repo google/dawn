@@ -28,6 +28,10 @@ void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
     std::cout << "Device error: " << message << std::endl;
 }
 
+void PrintGLFWError(int code, const char* message) {
+    std::cout << "GLFW error: " << code << " - " << message << std::endl;
+}
+
 enum class CmdBufType {
     None,
     Terrible,
@@ -64,6 +68,7 @@ nxt::Device CreateCppNXTDevice() {
         return nxt::Device();
     }
 
+    glfwSetErrorCallback(PrintGLFWError);
     if (!glfwInit()) {
         return nxt::Device();
     }
