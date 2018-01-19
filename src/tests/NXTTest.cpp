@@ -21,8 +21,8 @@
 #include "utils/NXTHelpers.h"
 #include "utils/SystemUtils.h"
 
+#include <iostream>
 #include "GLFW/glfw3.h"
-
 namespace {
 
     utils::BackendType ParamToBackendType(BackendType type) {
@@ -97,8 +97,8 @@ NXTTest::~NXTTest() {
     // We need to destroy child objects before the Device
     mReadbackSlots.clear();
     queue = nxt::Queue();
-    device = nxt::Device();
     swapchain = nxt::SwapChain();
+    device = nxt::Device();
 
     delete mBinding;
     mBinding = nullptr;
