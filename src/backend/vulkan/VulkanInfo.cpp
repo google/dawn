@@ -183,4 +183,71 @@ namespace backend { namespace vulkan {
         return true;
     }
 
+    bool GatherSurfaceInfo(const Device& device, VkSurfaceKHR surface, VulkanSurfaceInfo* info) {
+        VkPhysicalDevice physicalDevice = device.GetPhysicalDevice();
+
+        // Get the surface capabilities
+        {
+            VkResult result = device.fn.GetPhysicalDeviceSurfaceCapabilitiesKHR(
+                physicalDevice, surface, &info->capabilities);
+            if (result != VK_SUCCESS) {
+                return false;
+            }
+        }
+
+        // Query which queue families support presenting this surface
+        {
+            size_t nQueueFamilies = device.GetDeviceInfo().queueFamilies.size();
+            info->supportedQueueFamilies.resize(nQueueFamilies, false);
+
+            for (uint32_t i = 0; i < nQueueFamilies; ++i) {
+                VkBool32 supported = VK_FALSE;
+                VkResult result = device.fn.GetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i,
+                                                                               surface, &supported);
+
+                if (result != VK_SUCCESS) {
+                    return false;
+                }
+
+                info->supportedQueueFamilies[i] = (supported == VK_TRUE);
+            }
+        }
+
+        // Gather supported formats
+        {
+            uint32_t count = 0;
+            VkResult result = device.fn.GetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
+                                                                           &count, nullptr);
+            if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
+                return false;
+            }
+
+            info->formats.resize(count);
+            result = device.fn.GetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &count,
+                                                                  info->formats.data());
+            if (result != VK_SUCCESS) {
+                return false;
+            }
+        }
+
+        // Gather supported presents modes
+        {
+            uint32_t count = 0;
+            VkResult result = device.fn.GetPhysicalDeviceSurfacePresentModesKHR(
+                physicalDevice, surface, &count, nullptr);
+            if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
+                return false;
+            }
+
+            info->presentModes.resize(count);
+            result = device.fn.GetPhysicalDeviceSurfacePresentModesKHR(
+                physicalDevice, surface, &count, info->presentModes.data());
+            if (result != VK_SUCCESS) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }}  // namespace backend::vulkan

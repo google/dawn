@@ -65,11 +65,20 @@ namespace backend { namespace vulkan {
         // TODO(cwallez@chromium.org): layer instance extensions
     };
 
+    struct VulkanSurfaceInfo {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+        std::vector<bool> supportedQueueFamilies;
+    };
+
     bool GatherGlobalInfo(const Device& device, VulkanGlobalInfo* info);
     bool GetPhysicalDevices(const Device& device, std::vector<VkPhysicalDevice>* physicalDevices);
     bool GatherDeviceInfo(const Device& device,
                           VkPhysicalDevice physicalDevice,
                           VulkanDeviceInfo* info);
+    bool GatherSurfaceInfo(const Device& device, VkSurfaceKHR surface, VulkanSurfaceInfo* info);
+
 }}  // namespace backend::vulkan
 
 #endif  // BACKEND_VULKAN_VULKANINFO_H_

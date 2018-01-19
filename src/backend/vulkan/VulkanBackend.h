@@ -100,6 +100,7 @@ namespace backend { namespace vulkan {
 
         const VulkanDeviceInfo& GetDeviceInfo() const;
         VkInstance GetInstance() const;
+        VkPhysicalDevice GetPhysicalDevice() const;
         VkDevice GetVkDevice() const;
 
         BufferUploader* GetBufferUploader() const;

@@ -262,6 +262,18 @@ namespace backend { namespace vulkan {
         return mDeviceInfo;
     }
 
+    VkInstance Device::GetInstance() const {
+        return mInstance;
+    }
+
+    VkPhysicalDevice Device::GetPhysicalDevice() const {
+        return mPhysicalDevice;
+    }
+
+    VkDevice Device::GetVkDevice() const {
+        return mVkDevice;
+    }
+
     MapReadRequestTracker* Device::GetMapReadRequestTracker() const {
         return mMapReadRequestTracker;
     }
@@ -329,14 +341,6 @@ namespace backend { namespace vulkan {
         mPendingCommands = CommandPoolAndBuffer();
         mFencesInFlight.emplace(fence, mNextSerial);
         mNextSerial++;
-    }
-
-    VkInstance Device::GetInstance() const {
-        return mInstance;
-    }
-
-    VkDevice Device::GetVkDevice() const {
-        return mVkDevice;
     }
 
     bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs) {
