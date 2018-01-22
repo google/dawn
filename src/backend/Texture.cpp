@@ -21,6 +21,12 @@ namespace backend {
 
     uint32_t TextureFormatPixelSize(nxt::TextureFormat format) {
         switch (format) {
+            case nxt::TextureFormat::R8Unorm:
+            case nxt::TextureFormat::R8Uint:
+                return 1;
+            case nxt::TextureFormat::R8G8Unorm:
+            case nxt::TextureFormat::R8G8Uint:
+                return 2;
             case nxt::TextureFormat::R8G8B8A8Unorm:
             case nxt::TextureFormat::R8G8B8A8Uint:
             case nxt::TextureFormat::B8G8R8A8Unorm:
@@ -34,40 +40,28 @@ namespace backend {
 
     bool TextureFormatHasDepth(nxt::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::R8G8B8A8Unorm:
-            case nxt::TextureFormat::R8G8B8A8Uint:
-            case nxt::TextureFormat::B8G8R8A8Unorm:
-                return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;
             default:
-                UNREACHABLE();
+                return false;
         }
     }
 
     bool TextureFormatHasStencil(nxt::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::R8G8B8A8Unorm:
-            case nxt::TextureFormat::R8G8B8A8Uint:
-            case nxt::TextureFormat::B8G8R8A8Unorm:
-                return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;
             default:
-                UNREACHABLE();
+                return false;
         }
     }
 
     bool TextureFormatHasDepthOrStencil(nxt::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::R8G8B8A8Unorm:
-            case nxt::TextureFormat::R8G8B8A8Uint:
-            case nxt::TextureFormat::B8G8R8A8Unorm:
-                return false;
             case nxt::TextureFormat::D32FloatS8Uint:
                 return true;
             default:
-                UNREACHABLE();
+                return false;
         }
     }
 

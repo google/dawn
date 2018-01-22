@@ -88,8 +88,16 @@ namespace backend { namespace d3d12 {
         switch (format) {
             case nxt::TextureFormat::R8G8B8A8Unorm:
                 return DXGI_FORMAT_R8G8B8A8_UNORM;
+            case nxt::TextureFormat::R8G8Unorm:
+                return DXGI_FORMAT_R8G8_UNORM;
+            case nxt::TextureFormat::R8Unorm:
+                return DXGI_FORMAT_R8_UNORM;
             case nxt::TextureFormat::R8G8B8A8Uint:
                 return DXGI_FORMAT_R8G8B8A8_UINT;
+            case nxt::TextureFormat::R8G8Uint:
+                return DXGI_FORMAT_R8G8_UINT;
+            case nxt::TextureFormat::R8Uint:
+                return DXGI_FORMAT_R8_UINT;
             case nxt::TextureFormat::B8G8R8A8Unorm:
                 return DXGI_FORMAT_B8G8R8A8_UNORM;
             case nxt::TextureFormat::D32FloatS8Uint:

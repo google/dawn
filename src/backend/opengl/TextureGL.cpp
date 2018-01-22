@@ -36,8 +36,16 @@ namespace backend { namespace opengl {
             switch (format) {
                 case nxt::TextureFormat::R8G8B8A8Unorm:
                     return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
+                case nxt::TextureFormat::R8G8Unorm:
+                    return {GL_RG8, GL_RG, GL_UNSIGNED_BYTE};
+                case nxt::TextureFormat::R8Unorm:
+                    return {GL_R8, GL_RED, GL_UNSIGNED_BYTE};
                 case nxt::TextureFormat::R8G8B8A8Uint:
                     return {GL_RGBA8UI, GL_RGBA, GL_UNSIGNED_INT};
+                case nxt::TextureFormat::R8G8Uint:
+                    return {GL_RG8UI, GL_RG, GL_UNSIGNED_INT};
+                case nxt::TextureFormat::R8Uint:
+                    return {GL_R8UI, GL_RED, GL_UNSIGNED_INT};
                 case nxt::TextureFormat::B8G8R8A8Unorm:
                     // This doesn't have an enum for the internal format in OpenGL, so use RGBA8.
                     return {GL_RGBA8, GL_BGRA, GL_UNSIGNED_BYTE};
