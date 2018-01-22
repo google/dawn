@@ -128,8 +128,10 @@ namespace backend { namespace opengl {
                                              *reinterpret_cast<GLuint*>(&mValues[stage][constant]));
                                 break;
                             case PushConstantType::Float:
-                                glUniform1f(location,
-                                            *reinterpret_cast<GLfloat*>(&mValues[stage][constant]));
+                                float value;
+                                // Use a memcpy to avoid strict-aliasing warnings.
+                                memcpy(&value, &mValues[stage][constant], sizeof(value));
+                                glUniform1f(location, value);
                                 break;
                         }
                     }
