@@ -318,8 +318,8 @@ namespace backend { namespace vulkan {
         barrier.dstAccessMask = VulkanAccessFlags(targetUsage, format);
         barrier.oldLayout = VulkanImageLayout(currentUsage, format);
         barrier.newLayout = VulkanImageLayout(targetUsage, format);
-        barrier.srcQueueFamilyIndex = 0;
-        barrier.dstQueueFamilyIndex = 0;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = mHandle;
         // This transitions the whole resource but assumes it is a 2D texture
         ASSERT(GetDimension() == nxt::TextureDimension::e2D);
