@@ -122,6 +122,16 @@ namespace backend { namespace vulkan {
                     Framebuffer* framebuffer = ToBackend(cmd->framebuffer.Get());
                     RenderPass* renderPass = ToBackend(cmd->renderPass.Get());
 
+                    // NXT has an implicit transition to color attachment on subpasses. Transition
+                    // the attachments now before we start the render pass.
+                    for (uint32_t i = 0; i < renderPass->GetAttachmentCount(); ++i) {
+                        Texture* attachment =
+                            ToBackend(framebuffer->GetTextureView(i)->GetTexture());
+                        attachment->RecordBarrier(commands, attachment->GetUsage(),
+                                                  nxt::TextureUsageBit::OutputAttachment);
+                        attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
+                    }
+
                     ASSERT(renderPass->GetSubpassCount() == 1);
                     ASSERT(renderPass->GetAttachmentCount() <= kMaxColorAttachments + 1);
 
