@@ -63,6 +63,10 @@ class VkNonDispatchableHandle {
         return {handle};
     }
 
+    uint64_t GetHandle() const {
+        return mHandle;
+    }
+
   private:
     VkNonDispatchableHandle(uint64_t handle) : mHandle(handle) {
     }
