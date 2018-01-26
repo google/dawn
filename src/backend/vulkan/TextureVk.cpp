@@ -96,8 +96,14 @@ namespace backend { namespace vulkan {
                         VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 }
             }
-
-            // TODO(cwallez@chromium.org): What about present? Does it require VK_MEMORY_READ_BIT?
+            if (usage & nxt::TextureUsageBit::Present) {
+                // There is no access flag for present because the VK_KHR_SWAPCHAIN extension says
+                // that vkQueuePresentKHR makes the memory of the image visible to the presentation
+                // engine. There's also a note explicitly saying dstAccessMask should be 0. On the
+                // other side srcAccessMask can also be 0 because synchronization is required to
+                // happen with a semaphore instead.
+                flags |= 0;
+            }
 
             return flags;
         }
@@ -127,7 +133,6 @@ namespace backend { namespace vulkan {
                 // Writable storage textures must use general. If we could know the texture is read
                 // only we could use SHADER_READ_ONLY_OPTIMAL
                 case nxt::TextureUsageBit::Storage:
-                case nxt::TextureUsageBit::Present:
                     return VK_IMAGE_LAYOUT_GENERAL;
                 case nxt::TextureUsageBit::OutputAttachment:
                     if (TextureFormatHasDepthOrStencil(format)) {
@@ -135,6 +140,8 @@ namespace backend { namespace vulkan {
                     } else {
                         return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                     }
+                case nxt::TextureUsageBit::Present:
+                    return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
                 default:
                     UNREACHABLE();
             }
@@ -168,9 +175,18 @@ namespace backend { namespace vulkan {
                     flags |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
                 }
             }
+            if (usage & nxt::TextureUsageBit::Present) {
+                // There is no pipeline stage for present but a pipeline stage is required so we use
+                // "bottom of pipe" to block as little as possible and vkQueuePresentKHR will make
+                // the memory visible to the presentation engine. The spec explicitly mentions that
+                // "bottom of pipe" is ok. On the other direction, synchronization happens with a
+                // semaphore so bottom of pipe is ok too (but maybe it could be "top of pipe" to
+                // block less?)
+                flags |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+            }
 
-            // TODO(cwallez@chromium.org) What about present?
-
+            // A zero value isn't a valid pipeline stage mask
+            ASSERT(flags != 0);
             return flags;
         }
 
