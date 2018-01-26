@@ -31,6 +31,8 @@ namespace {
 namespace backend { namespace vulkan {
 
     const char kLayerNameLunargStandardValidation[] = "VK_LAYER_LUNARG_standard_validation";
+    const char kLayerNameLunargVKTrace[] = "VK_LAYER_LUNARG_vktrace";
+    const char kLayerNameRenderDocCapture[] = "VK_LAYER_RENDERDOC_Capture";
 
     const char kExtensionNameExtDebugReport[] = "VK_EXT_debug_report";
     const char kExtensionNameKhrSurface[] = "VK_KHR_surface";
@@ -57,6 +59,12 @@ namespace backend { namespace vulkan {
             for (const auto& layer : info->layers) {
                 if (IsLayerName(layer, kLayerNameLunargStandardValidation)) {
                     info->standardValidation = true;
+                }
+                if (IsLayerName(layer, kLayerNameLunargVKTrace)) {
+                    info->vktrace = true;
+                }
+                if (IsLayerName(layer, kLayerNameRenderDocCapture)) {
+                    info->renderDocCapture = true;
                 }
             }
         }

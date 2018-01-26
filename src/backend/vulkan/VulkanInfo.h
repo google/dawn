@@ -24,6 +24,8 @@ namespace backend { namespace vulkan {
     class Device;
 
     extern const char kLayerNameLunargStandardValidation[];
+    extern const char kLayerNameLunargVKTrace[];
+    extern const char kLayerNameRenderDocCapture[];
 
     extern const char kExtensionNameExtDebugReport[];
     extern const char kExtensionNameKhrSurface[];
@@ -33,6 +35,8 @@ namespace backend { namespace vulkan {
     struct VulkanGlobalKnobs {
         // Layers
         bool standardValidation = false;
+        bool vktrace = false;
+        bool renderDocCapture = false;
 
         // Extensions
         bool debugReport = false;

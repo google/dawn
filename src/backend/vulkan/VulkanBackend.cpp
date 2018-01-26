@@ -347,6 +347,21 @@ namespace backend { namespace vulkan {
         std::vector<const char*> layersToRequest;
         std::vector<const char*> extensionsToRequest;
 
+        // vktrace works by instering a layer, so we need to explicitly enable it if it is present.
+        // Also it is good to put it in first position so that it doesn't see Vulkan calls inserted
+        // by other layers.
+        if (mGlobalInfo.vktrace) {
+            layersToRequest.push_back(kLayerNameLunargVKTrace);
+            usedKnobs->vktrace = true;
+        }
+        // RenderDoc installs a layer at the system level for its capture but we don't want to use
+        // it unless we are debugging in RenderDoc so we hide it behind a macro.
+#if defined(NXT_USE_RENDERDOC)
+        if (mGlobalInfo.renderDocCapture) {
+            layersToRequest.push_back(kLayerNameRenderDocCapture);
+            usedKnobs->renderDocCapture = true;
+        }
+#endif
 #if defined(NXT_ENABLE_ASSERTS)
         if (mGlobalInfo.standardValidation) {
             layersToRequest.push_back(kLayerNameLunargStandardValidation);
