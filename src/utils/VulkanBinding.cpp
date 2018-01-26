@@ -14,11 +14,23 @@
 
 #include "utils/BackendBinding.h"
 
-#include "common/SwapChainUtils.h"
+#include "common/Assert.h"
+#include "common/vulkan_platform.h"
 #include "nxt/nxt_wsi.h"
 
+#include "GLFW/glfw3.h"
+
+#include <vector>
+
 namespace backend { namespace vulkan {
-    void Init(nxtProcTable* procs, nxtDevice* device);
+    void Init(nxtProcTable* procs,
+              nxtDevice* device,
+              const std::vector<const char*>& requiredInstanceExtensions);
+
+    VkInstance GetInstance(nxtDevice device);
+
+    nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, VkSurfaceKHR surface);
+    nxtTextureFormat GetNativeSwapChainPreferredFormat(const nxtSwapChainImplementation* swapChain);
 }}  // namespace backend::vulkan
 
 namespace utils {
@@ -52,21 +64,37 @@ namespace utils {
     class VulkanBinding : public BackendBinding {
       public:
         void SetupGLFWWindowHints() override {
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
         void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
-            backend::vulkan::Init(procs, device);
+            uint32_t extensionCount = 0;
+            const char** glfwInstanceExtensions =
+                glfwGetRequiredInstanceExtensions(&extensionCount);
+            std::vector<const char*> requiredExtensions(glfwInstanceExtensions,
+                                                        glfwInstanceExtensions + extensionCount);
+
+            backend::vulkan::Init(procs, device, requiredExtensions);
+            mDevice = *device;
         }
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                mSwapchainImpl = CreateSwapChainImplementation(new SwapChainImplVulkan(mWindow));
+                VkSurfaceKHR surface = VK_NULL_HANDLE;
+                if (glfwCreateWindowSurface(backend::vulkan::GetInstance(mDevice), mWindow, nullptr,
+                                            &surface) != VK_SUCCESS) {
+                    ASSERT(false);
+                }
+
+                mSwapchainImpl = backend::vulkan::CreateNativeSwapChainImpl(mDevice, surface);
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
         nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+            ASSERT(mSwapchainImpl.userData != nullptr);
+            return backend::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:
+        nxtDevice mDevice;
         nxtSwapChainImplementation mSwapchainImpl = {};
     };
 

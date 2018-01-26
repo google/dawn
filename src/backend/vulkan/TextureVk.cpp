@@ -43,34 +43,6 @@ namespace backend { namespace vulkan {
             }
         }
 
-        // Converts the NXT usage flags to Vulkan usage flags. Also needs the format to choose
-        // between color and depth attachment usages.
-        VkImageUsageFlags VulkanImageUsage(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
-            VkImageUsageFlags flags = 0;
-
-            if (usage & nxt::TextureUsageBit::TransferSrc) {
-                flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-            }
-            if (usage & nxt::TextureUsageBit::TransferDst) {
-                flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-            }
-            if (usage & nxt::TextureUsageBit::Sampled) {
-                flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
-            }
-            if (usage & nxt::TextureUsageBit::Storage) {
-                flags |= VK_IMAGE_USAGE_STORAGE_BIT;
-            }
-            if (usage & nxt::TextureUsageBit::OutputAttachment) {
-                if (TextureFormatHasDepthOrStencil(format)) {
-                    flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-                } else {
-                    flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-                }
-            }
-
-            return flags;
-        }
-
         // Computes which vulkan access type could be required for the given NXT usage.
         VkAccessFlags VulkanAccessFlags(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
             VkAccessFlags flags = 0;
@@ -225,6 +197,34 @@ namespace backend { namespace vulkan {
             default:
                 UNREACHABLE();
         }
+    }
+
+    // Converts the NXT usage flags to Vulkan usage flags. Also needs the format to choose
+    // between color and depth attachment usages.
+    VkImageUsageFlags VulkanImageUsage(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
+        VkImageUsageFlags flags = 0;
+
+        if (usage & nxt::TextureUsageBit::TransferSrc) {
+            flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        }
+        if (usage & nxt::TextureUsageBit::TransferDst) {
+            flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        }
+        if (usage & nxt::TextureUsageBit::Sampled) {
+            flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+        }
+        if (usage & nxt::TextureUsageBit::Storage) {
+            flags |= VK_IMAGE_USAGE_STORAGE_BIT;
+        }
+        if (usage & nxt::TextureUsageBit::OutputAttachment) {
+            if (TextureFormatHasDepthOrStencil(format)) {
+                flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+            } else {
+                flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            }
+        }
+
+        return flags;
     }
 
     Texture::Texture(TextureBuilder* builder) : TextureBase(builder) {

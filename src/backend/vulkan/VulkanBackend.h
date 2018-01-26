@@ -92,7 +92,7 @@ namespace backend { namespace vulkan {
 
     class Device : public DeviceBase {
       public:
-        Device();
+        Device(const std::vector<const char*>& requiredInstanceExtensions);
         ~Device();
 
         // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
@@ -102,6 +102,8 @@ namespace backend { namespace vulkan {
         VkInstance GetInstance() const;
         VkPhysicalDevice GetPhysicalDevice() const;
         VkDevice GetVkDevice() const;
+        uint32_t GetGraphicsQueueFamily() const;
+        VkQueue GetQueue() const;
 
         BufferUploader* GetBufferUploader() const;
         FencedDeleter* GetFencedDeleter() const;
@@ -112,6 +114,7 @@ namespace backend { namespace vulkan {
 
         VkCommandBuffer GetPendingCommandBuffer();
         void SubmitPendingCommands();
+        void AddWaitSemaphore(VkSemaphore semaphore);
 
         // NXT API
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
@@ -137,7 +140,8 @@ namespace backend { namespace vulkan {
         void TickImpl() override;
 
       private:
-        bool CreateInstance(VulkanGlobalKnobs* usedKnobs);
+        bool CreateInstance(VulkanGlobalKnobs* usedKnobs,
+                            const std::vector<const char*>& requiredExtensions);
         bool CreateDevice(VulkanDeviceKnobs* usedKnobs);
         void GatherQueueFromDevice();
 
@@ -197,6 +201,7 @@ namespace backend { namespace vulkan {
         SerialQueue<CommandPoolAndBuffer> mCommandsInFlight;
         std::vector<CommandPoolAndBuffer> mUnusedCommands;
         CommandPoolAndBuffer mPendingCommands;
+        std::vector<VkSemaphore> mWaitSemaphores;
     };
 
     class Queue : public QueueBase {

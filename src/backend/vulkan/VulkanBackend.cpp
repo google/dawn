@@ -21,6 +21,7 @@
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/FramebufferVk.h"
 #include "backend/vulkan/InputStateVk.h"
+#include "backend/vulkan/NativeSwapChainImplVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/RenderPassVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
@@ -28,6 +29,7 @@
 #include "backend/vulkan/SwapChainVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "common/Platform.h"
+#include "common/SwapChainUtils.h"
 
 #include <spirv-cross/spirv_cross.hpp>
 
@@ -46,14 +48,31 @@ namespace backend { namespace vulkan {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
-    void Init(nxtProcTable* procs, nxtDevice* device) {
+    void Init(nxtProcTable* procs,
+              nxtDevice* device,
+              const std::vector<const char*>& requiredInstanceExtensions) {
         *procs = GetValidatingProcs();
-        *device = reinterpret_cast<nxtDevice>(new Device);
+        *device = reinterpret_cast<nxtDevice>(new Device(requiredInstanceExtensions));
+    }
+
+    VkInstance GetInstance(nxtDevice device) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        return backendDevice->GetInstance();
+    }
+
+    nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, VkSurfaceKHR surface) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        return CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, surface));
+    }
+    nxtTextureFormat GetNativeSwapChainPreferredFormat(
+        const nxtSwapChainImplementation* swapChain) {
+        NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
+        return static_cast<nxtTextureFormat>(impl->GetPreferredFormat());
     }
 
     // Device
 
-    Device::Device() {
+    Device::Device(const std::vector<const char*>& requiredInstanceExtensions) {
         if (!mVulkanLib.Open(kVulkanLibName)) {
             ASSERT(false);
             return;
@@ -72,7 +91,7 @@ namespace backend { namespace vulkan {
         }
 
         VulkanGlobalKnobs usedGlobalKnobs = {};
-        if (!CreateInstance(&usedGlobalKnobs)) {
+        if (!CreateInstance(&usedGlobalKnobs, requiredInstanceExtensions)) {
             ASSERT(false);
             return;
         }
@@ -144,6 +163,8 @@ namespace backend { namespace vulkan {
             FreeCommands(&commands);
         }
         mUnusedCommands.clear();
+
+        ASSERT(mWaitSemaphores.empty());
 
         for (VkFence fence : mUnusedFences) {
             fn.DestroyFence(mVkDevice, fence, nullptr);
@@ -274,6 +295,14 @@ namespace backend { namespace vulkan {
         return mVkDevice;
     }
 
+    uint32_t Device::GetGraphicsQueueFamily() const {
+        return mQueueFamily;
+    }
+
+    VkQueue Device::GetQueue() const {
+        return mQueue;
+    }
+
     MapReadRequestTracker* Device::GetMapReadRequestTracker() const {
         return mMapReadRequestTracker;
     }
@@ -321,12 +350,15 @@ namespace backend { namespace vulkan {
             ASSERT(false);
         }
 
+        std::vector<VkPipelineStageFlags> dstStageMasks(mWaitSemaphores.size(),
+                                                        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+
         VkSubmitInfo submitInfo;
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.pNext = nullptr;
-        submitInfo.waitSemaphoreCount = 0;
-        submitInfo.pWaitSemaphores = nullptr;
-        submitInfo.pWaitDstStageMask = 0;
+        submitInfo.waitSemaphoreCount = static_cast<uint32_t>(mWaitSemaphores.size());
+        submitInfo.pWaitSemaphores = mWaitSemaphores.data();
+        submitInfo.pWaitDstStageMask = dstStageMasks.data();
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &mPendingCommands.commandBuffer;
         submitInfo.signalSemaphoreCount = 0;
@@ -340,12 +372,33 @@ namespace backend { namespace vulkan {
         mCommandsInFlight.Enqueue(mPendingCommands, mNextSerial);
         mPendingCommands = CommandPoolAndBuffer();
         mFencesInFlight.emplace(fence, mNextSerial);
+
+        for (VkSemaphore semaphore : mWaitSemaphores) {
+            mDeleter->DeleteWhenUnused(semaphore);
+        }
+        mWaitSemaphores.clear();
+
         mNextSerial++;
     }
 
-    bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs) {
+    void Device::AddWaitSemaphore(VkSemaphore semaphore) {
+        mWaitSemaphores.push_back(semaphore);
+    }
+
+    bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs,
+                                const std::vector<const char*>& requiredExtensions) {
         std::vector<const char*> layersToRequest;
-        std::vector<const char*> extensionsToRequest;
+        std::vector<const char*> extensionsToRequest = requiredExtensions;
+
+        auto AddExtensionIfNotPresent = [](std::vector<const char*>* extensions,
+                                           const char* extension) {
+            for (const char* present : *extensions) {
+                if (strcmp(present, extension) == 0) {
+                    return;
+                }
+            }
+            extensions->push_back(extension);
+        };
 
         // vktrace works by instering a layer, so we need to explicitly enable it if it is present.
         // Also it is good to put it in first position so that it doesn't see Vulkan calls inserted
@@ -368,12 +421,12 @@ namespace backend { namespace vulkan {
             usedKnobs->standardValidation = true;
         }
         if (mGlobalInfo.debugReport) {
-            extensionsToRequest.push_back(kExtensionNameExtDebugReport);
+            AddExtensionIfNotPresent(&extensionsToRequest, kExtensionNameExtDebugReport);
             usedKnobs->debugReport = true;
         }
 #endif
         if (mGlobalInfo.surface) {
-            extensionsToRequest.push_back(kExtensionNameKhrSurface);
+            AddExtensionIfNotPresent(&extensionsToRequest, kExtensionNameKhrSurface);
             usedKnobs->surface = true;
         }
 

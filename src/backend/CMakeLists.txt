@@ -302,6 +302,8 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/InputStateVk.h
         ${VULKAN_DIR}/MemoryAllocator.cpp
         ${VULKAN_DIR}/MemoryAllocator.h
+        ${VULKAN_DIR}/NativeSwapChainImplVk.cpp
+        ${VULKAN_DIR}/NativeSwapChainImplVk.h
         ${VULKAN_DIR}/PipelineLayoutVk.cpp
         ${VULKAN_DIR}/PipelineLayoutVk.h
         ${VULKAN_DIR}/RenderPassVk.cpp
