@@ -30,7 +30,10 @@ namespace backend { namespace vulkan {
         ASSERT(mPipelinesToDelete.Empty());
         ASSERT(mPipelineLayoutsToDelete.Empty());
         ASSERT(mRenderPassesToDelete.Empty());
+        ASSERT(mSemaphoresToDelete.Empty());
         ASSERT(mShaderModulesToDelete.Empty());
+        ASSERT(mSurfacesToDelete.Empty());
+        ASSERT(mSwapChainsToDelete.Empty());
     }
 
     void FencedDeleter::DeleteWhenUnused(VkBuffer buffer) {
@@ -65,12 +68,25 @@ namespace backend { namespace vulkan {
         mRenderPassesToDelete.Enqueue(renderPass, mDevice->GetSerial());
     }
 
+    void FencedDeleter::DeleteWhenUnused(VkSemaphore semaphore) {
+        mSemaphoresToDelete.Enqueue(semaphore, mDevice->GetSerial());
+    }
+
     void FencedDeleter::DeleteWhenUnused(VkShaderModule module) {
         mShaderModulesToDelete.Enqueue(module, mDevice->GetSerial());
     }
 
+    void FencedDeleter::DeleteWhenUnused(VkSurfaceKHR surface) {
+        mSurfacesToDelete.Enqueue(surface, mDevice->GetSerial());
+    }
+
+    void FencedDeleter::DeleteWhenUnused(VkSwapchainKHR swapChain) {
+        mSwapChainsToDelete.Enqueue(swapChain, mDevice->GetSerial());
+    }
+
     void FencedDeleter::Tick(Serial completedSerial) {
         VkDevice vkDevice = mDevice->GetVkDevice();
+        VkInstance instance = mDevice->GetInstance();
 
         // Buffers and images must be deleted before memories because it is invalid to free memory
         // that still have resources bound to it.
@@ -117,6 +133,21 @@ namespace backend { namespace vulkan {
             mDevice->fn.DestroyPipeline(vkDevice, pipeline, nullptr);
         }
         mPipelinesToDelete.ClearUpTo(completedSerial);
+
+        // Vulkan swapchains must be destroyed before their corresponding VkSurface
+        for (VkSwapchainKHR swapChain : mSwapChainsToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroySwapchainKHR(vkDevice, swapChain, nullptr);
+        }
+        mSwapChainsToDelete.ClearUpTo(completedSerial);
+        for (VkSurfaceKHR surface : mSurfacesToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroySurfaceKHR(instance, surface, nullptr);
+        }
+        mSurfacesToDelete.ClearUpTo(completedSerial);
+
+        for (VkSemaphore semaphore : mSemaphoresToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroySemaphore(vkDevice, semaphore, nullptr);
+        }
+        mSemaphoresToDelete.ClearUpTo(completedSerial);
     }
 
 }}  // namespace backend::vulkan

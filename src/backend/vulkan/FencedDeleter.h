@@ -35,7 +35,10 @@ namespace backend { namespace vulkan {
         void DeleteWhenUnused(VkPipelineLayout layout);
         void DeleteWhenUnused(VkRenderPass renderPass);
         void DeleteWhenUnused(VkPipeline pipeline);
+        void DeleteWhenUnused(VkSemaphore semaphore);
         void DeleteWhenUnused(VkShaderModule module);
+        void DeleteWhenUnused(VkSurfaceKHR surface);
+        void DeleteWhenUnused(VkSwapchainKHR swapChain);
 
         void Tick(Serial completedSerial);
 
@@ -49,7 +52,10 @@ namespace backend { namespace vulkan {
         SerialQueue<VkPipeline> mPipelinesToDelete;
         SerialQueue<VkPipelineLayout> mPipelineLayoutsToDelete;
         SerialQueue<VkRenderPass> mRenderPassesToDelete;
+        SerialQueue<VkSemaphore> mSemaphoresToDelete;
         SerialQueue<VkShaderModule> mShaderModulesToDelete;
+        SerialQueue<VkSurfaceKHR> mSurfacesToDelete;
+        SerialQueue<VkSwapchainKHR> mSwapChainsToDelete;
     };
 
 }}  // namespace backend::vulkan
