@@ -22,7 +22,7 @@ addons:
   sources:
    # PPA for clang 5.0
    - llvm-toolchain-trusty-5.0
-   # PPA for clang-format 6.0
+   # PPA for clang-format 7
    - llvm-toolchain-trusty
    # PPA for a more recen libstdc++
    - ubuntu-toolchain-r-test
@@ -38,7 +38,7 @@ addons:
    # Required dependency for GLFW on Linux
    - xorg-dev
    # Format using the latest and greatest
-   - clang-format-6.0
+   - clang-format-7
 
 before_install:
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
@@ -70,4 +70,4 @@ script:
  - cd ..
 
  # Lint
- - if [ "$TRAVIS_OS_NAME" == "linux" ]; then ./scripts/travis_lint_format.sh clang-format-6.0; fi
+ - if [ "$TRAVIS_OS_NAME" == "linux" ]; then ./scripts/travis_lint_format.sh clang-format-7; fi
