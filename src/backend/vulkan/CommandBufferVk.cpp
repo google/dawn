@@ -15,8 +15,10 @@
 #include "backend/vulkan/CommandBufferVk.h"
 
 #include "backend/Commands.h"
+#include "backend/vulkan/BindGroupVk.h"
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/FramebufferVk.h"
+#include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/RenderPassVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
 #include "backend/vulkan/TextureVk.h"
@@ -66,6 +68,8 @@ namespace backend { namespace vulkan {
 
     void CommandBuffer::RecordCommands(VkCommandBuffer commands) {
         Device* device = ToBackend(GetDevice());
+
+        RenderPipeline* lastRenderPipeline = nullptr;
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -223,6 +227,19 @@ namespace backend { namespace vulkan {
                     // Do nothing because the single subpass is ended in vkEndRenderPass
                 } break;
 
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+                    VkDescriptorSet set = ToBackend(cmd->group.Get())->GetHandle();
+
+                    // TODO(cwallez@chromium.org): Add some dirty bits for this to allow setting
+                    // before there is a pipeline layout
+                    // TODO(cwallez@chromium.org): fix for compute passes
+                    VkPipelineLayout layout =
+                        ToBackend(lastRenderPipeline->GetLayout())->GetHandle();
+                    device->fn.CmdBindDescriptorSets(commands, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                                     layout, cmd->index, 1, &set, 0, nullptr);
+                } break;
+
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
                     float blendConstants[4] = {
@@ -251,6 +268,7 @@ namespace backend { namespace vulkan {
 
                     device->fn.CmdBindPipeline(commands, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                                pipeline->GetHandle());
+                    lastRenderPipeline = pipeline;
                 } break;
 
                 case Command::SetVertexBuffers: {
