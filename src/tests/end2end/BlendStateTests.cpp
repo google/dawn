@@ -838,7 +838,14 @@ TEST_P(BlendStateTest, IndependentBlendState) {
     }
 }
 
+// Test that the default blend color is correctly set at the beginning of every subpass
 TEST_P(BlendStateTest, DefaultBlendColor) {
+    if (IsVulkan()) {
+        std::cout << "Test skipped on Vulkan because it doesn't support multisubpass renderpasses"
+                  << std::endl;
+        return;
+    }
+
     nxt::BlendState blendState = device.CreateBlendStateBuilder()
         .SetBlendEnabled(true)
         .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::BlendColor, nxt::BlendFactor::One)
@@ -973,4 +980,4 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
     }
 }
 
-NXT_INSTANTIATE_TEST(BlendStateTest, D3D12Backend, MetalBackend, OpenGLBackend)
+NXT_INSTANTIATE_TEST(BlendStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
