@@ -19,7 +19,6 @@
 
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
-#include "backend/BlendState.h"
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
@@ -38,7 +37,7 @@ namespace backend { namespace vulkan {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
-    using BlendState = BlendStateBase;
+    class BlendState;
     class Buffer;
     using BufferView = BufferViewBase;
     class CommandBuffer;

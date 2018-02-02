@@ -15,6 +15,7 @@
 #include "backend/vulkan/VulkanBackend.h"
 
 #include "backend/Commands.h"
+#include "backend/vulkan/BlendStateVk.h"
 #include "backend/vulkan/BufferUploader.h"
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/CommandBufferVk.h"

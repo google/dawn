@@ -14,6 +14,7 @@
 
 #include "backend/vulkan/RenderPipelineVk.h"
 
+#include "backend/vulkan/BlendStateVk.h"
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
@@ -155,28 +156,25 @@ namespace backend { namespace vulkan {
         depthStencil.minDepthBounds = 0.0f;
         depthStencil.maxDepthBounds = 0.0f;
 
-        // Even when not using independent blend, we need to provide blend information for every
-        // single attachment.
+        // Initialize the "blend state info" that will be chained in the "create info" from the data
+        // pre-computed in the BlendState
+        const auto& subpassInfo = GetRenderPass()->GetSubpassInfo(GetSubPass());
+
         std::array<VkPipelineColorBlendAttachmentState, kMaxColorAttachments> colorBlendAttachments;
-        for (auto& attachment : colorBlendAttachments) {
-            attachment.blendEnable = VK_FALSE;
-            attachment.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-            attachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-            attachment.colorBlendOp = VK_BLEND_OP_ADD;
-            attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-            attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-            attachment.alphaBlendOp = VK_BLEND_OP_ADD;
-            attachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-                                        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        for (uint32_t i : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
+            colorBlendAttachments[i] = ToBackend(GetBlendState(i))->GetState();
         }
         VkPipelineColorBlendStateCreateInfo colorBlend;
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         colorBlend.pNext = nullptr;
         colorBlend.flags = 0;
+        // LogicOp isn't supported so we disable it.
         colorBlend.logicOpEnable = VK_FALSE;
         colorBlend.logicOp = VK_LOGIC_OP_CLEAR;
-        colorBlend.attachmentCount = kMaxColorAttachments;
+        // TODO(cwallez@chromium.org): Do we allow holes in the color attachments?
+        colorBlend.attachmentCount = static_cast<uint32_t>(subpassInfo.colorAttachmentsSet.count());
         colorBlend.pAttachments = colorBlendAttachments.data();
+        // The blend constant is always dynamic so we fill in a dummy value
         colorBlend.blendConstants[0] = 0.0f;
         colorBlend.blendConstants[1] = 0.0f;
         colorBlend.blendConstants[2] = 0.0f;
