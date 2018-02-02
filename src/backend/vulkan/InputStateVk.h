@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_INPUTSTATE_H_
-#define BACKEND_VULKAN_INPUTSTATE_H_
+#ifndef BACKEND_VULKAN_INPUTSTATEVK_H_
+#define BACKEND_VULKAN_INPUTSTATEVK_H_
 
 #include "backend/InputState.h"
 
@@ -38,4 +38,4 @@ namespace backend { namespace vulkan {
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_INPUTSTATE_H_
+#endif  // BACKEND_VULKAN_INPUTSTATEVK_H_

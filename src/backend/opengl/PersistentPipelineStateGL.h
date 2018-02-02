@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_OPENGL_PERSISTENTPIPELINESTATE_H_
-#define BACKEND_OPENGL_PERSISTENTPIPELINESTATE_H_
+#ifndef BACKEND_OPENGL_PERSISTENTPIPELINESTATEGL_H_
+#define BACKEND_OPENGL_PERSISTENTPIPELINESTATEGL_H_
 
 #include "nxt/nxtcpp.h"
 
@@ -40,4 +40,4 @@ namespace backend { namespace opengl {
 
 }}  // namespace backend::opengl
 
-#endif  // BACKEND_OPENGL_PERSISTENTPIPELINESTATE_H_
+#endif  // BACKEND_OPENGL_PERSISTENTPIPELINESTATEGL_H_
