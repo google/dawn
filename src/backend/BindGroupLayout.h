@@ -39,6 +39,8 @@ namespace backend {
         };
         const LayoutBindingInfo& GetBindingInfo() const;
 
+        DeviceBase* GetDevice() const;
+
       private:
         DeviceBase* mDevice;
         LayoutBindingInfo mBindingInfo;

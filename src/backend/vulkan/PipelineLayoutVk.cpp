@@ -14,6 +14,7 @@
 
 #include "backend/vulkan/PipelineLayoutVk.h"
 
+#include "backend/vulkan/BindGroupLayoutVk.h"
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/VulkanBackend.h"
 
@@ -21,16 +22,31 @@ namespace backend { namespace vulkan {
 
     PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder)
         : PipelineLayoutBase(builder), mDevice(ToBackend(builder->GetDevice())) {
-        // Create an empty pipeline layout for now
-        // TODO(cwallez@chromium.org): Add support for descriptor sets, figure out push constants
+        // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
+        // TODO(cwallez@chromium.org) Vulkan doesn't allow holes in this array, should we expose
+        // this constraints at the NXT level?
+        uint32_t numSetLayouts = 0;
+        std::array<VkDescriptorSetLayout, kMaxBindGroups> setLayouts;
+        for (uint32_t setIndex : IterateBitSet(GetBindGroupsLayoutMask())) {
+            setLayouts[numSetLayouts] = ToBackend(GetBindGroupLayout(setIndex))->GetHandle();
+            numSetLayouts++;
+        }
+
+        // Specify NXT's push constant range on all pipeline layouts because we don't know which
+        // pipelines might use it.
+        VkPushConstantRange pushConstantRange;
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_ALL;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = 4 * kMaxPushConstants;
+
         VkPipelineLayoutCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        createInfo.setLayoutCount = 0;
-        createInfo.pSetLayouts = nullptr;
-        createInfo.pushConstantRangeCount = 0;
-        createInfo.pPushConstantRanges = nullptr;
+        createInfo.setLayoutCount = numSetLayouts;
+        createInfo.pSetLayouts = setLayouts.data();
+        createInfo.pushConstantRangeCount = 1;
+        createInfo.pPushConstantRanges = &pushConstantRange;
 
         if (mDevice->fn.CreatePipelineLayout(mDevice->GetVkDevice(), &createInfo, nullptr,
                                              &mHandle) != VK_SUCCESS) {

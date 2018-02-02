@@ -92,6 +92,10 @@ namespace backend {
         return mBindingInfo;
     }
 
+    DeviceBase* BindGroupLayoutBase::GetDevice() const {
+        return mDevice;
+    }
+
     // BindGroupLayoutBuilder
 
     BindGroupLayoutBuilder::BindGroupLayoutBuilder(DeviceBase* device) : Builder(device) {
