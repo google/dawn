@@ -127,6 +127,11 @@ namespace backend { namespace vulkan {
                     for (uint32_t i = 0; i < renderPass->GetAttachmentCount(); ++i) {
                         Texture* attachment =
                             ToBackend(framebuffer->GetTextureView(i)->GetTexture());
+
+                        if (attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment) {
+                            continue;
+                        }
+
                         attachment->RecordBarrier(commands, attachment->GetUsage(),
                                                   nxt::TextureUsageBit::OutputAttachment);
                         attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
