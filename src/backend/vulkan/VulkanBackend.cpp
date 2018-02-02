@@ -16,6 +16,7 @@
 
 #include "backend/Commands.h"
 #include "backend/vulkan/BindGroupLayoutVk.h"
+#include "backend/vulkan/BindGroupVk.h"
 #include "backend/vulkan/BlendStateVk.h"
 #include "backend/vulkan/BufferUploader.h"
 #include "backend/vulkan/BufferVk.h"

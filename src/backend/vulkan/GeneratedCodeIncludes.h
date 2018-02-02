@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "backend/vulkan/BindGroupLayoutVk.h"
+#include "backend/vulkan/BindGroupVk.h"
 #include "backend/vulkan/BlendStateVk.h"
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/CommandBufferVk.h"

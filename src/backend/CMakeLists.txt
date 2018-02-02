@@ -288,6 +288,8 @@ if (NXT_ENABLE_VULKAN)
     target_include_directories(vulkan_autogen PUBLIC ${SRC_DIR})
 
     list(APPEND BACKEND_SOURCES
+        ${VULKAN_DIR}/BindGroupVk.cpp
+        ${VULKAN_DIR}/BindGroupVk.h
         ${VULKAN_DIR}/BindGroupLayoutVk.cpp
         ${VULKAN_DIR}/BindGroupLayoutVk.h
         ${VULKAN_DIR}/BlendStateVk.cpp

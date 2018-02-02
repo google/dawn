@@ -17,7 +17,6 @@
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/BindGroup.h"
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
@@ -34,7 +33,7 @@
 
 namespace backend { namespace vulkan {
 
-    using BindGroup = BindGroupBase;
+    class BindGroup;
     class BindGroupLayout;
     class BlendState;
     class Buffer;

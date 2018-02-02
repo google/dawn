@@ -61,6 +61,10 @@ namespace backend {
         return reinterpret_cast<TextureViewBase*>(mBindings[binding].Get());
     }
 
+    DeviceBase* BindGroupBase::GetDevice() const {
+        return mLayout->GetDevice();
+    }
+
     // BindGroupBuilder
 
     enum BindGroupSetProperties {

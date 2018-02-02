@@ -23,6 +23,7 @@ namespace backend { namespace vulkan {
 
     FencedDeleter::~FencedDeleter() {
         ASSERT(mBuffersToDelete.Empty());
+        ASSERT(mDescriptorPoolsToDelete.Empty());
         ASSERT(mFramebuffersToDelete.Empty());
         ASSERT(mImagesToDelete.Empty());
         ASSERT(mImageViewsToDelete.Empty());
@@ -38,6 +39,10 @@ namespace backend { namespace vulkan {
 
     void FencedDeleter::DeleteWhenUnused(VkBuffer buffer) {
         mBuffersToDelete.Enqueue(buffer, mDevice->GetSerial());
+    }
+
+    void FencedDeleter::DeleteWhenUnused(VkDescriptorPool pool) {
+        mDescriptorPoolsToDelete.Enqueue(pool, mDevice->GetSerial());
     }
 
     void FencedDeleter::DeleteWhenUnused(VkDeviceMemory memory) {
@@ -148,6 +153,11 @@ namespace backend { namespace vulkan {
             mDevice->fn.DestroySemaphore(vkDevice, semaphore, nullptr);
         }
         mSemaphoresToDelete.ClearUpTo(completedSerial);
+
+        for (VkDescriptorPool pool : mDescriptorPoolsToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroyDescriptorPool(vkDevice, pool, nullptr);
+        }
+        mDescriptorPoolsToDelete.ClearUpTo(completedSerial);
     }
 
 }}  // namespace backend::vulkan

@@ -15,6 +15,7 @@
 #ifndef BACKEND_BINDGROUP_H_
 #define BACKEND_BINDGROUP_H_
 
+#include "backend/BindGroupLayout.h"
 #include "backend/Builder.h"
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
@@ -37,6 +38,8 @@ namespace backend {
         BufferViewBase* GetBindingAsBufferView(size_t binding);
         SamplerBase* GetBindingAsSampler(size_t binding);
         TextureViewBase* GetBindingAsTextureView(size_t binding);
+
+        DeviceBase* GetDevice() const;
 
       private:
         Ref<BindGroupLayoutBase> mLayout;

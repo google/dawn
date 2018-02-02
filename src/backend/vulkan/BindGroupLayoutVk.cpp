@@ -20,21 +20,6 @@ namespace backend { namespace vulkan {
 
     namespace {
 
-        VkDescriptorType VulkanDescriptorType(nxt::BindingType type) {
-            switch (type) {
-                case nxt::BindingType::UniformBuffer:
-                    return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                case nxt::BindingType::Sampler:
-                    return VK_DESCRIPTOR_TYPE_SAMPLER;
-                case nxt::BindingType::SampledTexture:
-                    return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-                case nxt::BindingType::StorageBuffer:
-                    return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-                default:
-                    UNREACHABLE();
-            }
-        }
-
         VkShaderStageFlags VulkanShaderStageFlags(nxt::ShaderStageBit stages) {
             VkShaderStageFlags flags = 0;
 
@@ -52,6 +37,21 @@ namespace backend { namespace vulkan {
         }
 
     }  // anonymous namespace
+
+    VkDescriptorType VulkanDescriptorType(nxt::BindingType type) {
+        switch (type) {
+            case nxt::BindingType::UniformBuffer:
+                return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            case nxt::BindingType::Sampler:
+                return VK_DESCRIPTOR_TYPE_SAMPLER;
+            case nxt::BindingType::SampledTexture:
+                return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+            case nxt::BindingType::StorageBuffer:
+                return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            default:
+                UNREACHABLE();
+        }
+    }
 
     BindGroupLayout::BindGroupLayout(BindGroupLayoutBuilder* builder)
         : BindGroupLayoutBase(builder) {
@@ -101,4 +101,53 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
+    BindGroupLayout::PoolSizeSpec BindGroupLayout::ComputePoolSizes(uint32_t* numPoolSizes) const {
+        uint32_t numSizes = 0;
+        PoolSizeSpec result{};
+
+        // Defines an array and indices into it that will contain for each sampler type at which
+        // position it is in the PoolSizeSpec, or -1 if it isn't present yet.
+        enum DescriptorType {
+            UNIFORM_BUFFER,
+            SAMPLER,
+            SAMPLED_IMAGE,
+            STORAGE_BUFFER,
+            MAX_TYPE,
+        };
+        static_assert(MAX_TYPE == kMaxPoolSizesNeeded, "");
+        auto ToDescriptorType = [](nxt::BindingType type) -> DescriptorType {
+            switch (type) {
+                case nxt::BindingType::UniformBuffer:
+                    return UNIFORM_BUFFER;
+                case nxt::BindingType::Sampler:
+                    return SAMPLER;
+                case nxt::BindingType::SampledTexture:
+                    return SAMPLED_IMAGE;
+                case nxt::BindingType::StorageBuffer:
+                    return STORAGE_BUFFER;
+                default:
+                    UNREACHABLE();
+            }
+        };
+
+        std::array<int, MAX_TYPE> descriptorTypeIndex;
+        descriptorTypeIndex.fill(-1);
+
+        const auto& info = GetBindingInfo();
+        for (uint32_t bindingIndex : IterateBitSet(info.mask)) {
+            DescriptorType type = ToDescriptorType(info.types[bindingIndex]);
+
+            if (descriptorTypeIndex[type] == -1) {
+                descriptorTypeIndex[type] = numSizes;
+                result[numSizes].type = VulkanDescriptorType(info.types[bindingIndex]);
+                result[numSizes].descriptorCount = 1;
+                numSizes++;
+            } else {
+                result[descriptorTypeIndex[type]].descriptorCount++;
+            }
+        }
+
+        *numPoolSizes = numSizes;
+        return result;
+    }
 }}  // namespace backend::vulkan

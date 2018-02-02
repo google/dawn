@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_BINDGROUPLAYOUTVK_H_
-#define BACKEND_VULKAN_BINDGROUPLAYOUTVK_H_
+#ifndef BACKEND_VULKAN_BINDGROUPVK_H_
+#define BACKEND_VULKAN_BINDGROUPVK_H_
 
-#include "backend/BindGroupLayout.h"
+#include "backend/BindGroup.h"
 
 #include "common/vulkan_platform.h"
 
@@ -23,23 +23,18 @@ namespace backend { namespace vulkan {
 
     class Device;
 
-    VkDescriptorType VulkanDescriptorType(nxt::BindingType type);
-
-    class BindGroupLayout : public BindGroupLayoutBase {
+    class BindGroup : public BindGroupBase {
       public:
-        BindGroupLayout(BindGroupLayoutBuilder* builder);
-        ~BindGroupLayout();
+        BindGroup(BindGroupBuilder* builder);
+        ~BindGroup();
 
-        VkDescriptorSetLayout GetHandle() const;
-
-        static constexpr size_t kMaxPoolSizesNeeded = 4;
-        using PoolSizeSpec = std::array<VkDescriptorPoolSize, kMaxPoolSizesNeeded>;
-        PoolSizeSpec ComputePoolSizes(uint32_t* numPoolSizes) const;
+        VkDescriptorSet GetHandle() const;
 
       private:
-        VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
+        VkDescriptorPool mPool = VK_NULL_HANDLE;
+        VkDescriptorSet mHandle = VK_NULL_HANDLE;
     };
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_BINDGROUPLAYOUTVK_H_
+#endif  // BACKEND_VULKAN_BINDGROUPVK_H_
