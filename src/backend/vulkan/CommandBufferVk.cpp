@@ -161,14 +161,6 @@ namespace backend { namespace vulkan {
                     device->fn.CmdSetLineWidth(commands, 1.0f);
                     device->fn.CmdSetDepthBounds(commands, 0.0f, 1.0f);
 
-                    float blendConstants[4] = {
-                        1.0f,
-                        1.0f,
-                        1.0f,
-                        1.0f,
-                    };
-                    device->fn.CmdSetBlendConstants(commands, blendConstants);
-
                     device->fn.CmdSetStencilCompareMask(commands, VK_STENCIL_FRONT_AND_BACK, 0);
                     device->fn.CmdSetStencilWriteMask(commands, VK_STENCIL_FRONT_AND_BACK, 0);
                     device->fn.CmdSetStencilReference(commands, VK_STENCIL_FRONT_AND_BACK, 0);
@@ -193,7 +185,17 @@ namespace backend { namespace vulkan {
 
                 case Command::BeginRenderSubpass: {
                     mCommands.NextCommand<BeginRenderSubpassCmd>();
-                    // Do nothing because the single subpass is started in vkBeginRenderPass
+                    // Do nothing related to subpasses because the single subpass is started in
+                    // vkBeginRenderPass
+
+                    // Set up the default state
+                    float blendConstants[4] = {
+                        0.0f,
+                        0.0f,
+                        0.0f,
+                        0.0f,
+                    };
+                    device->fn.CmdSetBlendConstants(commands, blendConstants);
                 } break;
 
                 case Command::DrawArrays: {
@@ -219,6 +221,17 @@ namespace backend { namespace vulkan {
                 case Command::EndRenderSubpass: {
                     mCommands.NextCommand<EndRenderSubpassCmd>();
                     // Do nothing because the single subpass is ended in vkEndRenderPass
+                } break;
+
+                case Command::SetBlendColor: {
+                    SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
+                    float blendConstants[4] = {
+                        cmd->r,
+                        cmd->g,
+                        cmd->b,
+                        cmd->a,
+                    };
+                    device->fn.CmdSetBlendConstants(commands, blendConstants);
                 } break;
 
                 case Command::SetIndexBuffer: {
