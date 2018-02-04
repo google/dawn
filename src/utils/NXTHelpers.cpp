@@ -106,7 +106,7 @@ namespace utils {
                                  .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
                                  .SetSize(size)
                                  .GetResult();
-        buffer.SetSubData(0, size / sizeof(uint32_t), reinterpret_cast<const uint32_t*>(data));
+        buffer.SetSubData(0, size, reinterpret_cast<const uint8_t*>(data));
         buffer.FreezeUsage(usage);
         return buffer;
     }

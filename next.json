@@ -197,7 +197,7 @@
                 "args": [
                     {"name": "start", "type": "uint32_t"},
                     {"name": "count", "type": "uint32_t"},
-                    {"name": "data", "type": "uint32_t", "annotation": "const*", "length": "count"}
+                    {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "count"}
                 ]
             },
             {
@@ -1250,6 +1250,9 @@
         ]
     },
     "void": {
+        "category": "native"
+    },
+    "uint8_t": {
         "category": "native"
     },
     "uint32_t": {

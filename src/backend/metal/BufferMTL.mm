@@ -49,10 +49,9 @@ namespace backend { namespace metal {
         }
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
+    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         auto* uploader = ToBackend(GetDevice())->GetResourceUploader();
-        uploader->BufferSubData(mMtlBuffer, start * sizeof(uint32_t), count * sizeof(uint32_t),
-                                data);
+        uploader->BufferSubData(mMtlBuffer, start, count, data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t) {

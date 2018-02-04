@@ -107,7 +107,7 @@ class CopyTests_T2B : public CopyTests {
                 .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
                 .GetResult();
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel);
-            buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size()), reinterpret_cast<const uint32_t*>(emptyData.data()));
+            buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(emptyData.data()));
 
             // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level` mip into the buffer at the specified `offset` and `rowPitch`
             commands[1] = device.CreateCommandBufferBuilder()
@@ -158,7 +158,7 @@ protected:
             .GetResult();
         std::vector<RGBA8> bufferData(bufferSpec.size / kBytesPerTexel);
         FillBufferData(bufferData.data(), bufferData.size());
-        buffer.SetSubData(0, static_cast<uint32_t>(bufferData.size()), reinterpret_cast<const uint32_t*>(bufferData.data()));
+        buffer.SetSubData(0, static_cast<uint32_t>(bufferData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(bufferData.data()));
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         nxt::Texture texture = device.CreateTextureBuilder()

@@ -41,20 +41,20 @@ class BufferMapReadTests : public NXTTest {
         const void* mappedData = nullptr;
 };
 
-// Test that the simplest map read (one u32 at offset 0) works.
+// Test that the simplest map read (one u8 at offset 0) works.
 TEST_P(BufferMapReadTests, SmallReadAtZero) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(4)
+        .SetSize(1)
         .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
         .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
-    uint32_t myData = 2934875;
-    buffer.SetSubData(0, 1, &myData);
+    uint8_t myData = 187;
+    buffer.SetSubData(0, sizeof(myData), &myData);
 
     buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
-    const void* mappedData = MapReadAsyncAndWait(buffer, 0, 4);
-    ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
+    const void* mappedData = MapReadAsyncAndWait(buffer, 0, 1);
+    ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
 
     buffer.Unmap();
 }
@@ -67,12 +67,30 @@ TEST_P(BufferMapReadTests, SmallReadAtOffset) {
         .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
-    uint32_t myData = 2934875;
-    buffer.SetSubData(2048 / sizeof(uint32_t), 1, &myData);
+    uint8_t myData = 234;
+    buffer.SetSubData(2048, sizeof(myData), &myData);
 
     buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
     const void* mappedData = MapReadAsyncAndWait(buffer, 2048, 4);
-    ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
+    ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
+
+    buffer.Unmap();
+}
+
+// Test mapping a buffer at an offset that's not uint32-aligned.
+TEST_P(BufferMapReadTests, SmallReadAtUnalignedOffset) {
+    nxt::Buffer buffer = device.CreateBufferBuilder()
+        .SetSize(4000)
+        .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
+        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
+        .GetResult();
+
+    uint8_t myData = 213;
+    buffer.SetSubData(3, 1, &myData);
+
+    buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
+    const void* mappedData = MapReadAsyncAndWait(buffer, 3, 1);
+    ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
 
     buffer.Unmap();
 }
@@ -91,7 +109,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
         .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
-    buffer.SetSubData(0, static_cast<uint32_t>(kDataSize), myData.data());
+    buffer.SetSubData(0, kDataSize * sizeof(uint32_t), reinterpret_cast<uint8_t*>(myData.data()));
 
     buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
     const void* mappedData = MapReadAsyncAndWait(buffer, 0, static_cast<uint32_t>(kDataSize * sizeof(uint32_t)));
@@ -185,18 +203,18 @@ NXT_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBack
 class BufferSetSubDataTests : public NXTTest {
 };
 
-// Test the simplest set sub data: setting one u32 at offset 0.
+// Test the simplest set sub data: setting one u8 at offset 0.
 TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(4)
+        .SetSize(1)
         .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
         .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
-    uint32_t value = 298371;
-    buffer.SetSubData(0, 1, &value);
+    uint8_t value = 171;
+    buffer.SetSubData(0, sizeof(value), &value);
 
-    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
+    EXPECT_BUFFER_U8_EQ(value, buffer, 0);
 }
 
 // Test that SetSubData offset works.
@@ -208,10 +226,10 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
         .GetResult();
 
     constexpr uint32_t kOffset = 2000;
-    uint32_t value = 298371;
-    buffer.SetSubData(kOffset / 4, 1, &value);
+    uint8_t value = 231;
+    buffer.SetSubData(kOffset, sizeof(value), &value);
 
-    EXPECT_BUFFER_U32_EQ(value, buffer, kOffset);
+    EXPECT_BUFFER_U8_EQ(value, buffer, kOffset);
 }
 
 // Stress test for many calls to SetSubData
@@ -233,7 +251,7 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 
     std::vector<uint32_t> expectedData;
     for (uint32_t i = 0; i < kElements; ++i) {
-        buffer.SetSubData(i, 1, &i);
+        buffer.SetSubData(i * sizeof(uint32_t), sizeof(i), reinterpret_cast<uint8_t*>(&i));
         expectedData.push_back(i);
     }
 
@@ -255,7 +273,7 @@ TEST_P(BufferSetSubDataTests, LargeSetSubData) {
         expectedData.push_back(i);
     }
 
-    buffer.SetSubData(0, kElements, expectedData.data());
+    buffer.SetSubData(0, kElements * sizeof(uint32_t), reinterpret_cast<uint8_t*>(expectedData.data()));
 
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
 }

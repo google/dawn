@@ -42,7 +42,7 @@ namespace backend { namespace d3d12 {
         ComPtr<ID3D12Resource> mResource;
 
         // NXT API
-        void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
+        void SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;

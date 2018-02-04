@@ -88,8 +88,8 @@ void initBuffers() {
             .GetResult();
 
         particleBuffers[i].SetSubData(0,
-            sizeof(Particle) * kNumParticles / sizeof(uint32_t),
-            reinterpret_cast<uint32_t*>(initialParticles.data()));
+            sizeof(Particle) * kNumParticles,
+            reinterpret_cast<uint8_t*>(initialParticles.data()));
     }
 }
 

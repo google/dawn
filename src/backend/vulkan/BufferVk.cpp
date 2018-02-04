@@ -184,9 +184,9 @@ namespace backend { namespace vulkan {
                                     nullptr);
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
+    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         BufferUploader* uploader = ToBackend(GetDevice())->GetBufferUploader();
-        uploader->BufferSubData(mHandle, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
+        uploader->BufferSubData(mHandle, start, count, data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {

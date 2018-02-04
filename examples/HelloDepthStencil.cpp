@@ -274,7 +274,7 @@ void frame() {
     );
 
     cameraBuffer.TransitionUsage(nxt::BufferUsageBit::TransferDst);
-    cameraBuffer.SetSubData(0, sizeof(CameraData) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&cameraData));
+    cameraBuffer.SetSubData(0, sizeof(CameraData), reinterpret_cast<uint8_t*>(&cameraData));
 
     nxt::Texture backbuffer;
     nxt::Framebuffer framebuffer;

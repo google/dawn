@@ -152,9 +152,8 @@ namespace backend { namespace d3d12 {
         }
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
-        mDevice->GetResourceUploader()->BufferSubData(mResource, start * sizeof(uint32_t),
-                                                      count * sizeof(uint32_t), data);
+    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
+        mDevice->GetResourceUploader()->BufferSubData(mResource, start, count, data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {

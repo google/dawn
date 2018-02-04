@@ -45,7 +45,7 @@ void init() {
         .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .SetSize(sizeof(s))
         .GetResult();
-    buffer.SetSubData(0, sizeof(s) / sizeof(uint32_t), reinterpret_cast<uint32_t*>(&s));
+    buffer.SetSubData(0, sizeof(s), reinterpret_cast<uint8_t*>(&s));
 
     nxt::BufferView view = buffer.CreateBufferViewBuilder()
         .SetExtent(0, sizeof(s))

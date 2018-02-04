@@ -41,7 +41,7 @@ namespace backend {
 
         // NXT API
         BufferViewBuilder* CreateBufferViewBuilder();
-        void SetSubData(uint32_t start, uint32_t count, const uint32_t* data);
+        void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);
         void MapReadAsync(uint32_t start,
                           uint32_t size,
                           nxtBufferMapReadCallback callback,
@@ -61,7 +61,7 @@ namespace backend {
         void CallMapWriteCallback(uint32_t serial, nxtBufferMapAsyncStatus status, void* pointer);
 
       private:
-        virtual void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) = 0;
+        virtual void SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) = 0;
         virtual void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
         virtual void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
         virtual void UnmapImpl() = 0;

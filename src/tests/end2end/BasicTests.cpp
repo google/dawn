@@ -28,10 +28,10 @@ TEST_P(BasicTests, BufferSetSubData) {
         .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
-    uint32_t value = 3094587;
-    buffer.SetSubData(0, 1, &value);
+    uint8_t value = 187;
+    buffer.SetSubData(0, sizeof(value), &value);
 
-    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
+    EXPECT_BUFFER_U8_EQ(value, buffer, 0);
 }
 
 NXT_INSTANTIATE_TEST(BasicTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

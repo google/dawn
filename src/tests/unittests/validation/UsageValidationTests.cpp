@@ -35,16 +35,16 @@ TEST_F(UsageValidationTest, UsageAfterCommandBuffer) {
     // Should we make an end2end test that tests this as well?
 
     nxt::Buffer buf = device.CreateBufferBuilder()
-        .SetSize(4)
+        .SetSize(1)
         .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Vertex)
         .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
-    uint32_t foo = 0;
-    buf.SetSubData(0, 1, &foo);
+    uint8_t foo = 0;
+    buf.SetSubData(0, sizeof(foo), &foo);
 
     buf.TransitionUsage(nxt::BufferUsageBit::Vertex);
-    ASSERT_DEVICE_ERROR(buf.SetSubData(0, 1, &foo));
+    ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
 
     nxt::CommandBuffer cmdbuf = device.CreateCommandBufferBuilder()
         .TransitionBufferUsage(buf, nxt::BufferUsageBit::TransferDst)
@@ -52,5 +52,5 @@ TEST_F(UsageValidationTest, UsageAfterCommandBuffer) {
     queue.Submit(1, &cmdbuf);
     // buf should be in TransferDst usage
 
-    buf.SetSubData(0, 1, &foo);
+    buf.SetSubData(0, sizeof(foo), &foo);
 }

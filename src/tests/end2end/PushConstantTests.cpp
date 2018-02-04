@@ -36,7 +36,7 @@ class PushConstantTest: public NXTTest {
                 .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
                 .GetResult();
             uint32_t one = 1;
-            buf1.SetSubData(0, 1, &one);
+            buf1.SetSubData(0, sizeof(one), reinterpret_cast<uint8_t*>(&one));
 
             nxt::Buffer buf2 = device.CreateBufferBuilder()
                 .SetSize(4)

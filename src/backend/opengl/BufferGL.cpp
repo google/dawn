@@ -30,9 +30,9 @@ namespace backend { namespace opengl {
         return mBuffer;
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
+    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(uint32_t), count * sizeof(uint32_t), data);
+        glBufferSubData(GL_ARRAY_BUFFER, start, count, data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {

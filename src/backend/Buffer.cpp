@@ -84,8 +84,8 @@ namespace backend {
         }
     }
 
-    void BufferBase::SetSubData(uint32_t start, uint32_t count, const uint32_t* data) {
-        if ((start + count) * sizeof(uint32_t) > GetSize()) {
+    void BufferBase::SetSubData(uint32_t start, uint32_t count, const uint8_t* data) {
+        if (start + count > GetSize()) {
             mDevice->HandleError("Buffer subdata out of range");
             return;
         }

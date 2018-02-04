@@ -430,6 +430,7 @@ namespace detail {
         return testing::AssertionSuccess();
     }
 
+    template class ExpectEq<uint8_t>;
     template class ExpectEq<uint32_t>;
     template class ExpectEq<RGBA8>;
 }

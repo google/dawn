@@ -508,8 +508,8 @@ namespace {
             // but the draw is queue level command that is pipelined. This causes bad rendering for models
             // that use the same part multiple time.
             material.uniformBuffer.SetSubData(0,
-                    sizeof(u_transform_block) / sizeof(uint32_t),
-                    reinterpret_cast<const uint32_t*>(&transforms));
+                    sizeof(u_transform_block),
+                    reinterpret_cast<const uint8_t*>(&transforms));
             cmd.SetRenderPipeline(material.pipeline);
             cmd.TransitionBufferUsage(material.uniformBuffer, nxt::BufferUsageBit::Uniform);
             cmd.SetBindGroup(0, material.bindGroup0);

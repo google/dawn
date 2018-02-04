@@ -487,28 +487,28 @@ TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
 
 // Test the success case for Buffer::SetSubData
 TEST_F(BufferValidationTest, SetSubDataSuccess) {
-    nxt::Buffer buf = CreateSetSubDataBuffer(4);
+    nxt::Buffer buf = CreateSetSubDataBuffer(1);
 
-    uint32_t foo = 0;
-    buf.SetSubData(0, 1, &foo);
+    uint8_t foo = 0;
+    buf.SetSubData(0, sizeof(foo), &foo);
 }
 
 // Test error case for SetSubData out of bounds
 TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
-    nxt::Buffer buf = CreateSetSubDataBuffer(4);
+    nxt::Buffer buf = CreateSetSubDataBuffer(1);
 
-    uint32_t foo = 0;
+    uint8_t foo = 0;
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, 2, &foo));
 }
 
 // Test error case for SetSubData with the wrong usage
 TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
     nxt::Buffer buf = device.CreateBufferBuilder()
-        .SetSize(4)
+        .SetSize(1)
         .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Vertex)
         .SetInitialUsage(nxt::BufferUsageBit::Vertex)
         .GetResult();
 
-    uint32_t foo = 0;
-    ASSERT_DEVICE_ERROR(buf.SetSubData(0, 1, &foo));
+    uint8_t foo = 0;
+    ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
 }
