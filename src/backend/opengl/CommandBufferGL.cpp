@@ -49,6 +49,24 @@ namespace backend { namespace opengl {
                 case nxt::VertexFormat::FloatR32G32:
                 case nxt::VertexFormat::FloatR32:
                     return GL_FLOAT;
+                case nxt::VertexFormat::UnormR8G8B8A8:
+                case nxt::VertexFormat::UnormR8G8:
+                    return GL_UNSIGNED_BYTE;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        GLboolean VertexFormatIsNormalized(nxt::VertexFormat format) {
+            switch (format) {
+                case nxt::VertexFormat::FloatR32G32B32A32:
+                case nxt::VertexFormat::FloatR32G32B32:
+                case nxt::VertexFormat::FloatR32G32:
+                case nxt::VertexFormat::FloatR32:
+                    return GL_FALSE;
+                case nxt::VertexFormat::UnormR8G8B8A8:
+                case nxt::VertexFormat::UnormR8G8:
+                    return GL_TRUE;
                 default:
                     UNREACHABLE();
             }
@@ -184,9 +202,10 @@ namespace backend { namespace opengl {
                         auto components = VertexFormatNumComponents(attribute.format);
                         auto formatType = VertexFormatType(attribute.format);
 
+                        GLboolean normalized = VertexFormatIsNormalized(attribute.format);
                         glBindBuffer(GL_ARRAY_BUFFER, buffer);
                         glVertexAttribPointer(
-                            location, components, formatType, GL_FALSE, input.stride,
+                            location, components, formatType, normalized, input.stride,
                             reinterpret_cast<void*>(
                                 static_cast<intptr_t>(offset + attribute.offset)));
                     }

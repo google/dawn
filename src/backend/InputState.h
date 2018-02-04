@@ -29,6 +29,7 @@ namespace backend {
 
     size_t IndexFormatSize(nxt::IndexFormat format);
     uint32_t VertexFormatNumComponents(nxt::VertexFormat format);
+    size_t VertexFormatComponentSize(nxt::VertexFormat format);
     size_t VertexFormatSize(nxt::VertexFormat format);
 
     class InputStateBase : public RefCounted {

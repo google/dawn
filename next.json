@@ -1222,7 +1222,9 @@
             {"value": 0, "name": "float r32 g32 b32 a32"},
             {"value": 1, "name": "float r32 g32 b32"},
             {"value": 2, "name": "float r32 g32"},
-            {"value": 3, "name": "float r32"}
+            {"value": 3, "name": "float r32"},
+            {"value": 4, "name": "unorm r8 g8 b8 a8"},
+            {"value": 5, "name": "unorm r8 g8"}
         ]
     },
     "void": {

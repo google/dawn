@@ -44,10 +44,12 @@ class InputStateTest : public NXTTest {
             EXPECT_TRUE(component >= 0 && component < 4);
             switch (format) {
                 case VertexFormat::FloatR32G32B32A32:
+                case VertexFormat::UnormR8G8B8A8:
                     return component >= 4;
                 case VertexFormat::FloatR32G32B32:
                     return component >= 3;
                 case VertexFormat::FloatR32G32:
+                case VertexFormat::UnormR8G8:
                     return component >= 2;
                 case VertexFormat::FloatR32:
                     return component >= 1;

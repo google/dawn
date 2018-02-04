@@ -35,10 +35,12 @@ namespace backend {
     uint32_t VertexFormatNumComponents(nxt::VertexFormat format) {
         switch (format) {
             case nxt::VertexFormat::FloatR32G32B32A32:
+            case nxt::VertexFormat::UnormR8G8B8A8:
                 return 4;
             case nxt::VertexFormat::FloatR32G32B32:
                 return 3;
             case nxt::VertexFormat::FloatR32G32:
+            case nxt::VertexFormat::UnormR8G8:
                 return 2;
             case nxt::VertexFormat::FloatR32:
                 return 1;
@@ -47,16 +49,23 @@ namespace backend {
         }
     }
 
-    size_t VertexFormatSize(nxt::VertexFormat format) {
+    size_t VertexFormatComponentSize(nxt::VertexFormat format) {
         switch (format) {
             case nxt::VertexFormat::FloatR32G32B32A32:
             case nxt::VertexFormat::FloatR32G32B32:
             case nxt::VertexFormat::FloatR32G32:
             case nxt::VertexFormat::FloatR32:
-                return VertexFormatNumComponents(format) * sizeof(float);
+                return sizeof(float);
+            case nxt::VertexFormat::UnormR8G8B8A8:
+            case nxt::VertexFormat::UnormR8G8:
+                return sizeof(uint8_t);
             default:
                 UNREACHABLE();
         }
+    }
+
+    size_t VertexFormatSize(nxt::VertexFormat format) {
+        return VertexFormatNumComponents(format) * VertexFormatComponentSize(format);
     }
 
     // InputStateBase
