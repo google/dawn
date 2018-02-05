@@ -18,7 +18,6 @@
 #include "nxt/nxtcpp.h"
 
 #include "backend/ComputePipeline.h"
-#include "backend/DepthStencilState.h"
 #include "backend/Device.h"
 #include "backend/Queue.h"
 #include "backend/Sampler.h"
@@ -40,7 +39,7 @@ namespace backend { namespace vulkan {
     using BufferView = BufferViewBase;
     class CommandBuffer;
     using ComputePipeline = ComputePipelineBase;
-    using DepthStencilState = DepthStencilStateBase;
+    class DepthStencilState;
     class Device;
     class Framebuffer;
     class InputState;

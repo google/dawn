@@ -15,6 +15,7 @@
 #include "backend/vulkan/RenderPipelineVk.h"
 
 #include "backend/vulkan/BlendStateVk.h"
+#include "backend/vulkan/DepthStencilStateVk.h"
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
@@ -130,32 +131,6 @@ namespace backend { namespace vulkan {
         multisample.alphaToCoverageEnable = VK_FALSE;
         multisample.alphaToOneEnable = VK_FALSE;
 
-        VkPipelineDepthStencilStateCreateInfo depthStencil;
-        depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-        depthStencil.pNext = nullptr;
-        depthStencil.flags = 0;
-        depthStencil.depthTestEnable = VK_TRUE;
-        depthStencil.depthWriteEnable = VK_TRUE;
-        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-        depthStencil.depthBoundsTestEnable = VK_FALSE;
-        depthStencil.stencilTestEnable = VK_FALSE;
-        depthStencil.front.failOp = VK_STENCIL_OP_KEEP;
-        depthStencil.front.passOp = VK_STENCIL_OP_KEEP;
-        depthStencil.front.depthFailOp = VK_STENCIL_OP_KEEP;
-        depthStencil.front.compareOp = VK_COMPARE_OP_NEVER;
-        depthStencil.front.compareMask = 0;
-        depthStencil.front.writeMask = 0;
-        depthStencil.front.reference = 0;
-        depthStencil.back.failOp = VK_STENCIL_OP_KEEP;
-        depthStencil.back.passOp = VK_STENCIL_OP_KEEP;
-        depthStencil.back.depthFailOp = VK_STENCIL_OP_KEEP;
-        depthStencil.back.compareOp = VK_COMPARE_OP_NEVER;
-        depthStencil.back.compareMask = 0;
-        depthStencil.back.writeMask = 0;
-        depthStencil.back.reference = 0;
-        depthStencil.minDepthBounds = 0.0f;
-        depthStencil.maxDepthBounds = 0.0f;
-
         // Initialize the "blend state info" that will be chained in the "create info" from the data
         // pre-computed in the BlendState
         const auto& subpassInfo = GetRenderPass()->GetSubpassInfo(GetSubPass());
@@ -211,7 +186,7 @@ namespace backend { namespace vulkan {
         createInfo.pViewportState = &viewport;
         createInfo.pRasterizationState = &rasterization;
         createInfo.pMultisampleState = &multisample;
-        createInfo.pDepthStencilState = &depthStencil;
+        createInfo.pDepthStencilState = ToBackend(GetDepthStencilState())->GetCreateInfo();
         createInfo.pColorBlendState = &colorBlend;
         createInfo.pDynamicState = &dynamic;
         createInfo.layout = ToBackend(GetLayout())->GetHandle();
