@@ -20,6 +20,19 @@
 
 namespace backend { namespace vulkan {
 
+    namespace {
+        VkAttachmentLoadOp VulkanAttachmentLoadOp(nxt::LoadOp op) {
+            switch (op) {
+                case nxt::LoadOp::Load:
+                    return VK_ATTACHMENT_LOAD_OP_LOAD;
+                case nxt::LoadOp::Clear:
+                    return VK_ATTACHMENT_LOAD_OP_CLEAR;
+                default:
+                    UNREACHABLE();
+            }
+        }
+    }  // anonymous namespace
+
     RenderPass::RenderPass(RenderPassBuilder* builder)
         : RenderPassBase(builder), mDevice(ToBackend(builder->GetDevice())) {
         // For now we only support single pass render passes.
@@ -65,14 +78,18 @@ namespace backend { namespace vulkan {
             attachmentDesc.flags = 0;
             attachmentDesc.format = VulkanImageFormat(attachment.format);
             attachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
-            attachmentDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            attachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            attachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
             if (TextureFormatHasDepthOrStencil(attachment.format)) {
+                attachmentDesc.loadOp = VulkanAttachmentLoadOp(attachment.depthLoadOp);
+                attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                attachmentDesc.stencilLoadOp = VulkanAttachmentLoadOp(attachment.stencilLoadOp);
+                attachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+
                 attachmentDesc.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
                 attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             } else {
+                attachmentDesc.loadOp = VulkanAttachmentLoadOp(attachment.colorLoadOp);
+                attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
                 attachmentDesc.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             }
