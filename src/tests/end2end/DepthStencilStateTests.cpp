@@ -524,4 +524,8 @@ TEST_P(DepthStencilStateTest, StencilDepthPass) {
 2);                                                         // Replace the stencil on stencil pass, depth pass, so it should be 2
 }
 
-NXT_INSTANTIATE_TEST(DepthStencilStateTest, D3D12Backend, MetalBackend, OpenGLBackend)
+NXT_INSTANTIATE_TEST(DepthStencilStateTest,
+                     D3D12Backend,
+                     MetalBackend,
+                     OpenGLBackend,
+                     VulkanBackend)
