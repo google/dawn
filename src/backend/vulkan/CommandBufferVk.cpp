@@ -269,6 +269,12 @@ namespace backend { namespace vulkan {
                     lastRenderPipeline = pipeline;
                 } break;
 
+                case Command::SetStencilReference: {
+                    SetStencilReferenceCmd* cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
+                    device->fn.CmdSetStencilReference(commands, VK_STENCIL_FRONT_AND_BACK,
+                                                      cmd->reference);
+                } break;
+
                 case Command::SetVertexBuffers: {
                     SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
                     auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
