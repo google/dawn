@@ -283,15 +283,17 @@ namespace backend { namespace vulkan {
     Texture::~Texture() {
         Device* device = ToBackend(GetDevice());
 
-        // We need to free both the memory allocation and the container. Memory should be freed
-        // after the VkImage is destroyed and this is taken care of by the FencedDeleter.
-        device->GetMemoryAllocator()->Free(&mMemoryAllocation);
-
         // If we own the resource, release it.
-        if (mHandle != VK_NULL_HANDLE) {
-            device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-            mHandle = VK_NULL_HANDLE;
+        if (mMemoryAllocation.GetMemory() != VK_NULL_HANDLE) {
+            // We need to free both the memory allocation and the container. Memory should be freed
+            // after the VkImage is destroyed and this is taken care of by the FencedDeleter.
+            device->GetMemoryAllocator()->Free(&mMemoryAllocation);
+
+            if (mHandle != VK_NULL_HANDLE) {
+                device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+            }
         }
+        mHandle = VK_NULL_HANDLE;
     }
 
     VkImage Texture::GetHandle() const {
