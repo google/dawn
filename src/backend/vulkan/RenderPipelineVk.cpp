@@ -180,7 +180,7 @@ namespace backend { namespace vulkan {
         colorBlend.blendConstants[2] = 0.0f;
         colorBlend.blendConstants[3] = 0.0f;
 
-        // Tag all state as dynamic.
+        // Tag all state as dynamic but stencil masks.
         VkDynamicState dynamicStates[] = {
             VK_DYNAMIC_STATE_VIEWPORT,
             VK_DYNAMIC_STATE_SCISSOR,
@@ -188,8 +188,6 @@ namespace backend { namespace vulkan {
             VK_DYNAMIC_STATE_DEPTH_BIAS,
             VK_DYNAMIC_STATE_BLEND_CONSTANTS,
             VK_DYNAMIC_STATE_DEPTH_BOUNDS,
-            VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK,
-            VK_DYNAMIC_STATE_STENCIL_WRITE_MASK,
             VK_DYNAMIC_STATE_STENCIL_REFERENCE,
         };
         VkPipelineDynamicStateCreateInfo dynamic;

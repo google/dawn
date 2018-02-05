@@ -165,8 +165,6 @@ namespace backend { namespace vulkan {
                     device->fn.CmdSetLineWidth(commands, 1.0f);
                     device->fn.CmdSetDepthBounds(commands, 0.0f, 1.0f);
 
-                    device->fn.CmdSetStencilCompareMask(commands, VK_STENCIL_FRONT_AND_BACK, 0);
-                    device->fn.CmdSetStencilWriteMask(commands, VK_STENCIL_FRONT_AND_BACK, 0);
                     device->fn.CmdSetStencilReference(commands, VK_STENCIL_FRONT_AND_BACK, 0);
 
                     // The viewport and scissor default to cover all of the attachments
