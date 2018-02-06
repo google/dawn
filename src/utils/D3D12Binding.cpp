@@ -37,10 +37,7 @@ namespace backend { namespace d3d12 {
     ComPtr<ID3D12CommandQueue> GetCommandQueue(nxtDevice device);
     uint64_t GetSerial(const nxtDevice device);
     void NextSerial(nxtDevice device);
-    void ExecuteCommandLists(nxtDevice device,
-                             std::initializer_list<ID3D12CommandList*> commandLists);
     void WaitForSerial(nxtDevice device, uint64_t serial);
-    void OpenCommandList(nxtDevice device, ComPtr<ID3D12GraphicsCommandList>* commandList);
 }}  // namespace backend::d3d12
 
 namespace utils {
@@ -188,24 +185,6 @@ namespace utils {
 
             ASSERT_SUCCESS(mSwapChain->Present(1, 0));
 
-            // Transition last frame's render target back to being a render target
-            if (mRenderTargetResourceState != D3D12_RESOURCE_STATE_PRESENT) {
-                ComPtr<ID3D12GraphicsCommandList> commandList = {};
-                backend::d3d12::OpenCommandList(mBackendDevice, &commandList);
-
-                D3D12_RESOURCE_BARRIER resourceBarrier;
-                resourceBarrier.Transition.pResource =
-                    mRenderTargetResources[mPreviousRenderTargetIndex].Get();
-                resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-                resourceBarrier.Transition.StateAfter = mRenderTargetResourceState;
-                resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                commandList->ResourceBarrier(1, &resourceBarrier);
-                ASSERT_SUCCESS(commandList->Close());
-                backend::d3d12::ExecuteCommandLists(mBackendDevice, {commandList.Get()});
-            }
-
             backend::d3d12::NextSerial(mBackendDevice);
 
             mPreviousRenderTargetIndex = mRenderTargetIndex;
@@ -240,8 +219,6 @@ namespace utils {
         uint32_t mRenderTargetIndex = 0;
         uint32_t mPreviousRenderTargetIndex = 0;
         uint64_t mLastSerialRenderTargetWasUsed[kFrameCount] = {};
-
-        D3D12_RESOURCE_STATES mRenderTargetResourceState;
     };
 
     class D3D12Binding : public BackendBinding {

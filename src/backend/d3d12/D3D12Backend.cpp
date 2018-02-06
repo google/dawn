@@ -62,20 +62,9 @@ namespace backend { namespace d3d12 {
         backendDevice->NextSerial();
     }
 
-    void ExecuteCommandLists(nxtDevice device,
-                             std::initializer_list<ID3D12CommandList*> commandLists) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-        backendDevice->ExecuteCommandLists(commandLists);
-    }
-
     void WaitForSerial(nxtDevice device, uint64_t serial) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         backendDevice->WaitForSerial(serial);
-    }
-
-    void OpenCommandList(nxtDevice device, ComPtr<ID3D12GraphicsCommandList>* commandList) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-        return backendDevice->OpenCommandList(commandList);
     }
 
     void ASSERT_SUCCESS(HRESULT hr) {

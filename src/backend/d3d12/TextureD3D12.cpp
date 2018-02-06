@@ -44,6 +44,9 @@ namespace backend { namespace d3d12 {
                     resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;
                 }
             }
+            if (usage & nxt::TextureUsageBit::Present) {
+                resourceState |= D3D12_RESOURCE_STATE_PRESENT;
+            }
 
             return resourceState;
         }
