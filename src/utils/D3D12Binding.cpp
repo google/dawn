@@ -15,7 +15,6 @@
 #include "utils/BackendBinding.h"
 
 #include "common/Assert.h"
-#include "common/SwapChainUtils.h"
 #include "nxt/nxt_wsi.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -33,11 +32,13 @@
 using Microsoft::WRL::ComPtr;
 
 namespace backend { namespace d3d12 {
-    void Init(ComPtr<ID3D12Device> d3d12Device, nxtProcTable* procs, nxtDevice* device);
-    ComPtr<ID3D12CommandQueue> GetCommandQueue(nxtDevice device);
-    uint64_t GetSerial(const nxtDevice device);
-    void NextSerial(nxtDevice device);
-    void WaitForSerial(nxtDevice device, uint64_t serial);
+    void Init(ComPtr<IDXGIFactory4> factory,
+              ComPtr<ID3D12Device> d3d12Device,
+              nxtProcTable* procs,
+              nxtDevice* device);
+
+    nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window);
+    nxtTextureFormat GetNativeSwapChainPreferredFormat(const nxtSwapChainImplementation* swapChain);
 }}  // namespace backend::d3d12
 
 namespace utils {
@@ -76,150 +77,7 @@ namespace utils {
             return factory;
         }
 
-        DXGI_USAGE D3D12SwapChainBufferUsage(nxtTextureUsageBit allowedUsages) {
-            DXGI_USAGE usage = DXGI_CPU_ACCESS_NONE;
-            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_SAMPLED) {
-                usage |= DXGI_USAGE_SHADER_INPUT;
-            }
-            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_STORAGE) {
-                usage |= DXGI_USAGE_UNORDERED_ACCESS;
-            }
-            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT) {
-                usage |= DXGI_USAGE_RENDER_TARGET_OUTPUT;
-            }
-            return usage;
-        }
-
-        D3D12_RESOURCE_STATES D3D12ResourceState(nxtTextureUsageBit usage) {
-            D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
-            if (usage & NXT_TEXTURE_USAGE_BIT_TRANSFER_SRC) {
-                resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
-            }
-            if (usage & NXT_TEXTURE_USAGE_BIT_TRANSFER_DST) {
-                resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
-            }
-            if (usage & NXT_TEXTURE_USAGE_BIT_SAMPLED) {
-                resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
-                                  D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-            }
-            if (usage & NXT_TEXTURE_USAGE_BIT_STORAGE) {
-                resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-            }
-            if (usage & NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT) {
-                resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;
-            }
-
-            return resourceState;
-        }
     }  // namespace
-
-    class SwapChainImplD3D12 {
-      public:
-        using WSIContext = nxtWSIContextD3D12;
-
-        SwapChainImplD3D12(HWND window, nxtProcTable procs)
-            : mWindow(window), mProcs(procs), mFactory(CreateFactory()) {
-        }
-
-        ~SwapChainImplD3D12() {
-        }
-
-        void Init(nxtWSIContextD3D12* ctx) {
-            mBackendDevice = ctx->device;
-            mCommandQueue = backend::d3d12::GetCommandQueue(mBackendDevice);
-        }
-
-        nxtSwapChainError Configure(nxtTextureFormat format,
-                                    nxtTextureUsageBit allowedUsage,
-                                    uint32_t width,
-                                    uint32_t height) {
-            if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
-                return "unsupported format";
-            }
-            ASSERT(width > 0);
-            ASSERT(height > 0);
-
-            DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-            swapChainDesc.Width = width;
-            swapChainDesc.Height = height;
-            swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-            swapChainDesc.BufferUsage = D3D12SwapChainBufferUsage(allowedUsage);
-            swapChainDesc.BufferCount = kFrameCount;
-            swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-            swapChainDesc.SampleDesc.Count = 1;
-            swapChainDesc.SampleDesc.Quality = 0;
-
-            ComPtr<IDXGISwapChain1> swapChain1;
-            ASSERT_SUCCESS(mFactory->CreateSwapChainForHwnd(
-                mCommandQueue.Get(), mWindow, &swapChainDesc, nullptr, nullptr, &swapChain1));
-            ASSERT_SUCCESS(swapChain1.As(&mSwapChain));
-
-            for (uint32_t n = 0; n < kFrameCount; ++n) {
-                ASSERT_SUCCESS(mSwapChain->GetBuffer(n, IID_PPV_ARGS(&mRenderTargetResources[n])));
-            }
-
-            // Get the initial render target and arbitrarily choose a "previous" render target
-            // that's different
-            mPreviousRenderTargetIndex = mRenderTargetIndex =
-                mSwapChain->GetCurrentBackBufferIndex();
-            mPreviousRenderTargetIndex = mRenderTargetIndex == 0 ? 1 : 0;
-
-            // Initial the serial for all render targets
-            const uint64_t initialSerial = backend::d3d12::GetSerial(mBackendDevice);
-            for (uint32_t n = 0; n < kFrameCount; ++n) {
-                mLastSerialRenderTargetWasUsed[n] = initialSerial;
-            }
-
-            return NXT_SWAP_CHAIN_NO_ERROR;
-        }
-
-        nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
-            nextTexture->texture.ptr = mRenderTargetResources[mRenderTargetIndex].Get();
-            return NXT_SWAP_CHAIN_NO_ERROR;
-        }
-
-        nxtSwapChainError Present() {
-            // Current frame already transitioned to Present by the application, but
-            // we need to flush the D3D12 backend's pending transitions.
-            mProcs.deviceTick(mBackendDevice);
-
-            ASSERT_SUCCESS(mSwapChain->Present(1, 0));
-
-            backend::d3d12::NextSerial(mBackendDevice);
-
-            mPreviousRenderTargetIndex = mRenderTargetIndex;
-            mRenderTargetIndex = mSwapChain->GetCurrentBackBufferIndex();
-
-            // If the next render target is not ready to be rendered yet, wait until it is ready.
-            // If the last completed serial is less than the last requested serial for this render
-            // target, then the commands previously executed on this render target have not yet
-            // completed
-            backend::d3d12::WaitForSerial(mBackendDevice,
-                                          mLastSerialRenderTargetWasUsed[mRenderTargetIndex]);
-
-            mLastSerialRenderTargetWasUsed[mRenderTargetIndex] =
-                backend::d3d12::GetSerial(mBackendDevice);
-
-            return NXT_SWAP_CHAIN_NO_ERROR;
-        }
-
-      private:
-        nxtDevice mBackendDevice = nullptr;
-        nxtProcTable mProcs = {};
-
-        static constexpr unsigned int kFrameCount = 2;
-
-        HWND mWindow = 0;
-        ComPtr<IDXGIFactory4> mFactory = {};
-        ComPtr<ID3D12CommandQueue> mCommandQueue = {};
-        ComPtr<IDXGISwapChain3> mSwapChain = {};
-        ComPtr<ID3D12Resource> mRenderTargetResources[kFrameCount] = {};
-
-        // Frame synchronization. Updated every frame
-        uint32_t mRenderTargetIndex = 0;
-        uint32_t mPreviousRenderTargetIndex = 0;
-        uint64_t mLastSerialRenderTargetWasUsed[kFrameCount] = {};
-    };
 
     class D3D12Binding : public BackendBinding {
       public:
@@ -233,7 +91,7 @@ namespace utils {
             ASSERT_SUCCESS(D3D12CreateDevice(mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0,
                                              IID_PPV_ARGS(&mD3d12Device)));
 
-            backend::d3d12::Init(mD3d12Device, procs, device);
+            backend::d3d12::Init(mFactory, mD3d12Device, procs, device);
             mBackendDevice = *device;
             mProcTable = *procs;
         }
@@ -242,13 +100,14 @@ namespace utils {
             if (mSwapchainImpl.userData == nullptr) {
                 HWND win32Window = glfwGetWin32Window(mWindow);
                 mSwapchainImpl =
-                    CreateSwapChainImplementation(new SwapChainImplD3D12(win32Window, mProcTable));
+                    backend::d3d12::CreateNativeSwapChainImpl(mBackendDevice, win32Window);
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
         nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+            ASSERT(mSwapchainImpl.userData != nullptr);
+            return backend::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:

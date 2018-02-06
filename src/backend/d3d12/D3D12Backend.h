@@ -86,7 +86,7 @@ namespace backend { namespace d3d12 {
     // Definition of backend types
     class Device : public DeviceBase {
       public:
-        Device(ComPtr<ID3D12Device> d3d12Device);
+        Device(ComPtr<IDXGIFactory4> factory, ComPtr<ID3D12Device> d3d12Device);
         ~Device();
 
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
@@ -111,6 +111,7 @@ namespace backend { namespace d3d12 {
 
         void TickImpl() override;
 
+        ComPtr<IDXGIFactory4> GetFactory();
         ComPtr<ID3D12Device> GetD3D12Device();
         ComPtr<ID3D12CommandQueue> GetCommandQueue();
 
@@ -133,6 +134,7 @@ namespace backend { namespace d3d12 {
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent;
 
+        ComPtr<IDXGIFactory4> mFactory;
         ComPtr<ID3D12Device> mD3d12Device;
         ComPtr<ID3D12CommandQueue> mCommandQueue;
 

@@ -25,6 +25,7 @@
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 #include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
+#include "backend/d3d12/NativeSwapChainImplD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/QueueD3D12.h"
 #include "backend/d3d12/RenderPipelineD3D12.h"
@@ -35,44 +36,40 @@
 #include "backend/d3d12/SwapChainD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
 #include "common/Assert.h"
+#include "common/SwapChainUtils.h"
 
 namespace backend { namespace d3d12 {
 
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
-    void Init(ComPtr<ID3D12Device> d3d12Device, nxtProcTable* procs, nxtDevice* device) {
+    void Init(ComPtr<IDXGIFactory4> factory,
+              ComPtr<ID3D12Device> d3d12Device,
+              nxtProcTable* procs,
+              nxtDevice* device) {
         *device = nullptr;
         *procs = GetValidatingProcs();
-        *device = reinterpret_cast<nxtDevice>(new Device(d3d12Device));
+        *device = reinterpret_cast<nxtDevice>(new Device(factory, d3d12Device));
     }
 
-    ComPtr<ID3D12CommandQueue> GetCommandQueue(nxtDevice device) {
+    nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
-        return backendDevice->GetCommandQueue();
+        return CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, window));
     }
 
-    uint64_t GetSerial(const nxtDevice device) {
-        const Device* backendDevice = reinterpret_cast<const Device*>(device);
-        return backendDevice->GetSerial();
-    }
-
-    void NextSerial(nxtDevice device) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-        backendDevice->NextSerial();
-    }
-
-    void WaitForSerial(nxtDevice device, uint64_t serial) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-        backendDevice->WaitForSerial(serial);
+    nxtTextureFormat GetNativeSwapChainPreferredFormat(
+        const nxtSwapChainImplementation* swapChain) {
+        NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
+        return static_cast<nxtTextureFormat>(impl->GetPreferredFormat());
     }
 
     void ASSERT_SUCCESS(HRESULT hr) {
         ASSERT(SUCCEEDED(hr));
     }
 
-    Device::Device(ComPtr<ID3D12Device> d3d12Device)
-        : mD3d12Device(d3d12Device),
+    Device::Device(ComPtr<IDXGIFactory4> factory, ComPtr<ID3D12Device> d3d12Device)
+        : mFactory(factory),
+          mD3d12Device(d3d12Device),
           mCommandAllocatorManager(new CommandAllocatorManager(this)),
           mDescriptorHeapAllocator(new DescriptorHeapAllocator(this)),
           mMapReadRequestTracker(new MapReadRequestTracker(this)),
@@ -101,6 +98,10 @@ namespace backend { namespace d3d12 {
         delete mMapReadRequestTracker;
         delete mResourceAllocator;
         delete mResourceUploader;
+    }
+
+    ComPtr<IDXGIFactory4> Device::GetFactory() {
+        return mFactory;
     }
 
     ComPtr<ID3D12Device> Device::GetD3D12Device() {

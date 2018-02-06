@@ -245,6 +245,8 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/FramebufferD3D12.h
         ${D3D12_DIR}/InputStateD3D12.cpp
         ${D3D12_DIR}/InputStateD3D12.h
+        ${D3D12_DIR}/NativeSwapChainImplD3D12.cpp
+        ${D3D12_DIR}/NativeSwapChainImplD3D12.h
         ${D3D12_DIR}/PipelineLayoutD3D12.cpp
         ${D3D12_DIR}/PipelineLayoutD3D12.h
         ${D3D12_DIR}/QueueD3D12.cpp
