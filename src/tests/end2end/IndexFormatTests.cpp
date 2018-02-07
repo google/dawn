@@ -235,6 +235,11 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
 // prevent a case in D3D12 where the index format would be captured from the last
 // pipeline on SetIndexBuffer.
 TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
+    if (IsD3D12() || IsVulkan()) {
+        std::cout << "Test skipped on D3D12 and Vulkan" << std::endl;
+        return;
+    }
+
     nxt::RenderPipeline pipeline32 = MakeTestPipeline(nxt::IndexFormat::Uint32);
     nxt::RenderPipeline pipeline16 = MakeTestPipeline(nxt::IndexFormat::Uint16);
 
@@ -267,4 +272,38 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
 }
 
-NXT_INSTANTIATE_TEST(IndexFormatTest, MetalBackend, OpenGLBackend)
+// Test that setting the index buffer before the pipeline works, this is important
+// for backends where the index format is passed inside the call to SetIndexBuffer
+// because it needs to be done lazily (to query the format from the last pipeline).
+// TODO(cwallez@chromium.org): This is currently disallowed by the validation but
+// we want to support eventually.
+TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
+    nxt::RenderPipeline pipeline = MakeTestPipeline(nxt::IndexFormat::Uint32);
+
+    nxt::Buffer vertexBuffer = utils::CreateFrozenBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+        -1.0f,  1.0f, 0.0f, 1.0f,
+         1.0f,  1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 1.0f
+    });
+    nxt::Buffer indexBuffer = utils::CreateFrozenBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
+        0, 1, 2
+    });
+
+    uint32_t zeroOffset = 0;
+    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+        .BeginRenderPass(renderpass, framebuffer)
+        .BeginRenderSubpass()
+            .SetIndexBuffer(indexBuffer, 0)
+            .SetRenderPipeline(pipeline)
+            .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
+            .DrawElements(3, 1, 0, 0)
+        .EndRenderSubpass()
+        .EndRenderPass()
+        .GetResult();
+
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
+}
+
+NXT_INSTANTIATE_TEST(IndexFormatTest, MetalBackend, OpenGLBackend, VulkanBackend)

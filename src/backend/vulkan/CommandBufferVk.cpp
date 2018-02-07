@@ -28,6 +28,17 @@ namespace backend { namespace vulkan {
 
     namespace {
 
+        VkIndexType VulkanIndexType(nxt::IndexFormat format) {
+            switch (format) {
+                case nxt::IndexFormat::Uint16:
+                    return VK_INDEX_TYPE_UINT16;
+                case nxt::IndexFormat::Uint32:
+                    return VK_INDEX_TYPE_UINT32;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
         VkBufferImageCopy ComputeBufferImageCopyRegion(uint32_t rowPitch,
                                                        const BufferCopyLocation& bufferLocation,
                                                        const TextureCopyLocation& textureLocation) {
@@ -255,9 +266,10 @@ namespace backend { namespace vulkan {
 
                     // TODO(cwallez@chromium.org): get the index type from the last render pipeline
                     // and rebind if needed on pipeline change
-                    device->fn.CmdBindIndexBuffer(commands, indexBuffer,
-                                                  static_cast<VkDeviceSize>(cmd->offset),
-                                                  VK_INDEX_TYPE_UINT16);
+                    ASSERT(lastRenderPipeline != nullptr);
+                    VkIndexType indexType = VulkanIndexType(lastRenderPipeline->GetIndexFormat());
+                    device->fn.CmdBindIndexBuffer(
+                        commands, indexBuffer, static_cast<VkDeviceSize>(cmd->offset), indexType);
                 } break;
 
                 case Command::SetRenderPipeline: {
