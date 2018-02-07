@@ -19,6 +19,10 @@
 #include <dxgi1_4.h>
 #include <wrl.h>
 
+#if defined(NXT_ENABLE_ASSERTS)
+#    include <dxgidebug.h>
+#endif  // defined(NXT_ENABLE_ASSERTS)
+
 using Microsoft::WRL::ComPtr;
 
 #endif  // BACKEND_D3D12_D3D12PLATFORM_H_

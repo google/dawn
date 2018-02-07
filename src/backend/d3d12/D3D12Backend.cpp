@@ -43,13 +43,10 @@ namespace backend { namespace d3d12 {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
-    void Init(ComPtr<IDXGIFactory4> factory,
-              ComPtr<ID3D12Device> d3d12Device,
-              nxtProcTable* procs,
-              nxtDevice* device) {
+    void Init(nxtProcTable* procs, nxtDevice* device) {
         *device = nullptr;
         *procs = GetValidatingProcs();
-        *device = reinterpret_cast<nxtDevice>(new Device(factory, d3d12Device));
+        *device = reinterpret_cast<nxtDevice>(new Device());
     }
 
     nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window) {
@@ -67,23 +64,82 @@ namespace backend { namespace d3d12 {
         ASSERT(SUCCEEDED(hr));
     }
 
-    Device::Device(ComPtr<IDXGIFactory4> factory, ComPtr<ID3D12Device> d3d12Device)
-        : mFactory(factory),
-          mD3d12Device(d3d12Device),
-          mCommandAllocatorManager(new CommandAllocatorManager(this)),
-          mDescriptorHeapAllocator(new DescriptorHeapAllocator(this)),
-          mMapReadRequestTracker(new MapReadRequestTracker(this)),
-          mResourceAllocator(new ResourceAllocator(this)),
-          mResourceUploader(new ResourceUploader(this)) {
+    namespace {
+        ComPtr<IDXGIFactory4> CreateFactory() {
+            ComPtr<IDXGIFactory4> factory;
+
+            uint32_t dxgiFactoryFlags = 0;
+#if defined(NXT_ENABLE_ASSERTS)
+            // Enable the debug layer (requires the Graphics Tools "optional feature").
+            {
+                ComPtr<ID3D12Debug> debugController;
+                if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+                    debugController->EnableDebugLayer();
+
+                    // Enable additional debug layers.
+                    dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+                }
+
+                ComPtr<IDXGIDebug1> dxgiDebug;
+                if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug)))) {
+                    dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
+                                                 DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
+                }
+            }
+#endif  // defined(NXT_ENABLE_ASSERTS)
+
+            ASSERT_SUCCESS(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
+            return factory;
+        }
+
+        ComPtr<IDXGIAdapter1> GetHardwareAdapter(ComPtr<IDXGIFactory4> factory) {
+            for (uint32_t adapterIndex = 0;; ++adapterIndex) {
+                IDXGIAdapter1* adapter = nullptr;
+                if (factory->EnumAdapters1(adapterIndex, &adapter) == DXGI_ERROR_NOT_FOUND) {
+                    break;  // No more adapters to enumerate.
+                }
+
+                // Check to see if the adapter supports Direct3D 12, but don't create the actual
+                // device yet.
+                if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0,
+                                                _uuidof(ID3D12Device), nullptr))) {
+                    return adapter;
+                }
+                adapter->Release();
+            }
+            return nullptr;
+        }
+
+    }  // anonymous namespace
+
+    Device::Device() {
+        // Create the connection to DXGI and the D3D12 device
+        mFactory = CreateFactory();
+        ASSERT(mFactory.Get() != nullptr);
+
+        mHardwareAdapter = GetHardwareAdapter(mFactory);
+        ASSERT(mHardwareAdapter.Get() != nullptr);
+
+        ASSERT_SUCCESS(D3D12CreateDevice(mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0,
+                                         IID_PPV_ARGS(&mD3d12Device)));
+
+        // Create device-global objects
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-        ASSERT_SUCCESS(d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)));
+        ASSERT_SUCCESS(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)));
 
         ASSERT_SUCCESS(
-            d3d12Device->CreateFence(mSerial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
+            mD3d12Device->CreateFence(mSerial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
         mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         ASSERT(mFenceEvent != nullptr);
+
+        // Initialize backend services
+        mCommandAllocatorManager = new CommandAllocatorManager(this);
+        mDescriptorHeapAllocator = new DescriptorHeapAllocator(this);
+        mMapReadRequestTracker = new MapReadRequestTracker(this);
+        mResourceAllocator = new ResourceAllocator(this);
+        mResourceUploader = new ResourceUploader(this);
 
         NextSerial();
     }

@@ -86,7 +86,7 @@ namespace backend { namespace d3d12 {
     // Definition of backend types
     class Device : public DeviceBase {
       public:
-        Device(ComPtr<IDXGIFactory4> factory, ComPtr<ID3D12Device> d3d12Device);
+        Device();
         ~Device();
 
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
@@ -135,14 +135,15 @@ namespace backend { namespace d3d12 {
         HANDLE mFenceEvent;
 
         ComPtr<IDXGIFactory4> mFactory;
+        ComPtr<IDXGIAdapter1> mHardwareAdapter;
         ComPtr<ID3D12Device> mD3d12Device;
         ComPtr<ID3D12CommandQueue> mCommandQueue;
 
-        CommandAllocatorManager* mCommandAllocatorManager;
-        DescriptorHeapAllocator* mDescriptorHeapAllocator;
-        MapReadRequestTracker* mMapReadRequestTracker;
-        ResourceAllocator* mResourceAllocator;
-        ResourceUploader* mResourceUploader;
+        CommandAllocatorManager* mCommandAllocatorManager = nullptr;
+        DescriptorHeapAllocator* mDescriptorHeapAllocator = nullptr;
+        MapReadRequestTracker* mMapReadRequestTracker = nullptr;
+        ResourceAllocator* mResourceAllocator = nullptr;
+        ResourceUploader* mResourceUploader = nullptr;
 
         struct PendingCommandList {
             ComPtr<ID3D12GraphicsCommandList> commandList;
