@@ -309,4 +309,4 @@ TEST_P(PrimitiveTopologyTest, TriangleStrip) {
     });
 }
 
-NXT_INSTANTIATE_TEST(PrimitiveTopologyTest, D3D12Backend, MetalBackend, OpenGLBackend)
+NXT_INSTANTIATE_TEST(PrimitiveTopologyTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
