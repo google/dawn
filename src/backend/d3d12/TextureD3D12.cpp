@@ -24,6 +24,11 @@ namespace backend { namespace d3d12 {
                                                 nxt::TextureFormat format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
+            // Present is an exclusive flag.
+            if (usage & nxt::TextureUsageBit::Present) {
+                return D3D12_RESOURCE_STATE_PRESENT;
+            }
+
             if (usage & nxt::TextureUsageBit::TransferSrc) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
             }
@@ -43,9 +48,6 @@ namespace backend { namespace d3d12 {
                 } else {
                     resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;
                 }
-            }
-            if (usage & nxt::TextureUsageBit::Present) {
-                resourceState |= D3D12_RESOURCE_STATE_PRESENT;
             }
 
             return resourceState;
