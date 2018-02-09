@@ -37,4 +37,15 @@ namespace utils {
                                           usage);
     }
 
+    struct BasicFramebuffer {
+        uint32_t width;
+        uint32_t height;
+        nxt::RenderPass renderPass;
+        nxt::Texture color;
+        nxt::Framebuffer framebuffer;
+    };
+    BasicFramebuffer CreateBasicFramebuffer(const nxt::Device& device,
+                                            uint32_t width,
+                                            uint32_t height);
+
 }  // namespace utils

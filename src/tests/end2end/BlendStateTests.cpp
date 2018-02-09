@@ -47,30 +47,7 @@ class BlendStateTest : public NXTTest {
                 .SetBindGroupLayout(0, bindGroupLayout)
                 .GetResult();
 
-            renderTarget = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
-                .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
-                .GetResult();
-
-            renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
-
-            renderpass = device.CreateRenderPassBuilder()
-                .SetAttachmentCount(1)
-                .SetSubpassCount(1)
-                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-                .SubpassSetColorAttachment(0, 0, 0)
-                .GetResult();
-
-            framebuffer = device.CreateFramebufferBuilder()
-                .SetRenderPass(renderpass)
-                .SetDimensions(kRTSize, kRTSize)
-                .SetAttachment(0, renderTargetView)
-                .GetResult();
+            fb = utils::CreateBasicFramebuffer(device, kRTSize, kRTSize);
         }
 
         struct TriangleSpec {
@@ -94,14 +71,14 @@ class BlendStateTest : public NXTTest {
             )");
 
             basePipeline = device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
+                .SetSubpass(fb.renderPass, 0)
                 .SetLayout(pipelineLayout)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
                 .GetResult();
 
             testPipeline = device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
+                .SetSubpass(fb.renderPass, 0)
                 .SetLayout(pipelineLayout)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -137,10 +114,10 @@ class BlendStateTest : public NXTTest {
 
         // Test that after drawing a triangle with the base color, and then the given triangle spec, the color is as expected
         void DoSingleSourceTest(RGBA8 base, const TriangleSpec& triangle, const RGBA8& expected) {
-            renderTarget.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
+            fb.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
 
             nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-                .BeginRenderPass(renderpass, framebuffer)
+                .BeginRenderPass(fb.renderPass, fb.framebuffer)
                     .BeginRenderSubpass()
                         // First use the base pipeline to draw a triangle with no blending
                         .SetRenderPipeline(basePipeline)
@@ -159,7 +136,7 @@ class BlendStateTest : public NXTTest {
 
             queue.Submit(1, &commands);
 
-            EXPECT_PIXEL_RGBA8_EQ(expected, renderTarget, kRTSize / 2, kRTSize / 2);
+            EXPECT_PIXEL_RGBA8_EQ(expected, fb.color, kRTSize / 2, kRTSize / 2);
         }
 
         // Given a vector of tests where each element is <testColor, expectedColor>, check that all expectations are true for the given blend operation
@@ -200,12 +177,9 @@ class BlendStateTest : public NXTTest {
             CheckBlendFactor(base, nxt::BlendFactor::One, colorFactor, nxt::BlendFactor::One, alphaFactor, tests);
         }
 
-        nxt::Framebuffer framebuffer;
-        nxt::RenderPass renderpass;
+        utils::BasicFramebuffer fb;
         nxt::RenderPipeline basePipeline;
         nxt::RenderPipeline testPipeline;
-        nxt::Texture renderTarget;
-        nxt::TextureView renderTargetView;
         nxt::ShaderModule vsModule;
         nxt::BindGroupLayout bindGroupLayout;
         nxt::PipelineLayout pipelineLayout;
@@ -713,7 +687,7 @@ TEST_P(BlendStateTest, IndependentBlendState) {
         renderTargetViews[i] = renderTargets[i].CreateTextureViewBuilder().GetResult();
     }
 
-    renderpass = device.CreateRenderPassBuilder()
+    nxt::RenderPass renderpass = device.CreateRenderPassBuilder()
         .SetAttachmentCount(5)
         .SetSubpassCount(1)
         .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
@@ -729,7 +703,7 @@ TEST_P(BlendStateTest, IndependentBlendState) {
         .SubpassSetColorAttachment(0, 3, 0)
         .GetResult();
 
-    framebuffer = device.CreateFramebufferBuilder()
+    nxt::Framebuffer framebuffer = device.CreateFramebufferBuilder()
         .SetRenderPass(renderpass)
         .SetDimensions(kRTSize, kRTSize)
         .SetAttachment(0, renderTargetViews[0])
@@ -852,7 +826,7 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
         .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::BlendColor, nxt::BlendFactor::One)
         .GetResult();
 
-    renderpass = device.CreateRenderPassBuilder()
+    nxt::RenderPass renderpass = device.CreateRenderPassBuilder()
         .SetAttachmentCount(1)
         .SetSubpassCount(2)
         .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
@@ -860,7 +834,18 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
         .SubpassSetColorAttachment(1, 0, 0)
         .GetResult();
 
-    framebuffer = device.CreateFramebufferBuilder()
+    nxt::Texture renderTarget = device.CreateTextureBuilder()
+        .SetDimension(nxt::TextureDimension::e2D)
+        .SetExtent(kRTSize, kRTSize, 1)
+        .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+        .SetMipLevels(1)
+        .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
+        .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
+        .GetResult();
+
+    nxt::TextureView renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
+
+    nxt::Framebuffer framebuffer = device.CreateFramebufferBuilder()
         .SetRenderPass(renderpass)
         .SetDimensions(kRTSize, kRTSize)
         .SetAttachment(0, renderTargetView)

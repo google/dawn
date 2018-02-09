@@ -111,4 +111,40 @@ namespace utils {
         return buffer;
     }
 
+    BasicFramebuffer CreateBasicFramebuffer(const nxt::Device& device,
+                                            uint32_t width,
+                                            uint32_t height) {
+        BasicFramebuffer result;
+        result.width = width;
+        result.height = height;
+
+        result.renderPass = device.CreateRenderPassBuilder()
+                                .SetAttachmentCount(1)
+                                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+                                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
+                                .SetSubpassCount(1)
+                                .SubpassSetColorAttachment(0, 0, 0)
+                                .GetResult();
+
+        result.color = device.CreateTextureBuilder()
+                           .SetDimension(nxt::TextureDimension::e2D)
+                           .SetExtent(width, height, 1)
+                           .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+                           .SetMipLevels(1)
+                           .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment |
+                                            nxt::TextureUsageBit::TransferSrc)
+                           .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
+                           .GetResult();
+
+        nxt::TextureView colorView = result.color.CreateTextureViewBuilder().GetResult();
+
+        result.framebuffer = device.CreateFramebufferBuilder()
+                                 .SetRenderPass(result.renderPass)
+                                 .SetAttachment(0, colorView)
+                                 .SetDimensions(width, height)
+                                 .GetResult();
+
+        return result;
+    }
+
 }  // namespace utils

@@ -37,30 +37,7 @@ class InputStateTest : public NXTTest {
         void SetUp() override {
             NXTTest::SetUp();
 
-            renderpass = device.CreateRenderPassBuilder()
-                .SetAttachmentCount(1)
-                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-                .SetSubpassCount(1)
-                .SubpassSetColorAttachment(0, 0, 0)
-                .GetResult();
-
-            renderTarget = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
-                .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
-                .GetResult();
-
-            renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
-
-            framebuffer = device.CreateFramebufferBuilder()
-                .SetRenderPass(renderpass)
-                .SetAttachment(0, renderTargetView)
-                .SetDimensions(400, 400)
-                .GetResult();
+            fb = utils::CreateBasicFramebuffer(device, kRTSize, kRTSize);
         }
 
         bool ShouldComponentBeDefault(VertexFormat format, int component) {
@@ -142,7 +119,7 @@ class InputStateTest : public NXTTest {
             );
 
             return device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
+                .SetSubpass(fb.renderPass, 0)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)
@@ -189,8 +166,8 @@ class InputStateTest : public NXTTest {
 
             nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
-            renderTarget.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
-            builder.BeginRenderPass(renderpass, framebuffer)
+            fb.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
+            builder.BeginRenderPass(fb.renderPass, fb.framebuffer)
                 .BeginRenderSubpass()
                 .SetRenderPipeline(pipeline);
 
@@ -214,18 +191,15 @@ class InputStateTest : public NXTTest {
                     unsigned int x = kRTCellOffset + kRTCellSize * triangle;
                     unsigned int y = kRTCellOffset + kRTCellSize * instance;
                     if (triangle < triangles && instance < instances) {
-                        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, x, y);
+                        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, x, y);
                     } else {
-                        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, x, y);
+                        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, x, y);
                     }
                 }
             }
         }
 
-        nxt::RenderPass renderpass;
-        nxt::Texture renderTarget;
-        nxt::TextureView renderTargetView;
-        nxt::Framebuffer framebuffer;
+        utils::BasicFramebuffer fb;
 };
 
 // Test compilation and usage of the fixture :)
