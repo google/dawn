@@ -10,8 +10,9 @@ base_commit=$(git rev-parse $TRAVIS_BRANCH)
 echo "Formatting against $TRAVIS_BRANCH a.k.a. $base_commit..."
 echo
 
+skipped_directories="(examples|src/tests/(unittests|end2end)|third_party)"
 # Find the files modified that need formatting
-files_to_check=$(git diff --name-only $base_commit | grep -E "*.(c|cpp|mm|h)$" | grep -vE "^third_party/*")
+files_to_check=$(git diff --name-only $base_commit | grep -E "*.(c|cpp|mm|h)$" | grep -vE "^$skipped_directories/*")
 if [ -z "$files_to_check" ]; then
     echo "No modified files to format."
     exit 0
