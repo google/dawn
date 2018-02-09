@@ -80,6 +80,7 @@ add_executable(nxt_end2end_tests
     ${END2END_TESTS_DIR}/PrimitiveTopologyTests.cpp
     ${END2END_TESTS_DIR}/PushConstantTests.cpp
     ${END2END_TESTS_DIR}/RenderPassLoadOpTests.cpp
+    ${END2END_TESTS_DIR}/ViewportOrientationTests.cpp
     ${TESTS_DIR}/End2EndTestsMain.cpp
     ${TESTS_DIR}/NXTTest.cpp
     ${TESTS_DIR}/NXTTest.h

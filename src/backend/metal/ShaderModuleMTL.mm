@@ -49,6 +49,10 @@ namespace backend { namespace metal {
                                                               const PipelineLayout* layout) const {
         spirv_cross::CompilerMSL compiler(mSpirv);
 
+        spirv_cross::CompilerGLSL::Options options_glsl;
+        options_glsl.vertex.flip_vert_y = true;
+        compiler.spirv_cross::CompilerGLSL::set_options(options_glsl);
+
         // By default SPIRV-Cross will give MSL resources indices in increasing order.
         // To make the MSL indices match the indices chosen in the PipelineLayout, we build
         // a table of MSLResourceBinding to give to SPIRV-Cross
