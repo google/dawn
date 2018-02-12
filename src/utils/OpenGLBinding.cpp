@@ -81,7 +81,7 @@ namespace utils {
         nxtSwapChainError Present() {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-            glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, mWidth, mHeight, GL_COLOR_BUFFER_BIT,
+            glBlitFramebuffer(0, 0, mWidth, mHeight, 0, mHeight, mWidth, 0, GL_COLOR_BUFFER_BIT,
                               GL_NEAREST);
             glfwSwapBuffers(mWindow);
 
