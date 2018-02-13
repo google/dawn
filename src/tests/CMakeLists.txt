@@ -47,6 +47,7 @@ list(APPEND UNITTEST_SOURCES
     ${VALIDATION_TESTS_DIR}/ComputeValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/CopyCommandsValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/DepthStencilStateValidationTests.cpp
+    ${VALIDATION_TESTS_DIR}/DynamicStateCommandValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/FramebufferValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/InputStateValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/PushConstantsValidationTests.cpp
