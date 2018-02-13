@@ -219,6 +219,10 @@ namespace backend {
                     SetStencilReferenceCmd* cmd = commands->NextCommand<SetStencilReferenceCmd>();
                     cmd->~SetStencilReferenceCmd();
                 } break;
+                case Command::SetScissorRect: {
+                    SetScissorRectCmd* cmd = commands->NextCommand<SetScissorRectCmd>();
+                    cmd->~SetScissorRectCmd();
+                } break;
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = commands->NextCommand<SetBlendColorCmd>();
                     cmd->~SetBlendColorCmd();
@@ -320,6 +324,10 @@ namespace backend {
 
             case Command::SetStencilReference:
                 commands->NextCommand<SetStencilReferenceCmd>();
+                break;
+
+            case Command::SetScissorRect:
+                commands->NextCommand<SetScissorRectCmd>();
                 break;
 
             case Command::SetBlendColor:
@@ -533,6 +541,14 @@ namespace backend {
                     mIterator.NextCommand<SetBlendColorCmd>();
                     if (!mState->HaveRenderSubpass()) {
                         HandleError("Can't set blend color without an active render subpass");
+                        return false;
+                    }
+                } break;
+
+                case Command::SetScissorRect: {
+                    mIterator.NextCommand<SetScissorRectCmd>();
+                    if (!mState->HaveRenderSubpass()) {
+                        HandleError("Can't set scissor rect without an active render subpass");
                         return false;
                     }
                 } break;
@@ -782,6 +798,18 @@ namespace backend {
         cmd->g = g;
         cmd->b = b;
         cmd->a = a;
+    }
+
+    void CommandBufferBuilder::SetScissorRect(uint32_t x,
+                                              uint32_t y,
+                                              uint32_t width,
+                                              uint32_t height) {
+        SetScissorRectCmd* cmd = mAllocator.Allocate<SetScissorRectCmd>(Command::SetScissorRect);
+        new (cmd) SetScissorRectCmd;
+        cmd->x = x;
+        cmd->y = y;
+        cmd->width = width;
+        cmd->height = height;
     }
 
     void CommandBufferBuilder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {

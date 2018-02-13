@@ -486,6 +486,15 @@
                 ]
             },
             {
+                "name": "set scissor rect",
+                "args": [
+                    {"name": "x", "type": "uint32_t"},
+                    {"name": "y", "type": "uint32_t"},
+                    {"name": "width", "type": "uint32_t"},
+                    {"name": "height", "type": "uint32_t"}
+                ]
+            },
+            {
                 "name": "set vertex buffers",
                 "args": [
                     {"name": "start slot", "type": "uint32_t"},

@@ -111,6 +111,7 @@ namespace backend {
         void SetRenderPipeline(RenderPipelineBase* pipeline);
         void SetStencilReference(uint32_t reference);
         void SetBlendColor(float r, float g, float b, float a);
+        void SetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
         void SetBindGroup(uint32_t groupIndex, BindGroupBase* group);
         void SetIndexBuffer(BufferBase* buffer, uint32_t offset);
 

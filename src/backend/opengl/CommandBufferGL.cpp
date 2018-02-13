@@ -370,6 +370,8 @@ namespace backend { namespace opengl {
                     glBlendColor(0, 0, 0, 0);
                     glViewport(0, 0, currentFramebuffer->GetWidth(),
                                currentFramebuffer->GetHeight());
+                    glScissor(0, 0, currentFramebuffer->GetWidth(),
+                              currentFramebuffer->GetHeight());
                 } break;
 
                 case Command::CopyBufferToBuffer: {
@@ -537,6 +539,11 @@ namespace backend { namespace opengl {
                 case Command::SetStencilReference: {
                     SetStencilReferenceCmd* cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
                     persistentPipelineState.SetStencilReference(cmd->reference);
+                } break;
+
+                case Command::SetScissorRect: {
+                    SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
+                    glScissor(cmd->x, cmd->y, cmd->width, cmd->height);
                 } break;
 
                 case Command::SetBlendColor: {

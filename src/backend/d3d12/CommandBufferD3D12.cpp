@@ -528,6 +528,17 @@ namespace backend { namespace d3d12 {
                     commandList->OMSetStencilRef(cmd->reference);
                 } break;
 
+                case Command::SetScissorRect: {
+                    SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
+                    D3D12_RECT rect;
+                    rect.left = cmd->x;
+                    rect.bottom = cmd->y;
+                    rect.right = cmd->x + cmd->width;
+                    rect.top = cmd->y + cmd->height;
+
+                    commandList->RSSetScissorRects(1, &rect);
+                } break;
+
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
                     ASSERT(lastRenderPipeline);

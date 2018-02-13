@@ -275,6 +275,17 @@ namespace backend { namespace vulkan {
                                                       cmd->reference);
                 } break;
 
+                case Command::SetScissorRect: {
+                    SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
+                    VkRect2D rect;
+                    rect.offset.x = cmd->x;
+                    rect.offset.y = cmd->y;
+                    rect.extent.width = cmd->width;
+                    rect.extent.height = cmd->height;
+
+                    device->fn.CmdSetScissor(commands, 0, 1, &rect);
+                } break;
+
                 case Command::SetVertexBuffers: {
                     SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
                     auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);

@@ -44,6 +44,7 @@ namespace backend {
         SetRenderPipeline,
         SetPushConstants,
         SetStencilReference,
+        SetScissorRect,
         SetBlendColor,
         SetBindGroup,
         SetIndexBuffer,
@@ -133,6 +134,10 @@ namespace backend {
 
     struct SetStencilReferenceCmd {
         uint32_t reference;
+    };
+
+    struct SetScissorRectCmd {
+        uint32_t x, y, width, height;
     };
 
     struct SetBlendColorCmd {

@@ -392,15 +392,25 @@ namespace backend { namespace metal {
                     SetStencilReferenceCmd* cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
 
                     ASSERT(encoders.render);
-
                     [encoders.render setStencilReferenceValue:cmd->reference];
+                } break;
+
+                case Command::SetScissorRect: {
+                    SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
+                    MTLScissorRect rect;
+                    rect.x = cmd->x;
+                    rect.y = cmd->y;
+                    rect.width = cmd->width;
+                    rect.height = cmd->height;
+
+                    ASSERT(encoders.render);
+                    [encoders.render setScissorRect:rect];
                 } break;
 
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
 
                     ASSERT(encoders.render);
-
                     [encoders.render setBlendColorRed:cmd->r green:cmd->g blue:cmd->b alpha:cmd->a];
                 } break;
 

@@ -40,6 +40,7 @@ namespace backend { namespace opengl {
         *device = reinterpret_cast<nxtDevice>(new Device);
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_SCISSOR_TEST);
         glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
     }
 
