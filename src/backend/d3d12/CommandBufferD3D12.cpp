@@ -532,9 +532,9 @@ namespace backend { namespace d3d12 {
                     SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
                     D3D12_RECT rect;
                     rect.left = cmd->x;
-                    rect.bottom = cmd->y;
+                    rect.top = cmd->y;
                     rect.right = cmd->x + cmd->width;
-                    rect.top = cmd->y + cmd->height;
+                    rect.bottom = cmd->y + cmd->height;
 
                     commandList->RSSetScissorRects(1, &rect);
                 } break;
