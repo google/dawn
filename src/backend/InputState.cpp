@@ -44,6 +44,8 @@ namespace backend {
                 return 2;
             case nxt::VertexFormat::FloatR32:
                 return 1;
+            case nxt::VertexFormat::UshortR16G16:
+                return 2;
             default:
                 UNREACHABLE();
         }
@@ -59,6 +61,8 @@ namespace backend {
             case nxt::VertexFormat::UnormR8G8B8A8:
             case nxt::VertexFormat::UnormR8G8:
                 return sizeof(uint8_t);
+            case nxt::VertexFormat::UshortR16G16:
+                return sizeof(unsigned short);
             default:
                 UNREACHABLE();
         }

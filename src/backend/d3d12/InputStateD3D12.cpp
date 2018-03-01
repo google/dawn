@@ -28,6 +28,8 @@ namespace backend { namespace d3d12 {
                 return DXGI_FORMAT_R32G32_FLOAT;
             case nxt::VertexFormat::FloatR32:
                 return DXGI_FORMAT_R32_FLOAT;
+            case nxt::VertexFormat::UshortR16G16:
+                return DXGI_FORMAT_R16G16_UINT;
             case nxt::VertexFormat::UnormR8G8B8A8:
                 return DXGI_FORMAT_R8G8B8A8_UNORM;
             case nxt::VertexFormat::UnormR8G8:
