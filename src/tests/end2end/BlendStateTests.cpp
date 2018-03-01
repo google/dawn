@@ -667,6 +667,32 @@ TEST_P(BlendStateTest, ColorWriteMask) {
     }
 }
 
+// Check that the color write mask works when blending is disabled
+TEST_P(BlendStateTest, ColorWriteMaskBlendingDisabled) {
+    {
+        nxt::BlendState blendState = device.CreateBlendStateBuilder()
+            .SetBlendEnabled(false)
+            .SetColorWriteMask(nxt::ColorWriteMask::Red)
+            .GetResult();
+        SetupSingleSourcePipelines(blendState);
+
+        RGBA8 base(32, 64, 128, 192);
+        RGBA8 expected(32, 0, 0, 0);
+        nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+            .BeginRenderPass(fb.renderPass, fb.framebuffer)
+            .BeginRenderSubpass()
+                .SetRenderPipeline(testPipeline)
+                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { base } })))
+                .DrawArrays(3, 1, 0, 0)
+            .EndRenderSubpass()
+            .EndRenderPass()
+            .GetResult();
+
+        queue.Submit(1, &commands);
+        EXPECT_PIXEL_RGBA8_EQ(expected, fb.color, kRTSize / 2, kRTSize / 2);
+    }
+}
+
 // Test that independent blend states on render targets works
 TEST_P(BlendStateTest, IndependentBlendState) {
 

@@ -85,13 +85,13 @@ namespace backend { namespace opengl {
                                  GLBlendFactor(info.colorBlend.dstFactor, false),
                                  GLBlendFactor(info.alphaBlend.srcFactor, true),
                                  GLBlendFactor(info.alphaBlend.dstFactor, true));
-            glColorMaski(attachment, info.colorWriteMask & nxt::ColorWriteMask::Red,
-                         info.colorWriteMask & nxt::ColorWriteMask::Green,
-                         info.colorWriteMask & nxt::ColorWriteMask::Blue,
-                         info.colorWriteMask & nxt::ColorWriteMask::Alpha);
         } else {
             glDisablei(GL_BLEND, attachment);
         }
+        glColorMaski(attachment, info.colorWriteMask & nxt::ColorWriteMask::Red,
+                     info.colorWriteMask & nxt::ColorWriteMask::Green,
+                     info.colorWriteMask & nxt::ColorWriteMask::Blue,
+                     info.colorWriteMask & nxt::ColorWriteMask::Alpha);
     }
 
 }}  // namespace backend::opengl
