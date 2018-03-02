@@ -21,8 +21,8 @@
 #include "backend/Device.h"
 #include "backend/RenderPass.h"
 #include "backend/ToBackend.h"
-
 #include "backend/d3d12/d3d12_platform.h"
+#include "common/SerialQueue.h"
 
 namespace backend { namespace d3d12 {
 
@@ -127,6 +127,8 @@ namespace backend { namespace d3d12 {
         void NextSerial();
         void WaitForSerial(uint64_t serial);
 
+        void ReferenceUntilUnused(ComPtr<IUnknown> object);
+
         void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
       private:
@@ -149,6 +151,8 @@ namespace backend { namespace d3d12 {
             ComPtr<ID3D12GraphicsCommandList> commandList;
             bool open = false;
         } mPendingCommands;
+
+        SerialQueue<ComPtr<IUnknown>> mUsedComObjectRefs;
     };
 
     class RenderPass : public RenderPassBase {

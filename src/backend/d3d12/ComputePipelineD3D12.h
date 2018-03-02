@@ -21,14 +21,18 @@
 
 namespace backend { namespace d3d12 {
 
+    class Device;
+
     class ComputePipeline : public ComputePipelineBase {
       public:
         ComputePipeline(ComputePipelineBuilder* builder);
+        ~ComputePipeline();
 
         ComPtr<ID3D12PipelineState> GetPipelineState();
 
       private:
         ComPtr<ID3D12PipelineState> mPipelineState;
+        Device* mDevice = nullptr;
     };
 
 }}  // namespace backend::d3d12

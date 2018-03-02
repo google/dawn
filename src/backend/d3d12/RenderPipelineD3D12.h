@@ -21,9 +21,12 @@
 
 namespace backend { namespace d3d12 {
 
+    class Device;
+
     class RenderPipeline : public RenderPipelineBase {
       public:
         RenderPipeline(RenderPipelineBuilder* builder);
+        ~RenderPipeline();
 
         D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
         ComPtr<ID3D12PipelineState> GetPipelineState();
@@ -31,6 +34,8 @@ namespace backend { namespace d3d12 {
       private:
         D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
         ComPtr<ID3D12PipelineState> mPipelineState;
+
+        Device* mDevice = nullptr;
     };
 
 }}  // namespace backend::d3d12

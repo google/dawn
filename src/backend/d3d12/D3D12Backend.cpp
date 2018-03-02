@@ -149,6 +149,8 @@ namespace backend { namespace d3d12 {
         NextSerial();
         WaitForSerial(currentSerial);  // Wait for all in-flight commands to finish executing
         TickImpl();                    // Call tick one last time so resources are cleaned up
+        ASSERT(mUsedComObjectRefs.Empty());
+
         delete mCommandAllocatorManager;
         delete mDescriptorHeapAllocator;
         delete mMapReadRequestTracker;
@@ -214,6 +216,7 @@ namespace backend { namespace d3d12 {
         mCommandAllocatorManager->Tick(lastCompletedSerial);
         mDescriptorHeapAllocator->Tick(lastCompletedSerial);
         mMapReadRequestTracker->Tick(lastCompletedSerial);
+        mUsedComObjectRefs.ClearUpTo(lastCompletedSerial);
         ExecuteCommandLists({});
         NextSerial();
     }
@@ -232,6 +235,10 @@ namespace backend { namespace d3d12 {
             ASSERT_SUCCESS(mFence->SetEventOnCompletion(serial, mFenceEvent));
             WaitForSingleObject(mFenceEvent, INFINITE);
         }
+    }
+
+    void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
+        mUsedComObjectRefs.Enqueue(object, mSerial);
     }
 
     void Device::ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists) {

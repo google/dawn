@@ -24,7 +24,7 @@
 namespace backend { namespace d3d12 {
 
     ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
-        : ComputePipelineBase(builder) {
+        : ComputePipelineBase(builder), mDevice(ToBackend(builder->GetDevice())) {
         uint32_t compileFlags = 0;
 #if defined(_DEBUG)
         // Enable better shader debugging with the graphics debugging tools.
@@ -55,6 +55,10 @@ namespace backend { namespace d3d12 {
         Device* device = ToBackend(builder->GetDevice());
         device->GetD3D12Device()->CreateComputePipelineState(&descriptor,
                                                              IID_PPV_ARGS(&mPipelineState));
+    }
+
+    ComputePipeline::~ComputePipeline() {
+        mDevice->ReferenceUntilUnused(mPipelineState);
     }
 
     ComPtr<ID3D12PipelineState> ComputePipeline::GetPipelineState() {
