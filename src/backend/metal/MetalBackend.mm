@@ -231,6 +231,7 @@ namespace backend { namespace metal {
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
         Device* device = ToBackend(GetDevice());
+        device->Tick();
         id<MTLCommandBuffer> commandBuffer = device->GetPendingCommandBuffer();
 
         for (uint32_t i = 0; i < numCommands; ++i) {
