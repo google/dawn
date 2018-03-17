@@ -167,7 +167,7 @@ namespace backend { namespace metal {
         ComputePipeline* lastComputePipeline = nullptr;
         RenderPipeline* lastRenderPipeline = nullptr;
         id<MTLBuffer> indexBuffer = nil;
-        uint32_t indexBufferOffset = 0;
+        uint32_t indexBufferBaseOffset = 0;
 
         CurrentEncoders encoders;
         encoders.device = mDevice;
@@ -304,6 +304,7 @@ namespace backend { namespace metal {
 
                 case Command::DrawElements: {
                     DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
+                    size_t formatSize = IndexFormatSize(lastRenderPipeline->GetIndexFormat());
 
                     ASSERT(encoders.render);
                     [encoders.render
@@ -311,7 +312,7 @@ namespace backend { namespace metal {
                                    indexCount:draw->indexCount
                                     indexType:lastRenderPipeline->GetMTLIndexType()
                                   indexBuffer:indexBuffer
-                            indexBufferOffset:indexBufferOffset
+                            indexBufferOffset:indexBufferBaseOffset + draw->firstIndex * formatSize
                                 instanceCount:draw->instanceCount
                                    baseVertex:0
                                  baseInstance:draw->firstInstance];
@@ -526,7 +527,7 @@ namespace backend { namespace metal {
                     SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
                     auto b = ToBackend(cmd->buffer.Get());
                     indexBuffer = b->GetMTLBuffer();
-                    indexBufferOffset = cmd->offset;
+                    indexBufferBaseOffset = cmd->offset;
                 } break;
 
                 case Command::SetVertexBuffers: {

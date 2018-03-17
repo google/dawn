@@ -243,7 +243,7 @@ namespace backend { namespace opengl {
         PipelineBase* lastPipeline = nullptr;
         PipelineGL* lastGLPipeline = nullptr;
         RenderPipeline* lastRenderPipeline = nullptr;
-        uint32_t indexBufferOffset = 0;
+        uint32_t indexBufferBaseOffset = 0;
 
         PersistentPipelineState persistentPipelineState;
         persistentPipelineState.SetDefaultState();
@@ -505,7 +505,7 @@ namespace backend { namespace opengl {
                             lastRenderPipeline->GetGLPrimitiveTopology(), draw->indexCount,
                             formatType,
                             reinterpret_cast<void*>(draw->firstIndex * formatSize +
-                                                    indexBufferOffset),
+                                                    indexBufferBaseOffset),
                             draw->instanceCount, draw->firstInstance);
                     } else {
                         // This branch is only needed on OpenGL < 4.2
@@ -513,7 +513,7 @@ namespace backend { namespace opengl {
                             lastRenderPipeline->GetGLPrimitiveTopology(), draw->indexCount,
                             formatType,
                             reinterpret_cast<void*>(draw->firstIndex * formatSize +
-                                                    indexBufferOffset),
+                                                    indexBufferBaseOffset),
                             draw->instanceCount);
                     }
                 } break;
@@ -635,7 +635,7 @@ namespace backend { namespace opengl {
 
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
-                    indexBufferOffset = cmd->offset;
+                    indexBufferBaseOffset = cmd->offset;
                     inputBuffers.OnSetIndexBuffer(cmd->buffer.Get());
                 } break;
 
