@@ -61,8 +61,11 @@ namespace backend {
                                          nxtBufferMapReadStatus status,
                                          const void* pointer) {
         if (mMapReadCallback && serial == mMapReadSerial) {
-            mMapReadCallback(status, pointer, mMapReadUserdata);
+            // Tag the callback as fired before firing it, otherwise it could fire a second time if
+            // for example buffer.Unmap() is called inside the application-provided callback.
+            nxtBufferMapReadCallback callback = mMapReadCallback;
             mMapReadCallback = nullptr;
+            callback(status, pointer, mMapReadUserdata);
         }
     }
 

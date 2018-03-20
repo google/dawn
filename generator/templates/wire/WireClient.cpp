@@ -532,6 +532,8 @@ namespace wire {
                     }
 
                     auto request = requestIt->second;
+                    // Delete the request before calling the callback otherwise the callback could be fired a second time if for example buffer.Unmap() is called inside the callback.
+                    buffer->readRequests.erase(requestIt);
 
                     //* On success, we copy the data locally because the IPC buffer isn't valid outside of this function
                     if (cmd->status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS) {
@@ -553,7 +555,6 @@ namespace wire {
                         request.callback(static_cast<nxtBufferMapReadStatus>(cmd->status), nullptr, request.userdata);
                     }
 
-                    buffer->readRequests.erase(requestIt);
                     return true;
                 }
         };

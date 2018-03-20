@@ -724,3 +724,55 @@ TEST_F(WireBufferMappingTests, MappingErrorWhileAlreadyMappedGetsNullptr) {
 
     FlushServer();
 }
+
+// Test that the MapReadCallback isn't fired twice when unmap() is called inside the callback
+TEST_F(WireBufferMappingTests, UnmapInsideMapReadCallback) {
+    nxtCallbackUserdata userdata = 2039;
+    nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+
+    uint32_t bufferContent = 31337;
+    EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            nxtBufferUnmap(buffer);
+        }));
+
+    FlushServer();
+
+    EXPECT_CALL(api, BufferUnmap(apiBuffer))
+        .Times(1);
+
+    FlushClient();
+}
+
+// Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the callback
+TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
+    nxtCallbackUserdata userdata = 2039;
+    nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
+
+    uint32_t bufferContent = 31337;
+    EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            nxtBufferRelease(buffer);
+        }));
+
+    FlushServer();
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer))
+        .Times(1);
+
+    FlushClient();
+}

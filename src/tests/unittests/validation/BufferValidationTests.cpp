@@ -290,6 +290,36 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
     queue.Submit(0, nullptr);
 }
 
+// Test that the MapReadCallback isn't fired twice when unmap() is called inside the callback
+TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
+    nxt::Buffer buf = CreateMapReadBuffer(4);
+
+    nxt::CallbackUserdata userdata = 40678;
+    buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Ne(nullptr), userdata))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            buf.Unmap();
+        }));
+
+    queue.Submit(0, nullptr);
+}
+
+// Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the callback
+TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
+    nxt::Buffer buf = CreateMapReadBuffer(4);
+
+    nxt::CallbackUserdata userdata = 40679;
+    buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Ne(nullptr), userdata))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            buf = nxt::Buffer();
+        }));
+
+    queue.Submit(0, nullptr);
+}
+
 // Test the success case for Buffer::SetSubData
 TEST_F(BufferValidationTest, SetSubDataSuccess) {
     nxt::Buffer buf = CreateSetSubDataBuffer(4);
