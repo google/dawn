@@ -43,11 +43,11 @@ static void ToMockBuilderErrorCallback(nxtBuilderErrorStatus status, const char*
 
 class MockBufferMapReadCallback {
     public:
-        MOCK_METHOD3(Call, void(nxtBufferMapReadStatus status, const uint32_t* ptr, nxtCallbackUserdata userdata));
+        MOCK_METHOD3(Call, void(nxtBufferMapAsyncStatus status, const uint32_t* ptr, nxtCallbackUserdata userdata));
 };
 
 static MockBufferMapReadCallback* mockBufferMapReadCallback = nullptr;
-static void ToMockBufferMapReadCallback(nxtBufferMapReadStatus status, const void* ptr, nxtCallbackUserdata userdata) {
+static void ToMockBufferMapReadCallback(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapReadCallback->Call(status, reinterpret_cast<const uint32_t*>(ptr), userdata);
 }
@@ -604,12 +604,12 @@ TEST_F(WireBufferMappingTests, MappingSuccessBuffer) {
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
         .Times(1);
 
     FlushServer();
@@ -628,12 +628,12 @@ TEST_F(WireBufferMappingTests, ErrorWhileMapping) {
     
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr);
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
     FlushServer();
@@ -646,7 +646,7 @@ TEST_F(WireBufferMappingTests, MappingErrorBuffer) {
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
     FlushServer();
@@ -661,7 +661,7 @@ TEST_F(WireBufferMappingTests, DestroyBeforeRequestEnd) {
     nxtCallbackUserdata userdata = 8656;
     nxtBufferMapReadAsync(errorBuffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
         .Times(1);
 
     nxtBufferRelease(errorBuffer);
@@ -675,13 +675,13 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarly) {
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent);
         }));
 
     FlushClient();
 
     // Oh no! We are calling Unmap too early!
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
         .Times(1);
     nxtBufferUnmap(buffer);
 
@@ -698,13 +698,13 @@ TEST_F(WireBufferMappingTests, MappingErrorWhileAlreadyMappedGetsNullptr) {
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent);
         }))
         .RetiresOnSaturation();
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
         .Times(1);
 
     FlushServer();
@@ -714,12 +714,12 @@ TEST_F(WireBufferMappingTests, MappingErrorWhileAlreadyMappedGetsNullptr) {
     nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr);
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
     FlushServer();
@@ -733,12 +733,12 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapReadCallback) {
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
         .WillOnce(InvokeWithoutArgs([&]() {
             nxtBufferUnmap(buffer);
         }));
@@ -759,12 +759,12 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, &bufferContent);
+            api.CallMapReadCallback(apiBuffer, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(bufferContent)), userdata))
         .WillOnce(InvokeWithoutArgs([&]() {
             nxtBufferRelease(buffer);
         }));

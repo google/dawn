@@ -33,7 +33,7 @@ namespace backend {
 
     BufferBase::~BufferBase() {
         if (mIsMapped) {
-            CallMapReadCallback(mMapReadSerial, NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr);
+            CallMapReadCallback(mMapReadSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         }
     }
 
@@ -58,7 +58,7 @@ namespace backend {
     }
 
     void BufferBase::CallMapReadCallback(uint32_t serial,
-                                         nxtBufferMapReadStatus status,
+                                         nxtBufferMapAsyncStatus status,
                                          const void* pointer) {
         if (mMapReadCallback && serial == mMapReadSerial) {
             // Tag the callback as fired before firing it, otherwise it could fire a second time if
@@ -89,19 +89,19 @@ namespace backend {
                                   nxtCallbackUserdata userdata) {
         if (start + size > GetSize()) {
             mDevice->HandleError("Buffer map read out of range");
-            callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
+            callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
         if (!(mCurrentUsage & nxt::BufferUsageBit::MapRead)) {
             mDevice->HandleError("Buffer needs the map read usage bit");
-            callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
+            callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
         if (mIsMapped) {
             mDevice->HandleError("Buffer already mapped");
-            callback(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
+            callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
@@ -121,7 +121,7 @@ namespace backend {
 
         // A map request can only be called once, so this will fire only if the request wasn't
         // completed before the Unmap
-        CallMapReadCallback(mMapReadSerial, NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr);
+        CallMapReadCallback(mMapReadSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         UnmapImpl();
         mIsMapped = false;
     }

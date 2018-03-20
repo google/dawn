@@ -67,7 +67,7 @@ class ProcTableAsClass {
         // Calls the stored callbacks
         void CallDeviceErrorCallback(nxtDevice device, const char* message);
         void CallBuilderErrorCallback(void* builder , nxtBuilderErrorStatus status, const char* message);
-        void CallMapReadCallback(nxtBuffer buffer, nxtBufferMapReadStatus status, const void* data);
+        void CallMapReadCallback(nxtBuffer buffer, nxtBufferMapAsyncStatus status, const void* data);
 
         struct Object {
             ProcTableAsClass* procs = nullptr;

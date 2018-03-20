@@ -42,7 +42,7 @@ namespace backend { namespace opengl {
         // instead?
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_READ_BIT);
-        CallMapReadCallback(serial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, data);
+        CallMapReadCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
     }
 
     void Buffer::UnmapImpl() {

@@ -128,7 +128,7 @@ namespace wire {
             void Forward{{type.name.CamelCase()}}ToClient(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2);
         {% endfor %}
 
-        void ForwardBufferMapReadAsync(nxtBufferMapReadStatus status, const void* ptr, nxtCallbackUserdata userdata);
+        void ForwardBufferMapReadAsync(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata);
 
         class Server : public CommandHandler {
             public:
@@ -183,7 +183,7 @@ namespace wire {
                     }
                 {% endfor %}
 
-                void OnMapReadAsyncCallback(nxtBufferMapReadStatus status, const void* ptr, MapReadUserdata* data) {
+                void OnMapReadAsyncCallback(nxtBufferMapAsyncStatus status, const void* ptr, MapReadUserdata* data) {
                     ReturnBufferMapReadAsyncCallbackCmd cmd;
                     cmd.bufferId = data->bufferId;
                     cmd.bufferSerial = data->bufferSerial;
@@ -191,14 +191,14 @@ namespace wire {
                     cmd.status = status;
 
                     cmd.dataLength = 0;
-                    if (status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS) {
+                    if (status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
                         cmd.dataLength = data->size;
                     }
 
                     auto allocCmd = reinterpret_cast<ReturnBufferMapReadAsyncCallbackCmd*>(GetCmdSpace(cmd.GetRequiredSize()));
                     *allocCmd = cmd;
 
-                    if (status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS) {
+                    if (status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
                         memcpy(allocCmd->GetData(), ptr, data->size);
                     }
 
@@ -469,7 +469,7 @@ namespace wire {
 
                     if (!buffer->valid) {
                         //* Fake the buffer returning a failure, data will be freed in this call.
-                        ForwardBufferMapReadAsync(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata);
+                        ForwardBufferMapReadAsync(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
                         return true;
                     }
 
@@ -493,7 +493,7 @@ namespace wire {
             }
         {% endfor %}
 
-        void ForwardBufferMapReadAsync(nxtBufferMapReadStatus status, const void* ptr, nxtCallbackUserdata userdata) {
+        void ForwardBufferMapReadAsync(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata) {
             auto data = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata));
             data->server->OnMapReadAsyncCallback(status, ptr, data);
         }

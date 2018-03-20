@@ -132,7 +132,7 @@ namespace backend { namespace null {
     }
 
     void Buffer::MapReadOperationCompleted(uint32_t serial, const void* ptr) {
-        CallMapReadCallback(serial, NXT_BUFFER_MAP_READ_STATUS_SUCCESS, ptr);
+        CallMapReadCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {

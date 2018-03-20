@@ -82,14 +82,14 @@ namespace wire {
             ~Buffer() {
                 //* Callbacks need to be fired in all cases, as they can handle freeing resources
                 //* so we call them with "Unknown" status.
-                ClearMapRequests(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN);
+                ClearMapRequests(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN);
 
                 if (mappedData) {
                     free(mappedData);
                 }
             }
 
-            void ClearMapRequests(nxtBufferMapReadStatus status) {
+            void ClearMapRequests(nxtBufferMapAsyncStatus status) {
                 for (auto& it : readRequests) {
                     it.second.callback(status, nullptr, it.second.userdata);
                 }
@@ -364,7 +364,7 @@ namespace wire {
                 free(buffer->mappedData);
                 buffer->mappedData = nullptr;
             }
-            buffer->ClearMapRequests(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN);
+            buffer->ClearMapRequests(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN);
 
             ClientBufferUnmap(buffer);
         }
@@ -536,7 +536,7 @@ namespace wire {
                     buffer->readRequests.erase(requestIt);
 
                     //* On success, we copy the data locally because the IPC buffer isn't valid outside of this function
-                    if (cmd->status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS) {
+                    if (cmd->status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
 
                         //* The server didn't send the right amount of data, this is an error and could cause
                         //* the application to crash if we did call the callback.
@@ -550,9 +550,9 @@ namespace wire {
                         buffer->mappedData = malloc(request.size);
                         memcpy(buffer->mappedData, cmd->GetData(), request.size);
 
-                        request.callback(static_cast<nxtBufferMapReadStatus>(cmd->status), buffer->mappedData, request.userdata);
+                        request.callback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
                     } else {
-                        request.callback(static_cast<nxtBufferMapReadStatus>(cmd->status), nullptr, request.userdata);
+                        request.callback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
                     }
 
                     return true;

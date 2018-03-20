@@ -20,11 +20,11 @@ using namespace testing;
 
 class MockBufferMapReadCallback {
     public:
-        MOCK_METHOD3(Call, void(nxtBufferMapReadStatus status, const uint32_t* ptr, nxtCallbackUserdata userdata));
+        MOCK_METHOD3(Call, void(nxtBufferMapAsyncStatus status, const uint32_t* ptr, nxtCallbackUserdata userdata));
 };
 
 static MockBufferMapReadCallback* mockBufferMapReadCallback = nullptr;
-static void ToMockBufferMapReadCallback(nxtBufferMapReadStatus status, const void* ptr, nxtCallbackUserdata userdata) {
+static void ToMockBufferMapReadCallback(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapReadCallback->Call(status, reinterpret_cast<const uint32_t*>(ptr), userdata);
 }
@@ -184,7 +184,7 @@ TEST_F(BufferValidationTest, MapReadSuccess) {
     nxt::CallbackUserdata userdata = 40598;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Ne(nullptr), userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
         .Times(1);
     queue.Submit(0, nullptr);
 
@@ -196,7 +196,7 @@ TEST_F(BufferValidationTest, MapReadOutOfRange) {
     nxt::Buffer buf = CreateMapReadBuffer(4);
 
     nxt::CallbackUserdata userdata = 40599;
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
     ASSERT_DEVICE_ERROR(buf.MapReadAsync(0, 5, ToMockBufferMapReadCallback, userdata));
@@ -211,7 +211,7 @@ TEST_F(BufferValidationTest, MapReadWrongUsage) {
         .GetResult();
 
     nxt::CallbackUserdata userdata = 40600;
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
     ASSERT_DEVICE_ERROR(buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata));
@@ -223,11 +223,11 @@ TEST_F(BufferValidationTest, MapReadAlreadyMapped) {
 
     nxt::CallbackUserdata userdata1 = 40601;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata1);
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Ne(nullptr), userdata1))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata1))
         .Times(1);
 
     nxt::CallbackUserdata userdata2 = 40602;
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_ERROR, nullptr, userdata2))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata2))
         .Times(1);
     ASSERT_DEVICE_ERROR(buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata2));
 
@@ -241,7 +241,7 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
     nxt::CallbackUserdata userdata = 40603;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
         .Times(1);
     buf.Unmap();
 
@@ -260,7 +260,7 @@ TEST_F(BufferValidationTest, DISABLED_MapReadDestroyBeforeResult) {
         nxt::CallbackUserdata userdata = 40604;
         buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
-        EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr, userdata))
+        EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
             .Times(1);
     }
 
@@ -277,7 +277,7 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
     nxt::CallbackUserdata userdata = 40605;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_UNKNOWN, nullptr, userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
         .Times(1);
     buf.Unmap();
 
@@ -285,7 +285,7 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
 
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Ne(nullptr), userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
         .Times(1);
     queue.Submit(0, nullptr);
 }
@@ -297,7 +297,7 @@ TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
     nxt::CallbackUserdata userdata = 40678;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Ne(nullptr), userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
         .WillOnce(InvokeWithoutArgs([&]() {
             buf.Unmap();
         }));
@@ -312,7 +312,7 @@ TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
     nxt::CallbackUserdata userdata = 40679;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, Ne(nullptr), userdata))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
         .WillOnce(InvokeWithoutArgs([&]() {
             buf = nxt::Buffer();
         }));

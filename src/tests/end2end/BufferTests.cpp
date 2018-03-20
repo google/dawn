@@ -19,8 +19,8 @@
 class BufferMapReadTests : public NXTTest {
     protected:
 
-        static void MapReadCallback(nxtBufferMapReadStatus status, const void* data, nxtCallbackUserdata userdata) {
-            ASSERT_EQ(NXT_BUFFER_MAP_READ_STATUS_SUCCESS, status);
+        static void MapReadCallback(nxtBufferMapAsyncStatus status, const void* data, nxtCallbackUserdata userdata) {
+            ASSERT_EQ(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
             ASSERT_NE(nullptr, data);
 
             auto test = reinterpret_cast<BufferMapReadTests*>(static_cast<uintptr_t>(userdata));

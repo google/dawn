@@ -72,7 +72,7 @@ void ProcTableAsClass::CallBuilderErrorCallback(void* builder , nxtBuilderErrorS
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(builder);
     object->builderErrorCallback(status, message, object->userdata1, object->userdata2);
 }
-void ProcTableAsClass::CallMapReadCallback(nxtBuffer buffer, nxtBufferMapReadStatus status, const void* data) {
+void ProcTableAsClass::CallMapReadCallback(nxtBuffer buffer, nxtBufferMapAsyncStatus status, const void* data) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapReadCallback(status, data, object->userdata1);
 }

@@ -52,7 +52,7 @@ namespace backend {
 
       protected:
         void CallMapReadCallback(uint32_t serial,
-                                 nxtBufferMapReadStatus status,
+                                 nxtBufferMapAsyncStatus status,
                                  const void* pointer);
 
       private:

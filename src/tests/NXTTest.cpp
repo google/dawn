@@ -276,8 +276,10 @@ void NXTTest::MapSlotsSynchronously() {
 }
 
 // static
-void NXTTest::SlotMapReadCallback(nxtBufferMapReadStatus status, const void* data, nxtCallbackUserdata userdata_) {
-    NXT_ASSERT(status == NXT_BUFFER_MAP_READ_STATUS_SUCCESS);
+void NXTTest::SlotMapReadCallback(nxtBufferMapAsyncStatus status,
+                                  const void* data,
+                                  nxtCallbackUserdata userdata_) {
+    NXT_ASSERT(status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
 
     auto userdata = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata_));
     userdata->test->mReadbackSlots[userdata->slot].mappedData = data;

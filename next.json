@@ -257,7 +257,7 @@
     "buffer map read callback": {
         "category": "natively defined"
     },
-    "buffer map read status": {
+    "buffer map async status": {
         "category": "enum",
         "values": [
             {"value": 0, "name": "success"},
