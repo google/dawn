@@ -113,12 +113,13 @@ namespace backend { namespace null {
 
     struct BufferMapReadOperation : PendingOperation {
         virtual void Execute() {
-            buffer->MapReadOperationCompleted(serial, ptr);
+            buffer->MapReadOperationCompleted(serial, ptr, isWrite);
         }
 
         Ref<Buffer> buffer;
-        const void* ptr;
+        void* ptr;
         uint32_t serial;
+        bool isWrite;
     };
 
     Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
@@ -131,8 +132,12 @@ namespace backend { namespace null {
     Buffer::~Buffer() {
     }
 
-    void Buffer::MapReadOperationCompleted(uint32_t serial, const void* ptr) {
-        CallMapReadCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
+    void Buffer::MapReadOperationCompleted(uint32_t serial, void* ptr, bool isWrite) {
+        if (isWrite) {
+            CallMapWriteCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
+        } else {
+            CallMapReadCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
+        }
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
@@ -142,6 +147,14 @@ namespace backend { namespace null {
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+        MapAsyncImplCommon(serial, start, count, false);
+    }
+
+    void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+        MapAsyncImplCommon(serial, start, count, true);
+    }
+
+    void Buffer::MapAsyncImplCommon(uint32_t serial, uint32_t start, uint32_t count, bool isWrite) {
         ASSERT(start + count <= GetSize());
         ASSERT(mBackingData);
 
@@ -149,6 +162,7 @@ namespace backend { namespace null {
         operation->buffer = this;
         operation->ptr = mBackingData.get() + start;
         operation->serial = serial;
+        operation->isWrite = isWrite;
 
         ToBackend(GetDevice())->AddPendingOperation(std::unique_ptr<PendingOperation>(operation));
     }

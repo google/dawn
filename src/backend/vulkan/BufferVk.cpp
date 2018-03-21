@@ -154,6 +154,10 @@ namespace backend { namespace vulkan {
         CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
     }
 
+    void Buffer::OnMapWriteCommandSerialFinished(uint32_t mapSerial, void* data) {
+        CallMapWriteCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+    }
+
     VkBuffer Buffer::GetHandle() const {
         return mHandle;
     }
@@ -186,11 +190,19 @@ namespace backend { namespace vulkan {
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
-        const uint8_t* memory = mMemoryAllocation.GetMappedPointer();
+        uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);
 
-        MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadRequestTracker();
-        tracker->Track(this, serial, memory + start);
+        MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
+        tracker->Track(this, serial, memory + start, false);
+    }
+
+    void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
+        uint8_t* memory = mMemoryAllocation.GetMappedPointer();
+        ASSERT(memory != nullptr);
+
+        MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
+        tracker->Track(this, serial, memory + start, true);
     }
 
     void Buffer::UnmapImpl() {
@@ -203,25 +215,30 @@ namespace backend { namespace vulkan {
         RecordBarrier(commands, currentUsage, targetUsage);
     }
 
-    MapReadRequestTracker::MapReadRequestTracker(Device* device) : mDevice(device) {
+    MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {
     }
 
-    MapReadRequestTracker::~MapReadRequestTracker() {
+    MapRequestTracker::~MapRequestTracker() {
         ASSERT(mInflightRequests.Empty());
     }
 
-    void MapReadRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, const void* data) {
+    void MapRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, void* data, bool isWrite) {
         Request request;
         request.buffer = buffer;
         request.mapSerial = mapSerial;
         request.data = data;
+        request.isWrite = isWrite;
 
         mInflightRequests.Enqueue(std::move(request), mDevice->GetSerial());
     }
 
-    void MapReadRequestTracker::Tick(Serial finishedSerial) {
+    void MapRequestTracker::Tick(Serial finishedSerial) {
         for (auto& request : mInflightRequests.IterateUpTo(finishedSerial)) {
-            request.buffer->OnMapReadCommandSerialFinished(request.mapSerial, request.data);
+            if (request.isWrite) {
+                request.buffer->OnMapWriteCommandSerialFinished(request.mapSerial, request.data);
+            } else {
+                request.buffer->OnMapReadCommandSerialFinished(request.mapSerial, request.data);
+            }
         }
         mInflightRequests.ClearUpTo(finishedSerial);
     }

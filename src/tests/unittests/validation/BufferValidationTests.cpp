@@ -29,6 +29,17 @@ static void ToMockBufferMapReadCallback(nxtBufferMapAsyncStatus status, const vo
     mockBufferMapReadCallback->Call(status, reinterpret_cast<const uint32_t*>(ptr), userdata);
 }
 
+class MockBufferMapWriteCallback {
+    public:
+        MOCK_METHOD3(Call, void(nxtBufferMapAsyncStatus status, uint32_t* ptr, nxtCallbackUserdata userdata));
+};
+
+static MockBufferMapWriteCallback* mockBufferMapWriteCallback = nullptr;
+static void ToMockBufferMapWriteCallback(nxtBufferMapAsyncStatus status, void* ptr, nxtCallbackUserdata userdata) {
+    // Assume the data is uint32_t to make writing matchers easier
+    mockBufferMapWriteCallback->Call(status, reinterpret_cast<uint32_t*>(ptr), userdata);
+}
+
 class BufferValidationTest : public ValidationTest {
     protected:
         nxt::Buffer CreateMapReadBuffer(uint32_t size) {
@@ -36,6 +47,13 @@ class BufferValidationTest : public ValidationTest {
                 .SetSize(size)
                 .SetAllowedUsage(nxt::BufferUsageBit::MapRead)
                 .SetInitialUsage(nxt::BufferUsageBit::MapRead)
+                .GetResult();
+        }
+        nxt::Buffer CreateMapWriteBuffer(uint32_t size) {
+            return device.CreateBufferBuilder()
+                .SetSize(size)
+                .SetAllowedUsage(nxt::BufferUsageBit::MapWrite)
+                .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
                 .GetResult();
         }
         nxt::Buffer CreateSetSubDataBuffer(uint32_t size) {
@@ -53,11 +71,13 @@ class BufferValidationTest : public ValidationTest {
             ValidationTest::SetUp();
 
             mockBufferMapReadCallback = new MockBufferMapReadCallback;
+            mockBufferMapWriteCallback = new MockBufferMapWriteCallback;
             queue = device.CreateQueueBuilder().GetResult();
         }
 
         void TearDown() override {
             delete mockBufferMapReadCallback;
+            delete mockBufferMapWriteCallback;
 
             ValidationTest::TearDown();
         }
@@ -177,7 +197,7 @@ TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
     }
 }
 
-// Test the success cause for mapping buffer for reading
+// Test the success case for mapping buffer for reading
 TEST_F(BufferValidationTest, MapReadSuccess) {
     nxt::Buffer buf = CreateMapReadBuffer(4);
 
@@ -185,6 +205,20 @@ TEST_F(BufferValidationTest, MapReadSuccess) {
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
+        .Times(1);
+    queue.Submit(0, nullptr);
+
+    buf.Unmap();
+}
+
+// Test the success case for mapping buffer for writing
+TEST_F(BufferValidationTest, MapWriteSuccess) {
+    nxt::Buffer buf = CreateMapWriteBuffer(4);
+
+    nxt::CallbackUserdata userdata = 40598;
+    buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
         .Times(1);
     queue.Submit(0, nullptr);
 
@@ -202,6 +236,17 @@ TEST_F(BufferValidationTest, MapReadOutOfRange) {
     ASSERT_DEVICE_ERROR(buf.MapReadAsync(0, 5, ToMockBufferMapReadCallback, userdata));
 }
 
+// Test map writing out of range causes an error
+TEST_F(BufferValidationTest, MapWriteOutOfRange) {
+    nxt::Buffer buf = CreateMapWriteBuffer(4);
+
+    nxt::CallbackUserdata userdata = 40599;
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
+        .Times(1);
+
+    ASSERT_DEVICE_ERROR(buf.MapWriteAsync(0, 5, ToMockBufferMapWriteCallback, userdata));
+}
+
 // Test map reading a buffer with wrong current usage
 TEST_F(BufferValidationTest, MapReadWrongUsage) {
     nxt::Buffer buf = device.CreateBufferBuilder()
@@ -215,6 +260,21 @@ TEST_F(BufferValidationTest, MapReadWrongUsage) {
         .Times(1);
 
     ASSERT_DEVICE_ERROR(buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata));
+}
+
+// Test map writing a buffer with wrong current usage
+TEST_F(BufferValidationTest, MapWriteWrongUsage) {
+    nxt::Buffer buf = device.CreateBufferBuilder()
+        .SetSize(4)
+        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+        .SetInitialUsage(nxt::BufferUsageBit::TransferSrc)
+        .GetResult();
+
+    nxt::CallbackUserdata userdata = 40600;
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
+        .Times(1);
+
+    ASSERT_DEVICE_ERROR(buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata));
 }
 
 // Test map reading a buffer that is already mapped
@@ -234,7 +294,25 @@ TEST_F(BufferValidationTest, MapReadAlreadyMapped) {
     queue.Submit(0, nullptr);
 }
 
-// Test unmapping before having the result gives UNKNOWN
+// Test map writing a buffer that is already mapped
+TEST_F(BufferValidationTest, MapWriteAlreadyMapped) {
+    nxt::Buffer buf = CreateMapWriteBuffer(4);
+
+    nxt::CallbackUserdata userdata1 = 40601;
+    buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata1);
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata1))
+        .Times(1);
+
+    nxt::CallbackUserdata userdata2 = 40602;
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata2))
+        .Times(1);
+    ASSERT_DEVICE_ERROR(buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata2));
+
+    queue.Submit(0, nullptr);
+}
+// TODO(cwallez@chromium.org) Test a MapWrite and already MapRead and vice-versa
+
+// Test unmapping before having the result gives UNKNOWN - for reading
 TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
     nxt::Buffer buf = CreateMapReadBuffer(4);
 
@@ -250,7 +328,23 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
     queue.Submit(0, nullptr);
 }
 
-// Test destroying the buffer before having the result gives UNKNOWN
+// Test unmapping before having the result gives UNKNOWN - for writing
+TEST_F(BufferValidationTest, MapWriteUnmapBeforeResult) {
+    nxt::Buffer buf = CreateMapWriteBuffer(4);
+
+    nxt::CallbackUserdata userdata = 40603;
+    buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
+        .Times(1);
+    buf.Unmap();
+
+    // Submitting the queue makes the null backend process map request, but the callback shouldn't
+    // be called again
+    queue.Submit(0, nullptr);
+}
+
+// Test destroying the buffer before having the result gives UNKNOWN - for reading
 // TODO(cwallez@chromium.org) currently this doesn't work because the buffer doesn't know
 // when its external ref count reaches 0.
 TEST_F(BufferValidationTest, DISABLED_MapReadDestroyBeforeResult) {
@@ -269,7 +363,26 @@ TEST_F(BufferValidationTest, DISABLED_MapReadDestroyBeforeResult) {
     queue.Submit(0, nullptr);
 }
 
-// When a request is cancelled with Unmap it might still be in flight, test doing a new request
+// Test destroying the buffer before having the result gives UNKNOWN - for writing
+// TODO(cwallez@chromium.org) currently this doesn't work because the buffer doesn't know
+// when its external ref count reaches 0.
+TEST_F(BufferValidationTest, DISABLED_MapWriteDestroyBeforeResult) {
+    {
+        nxt::Buffer buf = CreateMapWriteBuffer(4);
+
+        nxt::CallbackUserdata userdata = 40604;
+        buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
+
+        EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
+            .Times(1);
+    }
+
+    // Submitting the queue makes the null backend process map request, but the callback shouldn't
+    // be called again
+    queue.Submit(0, nullptr);
+}
+
+// When a MapRead is cancelled with Unmap it might still be in flight, test doing a new request
 // works as expected and we don't get the cancelled request's data.
 TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
     nxt::Buffer buf = CreateMapReadBuffer(4);
@@ -289,6 +402,28 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
         .Times(1);
     queue.Submit(0, nullptr);
 }
+// TODO(cwallez@chromium.org) Test a MapWrite and already MapRead and vice-versa
+
+// When a MapWrite is cancelled with Unmap it might still be in flight, test doing a new request
+// works as expected and we don't get the cancelled request's data.
+TEST_F(BufferValidationTest, MapWriteUnmapBeforeResultThenMapAgain) {
+    nxt::Buffer buf = CreateMapWriteBuffer(4);
+
+    nxt::CallbackUserdata userdata = 40605;
+    buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
+        .Times(1);
+    buf.Unmap();
+
+    userdata ++;
+
+    buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
+        .Times(1);
+    queue.Submit(0, nullptr);
+}
 
 // Test that the MapReadCallback isn't fired twice when unmap() is called inside the callback
 TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
@@ -305,6 +440,21 @@ TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
     queue.Submit(0, nullptr);
 }
 
+// Test that the MapWriteCallback isn't fired twice when unmap() is called inside the callback
+TEST_F(BufferValidationTest, UnmapInsideMapWriteCallback) {
+    nxt::Buffer buf = CreateMapWriteBuffer(4);
+
+    nxt::CallbackUserdata userdata = 40678;
+    buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            buf.Unmap();
+        }));
+
+    queue.Submit(0, nullptr);
+}
+
 // Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the callback
 TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
     nxt::Buffer buf = CreateMapReadBuffer(4);
@@ -313,6 +463,21 @@ TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            buf = nxt::Buffer();
+        }));
+
+    queue.Submit(0, nullptr);
+}
+
+// Test that the MapWriteCallback isn't fired twice the buffer external refcount reaches 0 in the callback
+TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
+    nxt::Buffer buf = CreateMapWriteBuffer(4);
+
+    nxt::CallbackUserdata userdata = 40679;
+    buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
+
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
         .WillOnce(InvokeWithoutArgs([&]() {
             buf = nxt::Buffer();
         }));

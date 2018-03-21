@@ -45,7 +45,7 @@ namespace backend { namespace metal {
 
     Device::Device(id<MTLDevice> mtlDevice)
         : mMtlDevice(mtlDevice),
-          mMapReadTracker(new MapReadRequestTracker(this)),
+          mMapTracker(new MapRequestTracker(this)),
           mResourceUploader(new ResourceUploader(this)) {
         [mMtlDevice retain];
         mCommandQueue = [mMtlDevice newCommandQueue];
@@ -65,8 +65,8 @@ namespace backend { namespace metal {
         [mPendingCommands release];
         mPendingCommands = nil;
 
-        delete mMapReadTracker;
-        mMapReadTracker = nullptr;
+        delete mMapTracker;
+        mMapTracker = nullptr;
 
         delete mResourceUploader;
         mResourceUploader = nullptr;
@@ -138,7 +138,7 @@ namespace backend { namespace metal {
 
     void Device::TickImpl() {
         mResourceUploader->Tick(mFinishedCommandSerial);
-        mMapReadTracker->Tick(mFinishedCommandSerial);
+        mMapTracker->Tick(mFinishedCommandSerial);
 
         // Code above might have added GPU work, submit it. This also makes sure
         // that even when no GPU work is happening, the serial number keeps incrementing.
@@ -186,8 +186,8 @@ namespace backend { namespace metal {
         return mPendingCommandSerial;
     }
 
-    MapReadRequestTracker* Device::GetMapReadTracker() const {
-        return mMapReadTracker;
+    MapRequestTracker* Device::GetMapTracker() const {
+        return mMapTracker;
     }
 
     ResourceUploader* Device::GetResourceUploader() const {

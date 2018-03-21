@@ -38,6 +38,7 @@ typedef uint64_t nxtCallbackUserdata;
 typedef void (*nxtDeviceErrorCallback)(const char* message, nxtCallbackUserdata userdata);
 typedef void (*nxtBuilderErrorCallback)(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2);
 typedef void (*nxtBufferMapReadCallback)(nxtBufferMapAsyncStatus status, const void* data, nxtCallbackUserdata userdata);
+typedef void (*nxtBufferMapWriteCallback)(nxtBufferMapAsyncStatus status, void* data, nxtCallbackUserdata userdata);
 
 #ifdef __cplusplus
 extern "C" {

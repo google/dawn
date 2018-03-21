@@ -211,6 +211,16 @@
                 ]
             },
             {
+                "_comment": "Contrary to set sub data, this is in char size",
+                "name": "map write async",
+                "args": [
+                    {"name": "start", "type": "uint32_t"},
+                    {"name": "size", "type": "uint32_t"},
+                    {"name": "callback", "type": "buffer map write callback"},
+                    {"name": "userdata", "type": "callback userdata"}
+                ]
+            },
+            {
                 "name": "unmap"
             },
             {
@@ -255,6 +265,9 @@
         ]
     },
     "buffer map read callback": {
+        "category": "natively defined"
+    },
+    "buffer map write callback": {
         "category": "natively defined"
     },
     "buffer map async status": {

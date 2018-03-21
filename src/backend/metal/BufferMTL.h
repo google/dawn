@@ -31,11 +31,12 @@ namespace backend { namespace metal {
 
         id<MTLBuffer> GetMTLBuffer();
 
-        void OnMapReadCommandSerialFinished(uint32_t mapSerial, uint32_t offset);
+        void OnMapCommandSerialFinished(uint32_t mapSerial, uint32_t offset, bool isWrite);
 
       private:
         void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;
         void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
                                  nxt::BufferUsageBit targetUsage) override;
@@ -48,12 +49,12 @@ namespace backend { namespace metal {
         BufferView(BufferViewBuilder* builder);
     };
 
-    class MapReadRequestTracker {
+    class MapRequestTracker {
       public:
-        MapReadRequestTracker(Device* device);
-        ~MapReadRequestTracker();
+        MapRequestTracker(Device* device);
+        ~MapRequestTracker();
 
-        void Track(Buffer* buffer, uint32_t mapSerial, uint32_t offset);
+        void Track(Buffer* buffer, uint32_t mapSerial, uint32_t offset, bool isWrite);
         void Tick(Serial finishedSerial);
 
       private:
@@ -63,6 +64,7 @@ namespace backend { namespace metal {
             Ref<Buffer> buffer;
             uint32_t mapSerial;
             uint32_t offset;
+            bool isWrite;
         };
         SerialQueue<Request> mInflightRequests;
     };

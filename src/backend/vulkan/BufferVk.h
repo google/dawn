@@ -31,6 +31,7 @@ namespace backend { namespace vulkan {
         ~Buffer();
 
         void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
+        void OnMapWriteCommandSerialFinished(uint32_t mapSerial, void* data);
 
         VkBuffer GetHandle() const;
 
@@ -41,6 +42,7 @@ namespace backend { namespace vulkan {
       private:
         void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;
         void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
                                  nxt::BufferUsageBit targetUsage) override;
@@ -49,12 +51,12 @@ namespace backend { namespace vulkan {
         DeviceMemoryAllocation mMemoryAllocation;
     };
 
-    class MapReadRequestTracker {
+    class MapRequestTracker {
       public:
-        MapReadRequestTracker(Device* device);
-        ~MapReadRequestTracker();
+        MapRequestTracker(Device* device);
+        ~MapRequestTracker();
 
-        void Track(Buffer* buffer, uint32_t mapSerial, const void* data);
+        void Track(Buffer* buffer, uint32_t mapSerial, void* data, bool isWrite);
         void Tick(Serial finishedSerial);
 
       private:
@@ -63,7 +65,8 @@ namespace backend { namespace vulkan {
         struct Request {
             Ref<Buffer> buffer;
             uint32_t mapSerial;
-            const void* data;
+            void* data;
+            bool isWrite;
         };
         SerialQueue<Request> mInflightRequests;
     };

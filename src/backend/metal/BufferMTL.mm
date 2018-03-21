@@ -40,9 +40,13 @@ namespace backend { namespace metal {
         return mMtlBuffer;
     }
 
-    void Buffer::OnMapReadCommandSerialFinished(uint32_t mapSerial, uint32_t offset) {
-        const char* data = reinterpret_cast<const char*>([mMtlBuffer contents]);
-        CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data + offset);
+    void Buffer::OnMapCommandSerialFinished(uint32_t mapSerial, uint32_t offset, bool isWrite) {
+        char* data = reinterpret_cast<char*>([mMtlBuffer contents]);
+        if (isWrite) {
+            CallMapWriteCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data + offset);
+        } else {
+            CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data + offset);
+        }
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) {
@@ -52,8 +56,13 @@ namespace backend { namespace metal {
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t) {
-        MapReadRequestTracker* tracker = ToBackend(GetDevice())->GetMapReadTracker();
-        tracker->Track(this, serial, start);
+        MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapTracker();
+        tracker->Track(this, serial, start, false);
+    }
+
+    void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t) {
+        MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapTracker();
+        tracker->Track(this, serial, start, true);
     }
 
     void Buffer::UnmapImpl() {
@@ -66,25 +75,30 @@ namespace backend { namespace metal {
     BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
     }
 
-    MapReadRequestTracker::MapReadRequestTracker(Device* device) : mDevice(device) {
+    MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {
     }
 
-    MapReadRequestTracker::~MapReadRequestTracker() {
+    MapRequestTracker::~MapRequestTracker() {
         ASSERT(mInflightRequests.Empty());
     }
 
-    void MapReadRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, uint32_t offset) {
+    void MapRequestTracker::Track(Buffer* buffer,
+                                  uint32_t mapSerial,
+                                  uint32_t offset,
+                                  bool isWrite) {
         Request request;
         request.buffer = buffer;
         request.mapSerial = mapSerial;
         request.offset = offset;
+        request.isWrite = isWrite;
 
         mInflightRequests.Enqueue(std::move(request), mDevice->GetPendingCommandSerial());
     }
 
-    void MapReadRequestTracker::Tick(Serial finishedSerial) {
+    void MapRequestTracker::Tick(Serial finishedSerial) {
         for (auto& request : mInflightRequests.IterateUpTo(finishedSerial)) {
-            request.buffer->OnMapReadCommandSerialFinished(request.mapSerial, request.offset);
+            request.buffer->OnMapCommandSerialFinished(request.mapSerial, request.offset,
+                                                       request.isWrite);
         }
         mInflightRequests.ClearUpTo(finishedSerial);
     }

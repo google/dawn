@@ -137,7 +137,7 @@ namespace backend { namespace d3d12 {
         // Initialize backend services
         mCommandAllocatorManager = new CommandAllocatorManager(this);
         mDescriptorHeapAllocator = new DescriptorHeapAllocator(this);
-        mMapReadRequestTracker = new MapReadRequestTracker(this);
+        mMapRequestTracker = new MapRequestTracker(this);
         mResourceAllocator = new ResourceAllocator(this);
         mResourceUploader = new ResourceUploader(this);
 
@@ -153,7 +153,7 @@ namespace backend { namespace d3d12 {
 
         delete mCommandAllocatorManager;
         delete mDescriptorHeapAllocator;
-        delete mMapReadRequestTracker;
+        delete mMapRequestTracker;
         delete mResourceAllocator;
         delete mResourceUploader;
     }
@@ -174,8 +174,8 @@ namespace backend { namespace d3d12 {
         return mDescriptorHeapAllocator;
     }
 
-    MapReadRequestTracker* Device::GetMapReadRequestTracker() const {
-        return mMapReadRequestTracker;
+    MapRequestTracker* Device::GetMapRequestTracker() const {
+        return mMapRequestTracker;
     }
 
     ResourceAllocator* Device::GetResourceAllocator() {
@@ -215,7 +215,7 @@ namespace backend { namespace d3d12 {
         mResourceAllocator->Tick(lastCompletedSerial);
         mCommandAllocatorManager->Tick(lastCompletedSerial);
         mDescriptorHeapAllocator->Tick(lastCompletedSerial);
-        mMapReadRequestTracker->Tick(lastCompletedSerial);
+        mMapRequestTracker->Tick(lastCompletedSerial);
         mUsedComObjectRefs.ClearUpTo(lastCompletedSerial);
         ExecuteCommandLists({});
         NextSerial();

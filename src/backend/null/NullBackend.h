@@ -132,14 +132,17 @@ namespace backend { namespace null {
         Buffer(BufferBuilder* builder);
         ~Buffer();
 
-        void MapReadOperationCompleted(uint32_t serial, const void* ptr);
+        void MapReadOperationCompleted(uint32_t serial, void* ptr, bool isWrite);
 
       private:
         void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;
         void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
                                  nxt::BufferUsageBit targetUsage) override;
+
+        void MapAsyncImplCommon(uint32_t serial, uint32_t start, uint32_t count, bool isWrite);
 
         std::unique_ptr<char[]> mBackingData;
     };

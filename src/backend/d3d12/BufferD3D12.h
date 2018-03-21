@@ -35,7 +35,7 @@ namespace backend { namespace d3d12 {
         bool GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage,
                                           nxt::BufferUsageBit targetUsage,
                                           D3D12_RESOURCE_BARRIER* barrier);
-        void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
+        void OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite);
 
       private:
         Device* mDevice;
@@ -44,6 +44,7 @@ namespace backend { namespace d3d12 {
         // NXT API
         void SetSubDataImpl(uint32_t start, uint32_t count, const uint32_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;
         void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
                                  nxt::BufferUsageBit targetUsage) override;
@@ -62,12 +63,12 @@ namespace backend { namespace d3d12 {
         D3D12_UNORDERED_ACCESS_VIEW_DESC mUavDesc;
     };
 
-    class MapReadRequestTracker {
+    class MapRequestTracker {
       public:
-        MapReadRequestTracker(Device* device);
-        ~MapReadRequestTracker();
+        MapRequestTracker(Device* device);
+        ~MapRequestTracker();
 
-        void Track(Buffer* buffer, uint32_t mapSerial, const void* data);
+        void Track(Buffer* buffer, uint32_t mapSerial, void* data, bool isWrite);
         void Tick(Serial finishedSerial);
 
       private:
@@ -76,7 +77,8 @@ namespace backend { namespace d3d12 {
         struct Request {
             Ref<Buffer> buffer;
             uint32_t mapSerial;
-            const void* data;
+            void* data;
+            bool isWrite;
         };
         SerialQueue<Request> mInflightRequests;
     };

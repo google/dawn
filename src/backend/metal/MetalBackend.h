@@ -81,7 +81,7 @@ namespace backend { namespace metal {
         return ToBackendBase<MetalBackendTraits>(common);
     }
 
-    class MapReadRequestTracker;
+    class MapRequestTracker;
     class ResourceUploader;
 
     class Device : public DeviceBase {
@@ -117,7 +117,7 @@ namespace backend { namespace metal {
         void SubmitPendingCommandBuffer();
         Serial GetPendingCommandSerial();
 
-        MapReadRequestTracker* GetMapReadTracker() const;
+        MapRequestTracker* GetMapTracker() const;
         ResourceUploader* GetResourceUploader() const;
 
       private:
@@ -125,7 +125,7 @@ namespace backend { namespace metal {
 
         id<MTLDevice> mMtlDevice = nil;
         id<MTLCommandQueue> mCommandQueue = nil;
-        MapReadRequestTracker* mMapReadTracker;
+        MapRequestTracker* mMapTracker;
         ResourceUploader* mResourceUploader;
 
         Serial mFinishedCommandSerial = 0;

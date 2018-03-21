@@ -33,7 +33,8 @@ namespace backend {
 
     BufferBase::~BufferBase() {
         if (mIsMapped) {
-            CallMapReadCallback(mMapReadSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
+            CallMapReadCallback(mMapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
+            CallMapWriteCallback(mMapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         }
     }
 
@@ -60,12 +61,26 @@ namespace backend {
     void BufferBase::CallMapReadCallback(uint32_t serial,
                                          nxtBufferMapAsyncStatus status,
                                          const void* pointer) {
-        if (mMapReadCallback && serial == mMapReadSerial) {
+        if (mMapReadCallback != nullptr && serial == mMapSerial) {
+            ASSERT(mMapWriteCallback == nullptr);
             // Tag the callback as fired before firing it, otherwise it could fire a second time if
             // for example buffer.Unmap() is called inside the application-provided callback.
             nxtBufferMapReadCallback callback = mMapReadCallback;
             mMapReadCallback = nullptr;
-            callback(status, pointer, mMapReadUserdata);
+            callback(status, pointer, mMapUserdata);
+        }
+    }
+
+    void BufferBase::CallMapWriteCallback(uint32_t serial,
+                                          nxtBufferMapAsyncStatus status,
+                                          void* pointer) {
+        if (mMapWriteCallback != nullptr && serial == mMapSerial) {
+            ASSERT(mMapReadCallback == nullptr);
+            // Tag the callback as fired before firing it, otherwise it could fire a second time if
+            // for example buffer.Unmap() is called inside the application-provided callback.
+            nxtBufferMapWriteCallback callback = mMapWriteCallback;
+            mMapWriteCallback = nullptr;
+            callback(status, pointer, mMapUserdata);
         }
     }
 
@@ -87,30 +102,40 @@ namespace backend {
                                   uint32_t size,
                                   nxtBufferMapReadCallback callback,
                                   nxtCallbackUserdata userdata) {
-        if (start + size > GetSize()) {
-            mDevice->HandleError("Buffer map read out of range");
+        if (!ValidateMapBase(start, size, nxt::BufferUsageBit::MapRead)) {
             callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
-        if (!(mCurrentUsage & nxt::BufferUsageBit::MapRead)) {
-            mDevice->HandleError("Buffer needs the map read usage bit");
-            callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
-            return;
-        }
-
-        if (mIsMapped) {
-            mDevice->HandleError("Buffer already mapped");
-            callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
-            return;
-        }
+        ASSERT(mMapWriteCallback == nullptr);
 
         // TODO(cwallez@chromium.org): what to do on wraparound? Could cause crashes.
-        mMapReadSerial++;
+        mMapSerial++;
         mMapReadCallback = callback;
-        mMapReadUserdata = userdata;
-        MapReadAsyncImpl(mMapReadSerial, start, size);
+        mMapUserdata = userdata;
         mIsMapped = true;
+
+        MapReadAsyncImpl(mMapSerial, start, size);
+    }
+
+    void BufferBase::MapWriteAsync(uint32_t start,
+                                   uint32_t size,
+                                   nxtBufferMapWriteCallback callback,
+                                   nxtCallbackUserdata userdata) {
+        if (!ValidateMapBase(start, size, nxt::BufferUsageBit::MapWrite)) {
+            callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+            return;
+        }
+
+        ASSERT(mMapReadCallback == nullptr);
+
+        // TODO(cwallez@chromium.org): what to do on wraparound? Could cause crashes.
+        mMapSerial++;
+        mMapWriteCallback = callback;
+        mMapUserdata = userdata;
+        mIsMapped = true;
+
+        MapWriteAsyncImpl(mMapSerial, start, size);
     }
 
     void BufferBase::Unmap() {
@@ -121,9 +146,13 @@ namespace backend {
 
         // A map request can only be called once, so this will fire only if the request wasn't
         // completed before the Unmap
-        CallMapReadCallback(mMapReadSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
+        CallMapReadCallback(mMapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
+        CallMapWriteCallback(mMapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         UnmapImpl();
         mIsMapped = false;
+        mMapReadCallback = nullptr;
+        mMapWriteCallback = nullptr;
+        mMapUserdata = 0;
     }
 
     bool BufferBase::IsFrozen() const {
@@ -246,6 +275,27 @@ namespace backend {
 
         mSize = size;
         mPropertiesSet |= BUFFER_PROPERTY_SIZE;
+    }
+
+    bool BufferBase::ValidateMapBase(uint32_t start,
+                                     uint32_t size,
+                                     nxt::BufferUsageBit requiredUsage) {
+        if (start + size > GetSize()) {
+            mDevice->HandleError("Buffer map read out of range");
+            return false;
+        }
+
+        if (mIsMapped) {
+            mDevice->HandleError("Buffer already mapped");
+            return false;
+        }
+
+        if (!(mCurrentUsage & requiredUsage)) {
+            mDevice->HandleError("Buffer needs the correct map usage bit");
+            return false;
+        }
+
+        return true;
     }
 
     // BufferViewBase

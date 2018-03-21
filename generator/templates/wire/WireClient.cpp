@@ -352,6 +352,11 @@ namespace wire {
             *allocCmd = cmd;
         }
 
+        void ClientBufferMapWriteAsync(Buffer*, uint32_t, uint32_t, nxtBufferMapWriteCallback, nxtCallbackUserdata) {
+            // TODO(cwallez@chromium.org): Implement the wire for BufferMapWriteAsync
+            ASSERT(false);
+        }
+
         void ProxyClientBufferUnmap(Buffer* buffer) {
             //* Invalidate the local pointer, and cancel all other in-flight requests that would turn into
             //* errors anyway (you can't double map). This prevents race when the following happens, where

@@ -49,7 +49,7 @@ namespace backend { namespace d3d12 {
 
     class CommandAllocatorManager;
     class DescriptorHeapAllocator;
-    class MapReadRequestTracker;
+    class MapRequestTracker;
     class ResourceAllocator;
     class ResourceUploader;
 
@@ -116,7 +116,7 @@ namespace backend { namespace d3d12 {
         ComPtr<ID3D12CommandQueue> GetCommandQueue();
 
         DescriptorHeapAllocator* GetDescriptorHeapAllocator();
-        MapReadRequestTracker* GetMapReadRequestTracker() const;
+        MapRequestTracker* GetMapRequestTracker() const;
         ResourceAllocator* GetResourceAllocator();
         ResourceUploader* GetResourceUploader();
 
@@ -143,7 +143,7 @@ namespace backend { namespace d3d12 {
 
         CommandAllocatorManager* mCommandAllocatorManager = nullptr;
         DescriptorHeapAllocator* mDescriptorHeapAllocator = nullptr;
-        MapReadRequestTracker* mMapReadRequestTracker = nullptr;
+        MapRequestTracker* mMapRequestTracker = nullptr;
         ResourceAllocator* mResourceAllocator = nullptr;
         ResourceUploader* mResourceUploader = nullptr;
 

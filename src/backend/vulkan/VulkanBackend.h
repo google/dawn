@@ -55,7 +55,7 @@ namespace backend { namespace vulkan {
 
     class BufferUploader;
     class FencedDeleter;
-    class MapReadRequestTracker;
+    class MapRequestTracker;
     class MemoryAllocator;
 
     struct VulkanBackendTraits {
@@ -103,7 +103,7 @@ namespace backend { namespace vulkan {
 
         BufferUploader* GetBufferUploader() const;
         FencedDeleter* GetFencedDeleter() const;
-        MapReadRequestTracker* GetMapReadRequestTracker() const;
+        MapRequestTracker* GetMapRequestTracker() const;
         MemoryAllocator* GetMemoryAllocator() const;
 
         Serial GetSerial() const;
@@ -170,7 +170,7 @@ namespace backend { namespace vulkan {
 
         BufferUploader* mBufferUploader = nullptr;
         FencedDeleter* mDeleter = nullptr;
-        MapReadRequestTracker* mMapReadRequestTracker = nullptr;
+        MapRequestTracker* mMapRequestTracker = nullptr;
         MemoryAllocator* mMemoryAllocator = nullptr;
 
         VkFence GetUnusedFence();

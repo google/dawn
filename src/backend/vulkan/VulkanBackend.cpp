@@ -142,7 +142,7 @@ namespace backend { namespace vulkan {
 
         mBufferUploader = new BufferUploader(this);
         mDeleter = new FencedDeleter(this);
-        mMapReadRequestTracker = new MapReadRequestTracker(this);
+        mMapRequestTracker = new MapRequestTracker(this);
         mMemoryAllocator = new MemoryAllocator(this);
     }
 
@@ -181,8 +181,8 @@ namespace backend { namespace vulkan {
         delete mDeleter;
         mDeleter = nullptr;
 
-        delete mMapReadRequestTracker;
-        mMapReadRequestTracker = nullptr;
+        delete mMapRequestTracker;
+        mMapRequestTracker = nullptr;
 
         delete mMemoryAllocator;
         mMemoryAllocator = nullptr;
@@ -267,7 +267,7 @@ namespace backend { namespace vulkan {
         CheckPassedFences();
         RecycleCompletedCommands();
 
-        mMapReadRequestTracker->Tick(mCompletedSerial);
+        mMapRequestTracker->Tick(mCompletedSerial);
         mBufferUploader->Tick(mCompletedSerial);
         mMemoryAllocator->Tick(mCompletedSerial);
 
@@ -307,8 +307,8 @@ namespace backend { namespace vulkan {
         return mQueue;
     }
 
-    MapReadRequestTracker* Device::GetMapReadRequestTracker() const {
-        return mMapReadRequestTracker;
+    MapRequestTracker* Device::GetMapRequestTracker() const {
+        return mMapRequestTracker;
     }
 
     MemoryAllocator* Device::GetMemoryAllocator() const {

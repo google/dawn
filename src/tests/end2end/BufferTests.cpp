@@ -102,6 +102,86 @@ TEST_P(BufferMapReadTests, LargeRead) {
 
 NXT_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
 
+class BufferMapWriteTests : public NXTTest {
+    protected:
+
+        static void MapWriteCallback(nxtBufferMapAsyncStatus status, void* data, nxtCallbackUserdata userdata) {
+            ASSERT_EQ(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+            ASSERT_NE(nullptr, data);
+
+            auto test = reinterpret_cast<BufferMapWriteTests*>(static_cast<uintptr_t>(userdata));
+            test->mappedData = data;
+        }
+
+        void* MapWriteAsyncAndWait(const nxt::Buffer& buffer, uint32_t start, uint32_t offset) {
+            buffer.MapWriteAsync(start, offset, MapWriteCallback, static_cast<nxt::CallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+
+            while (mappedData == nullptr) {
+                WaitABit();
+            }
+
+            return mappedData;
+        }
+
+    private:
+        void* mappedData = nullptr;
+};
+
+// Test that the simplest map write (one u32 at offset 0) works.
+TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
+    nxt::Buffer buffer = device.CreateBufferBuilder()
+        .SetSize(4)
+        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
+        .GetResult();
+
+    uint32_t myData = 2934875;
+    void* mappedData = MapWriteAsyncAndWait(buffer, 0, 4);
+    memcpy(mappedData, &myData, sizeof(myData));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
+}
+
+// Test mapping a buffer at an offset.
+TEST_P(BufferMapWriteTests, SmallWriteAtOffset) {
+    nxt::Buffer buffer = device.CreateBufferBuilder()
+        .SetSize(4000)
+        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
+        .GetResult();
+
+    uint32_t myData = 2934875;
+    void* mappedData = MapWriteAsyncAndWait(buffer, 2048, 4);
+    memcpy(mappedData, &myData, sizeof(myData));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 2048);
+}
+
+// Test mapping large ranges of a buffer.
+TEST_P(BufferMapWriteTests, LargeWrite) {
+    constexpr uint32_t kDataSize = 1000 * 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    nxt::Buffer buffer = device.CreateBufferBuilder()
+        .SetSize(static_cast<uint32_t>(kDataSize * sizeof(uint32_t)))
+        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
+        .GetResult();
+
+    void* mappedData = MapWriteAsyncAndWait(buffer, 0, kDataSize * sizeof(uint32_t));
+    memcpy(mappedData, myData.data(), kDataSize * sizeof(uint32_t));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
+}
+
+NXT_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+
 class BufferSetSubDataTests : public NXTTest {
 };
 
