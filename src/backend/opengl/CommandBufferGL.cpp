@@ -311,9 +311,12 @@ namespace backend { namespace opengl {
                         attachmentCount = location + 1;
 
                         // TODO(kainino@chromium.org): the color clears (later in
-                        // this function) may be undefined for other texture formats.
-                        ASSERT(textureView->GetTexture()->GetFormat() ==
-                               nxt::TextureFormat::R8G8B8A8Unorm);
+                        // this function) may be undefined for non-normalized integer formats.
+                        nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
+                        ASSERT(format == nxt::TextureFormat::R8G8B8A8Unorm ||
+                               format == nxt::TextureFormat::R8G8Unorm ||
+                               format == nxt::TextureFormat::R8Unorm ||
+                               format == nxt::TextureFormat::B8G8R8A8Unorm);
                     }
                     glDrawBuffers(attachmentCount, drawBuffers.data());
 
