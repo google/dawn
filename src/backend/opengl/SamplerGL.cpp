@@ -54,6 +54,20 @@ namespace backend { namespace opengl {
                     UNREACHABLE();
             }
         }
+
+        GLenum WrapMode(nxt::AddressMode mode) {
+            switch (mode) {
+                case nxt::AddressMode::Repeat:
+                    return GL_REPEAT;
+                case nxt::AddressMode::MirroredRepeat:
+                    return GL_MIRRORED_REPEAT;
+                case nxt::AddressMode::ClampToEdge:
+                    return GL_CLAMP_TO_EDGE;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
     }  // namespace
 
     Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
@@ -61,6 +75,9 @@ namespace backend { namespace opengl {
         glSamplerParameteri(mHandle, GL_TEXTURE_MAG_FILTER, MagFilterMode(builder->GetMagFilter()));
         glSamplerParameteri(mHandle, GL_TEXTURE_MIN_FILTER,
                             MinFilterMode(builder->GetMinFilter(), builder->GetMipMapFilter()));
+        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_R, WrapMode(builder->GetAddressModeW()));
+        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_S, WrapMode(builder->GetAddressModeU()));
+        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_T, WrapMode(builder->GetAddressModeV()));
     }
 
     GLuint Sampler::GetHandle() const {

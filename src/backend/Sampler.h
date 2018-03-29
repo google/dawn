@@ -36,10 +36,18 @@ namespace backend {
         nxt::FilterMode GetMinFilter() const;
         nxt::FilterMode GetMipMapFilter() const;
 
+        nxt::AddressMode GetAddressModeU() const;
+        nxt::AddressMode GetAddressModeV() const;
+        nxt::AddressMode GetAddressModeW() const;
+
         // NXT API
         void SetFilterMode(nxt::FilterMode magFilter,
                            nxt::FilterMode minFilter,
                            nxt::FilterMode mipMapFilter);
+
+        void SetAddressMode(nxt::AddressMode addressModeU,
+                            nxt::AddressMode addressModeV,
+                            nxt::AddressMode addressModeW);
 
       private:
         friend class SamplerBase;
@@ -51,6 +59,10 @@ namespace backend {
         nxt::FilterMode mMagFilter = nxt::FilterMode::Nearest;
         nxt::FilterMode mMinFilter = nxt::FilterMode::Nearest;
         nxt::FilterMode mMipMapFilter = nxt::FilterMode::Nearest;
+
+        nxt::AddressMode mAddressModeU = nxt::AddressMode::ClampToEdge;
+        nxt::AddressMode mAddressModeV = nxt::AddressMode::ClampToEdge;
+        nxt::AddressMode mAddressModeW = nxt::AddressMode::ClampToEdge;
     };
 
 }  // namespace backend

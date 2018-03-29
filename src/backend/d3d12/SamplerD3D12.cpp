@@ -18,6 +18,21 @@
 
 namespace backend { namespace d3d12 {
 
+    namespace {
+        D3D12_TEXTURE_ADDRESS_MODE AddressMode(nxt::AddressMode mode) {
+            switch (mode) {
+                case nxt::AddressMode::Repeat:
+                    return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+                case nxt::AddressMode::MirroredRepeat:
+                    return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+                case nxt::AddressMode::ClampToEdge:
+                    return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+                default:
+                    UNREACHABLE();
+            }
+        }
+    }  // namespace
+
     Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dn770367(v=vs.85).aspx
         // hex value, decimal value, min linear, mag linear, mip linear
@@ -61,9 +76,9 @@ namespace backend { namespace d3d12 {
         }
 
         mSamplerDesc.Filter = static_cast<D3D12_FILTER>(mode);
-        mSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-        mSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-        mSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        mSamplerDesc.AddressU = AddressMode(builder->GetAddressModeU());
+        mSamplerDesc.AddressV = AddressMode(builder->GetAddressModeV());
+        mSamplerDesc.AddressW = AddressMode(builder->GetAddressModeW());
         mSamplerDesc.MipLODBias = 0.f;
         mSamplerDesc.MaxAnisotropy = 1;
         mSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;

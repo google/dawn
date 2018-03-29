@@ -714,6 +714,14 @@
             {"value": 1, "name":"linear"}
         ]
     },
+    "address mode": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name":"repeat"},
+            {"value": 1, "name":"mirrored repeat"},
+            {"value": 2, "name":"clamp to edge"}
+        ]
+    },
     "float": {
         "category": "native"
     },
@@ -1017,6 +1025,14 @@
                     {"name": "mag filter", "type": "filter mode"},
                     {"name": "min filter", "type": "filter mode"},
                     {"name": "mipmap filter", "type": "filter mode"}
+                ]
+            },
+            {
+                "name": "set address mode",
+                "args": [
+                    {"name": "address mode u", "type": "address mode"},
+                    {"name": "address mode v", "type": "address mode"},
+                    {"name": "address mode w", "type": "address mode"}
                 ]
             }
         ]

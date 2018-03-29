@@ -27,6 +27,7 @@ namespace backend {
 
     enum SamplerSetProperties {
         SAMPLER_PROPERTY_FILTER = 0x1,
+        SAMPLER_PROPERTY_ADDRESS = 0x2,
     };
     SamplerBuilder::SamplerBuilder(DeviceBase* device) : Builder(device) {
     }
@@ -43,6 +44,18 @@ namespace backend {
         return mMipMapFilter;
     }
 
+    nxt::AddressMode SamplerBuilder::GetAddressModeU() const {
+        return mAddressModeU;
+    }
+
+    nxt::AddressMode SamplerBuilder::GetAddressModeV() const {
+        return mAddressModeV;
+    }
+
+    nxt::AddressMode SamplerBuilder::GetAddressModeW() const {
+        return mAddressModeW;
+    }
+
     void SamplerBuilder::SetFilterMode(nxt::FilterMode magFilter,
                                        nxt::FilterMode minFilter,
                                        nxt::FilterMode mipMapFilter) {
@@ -55,6 +68,20 @@ namespace backend {
         mMinFilter = minFilter;
         mMipMapFilter = mipMapFilter;
         mPropertiesSet |= SAMPLER_PROPERTY_FILTER;
+    }
+
+    void SamplerBuilder::SetAddressMode(nxt::AddressMode addressModeU,
+                                        nxt::AddressMode addressModeV,
+                                        nxt::AddressMode addressModeW) {
+        if ((mPropertiesSet & SAMPLER_PROPERTY_ADDRESS) != 0) {
+            HandleError("Sampler address property set multiple times");
+            return;
+        }
+
+        mAddressModeU = addressModeU;
+        mAddressModeV = addressModeV;
+        mAddressModeW = addressModeW;
+        mPropertiesSet |= SAMPLER_PROPERTY_ADDRESS;
     }
 
     SamplerBase* SamplerBuilder::GetResultImpl() {

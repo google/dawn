@@ -36,6 +36,17 @@ namespace backend { namespace metal {
                     return MTLSamplerMipFilterLinear;
             }
         }
+
+        MTLSamplerAddressMode AddressMode(nxt::AddressMode mode) {
+            switch (mode) {
+                case nxt::AddressMode::Repeat:
+                    return MTLSamplerAddressModeRepeat;
+                case nxt::AddressMode::MirroredRepeat:
+                    return MTLSamplerAddressModeMirrorRepeat;
+                case nxt::AddressMode::ClampToEdge:
+                    return MTLSamplerAddressModeClampToEdge;
+            }
+        }
     }
 
     Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
@@ -45,7 +56,10 @@ namespace backend { namespace metal {
         desc.magFilter = FilterModeToMinMagFilter(builder->GetMagFilter());
         desc.mipFilter = FilterModeToMipFilter(builder->GetMipMapFilter());
 
-        // TODO(kainino@chromium.org): wrap modes
+        desc.sAddressMode = AddressMode(builder->GetAddressModeU());
+        desc.tAddressMode = AddressMode(builder->GetAddressModeV());
+        desc.rAddressMode = AddressMode(builder->GetAddressModeW());
+
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
         mMtlSamplerState = [mtlDevice newSamplerStateWithDescriptor:desc];
     }
