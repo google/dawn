@@ -9,12 +9,18 @@ sudo: false
 language:
  - cpp
 
+python:
+ - "2.7"
+
 env:
  - BUILD_TYPE=Debug
  - BUILD_TYPE=Release
 
 compiler:
  - clang
+
+cache:
+ - pip
 
 addons:
  # Everything under apt is only used on linux
@@ -47,7 +53,7 @@ before_install:
 install:
  # Install dependencies required on OSX
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install ninja; fi
- - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo python -m pip install jinja2; fi
+ - if [ "$TRAVIS_OS_NAME" == "osx" ]; then pip install --user jinja2; fi
 
 script:
  # Use the more recent compilers we just installed
