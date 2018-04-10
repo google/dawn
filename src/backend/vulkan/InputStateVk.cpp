@@ -41,6 +41,10 @@ namespace backend { namespace vulkan {
                     return VK_FORMAT_R32G32_SFLOAT;
                 case nxt::VertexFormat::FloatR32:
                     return VK_FORMAT_R32_SFLOAT;
+                case nxt::VertexFormat::UshortR16G16B16A16:
+                    return VK_FORMAT_R16G16B16A16_UINT;
+                case nxt::VertexFormat::UshortR16G16:
+                    return VK_FORMAT_R16G16_UINT;
                 case nxt::VertexFormat::UnormR8G8B8A8:
                     return VK_FORMAT_R8G8B8A8_UNORM;
                 case nxt::VertexFormat::UnormR8G8:

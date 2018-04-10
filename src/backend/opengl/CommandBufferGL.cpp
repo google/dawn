@@ -49,6 +49,7 @@ namespace backend { namespace opengl {
                 case nxt::VertexFormat::FloatR32G32:
                 case nxt::VertexFormat::FloatR32:
                     return GL_FLOAT;
+                case nxt::VertexFormat::UshortR16G16B16A16:
                 case nxt::VertexFormat::UshortR16G16:
                     return GL_UNSIGNED_SHORT;
                 case nxt::VertexFormat::UnormR8G8B8A8:
@@ -61,17 +62,11 @@ namespace backend { namespace opengl {
 
         GLboolean VertexFormatIsNormalized(nxt::VertexFormat format) {
             switch (format) {
-                case nxt::VertexFormat::FloatR32G32B32A32:
-                case nxt::VertexFormat::FloatR32G32B32:
-                case nxt::VertexFormat::FloatR32G32:
-                case nxt::VertexFormat::FloatR32:
-                case nxt::VertexFormat::UshortR16G16:
-                    return GL_FALSE;
                 case nxt::VertexFormat::UnormR8G8B8A8:
                 case nxt::VertexFormat::UnormR8G8:
                     return GL_TRUE;
                 default:
-                    UNREACHABLE();
+                    return GL_FALSE;
             }
         }
 
