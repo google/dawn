@@ -30,6 +30,14 @@ namespace backend { namespace metal {
                     return MTLVertexFormatFloat2;
                 case nxt::VertexFormat::FloatR32:
                     return MTLVertexFormatFloat;
+                case nxt::VertexFormat::IntR32G32B32A32:
+                    return MTLVertexFormatInt4;
+                case nxt::VertexFormat::IntR32G32B32:
+                    return MTLVertexFormatInt3;
+                case nxt::VertexFormat::IntR32G32:
+                    return MTLVertexFormatInt2;
+                case nxt::VertexFormat::IntR32:
+                    return MTLVertexFormatInt;
                 case nxt::VertexFormat::UshortR16G16B16A16:
                     return MTLVertexFormatUShort4;
                 case nxt::VertexFormat::UshortR16G16:

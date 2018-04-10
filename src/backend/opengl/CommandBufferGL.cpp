@@ -49,6 +49,11 @@ namespace backend { namespace opengl {
                 case nxt::VertexFormat::FloatR32G32:
                 case nxt::VertexFormat::FloatR32:
                     return GL_FLOAT;
+                case nxt::VertexFormat::IntR32G32B32A32:
+                case nxt::VertexFormat::IntR32G32B32:
+                case nxt::VertexFormat::IntR32G32:
+                case nxt::VertexFormat::IntR32:
+                    return GL_INT;
                 case nxt::VertexFormat::UshortR16G16B16A16:
                 case nxt::VertexFormat::UshortR16G16:
                     return GL_UNSIGNED_SHORT;

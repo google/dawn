@@ -1239,14 +1239,18 @@
     "vertex format": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "float r32 g32 b32 a32"},
-            {"value": 1, "name": "float r32 g32 b32"},
-            {"value": 2, "name": "float r32 g32"},
-            {"value": 3, "name": "float r32"},
-            {"value": 4, "name": "ushort r16 g16 b16 a16"},
-            {"value": 5, "name": "ushort r16 g16"},
-            {"value": 6, "name": "unorm r8 g8 b8 a8"},
-            {"value": 7, "name": "unorm r8 g8"}
+            {"value": 0,  "name": "float r32 g32 b32 a32"},
+            {"value": 1,  "name": "float r32 g32 b32"},
+            {"value": 2,  "name": "float r32 g32"},
+            {"value": 3,  "name": "float r32"},
+            {"value": 4,  "name": "int r32 g32 b32 a32"},
+            {"value": 5,  "name": "int r32 g32 b32"},
+            {"value": 6,  "name": "int r32 g32"},
+            {"value": 7,  "name": "int r32"},
+            {"value": 8,  "name": "ushort r16 g16 b16 a16"},
+            {"value": 9,  "name": "ushort r16 g16"},
+            {"value": 10, "name": "unorm r8 g8 b8 a8"},
+            {"value": 11, "name": "unorm r8 g8"}
         ]
     },
     "void": {

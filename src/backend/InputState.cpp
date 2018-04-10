@@ -35,16 +35,20 @@ namespace backend {
     uint32_t VertexFormatNumComponents(nxt::VertexFormat format) {
         switch (format) {
             case nxt::VertexFormat::FloatR32G32B32A32:
+            case nxt::VertexFormat::IntR32G32B32A32:
             case nxt::VertexFormat::UshortR16G16B16A16:
             case nxt::VertexFormat::UnormR8G8B8A8:
                 return 4;
             case nxt::VertexFormat::FloatR32G32B32:
+            case nxt::VertexFormat::IntR32G32B32:
                 return 3;
             case nxt::VertexFormat::FloatR32G32:
+            case nxt::VertexFormat::IntR32G32:
             case nxt::VertexFormat::UshortR16G16:
             case nxt::VertexFormat::UnormR8G8:
                 return 2;
             case nxt::VertexFormat::FloatR32:
+            case nxt::VertexFormat::IntR32:
                 return 1;
             default:
                 UNREACHABLE();
@@ -58,6 +62,11 @@ namespace backend {
             case nxt::VertexFormat::FloatR32G32:
             case nxt::VertexFormat::FloatR32:
                 return sizeof(float);
+            case nxt::VertexFormat::IntR32G32B32A32:
+            case nxt::VertexFormat::IntR32G32B32:
+            case nxt::VertexFormat::IntR32G32:
+            case nxt::VertexFormat::IntR32:
+                return sizeof(int32_t);
             case nxt::VertexFormat::UshortR16G16B16A16:
             case nxt::VertexFormat::UshortR16G16:
                 return sizeof(uint16_t);
