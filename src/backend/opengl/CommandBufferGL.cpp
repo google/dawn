@@ -129,8 +129,8 @@ namespace backend { namespace opengl {
                                 break;
                             case PushConstantType::Float:
                                 float value;
-                                // Use a memcpy to avoid strict-aliasing warnings, even if it is still
-                                // technically undefined behavior.
+                                // Use a memcpy to avoid strict-aliasing warnings, even if it is
+                                // still technically undefined behavior.
                                 memcpy(&value, &mValues[stage][constant], sizeof(value));
                                 glUniform1f(location, value);
                                 break;
