@@ -82,6 +82,7 @@ namespace backend {
         // modified.
         auto iter = mCaches->bindGroupLayouts.find(const_cast<BindGroupLayoutBase*>(blueprint));
         if (iter != mCaches->bindGroupLayouts.end()) {
+            (*iter)->Reference();
             return *iter;
         }
 

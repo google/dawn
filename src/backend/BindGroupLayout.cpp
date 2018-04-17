@@ -109,7 +109,6 @@ namespace backend {
         BindGroupLayoutBase blueprint(this, true);
 
         auto* result = mDevice->GetOrCreateBindGroupLayout(&blueprint, this);
-        result->Reference();
         return result;
     }
 
