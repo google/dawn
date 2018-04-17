@@ -26,13 +26,16 @@ namespace backend {
 
     void RefCounted::ReferenceInternal() {
         ASSERT(mInternalRefs != 0);
+
         // TODO(cwallez@chromium.org): what to do on overflow?
         mInternalRefs++;
     }
 
     void RefCounted::ReleaseInternal() {
         ASSERT(mInternalRefs != 0);
+
         mInternalRefs--;
+
         if (mInternalRefs == 0) {
             ASSERT(mExternalRefs == 0);
             // TODO(cwallez@chromium.org): would this work with custom allocators?
@@ -49,14 +52,23 @@ namespace backend {
     }
 
     void RefCounted::Reference() {
-        ASSERT(mExternalRefs != 0);
+        ASSERT(mInternalRefs != 0);
+
+        // mExternalRefs != 0 counts as one internal ref.
+        if (mExternalRefs == 0) {
+            ReferenceInternal();
+        }
+
         // TODO(cwallez@chromium.org): what to do on overflow?
         mExternalRefs++;
     }
 
     void RefCounted::Release() {
+        ASSERT(mInternalRefs != 0);
         ASSERT(mExternalRefs != 0);
+
         mExternalRefs--;
+        // mExternalRefs != 0 counts as one internal ref.
         if (mExternalRefs == 0) {
             ReleaseInternal();
         }

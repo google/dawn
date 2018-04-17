@@ -60,6 +60,24 @@ TEST(RefCounted, InternalRefKeepsAlive) {
     ASSERT_TRUE(deleted);
 }
 
+// Test that when adding an external ref from 0, an internal ref is added
+TEST(RefCounted, AddExternalRefFromZero) {
+    bool deleted = false;
+    auto test = new RCTest(&deleted);
+
+    test->ReferenceInternal();
+    test->Release();
+    ASSERT_FALSE(deleted);
+
+    // Reference adds an internal ref and release removes one
+    test->Reference();
+    test->Release();
+    ASSERT_FALSE(deleted);
+
+    test->ReleaseInternal();
+    ASSERT_TRUE(deleted);
+}
+
 // Test Ref remove internal reference when going out of scope
 TEST(Ref, EndOfScopeRemovesInternalRef) {
     bool deleted = false;

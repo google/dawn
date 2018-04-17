@@ -60,6 +60,8 @@ namespace backend {
         for (size_t group = 0; group < kMaxBindGroups; ++group) {
             if (!mBindGroupLayouts[group]) {
                 mBindGroupLayouts[group] = mDevice->CreateBindGroupLayoutBuilder()->GetResult();
+                // Remove the external ref objects are created with
+                mBindGroupLayouts[group]->Release();
             }
         }
 
