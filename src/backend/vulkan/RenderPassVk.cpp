@@ -49,6 +49,9 @@ namespace backend { namespace vulkan {
         for (uint32_t i : IterateBitSet(subpass.colorAttachmentsSet)) {
             attachmentRefs[i].attachment = subpass.colorAttachments[i];
             attachmentRefs[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+            // TODO(cwallez@chromium.org): need validation rule that attachments are packed
+            ASSERT(i == 0 || subpass.colorAttachmentsSet[i - 1]);
         }
         if (subpass.depthStencilAttachment) {
             attachmentRefs[kMaxColorAttachments].attachment = subpass.depthStencilAttachment;
@@ -62,7 +65,8 @@ namespace backend { namespace vulkan {
         subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpassDesc.inputAttachmentCount = 0;
         subpassDesc.pInputAttachments = nullptr;
-        subpassDesc.colorAttachmentCount = kMaxColorAttachments;
+        subpassDesc.colorAttachmentCount =
+            static_cast<uint32_t>(subpass.colorAttachmentsSet.count());
         subpassDesc.pColorAttachments = attachmentRefs.data();
         subpassDesc.pResolveAttachments = nullptr;
         subpassDesc.pDepthStencilAttachment = &attachmentRefs[kMaxColorAttachments];
