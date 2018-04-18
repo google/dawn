@@ -168,4 +168,4 @@ TEST_P(SamplerTest, AddressMode) {
     }
 }
 
-NXT_INSTANTIATE_TEST(SamplerTest, D3D12Backend, MetalBackend, OpenGLBackend)
+NXT_INSTANTIATE_TEST(SamplerTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

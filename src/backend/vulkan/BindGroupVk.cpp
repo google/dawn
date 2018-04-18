@@ -18,6 +18,7 @@
 #include "BufferVk.h"
 #include "FencedDeleter.h"
 #include "SamplerVk.h"
+#include "TextureVk.h"
 #include "VulkanBackend.h"
 
 namespace backend { namespace vulkan {
@@ -95,7 +96,17 @@ namespace backend { namespace vulkan {
                     write.pImageInfo = &writeImageInfo[numWrites];
                 } break;
 
-                case nxt::BindingType::SampledTexture:
+                case nxt::BindingType::SampledTexture: {
+                    TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
+
+                    writeImageInfo[numWrites].imageView = view->GetHandle();
+                    // TODO(cwallez@chromium.org): This isn't true in general: if the image can has
+                    // two read-only usages one of which is Sampled. Works for now though :)
+                    writeImageInfo[numWrites].imageLayout =
+                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+                    write.pImageInfo = &writeImageInfo[numWrites];
+                } break;
                 default:
                     UNREACHABLE();
             }
