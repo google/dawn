@@ -67,6 +67,54 @@ namespace backend { namespace vulkan {
             return region;
         }
 
+        class DescriptorSetTracker {
+          public:
+            void OnSetBindGroup(uint32_t index, VkDescriptorSet set) {
+                mDirtySets.set(index);
+                mSets[index] = set;
+            }
+
+            void OnBeginPass() {
+                // All bindgroups will have to be bound in the pass before any draw / dispatch.
+                // Resetting the layout and ensures nothing gets propagated from an earlier pass
+                // to this pass.
+                mCurrentLayout = nullptr;
+            }
+
+            void OnPipelineLayoutChange(PipelineLayout* layout) {
+                if (layout == mCurrentLayout) {
+                    return;
+                }
+
+                if (mCurrentLayout == nullptr) {
+                    // We're at the beginning of a pass so all bind groups will be set before any
+                    // draw / dispatch. Still clear the dirty sets to avoid leftover dirty sets
+                    // from previous passes.
+                    mDirtySets.reset();
+                } else {
+                    // Bindgroups that are not inherited will be set again before any draw or
+                    // dispatch. Resetting the bits also makes sure we don't have leftover dirty
+                    // bindgroups that don't exist in the pipeline layout.
+                    mDirtySets &= ~layout->InheritedGroupsMask(mCurrentLayout);
+                }
+                mCurrentLayout = layout;
+            }
+
+            void Flush(Device* device, VkCommandBuffer commands, VkPipelineBindPoint bindPoint) {
+                for (uint32_t dirtyIndex : IterateBitSet(mDirtySets)) {
+                    device->fn.CmdBindDescriptorSets(commands, bindPoint,
+                                                     mCurrentLayout->GetHandle(), dirtyIndex, 1,
+                                                     &mSets[dirtyIndex], 0, nullptr);
+                }
+                mDirtySets.reset();
+            }
+
+          private:
+            PipelineLayout* mCurrentLayout = nullptr;
+            std::array<VkDescriptorSet, kMaxBindGroups> mSets;
+            std::bitset<kMaxBindGroups> mDirtySets;
+        };
+
     }  // anonymous namespace
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
@@ -80,6 +128,7 @@ namespace backend { namespace vulkan {
     void CommandBuffer::RecordCommands(VkCommandBuffer commands) {
         Device* device = ToBackend(GetDevice());
 
+        DescriptorSetTracker descriptorSets;
         RenderPipeline* lastRenderPipeline = nullptr;
 
         Command type;
@@ -194,6 +243,8 @@ namespace backend { namespace vulkan {
                     scissorRect.extent.width = framebuffer->GetWidth();
                     scissorRect.extent.height = framebuffer->GetHeight();
                     device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
+
+                    descriptorSets.OnBeginPass();
                 } break;
 
                 case Command::BeginRenderSubpass: {
@@ -214,6 +265,7 @@ namespace backend { namespace vulkan {
                 case Command::DrawArrays: {
                     DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
 
+                    descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_GRAPHICS);
                     device->fn.CmdDraw(commands, draw->vertexCount, draw->instanceCount,
                                        draw->firstVertex, draw->firstInstance);
                 } break;
@@ -221,6 +273,7 @@ namespace backend { namespace vulkan {
                 case Command::DrawElements: {
                     DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
 
+                    descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_GRAPHICS);
                     uint32_t vertexOffset = 0;
                     device->fn.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
                                               draw->firstIndex, vertexOffset, draw->firstInstance);
@@ -240,13 +293,7 @@ namespace backend { namespace vulkan {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                     VkDescriptorSet set = ToBackend(cmd->group.Get())->GetHandle();
 
-                    // TODO(cwallez@chromium.org): Add some dirty bits for this to allow setting
-                    // before there is a pipeline layout
-                    // TODO(cwallez@chromium.org): fix for compute passes
-                    VkPipelineLayout layout =
-                        ToBackend(lastRenderPipeline->GetLayout())->GetHandle();
-                    device->fn.CmdBindDescriptorSets(commands, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                                     layout, cmd->index, 1, &set, 0, nullptr);
+                    descriptorSets.OnSetBindGroup(cmd->index, set);
                 } break;
 
                 case Command::SetBlendColor: {
@@ -279,6 +326,8 @@ namespace backend { namespace vulkan {
                     device->fn.CmdBindPipeline(commands, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                                pipeline->GetHandle());
                     lastRenderPipeline = pipeline;
+
+                    descriptorSets.OnPipelineLayoutChange(ToBackend(pipeline->GetLayout()));
                 } break;
 
                 case Command::SetStencilReference: {

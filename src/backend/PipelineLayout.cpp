@@ -37,7 +37,7 @@ namespace backend {
 
     std::bitset<kMaxBindGroups> PipelineLayoutBase::InheritedGroupsMask(
         const PipelineLayoutBase* other) const {
-        return {GroupsInheritUpTo(other) - 1};
+        return {(1 << GroupsInheritUpTo(other)) - 1u};
     }
 
     uint32_t PipelineLayoutBase::GroupsInheritUpTo(const PipelineLayoutBase* other) const {
