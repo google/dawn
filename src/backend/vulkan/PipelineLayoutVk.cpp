@@ -18,6 +18,8 @@
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/VulkanBackend.h"
 
+#include "common/BitSetIterator.h"
+
 namespace backend { namespace vulkan {
 
     PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder)

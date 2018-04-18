@@ -14,12 +14,14 @@
 
 #include "backend/vulkan/BindGroupVk.h"
 
-#include "BindGroupLayoutVk.h"
-#include "BufferVk.h"
-#include "FencedDeleter.h"
-#include "SamplerVk.h"
-#include "TextureVk.h"
-#include "VulkanBackend.h"
+#include "backend/vulkan/BindGroupLayoutVk.h"
+#include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/FencedDeleter.h"
+#include "backend/vulkan/SamplerVk.h"
+#include "backend/vulkan/TextureVk.h"
+#include "backend/vulkan/VulkanBackend.h"
+
+#include "common/BitSetIterator.h"
 
 namespace backend { namespace vulkan {
 

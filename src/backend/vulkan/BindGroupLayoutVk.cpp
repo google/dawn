@@ -15,6 +15,7 @@
 #include "backend/vulkan/BindGroupLayoutVk.h"
 
 #include "backend/vulkan/VulkanBackend.h"
+#include "common/BitSetIterator.h"
 
 namespace backend { namespace vulkan {
 

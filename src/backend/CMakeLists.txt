@@ -302,6 +302,8 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/BufferVk.h
         ${VULKAN_DIR}/CommandBufferVk.cpp
         ${VULKAN_DIR}/CommandBufferVk.h
+        ${VULKAN_DIR}/ComputePipelineVk.cpp
+        ${VULKAN_DIR}/ComputePipelineVk.h
         ${VULKAN_DIR}/DepthStencilStateVk.cpp
         ${VULKAN_DIR}/DepthStencilStateVk.h
         ${VULKAN_DIR}/FencedDeleter.cpp

@@ -17,6 +17,7 @@
 #include "backend/vulkan/BlendStateVk.h"
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/CommandBufferVk.h"
+#include "backend/vulkan/ComputePipelineVk.h"
 #include "backend/vulkan/DepthStencilStateVk.h"
 #include "backend/vulkan/FramebufferVk.h"
 #include "backend/vulkan/InputStateVk.h"

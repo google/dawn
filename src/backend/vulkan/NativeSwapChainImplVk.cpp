@@ -18,6 +18,8 @@
 #include "backend/vulkan/TextureVk.h"
 #include "backend/vulkan/VulkanBackend.h"
 
+#include <limits>
+
 namespace backend { namespace vulkan {
 
     namespace {
