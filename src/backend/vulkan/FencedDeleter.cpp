@@ -31,6 +31,7 @@ namespace backend { namespace vulkan {
         ASSERT(mPipelinesToDelete.Empty());
         ASSERT(mPipelineLayoutsToDelete.Empty());
         ASSERT(mRenderPassesToDelete.Empty());
+        ASSERT(mSamplersToDelete.Empty());
         ASSERT(mSemaphoresToDelete.Empty());
         ASSERT(mShaderModulesToDelete.Empty());
         ASSERT(mSurfacesToDelete.Empty());
@@ -71,6 +72,10 @@ namespace backend { namespace vulkan {
 
     void FencedDeleter::DeleteWhenUnused(VkRenderPass renderPass) {
         mRenderPassesToDelete.Enqueue(renderPass, mDevice->GetSerial());
+    }
+
+    void FencedDeleter::DeleteWhenUnused(VkSampler sampler) {
+        mSamplersToDelete.Enqueue(sampler, mDevice->GetSerial());
     }
 
     void FencedDeleter::DeleteWhenUnused(VkSemaphore semaphore) {
@@ -158,6 +163,11 @@ namespace backend { namespace vulkan {
             mDevice->fn.DestroyDescriptorPool(vkDevice, pool, nullptr);
         }
         mDescriptorPoolsToDelete.ClearUpTo(completedSerial);
+
+        for (VkSampler sampler : mSamplersToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroySampler(vkDevice, sampler, nullptr);
+        }
+        mSamplersToDelete.ClearUpTo(completedSerial);
     }
 
 }}  // namespace backend::vulkan

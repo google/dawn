@@ -47,7 +47,7 @@ namespace backend { namespace vulkan {
     class Queue;
     class RenderPass;
     class RenderPipeline;
-    using Sampler = SamplerBase;
+    class Sampler;
     class ShaderModule;
     class SwapChain;
     class Texture;

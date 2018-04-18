@@ -17,6 +17,7 @@
 #include "BindGroupLayoutVk.h"
 #include "BufferVk.h"
 #include "FencedDeleter.h"
+#include "SamplerVk.h"
 #include "VulkanBackend.h"
 
 namespace backend { namespace vulkan {
@@ -62,6 +63,7 @@ namespace backend { namespace vulkan {
         uint32_t numWrites = 0;
         std::array<VkWriteDescriptorSet, kMaxBindingsPerGroup> writes;
         std::array<VkDescriptorBufferInfo, kMaxBindingsPerGroup> writeBufferInfo;
+        std::array<VkDescriptorImageInfo, kMaxBindingsPerGroup> writeImageInfo;
 
         const auto& layoutInfo = GetLayout()->GetBindingInfo();
         for (uint32_t bindingIndex : IterateBitSet(layoutInfo.mask)) {
@@ -87,7 +89,12 @@ namespace backend { namespace vulkan {
                     write.pBufferInfo = &writeBufferInfo[numWrites];
                 } break;
 
-                case nxt::BindingType::Sampler:
+                case nxt::BindingType::Sampler: {
+                    Sampler* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
+                    writeImageInfo[numWrites].sampler = sampler->GetHandle();
+                    write.pImageInfo = &writeImageInfo[numWrites];
+                } break;
+
                 case nxt::BindingType::SampledTexture:
                 default:
                     UNREACHABLE();

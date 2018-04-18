@@ -320,6 +320,8 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/RenderPassVk.h
         ${VULKAN_DIR}/RenderPipelineVk.cpp
         ${VULKAN_DIR}/RenderPipelineVk.h
+        ${VULKAN_DIR}/SamplerVk.cpp
+        ${VULKAN_DIR}/SamplerVk.h
         ${VULKAN_DIR}/ShaderModuleVk.cpp
         ${VULKAN_DIR}/ShaderModuleVk.h
         ${VULKAN_DIR}/SwapChainVk.cpp
