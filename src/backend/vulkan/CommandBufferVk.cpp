@@ -17,6 +17,7 @@
 #include "backend/Commands.h"
 #include "backend/vulkan/BindGroupVk.h"
 #include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/ComputePipelineVk.h"
 #include "backend/vulkan/FramebufferVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/RenderPassVk.h"
@@ -289,6 +290,21 @@ namespace backend { namespace vulkan {
                     // Do nothing because the single subpass is ended in vkEndRenderPass
                 } break;
 
+                case Command::BeginComputePass: {
+                    mCommands.NextCommand<BeginComputePassCmd>();
+                    descriptorSets.OnBeginPass();
+                } break;
+
+                case Command::EndComputePass: {
+                    mCommands.NextCommand<EndComputePassCmd>();
+                } break;
+
+                case Command::Dispatch: {
+                    DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
+                    descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_COMPUTE);
+                    device->fn.CmdDispatch(commands, dispatch->x, dispatch->y, dispatch->z);
+                } break;
+
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                     VkDescriptorSet set = ToBackend(cmd->group.Get())->GetHandle();
@@ -317,6 +333,15 @@ namespace backend { namespace vulkan {
                     VkIndexType indexType = VulkanIndexType(lastRenderPipeline->GetIndexFormat());
                     device->fn.CmdBindIndexBuffer(
                         commands, indexBuffer, static_cast<VkDeviceSize>(cmd->offset), indexType);
+                } break;
+
+                case Command::SetComputePipeline: {
+                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
+                    ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
+
+                    device->fn.CmdBindPipeline(commands, VK_PIPELINE_BIND_POINT_COMPUTE,
+                                               pipeline->GetHandle());
+                    descriptorSets.OnPipelineLayoutChange(ToBackend(pipeline->GetLayout()));
                 } break;
 
                 case Command::SetRenderPipeline: {
