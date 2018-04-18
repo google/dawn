@@ -137,17 +137,17 @@ void frame() {
     GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+        .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Storage)
         .BeginComputePass()
             .SetComputePipeline(computePipeline)
-            .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Storage)
             .SetBindGroup(0, computeBindGroup)
             .Dispatch(1, 1, 1)
         .EndComputePass()
 
+        .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Uniform)
         .BeginRenderPass(renderpass, framebuffer)
         .BeginRenderSubpass()
             .SetRenderPipeline(renderPipeline)
-            .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, renderBindGroup)
             .DrawArrays(3, 1, 0, 0)
         .EndRenderSubpass()
