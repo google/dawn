@@ -306,4 +306,4 @@ TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
 }
 
-NXT_INSTANTIATE_TEST(IndexFormatTest, MetalBackend, OpenGLBackend, VulkanBackend)
+NXT_INSTANTIATE_TEST(IndexFormatTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
