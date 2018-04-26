@@ -34,6 +34,9 @@ namespace backend { namespace metal {
         struct MetalFunctionData {
             id<MTLFunction> function;
             MTLSize localWorkgroupSize;
+            ~MetalFunctionData() {
+                [function release];
+            }
         };
         MetalFunctionData GetFunction(const char* functionName, const PipelineLayout* layout) const;
 

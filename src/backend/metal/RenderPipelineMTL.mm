@@ -76,8 +76,9 @@ namespace backend { namespace metal {
             const auto& module = ToBackend(builder->GetStageInfo(stage).module);
 
             const auto& entryPoint = builder->GetStageInfo(stage).entryPoint;
-            id<MTLFunction> function =
-                module->GetFunction(entryPoint.c_str(), ToBackend(GetLayout())).function;
+            ShaderModule::MetalFunctionData data =
+                module->GetFunction(entryPoint.c_str(), ToBackend(GetLayout()));
+            id<MTLFunction> function = data.function;
 
             switch (stage) {
                 case nxt::ShaderStage::Vertex:
