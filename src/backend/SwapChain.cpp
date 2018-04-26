@@ -68,6 +68,7 @@ namespace backend {
 
         auto* texture = GetNextTextureImpl(builder);
         mLastNextTexture = texture;
+        builder->Release();
         return texture;
     }
 

@@ -59,9 +59,11 @@ namespace backend {
         // the device once we have a cache of BGL
         for (size_t group = 0; group < kMaxBindGroups; ++group) {
             if (!mBindGroupLayouts[group]) {
-                mBindGroupLayouts[group] = mDevice->CreateBindGroupLayoutBuilder()->GetResult();
+                auto builder = mDevice->CreateBindGroupLayoutBuilder();
+                mBindGroupLayouts[group] = builder->GetResult();
                 // Remove the external ref objects are created with
                 mBindGroupLayouts[group]->Release();
+                builder->Release();
             }
         }
 

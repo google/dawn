@@ -88,14 +88,18 @@ namespace backend {
         // TODO(cwallez@chromium.org): the layout should be required, and put the default objects in
         // the device
         if (!mInputState) {
-            mInputState = mDevice->CreateInputStateBuilder()->GetResult();
+            auto builder = mDevice->CreateInputStateBuilder();
+            mInputState = builder->GetResult();
             // Remove the external ref objects are created with
             mInputState->Release();
+            builder->Release();
         }
         if (!mDepthStencilState) {
-            mDepthStencilState = mDevice->CreateDepthStencilStateBuilder()->GetResult();
+            auto builder = mDevice->CreateDepthStencilStateBuilder();
+            mDepthStencilState = builder->GetResult();
             // Remove the external ref objects are created with
             mDepthStencilState->Release();
+            builder->Release();
         }
         if (!mRenderPass) {
             HandleError("Pipeline render pass not set");
