@@ -43,6 +43,7 @@ namespace backend { namespace metal {
                 ASSERT(compute == nil);
                 if (blit != nil) {
                     [blit endEncoding];
+                    [blit release];
                     blit = nil;
                 }
             }
@@ -64,6 +65,7 @@ namespace backend { namespace metal {
             void EndCompute() {
                 ASSERT(compute != nil);
                 [compute endEncoding];
+                [compute release];
                 compute = nil;
             }
 
@@ -71,6 +73,7 @@ namespace backend { namespace metal {
                 ASSERT(currentRenderPass);
                 if (render != nil) {
                     [render endEncoding];
+                    [render release];
                     render = nil;
                 }
 
@@ -141,12 +144,14 @@ namespace backend { namespace metal {
                 }
 
                 render = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+                [descriptor release];
                 // TODO(cwallez@chromium.org): does any state need to be reset?
             }
 
             void EndSubpass() {
                 ASSERT(render != nil);
                 [render endEncoding];
+                [render release];
                 render = nil;
             }
         };
