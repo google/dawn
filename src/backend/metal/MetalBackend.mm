@@ -152,7 +152,6 @@ namespace backend { namespace metal {
     id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {
         if (mPendingCommands == nil) {
             mPendingCommands = [mCommandQueue commandBuffer];
-            [mPendingCommands retain];
         }
         return mPendingCommands;
     }
