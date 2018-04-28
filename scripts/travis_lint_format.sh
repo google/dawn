@@ -24,7 +24,7 @@ files_to_check=$(echo $files_to_check | tr '\n' ' ')
 
 # Run git-clang-format, check if it formatted anything
 format_output=$(scripts/git-clang-format --binary $1 --commit $base_commit --diff --style=file $files_to_check)
-if [ "$format_output" == "clang-format did not modify any files" ] || [ "format_output" == "no modified files to format" ] ; then
+if [ "$format_output" == "clang-format did not modify any files" ] || [ "$format_output" == "no modified files to format" ] ; then
     exit 0
 fi
 
