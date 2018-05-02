@@ -40,8 +40,8 @@ class SamplerTest : public NXTTest {
 protected:
     void SetUp() override {
         NXTTest::SetUp();
-        mFB = utils::CreateBasicFramebuffer(device, kRTSize, kRTSize);
-        mFB.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
+        mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+        mRenderPass.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
 
         mBindGroupLayout = device.CreateBindGroupLayoutBuilder()
             .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::Sampler, 0, 1)
@@ -76,7 +76,7 @@ protected:
         )");
 
         mPipeline = device.CreateRenderPipelineBuilder()
-            .SetSubpass(mFB.renderPass, 0)
+            .SetColorAttachmentFormat(0, mRenderPass.colorFormat)
             .SetLayout(pipelineLayout)
             .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
             .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -123,12 +123,10 @@ protected:
             .GetResult();
 
         nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(mFB.renderPass, mFB.framebuffer)
-            .BeginRenderSubpass()
+            .BeginRenderPass(mRenderPass.renderPassInfo)
             .SetRenderPipeline(mPipeline)
             .SetBindGroup(0, bindGroup)
             .DrawArrays(6, 1, 0, 0)
-            .EndRenderSubpass()
             .EndRenderPass()
             .GetResult();
 
@@ -140,18 +138,18 @@ protected:
         RGBA8 expectedV3(v.mExpected3, v.mExpected3, v.mExpected3, 255);
         RGBA8 black(0, 0, 0, 255);
         RGBA8 white(255, 255, 255, 255);
-        EXPECT_PIXEL_RGBA8_EQ(black, mFB.color, 0, 0);
-        EXPECT_PIXEL_RGBA8_EQ(white, mFB.color, 0, 1);
-        EXPECT_PIXEL_RGBA8_EQ(white, mFB.color, 1, 0);
-        EXPECT_PIXEL_RGBA8_EQ(black, mFB.color, 1, 1);
-        EXPECT_PIXEL_RGBA8_EQ(expectedU2, mFB.color, 2, 0);
-        EXPECT_PIXEL_RGBA8_EQ(expectedU3, mFB.color, 3, 0);
-        EXPECT_PIXEL_RGBA8_EQ(expectedV2, mFB.color, 0, 2);
-        EXPECT_PIXEL_RGBA8_EQ(expectedV3, mFB.color, 0, 3);
+        EXPECT_PIXEL_RGBA8_EQ(black, mRenderPass.color, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(white, mRenderPass.color, 0, 1);
+        EXPECT_PIXEL_RGBA8_EQ(white, mRenderPass.color, 1, 0);
+        EXPECT_PIXEL_RGBA8_EQ(black, mRenderPass.color, 1, 1);
+        EXPECT_PIXEL_RGBA8_EQ(expectedU2, mRenderPass.color, 2, 0);
+        EXPECT_PIXEL_RGBA8_EQ(expectedU3, mRenderPass.color, 3, 0);
+        EXPECT_PIXEL_RGBA8_EQ(expectedV2, mRenderPass.color, 0, 2);
+        EXPECT_PIXEL_RGBA8_EQ(expectedV3, mRenderPass.color, 0, 3);
         // TODO: add tests for W address mode, once NXT supports 3D textures
     }
 
-    utils::BasicFramebuffer mFB;
+    utils::BasicRenderPass mRenderPass;
     nxt::BindGroupLayout mBindGroupLayout;
     nxt::RenderPipeline mPipeline;
     nxt::TextureView mTextureView;

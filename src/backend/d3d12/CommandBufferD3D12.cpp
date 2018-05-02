@@ -21,9 +21,9 @@
 #include "backend/d3d12/ComputePipelineD3D12.h"
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/DescriptorHeapAllocator.h"
-#include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
+#include "backend/d3d12/RenderPassInfoD3D12.h"
 #include "backend/d3d12/RenderPipelineD3D12.h"
 #include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/SamplerD3D12.h"
@@ -255,10 +255,6 @@ namespace backend { namespace d3d12 {
         RenderPipeline* lastRenderPipeline = nullptr;
         PipelineLayout* lastLayout = nullptr;
 
-        RenderPass* currentRenderPass = nullptr;
-        Framebuffer* currentFramebuffer = nullptr;
-        uint32_t currentSubpass = 0;
-
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
@@ -269,26 +265,10 @@ namespace backend { namespace d3d12 {
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* beginRenderPassCmd =
                         mCommands.NextCommand<BeginRenderPassCmd>();
-                    currentRenderPass = ToBackend(beginRenderPassCmd->renderPass.Get());
-                    currentFramebuffer = ToBackend(beginRenderPassCmd->framebuffer.Get());
-                    currentSubpass = 0;
+                    RenderPassInfo* info = ToBackend(beginRenderPassCmd->info.Get());
 
-                    uint32_t width = currentFramebuffer->GetWidth();
-                    uint32_t height = currentFramebuffer->GetHeight();
-                    D3D12_VIEWPORT viewport = {
-                        0.f, 0.f, static_cast<float>(width), static_cast<float>(height), 0.f, 1.f};
-                    D3D12_RECT scissorRect = {0, 0, static_cast<long>(width),
-                                              static_cast<long>(height)};
-                    commandList->RSSetViewports(1, &viewport);
-                    commandList->RSSetScissorRects(1, &scissorRect);
-                } break;
-
-                case Command::BeginRenderSubpass: {
-                    mCommands.NextCommand<BeginRenderSubpassCmd>();
-                    const auto& subpass = currentRenderPass->GetSubpassInfo(currentSubpass);
-
-                    Framebuffer::OMSetRenderTargetArgs args =
-                        currentFramebuffer->GetSubpassOMSetRenderTargetArgs(currentSubpass);
+                    RenderPassInfo::OMSetRenderTargetArgs args =
+                        info->GetSubpassOMSetRenderTargetArgs();
                     if (args.dsv.ptr) {
                         commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE,
                                                         &args.dsv);
@@ -297,68 +277,76 @@ namespace backend { namespace d3d12 {
                                                         nullptr);
                     }
 
-                    // Clear framebuffer attachments as needed
+                    // Clear framebuffer attachments as needed and transition to render target
 
-                    for (unsigned int location : IterateBitSet(subpass.colorAttachmentsSet)) {
-                        uint32_t attachmentSlot = subpass.colorAttachments[location];
-                        const auto& attachmentInfo =
-                            currentRenderPass->GetAttachmentInfo(attachmentSlot);
+                    for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
+                        auto& attachmentInfo = info->GetColorAttachment(i);
+                        Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
 
-                        Texture* texture = ToBackend(
-                            currentFramebuffer->GetTextureView(attachmentSlot)->GetTexture());
-                        constexpr auto usage = nxt::TextureUsageBit::OutputAttachment;
                         // It's already validated that this texture is either frozen to the correct
                         // usage, or not frozen.
                         if (!texture->IsFrozen()) {
-                            texture->TransitionUsageImpl(texture->GetUsage(), usage);
-                            texture->UpdateUsageInternal(usage);
+                            texture->TransitionUsageImpl(texture->GetUsage(),
+                                                         nxt::TextureUsageBit::OutputAttachment);
+                            texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
                         }
 
-                        // Only perform load op on first use
-                        if (attachmentInfo.firstSubpass == currentSubpass) {
-                            // Load op - color
-                            if (attachmentInfo.colorLoadOp == nxt::LoadOp::Clear) {
-                                auto handle = currentFramebuffer->GetRTVDescriptor(attachmentSlot);
-                                const auto& clear =
-                                    currentFramebuffer->GetClearColor(attachmentSlot);
-                                commandList->ClearRenderTargetView(handle, clear.color, 0, nullptr);
-                            }
+                        // Load op - color
+                        if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                            D3D12_CPU_DESCRIPTOR_HANDLE handle = info->GetRTVDescriptor(i);
+                            commandList->ClearRenderTargetView(
+                                handle, attachmentInfo.clearColor.data(), 0, nullptr);
                         }
                     }
 
-                    if (subpass.depthStencilAttachmentSet) {
-                        uint32_t attachmentSlot = subpass.depthStencilAttachment;
-                        const auto& attachmentInfo =
-                            currentRenderPass->GetAttachmentInfo(attachmentSlot);
+                    if (info->HasDepthStencilAttachment()) {
+                        auto& attachmentInfo = info->GetDepthStencilAttachment();
+                        Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
 
-                        // Only perform load op on first use
-                        if (attachmentInfo.firstSubpass == currentSubpass) {
-                            // Load op - depth/stencil
-                            bool doDepthClear = TextureFormatHasDepth(attachmentInfo.format) &&
-                                                (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
-                            bool doStencilClear =
-                                TextureFormatHasStencil(attachmentInfo.format) &&
-                                (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+                        // It's already validated that this texture is either frozen to the correct
+                        // usage, or not frozen.
+                        if (!texture->IsFrozen()) {
+                            texture->TransitionUsageImpl(texture->GetUsage(),
+                                                         nxt::TextureUsageBit::OutputAttachment);
+                            texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
+                        }
 
-                            D3D12_CLEAR_FLAGS clearFlags = {};
-                            if (doDepthClear) {
-                                clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
-                            }
-                            if (doStencilClear) {
-                                clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
-                            }
-                            if (clearFlags) {
-                                auto handle = currentFramebuffer->GetDSVDescriptor(attachmentSlot);
-                                const auto& clear =
-                                    currentFramebuffer->GetClearDepthStencil(attachmentSlot);
-                                // TODO(kainino@chromium.org): investigate: should the NXT clear
-                                // stencil type be uint8_t?
-                                uint8_t clearStencil = static_cast<uint8_t>(clear.stencil);
-                                commandList->ClearDepthStencilView(handle, clearFlags, clear.depth,
-                                                                   clearStencil, 0, nullptr);
-                            }
+                        // Load op - depth/stencil
+                        bool doDepthClear = TextureFormatHasDepth(texture->GetFormat()) &&
+                                            (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
+                        bool doStencilClear = TextureFormatHasStencil(texture->GetFormat()) &&
+                                              (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+
+                        D3D12_CLEAR_FLAGS clearFlags = {};
+                        if (doDepthClear) {
+                            clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+                        }
+                        if (doStencilClear) {
+                            clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+                        }
+
+                        if (clearFlags) {
+                            auto handle = info->GetDSVDescriptor();
+                            // TODO(kainino@chromium.org): investigate: should the NXT clear
+                            // stencil type be uint8_t?
+                            uint8_t clearStencil =
+                                static_cast<uint8_t>(attachmentInfo.clearStencil);
+                            commandList->ClearDepthStencilView(handle, clearFlags,
+                                                               attachmentInfo.clearDepth,
+                                                               clearStencil, 0, nullptr);
                         }
                     }
+
+                    // Set up the default render pass dynamic state
+
+                    uint32_t width = info->GetWidth();
+                    uint32_t height = info->GetHeight();
+                    D3D12_VIEWPORT viewport = {
+                        0.f, 0.f, static_cast<float>(width), static_cast<float>(height), 0.f, 1.f};
+                    D3D12_RECT scissorRect = {0, 0, static_cast<long>(width),
+                                              static_cast<long>(height)};
+                    commandList->RSSetViewports(1, &viewport);
+                    commandList->RSSetScissorRects(1, &scissorRect);
 
                     static constexpr std::array<float, 4> defaultBlendFactor = {0, 0, 0, 0};
                     commandList->OMSetBlendFactor(&defaultBlendFactor[0]);
@@ -483,11 +471,6 @@ namespace backend { namespace d3d12 {
 
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
-                } break;
-
-                case Command::EndRenderSubpass: {
-                    mCommands.NextCommand<EndRenderSubpassCmd>();
-                    currentSubpass += 1;
                 } break;
 
                 case Command::SetComputePipeline: {

@@ -35,16 +35,14 @@ namespace backend {
     class CommandBufferBuilder;
     class DepthStencilStateBase;
     class DepthStencilStateBuilder;
-    class FramebufferBase;
-    class FramebufferBuilder;
     class InputStateBase;
     class InputStateBuilder;
     class PipelineLayoutBase;
     class PipelineLayoutBuilder;
     class QueueBase;
     class QueueBuilder;
-    class RenderPassBase;
-    class RenderPassBuilder;
+    class RenderPassInfoBase;
+    class RenderPassInfoBuilder;
     class RenderPipelineBase;
     class RenderPipelineBuilder;
     class SamplerBase;

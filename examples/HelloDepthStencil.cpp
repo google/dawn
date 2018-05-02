@@ -40,7 +40,6 @@ nxt::TextureView depthStencilView;
 nxt::RenderPipeline pipeline;
 nxt::RenderPipeline planePipeline;
 nxt::RenderPipeline reflectionPipeline;
-nxt::RenderPass renderpass;
 
 void initBuffers() {
     static const uint32_t indexData[6*6] = {
@@ -209,7 +208,6 @@ void init() {
         .SetBufferViews(1, 1, &transformBufferView[1])
         .GetResult();
 
-    renderpass = CreateDefaultRenderPass(device);
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     auto depthStencilState = device.CreateDepthStencilStateBuilder()
@@ -218,7 +216,8 @@ void init() {
         .GetResult();
 
     pipeline = device.CreateRenderPipelineBuilder()
-        .SetSubpass(renderpass, 0)
+        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
+        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -234,7 +233,8 @@ void init() {
         .GetResult();
 
     planePipeline = device.CreateRenderPipelineBuilder()
-        .SetSubpass(renderpass, 0)
+        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
+        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -249,7 +249,8 @@ void init() {
         .GetResult();
 
     reflectionPipeline = device.CreateRenderPipelineBuilder()
-        .SetSubpass(renderpass, 0)
+        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
+        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsReflectionModule, "main")
@@ -277,12 +278,11 @@ void frame() {
     cameraBuffer.SetSubData(0, sizeof(CameraData), reinterpret_cast<uint8_t*>(&cameraData));
 
     nxt::Texture backbuffer;
-    nxt::Framebuffer framebuffer;
-    GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+    nxt::RenderPassInfo renderPass;
+    GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass)
             .SetRenderPipeline(pipeline)
             .TransitionBufferUsage(cameraBuffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, bindGroup[0])
@@ -300,7 +300,6 @@ void frame() {
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
             .SetBindGroup(0, bindGroup[1])
             .DrawElements(36, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 

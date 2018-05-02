@@ -79,7 +79,6 @@ nxt::Device device;
 nxt::Queue queue;
 nxt::SwapChain swapchain;
 nxt::TextureView depthStencilView;
-nxt::RenderPass renderpass;
 
 nxt::Buffer defaultBuffer;
 std::map<std::string, nxt::Buffer> buffers;
@@ -291,7 +290,8 @@ namespace {
             .SetBindGroupLayout(0, bindGroupLayout)
             .GetResult();
         auto pipeline = device.CreateRenderPipelineBuilder()
-            .SetSubpass(renderpass, 0)
+            .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
+            .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
             .SetLayout(pipelineLayout)
             .SetStage(nxt::ShaderStage::Vertex, oVSModule, "main")
             .SetStage(nxt::ShaderStage::Fragment, oFSModule, "main")
@@ -468,7 +468,6 @@ namespace {
         swapchain.Configure(GetPreferredSwapChainTextureFormat(),
                             nxt::TextureUsageBit::OutputAttachment, 640, 480);
 
-        renderpass = CreateDefaultRenderPass(device);
         depthStencilView = CreateDefaultDepthStencilView(device);
 
         initBuffers();
@@ -585,21 +584,18 @@ namespace {
 
     void frame() {
         nxt::Texture backbuffer;
-        nxt::Framebuffer framebuffer;
-        GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
-        framebuffer.AttachmentSetClearColor(0, 0.3f, 0.4f, 0.5f, 1);
+        nxt::RenderPassInfo renderPass;
+        GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
         const auto& defaultSceneNodes = scene.scenes.at(scene.defaultScene);
         nxt::CommandBufferBuilder cmd = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderpass, framebuffer)
-            .BeginRenderSubpass()
+            .BeginRenderPass(renderPass)
             .Clone();
         for (const auto& n : defaultSceneNodes) {
             const auto& node = scene.nodes.at(n);
             drawNode(cmd, node);
         }
-        auto commands = cmd.EndRenderSubpass()
-            .EndRenderPass()
+        auto commands = cmd.EndRenderPass()
             .GetResult();
         queue.Submit(1, &commands);
 

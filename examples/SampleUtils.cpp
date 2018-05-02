@@ -134,19 +134,6 @@ nxt::SwapChain GetSwapChain(const nxt::Device &device) {
         .GetResult();
 }
 
-nxt::RenderPass CreateDefaultRenderPass(const nxt::Device& device) {
-    return device.CreateRenderPassBuilder()
-        .SetAttachmentCount(2)
-        .AttachmentSetFormat(0, GetPreferredSwapChainTextureFormat())
-        .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-        .AttachmentSetFormat(1, nxt::TextureFormat::D32FloatS8Uint)
-        .AttachmentSetDepthStencilLoadOps(1, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
-        .SetSubpassCount(1)
-        .SubpassSetColorAttachment(0, 0, 0)
-        .SubpassSetDepthStencilAttachment(0, 1)
-        .GetResult();
-}
-
 nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device) {
     auto depthStencilTexture = device.CreateTextureBuilder()
         .SetDimension(nxt::TextureDimension::e2D)
@@ -160,19 +147,16 @@ nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device) {
         .GetResult();
 }
 
-void GetNextFramebuffer(const nxt::Device& device,
-        const nxt::RenderPass& renderpass,
-        const nxt::SwapChain& swapchain,
-        const nxt::TextureView& depthStencilView,
-        nxt::Texture* backbuffer,
-        nxt::Framebuffer* framebuffer) {
+void GetNextRenderPassInfo(const nxt::Device& device,
+    const nxt::SwapChain& swapchain,
+    const nxt::TextureView& depthStencilView,
+    nxt::Texture* backbuffer,
+    nxt::RenderPassInfo* info) {
     *backbuffer = swapchain.GetNextTexture();
     auto backbufferView = backbuffer->CreateTextureViewBuilder().GetResult();
-    *framebuffer = device.CreateFramebufferBuilder()
-        .SetRenderPass(renderpass)
-        .SetDimensions(640, 480)
-        .SetAttachment(0, backbufferView)
-        .SetAttachment(1, depthStencilView)
+    *info = device.CreateRenderPassInfoBuilder()
+        .SetColorAttachment(0, backbufferView, nxt::LoadOp::Clear)
+        .SetDepthStencilAttachment(depthStencilView, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
         .GetResult();
 }
 

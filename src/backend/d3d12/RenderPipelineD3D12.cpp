@@ -136,26 +136,16 @@ namespace backend { namespace d3d12 {
         descriptor.RasterizerState.ForcedSampleCount = 0;
         descriptor.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
-        RenderPass* renderPass = ToBackend(GetRenderPass());
-        auto& subpassInfo = renderPass->GetSubpassInfo(GetSubPass());
-
-        if (subpassInfo.depthStencilAttachmentSet) {
-            const auto& attachmentInfo =
-                renderPass->GetAttachmentInfo(subpassInfo.depthStencilAttachment);
-            descriptor.DSVFormat = D3D12TextureFormat(attachmentInfo.format);
+        if (HasDepthStencilAttachment()) {
+            descriptor.DSVFormat = D3D12TextureFormat(GetDepthStencilFormat());
         }
 
-        unsigned int attachmentCount = 0;
-        for (unsigned int attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
-            uint32_t attachment = subpassInfo.colorAttachments[attachmentSlot];
-            const auto& attachmentInfo = renderPass->GetAttachmentInfo(attachment);
-
-            descriptor.RTVFormats[attachmentSlot] = D3D12TextureFormat(attachmentInfo.format);
-            descriptor.BlendState.RenderTarget[attachmentSlot] =
-                ToBackend(GetBlendState(attachmentSlot))->GetD3D12BlendDesc();
-            attachmentCount = attachmentSlot + 1;
+        for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
+            descriptor.RTVFormats[i] = D3D12TextureFormat(GetColorAttachmentFormat(i));
+            descriptor.BlendState.RenderTarget[i] =
+                ToBackend(GetBlendState(i))->GetD3D12BlendDesc();
         }
-        descriptor.NumRenderTargets = attachmentCount;
+        descriptor.NumRenderTargets = static_cast<uint32_t>(GetColorAttachmentsMask().count());
 
         descriptor.BlendState.AlphaToCoverageEnable = FALSE;
         descriptor.BlendState.IndependentBlendEnable = TRUE;

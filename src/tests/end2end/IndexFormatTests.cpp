@@ -24,36 +24,10 @@ class IndexFormatTest : public NXTTest {
         void SetUp() override {
             NXTTest::SetUp();
 
-            renderpass = device.CreateRenderPassBuilder()
-                .SetAttachmentCount(1)
-                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-                .SetSubpassCount(1)
-                .SubpassSetColorAttachment(0, 0, 0)
-                .GetResult();
-
-            renderTarget = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
-                .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
-                .GetResult();
-
-            renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
-
-            framebuffer = device.CreateFramebufferBuilder()
-                .SetRenderPass(renderpass)
-                .SetAttachment(0, renderTargetView)
-                .SetDimensions(kRTSize, kRTSize)
-                .GetResult();
+            renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
         }
 
-        nxt::RenderPass renderpass;
-        nxt::Texture renderTarget;
-        nxt::TextureView renderTargetView;
-        nxt::Framebuffer framebuffer;
+        utils::BasicRenderPass renderPass;
 
         nxt::RenderPipeline MakeTestPipeline(nxt::IndexFormat format) {
             nxt::InputState inputState = device.CreateInputStateBuilder()
@@ -78,7 +52,7 @@ class IndexFormatTest : public NXTTest {
             );
 
             return device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
+                .SetColorAttachmentFormat(0, renderPass.colorFormat)
                 .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleStrip)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -105,19 +79,17 @@ TEST_P(IndexFormatTest, Uint32) {
 
     uint32_t zeroOffset = 0;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
             .SetRenderPipeline(pipeline)
             .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
             .SetIndexBuffer(indexBuffer, 0)
             .DrawElements(3, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 }
 
 // Test that the Uint16 index format is correctly interpreted
@@ -136,19 +108,17 @@ TEST_P(IndexFormatTest, Uint16) {
 
     uint32_t zeroOffset = 0;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
             .SetRenderPipeline(pipeline)
             .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
             .SetIndexBuffer(indexBuffer, 0)
             .DrawElements(3, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 }
 
 // Test for primitive restart use vertices like in the drawing and draw the following
@@ -180,21 +150,19 @@ TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
 
     uint32_t zeroOffset = 0;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
             .SetRenderPipeline(pipeline)
             .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
             .SetIndexBuffer(indexBuffer, 0)
             .DrawElements(7, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 190, 190);  // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 210, 210);  // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, 210, 190);      // C
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 190, 190);  // A
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 210, 210);  // B
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 210, 190);      // C
 }
 
 // Test use of primitive restart with an Uint16 index format
@@ -214,21 +182,19 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
 
     uint32_t zeroOffset = 0;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
             .SetRenderPipeline(pipeline)
             .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
             .SetIndexBuffer(indexBuffer, 0)
             .DrawElements(7, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 190, 190);  // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 210, 210);  // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderTarget, 210, 190);      // C
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 190, 190);  // A
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 210, 210);  // B
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 210, 190);      // C
 }
 
 // Test that the index format used is the format of the last set pipeline. This is to
@@ -256,20 +222,18 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
 
     uint32_t zeroOffset = 0;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
             .SetRenderPipeline(pipeline16)
             .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
             .SetIndexBuffer(indexBuffer, 0)
             .SetRenderPipeline(pipeline32)
             .DrawElements(3, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 }
 
 // Test that setting the index buffer before the pipeline works, this is important
@@ -291,19 +255,17 @@ TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
 
     uint32_t zeroOffset = 0;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
             .SetIndexBuffer(indexBuffer, 0)
             .SetRenderPipeline(pipeline)
             .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
             .DrawElements(3, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 }
 
 NXT_INSTANTIATE_TEST(IndexFormatTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

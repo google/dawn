@@ -62,8 +62,7 @@ namespace backend {
 
         // NXT API
         void BeginComputePass();
-        void BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
-        void BeginRenderSubpass();
+        void BeginRenderPass(RenderPassInfoBase* info);
         void CopyBufferToBuffer(BufferBase* source,
                                 uint32_t sourceOffset,
                                 BufferBase* destination,
@@ -102,7 +101,6 @@ namespace backend {
                           uint32_t firstInstance);
         void EndComputePass();
         void EndRenderPass();
-        void EndRenderSubpass();
         void SetPushConstants(nxt::ShaderStageBit stages,
                               uint32_t offset,
                               uint32_t count,

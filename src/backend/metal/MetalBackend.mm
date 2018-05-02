@@ -101,9 +101,6 @@ namespace backend { namespace metal {
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(builder);
     }
-    FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
-        return new Framebuffer(builder);
-    }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);
     }
@@ -113,8 +110,8 @@ namespace backend { namespace metal {
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(builder);
     }
-    RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
-        return new RenderPass(builder);
+    RenderPassInfoBase* Device::CreateRenderPassInfo(RenderPassInfoBuilder* builder) {
+        return new RenderPassInfo(builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
@@ -202,14 +199,6 @@ namespace backend { namespace metal {
         : BindGroupLayoutBase(builder) {
     }
 
-    // Framebuffer
-
-    Framebuffer::Framebuffer(FramebufferBuilder* builder) : FramebufferBase(builder) {
-    }
-
-    Framebuffer::~Framebuffer() {
-    }
-
     // Queue
 
     Queue::Queue(QueueBuilder* builder) : QueueBase(builder) {
@@ -240,10 +229,10 @@ namespace backend { namespace metal {
 
     // RenderPass
 
-    RenderPass::RenderPass(RenderPassBuilder* builder) : RenderPassBase(builder) {
+    RenderPassInfo::RenderPassInfo(RenderPassInfoBuilder* builder) : RenderPassInfoBase(builder) {
     }
 
-    RenderPass::~RenderPass() {
+    RenderPassInfo::~RenderPassInfo() {
     }
 
 }}  // namespace backend::metal

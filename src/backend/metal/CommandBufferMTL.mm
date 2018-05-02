@@ -35,9 +35,6 @@ namespace backend { namespace metal {
             id<MTLComputeCommandEncoder> compute = nil;
             id<MTLRenderCommandEncoder> render = nil;
 
-            RenderPass* currentRenderPass = nullptr;
-            Framebuffer* currentFramebuffer = nullptr;
-
             void EnsureNoBlitEncoder() {
                 ASSERT(render == nil);
                 ASSERT(compute == nil);
@@ -67,59 +64,46 @@ namespace backend { namespace metal {
                 compute = nil;  // This will be autoreleased.
             }
 
-            void BeginSubpass(id<MTLCommandBuffer> commandBuffer, uint32_t subpass) {
-                ASSERT(currentRenderPass);
+            void BeginRenderPass(id<MTLCommandBuffer> commandBuffer, RenderPassInfo* info) {
                 if (render != nil) {
                     [render endEncoding];
                     render = nil;  // This will be autoreleased.
                 }
 
-                const auto& info = currentRenderPass->GetSubpassInfo(subpass);
-
                 MTLRenderPassDescriptor* descriptor =
                     [MTLRenderPassDescriptor renderPassDescriptor];
-                for (unsigned int location : IterateBitSet(info.colorAttachmentsSet)) {
-                    uint32_t attachment = info.colorAttachments[location];
-                    const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachment);
 
-                    auto textureView = currentFramebuffer->GetTextureView(attachment);
-                    auto texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
+                for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
+                    auto& attachmentInfo = info->GetColorAttachment(i);
 
-                    bool isFirstUse = attachmentInfo.firstSubpass == subpass;
-                    bool shouldClearOnFirstUse = attachmentInfo.colorLoadOp == nxt::LoadOp::Clear;
-                    if (isFirstUse && shouldClearOnFirstUse) {
-                        auto clearValue = currentFramebuffer->GetClearColor(location);
-                        descriptor.colorAttachments[location].loadAction = MTLLoadActionClear;
-                        descriptor.colorAttachments[location].clearColor =
-                            MTLClearColorMake(clearValue.color[0], clearValue.color[1],
-                                              clearValue.color[2], clearValue.color[3]);
+                    if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                        descriptor.colorAttachments[i].loadAction = MTLLoadActionClear;
+                        descriptor.colorAttachments[i].clearColor = MTLClearColorMake(
+                            attachmentInfo.clearColor[0], attachmentInfo.clearColor[1],
+                            attachmentInfo.clearColor[2], attachmentInfo.clearColor[3]);
                     } else {
-                        descriptor.colorAttachments[location].loadAction = MTLLoadActionLoad;
+                        descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
                     }
 
-                    descriptor.colorAttachments[location].texture = texture;
-                    descriptor.colorAttachments[location].storeAction = MTLStoreActionStore;
+                    descriptor.colorAttachments[i].texture =
+                        ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
+                    descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
                 }
-                if (info.depthStencilAttachmentSet) {
-                    uint32_t attachment = info.depthStencilAttachment;
-                    const auto& attachmentInfo = currentRenderPass->GetAttachmentInfo(attachment);
 
-                    auto textureView = currentFramebuffer->GetTextureView(attachment);
-                    id<MTLTexture> texture = ToBackend(textureView->GetTexture())->GetMTLTexture();
-                    nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
+                if (info->HasDepthStencilAttachment()) {
+                    auto& attachmentInfo = info->GetDepthStencilAttachment();
 
-                    bool isFirstUse = attachmentInfo.firstSubpass == subpass;
-                    const auto& clearValues = currentFramebuffer->GetClearDepthStencil(attachment);
+                    id<MTLTexture> texture =
+                        ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
+                    nxt::TextureFormat format = attachmentInfo.view->GetTexture()->GetFormat();
 
                     if (TextureFormatHasDepth(format)) {
                         descriptor.depthAttachment.texture = texture;
                         descriptor.depthAttachment.storeAction = MTLStoreActionStore;
 
-                        bool shouldClearDepthOnFirstUse =
-                            attachmentInfo.depthLoadOp == nxt::LoadOp::Clear;
-                        if (isFirstUse && shouldClearDepthOnFirstUse) {
+                        if (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear) {
                             descriptor.depthAttachment.loadAction = MTLLoadActionClear;
-                            descriptor.depthAttachment.clearDepth = clearValues.depth;
+                            descriptor.depthAttachment.clearDepth = attachmentInfo.clearDepth;
                         } else {
                             descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
                         }
@@ -129,11 +113,9 @@ namespace backend { namespace metal {
                         descriptor.stencilAttachment.texture = texture;
                         descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
 
-                        bool shouldClearStencilOnFirstUse =
-                            attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear;
-                        if (isFirstUse && shouldClearStencilOnFirstUse) {
+                        if (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear) {
                             descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
-                            descriptor.stencilAttachment.clearStencil = clearValues.stencil;
+                            descriptor.stencilAttachment.clearStencil = attachmentInfo.clearStencil;
                         } else {
                             descriptor.stencilAttachment.loadAction = MTLLoadActionLoad;
                         }
@@ -144,7 +126,7 @@ namespace backend { namespace metal {
                 // TODO(cwallez@chromium.org): does any state need to be reset?
             }
 
-            void EndSubpass() {
+            void EndRenderPass() {
                 ASSERT(render != nil);
                 [render endEncoding];
                 render = nil;  // This will be autoreleased.
@@ -174,7 +156,6 @@ namespace backend { namespace metal {
 
         PerStage<std::array<uint32_t, kMaxPushConstants>> pushConstants;
 
-        uint32_t currentSubpass = 0;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
@@ -190,15 +171,11 @@ namespace backend { namespace metal {
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* beginRenderPassCmd =
                         mCommands.NextCommand<BeginRenderPassCmd>();
-                    encoders.currentRenderPass = ToBackend(beginRenderPassCmd->renderPass.Get());
-                    encoders.currentFramebuffer = ToBackend(beginRenderPassCmd->framebuffer.Get());
-                    encoders.EnsureNoBlitEncoder();
-                    currentSubpass = 0;
-                } break;
 
-                case Command::BeginRenderSubpass: {
-                    mCommands.NextCommand<BeginRenderSubpassCmd>();
-                    encoders.BeginSubpass(commandBuffer, currentSubpass);
+                    RenderPassInfo* info = ToBackend(beginRenderPassCmd->info.Get());
+
+                    encoders.EnsureNoBlitEncoder();
+                    encoders.BeginRenderPass(commandBuffer, info);
 
                     pushConstants[nxt::ShaderStage::Vertex].fill(0);
                     pushConstants[nxt::ShaderStage::Fragment].fill(0);
@@ -325,12 +302,7 @@ namespace backend { namespace metal {
 
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
-                } break;
-
-                case Command::EndRenderSubpass: {
-                    mCommands.NextCommand<EndRenderSubpassCmd>();
-                    encoders.EndSubpass();
-                    currentSubpass += 1;
+                    encoders.EndRenderPass();
                 } break;
 
                 case Command::SetComputePipeline: {

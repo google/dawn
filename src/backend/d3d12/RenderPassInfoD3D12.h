@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_FRAMEBUFFERD3D12_H_
-#define BACKEND_D3D12_FRAMEBUFFERD3D12_H_
+#ifndef BACKEND_D3D12_RENDERPASSINFOD3D12_H_
+#define BACKEND_D3D12_RENDERPASSINFOD3D12_H_
 
-#include "backend/Framebuffer.h"
+#include "backend/RenderPassInfo.h"
 
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 #include "backend/d3d12/d3d12_platform.h"
@@ -28,7 +28,7 @@ namespace backend { namespace d3d12 {
 
     class Device;
 
-    class Framebuffer : public FramebufferBase {
+    class RenderPassInfo : public RenderPassInfoBase {
       public:
         struct OMSetRenderTargetArgs {
             unsigned int numRTVs = 0;
@@ -36,20 +36,17 @@ namespace backend { namespace d3d12 {
             D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
         };
 
-        Framebuffer(Device* device, FramebufferBuilder* builder);
-        OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs(uint32_t subpassIndex);
+        RenderPassInfo(Device* device, RenderPassInfoBuilder* builder);
+        OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs();
         D3D12_CPU_DESCRIPTOR_HANDLE GetRTVDescriptor(uint32_t attachmentSlot);
-        D3D12_CPU_DESCRIPTOR_HANDLE GetDSVDescriptor(uint32_t attachmentSlot);
+        D3D12_CPU_DESCRIPTOR_HANDLE GetDSVDescriptor();
 
       private:
         Device* mDevice = nullptr;
         DescriptorHeapHandle mRtvHeap = {};
         DescriptorHeapHandle mDsvHeap = {};
-
-        // Indices into either the RTV or DSV heap, depending on texture format.
-        std::vector<uint32_t> mAttachmentHeapIndices;
     };
 
 }}  // namespace backend::d3d12
 
-#endif  // BACKEND_D3D12_FRAMEBUFFERD3D12_H_
+#endif  // BACKEND_D3D12_RENDERPASSINFOD3D12_H_

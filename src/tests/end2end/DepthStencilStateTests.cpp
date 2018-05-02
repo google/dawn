@@ -24,17 +24,6 @@ class DepthStencilStateTest : public NXTTest {
         void SetUp() override {
             NXTTest::SetUp();
 
-            renderpass = device.CreateRenderPassBuilder()
-                .SetAttachmentCount(2)
-                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-                .AttachmentSetFormat(1, nxt::TextureFormat::D32FloatS8Uint)
-                .AttachmentSetDepthStencilLoadOps(1, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
-                .SetSubpassCount(1)
-                .SubpassSetColorAttachment(0, 0, 0)
-                .SubpassSetDepthStencilAttachment(0, 1)
-                .GetResult();
-
             renderTarget = device.CreateTextureBuilder()
                 .SetDimension(nxt::TextureDimension::e2D)
                 .SetExtent(kRTSize, kRTSize, 1)
@@ -57,11 +46,9 @@ class DepthStencilStateTest : public NXTTest {
 
             depthTextureView = depthTexture.CreateTextureViewBuilder().GetResult();
 
-            framebuffer = device.CreateFramebufferBuilder()
-                .SetRenderPass(renderpass)
-                .SetAttachment(0, renderTargetView)
-                .SetAttachment(1, depthTextureView)
-                .SetDimensions(kRTSize, kRTSize)
+            renderpass = device.CreateRenderPassInfoBuilder()
+                .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
+                .SetDepthStencilAttachment(depthTextureView, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
                 .GetResult();
 
             vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
@@ -207,8 +194,7 @@ class DepthStencilStateTest : public NXTTest {
             };
 
             renderTarget.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
-            builder.BeginRenderPass(renderpass, framebuffer)
-                .BeginRenderSubpass();
+            builder.BeginRenderPass(renderpass);
 
             for (size_t i = 0; i < testParams.size(); ++i) {
                 const TestSpec& test = testParams[i];
@@ -233,7 +219,8 @@ class DepthStencilStateTest : public NXTTest {
 
                 // Create a pipeline for the triangles with the test spec's depth stencil state
                 nxt::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-                    .SetSubpass(renderpass, 0)
+                    .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+                    .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
                     .SetLayout(pipelineLayout)
                     .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                     .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -247,7 +234,6 @@ class DepthStencilStateTest : public NXTTest {
             }
 
             nxt::CommandBuffer commands = builder
-                .EndRenderSubpass()
                 .EndRenderPass()
                 .GetResult();
 
@@ -261,12 +247,11 @@ class DepthStencilStateTest : public NXTTest {
             DoTest(testParams, expected, expected);
         }
 
-        nxt::RenderPass renderpass;
+        nxt::RenderPassInfo renderpass;
         nxt::Texture renderTarget;
         nxt::Texture depthTexture;
         nxt::TextureView renderTargetView;
         nxt::TextureView depthTextureView;
-        nxt::Framebuffer framebuffer;
         nxt::ShaderModule vsModule;
         nxt::ShaderModule fsModule;
         nxt::BindGroupLayout bindGroupLayout;

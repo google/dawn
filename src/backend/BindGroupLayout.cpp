@@ -40,7 +40,8 @@ namespace backend {
             }
 
             for (uint32_t binding : IterateBitSet(a.mask)) {
-                if ((a.visibilities[binding] != b.visibilities[binding]) || (a.types[binding] != b.types[binding])) {
+                if ((a.visibilities[binding] != b.visibilities[binding]) ||
+                    (a.types[binding] != b.types[binding])) {
                     return false;
                 }
             }

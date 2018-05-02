@@ -160,8 +160,7 @@ class PushConstantTest: public NXTTest {
 
         // The render pipeline adds one to the red channel for successful vertex push constant test
         // and adds one to green for the frgament test.
-        nxt::RenderPipeline MakeTestRenderPipeline(nxt::PipelineLayout& layout, nxt::RenderPass& renderPass, uint32_t subpass,
-                                                   PushConstantSpec vsSpec, PushConstantSpec fsSpec) {
+        nxt::RenderPipeline MakeTestRenderPipeline(nxt::PipelineLayout& layout, PushConstantSpec vsSpec, PushConstantSpec fsSpec) {
             nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, (R"(
                 #version 450
                 )" + MakePushConstantBlock(vsSpec) + R"(
@@ -192,7 +191,7 @@ class PushConstantTest: public NXTTest {
                 .GetResult();
 
             return device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderPass, subpass)
+                .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
                 .SetLayout(layout)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -233,63 +232,26 @@ TEST_P(PushConstantTest, ComputePassDefaultsToZero) {
     EXPECT_BUFFER_U32_EQ(1, binding.resultBuffer, 0);
 }
 
-// Test that push constants default to zero at the beginning of every render subpasses.
-TEST_P(PushConstantTest, RenderSubpassDefaultsToZero) {
-    // Change the renderpass to be a two subpass renderpass just for this test.
-    nxt::RenderPass renderPass = device.CreateRenderPassBuilder()
-        .SetAttachmentCount(1)
-        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-        .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-        .SetSubpassCount(2)
-        .SubpassSetColorAttachment(0, 0, 0)
-        .SubpassSetColorAttachment(1, 0, 0)
-        .GetResult();
-
-    nxt::Texture renderTarget = device.CreateTextureBuilder()
-        .SetDimension(nxt::TextureDimension::e2D)
-        .SetExtent(1, 1, 1)
-        .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
-        .SetMipLevels(1)
-        .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-        .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
-        .GetResult();
-
-    nxt::TextureView renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
-
-    nxt::Framebuffer framebuffer = device.CreateFramebufferBuilder()
-        .SetRenderPass(renderPass)
-        .SetAttachment(0, renderTargetView)
-        .SetDimensions(1, 1)
-        .GetResult();
+// Test that push constants default to zero at the beginning of render passes.
+TEST_P(PushConstantTest, RenderPassDefaultsToZero) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
     // Expect push constants to be zero in all draws of this test.
     PushConstantSpec allZeros = MakeAllZeroSpec();
     nxt::PipelineLayout layout = MakeEmptyLayout();
-    nxt::RenderPipeline pipeline1 = MakeTestRenderPipeline(layout, renderPass, 0, MakeAllZeroSpec(), MakeAllZeroSpec());
-    nxt::RenderPipeline pipeline2 = MakeTestRenderPipeline(layout, renderPass, 1, MakeAllZeroSpec(), MakeAllZeroSpec());
+    nxt::RenderPipeline pipeline = MakeTestRenderPipeline(layout, MakeAllZeroSpec(), MakeAllZeroSpec());
 
-    uint32_t notZero = 42;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass, framebuffer)
-            .BeginRenderSubpass()
-                // Test render push constants are set to zero by default.
-                .SetRenderPipeline(pipeline1)
-                .DrawArrays(1, 1, 0, 0)
-                // Set push constants to non-zero value to check they will be reset to zero
-                // on the next subpass. This tests both fragment and vertex as they write to different
-                // color channels on error.
-                .SetPushConstants(nxt::ShaderStageBit::Fragment | nxt::ShaderStageBit::Vertex, 0, 1, &notZero)
-            .EndRenderSubpass()
-            .BeginRenderSubpass()
-                .SetRenderPipeline(pipeline2)
-                .DrawArrays(1, 1, 0, 0)
-            .EndRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
+            // Test render push constants are set to zero by default.
+            .SetRenderPipeline(pipeline)
+            .DrawArrays(1, 1, 0, 0)
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(2, 2, 0, 0), renderTarget, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(1, 1, 0, 0), renderPass.color, 0, 0);
 }
 
 // Test setting push constants of various 32bit types.
@@ -389,51 +351,47 @@ TEST_P(PushConstantTest, SeparateVertexAndFragmentConstants) {
     PushConstantSpec vsSpec = {{Int, 1}};
     PushConstantSpec fsSpec = {{Int, 2}};
 
-    utils::BasicFramebuffer fb = utils::CreateBasicFramebuffer(device, 1, 1);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
     nxt::PipelineLayout layout = MakeEmptyLayout();
-    nxt::RenderPipeline pipeline = MakeTestRenderPipeline(layout, fb.renderPass, 0, vsSpec, fsSpec);
+    nxt::RenderPipeline pipeline = MakeTestRenderPipeline(layout, vsSpec, fsSpec);
 
     uint32_t one = 1;
     uint32_t two = 2;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-            .BeginRenderSubpass()
-                .SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 1, &one)
-                .SetPushConstants(nxt::ShaderStageBit::Fragment, 0, 1, &two)
-                .SetRenderPipeline(pipeline)
-                .DrawArrays(1, 1, 0, 0)
-            .EndRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
+            .SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 1, &one)
+            .SetPushConstants(nxt::ShaderStageBit::Fragment, 0, 1, &two)
+            .SetRenderPipeline(pipeline)
+            .DrawArrays(1, 1, 0, 0)
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(1, 1, 0, 0), fb.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(1, 1, 0, 0), renderPass.color, 0, 0);
 }
 
 // Try setting push constants for vertex and fragment stage simulteanously
 TEST_P(PushConstantTest, SimultaneousVertexAndFragmentConstants) {
     PushConstantSpec spec = {{Int, 2}};
 
-    utils::BasicFramebuffer fb = utils::CreateBasicFramebuffer(device, 1, 1);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
     nxt::PipelineLayout layout = MakeEmptyLayout();
-    nxt::RenderPipeline pipeline = MakeTestRenderPipeline(layout, fb.renderPass, 0, spec, spec);
+    nxt::RenderPipeline pipeline = MakeTestRenderPipeline(layout, spec, spec);
 
     uint32_t two = 2;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-            .BeginRenderSubpass()
-                .SetPushConstants(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment, 0, 1, &two)
-                .SetRenderPipeline(pipeline)
-                .DrawArrays(1, 1, 0, 0)
-            .EndRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
+            .SetPushConstants(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment, 0, 1, &two)
+            .SetRenderPipeline(pipeline)
+            .DrawArrays(1, 1, 0, 0)
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(1, 1, 0, 0), fb.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(1, 1, 0, 0), renderPass.color, 0, 0);
 }
 NXT_INSTANTIATE_TEST(PushConstantTest, MetalBackend, OpenGLBackend)

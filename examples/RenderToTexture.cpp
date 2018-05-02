@@ -33,7 +33,6 @@ nxt::SwapChain swapchain;
 nxt::RenderPipeline pipeline;
 nxt::RenderPipeline pipelinePost;
 nxt::BindGroup bindGroup;
-nxt::RenderPass renderpass;
 
 void initBuffers() {
     static const float vertexData[12] = {
@@ -70,19 +69,6 @@ void initTextures() {
         .GetResult();
 }
 
-void initRenderPass() {
-    renderpass = device.CreateRenderPassBuilder()
-        .SetAttachmentCount(2)
-        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-        .AttachmentSetFormat(1, nxt::TextureFormat::R8G8B8A8Unorm)
-        .SetSubpassCount(2)
-        // subpass 0
-        .SubpassSetColorAttachment(0, 0, 0) // -> render target
-        // subpass 1
-        .SubpassSetColorAttachment(1, 0, 1) // -> back buffer
-        .GetResult();
-}
-
 void initPipeline() {
     nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
@@ -106,7 +92,7 @@ void initPipeline() {
         .GetResult();
 
     pipeline = device.CreateRenderPipelineBuilder()
-        .SetSubpass(renderpass, 0)
+        .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
         .SetInputState(inputState)
@@ -147,7 +133,7 @@ void initPipelinePost() {
         .GetResult();
 
     pipelinePost = device.CreateRenderPipelineBuilder()
-        .SetSubpass(renderpass, 1)
+        .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -172,7 +158,6 @@ void init() {
 
     initBuffers();
     initTextures();
-    initRenderPass();
     initPipeline();
     initPipelinePost();
 }
@@ -180,30 +165,30 @@ void init() {
 void frame() {
     nxt::Texture backbuffer = swapchain.GetNextTexture();
     auto backbufferView = backbuffer.CreateTextureViewBuilder().GetResult();
-    auto framebuffer = device.CreateFramebufferBuilder()
-        .SetRenderPass(renderpass)
-        .SetDimensions(640, 480)
-        .SetAttachment(0, renderTargetView)
-        .SetAttachment(1, backbufferView)
+
+    nxt::RenderPassInfo renderPass1 = device.CreateRenderPassInfoBuilder()
+        .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
+        .GetResult();
+
+    nxt::RenderPassInfo renderPass2 = device.CreateRenderPassInfoBuilder()
+        .SetColorAttachment(0, backbufferView, nxt::LoadOp::Clear)
         .GetResult();
 
     static const uint32_t vertexBufferOffsets[1] = {0};
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-            .BeginRenderSubpass()
-                // renderTarget implicitly locked to to Attachment usage (if not already frozen)
-                .SetRenderPipeline(pipeline)
-                .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
-                .DrawArrays(3, 1, 0, 0)
-            .EndRenderSubpass()
-            // renderTarget usage unlocked, but left in Attachment usage
-            .BeginRenderSubpass()
-                .SetRenderPipeline(pipelinePost)
-                .SetVertexBuffers(0, 1, &vertexBufferQuad, vertexBufferOffsets)
-                .TransitionTextureUsage(renderTarget, nxt::TextureUsageBit::Sampled)
-                .SetBindGroup(0, bindGroup)
-                .DrawArrays(6, 1, 0, 0)
-            .EndRenderSubpass()
+        .BeginRenderPass(renderPass1)
+            // renderTarget implicitly locked to to Attachment usage (if not already frozen)
+            .SetRenderPipeline(pipeline)
+            .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
+            .DrawArrays(3, 1, 0, 0)
+        .EndRenderPass()
+        // renderTarget usage unlocked, but left in Attachment usage
+        .TransitionTextureUsage(renderTarget, nxt::TextureUsageBit::Sampled)
+        .BeginRenderPass(renderPass2)
+            .SetRenderPipeline(pipelinePost)
+            .SetVertexBuffers(0, 1, &vertexBufferQuad, vertexBufferOffsets)
+            .SetBindGroup(0, bindGroup)
+            .DrawArrays(6, 1, 0, 0)
         .EndRenderPass()
         .GetResult();
 

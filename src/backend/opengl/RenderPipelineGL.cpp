@@ -60,10 +60,7 @@ namespace backend { namespace opengl {
         auto depthStencilState = ToBackend(GetDepthStencilState());
         depthStencilState->ApplyNow(persistentPipelineState);
 
-        RenderPass* renderPass = ToBackend(GetRenderPass());
-        auto& subpassInfo = renderPass->GetSubpassInfo(GetSubPass());
-
-        for (uint32_t attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
+        for (uint32_t attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
             ToBackend(GetBlendState(attachmentSlot))->ApplyNow(attachmentSlot);
         }
     }

@@ -23,30 +23,7 @@ class DrawElementsTest : public NXTTest {
         void SetUp() override {
             NXTTest::SetUp();
 
-            renderpass = device.CreateRenderPassBuilder()
-                .SetAttachmentCount(1)
-                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-                .SetSubpassCount(1)
-                .SubpassSetColorAttachment(0, 0, 0)
-                .GetResult();
-
-            renderTarget = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
-                .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
-                .GetResult();
-
-            renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
-
-            framebuffer = device.CreateFramebufferBuilder()
-                .SetRenderPass(renderpass)
-                .SetAttachment(0, renderTargetView)
-                .SetDimensions(kRTSize, kRTSize)
-                .GetResult();
+            renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
             nxt::InputState inputState = device.CreateInputStateBuilder()
                 .SetInput(0, 4 * sizeof(float), nxt::InputStepMode::Vertex)
@@ -70,7 +47,7 @@ class DrawElementsTest : public NXTTest {
             );
 
             pipeline = device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
+                .SetColorAttachmentFormat(0, renderPass.colorFormat)
                 .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleStrip)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -89,10 +66,7 @@ class DrawElementsTest : public NXTTest {
             });
         }
 
-        nxt::RenderPass renderpass;
-        nxt::Texture renderTarget;
-        nxt::TextureView renderTargetView;
-        nxt::Framebuffer framebuffer;
+        utils::BasicRenderPass renderPass;
         nxt::RenderPipeline pipeline;
         nxt::Buffer vertexBuffer;
         nxt::Buffer indexBuffer;
@@ -101,20 +75,18 @@ class DrawElementsTest : public NXTTest {
                   uint32_t firstInstance, RGBA8 bottomLeftExpected, RGBA8 topRightExpected) {
             uint32_t zeroOffset = 0;
             nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-                .BeginRenderPass(renderpass, framebuffer)
-                .BeginRenderSubpass()
+                .BeginRenderPass(renderPass.renderPassInfo)
                     .SetRenderPipeline(pipeline)
                     .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
                     .SetIndexBuffer(indexBuffer, 0)
                     .DrawElements(indexCount, instanceCount, firstIndex, firstInstance)
-                .EndRenderSubpass()
                 .EndRenderPass()
                 .GetResult();
 
             queue.Submit(1, &commands);
 
-            EXPECT_PIXEL_RGBA8_EQ(bottomLeftExpected, renderTarget, 1, 3);
-            EXPECT_PIXEL_RGBA8_EQ(topRightExpected, renderTarget, 3, 1);
+            EXPECT_PIXEL_RGBA8_EQ(bottomLeftExpected, renderPass.color, 1, 3);
+            EXPECT_PIXEL_RGBA8_EQ(topRightExpected, renderPass.color, 3, 1);
         }
 };
 

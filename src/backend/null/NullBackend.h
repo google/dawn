@@ -25,11 +25,10 @@
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
-#include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
 #include "backend/Queue.h"
-#include "backend/RenderPass.h"
+#include "backend/RenderPassInfo.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
@@ -48,11 +47,10 @@ namespace backend { namespace null {
     using ComputePipeline = ComputePipelineBase;
     using DepthStencilState = DepthStencilStateBase;
     class Device;
-    using Framebuffer = FramebufferBase;
     using InputState = InputStateBase;
     using PipelineLayout = PipelineLayoutBase;
     class Queue;
-    using RenderPass = RenderPassBase;
+    using RenderPassInfo = RenderPassInfoBase;
     using RenderPipeline = RenderPipelineBase;
     using Sampler = SamplerBase;
     using ShaderModule = ShaderModuleBase;
@@ -70,11 +68,10 @@ namespace backend { namespace null {
         using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;
         using DeviceType = Device;
-        using FramebufferType = Framebuffer;
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassType = RenderPass;
+        using RenderPassInfoType = RenderPassInfo;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
@@ -106,11 +103,10 @@ namespace backend { namespace null {
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
         ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
         QueueBase* CreateQueue(QueueBuilder* builder) override;
-        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;

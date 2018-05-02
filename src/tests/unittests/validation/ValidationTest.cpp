@@ -69,7 +69,7 @@ bool ValidationTest::EndExpectDeviceError() {
     return mError;
 }
 
-void ValidationTest::CreateSimpleRenderPassAndFramebuffer(const nxt::Device& device, nxt::RenderPass* renderpass, nxt::Framebuffer* framebuffer) {
+nxt::RenderPassInfo ValidationTest::CreateSimpleRenderPass() {
         auto colorBuffer = device.CreateTextureBuilder()
             .SetDimension(nxt::TextureDimension::e2D)
             .SetExtent(640, 480, 1)
@@ -81,17 +81,8 @@ void ValidationTest::CreateSimpleRenderPassAndFramebuffer(const nxt::Device& dev
         auto colorView = colorBuffer.CreateTextureViewBuilder()
             .GetResult();
 
-        *renderpass = device.CreateRenderPassBuilder()
-            .SetAttachmentCount(1)
-            .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-            .SetSubpassCount(1)
-            .SubpassSetColorAttachment(0, 0, 0)
-            .GetResult();
-
-        *framebuffer = device.CreateFramebufferBuilder()
-            .SetRenderPass(*renderpass)
-            .SetDimensions(640, 480)
-            .SetAttachment(0, colorView)
+        return device.CreateRenderPassInfoBuilder()
+            .SetColorAttachment(0, colorView, nxt::LoadOp::Clear)
             .GetResult();
 }
 
@@ -128,13 +119,6 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
     dummy.height = 400;
     dummy.attachmentFormat = nxt::TextureFormat::R8G8B8A8Unorm;
 
-    dummy.renderPass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
-        .SetAttachmentCount(1)
-        .AttachmentSetFormat(0, dummy.attachmentFormat)
-        .SetSubpassCount(1)
-        .SubpassSetColorAttachment(0, 0, 0)
-        .GetResult();
-
     dummy.attachment = AssertWillBeSuccess(device.CreateTextureBuilder())
         .SetDimension(nxt::TextureDimension::e2D)
         .SetExtent(dummy.width, dummy.height, 1)
@@ -146,10 +130,8 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
 
     nxt::TextureView view = AssertWillBeSuccess(dummy.attachment.CreateTextureViewBuilder()).GetResult();
 
-    dummy.framebuffer = AssertWillBeSuccess(device.CreateFramebufferBuilder())
-        .SetRenderPass(dummy.renderPass)
-        .SetAttachment(0, view)
-        .SetDimensions(dummy.width, dummy.height)
+    dummy.renderPass = AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        .SetColorAttachment(0, view, nxt::LoadOp::Clear)
         .GetResult();
 
     return dummy;

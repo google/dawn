@@ -23,10 +23,9 @@
 #include "backend/Buffer.h"
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
-#include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/Queue.h"
-#include "backend/RenderPass.h"
+#include "backend/RenderPassInfo.h"
 #include "backend/ToBackend.h"
 
 #include "glad/glad.h"
@@ -42,12 +41,11 @@ namespace backend { namespace opengl {
     class ComputePipeline;
     class DepthStencilState;
     class Device;
-    class Framebuffer;
     class InputState;
     class PersistentPipelineState;
     class PipelineLayout;
     class Queue;
-    class RenderPass;
+    class RenderPassInfo;
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
@@ -65,11 +63,10 @@ namespace backend { namespace opengl {
         using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;
         using DeviceType = Device;
-        using FramebufferType = Framebuffer;
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassType = RenderPass;
+        using RenderPassInfoType = RenderPassInfo;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
@@ -95,10 +92,9 @@ namespace backend { namespace opengl {
         ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
         QueueBase* CreateQueue(QueueBuilder* builder) override;
-        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
@@ -119,11 +115,6 @@ namespace backend { namespace opengl {
         BindGroupLayout(BindGroupLayoutBuilder* builder);
     };
 
-    class Framebuffer : public FramebufferBase {
-      public:
-        Framebuffer(FramebufferBuilder* builder);
-    };
-
     class Queue : public QueueBase {
       public:
         Queue(QueueBuilder* builder);
@@ -132,9 +123,9 @@ namespace backend { namespace opengl {
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
-    class RenderPass : public RenderPassBase {
+    class RenderPassInfo : public RenderPassInfoBase {
       public:
-        RenderPass(RenderPassBuilder* builder);
+        RenderPassInfo(RenderPassInfoBuilder* builder);
     };
 
 }}  // namespace backend::opengl

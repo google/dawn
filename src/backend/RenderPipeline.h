@@ -19,7 +19,6 @@
 #include "backend/DepthStencilState.h"
 #include "backend/InputState.h"
 #include "backend/Pipeline.h"
-#include "backend/RenderPass.h"
 
 #include "nxt/nxtcpp.h"
 
@@ -37,8 +36,15 @@ namespace backend {
         nxt::IndexFormat GetIndexFormat() const;
         InputStateBase* GetInputState();
         nxt::PrimitiveTopology GetPrimitiveTopology() const;
-        RenderPassBase* GetRenderPass();
-        uint32_t GetSubPass();
+
+        std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
+        bool HasDepthStencilAttachment() const;
+        nxt::TextureFormat GetColorAttachmentFormat(uint32_t attachment) const;
+        nxt::TextureFormat GetDepthStencilFormat() const;
+
+        // A pipeline can be used in a render pass if its attachment info matches the actual
+        // attachments in the render pass. This returns whether it is the case.
+        bool IsCompatibleWith(const RenderPassInfoBase* renderPass) const;
 
       private:
         Ref<DepthStencilStateBase> mDepthStencilState;
@@ -46,8 +52,11 @@ namespace backend {
         Ref<InputStateBase> mInputState;
         nxt::PrimitiveTopology mPrimitiveTopology;
         std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
-        Ref<RenderPassBase> mRenderPass;
-        uint32_t mSubpass;
+
+        std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
+        std::array<nxt::TextureFormat, kMaxColorAttachments> mColorAttachmentFormats;
+        bool mDepthStencilFormatSet = false;
+        nxt::TextureFormat mDepthStencilFormat;
     };
 
     class RenderPipelineBuilder : public Builder<RenderPipelineBase>, public PipelineBuilder {
@@ -55,12 +64,13 @@ namespace backend {
         RenderPipelineBuilder(DeviceBase* device);
 
         // NXT API
+        void SetColorAttachmentFormat(uint32_t attachmentSlot, nxt::TextureFormat format);
         void SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState);
+        void SetDepthStencilAttachmentFormat(nxt::TextureFormat format);
         void SetDepthStencilState(DepthStencilStateBase* depthStencilState);
         void SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology);
         void SetIndexFormat(nxt::IndexFormat format);
         void SetInputState(InputStateBase* inputState);
-        void SetSubpass(RenderPassBase* renderPass, uint32_t subpass);
 
       private:
         friend class RenderPipelineBase;
@@ -75,8 +85,10 @@ namespace backend {
         nxt::IndexFormat mIndexFormat = nxt::IndexFormat::Uint32;
         std::bitset<kMaxColorAttachments> mBlendStatesSet;
         std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
-        Ref<RenderPassBase> mRenderPass;
-        uint32_t mSubpass;
+        std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
+        std::array<nxt::TextureFormat, kMaxColorAttachments> mColorAttachmentFormats;
+        bool mDepthStencilFormatSet = false;
+        nxt::TextureFormat mDepthStencilFormat;
     };
 
 }  // namespace backend

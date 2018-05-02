@@ -15,8 +15,7 @@
 #ifndef BACKEND_COMMANDS_H_
 #define BACKEND_COMMANDS_H_
 
-#include "backend/Framebuffer.h"
-#include "backend/RenderPass.h"
+#include "backend/RenderPassInfo.h"
 #include "backend/Texture.h"
 
 #include "nxt/nxtcpp.h"
@@ -30,7 +29,6 @@ namespace backend {
     enum class Command {
         BeginComputePass,
         BeginRenderPass,
-        BeginRenderSubpass,
         CopyBufferToBuffer,
         CopyBufferToTexture,
         CopyTextureToBuffer,
@@ -39,7 +37,6 @@ namespace backend {
         DrawElements,
         EndComputePass,
         EndRenderPass,
-        EndRenderSubpass,
         SetComputePipeline,
         SetRenderPipeline,
         SetPushConstants,
@@ -56,11 +53,8 @@ namespace backend {
     struct BeginComputePassCmd {};
 
     struct BeginRenderPassCmd {
-        Ref<RenderPassBase> renderPass;
-        Ref<FramebufferBase> framebuffer;
+        Ref<RenderPassInfoBase> info;
     };
-
-    struct BeginRenderSubpassCmd {};
 
     struct BufferCopyLocation {
         Ref<BufferBase> buffer;
@@ -115,8 +109,6 @@ namespace backend {
     struct EndComputePassCmd {};
 
     struct EndRenderPassCmd {};
-
-    struct EndRenderSubpassCmd {};
 
     struct SetComputePipelineCmd {
         Ref<ComputePipelineBase> pipeline;

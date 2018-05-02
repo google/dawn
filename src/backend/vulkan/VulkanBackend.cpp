@@ -24,11 +24,11 @@
 #include "backend/vulkan/ComputePipelineVk.h"
 #include "backend/vulkan/DepthStencilStateVk.h"
 #include "backend/vulkan/FencedDeleter.h"
-#include "backend/vulkan/FramebufferVk.h"
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/NativeSwapChainImplVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
-#include "backend/vulkan/RenderPassVk.h"
+#include "backend/vulkan/RenderPassCache.h"
+#include "backend/vulkan/RenderPassInfoVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
 #include "backend/vulkan/SamplerVk.h"
 #include "backend/vulkan/ShaderModuleVk.h"
@@ -146,6 +146,7 @@ namespace backend { namespace vulkan {
         mDeleter = new FencedDeleter(this);
         mMapRequestTracker = new MapRequestTracker(this);
         mMemoryAllocator = new MemoryAllocator(this);
+        mRenderPassCache = new RenderPassCache(this);
     }
 
     Device::~Device() {
@@ -189,6 +190,11 @@ namespace backend { namespace vulkan {
         delete mMemoryAllocator;
         mMemoryAllocator = nullptr;
 
+        // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
+        // to them are guaranteed to be finished executing.
+        delete mRenderPassCache;
+        mRenderPassCache = nullptr;
+
         // VkQueues are destroyed when the VkDevice is destroyed
         if (mVkDevice != VK_NULL_HANDLE) {
             fn.DestroyDevice(mVkDevice, nullptr);
@@ -231,9 +237,6 @@ namespace backend { namespace vulkan {
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(builder);
     }
-    FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
-        return new Framebuffer(builder);
-    }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);
     }
@@ -243,8 +246,8 @@ namespace backend { namespace vulkan {
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(builder);
     }
-    RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
-        return new RenderPass(builder);
+    RenderPassInfoBase* Device::CreateRenderPassInfo(RenderPassInfoBuilder* builder) {
+        return new RenderPassInfo(builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
@@ -323,6 +326,10 @@ namespace backend { namespace vulkan {
 
     FencedDeleter* Device::GetFencedDeleter() const {
         return mDeleter;
+    }
+
+    RenderPassCache* Device::GetRenderPassCache() const {
+        return mRenderPassCache;
     }
 
     Serial Device::GetSerial() const {

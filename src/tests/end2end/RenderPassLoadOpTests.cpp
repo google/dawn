@@ -32,9 +32,9 @@ class DrawQuad {
                     .GetResult();
             }
 
-        void Draw(const nxt::RenderPass& renderpass, nxt::CommandBufferBuilder* builder) {
+        void Draw(nxt::CommandBufferBuilder* builder) {
             auto renderPipeline = device->CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
+                .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
                 .SetLayout(pipelineLayout)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -108,126 +108,62 @@ class RenderPassLoadOpTests : public NXTTest {
 
 // Tests clearing, loading, and drawing into color attachments
 TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
-    if (IsOpenGL()) {
-        // TODO(kainino@chromium.org): currently fails on OpenGL backend
-        return;
-    }
 
     // Part 1: clear once, check to make sure it's cleared
 
-    auto renderpass1 = device.CreateRenderPassBuilder()
-        .SetAttachmentCount(1)
-        .SetSubpassCount(1)
-        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-        .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-        .SubpassSetColorAttachment(0, 0, 0)
-        .GetResult();
-    auto framebuffer1 = device.CreateFramebufferBuilder()
-        .SetRenderPass(renderpass1)
-        .SetDimensions(kRTSize, kRTSize)
-        .SetAttachment(0, renderTargetView)
+    auto renderPassClearZero = device.CreateRenderPassInfoBuilder()
+        .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
+        .SetColorAttachmentClearColor(0, 0.0f, 0.0f, 0.0f, 0.0f)
         .GetResult();
 
-    auto commands1 = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass1, framebuffer1)
-        .BeginRenderSubpass()
+    auto commandsClearZero = device.CreateCommandBufferBuilder()
+        .BeginRenderPass(renderPassClearZero)
             // Clear should occur implicitly
             // Store should occur implicitly
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
-    framebuffer1.AttachmentSetClearColor(0, 0.0f, 0.0f, 0.0f, 0.0f); // zero
-    queue.Submit(1, &commands1);
-    // Cleared to zero
+    auto renderPassClearGreen = device.CreateRenderPassInfoBuilder()
+        .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
+        .SetColorAttachmentClearColor(0, 0.0f, 1.0f, 0.0f, 1.0f)
+        .GetResult();
+
+    auto commandsClearGreen = device.CreateCommandBufferBuilder()
+        .BeginRenderPass(renderPassClearGreen)
+            // Clear should occur implicitly
+            // Store should occur implicitly
+        .EndRenderPass()
+        .GetResult();
+
+    queue.Submit(1, &commandsClearZero);
     EXPECT_TEXTURE_RGBA8_EQ(expectZero.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0);
 
-    framebuffer1.AttachmentSetClearColor(0, 0.0f, 1.0f, 0.0f, 1.0f); // green
-    queue.Submit(1, &commands1);
-    // Now cleared to green
+    queue.Submit(1, &commandsClearGreen);
     EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0);
 
     // Part 2: draw a blue quad into the right half of the render target, and check result
 
-    auto renderpass2 = device.CreateRenderPassBuilder()
-        .SetAttachmentCount(1)
-        .SetSubpassCount(1)
-        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-        .AttachmentSetColorLoadOp(0, nxt::LoadOp::Load)
-        .SubpassSetColorAttachment(0, 0, 0)
+    auto renderPassLoad = device.CreateRenderPassInfoBuilder()
+        .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Load)
         .GetResult();
-    auto framebuffer2 = device.CreateFramebufferBuilder()
-        .SetRenderPass(renderpass2)
-        .SetDimensions(kRTSize, kRTSize)
-        .SetAttachment(0, renderTargetView)
-        .GetResult();
-    framebuffer2.AttachmentSetClearColor(0, 1.0f, 0.0f, 0.0f, 1.0f); // red
 
-    nxt::CommandBuffer commands2;
+    nxt::CommandBuffer commandsLoad;
     {
         auto builder = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderpass2, framebuffer2)
-            .BeginRenderSubpass()
-                // Clear should occur implicitly
+            .BeginRenderPass(renderPassLoad)
+                // Load should occur implicitly
             .Clone();
-        blueQuad.Draw(renderpass2, &builder);
-        commands2 = builder
+        blueQuad.Draw(&builder);
+        commandsLoad = builder
                 // Store should occur implicitly
-            .EndRenderSubpass()
             .EndRenderPass()
             .GetResult();
     }
 
-    queue.Submit(1, &commands2);
+    queue.Submit(1, &commandsLoad);
     // Left half should still be green
     EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize / 2, kRTSize, 0);
     // Right half should now be blue
-    EXPECT_TEXTURE_RGBA8_EQ(expectBlue.data(), renderTarget, kRTSize / 2, 0, kRTSize / 2, kRTSize, 0);
-}
-
-// Tests that an attachment is cleared only on the first subpass that uses it in a renderpass
-TEST_P(RenderPassLoadOpTests, ClearsOnlyOnFirstUsePerRenderPass) {
-    if (IsOpenGL()) {
-        // TODO(kainino@chromium.org): currently fails on OpenGL backend
-        return;
-    }
-
-    auto renderpass = device.CreateRenderPassBuilder()
-        .SetAttachmentCount(1)
-        .SetSubpassCount(2)
-        .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-        .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-        .SubpassSetColorAttachment(0, 0, 0)
-        .SubpassSetColorAttachment(1, 0, 0)
-        .GetResult();
-    auto framebuffer = device.CreateFramebufferBuilder()
-        .SetRenderPass(renderpass)
-        .SetDimensions(kRTSize, kRTSize)
-        .SetAttachment(0, renderTargetView)
-        .GetResult();
-
-    nxt::CommandBuffer commands;
-    auto builder = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
-            // Clear should occur implicitly
-        .Clone();
-    blueQuad.Draw(renderpass, &builder);
-    commands = builder
-            // Store should occur implicitly
-        .EndRenderSubpass()
-        .BeginRenderSubpass()
-            // Load (not clear!) should occur implicitly
-            // Store should occur implicitly
-        .EndRenderSubpass()
-        .EndRenderPass()
-        .GetResult();
-
-    framebuffer.AttachmentSetClearColor(0, 0.0f, 1.0f, 0.0f, 1.0f); // green
-    queue.Submit(1, &commands);
-    // Left half should still be green from the first clear
-    EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize / 2, kRTSize, 0);
-    // Right half should be blue, not cleared by the second subpass
     EXPECT_TEXTURE_RGBA8_EQ(expectBlue.data(), renderTarget, kRTSize / 2, 0, kRTSize / 2, kRTSize, 0);
 }
 

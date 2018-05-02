@@ -23,43 +23,15 @@ TEST_F(CommandBufferValidationTest, Empty) {
         .GetResult();
 }
 
-// Tests for null arguments to the command buffer builder
-TEST_F(CommandBufferValidationTest, NullArguments) {
-    auto renderpass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
-        .SetSubpassCount(1)
-        .SetAttachmentCount(0)
-        .GetResult();
-    auto framebuffer = AssertWillBeSuccess(device.CreateFramebufferBuilder())
-        .SetRenderPass(renderpass)
-        .SetDimensions(100, 100)
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass, nullptr)
-        .EndRenderPass()
-        .GetResult();
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(nullptr, framebuffer)
-        .EndRenderPass()
-        .GetResult();
-}
-
 // Tests for basic render pass usage
 TEST_F(CommandBufferValidationTest, RenderPass) {
-    auto renderpass = AssertWillBeSuccess(device.CreateRenderPassBuilder())
-        .SetAttachmentCount(0)
-        .SetSubpassCount(1)
-        .GetResult();
-    auto framebuffer = AssertWillBeSuccess(device.CreateFramebufferBuilder())
-        .SetRenderPass(renderpass)
-        .SetDimensions(100, 100)
-        .GetResult();
+    auto renderpass = CreateSimpleRenderPass();
 
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass, framebuffer)
+        .BeginRenderPass(renderpass)
         .EndRenderPass()
         .GetResult();
     AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass, framebuffer)
+        .BeginRenderPass(renderpass)
         .GetResult();
 }

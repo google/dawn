@@ -21,11 +21,10 @@
 #include "backend/CommandBuffer.h"
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
-#include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
 #include "backend/Queue.h"
-#include "backend/RenderPass.h"
+#include "backend/RenderPassInfo.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
@@ -116,9 +115,6 @@ namespace backend {
     DepthStencilStateBuilder* DeviceBase::CreateDepthStencilStateBuilder() {
         return new DepthStencilStateBuilder(this);
     }
-    FramebufferBuilder* DeviceBase::CreateFramebufferBuilder() {
-        return new FramebufferBuilder(this);
-    }
     InputStateBuilder* DeviceBase::CreateInputStateBuilder() {
         return new InputStateBuilder(this);
     }
@@ -128,8 +124,8 @@ namespace backend {
     QueueBuilder* DeviceBase::CreateQueueBuilder() {
         return new QueueBuilder(this);
     }
-    RenderPassBuilder* DeviceBase::CreateRenderPassBuilder() {
-        return new RenderPassBuilder(this);
+    RenderPassInfoBuilder* DeviceBase::CreateRenderPassInfoBuilder() {
+        return new RenderPassInfoBuilder(this);
     }
     RenderPipelineBuilder* DeviceBase::CreateRenderPipelineBuilder() {
         return new RenderPipelineBuilder(this);

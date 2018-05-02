@@ -54,11 +54,9 @@ TEST_F(PushConstantTest, Success) {
         .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, constants)
         .EndComputePass()
 
-        // PushConstants in a render subpass
-        .BeginRenderPass(renderpassData.renderPass, renderpassData.framebuffer)
-        .BeginRenderSubpass()
+        // PushConstants in a render pass
+        .BeginRenderPass(renderpassData.renderPass)
         .SetPushConstants(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment, 0, 1, constants)
-        .EndRenderSubpass()
         .EndRenderPass()
 
         // Setting all constants
@@ -120,36 +118,9 @@ TEST_F(PushConstantTest, NotInPass) {
             .SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 1, constants)
             .GetResult();
     }
-
-    // Setting in renderpass but outside subpass is invalid
-    {
-        // Control to check the error is caused by the SetPushConstants
-        AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-            .BeginRenderPass(renderpassData.renderPass, renderpassData.framebuffer)
-            .BeginRenderSubpass()
-            .EndRenderSubpass()
-            .EndRenderPass()
-            .GetResult();
-
-        AssertWillBeError(device.CreateCommandBufferBuilder())
-            .BeginRenderPass(renderpassData.renderPass, renderpassData.framebuffer)
-            .SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 1, constants)
-            .BeginRenderSubpass()
-            .EndRenderSubpass()
-            .EndRenderPass()
-            .GetResult();
-
-        AssertWillBeError(device.CreateCommandBufferBuilder())
-            .BeginRenderPass(renderpassData.renderPass, renderpassData.framebuffer)
-            .BeginRenderSubpass()
-            .EndRenderSubpass()
-            .SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 1, constants)
-            .EndRenderPass()
-            .GetResult();
-    }
 }
 
-// Test valid stages for subpass
+// Test valid stages for compute pass
 TEST_F(PushConstantTest, StageForComputePass) {
     // Control case: setting to the compute stage in compute passes
     {
@@ -179,17 +150,15 @@ TEST_F(PushConstantTest, StageForComputePass) {
     }
 }
 
-// Test valid stages for compute passes
-TEST_F(PushConstantTest, StageForSubpass) {
+// Test valid stages for render passes
+TEST_F(PushConstantTest, StageForRenderPass) {
     DummyRenderPass renderpassData = CreateDummyRenderPass();
 
-    // Control case: setting to vertex and fragment in subpass
+    // Control case: setting to vertex and fragment in render pass
     {
         AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-            .BeginRenderPass(renderpassData.renderPass, renderpassData.framebuffer)
-            .BeginRenderSubpass()
+            .BeginRenderPass(renderpassData.renderPass)
             .SetPushConstants(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment, 0, 1, constants)
-            .EndRenderSubpass()
             .EndRenderPass()
             .GetResult();
     }
@@ -197,10 +166,8 @@ TEST_F(PushConstantTest, StageForSubpass) {
     // Compute stage is disallowed
     {
         AssertWillBeError(device.CreateCommandBufferBuilder())
-            .BeginRenderPass(renderpassData.renderPass, renderpassData.framebuffer)
-            .BeginRenderSubpass()
+            .BeginRenderPass(renderpassData.renderPass)
             .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, constants)
-            .EndRenderSubpass()
             .EndRenderPass()
             .GetResult();
     }
@@ -208,10 +175,8 @@ TEST_F(PushConstantTest, StageForSubpass) {
     // A None shader stage mask is valid.
     {
         AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-            .BeginRenderPass(renderpassData.renderPass, renderpassData.framebuffer)
-            .BeginRenderSubpass()
+            .BeginRenderPass(renderpassData.renderPass)
             .SetPushConstants(nxt::ShaderStageBit::None, 0, 1, constants)
-            .EndRenderSubpass()
             .EndRenderPass()
             .GetResult();
     }

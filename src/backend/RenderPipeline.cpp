@@ -18,7 +18,8 @@
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
 #include "backend/InputState.h"
-#include "backend/RenderPass.h"
+#include "backend/RenderPassInfo.h"
+#include "backend/Texture.h"
 #include "common/BitSetIterator.h"
 
 namespace backend {
@@ -32,8 +33,10 @@ namespace backend {
           mInputState(std::move(builder->mInputState)),
           mPrimitiveTopology(builder->mPrimitiveTopology),
           mBlendStates(builder->mBlendStates),
-          mRenderPass(std::move(builder->mRenderPass)),
-          mSubpass(builder->mSubpass) {
+          mColorAttachmentsSet(builder->mColorAttachmentsSet),
+          mColorAttachmentFormats(builder->mColorAttachmentFormats),
+          mDepthStencilFormatSet(builder->mDepthStencilFormatSet),
+          mDepthStencilFormat(builder->mDepthStencilFormat) {
         if (GetStageMask() != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
             builder->HandleError("Render pipeline should have exactly a vertex and fragment stage");
             return;
@@ -45,6 +48,19 @@ namespace backend {
              ~mInputState->GetAttributesSetMask())
                 .any()) {
             builder->HandleError("Pipeline vertex stage uses inputs not in the input state");
+            return;
+        }
+
+        // TODO(cwallez@chromium.org): Check against the shader module that the correct color
+        // attachment are set?
+
+        size_t attachmentCount = mColorAttachmentsSet.count();
+        if (mDepthStencilFormatSet) {
+            attachmentCount++;
+        }
+
+        if (attachmentCount == 0) {
+            builder->HandleError("Should have at least one attachment");
             return;
         }
     }
@@ -70,12 +86,49 @@ namespace backend {
         return mPrimitiveTopology;
     }
 
-    RenderPassBase* RenderPipelineBase::GetRenderPass() {
-        return mRenderPass.Get();
+    std::bitset<kMaxColorAttachments> RenderPipelineBase::GetColorAttachmentsMask() const {
+        return mColorAttachmentsSet;
     }
 
-    uint32_t RenderPipelineBase::GetSubPass() {
-        return mSubpass;
+    bool RenderPipelineBase::HasDepthStencilAttachment() const {
+        return mDepthStencilFormatSet;
+    }
+
+    nxt::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(uint32_t attachment) const {
+        return mColorAttachmentFormats[attachment];
+    }
+
+    nxt::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
+        return mDepthStencilFormat;
+    }
+
+    bool RenderPipelineBase::IsCompatibleWith(const RenderPassInfoBase* renderPass) const {
+        // TODO(cwallez@chromium.org): This is called on every SetPipeline command. Optimize it for
+        // example by caching some "attachment compatibility" object that would make the
+        // compatibility check a single pointer comparison.
+
+        if (renderPass->GetColorAttachmentMask() != mColorAttachmentsSet) {
+            return false;
+        }
+
+        for (uint32_t i : IterateBitSet(mColorAttachmentsSet)) {
+            if (renderPass->GetColorAttachment(i).view->GetTexture()->GetFormat() !=
+                mColorAttachmentFormats[i]) {
+                return false;
+            }
+        }
+
+        if (renderPass->HasDepthStencilAttachment() != mDepthStencilFormatSet) {
+            return false;
+        }
+
+        if (mDepthStencilFormatSet &&
+            (renderPass->GetDepthStencilAttachment().view->GetTexture()->GetFormat() !=
+             mDepthStencilFormat)) {
+            return false;
+        }
+
+        return true;
     }
 
     // RenderPipelineBuilder
@@ -101,21 +154,15 @@ namespace backend {
             mDepthStencilState->Release();
             builder->Release();
         }
-        if (!mRenderPass) {
-            HandleError("Pipeline render pass not set");
-            return nullptr;
-        }
-        const auto& subpassInfo = mRenderPass->GetSubpassInfo(mSubpass);
-        if ((mBlendStatesSet | subpassInfo.colorAttachmentsSet) !=
-            subpassInfo.colorAttachmentsSet) {
+
+        if ((mBlendStatesSet | mColorAttachmentsSet) != mColorAttachmentsSet) {
             HandleError("Blend state set on unset color attachment");
             return nullptr;
         }
 
         // Assign all color attachments without a blend state the default state
         // TODO(enga@google.com): Put the default objects in the device
-        for (uint32_t attachmentSlot :
-             IterateBitSet(subpassInfo.colorAttachmentsSet & ~mBlendStatesSet)) {
+        for (uint32_t attachmentSlot : IterateBitSet(mColorAttachmentsSet & ~mBlendStatesSet)) {
             mBlendStates[attachmentSlot] = mDevice->CreateBlendStateBuilder()->GetResult();
             // Remove the external ref objects are created with
             mBlendStates[attachmentSlot]->Release();
@@ -124,9 +171,20 @@ namespace backend {
         return mDevice->CreateRenderPipeline(this);
     }
 
+    void RenderPipelineBuilder::SetColorAttachmentFormat(uint32_t attachmentSlot,
+                                                         nxt::TextureFormat format) {
+        if (attachmentSlot >= kMaxColorAttachments) {
+            HandleError("Attachment index out of bounds");
+            return;
+        }
+
+        mColorAttachmentsSet.set(attachmentSlot);
+        mColorAttachmentFormats[attachmentSlot] = format;
+    }
+
     void RenderPipelineBuilder::SetColorAttachmentBlendState(uint32_t attachmentSlot,
                                                              BlendStateBase* blendState) {
-        if (attachmentSlot > mBlendStates.size()) {
+        if (attachmentSlot >= kMaxColorAttachments) {
             HandleError("Attachment index out of bounds");
             return;
         }
@@ -143,6 +201,11 @@ namespace backend {
         mDepthStencilState = depthStencilState;
     }
 
+    void RenderPipelineBuilder::SetDepthStencilAttachmentFormat(nxt::TextureFormat format) {
+        mDepthStencilFormatSet = true;
+        mDepthStencilFormat = format;
+    }
+
     void RenderPipelineBuilder::SetIndexFormat(nxt::IndexFormat format) {
         mIndexFormat = format;
     }
@@ -153,11 +216,6 @@ namespace backend {
 
     void RenderPipelineBuilder::SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
         mPrimitiveTopology = primitiveTopology;
-    }
-
-    void RenderPipelineBuilder::SetSubpass(RenderPassBase* renderPass, uint32_t subpass) {
-        mRenderPass = renderPass;
-        mSubpass = subpass;
     }
 
 }  // namespace backend

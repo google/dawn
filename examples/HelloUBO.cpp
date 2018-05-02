@@ -22,7 +22,6 @@ nxt::Queue queue;
 nxt::SwapChain swapchain;
 nxt::TextureView depthStencilView;
 nxt::RenderPipeline pipeline;
-nxt::RenderPass renderpass;
 nxt::Buffer buffer;
 nxt::BindGroup bindGroup;
 
@@ -63,11 +62,11 @@ void init() {
         .SetBindGroupLayout(0, bgl)
         .GetResult();
 
-    renderpass = CreateDefaultRenderPass(device);
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     pipeline = device.CreateRenderPipelineBuilder()
-        .SetSubpass(renderpass, 0)
+        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
+        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
         .SetLayout(pl)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
@@ -99,17 +98,15 @@ void frame() {
     buffer.SetSubData(0, sizeof(s), reinterpret_cast<uint8_t*>(&s));
 
     nxt::Texture backbuffer;
-    nxt::Framebuffer framebuffer;
-    GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+    nxt::RenderPassInfo renderPass;
+    GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass)
             .SetRenderPipeline(pipeline)
             .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, bindGroup)
             .DrawArrays(3, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 

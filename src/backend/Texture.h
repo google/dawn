@@ -99,6 +99,7 @@ namespace backend {
       public:
         TextureViewBase(TextureViewBuilder* builder);
 
+        const TextureBase* GetTexture() const;
         TextureBase* GetTexture();
 
       private:

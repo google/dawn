@@ -19,7 +19,8 @@
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
-#include "backend/vulkan/RenderPassVk.h"
+#include "backend/vulkan/RenderPassCache.h"
+#include "backend/vulkan/RenderPassInfoVk.h"
 #include "backend/vulkan/ShaderModuleVk.h"
 #include "backend/vulkan/VulkanBackend.h"
 
@@ -133,10 +134,8 @@ namespace backend { namespace vulkan {
 
         // Initialize the "blend state info" that will be chained in the "create info" from the data
         // pre-computed in the BlendState
-        const auto& subpassInfo = GetRenderPass()->GetSubpassInfo(GetSubPass());
-
         std::array<VkPipelineColorBlendAttachmentState, kMaxColorAttachments> colorBlendAttachments;
-        for (uint32_t i : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
+        for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
             colorBlendAttachments[i] = ToBackend(GetBlendState(i))->GetState();
         }
         VkPipelineColorBlendStateCreateInfo colorBlend;
@@ -147,7 +146,7 @@ namespace backend { namespace vulkan {
         colorBlend.logicOpEnable = VK_FALSE;
         colorBlend.logicOp = VK_LOGIC_OP_CLEAR;
         // TODO(cwallez@chromium.org): Do we allow holes in the color attachments?
-        colorBlend.attachmentCount = static_cast<uint32_t>(subpassInfo.colorAttachmentsSet.count());
+        colorBlend.attachmentCount = static_cast<uint32_t>(GetColorAttachmentsMask().count());
         colorBlend.pAttachments = colorBlendAttachments.data();
         // The blend constant is always dynamic so we fill in a dummy value
         colorBlend.blendConstants[0] = 0.0f;
@@ -172,6 +171,24 @@ namespace backend { namespace vulkan {
         dynamic.dynamicStateCount = sizeof(dynamicStates) / sizeof(dynamicStates[0]);
         dynamic.pDynamicStates = dynamicStates;
 
+        // Get a VkRenderPass that matches the attachment formats for this pipeline, load ops don't
+        // matter so set them all to LoadOp::Load
+        VkRenderPass renderPass = VK_NULL_HANDLE;
+        {
+            RenderPassCacheQuery query;
+
+            for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
+                query.SetColor(i, GetColorAttachmentFormat(i), nxt::LoadOp::Load);
+            }
+
+            if (HasDepthStencilAttachment()) {
+                query.SetDepthStencil(GetDepthStencilFormat(), nxt::LoadOp::Load,
+                                      nxt::LoadOp::Load);
+            }
+
+            renderPass = mDevice->GetRenderPassCache()->GetRenderPass(query);
+        }
+
         // The create info chains in a bunch of things created on the stack here or inside state
         // objects.
         VkGraphicsPipelineCreateInfo createInfo;
@@ -190,8 +207,8 @@ namespace backend { namespace vulkan {
         createInfo.pColorBlendState = &colorBlend;
         createInfo.pDynamicState = &dynamic;
         createInfo.layout = ToBackend(GetLayout())->GetHandle();
-        createInfo.renderPass = ToBackend(GetRenderPass())->GetHandle();
-        createInfo.subpass = GetSubPass();
+        createInfo.renderPass = renderPass;
+        createInfo.subpass = 0;
         createInfo.basePipelineHandle = VK_NULL_HANDLE;
         createInfo.basePipelineIndex = -1;
 

@@ -46,7 +46,7 @@ class InputStateTest : public ValidationTest {
                 builder = AssertWillBeError(device.CreateRenderPipelineBuilder());
             }
 
-            return builder.SetSubpass(renderpassData.renderPass, 0)
+            return builder.SetColorAttachmentFormat(0, renderpassData.attachmentFormat)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)

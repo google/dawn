@@ -267,6 +267,10 @@ namespace backend {
     TextureViewBase::TextureViewBase(TextureViewBuilder* builder) : mTexture(builder->mTexture) {
     }
 
+    const TextureBase* TextureViewBase::GetTexture() const {
+        return mTexture.Get();
+    }
+
     TextureBase* TextureViewBase::GetTexture() {
         return mTexture.Get();
     }

@@ -60,9 +60,6 @@ namespace backend { namespace null {
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(builder);
     }
-    FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
-        return new Framebuffer(builder);
-    }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);
     }
@@ -72,8 +69,8 @@ namespace backend { namespace null {
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(builder);
     }
-    RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
-        return new RenderPass(builder);
+    RenderPassInfoBase* Device::CreateRenderPassInfo(RenderPassInfoBuilder* builder) {
+        return new RenderPassInfo(builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);

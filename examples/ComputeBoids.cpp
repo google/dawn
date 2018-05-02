@@ -32,7 +32,6 @@ nxt::Buffer modelBuffer;
 std::array<nxt::Buffer, 2> particleBuffers;
 
 nxt::RenderPipeline renderPipeline;
-nxt::RenderPass renderpass;
 
 nxt::Buffer updateParams;
 nxt::ComputePipeline updatePipeline;
@@ -123,11 +122,11 @@ void initRender() {
         .SetInput(1, sizeof(glm::vec2), nxt::InputStepMode::Vertex)
         .GetResult();
 
-    renderpass = CreateDefaultRenderPass(device);
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     renderPipeline = device.CreateRenderPipelineBuilder()
-        .SetSubpass(renderpass, 0)
+        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
+        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
         .SetInputState(inputState)
@@ -260,7 +259,7 @@ void initSim() {
     }
 }
 
-nxt::CommandBuffer createCommandBuffer(const nxt::Framebuffer& framebuffer, size_t i) {
+nxt::CommandBuffer createCommandBuffer(const nxt::RenderPassInfo& renderPass, size_t i) {
     static const uint32_t zeroOffsets[1] = {0};
     auto& bufferSrc = particleBuffers[i];
     auto& bufferDst = particleBuffers[(i + 1) % 2];
@@ -273,14 +272,12 @@ nxt::CommandBuffer createCommandBuffer(const nxt::Framebuffer& framebuffer, size
             .Dispatch(kNumParticles, 1, 1)
         .EndComputePass()
 
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass)
             .SetRenderPipeline(renderPipeline)
             .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Vertex)
             .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
             .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)
             .DrawArrays(3, kNumParticles, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
 
         .GetResult();
@@ -301,10 +298,10 @@ void init() {
 
 void frame() {
     nxt::Texture backbuffer;
-    nxt::Framebuffer framebuffer;
-    GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+    nxt::RenderPassInfo renderPass;
+    GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
-    nxt::CommandBuffer commandBuffer = createCommandBuffer(framebuffer, pingpong);
+    nxt::CommandBuffer commandBuffer = createCommandBuffer(renderPass, pingpong);
     queue.Submit(1, &commandBuffer);
     backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
     swapchain.Present(backbuffer);

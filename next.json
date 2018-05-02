@@ -345,12 +345,8 @@
             {
                 "name": "begin render pass",
                 "args": [
-                    {"name": "render pass", "type": "render pass"},
-                    {"name": "framebuffer", "type": "framebuffer"}
+                    {"name": "info", "type": "render pass info"}
                 ]
-            },
-            {
-                "name": "begin render subpass"
             },
             {
                 "name": "copy buffer to buffer",
@@ -440,9 +436,6 @@
             },
             {
                 "name": "end render pass"
-            },
-            {
-                "name": "end render subpass"
             },
             {
                 "name": "set stencil reference",
@@ -599,8 +592,8 @@
                 "returns": "depth stencil state builder"
             },
             {
-                "name": "create framebuffer builder",
-                "returns": "framebuffer builder"
+                "name": "create render pass info builder",
+                "returns": "render pass info builder"
             },
             {
                 "name": "create input state builder",
@@ -621,10 +614,6 @@
             {
                 "name": "create queue builder",
                 "returns": "queue builder"
-            },
-            {
-                "name": "create render pass builder",
-                "returns": "render pass builder"
             },
             {
                 "name": "create sampler builder",
@@ -724,60 +713,6 @@
     },
     "float": {
         "category": "native"
-    },
-    "framebuffer": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "attachment set clear color",
-                "TODO": "determine where to put these methods (probably BeginRenderPass?)",
-                "args": [
-                    {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "clear r", "type": "float"},
-                    {"name": "clear g", "type": "float"},
-                    {"name": "clear b", "type": "float"},
-                    {"name": "clear a", "type": "float"}
-                ]
-            },
-            {
-                "name": "attachment set clear depth stencil",
-                "TODO": "determine where to put these methods (probably BeginRenderPass?)",
-                "args": [
-                    {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "clear depth", "type": "float"},
-                    {"name": "clear stencil", "type": "uint32_t"}
-                ]
-            }
-        ]
-    },
-    "framebuffer builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "framebuffer"
-            },
-            {
-                "name": "set render pass",
-                "args": [
-                    {"name": "render pass", "type": "render pass"}
-                ]
-            },
-            {
-                "name": "set dimensions",
-                "args": [
-                    {"name": "width", "type": "uint32_t"},
-                    {"name": "height", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "set attachment",
-                "args": [
-                    {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "texture view", "type": "texture view"}
-                ]
-            }
-        ]
     },
     "index format": {
         "category": "enum",
@@ -879,70 +814,51 @@
             }
         ]
     },
-    "render pass builder": {
+    "render pass info builder": {
         "category": "object",
-        "TODO": {
-            "attachments": "Also need load op, store op, depth/stencil attachments and depth/stencil ops, and maybe usages for the implicit attachment transitions",
-            "subpasses": "Also need input attachments, resolve attachments, and preserve attachments"
-        },
         "methods": [
             {
                 "name": "get result",
-                "returns": "render pass"
+                "returns": "render pass info"
             },
             {
-                "name": "set attachment count",
-                "args": [
-                    {"name": "attachment count", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "attachment set format",
-                "TODO": "Also need sample count",
+                "name": "set color attachment",
                 "args": [
                     {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "format", "type": "texture format"}
+                    {"name": "texture view", "type": "texture view"},
+                    {"name": "load op", "type": "load op"}
                 ]
             },
             {
-                "name": "attachment set color load op",
+                "name": "set color attachment clear color",
+                "TODO": "determine where to put these methods (probably BeginRenderPass?)",
                 "args": [
                     {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "op", "type": "load op"}
+                    {"name": "clear r", "type": "float"},
+                    {"name": "clear g", "type": "float"},
+                    {"name": "clear b", "type": "float"},
+                    {"name": "clear a", "type": "float"}
                 ]
             },
             {
-                "name": "attachment set depth stencil load ops",
+                "name": "set depth stencil attachment",
                 "args": [
-                    {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "depth op", "type": "load op"},
-                    {"name": "stencil op", "type": "load op"}
+                    {"name": "texture view", "type": "texture view"},
+                    {"name": "depth load op", "type": "load op"},
+                    {"name": "stencil load op", "type": "load op"}
                 ]
             },
             {
-                "name": "set subpass count",
+                "name": "set depth stencil attachment clear value",
+                "TODO": "determine where to put these methods (probably BeginRenderPass?)",
                 "args": [
-                    {"name": "subpass count", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "subpass set color attachment",
-                "args": [
-                    {"name": "subpass index", "type": "uint32_t"},
-                    {"name": "output attachment location", "type": "uint32_t"},
-                    {"name": "attachment slot", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "subpass set depth stencil attachment",
-                "args": [
-                    {"name": "subpass index", "type": "uint32_t"},
-                    {"name": "attachment slot", "type": "uint32_t"}
+                    {"name": "clear depth", "type": "float"},
+                    {"name": "clear stencil", "type": "uint32_t"}
                 ]
             }
         ]
     },
-    "render pass": {
+    "render pass info": {
         "category": "object"
     },
     "render pipeline": {
@@ -954,6 +870,21 @@
             {
                 "name": "get result",
                 "returns": "render pipeline"
+            },
+            {
+                "name": "set color attachment format",
+                "TODO": "Also need sample count",
+                "args": [
+                    {"name": "attachment slot", "type": "uint32_t"},
+                    {"name": "format", "type": "texture format"}
+                ]
+            },
+            {
+                "name": "set depth stencil attachment format",
+                "TODO": "Also need sample count",
+                "args": [
+                    {"name": "format", "type": "texture format"}
+                ]
             },
             {
                 "name": "set color attachment blend state",
@@ -998,13 +929,6 @@
                     {"name": "stage", "type": "shader stage"},
                     {"name": "module", "type": "shader module"},
                     {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"}
-                ]
-            },
-            {
-                "name": "set subpass",
-                "args": [
-                    {"name": "render pass", "type": "render pass"},
-                    {"name": "subpass", "type": "uint32_t"}
                 ]
             }
         ]

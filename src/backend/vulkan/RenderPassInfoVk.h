@@ -12,27 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_FRAMEBUFFERVK_H_
-#define BACKEND_VULKAN_FRAMEBUFFERVK_H_
+#ifndef BACKEND_VULKAN_RENDERPASSINFOVK_H_
+#define BACKEND_VULKAN_RENDERPASSINFOVK_H_
 
-#include "backend/Framebuffer.h"
+#include "backend/RenderPassInfo.h"
 
 #include "common/vulkan_platform.h"
 
 namespace backend { namespace vulkan {
 
-    class Framebuffer : public FramebufferBase {
-      public:
-        Framebuffer(FramebufferBuilder* builder);
-        ~Framebuffer();
+    class Device;
 
-        VkFramebuffer GetHandle() const;
-        void FillClearValues(VkClearValue* values);
+    class RenderPassInfo : public RenderPassInfoBase {
+      public:
+        RenderPassInfo(RenderPassInfoBuilder* builder);
+
+        // Compute all the arguments for, and record the vkCmdBeginRenderPass command.
+        void RecordBeginRenderPass(VkCommandBuffer commands);
 
       private:
-        VkFramebuffer mHandle = VK_NULL_HANDLE;
+        Device* mDevice = nullptr;
     };
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_FRAMEBUFFERVK_H_
+#endif  // BACKEND_VULKAN_RENDERPASSINFOVK_H_

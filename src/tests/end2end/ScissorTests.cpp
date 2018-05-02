@@ -18,7 +18,7 @@
 
 class ScissorTest: public NXTTest {
   protected:
-    nxt::RenderPipeline CreateQuadPipeline(const nxt::RenderPass& renderPass) {
+    nxt::RenderPipeline CreateQuadPipeline(nxt::TextureFormat format) {
         nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
             #version 450
             const vec2 pos[6] = vec2[6](
@@ -37,7 +37,7 @@ class ScissorTest: public NXTTest {
             })");
 
         nxt::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-            .SetSubpass(renderPass, 0)
+            .SetColorAttachmentFormat(0, format)
             .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
             .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
             .GetResult();
@@ -48,47 +48,43 @@ class ScissorTest: public NXTTest {
 
 // Test that by default the scissor test is disabled and the whole attachment can be drawn to.
 TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
-    utils::BasicFramebuffer fb = utils::CreateBasicFramebuffer(device, 100, 100);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(fb.renderPass);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
+    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .DrawArrays(6, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 0, 99);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 99, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 99, 99);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 99);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 99, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 99, 99);
 }
 
 // Test setting the scissor to something larger than the attachments.
 TEST_P(ScissorTest, LargerThanAttachment) {
-    utils::BasicFramebuffer fb = utils::CreateBasicFramebuffer(device, 100, 100);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(fb.renderPass);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
+    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .SetScissorRect(0, 0, 200, 200)
         .DrawArrays(6, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 0, 99);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 99, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 99, 99);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 99);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 99, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 99, 99);
 }
 
 // Test setting an empty scissor rect
@@ -98,86 +94,76 @@ TEST_P(ScissorTest, EmptyRect) {
         return;
     }
 
-    utils::BasicFramebuffer fb = utils::CreateBasicFramebuffer(device, 2, 2);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(fb.renderPass);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
+    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .SetScissorRect(0, 0, 0, 0)
         .DrawArrays(6, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, 0, 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, 1, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 0, 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 1, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 1, 1);
 }
 
 // Test setting a partial scissor (not empty, not full attachment)
 TEST_P(ScissorTest, PartialRect) {
-    utils::BasicFramebuffer fb = utils::CreateBasicFramebuffer(device, 100, 100);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(fb.renderPass);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
+    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
     constexpr uint32_t kX = 3;
     constexpr uint32_t kY = 7;
     constexpr uint32_t kW = 5;
     constexpr uint32_t kH = 13;
 
-
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .SetScissorRect(kX, kY, kW, kH)
         .DrawArrays(6, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
     // Test the two opposite corners of the scissor box. With one pixel inside and on outside
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, kX - 1, kY - 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, kX, kY);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, kX - 1, kY - 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, kX, kY);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, kX + kW, kY + kH);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, kX + kW - 1, kY + kH - 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, kX + kW, kY + kH);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, kX + kW - 1, kY + kH - 1);
 }
 
 // Test that the scissor setting doesn't get inherited between renderpasses
-// TODO(cwallez@chromium.org): do the same between subpasses?
 TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
-    utils::BasicFramebuffer fb = utils::CreateBasicFramebuffer(device, 100, 100);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(fb.renderPass);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
+    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         // RenderPass 1 set the scissor
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
         .SetScissorRect(0, 0, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         // RenderPass 2 draw a full quad, it shouldn't be scissored
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .DrawArrays(6, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 0, 99);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 99, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 99, 99);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 99);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 99, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 99, 99);
 }
 
 NXT_INSTANTIATE_TEST(ScissorTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

@@ -254,9 +254,6 @@ namespace backend { namespace opengl {
         PushConstantTracker pushConstants;
         InputBufferTracker inputBuffers;
 
-        RenderPass* currentRenderPass = nullptr;
-        Framebuffer* currentFramebuffer = nullptr;
-        uint32_t currentSubpass = 0;
         GLuint currentFBO = 0;
 
         while (mCommands.NextCommandId(&type)) {
@@ -268,13 +265,8 @@ namespace backend { namespace opengl {
 
                 case Command::BeginRenderPass: {
                     auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    currentRenderPass = ToBackend(cmd->renderPass.Get());
-                    currentFramebuffer = ToBackend(cmd->framebuffer.Get());
-                    currentSubpass = 0;
-                } break;
+                    RenderPassInfo* info = ToBackend(cmd->info.Get());
 
-                case Command::BeginRenderSubpass: {
-                    mCommands.NextCommand<BeginRenderSubpassCmd>();
                     pushConstants.OnBeginPass();
                     inputBuffers.OnBeginPass();
 
@@ -292,8 +284,6 @@ namespace backend { namespace opengl {
                     glGenFramebuffers(1, &currentFBO);
                     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFBO);
 
-                    const auto& subpass = currentRenderPass->GetSubpassInfo(currentSubpass);
-
                     // Mapping from attachmentSlot to GL framebuffer
                     // attachment points. Defaults to zero (GL_NONE).
                     std::array<GLenum, kMaxColorAttachments> drawBuffers = {};
@@ -301,17 +291,15 @@ namespace backend { namespace opengl {
                     // Construct GL framebuffer
 
                     unsigned int attachmentCount = 0;
-                    for (unsigned int location : IterateBitSet(subpass.colorAttachmentsSet)) {
-                        uint32_t attachment = subpass.colorAttachments[location];
-
-                        auto textureView = currentFramebuffer->GetTextureView(attachment);
+                    for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
+                        TextureViewBase* textureView = info->GetColorAttachment(i).view.Get();
                         GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
 
                         // Attach color buffers.
-                        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + location,
+                        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
                                                GL_TEXTURE_2D, texture, 0);
-                        drawBuffers[location] = GL_COLOR_ATTACHMENT0 + location;
-                        attachmentCount = location + 1;
+                        drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+                        attachmentCount = i + 1;
 
                         // TODO(kainino@chromium.org): the color clears (later in
                         // this function) may be undefined for non-normalized integer formats.
@@ -323,10 +311,8 @@ namespace backend { namespace opengl {
                     }
                     glDrawBuffers(attachmentCount, drawBuffers.data());
 
-                    if (subpass.depthStencilAttachmentSet) {
-                        uint32_t attachmentSlot = subpass.depthStencilAttachment;
-
-                        auto textureView = currentFramebuffer->GetTextureView(attachmentSlot);
+                    if (info->HasDepthStencilAttachment()) {
+                        TextureViewBase* textureView = info->GetDepthStencilAttachment().view.Get();
                         GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
                         nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
 
@@ -354,52 +340,39 @@ namespace backend { namespace opengl {
 
                     // Clear framebuffer attachments as needed
 
-                    for (unsigned int location : IterateBitSet(subpass.colorAttachmentsSet)) {
-                        uint32_t attachmentSlot = subpass.colorAttachments[location];
-                        const auto& attachmentInfo =
-                            currentRenderPass->GetAttachmentInfo(attachmentSlot);
+                    for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
+                        const auto& attachmentInfo = info->GetColorAttachment(i);
 
-                        // Only perform load op on first use
-                        if (attachmentInfo.firstSubpass == currentSubpass) {
-                            // Load op - color
-                            if (attachmentInfo.colorLoadOp == nxt::LoadOp::Clear) {
-                                const auto& clear = currentFramebuffer->GetClearColor(location);
-                                glClearBufferfv(GL_COLOR, location, clear.color);
-                            }
+                        // Load op - color
+                        if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                            glClearBufferfv(GL_COLOR, i, attachmentInfo.clearColor.data());
                         }
                     }
 
-                    if (subpass.depthStencilAttachmentSet) {
-                        uint32_t attachmentSlot = subpass.depthStencilAttachment;
-                        const auto& attachmentInfo =
-                            currentRenderPass->GetAttachmentInfo(attachmentSlot);
+                    if (info->HasDepthStencilAttachment()) {
+                        const auto& attachmentInfo = info->GetDepthStencilAttachment();
+                        nxt::TextureFormat attachmentFormat =
+                            attachmentInfo.view->GetTexture()->GetFormat();
 
-                        // Only perform load op on first use
-                        if (attachmentInfo.firstSubpass == currentSubpass) {
-                            // Load op - depth/stencil
-                            const auto& clear = currentFramebuffer->GetClearDepthStencil(
-                                subpass.depthStencilAttachment);
-                            bool doDepthClear = TextureFormatHasDepth(attachmentInfo.format) &&
-                                                (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
-                            bool doStencilClear =
-                                TextureFormatHasStencil(attachmentInfo.format) &&
-                                (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
-                            if (doDepthClear && doStencilClear) {
-                                glClearBufferfi(GL_DEPTH_STENCIL, 0, clear.depth, clear.stencil);
-                            } else if (doDepthClear) {
-                                glClearBufferfv(GL_DEPTH, 0, &clear.depth);
-                            } else if (doStencilClear) {
-                                const GLint clearStencil = clear.stencil;
-                                glClearBufferiv(GL_STENCIL, 0, &clearStencil);
-                            }
+                        // Load op - depth/stencil
+                        bool doDepthClear = TextureFormatHasDepth(attachmentFormat) &&
+                                            (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
+                        bool doStencilClear = TextureFormatHasStencil(attachmentFormat) &&
+                                              (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+                        if (doDepthClear && doStencilClear) {
+                            glClearBufferfi(GL_DEPTH_STENCIL, 0, attachmentInfo.clearDepth,
+                                            attachmentInfo.clearStencil);
+                        } else if (doDepthClear) {
+                            glClearBufferfv(GL_DEPTH, 0, &attachmentInfo.clearDepth);
+                        } else if (doStencilClear) {
+                            const GLint clearStencil = attachmentInfo.clearStencil;
+                            glClearBufferiv(GL_STENCIL, 0, &clearStencil);
                         }
                     }
 
                     glBlendColor(0, 0, 0, 0);
-                    glViewport(0, 0, currentFramebuffer->GetWidth(),
-                               currentFramebuffer->GetHeight());
-                    glScissor(0, 0, currentFramebuffer->GetWidth(),
-                              currentFramebuffer->GetHeight());
+                    glViewport(0, 0, info->GetWidth(), info->GetHeight());
+                    glScissor(0, 0, info->GetWidth(), info->GetHeight());
                 } break;
 
                 case Command::CopyBufferToBuffer: {
@@ -530,13 +503,8 @@ namespace backend { namespace opengl {
 
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
-                } break;
-
-                case Command::EndRenderSubpass: {
-                    mCommands.NextCommand<EndRenderSubpassCmd>();
                     glDeleteFramebuffers(1, &currentFBO);
                     currentFBO = 0;
-                    currentSubpass += 1;
                 } break;
 
                 case Command::SetComputePipeline: {

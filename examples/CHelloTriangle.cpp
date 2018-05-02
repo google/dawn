@@ -21,7 +21,6 @@ nxtDevice device;
 nxtQueue queue;
 nxtSwapChain swapchain;
 nxtRenderPipeline pipeline;
-nxtRenderPass renderpass;
 
 nxtTextureFormat swapChainFormat;
 
@@ -62,17 +61,8 @@ void init() {
     nxtShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, fs).Release();
 
     {
-        nxtRenderPassBuilder builder = nxtDeviceCreateRenderPassBuilder(device);
-        nxtRenderPassBuilderSetAttachmentCount(builder, 1);
-        nxtRenderPassBuilderAttachmentSetFormat(builder, 0, swapChainFormat);
-        nxtRenderPassBuilderSetSubpassCount(builder, 1);
-        nxtRenderPassBuilderSubpassSetColorAttachment(builder, 0, 0, 0);
-        renderpass = nxtRenderPassBuilderGetResult(builder);
-        nxtRenderPassBuilderRelease(builder);
-    }
-    {
         nxtRenderPipelineBuilder builder = nxtDeviceCreateRenderPipelineBuilder(device);
-        nxtRenderPipelineBuilderSetSubpass(builder, renderpass, 0);
+        nxtRenderPipelineBuilderSetColorAttachmentFormat(builder, 0, swapChainFormat);
         nxtRenderPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_VERTEX, vsModule, "main");
         nxtRenderPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_FRAGMENT, fsModule, "main");
         pipeline = nxtRenderPipelineBuilderGetResult(builder);
@@ -91,23 +81,19 @@ void frame() {
         backbufferView = nxtTextureViewBuilderGetResult(builder);
         nxtTextureViewBuilderRelease(builder);
     }
-    nxtFramebuffer framebuffer;
+    nxtRenderPassInfo renderpassInfo;
     {
-        nxtFramebufferBuilder builder = nxtDeviceCreateFramebufferBuilder(device);
-        nxtFramebufferBuilderSetRenderPass(builder, renderpass);
-        nxtFramebufferBuilderSetDimensions(builder, 640, 480);
-        nxtFramebufferBuilderSetAttachment(builder, 0, backbufferView);
-        framebuffer = nxtFramebufferBuilderGetResult(builder);
-        nxtFramebufferBuilderRelease(builder);
+        nxtRenderPassInfoBuilder builder = nxtDeviceCreateRenderPassInfoBuilder(device);
+        nxtRenderPassInfoBuilderSetColorAttachment(builder, 0, backbufferView, NXT_LOAD_OP_CLEAR);
+        renderpassInfo = nxtRenderPassInfoBuilderGetResult(builder);
+        nxtRenderPassInfoBuilderRelease(builder);
     }
     nxtCommandBuffer commands;
     {
         nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
-        nxtCommandBufferBuilderBeginRenderPass(builder, renderpass, framebuffer);
-        nxtCommandBufferBuilderBeginRenderSubpass(builder);
+        nxtCommandBufferBuilderBeginRenderPass(builder, renderpassInfo);
         nxtCommandBufferBuilderSetRenderPipeline(builder, pipeline);
         nxtCommandBufferBuilderDrawArrays(builder, 3, 1, 0, 0);
-        nxtCommandBufferBuilderEndRenderSubpass(builder);
         nxtCommandBufferBuilderEndRenderPass(builder);
         commands = nxtCommandBufferBuilderGetResult(builder);
         nxtCommandBufferBuilderRelease(builder);
@@ -117,7 +103,7 @@ void frame() {
     nxtCommandBufferRelease(commands);
     nxtTextureTransitionUsage(backbuffer, NXT_TEXTURE_USAGE_BIT_PRESENT);
     nxtSwapChainPresent(swapchain, backbuffer);
-    nxtFramebufferRelease(framebuffer);
+    nxtRenderPassInfoRelease(renderpassInfo);
     nxtTextureViewRelease(backbufferView);
 
     DoFlush();

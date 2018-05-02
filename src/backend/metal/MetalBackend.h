@@ -20,9 +20,8 @@
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"
 #include "backend/Device.h"
-#include "backend/Framebuffer.h"
 #include "backend/Queue.h"
-#include "backend/RenderPass.h"
+#include "backend/RenderPassInfo.h"
 #include "backend/ToBackend.h"
 #include "common/Serial.h"
 
@@ -45,7 +44,7 @@ namespace backend { namespace metal {
     class InputState;
     class PipelineLayout;
     class Queue;
-    class RenderPass;
+    class RenderPassInfo;
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
@@ -63,11 +62,10 @@ namespace backend { namespace metal {
         using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;
         using DeviceType = Device;
-        using FramebufferType = Framebuffer;
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassType = RenderPass;
+        using RenderPassInfoType = RenderPassInfo;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
@@ -98,10 +96,9 @@ namespace backend { namespace metal {
         ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
         QueueBase* CreateQueue(QueueBuilder* builder) override;
-        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
@@ -143,12 +140,6 @@ namespace backend { namespace metal {
         BindGroupLayout(BindGroupLayoutBuilder* builder);
     };
 
-    class Framebuffer : public FramebufferBase {
-      public:
-        Framebuffer(FramebufferBuilder* builder);
-        ~Framebuffer();
-    };
-
     class Queue : public QueueBase {
       public:
         Queue(QueueBuilder* builder);
@@ -163,10 +154,10 @@ namespace backend { namespace metal {
         id<MTLCommandQueue> mCommandQueue = nil;
     };
 
-    class RenderPass : public RenderPassBase {
+    class RenderPassInfo : public RenderPassInfoBase {
       public:
-        RenderPass(RenderPassBuilder* builder);
-        ~RenderPass();
+        RenderPassInfo(RenderPassInfoBuilder* builder);
+        ~RenderPassInfo();
     };
 
 }}  // namespace backend::metal

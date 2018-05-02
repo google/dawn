@@ -30,7 +30,6 @@ namespace backend {
 
         // Non-state-modifying validation functions
         bool HaveRenderPass() const;
-        bool HaveRenderSubpass() const;
         bool ValidateCanCopy() const;
         bool ValidateCanUseBufferAs(BufferBase* buffer, nxt::BufferUsageBit usage) const;
         bool ValidateCanUseTextureAs(TextureBase* texture, nxt::TextureUsageBit usage) const;
@@ -43,9 +42,7 @@ namespace backend {
         // State-modifying methods
         bool BeginComputePass();
         bool EndComputePass();
-        bool BeginSubpass();
-        bool EndSubpass();
-        bool BeginRenderPass(RenderPassBase* renderPass, FramebufferBase* framebuffer);
+        bool BeginRenderPass(RenderPassInfoBase* info);
         bool EndRenderPass();
         bool SetComputePipeline(ComputePipelineBase* pipeline);
         bool SetRenderPipeline(RenderPipelineBase* pipeline);
@@ -70,7 +67,7 @@ namespace backend {
             VALIDATION_ASPECT_BIND_GROUPS,
             VALIDATION_ASPECT_VERTEX_BUFFERS,
             VALIDATION_ASPECT_INDEX_BUFFER,
-            VALIDATION_ASPECT_RENDER_SUBPASS,
+            VALIDATION_ASPECT_RENDER_PASS,
             VALIDATION_ASPECT_COMPUTE_PASS,
 
             VALIDATION_ASPECT_COUNT
@@ -109,9 +106,7 @@ namespace backend {
         std::map<BufferBase*, nxt::BufferUsageBit> mMostRecentBufferUsages;
         std::map<TextureBase*, nxt::TextureUsageBit> mMostRecentTextureUsages;
 
-        RenderPassBase* mCurrentRenderPass = nullptr;
-        FramebufferBase* mCurrentFramebuffer = nullptr;
-        uint32_t mCurrentSubpass = 0;
+        RenderPassInfoBase* mCurrentRenderPass = nullptr;
     };
 }  // namespace backend
 

@@ -147,30 +147,7 @@ class PrimitiveTopologyTest : public NXTTest {
         void SetUp() override {
             NXTTest::SetUp();
 
-            renderpass = device.CreateRenderPassBuilder()
-                .SetAttachmentCount(1)
-                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-                .SetSubpassCount(1)
-                .SubpassSetColorAttachment(0, 0, 0)
-                .GetResult();
-
-            renderTarget = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
-                .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
-                .GetResult();
-
-            renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
-
-            framebuffer = device.CreateFramebufferBuilder()
-                .SetRenderPass(renderpass)
-                .SetAttachment(0, renderTargetView)
-                .SetDimensions(kRTSize, kRTSize)
-                .GetResult();
+            renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
             vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
                 #version 450
@@ -209,22 +186,20 @@ class PrimitiveTopologyTest : public NXTTest {
         // Draw the vertices with the given primitive topology and check the pixel values of the test locations
         void DoTest(nxt::PrimitiveTopology primitiveTopology, const std::vector<LocationSpec> &locationSpecs) {
             nxt::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, 0)
+                .SetColorAttachmentFormat(0, renderPass.colorFormat)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)
                 .SetPrimitiveTopology(primitiveTopology)
                 .GetResult();
 
-            renderTarget.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
+            renderPass.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
             static const uint32_t zeroOffset = 0;
             nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-                .BeginRenderPass(renderpass, framebuffer)
-                .BeginRenderSubpass()
+                .BeginRenderPass(renderPass.renderPassInfo)
                     .SetRenderPipeline(pipeline)
                     .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
                     .DrawArrays(6, 1, 0, 0)
-                .EndRenderSubpass()
                 .EndRenderPass()
                 .GetResult();
 
@@ -234,16 +209,13 @@ class PrimitiveTopologyTest : public NXTTest {
                 for (size_t i = 0; i < locationSpec.count; ++i) {
                     // If this pixel is included, check that it is green. Otherwise, check that it is black
                     RGBA8 color = locationSpec.include ? RGBA8(0, 255, 0, 255) : RGBA8(0, 0, 0, 0);
-                    EXPECT_PIXEL_RGBA8_EQ(color, renderTarget, locationSpec.locations[i].x, locationSpec.locations[i].y)
+                    EXPECT_PIXEL_RGBA8_EQ(color, renderPass.color, locationSpec.locations[i].x, locationSpec.locations[i].y)
                         << "Expected (" << locationSpec.locations[i].x << ", " << locationSpec.locations[i].y << ") to be " << color;
                 }
             }
         }
 
-        nxt::RenderPass renderpass;
-        nxt::Texture renderTarget;
-        nxt::TextureView renderTargetView;
-        nxt::Framebuffer framebuffer;
+        utils::BasicRenderPass renderPass;
         nxt::ShaderModule vsModule;
         nxt::ShaderModule fsModule;
         nxt::InputState inputState;

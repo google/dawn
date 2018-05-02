@@ -73,17 +73,14 @@ namespace backend { namespace opengl {
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);
     }
-    FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
-        return new Framebuffer(builder);
-    }
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
         return new PipelineLayout(builder);
     }
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(builder);
     }
-    RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
-        return new RenderPass(builder);
+    RenderPassInfoBase* Device::CreateRenderPassInfo(RenderPassInfoBuilder* builder) {
+        return new RenderPassInfo(builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
@@ -118,11 +115,6 @@ namespace backend { namespace opengl {
         : BindGroupLayoutBase(builder) {
     }
 
-    // Framebuffer
-
-    Framebuffer::Framebuffer(FramebufferBuilder* builder) : FramebufferBase(builder) {
-    }
-
     // Queue
 
     Queue::Queue(QueueBuilder* builder) : QueueBase(builder) {
@@ -134,9 +126,9 @@ namespace backend { namespace opengl {
         }
     }
 
-    // RenderPass
+    // RenderPassInfo
 
-    RenderPass::RenderPass(RenderPassBuilder* builder) : RenderPassBase(builder) {
+    RenderPassInfo::RenderPassInfo(RenderPassInfoBuilder* builder) : RenderPassInfoBase(builder) {
     }
 
 }}  // namespace backend::opengl

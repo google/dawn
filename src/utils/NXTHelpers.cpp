@@ -111,25 +111,18 @@ namespace utils {
         return buffer;
     }
 
-    BasicFramebuffer CreateBasicFramebuffer(const nxt::Device& device,
-                                            uint32_t width,
-                                            uint32_t height) {
-        BasicFramebuffer result;
+    BasicRenderPass CreateBasicRenderPass(const nxt::Device& device,
+                                          uint32_t width,
+                                          uint32_t height) {
+        BasicRenderPass result;
         result.width = width;
         result.height = height;
 
-        result.renderPass = device.CreateRenderPassBuilder()
-                                .SetAttachmentCount(1)
-                                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                                .AttachmentSetColorLoadOp(0, nxt::LoadOp::Clear)
-                                .SetSubpassCount(1)
-                                .SubpassSetColorAttachment(0, 0, 0)
-                                .GetResult();
-
+        result.colorFormat = nxt::TextureFormat::R8G8B8A8Unorm;
         result.color = device.CreateTextureBuilder()
                            .SetDimension(nxt::TextureDimension::e2D)
                            .SetExtent(width, height, 1)
-                           .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+                           .SetFormat(result.colorFormat)
                            .SetMipLevels(1)
                            .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment |
                                             nxt::TextureUsageBit::TransferSrc)
@@ -137,12 +130,9 @@ namespace utils {
                            .GetResult();
 
         nxt::TextureView colorView = result.color.CreateTextureViewBuilder().GetResult();
-
-        result.framebuffer = device.CreateFramebufferBuilder()
-                                 .SetRenderPass(result.renderPass)
-                                 .SetAttachment(0, colorView)
-                                 .SetDimensions(width, height)
-                                 .GetResult();
+        result.renderPassInfo = device.CreateRenderPassInfoBuilder()
+                                    .SetColorAttachment(0, colorView, nxt::LoadOp::Clear)
+                                    .GetResult();
 
         return result;
     }

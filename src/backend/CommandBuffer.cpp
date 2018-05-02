@@ -162,10 +162,6 @@ namespace backend {
                     BeginRenderPassCmd* begin = commands->NextCommand<BeginRenderPassCmd>();
                     begin->~BeginRenderPassCmd();
                 } break;
-                case Command::BeginRenderSubpass: {
-                    BeginRenderSubpassCmd* begin = commands->NextCommand<BeginRenderSubpassCmd>();
-                    begin->~BeginRenderSubpassCmd();
-                } break;
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = commands->NextCommand<CopyBufferToBufferCmd>();
                     copy->~CopyBufferToBufferCmd();
@@ -197,10 +193,6 @@ namespace backend {
                 case Command::EndRenderPass: {
                     EndRenderPassCmd* cmd = commands->NextCommand<EndRenderPassCmd>();
                     cmd->~EndRenderPassCmd();
-                } break;
-                case Command::EndRenderSubpass: {
-                    EndRenderSubpassCmd* cmd = commands->NextCommand<EndRenderSubpassCmd>();
-                    cmd->~EndRenderSubpassCmd();
                 } break;
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = commands->NextCommand<SetComputePipelineCmd>();
@@ -269,10 +261,6 @@ namespace backend {
                 commands->NextCommand<BeginRenderPassCmd>();
                 break;
 
-            case Command::BeginRenderSubpass:
-                commands->NextCommand<BeginRenderSubpassCmd>();
-                break;
-
             case Command::CopyBufferToBuffer:
                 commands->NextCommand<CopyBufferToBufferCmd>();
                 break;
@@ -303,10 +291,6 @@ namespace backend {
 
             case Command::EndRenderPass:
                 commands->NextCommand<EndRenderPassCmd>();
-                break;
-
-            case Command::EndRenderSubpass:
-                commands->NextCommand<EndRenderSubpassCmd>();
                 break;
 
             case Command::SetComputePipeline:
@@ -384,25 +368,8 @@ namespace backend {
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mIterator.NextCommand<BeginRenderPassCmd>();
-                    auto* renderPass = cmd->renderPass.Get();
-                    auto* framebuffer = cmd->framebuffer.Get();
-                    // TODO(kainino@chromium.org): null checks should not be necessary
-                    if (renderPass == nullptr) {
-                        HandleError("Render pass is invalid");
-                        return false;
-                    }
-                    if (framebuffer == nullptr) {
-                        HandleError("Framebuffer is invalid");
-                        return false;
-                    }
-                    if (!mState->BeginRenderPass(renderPass, framebuffer)) {
-                        return false;
-                    }
-                } break;
-
-                case Command::BeginRenderSubpass: {
-                    mIterator.NextCommand<BeginRenderSubpassCmd>();
-                    if (!mState->BeginSubpass()) {
+                    RenderPassInfoBase* info = cmd->info.Get();
+                    if (!mState->BeginRenderPass(info)) {
                         return false;
                     }
                 } break;
@@ -495,13 +462,6 @@ namespace backend {
                     }
                 } break;
 
-                case Command::EndRenderSubpass: {
-                    mIterator.NextCommand<EndRenderSubpassCmd>();
-                    if (!mState->EndSubpass()) {
-                        return false;
-                    }
-                } break;
-
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = mIterator.NextCommand<SetComputePipelineCmd>();
                     ComputePipelineBase* pipeline = cmd->pipeline.Get();
@@ -531,24 +491,24 @@ namespace backend {
 
                 case Command::SetStencilReference: {
                     mIterator.NextCommand<SetStencilReferenceCmd>();
-                    if (!mState->HaveRenderSubpass()) {
-                        HandleError("Can't set stencil reference without an active render subpass");
+                    if (!mState->HaveRenderPass()) {
+                        HandleError("Can't set stencil reference without an active render pass");
                         return false;
                     }
                 } break;
 
                 case Command::SetBlendColor: {
                     mIterator.NextCommand<SetBlendColorCmd>();
-                    if (!mState->HaveRenderSubpass()) {
-                        HandleError("Can't set blend color without an active render subpass");
+                    if (!mState->HaveRenderPass()) {
+                        HandleError("Can't set blend color without an active render pass");
                         return false;
                     }
                 } break;
 
                 case Command::SetScissorRect: {
                     mIterator.NextCommand<SetScissorRectCmd>();
-                    if (!mState->HaveRenderSubpass()) {
-                        HandleError("Can't set scissor rect without an active render subpass");
+                    if (!mState->HaveRenderPass()) {
+                        HandleError("Can't set scissor rect without an active render pass");
                         return false;
                     }
                 } break;
@@ -618,16 +578,10 @@ namespace backend {
         mAllocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
     }
 
-    void CommandBufferBuilder::BeginRenderPass(RenderPassBase* renderPass,
-                                               FramebufferBase* framebuffer) {
+    void CommandBufferBuilder::BeginRenderPass(RenderPassInfoBase* info) {
         BeginRenderPassCmd* cmd = mAllocator.Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
         new (cmd) BeginRenderPassCmd;
-        cmd->renderPass = renderPass;
-        cmd->framebuffer = framebuffer;
-    }
-
-    void CommandBufferBuilder::BeginRenderSubpass() {
-        mAllocator.Allocate<BeginRenderSubpassCmd>(Command::BeginRenderSubpass);
+        cmd->info = info;
     }
 
     void CommandBufferBuilder::CopyBufferToBuffer(BufferBase* source,
@@ -743,10 +697,6 @@ namespace backend {
 
     void CommandBufferBuilder::EndRenderPass() {
         mAllocator.Allocate<EndRenderPassCmd>(Command::EndRenderPass);
-    }
-
-    void CommandBufferBuilder::EndRenderSubpass() {
-        mAllocator.Allocate<EndRenderSubpassCmd>(Command::EndRenderSubpass);
     }
 
     void CommandBufferBuilder::SetComputePipeline(ComputePipelineBase* pipeline) {

@@ -37,7 +37,7 @@ class InputStateTest : public NXTTest {
         void SetUp() override {
             NXTTest::SetUp();
 
-            fb = utils::CreateBasicFramebuffer(device, kRTSize, kRTSize);
+            renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
         }
 
         bool ShouldComponentBeDefault(VertexFormat format, int component) {
@@ -121,7 +121,7 @@ class InputStateTest : public NXTTest {
             );
 
             return device.CreateRenderPipelineBuilder()
-                .SetSubpass(fb.renderPass, 0)
+                .SetColorAttachmentFormat(0, renderPass.colorFormat)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)
@@ -168,9 +168,8 @@ class InputStateTest : public NXTTest {
 
             nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
-            fb.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
-            builder.BeginRenderPass(fb.renderPass, fb.framebuffer)
-                .BeginRenderSubpass()
+            renderPass.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
+            builder.BeginRenderPass(renderPass.renderPassInfo)
                 .SetRenderPipeline(pipeline);
 
             uint32_t zeroOffset = 0;
@@ -180,7 +179,6 @@ class InputStateTest : public NXTTest {
 
             nxt::CommandBuffer commands = builder
                 .DrawArrays(triangles * 3, instances, 0, 0)
-                .EndRenderSubpass()
                 .EndRenderPass()
                 .GetResult();
 
@@ -193,15 +191,15 @@ class InputStateTest : public NXTTest {
                     unsigned int x = kRTCellOffset + kRTCellSize * triangle;
                     unsigned int y = kRTCellOffset + kRTCellSize * instance;
                     if (triangle < triangles && instance < instances) {
-                        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, x, y);
+                        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, x, y);
                     } else {
-                        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, x, y);
+                        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, x, y);
                     }
                 }
             }
         }
 
-        utils::BasicFramebuffer fb;
+        utils::BasicRenderPass renderPass;
 };
 
 // Test compilation and usage of the fixture :)

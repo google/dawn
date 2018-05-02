@@ -39,11 +39,10 @@ namespace backend { namespace vulkan {
     class ComputePipeline;
     class DepthStencilState;
     class Device;
-    class Framebuffer;
     class InputState;
     class PipelineLayout;
     class Queue;
-    class RenderPass;
+    class RenderPassInfo;
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
@@ -55,6 +54,7 @@ namespace backend { namespace vulkan {
     class FencedDeleter;
     class MapRequestTracker;
     class MemoryAllocator;
+    class RenderPassCache;
 
     struct VulkanBackendTraits {
         using BindGroupType = BindGroup;
@@ -66,11 +66,10 @@ namespace backend { namespace vulkan {
         using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;
         using DeviceType = Device;
-        using FramebufferType = Framebuffer;
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassType = RenderPass;
+        using RenderPassInfoType = RenderPassInfo;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
@@ -103,6 +102,7 @@ namespace backend { namespace vulkan {
         FencedDeleter* GetFencedDeleter() const;
         MapRequestTracker* GetMapRequestTracker() const;
         MemoryAllocator* GetMemoryAllocator() const;
+        RenderPassCache* GetRenderPassCache() const;
 
         Serial GetSerial() const;
 
@@ -119,11 +119,10 @@ namespace backend { namespace vulkan {
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
         ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
-        FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
         QueueBase* CreateQueue(QueueBuilder* builder) override;
-        RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) override;
+        RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
@@ -170,6 +169,7 @@ namespace backend { namespace vulkan {
         FencedDeleter* mDeleter = nullptr;
         MapRequestTracker* mMapRequestTracker = nullptr;
         MemoryAllocator* mMemoryAllocator = nullptr;
+        RenderPassCache* mRenderPassCache = nullptr;
 
         VkFence GetUnusedFence();
         void CheckPassedFences();

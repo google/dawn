@@ -43,11 +43,10 @@ namespace backend {
         virtual ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) = 0;
         virtual DepthStencilStateBase* CreateDepthStencilState(
             DepthStencilStateBuilder* builder) = 0;
-        virtual FramebufferBase* CreateFramebuffer(FramebufferBuilder* builder) = 0;
         virtual InputStateBase* CreateInputState(InputStateBuilder* builder) = 0;
         virtual PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) = 0;
         virtual QueueBase* CreateQueue(QueueBuilder* builder) = 0;
-        virtual RenderPassBase* CreateRenderPass(RenderPassBuilder* builder) = 0;
+        virtual RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) = 0;
         virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
         virtual SamplerBase* CreateSampler(SamplerBuilder* builder) = 0;
         virtual ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) = 0;
@@ -83,11 +82,10 @@ namespace backend {
         CommandBufferBuilder* CreateCommandBufferBuilder();
         ComputePipelineBuilder* CreateComputePipelineBuilder();
         DepthStencilStateBuilder* CreateDepthStencilStateBuilder();
-        FramebufferBuilder* CreateFramebufferBuilder();
         InputStateBuilder* CreateInputStateBuilder();
         PipelineLayoutBuilder* CreatePipelineLayoutBuilder();
         QueueBuilder* CreateQueueBuilder();
-        RenderPassBuilder* CreateRenderPassBuilder();
+        RenderPassInfoBuilder* CreateRenderPassInfoBuilder();
         RenderPipelineBuilder* CreateRenderPipelineBuilder();
         SamplerBuilder* CreateSamplerBuilder();
         ShaderModuleBuilder* CreateShaderModuleBuilder();

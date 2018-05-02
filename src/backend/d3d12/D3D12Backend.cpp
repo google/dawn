@@ -23,11 +23,11 @@
 #include "backend/d3d12/ComputePipelineD3D12.h"
 #include "backend/d3d12/DepthStencilStateD3D12.h"
 #include "backend/d3d12/DescriptorHeapAllocator.h"
-#include "backend/d3d12/FramebufferD3D12.h"
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/NativeSwapChainImplD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/QueueD3D12.h"
+#include "backend/d3d12/RenderPassInfoD3D12.h"
 #include "backend/d3d12/RenderPipelineD3D12.h"
 #include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/ResourceUploader.h"
@@ -282,9 +282,6 @@ namespace backend { namespace d3d12 {
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(this, builder);
     }
-    FramebufferBase* Device::CreateFramebuffer(FramebufferBuilder* builder) {
-        return new Framebuffer(this, builder);
-    }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(this, builder);
     }
@@ -294,8 +291,8 @@ namespace backend { namespace d3d12 {
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(this, builder);
     }
-    RenderPassBase* Device::CreateRenderPass(RenderPassBuilder* builder) {
-        return new RenderPass(this, builder);
+    RenderPassInfoBase* Device::CreateRenderPassInfo(RenderPassInfoBuilder* builder) {
+        return new RenderPassInfo(this, builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
@@ -314,12 +311,6 @@ namespace backend { namespace d3d12 {
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
         return new TextureView(builder);
-    }
-
-    // RenderPass
-
-    RenderPass::RenderPass(Device* device, RenderPassBuilder* builder)
-        : RenderPassBase(builder), mDevice(device) {
     }
 
 }}  // namespace backend::d3d12

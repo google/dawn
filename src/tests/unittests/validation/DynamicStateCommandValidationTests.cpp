@@ -17,23 +17,13 @@
 class SetScissorRectTest : public ValidationTest {
 };
 
-// Test to check that SetScissor can only be used inside render subpasses
-TEST_F(SetScissorRectTest, AllowedOnlyInRenderSubpass) {
+// Test to check that SetScissor can only be used inside render passes
+TEST_F(SetScissorRectTest, AllowedOnlyInRenderPass) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPass)
         .SetScissorRect(0, 0, 1, 1)
-        .EndRenderSubpass()
-        .EndRenderPass()
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .SetScissorRect(0, 0, 1, 1)
-        .BeginRenderSubpass()
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
@@ -53,10 +43,8 @@ TEST_F(SetScissorRectTest, EmptyScissor) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPass)
         .SetScissorRect(0, 0, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 }
@@ -68,10 +56,8 @@ TEST_F(SetScissorRectTest, ScissorLargerThanFramebuffer) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPass)
         .SetScissorRect(0, 0, renderPass.width + 1, renderPass.height + 1)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 }
@@ -79,23 +65,13 @@ TEST_F(SetScissorRectTest, ScissorLargerThanFramebuffer) {
 class SetBlendColorTest : public ValidationTest {
 };
 
-// Test to check that SetBlendColor can only be used inside render subpasses
-TEST_F(SetBlendColorTest, AllowedOnlyInRenderSubpass) {
+// Test to check that SetBlendColor can only be used inside render passes
+TEST_F(SetBlendColorTest, AllowedOnlyInRenderPass) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPass)
         .SetBlendColor(0.0f, 0.0f, 0.0f, 0.0f)
-        .EndRenderSubpass()
-        .EndRenderPass()
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .SetBlendColor(0.0f, 0.0f, 0.0f, 0.0f)
-        .BeginRenderSubpass()
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
@@ -115,10 +91,8 @@ TEST_F(SetBlendColorTest, AnyValueAllowed) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPass)
         .SetBlendColor(-1.0f, 42.0f, -0.0f, 0.0f)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 }
@@ -126,23 +100,13 @@ TEST_F(SetBlendColorTest, AnyValueAllowed) {
 class SetStencilReferenceTest : public ValidationTest {
 };
 
-// Test to check that SetStencilReference can only be used inside render subpasses
-TEST_F(SetStencilReferenceTest, AllowedOnlyInRenderSubpass) {
+// Test to check that SetStencilReference can only be used inside render passes
+TEST_F(SetStencilReferenceTest, AllowedOnlyInRenderPass) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPass)
         .SetStencilReference(0)
-        .EndRenderSubpass()
-        .EndRenderPass()
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .SetStencilReference(0)
-        .BeginRenderSubpass()
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
@@ -162,10 +126,8 @@ TEST_F(SetStencilReferenceTest, AllBitsAllowed) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass, renderPass.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPass)
         .SetStencilReference(0xFFFFFFFF)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 }

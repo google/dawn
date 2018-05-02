@@ -20,7 +20,7 @@ class ViewportOrientationTests : public NXTTest {};
 
 // Test that the pixel in viewport coordinate (-1, -1) matches texel (0, 0)
 TEST_P(ViewportOrientationTests, OriginAt0x0) {
-    utils::BasicFramebuffer fb = utils::CreateBasicFramebuffer(device, 2, 2);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
 
     nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
         #version 450
@@ -36,27 +36,25 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
         })");
 
     nxt::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-        .SetSubpass(fb.renderPass, 0)
+        .SetColorAttachmentFormat(0, renderPass.colorFormat)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
         .SetPrimitiveTopology(nxt::PrimitiveTopology::PointList)
         .GetResult();
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(fb.renderPass, fb.framebuffer)
-        .BeginRenderSubpass()
+        .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .DrawArrays(1, 1, 0, 0)
-        .EndRenderSubpass()
         .EndRenderPass()
         .GetResult();
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), fb.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, 0, 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, 1, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), fb.color, 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 0, 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 1, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 1, 1);
 }
 
 NXT_INSTANTIATE_TEST(ViewportOrientationTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

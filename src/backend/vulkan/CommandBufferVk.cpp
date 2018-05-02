@@ -18,9 +18,8 @@
 #include "backend/vulkan/BindGroupVk.h"
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/ComputePipelineVk.h"
-#include "backend/vulkan/FramebufferVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
-#include "backend/vulkan/RenderPassVk.h"
+#include "backend/vulkan/RenderPassInfoVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "backend/vulkan/VulkanBackend.h"
@@ -184,43 +183,32 @@ namespace backend { namespace vulkan {
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    Framebuffer* framebuffer = ToBackend(cmd->framebuffer.Get());
-                    RenderPass* renderPass = ToBackend(cmd->renderPass.Get());
+                    RenderPassInfo* info = ToBackend(cmd->info.Get());
 
-                    // NXT has an implicit transition to color attachment on subpasses. Transition
-                    // the attachments now before we start the render pass.
-                    for (uint32_t i = 0; i < renderPass->GetAttachmentCount(); ++i) {
+                    // NXT has an implicit transition to color attachment on render passes.
+                    // Transition the attachments now before we start the render pass.
+                    for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
                         Texture* attachment =
-                            ToBackend(framebuffer->GetTextureView(i)->GetTexture());
+                            ToBackend(info->GetColorAttachment(i).view->GetTexture());
 
-                        if (attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment) {
-                            continue;
+                        if (!(attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment)) {
+                            attachment->RecordBarrier(commands, attachment->GetUsage(),
+                                                      nxt::TextureUsageBit::OutputAttachment);
+                            attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
                         }
+                    }
+                    if (info->HasDepthStencilAttachment()) {
+                        Texture* attachment =
+                            ToBackend(info->GetDepthStencilAttachment().view->GetTexture());
 
-                        attachment->RecordBarrier(commands, attachment->GetUsage(),
-                                                  nxt::TextureUsageBit::OutputAttachment);
-                        attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
+                        if (!(attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment)) {
+                            attachment->RecordBarrier(commands, attachment->GetUsage(),
+                                                      nxt::TextureUsageBit::OutputAttachment);
+                            attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
+                        }
                     }
 
-                    ASSERT(renderPass->GetSubpassCount() == 1);
-                    ASSERT(renderPass->GetAttachmentCount() <= kMaxColorAttachments + 1);
-
-                    std::array<VkClearValue, kMaxColorAttachments + 1> clearValues;
-                    framebuffer->FillClearValues(clearValues.data());
-
-                    VkRenderPassBeginInfo beginInfo;
-                    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-                    beginInfo.pNext = nullptr;
-                    beginInfo.renderPass = renderPass->GetHandle();
-                    beginInfo.framebuffer = framebuffer->GetHandle();
-                    beginInfo.renderArea.offset.x = 0;
-                    beginInfo.renderArea.offset.y = 0;
-                    beginInfo.renderArea.extent.width = framebuffer->GetWidth();
-                    beginInfo.renderArea.extent.height = framebuffer->GetHeight();
-                    beginInfo.clearValueCount = renderPass->GetAttachmentCount();
-                    beginInfo.pClearValues = clearValues.data();
-
-                    device->fn.CmdBeginRenderPass(commands, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+                    info->RecordBeginRenderPass(commands);
 
                     // Set all the dynamic state just in case.
                     device->fn.CmdSetLineWidth(commands, 1.0f);
@@ -228,32 +216,6 @@ namespace backend { namespace vulkan {
 
                     device->fn.CmdSetStencilReference(commands, VK_STENCIL_FRONT_AND_BACK, 0);
 
-                    // The viewport and scissor default to cover all of the attachments
-                    VkViewport viewport;
-                    viewport.x = 0.0f;
-                    viewport.y = 0.0f;
-                    viewport.width = static_cast<float>(framebuffer->GetWidth());
-                    viewport.height = static_cast<float>(framebuffer->GetHeight());
-                    viewport.minDepth = 0.0f;
-                    viewport.maxDepth = 1.0f;
-                    device->fn.CmdSetViewport(commands, 0, 1, &viewport);
-
-                    VkRect2D scissorRect;
-                    scissorRect.offset.x = 0;
-                    scissorRect.offset.y = 0;
-                    scissorRect.extent.width = framebuffer->GetWidth();
-                    scissorRect.extent.height = framebuffer->GetHeight();
-                    device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
-
-                    descriptorSets.OnBeginPass();
-                } break;
-
-                case Command::BeginRenderSubpass: {
-                    mCommands.NextCommand<BeginRenderSubpassCmd>();
-                    // Do nothing related to subpasses because the single subpass is started in
-                    // vkBeginRenderPass
-
-                    // Set up the default state
                     float blendConstants[4] = {
                         0.0f,
                         0.0f,
@@ -261,6 +223,25 @@ namespace backend { namespace vulkan {
                         0.0f,
                     };
                     device->fn.CmdSetBlendConstants(commands, blendConstants);
+
+                    // The viewport and scissor default to cover all of the attachments
+                    VkViewport viewport;
+                    viewport.x = 0.0f;
+                    viewport.y = 0.0f;
+                    viewport.width = static_cast<float>(info->GetWidth());
+                    viewport.height = static_cast<float>(info->GetHeight());
+                    viewport.minDepth = 0.0f;
+                    viewport.maxDepth = 1.0f;
+                    device->fn.CmdSetViewport(commands, 0, 1, &viewport);
+
+                    VkRect2D scissorRect;
+                    scissorRect.offset.x = 0;
+                    scissorRect.offset.y = 0;
+                    scissorRect.extent.width = info->GetWidth();
+                    scissorRect.extent.height = info->GetHeight();
+                    device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
+
+                    descriptorSets.OnBeginPass();
                 } break;
 
                 case Command::DrawArrays: {
@@ -283,11 +264,6 @@ namespace backend { namespace vulkan {
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
                     device->fn.CmdEndRenderPass(commands);
-                } break;
-
-                case Command::EndRenderSubpass: {
-                    mCommands.NextCommand<EndRenderSubpassCmd>();
-                    // Do nothing because the single subpass is ended in vkEndRenderPass
                 } break;
 
                 case Command::BeginComputePass: {

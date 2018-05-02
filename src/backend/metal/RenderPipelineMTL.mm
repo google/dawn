@@ -92,24 +92,17 @@ namespace backend { namespace metal {
             }
         }
 
-        RenderPass* renderPass = ToBackend(GetRenderPass());
-        auto& subpassInfo = renderPass->GetSubpassInfo(GetSubPass());
-
-        if (subpassInfo.depthStencilAttachmentSet) {
-            const auto& attachmentInfo =
-                renderPass->GetAttachmentInfo(subpassInfo.depthStencilAttachment);
-            descriptor.depthAttachmentPixelFormat = MetalPixelFormat(attachmentInfo.format);
-            descriptor.stencilAttachmentPixelFormat = MetalPixelFormat(attachmentInfo.format);
+        if (HasDepthStencilAttachment()) {
+            // TODO(kainino@chromium.org): Handle depth-only and stencil-only formats.
+            nxt::TextureFormat depthStencilFormat = GetDepthStencilFormat();
+            descriptor.depthAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
+            descriptor.stencilAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
         }
 
-        for (unsigned int attachmentSlot : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
-            uint32_t attachment = subpassInfo.colorAttachments[attachmentSlot];
-            const auto& attachmentInfo = renderPass->GetAttachmentInfo(attachment);
-
-            descriptor.colorAttachments[attachmentSlot].pixelFormat =
-                MetalPixelFormat(attachmentInfo.format);
-            ToBackend(GetBlendState(attachmentSlot))
-                ->ApplyBlendState(descriptor.colorAttachments[attachmentSlot]);
+        for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
+            descriptor.colorAttachments[i].pixelFormat =
+                MetalPixelFormat(GetColorAttachmentFormat(i));
+            ToBackend(GetBlendState(i))->ApplyBlendState(descriptor.colorAttachments[i]);
         }
 
         descriptor.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());

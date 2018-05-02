@@ -18,7 +18,6 @@
 #include "backend/Device.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
-#include "backend/RenderPass.h"
 #include "backend/ShaderModule.h"
 
 namespace backend {

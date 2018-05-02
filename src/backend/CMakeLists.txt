@@ -241,8 +241,6 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/DescriptorHeapAllocator.h
         ${D3D12_DIR}/D3D12Backend.cpp
         ${D3D12_DIR}/D3D12Backend.h
-        ${D3D12_DIR}/FramebufferD3D12.cpp
-        ${D3D12_DIR}/FramebufferD3D12.h
         ${D3D12_DIR}/InputStateD3D12.cpp
         ${D3D12_DIR}/InputStateD3D12.h
         ${D3D12_DIR}/NativeSwapChainImplD3D12.cpp
@@ -251,6 +249,8 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/PipelineLayoutD3D12.h
         ${D3D12_DIR}/QueueD3D12.cpp
         ${D3D12_DIR}/QueueD3D12.h
+        ${D3D12_DIR}/RenderPassInfoD3D12.cpp
+        ${D3D12_DIR}/RenderPassInfoD3D12.h
         ${D3D12_DIR}/RenderPipelineD3D12.cpp
         ${D3D12_DIR}/RenderPipelineD3D12.h
         ${D3D12_DIR}/ResourceAllocator.cpp
@@ -308,8 +308,6 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/DepthStencilStateVk.h
         ${VULKAN_DIR}/FencedDeleter.cpp
         ${VULKAN_DIR}/FencedDeleter.h
-        ${VULKAN_DIR}/FramebufferVk.cpp
-        ${VULKAN_DIR}/FramebufferVk.h
         ${VULKAN_DIR}/InputStateVk.cpp
         ${VULKAN_DIR}/InputStateVk.h
         ${VULKAN_DIR}/MemoryAllocator.cpp
@@ -318,8 +316,10 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/NativeSwapChainImplVk.h
         ${VULKAN_DIR}/PipelineLayoutVk.cpp
         ${VULKAN_DIR}/PipelineLayoutVk.h
-        ${VULKAN_DIR}/RenderPassVk.cpp
-        ${VULKAN_DIR}/RenderPassVk.h
+        ${VULKAN_DIR}/RenderPassCache.cpp
+        ${VULKAN_DIR}/RenderPassCache.h
+        ${VULKAN_DIR}/RenderPassInfoVk.cpp
+        ${VULKAN_DIR}/RenderPassInfoVk.h
         ${VULKAN_DIR}/RenderPipelineVk.cpp
         ${VULKAN_DIR}/RenderPipelineVk.h
         ${VULKAN_DIR}/SamplerVk.cpp
@@ -367,8 +367,6 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/Device.cpp
     ${BACKEND_DIR}/Device.h
     ${BACKEND_DIR}/Forward.h
-    ${BACKEND_DIR}/Framebuffer.cpp
-    ${BACKEND_DIR}/Framebuffer.h
     ${BACKEND_DIR}/InputState.cpp
     ${BACKEND_DIR}/InputState.h
     ${BACKEND_DIR}/RenderPipeline.cpp
@@ -381,8 +379,8 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/PipelineLayout.h
     ${BACKEND_DIR}/Queue.cpp
     ${BACKEND_DIR}/Queue.h
-    ${BACKEND_DIR}/RenderPass.cpp
-    ${BACKEND_DIR}/RenderPass.h
+    ${BACKEND_DIR}/RenderPassInfo.cpp
+    ${BACKEND_DIR}/RenderPassInfo.h
     ${BACKEND_DIR}/RefCounted.cpp
     ${BACKEND_DIR}/RefCounted.h
     ${BACKEND_DIR}/Sampler.cpp

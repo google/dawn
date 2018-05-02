@@ -23,42 +23,14 @@ class VertexBufferValidationTest : public ValidationTest {
         void SetUp() override {
             ValidationTest::SetUp();
 
+            renderpass = CreateSimpleRenderPass();
+
             fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(0.0, 1.0, 0.0, 1.0);
                 })");
-        }
-
-        void MakeRenderPassAndFrameBuffer(uint32_t subpassCount) {
-            auto colorBuffer = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
-                .SetExtent(640, 480, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
-                .GetResult();
-            colorBuffer.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
-            auto colorView = colorBuffer.CreateTextureViewBuilder()
-                .GetResult();
-
-            auto renderpassBuilder = device.CreateRenderPassBuilder();
-                renderpassBuilder.SetAttachmentCount(1)
-                .AttachmentSetFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetSubpassCount(subpassCount);
-
-            for (uint32_t i = 0; i < subpassCount; ++i) {
-                renderpassBuilder.SubpassSetColorAttachment(i, 0, 0);
-            }
-
-            renderpass = renderpassBuilder.GetResult();
-
-            framebuffer = device.CreateFramebufferBuilder()
-                .SetRenderPass(renderpass)
-                .SetDimensions(640, 480)
-                .SetAttachment(0, colorView)
-                .GetResult();
         }
 
         template <unsigned int N>
@@ -105,102 +77,89 @@ class VertexBufferValidationTest : public ValidationTest {
             return builder.GetResult();
         }
 
-        nxt::RenderPipeline MakeRenderPipeline(uint32_t subpass, const nxt::ShaderModule& vsModule, const nxt::InputState& inputState) {
+        nxt::RenderPipeline MakeRenderPipeline(const nxt::ShaderModule& vsModule, const nxt::InputState& inputState) {
             return device.CreateRenderPipelineBuilder()
-                .SetSubpass(renderpass, subpass)
+                .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
                 .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
                 .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)
                 .GetResult();
         }
 
-        nxt::RenderPass renderpass;
-        nxt::Framebuffer framebuffer;
+        nxt::RenderPassInfo renderpass;
         nxt::ShaderModule fsModule;
 };
 
 TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
-    MakeRenderPassAndFrameBuffer(1);
-
     auto vsModule2 = MakeVertexShader(2);
     auto vsModule1 = MakeVertexShader(1);
 
     auto inputState2 = MakeInputState(2);
     auto inputState1 = MakeInputState(1);
 
-    auto pipeline2 = MakeRenderPipeline(0, vsModule2, inputState2);
-    auto pipeline1 = MakeRenderPipeline(0, vsModule1, inputState1);
+    auto pipeline2 = MakeRenderPipeline(vsModule2, inputState2);
+    auto pipeline1 = MakeRenderPipeline(vsModule1, inputState1);
 
     auto vertexBuffers = MakeVertexBuffers<2>();
     uint32_t offsets[] = { 0, 0 };
 
     // Check failure when vertex buffer is not set
     AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
-        .SetRenderPipeline(pipeline1)
-        .DrawArrays(3, 1, 0, 0)
-        .EndRenderSubpass()
+        .BeginRenderPass(renderpass)
+            .SetRenderPipeline(pipeline1)
+            .DrawArrays(3, 1, 0, 0)
         .EndRenderPass()
         .GetResult();
 
     // Check success when vertex buffer is inherited from previous pipeline
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
-        .SetRenderPipeline(pipeline2)
-        .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
-        .DrawArrays(3, 1, 0, 0)
-        .SetRenderPipeline(pipeline1)
-        .DrawArrays(3, 1, 0, 0)
-        .EndRenderSubpass()
+        .BeginRenderPass(renderpass)
+            .SetRenderPipeline(pipeline2)
+            .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
+            .DrawArrays(3, 1, 0, 0)
+            .SetRenderPipeline(pipeline1)
+            .DrawArrays(3, 1, 0, 0)
         .EndRenderPass()
         .GetResult();
 }
 
-TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenSubpasses) {
-    MakeRenderPassAndFrameBuffer(2);
-
+TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
     auto vsModule2 = MakeVertexShader(2);
     auto vsModule1 = MakeVertexShader(1);
 
     auto inputState2 = MakeInputState(2);
     auto inputState1 = MakeInputState(1);
 
-    auto pipeline2 = MakeRenderPipeline(0, vsModule2, inputState2);
-    auto pipeline1 = MakeRenderPipeline(1, vsModule1, inputState1);
+    auto pipeline2 = MakeRenderPipeline(vsModule2, inputState2);
+    auto pipeline1 = MakeRenderPipeline(vsModule1, inputState1);
 
     auto vertexBuffers = MakeVertexBuffers<2>();
     uint32_t offsets[] = { 0, 0 };
 
-    // Check success when vertex buffer is set for each subpass
+    // Check success when vertex buffer is set for each render pass
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
-        .SetRenderPipeline(pipeline2)
-        .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
-        .DrawArrays(3, 1, 0, 0)
-        .EndRenderSubpass()
-        .BeginRenderSubpass()
-        .SetRenderPipeline(pipeline1)
-        .SetVertexBuffers(0, 1, vertexBuffers.data(), offsets)
-        .DrawArrays(3, 1, 0, 0)
-        .EndRenderSubpass()
+        .BeginRenderPass(renderpass)
+            .SetRenderPipeline(pipeline2)
+            .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
+            .DrawArrays(3, 1, 0, 0)
+        .EndRenderPass()
+        .BeginRenderPass(renderpass)
+            .SetRenderPipeline(pipeline1)
+            .SetVertexBuffers(0, 1, vertexBuffers.data(), offsets)
+            .DrawArrays(3, 1, 0, 0)
         .EndRenderPass()
         .GetResult();
 
     // Check failure because vertex buffer is not inherited in second subpass
     AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass, framebuffer)
-        .BeginRenderSubpass()
-        .SetRenderPipeline(pipeline2)
-        .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
-        .DrawArrays(3, 1, 0, 0)
-        .EndRenderSubpass()
-        .BeginRenderSubpass()
-        .SetRenderPipeline(pipeline1)
-        .DrawArrays(3, 1, 0, 0)
-        .EndRenderSubpass()
+        .BeginRenderPass(renderpass)
+            .SetRenderPipeline(pipeline2)
+            .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
+            .DrawArrays(3, 1, 0, 0)
+        .EndRenderPass()
+        .BeginRenderPass(renderpass)
+            .SetRenderPipeline(pipeline1)
+            .DrawArrays(3, 1, 0, 0)
         .EndRenderPass()
         .GetResult();
 }

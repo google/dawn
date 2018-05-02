@@ -19,10 +19,9 @@
 #include "backend/Buffer.h"
 #include "backend/ComputePipeline.h"
 #include "backend/Forward.h"
-#include "backend/Framebuffer.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
-#include "backend/RenderPass.h"
+#include "backend/RenderPassInfo.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Texture.h"
 #include "common/Assert.h"
@@ -35,10 +34,6 @@ namespace backend {
 
     bool CommandBufferStateTracker::HaveRenderPass() const {
         return mCurrentRenderPass != nullptr;
-    }
-
-    bool CommandBufferStateTracker::HaveRenderSubpass() const {
-        return mAspects[VALIDATION_ASPECT_RENDER_SUBPASS];
     }
 
     bool CommandBufferStateTracker::ValidateCanCopy() const {
@@ -91,7 +86,7 @@ namespace backend {
     bool CommandBufferStateTracker::ValidateCanDrawArrays() {
         // TODO(kainino@chromium.org): Check for a current render pass
         constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE |  // implicitly requires RENDER_SUBPASS
+            1 << VALIDATION_ASPECT_RENDER_PIPELINE |  // implicitly requires RENDER_PASS
             1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
@@ -137,15 +132,16 @@ namespace backend {
                     "SetPushConstants stage must be compute or 0 in compute passes");
                 return false;
             }
-        } else if (mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
+        } else if (mAspects[VALIDATION_ASPECT_RENDER_PASS]) {
             if (stages & ~(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
                 mBuilder->HandleError(
-                    "SetPushConstants stage must be a subset if (vertex|fragment) in subpasses");
+                    "SetPushConstants stage must be a subset if (vertex|fragment) in render "
+                    "passes");
                 return false;
             }
         } else {
             mBuilder->HandleError(
-                "PushConstants must be set in either compute passes or subpasses");
+                "PushConstants must be set in either compute passes or render passes");
             return false;
         }
         return true;
@@ -170,64 +166,7 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::BeginSubpass() {
-        if (mCurrentRenderPass == nullptr) {
-            mBuilder->HandleError("Can't begin a subpass without an active render pass");
-            return false;
-        }
-        if (mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-            mBuilder->HandleError("Can't begin a subpass without ending the previous subpass");
-            return false;
-        }
-        if (mCurrentSubpass >= mCurrentRenderPass->GetSubpassCount()) {
-            mBuilder->HandleError("Can't begin a subpass beyond the last subpass");
-            return false;
-        }
-
-        auto& subpassInfo = mCurrentRenderPass->GetSubpassInfo(mCurrentSubpass);
-        for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
-            auto attachmentSlot = subpassInfo.colorAttachments[location];
-            auto* tv = mCurrentFramebuffer->GetTextureView(attachmentSlot);
-            auto* texture = tv->GetTexture();
-            if (!EnsureTextureUsage(texture, nxt::TextureUsageBit::OutputAttachment)) {
-                mBuilder->HandleError("Unable to ensure texture has OutputAttachment usage");
-                return false;
-            }
-            mTexturesAttached.insert(texture);
-        }
-
-        mAspects.set(VALIDATION_ASPECT_RENDER_SUBPASS);
-        return true;
-    }
-
-    bool CommandBufferStateTracker::EndSubpass() {
-        if (!mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-            mBuilder->HandleError("Can't end a subpass without beginning one");
-            return false;
-        }
-        ASSERT(mCurrentRenderPass != nullptr);
-
-        auto& subpassInfo = mCurrentRenderPass->GetSubpassInfo(mCurrentSubpass);
-        for (auto location : IterateBitSet(subpassInfo.colorAttachmentsSet)) {
-            auto attachmentSlot = subpassInfo.colorAttachments[location];
-            auto* tv = mCurrentFramebuffer->GetTextureView(attachmentSlot);
-            auto* texture = tv->GetTexture();
-            if (texture->IsFrozen()) {
-                continue;
-            }
-        }
-        // Everything in mTexturesAttached should be for the current render subpass.
-        mTexturesAttached.clear();
-
-        mCurrentSubpass += 1;
-        mInputsSet.reset();
-        mAspects.reset(VALIDATION_ASPECT_RENDER_SUBPASS);
-        UnsetPipeline();
-        return true;
-    }
-
-    bool CommandBufferStateTracker::BeginRenderPass(RenderPassBase* renderPass,
-                                                    FramebufferBase* framebuffer) {
+    bool CommandBufferStateTracker::BeginRenderPass(RenderPassInfoBase* info) {
         if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
             mBuilder->HandleError("Cannot begin a render pass while a compute pass is active");
             return false;
@@ -236,15 +175,27 @@ namespace backend {
             mBuilder->HandleError("A render pass is already active");
             return false;
         }
-        ASSERT(!mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]);
-        if (!framebuffer->GetRenderPass()->IsCompatibleWith(renderPass)) {
-            mBuilder->HandleError("Framebuffer is incompatible with this render pass");
-            return false;
+
+        mCurrentRenderPass = info;
+        mAspects.set(VALIDATION_ASPECT_RENDER_PASS);
+
+        for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
+            TextureBase* texture = info->GetColorAttachment(i).view->GetTexture();
+            if (!EnsureTextureUsage(texture, nxt::TextureUsageBit::OutputAttachment)) {
+                mBuilder->HandleError("Unable to ensure texture has OutputAttachment usage");
+                return false;
+            }
+            mTexturesAttached.insert(texture);
         }
 
-        mCurrentRenderPass = renderPass;
-        mCurrentFramebuffer = framebuffer;
-        mCurrentSubpass = 0;
+        if (info->HasDepthStencilAttachment()) {
+            TextureBase* texture = info->GetDepthStencilAttachment().view->GetTexture();
+            if (!EnsureTextureUsage(texture, nxt::TextureUsageBit::OutputAttachment)) {
+                mBuilder->HandleError("Unable to ensure texture has OutputAttachment usage");
+                return false;
+            }
+            mTexturesAttached.insert(texture);
+        }
 
         return true;
     }
@@ -254,16 +205,15 @@ namespace backend {
             mBuilder->HandleError("No render pass is currently active");
             return false;
         }
-        if (mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-            mBuilder->HandleError("Can't end a render pass while a subpass is active");
-            return false;
-        }
-        if (mCurrentSubpass < mCurrentRenderPass->GetSubpassCount() - 1) {
-            mBuilder->HandleError("Can't end a render pass before the last subpass");
-            return false;
-        }
+
+        // Everything in mTexturesAttached should be for the current render pass.
+        mTexturesAttached.clear();
+
+        mInputsSet.reset();
+        UnsetPipeline();
+
+        mAspects.reset(VALIDATION_ASPECT_RENDER_PASS);
         mCurrentRenderPass = nullptr;
-        mCurrentFramebuffer = nullptr;
 
         return true;
     }
@@ -284,11 +234,11 @@ namespace backend {
     }
 
     bool CommandBufferStateTracker::SetRenderPipeline(RenderPipelineBase* pipeline) {
-        if (!mAspects[VALIDATION_ASPECT_RENDER_SUBPASS]) {
-            mBuilder->HandleError("A render subpass must be active when a render pipeline is set");
+        if (!mAspects[VALIDATION_ASPECT_RENDER_PASS]) {
+            mBuilder->HandleError("A render pass must be active when a render pipeline is set");
             return false;
         }
-        if (!pipeline->GetRenderPass()->IsCompatibleWith(mCurrentRenderPass)) {
+        if (!pipeline->IsCompatibleWith(mCurrentRenderPass)) {
             mBuilder->HandleError("Pipeline is incompatible with this render pass");
             return false;
         }

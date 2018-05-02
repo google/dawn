@@ -26,7 +26,6 @@ nxt::Queue queue;
 nxt::SwapChain swapchain;
 nxt::TextureView depthStencilView;
 nxt::RenderPipeline pipeline;
-nxt::RenderPass renderpass;
 
 float RandomFloat(float min, float max) {
     float zeroOne = rand() / float(RAND_MAX);
@@ -108,11 +107,11 @@ void init() {
             fragColor = v_color;
         })");
 
-    renderpass = CreateDefaultRenderPass(device);
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     pipeline = device.CreateRenderPipelineBuilder()
-        .SetSubpass(renderpass, 0)
+        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
+        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
         .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
         .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
         .GetResult();
@@ -130,8 +129,8 @@ void init() {
 
 void frame() {
     nxt::Texture backbuffer;
-    nxt::Framebuffer framebuffer;
-    GetNextFramebuffer(device, renderpass, swapchain, depthStencilView, &backbuffer, &framebuffer);
+    nxt::RenderPassInfo renderPass;
+    GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     static int f = 0;
     f++;
@@ -141,8 +140,7 @@ void frame() {
     nxt::CommandBuffer commands;
     {
         nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderpass, framebuffer)
-            .BeginRenderSubpass()
+            .BeginRenderPass(renderPass)
             .SetRenderPipeline(pipeline)
             .Clone();
 
@@ -153,7 +151,6 @@ void frame() {
             i++;
         }
 
-        builder.EndRenderSubpass();
         builder.EndRenderPass();
         commands = builder.GetResult();
     }
