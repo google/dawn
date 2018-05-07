@@ -21,6 +21,7 @@ list(APPEND COMMON_SOURCES
     ${COMMON_DIR}/Compiler.h
     ${COMMON_DIR}/DynamicLib.cpp
     ${COMMON_DIR}/DynamicLib.h
+    ${COMMON_DIR}/HashUtils.h
     ${COMMON_DIR}/Math.cpp
     ${COMMON_DIR}/Math.h
     ${COMMON_DIR}/Platform.h

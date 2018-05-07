@@ -15,39 +15,19 @@
 #include "backend/BindGroupLayout.h"
 
 #include "backend/Device.h"
+#include "common/HashUtils.h"
 
 #include <functional>
 
 namespace backend {
 
     namespace {
-
-        // Workaround for Chrome's stdlib having a broken std::hash for enums and bitsets
-        template <typename T>
-        typename std::enable_if<std::is_enum<T>::value, size_t>::type Hash(T value) {
-            using Integral = typename nxt::UnderlyingType<T>::type;
-            return std::hash<Integral>()(static_cast<Integral>(value));
-        }
-
-        template <size_t N>
-        size_t Hash(const std::bitset<N>& value) {
-            static_assert(N <= sizeof(unsigned long long) * 8, "");
-            return std::hash<unsigned long long>()(value.to_ullong());
-        }
-
-        // TODO(cwallez@chromium.org): see if we can use boost's hash combined or some equivalent
-        // this currently assumes that size_t is 64 bits
-        void CombineHashes(size_t* h1, size_t h2) {
-            *h1 ^= (h2 << 7) + (h2 >> (sizeof(size_t) * 8 - 7)) + 0x304975;
-        }
-
         size_t HashBindingInfo(const BindGroupLayoutBase::LayoutBindingInfo& info) {
             size_t hash = Hash(info.mask);
 
             for (size_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
                 if (info.mask[binding]) {
-                    CombineHashes(&hash, Hash(info.visibilities[binding]));
-                    CombineHashes(&hash, Hash(info.types[binding]));
+                    HashCombine(&hash, info.visibilities[binding], info.types[binding]);
                 }
             }
 
