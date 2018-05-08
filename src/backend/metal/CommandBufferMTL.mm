@@ -43,8 +43,7 @@ namespace backend { namespace metal {
                 ASSERT(compute == nil);
                 if (blit != nil) {
                     [blit endEncoding];
-                    [blit release];
-                    blit = nil;
+                    blit = nil;  // This will be autoreleased.
                 }
             }
 
@@ -65,16 +64,14 @@ namespace backend { namespace metal {
             void EndCompute() {
                 ASSERT(compute != nil);
                 [compute endEncoding];
-                [compute release];
-                compute = nil;
+                compute = nil;  // This will be autoreleased.
             }
 
             void BeginSubpass(id<MTLCommandBuffer> commandBuffer, uint32_t subpass) {
                 ASSERT(currentRenderPass);
                 if (render != nil) {
                     [render endEncoding];
-                    [render release];
-                    render = nil;
+                    render = nil;  // This will be autoreleased.
                 }
 
                 const auto& info = currentRenderPass->GetSubpassInfo(subpass);
@@ -144,15 +141,13 @@ namespace backend { namespace metal {
                 }
 
                 render = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-                [descriptor release];
                 // TODO(cwallez@chromium.org): does any state need to be reset?
             }
 
             void EndSubpass() {
                 ASSERT(render != nil);
                 [render endEncoding];
-                [render release];
-                render = nil;
+                render = nil;  // This will be autoreleased.
             }
         };
     }

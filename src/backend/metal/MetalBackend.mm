@@ -62,8 +62,7 @@ namespace backend { namespace metal {
         }
         Tick();
 
-        [mPendingCommands release];
-        mPendingCommands = nil;
+        mPendingCommands = nil;  // This will be autoreleased.
 
         delete mMapTracker;
         mMapTracker = nullptr;
@@ -171,8 +170,7 @@ namespace backend { namespace metal {
         }];
 
         [mPendingCommands commit];
-        [mPendingCommands release];
-        mPendingCommands = nil;
+        mPendingCommands = nil;  // This will be autoreleased.
         mPendingCommandSerial++;
     }
 
