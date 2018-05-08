@@ -27,4 +27,14 @@
 #    error "Unsupported platform."
 #endif
 
+#if defined(_WIN64) || defined(__aarch64__) || defined(__x86_64__)
+#    define NXT_PLATFORM_64_BIT 1
+static_assert(sizeof(sizeof(char)) == 8, "Expect sizeof(size_t) == 8");
+#elif defined(_WIN32) || defined(__i386__) || defined(__arm__)
+#    define NXT_PLATFORM_32_BIT 1
+static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
+#else
+#    error "Unsupported platform"
+#endif
+
 #endif  // COMMON_PLATFORM_H_
