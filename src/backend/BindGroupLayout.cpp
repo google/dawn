@@ -15,6 +15,7 @@
 #include "backend/BindGroupLayout.h"
 
 #include "backend/Device.h"
+#include "common/BitSetIterator.h"
 #include "common/HashUtils.h"
 
 #include <functional>
@@ -25,10 +26,8 @@ namespace backend {
         size_t HashBindingInfo(const BindGroupLayoutBase::LayoutBindingInfo& info) {
             size_t hash = Hash(info.mask);
 
-            for (size_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
-                if (info.mask[binding]) {
-                    HashCombine(&hash, info.visibilities[binding], info.types[binding]);
-                }
+            for (uint32_t binding : IterateBitSet(info.mask)) {
+                HashCombine(&hash, info.visibilities[binding], info.types[binding]);
             }
 
             return hash;
@@ -40,14 +39,9 @@ namespace backend {
                 return false;
             }
 
-            for (size_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
-                if (a.mask[binding]) {
-                    if (a.visibilities[binding] != b.visibilities[binding]) {
-                        return false;
-                    }
-                    if (a.types[binding] != b.types[binding]) {
-                        return false;
-                    }
+            for (uint32_t binding : IterateBitSet(a.mask)) {
+                if ((a.visibilities[binding] != b.visibilities[binding]) || (a.types[binding] != b.types[binding])) {
+                    return false;
                 }
             }
 
