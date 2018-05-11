@@ -46,7 +46,7 @@ class DepthStencilStateTest : public NXTTest {
 
             depthTextureView = depthTexture.CreateTextureViewBuilder().GetResult();
 
-            renderpass = device.CreateRenderPassInfoBuilder()
+            renderpass = device.CreateRenderPassDescriptorBuilder()
                 .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
                 .SetDepthStencilAttachment(depthTextureView, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
                 .GetResult();
@@ -247,7 +247,7 @@ class DepthStencilStateTest : public NXTTest {
             DoTest(testParams, expected, expected);
         }
 
-        nxt::RenderPassInfo renderpass;
+        nxt::RenderPassDescriptor renderpass;
         nxt::Texture renderTarget;
         nxt::Texture depthTexture;
         nxt::TextureView renderTargetView;

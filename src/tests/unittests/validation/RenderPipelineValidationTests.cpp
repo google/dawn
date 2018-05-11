@@ -54,7 +54,7 @@ class RenderPipelineValidationTest : public ValidationTest {
             return builder;
         }
 
-        nxt::RenderPassInfo renderpass;
+        nxt::RenderPassDescriptor renderpass;
         nxt::ShaderModule vsModule;
         nxt::ShaderModule fsModule;
         nxt::InputState inputState;

@@ -24,7 +24,7 @@
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
 #include "backend/Queue.h"
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
@@ -124,8 +124,8 @@ namespace backend {
     QueueBuilder* DeviceBase::CreateQueueBuilder() {
         return new QueueBuilder(this);
     }
-    RenderPassInfoBuilder* DeviceBase::CreateRenderPassInfoBuilder() {
-        return new RenderPassInfoBuilder(this);
+    RenderPassDescriptorBuilder* DeviceBase::CreateRenderPassDescriptorBuilder() {
+        return new RenderPassDescriptorBuilder(this);
     }
     RenderPipelineBuilder* DeviceBase::CreateRenderPipelineBuilder() {
         return new RenderPipelineBuilder(this);

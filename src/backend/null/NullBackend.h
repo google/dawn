@@ -28,7 +28,7 @@
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
 #include "backend/Queue.h"
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Sampler.h"
 #include "backend/ShaderModule.h"
@@ -50,7 +50,7 @@ namespace backend { namespace null {
     using InputState = InputStateBase;
     using PipelineLayout = PipelineLayoutBase;
     class Queue;
-    using RenderPassInfo = RenderPassInfoBase;
+    using RenderPassDescriptor = RenderPassDescriptorBase;
     using RenderPipeline = RenderPipelineBase;
     using Sampler = SamplerBase;
     using ShaderModule = ShaderModuleBase;
@@ -71,7 +71,7 @@ namespace backend { namespace null {
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassInfoType = RenderPassInfo;
+        using RenderPassDescriptorType = RenderPassDescriptor;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
@@ -106,7 +106,8 @@ namespace backend { namespace null {
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
         QueueBase* CreateQueue(QueueBuilder* builder) override;
-        RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) override;
+        RenderPassDescriptorBase* CreateRenderPassDescriptor(
+            RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;

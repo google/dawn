@@ -41,8 +41,8 @@ namespace backend {
     class PipelineLayoutBuilder;
     class QueueBase;
     class QueueBuilder;
-    class RenderPassInfoBase;
-    class RenderPassInfoBuilder;
+    class RenderPassDescriptorBase;
+    class RenderPassDescriptorBuilder;
     class RenderPipelineBase;
     class RenderPipelineBuilder;
     class SamplerBase;

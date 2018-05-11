@@ -69,7 +69,7 @@ bool ValidationTest::EndExpectDeviceError() {
     return mError;
 }
 
-nxt::RenderPassInfo ValidationTest::CreateSimpleRenderPass() {
+nxt::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
         auto colorBuffer = device.CreateTextureBuilder()
             .SetDimension(nxt::TextureDimension::e2D)
             .SetExtent(640, 480, 1)
@@ -81,7 +81,7 @@ nxt::RenderPassInfo ValidationTest::CreateSimpleRenderPass() {
         auto colorView = colorBuffer.CreateTextureViewBuilder()
             .GetResult();
 
-        return device.CreateRenderPassInfoBuilder()
+        return device.CreateRenderPassDescriptorBuilder()
             .SetColorAttachment(0, colorView, nxt::LoadOp::Clear)
             .GetResult();
 }
@@ -130,7 +130,7 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
 
     nxt::TextureView view = AssertWillBeSuccess(dummy.attachment.CreateTextureViewBuilder()).GetResult();
 
-    dummy.renderPass = AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+    dummy.renderPass = AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
         .SetColorAttachment(0, view, nxt::LoadOp::Clear)
         .GetResult();
 

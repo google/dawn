@@ -132,8 +132,8 @@ void init() {
 
 void frame() {
     nxt::Texture backbuffer;
-    nxt::RenderPassInfo renderPass;
-    GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
+    nxt::RenderPassDescriptor renderPass;
+    GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .TransitionBufferUsage(buffer, nxt::BufferUsageBit::Storage)

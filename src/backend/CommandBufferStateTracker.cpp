@@ -21,7 +21,7 @@
 #include "backend/Forward.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/RenderPipeline.h"
 #include "backend/Texture.h"
 #include "common/Assert.h"
@@ -166,7 +166,7 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::BeginRenderPass(RenderPassInfoBase* info) {
+    bool CommandBufferStateTracker::BeginRenderPass(RenderPassDescriptorBase* info) {
         if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
             mBuilder->HandleError("Cannot begin a render pass while a compute pass is active");
             return false;

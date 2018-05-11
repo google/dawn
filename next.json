@@ -345,7 +345,7 @@
             {
                 "name": "begin render pass",
                 "args": [
-                    {"name": "info", "type": "render pass info"}
+                    {"name": "info", "type": "render pass descriptor"}
                 ]
             },
             {
@@ -592,8 +592,8 @@
                 "returns": "depth stencil state builder"
             },
             {
-                "name": "create render pass info builder",
-                "returns": "render pass info builder"
+                "name": "create render pass descriptor builder",
+                "returns": "render pass descriptor builder"
             },
             {
                 "name": "create input state builder",
@@ -814,12 +814,12 @@
             }
         ]
     },
-    "render pass info builder": {
+    "render pass descriptor builder": {
         "category": "object",
         "methods": [
             {
                 "name": "get result",
-                "returns": "render pass info"
+                "returns": "render pass descriptor"
             },
             {
                 "name": "set color attachment",
@@ -858,7 +858,7 @@
             }
         ]
     },
-    "render pass info": {
+    "render pass descriptor": {
         "category": "object"
     },
     "render pipeline": {

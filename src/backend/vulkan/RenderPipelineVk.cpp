@@ -20,7 +20,7 @@
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/RenderPassCache.h"
-#include "backend/vulkan/RenderPassInfoVk.h"
+#include "backend/vulkan/RenderPassDescriptorVk.h"
 #include "backend/vulkan/ShaderModuleVk.h"
 #include "backend/vulkan/VulkanBackend.h"
 

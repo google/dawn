@@ -111,7 +111,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
 
     // Part 1: clear once, check to make sure it's cleared
 
-    auto renderPassClearZero = device.CreateRenderPassInfoBuilder()
+    auto renderPassClearZero = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
         .SetColorAttachmentClearColor(0, 0.0f, 0.0f, 0.0f, 0.0f)
         .GetResult();
@@ -123,7 +123,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
         .EndRenderPass()
         .GetResult();
 
-    auto renderPassClearGreen = device.CreateRenderPassInfoBuilder()
+    auto renderPassClearGreen = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
         .SetColorAttachmentClearColor(0, 0.0f, 1.0f, 0.0f, 1.0f)
         .GetResult();
@@ -143,7 +143,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
 
     // Part 2: draw a blue quad into the right half of the render target, and check result
 
-    auto renderPassLoad = device.CreateRenderPassInfoBuilder()
+    auto renderPassLoad = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Load)
         .GetResult();
 

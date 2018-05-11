@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_RENDERPASSINFO_H_
-#define BACKEND_RENDERPASSINFO_H_
+#ifndef BACKEND_RENDERPASSDESCRIPTOR_H_
+#define BACKEND_RENDERPASSDESCRIPTOR_H_
 
 #include "backend/Builder.h"
 #include "backend/Forward.h"
@@ -42,12 +42,12 @@ namespace backend {
         Ref<TextureViewBase> view;
     };
 
-    // RenderPassInfo contains the list of attachments for a renderpass along with data such as the
-    // load operation and the clear values for the attachments.
+    // RenderPassDescriptor contains the list of attachments for a renderpass along with data such
+    // as the load operation and the clear values for the attachments.
 
-    class RenderPassInfoBase : public RefCounted {
+    class RenderPassDescriptorBase : public RefCounted {
       public:
-        RenderPassInfoBase(RenderPassInfoBuilder* builder);
+        RenderPassDescriptorBase(RenderPassDescriptorBuilder* builder);
 
         std::bitset<kMaxColorAttachments> GetColorAttachmentMask() const;
         bool HasDepthStencilAttachment() const;
@@ -72,12 +72,12 @@ namespace backend {
         uint32_t mHeight;
     };
 
-    class RenderPassInfoBuilder : public Builder<RenderPassInfoBase> {
+    class RenderPassDescriptorBuilder : public Builder<RenderPassDescriptorBase> {
       public:
-        RenderPassInfoBuilder(DeviceBase* device);
+        RenderPassDescriptorBuilder(DeviceBase* device);
 
         // NXT API
-        RenderPassInfoBase* GetResultImpl() override;
+        RenderPassDescriptorBase* GetResultImpl() override;
         void SetColorAttachment(uint32_t attachment,
                                 TextureViewBase* textureView,
                                 nxt::LoadOp loadOp);
@@ -92,7 +92,7 @@ namespace backend {
         void SetDepthStencilAttachmentClearValue(float clearDepth, uint32_t clearStencil);
 
       private:
-        friend class RenderPassInfoBase;
+        friend class RenderPassDescriptorBase;
 
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
         std::array<RenderPassColorAttachmentInfo, kMaxColorAttachments> mColorAttachments;

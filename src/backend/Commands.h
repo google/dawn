@@ -15,7 +15,7 @@
 #ifndef BACKEND_COMMANDS_H_
 #define BACKEND_COMMANDS_H_
 
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/Texture.h"
 
 #include "nxt/nxtcpp.h"
@@ -53,7 +53,7 @@ namespace backend {
     struct BeginComputePassCmd {};
 
     struct BeginRenderPassCmd {
-        Ref<RenderPassInfoBase> info;
+        Ref<RenderPassDescriptorBase> info;
     };
 
     struct BufferCopyLocation {

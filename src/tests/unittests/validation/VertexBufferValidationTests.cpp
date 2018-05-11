@@ -86,7 +86,7 @@ class VertexBufferValidationTest : public ValidationTest {
                 .GetResult();
         }
 
-        nxt::RenderPassInfo renderpass;
+        nxt::RenderPassDescriptor renderpass;
         nxt::ShaderModule fsModule;
 };
 

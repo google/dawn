@@ -707,7 +707,7 @@ TEST_P(BlendStateTest, IndependentBlendState) {
         renderTargetViews[i] = renderTargets[i].CreateTextureViewBuilder().GetResult();
     }
 
-    nxt::RenderPassInfo renderpass = device.CreateRenderPassInfoBuilder()
+    nxt::RenderPassDescriptor renderpass = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, renderTargetViews[0], nxt::LoadOp::Clear)
         .SetColorAttachment(1, renderTargetViews[1], nxt::LoadOp::Clear)
         .SetColorAttachment(2, renderTargetViews[2], nxt::LoadOp::Clear)

@@ -259,7 +259,7 @@ void initSim() {
     }
 }
 
-nxt::CommandBuffer createCommandBuffer(const nxt::RenderPassInfo& renderPass, size_t i) {
+nxt::CommandBuffer createCommandBuffer(const nxt::RenderPassDescriptor& renderPass, size_t i) {
     static const uint32_t zeroOffsets[1] = {0};
     auto& bufferSrc = particleBuffers[i];
     auto& bufferDst = particleBuffers[(i + 1) % 2];
@@ -298,8 +298,8 @@ void init() {
 
 void frame() {
     nxt::Texture backbuffer;
-    nxt::RenderPassInfo renderPass;
-    GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
+    nxt::RenderPassDescriptor renderPass;
+    GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     nxt::CommandBuffer commandBuffer = createCommandBuffer(renderPass, pingpong);
     queue.Submit(1, &commandBuffer);

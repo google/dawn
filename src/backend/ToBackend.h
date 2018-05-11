@@ -84,8 +84,8 @@ namespace backend {
     };
 
     template <typename BackendTraits>
-    struct ToBackendTraits<RenderPassInfoBase, BackendTraits> {
-        using BackendType = typename BackendTraits::RenderPassInfoType;
+    struct ToBackendTraits<RenderPassDescriptorBase, BackendTraits> {
+        using BackendType = typename BackendTraits::RenderPassDescriptorType;
     };
 
     template <typename BackendTraits>

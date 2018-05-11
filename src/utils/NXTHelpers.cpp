@@ -130,7 +130,7 @@ namespace utils {
                            .GetResult();
 
         nxt::TextureView colorView = result.color.CreateTextureViewBuilder().GetResult();
-        result.renderPassInfo = device.CreateRenderPassInfoBuilder()
+        result.renderPassInfo = device.CreateRenderPassDescriptorBuilder()
                                     .SetColorAttachment(0, colorView, nxt::LoadOp::Clear)
                                     .GetResult();
 

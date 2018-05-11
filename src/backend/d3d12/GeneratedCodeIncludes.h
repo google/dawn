@@ -23,7 +23,7 @@
 #include "backend/d3d12/InputStateD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/QueueD3D12.h"
-#include "backend/d3d12/RenderPassInfoD3D12.h"
+#include "backend/d3d12/RenderPassDescriptorD3D12.h"
 #include "backend/d3d12/RenderPipelineD3D12.h"
 #include "backend/d3d12/SamplerD3D12.h"
 #include "backend/d3d12/ShaderModuleD3D12.h"

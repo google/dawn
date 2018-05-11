@@ -98,8 +98,8 @@ void frame() {
     buffer.SetSubData(0, sizeof(s), reinterpret_cast<uint8_t*>(&s));
 
     nxt::Texture backbuffer;
-    nxt::RenderPassInfo renderPass;
-    GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
+    nxt::RenderPassDescriptor renderPass;
+    GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass)

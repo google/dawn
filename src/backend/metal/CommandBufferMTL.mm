@@ -64,7 +64,7 @@ namespace backend { namespace metal {
                 compute = nil;  // This will be autoreleased.
             }
 
-            void BeginRenderPass(id<MTLCommandBuffer> commandBuffer, RenderPassInfo* info) {
+            void BeginRenderPass(id<MTLCommandBuffer> commandBuffer, RenderPassDescriptor* info) {
                 if (render != nil) {
                     [render endEncoding];
                     render = nil;  // This will be autoreleased.
@@ -172,7 +172,7 @@ namespace backend { namespace metal {
                     BeginRenderPassCmd* beginRenderPassCmd =
                         mCommands.NextCommand<BeginRenderPassCmd>();
 
-                    RenderPassInfo* info = ToBackend(beginRenderPassCmd->info.Get());
+                    RenderPassDescriptor* info = ToBackend(beginRenderPassCmd->info.Get());
 
                     encoders.EnsureNoBlitEncoder();
                     encoders.BeginRenderPass(commandBuffer, info);

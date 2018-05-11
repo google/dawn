@@ -265,7 +265,7 @@ namespace backend { namespace opengl {
 
                 case Command::BeginRenderPass: {
                     auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    RenderPassInfo* info = ToBackend(cmd->info.Get());
+                    RenderPassDescriptor* info = ToBackend(cmd->info.Get());
 
                     pushConstants.OnBeginPass();
                     inputBuffers.OnBeginPass();

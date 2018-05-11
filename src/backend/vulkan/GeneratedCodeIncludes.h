@@ -21,7 +21,7 @@
 #include "backend/vulkan/DepthStencilStateVk.h"
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
-#include "backend/vulkan/RenderPassInfoVk.h"
+#include "backend/vulkan/RenderPassDescriptorVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
 #include "backend/vulkan/SamplerVk.h"
 #include "backend/vulkan/ShaderModuleVk.h"

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 
 #include "backend/Device.h"
 #include "backend/Texture.h"
@@ -21,9 +21,9 @@
 
 namespace backend {
 
-    // RenderPassInfo
+    // RenderPassDescriptor
 
-    RenderPassInfoBase::RenderPassInfoBase(RenderPassInfoBuilder* builder)
+    RenderPassDescriptorBase::RenderPassDescriptorBase(RenderPassDescriptorBuilder* builder)
         : mColorAttachmentsSet(builder->mColorAttachmentsSet),
           mColorAttachments(builder->mColorAttachments),
           mDepthStencilAttachmentSet(builder->mDepthStencilAttachmentSet),
@@ -32,15 +32,15 @@ namespace backend {
           mHeight(builder->mHeight) {
     }
 
-    std::bitset<kMaxColorAttachments> RenderPassInfoBase::GetColorAttachmentMask() const {
+    std::bitset<kMaxColorAttachments> RenderPassDescriptorBase::GetColorAttachmentMask() const {
         return mColorAttachmentsSet;
     }
 
-    bool RenderPassInfoBase::HasDepthStencilAttachment() const {
+    bool RenderPassDescriptorBase::HasDepthStencilAttachment() const {
         return mDepthStencilAttachmentSet;
     }
 
-    const RenderPassColorAttachmentInfo& RenderPassInfoBase::GetColorAttachment(
+    const RenderPassColorAttachmentInfo& RenderPassDescriptorBase::GetColorAttachment(
         uint32_t attachment) const {
         ASSERT(attachment < kMaxColorAttachments);
         ASSERT(mColorAttachmentsSet[attachment]);
@@ -48,40 +48,41 @@ namespace backend {
         return mColorAttachments[attachment];
     }
 
-    RenderPassColorAttachmentInfo& RenderPassInfoBase::GetColorAttachment(uint32_t attachment) {
+    RenderPassColorAttachmentInfo& RenderPassDescriptorBase::GetColorAttachment(
+        uint32_t attachment) {
         ASSERT(attachment < kMaxColorAttachments);
         ASSERT(mColorAttachmentsSet[attachment]);
 
         return mColorAttachments[attachment];
     }
 
-    const RenderPassDepthStencilAttachmentInfo& RenderPassInfoBase::GetDepthStencilAttachment()
-        const {
+    const RenderPassDepthStencilAttachmentInfo&
+    RenderPassDescriptorBase::GetDepthStencilAttachment() const {
         ASSERT(mDepthStencilAttachmentSet);
 
         return mDepthStencilAttachment;
     }
 
-    RenderPassDepthStencilAttachmentInfo& RenderPassInfoBase::GetDepthStencilAttachment() {
+    RenderPassDepthStencilAttachmentInfo& RenderPassDescriptorBase::GetDepthStencilAttachment() {
         ASSERT(mDepthStencilAttachmentSet);
 
         return mDepthStencilAttachment;
     }
 
-    uint32_t RenderPassInfoBase::GetWidth() const {
+    uint32_t RenderPassDescriptorBase::GetWidth() const {
         return mWidth;
     }
 
-    uint32_t RenderPassInfoBase::GetHeight() const {
+    uint32_t RenderPassDescriptorBase::GetHeight() const {
         return mHeight;
     }
 
-    // RenderPassInfoBuilder
+    // RenderPassDescriptorBuilder
 
-    RenderPassInfoBuilder::RenderPassInfoBuilder(DeviceBase* device) : Builder(device) {
+    RenderPassDescriptorBuilder::RenderPassDescriptorBuilder(DeviceBase* device) : Builder(device) {
     }
 
-    RenderPassInfoBase* RenderPassInfoBuilder::GetResultImpl() {
+    RenderPassDescriptorBase* RenderPassDescriptorBuilder::GetResultImpl() {
         auto CheckOrSetSize = [this](const TextureViewBase* attachment) -> bool {
             if (this->mWidth == 0) {
                 ASSERT(this->mHeight == 0);
@@ -120,12 +121,12 @@ namespace backend {
             return nullptr;
         }
 
-        return mDevice->CreateRenderPassInfo(this);
+        return mDevice->CreateRenderPassDescriptor(this);
     }
 
-    void RenderPassInfoBuilder::SetColorAttachment(uint32_t attachment,
-                                                   TextureViewBase* textureView,
-                                                   nxt::LoadOp loadOp) {
+    void RenderPassDescriptorBuilder::SetColorAttachment(uint32_t attachment,
+                                                         TextureViewBase* textureView,
+                                                         nxt::LoadOp loadOp) {
         if (attachment >= kMaxColorAttachments) {
             HandleError("Setting color attachment out of bounds");
             return;
@@ -141,11 +142,11 @@ namespace backend {
         mColorAttachments[attachment].view = textureView;
     }
 
-    void RenderPassInfoBuilder::SetColorAttachmentClearColor(uint32_t attachment,
-                                                             float clearR,
-                                                             float clearG,
-                                                             float clearB,
-                                                             float clearA) {
+    void RenderPassDescriptorBuilder::SetColorAttachmentClearColor(uint32_t attachment,
+                                                                   float clearR,
+                                                                   float clearG,
+                                                                   float clearB,
+                                                                   float clearA) {
         if (attachment >= kMaxColorAttachments) {
             HandleError("Setting color attachment out of bounds");
             return;
@@ -157,9 +158,9 @@ namespace backend {
         mColorAttachments[attachment].clearColor[3] = clearA;
     }
 
-    void RenderPassInfoBuilder::SetDepthStencilAttachment(TextureViewBase* textureView,
-                                                          nxt::LoadOp depthLoadOp,
-                                                          nxt::LoadOp stencilLoadOp) {
+    void RenderPassDescriptorBuilder::SetDepthStencilAttachment(TextureViewBase* textureView,
+                                                                nxt::LoadOp depthLoadOp,
+                                                                nxt::LoadOp stencilLoadOp) {
         if (!TextureFormatHasDepthOrStencil(textureView->GetTexture()->GetFormat())) {
             HandleError("Using color texture as depth stencil attachment");
             return;
@@ -171,8 +172,8 @@ namespace backend {
         mDepthStencilAttachment.view = textureView;
     }
 
-    void RenderPassInfoBuilder::SetDepthStencilAttachmentClearValue(float clearDepth,
-                                                                    uint32_t clearStencil) {
+    void RenderPassDescriptorBuilder::SetDepthStencilAttachmentClearValue(float clearDepth,
+                                                                          uint32_t clearStencil) {
         mDepthStencilAttachment.clearDepth = clearDepth;
         mDepthStencilAttachment.clearStencil = clearStencil;
     }

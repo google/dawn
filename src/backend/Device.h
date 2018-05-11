@@ -46,7 +46,8 @@ namespace backend {
         virtual InputStateBase* CreateInputState(InputStateBuilder* builder) = 0;
         virtual PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) = 0;
         virtual QueueBase* CreateQueue(QueueBuilder* builder) = 0;
-        virtual RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) = 0;
+        virtual RenderPassDescriptorBase* CreateRenderPassDescriptor(
+            RenderPassDescriptorBuilder* builder) = 0;
         virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
         virtual SamplerBase* CreateSampler(SamplerBuilder* builder) = 0;
         virtual ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) = 0;
@@ -85,7 +86,7 @@ namespace backend {
         InputStateBuilder* CreateInputStateBuilder();
         PipelineLayoutBuilder* CreatePipelineLayoutBuilder();
         QueueBuilder* CreateQueueBuilder();
-        RenderPassInfoBuilder* CreateRenderPassInfoBuilder();
+        RenderPassDescriptorBuilder* CreateRenderPassDescriptorBuilder();
         RenderPipelineBuilder* CreateRenderPipelineBuilder();
         SamplerBuilder* CreateSamplerBuilder();
         ShaderModuleBuilder* CreateShaderModuleBuilder();

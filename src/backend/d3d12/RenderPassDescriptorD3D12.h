@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_RENDERPASSINFOD3D12_H_
-#define BACKEND_D3D12_RENDERPASSINFOD3D12_H_
+#ifndef BACKEND_D3D12_RENDERPASSDESCRIPTORD3D12_H_
+#define BACKEND_D3D12_RENDERPASSDESCRIPTORD3D12_H_
 
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 
 #include "backend/d3d12/DescriptorHeapAllocator.h"
 #include "backend/d3d12/d3d12_platform.h"
@@ -28,7 +28,7 @@ namespace backend { namespace d3d12 {
 
     class Device;
 
-    class RenderPassInfo : public RenderPassInfoBase {
+    class RenderPassDescriptor : public RenderPassDescriptorBase {
       public:
         struct OMSetRenderTargetArgs {
             unsigned int numRTVs = 0;
@@ -36,7 +36,7 @@ namespace backend { namespace d3d12 {
             D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
         };
 
-        RenderPassInfo(Device* device, RenderPassInfoBuilder* builder);
+        RenderPassDescriptor(Device* device, RenderPassDescriptorBuilder* builder);
         OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs();
         D3D12_CPU_DESCRIPTOR_HANDLE GetRTVDescriptor(uint32_t attachmentSlot);
         D3D12_CPU_DESCRIPTOR_HANDLE GetDSVDescriptor();
@@ -49,4 +49,4 @@ namespace backend { namespace d3d12 {
 
 }}  // namespace backend::d3d12
 
-#endif  // BACKEND_D3D12_RENDERPASSINFOD3D12_H_
+#endif  // BACKEND_D3D12_RENDERPASSDESCRIPTORD3D12_H_

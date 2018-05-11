@@ -368,7 +368,7 @@ namespace backend {
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mIterator.NextCommand<BeginRenderPassCmd>();
-                    RenderPassInfoBase* info = cmd->info.Get();
+                    RenderPassDescriptorBase* info = cmd->info.Get();
                     if (!mState->BeginRenderPass(info)) {
                         return false;
                     }
@@ -578,7 +578,7 @@ namespace backend {
         mAllocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
     }
 
-    void CommandBufferBuilder::BeginRenderPass(RenderPassInfoBase* info) {
+    void CommandBufferBuilder::BeginRenderPass(RenderPassDescriptorBase* info) {
         BeginRenderPassCmd* cmd = mAllocator.Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
         new (cmd) BeginRenderPassCmd;
         cmd->info = info;

@@ -42,7 +42,7 @@ namespace utils {
         uint32_t height;
         nxt::Texture color;
         nxt::TextureFormat colorFormat;
-        nxt::RenderPassInfo renderPassInfo;
+        nxt::RenderPassDescriptor renderPassInfo;
     };
     BasicRenderPass CreateBasicRenderPass(const nxt::Device& device,
                                           uint32_t width,

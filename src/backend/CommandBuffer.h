@@ -62,7 +62,7 @@ namespace backend {
 
         // NXT API
         void BeginComputePass();
-        void BeginRenderPass(RenderPassInfoBase* info);
+        void BeginRenderPass(RenderPassDescriptorBase* info);
         void CopyBufferToBuffer(BufferBase* source,
                                 uint32_t sourceOffset,
                                 BufferBase* destination,

@@ -42,7 +42,7 @@ namespace backend {
         // State-modifying methods
         bool BeginComputePass();
         bool EndComputePass();
-        bool BeginRenderPass(RenderPassInfoBase* info);
+        bool BeginRenderPass(RenderPassDescriptorBase* info);
         bool EndRenderPass();
         bool SetComputePipeline(ComputePipelineBase* pipeline);
         bool SetRenderPipeline(RenderPipelineBase* pipeline);
@@ -106,7 +106,7 @@ namespace backend {
         std::map<BufferBase*, nxt::BufferUsageBit> mMostRecentBufferUsages;
         std::map<TextureBase*, nxt::TextureUsageBit> mMostRecentTextureUsages;
 
-        RenderPassInfoBase* mCurrentRenderPass = nullptr;
+        RenderPassDescriptorBase* mCurrentRenderPass = nullptr;
     };
 }  // namespace backend
 

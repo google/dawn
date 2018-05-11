@@ -149,8 +149,8 @@ void frame() {
     if (s.b >= 1.0f) {s.b = 0.0f;}
 
     nxt::Texture backbuffer;
-    nxt::RenderPassInfo renderPass;
-    GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
+    nxt::RenderPassDescriptor renderPass;
+    GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     static const uint32_t vertexBufferOffsets[1] = {0};
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()

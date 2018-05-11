@@ -147,14 +147,14 @@ nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device) {
         .GetResult();
 }
 
-void GetNextRenderPassInfo(const nxt::Device& device,
+void GetNextRenderPassDescriptor(const nxt::Device& device,
     const nxt::SwapChain& swapchain,
     const nxt::TextureView& depthStencilView,
     nxt::Texture* backbuffer,
-    nxt::RenderPassInfo* info) {
+    nxt::RenderPassDescriptor* info) {
     *backbuffer = swapchain.GetNextTexture();
     auto backbufferView = backbuffer->CreateTextureViewBuilder().GetResult();
-    *info = device.CreateRenderPassInfoBuilder()
+    *info = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, backbufferView, nxt::LoadOp::Clear)
         .SetDepthStencilAttachment(depthStencilView, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
         .GetResult();

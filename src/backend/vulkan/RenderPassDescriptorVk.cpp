@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/vulkan/RenderPassInfoVk.h"
+#include "backend/vulkan/RenderPassDescriptorVk.h"
 
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/RenderPassCache.h"
@@ -22,11 +22,11 @@
 
 namespace backend { namespace vulkan {
 
-    RenderPassInfo::RenderPassInfo(RenderPassInfoBuilder* builder)
-        : RenderPassInfoBase(builder), mDevice(ToBackend(builder->GetDevice())) {
+    RenderPassDescriptor::RenderPassDescriptor(RenderPassDescriptorBuilder* builder)
+        : RenderPassDescriptorBase(builder), mDevice(ToBackend(builder->GetDevice())) {
     }
 
-    void RenderPassInfo::RecordBeginRenderPass(VkCommandBuffer commands) {
+    void RenderPassDescriptor::RecordBeginRenderPass(VkCommandBuffer commands) {
         // Query a VkRenderPass from the cache
         VkRenderPass renderPass = VK_NULL_HANDLE;
         {

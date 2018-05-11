@@ -19,7 +19,7 @@
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/ComputePipelineVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
-#include "backend/vulkan/RenderPassInfoVk.h"
+#include "backend/vulkan/RenderPassDescriptorVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
 #include "backend/vulkan/TextureVk.h"
 #include "backend/vulkan/VulkanBackend.h"
@@ -183,7 +183,7 @@ namespace backend { namespace vulkan {
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    RenderPassInfo* info = ToBackend(cmd->info.Get());
+                    RenderPassDescriptor* info = ToBackend(cmd->info.Get());
 
                     // NXT has an implicit transition to color attachment on render passes.
                     // Transition the attachments now before we start the render pass.

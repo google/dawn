@@ -69,8 +69,9 @@ namespace backend { namespace null {
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(builder);
     }
-    RenderPassInfoBase* Device::CreateRenderPassInfo(RenderPassInfoBuilder* builder) {
-        return new RenderPassInfo(builder);
+    RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
+        RenderPassDescriptorBuilder* builder) {
+        return new RenderPassDescriptor(builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);

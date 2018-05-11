@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/d3d12/RenderPassInfoD3D12.h"
+#include "backend/d3d12/RenderPassDescriptorD3D12.h"
 
 #include "backend/d3d12/D3D12Backend.h"
 #include "backend/d3d12/TextureD3D12.h"
@@ -20,8 +20,8 @@
 
 namespace backend { namespace d3d12 {
 
-    RenderPassInfo::RenderPassInfo(Device* device, RenderPassInfoBuilder* builder)
-        : RenderPassInfoBase(builder), mDevice(device) {
+    RenderPassDescriptor::RenderPassDescriptor(Device* device, RenderPassDescriptorBuilder* builder)
+        : RenderPassDescriptorBase(builder), mDevice(device) {
         // Get and fill an RTV heap with the color attachments
         uint32_t colorAttachmentCount = static_cast<uint32_t>(GetColorAttachmentMask().count());
         if (colorAttachmentCount != 0) {
@@ -53,7 +53,8 @@ namespace backend { namespace d3d12 {
         }
     }
 
-    RenderPassInfo::OMSetRenderTargetArgs RenderPassInfo::GetSubpassOMSetRenderTargetArgs() {
+    RenderPassDescriptor::OMSetRenderTargetArgs
+    RenderPassDescriptor::GetSubpassOMSetRenderTargetArgs() {
         OMSetRenderTargetArgs args = {};
 
         size_t rtvIndex = 0;
@@ -70,11 +71,11 @@ namespace backend { namespace d3d12 {
         return args;
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE RenderPassInfo::GetRTVDescriptor(uint32_t attachmentSlot) {
+    D3D12_CPU_DESCRIPTOR_HANDLE RenderPassDescriptor::GetRTVDescriptor(uint32_t attachmentSlot) {
         return mRtvHeap.GetCPUHandle(attachmentSlot);
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE RenderPassInfo::GetDSVDescriptor() {
+    D3D12_CPU_DESCRIPTOR_HANDLE RenderPassDescriptor::GetDSVDescriptor() {
         return mDsvHeap.GetCPUHandle(0);
     }
 

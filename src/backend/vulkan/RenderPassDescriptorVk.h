@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_RENDERPASSINFOVK_H_
-#define BACKEND_VULKAN_RENDERPASSINFOVK_H_
+#ifndef BACKEND_VULKAN_RENDERPASSDESCRIPTORVK_H_
+#define BACKEND_VULKAN_RENDERPASSDESCRIPTORVK_H_
 
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 
 #include "common/vulkan_platform.h"
 
@@ -23,9 +23,9 @@ namespace backend { namespace vulkan {
 
     class Device;
 
-    class RenderPassInfo : public RenderPassInfoBase {
+    class RenderPassDescriptor : public RenderPassDescriptorBase {
       public:
-        RenderPassInfo(RenderPassInfoBuilder* builder);
+        RenderPassDescriptor(RenderPassDescriptorBuilder* builder);
 
         // Compute all the arguments for, and record the vkCmdBeginRenderPass command.
         void RecordBeginRenderPass(VkCommandBuffer commands);
@@ -36,4 +36,4 @@ namespace backend { namespace vulkan {
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_RENDERPASSINFOVK_H_
+#endif  // BACKEND_VULKAN_RENDERPASSDESCRIPTORVK_H_

@@ -18,7 +18,7 @@
 #include "backend/DepthStencilState.h"
 #include "backend/Device.h"
 #include "backend/InputState.h"
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/Texture.h"
 #include "common/BitSetIterator.h"
 
@@ -102,7 +102,7 @@ namespace backend {
         return mDepthStencilFormat;
     }
 
-    bool RenderPipelineBase::IsCompatibleWith(const RenderPassInfoBase* renderPass) const {
+    bool RenderPipelineBase::IsCompatibleWith(const RenderPassDescriptorBase* renderPass) const {
         // TODO(cwallez@chromium.org): This is called on every SetPipeline command. Optimize it for
         // example by caching some "attachment compatibility" object that would make the
         // compatibility check a single pointer comparison.

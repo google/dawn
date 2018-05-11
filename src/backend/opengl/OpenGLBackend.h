@@ -25,7 +25,7 @@
 #include "backend/Device.h"
 #include "backend/InputState.h"
 #include "backend/Queue.h"
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/ToBackend.h"
 
 #include "glad/glad.h"
@@ -45,7 +45,7 @@ namespace backend { namespace opengl {
     class PersistentPipelineState;
     class PipelineLayout;
     class Queue;
-    class RenderPassInfo;
+    class RenderPassDescriptor;
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
@@ -66,7 +66,7 @@ namespace backend { namespace opengl {
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassInfoType = RenderPassInfo;
+        using RenderPassDescriptorType = RenderPassDescriptor;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
@@ -94,7 +94,8 @@ namespace backend { namespace opengl {
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
         QueueBase* CreateQueue(QueueBuilder* builder) override;
-        RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) override;
+        RenderPassDescriptorBase* CreateRenderPassDescriptor(
+            RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
@@ -123,9 +124,9 @@ namespace backend { namespace opengl {
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
-    class RenderPassInfo : public RenderPassInfoBase {
+    class RenderPassDescriptor : public RenderPassDescriptorBase {
       public:
-        RenderPassInfo(RenderPassInfoBuilder* builder);
+        RenderPassDescriptor(RenderPassDescriptorBuilder* builder);
     };
 
 }}  // namespace backend::opengl

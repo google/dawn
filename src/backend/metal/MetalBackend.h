@@ -21,7 +21,7 @@
 #include "backend/BindGroupLayout.h"
 #include "backend/Device.h"
 #include "backend/Queue.h"
-#include "backend/RenderPassInfo.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/ToBackend.h"
 #include "common/Serial.h"
 
@@ -44,7 +44,7 @@ namespace backend { namespace metal {
     class InputState;
     class PipelineLayout;
     class Queue;
-    class RenderPassInfo;
+    class RenderPassDescriptor;
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
@@ -65,7 +65,7 @@ namespace backend { namespace metal {
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassInfoType = RenderPassInfo;
+        using RenderPassDescriptorType = RenderPassDescriptor;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
@@ -98,7 +98,8 @@ namespace backend { namespace metal {
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
         QueueBase* CreateQueue(QueueBuilder* builder) override;
-        RenderPassInfoBase* CreateRenderPassInfo(RenderPassInfoBuilder* builder) override;
+        RenderPassDescriptorBase* CreateRenderPassDescriptor(
+            RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
@@ -154,10 +155,10 @@ namespace backend { namespace metal {
         id<MTLCommandQueue> mCommandQueue = nil;
     };
 
-    class RenderPassInfo : public RenderPassInfoBase {
+    class RenderPassDescriptor : public RenderPassDescriptorBase {
       public:
-        RenderPassInfo(RenderPassInfoBuilder* builder);
-        ~RenderPassInfo();
+        RenderPassDescriptor(RenderPassDescriptorBuilder* builder);
+        ~RenderPassDescriptor();
     };
 
 }}  // namespace backend::metal

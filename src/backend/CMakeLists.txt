@@ -249,8 +249,8 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/PipelineLayoutD3D12.h
         ${D3D12_DIR}/QueueD3D12.cpp
         ${D3D12_DIR}/QueueD3D12.h
-        ${D3D12_DIR}/RenderPassInfoD3D12.cpp
-        ${D3D12_DIR}/RenderPassInfoD3D12.h
+        ${D3D12_DIR}/RenderPassDescriptorD3D12.cpp
+        ${D3D12_DIR}/RenderPassDescriptorD3D12.h
         ${D3D12_DIR}/RenderPipelineD3D12.cpp
         ${D3D12_DIR}/RenderPipelineD3D12.h
         ${D3D12_DIR}/ResourceAllocator.cpp
@@ -318,8 +318,8 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/PipelineLayoutVk.h
         ${VULKAN_DIR}/RenderPassCache.cpp
         ${VULKAN_DIR}/RenderPassCache.h
-        ${VULKAN_DIR}/RenderPassInfoVk.cpp
-        ${VULKAN_DIR}/RenderPassInfoVk.h
+        ${VULKAN_DIR}/RenderPassDescriptorVk.cpp
+        ${VULKAN_DIR}/RenderPassDescriptorVk.h
         ${VULKAN_DIR}/RenderPipelineVk.cpp
         ${VULKAN_DIR}/RenderPipelineVk.h
         ${VULKAN_DIR}/SamplerVk.cpp
@@ -379,8 +379,8 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/PipelineLayout.h
     ${BACKEND_DIR}/Queue.cpp
     ${BACKEND_DIR}/Queue.h
-    ${BACKEND_DIR}/RenderPassInfo.cpp
-    ${BACKEND_DIR}/RenderPassInfo.h
+    ${BACKEND_DIR}/RenderPassDescriptor.cpp
+    ${BACKEND_DIR}/RenderPassDescriptor.h
     ${BACKEND_DIR}/RefCounted.cpp
     ${BACKEND_DIR}/RefCounted.h
     ${BACKEND_DIR}/Sampler.cpp

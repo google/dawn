@@ -18,7 +18,7 @@
 
 namespace {
 
-class RenderPassInfoValidationTest : public ValidationTest {
+class RenderPassDescriptorValidationTest : public ValidationTest {
 };
 
 nxt::TextureView Create2DAttachment(nxt::Device& device, uint32_t width, uint32_t height, nxt::TextureFormat format) {
@@ -36,42 +36,42 @@ nxt::TextureView Create2DAttachment(nxt::Device& device, uint32_t width, uint32_
 }
 
 // A render pass with no attachments isn't valid
-TEST_F(RenderPassInfoValidationTest, Empty) {
-    AssertWillBeError(device.CreateRenderPassInfoBuilder())
+TEST_F(RenderPassDescriptorValidationTest, Empty) {
+    AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
         .GetResult();
 }
 
 // A render pass with only one color or one depth attachment is ok
-TEST_F(RenderPassInfoValidationTest, OneAttachment) {
+TEST_F(RenderPassDescriptorValidationTest, OneAttachment) {
     // One color attachment
     {
         nxt::TextureView color = Create2DAttachment(device, 1, 1, nxt::TextureFormat::R8G8B8A8Unorm);
-        AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, color, nxt::LoadOp::Clear)
             .GetResult();
     }
     // One depth-stencil attachment
     {
         nxt::TextureView depthStencil = Create2DAttachment(device, 1, 1, nxt::TextureFormat::D32FloatS8Uint);
-        AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
             .SetDepthStencilAttachment(depthStencil, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
             .GetResult();
     }
 }
 
 // Test OOB color attachment indices are handled
-TEST_F(RenderPassInfoValidationTest, ColorAttachmentOutOfBounds) {
+TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentOutOfBounds) {
     // For setting the color attachment, control case
     {
         nxt::TextureView color = Create2DAttachment(device, 1, 1, nxt::TextureFormat::R8G8B8A8Unorm);
-        AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(kMaxColorAttachments - 1, color, nxt::LoadOp::Clear)
             .GetResult();
     }
     // For setting the color attachment, OOB
     {
         nxt::TextureView color = Create2DAttachment(device, 1, 1, nxt::TextureFormat::R8G8B8A8Unorm);
-        AssertWillBeError(device.CreateRenderPassInfoBuilder())
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(kMaxColorAttachments, color, nxt::LoadOp::Clear)
             .GetResult();
     }
@@ -79,14 +79,14 @@ TEST_F(RenderPassInfoValidationTest, ColorAttachmentOutOfBounds) {
     nxt::TextureView color = Create2DAttachment(device, 1, 1, nxt::TextureFormat::R8G8B8A8Unorm);
     // For setting the clear color, control case
     {
-        AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, color, nxt::LoadOp::Clear)
             .SetColorAttachmentClearColor(kMaxColorAttachments - 1, 0.0f, 0.0f, 0.0f, 0.0f)
             .GetResult();
     }
     // For setting the clear color, OOB
     {
-        AssertWillBeError(device.CreateRenderPassInfoBuilder())
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, color, nxt::LoadOp::Clear)
             .SetColorAttachmentClearColor(kMaxColorAttachments, 0.0f, 0.0f, 0.0f, 0.0f)
             .GetResult();
@@ -94,12 +94,12 @@ TEST_F(RenderPassInfoValidationTest, ColorAttachmentOutOfBounds) {
 }
 
 // Test setting a clear value without an attachment and vice-versa is ok.
-TEST_F(RenderPassInfoValidationTest, ClearAndAttachmentMismatchIsOk) {
+TEST_F(RenderPassDescriptorValidationTest, ClearAndAttachmentMismatchIsOk) {
     nxt::TextureView color = Create2DAttachment(device, 1, 1, nxt::TextureFormat::R8G8B8A8Unorm);
 
     // For cleared attachment 0 doesn't get a color, clear color for 1 is unused
     {
-        AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, color, nxt::LoadOp::Clear)
             .SetColorAttachmentClearColor(1, 0.0f, 0.0f, 0.0f, 0.0f)
             .GetResult();
@@ -107,13 +107,13 @@ TEST_F(RenderPassInfoValidationTest, ClearAndAttachmentMismatchIsOk) {
     // Clear depth stencil doesn't get values
     {
         nxt::TextureView depthStencil = Create2DAttachment(device, 1, 1, nxt::TextureFormat::D32FloatS8Uint);
-        AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
             .SetDepthStencilAttachment(depthStencil, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
             .GetResult();
     }
     // Clear values for depth-stencil when it isn't used
     {
-        AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, color, nxt::LoadOp::Clear)
             .SetDepthStencilAttachmentClearValue(0.0f, 0)
             .GetResult();
@@ -121,7 +121,7 @@ TEST_F(RenderPassInfoValidationTest, ClearAndAttachmentMismatchIsOk) {
 }
 
 // Attachments must have the same size
-TEST_F(RenderPassInfoValidationTest, SizeMustMatch) {
+TEST_F(RenderPassDescriptorValidationTest, SizeMustMatch) {
     nxt::TextureView color1x1A = Create2DAttachment(device, 1, 1, nxt::TextureFormat::R8G8B8A8Unorm);
     nxt::TextureView color1x1B = Create2DAttachment(device, 1, 1, nxt::TextureFormat::R8G8B8A8Unorm);
     nxt::TextureView color2x2 = Create2DAttachment(device, 2, 2, nxt::TextureFormat::R8G8B8A8Unorm);
@@ -130,7 +130,7 @@ TEST_F(RenderPassInfoValidationTest, SizeMustMatch) {
 
     // Control case: all the same size (1x1)
     {
-        AssertWillBeSuccess(device.CreateRenderPassInfoBuilder())
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, color1x1A, nxt::LoadOp::Clear)
             .SetColorAttachment(1, color1x1B, nxt::LoadOp::Clear)
             .SetDepthStencilAttachment(depthStencil1x1, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
@@ -139,7 +139,7 @@ TEST_F(RenderPassInfoValidationTest, SizeMustMatch) {
 
     // One of the color attachments has a different size
     {
-        AssertWillBeError(device.CreateRenderPassInfoBuilder())
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, color1x1A, nxt::LoadOp::Clear)
             .SetColorAttachment(1, color2x2, nxt::LoadOp::Clear)
             .SetDepthStencilAttachment(depthStencil1x1, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
@@ -148,7 +148,7 @@ TEST_F(RenderPassInfoValidationTest, SizeMustMatch) {
 
     // The depth stencil attachment has a different size
     {
-        AssertWillBeError(device.CreateRenderPassInfoBuilder())
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, color1x1A, nxt::LoadOp::Clear)
             .SetColorAttachment(1, color1x1B, nxt::LoadOp::Clear)
             .SetDepthStencilAttachment(depthStencil2x2, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
@@ -157,20 +157,20 @@ TEST_F(RenderPassInfoValidationTest, SizeMustMatch) {
 }
 
 // Attachments formats must match whether they are used for color or depth-stencil
-TEST_F(RenderPassInfoValidationTest, FormatMismatch) {
+TEST_F(RenderPassDescriptorValidationTest, FormatMismatch) {
     nxt::TextureView color = Create2DAttachment(device, 1, 1, nxt::TextureFormat::R8G8B8A8Unorm);
     nxt::TextureView depthStencil = Create2DAttachment(device, 1, 1, nxt::TextureFormat::D32FloatS8Uint);
 
     // Using depth-stencil for color
     {
-        AssertWillBeError(device.CreateRenderPassInfoBuilder())
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
             .SetColorAttachment(0, depthStencil, nxt::LoadOp::Clear)
             .GetResult();
     }
 
     // Using color for depth-stencil
     {
-        AssertWillBeError(device.CreateRenderPassInfoBuilder())
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
             .SetDepthStencilAttachment(color, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
             .GetResult();
     }

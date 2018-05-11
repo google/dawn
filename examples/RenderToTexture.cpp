@@ -166,11 +166,11 @@ void frame() {
     nxt::Texture backbuffer = swapchain.GetNextTexture();
     auto backbufferView = backbuffer.CreateTextureViewBuilder().GetResult();
 
-    nxt::RenderPassInfo renderPass1 = device.CreateRenderPassInfoBuilder()
+    nxt::RenderPassDescriptor renderPass1 = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
         .GetResult();
 
-    nxt::RenderPassInfo renderPass2 = device.CreateRenderPassInfoBuilder()
+    nxt::RenderPassDescriptor renderPass2 = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, backbufferView, nxt::LoadOp::Clear)
         .GetResult();
 

@@ -44,7 +44,7 @@ namespace backend {
 
         // A pipeline can be used in a render pass if its attachment info matches the actual
         // attachments in the render pass. This returns whether it is the case.
-        bool IsCompatibleWith(const RenderPassInfoBase* renderPass) const;
+        bool IsCompatibleWith(const RenderPassDescriptorBase* renderPass) const;
 
       private:
         Ref<DepthStencilStateBase> mDepthStencilState;

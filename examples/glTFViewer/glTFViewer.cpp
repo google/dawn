@@ -584,8 +584,8 @@ namespace {
 
     void frame() {
         nxt::Texture backbuffer;
-        nxt::RenderPassInfo renderPass;
-        GetNextRenderPassInfo(device, swapchain, depthStencilView, &backbuffer, &renderPass);
+        nxt::RenderPassDescriptor renderPass;
+        GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
         const auto& defaultSceneNodes = scene.scenes.at(scene.defaultScene);
         nxt::CommandBufferBuilder cmd = device.CreateCommandBufferBuilder()

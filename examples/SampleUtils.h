@@ -27,8 +27,8 @@ uint64_t GetSwapChainImplementation();
 nxt::TextureFormat GetPreferredSwapChainTextureFormat();
 nxt::SwapChain GetSwapChain(const nxt::Device& device);
 nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device);
-void GetNextRenderPassInfo(const nxt::Device& device,
+void GetNextRenderPassDescriptor(const nxt::Device& device,
     const nxt::SwapChain& swapchain,
     const nxt::TextureView& depthStencilView,
     nxt::Texture* backbuffer,
-    nxt::RenderPassInfo* info);
+    nxt::RenderPassDescriptor* info);

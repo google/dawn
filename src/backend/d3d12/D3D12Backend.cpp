@@ -27,7 +27,7 @@
 #include "backend/d3d12/NativeSwapChainImplD3D12.h"
 #include "backend/d3d12/PipelineLayoutD3D12.h"
 #include "backend/d3d12/QueueD3D12.h"
-#include "backend/d3d12/RenderPassInfoD3D12.h"
+#include "backend/d3d12/RenderPassDescriptorD3D12.h"
 #include "backend/d3d12/RenderPipelineD3D12.h"
 #include "backend/d3d12/ResourceAllocator.h"
 #include "backend/d3d12/ResourceUploader.h"
@@ -291,8 +291,9 @@ namespace backend { namespace d3d12 {
     QueueBase* Device::CreateQueue(QueueBuilder* builder) {
         return new Queue(this, builder);
     }
-    RenderPassInfoBase* Device::CreateRenderPassInfo(RenderPassInfoBuilder* builder) {
-        return new RenderPassInfo(this, builder);
+    RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
+        RenderPassDescriptorBuilder* builder) {
+        return new RenderPassDescriptor(this, builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
