@@ -30,6 +30,25 @@ namespace nxt {
     {% endfor %}
 
 
+    {% for type in by_category["structure"] %}
+        {% set CppType = as_cppType(type.name) %}
+        {% set CType = as_cType(type.name) %}
+
+        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
+
+        {% if type.extensible %}
+            static_assert(offsetof({{CppType}}, nextInChain) == offsetof({{CType}}, nextInChain),
+                    "offsetof mismatch for {{CppType}}::nextInChain");
+        {% endif %}
+        {% for member in type.members %}
+            {% set memberName = member.name.camelCase() %}
+            static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
+                    "offsetof mismatch for {{CppType}}::{{memberName}}");
+        {% endfor %}
+
+    {% endfor %}
+
     {% for type in by_category["object"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}

@@ -33,6 +33,17 @@
 
 {% endfor %}
 
+{% for type in by_category["structure"] %}
+    typedef struct {
+        {% if type.extensible %}
+            const void* nextInChain;
+        {% endif %}
+        {% for member in type.members %}
+            {{as_annotated_cType(member)}};
+        {% endfor %}
+    } {{as_cType(type.name)}};
+{% endfor %}
+
 // Custom types depending on the target language
 typedef uint64_t nxtCallbackUserdata;
 typedef void (*nxtDeviceErrorCallback)(const char* message, nxtCallbackUserdata userdata);

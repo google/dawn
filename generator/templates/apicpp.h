@@ -55,6 +55,18 @@ namespace nxt {
         class {{as_cppType(type.name)}};
     {% endfor %}
 
+    {% for type in by_category["structure"] %}
+        struct {{as_cppType(type.name)}} {
+            {% if type.extensible %}
+                const void* nextInChain = nullptr;
+            {% endif %}
+            {% for member in type.members %}
+                {{as_annotated_cppType(member)}};
+            {% endfor %}
+        };
+
+    {% endfor %}
+
     template<typename Derived, typename CType>
     class ObjectBase {
         public:

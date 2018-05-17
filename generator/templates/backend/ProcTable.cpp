@@ -49,6 +49,8 @@ namespace {{namespace}} {
                             {%- if not loop.first %}, {% endif -%}
                             {%- if arg.type.category in ["enum", "bitmask"] -%}
                                 static_cast<nxt::{{as_cppType(arg.type.name)}}>({{as_varName(arg.name)}})
+                            {%- elif arg.type.category == "structure" and arg.annotation != "value" -%}
+                                reinterpret_cast<const nxt::{{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
                             {%- else -%}
                                 {{as_varName(arg.name)}}
                             {%- endif -%}
@@ -147,6 +149,8 @@ namespace {{namespace}} {
                             {%- if not loop.first %}, {% endif -%}
                             {%- if arg.type.category in ["enum", "bitmask"] -%}
                                 static_cast<nxt::{{as_cppType(arg.type.name)}}>({{as_varName(arg.name)}})
+                            {%- elif arg.type.category == "structure" and arg.annotation != "value" -%}
+                                reinterpret_cast<const nxt::{{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
                             {%- else -%}
                                 {{as_varName(arg.name)}}
                             {%- endif -%}

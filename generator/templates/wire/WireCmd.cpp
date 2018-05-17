@@ -27,6 +27,8 @@ namespace wire {
                 {% for arg in method.arguments if arg.annotation != "value" %}
                     {% if arg.length == "strlen" %}
                         result += {{as_varName(arg.name)}}Strlen + 1;
+                    {% elif arg.length == "constant_one" %}
+                        result += sizeof({{as_cType(arg.type.name)}});
                     {% elif arg.type.category == "object" %}
                         result += {{as_varName(arg.length.name)}} * sizeof(uint32_t);
                     {% else %}
@@ -53,6 +55,8 @@ namespace wire {
                             {% endif %}
                             {% if arg.length == "strlen" %}
                                 ptr += {{as_varName(arg.name)}}Strlen + 1;
+                            {% elif arg.length == "constant_one" %}
+                                ptr += sizeof({{as_cType(arg.type.name)}});
                             {% elif arg.type.category == "object" %}
                                 ptr += {{as_varName(arg.length.name)}} * sizeof(uint32_t);
                             {% else %}

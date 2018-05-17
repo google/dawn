@@ -264,6 +264,8 @@ namespace wire {
                         {% set argName = as_varName(arg.name) %}
                         {% if arg.length == "strlen" %}
                             memcpy(allocCmd->GetPtr_{{argName}}(), {{argName}}, allocCmd->{{argName}}Strlen + 1);
+                        {% elif arg.length == "constant_one" %}
+                            memcpy(allocCmd->GetPtr_{{argName}}(), {{argName}}, sizeof(*{{argName}}));
                         {% elif arg.type.category == "object" %}
                             auto {{argName}}Storage = reinterpret_cast<uint32_t*>(allocCmd->GetPtr_{{argName}}());
                             for (size_t i = 0; i < {{as_varName(arg.length.name)}}; i++) {

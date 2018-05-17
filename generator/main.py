@@ -93,6 +93,19 @@ class ObjectType(Type):
         self.native_methods = []
         self.built_type = None
 
+class StructureMember:
+    def __init__(self, name, typ, annotation):
+        self.name = name
+        self.type = typ
+        self.annotation = annotation
+        self.length = None
+
+class StructureType(Type):
+    def __init__(self, name, record):
+        Type.__init__(self, name, record)
+        self.extensible = record.get("extensible", False)
+        self.members = []
+
 ############################################################
 # PARSE
 ############################################################
@@ -112,9 +125,13 @@ def link_object(obj, types):
             arguments_by_name[arg.name.canonical_case()] = arg
 
         for (arg, a) in zip(arguments, record.get('args', [])):
-            assert(arg.annotation == 'value' or 'length' in a)
             if arg.annotation != 'value':
-                if a['length'] == 'strlen':
+                if not 'length' in a:
+                    if arg.type.category == 'structure':
+                        arg.length = "constant_one"
+                    else:
+                        assert(false)
+                elif a['length'] == 'strlen':
                     arg.length = 'strlen'
                 else:
                     arg.length = arguments_by_name[a['length']]
@@ -133,6 +150,13 @@ def link_object(obj, types):
                 break
         assert(obj.built_type != None)
 
+def link_structure(struct, types):
+    def make_member(m):
+        return StructureMember(Name(m['name']), types[m['type']], m.get('annotation', 'value'))
+
+    # TODO(cwallez@chromium.org): Handle pointer members and their length
+    struct.members = [make_member(m) for m in struct.record['members']]
+
 def parse_json(json):
     category_to_parser = {
         'bitmask': BitmaskType,
@@ -140,6 +164,7 @@ def parse_json(json):
         'native': NativeType,
         'natively defined': NativelyDefined,
         'object': ObjectType,
+        'structure': StructureType,
     }
 
     types = {}
@@ -158,6 +183,9 @@ def parse_json(json):
 
     for obj in by_category['object']:
         link_object(obj, types)
+
+    for struct in by_category['structure']:
+        link_structure(struct, types)
 
     for category in by_category.keys():
         by_category[category] = sorted(by_category[category], key=lambda typ: typ.name.canonical_case())
