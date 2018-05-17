@@ -33,7 +33,8 @@ namespace backend { namespace d3d12 {
         }
     }  // namespace
 
-    Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
+    Sampler::Sampler(Device* device, const nxt::SamplerDescriptor* descriptor)
+        : SamplerBase(device, descriptor) {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dn770367(v=vs.85).aspx
         // hex value, decimal value, min linear, mag linear, mip linear
         // D3D12_FILTER_MIN_MAG_MIP_POINT                       = 0       0     0 0 0
@@ -51,7 +52,7 @@ namespace backend { namespace d3d12 {
 
         uint8_t mode = 0;
 
-        switch (builder->GetMinFilter()) {
+        switch (descriptor->minFilter) {
             case nxt::FilterMode::Nearest:
                 break;
             case nxt::FilterMode::Linear:
@@ -59,7 +60,7 @@ namespace backend { namespace d3d12 {
                 break;
         }
 
-        switch (builder->GetMagFilter()) {
+        switch (descriptor->magFilter) {
             case nxt::FilterMode::Nearest:
                 break;
             case nxt::FilterMode::Linear:
@@ -67,7 +68,7 @@ namespace backend { namespace d3d12 {
                 break;
         }
 
-        switch (builder->GetMipMapFilter()) {
+        switch (descriptor->mipmapFilter) {
             case nxt::FilterMode::Nearest:
                 break;
             case nxt::FilterMode::Linear:
@@ -76,9 +77,9 @@ namespace backend { namespace d3d12 {
         }
 
         mSamplerDesc.Filter = static_cast<D3D12_FILTER>(mode);
-        mSamplerDesc.AddressU = AddressMode(builder->GetAddressModeU());
-        mSamplerDesc.AddressV = AddressMode(builder->GetAddressModeV());
-        mSamplerDesc.AddressW = AddressMode(builder->GetAddressModeW());
+        mSamplerDesc.AddressU = AddressMode(descriptor->addressModeU);
+        mSamplerDesc.AddressV = AddressMode(descriptor->addressModeV);
+        mSamplerDesc.AddressW = AddressMode(descriptor->addressModeW);
         mSamplerDesc.MipLODBias = 0.f;
         mSamplerDesc.MaxAnisotropy = 1;
         mSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;

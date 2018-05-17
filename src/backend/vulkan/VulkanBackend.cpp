@@ -253,8 +253,8 @@ namespace backend { namespace vulkan {
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
     }
-    SamplerBase* Device::CreateSampler(SamplerBuilder* builder) {
-        return new Sampler(builder);
+    SamplerBase* Device::CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) {
+        return new Sampler(this, descriptor);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
         return new ShaderModule(builder);

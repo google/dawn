@@ -616,8 +616,11 @@
                 "returns": "queue builder"
             },
             {
-                "name": "create sampler builder",
-                "returns": "sampler builder"
+                "name": "create sampler",
+                "returns": "sampler",
+                "args": [
+                    {"name": "descriptor", "type": "sampler descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create shader module builder",
@@ -936,29 +939,16 @@
     "sampler": {
         "category": "object"
     },
-    "sampler builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "sampler"
-            },
-            {
-                "name": "set filter mode",
-                "args": [
-                    {"name": "mag filter", "type": "filter mode"},
-                    {"name": "min filter", "type": "filter mode"},
-                    {"name": "mipmap filter", "type": "filter mode"}
-                ]
-            },
-            {
-                "name": "set address mode",
-                "args": [
-                    {"name": "address mode u", "type": "address mode"},
-                    {"name": "address mode v", "type": "address mode"},
-                    {"name": "address mode w", "type": "address mode"}
-                ]
-            }
+    "sampler descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "mag filter", "type": "filter mode"},
+            {"name": "min filter", "type": "filter mode"},
+            {"name": "mipmap filter", "type": "filter mode"},
+            {"name": "address mode u", "type": "address mode"},
+            {"name": "address mode v", "type": "address mode"},
+            {"name": "address mode w", "type": "address mode"}
         ]
     },
     "shader module": {

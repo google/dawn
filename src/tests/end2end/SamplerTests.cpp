@@ -110,10 +110,17 @@ protected:
     }
 
     void TestAddressModes(AddressModeTestCase u, AddressModeTestCase v, AddressModeTestCase w) {
-
-        nxt::Sampler sampler = device.CreateSamplerBuilder()
-            .SetAddressMode(u.mMode, v.mMode, w.mMode)
-            .GetResult();
+        nxt::Sampler sampler;
+        {
+            nxt::SamplerDescriptor descriptor;
+            descriptor.minFilter = nxt::FilterMode::Nearest;
+            descriptor.magFilter = nxt::FilterMode::Nearest;
+            descriptor.mipmapFilter = nxt::FilterMode::Nearest;
+            descriptor.addressModeU = u.mMode;
+            descriptor.addressModeV = v.mMode;
+            descriptor.addressModeW = w.mMode;
+            sampler = device.CreateSampler(&descriptor);
+        }
 
         auto bindGroup = device.CreateBindGroupBuilder()
             .SetLayout(mBindGroupLayout)

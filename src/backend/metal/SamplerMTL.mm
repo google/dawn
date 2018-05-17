@@ -49,19 +49,19 @@ namespace backend { namespace metal {
         }
     }
 
-    Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
-        auto desc = [MTLSamplerDescriptor new];
-        [desc autorelease];
-        desc.minFilter = FilterModeToMinMagFilter(builder->GetMinFilter());
-        desc.magFilter = FilterModeToMinMagFilter(builder->GetMagFilter());
-        desc.mipFilter = FilterModeToMipFilter(builder->GetMipMapFilter());
+    Sampler::Sampler(Device* device, const nxt::SamplerDescriptor* descriptor)
+        : SamplerBase(device, descriptor) {
+        MTLSamplerDescriptor* mtlDesc = [MTLSamplerDescriptor new];
+        [mtlDesc autorelease];
+        mtlDesc.minFilter = FilterModeToMinMagFilter(descriptor->minFilter);
+        mtlDesc.magFilter = FilterModeToMinMagFilter(descriptor->magFilter);
+        mtlDesc.mipFilter = FilterModeToMipFilter(descriptor->mipmapFilter);
 
-        desc.sAddressMode = AddressMode(builder->GetAddressModeU());
-        desc.tAddressMode = AddressMode(builder->GetAddressModeV());
-        desc.rAddressMode = AddressMode(builder->GetAddressModeW());
+        mtlDesc.sAddressMode = AddressMode(descriptor->addressModeU);
+        mtlDesc.tAddressMode = AddressMode(descriptor->addressModeV);
+        mtlDesc.rAddressMode = AddressMode(descriptor->addressModeW);
 
-        auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
-        mMtlSamplerState = [mtlDevice newSamplerStateWithDescriptor:desc];
+        mMtlSamplerState = [device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc];
     }
 
     Sampler::~Sampler() {

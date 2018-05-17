@@ -15,77 +15,22 @@
 #include "backend/Sampler.h"
 
 #include "backend/Device.h"
+#include "backend/ValidationUtils_autogen.h"
 
 namespace backend {
 
+    bool ValidateSamplerDescriptor(DeviceBase*, const nxt::SamplerDescriptor* descriptor) {
+        return descriptor->nextInChain == nullptr && IsValidFilterMode(descriptor->magFilter) &&
+               IsValidFilterMode(descriptor->minFilter) &&
+               IsValidFilterMode(descriptor->mipmapFilter) &&
+               IsValidAddressMode(descriptor->addressModeU) &&
+               IsValidAddressMode(descriptor->addressModeV) &&
+               IsValidAddressMode(descriptor->addressModeW);
+    }
+
     // SamplerBase
 
-    SamplerBase::SamplerBase(SamplerBuilder*) {
-    }
-
-    // SamplerBuilder
-
-    enum SamplerSetProperties {
-        SAMPLER_PROPERTY_FILTER = 0x1,
-        SAMPLER_PROPERTY_ADDRESS = 0x2,
-    };
-    SamplerBuilder::SamplerBuilder(DeviceBase* device) : Builder(device) {
-    }
-
-    nxt::FilterMode SamplerBuilder::GetMagFilter() const {
-        return mMagFilter;
-    }
-
-    nxt::FilterMode SamplerBuilder::GetMinFilter() const {
-        return mMinFilter;
-    }
-
-    nxt::FilterMode SamplerBuilder::GetMipMapFilter() const {
-        return mMipMapFilter;
-    }
-
-    nxt::AddressMode SamplerBuilder::GetAddressModeU() const {
-        return mAddressModeU;
-    }
-
-    nxt::AddressMode SamplerBuilder::GetAddressModeV() const {
-        return mAddressModeV;
-    }
-
-    nxt::AddressMode SamplerBuilder::GetAddressModeW() const {
-        return mAddressModeW;
-    }
-
-    void SamplerBuilder::SetFilterMode(nxt::FilterMode magFilter,
-                                       nxt::FilterMode minFilter,
-                                       nxt::FilterMode mipMapFilter) {
-        if ((mPropertiesSet & SAMPLER_PROPERTY_FILTER) != 0) {
-            HandleError("Sampler filter property set multiple times");
-            return;
-        }
-
-        mMagFilter = magFilter;
-        mMinFilter = minFilter;
-        mMipMapFilter = mipMapFilter;
-        mPropertiesSet |= SAMPLER_PROPERTY_FILTER;
-    }
-
-    void SamplerBuilder::SetAddressMode(nxt::AddressMode addressModeU,
-                                        nxt::AddressMode addressModeV,
-                                        nxt::AddressMode addressModeW) {
-        if ((mPropertiesSet & SAMPLER_PROPERTY_ADDRESS) != 0) {
-            HandleError("Sampler address property set multiple times");
-            return;
-        }
-
-        mAddressModeU = addressModeU;
-        mAddressModeV = addressModeV;
-        mAddressModeW = addressModeW;
-        mPropertiesSet |= SAMPLER_PROPERTY_ADDRESS;
-    }
-
-    SamplerBase* SamplerBuilder::GetResultImpl() {
-        return mDevice->CreateSampler(this);
+    SamplerBase::SamplerBase(DeviceBase*, const nxt::SamplerDescriptor*) {
     }
 
 }  // namespace backend

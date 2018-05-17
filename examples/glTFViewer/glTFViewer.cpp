@@ -336,15 +336,21 @@ namespace {
             const auto& iSamplerID = s.first;
             const auto& iSampler = s.second;
 
-            auto magFilter = nxt::FilterMode::Nearest;
-            auto minFilter = nxt::FilterMode::Nearest;
-            auto mipmapFilter = nxt::FilterMode::Nearest;
+            nxt::SamplerDescriptor desc;
+            desc.magFilter = nxt::FilterMode::Nearest;
+            desc.minFilter = nxt::FilterMode::Nearest;
+            desc.mipmapFilter = nxt::FilterMode::Nearest;
+            // TODO: wrap modes
+            desc.addressModeU = nxt::AddressMode::Repeat;
+            desc.addressModeV = nxt::AddressMode::Repeat;
+            desc.addressModeW = nxt::AddressMode::Repeat;
+
             switch (iSampler.magFilter) {
                 case gl::Nearest:
-                    magFilter = nxt::FilterMode::Nearest;
+                    desc.magFilter = nxt::FilterMode::Nearest;
                     break;
                 case gl::Linear:
-                    magFilter = nxt::FilterMode::Linear;
+                    desc.magFilter = nxt::FilterMode::Linear;
                     break;
                 default:
                     fprintf(stderr, "unsupported magFilter %d\n", iSampler.magFilter);
@@ -354,12 +360,12 @@ namespace {
                 case gl::Nearest:
                 case gl::NearestMipmapNearest:
                 case gl::NearestMipmapLinear:
-                    minFilter = nxt::FilterMode::Nearest;
+                    desc.minFilter = nxt::FilterMode::Nearest;
                     break;
                 case gl::Linear:
                 case gl::LinearMipmapNearest:
                 case gl::LinearMipmapLinear:
-                    minFilter = nxt::FilterMode::Linear;
+                    desc.minFilter = nxt::FilterMode::Linear;
                     break;
                 default:
                     fprintf(stderr, "unsupported minFilter %d\n", iSampler.magFilter);
@@ -368,20 +374,15 @@ namespace {
             switch (iSampler.minFilter) {
                 case gl::NearestMipmapNearest:
                 case gl::LinearMipmapNearest:
-                    mipmapFilter = nxt::FilterMode::Nearest;
+                    desc.mipmapFilter = nxt::FilterMode::Nearest;
                     break;
                 case gl::NearestMipmapLinear:
                 case gl::LinearMipmapLinear:
-                    mipmapFilter = nxt::FilterMode::Linear;
+                    desc.mipmapFilter = nxt::FilterMode::Linear;
                     break;
             }
 
-            auto oSampler = device.CreateSamplerBuilder()
-                .SetFilterMode(magFilter, minFilter, mipmapFilter)
-                // TODO: wrap modes
-                .GetResult();
-
-            samplers[iSamplerID] = std::move(oSampler);
+            samplers[iSamplerID] = device.CreateSampler(&desc);
         }
     }
 

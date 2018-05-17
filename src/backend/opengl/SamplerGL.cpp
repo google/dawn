@@ -14,6 +14,7 @@
 
 #include "backend/opengl/SamplerGL.h"
 
+#include "backend/opengl/OpenGLBackend.h"
 #include "common/Assert.h"
 
 namespace backend { namespace opengl {
@@ -70,14 +71,15 @@ namespace backend { namespace opengl {
 
     }  // namespace
 
-    Sampler::Sampler(SamplerBuilder* builder) : SamplerBase(builder) {
+    Sampler::Sampler(Device* device, const nxt::SamplerDescriptor* descriptor)
+        : SamplerBase(device, descriptor) {
         glGenSamplers(1, &mHandle);
-        glSamplerParameteri(mHandle, GL_TEXTURE_MAG_FILTER, MagFilterMode(builder->GetMagFilter()));
+        glSamplerParameteri(mHandle, GL_TEXTURE_MAG_FILTER, MagFilterMode(descriptor->magFilter));
         glSamplerParameteri(mHandle, GL_TEXTURE_MIN_FILTER,
-                            MinFilterMode(builder->GetMinFilter(), builder->GetMipMapFilter()));
-        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_R, WrapMode(builder->GetAddressModeW()));
-        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_S, WrapMode(builder->GetAddressModeU()));
-        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_T, WrapMode(builder->GetAddressModeV()));
+                            MinFilterMode(descriptor->minFilter, descriptor->mipmapFilter));
+        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_R, WrapMode(descriptor->addressModeW));
+        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_S, WrapMode(descriptor->addressModeU));
+        glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_T, WrapMode(descriptor->addressModeV));
     }
 
     GLuint Sampler::GetHandle() const {

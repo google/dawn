@@ -125,7 +125,6 @@ namespace backend { namespace vulkan {
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
         TextureBase* CreateTexture(TextureBuilder* builder) override;
@@ -134,6 +133,8 @@ namespace backend { namespace vulkan {
         void TickImpl() override;
 
       private:
+        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
+
         bool CreateInstance(VulkanGlobalKnobs* usedKnobs,
                             const std::vector<const char*>& requiredExtensions);
         bool CreateDevice(VulkanDeviceKnobs* usedKnobs);

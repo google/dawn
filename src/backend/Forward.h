@@ -46,7 +46,6 @@ namespace backend {
     class RenderPipelineBase;
     class RenderPipelineBuilder;
     class SamplerBase;
-    class SamplerBuilder;
     class ShaderModuleBase;
     class ShaderModuleBuilder;
     class SwapChainBase;

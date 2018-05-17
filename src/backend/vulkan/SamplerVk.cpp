@@ -56,18 +56,18 @@ namespace backend { namespace vulkan {
         }
     }  // anonymous namespace
 
-    Sampler::Sampler(SamplerBuilder* builder)
-        : SamplerBase(builder), mDevice(ToBackend(builder->GetDevice())) {
+    Sampler::Sampler(Device* device, const nxt::SamplerDescriptor* descriptor)
+        : SamplerBase(device, descriptor), mDevice(device) {
         VkSamplerCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        createInfo.magFilter = VulkanSamplerFilter(builder->GetMagFilter());
-        createInfo.minFilter = VulkanSamplerFilter(builder->GetMinFilter());
-        createInfo.mipmapMode = VulkanMipMapMode(builder->GetMipMapFilter());
-        createInfo.addressModeU = VulkanSamplerAddressMode(builder->GetAddressModeU());
-        createInfo.addressModeV = VulkanSamplerAddressMode(builder->GetAddressModeV());
-        createInfo.addressModeW = VulkanSamplerAddressMode(builder->GetAddressModeW());
+        createInfo.magFilter = VulkanSamplerFilter(descriptor->magFilter);
+        createInfo.minFilter = VulkanSamplerFilter(descriptor->minFilter);
+        createInfo.mipmapMode = VulkanMipMapMode(descriptor->mipmapFilter);
+        createInfo.addressModeU = VulkanSamplerAddressMode(descriptor->addressModeU);
+        createInfo.addressModeV = VulkanSamplerAddressMode(descriptor->addressModeV);
+        createInfo.addressModeW = VulkanSamplerAddressMode(descriptor->addressModeW);
         createInfo.mipLodBias = 0.0f;
         createInfo.anisotropyEnable = VK_FALSE;
         createInfo.maxAnisotropy = 1.0f;
@@ -78,7 +78,7 @@ namespace backend { namespace vulkan {
         createInfo.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
         createInfo.unnormalizedCoordinates = VK_FALSE;
 
-        if (mDevice->fn.CreateSampler(mDevice->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
+        if (device->fn.CreateSampler(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
             VK_SUCCESS) {
             ASSERT(false);
         }

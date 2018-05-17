@@ -101,7 +101,6 @@ namespace backend { namespace metal {
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
         TextureBase* CreateTexture(TextureBuilder* builder) override;
@@ -119,6 +118,8 @@ namespace backend { namespace metal {
         ResourceUploader* GetResourceUploader() const;
 
       private:
+        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
+
         void OnCompletedHandler();
 
         id<MTLDevice> mMtlDevice = nil;

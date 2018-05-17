@@ -24,7 +24,7 @@ namespace backend { namespace vulkan {
 
     class Sampler : public SamplerBase {
       public:
-        Sampler(SamplerBuilder* builder);
+        Sampler(Device* device, const nxt::SamplerDescriptor* descriptor);
         ~Sampler();
 
         VkSampler GetHandle() const;

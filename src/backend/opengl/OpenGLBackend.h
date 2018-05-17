@@ -97,13 +97,15 @@ namespace backend { namespace opengl {
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
         TextureBase* CreateTexture(TextureBuilder* builder) override;
         TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
         void TickImpl() override;
+
+      private:
+        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
     };
 
     class BindGroup : public BindGroupBase {

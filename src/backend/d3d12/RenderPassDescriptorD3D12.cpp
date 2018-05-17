@@ -57,7 +57,7 @@ namespace backend { namespace d3d12 {
     RenderPassDescriptor::GetSubpassOMSetRenderTargetArgs() {
         OMSetRenderTargetArgs args = {};
 
-        size_t rtvIndex = 0;
+        unsigned int rtvIndex = 0;
         for (uint32_t i : IterateBitSet(GetColorAttachmentMask())) {
             args.RTVs[rtvIndex] = GetRTVDescriptor(i);
             rtvIndex++;

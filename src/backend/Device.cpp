@@ -130,8 +130,11 @@ namespace backend {
     RenderPipelineBuilder* DeviceBase::CreateRenderPipelineBuilder() {
         return new RenderPipelineBuilder(this);
     }
-    SamplerBuilder* DeviceBase::CreateSamplerBuilder() {
-        return new SamplerBuilder(this);
+    SamplerBase* DeviceBase::CreateSampler(const nxt::SamplerDescriptor* descriptor) {
+        if (!ValidateSamplerDescriptor(this, descriptor)) {
+            return nullptr;
+        }
+        return CreateSamplerImpl(descriptor);
     }
     ShaderModuleBuilder* DeviceBase::CreateShaderModuleBuilder() {
         return new ShaderModuleBuilder(this);

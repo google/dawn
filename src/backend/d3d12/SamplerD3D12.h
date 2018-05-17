@@ -21,9 +21,11 @@
 
 namespace backend { namespace d3d12 {
 
+    class Device;
+
     class Sampler : public SamplerBase {
       public:
-        Sampler(SamplerBuilder* builder);
+        Sampler(Device* device, const nxt::SamplerDescriptor* descriptor);
 
         const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
 

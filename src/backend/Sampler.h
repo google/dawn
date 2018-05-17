@@ -15,54 +15,19 @@
 #ifndef BACKEND_SAMPLER_H_
 #define BACKEND_SAMPLER_H_
 
-#include "backend/Buffer.h"
-#include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
 #include "nxt/nxtcpp.h"
 
 namespace backend {
 
+    class DeviceBase;
+
+    bool ValidateSamplerDescriptor(DeviceBase* device, const nxt::SamplerDescriptor* descriptor);
+
     class SamplerBase : public RefCounted {
       public:
-        SamplerBase(SamplerBuilder* builder);
-    };
-
-    class SamplerBuilder : public Builder<SamplerBase> {
-      public:
-        SamplerBuilder(DeviceBase* device);
-
-        nxt::FilterMode GetMagFilter() const;
-        nxt::FilterMode GetMinFilter() const;
-        nxt::FilterMode GetMipMapFilter() const;
-
-        nxt::AddressMode GetAddressModeU() const;
-        nxt::AddressMode GetAddressModeV() const;
-        nxt::AddressMode GetAddressModeW() const;
-
-        // NXT API
-        void SetFilterMode(nxt::FilterMode magFilter,
-                           nxt::FilterMode minFilter,
-                           nxt::FilterMode mipMapFilter);
-
-        void SetAddressMode(nxt::AddressMode addressModeU,
-                            nxt::AddressMode addressModeV,
-                            nxt::AddressMode addressModeW);
-
-      private:
-        friend class SamplerBase;
-
-        SamplerBase* GetResultImpl() override;
-
-        int mPropertiesSet = 0;
-
-        nxt::FilterMode mMagFilter = nxt::FilterMode::Nearest;
-        nxt::FilterMode mMinFilter = nxt::FilterMode::Nearest;
-        nxt::FilterMode mMipMapFilter = nxt::FilterMode::Nearest;
-
-        nxt::AddressMode mAddressModeU = nxt::AddressMode::ClampToEdge;
-        nxt::AddressMode mAddressModeV = nxt::AddressMode::ClampToEdge;
-        nxt::AddressMode mAddressModeW = nxt::AddressMode::ClampToEdge;
+        SamplerBase(DeviceBase* device, const nxt::SamplerDescriptor* descriptor);
     };
 
 }  // namespace backend

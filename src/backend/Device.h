@@ -49,7 +49,6 @@ namespace backend {
         virtual RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) = 0;
         virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
-        virtual SamplerBase* CreateSampler(SamplerBuilder* builder) = 0;
         virtual ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) = 0;
         virtual SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) = 0;
         virtual TextureBase* CreateTexture(TextureBuilder* builder) = 0;
@@ -88,7 +87,7 @@ namespace backend {
         QueueBuilder* CreateQueueBuilder();
         RenderPassDescriptorBuilder* CreateRenderPassDescriptorBuilder();
         RenderPipelineBuilder* CreateRenderPipelineBuilder();
-        SamplerBuilder* CreateSamplerBuilder();
+        SamplerBase* CreateSampler(const nxt::SamplerDescriptor* descriptor);
         ShaderModuleBuilder* CreateShaderModuleBuilder();
         SwapChainBuilder* CreateSwapChainBuilder();
         TextureBuilder* CreateTextureBuilder();
@@ -99,6 +98,8 @@ namespace backend {
         void Release();
 
       private:
+        virtual SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) = 0;
+
         // The object caches aren't exposed in the header as they would require a lot of
         // additional includes.
         struct Caches;

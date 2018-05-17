@@ -109,7 +109,6 @@ namespace backend { namespace null {
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-        SamplerBase* CreateSampler(SamplerBuilder* builder) override;
         ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
         TextureBase* CreateTexture(TextureBuilder* builder) override;
@@ -121,6 +120,8 @@ namespace backend { namespace null {
         std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
 
       private:
+        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
+
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
     };
 

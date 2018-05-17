@@ -25,7 +25,7 @@ namespace backend { namespace opengl {
 
     class Sampler : public SamplerBase {
       public:
-        Sampler(SamplerBuilder* builder);
+        Sampler(Device* device, const nxt::SamplerDescriptor* descriptor);
 
         GLuint GetHandle() const;
 
