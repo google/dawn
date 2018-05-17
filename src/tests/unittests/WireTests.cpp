@@ -184,14 +184,14 @@ TEST_F(WireTests, ReleaseCalledOnRefCount0) {
 
 // Test that the wire is able to send numerical values
 TEST_F(WireTests, ValueArgument) {
-    nxtSamplerBuilder builder = nxtDeviceCreateSamplerBuilder(device);
-    nxtSamplerBuilderSetFilterMode(builder, NXT_FILTER_MODE_LINEAR, NXT_FILTER_MODE_LINEAR, NXT_FILTER_MODE_NEAREST);
+    nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
+    nxtCommandBufferBuilderDispatch(builder, 1, 2, 3);
 
-    nxtSamplerBuilder apiBuilder = api.GetNewSamplerBuilder();
-    EXPECT_CALL(api, DeviceCreateSamplerBuilder(apiDevice))
+    nxtCommandBufferBuilder apiBuilder = api.GetNewCommandBufferBuilder();
+    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
         .WillOnce(Return(apiBuilder));
 
-    EXPECT_CALL(api, SamplerBuilderSetFilterMode(apiBuilder, NXT_FILTER_MODE_LINEAR, NXT_FILTER_MODE_LINEAR, NXT_FILTER_MODE_NEAREST))
+    EXPECT_CALL(api, CommandBufferBuilderDispatch(apiBuilder, 1, 2, 3))
         .Times(1);
 
     FlushClient();
