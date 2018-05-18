@@ -373,6 +373,32 @@ TEST_F(WireTests, ObjectsAsPointerArgument) {
     FlushClient();
 }
 
+// Test that the wire is able to send structures that contain pure values (non-objects)
+TEST_F(WireTests, StructureOfValuesArgument) {
+    nxtSamplerDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.magFilter = NXT_FILTER_MODE_LINEAR;
+    descriptor.minFilter = NXT_FILTER_MODE_NEAREST;
+    descriptor.mipmapFilter = NXT_FILTER_MODE_LINEAR;
+    descriptor.addressModeU = NXT_ADDRESS_MODE_CLAMP_TO_EDGE;
+    descriptor.addressModeV = NXT_ADDRESS_MODE_REPEAT;
+    descriptor.addressModeW = NXT_ADDRESS_MODE_MIRRORED_REPEAT;
+
+    nxtDeviceCreateSampler(device, &descriptor);
+    EXPECT_CALL(api, DeviceCreateSampler(apiDevice, MatchesLambda([](const nxtSamplerDescriptor* desc) -> bool {
+        return desc->nextInChain == nullptr &&
+            desc->magFilter == NXT_FILTER_MODE_LINEAR &&
+            desc->minFilter == NXT_FILTER_MODE_NEAREST &&
+            desc->mipmapFilter == NXT_FILTER_MODE_LINEAR &&
+            desc->addressModeU == NXT_ADDRESS_MODE_CLAMP_TO_EDGE &&
+            desc->addressModeV == NXT_ADDRESS_MODE_REPEAT &&
+            desc->addressModeW == NXT_ADDRESS_MODE_MIRRORED_REPEAT;
+    })))
+        .WillOnce(Return(nullptr));
+
+    FlushClient();
+}
+
 // Test that the server doesn't forward calls to error objects or with error objects
 // Also test that when GetResult is called on an error builder, the error callback is fired
 TEST_F(WireTests, CallsSkippedAfterBuilderError) {
