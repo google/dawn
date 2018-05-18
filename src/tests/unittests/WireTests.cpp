@@ -21,6 +21,54 @@
 using namespace testing;
 using namespace nxt::wire;
 
+// Definition of a "Lambda predicate matcher" for GMock to allow checking deep structures
+// are passed correctly by the wire.
+
+// Helper templates to extract the argument type of a lambda.
+template<typename T>
+struct MatcherMethodArgument;
+
+template<typename Lambda, typename Arg>
+struct MatcherMethodArgument<bool (Lambda::*)(Arg) const> {
+    using Type = Arg;
+};
+
+template<typename Lambda>
+using MatcherLambdaArgument = typename MatcherMethodArgument<decltype(&Lambda::operator())>::Type;
+
+// The matcher itself, unfortunately it isn't able to return detailed information like other
+// matchers do.
+template <typename Lambda, typename Arg>
+class LambdaMatcherImpl : public MatcherInterface<Arg> {
+  public:
+    explicit LambdaMatcherImpl(Lambda lambda) : mLambda(lambda) {}
+
+    void DescribeTo(std::ostream* os) const override {
+        *os << "with a custom matcher";
+    }
+
+    bool MatchAndExplain(Arg value, MatchResultListener* listener) const override {
+        if (!mLambda(value)) {
+            *listener << "which doesn't satisfy the custom predicate";
+        }
+        return true;
+    }
+
+  private:
+    Lambda mLambda;
+};
+
+// Use the MatchesLambda as follows:
+//
+//   EXPECT_CALL(foo, Bar(MatchesLambda([](ArgType arg) -> bool {
+//       return CheckPredicateOnArg(arg);
+//   })));
+template <typename Lambda>
+inline Matcher<MatcherLambdaArgument<Lambda>> MatchesLambda(Lambda lambda) {
+    return MakeMatcher(new LambdaMatcherImpl<Lambda, MatcherLambdaArgument<Lambda>>(lambda));
+}
+
+// Mock classes to add expectations on the wire calling callbacks
 class MockDeviceErrorCallback {
     public:
         MOCK_METHOD2(Call, void(const char* message, nxtCallbackUserdata userdata));
@@ -281,16 +329,6 @@ TEST_F(WireTests, ObjectAsValueArgument) {
     FlushClient();
 }
 
-// GMock doesn't support lambdas in ResultOf, so we make a functor instead.
-struct AreAPICmdBufs {
-    using result_type = bool;
-    using argument_type = const nxtCommandBuffer*;
-    bool operator() (const nxtCommandBuffer* cmdBufs) const {
-        return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
-    }
-    nxtCommandBuffer apiCmdBufs[2];
-};
-
 // Test that the wire is able to send array of objects
 TEST_F(WireTests, ObjectsAsPointerArgument) {
     nxtCommandBuffer cmdBufs[2];
@@ -328,11 +366,9 @@ TEST_F(WireTests, ObjectsAsPointerArgument) {
     // Submit command buffer and check we got a call with both API-side command buffers
     nxtQueueSubmit(queue, 2, cmdBufs);
 
-    AreAPICmdBufs predicate;
-    predicate.apiCmdBufs[0] = apiCmdBufs[0];
-    predicate.apiCmdBufs[1] = apiCmdBufs[1];
-
-    EXPECT_CALL(api, QueueSubmit(apiQueue, 2, ResultOf(predicate, Eq(true))));
+    EXPECT_CALL(api, QueueSubmit(apiQueue, 2, MatchesLambda([=](const nxtCommandBuffer* cmdBufs) -> bool {
+        return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
+    })));
 
     FlushClient();
 }
