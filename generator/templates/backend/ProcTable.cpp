@@ -17,34 +17,13 @@
 
 #include "common/Assert.h"
 
+#include "backend/ValidationUtils_autogen.h"
 #include "backend/{{namespace}}/GeneratedCodeIncludes.h"
 
 namespace backend {
 namespace {{namespace}} {
 
     namespace {
-
-        //* Helper functions to check the value of enums
-        {% for type in by_category["enum"] %}
-            {% set cType = as_cType(type.name) %}
-            bool CheckEnum{{cType}}({{cType}} value) {
-                switch (value) {
-                    {% for value in type.values %}
-                        case {{as_cEnum(type.name, value.name)}}:
-                            return true;
-                    {% endfor %}
-                    default:
-                        return false;
-                }
-            }
-        {% endfor %}
-
-        {% for type in by_category["bitmask"] %}
-            {% set cType = as_cType(type.name) %}
-            bool CheckBitmask{{cType}}({{cType}} value) {
-                return (value & ~{{type.full_mask}}) == 0;
-            }
-        {% endfor %}
 
         {% set methodsWithExtraValidation = (
             "CommandBufferBuilderGetResult",
@@ -100,10 +79,9 @@ namespace {{namespace}} {
                     {% endif %}
                     bool error = false;
                     {% for arg in method.arguments %}
-                        {% if arg.type.category == "enum" %}
-                            if (!CheckEnum{{as_cType(arg.type.name)}}({{as_varName(arg.name)}})) error = true;;
-                        {% elif arg.type.category == "bitmask" %}
-                            if (!CheckBitmask{{as_cType(arg.type.name)}}({{as_varName(arg.name)}})) error = true;
+                        {% set cppType = as_cppType(arg.type.name) %}
+                        {% if arg.type.category in ["enum", "bitmask"] %}
+                            if (!IsValid{{cppType}}(static_cast<nxt::{{cppType}}>({{as_varName(arg.name)}}))) error = true;
                         {% else %}
                             (void) {{as_varName(arg.name)}};
                         {% endif %}

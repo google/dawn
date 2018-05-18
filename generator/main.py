@@ -434,7 +434,11 @@ def main():
         backend_params = {
             'namespace': backend,
         }
-        renders.append(FileRender('BackendProcTable.cpp', backend + '/ProcTable.' + extension, base_backend_params + [backend_params]))
+        renders.append(FileRender('backend/ProcTable.cpp', 'backend/' + backend + '/ProcTable.' + extension, base_backend_params + [backend_params]))
+
+    if 'backend_utils' in targets:
+        renders.append(FileRender('backend/ValidationUtils.h', 'backend/ValidationUtils_autogen.h', base_backend_params))
+        renders.append(FileRender('backend/ValidationUtils.cpp', 'backend/ValidationUtils_autogen.cpp', base_backend_params))
 
     if 'wire' in targets:
         renders.append(FileRender('wire/WireCmd.h', 'wire/WireCmd_autogen.h', base_backend_params))
