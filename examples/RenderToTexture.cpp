@@ -64,16 +64,8 @@ void initTextures() {
         .GetResult();
     renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
 
-    {
-        nxt::SamplerDescriptor desc;
-        desc.minFilter = nxt::FilterMode::Linear;
-        desc.magFilter = nxt::FilterMode::Linear;
-        desc.mipmapFilter = nxt::FilterMode::Linear;
-        desc.addressModeU = nxt::AddressMode::Repeat;
-        desc.addressModeV = nxt::AddressMode::Repeat;
-        desc.addressModeW = nxt::AddressMode::Repeat;
-        samplerPost = device.CreateSampler(&desc);
-    }
+    nxt::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    samplerPost = device.CreateSampler(&samplerDesc);
 }
 
 void initPipeline() {

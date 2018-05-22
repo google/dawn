@@ -56,16 +56,8 @@ void initTextures() {
         .SetAllowedUsage(nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::Sampled)
         .GetResult();
 
-    {
-        nxt::SamplerDescriptor desc;
-        desc.minFilter = nxt::FilterMode::Linear;
-        desc.magFilter = nxt::FilterMode::Linear;
-        desc.mipmapFilter = nxt::FilterMode::Linear;
-        desc.addressModeU = nxt::AddressMode::Repeat;
-        desc.addressModeV = nxt::AddressMode::Repeat;
-        desc.addressModeW = nxt::AddressMode::Repeat;
-        sampler = device.CreateSampler(&desc);
-    }
+    nxt::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    sampler = device.CreateSampler(&samplerDesc);
 
     // Initialize the texture with arbitrary data until we can load images
     std::vector<uint8_t> data(4 * 1024 * 1024, 0);

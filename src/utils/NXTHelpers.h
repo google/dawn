@@ -48,4 +48,6 @@ namespace utils {
                                           uint32_t width,
                                           uint32_t height);
 
+    nxt::SamplerDescriptor GetDefaultSamplerDescriptor();
+
 }  // namespace utils

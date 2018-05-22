@@ -137,4 +137,17 @@ namespace utils {
         return result;
     }
 
+    nxt::SamplerDescriptor GetDefaultSamplerDescriptor() {
+        nxt::SamplerDescriptor desc;
+
+        desc.minFilter = nxt::FilterMode::Linear;
+        desc.magFilter = nxt::FilterMode::Linear;
+        desc.mipmapFilter = nxt::FilterMode::Linear;
+        desc.addressModeU = nxt::AddressMode::Repeat;
+        desc.addressModeV = nxt::AddressMode::Repeat;
+        desc.addressModeW = nxt::AddressMode::Repeat;
+
+        return desc;
+    }
+
 }  // namespace utils

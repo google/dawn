@@ -336,14 +336,8 @@ namespace {
             const auto& iSamplerID = s.first;
             const auto& iSampler = s.second;
 
-            nxt::SamplerDescriptor desc;
-            desc.magFilter = nxt::FilterMode::Nearest;
-            desc.minFilter = nxt::FilterMode::Nearest;
-            desc.mipmapFilter = nxt::FilterMode::Nearest;
+            nxt::SamplerDescriptor desc = utils::GetDefaultSamplerDescriptor();
             // TODO: wrap modes
-            desc.addressModeU = nxt::AddressMode::Repeat;
-            desc.addressModeV = nxt::AddressMode::Repeat;
-            desc.addressModeW = nxt::AddressMode::Repeat;
 
             switch (iSampler.magFilter) {
                 case gl::Nearest:
