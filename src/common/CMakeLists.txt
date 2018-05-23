@@ -25,6 +25,7 @@ list(APPEND COMMON_SOURCES
     ${COMMON_DIR}/Math.cpp
     ${COMMON_DIR}/Math.h
     ${COMMON_DIR}/Platform.h
+    ${COMMON_DIR}/Result.h
     ${COMMON_DIR}/Serial.h
     ${COMMON_DIR}/SerialQueue.h
     ${COMMON_DIR}/SwapChainUtils.h

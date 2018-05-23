@@ -37,6 +37,7 @@ list(APPEND UNITTEST_SOURCES
     ${UNITTESTS_DIR}/ObjectBaseTests.cpp
     ${UNITTESTS_DIR}/PerStageTests.cpp
     ${UNITTESTS_DIR}/RefCountedTests.cpp
+    ${UNITTESTS_DIR}/ResultTests.cpp
     ${UNITTESTS_DIR}/SerialQueueTests.cpp
     ${UNITTESTS_DIR}/ToBackendTests.cpp
     ${UNITTESTS_DIR}/WireTests.cpp
