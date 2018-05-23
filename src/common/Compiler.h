@@ -19,6 +19,7 @@
 //  - NXT_COMPILER_[CLANG|GCC|MSVC]: Compiler detection
 //  - NXT_BREAKPOINT(): Raises an exception and breaks in the debugger
 //  - NXT_BUILTIN_UNREACHABLE(): Hints the compiler that a code path is unreachable
+//  - NXT_NO_DISCARD: An attribute that is C++17 [[nodiscard]] where available
 
 // Clang and GCC
 #if defined(__GNUC__)
@@ -36,6 +37,19 @@
 
 #    define NXT_BUILTIN_UNREACHABLE() __builtin_unreachable()
 
+#    if !defined(__has_cpp_attribute)
+#        define __has_cpp_attribute(name) 0
+#    endif
+
+// Use warn_unused_result on clang otherwise we can a c++1z extension warning in C++14 mode
+// Also avoid warn_unused_result with GCC because it is only a function attribute and not a type
+// attribute.
+#    if __has_cpp_attribute(warn_unused_result) && defined(__clang__)
+#        define NXT_NO_DISCARD __attribute__((warn_unused_result))
+#    elif NXT_CPP_VERSION >= 17 && __has_cpp_attribute(nodiscard)
+#        define NXT_NO_DISCARD [[nodiscard]]
+#    endif
+
 // MSVC
 #elif defined(_MSC_VER)
 #    define NXT_COMPILER_MSVC
@@ -45,8 +59,18 @@ extern void __cdecl __debugbreak(void);
 
 #    define NXT_BUILTIN_UNREACHABLE() __assume(false)
 
+// Visual Studio 2017 15.3 adds support for [[nodiscard]]
+#    if _MSC_VER >= 1911 && NXT_CPP_VERSION >= 17
+#        define NXT_NO_DISCARD [[nodiscard]]
+#    endif
+
 #else
 #    error "Unsupported compiler"
+#endif
+
+// Add noop replacements for macros for features that aren't supported by the compiler.
+#if !defined(NXT_NO_DISCARD)
+#    define NXT_NO_DISCARD
 #endif
 
 #endif  // COMMON_COMPILER_H_

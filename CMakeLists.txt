@@ -49,6 +49,7 @@ option(NXT_ENABLE_NULL "Enable compilation of the Null backend" ON)
 option(NXT_ENABLE_OPENGL "Enable compilation of the OpenGL backend" ON)
 option(NXT_ENABLE_VULKAN "Enable compilation of the Vulkan backend" OFF)
 option(NXT_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
+option(NXT_USE_CPP17 "Use some optional C++17 features for compile-time checks" OFF)
 
 ################################################################################
 # Precompute compile flags and defines, functions to set them
@@ -63,6 +64,12 @@ set(NXT_GENERATED_FLAGS "")
 set(NXT_ENABLE_ASSERTS $<OR:$<CONFIG:Debug>,$<BOOL:${NXT_ALWAYS_ASSERT}>>)
 
 list(APPEND NXT_DEFS $<${NXT_ENABLE_ASSERTS}:NXT_ENABLE_ASSERTS>)
+
+if (NXT_USE_CPP17)
+    list(APPEND NXT_INTERNAL_DEFS "NXT_CPP_VERSION=17")
+else()
+    list(APPEND NXT_INTERNAL_DEFS "NXT_CPP_VERSION=14")
+endif()
 
 if (NXT_ENABLE_D3D12)
     list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_D3D12")
