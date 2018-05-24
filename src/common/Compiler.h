@@ -20,6 +20,8 @@
 //  - NXT_BREAKPOINT(): Raises an exception and breaks in the debugger
 //  - NXT_BUILTIN_UNREACHABLE(): Hints the compiler that a code path is unreachable
 //  - NXT_NO_DISCARD: An attribute that is C++17 [[nodiscard]] where available
+//  - NXT_(UN)?LIKELY(EXPR): Where available, hints the compiler that the expression will be true
+//      (resp. false) to help it generate code that leads to better branch prediction.
 
 // Clang and GCC
 #if defined(__GNUC__)
@@ -36,6 +38,8 @@
 #    endif
 
 #    define NXT_BUILTIN_UNREACHABLE() __builtin_unreachable()
+#    define NXT_LIKELY(x) __builtin_expect(!!(x), 1)
+#    define NXT_UNLIKELY(x) __builtin_expect(!!(x), 0)
 
 #    if !defined(__has_cpp_attribute)
 #        define __has_cpp_attribute(name) 0
@@ -69,6 +73,12 @@ extern void __cdecl __debugbreak(void);
 #endif
 
 // Add noop replacements for macros for features that aren't supported by the compiler.
+#if !defined(NXT_LIKELY)
+#    define NXT_LIKELY(X) X
+#endif
+#if !defined(NXT_UNLIKELY)
+#    define NXT_UNLIKELY(X) X
+#endif
 #if !defined(NXT_NO_DISCARD)
 #    define NXT_NO_DISCARD
 #endif
