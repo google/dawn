@@ -30,6 +30,7 @@ Generate(
 )
 target_link_libraries(backend_utils_autogen nxtcpp)
 target_include_directories(backend_utils_autogen PUBLIC ${GENERATED_DIR})
+target_include_directories(backend_utils_autogen PRIVATE ${SRC_DIR})
 
 function(GenerateProcTable backend)
     Generate(
@@ -342,6 +343,10 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/CommandBufferStateTracker.h
     ${BACKEND_DIR}/Device.cpp
     ${BACKEND_DIR}/Device.h
+    ${BACKEND_DIR}/Error.cpp
+    ${BACKEND_DIR}/Error.h
+    ${BACKEND_DIR}/ErrorData.cpp
+    ${BACKEND_DIR}/ErrorData.h
     ${BACKEND_DIR}/Forward.h
     ${BACKEND_DIR}/InputState.cpp
     ${BACKEND_DIR}/InputState.h

@@ -33,6 +33,7 @@ list(APPEND UNITTEST_SOURCES
     ${UNITTESTS_DIR}/BitSetIteratorTests.cpp
     ${UNITTESTS_DIR}/CommandAllocatorTests.cpp
     ${UNITTESTS_DIR}/EnumClassBitmasksTests.cpp
+    ${UNITTESTS_DIR}/ErrorTests.cpp
     ${UNITTESTS_DIR}/MathTests.cpp
     ${UNITTESTS_DIR}/ObjectBaseTests.cpp
     ${UNITTESTS_DIR}/PerStageTests.cpp
