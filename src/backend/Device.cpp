@@ -21,6 +21,7 @@
 #include "backend/CommandBuffer.h"
 #include "backend/ComputePipeline.h"
 #include "backend/DepthStencilState.h"
+#include "backend/ErrorData.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
 #include "backend/Queue.h"
@@ -131,9 +132,13 @@ namespace backend {
         return new RenderPipelineBuilder(this);
     }
     SamplerBase* DeviceBase::CreateSampler(const nxt::SamplerDescriptor* descriptor) {
-        if (!ValidateSamplerDescriptor(this, descriptor)) {
+        MaybeError validation = ValidateSamplerDescriptor(this, descriptor);
+        if (validation.IsError()) {
+            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
+            delete validation.AcquireError();
             return nullptr;
         }
+
         return CreateSamplerImpl(descriptor);
     }
     ShaderModuleBuilder* DeviceBase::CreateShaderModuleBuilder() {

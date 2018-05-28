@@ -17,6 +17,7 @@
 
 #include "common/Assert.h"
 
+#include "backend/ErrorData.h"
 #include "backend/ValidationUtils_autogen.h"
 #include "backend/{{namespace}}/GeneratedCodeIncludes.h"
 
@@ -82,10 +83,15 @@ namespace {{namespace}} {
                     bool error = false;
                     {% for arg in method.arguments %}
                         {% set cppType = as_cppType(arg.type.name) %}
+                        {% set argName = as_varName(arg.name) %}
                         {% if arg.type.category in ["enum", "bitmask"] %}
-                            if (!IsValid{{cppType}}(static_cast<nxt::{{cppType}}>({{as_varName(arg.name)}}))) error = true;
+                            MaybeError {{argName}}Valid = Validate{{cppType}}(static_cast<nxt::{{cppType}}>({{argName}}));
+                            if ({{argName}}Valid.IsError()) {
+                                delete {{argName}}Valid.AcquireError();
+                                error = true;
+                            }
                         {% else %}
-                            (void) {{as_varName(arg.name)}};
+                            (void) {{argName}};
                         {% endif %}
                         if (error) {
                             {% if type.is_builder %}

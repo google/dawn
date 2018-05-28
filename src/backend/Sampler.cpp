@@ -19,13 +19,18 @@
 
 namespace backend {
 
-    bool ValidateSamplerDescriptor(DeviceBase*, const nxt::SamplerDescriptor* descriptor) {
-        return descriptor->nextInChain == nullptr && IsValidFilterMode(descriptor->magFilter) &&
-               IsValidFilterMode(descriptor->minFilter) &&
-               IsValidFilterMode(descriptor->mipmapFilter) &&
-               IsValidAddressMode(descriptor->addressModeU) &&
-               IsValidAddressMode(descriptor->addressModeV) &&
-               IsValidAddressMode(descriptor->addressModeW);
+    MaybeError ValidateSamplerDescriptor(DeviceBase*, const nxt::SamplerDescriptor* descriptor) {
+        NXT_TRY(ValidateFilterMode(descriptor->minFilter));
+        NXT_TRY(ValidateFilterMode(descriptor->magFilter));
+        NXT_TRY(ValidateFilterMode(descriptor->mipmapFilter));
+        NXT_TRY(ValidateAddressMode(descriptor->addressModeU));
+        NXT_TRY(ValidateAddressMode(descriptor->addressModeV));
+        NXT_TRY(ValidateAddressMode(descriptor->addressModeW));
+
+        if (descriptor->nextInChain != nullptr) {
+            NXT_RETURN_ERROR("nextInChain must be nullptr");
+        }
+        return {};
     }
 
     // SamplerBase

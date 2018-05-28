@@ -15,6 +15,7 @@
 #ifndef BACKEND_SAMPLER_H_
 #define BACKEND_SAMPLER_H_
 
+#include "backend/Error.h"
 #include "backend/RefCounted.h"
 
 #include "nxt/nxtcpp.h"
@@ -23,7 +24,8 @@ namespace backend {
 
     class DeviceBase;
 
-    bool ValidateSamplerDescriptor(DeviceBase* device, const nxt::SamplerDescriptor* descriptor);
+    MaybeError ValidateSamplerDescriptor(DeviceBase* device,
+                                         const nxt::SamplerDescriptor* descriptor);
 
     class SamplerBase : public RefCounted {
       public:

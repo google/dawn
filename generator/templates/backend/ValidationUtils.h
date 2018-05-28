@@ -17,11 +17,13 @@
 
 #include "nxt/nxtcpp.h"
 
+#include "backend/Error.h"
+
 namespace backend {
 
     // Helper functions to check the value of enums and bitmasks
     {% for type in by_category["enum"] + by_category["bitmask"] %}
-        bool IsValid{{type.name.CamelCase()}}(nxt::{{as_cppType(type.name)}} value);
+        MaybeError Validate{{type.name.CamelCase()}}(nxt::{{as_cppType(type.name)}} value);
     {% endfor %}
 
 } // namespace backend
