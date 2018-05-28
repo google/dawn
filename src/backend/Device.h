@@ -15,6 +15,7 @@
 #ifndef BACKEND_DEVICEBASE_H_
 #define BACKEND_DEVICEBASE_H_
 
+#include "backend/Error.h"
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
@@ -98,7 +99,8 @@ namespace backend {
         void Release();
 
       private:
-        virtual SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) = 0;
+        virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
+            const nxt::SamplerDescriptor* descriptor) = 0;
 
         // The object caches aren't exposed in the header as they would require a lot of
         // additional includes.

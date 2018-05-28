@@ -118,7 +118,8 @@ namespace backend { namespace metal {
         ResourceUploader* GetResourceUploader() const;
 
       private:
-        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
+        ResultOrError<SamplerBase*> CreateSamplerImpl(
+            const nxt::SamplerDescriptor* descriptor) override;
 
         void OnCompletedHandler();
 

@@ -105,7 +105,8 @@ namespace backend { namespace opengl {
         void TickImpl() override;
 
       private:
-        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
+        ResultOrError<SamplerBase*> CreateSamplerImpl(
+            const nxt::SamplerDescriptor* descriptor) override;
     };
 
     class BindGroup : public BindGroupBase {

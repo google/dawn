@@ -133,7 +133,8 @@ namespace backend { namespace vulkan {
         void TickImpl() override;
 
       private:
-        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
+        ResultOrError<SamplerBase*> CreateSamplerImpl(
+            const nxt::SamplerDescriptor* descriptor) override;
 
         bool CreateInstance(VulkanGlobalKnobs* usedKnobs,
                             const std::vector<const char*>& requiredExtensions);

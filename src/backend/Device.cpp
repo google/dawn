@@ -139,7 +139,13 @@ namespace backend {
             return nullptr;
         }
 
-        return CreateSamplerImpl(descriptor);
+        ResultOrError<SamplerBase*> maybeSampler = CreateSamplerImpl(descriptor);
+        if (maybeSampler.IsError()) {
+            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
+            delete validation.AcquireError();
+            return nullptr;
+        }
+        return maybeSampler.AcquireSuccess();
     }
     ShaderModuleBuilder* DeviceBase::CreateShaderModuleBuilder() {
         return new ShaderModuleBuilder(this);

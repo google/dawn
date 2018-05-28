@@ -128,7 +128,8 @@ namespace backend { namespace d3d12 {
         void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
       private:
-        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
+        ResultOrError<SamplerBase*> CreateSamplerImpl(
+            const nxt::SamplerDescriptor* descriptor) override;
 
         uint64_t mSerial = 0;
         ComPtr<ID3D12Fence> mFence;

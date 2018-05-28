@@ -298,7 +298,8 @@ namespace backend { namespace d3d12 {
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
     }
-    SamplerBase* Device::CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) {
+    ResultOrError<SamplerBase*> Device::CreateSamplerImpl(
+        const nxt::SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {

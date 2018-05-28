@@ -120,7 +120,8 @@ namespace backend { namespace null {
         std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
 
       private:
-        SamplerBase* CreateSamplerImpl(const nxt::SamplerDescriptor* descriptor) override;
+        ResultOrError<SamplerBase*> CreateSamplerImpl(
+            const nxt::SamplerDescriptor* descriptor) override;
 
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
     };
