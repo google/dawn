@@ -31,7 +31,7 @@ namespace nxt { namespace wire {
     class CommandHandler {
       public:
         virtual ~CommandHandler() = default;
-        virtual const uint8_t* HandleCommands(const uint8_t* commands, size_t size) = 0;
+        virtual const char* HandleCommands(const char* commands, size_t size) = 0;
     };
 
     CommandHandler* NewClientDevice(nxtProcTable* procs,

@@ -15,10 +15,41 @@
 #ifndef WIRE_WIRECMD_AUTOGEN_H_
 #define WIRE_WIRECMD_AUTOGEN_H_
 
-#include <nxt/nxt.h>
+namespace nxt { namespace wire {
 
-namespace nxt {
-namespace wire {
+    using ObjectId = uint32_t;
+    using ObjectSerial = uint32_t;
+
+    enum class DeserializeResult {
+        Success,
+        FatalError,
+        ErrorObject,
+    };
+
+    // Interface to allocate more space to deserialize pointed-to data.
+    // nullptr is treated as an error.
+    class DeserializeAllocator {
+        public:
+            virtual void* GetSpace(size_t size) = 0;
+    };
+
+    // Interface to convert an ID to a server object, if possible.
+    // Methods return FatalError if the ID is for a non-existent object, ErrorObject if the
+    // object is an error value and Success otherwise.
+    class ObjectIdResolver {
+        public:
+            {% for type in by_category["object"] %}
+                virtual DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
+            {% endfor %}
+    };
+
+    // Interface to convert a client object to its ID for the wiring.
+    class ObjectIdProvider {
+        public:
+            {% for type in by_category["object"] %}
+                virtual ObjectId GetId({{as_cType(type.name)}} object) const = 0;
+            {% endfor %}
+    };
 
     //* Enum used as a prefix to each command on the wire format.
     enum class WireCmd : uint32_t {
@@ -34,50 +65,45 @@ namespace wire {
     {% for type in by_category["object"] %}
         {% for method in type.methods %}
             {% set Suffix = as_MethodSuffix(type.name, method.name) %}
+            {% set Cmd = Suffix + "Cmd" %}
 
-            //* Structure for the wire format of each of the commands. Parameters passed by value
-            //* are embedded directly in the structure. Other parameters are assumed to be in the
-            //* memory directly following the structure in the buffer. With value parameters the
-            //* structure can compute how much buffer size it needs and where the start of non-value
-            //* parameters is in the buffer.
-            struct {{Suffix}}Cmd {
+            //* These are "structure" version of the list of arguments to the different NXT methods.
+            //* They provide helpers to serialize/deserialize to/from a buffer.
+            struct {{Cmd}} {
+                //* From a filled structure, compute how much size will be used in the serialization buffer.
+                size_t GetRequiredSize() const;
 
-                //* Start the structure with the command ID, so that casting to WireCmd gives the ID.
-                wire::WireCmd commandId = wire::WireCmd::{{Suffix}};
+                //* Serialize the structure and everything it points to into serializeBuffer which must be
+                //* big enough to contain all the data (as queried from GetRequiredSize).
+                void Serialize(char* serializeBuffer, const ObjectIdProvider& objectIdProvider) const;
 
-                uint32_t self;
+                //* Deserializes the structure from a buffer, consuming a maximum of *size bytes. When this
+                //* function returns, buffer and size will be updated by the number of bytes consumed to
+                //* deserialize the structure. Structures containing pointers will use allocator to get
+                //* scratch space to deserialize the pointed-to data.
+                //* Deserialize returns:
+                //*  - Success if everything went well (yay!)
+                //*  - FatalError is something bad happened (buffer too small for example)
+                //*  - ErrorObject if one if the deserialized object is an error value, for the implementation
+                //*    of the Maybe monad.
+                //* If the return value is not FatalError, selfId, resultId and resultSerial (if present) are
+                //* filled.
+                DeserializeResult Deserialize(const char** buffer, size_t* size, DeserializeAllocator* allocator, const ObjectIdResolver& resolver);
+
+                {{as_cType(type.name)}} self;
+
+                //* Command handlers want to know the object ID in addition to the backing object.
+                //* Doesn't need to be filled before Serialize, or GetRequiredSize.
+                ObjectId selfId;
 
                 //* Commands creating objects say which ID the created object will be referred as.
                 {% if method.return_type.category == "object" %}
-                    uint32_t resultId;
-                    uint32_t resultSerial;
+                    ObjectId resultId;
+                    ObjectSerial resultSerial;
                 {% endif %}
 
-                //* Value types are directly in the command, objects being replaced with their IDs.
-                {% for arg in method.arguments if arg.annotation == "value" %}
-                    {% if arg.type.category == "object" %}
-                        uint32_t {{as_varName(arg.name)}};
-                    {% else %}
-                        {{as_cType(arg.type.name)}} {{as_varName(arg.name)}};
-                    {% endif %}
-                {% endfor %}
-
-                //* const char* have their length embedded directly in the command.
-                {% for arg in method.arguments if arg.length == "strlen" %}
-                    size_t {{as_varName(arg.name)}}Strlen;
-                {% endfor %}
-
-                //* The following commands do computation, provided the members for value parameters
-                //* have been initialized.
-
-                //* Compute how much buffer memory is required to hold the structure and all its arguments.
-                size_t GetRequiredSize() const;
-
-                //* Gets the pointer to the start of the buffer containing a non-value parameter.
-                {% for get_arg in method.arguments if get_arg.annotation != "value" %}
-                    {% set ArgName = as_varName(get_arg.name) %}
-                    uint8_t* GetPtr_{{ArgName}}();
-                    const uint8_t* GetPtr_{{ArgName}}() const;
+                {% for arg in method.arguments %}
+                    {{as_annotated_cType(arg)}};
                 {% endfor %}
             };
         {% endfor %}
@@ -86,9 +112,7 @@ namespace wire {
         {% set Suffix = as_MethodSuffix(type.name, Name("destroy")) %}
         struct {{Suffix}}Cmd {
             WireCmd commandId = WireCmd::{{Suffix}};
-            uint32_t objectId;
-
-            size_t GetRequiredSize() const;
+            ObjectId objectId;
         };
 
     {% endfor %}
@@ -102,22 +126,18 @@ namespace wire {
         BufferMapReadAsyncCallback,
     };
 
+    //* Command for the server calling a builder status callback.
     {% for type in by_category["object"] if type.is_builder %}
         struct Return{{type.name.CamelCase()}}ErrorCallbackCmd {
             wire::ReturnWireCmd commandId = ReturnWireCmd::{{type.name.CamelCase()}}ErrorCallback;
 
-            uint32_t builtObjectId;
-            uint32_t builtObjectSerial;
+            ObjectId builtObjectId;
+            ObjectSerial builtObjectSerial;
             uint32_t status;
             size_t messageStrlen;
-
-            size_t GetRequiredSize() const;
-            char* GetMessage();
-            const char* GetMessage() const;
         };
     {% endfor %}
 
-}
-}
+}}  // namespace nxt::wire
 
 #endif // WIRE_WIRECMD_AUTOGEN_H_

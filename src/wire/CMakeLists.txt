@@ -25,7 +25,6 @@ Generate(
         ${GENERATOR_COMMON_ARGS}
         -T wire
     EXTRA_SOURCES
-        ${WIRE_DIR}/WireCmd.cpp
         ${WIRE_DIR}/WireCmd.h
 )
 target_include_directories(wire_autogen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

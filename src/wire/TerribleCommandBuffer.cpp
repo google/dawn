@@ -31,7 +31,7 @@ namespace nxt { namespace wire {
             return nullptr;
         }
 
-        uint8_t* result = &mBuffer[mOffset];
+        char* result = &mBuffer[mOffset];
         mOffset += size;
 
         if (mOffset > sizeof(mBuffer)) {

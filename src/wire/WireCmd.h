@@ -15,6 +15,8 @@
 #ifndef WIRE_WIRECMD_H_
 #define WIRE_WIRECMD_H_
 
+#include <nxt/nxt.h>
+
 #include "wire/WireCmd_autogen.h"
 
 namespace nxt { namespace wire {
@@ -23,10 +25,6 @@ namespace nxt { namespace wire {
         wire::ReturnWireCmd commandId = ReturnWireCmd::DeviceErrorCallback;
 
         size_t messageStrlen;
-
-        size_t GetRequiredSize() const;
-        char* GetMessage();
-        const char* GetMessage() const;
     };
 
     struct BufferMapReadAsyncCmd {
@@ -36,8 +34,6 @@ namespace nxt { namespace wire {
         uint32_t requestSerial;
         uint32_t start;
         uint32_t size;
-
-        size_t GetRequiredSize() const;
     };
 
     struct ReturnBufferMapReadAsyncCallbackCmd {
@@ -48,10 +44,6 @@ namespace nxt { namespace wire {
         uint32_t requestSerial;
         uint32_t status;
         uint32_t dataLength;
-
-        size_t GetRequiredSize() const;
-        void* GetData();
-        const void* GetData() const;
     };
 
 }}  // namespace nxt::wire

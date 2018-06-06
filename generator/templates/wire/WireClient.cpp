@@ -24,8 +24,7 @@
 #include <string>
 #include <vector>
 
-namespace nxt {
-namespace wire {
+namespace nxt { namespace wire {
 
     //* Client side implementation of the API, will serialize everything to memory to send to the server side.
     namespace client {
@@ -187,7 +186,7 @@ namespace wire {
 
         //* The client wire uses the global NXT device to store its global data such as the serializer
         //* and the object id allocators.
-        class Device : public ObjectBase {
+        class Device : public ObjectBase, public wire::ObjectIdProvider {
             public:
                 Device(CommandSerializer* serializer)
                     : ObjectBase(this, 1, 1),
@@ -203,6 +202,13 @@ namespace wire {
 
                 {% for type in by_category["object"] if not type.name.canonical_case() == "device" %}
                     ObjectAllocator<{{type.name.CamelCase()}}> {{type.name.camelCase()}};
+                {% endfor %}
+
+                // Implementation of the ObjectIdProvider interface
+                {% for type in by_category["object"] %}
+                    ObjectId GetId({{as_cType(type.name)}} object) const override {
+                        return reinterpret_cast<{{as_backendType(type)}}>(object)->id;
+                    }
                 {% endfor %}
 
                 void HandleError(const char* message) {
@@ -226,55 +232,18 @@ namespace wire {
                 {% set Suffix = as_MethodSuffix(type.name, method.name) %}
 
                 {{as_backendType(method.return_type)}} Client{{Suffix}}(
-                    {{-as_backendType(type)}} self
+                    {{-as_cType(type.name)}} cSelf
                     {%- for arg in method.arguments -%}
-                        , {{as_annotated_backendType(arg)}}
+                        , {{as_annotated_cType(arg)}}
                     {%- endfor -%}
                 ) {
+                    {{as_backendType(type)}} self = reinterpret_cast<{{as_backendType(type)}}>(cSelf);
                     Device* device = self->device;
                     wire::{{Suffix}}Cmd cmd;
 
                     //* Create the structure going on the wire on the stack and fill it with the value
                     //* arguments so it can compute its size.
-                    {
-                        //* Value objects are stored as IDs
-                        {% for arg in method.arguments if arg.annotation == "value" %}
-                            {% if arg.type.category == "object" %}
-                                cmd.{{as_varName(arg.name)}} = {{as_varName(arg.name)}}->id;
-                            {% else %}
-                                cmd.{{as_varName(arg.name)}} = {{as_varName(arg.name)}};
-                            {% endif %}
-                        {% endfor %}
-
-                        cmd.self = self->id;
-
-                        //* The length of const char* is considered a value argument.
-                        {% for arg in method.arguments if arg.length == "strlen" %}
-                            cmd.{{as_varName(arg.name)}}Strlen = strlen({{as_varName(arg.name)}});
-                        {% endfor %}
-                    }
-
-                    //* Allocate space to send the command and copy the value args over.
-                    size_t requiredSize = cmd.GetRequiredSize();
-                    auto allocCmd = reinterpret_cast<decltype(cmd)*>(device->GetCmdSpace(requiredSize));
-                    *allocCmd = cmd;
-
-                    //* In the allocated space, write the non-value arguments.
-                    {% for arg in method.arguments if arg.annotation != "value" %}
-                        {% set argName = as_varName(arg.name) %}
-                        {% if arg.length == "strlen" %}
-                            memcpy(allocCmd->GetPtr_{{argName}}(), {{argName}}, allocCmd->{{argName}}Strlen + 1);
-                        {% elif arg.length == "constant_one" %}
-                            memcpy(allocCmd->GetPtr_{{argName}}(), {{argName}}, sizeof(*{{argName}}));
-                        {% elif arg.type.category == "object" %}
-                            auto {{argName}}Storage = reinterpret_cast<uint32_t*>(allocCmd->GetPtr_{{argName}}());
-                            for (size_t i = 0; i < {{as_varName(arg.length.name)}}; i++) {
-                                {{argName}}Storage[i] = {{argName}}[i]->id;
-                            }
-                        {% else %}
-                            memcpy(allocCmd->GetPtr_{{argName}}(), {{argName}}, {{as_varName(arg.length.name)}} * sizeof(*{{argName}}));
-                        {% endif %}
-                    {% endfor %}
+                    cmd.self = cSelf;
 
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
@@ -288,8 +257,20 @@ namespace wire {
                             self->builderCallback.canCall = false;
                         {% endif %}
 
-                        allocCmd->resultId = allocation->object->id;
-                        allocCmd->resultSerial = allocation->serial;
+                        cmd.resultId = allocation->object->id;
+                        cmd.resultSerial = allocation->serial;
+                    {% endif %}
+
+                    {% for arg in method.arguments %}
+                        cmd.{{as_varName(arg.name)}} = {{as_varName(arg.name)}};
+                    {% endfor %}
+
+                    //* Allocate space to send the command and copy the value args over.
+                    size_t requiredSize = cmd.GetRequiredSize();
+                    char* allocatedBuffer = static_cast<char*>(device->GetCmdSpace(requiredSize));
+                    cmd.Serialize(allocatedBuffer, *device);
+
+                    {% if method.return_type.category == "object" %}
                         return allocation->object.get();
                     {% endif %}
                 }
@@ -320,8 +301,7 @@ namespace wire {
                     wire::{{as_MethodSuffix(type.name, Name("destroy"))}}Cmd cmd;
                     cmd.objectId = obj->id;
 
-                    size_t requiredSize = cmd.GetRequiredSize();
-                    auto allocCmd = reinterpret_cast<decltype(cmd)*>(obj->device->GetCmdSpace(requiredSize));
+                    auto allocCmd = static_cast<decltype(cmd)*>(obj->device->GetCmdSpace(sizeof(cmd)));
                     *allocCmd = cmd;
 
                     obj->device->{{type.name.camelCase()}}.Free(obj);
@@ -349,8 +329,7 @@ namespace wire {
             cmd.start = start;
             cmd.size = size;
 
-            size_t requiredSize = cmd.GetRequiredSize();
-            auto allocCmd = reinterpret_cast<decltype(cmd)*>(buffer->device->GetCmdSpace(requiredSize));
+            auto allocCmd = static_cast<decltype(cmd)*>(buffer->device->GetCmdSpace(sizeof(cmd)));
             *allocCmd = cmd;
         }
 
@@ -359,7 +338,9 @@ namespace wire {
             ASSERT(false);
         }
 
-        void ProxyClientBufferUnmap(Buffer* buffer) {
+        void ProxyClientBufferUnmap(nxtBuffer cBuffer) {
+            Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+
             //* Invalidate the local pointer, and cancel all other in-flight requests that would turn into
             //* errors anyway (you can't double map). This prevents race when the following happens, where
             //* the application code would have unmapped a buffer but still receive a callback:
@@ -373,7 +354,7 @@ namespace wire {
             }
             buffer->ClearMapRequests(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN);
 
-            ClientBufferUnmap(buffer);
+            ClientBufferUnmap(cBuffer);
         }
 
         void ClientDeviceReference(Device*) {
@@ -414,7 +395,7 @@ namespace wire {
                 Client(Device* device) : mDevice(device) {
                 }
 
-                const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
+                const char* HandleCommands(const char* commands, size_t size) override {
                     while (size > sizeof(ReturnWireCmd)) {
                         ReturnWireCmd cmdId = *reinterpret_cast<const ReturnWireCmd*>(commands);
 
@@ -453,49 +434,52 @@ namespace wire {
                 //* Helper function for the getting of the command data in command handlers.
                 //* Checks there is enough data left, updates the buffer / size and returns
                 //* the command (or nullptr for an error).
-                template<typename T>
-                static const T* GetCommand(const uint8_t** commands, size_t* size) {
-                    if (*size < sizeof(T)) {
+                template <typename T>
+                static const T* GetData(const char** buffer, size_t* size, size_t count) {
+                    // TODO(cwallez@chromium.org): Check for overflow
+                    size_t totalSize = count * sizeof(T);
+                    if (*size < totalSize) {
                         return nullptr;
                     }
 
-                    const T* cmd = reinterpret_cast<const T*>(*commands);
+                    const T* data = reinterpret_cast<const T*>(*buffer);
 
-                    size_t cmdSize = cmd->GetRequiredSize();
-                    if (*size < cmdSize) {
-                        return nullptr;
-                    }
+                    *buffer += totalSize;
+                    *size -= totalSize;
 
-                    *commands += cmdSize;
-                    *size -= cmdSize;
-
-                    return cmd;
+                    return data;
+                }
+                template <typename T>
+                static const T* GetCommand(const char** commands, size_t* size) {
+                    return GetData<T>(commands, size, 1);
                 }
 
-                bool HandleDeviceErrorCallbackCmd(const uint8_t** commands, size_t* size) {
+                bool HandleDeviceErrorCallbackCmd(const char** commands, size_t* size) {
                     const auto* cmd = GetCommand<ReturnDeviceErrorCallbackCmd>(commands, size);
                     if (cmd == nullptr) {
                         return false;
                     }
 
-                    if (cmd->GetMessage()[cmd->messageStrlen] != '\0') {
+                    const char* message = GetData<char>(commands, size, cmd->messageStrlen + 1);
+                    if (message == nullptr || message[cmd->messageStrlen] != '\0') {
                         return false;
                     }
 
-                    mDevice->HandleError(cmd->GetMessage());
+                    mDevice->HandleError(message);
 
                     return true;
                 }
 
                 {% for type in by_category["object"] if type.is_builder %}
                     {% set Type = type.name.CamelCase() %}
-                    bool Handle{{Type}}ErrorCallbackCmd(const uint8_t** commands, size_t* size) {
+                    bool Handle{{Type}}ErrorCallbackCmd(const char** commands, size_t* size) {
                         const auto* cmd = GetCommand<Return{{Type}}ErrorCallbackCmd>(commands, size);
                         if (cmd == nullptr) {
                             return false;
                         }
 
-                        if (cmd->GetMessage()[cmd->messageStrlen] != '\0') {
+                        const char* message = GetData<char>(commands, size, cmd->messageStrlen + 1);
+                        if (message == nullptr || message[cmd->messageStrlen] != '\0') {
                             return false;
                         }
 
@@ -507,18 +491,18 @@ namespace wire {
                             return true;
                         }
 
-                        bool called = builtObject->builderCallback.Call(static_cast<nxtBuilderErrorStatus>(cmd->status), cmd->GetMessage());
+                        bool called = builtObject->builderCallback.Call(static_cast<nxtBuilderErrorStatus>(cmd->status), message);
 
                         // Unhandled builder errors are forwarded to the device
                         if (!called && cmd->status != NXT_BUILDER_ERROR_STATUS_SUCCESS && cmd->status != NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
-                            mDevice->HandleError(("Unhandled builder error: " + std::string(cmd->GetMessage())).c_str());
+                            mDevice->HandleError(("Unhandled builder error: " + std::string(message)).c_str());
                         }
 
                         return true;
                     }
                 {% endfor %}
 
-                bool HandleBufferMapReadAsyncCallback(const uint8_t** commands, size_t* size) {
+                bool HandleBufferMapReadAsyncCallback(const char** commands, size_t* size) {
                     const auto* cmd = GetCommand<ReturnBufferMapReadAsyncCallbackCmd>(commands, size);
                     if (cmd == nullptr) {
                         return false;
@@ -554,8 +538,14 @@ namespace wire {
                         if (buffer->mappedData != nullptr) {
                             return false;
                         }
+
+                        const char* requestData = GetData<char>(commands, size, request.size);
+                        if (requestData == nullptr) {
+                            return false;
+                        }
+
                         buffer->mappedData = malloc(request.size);
-                        memcpy(buffer->mappedData, cmd->GetData(), request.size);
+                        memcpy(buffer->mappedData, requestData, request.size);
 
                         request.callback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
                     } else {
@@ -577,5 +567,4 @@ namespace wire {
         return new client::Client(clientDevice);
     }
 
-}
-}
+}}  // namespace nxt::wire

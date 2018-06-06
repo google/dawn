@@ -34,7 +34,7 @@ namespace nxt { namespace wire {
       private:
         CommandHandler* mHandler = nullptr;
         size_t mOffset = 0;
-        uint8_t mBuffer[10000000];
+        char mBuffer[10000000];
     };
 
 }}  // namespace nxt::wire

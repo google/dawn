@@ -17,11 +17,12 @@
 
 #include "common/Assert.h"
 
+#include <algorithm>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 
-namespace nxt {
-namespace wire {
+namespace nxt { namespace wire {
 
     namespace server {
         class Server;
@@ -72,6 +73,19 @@ namespace wire {
 
                 //* Get a backend objects for a given client ID.
                 //* Returns nullptr if the ID hasn't previously been allocated.
+                const Data* Get(uint32_t id) const {
+                    if (id >= mKnown.size()) {
+                        return nullptr;
+                    }
+
+                    const Data* data = &mKnown[id];
+
+                    if (!data->allocated) {
+                        return nullptr;
+                    }
+
+                    return data;
+                }
                 Data* Get(uint32_t id) {
                     if (id >= mKnown.size()) {
                         return nullptr;
@@ -130,7 +144,60 @@ namespace wire {
 
         void ForwardBufferMapReadAsync(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata);
 
-        class Server : public CommandHandler {
+        // A really really simple implementation of the DeserializeAllocator. It's main feature
+        // is that it has some inline storage so as to avoid allocations for the majority of
+        // commands.
+        class ServerAllocator : public DeserializeAllocator {
+            public:
+                ServerAllocator() {
+                    Reset();
+                }
+
+                ~ServerAllocator() {
+                    Reset();
+                }
+
+                void* GetSpace(size_t size) override {
+                    // Return space in the current buffer if possible first.
+                    if (mRemainingSize >= size) {
+                        char* buffer = mCurrentBuffer;
+                        mCurrentBuffer += size;
+                        mRemainingSize -= size;
+                        return buffer;
+                    }
+
+                    // Otherwise allocate a new buffer and try again.
+                    size_t allocationSize = std::max(size, size_t(2048));
+                    char* allocation = static_cast<char*>(malloc(allocationSize));
+                    if (allocation == nullptr) {
+                        return nullptr;
+                    }
+
+                    mAllocations.push_back(allocation);
+                    mCurrentBuffer = allocation;
+                    mRemainingSize = allocationSize;
+                    return GetSpace(size);
+                }
+
+                void Reset() {
+                    for (auto allocation : mAllocations) {
+                        free(allocation);
+                    }
+                    mAllocations.clear();
+
+                    // The initial buffer is the inline buffer so that some allocations can be skipped
+                    mCurrentBuffer = mStaticBuffer;
+                    mRemainingSize = sizeof(mStaticBuffer);
+                }
+
+            private:
+                size_t mRemainingSize = 0;
+                char* mCurrentBuffer = nullptr;
+                char mStaticBuffer[2048];
+                std::vector<char*> mAllocations;
+        };
+
+        class Server : public CommandHandler, public ObjectIdResolver {
             public:
                 Server(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer)
                     : mProcs(procs), mSerializer(serializer) {
@@ -147,9 +214,11 @@ namespace wire {
                     ReturnDeviceErrorCallbackCmd cmd;
                     cmd.messageStrlen = std::strlen(message);
 
-                    auto allocCmd = reinterpret_cast<ReturnDeviceErrorCallbackCmd*>(GetCmdSpace(cmd.GetRequiredSize()));
+                    auto allocCmd = static_cast<ReturnDeviceErrorCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
                     *allocCmd = cmd;
-                    strcpy(allocCmd->GetMessage(), message);
+
+                    char* messageAlloc = static_cast<char*>(GetCmdSpace(cmd.messageStrlen + 1));
+                    strcpy(messageAlloc, message);
                 }
 
                 {% for type in by_category["object"] if type.is_builder%}
@@ -176,9 +245,10 @@ namespace wire {
                             cmd.status = status;
                             cmd.messageStrlen = std::strlen(message);
 
-                            auto allocCmd = reinterpret_cast<Return{{Type}}ErrorCallbackCmd*>(GetCmdSpace(cmd.GetRequiredSize()));
+                            auto allocCmd = static_cast<Return{{Type}}ErrorCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
                             *allocCmd = cmd;
-                            strcpy(allocCmd->GetMessage(), message);
+                            char* messageAlloc = static_cast<char*>(GetCmdSpace(strlen(message) + 1));
+                            strcpy(messageAlloc, message);
                         }
                     }
                 {% endfor %}
@@ -189,23 +259,22 @@ namespace wire {
                     cmd.bufferSerial = data->bufferSerial;
                     cmd.requestSerial = data->requestSerial;
                     cmd.status = status;
-
                     cmd.dataLength = 0;
-                    if (status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
-                        cmd.dataLength = data->size;
-                    }
 
-                    auto allocCmd = reinterpret_cast<ReturnBufferMapReadAsyncCallbackCmd*>(GetCmdSpace(cmd.GetRequiredSize()));
+                    auto allocCmd = static_cast<ReturnBufferMapReadAsyncCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
                     *allocCmd = cmd;
 
                     if (status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
-                        memcpy(allocCmd->GetData(), ptr, data->size);
+                        allocCmd->dataLength = data->size;
+
+                        void* dataAlloc = GetCmdSpace(data->size);
+                        memcpy(dataAlloc, ptr, data->size);
                     }
 
                     delete data;
                 }
 
-                const uint8_t* HandleCommands(const uint8_t* commands, size_t size) override {
+                const char* HandleCommands(const char* commands, size_t size) override {
                     mProcs.deviceTick(mKnownDevice.Get(1)->handle);
 
                     while (size > sizeof(WireCmd)) {
@@ -236,6 +305,7 @@ namespace wire {
                         if (!success) {
                             return nullptr;
                         }
+                        mAllocator.Reset();
                     }
 
                     if (size != 0) {
@@ -249,9 +319,28 @@ namespace wire {
                 nxtProcTable mProcs;
                 CommandSerializer* mSerializer = nullptr;
 
+                ServerAllocator mAllocator;
+
                 void* GetCmdSpace(size_t size) {
                     return mSerializer->GetCmdSpace(size);
                 }
+
+                // Implementation of the ObjectIdResolver interface
+                {% for type in by_category["object"] %}
+                    DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const override {
+                        auto data = mKnown{{type.name.CamelCase()}}.Get(id);
+                        if (data == nullptr) {
+                            return DeserializeResult::FatalError;
+                        }
+
+                        *out = data->handle;
+                        if (data->valid) {
+                            return DeserializeResult::Success;
+                        } else {
+                            return DeserializeResult::ErrorObject;
+                        }
+                    }
+                {% endfor %}
 
                 //* The list of known IDs for each object type.
                 {% for type in by_category["object"] %}
@@ -262,20 +351,15 @@ namespace wire {
                 //* Checks there is enough data left, updates the buffer / size and returns
                 //* the command (or nullptr for an error).
                 template<typename T>
-                static const T* GetCommand(const uint8_t** commands, size_t* size) {
+                static const T* GetCommand(const char** commands, size_t* size) {
                     if (*size < sizeof(T)) {
                         return nullptr;
                     }
 
                     const T* cmd = reinterpret_cast<const T*>(*commands);
 
-                    size_t cmdSize = cmd->GetRequiredSize();
-                    if (*size < cmdSize) {
-                        return nullptr;
-                    }
-
-                    *commands += cmdSize;
-                    *size -= cmdSize;
+                    *commands += sizeof(T);
+                    *size -= sizeof(T);
 
                     return cmd;
                 }
@@ -287,99 +371,42 @@ namespace wire {
 
                         //* The generic command handlers
 
-                        bool Handle{{Suffix}}(const uint8_t** commands, size_t* size) {
-                            //* Get command ptr, and check it fits in the buffer.
-                            const auto* cmd = GetCommand<{{Suffix}}Cmd>(commands, size);
-                            if (cmd == nullptr) {
+                        bool Handle{{Suffix}}(const char** commands, size_t* size) {
+                            {{Suffix}}Cmd cmd;
+                            DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator, *this);
+
+                            if (deserializeResult == DeserializeResult::FatalError) {
                                 return false;
                             }
 
-                            //* While unpacking arguments, if any of them is an error, valid will be set to false.
-                            bool valid = true;
-
                             //* Unpack 'self'
-                            {% set Type = type.name.CamelCase() %}
-                            {{as_cType(type.name)}} self;
-                            auto* selfData = mKnown{{Type}}.Get(cmd->self);
-                            {
-                                if (selfData == nullptr) {
-                                    return false;
-                                }
-                                valid = valid && selfData->valid;
-                                self = selfData->handle;
-                            }
-
-                            //* Unpack value objects from IDs.
-                            {% for arg in method.arguments if arg.annotation == "value" and arg.type.category == "object" %}
-                                {% set Type = arg.type.name.CamelCase() %}
-                                {{as_cType(arg.type.name)}} arg_{{as_varName(arg.name)}};
-                                {
-                                    auto* data = mKnown{{Type}}.Get(cmd->{{as_varName(arg.name)}});
-                                    if (data == nullptr) {
-                                        return false;
-                                    }
-                                    valid = valid && data->valid;
-                                    arg_{{as_varName(arg.name)}} = data->handle;
-                                }
-                            {% endfor %}
-
-                            //* Unpack pointer arguments
-                            {% for arg in method.arguments if arg.annotation != "value" %}
-                                {% set argName = as_varName(arg.name) %}
-                                const {{as_cType(arg.type.name)}}* arg_{{argName}};
-                                {% if arg.length == "strlen" %}
-                                    //* Unpack strings, checking they are null-terminated.
-                                    arg_{{argName}} = reinterpret_cast<const {{as_cType(arg.type.name)}}*>(cmd->GetPtr_{{argName}}());
-                                    if (arg_{{argName}}[cmd->{{argName}}Strlen] != 0) {
-                                        return false;
-                                    }
-                                {% elif arg.type.category == "object" %}
-                                    //* Unpack arrays of objects.
-                                    //* TODO(cwallez@chromium.org) do not allocate when there are few objects.
-                                    std::vector<{{as_cType(arg.type.name)}}> {{argName}}Storage(cmd->{{as_varName(arg.length.name)}});
-                                    auto {{argName}}Ids = reinterpret_cast<const uint32_t*>(cmd->GetPtr_{{argName}}());
-                                    for (size_t i = 0; i < cmd->{{as_varName(arg.length.name)}}; i++) {
-                                        {% set Type = arg.type.name.CamelCase() %}
-                                        auto* data = mKnown{{Type}}.Get({{argName}}Ids[i]);
-                                        if (data == nullptr) {
-                                            return false;
-                                        }
-                                        {{argName}}Storage[i] = data->handle;
-                                        valid = valid && data->valid;
-                                    }
-                                    arg_{{argName}} = {{argName}}Storage.data();
-                                {% else %}
-                                    //* For anything else, just get the pointer.
-                                    arg_{{argName}} = reinterpret_cast<const {{as_cType(arg.type.name)}}*>(cmd->GetPtr_{{argName}}());
-                                {% endif %}
-                            {% endfor %}
-
-                            //* At that point all the data has been upacked in cmd->* or arg_*
+                            auto* selfData = mKnown{{type.name.CamelCase()}}.Get(cmd.selfId);
+                            ASSERT(selfData != nullptr);
 
                             //* In all cases allocate the object data as it will be refered-to by the client.
                             {% set return_type = method.return_type %}
                             {% set returns = return_type.name.canonical_case() != "void" %}
                             {% if returns %}
                                 {% set Type = method.return_type.name.CamelCase() %}
-                                auto* resultData = mKnown{{Type}}.Allocate(cmd->resultId);
+                                auto* resultData = mKnown{{Type}}.Allocate(cmd.resultId);
                                 if (resultData == nullptr) {
                                     return false;
                                 }
-                                resultData->serial = cmd->resultSerial;
+                                resultData->serial = cmd.resultSerial;
 
                                 {% if type.is_builder %}
-                                    selfData->builtObjectId = cmd->resultId;
-                                    selfData->builtObjectSerial = cmd->resultSerial;
+                                    selfData->builtObjectId = cmd.resultId;
+                                    selfData->builtObjectSerial = cmd.resultSerial;
                                 {% endif %}
                             {% endif %}
 
                             //* After the data is allocated, apply the argument error propagation mechanism
-                            if (!valid) {
+                            if (deserializeResult == DeserializeResult::ErrorObject) {
                                 {% if type.is_builder %}
                                     selfData->valid = false;
                                     //* If we are in GetResult, fake an error callback
                                     {% if returns %}
-                                        On{{type.name.CamelCase()}}Error(NXT_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd->self, selfData->serial);
+                                        On{{type.name.CamelCase()}}Error(NXT_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd.selfId, selfData->serial);
                                     {% endif %}
                                 {% endif %}
                                 return true;
@@ -388,13 +415,9 @@ namespace wire {
                             {% if returns %}
                                 auto result ={{" "}}
                             {%- endif %}
-                            mProcs.{{as_varName(type.name, method.name)}}(self
+                            mProcs.{{as_varName(type.name, method.name)}}(cmd.self
                                 {%- for arg in method.arguments -%}
-                                    {%- if arg.annotation == "value" and arg.type.category != "object" -%}
-                                        , cmd->{{as_varName(arg.name)}}
-                                    {%- else -%}
-                                        , arg_{{as_varName(arg.name)}}
-                                    {%- endif -%}
+                                    , cmd.{{as_varName(arg.name)}}
                                 {%- endfor -%}
                             );
 
@@ -407,7 +430,7 @@ namespace wire {
                                 {% if return_type.is_builder %}
                                     if (result != nullptr) {
                                         uint64_t userdata1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
-                                        uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd->resultId;
+                                        uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd.resultId;
                                         mProcs.{{as_varName(return_type.name, Name("set error callback"))}}(result, Forward{{return_type.name.CamelCase()}}ToClient, userdata1, userdata2);
                                     }
                                 {% endif %}
@@ -420,18 +443,20 @@ namespace wire {
                     //* Handlers for the destruction of objects: clients do the tracking of the
                     //* reference / release and only send destroy on refcount = 0.
                     {% set Suffix = as_MethodSuffix(type.name, Name("destroy")) %}
-                    bool Handle{{Suffix}}(const uint8_t** commands, size_t* size) {
+                    bool Handle{{Suffix}}(const char** commands, size_t* size) {
                         const auto* cmd = GetCommand<{{Suffix}}Cmd>(commands, size);
                         if (cmd == nullptr) {
                             return false;
                         }
 
+                        ObjectId objectId = cmd->objectId;
+
                         //* ID 0 are reserved for nullptr and cannot be destroyed.
-                        if (cmd->objectId == 0) {
+                        if (objectId == 0) {
                             return false;
                         }
 
-                        auto* data = mKnown{{type.name.CamelCase()}}.Get(cmd->objectId);
+                        auto* data = mKnown{{type.name.CamelCase()}}.Get(objectId);
                         if (data == nullptr) {
                             return false;
                         }
@@ -440,12 +465,12 @@ namespace wire {
                             mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
                         }
 
-                        mKnown{{type.name.CamelCase()}}.Free(cmd->objectId);
+                        mKnown{{type.name.CamelCase()}}.Free(objectId);
                         return true;
                     }
                 {% endfor %}
 
-                bool HandleBufferMapReadAsync(const uint8_t** commands, size_t* size) {
+                bool HandleBufferMapReadAsync(const char** commands, size_t* size) {
                     //* These requests are just forwarded to the buffer, with userdata containing what the client
                     //* will require in the return command.
                     const auto* cmd = GetCommand<BufferMapReadAsyncCmd>(commands, size);
@@ -453,17 +478,22 @@ namespace wire {
                         return false;
                     }
 
-                    auto* buffer = mKnownBuffer.Get(cmd->bufferId);
+                    ObjectId bufferId = cmd->bufferId;
+                    uint32_t requestSerial = cmd->requestSerial;
+                    uint32_t requestSize = cmd->size;
+                    uint32_t requestStart = cmd->start;
+
+                    auto* buffer = mKnownBuffer.Get(bufferId);
                     if (buffer == nullptr) {
                         return false;
                     }
 
                     auto* data = new MapReadUserdata;
                     data->server = this;
-                    data->bufferId = cmd->bufferId;
+                    data->bufferId = bufferId;
                     data->bufferSerial = buffer->serial;
-                    data->requestSerial = cmd->requestSerial;
-                    data->size = cmd->size;
+                    data->requestSerial = requestSerial;
+                    data->size = requestSize;
 
                     auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
 
@@ -473,7 +503,7 @@ namespace wire {
                         return true;
                     }
 
-                    mProcs.bufferMapReadAsync(buffer->handle, cmd->start, cmd->size, ForwardBufferMapReadAsync, userdata);
+                    mProcs.bufferMapReadAsync(buffer->handle, requestStart, requestSize, ForwardBufferMapReadAsync, userdata);
 
                     return true;
                 }
@@ -503,5 +533,4 @@ namespace wire {
         return new server::Server(device, procs, serializer);
     }
 
-}
-}
+}}  // namespace nxt::wire
