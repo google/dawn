@@ -59,7 +59,8 @@ namespace nxt { namespace wire {
             {% endfor %}
             {{as_MethodSuffix(type.name, Name("destroy"))}},
         {% endfor %}
-        BufferMapReadAsync,
+        BufferMapAsync,
+        BufferUpdateMappedDataCmd,
     };
 
     {% for type in by_category["object"] %}
@@ -124,6 +125,7 @@ namespace nxt { namespace wire {
                 {{type.name.CamelCase()}}ErrorCallback,
         {% endfor %}
         BufferMapReadAsyncCallback,
+        BufferMapWriteAsyncCallback,
     };
 
     //* Command for the server calling a builder status callback.

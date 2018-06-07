@@ -27,22 +27,39 @@ namespace nxt { namespace wire {
         size_t messageStrlen;
     };
 
-    struct BufferMapReadAsyncCmd {
-        wire::WireCmd commandId = WireCmd::BufferMapReadAsync;
+    struct BufferMapAsyncCmd {
+        wire::WireCmd commandId = WireCmd::BufferMapAsync;
 
-        uint32_t bufferId;
-        uint32_t requestSerial;
+        ObjectId bufferId;
+        ObjectSerial requestSerial;
         uint32_t start;
         uint32_t size;
+        bool isWrite;
     };
 
     struct ReturnBufferMapReadAsyncCallbackCmd {
         wire::ReturnWireCmd commandId = ReturnWireCmd::BufferMapReadAsyncCallback;
 
-        uint32_t bufferId;
-        uint32_t bufferSerial;
+        ObjectId bufferId;
+        ObjectSerial bufferSerial;
         uint32_t requestSerial;
         uint32_t status;
+        uint32_t dataLength;
+    };
+
+    struct ReturnBufferMapWriteAsyncCallbackCmd {
+        wire::ReturnWireCmd commandId = ReturnWireCmd::BufferMapWriteAsyncCallback;
+
+        ObjectId bufferId;
+        ObjectSerial bufferSerial;
+        uint32_t requestSerial;
+        uint32_t status;
+    };
+
+    struct BufferUpdateMappedDataCmd {
+        wire::WireCmd commandId = WireCmd::BufferUpdateMappedDataCmd;
+
+        ObjectId bufferId;
         uint32_t dataLength;
     };
 

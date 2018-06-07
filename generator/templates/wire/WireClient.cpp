@@ -89,25 +89,33 @@ namespace nxt { namespace wire {
             }
 
             void ClearMapRequests(nxtBufferMapAsyncStatus status) {
-                for (auto& it : readRequests) {
-                    it.second.callback(status, nullptr, it.second.userdata);
+                for (auto& it : requests) {
+                    if (it.second.isWrite) {
+                        it.second.writeCallback(status, nullptr, it.second.userdata);
+                    } else {
+                        it.second.readCallback(status, nullptr, it.second.userdata);
+                    }
                 }
-                readRequests.clear();
+                requests.clear();
             }
 
             //* We want to defer all the validation to the server, which means we could have multiple
             //* map request in flight at a single time and need to track them separately.
             //* On well-behaved applications, only one request should exist at a single time.
-            struct MapReadRequestData {
-                nxtBufferMapReadCallback callback = nullptr;
+            struct MapRequestData {
+                nxtBufferMapReadCallback readCallback = nullptr;
+                nxtBufferMapWriteCallback writeCallback = nullptr;
                 nxtCallbackUserdata userdata = 0;
                 uint32_t size = 0;
+                bool isWrite = false;
             };
-            std::map<uint32_t, MapReadRequestData> readRequests;
-            uint32_t readRequestSerial = 0;
+            std::map<uint32_t, MapRequestData> requests;
+            uint32_t requestSerial = 0;
 
             //* Only one mapped pointer can be active at a time because Unmap clears all the in-flight requests.
             void* mappedData = nullptr;
+            size_t mappedDataSize = 0;
+            bool isWriteMapped = false;
         };
 
         //* TODO(cwallez@chromium.org): Do something with objects before they are destroyed ?
@@ -314,28 +322,47 @@ namespace nxt { namespace wire {
         {% endfor %}
 
         void ClientBufferMapReadAsync(Buffer* buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
-            uint32_t serial = buffer->readRequestSerial++;
-            ASSERT(buffer->readRequests.find(serial) == buffer->readRequests.end());
+            uint32_t serial = buffer->requestSerial++;
+            ASSERT(buffer->requests.find(serial) == buffer->requests.end());
 
-            Buffer::MapReadRequestData request;
-            request.callback = callback;
+            Buffer::MapRequestData request;
+            request.readCallback = callback;
             request.userdata = userdata;
             request.size = size;
-            buffer->readRequests[serial] = request;
+            request.isWrite = false;
+            buffer->requests[serial] = request;
 
-            wire::BufferMapReadAsyncCmd cmd;
+            wire::BufferMapAsyncCmd cmd;
             cmd.bufferId = buffer->id;
             cmd.requestSerial = serial;
             cmd.start = start;
             cmd.size = size;
+            cmd.isWrite = false;
 
             auto allocCmd = static_cast<decltype(cmd)*>(buffer->device->GetCmdSpace(sizeof(cmd)));
             *allocCmd = cmd;
         }
 
-        void ClientBufferMapWriteAsync(Buffer*, uint32_t, uint32_t, nxtBufferMapWriteCallback, nxtCallbackUserdata) {
-            // TODO(cwallez@chromium.org): Implement the wire for BufferMapWriteAsync
-            ASSERT(false);
+        void ClientBufferMapWriteAsync(Buffer* buffer, uint32_t start, uint32_t size, nxtBufferMapWriteCallback callback, nxtCallbackUserdata userdata) {
+            uint32_t serial = buffer->requestSerial++;
+            ASSERT(buffer->requests.find(serial) == buffer->requests.end());
+
+            Buffer::MapRequestData request;
+            request.writeCallback = callback;
+            request.userdata = userdata;
+            request.size = size;
+            request.isWrite = true;
+            buffer->requests[serial] = request;
+
+            wire::BufferMapAsyncCmd cmd;
+            cmd.bufferId = buffer->id;
+            cmd.requestSerial = serial;
+            cmd.start = start;
+            cmd.size = size;
+            cmd.isWrite = true;
+
+            auto allocCmd = static_cast<decltype(cmd)*>(buffer->device->GetCmdSpace(sizeof(cmd)));
+            *allocCmd = cmd;
         }
 
         void ProxyClientBufferUnmap(nxtBuffer cBuffer) {
@@ -349,6 +376,20 @@ namespace nxt { namespace wire {
             //*  - Unmap locally on the client
             //*  - Server -> Client: Result of MapRequest2
             if (buffer->mappedData) {
+
+                // If the buffer was mapped for writing, send the update to the data to the server
+                if (buffer->isWriteMapped) {
+                    wire::BufferUpdateMappedDataCmd cmd;
+                    cmd.bufferId = buffer->id;
+                    cmd.dataLength = static_cast<uint32_t>(buffer->mappedDataSize);
+
+                    auto allocCmd = static_cast<decltype(cmd)*>(buffer->device->GetCmdSpace(sizeof(cmd)));
+                    *allocCmd = cmd;
+
+                    void* dataAlloc = buffer->device->GetCmdSpace(cmd.dataLength);
+                    memcpy(dataAlloc, buffer->mappedData, cmd.dataLength);
+                }
+
                 free(buffer->mappedData);
                 buffer->mappedData = nullptr;
             }
@@ -369,7 +410,7 @@ namespace nxt { namespace wire {
         }
 
         // Some commands don't have a custom wire format, but need to be handled manually to update
-        // some client-side state tracking. For these we have to functions:
+        // some client-side state tracking. For these we have two functions:
         //  - An autogenerated Client{{suffix}} method that sends the command on the wire
         //  - A manual ProxyClient{{suffix}} method that will be inserted in the proctable instead of
         //    the autogenerated one, and that will have to call Client{{suffix}}
@@ -411,6 +452,9 @@ namespace nxt { namespace wire {
                             {% endfor %}
                             case ReturnWireCmd::BufferMapReadAsyncCallback:
                                 success = HandleBufferMapReadAsyncCallback(&commands, &size);
+                                break;
+                            case ReturnWireCmd::BufferMapWriteAsyncCallback:
+                                success = HandleBufferMapWriteAsyncCallback(&commands, &size);
                                 break;
                             default:
                                 success = false;
@@ -517,18 +561,22 @@ namespace nxt { namespace wire {
                     }
 
                     //* The requests can have been deleted via an Unmap so this isn't an error.
-                    auto requestIt = buffer->readRequests.find(cmd->requestSerial);
-                    if (requestIt == buffer->readRequests.end()) {
+                    auto requestIt = buffer->requests.find(cmd->requestSerial);
+                    if (requestIt == buffer->requests.end()) {
                         return true;
                     }
 
+                    //* It is an error for the server to call the read callback when we asked for a map write
+                    if (requestIt->second.isWrite) {
+                        return false;
+                    }
+
                     auto request = requestIt->second;
-                    // Delete the request before calling the callback otherwise the callback could be fired a second time if for example buffer.Unmap() is called inside the callback.
-                    buffer->readRequests.erase(requestIt);
+                    //* Delete the request before calling the callback otherwise the callback could be fired a second time. If, for example, buffer.Unmap() is called inside the callback.
+                    buffer->requests.erase(requestIt);
 
                     //* On success, we copy the data locally because the IPC buffer isn't valid outside of this function
                     if (cmd->status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
-
                         //* The server didn't send the right amount of data, this is an error and could cause
                         //* the application to crash if we did call the callback.
                         if (request.size != cmd->dataLength) {
@@ -544,12 +592,62 @@ namespace nxt { namespace wire {
                             return false;
                         }
 
+                        buffer->isWriteMapped = false;
+                        buffer->mappedDataSize = request.size;
                         buffer->mappedData = malloc(request.size);
                         memcpy(buffer->mappedData, requestData, request.size);
 
-                        request.callback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
+                        request.readCallback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
                     } else {
-                        request.callback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
+                        request.readCallback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
+                    }
+
+                    return true;
+                }
+
+                bool HandleBufferMapWriteAsyncCallback(const char** commands, size_t* size) {
+                    const auto* cmd = GetCommand<ReturnBufferMapWriteAsyncCallbackCmd>(commands, size);
+                    if (cmd == nullptr) {
+                        return false;
+                    }
+
+                    auto* buffer = mDevice->buffer.GetObject(cmd->bufferId);
+                    uint32_t bufferSerial = mDevice->buffer.GetSerial(cmd->bufferId);
+
+                    //* The buffer might have been deleted or recreated so this isn't an error.
+                    if (buffer == nullptr || bufferSerial != cmd->bufferSerial) {
+                        return true;
+                    }
+
+                    //* The requests can have been deleted via an Unmap so this isn't an error.
+                    auto requestIt = buffer->requests.find(cmd->requestSerial);
+                    if (requestIt == buffer->requests.end()) {
+                        return true;
+                    }
+
+                    //* It is an error for the server to call the write callback when we asked for a map read
+                    if (!requestIt->second.isWrite) {
+                        return false;
+                    }
+
+                    auto request = requestIt->second;
+                    //* Delete the request before calling the callback otherwise the callback could be fired a second time. If, for example, buffer.Unmap() is called inside the callback.
+                    buffer->requests.erase(requestIt);
+
+                    //* On success, we copy the data locally because the IPC buffer isn't valid outside of this function
+                    if (cmd->status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+                        if (buffer->mappedData != nullptr) {
+                            return false;
+                        }
+
+                        buffer->isWriteMapped = true;
+                        buffer->mappedDataSize = request.size;
+                        buffer->mappedData = malloc(request.size);
+                        memset(buffer->mappedData, 0, request.size);
+
+                        request.writeCallback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
+                    } else {
+                        request.writeCallback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
                     }
 
                     return true;

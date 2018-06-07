@@ -27,12 +27,13 @@ namespace nxt { namespace wire {
     namespace server {
         class Server;
 
-        struct MapReadUserdata {
+        struct MapUserdata {
             Server* server;
             uint32_t bufferId;
             uint32_t bufferSerial;
             uint32_t requestSerial;
             uint32_t size;
+            bool isWrite;
         };
 
         //* Stores what the backend knows about the type.
@@ -54,6 +55,10 @@ namespace nxt { namespace wire {
             //* Whether this object has been allocated, used by the KnownObjects queries
             //* TODO(cwallez@chromium.org): make this an internal bit vector in KnownObjects.
             bool allocated;
+
+            //* TODO(cwallez@chromium.org): this is only useful for buffers
+            void* mappedData = nullptr;
+            size_t mappedDataSize = 0;
         };
 
         //* Keeps track of the mapping between client IDs and backend objects.
@@ -143,6 +148,7 @@ namespace nxt { namespace wire {
         {% endfor %}
 
         void ForwardBufferMapReadAsync(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata);
+        void ForwardBufferMapWriteAsync(nxtBufferMapAsyncStatus status, void* ptr, nxtCallbackUserdata userdata);
 
         // A really really simple implementation of the DeserializeAllocator. It's main feature
         // is that it has some inline storage so as to avoid allocations for the majority of
@@ -253,7 +259,7 @@ namespace nxt { namespace wire {
                     }
                 {% endfor %}
 
-                void OnMapReadAsyncCallback(nxtBufferMapAsyncStatus status, const void* ptr, MapReadUserdata* data) {
+                void OnMapReadAsyncCallback(nxtBufferMapAsyncStatus status, const void* ptr, MapUserdata* data) {
                     ReturnBufferMapReadAsyncCallbackCmd cmd;
                     cmd.bufferId = data->bufferId;
                     cmd.bufferSerial = data->bufferSerial;
@@ -269,6 +275,27 @@ namespace nxt { namespace wire {
 
                         void* dataAlloc = GetCmdSpace(data->size);
                         memcpy(dataAlloc, ptr, data->size);
+                    }
+
+                    delete data;
+                }
+
+                void OnMapWriteAsyncCallback(nxtBufferMapAsyncStatus status, void* ptr, MapUserdata* data) {
+                    ReturnBufferMapWriteAsyncCallbackCmd cmd;
+                    cmd.bufferId = data->bufferId;
+                    cmd.bufferSerial = data->bufferSerial;
+                    cmd.requestSerial = data->requestSerial;
+                    cmd.status = status;
+
+                    auto allocCmd = static_cast<ReturnBufferMapWriteAsyncCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
+                    *allocCmd = cmd;
+
+                    if (status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+                        auto* selfData = mKnownBuffer.Get(data->bufferId);
+                        ASSERT(selfData != nullptr);
+
+                        selfData->mappedData = ptr;
+                        selfData->mappedDataSize = data->size;
                     }
 
                     delete data;
@@ -294,8 +321,11 @@ namespace nxt { namespace wire {
                                     success = Handle{{Suffix}}(&commands, &size);
                                     break;
                             {% endfor %}
-                            case WireCmd::BufferMapReadAsync:
-                                success = HandleBufferMapReadAsync(&commands, &size);
+                            case WireCmd::BufferMapAsync:
+                                success = HandleBufferMapAsync(&commands, &size);
+                                break;
+                            case WireCmd::BufferUpdateMappedDataCmd:
+                                success = HandleBufferUpdateMappedData(&commands, &size);
                                 break;
 
                             default:
@@ -350,18 +380,35 @@ namespace nxt { namespace wire {
                 //* Helper function for the getting of the command data in command handlers.
                 //* Checks there is enough data left, updates the buffer / size and returns
                 //* the command (or nullptr for an error).
-                template<typename T>
-                static const T* GetCommand(const char** commands, size_t* size) {
-                    if (*size < sizeof(T)) {
+                template <typename T>
+                static const T* GetData(const char** buffer, size_t* size, size_t count) {
+                    // TODO(cwallez@chromium.org): Check for overflow
+                    size_t totalSize = count * sizeof(T);
+                    if (*size < totalSize) {
                         return nullptr;
                     }
 
-                    const T* cmd = reinterpret_cast<const T*>(*commands);
+                    const T* data = reinterpret_cast<const T*>(*buffer);
 
-                    *commands += sizeof(T);
-                    *size -= sizeof(T);
+                    *buffer += totalSize;
+                    *size -= totalSize;
 
-                    return cmd;
+                    return data;
+                }
+                template <typename T>
+                static const T* GetCommand(const char** commands, size_t* size) {
+                    return GetData<T>(commands, size, 1);
+                }
+
+                {% set custom_pre_handler_commands = ["BufferUnmap"] %}
+
+                bool PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
+                    auto* selfData = mKnownBuffer.Get(cmd.selfId);
+                    ASSERT(selfData != nullptr);
+
+                    selfData->mappedData = nullptr;
+
+                    return true;
                 }
 
                 //* Implementation of the command handlers
@@ -378,6 +425,12 @@ namespace nxt { namespace wire {
                             if (deserializeResult == DeserializeResult::FatalError) {
                                 return false;
                             }
+
+                            {% if Suffix in custom_pre_handler_commands %}
+                                if (!PreHandle{{Suffix}}(cmd)) {
+                                    return false;
+                                }
+                            {% endif %}
 
                             //* Unpack 'self'
                             auto* selfData = mKnown{{type.name.CamelCase()}}.Get(cmd.selfId);
@@ -470,10 +523,10 @@ namespace nxt { namespace wire {
                     }
                 {% endfor %}
 
-                bool HandleBufferMapReadAsync(const char** commands, size_t* size) {
+                bool HandleBufferMapAsync(const char** commands, size_t* size) {
                     //* These requests are just forwarded to the buffer, with userdata containing what the client
                     //* will require in the return command.
-                    const auto* cmd = GetCommand<BufferMapReadAsyncCmd>(commands, size);
+                    const auto* cmd = GetCommand<BufferMapAsyncCmd>(commands, size);
                     if (cmd == nullptr) {
                         return false;
                     }
@@ -482,28 +535,63 @@ namespace nxt { namespace wire {
                     uint32_t requestSerial = cmd->requestSerial;
                     uint32_t requestSize = cmd->size;
                     uint32_t requestStart = cmd->start;
+                    bool isWrite = cmd->isWrite;
 
                     auto* buffer = mKnownBuffer.Get(bufferId);
                     if (buffer == nullptr) {
                         return false;
                     }
 
-                    auto* data = new MapReadUserdata;
+                    auto* data = new MapUserdata;
                     data->server = this;
                     data->bufferId = bufferId;
                     data->bufferSerial = buffer->serial;
                     data->requestSerial = requestSerial;
                     data->size = requestSize;
+                    data->isWrite = isWrite;
 
                     auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
 
                     if (!buffer->valid) {
                         //* Fake the buffer returning a failure, data will be freed in this call.
-                        ForwardBufferMapReadAsync(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+                        if (isWrite) {
+                            ForwardBufferMapWriteAsync(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+                        } else {
+                            ForwardBufferMapReadAsync(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+                        }
                         return true;
                     }
 
-                    mProcs.bufferMapReadAsync(buffer->handle, requestStart, requestSize, ForwardBufferMapReadAsync, userdata);
+                    if (isWrite) {
+                        mProcs.bufferMapWriteAsync(buffer->handle, requestStart, requestSize, ForwardBufferMapWriteAsync, userdata);
+                    } else {
+                        mProcs.bufferMapReadAsync(buffer->handle, requestStart, requestSize, ForwardBufferMapReadAsync, userdata);
+                    }
+
+                    return true;
+                }
+
+                bool HandleBufferUpdateMappedData(const char** commands, size_t* size) {
+                    const auto* cmd = GetCommand<BufferUpdateMappedDataCmd>(commands, size);
+                    if (cmd == nullptr) {
+                        return false;
+                    }
+
+                    ObjectId bufferId = cmd->bufferId;
+                    size_t dataLength = cmd->dataLength;
+
+                    auto* buffer = mKnownBuffer.Get(bufferId);
+                    if (buffer == nullptr || !buffer->valid || buffer->mappedData == nullptr ||
+                        buffer->mappedDataSize != dataLength) {
+                        return false;
+                    }
+
+                    const char* data = GetData<char>(commands, size, dataLength);
+                    if (data == nullptr) {
+                        return false;
+                    }
+
+                    memcpy(buffer->mappedData, data, dataLength);
 
                     return true;
                 }
@@ -524,8 +612,13 @@ namespace nxt { namespace wire {
         {% endfor %}
 
         void ForwardBufferMapReadAsync(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata) {
-            auto data = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata));
+            auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
             data->server->OnMapReadAsyncCallback(status, ptr, data);
+        }
+
+        void ForwardBufferMapWriteAsync(nxtBufferMapAsyncStatus status, void* ptr, nxtCallbackUserdata userdata) {
+            auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
+            data->server->OnMapWriteAsyncCallback(status, ptr, data);
         }
     }
 
