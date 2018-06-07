@@ -161,7 +161,7 @@ void GetNextRenderPassDescriptor(const nxt::Device& device,
 }
 
 bool InitSample(int argc, const char** argv) {
-    for (int i = 0; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {
             i++;
             if (i < argc && std::string("d3d12") == argv[i]) {
