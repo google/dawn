@@ -20,9 +20,12 @@
 #include "utils/BackendBinding.h"
 #include "utils/NXTHelpers.h"
 #include "utils/SystemUtils.h"
+#include "wire/TerribleCommandBuffer.h"
+#include "wire/Wire.h"
 
 #include <iostream>
 #include "GLFW/glfw3.h"
+
 namespace {
 
     utils::BackendType ParamToBackendType(BackendType type) {
@@ -122,6 +125,8 @@ bool NXTTest::IsVulkan() const {
     return GetParam() == VulkanBackend;
 }
 
+bool gTestUsesWire = false;
+
 void NXTTest::SetUp() {
     mBinding = utils::CreateBinding(ParamToBackendType(GetParam()));
     NXT_ASSERT(mBinding != nullptr);
@@ -135,20 +140,50 @@ void NXTTest::SetUp() {
     nxtProcTable backendProcs;
     mBinding->GetProcAndDevice(&backendProcs, &backendDevice);
 
-    nxtSetProcs(&backendProcs);
-    device = nxt::Device::Acquire(backendDevice);
+    // Choose whether to use the backend procs and devices directly, or set up the wire.
+    nxtDevice cDevice = nullptr;
+    nxtProcTable procs;
+
+    if (gTestUsesWire) {
+        mC2sBuf = new nxt::wire::TerribleCommandBuffer();
+        mS2cBuf = new nxt::wire::TerribleCommandBuffer();
+
+        mWireServer = nxt::wire::NewServerCommandHandler(backendDevice, backendProcs, mS2cBuf);
+        mC2sBuf->SetHandler(mWireServer);
+
+        nxtDevice clientDevice;
+        nxtProcTable clientProcs;
+        mWireClient = nxt::wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf);
+        mS2cBuf->SetHandler(mWireClient);
+
+        procs = clientProcs;
+        cDevice = clientDevice;
+    } else {
+        procs = backendProcs;
+        cDevice = backendDevice;
+    }
+
+    // Set up the device and queue because all tests need them, and NXTTest needs them too for the
+    // deferred expectations.
+    nxtSetProcs(&procs);
+    device = nxt::Device::Acquire(cDevice);
     queue = device.CreateQueueBuilder().GetResult();
 
+    // The swapchain isn't used by tests but is useful when debugging with graphics debuggers that
+    // capture at frame boundaries.
     swapchain = device.CreateSwapChainBuilder()
         .SetImplementation(mBinding->GetSwapChainImplementation())
         .GetResult();
     swapchain.Configure(static_cast<nxt::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
                         nxt::TextureUsageBit::OutputAttachment, 400, 400);
 
+    // The end2end tests should never cause validation errors. These should be tested in unittests.
     device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
 }
 
 void NXTTest::TearDown() {
+    FlushWire();
+
     MapSlotsSynchronously();
     ResolveExpectations();
 
@@ -159,6 +194,13 @@ void NXTTest::TearDown() {
     for (auto& expectation : mDeferredExpectations) {
         delete expectation.expectation;
         expectation.expectation = nullptr;
+    }
+
+    if (gTestUsesWire) {
+        delete mC2sBuf;
+        delete mS2cBuf;
+        delete mWireClient;
+        delete mWireServer;
     }
 }
 
@@ -226,6 +268,8 @@ std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, c
 
 void NXTTest::WaitABit() {
     device.Tick();
+    FlushWire();
+
     utils::USleep(100);
 }
 
@@ -234,6 +278,13 @@ void NXTTest::SwapBuffersForCapture() {
     nxt::Texture backBuffer = swapchain.GetNextTexture();
     backBuffer.TransitionUsage(nxt::TextureUsageBit::Present);
     swapchain.Present(backBuffer);
+}
+
+void NXTTest::FlushWire() {
+    if (gTestUsesWire) {
+        mC2sBuf->Flush();
+        mS2cBuf->Flush();
+    }
 }
 
 NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {

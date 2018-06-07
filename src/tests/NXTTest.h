@@ -66,74 +66,100 @@ namespace detail {
     class Expectation;
 }
 
+namespace nxt { namespace wire {
+    class CommandHandler;
+    class TerribleCommandBuffer;
+}}  // namespace nxt::wire
+
 class NXTTest : public ::testing::TestWithParam<BackendType> {
-    public:
-        ~NXTTest();
+  public:
+    ~NXTTest();
 
-        void SetUp() override;
-        void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 
-        bool IsD3D12() const;
-        bool IsMetal() const;
-        bool IsOpenGL() const;
-        bool IsVulkan() const;
+    bool IsD3D12() const;
+    bool IsMetal() const;
+    bool IsOpenGL() const;
+    bool IsVulkan() const;
 
-    protected:
-        nxt::Device device;
-        nxt::Queue queue;
-        nxt::SwapChain swapchain;
+  protected:
+    nxt::Device device;
+    nxt::Queue queue;
+    nxt::SwapChain swapchain;
 
-        // Helper methods to implement the EXPECT_ macros
-        std::ostringstream& AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation);
-        std::ostringstream& AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t level, uint32_t pixelSize, detail::Expectation* expectation);
+    // Helper methods to implement the EXPECT_ macros
+    std::ostringstream& AddBufferExpectation(const char* file,
+                                             int line,
+                                             const nxt::Buffer& buffer,
+                                             uint32_t offset,
+                                             uint32_t size,
+                                             detail::Expectation* expectation);
+    std::ostringstream& AddTextureExpectation(const char* file,
+                                              int line,
+                                              const nxt::Texture& texture,
+                                              uint32_t x,
+                                              uint32_t y,
+                                              uint32_t width,
+                                              uint32_t height,
+                                              uint32_t level,
+                                              uint32_t pixelSize,
+                                              detail::Expectation* expectation);
 
-        void WaitABit();
+    void WaitABit();
 
-        void SwapBuffersForCapture();
+    void SwapBuffersForCapture();
 
-    private:
-        // MapRead buffers used to get data for the expectations
-        struct ReadbackSlot {
-            nxt::Buffer buffer;
-            uint32_t bufferSize;
-            const void* mappedData = nullptr;
-        };
-        std::vector<ReadbackSlot> mReadbackSlots;
+  private:
+    // Things used to set up testing through the Wire.
+    nxt::wire::CommandHandler* mWireServer = nullptr;
+    nxt::wire::CommandHandler* mWireClient = nullptr;
+    nxt::wire::TerribleCommandBuffer* mC2sBuf = nullptr;
+    nxt::wire::TerribleCommandBuffer* mS2cBuf = nullptr;
+    void FlushWire();
 
-        // Maps all the buffers and fill ReadbackSlot::mappedData
-        void MapSlotsSynchronously();
-        static void SlotMapReadCallback(nxtBufferMapAsyncStatus status,
-                                        const void* data,
-                                        nxtCallbackUserdata userdata);
-        size_t mNumPendingMapOperations = 0;
+    // MapRead buffers used to get data for the expectations
+    struct ReadbackSlot {
+        nxt::Buffer buffer;
+        uint32_t bufferSize;
+        const void* mappedData = nullptr;
+    };
+    std::vector<ReadbackSlot> mReadbackSlots;
 
-        // Reserve space where the data for an expectation can be copied
-        struct ReadbackReservation {
-            nxt::Buffer buffer;
-            size_t slot;
-            uint32_t offset;
-        };
-        ReadbackReservation ReserveReadback(uint32_t readbackSize);
+    // Maps all the buffers and fill ReadbackSlot::mappedData
+    void MapSlotsSynchronously();
+    static void SlotMapReadCallback(nxtBufferMapAsyncStatus status,
+                                    const void* data,
+                                    nxtCallbackUserdata userdata);
+    size_t mNumPendingMapOperations = 0;
 
-        struct DeferredExpectation {
-            const char* file;
-            int line;
-            size_t readbackSlot;
-            uint32_t readbackOffset;
-            uint32_t size;
-            uint32_t rowBytes;
-            uint32_t rowPitch;
-            detail::Expectation* expectation;
-            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54316
-            // Use unique_ptr because of missing move/copy constructors on std::basic_ostringstream
-            std::unique_ptr<std::ostringstream> message;
-        };
-        std::vector<DeferredExpectation> mDeferredExpectations;
+    // Reserve space where the data for an expectation can be copied
+    struct ReadbackReservation {
+        nxt::Buffer buffer;
+        size_t slot;
+        uint32_t offset;
+    };
+    ReadbackReservation ReserveReadback(uint32_t readbackSize);
 
-        // Assuming the data is mapped, checks all expectations
-        void ResolveExpectations();
+    struct DeferredExpectation {
+        const char* file;
+        int line;
+        size_t readbackSlot;
+        uint32_t readbackOffset;
+        uint32_t size;
+        uint32_t rowBytes;
+        uint32_t rowPitch;
+        detail::Expectation* expectation;
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54316
+        // Use unique_ptr because of missing move/copy constructors on std::basic_ostringstream
+        std::unique_ptr<std::ostringstream> message;
+    };
+    std::vector<DeferredExpectation> mDeferredExpectations;
 
-        utils::BackendBinding* mBinding = nullptr;
+    // Assuming the data is mapped, checks all expectations
+    void ResolveExpectations();
+
+    utils::BackendBinding* mBinding = nullptr;
 };
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:

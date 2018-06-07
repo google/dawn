@@ -90,5 +90,5 @@ add_executable(nxt_end2end_tests
     ${TESTS_DIR}/NXTTest.cpp
     ${TESTS_DIR}/NXTTest.h
 )
-target_link_libraries(nxt_end2end_tests nxt_common gtest utils)
+target_link_libraries(nxt_end2end_tests nxt_common nxt_wire gtest utils)
 NXTInternalTarget("tests" nxt_end2end_tests)
