@@ -128,7 +128,8 @@ def link_object(obj, types):
             if arg.annotation != 'value':
                 if not 'length' in a:
                     if arg.type.category == 'structure':
-                        arg.length = "constant_one"
+                        arg.length = "constant"
+                        arg.constant_length = 1
                     else:
                         assert(false)
                 elif a['length'] == 'strlen':

@@ -14,7 +14,249 @@
 
 #include "wire/WireCmd.h"
 
+#include "common/Assert.h"
+
 #include <cstring>
+
+//* Helper macros so that the main [de]serialization functions can be written in a generic manner.
+
+//* Outputs an rvalue that's the number of elements a pointer member points to.
+{% macro member_length(member, record_accessor) -%}
+    {%- if member.length == "constant" -%}
+        {{member.constant_length}}
+    {%- else -%}
+        {{record_accessor}}{{as_varName(member.length.name)}}
+    {%- endif -%}
+{%- endmacro %}
+
+//* Outputs the type that will be used on the wire for the member
+{% macro member_transfer_type(member) -%}
+    {%- if member.type.category == "object" -%}
+        ObjectId
+    {%- elif member.type.category == "structure" -%}
+        {{as_cType(member.type.name)}}Transfer
+    {%- else -%}
+        {{as_cType(member.type.name)}}
+    {%- endif -%}
+{%- endmacro %}
+
+//* Outputs the size of one element of the type that will be used on the wire for the member
+{% macro member_transfer_sizeof(member) -%}
+    sizeof({{member_transfer_type(member)}})
+{%- endmacro %}
+
+//* Outputs the serialization code to put `in` in `out`
+{% macro serialize_member(member, in, out) %}
+    {%- if member.type.category == "object" -%}
+        {{out}} = provider.GetId({{in}});
+    {% elif member.type.category == "structure"%}
+        {{as_cType(member.type.name)}}Serialize({{in}}, &{{out}}, buffer, provider);
+    {%- else -%}
+        {{out}} = {{in}};
+    {%- endif -%}
+{% endmacro %}
+
+//* Outputs the deserialization code to put `in` in `out`
+{% macro deserialize_member(member, in, out) %}
+    {%- if member.type.category == "object" -%}
+        DESERIALIZE_TRY(resolver.GetFromId({{in}}, &{{out}}));
+    {% elif member.type.category == "structure"%}
+        DESERIALIZE_TRY({{as_cType(member.type.name)}}Deserialize(&{{out}}, &{{in}}, buffer, size, allocator, resolver));
+    {%- else -%}
+        {{out}} = {{in}};
+    {%- endif -%}
+{% endmacro %}
+
+//* The main [de]serialization macro
+
+//* Methods are very similar to structures that have one member corresponding to each arguments.
+//* This macro takes advantage of the similarity to output [de]serialization code for a record
+//* that is either a structure or a method, with some special cases for each.
+{% macro write_serialization_methods(name, members, as_method=None, as_struct=None, is_return_command=False) %}
+    {% set Return = "Return" if is_return_command else "" %}
+    {% set is_method = as_method != None %}
+    {% set is_struct = as_struct != None %}
+
+    //* Structure for the wire format of each of the records. Members that are values
+    //* are embedded directly in the structure. Other members are assumed to be in the
+    //* memory directly following the structure in the buffer.
+    struct {{name}}Transfer {
+        {% if is_method %}
+            //* Start the transfer structure with the command ID, so that casting to WireCmd gives the ID.
+            wire::{{Return}}WireCmd commandId;
+
+            //* Methods always have an implicit "self" argument.
+            ObjectId self;
+
+            //* Methods that return objects need to declare to the server which ID will be used for the
+            //* return value.
+            {% if as_method.return_type.category == "object" %}
+                ObjectId resultId;
+                ObjectSerial resultSerial;
+            {% endif %}
+        {% endif %}
+
+        //* Value types are directly in the command, objects being replaced with their IDs.
+        {% for member in members if member.annotation == "value" %}
+            {{member_transfer_type(member)}} {{as_varName(member.name)}};
+        {% endfor %}
+
+        //* const char* have their length embedded directly in the command.
+        {% for member in members if member.length == "strlen" %}
+            size_t {{as_varName(member.name)}}Strlen;
+        {% endfor %}
+    };
+
+    //* Returns the required transfer size for `record` in addition to the transfer structure.
+    size_t {{name}}GetExtraRequiredSize(const {{name}}& record) {
+        NXT_UNUSED(record);
+
+        size_t result = 0;
+
+        //* Special handling of const char* that have their length embedded directly in the command
+        {% for member in members if member.length == "strlen" %}
+            result += std::strlen(record.{{as_varName(member.name)}});
+        {% endfor %}
+
+        //* Gather how much space will be needed for pointer members.
+        {% for member in members if member.annotation != "value" and member.length != "strlen" %}
+            {
+                size_t memberLength = {{member_length(member, "record.")}};
+                result += memberLength * {{member_transfer_sizeof(member)}};
+
+                //* Structures might contain more pointers so we need to add their extra size as well.
+                {% if member.type.category == "structure" %}
+                    for (size_t i = 0; i < memberLength; ++i) {
+                        result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}}[i]);
+                    }
+                {% endif %}
+            }
+        {% endfor %}
+
+        return result;
+    }
+
+    //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
+    //* and `provider` to serialize objects.
+    void {{name}}Serialize(const {{name}}& record, {{name}}Transfer* transfer,
+                           char* buffer, const ObjectIdProvider& provider) {
+        NXT_UNUSED(provider);
+        NXT_UNUSED(buffer);
+
+        //* Handle special transfer members of methods.
+        {% if is_method %}
+            {% if as_method.return_type.category == "object" %}
+                transfer->resultId = record.resultId;
+                transfer->resultSerial = record.resultSerial;
+            {% endif %}
+
+            transfer->commandId = wire::{{Return}}WireCmd::{{name}};
+            transfer->self = provider.GetId(record.self);
+        {% endif %}
+
+        //* Value types are directly in the transfer record, objects being replaced with their IDs.
+        {% for member in members if member.annotation == "value" %}
+            {% set memberName = as_varName(member.name) %}
+            {{serialize_member(member, "record." + memberName, "transfer->" + memberName)}}
+        {% endfor %}
+
+        //* Special handling of const char* that have their length embedded directly in the command
+        {% for member in members if member.length == "strlen" %}
+            {% set memberName = as_varName(member.name) %}
+            transfer->{{memberName}}Strlen = std::strlen(record.{{memberName}});
+
+            memcpy(buffer, record.{{memberName}}, transfer->{{memberName}}Strlen);
+            buffer += transfer->{{memberName}}Strlen;
+        {% endfor %}
+
+        //* Allocate space and write the non-value arguments in it.
+        {% for member in members if member.annotation != "value" and member.length != "strlen" %}
+            {% set memberName = as_varName(member.name) %}
+            {
+                size_t memberLength = {{member_length(member, "record.")}};
+                auto memberBuffer = reinterpret_cast<{{member_transfer_type(member)}}*>(buffer);
+
+                for (size_t i = 0; i < memberLength; ++i) {
+                    {{serialize_member(member, "record." + memberName + "[i]", "memberBuffer[i]" )}}
+                }
+                buffer += memberLength * {{member_transfer_sizeof(member)}};
+            }
+        {% endfor %}
+    }
+
+    //* Deserializes `transfer` into `record` getting more serialized data from `buffer` and `size`
+    //* if needed, using `allocator` to store pointed-to values and `resolver` to translate object
+    //* Ids to actual objects.
+    DeserializeResult {{name}}Deserialize({{name}}* record, const {{name}}Transfer* transfer,
+                                          const char** buffer, size_t* size, DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
+        NXT_UNUSED(allocator);
+        NXT_UNUSED(resolver);
+        NXT_UNUSED(buffer);
+        NXT_UNUSED(size);
+
+        //* Handle special transfer members for methods
+        {% if is_method %}
+            {% if as_method.return_type.category == "object" %}
+                record->resultId = transfer->resultId;
+                record->resultSerial = transfer->resultSerial;
+            {% endif %}
+
+            ASSERT(transfer->commandId == wire::{{Return}}WireCmd::{{name}});
+
+            record->selfId = transfer->self;
+            //* This conversion is done after the copying of result* and selfId: Deserialize
+            //* guarantees they are filled even if there is an ID for an error object for the
+            //* Maybe monad mechanism.
+            DESERIALIZE_TRY(resolver.GetFromId(record->selfId, &record->self));
+        {% endif %}
+
+        {% if is_struct and as_struct.extensible %}
+            record->nextInChain = nullptr;
+        {% endif %}
+
+        //* Value types are directly in the transfer record, objects being replaced with their IDs.
+        {% for member in members if member.annotation == "value" %}
+            {% set memberName = as_varName(member.name) %}
+            {{deserialize_member(member, "transfer->" + memberName, "record->" + memberName)}}
+        {% endfor %}
+
+        //* Special handling of const char* that have their length embedded directly in the command
+        {% for member in members if member.length == "strlen" %}
+            {% set memberName = as_varName(member.name) %}
+            {
+                size_t stringLength = transfer->{{memberName}}Strlen;
+                const char* stringInBuffer = nullptr;
+                DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, stringLength, &stringInBuffer));
+
+                char* copiedString = nullptr;
+                DESERIALIZE_TRY(GetSpace(allocator, stringLength + 1, &copiedString));
+                memcpy(copiedString, stringInBuffer, stringLength);
+                copiedString[stringLength] = '\0';
+                record->{{memberName}} = copiedString;
+            }
+        {% endfor %}
+
+        //* Get extra buffer data, and copy pointed to values in extra allocated space.
+        {% for member in members if member.annotation != "value" and member.length != "strlen" %}
+            {% set memberName = as_varName(member.name) %}
+            {
+                size_t memberLength = {{member_length(member, "record->")}};
+                auto memberBuffer = reinterpret_cast<const {{member_transfer_type(member)}}*>(buffer);
+                DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, memberLength, &memberBuffer));
+
+                {{as_cType(member.type.name)}}* copiedMembers = nullptr;
+                DESERIALIZE_TRY(GetSpace(allocator, memberLength, &copiedMembers));
+                record->{{memberName}} = copiedMembers;
+
+                for (size_t i = 0; i < memberLength; ++i) {
+                    {{deserialize_member(member, "memberBuffer[i]", "copiedMembers[i]")}}
+                }
+            }
+        {% endfor %}
+
+        return DeserializeResult::Success;
+    }
+{% endmacro %}
 
 namespace nxt { namespace wire {
 
@@ -27,229 +269,77 @@ namespace nxt { namespace wire {
         } \
     }
 
-    // Consumes from (buffer, size) enough memory to contain T[count] and return it in data.
-    // Returns FatalError if not enough memory was available
-    template <typename T>
-    DeserializeResult GetPtrFromBuffer(const char** buffer, size_t* size, size_t count, const T** data) {
-        // TODO(cwallez@chromium.org): For robustness we would need to handle overflows here.
-        size_t totalSize = sizeof(T) * count;
-        if (totalSize > *size) {
-            return DeserializeResult::FatalError;
+    namespace {
+
+        // Consumes from (buffer, size) enough memory to contain T[count] and return it in data.
+        // Returns FatalError if not enough memory was available
+        template <typename T>
+        DeserializeResult GetPtrFromBuffer(const char** buffer, size_t* size, size_t count, const T** data) {
+            // TODO(cwallez@chromium.org): For robustness we would need to handle overflows here.
+            size_t totalSize = sizeof(T) * count;
+            if (totalSize > *size) {
+                return DeserializeResult::FatalError;
+            }
+
+            *data = reinterpret_cast<const T*>(*buffer);
+            *buffer += totalSize;
+            *size -= totalSize;
+
+            return DeserializeResult::Success;
         }
 
-        *data = reinterpret_cast<const T*>(*buffer);
-        *buffer += totalSize;
-        *size -= totalSize;
+        // Allocates enough space from allocator to countain T[count] and return it in out.
+        // Return FatalError if the allocator couldn't allocate the memory.
+        template <typename T>
+        DeserializeResult GetSpace(DeserializeAllocator* allocator, size_t count, T** out) {
+            // TODO(cwallez@chromium.org): For robustness we would need to handle overflows here.
+            size_t totalSize = sizeof(T) * count;
+            *out = static_cast<T*>(allocator->GetSpace(totalSize));
+            if (*out == nullptr) {
+                return DeserializeResult::FatalError;
+            }
 
-        return DeserializeResult::Success;
-    }
-
-    // Allocates enough space from allocator to countain T[count] and return it in out.
-    // Return FatalError if the allocator couldn't allocate the memory.
-    template <typename T>
-    DeserializeResult GetSpace(DeserializeAllocator* allocator, size_t count, T** out) {
-        // TODO(cwallez@chromium.org): For robustness we would need to handle overflows here.
-        size_t totalSize = sizeof(T) * count;
-        *out = static_cast<T*>(allocator->GetSpace(totalSize));
-        if (*out == nullptr) {
-            return DeserializeResult::FatalError;
+            return DeserializeResult::Success;
         }
 
-        return DeserializeResult::Success;
-    }
+        //* Output structure [de]serialization first because it is used by methods.
+        {% for type in by_category["structure"] %}
+            {% set name = as_cType(type.name) %}
+            {{write_serialization_methods(name, type.members, as_struct=type)}}
+        {% endfor %}
+
+        // * Output [de]serialization helpers for methods
+        {% for type in by_category["object"] %}
+            {% for method in type.methods %}
+                {% set name = as_MethodSuffix(type.name, method.name) %}
+
+                using {{name}} = {{name}}Cmd;
+                {{write_serialization_methods(name, method.arguments, as_method=method)}}
+            {% endfor %}
+        {% endfor %}
+    }  // anonymous namespace
 
     {% for type in by_category["object"] %}
         {% for method in type.methods %}
-            {% set Suffix = as_MethodSuffix(type.name, method.name) %}
-            {% set Cmd = Suffix + "Cmd" %}
-
-            //* Structure for the wire format of each of the commands. Parameters passed by value
-            //* are embedded directly in the structure. Other parameters are assumed to be in the
-            //* memory directly following the structure in the buffer. With value parameters the
-            //* structure can compute how much buffer size it needs and where the start of non-value
-            //* parameters is in the buffer.
-            struct {{Cmd}}Transfer {
-                //* Start the structure with the command ID, so that casting to WireCmd gives the ID.
-                wire::WireCmd commandId;
-
-                ObjectId self;
-
-                {% if method.return_type.category == "object" %}
-                    ObjectId resultId;
-                    ObjectSerial resultSerial;
-                {% endif %}
-
-                //* Value types are directly in the command, objects being replaced with their IDs.
-                {% for arg in method.arguments if arg.annotation == "value" %}
-                    {% if arg.type.category == "object" %}
-                        ObjectId {{as_varName(arg.name)}};
-                    {% else %}
-                        {{as_cType(arg.type.name)}} {{as_varName(arg.name)}};
-                    {% endif %}
-                {% endfor %}
-
-                //* const char* have their length embedded directly in the command.
-                {% for arg in method.arguments if arg.length == "strlen" %}
-                    size_t {{as_varName(arg.name)}}Strlen;
-                {% endfor %}
-            };
+            {% set name = as_MethodSuffix(type.name, method.name) %}
+            {% set Cmd = name + "Cmd" %}
 
             size_t {{Cmd}}::GetRequiredSize() const {
-                size_t result = sizeof({{Cmd}}Transfer);
-
-                {% for arg in method.arguments if arg.annotation != "value" %}
-                    {% set argName = as_varName(arg.name) %}
-
-                    {% if arg.length == "strlen" %}
-                        result += std::strlen({{as_varName(arg.name)}});
-
-                    {% elif arg.length == "constant_one" %}
-                        result += sizeof({{as_cType(arg.type.name)}});
-
-                    {% elif arg.type.category == "object" %}
-                        result += {{as_varName(arg.length.name)}} * sizeof(ObjectId);
-
-                    {% else %}
-                        result += {{as_varName(arg.length.name)}} * sizeof({{as_cType(arg.type.name)}});
-
-                    {% endif %}
-                {% endfor %}
-
-                return result;
+                return sizeof({{name}}Transfer) + {{name}}GetExtraRequiredSize(*this);
             }
 
             void {{Cmd}}::Serialize(char* buffer, const ObjectIdProvider& objectIdProvider) const {
-                auto transfer = reinterpret_cast<{{Cmd}}Transfer*>(buffer);
-                buffer += sizeof({{Cmd}}Transfer);
+                auto transfer = reinterpret_cast<{{name}}Transfer*>(buffer);
+                buffer += sizeof({{name}}Transfer);
 
-                transfer->commandId = wire::WireCmd::{{Suffix}};
-                transfer->self = objectIdProvider.GetId(self);
-
-                {% if method.return_type.category == "object" %}
-                    transfer->resultId = resultId;
-                    transfer->resultSerial = resultSerial;
-                {% endif %}
-
-                //* Value types are directly in the command, objects being replaced with their IDs.
-                {% for arg in method.arguments if arg.annotation == "value" %}
-                    {% set argName = as_varName(arg.name) %}
-                    {% if arg.type.category == "object" %}
-                        transfer->{{argName}} = objectIdProvider.GetId(this->{{argName}});
-                    {% else %}
-                        transfer->{{argName}} = this->{{argName}};
-                    {% endif %}
-                {% endfor %}
-
-                //* const char* have their length embedded directly in the command.
-                {% for arg in method.arguments if arg.length == "strlen" %}
-                    {% set argName = as_varName(arg.name) %}
-                    transfer->{{argName}}Strlen = std::strlen(this->{{argName}});
-                {% endfor %}
-
-                //* In the allocated space, write the non-value arguments.
-                {% for arg in method.arguments if arg.annotation != "value" %}
-                    {% set argName = as_varName(arg.name) %}
-
-                    {% if arg.length == "strlen" %}
-                        memcpy(buffer, this->{{argName}}, transfer->{{argName}}Strlen);
-                        buffer += transfer->{{argName}}Strlen;
-
-                    {% elif arg.length == "constant_one" %}
-                        memcpy(buffer, this->{{argName}}, sizeof(*(this->{{argName}})));
-                        buffer += sizeof(*(this->{{argName}}));
-
-                    {% elif arg.type.category == "object" %}
-                        {% set argLength = as_varName(arg.length.name) %}
-                        auto {{argName}}Storage = reinterpret_cast<ObjectId*>(buffer);
-                        for (size_t i = 0; i < {{argLength}}; i++) {
-                            {{argName}}Storage[i] = objectIdProvider.GetId(this->{{argName}}[i]);
-                        }
-                        buffer += sizeof(ObjectId) * {{argLength}};
-
-                    {% else %}
-                        {% set argLength = as_varName(arg.length.name) %}
-                        memcpy(buffer, this->{{argName}}, {{argLength}} * sizeof(*(this->{{argName}})));
-                        buffer += {{argLength}} * sizeof(*(this->{{argName}}));
-
-                    {% endif %}
-                {% endfor %}
+                {{name}}Serialize(*this, transfer, buffer, objectIdProvider);
             }
 
             DeserializeResult {{Cmd}}::Deserialize(const char** buffer, size_t* size, DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-                (void) allocator;
-
-                const {{Cmd}}Transfer* transfer = nullptr;
+                const {{name}}Transfer* transfer = nullptr;
                 DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, 1, &transfer));
 
-                selfId = transfer->self;
-                {% if method.return_type.category == "object" %}
-                    resultId = transfer->resultId;
-                    resultSerial = transfer->resultSerial;
-                {% endif %}
-
-                DESERIALIZE_TRY(resolver.GetFromId(selfId, &self));
-
-                {% for arg in method.arguments if arg.annotation == "value" %}
-                    {% set argName = as_varName(arg.name) %}
-                    {% if arg.type.category == "object" %}
-                        DESERIALIZE_TRY(resolver.GetFromId(transfer->{{argName}}, &(this->{{argName}})));
-                    {% else %}
-                        this->{{argName}} = transfer->{{argName}};
-                    {% endif %}
-                {% endfor %}
-
-                {% for arg in method.arguments if arg.annotation != "value" %}
-                    {% set argName = as_varName(arg.name) %}
-                    {% if arg.length == "strlen" %}
-                        {
-                            size_t stringLength = transfer->{{argName}}Strlen;
-                            const char* stringInBuffer = nullptr;
-                            DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, stringLength, &stringInBuffer));
-
-                            char* copiedString = nullptr;
-                            DESERIALIZE_TRY(GetSpace(allocator, stringLength + 1, &copiedString));
-                            memcpy(copiedString, stringInBuffer, stringLength);
-                            copiedString[stringLength] = '\0';
-                            this->{{argName}} = copiedString;
-                        }
-                    {% elif arg.length == "constant_one" %}
-                        {
-                            const {{as_cType(arg.type.name)}}* argInBuffer = nullptr;
-                            DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, 1, &argInBuffer));
-
-                            {{as_cType(arg.type.name)}}* copiedArg = nullptr;
-                            DESERIALIZE_TRY(GetSpace(allocator, 1, &copiedArg));
-                            memcpy(copiedArg, argInBuffer, sizeof(*{{argName}}));
-                            this->{{argName}} = copiedArg;
-                        }
-                    {% elif arg.type.category == "object" %}
-                        {% set argLength = as_varName(arg.length.name) %}
-                        {
-                            const ObjectId* idsInBuffer = nullptr;
-                            DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, {{argLength}}, &idsInBuffer));
-
-                            {{as_cType(arg.type.name)}}* copiedObjects = nullptr;
-                            DESERIALIZE_TRY(GetSpace(allocator, {{argLength}}, &copiedObjects));
-                            for (size_t i = 0; i < {{argLength}}; i++) {
-                                DESERIALIZE_TRY(resolver.GetFromId(idsInBuffer[i], &copiedObjects[i]));
-                            }
-                            this->{{argName}} = copiedObjects;
-                        }
-                    {% else %}
-                        {% set argLength = as_varName(arg.length.name) %}
-                        {
-                            const {{as_cType(arg.type.name)}}* argInBuffer = nullptr;
-                            DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, {{argLength}}, &argInBuffer));
-
-                            {{as_cType(arg.type.name)}}* copiedArg = nullptr;
-                            DESERIALIZE_TRY(GetSpace(allocator, {{argLength}}, &copiedArg))
-                            memcpy(copiedArg, argInBuffer, {{argLength}} * sizeof(*{{argName}}));
-                            this->{{argName}} = copiedArg;
-                        }
-                    {% endif %}
-                {% endfor %}
-
-                return DeserializeResult::Success;
+                return {{name}}Deserialize(this, transfer, buffer, size, allocator, resolver);
             }
         {% endfor %}
     {% endfor %}
