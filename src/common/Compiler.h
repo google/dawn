@@ -22,6 +22,7 @@
 //  - NXT_NO_DISCARD: An attribute that is C++17 [[nodiscard]] where available
 //  - NXT_(UN)?LIKELY(EXPR): Where available, hints the compiler that the expression will be true
 //      (resp. false) to help it generate code that leads to better branch prediction.
+//  - NXT_UNUSED(EXPR): Prevents unused variable/expression warnings on EXPR.
 
 // Clang and GCC
 #if defined(__GNUC__)
@@ -71,6 +72,9 @@ extern void __cdecl __debugbreak(void);
 #else
 #    error "Unsupported compiler"
 #endif
+
+// It seems that (void) EXPR works on all compilers to silence the unused variable warning.
+#define NXT_UNUSED(EXPR) (void)EXPR
 
 // Add noop replacements for macros for features that aren't supported by the compiler.
 #if !defined(NXT_LIKELY)

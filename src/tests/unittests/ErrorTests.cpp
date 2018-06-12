@@ -178,7 +178,7 @@ TEST(ErrorTests, TRY_RESULT_Error) {
     auto Try = [ReturnError]() -> ResultOrError<int*> {
         int* result = nullptr;
         NXT_TRY_ASSIGN(result, ReturnError());
-        (void) result;
+        NXT_UNUSED(result);
 
         // NXT_TRY should return before this point
         EXPECT_FALSE(true);
@@ -233,7 +233,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToError) {
     auto Try = [ReturnError]() -> MaybeError {
         int* result = nullptr;
         NXT_TRY_ASSIGN(result, ReturnError());
-        (void) result;
+        NXT_UNUSED(result);
 
         return {};
     };

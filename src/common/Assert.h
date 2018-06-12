@@ -55,7 +55,7 @@
 #    else
 #        define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
             do {                                                        \
-                (void)sizeof(condition);                                \
+                NXT_UNUSED(sizeof(condition));                          \
             } while (NXT_ASSERT_LOOP_CONDITION)
 #    endif
 #endif
