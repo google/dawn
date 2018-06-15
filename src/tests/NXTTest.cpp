@@ -167,7 +167,7 @@ void NXTTest::SetUp() {
     // deferred expectations.
     nxtSetProcs(&procs);
     device = nxt::Device::Acquire(cDevice);
-    queue = device.CreateQueueBuilder().GetResult();
+    queue = device.CreateQueue();
 
     // The swapchain isn't used by tests but is useful when debugging with graphics debuggers that
     // capture at frame boundaries.

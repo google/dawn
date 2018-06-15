@@ -72,7 +72,7 @@ class BufferValidationTest : public ValidationTest {
 
             mockBufferMapReadCallback = new MockBufferMapReadCallback;
             mockBufferMapWriteCallback = new MockBufferMapWriteCallback;
-            queue = device.CreateQueueBuilder().GetResult();
+            queue = device.CreateQueue();
         }
 
         void TearDown() override {

@@ -288,8 +288,8 @@ namespace backend { namespace d3d12 {
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
         return new PipelineLayout(this, builder);
     }
-    QueueBase* Device::CreateQueue(QueueBuilder* builder) {
-        return new Queue(this, builder);
+    ResultOrError<QueueBase*> Device::CreateQueueImpl() {
+        return new Queue(this);
     }
     RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
         RenderPassDescriptorBuilder* builder) {

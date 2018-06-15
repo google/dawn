@@ -40,7 +40,6 @@ namespace backend {
     class PipelineLayoutBase;
     class PipelineLayoutBuilder;
     class QueueBase;
-    class QueueBuilder;
     class RenderPassDescriptorBase;
     class RenderPassDescriptorBuilder;
     class RenderPipelineBase;

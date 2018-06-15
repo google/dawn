@@ -107,15 +107,15 @@ namespace backend { namespace metal {
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
         return new PipelineLayout(builder);
     }
-    QueueBase* Device::CreateQueue(QueueBuilder* builder) {
-        return new Queue(builder);
-    }
     RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
         RenderPassDescriptorBuilder* builder) {
         return new RenderPassDescriptor(builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
+    }
+    ResultOrError<QueueBase*> Device::CreateQueueImpl() {
+        return new Queue(this);
     }
     ResultOrError<SamplerBase*> Device::CreateSamplerImpl(
         const nxt::SamplerDescriptor* descriptor) {
@@ -203,18 +203,7 @@ namespace backend { namespace metal {
 
     // Queue
 
-    Queue::Queue(QueueBuilder* builder) : QueueBase(builder) {
-        Device* device = ToBackend(builder->GetDevice());
-        mCommandQueue = [device->GetMTLDevice() newCommandQueue];
-    }
-
-    Queue::~Queue() {
-        [mCommandQueue release];
-        mCommandQueue = nil;
-    }
-
-    id<MTLCommandQueue> Queue::GetMTLCommandQueue() {
-        return mCommandQueue;
+    Queue::Queue(Device* device) : QueueBase(device) {
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {

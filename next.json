@@ -612,8 +612,8 @@
                 "returns": "pipeline layout builder"
             },
             {
-                "name": "create queue builder",
-                "returns": "queue builder"
+                "name": "create queue",
+                "returns": "queue"
             },
             {
                 "name": "create sampler",
@@ -805,15 +805,6 @@
                     {"name": "num commands", "type": "uint32_t"},
                     {"name": "commands", "type": "command buffer", "annotation": "const*", "length": "num commands"}
                 ]
-            }
-        ]
-    },
-    "queue builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "queue"
             }
         ]
     },

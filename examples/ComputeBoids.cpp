@@ -286,7 +286,7 @@ nxt::CommandBuffer createCommandBuffer(const nxt::RenderPassDescriptor& renderPa
 void init() {
     device = CreateCppNXTDevice();
 
-    queue = device.CreateQueueBuilder().GetResult();
+    queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
     swapchain.Configure(GetPreferredSwapChainTextureFormat(),
                         nxt::TextureUsageBit::OutputAttachment, 640, 480);

@@ -122,8 +122,14 @@ namespace backend {
     PipelineLayoutBuilder* DeviceBase::CreatePipelineLayoutBuilder() {
         return new PipelineLayoutBuilder(this);
     }
-    QueueBuilder* DeviceBase::CreateQueueBuilder() {
-        return new QueueBuilder(this);
+    QueueBase* DeviceBase::CreateQueue() {
+        ResultOrError<QueueBase*> maybeQueue = CreateQueueImpl();
+        if (maybeQueue.IsError()) {
+            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
+            delete maybeQueue.AcquireError();
+            return nullptr;
+        }
+        return maybeQueue.AcquireSuccess();
     }
     RenderPassDescriptorBuilder* DeviceBase::CreateRenderPassDescriptorBuilder() {
         return new RenderPassDescriptorBuilder(this);
@@ -142,7 +148,7 @@ namespace backend {
         ResultOrError<SamplerBase*> maybeSampler = CreateSamplerImpl(descriptor);
         if (maybeSampler.IsError()) {
             // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
-            delete validation.AcquireError();
+            delete maybeSampler.AcquireError();
             return nullptr;
         }
         return maybeSampler.AcquireSuccess();

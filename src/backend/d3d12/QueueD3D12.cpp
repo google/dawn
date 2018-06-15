@@ -19,21 +19,23 @@
 
 namespace backend { namespace d3d12 {
 
-    Queue::Queue(Device* device, QueueBuilder* builder) : QueueBase(builder), mDevice(device) {
+    Queue::Queue(Device* device) : QueueBase(device) {
     }
 
     void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
-        mDevice->Tick();
+        Device* device = ToBackend(GetDevice());
 
-        mDevice->OpenCommandList(&mCommandList);
+        device->Tick();
+
+        device->OpenCommandList(&mCommandList);
         for (uint32_t i = 0; i < numCommands; ++i) {
             commands[i]->FillCommands(mCommandList);
         }
         ASSERT_SUCCESS(mCommandList->Close());
 
-        mDevice->ExecuteCommandLists({mCommandList.Get()});
+        device->ExecuteCommandLists({mCommandList.Get()});
 
-        mDevice->NextSerial();
+        device->NextSerial();
     }
 
 }}  // namespace backend::d3d12

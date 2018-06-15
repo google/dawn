@@ -243,8 +243,8 @@ namespace backend { namespace vulkan {
     PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
         return new PipelineLayout(builder);
     }
-    QueueBase* Device::CreateQueue(QueueBuilder* builder) {
-        return new Queue(builder);
+    ResultOrError<QueueBase*> Device::CreateQueueImpl() {
+        return new Queue(this);
     }
     RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
         RenderPassDescriptorBuilder* builder) {
@@ -677,7 +677,7 @@ namespace backend { namespace vulkan {
 
     // Queue
 
-    Queue::Queue(QueueBuilder* builder) : QueueBase(builder) {
+    Queue::Queue(Device* device) : QueueBase(device) {
     }
 
     Queue::~Queue() {

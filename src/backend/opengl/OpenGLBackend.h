@@ -93,7 +93,6 @@ namespace backend { namespace opengl {
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
-        QueueBase* CreateQueue(QueueBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
@@ -105,6 +104,7 @@ namespace backend { namespace opengl {
         void TickImpl() override;
 
       private:
+        ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(
             const nxt::SamplerDescriptor* descriptor) override;
     };
@@ -121,7 +121,7 @@ namespace backend { namespace opengl {
 
     class Queue : public QueueBase {
       public:
-        Queue(QueueBuilder* builder);
+        Queue(Device* device);
 
         // NXT API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);

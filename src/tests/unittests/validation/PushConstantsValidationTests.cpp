@@ -40,7 +40,7 @@ class PushConstantTest : public ValidationTest {
     private:
         void SetUp() override {
             ValidationTest::SetUp();
-            queue = device.CreateQueueBuilder().GetResult();
+            queue = device.CreateQueue();
         }
 };
 

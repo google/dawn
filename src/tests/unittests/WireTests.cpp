@@ -367,15 +367,9 @@ TEST_F(WireTests, ObjectsAsPointerArgument) {
     }
 
     // Create queue
-    nxtQueueBuilder queueBuilder = nxtDeviceCreateQueueBuilder(device);
-    nxtQueue queue = nxtQueueBuilderGetResult(queueBuilder);
-
-    nxtQueueBuilder apiQueueBuilder = api.GetNewQueueBuilder();
-    EXPECT_CALL(api, DeviceCreateQueueBuilder(apiDevice))
-        .WillOnce(Return(apiQueueBuilder));
-
+    nxtQueue queue = nxtDeviceCreateQueue(device);
     nxtQueue apiQueue = api.GetNewQueue();
-    EXPECT_CALL(api, QueueBuilderGetResult(apiQueueBuilder))
+    EXPECT_CALL(api, DeviceCreateQueue(apiDevice))
         .WillOnce(Return(apiQueue));
 
     // Submit command buffer and check we got a call with both API-side command buffers

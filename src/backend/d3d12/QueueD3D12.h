@@ -26,14 +26,12 @@ namespace backend { namespace d3d12 {
 
     class Queue : public QueueBase {
       public:
-        Queue(Device* device, QueueBuilder* builder);
+        Queue(Device* device);
 
         // NXT API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
 
       private:
-        Device* mDevice;
-
         ComPtr<ID3D12GraphicsCommandList> mCommandList;
     };
 

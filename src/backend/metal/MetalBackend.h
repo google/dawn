@@ -97,7 +97,6 @@ namespace backend { namespace metal {
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
-        QueueBase* CreateQueue(QueueBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
@@ -118,6 +117,7 @@ namespace backend { namespace metal {
         ResourceUploader* GetResourceUploader() const;
 
       private:
+        ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(
             const nxt::SamplerDescriptor* descriptor) override;
 
@@ -145,16 +145,10 @@ namespace backend { namespace metal {
 
     class Queue : public QueueBase {
       public:
-        Queue(QueueBuilder* builder);
-        ~Queue();
-
-        id<MTLCommandQueue> GetMTLCommandQueue();
+        Queue(Device* device);
 
         // NXT API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
-
-      private:
-        id<MTLCommandQueue> mCommandQueue = nil;
     };
 
     class RenderPassDescriptor : public RenderPassDescriptorBase {

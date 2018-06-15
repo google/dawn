@@ -25,7 +25,7 @@ namespace backend {
 
     class QueueBase : public RefCounted {
       public:
-        QueueBase(QueueBuilder* builder);
+        QueueBase(DeviceBase* device);
 
         DeviceBase* GetDevice();
 
@@ -46,15 +46,6 @@ namespace backend {
         bool ValidateSubmitCommand(CommandBufferBase* command);
 
         DeviceBase* mDevice;
-    };
-
-    class QueueBuilder : public Builder<QueueBase> {
-      public:
-        QueueBuilder(DeviceBase* device);
-
-      private:
-        friend class QueueBase;
-        QueueBase* GetResultImpl() override;
     };
 
 }  // namespace backend

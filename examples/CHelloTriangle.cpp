@@ -26,12 +26,7 @@ nxtTextureFormat swapChainFormat;
 
 void init() {
     device = CreateCppNXTDevice().Release();
-
-    {
-        nxtQueueBuilder builder = nxtDeviceCreateQueueBuilder(device);
-        queue = nxtQueueBuilderGetResult(builder);
-        nxtQueueBuilderRelease(builder);
-    }
+    queue = nxtDeviceCreateQueue(device);
 
     {
         nxtSwapChainBuilder builder = nxtDeviceCreateSwapChainBuilder(device);

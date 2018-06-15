@@ -96,7 +96,6 @@ namespace backend { namespace d3d12 {
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
-        QueueBase* CreateQueue(QueueBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
@@ -128,6 +127,7 @@ namespace backend { namespace d3d12 {
         void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
       private:
+        ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(
             const nxt::SamplerDescriptor* descriptor) override;
 
