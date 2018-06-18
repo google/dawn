@@ -12,71 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_D3D12BACKEND_H_
-#define BACKEND_D3D12_D3D12BACKEND_H_
+#ifndef BACKEND_D3D12_DEVICED3D12_H_
+#define BACKEND_D3D12_DEVICED3D12_H_
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/DepthStencilState.h"
 #include "backend/Device.h"
-#include "backend/ToBackend.h"
+#include "backend/d3d12/Forward.h"
 #include "backend/d3d12/d3d12_platform.h"
 #include "common/SerialQueue.h"
 
 namespace backend { namespace d3d12 {
-
-    class BindGroup;
-    class BindGroupLayout;
-    class BlendState;
-    class Buffer;
-    class BufferView;
-    class CommandBuffer;
-    class ComputePipeline;
-    class DepthStencilState;
-    class Device;
-    class InputState;
-    class PipelineLayout;
-    class Queue;
-    class RenderPassDescriptor;
-    class RenderPipeline;
-    class Sampler;
-    class ShaderModule;
-    class SwapChain;
-    class Texture;
-    class TextureView;
 
     class CommandAllocatorManager;
     class DescriptorHeapAllocator;
     class MapRequestTracker;
     class ResourceAllocator;
     class ResourceUploader;
-
-    struct D3D12BackendTraits {
-        using BindGroupType = BindGroup;
-        using BindGroupLayoutType = BindGroupLayout;
-        using BlendStateType = BlendState;
-        using BufferType = Buffer;
-        using BufferViewType = BufferView;
-        using CommandBufferType = CommandBuffer;
-        using ComputePipelineType = ComputePipeline;
-        using DepthStencilStateType = DepthStencilState;
-        using DeviceType = Device;
-        using InputStateType = InputState;
-        using PipelineLayoutType = PipelineLayout;
-        using QueueType = Queue;
-        using RenderPassDescriptorType = RenderPassDescriptor;
-        using RenderPipelineType = RenderPipeline;
-        using SamplerType = Sampler;
-        using ShaderModuleType = ShaderModule;
-        using SwapChainType = SwapChain;
-        using TextureType = Texture;
-        using TextureViewType = TextureView;
-    };
-
-    template <typename T>
-    auto ToBackend(T&& common) -> decltype(ToBackendBase<D3D12BackendTraits>(common)) {
-        return ToBackendBase<D3D12BackendTraits>(common);
-    }
 
     void ASSERT_SUCCESS(HRESULT hr);
 
@@ -156,4 +108,4 @@ namespace backend { namespace d3d12 {
 
 }}  // namespace backend::d3d12
 
-#endif  // BACKEND_D3D12_D3D12BACKEND_H_
+#endif  // BACKEND_D3D12_DEVICED3D12_H_

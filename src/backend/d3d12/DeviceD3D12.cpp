@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/d3d12/D3D12Backend.h"
+#include "backend/d3d12/DeviceD3D12.h"
 
 #include "backend/d3d12/BindGroupD3D12.h"
 #include "backend/d3d12/BindGroupLayoutD3D12.h"

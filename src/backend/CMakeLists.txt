@@ -233,8 +233,9 @@ if (NXT_ENABLE_D3D12)
         ${D3D12_DIR}/DepthStencilStateD3D12.h
         ${D3D12_DIR}/DescriptorHeapAllocator.cpp
         ${D3D12_DIR}/DescriptorHeapAllocator.h
-        ${D3D12_DIR}/D3D12Backend.cpp
-        ${D3D12_DIR}/D3D12Backend.h
+        ${D3D12_DIR}/DeviceD3D12.cpp
+        ${D3D12_DIR}/DeviceD3D12.h
+        ${D3D12_DIR}/Forward.h
         ${D3D12_DIR}/InputStateD3D12.cpp
         ${D3D12_DIR}/InputStateD3D12.h
         ${D3D12_DIR}/NativeSwapChainImplD3D12.cpp

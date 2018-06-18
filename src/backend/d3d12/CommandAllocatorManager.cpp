@@ -14,7 +14,7 @@
 
 #include "backend/d3d12/CommandAllocatorManager.h"
 
-#include "backend/d3d12/D3D12Backend.h"
+#include "backend/d3d12/DeviceD3D12.h"
 
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"

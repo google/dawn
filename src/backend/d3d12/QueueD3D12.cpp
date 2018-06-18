@@ -15,7 +15,7 @@
 #include "backend/d3d12/QueueD3D12.h"
 
 #include "backend/d3d12/CommandBufferD3D12.h"
-#include "backend/d3d12/D3D12Backend.h"
+#include "backend/d3d12/DeviceD3D12.h"
 
 namespace backend { namespace d3d12 {
 

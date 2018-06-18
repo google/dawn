@@ -19,7 +19,7 @@
 #include "backend/d3d12/TextureD3D12.h"
 #include "common/BitSetIterator.h"
 
-#include "backend/d3d12/D3D12Backend.h"
+#include "backend/d3d12/DeviceD3D12.h"
 
 namespace backend { namespace d3d12 {
 
