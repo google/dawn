@@ -23,6 +23,7 @@
 #include "backend/metal/DeviceMTL.h"
 #include "backend/metal/InputStateMTL.h"
 #include "backend/metal/PipelineLayoutMTL.h"
+#include "backend/metal/QueueMTL.h"
 #include "backend/metal/RenderPipelineMTL.h"
 #include "backend/metal/SamplerMTL.h"
 #include "backend/metal/ShaderModuleMTL.h"

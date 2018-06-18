@@ -18,7 +18,6 @@
 #include "nxt/nxtcpp.h"
 
 #include "backend/Device.h"
-#include "backend/Queue.h"
 #include "backend/metal/Forward.h"
 #include "common/Serial.h"
 
@@ -80,14 +79,6 @@ namespace backend { namespace metal {
         Serial mFinishedCommandSerial = 0;
         Serial mPendingCommandSerial = 1;
         id<MTLCommandBuffer> mPendingCommands = nil;
-    };
-
-    class Queue : public QueueBase {
-      public:
-        Queue(Device* device);
-
-        // NXT API
-        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
 }}  // namespace backend::metal

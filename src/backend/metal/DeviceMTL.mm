@@ -1,4 +1,4 @@
-// Copyright 2017 The NXT Authors
+// Copyright 2018 The NXT Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 #include "backend/metal/DepthStencilStateMTL.h"
 #include "backend/metal/InputStateMTL.h"
 #include "backend/metal/PipelineLayoutMTL.h"
+#include "backend/metal/QueueMTL.h"
 #include "backend/metal/RenderPipelineMTL.h"
 #include "backend/metal/ResourceUploader.h"
 #include "backend/metal/SamplerMTL.h"
@@ -191,23 +192,6 @@ namespace backend { namespace metal {
 
     ResourceUploader* Device::GetResourceUploader() const {
         return mResourceUploader;
-    }
-
-    // Queue
-
-    Queue::Queue(Device* device) : QueueBase(device) {
-    }
-
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
-        Device* device = ToBackend(GetDevice());
-        device->Tick();
-        id<MTLCommandBuffer> commandBuffer = device->GetPendingCommandBuffer();
-
-        for (uint32_t i = 0; i < numCommands; ++i) {
-            commands[i]->FillCommands(commandBuffer);
-        }
-
-        device->SubmitPendingCommandBuffer();
     }
 
 }}  // namespace backend::metal

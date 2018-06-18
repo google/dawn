@@ -131,6 +131,8 @@ if (NXT_ENABLE_METAL)
         ${METAL_DIR}/InputStateMTL.h
         ${METAL_DIR}/PipelineLayoutMTL.mm
         ${METAL_DIR}/PipelineLayoutMTL.h
+        ${METAL_DIR}/QueueMTL.mm
+        ${METAL_DIR}/QueueMTL.h
         ${METAL_DIR}/RenderPipelineMTL.mm
         ${METAL_DIR}/RenderPipelineMTL.h
         ${METAL_DIR}/ResourceUploader.mm
