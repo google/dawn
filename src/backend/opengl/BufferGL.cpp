@@ -14,8 +14,6 @@
 
 #include "backend/opengl/BufferGL.h"
 
-#include "backend/opengl/OpenGLBackend.h"
-
 namespace backend { namespace opengl {
 
     // Buffer

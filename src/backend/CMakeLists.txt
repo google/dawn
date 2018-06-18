@@ -66,10 +66,11 @@ if (NXT_ENABLE_OPENGL)
         ${OPENGL_DIR}/ComputePipelineGL.h
         ${OPENGL_DIR}/DepthStencilStateGL.cpp
         ${OPENGL_DIR}/DepthStencilStateGL.h
+        ${OPENGL_DIR}/DeviceGL.cpp
+        ${OPENGL_DIR}/DeviceGL.h
+        ${OPENGL_DIR}/Forward.h
         ${OPENGL_DIR}/InputStateGL.cpp
         ${OPENGL_DIR}/InputStateGL.h
-        ${OPENGL_DIR}/OpenGLBackend.cpp
-        ${OPENGL_DIR}/OpenGLBackend.h
         ${OPENGL_DIR}/PersistentPipelineStateGL.cpp
         ${OPENGL_DIR}/PersistentPipelineStateGL.h
         ${OPENGL_DIR}/PipelineGL.cpp

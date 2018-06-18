@@ -14,8 +14,6 @@
 
 #include "backend/opengl/PersistentPipelineStateGL.h"
 
-#include "backend/opengl/OpenGLBackend.h"
-
 namespace backend { namespace opengl {
 
     void PersistentPipelineState::SetDefaultState() {

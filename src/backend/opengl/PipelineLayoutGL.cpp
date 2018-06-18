@@ -14,7 +14,7 @@
 
 #include "backend/opengl/PipelineLayoutGL.h"
 
-#include "backend/opengl/OpenGLBackend.h"
+#include "backend/BindGroupLayout.h"
 
 namespace backend { namespace opengl {
 

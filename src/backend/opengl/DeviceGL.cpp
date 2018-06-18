@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/opengl/OpenGLBackend.h"
+#include "backend/opengl/DeviceGL.h"
 
+#include "backend/BindGroup.h"
+#include "backend/BindGroupLayout.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/opengl/BlendStateGL.h"
 #include "backend/opengl/BufferGL.h"
 #include "backend/opengl/CommandBufferGL.h"
@@ -106,17 +109,6 @@ namespace backend { namespace opengl {
     void Device::TickImpl() {
     }
 
-    // Bind Group
-
-    BindGroup::BindGroup(BindGroupBuilder* builder) : BindGroupBase(builder) {
-    }
-
-    // Bind Group Layout
-
-    BindGroupLayout::BindGroupLayout(BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder) {
-    }
-
     // Queue
 
     Queue::Queue(Device* device) : QueueBase(device) {
@@ -126,12 +118,6 @@ namespace backend { namespace opengl {
         for (uint32_t i = 0; i < numCommands; ++i) {
             commands[i]->Execute();
         }
-    }
-
-    // RenderPassDescriptor
-
-    RenderPassDescriptor::RenderPassDescriptor(RenderPassDescriptorBuilder* builder)
-        : RenderPassDescriptorBase(builder) {
     }
 
 }}  // namespace backend::opengl

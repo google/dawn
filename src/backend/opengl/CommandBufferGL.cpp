@@ -14,11 +14,12 @@
 
 #include "backend/opengl/CommandBufferGL.h"
 
+#include "backend/BindGroup.h"
 #include "backend/Commands.h"
 #include "backend/opengl/BufferGL.h"
 #include "backend/opengl/ComputePipelineGL.h"
+#include "backend/opengl/Forward.h"
 #include "backend/opengl/InputStateGL.h"
-#include "backend/opengl/OpenGLBackend.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
 #include "backend/opengl/RenderPipelineGL.h"

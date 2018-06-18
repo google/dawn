@@ -14,7 +14,8 @@
 
 #include "backend/opengl/PipelineGL.h"
 
-#include "backend/opengl/OpenGLBackend.h"
+#include "backend/BindGroupLayout.h"
+#include "backend/opengl/Forward.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
 #include "backend/opengl/ShaderModuleGL.h"

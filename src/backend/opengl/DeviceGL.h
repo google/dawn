@@ -1,4 +1,4 @@
-// Copyright 2017 The NXT Authors
+// Copyright 2018 The NXT Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,75 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_OPENGL_OPENGLBACKEND_H_
-#define BACKEND_OPENGL_OPENGLBACKEND_H_
+#ifndef BACKEND_OPENGL_DEVICEGL_H_
+#define BACKEND_OPENGL_DEVICEGL_H_
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/BindGroup.h"
-#include "backend/BindGroupLayout.h"
-#include "backend/BlendState.h"
-#include "backend/Buffer.h"
-#include "backend/DepthStencilState.h"
 #include "backend/Device.h"
-#include "backend/InputState.h"
 #include "backend/Queue.h"
-#include "backend/RenderPassDescriptor.h"
-#include "backend/ToBackend.h"
+#include "backend/opengl/Forward.h"
 
 #include "glad/glad.h"
 
 namespace backend { namespace opengl {
 
-    class BindGroup;
-    class BindGroupLayout;
-    class BlendState;
-    class Buffer;
-    class BufferView;
-    class CommandBuffer;
-    class ComputePipeline;
-    class DepthStencilState;
-    class Device;
-    class InputState;
-    class PersistentPipelineState;
-    class PipelineLayout;
-    class Queue;
-    class RenderPassDescriptor;
-    class RenderPipeline;
-    class Sampler;
-    class ShaderModule;
-    class SwapChain;
-    class Texture;
-    class TextureView;
-
-    struct OpenGLBackendTraits {
-        using BindGroupType = BindGroup;
-        using BindGroupLayoutType = BindGroupLayout;
-        using BlendStateType = BlendState;
-        using BufferType = Buffer;
-        using BufferViewType = BufferView;
-        using CommandBufferType = CommandBuffer;
-        using ComputePipelineType = ComputePipeline;
-        using DepthStencilStateType = DepthStencilState;
-        using DeviceType = Device;
-        using InputStateType = InputState;
-        using PipelineLayoutType = PipelineLayout;
-        using QueueType = Queue;
-        using RenderPassDescriptorType = RenderPassDescriptor;
-        using RenderPipelineType = RenderPipeline;
-        using SamplerType = Sampler;
-        using ShaderModuleType = ShaderModule;
-        using SwapChainType = SwapChain;
-        using TextureType = Texture;
-        using TextureViewType = TextureView;
-    };
-
-    template <typename T>
-    auto ToBackend(T&& common) -> decltype(ToBackendBase<OpenGLBackendTraits>(common)) {
-        return ToBackendBase<OpenGLBackendTraits>(common);
-    }
-
-    // Definition of backend types
     class Device : public DeviceBase {
       public:
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
@@ -109,16 +53,6 @@ namespace backend { namespace opengl {
             const nxt::SamplerDescriptor* descriptor) override;
     };
 
-    class BindGroup : public BindGroupBase {
-      public:
-        BindGroup(BindGroupBuilder* builder);
-    };
-
-    class BindGroupLayout : public BindGroupLayoutBase {
-      public:
-        BindGroupLayout(BindGroupLayoutBuilder* builder);
-    };
-
     class Queue : public QueueBase {
       public:
         Queue(Device* device);
@@ -127,11 +61,6 @@ namespace backend { namespace opengl {
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
-    class RenderPassDescriptor : public RenderPassDescriptorBase {
-      public:
-        RenderPassDescriptor(RenderPassDescriptorBuilder* builder);
-    };
-
 }}  // namespace backend::opengl
 
-#endif  // BACKEND_OPENGL_OPENGLBACKEND_H_
+#endif  // BACKEND_OPENGL_DEVICEGL_H_

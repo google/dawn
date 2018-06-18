@@ -14,7 +14,6 @@
 
 #include "backend/opengl/InputStateGL.h"
 
-#include "backend/opengl/OpenGLBackend.h"
 #include "common/Assert.h"
 
 namespace backend { namespace opengl {

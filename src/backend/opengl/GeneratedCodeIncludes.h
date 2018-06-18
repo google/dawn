@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "backend/BindGroup.h"
+#include "backend/BindGroupLayout.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/opengl/BlendStateGL.h"
 #include "backend/opengl/BufferGL.h"
 #include "backend/opengl/CommandBufferGL.h"
 #include "backend/opengl/ComputePipelineGL.h"
 #include "backend/opengl/DepthStencilStateGL.h"
+#include "backend/opengl/DeviceGL.h"
 #include "backend/opengl/InputStateGL.h"
-#include "backend/opengl/OpenGLBackend.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
 #include "backend/opengl/RenderPipelineGL.h"
