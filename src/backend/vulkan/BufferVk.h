@@ -51,6 +51,8 @@ namespace backend { namespace vulkan {
         DeviceMemoryAllocation mMemoryAllocation;
     };
 
+    using BufferView = BufferViewBase;
+
     class MapRequestTracker {
       public:
         MapRequestTracker(Device* device);

@@ -18,7 +18,6 @@
 #include "nxt/nxtcpp.h"
 
 #include "backend/Device.h"
-#include "backend/Queue.h"
 #include "backend/ToBackend.h"
 #include "backend/vulkan/VulkanFunctions.h"
 #include "backend/vulkan/VulkanInfo.h"
@@ -27,6 +26,10 @@
 #include "common/SerialQueue.h"
 
 #include <queue>
+
+namespace backend {
+    class BufferViewBase;
+}
 
 namespace backend { namespace vulkan {
 
@@ -199,15 +202,6 @@ namespace backend { namespace vulkan {
         std::vector<CommandPoolAndBuffer> mUnusedCommands;
         CommandPoolAndBuffer mPendingCommands;
         std::vector<VkSemaphore> mWaitSemaphores;
-    };
-
-    class Queue : public QueueBase {
-      public:
-        Queue(Device* device);
-        ~Queue();
-
-        // NXT API
-        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
 }}  // namespace backend::vulkan

@@ -27,6 +27,7 @@
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/NativeSwapChainImplVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
+#include "backend/vulkan/QueueVk.h"
 #include "backend/vulkan/RenderPassCache.h"
 #include "backend/vulkan/RenderPassDescriptorVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
@@ -673,25 +674,6 @@ namespace backend { namespace vulkan {
 
         // Command buffers are implicitly destroyed when the command pool is.
         commands->commandBuffer = VK_NULL_HANDLE;
-    }
-
-    // Queue
-
-    Queue::Queue(Device* device) : QueueBase(device) {
-    }
-
-    Queue::~Queue() {
-    }
-
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
-        Device* device = ToBackend(GetDevice());
-
-        VkCommandBuffer commandBuffer = device->GetPendingCommandBuffer();
-        for (uint32_t i = 0; i < numCommands; ++i) {
-            commands[i]->RecordCommands(commandBuffer);
-        }
-
-        device->SubmitPendingCommands();
     }
 
 }}  // namespace backend::vulkan

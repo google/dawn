@@ -293,6 +293,8 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/NativeSwapChainImplVk.h
         ${VULKAN_DIR}/PipelineLayoutVk.cpp
         ${VULKAN_DIR}/PipelineLayoutVk.h
+        ${VULKAN_DIR}/QueueVk.cpp
+        ${VULKAN_DIR}/QueueVk.h
         ${VULKAN_DIR}/RenderPassCache.cpp
         ${VULKAN_DIR}/RenderPassCache.h
         ${VULKAN_DIR}/RenderPassDescriptorVk.cpp
