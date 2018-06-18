@@ -14,8 +14,8 @@
 
 #include "backend/vulkan/RenderPassCache.h"
 
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/TextureVk.h"
-#include "backend/vulkan/VulkanBackend.h"
 #include "common/BitSetIterator.h"
 #include "common/HashUtils.h"
 

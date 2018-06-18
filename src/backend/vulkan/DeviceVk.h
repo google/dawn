@@ -1,4 +1,4 @@
-// Copyright 2017 The NXT Authors
+// Copyright 2018 The NXT Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_VULKANBACKEND_H_
-#define BACKEND_VULKAN_VULKANBACKEND_H_
+#ifndef BACKEND_VULKAN_DEVICEVK_H_
+#define BACKEND_VULKAN_DEVICEVK_H_
 
 #include "nxt/nxtcpp.h"
 
 #include "backend/Device.h"
-#include "backend/ToBackend.h"
+#include "backend/vulkan/Forward.h"
 #include "backend/vulkan/VulkanFunctions.h"
 #include "backend/vulkan/VulkanInfo.h"
 #include "common/DynamicLib.h"
@@ -27,64 +27,13 @@
 
 #include <queue>
 
-namespace backend {
-    class BufferViewBase;
-}
-
 namespace backend { namespace vulkan {
-
-    class BindGroup;
-    class BindGroupLayout;
-    class BlendState;
-    class Buffer;
-    using BufferView = BufferViewBase;
-    class CommandBuffer;
-    class ComputePipeline;
-    class DepthStencilState;
-    class Device;
-    class InputState;
-    class PipelineLayout;
-    class Queue;
-    class RenderPassDescriptor;
-    class RenderPipeline;
-    class Sampler;
-    class ShaderModule;
-    class SwapChain;
-    class Texture;
-    class TextureView;
 
     class BufferUploader;
     class FencedDeleter;
     class MapRequestTracker;
     class MemoryAllocator;
     class RenderPassCache;
-
-    struct VulkanBackendTraits {
-        using BindGroupType = BindGroup;
-        using BindGroupLayoutType = BindGroupLayout;
-        using BlendStateType = BlendState;
-        using BufferType = Buffer;
-        using BufferViewType = BufferView;
-        using CommandBufferType = CommandBuffer;
-        using ComputePipelineType = ComputePipeline;
-        using DepthStencilStateType = DepthStencilState;
-        using DeviceType = Device;
-        using InputStateType = InputState;
-        using PipelineLayoutType = PipelineLayout;
-        using QueueType = Queue;
-        using RenderPassDescriptorType = RenderPassDescriptor;
-        using RenderPipelineType = RenderPipeline;
-        using SamplerType = Sampler;
-        using ShaderModuleType = ShaderModule;
-        using SwapChainType = SwapChain;
-        using TextureType = Texture;
-        using TextureViewType = TextureView;
-    };
-
-    template <typename T>
-    auto ToBackend(T&& common) -> decltype(ToBackendBase<VulkanBackendTraits>(common)) {
-        return ToBackendBase<VulkanBackendTraits>(common);
-    }
 
     class Device : public DeviceBase {
       public:
@@ -206,4 +155,4 @@ namespace backend { namespace vulkan {
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_VULKANBACKEND_H_
+#endif  // BACKEND_VULKAN_DEVICEVK_H_

@@ -16,10 +16,10 @@
 
 #include "backend/vulkan/BindGroupLayoutVk.h"
 #include "backend/vulkan/BufferVk.h"
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/SamplerVk.h"
 #include "backend/vulkan/TextureVk.h"
-#include "backend/vulkan/VulkanBackend.h"
 
 #include "common/BitSetIterator.h"
 

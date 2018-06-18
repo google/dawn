@@ -281,10 +281,13 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/CommandBufferVk.h
         ${VULKAN_DIR}/ComputePipelineVk.cpp
         ${VULKAN_DIR}/ComputePipelineVk.h
+        ${VULKAN_DIR}/DeviceVk.cpp
+        ${VULKAN_DIR}/DeviceVk.h
         ${VULKAN_DIR}/DepthStencilStateVk.cpp
         ${VULKAN_DIR}/DepthStencilStateVk.h
         ${VULKAN_DIR}/FencedDeleter.cpp
         ${VULKAN_DIR}/FencedDeleter.h
+        ${VULKAN_DIR}/Forward.h
         ${VULKAN_DIR}/InputStateVk.cpp
         ${VULKAN_DIR}/InputStateVk.h
         ${VULKAN_DIR}/MemoryAllocator.cpp
@@ -309,8 +312,6 @@ if (NXT_ENABLE_VULKAN)
         ${VULKAN_DIR}/SwapChainVk.h
         ${VULKAN_DIR}/TextureVk.cpp
         ${VULKAN_DIR}/TextureVk.h
-        ${VULKAN_DIR}/VulkanBackend.cpp
-        ${VULKAN_DIR}/VulkanBackend.h
         ${VULKAN_DIR}/VulkanFunctions.cpp
         ${VULKAN_DIR}/VulkanFunctions.h
         ${VULKAN_DIR}/VulkanInfo.cpp

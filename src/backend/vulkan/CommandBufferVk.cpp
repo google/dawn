@@ -18,11 +18,11 @@
 #include "backend/vulkan/BindGroupVk.h"
 #include "backend/vulkan/BufferVk.h"
 #include "backend/vulkan/ComputePipelineVk.h"
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/RenderPassDescriptorVk.h"
 #include "backend/vulkan/RenderPipelineVk.h"
 #include "backend/vulkan/TextureVk.h"
-#include "backend/vulkan/VulkanBackend.h"
 
 namespace backend { namespace vulkan {
 

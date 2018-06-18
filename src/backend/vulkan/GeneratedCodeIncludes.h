@@ -19,6 +19,7 @@
 #include "backend/vulkan/CommandBufferVk.h"
 #include "backend/vulkan/ComputePipelineVk.h"
 #include "backend/vulkan/DepthStencilStateVk.h"
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/InputStateVk.h"
 #include "backend/vulkan/PipelineLayoutVk.h"
 #include "backend/vulkan/QueueVk.h"
@@ -28,4 +29,3 @@
 #include "backend/vulkan/ShaderModuleVk.h"
 #include "backend/vulkan/SwapChainVk.h"
 #include "backend/vulkan/TextureVk.h"
-#include "backend/vulkan/VulkanBackend.h"

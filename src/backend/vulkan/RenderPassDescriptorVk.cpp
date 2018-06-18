@@ -14,10 +14,10 @@
 
 #include "backend/vulkan/RenderPassDescriptorVk.h"
 
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/RenderPassCache.h"
 #include "backend/vulkan/TextureVk.h"
-#include "backend/vulkan/VulkanBackend.h"
 #include "common/BitSetIterator.h"
 
 namespace backend { namespace vulkan {

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/vulkan/VulkanBackend.h"
+#include "backend/vulkan/DeviceVk.h"
 
 #include "backend/Commands.h"
 #include "backend/vulkan/BindGroupLayoutVk.h"

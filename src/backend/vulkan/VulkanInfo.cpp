@@ -14,7 +14,7 @@
 
 #include "backend/vulkan/VulkanInfo.h"
 
-#include "backend/vulkan/VulkanBackend.h"
+#include "backend/vulkan/DeviceVk.h"
 
 #include <cstring>
 

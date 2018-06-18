@@ -14,8 +14,8 @@
 
 #include "backend/vulkan/SwapChainVk.h"
 
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/TextureVk.h"
-#include "backend/vulkan/VulkanBackend.h"
 
 namespace backend { namespace vulkan {
 

@@ -14,8 +14,8 @@
 
 #include "backend/vulkan/ShaderModuleVk.h"
 
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/FencedDeleter.h"
-#include "backend/vulkan/VulkanBackend.h"
 
 #include <spirv-cross/spirv_cross.hpp>
 

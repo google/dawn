@@ -15,8 +15,8 @@
 #include "backend/vulkan/PipelineLayoutVk.h"
 
 #include "backend/vulkan/BindGroupLayoutVk.h"
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/FencedDeleter.h"
-#include "backend/vulkan/VulkanBackend.h"
 
 #include "common/BitSetIterator.h"
 

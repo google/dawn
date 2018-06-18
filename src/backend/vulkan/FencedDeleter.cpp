@@ -14,7 +14,7 @@
 
 #include "backend/vulkan/FencedDeleter.h"
 
-#include "backend/vulkan/VulkanBackend.h"
+#include "backend/vulkan/DeviceVk.h"
 
 namespace backend { namespace vulkan {
 

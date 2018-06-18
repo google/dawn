@@ -15,8 +15,8 @@
 #include "backend/vulkan/BufferVk.h"
 
 #include "backend/vulkan/BufferUploader.h"
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/FencedDeleter.h"
-#include "backend/vulkan/VulkanBackend.h"
 
 #include <cstring>
 

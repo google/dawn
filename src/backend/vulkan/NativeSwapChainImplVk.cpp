@@ -14,9 +14,9 @@
 
 #include "backend/vulkan/NativeSwapChainImplVk.h"
 
+#include "backend/vulkan/DeviceVk.h"
 #include "backend/vulkan/FencedDeleter.h"
 #include "backend/vulkan/TextureVk.h"
-#include "backend/vulkan/VulkanBackend.h"
 
 #include <limits>
 
