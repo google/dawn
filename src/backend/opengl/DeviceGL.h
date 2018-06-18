@@ -18,7 +18,6 @@
 #include "nxt/nxtcpp.h"
 
 #include "backend/Device.h"
-#include "backend/Queue.h"
 #include "backend/opengl/Forward.h"
 
 #include "glad/glad.h"
@@ -51,14 +50,6 @@ namespace backend { namespace opengl {
         ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(
             const nxt::SamplerDescriptor* descriptor) override;
-    };
-
-    class Queue : public QueueBase {
-      public:
-        Queue(Device* device);
-
-        // NXT API
-        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
 }}  // namespace backend::opengl

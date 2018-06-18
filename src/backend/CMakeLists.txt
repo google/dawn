@@ -77,6 +77,8 @@ if (NXT_ENABLE_OPENGL)
         ${OPENGL_DIR}/PipelineGL.h
         ${OPENGL_DIR}/PipelineLayoutGL.cpp
         ${OPENGL_DIR}/PipelineLayoutGL.h
+        ${OPENGL_DIR}/QueueGL.cpp
+        ${OPENGL_DIR}/QueueGL.h
         ${OPENGL_DIR}/RenderPipelineGL.cpp
         ${OPENGL_DIR}/RenderPipelineGL.h
         ${OPENGL_DIR}/SamplerGL.cpp

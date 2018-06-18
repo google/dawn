@@ -24,6 +24,7 @@
 #include "backend/opengl/InputStateGL.h"
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
+#include "backend/opengl/QueueGL.h"
 #include "backend/opengl/RenderPipelineGL.h"
 #include "backend/opengl/SamplerGL.h"
 #include "backend/opengl/ShaderModuleGL.h"

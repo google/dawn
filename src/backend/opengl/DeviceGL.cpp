@@ -1,4 +1,4 @@
-// Copyright 2017 The NXT Authors
+// Copyright 2018 The NXT Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 #include "backend/opengl/DepthStencilStateGL.h"
 #include "backend/opengl/InputStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
+#include "backend/opengl/QueueGL.h"
 #include "backend/opengl/RenderPipelineGL.h"
 #include "backend/opengl/SamplerGL.h"
 #include "backend/opengl/ShaderModuleGL.h"
