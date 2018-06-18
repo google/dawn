@@ -14,7 +14,7 @@
 
 #include "backend/metal/SwapChainMTL.h"
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/metal/DeviceMTL.h"
 #include "backend/metal/TextureMTL.h"
 
 #include <nxt/nxt_wsi.h>

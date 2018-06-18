@@ -1,4 +1,4 @@
-// Copyright 2017 The NXT Authors
+// Copyright 2018 The NXT Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_METAL_METALBACKEND_H_
-#define BACKEND_METAL_METALBACKEND_H_
+#ifndef BACKEND_METAL_DEVICEMTL_H_
+#define BACKEND_METAL_DEVICEMTL_H_
 
 #include "nxt/nxtcpp.h"
 
-#include "backend/BindGroup.h"
-#include "backend/BindGroupLayout.h"
 #include "backend/Device.h"
 #include "backend/Queue.h"
-#include "backend/RenderPassDescriptor.h"
-#include "backend/ToBackend.h"
+#include "backend/metal/Forward.h"
 #include "common/Serial.h"
 
 #import <Metal/Metal.h>
@@ -30,54 +27,6 @@
 #include <type_traits>
 
 namespace backend { namespace metal {
-
-    class BindGroup;
-    class BindGroupLayout;
-    class BlendState;
-    class Buffer;
-    class BufferView;
-    class CommandBuffer;
-    class ComputePipeline;
-    class DepthStencilState;
-    class Device;
-    class Framebuffer;
-    class InputState;
-    class PipelineLayout;
-    class Queue;
-    class RenderPassDescriptor;
-    class RenderPipeline;
-    class Sampler;
-    class ShaderModule;
-    class SwapChain;
-    class Texture;
-    class TextureView;
-
-    struct MetalBackendTraits {
-        using BindGroupType = BindGroup;
-        using BindGroupLayoutType = BindGroupLayout;
-        using BlendStateType = BlendState;
-        using BufferType = Buffer;
-        using BufferViewType = BufferView;
-        using CommandBufferType = CommandBuffer;
-        using ComputePipelineType = ComputePipeline;
-        using DepthStencilStateType = DepthStencilState;
-        using DeviceType = Device;
-        using InputStateType = InputState;
-        using PipelineLayoutType = PipelineLayout;
-        using QueueType = Queue;
-        using RenderPassDescriptorType = RenderPassDescriptor;
-        using RenderPipelineType = RenderPipeline;
-        using SamplerType = Sampler;
-        using ShaderModuleType = ShaderModule;
-        using SwapChainType = SwapChain;
-        using TextureType = Texture;
-        using TextureViewType = TextureView;
-    };
-
-    template <typename T>
-    auto ToBackend(T&& common) -> decltype(ToBackendBase<MetalBackendTraits>(common)) {
-        return ToBackendBase<MetalBackendTraits>(common);
-    }
 
     class MapRequestTracker;
     class ResourceUploader;
@@ -133,16 +82,6 @@ namespace backend { namespace metal {
         id<MTLCommandBuffer> mPendingCommands = nil;
     };
 
-    class BindGroup : public BindGroupBase {
-      public:
-        BindGroup(BindGroupBuilder* builder);
-    };
-
-    class BindGroupLayout : public BindGroupLayoutBase {
-      public:
-        BindGroupLayout(BindGroupLayoutBuilder* builder);
-    };
-
     class Queue : public QueueBase {
       public:
         Queue(Device* device);
@@ -151,12 +90,6 @@ namespace backend { namespace metal {
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
-    class RenderPassDescriptor : public RenderPassDescriptorBase {
-      public:
-        RenderPassDescriptor(RenderPassDescriptorBuilder* builder);
-        ~RenderPassDescriptor();
-    };
-
 }}  // namespace backend::metal
 
-#endif  // BACKEND_METAL_METALBACKEND_H_
+#endif  // BACKEND_METAL_DEVICEMTL_H_

@@ -14,7 +14,6 @@
 
 #include "backend/metal/InputStateMTL.h"
 
-#include "backend/metal/MetalBackend.h"
 #include "common/BitSetIterator.h"
 
 namespace backend { namespace metal {

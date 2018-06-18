@@ -14,8 +14,6 @@
 
 #include "backend/metal/BlendStateMTL.h"
 
-#include "backend/metal/MetalBackend.h"
-
 namespace backend { namespace metal {
 
     namespace {

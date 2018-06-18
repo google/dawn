@@ -14,7 +14,7 @@
 
 #include "backend/metal/SamplerMTL.h"
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/metal/DeviceMTL.h"
 
 namespace backend { namespace metal {
 

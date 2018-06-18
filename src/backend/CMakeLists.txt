@@ -124,10 +124,11 @@ if (NXT_ENABLE_METAL)
         ${METAL_DIR}/ComputePipelineMTL.h
         ${METAL_DIR}/DepthStencilStateMTL.mm
         ${METAL_DIR}/DepthStencilStateMTL.h
+        ${METAL_DIR}/DeviceMTL.mm
+        ${METAL_DIR}/DeviceMTL.h
+        ${METAL_DIR}/Forward.h
         ${METAL_DIR}/InputStateMTL.mm
         ${METAL_DIR}/InputStateMTL.h
-        ${METAL_DIR}/MetalBackend.mm
-        ${METAL_DIR}/MetalBackend.h
         ${METAL_DIR}/PipelineLayoutMTL.mm
         ${METAL_DIR}/PipelineLayoutMTL.h
         ${METAL_DIR}/RenderPipelineMTL.mm

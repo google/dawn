@@ -14,7 +14,7 @@
 
 #include "backend/metal/BufferMTL.h"
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/metal/DeviceMTL.h"
 #include "backend/metal/ResourceUploader.h"
 
 namespace backend { namespace metal {

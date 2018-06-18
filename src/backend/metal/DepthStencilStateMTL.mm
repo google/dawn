@@ -14,7 +14,7 @@
 
 #include "backend/metal/DepthStencilStateMTL.h"
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/metal/DeviceMTL.h"
 
 namespace backend { namespace metal {
 

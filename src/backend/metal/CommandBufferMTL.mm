@@ -14,12 +14,13 @@
 
 #include "backend/metal/CommandBufferMTL.h"
 
+#include "backend/BindGroup.h"
 #include "backend/Commands.h"
 #include "backend/metal/BufferMTL.h"
 #include "backend/metal/ComputePipelineMTL.h"
 #include "backend/metal/DepthStencilStateMTL.h"
+#include "backend/metal/DeviceMTL.h"
 #include "backend/metal/InputStateMTL.h"
-#include "backend/metal/MetalBackend.h"
 #include "backend/metal/PipelineLayoutMTL.h"
 #include "backend/metal/RenderPipelineMTL.h"
 #include "backend/metal/SamplerMTL.h"

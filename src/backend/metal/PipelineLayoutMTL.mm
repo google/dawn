@@ -14,7 +14,7 @@
 
 #include "backend/metal/PipelineLayoutMTL.h"
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/BindGroupLayout.h"
 
 namespace backend { namespace metal {
 

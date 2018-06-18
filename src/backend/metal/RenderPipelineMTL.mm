@@ -16,8 +16,8 @@
 
 #include "backend/metal/BlendStateMTL.h"
 #include "backend/metal/DepthStencilStateMTL.h"
+#include "backend/metal/DeviceMTL.h"
 #include "backend/metal/InputStateMTL.h"
-#include "backend/metal/MetalBackend.h"
 #include "backend/metal/PipelineLayoutMTL.h"
 #include "backend/metal/ShaderModuleMTL.h"
 #include "backend/metal/TextureMTL.h"

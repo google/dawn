@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/metal/DeviceMTL.h"
 
+#include "backend/BindGroup.h"
+#include "backend/BindGroupLayout.h"
+#include "backend/RenderPassDescriptor.h"
 #include "backend/metal/BlendStateMTL.h"
 #include "backend/metal/BufferMTL.h"
 #include "backend/metal/CommandBufferMTL.h"
@@ -190,17 +193,6 @@ namespace backend { namespace metal {
         return mResourceUploader;
     }
 
-    // Bind Group
-
-    BindGroup::BindGroup(BindGroupBuilder* builder) : BindGroupBase(builder) {
-    }
-
-    // Bind Group Layout
-
-    BindGroupLayout::BindGroupLayout(BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder) {
-    }
-
     // Queue
 
     Queue::Queue(Device* device) : QueueBase(device) {
@@ -216,15 +208,6 @@ namespace backend { namespace metal {
         }
 
         device->SubmitPendingCommandBuffer();
-    }
-
-    // RenderPass
-
-    RenderPassDescriptor::RenderPassDescriptor(RenderPassDescriptorBuilder* builder)
-        : RenderPassDescriptorBase(builder) {
-    }
-
-    RenderPassDescriptor::~RenderPassDescriptor() {
     }
 
 }}  // namespace backend::metal

@@ -14,7 +14,7 @@
 
 #include "backend/metal/TextureMTL.h"
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/metal/DeviceMTL.h"
 
 namespace backend { namespace metal {
 

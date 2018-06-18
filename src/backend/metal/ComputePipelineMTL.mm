@@ -14,7 +14,7 @@
 
 #include "backend/metal/ComputePipelineMTL.h"
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/metal/DeviceMTL.h"
 #include "backend/metal/ShaderModuleMTL.h"
 
 namespace backend { namespace metal {

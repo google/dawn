@@ -14,7 +14,8 @@
 
 #include "backend/metal/ShaderModuleMTL.h"
 
-#include "backend/metal/MetalBackend.h"
+#include "backend/BindGroupLayout.h"
+#include "backend/metal/DeviceMTL.h"
 #include "backend/metal/PipelineLayoutMTL.h"
 
 #include <spirv-cross/spirv_msl.hpp>
