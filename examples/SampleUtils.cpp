@@ -14,6 +14,7 @@
 
 #include "SampleUtils.h"
 
+#include "common/Assert.h"
 #include "common/Platform.h"
 #include "utils/BackendBinding.h"
 #include "wire/TerribleCommandBuffer.h"
@@ -212,8 +213,8 @@ bool InitSample(int argc, const char** argv) {
 
 void DoFlush() {
     if (cmdBufType == CmdBufType::Terrible) {
-        c2sBuf->Flush();
-        s2cBuf->Flush();
+        ASSERT(c2sBuf->Flush());
+        ASSERT(s2cBuf->Flush());
     }
     glfwPollEvents();
 }

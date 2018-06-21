@@ -304,7 +304,7 @@ namespace nxt { namespace wire {
                 const char* HandleCommands(const char* commands, size_t size) override {
                     mProcs.deviceTick(mKnownDevice.Get(1)->handle);
 
-                    while (size > sizeof(WireCmd)) {
+                    while (size >= sizeof(WireCmd)) {
                         WireCmd cmdId = *reinterpret_cast<const WireCmd*>(commands);
 
                         bool success = false;

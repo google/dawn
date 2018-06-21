@@ -25,7 +25,7 @@ namespace nxt { namespace wire {
       public:
         virtual ~CommandSerializer() = default;
         virtual void* GetCmdSpace(size_t size) = 0;
-        virtual void Flush() = 0;
+        virtual bool Flush() = 0;
     };
 
     class CommandHandler {

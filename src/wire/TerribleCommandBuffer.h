@@ -29,7 +29,7 @@ namespace nxt { namespace wire {
         void SetHandler(CommandHandler* handler);
 
         void* GetCmdSpace(size_t size) override;
-        void Flush() override;
+        bool Flush() override;
 
       private:
         CommandHandler* mHandler = nullptr;

@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "mock/mock_nxt.h"
 
+#include "common/Assert.h"
 #include "wire/TerribleCommandBuffer.h"
 #include "wire/Wire.h"
 
@@ -164,11 +165,11 @@ class WireTestsBase : public Test {
         }
 
         void FlushClient() {
-            mC2sBuf->Flush();
+            ASSERT_TRUE(mC2sBuf->Flush());
         }
 
         void FlushServer() {
-            mS2cBuf->Flush();
+            ASSERT_TRUE(mS2cBuf->Flush());
         }
 
         MockProcTable api;
@@ -807,7 +808,7 @@ TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
 TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
     nxtCallbackUserdata userdata = 8657;
     nxtBufferMapReadAsync(buffer, 40, sizeof(uint32_t), ToMockBufferMapReadCallback, userdata);
-    
+
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, 40, sizeof(uint32_t), _, _))
         .WillOnce(InvokeWithoutArgs([&]() {

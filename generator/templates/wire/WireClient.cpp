@@ -437,7 +437,7 @@ namespace nxt { namespace wire {
                 }
 
                 const char* HandleCommands(const char* commands, size_t size) override {
-                    while (size > sizeof(ReturnWireCmd)) {
+                    while (size >= sizeof(ReturnWireCmd)) {
                         ReturnWireCmd cmdId = *reinterpret_cast<const ReturnWireCmd*>(commands);
 
                         bool success = false;

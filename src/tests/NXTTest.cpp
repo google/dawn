@@ -282,8 +282,8 @@ void NXTTest::SwapBuffersForCapture() {
 
 void NXTTest::FlushWire() {
     if (gTestUsesWire) {
-        mC2sBuf->Flush();
-        mS2cBuf->Flush();
+        ASSERT(mC2sBuf->Flush());
+        ASSERT(mS2cBuf->Flush());
     }
 }
 

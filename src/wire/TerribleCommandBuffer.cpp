@@ -14,6 +14,8 @@
 
 #include "wire/TerribleCommandBuffer.h"
 
+#include "common/Assert.h"
+
 namespace nxt { namespace wire {
 
     TerribleCommandBuffer::TerribleCommandBuffer() {
@@ -39,16 +41,19 @@ namespace nxt { namespace wire {
         mOffset += size;
 
         if (mOffset > sizeof(mBuffer)) {
-            Flush();
+            if (!Flush()) {
+                return nullptr;
+            }
             return GetCmdSpace(size);
         }
 
         return result;
     }
 
-    void TerribleCommandBuffer::Flush() {
-        mHandler->HandleCommands(mBuffer, mOffset);
+    bool TerribleCommandBuffer::Flush() {
+        bool success = mHandler->HandleCommands(mBuffer, mOffset) != nullptr;
         mOffset = 0;
+        return success;
     }
 
 }}  // namespace nxt::wire
