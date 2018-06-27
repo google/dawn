@@ -155,8 +155,18 @@ def link_structure(struct, types):
     def make_member(m):
         return StructureMember(Name(m['name']), types[m['type']], m.get('annotation', 'value'))
 
-    # TODO(cwallez@chromium.org): Handle pointer members and their length
-    struct.members = [make_member(m) for m in struct.record['members']]
+    members = []
+    members_by_name = {}
+    for m in struct.record['members']:
+        member = make_member(m)
+        members.append(member)
+        members_by_name[member.name.canonical_case()] = member
+    struct.members = members
+
+    for (member, m) in zip(members, struct.record['members']):
+        # TODO(kainino@chromium.org): More robust pointer/length handling?
+        if 'length' in m:
+            member.length = members_by_name[m['length']]
 
 def parse_json(json):
     category_to_parser = {

@@ -67,9 +67,7 @@ void init() {
             .SetBindingsType(nxt::ShaderStageBit::Compute, nxt::BindingType::StorageBuffer, 0, 1)
             .GetResult();
 
-        nxt::PipelineLayout pl = device.CreatePipelineLayoutBuilder()
-            .SetBindGroupLayout(0, bgl)
-            .GetResult();
+        nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
         computePipeline = device.CreateComputePipelineBuilder()
             .SetLayout(pl)
@@ -108,9 +106,7 @@ void init() {
             .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::UniformBuffer, 0, 1)
             .GetResult();
 
-        nxt::PipelineLayout pl = device.CreatePipelineLayoutBuilder()
-            .SetBindGroupLayout(0, bgl)
-            .GetResult();
+        nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
         depthStencilView = CreateDefaultDepthStencilView(device);
 

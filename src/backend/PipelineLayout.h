@@ -15,7 +15,7 @@
 #ifndef BACKEND_PIPELINELAYOUT_H_
 #define BACKEND_PIPELINELAYOUT_H_
 
-#include "backend/Builder.h"
+#include "backend/Error.h"
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
 #include "common/Constants.h"
@@ -27,11 +27,14 @@
 
 namespace backend {
 
+    MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
+                                                const nxt::PipelineLayoutDescriptor* descriptor);
+
     using BindGroupLayoutArray = std::array<Ref<BindGroupLayoutBase>, kMaxBindGroups>;
 
     class PipelineLayoutBase : public RefCounted {
       public:
-        PipelineLayoutBase(PipelineLayoutBuilder* builder);
+        PipelineLayoutBase(DeviceBase* device, const nxt::PipelineLayoutDescriptor* descriptor);
 
         const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
         const std::bitset<kMaxBindGroups> GetBindGroupsLayoutMask() const;
@@ -45,22 +48,6 @@ namespace backend {
         uint32_t GroupsInheritUpTo(const PipelineLayoutBase* other) const;
 
       protected:
-        BindGroupLayoutArray mBindGroupLayouts;
-        std::bitset<kMaxBindGroups> mMask;
-    };
-
-    class PipelineLayoutBuilder : public Builder<PipelineLayoutBase> {
-      public:
-        PipelineLayoutBuilder(DeviceBase* device);
-
-        // NXT API
-        void SetBindGroupLayout(uint32_t groupIndex, BindGroupLayoutBase* layout);
-
-      private:
-        friend class PipelineLayoutBase;
-
-        PipelineLayoutBase* GetResultImpl() override;
-
         BindGroupLayoutArray mBindGroupLayouts;
         std::bitset<kMaxBindGroups> mMask;
     };

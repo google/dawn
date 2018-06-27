@@ -22,8 +22,8 @@
 
 namespace backend { namespace vulkan {
 
-    PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder)
-        : PipelineLayoutBase(builder), mDevice(ToBackend(builder->GetDevice())) {
+    PipelineLayout::PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor)
+        : PipelineLayoutBase(device, descriptor), mDevice(device) {
         // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
         // TODO(cwallez@chromium.org) Vulkan doesn't allow holes in this array, should we expose
         // this constraints at the NXT level?

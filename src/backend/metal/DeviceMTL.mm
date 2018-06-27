@@ -108,8 +108,9 @@ namespace backend { namespace metal {
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);
     }
-    PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
-        return new PipelineLayout(builder);
+    ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
+        const nxt::PipelineLayoutDescriptor* descriptor) {
+        return new PipelineLayout(this, descriptor);
     }
     RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
         RenderPassDescriptorBuilder* builder) {

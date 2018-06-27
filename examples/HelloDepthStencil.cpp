@@ -165,9 +165,7 @@ void init() {
         .SetBindingsType(nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer, 0, 2)
         .GetResult();
 
-    nxt::PipelineLayout pl = device.CreatePipelineLayoutBuilder()
-        .SetBindGroupLayout(0, bgl)
-        .GetResult();
+    nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     cameraBuffer = device.CreateBufferBuilder()
         .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Uniform)

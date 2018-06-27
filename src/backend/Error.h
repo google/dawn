@@ -36,7 +36,15 @@ namespace backend {
     //
     // Returning an error is done via:
     //   NXT_RETURN_ERROR("My error message");
-#define NXT_RETURN_ERROR(EXPR) return MakeError(EXPR, __FILE__, __func__, __LINE__)
+#define NXT_RETURN_ERROR(MESSAGE) return MakeError(MESSAGE, __FILE__, __func__, __LINE__)
+#define NXT_TRY_ASSERT(EXPR, MESSAGE)  \
+    {                                  \
+        if (!(EXPR)) {                 \
+            NXT_RETURN_ERROR(MESSAGE); \
+        }                              \
+    }                                  \
+    for (;;)                           \
+    break
 
 #define NXT_CONCAT1(x, y) x##y
 #define NXT_CONCAT2(x, y) NXT_CONCAT1(x, y)

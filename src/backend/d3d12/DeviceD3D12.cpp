@@ -285,8 +285,9 @@ namespace backend { namespace d3d12 {
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(this, builder);
     }
-    PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
-        return new PipelineLayout(this, builder);
+    ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
+        const nxt::PipelineLayoutDescriptor* descriptor) {
+        return new PipelineLayout(this, descriptor);
     }
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
         return new Queue(this);

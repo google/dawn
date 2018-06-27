@@ -25,7 +25,7 @@ namespace backend { namespace vulkan {
 
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(PipelineLayoutBuilder* builder);
+        PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor);
         ~PipelineLayout();
 
         VkPipelineLayout GetHandle() const;

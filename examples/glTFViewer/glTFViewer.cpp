@@ -286,9 +286,7 @@ namespace {
             .SetDepthWriteEnabled(true)
             .GetResult();
 
-        auto pipelineLayout = device.CreatePipelineLayoutBuilder()
-            .SetBindGroupLayout(0, bindGroupLayout)
-            .GetResult();
+        auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
         auto pipeline = device.CreateRenderPipelineBuilder()
             .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
             .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)

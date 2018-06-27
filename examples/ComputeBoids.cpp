@@ -228,9 +228,7 @@ void initSim() {
         .SetBindingsType(nxt::ShaderStageBit::Compute, nxt::BindingType::StorageBuffer, 1, 2)
         .GetResult();
 
-    nxt::PipelineLayout pl = device.CreatePipelineLayoutBuilder()
-        .SetBindGroupLayout(0, bgl)
-        .GetResult();
+    nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     updatePipeline = device.CreateComputePipelineBuilder()
         .SetLayout(pl)

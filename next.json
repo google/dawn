@@ -608,8 +608,11 @@
                 "returns": "render pipeline builder"
             },
             {
-                "name": "create pipeline layout builder",
-                "returns": "pipeline layout builder"
+                "name": "create pipeline layout",
+                "returns": "pipeline layout",
+                "args": [
+                    {"name": "descriptor", "type": "pipeline layout descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create queue",
@@ -770,20 +773,12 @@
     "pipeline layout": {
         "category": "object"
     },
-    "pipeline layout builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "pipeline layout"
-            },
-            {
-                "name": "set bind group layout",
-                "args": [
-                    {"name": "group index", "type": "uint32_t"},
-                    {"name": "layout", "type": "bind group layout"}
-                ]
-            }
+    "pipeline layout descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "num bind group layouts", "type": "uint32_t"},
+            {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "num bind group layouts"}
         ]
     },
     "primitive topology": {

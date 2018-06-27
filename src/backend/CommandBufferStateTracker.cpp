@@ -395,7 +395,8 @@ namespace backend {
         for (size_t i = 0; i < mBindgroups.size(); ++i) {
             if (auto* bindgroup = mBindgroups[i]) {
                 // TODO(kainino@chromium.org): bind group compatibility
-                if (bindgroup->GetLayout() != mLastPipeline->GetLayout()->GetBindGroupLayout(i)) {
+                auto* pipelineBGL = mLastPipeline->GetLayout()->GetBindGroupLayout(i);
+                if (pipelineBGL && bindgroup->GetLayout() != pipelineBGL) {
                     return false;
                 }
             }

@@ -25,7 +25,7 @@ namespace backend { namespace d3d12 {
 
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(Device* device, PipelineLayoutBuilder* builder);
+        PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor);
 
         uint32_t GetCbvUavSrvRootParameterIndex(uint32_t group) const;
         uint32_t GetSamplerRootParameterIndex(uint32_t group) const;
@@ -33,8 +33,6 @@ namespace backend { namespace d3d12 {
         ComPtr<ID3D12RootSignature> GetRootSignature();
 
       private:
-        Device* mDevice;
-
         std::array<uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
         std::array<uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
 

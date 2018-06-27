@@ -127,9 +127,7 @@ void initPipelinePost() {
         .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::SampledTexture, 1, 1)
         .GetResult();
 
-    nxt::PipelineLayout pl = device.CreatePipelineLayoutBuilder()
-        .SetBindGroupLayout(0, bgl)
-        .GetResult();
+    nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     pipelinePost = device.CreateRenderPipelineBuilder()
         .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)

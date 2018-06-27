@@ -48,9 +48,7 @@ protected:
             .SetBindingsType(nxt::ShaderStageBit::Fragment, nxt::BindingType::SampledTexture, 1, 1)
             .GetResult();
 
-        auto pipelineLayout = device.CreatePipelineLayoutBuilder()
-            .SetBindGroupLayout(0, mBindGroupLayout)
-            .GetResult();
+        auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
 
         auto vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
             #version 450

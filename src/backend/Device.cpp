@@ -119,8 +119,23 @@ namespace backend {
     InputStateBuilder* DeviceBase::CreateInputStateBuilder() {
         return new InputStateBuilder(this);
     }
-    PipelineLayoutBuilder* DeviceBase::CreatePipelineLayoutBuilder() {
-        return new PipelineLayoutBuilder(this);
+    PipelineLayoutBase* DeviceBase::CreatePipelineLayout(
+        const nxt::PipelineLayoutDescriptor* descriptor) {
+        MaybeError validation = ValidatePipelineLayoutDescriptor(this, descriptor);
+        if (validation.IsError()) {
+            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
+            delete validation.AcquireError();
+            return nullptr;
+        }
+
+        ResultOrError<PipelineLayoutBase*> maybePipelineLayout =
+            CreatePipelineLayoutImpl(descriptor);
+        if (maybePipelineLayout.IsError()) {
+            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
+            delete maybePipelineLayout.AcquireError();
+            return nullptr;
+        }
+        return maybePipelineLayout.AcquireSuccess();
     }
     QueueBase* DeviceBase::CreateQueue() {
         ResultOrError<QueueBase*> maybeQueue = CreateQueueImpl();

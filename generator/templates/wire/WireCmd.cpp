@@ -176,10 +176,10 @@
                 size_t memberLength = {{member_length(member, "record.")}};
                 auto memberBuffer = reinterpret_cast<{{member_transfer_type(member)}}*>(buffer);
 
+                buffer += memberLength * {{member_transfer_sizeof(member)}};
                 for (size_t i = 0; i < memberLength; ++i) {
                     {{serialize_member(member, "record." + memberName + "[i]", "memberBuffer[i]" )}}
                 }
-                buffer += memberLength * {{member_transfer_sizeof(member)}};
             }
         {% endfor %}
     }

@@ -63,8 +63,9 @@ namespace backend { namespace null {
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);
     }
-    PipelineLayoutBase* Device::CreatePipelineLayout(PipelineLayoutBuilder* builder) {
-        return new PipelineLayout(builder);
+    ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
+        const nxt::PipelineLayoutDescriptor* descriptor) {
+        return new PipelineLayout(this, descriptor);
     }
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
         return new Queue(this);

@@ -27,9 +27,11 @@ namespace spirv_cross {
 
 namespace backend { namespace metal {
 
+    class Device;
+
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(PipelineLayoutBuilder* builder);
+        PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
             std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;

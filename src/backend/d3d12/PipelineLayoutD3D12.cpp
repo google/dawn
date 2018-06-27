@@ -22,8 +22,8 @@ using Microsoft::WRL::ComPtr;
 
 namespace backend { namespace d3d12 {
 
-    PipelineLayout::PipelineLayout(Device* device, PipelineLayoutBuilder* builder)
-        : PipelineLayoutBase(builder), mDevice(device) {
+    PipelineLayout::PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor)
+        : PipelineLayoutBase(device, descriptor) {
         D3D12_ROOT_PARAMETER rootParameters[kMaxBindGroups * 2];
 
         // A root parameter is one of these types

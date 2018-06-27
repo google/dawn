@@ -24,7 +24,7 @@ class RenderPipelineValidationTest : public ValidationTest {
 
             renderpass = CreateSimpleRenderPass();
 
-            pipelineLayout = device.CreatePipelineLayoutBuilder().GetResult();
+            nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
 
             inputState = device.CreateInputStateBuilder().GetResult();
 

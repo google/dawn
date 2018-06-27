@@ -28,8 +28,7 @@ class DrawQuad {
                 vsModule = utils::CreateShaderModule(*device, nxt::ShaderStage::Vertex, vsSource);
                 fsModule = utils::CreateShaderModule(*device, nxt::ShaderStage::Fragment, fsSource);
 
-                pipelineLayout = device->CreatePipelineLayoutBuilder()
-                    .GetResult();
+                pipelineLayout = utils::MakeBasicPipelineLayout(*device, nullptr);
             }
 
         void Draw(nxt::CommandBufferBuilder* builder) {

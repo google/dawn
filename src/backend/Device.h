@@ -45,7 +45,6 @@ namespace backend {
         virtual DepthStencilStateBase* CreateDepthStencilState(
             DepthStencilStateBuilder* builder) = 0;
         virtual InputStateBase* CreateInputState(InputStateBuilder* builder) = 0;
-        virtual PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) = 0;
         virtual RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) = 0;
         virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
@@ -83,7 +82,7 @@ namespace backend {
         ComputePipelineBuilder* CreateComputePipelineBuilder();
         DepthStencilStateBuilder* CreateDepthStencilStateBuilder();
         InputStateBuilder* CreateInputStateBuilder();
-        PipelineLayoutBuilder* CreatePipelineLayoutBuilder();
+        PipelineLayoutBase* CreatePipelineLayout(const nxt::PipelineLayoutDescriptor* descriptor);
         QueueBase* CreateQueue();
         RenderPassDescriptorBuilder* CreateRenderPassDescriptorBuilder();
         RenderPipelineBuilder* CreateRenderPipelineBuilder();
@@ -98,6 +97,8 @@ namespace backend {
         void Release();
 
       private:
+        virtual ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
+            const nxt::PipelineLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<QueueBase*> CreateQueueImpl() = 0;
         virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
             const nxt::SamplerDescriptor* descriptor) = 0;

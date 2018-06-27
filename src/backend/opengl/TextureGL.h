@@ -21,8 +21,6 @@
 
 namespace backend { namespace opengl {
 
-    class Device;
-
     struct TextureFormatInfo {
         GLenum internalFormat;
         GLenum format;

@@ -15,10 +15,12 @@
 #include "backend/opengl/PipelineLayoutGL.h"
 
 #include "backend/BindGroupLayout.h"
+#include "backend/opengl/DeviceGL.h"
 
 namespace backend { namespace opengl {
 
-    PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder) : PipelineLayoutBase(builder) {
+    PipelineLayout::PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor)
+        : PipelineLayoutBase(device, descriptor) {
         GLuint uboIndex = 0;
         GLuint samplerIndex = 0;
         GLuint sampledTextureIndex = 0;

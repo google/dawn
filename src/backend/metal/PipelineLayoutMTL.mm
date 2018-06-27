@@ -15,10 +15,12 @@
 #include "backend/metal/PipelineLayoutMTL.h"
 
 #include "backend/BindGroupLayout.h"
+#include "backend/metal/DeviceMTL.h"
 
 namespace backend { namespace metal {
 
-    PipelineLayout::PipelineLayout(PipelineLayoutBuilder* builder) : PipelineLayoutBase(builder) {
+    PipelineLayout::PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor)
+        : PipelineLayoutBase(device, descriptor) {
         // Each stage has its own numbering namespace in CompilerMSL.
         for (auto stage : IterateStages(kAllStages)) {
             // Buffer number 0 is reserved for push constants

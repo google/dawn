@@ -25,7 +25,7 @@ namespace backend { namespace opengl {
 
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(PipelineLayoutBuilder* builder);
+        PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
             std::array<std::array<GLuint, kMaxBindingsPerGroup>, kMaxBindGroups>;

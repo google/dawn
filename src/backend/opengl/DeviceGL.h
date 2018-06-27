@@ -35,7 +35,6 @@ namespace backend { namespace opengl {
         ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-        PipelineLayoutBase* CreatePipelineLayout(PipelineLayoutBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
@@ -47,6 +46,8 @@ namespace backend { namespace opengl {
         void TickImpl() override;
 
       private:
+        ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
+            const nxt::PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(
             const nxt::SamplerDescriptor* descriptor) override;
