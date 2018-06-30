@@ -34,22 +34,13 @@ namespace backend {
 
     // PipelineLayoutBase
 
-    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
+    PipelineLayoutBase::PipelineLayoutBase(DeviceBase*,
                                            const nxt::PipelineLayoutDescriptor* descriptor) {
         ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups);
         for (uint32_t group = 0; group < descriptor->numBindGroupLayouts; ++group) {
             mBindGroupLayouts[group] =
                 reinterpret_cast<BindGroupLayoutBase*>(descriptor->bindGroupLayouts[group].Get());
             mMask.set(group);
-        }
-        // TODO(kainino@chromium.org): It shouldn't be necessary to construct default bind
-        // group layouts here. Remove these and fix things so that they are not needed.
-        for (uint32_t group = descriptor->numBindGroupLayouts; group < kMaxBindGroups; ++group) {
-            auto builder = device->CreateBindGroupLayoutBuilder();
-            mBindGroupLayouts[group] = builder->GetResult();
-            // Remove the external ref objects are created with
-            mBindGroupLayouts[group]->Release();
-            builder->Release();
         }
     }
 

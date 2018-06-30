@@ -37,6 +37,7 @@ namespace backend {
         PipelineLayoutBase(DeviceBase* device, const nxt::PipelineLayoutDescriptor* descriptor);
 
         const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
+        // XXX: rename to GetBindGroupLayoutsMask?
         const std::bitset<kMaxBindGroups> GetBindGroupsLayoutMask() const;
 
         // Utility functions to compute inherited bind groups.

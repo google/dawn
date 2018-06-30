@@ -16,6 +16,7 @@
 
 #include "backend/BindGroupLayout.h"
 #include "backend/opengl/DeviceGL.h"
+#include "common/BitSetIterator.h"
 
 namespace backend { namespace opengl {
 
@@ -26,7 +27,7 @@ namespace backend { namespace opengl {
         GLuint sampledTextureIndex = 0;
         GLuint ssboIndex = 0;
 
-        for (size_t group = 0; group < kMaxBindGroups; ++group) {
+        for (uint32_t group : IterateBitSet(GetBindGroupsLayoutMask())) {
             const auto& groupInfo = GetBindGroupLayout(group)->GetBindingInfo();
 
             for (size_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {

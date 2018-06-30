@@ -19,6 +19,7 @@
 #include "backend/opengl/PersistentPipelineStateGL.h"
 #include "backend/opengl/PipelineLayoutGL.h"
 #include "backend/opengl/ShaderModuleGL.h"
+#include "common/BitSetIterator.h"
 
 #include <iostream>
 #include <set>
@@ -125,7 +126,7 @@ namespace backend { namespace opengl {
         const auto& layout = ToBackend(parent->GetLayout());
         const auto& indices = layout->GetBindingIndexInfo();
 
-        for (uint32_t group = 0; group < kMaxBindGroups; ++group) {
+        for (uint32_t group : IterateBitSet(layout->GetBindGroupsLayoutMask())) {
             const auto& groupInfo = layout->GetBindGroupLayout(group)->GetBindingInfo();
 
             for (uint32_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
