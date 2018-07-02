@@ -43,7 +43,7 @@ namespace backend { namespace d3d12 {
         uint32_t parameterIndex = 0;
         uint32_t rangeIndex = 0;
 
-        for (uint32_t group : IterateBitSet(GetBindGroupsLayoutMask())) {
+        for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
             const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
 
             // Set the root descriptor table parameter and copy ranges. Ranges are offset by the

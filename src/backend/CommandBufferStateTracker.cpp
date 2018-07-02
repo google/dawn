@@ -494,7 +494,7 @@ namespace backend {
         mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
         mAspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
         // Reset bindgroups but mark unused bindgroups as valid
-        mBindgroupsSet = ~layout->GetBindGroupsLayoutMask();
+        mBindgroupsSet = ~layout->GetBindGroupLayoutsMask();
 
         // Only bindgroups that were not the same layout in the last pipeline need to be set again.
         if (mLastPipeline) {

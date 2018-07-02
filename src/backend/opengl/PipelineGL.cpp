@@ -126,7 +126,7 @@ namespace backend { namespace opengl {
         const auto& layout = ToBackend(parent->GetLayout());
         const auto& indices = layout->GetBindingIndexInfo();
 
-        for (uint32_t group : IterateBitSet(layout->GetBindGroupsLayoutMask())) {
+        for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const auto& groupInfo = layout->GetBindGroupLayout(group)->GetBindingInfo();
 
             for (uint32_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {

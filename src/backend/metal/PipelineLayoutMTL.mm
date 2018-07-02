@@ -29,7 +29,7 @@ namespace backend { namespace metal {
             uint32_t samplerIndex = 0;
             uint32_t textureIndex = 0;
 
-            for (uint32_t group : IterateBitSet(GetBindGroupsLayoutMask())) {
+            for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
                 const auto& groupInfo = GetBindGroupLayout(group)->GetBindingInfo();
                 for (size_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
                     if (!(groupInfo.visibilities[binding] & StageBit(stage))) {

@@ -29,7 +29,7 @@ namespace backend { namespace vulkan {
         // this constraints at the NXT level?
         uint32_t numSetLayouts = 0;
         std::array<VkDescriptorSetLayout, kMaxBindGroups> setLayouts;
-        for (uint32_t setIndex : IterateBitSet(GetBindGroupsLayoutMask())) {
+        for (uint32_t setIndex : IterateBitSet(GetBindGroupLayoutsMask())) {
             setLayouts[numSetLayouts] = ToBackend(GetBindGroupLayout(setIndex))->GetHandle();
             numSetLayouts++;
         }

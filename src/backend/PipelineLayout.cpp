@@ -49,7 +49,7 @@ namespace backend {
         return mBindGroupLayouts[group].Get();
     }
 
-    const std::bitset<kMaxBindGroups> PipelineLayoutBase::GetBindGroupsLayoutMask() const {
+    const std::bitset<kMaxBindGroups> PipelineLayoutBase::GetBindGroupLayoutsMask() const {
         return mMask;
     }
 

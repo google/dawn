@@ -71,7 +71,7 @@ namespace backend { namespace metal {
         }
 
         // Create one resource binding entry per stage per binding.
-        for (uint32_t group : IterateBitSet(layout->GetBindGroupsLayoutMask())) {
+        for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const auto& bgInfo = layout->GetBindGroupLayout(group)->GetBindingInfo();
             for (uint32_t binding : IterateBitSet(bgInfo.mask)) {
                 for (auto stage : IterateStages(bgInfo.visibilities[binding])) {
