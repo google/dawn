@@ -66,7 +66,8 @@ namespace backend { namespace metal {
         }
         Tick();
 
-        mPendingCommands = nil;  // This will be autoreleased.
+        [mPendingCommands release];
+        mPendingCommands = nil;
 
         delete mMapTracker;
         mMapTracker = nullptr;
@@ -155,6 +156,7 @@ namespace backend { namespace metal {
     id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {
         if (mPendingCommands == nil) {
             mPendingCommands = [mCommandQueue commandBuffer];
+            [mPendingCommands retain];
         }
         return mPendingCommands;
     }
@@ -174,7 +176,8 @@ namespace backend { namespace metal {
         }];
 
         [mPendingCommands commit];
-        mPendingCommands = nil;  // This will be autoreleased.
+        [mPendingCommands release];
+        mPendingCommands = nil;
         mPendingCommandSerial++;
     }
 
