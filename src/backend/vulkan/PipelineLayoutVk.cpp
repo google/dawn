@@ -23,7 +23,7 @@
 namespace backend { namespace vulkan {
 
     PipelineLayout::PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor)
-        : PipelineLayoutBase(device, descriptor), mDevice(device) {
+        : PipelineLayoutBase(device, descriptor) {
         // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
         // TODO(cwallez@chromium.org) Vulkan doesn't allow holes in this array, should we expose
         // this constraints at the NXT level?
@@ -50,15 +50,15 @@ namespace backend { namespace vulkan {
         createInfo.pushConstantRangeCount = 1;
         createInfo.pPushConstantRanges = &pushConstantRange;
 
-        if (mDevice->fn.CreatePipelineLayout(mDevice->GetVkDevice(), &createInfo, nullptr,
-                                             &mHandle) != VK_SUCCESS) {
+        if (device->fn.CreatePipelineLayout(device->GetVkDevice(), &createInfo, nullptr,
+                                            &mHandle) != VK_SUCCESS) {
             ASSERT(false);
         }
     }
 
     PipelineLayout::~PipelineLayout() {
         if (mHandle != VK_NULL_HANDLE) {
-            mDevice->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;
         }
     }

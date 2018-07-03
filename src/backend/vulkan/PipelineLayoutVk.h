@@ -32,8 +32,6 @@ namespace backend { namespace vulkan {
 
       private:
         VkPipelineLayout mHandle = VK_NULL_HANDLE;
-
-        Device* mDevice = nullptr;
     };
 
 }}  // namespace backend::vulkan

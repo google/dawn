@@ -34,8 +34,9 @@ namespace backend {
 
     // PipelineLayoutBase
 
-    PipelineLayoutBase::PipelineLayoutBase(DeviceBase*,
-                                           const nxt::PipelineLayoutDescriptor* descriptor) {
+    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
+                                           const nxt::PipelineLayoutDescriptor* descriptor)
+        : mDevice(device) {
         ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups);
         for (uint32_t group = 0; group < descriptor->numBindGroupLayouts; ++group) {
             mBindGroupLayouts[group] =
@@ -65,6 +66,10 @@ namespace backend {
             }
         }
         return kMaxBindGroups + 1;
+    }
+
+    DeviceBase* PipelineLayoutBase::GetDevice() const {
+        return mDevice;
     }
 
 }  // namespace backend
