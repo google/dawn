@@ -136,6 +136,9 @@ namespace backend {
         CommandBufferBase* GetResultImpl() override;
         void MoveToIterator();
 
+        bool ValidateComputePass();
+        bool ValidateRenderPass(RenderPassDescriptorBase* renderPass);
+
         std::unique_ptr<CommandBufferStateTracker> mState;
         CommandAllocator mAllocator;
         CommandIterator mIterator;

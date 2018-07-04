@@ -32,18 +32,6 @@ namespace backend {
         : mBuilder(mBuilder) {
     }
 
-    bool CommandBufferStateTracker::HaveRenderPass() const {
-        return mCurrentRenderPass != nullptr;
-    }
-
-    bool CommandBufferStateTracker::ValidateCanCopy() const {
-        if (mCurrentRenderPass) {
-            mBuilder->HandleError("Copy cannot occur during a render pass");
-            return false;
-        }
-        return true;
-    }
-
     bool CommandBufferStateTracker::ValidateCanUseBufferAs(BufferBase* buffer,
                                                            nxt::BufferUsageBit usage) const {
         if (!BufferHasGuaranteedUsageBit(buffer, usage)) {
@@ -64,14 +52,13 @@ namespace backend {
 
     bool CommandBufferStateTracker::ValidateCanDispatch() {
         constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |  // implicitly requires COMPUTE_PASS
-            1 << VALIDATION_ASPECT_BIND_GROUPS;
+            1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
             return true;
         }
 
-        if (!mAspects[VALIDATION_ASPECT_COMPUTE_PIPELINE]) {
+        if (!mAspects[VALIDATION_ASPECT_PIPELINE]) {
             mBuilder->HandleError("No active compute pipeline");
             return false;
         }
@@ -84,10 +71,9 @@ namespace backend {
     }
 
     bool CommandBufferStateTracker::ValidateCanDrawArrays() {
-        // TODO(kainino@chromium.org): Check for a current render pass
-        constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE |  // implicitly requires RENDER_PASS
-            1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
+        constexpr ValidationAspects requiredAspects = 1 << VALIDATION_ASPECT_PIPELINE |
+                                                      1 << VALIDATION_ASPECT_BIND_GROUPS |
+                                                      1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
             return true;
@@ -97,9 +83,8 @@ namespace backend {
     }
 
     bool CommandBufferStateTracker::ValidateCanDrawElements() {
-        // TODO(kainino@chromium.org): Check for a current render pass
         constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
+            1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
             1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
@@ -113,72 +98,7 @@ namespace backend {
         return RevalidateCanDraw();
     }
 
-    bool CommandBufferStateTracker::ValidateEndCommandBuffer() const {
-        if (mCurrentRenderPass != nullptr) {
-            mBuilder->HandleError("Can't end command buffer with an active render pass");
-            return false;
-        }
-        if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            mBuilder->HandleError("Can't end command buffer with an active compute pass");
-            return false;
-        }
-        return true;
-    }
-
-    bool CommandBufferStateTracker::ValidateSetPushConstants(nxt::ShaderStageBit stages) {
-        if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            if (stages & ~nxt::ShaderStageBit::Compute) {
-                mBuilder->HandleError(
-                    "SetPushConstants stage must be compute or 0 in compute passes");
-                return false;
-            }
-        } else if (mAspects[VALIDATION_ASPECT_RENDER_PASS]) {
-            if (stages & ~(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
-                mBuilder->HandleError(
-                    "SetPushConstants stage must be a subset if (vertex|fragment) in render "
-                    "passes");
-                return false;
-            }
-        } else {
-            mBuilder->HandleError(
-                "PushConstants must be set in either compute passes or render passes");
-            return false;
-        }
-        return true;
-    }
-
-    bool CommandBufferStateTracker::BeginComputePass() {
-        if (mCurrentRenderPass != nullptr) {
-            mBuilder->HandleError("Cannot begin a compute pass while a render pass is active");
-            return false;
-        }
-        mAspects.set(VALIDATION_ASPECT_COMPUTE_PASS);
-        return true;
-    }
-
-    bool CommandBufferStateTracker::EndComputePass() {
-        if (!mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            mBuilder->HandleError("Can't end a compute pass without beginning one");
-            return false;
-        }
-        mAspects.reset(VALIDATION_ASPECT_COMPUTE_PASS);
-        UnsetPipeline();
-        return true;
-    }
-
     bool CommandBufferStateTracker::BeginRenderPass(RenderPassDescriptorBase* info) {
-        if (mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            mBuilder->HandleError("Cannot begin a render pass while a compute pass is active");
-            return false;
-        }
-        if (mCurrentRenderPass != nullptr) {
-            mBuilder->HandleError("A render pass is already active");
-            return false;
-        }
-
-        mCurrentRenderPass = info;
-        mAspects.set(VALIDATION_ASPECT_RENDER_PASS);
-
         for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
             TextureBase* texture = info->GetColorAttachment(i).view->GetTexture();
             if (!EnsureTextureUsage(texture, nxt::TextureUsageBit::OutputAttachment)) {
@@ -200,50 +120,21 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::EndRenderPass() {
-        if (mCurrentRenderPass == nullptr) {
-            mBuilder->HandleError("No render pass is currently active");
-            return false;
-        }
-
+    void CommandBufferStateTracker::EndPass() {
         // Everything in mTexturesAttached should be for the current render pass.
         mTexturesAttached.clear();
 
         mInputsSet.reset();
-        UnsetPipeline();
-
-        mAspects.reset(VALIDATION_ASPECT_RENDER_PASS);
-        mCurrentRenderPass = nullptr;
-
-        return true;
+        mAspects = 0;
+        mBindgroups.fill(nullptr);
     }
 
     bool CommandBufferStateTracker::SetComputePipeline(ComputePipelineBase* pipeline) {
-        if (!mAspects[VALIDATION_ASPECT_COMPUTE_PASS]) {
-            mBuilder->HandleError("A compute pass must be active when a compute pipeline is set");
-            return false;
-        }
-        if (mCurrentRenderPass) {
-            mBuilder->HandleError("Can't use a compute pipeline while a render pass is active");
-            return false;
-        }
-
-        mAspects.set(VALIDATION_ASPECT_COMPUTE_PIPELINE);
         SetPipelineCommon(pipeline);
         return true;
     }
 
     bool CommandBufferStateTracker::SetRenderPipeline(RenderPipelineBase* pipeline) {
-        if (!mAspects[VALIDATION_ASPECT_RENDER_PASS]) {
-            mBuilder->HandleError("A render pass must be active when a render pipeline is set");
-            return false;
-        }
-        if (!pipeline->IsCompatibleWith(mCurrentRenderPass)) {
-            mBuilder->HandleError("Pipeline is incompatible with this render pass");
-            return false;
-        }
-
-        mAspects.set(VALIDATION_ASPECT_RENDER_PIPELINE);
         mLastRenderPipeline = pipeline;
         SetPipelineCommon(pipeline);
         return true;
@@ -419,9 +310,7 @@ namespace backend {
     }
 
     bool CommandBufferStateTracker::HavePipeline() const {
-        constexpr ValidationAspects pipelineAspects =
-            1 << VALIDATION_ASPECT_COMPUTE_PIPELINE | 1 << VALIDATION_ASPECT_RENDER_PIPELINE;
-        return (mAspects & pipelineAspects).any();
+        return mAspects[VALIDATION_ASPECT_PIPELINE];
     }
 
     bool CommandBufferStateTracker::ValidateBindGroupUsages(BindGroupBase* group) const {
@@ -472,7 +361,7 @@ namespace backend {
     }
 
     bool CommandBufferStateTracker::RevalidateCanDraw() {
-        if (!mAspects[VALIDATION_ASPECT_RENDER_PIPELINE]) {
+        if (!mAspects[VALIDATION_ASPECT_PIPELINE]) {
             mBuilder->HandleError("No active render pipeline");
             return false;
         }
@@ -491,6 +380,8 @@ namespace backend {
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
         PipelineLayoutBase* layout = pipeline->GetLayout();
 
+        mAspects.set(VALIDATION_ASPECT_PIPELINE);
+
         mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
         mAspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
         // Reset bindgroups but mark unused bindgroups as valid
@@ -504,12 +395,4 @@ namespace backend {
         mLastPipeline = pipeline;
     }
 
-    void CommandBufferStateTracker::UnsetPipeline() {
-        constexpr ValidationAspects pipelineDependentAspects =
-            1 << VALIDATION_ASPECT_RENDER_PIPELINE | 1 << VALIDATION_ASPECT_COMPUTE_PIPELINE |
-            1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
-            1 << VALIDATION_ASPECT_INDEX_BUFFER;
-        mAspects &= ~pipelineDependentAspects;
-        mBindgroups.fill(nullptr);
-    }
 }  // namespace backend

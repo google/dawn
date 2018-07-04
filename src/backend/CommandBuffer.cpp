@@ -124,6 +124,8 @@ namespace backend {
 
     }  // namespace
 
+    // CommandBuffer
+
     CommandBufferBase::CommandBufferBase(CommandBufferBuilder* builder)
         : mDevice(builder->mDevice),
           mBuffersTransitioned(std::move(builder->mState->mBuffersTransitioned)),
@@ -150,6 +152,8 @@ namespace backend {
         return mDevice;
     }
 
+    // CommandBufferBuilder
+
     CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device)
         : Builder(device), mState(std::make_unique<CommandBufferStateTracker>(this)) {
     }
@@ -161,23 +165,43 @@ namespace backend {
         }
     }
 
+    CommandIterator CommandBufferBuilder::AcquireCommands() {
+        ASSERT(!mWereCommandsAcquired);
+        mWereCommandsAcquired = true;
+        return std::move(mIterator);
+    }
+
+    CommandBufferBase* CommandBufferBuilder::GetResultImpl() {
+        MoveToIterator();
+        return mDevice->CreateCommandBuffer(this);
+    }
+
+    void CommandBufferBuilder::MoveToIterator() {
+        if (!mWasMovedToIterator) {
+            mIterator = std::move(mAllocator);
+            mWasMovedToIterator = true;
+        }
+    }
+
+    // Implementation of the command buffer validation that can be precomputed before submit
+
     bool CommandBufferBuilder::ValidateGetResult() {
         MoveToIterator();
+        mIterator.Reset();
 
         Command type;
         while (mIterator.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     mIterator.NextCommand<BeginComputePassCmd>();
-                    if (!mState->BeginComputePass()) {
+                    if (!ValidateComputePass()) {
                         return false;
                     }
                 } break;
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mIterator.NextCommand<BeginRenderPassCmd>();
-                    RenderPassDescriptorBase* info = cmd->info.Get();
-                    if (!mState->BeginRenderPass(info)) {
+                    if (!ValidateRenderPass(cmd->info.Get())) {
                         return false;
                     }
                 } break;
@@ -186,7 +210,6 @@ namespace backend {
                     CopyBufferToBufferCmd* copy = mIterator.NextCommand<CopyBufferToBufferCmd>();
                     if (!ValidateCopySizeFitsInBuffer(this, copy->source, copy->size) ||
                         !ValidateCopySizeFitsInBuffer(this, copy->destination, copy->size) ||
-                        !mState->ValidateCanCopy() ||
                         !mState->ValidateCanUseBufferAs(copy->source.buffer.Get(),
                                                         nxt::BufferUsageBit::TransferSrc) ||
                         !mState->ValidateCanUseBufferAs(copy->destination.buffer.Get(),
@@ -206,7 +229,6 @@ namespace backend {
                         !ValidateCopySizeFitsInBuffer(this, copy->source, bufferCopySize) ||
                         !ValidateTexelBufferOffset(this, copy->destination.texture.Get(),
                                                    copy->source) ||
-                        !mState->ValidateCanCopy() ||
                         !mState->ValidateCanUseBufferAs(copy->source.buffer.Get(),
                                                         nxt::BufferUsageBit::TransferSrc) ||
                         !mState->ValidateCanUseTextureAs(copy->destination.texture.Get(),
@@ -226,7 +248,6 @@ namespace backend {
                         !ValidateCopySizeFitsInBuffer(this, copy->destination, bufferCopySize) ||
                         !ValidateTexelBufferOffset(this, copy->source.texture.Get(),
                                                    copy->destination) ||
-                        !mState->ValidateCanCopy() ||
                         !mState->ValidateCanUseTextureAs(copy->source.texture.Get(),
                                                          nxt::TextureUsageBit::TransferSrc) ||
                         !mState->ValidateCanUseBufferAs(copy->destination.buffer.Get(),
@@ -235,11 +256,99 @@ namespace backend {
                     }
                 } break;
 
+                case Command::TransitionBufferUsage: {
+                    TransitionBufferUsageCmd* cmd =
+                        mIterator.NextCommand<TransitionBufferUsageCmd>();
+                    if (!mState->TransitionBufferUsage(cmd->buffer.Get(), cmd->usage)) {
+                        return false;
+                    }
+                } break;
+
+                case Command::TransitionTextureUsage: {
+                    TransitionTextureUsageCmd* cmd =
+                        mIterator.NextCommand<TransitionTextureUsageCmd>();
+                    if (!mState->TransitionTextureUsage(cmd->texture.Get(), cmd->usage)) {
+                        return false;
+                    }
+
+                } break;
+
+                default:
+                    HandleError("Command disallowed outside of a pass");
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool CommandBufferBuilder::ValidateComputePass() {
+        Command type;
+        while (mIterator.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndComputePass: {
+                    mIterator.NextCommand<EndComputePassCmd>();
+                    mState->EndPass();
+                    return true;
+                } break;
+
                 case Command::Dispatch: {
                     mIterator.NextCommand<DispatchCmd>();
                     if (!mState->ValidateCanDispatch()) {
                         return false;
                     }
+                } break;
+
+                case Command::SetComputePipeline: {
+                    SetComputePipelineCmd* cmd = mIterator.NextCommand<SetComputePipelineCmd>();
+                    ComputePipelineBase* pipeline = cmd->pipeline.Get();
+                    if (!mState->SetComputePipeline(pipeline)) {
+                        return false;
+                    }
+                } break;
+
+                case Command::SetPushConstants: {
+                    SetPushConstantsCmd* cmd = mIterator.NextCommand<SetPushConstantsCmd>();
+                    mIterator.NextData<uint32_t>(cmd->count);
+                    // Validation of count and offset has already been done when the command was
+                    // recorded because it impacts the size of an allocation in the
+                    // CommandAllocator.
+                    if (cmd->stages & ~nxt::ShaderStageBit::Compute) {
+                        HandleError(
+                            "SetPushConstants stage must be compute or 0 in compute passes");
+                        return false;
+                    }
+                } break;
+
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
+                    if (!mState->SetBindGroup(cmd->index, cmd->group.Get())) {
+                        return false;
+                    }
+                } break;
+
+                default:
+                    HandleError("Command disallowed inside a compute pass");
+                    return false;
+            }
+        }
+
+        HandleError("Unfinished compute pass");
+        return false;
+    }
+
+    bool CommandBufferBuilder::ValidateRenderPass(RenderPassDescriptorBase* renderPass) {
+        if (!mState->BeginRenderPass(renderPass)) {
+            return false;
+        }
+
+        Command type;
+        while (mIterator.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndRenderPass: {
+                    mIterator.NextCommand<EndRenderPassCmd>();
+                    mState->EndPass();
+                    return true;
                 } break;
 
                 case Command::DrawArrays: {
@@ -256,31 +365,15 @@ namespace backend {
                     }
                 } break;
 
-                case Command::EndComputePass: {
-                    mIterator.NextCommand<EndComputePassCmd>();
-                    if (!mState->EndComputePass()) {
-                        return false;
-                    }
-                } break;
-
-                case Command::EndRenderPass: {
-                    mIterator.NextCommand<EndRenderPassCmd>();
-                    if (!mState->EndRenderPass()) {
-                        return false;
-                    }
-                } break;
-
-                case Command::SetComputePipeline: {
-                    SetComputePipelineCmd* cmd = mIterator.NextCommand<SetComputePipelineCmd>();
-                    ComputePipelineBase* pipeline = cmd->pipeline.Get();
-                    if (!mState->SetComputePipeline(pipeline)) {
-                        return false;
-                    }
-                } break;
-
                 case Command::SetRenderPipeline: {
                     SetRenderPipelineCmd* cmd = mIterator.NextCommand<SetRenderPipelineCmd>();
                     RenderPipelineBase* pipeline = cmd->pipeline.Get();
+
+                    if (!pipeline->IsCompatibleWith(renderPass)) {
+                        HandleError("Pipeline is incompatible with this render pass");
+                        return false;
+                    }
+
                     if (!mState->SetRenderPipeline(pipeline)) {
                         return false;
                     }
@@ -292,33 +385,25 @@ namespace backend {
                     // Validation of count and offset has already been done when the command was
                     // recorded because it impacts the size of an allocation in the
                     // CommandAllocator.
-                    if (!mState->ValidateSetPushConstants(cmd->stages)) {
+                    if (cmd->stages &
+                        ~(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
+                        HandleError(
+                            "SetPushConstants stage must be a subset of (vertex|fragment) in "
+                            "render passes");
                         return false;
                     }
                 } break;
 
                 case Command::SetStencilReference: {
                     mIterator.NextCommand<SetStencilReferenceCmd>();
-                    if (!mState->HaveRenderPass()) {
-                        HandleError("Can't set stencil reference without an active render pass");
-                        return false;
-                    }
                 } break;
 
                 case Command::SetBlendColor: {
                     mIterator.NextCommand<SetBlendColorCmd>();
-                    if (!mState->HaveRenderPass()) {
-                        HandleError("Can't set blend color without an active render pass");
-                        return false;
-                    }
                 } break;
 
                 case Command::SetScissorRect: {
                     mIterator.NextCommand<SetScissorRectCmd>();
-                    if (!mState->HaveRenderPass()) {
-                        HandleError("Can't set scissor rect without an active render pass");
-                        return false;
-                    }
                 } break;
 
                 case Command::SetBindGroup: {
@@ -345,42 +430,17 @@ namespace backend {
                     }
                 } break;
 
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mIterator.NextCommand<TransitionBufferUsageCmd>();
-                    if (!mState->TransitionBufferUsage(cmd->buffer.Get(), cmd->usage)) {
-                        return false;
-                    }
-                } break;
-
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mIterator.NextCommand<TransitionTextureUsageCmd>();
-                    if (!mState->TransitionTextureUsage(cmd->texture.Get(), cmd->usage)) {
-                        return false;
-                    }
-
-                } break;
+                default:
+                    HandleError("Command disallowed inside a render pass");
+                    return false;
             }
         }
 
-        if (!mState->ValidateEndCommandBuffer()) {
-            return false;
-        }
-
-        return true;
+        HandleError("Unfinished render pass");
+        return false;
     }
 
-    CommandIterator CommandBufferBuilder::AcquireCommands() {
-        ASSERT(!mWereCommandsAcquired);
-        mWereCommandsAcquired = true;
-        return std::move(mIterator);
-    }
-
-    CommandBufferBase* CommandBufferBuilder::GetResultImpl() {
-        MoveToIterator();
-        return mDevice->CreateCommandBuffer(this);
-    }
+    // Implementation of the API's command recording methods
 
     void CommandBufferBuilder::BeginComputePass() {
         mAllocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
@@ -628,13 +688,6 @@ namespace backend {
         new (cmd) TransitionTextureUsageCmd;
         cmd->texture = texture;
         cmd->usage = usage;
-    }
-
-    void CommandBufferBuilder::MoveToIterator() {
-        if (!mWasMovedToIterator) {
-            mIterator = std::move(mAllocator);
-            mWasMovedToIterator = true;
-        }
     }
 
 }  // namespace backend

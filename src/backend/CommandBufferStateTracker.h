@@ -29,21 +29,16 @@ namespace backend {
         explicit CommandBufferStateTracker(CommandBufferBuilder* builder);
 
         // Non-state-modifying validation functions
-        bool HaveRenderPass() const;
         bool ValidateCanCopy() const;
         bool ValidateCanUseBufferAs(BufferBase* buffer, nxt::BufferUsageBit usage) const;
         bool ValidateCanUseTextureAs(TextureBase* texture, nxt::TextureUsageBit usage) const;
         bool ValidateCanDispatch();
         bool ValidateCanDrawArrays();
         bool ValidateCanDrawElements();
-        bool ValidateEndCommandBuffer() const;
-        bool ValidateSetPushConstants(nxt::ShaderStageBit stages);
 
         // State-modifying methods
-        bool BeginComputePass();
-        bool EndComputePass();
+        void EndPass();
         bool BeginRenderPass(RenderPassDescriptorBase* info);
-        bool EndRenderPass();
         bool SetComputePipeline(ComputePipelineBase* pipeline);
         bool SetRenderPipeline(RenderPipelineBase* pipeline);
         bool SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
@@ -58,17 +53,13 @@ namespace backend {
         // command buffer.
         std::set<BufferBase*> mBuffersTransitioned;
         std::set<TextureBase*> mTexturesTransitioned;
-        std::set<TextureBase*> mTexturesAttached;
 
       private:
         enum ValidationAspect {
-            VALIDATION_ASPECT_RENDER_PIPELINE,
-            VALIDATION_ASPECT_COMPUTE_PIPELINE,
+            VALIDATION_ASPECT_PIPELINE,
             VALIDATION_ASPECT_BIND_GROUPS,
             VALIDATION_ASPECT_VERTEX_BUFFERS,
             VALIDATION_ASPECT_INDEX_BUFFER,
-            VALIDATION_ASPECT_RENDER_PASS,
-            VALIDATION_ASPECT_COMPUTE_PASS,
 
             VALIDATION_ASPECT_COUNT
         };
@@ -91,7 +82,6 @@ namespace backend {
         bool RevalidateCanDraw();
 
         void SetPipelineCommon(PipelineBase* pipeline);
-        void UnsetPipeline();
 
         CommandBufferBuilder* mBuilder;
 
@@ -105,8 +95,7 @@ namespace backend {
 
         std::map<BufferBase*, nxt::BufferUsageBit> mMostRecentBufferUsages;
         std::map<TextureBase*, nxt::TextureUsageBit> mMostRecentTextureUsages;
-
-        RenderPassDescriptorBase* mCurrentRenderPass = nullptr;
+        std::set<TextureBase*> mTexturesAttached;
     };
 }  // namespace backend
 
