@@ -18,6 +18,10 @@
 #include "backend/CommandAllocator.h"
 #include "backend/CommandBuffer.h"
 
+namespace backend {
+    class RenderPassDescriptorBase;
+}  // namespace backend
+
 namespace backend { namespace opengl {
 
     class Device;
@@ -30,6 +34,9 @@ namespace backend { namespace opengl {
         void Execute();
 
       private:
+        void ExecuteComputePass();
+        void ExecuteRenderPass(RenderPassDescriptorBase* renderPass);
+
         CommandIterator mCommands;
     };
 

@@ -84,7 +84,7 @@ namespace backend { namespace opengl {
         // constants that should be applied before the next draw or dispatch.
         class PushConstantTracker {
           public:
-            void OnBeginPass() {
+            PushConstantTracker() {
                 for (auto stage : IterateStages(kAllStages)) {
                     mValues[stage].fill(0);
                     // No need to set dirty bits as a pipeline will be set before the next operation
@@ -152,12 +152,6 @@ namespace backend { namespace opengl {
         // This means that we have to re-apply these buffers on an InputState change.
         class InputBufferTracker {
           public:
-            void OnBeginPass() {
-                // We don't know what happened between this pass and the last one, just reset the
-                // input state so everything gets reapplied.
-                mLastInputState = nullptr;
-            }
-
             void OnSetIndexBuffer(BufferBase* buffer) {
                 mIndexBufferDirty = true;
                 mIndexBuffer = ToBackend(buffer);
@@ -232,6 +226,60 @@ namespace backend { namespace opengl {
             InputState* mLastInputState = nullptr;
         };
 
+        // Handles SetBindGroup commands with the specifics of translating to OpenGL texture and
+        // buffer units
+        void ApplyBindGroup(uint32_t index,
+                            BindGroupBase* group,
+                            PipelineLayout* pipelineLayout,
+                            PipelineGL* pipeline) {
+            const auto& indices = pipelineLayout->GetBindingIndexInfo()[index];
+            const auto& layout = group->GetLayout()->GetBindingInfo();
+
+            for (uint32_t binding : IterateBitSet(layout.mask)) {
+                switch (layout.types[binding]) {
+                    case nxt::BindingType::UniformBuffer: {
+                        BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
+                        GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
+                        GLuint uboIndex = indices[binding];
+
+                        glBindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer, view->GetOffset(),
+                                          view->GetSize());
+                    } break;
+
+                    case nxt::BindingType::Sampler: {
+                        GLuint sampler =
+                            ToBackend(group->GetBindingAsSampler(binding))->GetHandle();
+                        GLuint samplerIndex = indices[binding];
+
+                        for (auto unit : pipeline->GetTextureUnitsForSampler(samplerIndex)) {
+                            glBindSampler(unit, sampler);
+                        }
+                    } break;
+
+                    case nxt::BindingType::SampledTexture: {
+                        TextureView* view = ToBackend(group->GetBindingAsTextureView(binding));
+                        Texture* texture = ToBackend(view->GetTexture());
+                        GLuint handle = texture->GetHandle();
+                        GLenum target = texture->GetGLTarget();
+                        GLuint textureIndex = indices[binding];
+
+                        for (auto unit : pipeline->GetTextureUnitsForTexture(textureIndex)) {
+                            glActiveTexture(GL_TEXTURE0 + unit);
+                            glBindTexture(target, handle);
+                        }
+                    } break;
+
+                    case nxt::BindingType::StorageBuffer: {
+                        BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
+                        GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
+                        GLuint ssboIndex = indices[binding];
+
+                        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer,
+                                          view->GetOffset(), view->GetSize());
+                    } break;
+                }
+            }
+        }
     }  // namespace
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
@@ -244,136 +292,16 @@ namespace backend { namespace opengl {
 
     void CommandBuffer::Execute() {
         Command type;
-        PipelineBase* lastPipeline = nullptr;
-        PipelineGL* lastGLPipeline = nullptr;
-        RenderPipeline* lastRenderPipeline = nullptr;
-        uint32_t indexBufferBaseOffset = 0;
-
-        PersistentPipelineState persistentPipelineState;
-        persistentPipelineState.SetDefaultState();
-
-        PushConstantTracker pushConstants;
-        InputBufferTracker inputBuffers;
-
-        GLuint currentFBO = 0;
-
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
-                    pushConstants.OnBeginPass();
+                    ExecuteComputePass();
                 } break;
 
                 case Command::BeginRenderPass: {
                     auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    RenderPassDescriptor* info = ToBackend(cmd->info.Get());
-
-                    pushConstants.OnBeginPass();
-                    inputBuffers.OnBeginPass();
-
-                    // TODO(kainino@chromium.org): This is added to possibly
-                    // work around an issue seen on Windows/Intel. It should
-                    // break any feedback loop before the clears, even if
-                    // there shouldn't be any negative effects from this.
-                    // Investigate whether it's actually needed.
-                    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-                    // TODO(kainino@chromium.org): possible future
-                    // optimization: create these framebuffers at
-                    // Framebuffer build time (or maybe CommandBuffer build
-                    // time) so they don't have to be created and destroyed
-                    // at draw time.
-                    glGenFramebuffers(1, &currentFBO);
-                    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFBO);
-
-                    // Mapping from attachmentSlot to GL framebuffer
-                    // attachment points. Defaults to zero (GL_NONE).
-                    std::array<GLenum, kMaxColorAttachments> drawBuffers = {};
-
-                    // Construct GL framebuffer
-
-                    unsigned int attachmentCount = 0;
-                    for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
-                        TextureViewBase* textureView = info->GetColorAttachment(i).view.Get();
-                        GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
-
-                        // Attach color buffers.
-                        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                               GL_TEXTURE_2D, texture, 0);
-                        drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
-                        attachmentCount = i + 1;
-
-                        // TODO(kainino@chromium.org): the color clears (later in
-                        // this function) may be undefined for non-normalized integer formats.
-                        nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
-                        ASSERT(format == nxt::TextureFormat::R8G8B8A8Unorm ||
-                               format == nxt::TextureFormat::R8G8Unorm ||
-                               format == nxt::TextureFormat::R8Unorm ||
-                               format == nxt::TextureFormat::B8G8R8A8Unorm);
-                    }
-                    glDrawBuffers(attachmentCount, drawBuffers.data());
-
-                    if (info->HasDepthStencilAttachment()) {
-                        TextureViewBase* textureView = info->GetDepthStencilAttachment().view.Get();
-                        GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
-                        nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
-
-                        // Attach depth/stencil buffer.
-                        GLenum glAttachment = 0;
-                        // TODO(kainino@chromium.org): it may be valid to just always use
-                        // GL_DEPTH_STENCIL_ATTACHMENT here.
-                        if (TextureFormatHasDepth(format)) {
-                            if (TextureFormatHasStencil(format)) {
-                                glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
-                            } else {
-                                glAttachment = GL_DEPTH_ATTACHMENT;
-                            }
-                        } else {
-                            glAttachment = GL_STENCIL_ATTACHMENT;
-                        }
-
-                        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, GL_TEXTURE_2D,
-                                               texture, 0);
-
-                        // TODO(kainino@chromium.org): the depth/stencil clears (later in
-                        // this function) may be undefined for other texture formats.
-                        ASSERT(format == nxt::TextureFormat::D32FloatS8Uint);
-                    }
-
-                    // Clear framebuffer attachments as needed
-
-                    for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
-                        const auto& attachmentInfo = info->GetColorAttachment(i);
-
-                        // Load op - color
-                        if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
-                            glClearBufferfv(GL_COLOR, i, attachmentInfo.clearColor.data());
-                        }
-                    }
-
-                    if (info->HasDepthStencilAttachment()) {
-                        const auto& attachmentInfo = info->GetDepthStencilAttachment();
-                        nxt::TextureFormat attachmentFormat =
-                            attachmentInfo.view->GetTexture()->GetFormat();
-
-                        // Load op - depth/stencil
-                        bool doDepthClear = TextureFormatHasDepth(attachmentFormat) &&
-                                            (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
-                        bool doStencilClear = TextureFormatHasStencil(attachmentFormat) &&
-                                              (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
-                        if (doDepthClear && doStencilClear) {
-                            glClearBufferfi(GL_DEPTH_STENCIL, 0, attachmentInfo.clearDepth,
-                                            attachmentInfo.clearStencil);
-                        } else if (doDepthClear) {
-                            glClearBufferfv(GL_DEPTH, 0, &attachmentInfo.clearDepth);
-                        } else if (doStencilClear) {
-                            const GLint clearStencil = attachmentInfo.clearStencil;
-                            glClearBufferiv(GL_STENCIL, 0, &clearStencil);
-                        }
-                    }
-
-                    glBlendColor(0, 0, 0, 0);
-                    glViewport(0, 0, info->GetWidth(), info->GetHeight());
-                    glScissor(0, 0, info->GetWidth(), info->GetHeight());
+                    ExecuteRenderPass(ToBackend(cmd->info.Get()));
                 } break;
 
                 case Command::CopyBufferToBuffer: {
@@ -446,26 +374,212 @@ namespace backend { namespace opengl {
                     glDeleteFramebuffers(1, &readFBO);
                 } break;
 
+                case Command::TransitionBufferUsage: {
+                    TransitionBufferUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionBufferUsageCmd>();
+
+                    cmd->buffer->UpdateUsageInternal(cmd->usage);
+                } break;
+
+                case Command::TransitionTextureUsage: {
+                    TransitionTextureUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionTextureUsageCmd>();
+
+                    cmd->texture->UpdateUsageInternal(cmd->usage);
+                } break;
+
+                default: { UNREACHABLE(); } break;
+            }
+        }
+    }
+
+    void CommandBuffer::ExecuteComputePass() {
+        PushConstantTracker pushConstants;
+        ComputePipeline* lastPipeline = nullptr;
+
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndComputePass: {
+                    mCommands.NextCommand<EndComputePassCmd>();
+                    return;
+                } break;
+
                 case Command::Dispatch: {
                     DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
-                    pushConstants.Apply(lastPipeline, lastGLPipeline);
+                    pushConstants.Apply(lastPipeline, lastPipeline);
                     glDispatchCompute(dispatch->x, dispatch->y, dispatch->z);
                     // TODO(cwallez@chromium.org): add barriers to the API
                     glMemoryBarrier(GL_ALL_BARRIER_BITS);
                 } break;
 
+                case Command::SetComputePipeline: {
+                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
+                    lastPipeline = ToBackend(cmd->pipeline).Get();
+
+                    lastPipeline->ApplyNow();
+                    pushConstants.OnSetPipeline(lastPipeline);
+                } break;
+
+                case Command::SetPushConstants: {
+                    SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
+                    uint32_t* data = mCommands.NextData<uint32_t>(cmd->count);
+                    pushConstants.OnSetPushConstants(cmd->stages, cmd->count, cmd->offset, data);
+                } break;
+
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+                    ApplyBindGroup(cmd->index, cmd->group.Get(),
+                                   ToBackend(lastPipeline->GetLayout()), lastPipeline);
+                } break;
+
+                default: { UNREACHABLE(); } break;
+            }
+        }
+
+        // EndComputePass should have been called
+        UNREACHABLE();
+    }
+
+    void CommandBuffer::ExecuteRenderPass(RenderPassDescriptorBase* renderPass) {
+        GLuint fbo = 0;
+
+        // Create the framebuffer used for this render pass and calls the correct glDrawBuffers
+        {
+            // TODO(kainino@chromium.org): This is added to possibly work around an issue seen on
+            // Windows/Intel. It should break any feedback loop before the clears, even if there
+            // shouldn't be any negative effects from this. Investigate whether it's actually
+            // needed.
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            // TODO(kainino@chromium.org): possible future optimization: create these framebuffers
+            // at Framebuffer build time (or maybe CommandBuffer build time) so they don't have to
+            // be created and destroyed at draw time.
+            glGenFramebuffers(1, &fbo);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
+            // Mapping from attachmentSlot to GL framebuffer attachment points. Defaults to zero
+            // (GL_NONE).
+            std::array<GLenum, kMaxColorAttachments> drawBuffers = {};
+
+            // Construct GL framebuffer
+
+            unsigned int attachmentCount = 0;
+            for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
+                TextureViewBase* textureView = renderPass->GetColorAttachment(i).view.Get();
+                GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
+
+                // Attach color buffers.
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D,
+                                       texture, 0);
+                drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+                attachmentCount = i + 1;
+
+                // TODO(kainino@chromium.org): the color clears (later in
+                // this function) may be undefined for non-normalized integer formats.
+                nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
+                ASSERT(format == nxt::TextureFormat::R8G8B8A8Unorm ||
+                       format == nxt::TextureFormat::R8G8Unorm ||
+                       format == nxt::TextureFormat::R8Unorm ||
+                       format == nxt::TextureFormat::B8G8R8A8Unorm);
+            }
+            glDrawBuffers(attachmentCount, drawBuffers.data());
+
+            if (renderPass->HasDepthStencilAttachment()) {
+                TextureViewBase* textureView = renderPass->GetDepthStencilAttachment().view.Get();
+                GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
+                nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
+
+                // Attach depth/stencil buffer.
+                GLenum glAttachment = 0;
+                // TODO(kainino@chromium.org): it may be valid to just always use
+                // GL_DEPTH_STENCIL_ATTACHMENT here.
+                if (TextureFormatHasDepth(format)) {
+                    if (TextureFormatHasStencil(format)) {
+                        glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
+                    } else {
+                        glAttachment = GL_DEPTH_ATTACHMENT;
+                    }
+                } else {
+                    glAttachment = GL_STENCIL_ATTACHMENT;
+                }
+
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, GL_TEXTURE_2D, texture,
+                                       0);
+
+                // TODO(kainino@chromium.org): the depth/stencil clears (later in
+                // this function) may be undefined for other texture formats.
+                ASSERT(format == nxt::TextureFormat::D32FloatS8Uint);
+            }
+        }
+
+        // Clear framebuffer attachments as needed
+        {
+            for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
+                const auto& attachmentInfo = renderPass->GetColorAttachment(i);
+
+                // Load op - color
+                if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                    glClearBufferfv(GL_COLOR, i, attachmentInfo.clearColor.data());
+                }
+            }
+
+            if (renderPass->HasDepthStencilAttachment()) {
+                const auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
+                nxt::TextureFormat attachmentFormat =
+                    attachmentInfo.view->GetTexture()->GetFormat();
+
+                // Load op - depth/stencil
+                bool doDepthClear = TextureFormatHasDepth(attachmentFormat) &&
+                                    (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
+                bool doStencilClear = TextureFormatHasStencil(attachmentFormat) &&
+                                      (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+                if (doDepthClear && doStencilClear) {
+                    glClearBufferfi(GL_DEPTH_STENCIL, 0, attachmentInfo.clearDepth,
+                                    attachmentInfo.clearStencil);
+                } else if (doDepthClear) {
+                    glClearBufferfv(GL_DEPTH, 0, &attachmentInfo.clearDepth);
+                } else if (doStencilClear) {
+                    const GLint clearStencil = attachmentInfo.clearStencil;
+                    glClearBufferiv(GL_STENCIL, 0, &clearStencil);
+                }
+            }
+        }
+
+        RenderPipeline* lastPipeline = nullptr;
+        uint32_t indexBufferBaseOffset = 0;
+
+        PersistentPipelineState persistentPipelineState;
+
+        PushConstantTracker pushConstants;
+        InputBufferTracker inputBuffers;
+
+        // Set defaults for dynamic state
+        persistentPipelineState.SetDefaultState();
+        glBlendColor(0, 0, 0, 0);
+        glViewport(0, 0, renderPass->GetWidth(), renderPass->GetHeight());
+        glScissor(0, 0, renderPass->GetWidth(), renderPass->GetHeight());
+
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndRenderPass: {
+                    mCommands.NextCommand<EndRenderPassCmd>();
+                    glDeleteFramebuffers(1, &fbo);
+                    return;
+                } break;
+
                 case Command::DrawArrays: {
                     DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
-                    pushConstants.Apply(lastPipeline, lastGLPipeline);
+                    pushConstants.Apply(lastPipeline, lastPipeline);
                     inputBuffers.Apply();
 
                     if (draw->firstInstance > 0) {
-                        glDrawArraysInstancedBaseInstance(
-                            lastRenderPipeline->GetGLPrimitiveTopology(), draw->firstVertex,
-                            draw->vertexCount, draw->instanceCount, draw->firstInstance);
+                        glDrawArraysInstancedBaseInstance(lastPipeline->GetGLPrimitiveTopology(),
+                                                          draw->firstVertex, draw->vertexCount,
+                                                          draw->instanceCount, draw->firstInstance);
                     } else {
                         // This branch is only needed on OpenGL < 4.2
-                        glDrawArraysInstanced(lastRenderPipeline->GetGLPrimitiveTopology(),
+                        glDrawArraysInstanced(lastPipeline->GetGLPrimitiveTopology(),
                                               draw->firstVertex, draw->vertexCount,
                                               draw->instanceCount);
                     }
@@ -473,58 +587,36 @@ namespace backend { namespace opengl {
 
                 case Command::DrawElements: {
                     DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
-                    pushConstants.Apply(lastPipeline, lastGLPipeline);
+                    pushConstants.Apply(lastPipeline, lastPipeline);
                     inputBuffers.Apply();
 
-                    nxt::IndexFormat indexFormat = lastRenderPipeline->GetIndexFormat();
+                    nxt::IndexFormat indexFormat = lastPipeline->GetIndexFormat();
                     size_t formatSize = IndexFormatSize(indexFormat);
                     GLenum formatType = IndexFormatType(indexFormat);
 
                     if (draw->firstInstance > 0) {
                         glDrawElementsInstancedBaseInstance(
-                            lastRenderPipeline->GetGLPrimitiveTopology(), draw->indexCount,
-                            formatType,
+                            lastPipeline->GetGLPrimitiveTopology(), draw->indexCount, formatType,
                             reinterpret_cast<void*>(draw->firstIndex * formatSize +
                                                     indexBufferBaseOffset),
                             draw->instanceCount, draw->firstInstance);
                     } else {
                         // This branch is only needed on OpenGL < 4.2
                         glDrawElementsInstanced(
-                            lastRenderPipeline->GetGLPrimitiveTopology(), draw->indexCount,
-                            formatType,
+                            lastPipeline->GetGLPrimitiveTopology(), draw->indexCount, formatType,
                             reinterpret_cast<void*>(draw->firstIndex * formatSize +
                                                     indexBufferBaseOffset),
                             draw->instanceCount);
                     }
                 } break;
 
-                case Command::EndComputePass: {
-                    mCommands.NextCommand<EndComputePassCmd>();
-                } break;
-
-                case Command::EndRenderPass: {
-                    mCommands.NextCommand<EndRenderPassCmd>();
-                    glDeleteFramebuffers(1, &currentFBO);
-                    currentFBO = 0;
-                } break;
-
-                case Command::SetComputePipeline: {
-                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
-                    ToBackend(cmd->pipeline)->ApplyNow();
-                    lastGLPipeline = ToBackend(cmd->pipeline).Get();
-                    lastPipeline = ToBackend(cmd->pipeline).Get();
-                    pushConstants.OnSetPipeline(lastPipeline);
-                } break;
-
                 case Command::SetRenderPipeline: {
                     SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
-                    ToBackend(cmd->pipeline)->ApplyNow(persistentPipelineState);
-                    lastRenderPipeline = ToBackend(cmd->pipeline).Get();
-                    lastGLPipeline = ToBackend(cmd->pipeline).Get();
                     lastPipeline = ToBackend(cmd->pipeline).Get();
+                    lastPipeline->ApplyNow(persistentPipelineState);
 
                     pushConstants.OnSetPipeline(lastPipeline);
-                    inputBuffers.OnSetPipeline(lastRenderPipeline);
+                    inputBuffers.OnSetPipeline(lastPipeline);
                 } break;
 
                 case Command::SetPushConstants: {
@@ -550,62 +642,8 @@ namespace backend { namespace opengl {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    size_t groupIndex = cmd->index;
-                    BindGroup* group = ToBackend(cmd->group.Get());
-
-                    const auto& indices =
-                        ToBackend(lastPipeline->GetLayout())->GetBindingIndexInfo()[groupIndex];
-                    const auto& layout = group->GetLayout()->GetBindingInfo();
-
-                    for (uint32_t binding : IterateBitSet(layout.mask)) {
-                        switch (layout.types[binding]) {
-                            case nxt::BindingType::UniformBuffer: {
-                                BufferView* view =
-                                    ToBackend(group->GetBindingAsBufferView(binding));
-                                GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
-                                GLuint uboIndex = indices[binding];
-
-                                glBindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer,
-                                                  view->GetOffset(), view->GetSize());
-                            } break;
-
-                            case nxt::BindingType::Sampler: {
-                                GLuint sampler =
-                                    ToBackend(group->GetBindingAsSampler(binding))->GetHandle();
-                                GLuint samplerIndex = indices[binding];
-
-                                for (auto unit :
-                                     lastGLPipeline->GetTextureUnitsForSampler(samplerIndex)) {
-                                    glBindSampler(unit, sampler);
-                                }
-                            } break;
-
-                            case nxt::BindingType::SampledTexture: {
-                                TextureView* view =
-                                    ToBackend(group->GetBindingAsTextureView(binding));
-                                Texture* texture = ToBackend(view->GetTexture());
-                                GLuint handle = texture->GetHandle();
-                                GLenum target = texture->GetGLTarget();
-                                GLuint textureIndex = indices[binding];
-
-                                for (auto unit :
-                                     lastGLPipeline->GetTextureUnitsForTexture(textureIndex)) {
-                                    glActiveTexture(GL_TEXTURE0 + unit);
-                                    glBindTexture(target, handle);
-                                }
-                            } break;
-
-                            case nxt::BindingType::StorageBuffer: {
-                                BufferView* view =
-                                    ToBackend(group->GetBindingAsBufferView(binding));
-                                GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
-                                GLuint ssboIndex = indices[binding];
-
-                                glBindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer,
-                                                  view->GetOffset(), view->GetSize());
-                            } break;
-                        }
-                    }
+                    ApplyBindGroup(cmd->index, cmd->group.Get(),
+                                   ToBackend(lastPipeline->GetLayout()), lastPipeline);
                 } break;
 
                 case Command::SetIndexBuffer: {
@@ -621,25 +659,12 @@ namespace backend { namespace opengl {
                     inputBuffers.OnSetVertexBuffers(cmd->startSlot, cmd->count, buffers, offsets);
                 } break;
 
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionBufferUsageCmd>();
-
-                    cmd->buffer->UpdateUsageInternal(cmd->usage);
-                } break;
-
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionTextureUsageCmd>();
-
-                    cmd->texture->UpdateUsageInternal(cmd->usage);
-                } break;
+                default: { UNREACHABLE(); } break;
             }
         }
 
-        // HACK: cleanup a tiny bit of state to make this work with
-        // virtualized contexts enabled in Chromium
-        glBindSampler(0, 0);
+        // EndRenderPass should have been called
+        UNREACHABLE();
     }
 
 }}  // namespace backend::opengl
