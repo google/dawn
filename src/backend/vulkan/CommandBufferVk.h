@@ -21,6 +21,8 @@
 
 namespace backend { namespace vulkan {
 
+    class RenderPassDescriptor;
+
     class CommandBuffer : public CommandBufferBase {
       public:
         CommandBuffer(CommandBufferBuilder* builder);
@@ -29,6 +31,9 @@ namespace backend { namespace vulkan {
         void RecordCommands(VkCommandBuffer commands);
 
       private:
+        void RecordComputePass(VkCommandBuffer commands);
+        void RecordRenderPass(VkCommandBuffer commands, RenderPassDescriptor* renderPass);
+
         CommandIterator mCommands;
     };
 

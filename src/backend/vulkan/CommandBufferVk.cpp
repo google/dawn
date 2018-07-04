@@ -74,13 +74,6 @@ namespace backend { namespace vulkan {
                 mSets[index] = set;
             }
 
-            void OnBeginPass() {
-                // All bindgroups will have to be bound in the pass before any draw / dispatch.
-                // Resetting the layout and ensures nothing gets propagated from an earlier pass
-                // to this pass.
-                mCurrentLayout = nullptr;
-            }
-
             void OnPipelineLayoutChange(PipelineLayout* layout) {
                 if (layout == mCurrentLayout) {
                     return;
@@ -127,9 +120,6 @@ namespace backend { namespace vulkan {
 
     void CommandBuffer::RecordCommands(VkCommandBuffer commands) {
         Device* device = ToBackend(GetDevice());
-
-        DescriptorSetTracker descriptorSets;
-        RenderPipeline* lastRenderPipeline = nullptr;
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -183,65 +173,153 @@ namespace backend { namespace vulkan {
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    RenderPassDescriptor* info = ToBackend(cmd->info.Get());
+                    RecordRenderPass(commands, ToBackend(cmd->info.Get()));
+                } break;
 
-                    // NXT has an implicit transition to color attachment on render passes.
-                    // Transition the attachments now before we start the render pass.
-                    for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
-                        Texture* attachment =
-                            ToBackend(info->GetColorAttachment(i).view->GetTexture());
+                case Command::BeginComputePass: {
+                    mCommands.NextCommand<BeginComputePassCmd>();
+                    RecordComputePass(commands);
+                } break;
 
-                        if (!(attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment)) {
-                            attachment->RecordBarrier(commands, attachment->GetUsage(),
-                                                      nxt::TextureUsageBit::OutputAttachment);
-                            attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
-                        }
-                    }
-                    if (info->HasDepthStencilAttachment()) {
-                        Texture* attachment =
-                            ToBackend(info->GetDepthStencilAttachment().view->GetTexture());
+                case Command::TransitionBufferUsage: {
+                    TransitionBufferUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionBufferUsageCmd>();
 
-                        if (!(attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment)) {
-                            attachment->RecordBarrier(commands, attachment->GetUsage(),
-                                                      nxt::TextureUsageBit::OutputAttachment);
-                            attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
-                        }
-                    }
+                    Buffer* buffer = ToBackend(cmd->buffer.Get());
+                    buffer->RecordBarrier(commands, buffer->GetUsage(), cmd->usage);
+                    buffer->UpdateUsageInternal(cmd->usage);
+                } break;
 
-                    info->RecordBeginRenderPass(commands);
+                case Command::TransitionTextureUsage: {
+                    TransitionTextureUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionTextureUsageCmd>();
 
-                    // Set all the dynamic state just in case.
-                    device->fn.CmdSetLineWidth(commands, 1.0f);
-                    device->fn.CmdSetDepthBounds(commands, 0.0f, 1.0f);
+                    Texture* texture = ToBackend(cmd->texture.Get());
+                    texture->RecordBarrier(commands, texture->GetUsage(), cmd->usage);
+                    texture->UpdateUsageInternal(cmd->usage);
+                } break;
 
-                    device->fn.CmdSetStencilReference(commands, VK_STENCIL_FRONT_AND_BACK, 0);
+                default: { UNREACHABLE(); } break;
+            }
+        }
+    }
 
-                    float blendConstants[4] = {
-                        0.0f,
-                        0.0f,
-                        0.0f,
-                        0.0f,
-                    };
-                    device->fn.CmdSetBlendConstants(commands, blendConstants);
+    void CommandBuffer::RecordComputePass(VkCommandBuffer commands) {
+        Device* device = ToBackend(GetDevice());
 
-                    // The viewport and scissor default to cover all of the attachments
-                    VkViewport viewport;
-                    viewport.x = 0.0f;
-                    viewport.y = 0.0f;
-                    viewport.width = static_cast<float>(info->GetWidth());
-                    viewport.height = static_cast<float>(info->GetHeight());
-                    viewport.minDepth = 0.0f;
-                    viewport.maxDepth = 1.0f;
-                    device->fn.CmdSetViewport(commands, 0, 1, &viewport);
+        DescriptorSetTracker descriptorSets;
 
-                    VkRect2D scissorRect;
-                    scissorRect.offset.x = 0;
-                    scissorRect.offset.y = 0;
-                    scissorRect.extent.width = info->GetWidth();
-                    scissorRect.extent.height = info->GetHeight();
-                    device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndComputePass: {
+                    mCommands.NextCommand<EndComputePassCmd>();
+                    return;
+                } break;
 
-                    descriptorSets.OnBeginPass();
+                case Command::Dispatch: {
+                    DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
+                    descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_COMPUTE);
+                    device->fn.CmdDispatch(commands, dispatch->x, dispatch->y, dispatch->z);
+                } break;
+
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+                    VkDescriptorSet set = ToBackend(cmd->group.Get())->GetHandle();
+
+                    descriptorSets.OnSetBindGroup(cmd->index, set);
+                } break;
+
+                case Command::SetComputePipeline: {
+                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
+                    ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
+
+                    device->fn.CmdBindPipeline(commands, VK_PIPELINE_BIND_POINT_COMPUTE,
+                                               pipeline->GetHandle());
+                    descriptorSets.OnPipelineLayoutChange(ToBackend(pipeline->GetLayout()));
+                } break;
+
+                default: { UNREACHABLE(); } break;
+            }
+        }
+
+        // EndComputePass should have been called
+        UNREACHABLE();
+    }
+    void CommandBuffer::RecordRenderPass(VkCommandBuffer commands,
+                                         RenderPassDescriptor* renderPass) {
+        Device* device = ToBackend(GetDevice());
+
+        // NXT has an implicit transition to color attachment on render passes.
+        // Transition the attachments now before we start the render pass.
+        {
+            for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
+                Texture* attachment =
+                    ToBackend(renderPass->GetColorAttachment(i).view->GetTexture());
+
+                if (!(attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment)) {
+                    attachment->RecordBarrier(commands, attachment->GetUsage(),
+                                              nxt::TextureUsageBit::OutputAttachment);
+                    attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
+                }
+            }
+            if (renderPass->HasDepthStencilAttachment()) {
+                Texture* attachment =
+                    ToBackend(renderPass->GetDepthStencilAttachment().view->GetTexture());
+
+                if (!(attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment)) {
+                    attachment->RecordBarrier(commands, attachment->GetUsage(),
+                                              nxt::TextureUsageBit::OutputAttachment);
+                    attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
+                }
+            }
+        }
+
+        renderPass->RecordBeginRenderPass(commands);
+
+        // Set the default value for the dynamic state
+        {
+            device->fn.CmdSetLineWidth(commands, 1.0f);
+            device->fn.CmdSetDepthBounds(commands, 0.0f, 1.0f);
+
+            device->fn.CmdSetStencilReference(commands, VK_STENCIL_FRONT_AND_BACK, 0);
+
+            float blendConstants[4] = {
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+            };
+            device->fn.CmdSetBlendConstants(commands, blendConstants);
+
+            // The viewport and scissor default to cover all of the attachments
+            VkViewport viewport;
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(renderPass->GetWidth());
+            viewport.height = static_cast<float>(renderPass->GetHeight());
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            device->fn.CmdSetViewport(commands, 0, 1, &viewport);
+
+            VkRect2D scissorRect;
+            scissorRect.offset.x = 0;
+            scissorRect.offset.y = 0;
+            scissorRect.extent.width = renderPass->GetWidth();
+            scissorRect.extent.height = renderPass->GetHeight();
+            device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
+        }
+
+        DescriptorSetTracker descriptorSets;
+        RenderPipeline* lastPipeline = nullptr;
+
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndRenderPass: {
+                    mCommands.NextCommand<EndRenderPassCmd>();
+                    device->fn.CmdEndRenderPass(commands);
+                    return;
                 } break;
 
                 case Command::DrawArrays: {
@@ -259,26 +337,6 @@ namespace backend { namespace vulkan {
                     uint32_t vertexOffset = 0;
                     device->fn.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
                                               draw->firstIndex, vertexOffset, draw->firstInstance);
-                } break;
-
-                case Command::EndRenderPass: {
-                    mCommands.NextCommand<EndRenderPassCmd>();
-                    device->fn.CmdEndRenderPass(commands);
-                } break;
-
-                case Command::BeginComputePass: {
-                    mCommands.NextCommand<BeginComputePassCmd>();
-                    descriptorSets.OnBeginPass();
-                } break;
-
-                case Command::EndComputePass: {
-                    mCommands.NextCommand<EndComputePassCmd>();
-                } break;
-
-                case Command::Dispatch: {
-                    DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
-                    descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_COMPUTE);
-                    device->fn.CmdDispatch(commands, dispatch->x, dispatch->y, dispatch->z);
                 } break;
 
                 case Command::SetBindGroup: {
@@ -305,19 +363,10 @@ namespace backend { namespace vulkan {
 
                     // TODO(cwallez@chromium.org): get the index type from the last render pipeline
                     // and rebind if needed on pipeline change
-                    ASSERT(lastRenderPipeline != nullptr);
-                    VkIndexType indexType = VulkanIndexType(lastRenderPipeline->GetIndexFormat());
+                    ASSERT(lastPipeline != nullptr);
+                    VkIndexType indexType = VulkanIndexType(lastPipeline->GetIndexFormat());
                     device->fn.CmdBindIndexBuffer(
                         commands, indexBuffer, static_cast<VkDeviceSize>(cmd->offset), indexType);
-                } break;
-
-                case Command::SetComputePipeline: {
-                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
-                    ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
-
-                    device->fn.CmdBindPipeline(commands, VK_PIPELINE_BIND_POINT_COMPUTE,
-                                               pipeline->GetHandle());
-                    descriptorSets.OnPipelineLayoutChange(ToBackend(pipeline->GetLayout()));
                 } break;
 
                 case Command::SetRenderPipeline: {
@@ -326,7 +375,7 @@ namespace backend { namespace vulkan {
 
                     device->fn.CmdBindPipeline(commands, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                                pipeline->GetHandle());
-                    lastRenderPipeline = pipeline;
+                    lastPipeline = pipeline;
 
                     descriptorSets.OnPipelineLayoutChange(ToBackend(pipeline->GetLayout()));
                 } break;
@@ -366,27 +415,12 @@ namespace backend { namespace vulkan {
                                                     vkBuffers.data(), vkOffsets.data());
                 } break;
 
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionBufferUsageCmd>();
-
-                    Buffer* buffer = ToBackend(cmd->buffer.Get());
-                    buffer->RecordBarrier(commands, buffer->GetUsage(), cmd->usage);
-                    buffer->UpdateUsageInternal(cmd->usage);
-                } break;
-
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionTextureUsageCmd>();
-
-                    Texture* texture = ToBackend(cmd->texture.Get());
-                    texture->RecordBarrier(commands, texture->GetUsage(), cmd->usage);
-                    texture->UpdateUsageInternal(cmd->usage);
-                } break;
-
                 default: { UNREACHABLE(); } break;
             }
         }
+
+        // EndRenderPass should have been called
+        UNREACHABLE();
     }
 
 }}  // namespace backend::vulkan
