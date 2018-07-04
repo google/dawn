@@ -167,6 +167,9 @@ namespace backend {
     // the commands have a chance to run their destructor and remove internal references.
     class CommandIterator;
     void FreeCommands(CommandIterator* commands);
+
+    // Helper function to allow skipping over a command when it is unimplemented, while still
+    // consuming the correct amount of data from the command iterator.
     void SkipCommand(CommandIterator* commands, Command type);
 
 }  // namespace backend

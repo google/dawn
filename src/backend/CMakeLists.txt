@@ -345,6 +345,8 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/CommandAllocator.h
     ${BACKEND_DIR}/CommandBuffer.cpp
     ${BACKEND_DIR}/CommandBuffer.h
+    ${BACKEND_DIR}/Commands.cpp
+    ${BACKEND_DIR}/Commands.h
     ${BACKEND_DIR}/ComputePipeline.cpp
     ${BACKEND_DIR}/ComputePipeline.h
     ${BACKEND_DIR}/DepthStencilState.cpp
