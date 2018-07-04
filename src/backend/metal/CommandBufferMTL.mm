@@ -29,16 +29,11 @@
 namespace backend { namespace metal {
 
     namespace {
-        struct CurrentEncoders {
-            Device* device;
 
+        struct GlobalEncoders {
             id<MTLBlitCommandEncoder> blit = nil;
-            id<MTLComputeCommandEncoder> compute = nil;
-            id<MTLRenderCommandEncoder> render = nil;
 
-            void EnsureNoBlitEncoder() {
-                ASSERT(render == nil);
-                ASSERT(compute == nil);
+            void Finish() {
                 if (blit != nil) {
                     [blit endEncoding];
                     blit = nil;  // This will be autoreleased.
@@ -46,94 +41,169 @@ namespace backend { namespace metal {
             }
 
             void EnsureBlit(id<MTLCommandBuffer> commandBuffer) {
-                ASSERT(render == nil);
-                ASSERT(compute == nil);
                 if (blit == nil) {
                     blit = [commandBuffer blitCommandEncoder];
                 }
             }
-
-            void BeginCompute(id<MTLCommandBuffer> commandBuffer) {
-                EnsureNoBlitEncoder();
-                compute = [commandBuffer computeCommandEncoder];
-                // TODO(cwallez@chromium.org): does any state need to be reset?
-            }
-
-            void EndCompute() {
-                ASSERT(compute != nil);
-                [compute endEncoding];
-                compute = nil;  // This will be autoreleased.
-            }
-
-            void BeginRenderPass(id<MTLCommandBuffer> commandBuffer, RenderPassDescriptor* info) {
-                if (render != nil) {
-                    [render endEncoding];
-                    render = nil;  // This will be autoreleased.
-                }
-
-                MTLRenderPassDescriptor* descriptor =
-                    [MTLRenderPassDescriptor renderPassDescriptor];
-
-                for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
-                    auto& attachmentInfo = info->GetColorAttachment(i);
-
-                    if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
-                        descriptor.colorAttachments[i].loadAction = MTLLoadActionClear;
-                        descriptor.colorAttachments[i].clearColor = MTLClearColorMake(
-                            attachmentInfo.clearColor[0], attachmentInfo.clearColor[1],
-                            attachmentInfo.clearColor[2], attachmentInfo.clearColor[3]);
-                    } else {
-                        descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
-                    }
-
-                    descriptor.colorAttachments[i].texture =
-                        ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
-                    descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
-                }
-
-                if (info->HasDepthStencilAttachment()) {
-                    auto& attachmentInfo = info->GetDepthStencilAttachment();
-
-                    id<MTLTexture> texture =
-                        ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
-                    nxt::TextureFormat format = attachmentInfo.view->GetTexture()->GetFormat();
-
-                    if (TextureFormatHasDepth(format)) {
-                        descriptor.depthAttachment.texture = texture;
-                        descriptor.depthAttachment.storeAction = MTLStoreActionStore;
-
-                        if (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear) {
-                            descriptor.depthAttachment.loadAction = MTLLoadActionClear;
-                            descriptor.depthAttachment.clearDepth = attachmentInfo.clearDepth;
-                        } else {
-                            descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
-                        }
-                    }
-
-                    if (TextureFormatHasStencil(format)) {
-                        descriptor.stencilAttachment.texture = texture;
-                        descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
-
-                        if (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear) {
-                            descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
-                            descriptor.stencilAttachment.clearStencil = attachmentInfo.clearStencil;
-                        } else {
-                            descriptor.stencilAttachment.loadAction = MTLLoadActionLoad;
-                        }
-                    }
-                }
-
-                render = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-                // TODO(cwallez@chromium.org): does any state need to be reset?
-            }
-
-            void EndRenderPass() {
-                ASSERT(render != nil);
-                [render endEncoding];
-                render = nil;  // This will be autoreleased.
-            }
         };
-    }
+
+        // Creates an autoreleased MTLRenderPassDescriptor matching desc
+        MTLRenderPassDescriptor* CreateMTLRenderPassDescriptor(RenderPassDescriptorBase* desc) {
+            MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+
+            for (uint32_t i : IterateBitSet(desc->GetColorAttachmentMask())) {
+                auto& attachmentInfo = desc->GetColorAttachment(i);
+
+                if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                    descriptor.colorAttachments[i].loadAction = MTLLoadActionClear;
+                    descriptor.colorAttachments[i].clearColor = MTLClearColorMake(
+                        attachmentInfo.clearColor[0], attachmentInfo.clearColor[1],
+                        attachmentInfo.clearColor[2], attachmentInfo.clearColor[3]);
+                } else {
+                    descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
+                }
+
+                descriptor.colorAttachments[i].texture =
+                    ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
+                descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
+            }
+
+            if (desc->HasDepthStencilAttachment()) {
+                auto& attachmentInfo = desc->GetDepthStencilAttachment();
+
+                id<MTLTexture> texture =
+                    ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
+                nxt::TextureFormat format = attachmentInfo.view->GetTexture()->GetFormat();
+
+                if (TextureFormatHasDepth(format)) {
+                    descriptor.depthAttachment.texture = texture;
+                    descriptor.depthAttachment.storeAction = MTLStoreActionStore;
+
+                    if (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear) {
+                        descriptor.depthAttachment.loadAction = MTLLoadActionClear;
+                        descriptor.depthAttachment.clearDepth = attachmentInfo.clearDepth;
+                    } else {
+                        descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
+                    }
+                }
+
+                if (TextureFormatHasStencil(format)) {
+                    descriptor.stencilAttachment.texture = texture;
+                    descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
+
+                    if (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear) {
+                        descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
+                        descriptor.stencilAttachment.clearStencil = attachmentInfo.clearStencil;
+                    } else {
+                        descriptor.stencilAttachment.loadAction = MTLLoadActionLoad;
+                    }
+                }
+            }
+
+            return descriptor;
+        }
+
+        // Handles a call to SetBindGroup, directing the commands to the correct encoder.
+        // There is a single function that takes both encoders to factor code. Other approaches like
+        // templates wouldn't work because the name of methods are different between the two encoder
+        // types.
+        void ApplyBindGroup(uint32_t index,
+                            BindGroup* group,
+                            PipelineLayout* pipelineLayout,
+                            id<MTLRenderCommandEncoder> render,
+                            id<MTLComputeCommandEncoder> compute) {
+            const auto& layout = group->GetLayout()->GetBindingInfo();
+
+            // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup
+            // so that we only have to do one setVertexBuffers and one setFragmentBuffers
+            // call here.
+            for (size_t binding = 0; binding < layout.mask.size(); ++binding) {
+                if (!layout.mask[binding]) {
+                    continue;
+                }
+
+                auto stage = layout.visibilities[binding];
+                bool hasVertStage = stage & nxt::ShaderStageBit::Vertex && render != nil;
+                bool hasFragStage = stage & nxt::ShaderStageBit::Fragment && render != nil;
+                bool hasComputeStage = stage & nxt::ShaderStageBit::Compute && compute != nil;
+
+                uint32_t vertIndex = 0;
+                uint32_t fragIndex = 0;
+                uint32_t computeIndex = 0;
+
+                if (hasVertStage) {
+                    vertIndex = pipelineLayout->GetBindingIndexInfo(
+                        nxt::ShaderStage::Vertex)[index][binding];
+                }
+                if (hasFragStage) {
+                    fragIndex = pipelineLayout->GetBindingIndexInfo(
+                        nxt::ShaderStage::Fragment)[index][binding];
+                }
+                if (hasComputeStage) {
+                    computeIndex = pipelineLayout->GetBindingIndexInfo(
+                        nxt::ShaderStage::Compute)[index][binding];
+                }
+
+                switch (layout.types[binding]) {
+                    case nxt::BindingType::UniformBuffer:
+                    case nxt::BindingType::StorageBuffer: {
+                        BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
+                        auto b = ToBackend(view->GetBuffer());
+                        const id<MTLBuffer> buffer = b->GetMTLBuffer();
+                        const NSUInteger offset = view->GetOffset();
+
+                        if (hasVertStage) {
+                            [render setVertexBuffers:&buffer
+                                             offsets:&offset
+                                           withRange:NSMakeRange(vertIndex, 1)];
+                        }
+                        if (hasFragStage) {
+                            [render setFragmentBuffers:&buffer
+                                               offsets:&offset
+                                             withRange:NSMakeRange(fragIndex, 1)];
+                        }
+                        if (hasComputeStage) {
+                            [compute setBuffers:&buffer
+                                        offsets:&offset
+                                      withRange:NSMakeRange(computeIndex, 1)];
+                        }
+
+                    } break;
+
+                    case nxt::BindingType::Sampler: {
+                        auto sampler = ToBackend(group->GetBindingAsSampler(binding));
+                        if (hasVertStage) {
+                            [render setVertexSamplerState:sampler->GetMTLSamplerState()
+                                                  atIndex:vertIndex];
+                        }
+                        if (hasFragStage) {
+                            [render setFragmentSamplerState:sampler->GetMTLSamplerState()
+                                                    atIndex:fragIndex];
+                        }
+                        if (hasComputeStage) {
+                            [compute setSamplerState:sampler->GetMTLSamplerState()
+                                             atIndex:computeIndex];
+                        }
+                    } break;
+
+                    case nxt::BindingType::SampledTexture: {
+                        auto texture =
+                            ToBackend(group->GetBindingAsTextureView(binding)->GetTexture());
+                        if (hasVertStage) {
+                            [render setVertexTexture:texture->GetMTLTexture() atIndex:vertIndex];
+                        }
+                        if (hasFragStage) {
+                            [render setFragmentTexture:texture->GetMTLTexture() atIndex:fragIndex];
+                        }
+                        if (hasComputeStage) {
+                            [compute setTexture:texture->GetMTLTexture() atIndex:computeIndex];
+                        }
+                    } break;
+                }
+            }
+        }
+
+    }  // anonymous namespace
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
         : CommandBufferBase(builder),
@@ -146,47 +216,21 @@ namespace backend { namespace metal {
     }
 
     void CommandBuffer::FillCommands(id<MTLCommandBuffer> commandBuffer) {
+        GlobalEncoders encoders;
+
         Command type;
-        ComputePipeline* lastComputePipeline = nullptr;
-        RenderPipeline* lastRenderPipeline = nullptr;
-        id<MTLBuffer> indexBuffer = nil;
-        uint32_t indexBufferBaseOffset = 0;
-
-        CurrentEncoders encoders;
-        encoders.device = mDevice;
-
-        PerStage<std::array<uint32_t, kMaxPushConstants>> pushConstants;
-
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
-                    encoders.BeginCompute(commandBuffer);
-
-                    pushConstants[nxt::ShaderStage::Compute].fill(0);
-                    [encoders.compute setBytes:&pushConstants[nxt::ShaderStage::Compute]
-                                        length:sizeof(uint32_t) * kMaxPushConstants
-                                       atIndex:0];
+                    encoders.Finish();
+                    EncodeComputePass(commandBuffer);
                 } break;
 
                 case Command::BeginRenderPass: {
-                    BeginRenderPassCmd* beginRenderPassCmd =
-                        mCommands.NextCommand<BeginRenderPassCmd>();
-
-                    RenderPassDescriptor* info = ToBackend(beginRenderPassCmd->info.Get());
-
-                    encoders.EnsureNoBlitEncoder();
-                    encoders.BeginRenderPass(commandBuffer, info);
-
-                    pushConstants[nxt::ShaderStage::Vertex].fill(0);
-                    pushConstants[nxt::ShaderStage::Fragment].fill(0);
-
-                    [encoders.render setVertexBytes:&pushConstants[nxt::ShaderStage::Vertex]
-                                             length:sizeof(uint32_t) * kMaxPushConstants
-                                            atIndex:0];
-                    [encoders.render setFragmentBytes:&pushConstants[nxt::ShaderStage::Fragment]
-                                               length:sizeof(uint32_t) * kMaxPushConstants
-                                              atIndex:0];
+                    BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
+                    encoders.Finish();
+                    EncodeRenderPass(commandBuffer, ToBackend(cmd->info.Get()));
                 } break;
 
                 case Command::CopyBufferToBuffer: {
@@ -260,35 +304,138 @@ namespace backend { namespace metal {
                           destinationBytesPerImage:copy->rowPitch * src.height];
                 } break;
 
+                case Command::TransitionBufferUsage: {
+                    TransitionBufferUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionBufferUsageCmd>();
+
+                    cmd->buffer->UpdateUsageInternal(cmd->usage);
+                } break;
+
+                case Command::TransitionTextureUsage: {
+                    TransitionTextureUsageCmd* cmd =
+                        mCommands.NextCommand<TransitionTextureUsageCmd>();
+
+                    cmd->texture->UpdateUsageInternal(cmd->usage);
+                } break;
+
+                default: { UNREACHABLE(); } break;
+            }
+        }
+
+        encoders.Finish();
+    }
+
+    void CommandBuffer::EncodeComputePass(id<MTLCommandBuffer> commandBuffer) {
+        ComputePipeline* lastPipeline = nullptr;
+        std::array<uint32_t, kMaxPushConstants> pushConstants;
+
+        // Will be autoreleased
+        id<MTLComputeCommandEncoder> encoder = [commandBuffer computeCommandEncoder];
+
+        // Set default values for push constants
+        pushConstants.fill(0);
+        [encoder setBytes:&pushConstants length:sizeof(uint32_t) * kMaxPushConstants atIndex:0];
+
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndComputePass: {
+                    mCommands.NextCommand<EndComputePassCmd>();
+                    [encoder endEncoding];
+                    return;
+                } break;
+
                 case Command::Dispatch: {
                     DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
-                    ASSERT(encoders.compute);
+                    [encoder dispatchThreadgroups:MTLSizeMake(dispatch->x, dispatch->y, dispatch->z)
+                            threadsPerThreadgroup:lastPipeline->GetLocalWorkGroupSize()];
+                } break;
 
-                    [encoders.compute
-                         dispatchThreadgroups:MTLSizeMake(dispatch->x, dispatch->y, dispatch->z)
-                        threadsPerThreadgroup:lastComputePipeline->GetLocalWorkGroupSize()];
+                case Command::SetComputePipeline: {
+                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
+                    lastPipeline = ToBackend(cmd->pipeline).Get();
+
+                    lastPipeline->Encode(encoder);
+                } break;
+
+                case Command::SetPushConstants: {
+                    SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
+                    uint32_t* values = mCommands.NextData<uint32_t>(cmd->count);
+
+                    if (cmd->stages & nxt::ShaderStageBit::Compute) {
+                        memcpy(&pushConstants[cmd->offset], values, cmd->count * sizeof(uint32_t));
+
+                        [encoder setBytes:&pushConstants
+                                   length:sizeof(uint32_t) * kMaxPushConstants
+                                  atIndex:0];
+                    }
+                } break;
+
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+                    ApplyBindGroup(cmd->index, ToBackend(cmd->group.Get()),
+                                   ToBackend(lastPipeline->GetLayout()), nil, encoder);
+                } break;
+
+                default: { UNREACHABLE(); } break;
+            }
+        }
+
+        // EndComputePass should have been called
+        UNREACHABLE();
+    }
+
+    void CommandBuffer::EncodeRenderPass(id<MTLCommandBuffer> commandBuffer,
+                                         RenderPassDescriptorBase* renderPass) {
+        RenderPipeline* lastPipeline = nullptr;
+        id<MTLBuffer> indexBuffer = nil;
+        uint32_t indexBufferBaseOffset = 0;
+
+        std::array<uint32_t, kMaxPushConstants> vertexPushConstants;
+        std::array<uint32_t, kMaxPushConstants> fragmentPushConstants;
+
+        // This will be autoreleased
+        id<MTLRenderCommandEncoder> encoder = [commandBuffer
+            renderCommandEncoderWithDescriptor:CreateMTLRenderPassDescriptor(renderPass)];
+
+        // Set default values for push constants
+        vertexPushConstants.fill(0);
+        fragmentPushConstants.fill(0);
+
+        [encoder setVertexBytes:&vertexPushConstants
+                         length:sizeof(uint32_t) * kMaxPushConstants
+                        atIndex:0];
+        [encoder setFragmentBytes:&fragmentPushConstants
+                           length:sizeof(uint32_t) * kMaxPushConstants
+                          atIndex:0];
+
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndRenderPass: {
+                    mCommands.NextCommand<EndRenderPassCmd>();
+                    [encoder endEncoding];
+                    return;
                 } break;
 
                 case Command::DrawArrays: {
                     DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
 
-                    ASSERT(encoders.render);
-                    [encoders.render drawPrimitives:lastRenderPipeline->GetMTLPrimitiveTopology()
-                                        vertexStart:draw->firstVertex
-                                        vertexCount:draw->vertexCount
-                                      instanceCount:draw->instanceCount
-                                       baseInstance:draw->firstInstance];
+                    [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
+                                vertexStart:draw->firstVertex
+                                vertexCount:draw->vertexCount
+                              instanceCount:draw->instanceCount
+                               baseInstance:draw->firstInstance];
                 } break;
 
                 case Command::DrawElements: {
                     DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
-                    size_t formatSize = IndexFormatSize(lastRenderPipeline->GetIndexFormat());
+                    size_t formatSize = IndexFormatSize(lastPipeline->GetIndexFormat());
 
-                    ASSERT(encoders.render);
-                    [encoders.render
-                        drawIndexedPrimitives:lastRenderPipeline->GetMTLPrimitiveTopology()
+                    [encoder
+                        drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
                                    indexCount:draw->indexCount
-                                    indexType:lastRenderPipeline->GetMTLIndexType()
+                                    indexType:lastPipeline->GetMTLIndexType()
                                   indexBuffer:indexBuffer
                             indexBufferOffset:indexBufferBaseOffset + draw->firstIndex * formatSize
                                 instanceCount:draw->instanceCount
@@ -296,77 +443,40 @@ namespace backend { namespace metal {
                                  baseInstance:draw->firstInstance];
                 } break;
 
-                case Command::EndComputePass: {
-                    mCommands.NextCommand<EndComputePassCmd>();
-                    encoders.EndCompute();
-                } break;
-
-                case Command::EndRenderPass: {
-                    mCommands.NextCommand<EndRenderPassCmd>();
-                    encoders.EndRenderPass();
-                } break;
-
-                case Command::SetComputePipeline: {
-                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
-                    lastComputePipeline = ToBackend(cmd->pipeline).Get();
-
-                    ASSERT(encoders.compute);
-                    lastComputePipeline->Encode(encoders.compute);
-                } break;
-
                 case Command::SetRenderPipeline: {
                     SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
-                    lastRenderPipeline = ToBackend(cmd->pipeline).Get();
+                    lastPipeline = ToBackend(cmd->pipeline).Get();
 
-                    ASSERT(encoders.render);
                     DepthStencilState* depthStencilState =
-                        ToBackend(lastRenderPipeline->GetDepthStencilState());
-                    [encoders.render
-                        setDepthStencilState:depthStencilState->GetMTLDepthStencilState()];
-                    lastRenderPipeline->Encode(encoders.render);
+                        ToBackend(lastPipeline->GetDepthStencilState());
+                    [encoder setDepthStencilState:depthStencilState->GetMTLDepthStencilState()];
+                    lastPipeline->Encode(encoder);
                 } break;
 
                 case Command::SetPushConstants: {
                     SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
                     uint32_t* values = mCommands.NextData<uint32_t>(cmd->count);
 
-                    for (auto stage : IterateStages(cmd->stages)) {
-                        memcpy(&pushConstants[stage][cmd->offset], values,
+                    if (cmd->stages & nxt::ShaderStageBit::Vertex) {
+                        memcpy(&vertexPushConstants[cmd->offset], values,
                                cmd->count * sizeof(uint32_t));
+                        [encoder setVertexBytes:&vertexPushConstants
+                                         length:sizeof(uint32_t) * kMaxPushConstants
+                                        atIndex:0];
+                    }
 
-                        switch (stage) {
-                            case nxt::ShaderStage::Compute:
-                                ASSERT(encoders.compute);
-                                [encoders.compute setBytes:&pushConstants[nxt::ShaderStage::Compute]
-                                                    length:sizeof(uint32_t) * kMaxPushConstants
-                                                   atIndex:0];
-                                break;
-                            case nxt::ShaderStage::Fragment:
-                                ASSERT(encoders.render);
-                                [encoders.render
-                                    setFragmentBytes:&pushConstants[nxt::ShaderStage::Fragment]
-                                              length:sizeof(uint32_t) * kMaxPushConstants
-                                             atIndex:0];
-                                break;
-                            case nxt::ShaderStage::Vertex:
-                                ASSERT(encoders.render);
-                                [encoders.render
-                                    setVertexBytes:&pushConstants[nxt::ShaderStage::Vertex]
-                                            length:sizeof(uint32_t) * kMaxPushConstants
-                                           atIndex:0];
-                                break;
-                            default:
-                                UNREACHABLE();
-                                break;
-                        }
+                    if (cmd->stages & nxt::ShaderStageBit::Fragment) {
+                        memcpy(&fragmentPushConstants[cmd->offset], values,
+                               cmd->count * sizeof(uint32_t));
+                        [encoder setFragmentBytes:&fragmentPushConstants
+                                           length:sizeof(uint32_t) * kMaxPushConstants
+                                          atIndex:0];
                     }
                 } break;
 
                 case Command::SetStencilReference: {
                     SetStencilReferenceCmd* cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
-
-                    ASSERT(encoders.render);
-                    [encoders.render setStencilReferenceValue:cmd->reference];
+                    [encoder setStencilReferenceValue:cmd->reference];
                 } break;
 
                 case Command::SetScissorRect: {
@@ -377,123 +487,18 @@ namespace backend { namespace metal {
                     rect.width = cmd->width;
                     rect.height = cmd->height;
 
-                    ASSERT(encoders.render);
-                    [encoders.render setScissorRect:rect];
+                    [encoder setScissorRect:rect];
                 } break;
 
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
-
-                    ASSERT(encoders.render);
-                    [encoders.render setBlendColorRed:cmd->r green:cmd->g blue:cmd->b alpha:cmd->a];
+                    [encoder setBlendColorRed:cmd->r green:cmd->g blue:cmd->b alpha:cmd->a];
                 } break;
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    BindGroup* group = ToBackend(cmd->group.Get());
-                    uint32_t groupIndex = cmd->index;
-
-                    const auto& layout = group->GetLayout()->GetBindingInfo();
-
-                    // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup
-                    // so that we only have to do one setVertexBuffers and one setFragmentBuffers
-                    // call here.
-                    for (size_t binding = 0; binding < layout.mask.size(); ++binding) {
-                        if (!layout.mask[binding]) {
-                            continue;
-                        }
-
-                        auto stage = layout.visibilities[binding];
-                        bool vertStage =
-                            stage & nxt::ShaderStageBit::Vertex && lastRenderPipeline != nullptr;
-                        bool fragStage =
-                            stage & nxt::ShaderStageBit::Fragment && lastRenderPipeline != nullptr;
-                        bool computeStage =
-                            stage & nxt::ShaderStageBit::Compute && lastComputePipeline != nullptr;
-                        uint32_t vertIndex = 0;
-                        uint32_t fragIndex = 0;
-                        uint32_t computeIndex = 0;
-                        if (vertStage) {
-                            ASSERT(lastRenderPipeline != nullptr);
-                            vertIndex = ToBackend(lastRenderPipeline->GetLayout())
-                                            ->GetBindingIndexInfo(
-                                                nxt::ShaderStage::Vertex)[groupIndex][binding];
-                        }
-                        if (fragStage) {
-                            ASSERT(lastRenderPipeline != nullptr);
-                            fragIndex = ToBackend(lastRenderPipeline->GetLayout())
-                                            ->GetBindingIndexInfo(
-                                                nxt::ShaderStage::Fragment)[groupIndex][binding];
-                        }
-                        if (computeStage) {
-                            ASSERT(lastComputePipeline != nullptr);
-                            computeIndex = ToBackend(lastComputePipeline->GetLayout())
-                                               ->GetBindingIndexInfo(
-                                                   nxt::ShaderStage::Compute)[groupIndex][binding];
-                        }
-
-                        switch (layout.types[binding]) {
-                            case nxt::BindingType::UniformBuffer:
-                            case nxt::BindingType::StorageBuffer: {
-                                BufferView* view =
-                                    ToBackend(group->GetBindingAsBufferView(binding));
-                                auto b = ToBackend(view->GetBuffer());
-                                const id<MTLBuffer> buffer = b->GetMTLBuffer();
-                                const NSUInteger offset = view->GetOffset();
-                                if (vertStage) {
-                                    [encoders.render setVertexBuffers:&buffer
-                                                              offsets:&offset
-                                                            withRange:NSMakeRange(vertIndex, 1)];
-                                }
-                                if (fragStage) {
-                                    [encoders.render setFragmentBuffers:&buffer
-                                                                offsets:&offset
-                                                              withRange:NSMakeRange(fragIndex, 1)];
-                                }
-                                if (computeStage) {
-                                    [encoders.compute setBuffers:&buffer
-                                                         offsets:&offset
-                                                       withRange:NSMakeRange(computeIndex, 1)];
-                                }
-
-                            } break;
-
-                            case nxt::BindingType::Sampler: {
-                                auto sampler = ToBackend(group->GetBindingAsSampler(binding));
-                                if (vertStage) {
-                                    [encoders.render
-                                        setVertexSamplerState:sampler->GetMTLSamplerState()
-                                                      atIndex:vertIndex];
-                                }
-                                if (fragStage) {
-                                    [encoders.render
-                                        setFragmentSamplerState:sampler->GetMTLSamplerState()
-                                                        atIndex:fragIndex];
-                                }
-                                if (computeStage) {
-                                    [encoders.compute setSamplerState:sampler->GetMTLSamplerState()
-                                                              atIndex:computeIndex];
-                                }
-                            } break;
-
-                            case nxt::BindingType::SampledTexture: {
-                                auto texture = ToBackend(
-                                    group->GetBindingAsTextureView(binding)->GetTexture());
-                                if (vertStage) {
-                                    [encoders.render setVertexTexture:texture->GetMTLTexture()
-                                                              atIndex:vertIndex];
-                                }
-                                if (fragStage) {
-                                    [encoders.render setFragmentTexture:texture->GetMTLTexture()
-                                                                atIndex:fragIndex];
-                                }
-                                if (computeStage) {
-                                    [encoders.compute setTexture:texture->GetMTLTexture()
-                                                         atIndex:computeIndex];
-                                }
-                            } break;
-                        }
-                    }
+                    ApplyBindGroup(cmd->index, ToBackend(cmd->group.Get()),
+                                   ToBackend(lastPipeline->GetLayout()), encoder, nil);
                 } break;
 
                 case Command::SetIndexBuffer: {
@@ -519,33 +524,18 @@ namespace backend { namespace metal {
                         mtlOffsets[i] = offsets[i];
                     }
 
-                    ASSERT(encoders.render);
-                    [encoders.render
-                        setVertexBuffers:mtlBuffers.data()
-                                 offsets:mtlOffsets.data()
-                               withRange:NSMakeRange(kMaxBindingsPerGroup + cmd->startSlot,
-                                                     cmd->count)];
+                    [encoder setVertexBuffers:mtlBuffers.data()
+                                      offsets:mtlOffsets.data()
+                                    withRange:NSMakeRange(kMaxBindingsPerGroup + cmd->startSlot,
+                                                          cmd->count)];
                 } break;
 
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionBufferUsageCmd>();
-
-                    cmd->buffer->UpdateUsageInternal(cmd->usage);
-                } break;
-
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionTextureUsageCmd>();
-
-                    cmd->texture->UpdateUsageInternal(cmd->usage);
-                } break;
+                default: { UNREACHABLE(); } break;
             }
         }
 
-        encoders.EnsureNoBlitEncoder();
-        ASSERT(encoders.render == nil);
-        ASSERT(encoders.compute == nil);
+        // EndRenderPass should have been called
+        UNREACHABLE();
     }
 
 }}  // namespace backend::metal

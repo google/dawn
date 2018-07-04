@@ -19,6 +19,10 @@
 
 #import <Metal/Metal.h>
 
+namespace backend {
+    class RenderPassDescriptorBase;
+}
+
 namespace backend { namespace metal {
 
     class Device;
@@ -31,6 +35,10 @@ namespace backend { namespace metal {
         void FillCommands(id<MTLCommandBuffer> commandBuffer);
 
       private:
+        void EncodeComputePass(id<MTLCommandBuffer> commandBuffer);
+        void EncodeRenderPass(id<MTLCommandBuffer> commandBuffer,
+                              RenderPassDescriptorBase* renderPass);
+
         Device* mDevice;
         CommandIterator mCommands;
     };
