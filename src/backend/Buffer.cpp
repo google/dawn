@@ -164,11 +164,8 @@ namespace backend {
     }
 
     bool BufferBase::IsUsagePossible(nxt::BufferUsageBit allowedUsage, nxt::BufferUsageBit usage) {
-        const nxt::BufferUsageBit allReadBits =
-            nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferSrc |
-            nxt::BufferUsageBit::Index | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Uniform;
         bool allowed = (usage & allowedUsage) == usage;
-        bool readOnly = (usage & allReadBits) == usage;
+        bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
         bool singleUse = nxt::HasZeroOrOneBits(usage);
         return allowed && (readOnly || singleUse);
     }

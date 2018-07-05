@@ -53,16 +53,23 @@ namespace nxt {
     struct LowerBitmask<T, typename std::enable_if<IsNXTBitmask<T>::enable>::type> {
         static constexpr bool enable = true;
         using type = T;
-        static T Lower(T t) {return t;}
+        constexpr static T Lower(T t) {
+            return t;
+        }
     };
 
     template<typename T>
     struct BoolConvertible {
         using Integral = typename UnderlyingType<T>::type;
 
-        BoolConvertible(Integral value) : value(value) {}
-        operator bool() const {return value != 0;}
-        operator T() const {return static_cast<T>(value);}
+        constexpr BoolConvertible(Integral value) : value(value) {
+        }
+        constexpr operator bool() const {
+            return value != 0;
+        }
+        constexpr operator T() const {
+            return static_cast<T>(value);
+        }
 
         Integral value;
     };
@@ -71,7 +78,9 @@ namespace nxt {
     struct LowerBitmask<BoolConvertible<T>> {
         static constexpr bool enable = true;
         using type = T;
-        static type Lower(BoolConvertible<T> t) {return t;}
+        static constexpr type Lower(BoolConvertible<T> t) {
+            return t;
+        }
     };
 
     template<typename T>
@@ -117,33 +126,35 @@ namespace nxt {
         return ~static_cast<Integral>(LowerBitmask<T1>::Lower(t));
     }
 
-    template<typename T, typename T2, typename = typename std::enable_if<
-        IsNXTBitmask<T>::enable && LowerBitmask<T2>::enable
-    >::type>
-    T& operator &= (T& l, T2 right) {
+    template <typename T,
+              typename T2,
+              typename = typename std::enable_if<IsNXTBitmask<T>::enable &&
+                                                 LowerBitmask<T2>::enable>::type>
+    constexpr T& operator&=(T& l, T2 right) {
         T r = LowerBitmask<T2>::Lower(right);
         l = l & r;
         return l;
     }
 
-    template<typename T, typename T2, typename = typename std::enable_if<
-        IsNXTBitmask<T>::enable && LowerBitmask<T2>::enable
-    >::type>
-    T& operator |= (T& l, T2 right) {
+    template <typename T,
+              typename T2,
+              typename = typename std::enable_if<IsNXTBitmask<T>::enable &&
+                                                 LowerBitmask<T2>::enable>::type>
+    constexpr T& operator|=(T& l, T2 right) {
         T r = LowerBitmask<T2>::Lower(right);
         l = l | r;
         return l;
     }
 
-    template<typename T, typename T2, typename = typename std::enable_if<
-        IsNXTBitmask<T>::enable && LowerBitmask<T2>::enable
-    >::type>
-    T& operator ^= (T& l, T2 right) {
+    template <typename T,
+              typename T2,
+              typename = typename std::enable_if<IsNXTBitmask<T>::enable &&
+                                                 LowerBitmask<T2>::enable>::type>
+    constexpr T& operator^=(T& l, T2 right) {
         T r = LowerBitmask<T2>::Lower(right);
         l = l ^ r;
         return l;
     }
-
 }
 
 #endif // NXT_ENUM_CLASS_BITMASKS_H_

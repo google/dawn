@@ -23,6 +23,14 @@
 
 namespace backend {
 
+    static constexpr nxt::BufferUsageBit kReadOnlyBufferUsages =
+        nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferSrc |
+        nxt::BufferUsageBit::Index | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Uniform;
+
+    static constexpr nxt::BufferUsageBit kWritableBufferUsages = nxt::BufferUsageBit::MapWrite |
+                                                                 nxt::BufferUsageBit::TransferDst |
+                                                                 nxt::BufferUsageBit::Storage;
+
     class BufferBase : public RefCounted {
       public:
         BufferBase(BufferBuilder* builder);
