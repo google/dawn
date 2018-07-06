@@ -111,15 +111,4 @@ namespace backend { namespace opengl {
     void Device::TickImpl() {
     }
 
-    // Queue
-
-    Queue::Queue(Device* device) : QueueBase(device) {
-    }
-
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
-        for (uint32_t i = 0; i < numCommands; ++i) {
-            commands[i]->Execute();
-        }
-    }
-
 }}  // namespace backend::opengl
