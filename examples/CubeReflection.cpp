@@ -280,9 +280,10 @@ void frame() {
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+        .TransitionBufferUsage(cameraBuffer, nxt::BufferUsageBit::Uniform)
+
         .BeginRenderPass(renderPass)
             .SetRenderPipeline(pipeline)
-            .TransitionBufferUsage(cameraBuffer, nxt::BufferUsageBit::Uniform)
             .SetBindGroup(0, bindGroup[0])
             .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
             .SetIndexBuffer(indexBuffer, 0)
