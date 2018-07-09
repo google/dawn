@@ -169,7 +169,7 @@ class PrimitiveTopologyTest : public NXTTest {
                 .SetInput(0, 4 * sizeof(float), nxt::InputStepMode::Vertex)
                 .GetResult();
 
-            vertexBuffer = utils::CreateFrozenBufferFromData(device, kVertices, sizeof(kVertices), nxt::BufferUsageBit::Vertex);
+            vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices), nxt::BufferUsageBit::Vertex);
         }
 
         struct LocationSpec {
@@ -193,7 +193,6 @@ class PrimitiveTopologyTest : public NXTTest {
                 .SetPrimitiveTopology(primitiveTopology)
                 .GetResult();
 
-            renderPass.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
             static const uint32_t zeroOffset = 0;
             nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
                 .BeginRenderPass(renderPass.renderPassInfo)

@@ -408,18 +408,6 @@ namespace backend { namespace d3d12 {
                     }
                 } break;
 
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionBufferUsageCmd>();
-                    cmd->buffer->UpdateUsageInternal(cmd->usage);
-                } break;
-
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionTextureUsageCmd>();
-                    cmd->texture->UpdateUsageInternal(cmd->usage);
-                } break;
-
                 default: { UNREACHABLE(); } break;
             }
         }
@@ -464,6 +452,7 @@ namespace backend { namespace d3d12 {
             }
         }
     }
+
     void CommandBuffer::RecordRenderPass(ComPtr<ID3D12GraphicsCommandList> commandList,
                                          BindGroupStateTracker* bindingTracker,
                                          RenderPassDescriptor* renderPass) {
@@ -471,13 +460,6 @@ namespace backend { namespace d3d12 {
         {
             for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
                 auto& attachmentInfo = renderPass->GetColorAttachment(i);
-                Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
-
-                // It's already validated that this texture is either frozen to the correct
-                // usage, or not frozen.
-                if (!texture->IsFrozen()) {
-                    texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
-                }
 
                 // Load op - color
                 if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
@@ -490,12 +472,6 @@ namespace backend { namespace d3d12 {
             if (renderPass->HasDepthStencilAttachment()) {
                 auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
                 Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
-
-                // It's already validated that this texture is either frozen to the correct
-                // usage, or not frozen.
-                if (!texture->IsFrozen()) {
-                    texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
-                }
 
                 // Load op - depth/stencil
                 bool doDepthClear = TextureFormatHasDepth(texture->GetFormat()) &&

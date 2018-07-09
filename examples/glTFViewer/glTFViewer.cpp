@@ -125,7 +125,6 @@ namespace {
             .SetAllowedUsage(nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Index)
             .SetSize(256)
             .GetResult();
-        defaultBuffer.FreezeUsage(nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Index);
 
         for (const auto& bv : scene.bufferViews) {
             const auto& iBufferViewID = bv.first;
@@ -151,7 +150,7 @@ namespace {
             size_t iBufferViewSize =
                 iBufferView.byteLength ? iBufferView.byteLength :
                 (iBuffer.data.size() - iBufferView.byteOffset);
-            auto oBuffer = utils::CreateFrozenBufferFromData(device, &iBuffer.data.at(iBufferView.byteOffset), static_cast<uint32_t>(iBufferViewSize), usage);
+            auto oBuffer = utils::CreateBufferFromData(device, &iBuffer.data.at(iBufferView.byteOffset), static_cast<uint32_t>(iBufferViewSize), usage);
             buffers[iBufferViewID] = std::move(oBuffer);
         }
     }
@@ -299,7 +298,6 @@ namespace {
 
         auto uniformBuffer = device.CreateBufferBuilder()
             .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Uniform)
-            .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
             .SetSize(sizeof(u_transform_block))
             .GetResult();
 
@@ -440,13 +438,11 @@ namespace {
                 fprintf(stderr, "unsupported image.component %d\n", iImage.component);
             }
 
-            nxt::Buffer staging = utils::CreateFrozenBufferFromData(device, data, rowPitch * iImage.height, nxt::BufferUsageBit::TransferSrc);
+            nxt::Buffer staging = utils::CreateBufferFromData(device, data, rowPitch * iImage.height, nxt::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
-                .TransitionTextureUsage(oTexture, nxt::TextureUsageBit::TransferDst)
                 .CopyBufferToTexture(staging, 0, rowPitch, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)
                 .GetResult();
             queue.Submit(1, &cmdbuf);
-            oTexture.FreezeUsage(nxt::TextureUsageBit::Sampled);
 
             textures[iTextureID] = oTexture.CreateTextureViewBuilder().GetResult();
         }
@@ -494,7 +490,6 @@ namespace {
                 }
             }
             const MaterialInfo& material = getMaterial(iPrim.material, strides[0], strides[1], strides[2]);
-            material.uniformBuffer.TransitionUsage(nxt::BufferUsageBit::TransferDst);
             // TODO(cwallez@google.com): This is updating the uniform buffer with a device-level command
             // but the draw is queue level command that is pipelined. This causes bad rendering for models
             // that use the same part multiple time.
@@ -502,7 +497,6 @@ namespace {
                     sizeof(u_transform_block),
                     reinterpret_cast<const uint8_t*>(&transforms));
             cmd.SetRenderPipeline(material.pipeline);
-            cmd.TransitionBufferUsage(material.uniformBuffer, nxt::BufferUsageBit::Uniform);
             cmd.SetBindGroup(0, material.bindGroup0);
 
             uint32_t vertexCount = 0;
@@ -591,7 +585,6 @@ namespace {
             .GetResult();
         queue.Submit(1, &commands);
 
-        backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
         swapchain.Present(backbuffer);
         DoFlush();
     }

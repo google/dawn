@@ -28,7 +28,6 @@ nxt::TextureView Create2DAttachment(nxt::Device& device, uint32_t width, uint32_
         .SetFormat(format)
         .SetMipLevels(1)
         .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
-        .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
         .GetResult();
 
     return attachment.CreateTextureViewBuilder()

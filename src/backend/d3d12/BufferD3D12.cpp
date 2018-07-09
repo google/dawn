@@ -198,9 +198,6 @@ namespace backend { namespace d3d12 {
         ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
-    }
-
     BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
         mCbvDesc.BufferLocation = ToBackend(GetBuffer())->GetVA() + GetOffset();
         mCbvDesc.SizeInBytes = GetD3D12Size();

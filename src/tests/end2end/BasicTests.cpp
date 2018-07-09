@@ -25,7 +25,6 @@ TEST_P(BasicTests, BufferSetSubData) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4)
         .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t value = 187;

@@ -122,9 +122,8 @@ namespace backend { namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage(), GetFormat());
 
-        mResource =
-            mDevice->GetResourceAllocator()->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
-                                                      D3D12TextureUsage(GetUsage(), GetFormat()));
+        mResource = mDevice->GetResourceAllocator()->Allocate(
+            D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12_RESOURCE_STATE_COMMON);
         mResourcePtr = mResource.Get();
     }
 
@@ -172,9 +171,6 @@ namespace backend { namespace d3d12 {
         commandList->ResourceBarrier(1, &barrier);
 
         mLastUsage = usage;
-    }
-
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
     TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {

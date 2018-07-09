@@ -37,9 +37,6 @@ namespace backend { namespace opengl {
         GLenum GetGLTarget() const;
         TextureFormatInfo GetGLFormat() const;
 
-        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                 nxt::TextureUsageBit targetUsage) override;
-
       private:
         GLuint mHandle;
         GLenum mTarget;

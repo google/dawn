@@ -46,21 +46,18 @@ class BufferValidationTest : public ValidationTest {
             return device.CreateBufferBuilder()
                 .SetSize(size)
                 .SetAllowedUsage(nxt::BufferUsageBit::MapRead)
-                .SetInitialUsage(nxt::BufferUsageBit::MapRead)
                 .GetResult();
         }
         nxt::Buffer CreateMapWriteBuffer(uint32_t size) {
             return device.CreateBufferBuilder()
                 .SetSize(size)
                 .SetAllowedUsage(nxt::BufferUsageBit::MapWrite)
-                .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
                 .GetResult();
         }
         nxt::Buffer CreateSetSubDataBuffer(uint32_t size) {
             return device.CreateBufferBuilder()
                 .SetSize(size)
                 .SetAllowedUsage(nxt::BufferUsageBit::TransferDst)
-                .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
                 .GetResult();
         }
 
@@ -90,15 +87,6 @@ TEST_F(BufferValidationTest, CreationSuccess) {
         nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder())
             .SetSize(4)
             .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
-            .SetInitialUsage(nxt::BufferUsageBit::Uniform)
-            .GetResult();
-    }
-
-    // Success, when no initial usage is set
-    {
-        nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder())
-            .SetSize(4)
-            .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
             .GetResult();
     }
 }
@@ -111,7 +99,6 @@ TEST_F(BufferValidationTest, CreationDuplicates) {
             .SetSize(4)
             .SetSize(3)
             .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
-            .SetInitialUsage(nxt::BufferUsageBit::Uniform)
             .GetResult();
     }
 
@@ -121,28 +108,8 @@ TEST_F(BufferValidationTest, CreationDuplicates) {
             .SetSize(4)
             .SetAllowedUsage(nxt::BufferUsageBit::Vertex)
             .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
-            .SetInitialUsage(nxt::BufferUsageBit::Uniform)
             .GetResult();
     }
-
-    // When initial usage is specified multiple times
-    {
-        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
-            .SetSize(4)
-            .SetAllowedUsage(nxt::BufferUsageBit::Uniform | nxt::BufferUsageBit::Vertex)
-            .SetInitialUsage(nxt::BufferUsageBit::Uniform)
-            .SetInitialUsage(nxt::BufferUsageBit::Vertex)
-            .GetResult();
-    }
-}
-
-// Test failure when the initial usage isn't a subset of the allowed usage
-TEST_F(BufferValidationTest, CreationInitialNotSubsetOfAllowed) {
-        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
-            .SetSize(4)
-            .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
-            .SetInitialUsage(nxt::BufferUsageBit::Vertex)
-            .GetResult();
 }
 
 // Test failure when required properties are missing
@@ -251,8 +218,7 @@ TEST_F(BufferValidationTest, MapWriteOutOfRange) {
 TEST_F(BufferValidationTest, MapReadWrongUsage) {
     nxt::Buffer buf = device.CreateBufferBuilder()
         .SetSize(4)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     nxt::CallbackUserdata userdata = 40600;
@@ -266,8 +232,7 @@ TEST_F(BufferValidationTest, MapReadWrongUsage) {
 TEST_F(BufferValidationTest, MapWriteWrongUsage) {
     nxt::Buffer buf = device.CreateBufferBuilder()
         .SetSize(4)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferSrc)
+        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc)
         .GetResult();
 
     nxt::CallbackUserdata userdata = 40600;
@@ -505,8 +470,7 @@ TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
 TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
     nxt::Buffer buf = device.CreateBufferBuilder()
         .SetSize(1)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Vertex)
-        .SetInitialUsage(nxt::BufferUsageBit::Vertex)
+        .SetAllowedUsage(nxt::BufferUsageBit::Vertex)
         .GetResult();
 
     uint8_t foo = 0;

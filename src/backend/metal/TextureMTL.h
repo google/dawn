@@ -31,9 +31,6 @@ namespace backend { namespace metal {
 
         id<MTLTexture> GetMTLTexture();
 
-        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                 nxt::TextureUsageBit targetUsage) override;
-
       private:
         id<MTLTexture> mMtlTexture = nil;
     };

@@ -111,16 +111,6 @@ namespace backend {
                     commands->NextData<uint32_t>(cmd->count);
                     cmd->~SetVertexBuffersCmd();
                 } break;
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        commands->NextCommand<TransitionBufferUsageCmd>();
-                    cmd->~TransitionBufferUsageCmd();
-                } break;
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        commands->NextCommand<TransitionTextureUsageCmd>();
-                    cmd->~TransitionTextureUsageCmd();
-                } break;
             }
         }
         commands->DataWasDestroyed();
@@ -206,14 +196,6 @@ namespace backend {
                 commands->NextData<Ref<BufferBase>>(cmd->count);
                 commands->NextData<uint32_t>(cmd->count);
             } break;
-
-            case Command::TransitionBufferUsage:
-                commands->NextCommand<TransitionBufferUsageCmd>();
-                break;
-
-            case Command::TransitionTextureUsage:
-                commands->NextCommand<TransitionTextureUsageCmd>();
-                break;
         }
     }
 

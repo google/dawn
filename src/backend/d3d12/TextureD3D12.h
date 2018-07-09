@@ -38,9 +38,6 @@ namespace backend { namespace d3d12 {
                                 nxt::TextureUsageBit usage);
 
       private:
-        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                 nxt::TextureUsageBit targetUsage) override;
-
         Device* mDevice;
         ComPtr<ID3D12Resource> mResource = {};
         ID3D12Resource* mResourcePtr = nullptr;

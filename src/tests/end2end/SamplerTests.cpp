@@ -41,7 +41,6 @@ protected:
     void SetUp() override {
         NXTTest::SetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
-        mRenderPass.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
 
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {
@@ -97,14 +96,12 @@ protected:
         data[0] = data[rowPixels + 1] = black;
         data[1] = data[rowPixels] = white;
 
-        nxt::Buffer stagingBuffer = utils::CreateFrozenBufferFromData(device, data, sizeof(data), nxt::BufferUsageBit::TransferSrc);
+        nxt::Buffer stagingBuffer = utils::CreateBufferFromData(device, data, sizeof(data), nxt::BufferUsageBit::TransferSrc);
         nxt::CommandBuffer copy = device.CreateCommandBufferBuilder()
-            .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
             .CopyBufferToTexture(stagingBuffer, 0, 256, texture, 0, 0, 0, 2, 2, 1, 0)
             .GetResult();
 
         queue.Submit(1, &copy);
-        texture.FreezeUsage(nxt::TextureUsageBit::Sampled);
         mTextureView = texture.CreateTextureViewBuilder().GetResult();
     }
 

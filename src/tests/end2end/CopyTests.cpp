@@ -89,12 +89,11 @@ class CopyTests_T2B : public CopyTests {
             // Create an upload buffer and use it to populate the `level` mip of the texture
             std::vector<RGBA8> textureData(texelCount);
             FillTextureData(width, height, rowPitch / kBytesPerTexel, textureData.data());
-            nxt::Buffer uploadBuffer = utils::CreateFrozenBufferFromData(device, textureData.data(), static_cast<uint32_t>(sizeof(RGBA8) * textureData.size()), nxt::BufferUsageBit::TransferSrc);
+            nxt::Buffer uploadBuffer = utils::CreateBufferFromData(device, textureData.data(), static_cast<uint32_t>(sizeof(RGBA8) * textureData.size()), nxt::BufferUsageBit::TransferSrc);
 
             nxt::CommandBuffer commands[2];
 
             commands[0] = device.CreateCommandBufferBuilder()
-                .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
                 .CopyBufferToTexture(uploadBuffer, 0, rowPitch, texture, 0, 0, 0, width, height, 1, textureSpec.level)
                 .GetResult();
 
@@ -104,15 +103,12 @@ class CopyTests_T2B : public CopyTests {
             nxt::Buffer buffer = device.CreateBufferBuilder()
                 .SetSize(bufferSpec.size)
                 .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
-                .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
                 .GetResult();
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel);
             buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(emptyData.data()));
 
             // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level` mip into the buffer at the specified `offset` and `rowPitch`
             commands[1] = device.CreateCommandBufferBuilder()
-                .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferSrc)
-                .TransitionBufferUsage(buffer, nxt::BufferUsageBit::TransferDst)
                 .CopyTextureToBuffer(texture, textureSpec.x, textureSpec.y, 0, textureSpec.copyWidth, textureSpec.copyHeight, 1, textureSpec.level, buffer, bufferSpec.offset, bufferSpec.rowPitch)
                 .GetResult();
 
@@ -154,7 +150,6 @@ protected:
         nxt::Buffer buffer = device.CreateBufferBuilder()
             .SetSize(bufferSpec.size)
             .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
-            .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
             .GetResult();
         std::vector<RGBA8> bufferData(bufferSpec.size / kBytesPerTexel);
         FillBufferData(bufferData.data(), bufferData.size());
@@ -182,18 +177,15 @@ protected:
             uint32_t texelCount = texelsPerRow * (height - 1) + width;
 
             std::vector<RGBA8> emptyData(texelCount);
-            nxt::Buffer uploadBuffer = utils::CreateFrozenBufferFromData(device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()), nxt::BufferUsageBit::TransferSrc);
+            nxt::Buffer uploadBuffer = utils::CreateBufferFromData(device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()), nxt::BufferUsageBit::TransferSrc);
 
             commands[0] = device.CreateCommandBufferBuilder()
-                .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
                 .CopyBufferToTexture(uploadBuffer, 0, rowPitch, texture, 0, 0, 0, width, height, 1, textureSpec.level)
                 .GetResult();
         }
 
         // Copy to the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] at the `level` mip from the buffer at the specified `offset` and `rowPitch`
         commands[1] = device.CreateCommandBufferBuilder()
-            .TransitionBufferUsage(buffer, nxt::BufferUsageBit::TransferSrc)
-            .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
             .CopyBufferToTexture(buffer, bufferSpec.offset, bufferSpec.rowPitch, texture, textureSpec.x, textureSpec.y, 0, textureSpec.copyWidth, textureSpec.copyHeight, 1, textureSpec.level)
             .GetResult();
 

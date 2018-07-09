@@ -221,18 +221,6 @@
             },
             {
                 "name": "unmap"
-            },
-            {
-                "name": "transition usage",
-                "args": [
-                    {"name": "usage", "type": "buffer usage bit"}
-                ]
-            },
-            {
-                "name": "freeze usage",
-                "args": [
-                    {"name": "usage", "type": "buffer usage bit"}
-                ]
             }
         ]
     },
@@ -245,12 +233,6 @@
             },
             {
                 "name": "set allowed usage",
-                "args": [
-                    {"name": "usage", "type": "buffer usage bit"}
-                ]
-            },
-            {
-                "name": "set initial usage",
                 "args": [
                     {"name": "usage", "type": "buffer usage bit"}
                 ]
@@ -506,20 +488,6 @@
                     {"name": "count", "type": "uint32_t"},
                     {"name": "buffers", "type": "buffer", "annotation": "const*", "length": "count"},
                     {"name": "offsets", "type": "uint32_t", "annotation": "const*", "length": "count"}
-                ]
-            },
-            {
-                "name": "transition buffer usage",
-                "args": [
-                    {"name": "buffer", "type": "buffer"},
-                    {"name": "usage", "type": "buffer usage bit"}
-                ]
-            },
-            {
-                "name": "transition texture usage",
-                "args": [
-                    {"name": "texture", "type": "texture"},
-                    {"name": "usage", "type": "texture usage bit"}
                 ]
             }
         ]
@@ -1033,18 +1001,6 @@
             {
                 "name": "create texture view builder",
                 "returns": "texture view builder"
-            },
-            {
-                "name": "transition usage",
-                "args": [
-                    {"name": "usage", "type": "texture usage bit"}
-                ]
-            },
-            {
-                "name": "freeze usage",
-                "args": [
-                    {"name": "usage", "type": "texture usage bit"}
-                ]
             }
         ]
     },
@@ -1083,12 +1039,6 @@
             },
             {
                 "name": "set allowed usage",
-                "args": [
-                    {"name": "usage", "type": "texture usage bit"}
-                ]
-            },
-            {
-                "name": "set initial usage",
                 "args": [
                     {"name": "usage", "type": "texture usage bit"}
                 ]

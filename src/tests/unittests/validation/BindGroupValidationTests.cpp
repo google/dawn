@@ -26,7 +26,6 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
     auto buffer = device.CreateBufferBuilder()
         .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
-        .SetInitialUsage(nxt::BufferUsageBit::Uniform)
         .SetSize(512)
         .GetResult();
 

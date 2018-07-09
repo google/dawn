@@ -40,9 +40,6 @@ namespace backend { namespace vulkan {
         void TransitionUsageNow(VkCommandBuffer commands, nxt::TextureUsageBit usage);
 
       private:
-        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                 nxt::TextureUsageBit targetUsage) override;
-
         VkImage mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;
 

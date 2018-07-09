@@ -75,8 +75,7 @@ namespace backend {
           mHeight(builder->mHeight),
           mDepth(builder->mDepth),
           mNumMipLevels(builder->mNumMipLevels),
-          mAllowedUsage(builder->mAllowedUsage),
-          mCurrentUsage(builder->mCurrentUsage) {
+          mAllowedUsage(builder->mAllowedUsage) {
     }
 
     DeviceBase* TextureBase::GetDevice() const {
@@ -104,62 +103,9 @@ namespace backend {
     nxt::TextureUsageBit TextureBase::GetAllowedUsage() const {
         return mAllowedUsage;
     }
-    nxt::TextureUsageBit TextureBase::GetUsage() const {
-        return mCurrentUsage;
-    }
 
     TextureViewBuilder* TextureBase::CreateTextureViewBuilder() {
         return new TextureViewBuilder(mDevice, this);
-    }
-
-    bool TextureBase::IsFrozen() const {
-        return mIsFrozen;
-    }
-
-    bool TextureBase::HasFrozenUsage(nxt::TextureUsageBit usage) const {
-        return mIsFrozen && (usage & mAllowedUsage);
-    }
-
-    bool TextureBase::IsUsagePossible(nxt::TextureUsageBit allowedUsage,
-                                      nxt::TextureUsageBit usage) {
-        bool allowed = (usage & allowedUsage) == usage;
-        bool singleUse = nxt::HasZeroOrOneBits(usage);
-        return allowed && singleUse;
-    }
-
-    bool TextureBase::IsTransitionPossible(nxt::TextureUsageBit usage) const {
-        if (mIsFrozen) {
-            return false;
-        }
-        if (mCurrentUsage == nxt::TextureUsageBit::Present) {
-            return false;
-        }
-        return IsUsagePossible(mAllowedUsage, usage);
-    }
-
-    void TextureBase::UpdateUsageInternal(nxt::TextureUsageBit usage) {
-        ASSERT(IsTransitionPossible(usage));
-        mCurrentUsage = usage;
-    }
-
-    void TextureBase::TransitionUsage(nxt::TextureUsageBit usage) {
-        if (!IsTransitionPossible(usage)) {
-            mDevice->HandleError("Texture frozen or usage not allowed");
-            return;
-        }
-        TransitionUsageImpl(mCurrentUsage, usage);
-        UpdateUsageInternal(usage);
-    }
-
-    void TextureBase::FreezeUsage(nxt::TextureUsageBit usage) {
-        if (!IsTransitionPossible(usage)) {
-            mDevice->HandleError("Texture frozen or usage not allowed");
-            return;
-        }
-        mAllowedUsage = usage;
-        TransitionUsageImpl(mCurrentUsage, usage);
-        UpdateUsageInternal(usage);
-        mIsFrozen = true;
     }
 
     // TextureBuilder
@@ -170,7 +116,6 @@ namespace backend {
         TEXTURE_PROPERTY_FORMAT = 0x4,
         TEXTURE_PROPERTY_MIP_LEVELS = 0x8,
         TEXTURE_PROPERTY_ALLOWED_USAGE = 0x10,
-        TEXTURE_PROPERTY_INITIAL_USAGE = 0x20,
     };
 
     TextureBuilder::TextureBuilder(DeviceBase* device) : Builder(device) {
@@ -182,11 +127,6 @@ namespace backend {
                                       TEXTURE_PROPERTY_ALLOWED_USAGE;
         if ((mPropertiesSet & allProperties) != allProperties) {
             HandleError("Texture missing properties");
-            return nullptr;
-        }
-
-        if (!TextureBase::IsUsagePossible(mAllowedUsage, mCurrentUsage)) {
-            HandleError("Initial texture usage is not allowed");
             return nullptr;
         }
 
@@ -250,16 +190,6 @@ namespace backend {
 
         mPropertiesSet |= TEXTURE_PROPERTY_ALLOWED_USAGE;
         mAllowedUsage = usage;
-    }
-
-    void TextureBuilder::SetInitialUsage(nxt::TextureUsageBit usage) {
-        if ((mPropertiesSet & TEXTURE_PROPERTY_INITIAL_USAGE) != 0) {
-            HandleError("Texture initial usage property set multiple times");
-            return;
-        }
-
-        mPropertiesSet |= TEXTURE_PROPERTY_INITIAL_USAGE;
-        mCurrentUsage = usage;
     }
 
     // TextureViewBase

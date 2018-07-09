@@ -68,9 +68,6 @@ namespace backend { namespace metal {
         // Nothing to do, Metal StorageModeShared buffers are always mapped.
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
-    }
-
     BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
     }
 

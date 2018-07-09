@@ -23,11 +23,10 @@ class CopyCommandTest : public ValidationTest {
                 .SetSize(size)
                 .SetAllowedUsage(usage)
                 .GetResult();
-            buf.FreezeUsage(usage);
             return buf;
         }
 
-        nxt::Texture CreateFrozen2DTexture(uint32_t width, uint32_t height, uint32_t levels,
+        nxt::Texture Create2DTexture(uint32_t width, uint32_t height, uint32_t levels,
                                          nxt::TextureFormat format, nxt::TextureUsageBit usage) {
             nxt::Texture tex = AssertWillBeSuccess(device.CreateTextureBuilder())
                 .SetDimension(nxt::TextureDimension::e2D)
@@ -36,7 +35,6 @@ class CopyCommandTest : public ValidationTest {
                 .SetMipLevels(levels)
                 .SetAllowedUsage(usage)
                 .GetResult();
-            tex.FreezeUsage(usage);
             return tex;
         }
 
@@ -123,7 +121,7 @@ class CopyCommandTest_B2T : public CopyCommandTest {
 TEST_F(CopyCommandTest_B2T, Success) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                      nxt::TextureUsageBit::TransferDst);
 
     // Different copies, including some that touch the OOB condition
@@ -169,7 +167,7 @@ TEST_F(CopyCommandTest_B2T, Success) {
 TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                      nxt::TextureUsageBit::TransferDst);
 
     // OOB on the buffer because we copy too many pixels
@@ -209,7 +207,7 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
 TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                      nxt::TextureUsageBit::TransferDst);
 
     // OOB on the texture because x + width overflows
@@ -244,7 +242,7 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
 // Test that we force Z=0 and Depth=1 on copies to 2D textures
 TEST_F(CopyCommandTest_B2T, ZDepthConstraintFor2DTextures) {
     nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                      nxt::TextureUsageBit::TransferDst);
 
     // Z=1 on an empty copy still errors
@@ -266,9 +264,9 @@ TEST_F(CopyCommandTest_B2T, ZDepthConstraintFor2DTextures) {
 TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
     nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
     nxt::Buffer vertex = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::Vertex);
-    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                      nxt::TextureUsageBit::TransferDst);
-    nxt::Texture sampled = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture sampled = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                  nxt::TextureUsageBit::Sampled);
 
     // Incorrect source usage
@@ -289,7 +287,7 @@ TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
 TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
     uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
     nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = CreateFrozen2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture destination = Create2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
         nxt::TextureUsageBit::TransferDst);
 
     // Default row pitch is not 256-byte aligned
@@ -318,7 +316,7 @@ TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
 TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                      nxt::TextureUsageBit::TransferDst);
 
     // Correct usage
@@ -351,7 +349,7 @@ class CopyCommandTest_T2B : public CopyCommandTest {
 // Test a successfull T2B copy
 TEST_F(CopyCommandTest_T2B, Success) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                 nxt::TextureUsageBit::TransferSrc);
     nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
 
@@ -397,7 +395,7 @@ TEST_F(CopyCommandTest_T2B, Success) {
 // Test OOB conditions on the texture
 TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                 nxt::TextureUsageBit::TransferSrc);
     nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
 
@@ -433,7 +431,7 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
 // Test OOB conditions on the buffer
 TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                 nxt::TextureUsageBit::TransferSrc);
     nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
 
@@ -473,7 +471,7 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
 // Test that we force Z=0 and Depth=1 on copies from to 2D textures
 TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                 nxt::TextureUsageBit::TransferSrc);
     nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
 
@@ -495,9 +493,9 @@ TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
 // Test T2B copies with incorrect buffer usage
 TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                 nxt::TextureUsageBit::TransferSrc);
-    nxt::Texture sampled = CreateFrozen2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture sampled = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
                                                  nxt::TextureUsageBit::Sampled);
     nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
     nxt::Buffer vertex = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::Vertex);
@@ -519,7 +517,7 @@ TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
 
 TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
     uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
-    nxt::Texture source = CreateFrozen2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture source = Create2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
         nxt::TextureUsageBit::TransferDst);
     nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
 
@@ -548,7 +546,7 @@ TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
 // Test T2B copies with incorrect buffer offset usage
 TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
     uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
-    nxt::Texture source = CreateFrozen2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
+    nxt::Texture source = Create2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
         nxt::TextureUsageBit::TransferSrc);
     nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
 

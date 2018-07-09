@@ -47,22 +47,10 @@ namespace backend {
         uint32_t GetDepth() const;
         uint32_t GetNumMipLevels() const;
         nxt::TextureUsageBit GetAllowedUsage() const;
-        nxt::TextureUsageBit GetUsage() const;
-        bool IsFrozen() const;
-        bool HasFrozenUsage(nxt::TextureUsageBit usage) const;
-        static bool IsUsagePossible(nxt::TextureUsageBit allowedUsage, nxt::TextureUsageBit usage);
-        bool IsTransitionPossible(nxt::TextureUsageBit usage) const;
-        void UpdateUsageInternal(nxt::TextureUsageBit usage);
-
         DeviceBase* GetDevice() const;
 
         // NXT API
         TextureViewBuilder* CreateTextureViewBuilder();
-        void TransitionUsage(nxt::TextureUsageBit usage);
-        void FreezeUsage(nxt::TextureUsageBit usage);
-
-        virtual void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                         nxt::TextureUsageBit targetUsage) = 0;
 
       private:
         DeviceBase* mDevice;
@@ -72,8 +60,6 @@ namespace backend {
         uint32_t mWidth, mHeight, mDepth;
         uint32_t mNumMipLevels;
         nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
-        nxt::TextureUsageBit mCurrentUsage = nxt::TextureUsageBit::None;
-        bool mIsFrozen = false;
     };
 
     class TextureBuilder : public Builder<TextureBase> {
@@ -100,7 +86,6 @@ namespace backend {
         nxt::TextureFormat mFormat;
         uint32_t mNumMipLevels;
         nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
-        nxt::TextureUsageBit mCurrentUsage = nxt::TextureUsageBit::None;
     };
 
     class TextureViewBase : public RefCounted {

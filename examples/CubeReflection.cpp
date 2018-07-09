@@ -61,7 +61,7 @@ void initBuffers() {
         20, 21, 22,
         20, 22, 23
     };
-    indexBuffer = utils::CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
+    indexBuffer = utils::CreateBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
 
     static const float vertexData[6 * 4 * 6] = {
         -1.0, -1.0,  1.0,    1.0, 0.0, 0.0,
@@ -94,7 +94,7 @@ void initBuffers() {
         -1.0,  1.0,  1.0,    1.0, 1.0, 1.0,
         -1.0,  1.0, -1.0,    1.0, 1.0, 1.0
     };
-    vertexBuffer = utils::CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 
     static const float planeData[6 * 4] = {
         -2.0, -1.0, -2.0,    0.5, 0.5, 0.5,
@@ -102,7 +102,7 @@ void initBuffers() {
         2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
         -2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
     };
-    planeBuffer = utils::CreateFrozenBufferFromData(device, planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
+    planeBuffer = utils::CreateBufferFromData(device, planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
 }
 
 struct CameraData {
@@ -171,15 +171,14 @@ void init() {
 
     cameraBuffer = device.CreateBufferBuilder()
         .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Uniform)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .SetSize(sizeof(CameraData))
         .GetResult();
 
     glm::mat4 transform(1.0);
-    transformBuffer[0] = utils::CreateFrozenBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
+    transformBuffer[0] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
 
     transform = glm::translate(transform, glm::vec3(0.f, -2.f, 0.f));
-    transformBuffer[1] = utils::CreateFrozenBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
+    transformBuffer[1] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
 
     nxt::BufferView cameraBufferView = cameraBuffer.CreateBufferViewBuilder()
         .SetExtent(0, sizeof(CameraData))
@@ -274,7 +273,6 @@ void frame() {
         glm::vec3(0.0f, -1.0f, 0.0f)
     );
 
-    cameraBuffer.TransitionUsage(nxt::BufferUsageBit::TransferDst);
     cameraBuffer.SetSubData(0, sizeof(CameraData), reinterpret_cast<uint8_t*>(&cameraData));
 
     nxt::Texture backbuffer;
@@ -282,8 +280,6 @@ void frame() {
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .TransitionBufferUsage(cameraBuffer, nxt::BufferUsageBit::Uniform)
-
         .BeginRenderPass(renderPass)
             .SetRenderPipeline(pipeline)
             .SetBindGroup(0, bindGroup[0])
@@ -305,7 +301,6 @@ void frame() {
         .GetResult();
 
     queue.Submit(1, &commands);
-    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
     swapchain.Present(backbuffer);
     DoFlush();
 }

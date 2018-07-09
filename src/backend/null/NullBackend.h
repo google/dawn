@@ -55,7 +55,7 @@ namespace backend { namespace null {
     using Sampler = SamplerBase;
     using ShaderModule = ShaderModuleBase;
     class SwapChain;
-    class Texture;
+    using Texture = TextureBase;
     using TextureView = TextureViewBase;
 
     struct NullBackendTraits {
@@ -140,8 +140,6 @@ namespace backend { namespace null {
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;
-        void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
-                                 nxt::BufferUsageBit targetUsage) override;
 
         void MapAsyncImplCommon(uint32_t serial, uint32_t start, uint32_t count, bool isWrite);
 
@@ -152,8 +150,6 @@ namespace backend { namespace null {
       public:
         CommandBuffer(CommandBufferBuilder* builder);
         ~CommandBuffer();
-
-        void Execute();
 
       private:
         CommandIterator mCommands;
@@ -166,15 +162,6 @@ namespace backend { namespace null {
 
         // NXT API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
-    };
-
-    class Texture : public TextureBase {
-      public:
-        Texture(TextureBuilder* builder);
-        ~Texture();
-
-        void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                 nxt::TextureUsageBit targetUsage) override;
     };
 
     class SwapChain : public SwapChainBase {

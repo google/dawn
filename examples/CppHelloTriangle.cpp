@@ -37,14 +37,14 @@ void initBuffers() {
     static const uint32_t indexData[3] = {
         0, 1, 2,
     };
-    indexBuffer = utils::CreateFrozenBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
+    indexBuffer = utils::CreateBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
 
     static const float vertexData[12] = {
         0.0f, 0.5f, 0.0f, 1.0f,
         -0.5f, -0.5f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = utils::CreateFrozenBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
 }
 
 void initTextures() {
@@ -66,14 +66,12 @@ void initTextures() {
     }
 
 
-    nxt::Buffer stagingBuffer = utils::CreateFrozenBufferFromData(device, data.data(), static_cast<uint32_t>(data.size()), nxt::BufferUsageBit::TransferSrc);
+    nxt::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), static_cast<uint32_t>(data.size()), nxt::BufferUsageBit::TransferSrc);
     nxt::CommandBuffer copy = device.CreateCommandBufferBuilder()
-        .TransitionTextureUsage(texture, nxt::TextureUsageBit::TransferDst)
         .CopyBufferToTexture(stagingBuffer, 0, 0, texture, 0, 0, 0, 1024, 1024, 1, 0)
         .GetResult();
 
     queue.Submit(1, &copy);
-    texture.FreezeUsage(nxt::TextureUsageBit::Sampled);
 }
 
 void init() {
@@ -162,7 +160,6 @@ void frame() {
         .GetResult();
 
     queue.Submit(1, &commands);
-    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
     swapchain.Present(backbuffer);
     DoFlush();
 }

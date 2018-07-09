@@ -122,6 +122,30 @@ namespace backend {
             return true;
         }
 
+        bool ValidateCanUseAs(CommandBufferBuilder* builder,
+                              BufferBase* buffer,
+                              nxt::BufferUsageBit usage) {
+            ASSERT(HasZeroOrOneBits(usage));
+            if (!(buffer->GetAllowedUsage() & usage)) {
+                builder->HandleError("buffer doesn't have the required usage.");
+                return false;
+            }
+
+            return true;
+        }
+
+        bool ValidateCanUseAs(CommandBufferBuilder* builder,
+                              TextureBase* texture,
+                              nxt::TextureUsageBit usage) {
+            ASSERT(HasZeroOrOneBits(usage));
+            if (!(texture->GetAllowedUsage() & usage)) {
+                builder->HandleError("texture doesn't have the required usage.");
+                return false;
+            }
+
+            return true;
+        }
+
         enum class PassType {
             Render,
             Compute,
@@ -263,25 +287,7 @@ namespace backend {
     // CommandBuffer
 
     CommandBufferBase::CommandBufferBase(CommandBufferBuilder* builder)
-        : mDevice(builder->mDevice),
-          mBuffersTransitioned(std::move(builder->mState->mBuffersTransitioned)),
-          mTexturesTransitioned(std::move(builder->mState->mTexturesTransitioned)) {
-    }
-
-    bool CommandBufferBase::ValidateResourceUsagesImmediate() {
-        for (auto buffer : mBuffersTransitioned) {
-            if (buffer->IsFrozen()) {
-                mDevice->HandleError("Command buffer: cannot transition buffer with frozen usage");
-                return false;
-            }
-        }
-        for (auto texture : mTexturesTransitioned) {
-            if (texture->IsFrozen()) {
-                mDevice->HandleError("Command buffer: cannot transition texture with frozen usage");
-                return false;
-            }
-        }
-        return true;
+        : mDevice(builder->mDevice) {
     }
 
     DeviceBase* CommandBufferBase::GetDevice() {
@@ -352,10 +358,10 @@ namespace backend {
                     CopyBufferToBufferCmd* copy = mIterator.NextCommand<CopyBufferToBufferCmd>();
                     if (!ValidateCopySizeFitsInBuffer(this, copy->source, copy->size) ||
                         !ValidateCopySizeFitsInBuffer(this, copy->destination, copy->size) ||
-                        !mState->ValidateCanUseBufferAs(copy->source.buffer.Get(),
-                                                        nxt::BufferUsageBit::TransferSrc) ||
-                        !mState->ValidateCanUseBufferAs(copy->destination.buffer.Get(),
-                                                        nxt::BufferUsageBit::TransferDst)) {
+                        !ValidateCanUseAs(this, copy->source.buffer.Get(),
+                                          nxt::BufferUsageBit::TransferSrc) ||
+                        !ValidateCanUseAs(this, copy->destination.buffer.Get(),
+                                          nxt::BufferUsageBit::TransferDst)) {
                         return false;
                     }
                 } break;
@@ -371,10 +377,10 @@ namespace backend {
                         !ValidateCopySizeFitsInBuffer(this, copy->source, bufferCopySize) ||
                         !ValidateTexelBufferOffset(this, copy->destination.texture.Get(),
                                                    copy->source) ||
-                        !mState->ValidateCanUseBufferAs(copy->source.buffer.Get(),
-                                                        nxt::BufferUsageBit::TransferSrc) ||
-                        !mState->ValidateCanUseTextureAs(copy->destination.texture.Get(),
-                                                         nxt::TextureUsageBit::TransferDst)) {
+                        !ValidateCanUseAs(this, copy->source.buffer.Get(),
+                                          nxt::BufferUsageBit::TransferSrc) ||
+                        !ValidateCanUseAs(this, copy->destination.texture.Get(),
+                                          nxt::TextureUsageBit::TransferDst)) {
                         return false;
                     }
                 } break;
@@ -390,29 +396,12 @@ namespace backend {
                         !ValidateCopySizeFitsInBuffer(this, copy->destination, bufferCopySize) ||
                         !ValidateTexelBufferOffset(this, copy->source.texture.Get(),
                                                    copy->destination) ||
-                        !mState->ValidateCanUseTextureAs(copy->source.texture.Get(),
-                                                         nxt::TextureUsageBit::TransferSrc) ||
-                        !mState->ValidateCanUseBufferAs(copy->destination.buffer.Get(),
-                                                        nxt::BufferUsageBit::TransferDst)) {
+                        !ValidateCanUseAs(this, copy->source.texture.Get(),
+                                          nxt::TextureUsageBit::TransferSrc) ||
+                        !ValidateCanUseAs(this, copy->destination.buffer.Get(),
+                                          nxt::BufferUsageBit::TransferDst)) {
                         return false;
                     }
-                } break;
-
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mIterator.NextCommand<TransitionBufferUsageCmd>();
-                    if (!mState->TransitionBufferUsage(cmd->buffer.Get(), cmd->usage)) {
-                        return false;
-                    }
-                } break;
-
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mIterator.NextCommand<TransitionTextureUsageCmd>();
-                    if (!mState->TransitionTextureUsage(cmd->texture.Get(), cmd->usage)) {
-                        return false;
-                    }
-
                 } break;
 
                 default:
@@ -474,9 +463,7 @@ namespace backend {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
 
                     TrackBindGroupResourceUsage(cmd->group.Get(), &usageTracker);
-                    if (!mState->SetBindGroup(cmd->index, cmd->group.Get())) {
-                        return false;
-                    }
+                    mState->SetBindGroup(cmd->index, cmd->group.Get());
                 } break;
 
                 default:
@@ -490,10 +477,6 @@ namespace backend {
     }
 
     bool CommandBufferBuilder::ValidateRenderPass(RenderPassDescriptorBase* renderPass) {
-        if (!mState->BeginRenderPass(renderPass)) {
-            return false;
-        }
-
         PassResourceUsageTracker usageTracker;
 
         // Track usage of the render pass attachments
@@ -581,16 +564,14 @@ namespace backend {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
 
                     TrackBindGroupResourceUsage(cmd->group.Get(), &usageTracker);
-                    if (!mState->SetBindGroup(cmd->index, cmd->group.Get())) {
-                        return false;
-                    }
+                    mState->SetBindGroup(cmd->index, cmd->group.Get());
                 } break;
 
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = mIterator.NextCommand<SetIndexBufferCmd>();
 
                     usageTracker.BufferUsedAs(cmd->buffer.Get(), nxt::BufferUsageBit::Index);
-                    if (!mState->SetIndexBuffer(cmd->buffer.Get())) {
+                    if (!mState->SetIndexBuffer()) {
                         return false;
                     }
                 } break;
@@ -602,7 +583,7 @@ namespace backend {
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
                         usageTracker.BufferUsedAs(buffers[i].Get(), nxt::BufferUsageBit::Vertex);
-                        mState->SetVertexBuffer(cmd->startSlot + i, buffers[i].Get());
+                        mState->SetVertexBuffer(cmd->startSlot + i);
                     }
                 } break;
 
@@ -846,24 +827,6 @@ namespace backend {
 
         uint32_t* cmdOffsets = mAllocator.AllocateData<uint32_t>(count);
         memcpy(cmdOffsets, offsets, count * sizeof(uint32_t));
-    }
-
-    void CommandBufferBuilder::TransitionBufferUsage(BufferBase* buffer,
-                                                     nxt::BufferUsageBit usage) {
-        TransitionBufferUsageCmd* cmd =
-            mAllocator.Allocate<TransitionBufferUsageCmd>(Command::TransitionBufferUsage);
-        new (cmd) TransitionBufferUsageCmd;
-        cmd->buffer = buffer;
-        cmd->usage = usage;
-    }
-
-    void CommandBufferBuilder::TransitionTextureUsage(TextureBase* texture,
-                                                      nxt::TextureUsageBit usage) {
-        TransitionTextureUsageCmd* cmd =
-            mAllocator.Allocate<TransitionTextureUsageCmd>(Command::TransitionTextureUsage);
-        new (cmd) TransitionTextureUsageCmd;
-        cmd->texture = texture;
-        cmd->usage = usage;
     }
 
 }  // namespace backend

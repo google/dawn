@@ -25,10 +25,7 @@ namespace backend {
     // Buffer
 
     BufferBase::BufferBase(BufferBuilder* builder)
-        : mDevice(builder->mDevice),
-          mSize(builder->mSize),
-          mAllowedUsage(builder->mAllowedUsage),
-          mCurrentUsage(builder->mCurrentUsage) {
+        : mDevice(builder->mDevice), mSize(builder->mSize), mAllowedUsage(builder->mAllowedUsage) {
     }
 
     BufferBase::~BufferBase() {
@@ -52,10 +49,6 @@ namespace backend {
 
     nxt::BufferUsageBit BufferBase::GetAllowedUsage() const {
         return mAllowedUsage;
-    }
-
-    nxt::BufferUsageBit BufferBase::GetUsage() const {
-        return mCurrentUsage;
     }
 
     void BufferBase::CallMapReadCallback(uint32_t serial,
@@ -90,7 +83,7 @@ namespace backend {
             return;
         }
 
-        if (!(mCurrentUsage & nxt::BufferUsageBit::TransferDst)) {
+        if (!(mAllowedUsage & nxt::BufferUsageBit::TransferDst)) {
             mDevice->HandleError("Buffer needs the transfer dst usage bit");
             return;
         }
@@ -155,59 +148,33 @@ namespace backend {
         mMapUserdata = 0;
     }
 
-    bool BufferBase::IsFrozen() const {
-        return mIsFrozen;
-    }
-
-    bool BufferBase::HasFrozenUsage(nxt::BufferUsageBit usage) const {
-        return mIsFrozen && (usage & mAllowedUsage);
-    }
-
-    bool BufferBase::IsUsagePossible(nxt::BufferUsageBit allowedUsage, nxt::BufferUsageBit usage) {
-        bool allowed = (usage & allowedUsage) == usage;
-        bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
-        bool singleUse = nxt::HasZeroOrOneBits(usage);
-        return allowed && (readOnly || singleUse);
-    }
-
-    bool BufferBase::IsTransitionPossible(nxt::BufferUsageBit usage) const {
-        if (mIsFrozen || mIsMapped) {
+    bool BufferBase::ValidateMapBase(uint32_t start,
+                                     uint32_t size,
+                                     nxt::BufferUsageBit requiredUsage) {
+        // TODO(cwallez@chromium.org): check for overflows.
+        if (start + size > GetSize()) {
+            mDevice->HandleError("Buffer map read out of range");
             return false;
         }
-        return IsUsagePossible(mAllowedUsage, usage);
-    }
 
-    void BufferBase::UpdateUsageInternal(nxt::BufferUsageBit usage) {
-        ASSERT(IsTransitionPossible(usage));
-        mCurrentUsage = usage;
-    }
-
-    void BufferBase::TransitionUsage(nxt::BufferUsageBit usage) {
-        if (!IsTransitionPossible(usage)) {
-            mDevice->HandleError("Buffer frozen or usage not allowed");
-            return;
+        if (mIsMapped) {
+            mDevice->HandleError("Buffer already mapped");
+            return false;
         }
-        TransitionUsageImpl(mCurrentUsage, usage);
-        mCurrentUsage = usage;
-    }
 
-    void BufferBase::FreezeUsage(nxt::BufferUsageBit usage) {
-        if (!IsTransitionPossible(usage)) {
-            mDevice->HandleError("Buffer frozen or usage not allowed");
-            return;
+        if (!(mAllowedUsage & requiredUsage)) {
+            mDevice->HandleError("Buffer needs the correct map usage bit");
+            return false;
         }
-        mAllowedUsage = usage;
-        TransitionUsageImpl(mCurrentUsage, usage);
-        mCurrentUsage = usage;
-        mIsFrozen = true;
+
+        return true;
     }
 
     // BufferBuilder
 
     enum BufferSetProperties {
         BUFFER_PROPERTY_ALLOWED_USAGE = 0x1,
-        BUFFER_PROPERTY_INITIAL_USAGE = 0x2,
-        BUFFER_PROPERTY_SIZE = 0x4,
+        BUFFER_PROPERTY_SIZE = 0x2,
     };
 
     BufferBuilder::BufferBuilder(DeviceBase* device) : Builder(device) {
@@ -236,11 +203,6 @@ namespace backend {
             return nullptr;
         }
 
-        if (!BufferBase::IsUsagePossible(mAllowedUsage, mCurrentUsage)) {
-            HandleError("Initial buffer usage is not allowed");
-            return nullptr;
-        }
-
         return mDevice->CreateBuffer(this);
     }
 
@@ -254,16 +216,6 @@ namespace backend {
         mPropertiesSet |= BUFFER_PROPERTY_ALLOWED_USAGE;
     }
 
-    void BufferBuilder::SetInitialUsage(nxt::BufferUsageBit usage) {
-        if ((mPropertiesSet & BUFFER_PROPERTY_INITIAL_USAGE) != 0) {
-            HandleError("Buffer initialUsage property set multiple times");
-            return;
-        }
-
-        mCurrentUsage = usage;
-        mPropertiesSet |= BUFFER_PROPERTY_INITIAL_USAGE;
-    }
-
     void BufferBuilder::SetSize(uint32_t size) {
         if ((mPropertiesSet & BUFFER_PROPERTY_SIZE) != 0) {
             HandleError("Buffer size property set multiple times");
@@ -272,27 +224,6 @@ namespace backend {
 
         mSize = size;
         mPropertiesSet |= BUFFER_PROPERTY_SIZE;
-    }
-
-    bool BufferBase::ValidateMapBase(uint32_t start,
-                                     uint32_t size,
-                                     nxt::BufferUsageBit requiredUsage) {
-        if (start + size > GetSize()) {
-            mDevice->HandleError("Buffer map read out of range");
-            return false;
-        }
-
-        if (mIsMapped) {
-            mDevice->HandleError("Buffer already mapped");
-            return false;
-        }
-
-        if (!(mCurrentUsage & requiredUsage)) {
-            mDevice->HandleError("Buffer needs the correct map usage bit");
-            return false;
-        }
-
-        return true;
     }
 
     // BufferViewBase

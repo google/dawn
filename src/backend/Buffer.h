@@ -38,12 +38,6 @@ namespace backend {
 
         uint32_t GetSize() const;
         nxt::BufferUsageBit GetAllowedUsage() const;
-        nxt::BufferUsageBit GetUsage() const;
-        static bool IsUsagePossible(nxt::BufferUsageBit allowedUsage, nxt::BufferUsageBit usage);
-        bool IsTransitionPossible(nxt::BufferUsageBit usage) const;
-        bool IsFrozen() const;
-        bool HasFrozenUsage(nxt::BufferUsageBit usage) const;
-        void UpdateUsageInternal(nxt::BufferUsageBit usage);
 
         DeviceBase* GetDevice() const;
 
@@ -59,8 +53,6 @@ namespace backend {
                            nxtBufferMapWriteCallback callback,
                            nxtCallbackUserdata userdata);
         void Unmap();
-        void TransitionUsage(nxt::BufferUsageBit usage);
-        void FreezeUsage(nxt::BufferUsageBit usage);
 
       protected:
         void CallMapReadCallback(uint32_t serial,
@@ -73,22 +65,18 @@ namespace backend {
         virtual void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
         virtual void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
         virtual void UnmapImpl() = 0;
-        virtual void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
-                                         nxt::BufferUsageBit targetUsage) = 0;
 
         bool ValidateMapBase(uint32_t start, uint32_t size, nxt::BufferUsageBit requiredUsage);
 
         DeviceBase* mDevice;
         uint32_t mSize;
         nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
-        nxt::BufferUsageBit mCurrentUsage = nxt::BufferUsageBit::None;
 
         nxtBufferMapReadCallback mMapReadCallback = nullptr;
         nxtBufferMapWriteCallback mMapWriteCallback = nullptr;
         nxtCallbackUserdata mMapUserdata = 0;
         uint32_t mMapSerial = 0;
 
-        bool mIsFrozen = false;
         bool mIsMapped = false;
     };
 

@@ -374,20 +374,6 @@ namespace backend { namespace opengl {
                     glDeleteFramebuffers(1, &readFBO);
                 } break;
 
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionBufferUsageCmd>();
-
-                    cmd->buffer->UpdateUsageInternal(cmd->usage);
-                } break;
-
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionTextureUsageCmd>();
-
-                    cmd->texture->UpdateUsageInternal(cmd->usage);
-                } break;
-
                 default: { UNREACHABLE(); } break;
             }
         }

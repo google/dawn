@@ -96,7 +96,6 @@ void frame() {
 
     nxtQueueSubmit(queue, 1, &commands);
     nxtCommandBufferRelease(commands);
-    nxtTextureTransitionUsage(backbuffer, NXT_TEXTURE_USAGE_BIT_PRESENT);
     nxtSwapChainPresent(swapchain, backbuffer);
     nxtRenderPassDescriptorRelease(renderpassInfo);
     nxtTextureViewRelease(backbufferView);

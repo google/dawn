@@ -238,9 +238,6 @@ namespace backend { namespace vulkan {
         // No need to do anything, we keep CPU-visible memory mapped at all time.
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
-    }
-
     // MapRequestTracker
 
     MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {

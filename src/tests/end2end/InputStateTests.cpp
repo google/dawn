@@ -155,7 +155,7 @@ class InputStateTest : public NXTTest {
 
         template<typename T>
         nxt::Buffer MakeVertexBuffer(std::vector<T> data) {
-            return utils::CreateFrozenBufferFromData(device, data.data(), static_cast<uint32_t>(data.size() * sizeof(T)), nxt::BufferUsageBit::Vertex);
+            return utils::CreateBufferFromData(device, data.data(), static_cast<uint32_t>(data.size() * sizeof(T)), nxt::BufferUsageBit::Vertex);
         }
 
         struct DrawVertexBuffer {
@@ -168,7 +168,6 @@ class InputStateTest : public NXTTest {
 
             nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
-            renderPass.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
             builder.BeginRenderPass(renderPass.renderPassInfo)
                 .SetRenderPipeline(pipeline);
 

@@ -46,8 +46,6 @@ namespace backend {
         SetBindGroup,
         SetIndexBuffer,
         SetVertexBuffers,
-        TransitionBufferUsage,
-        TransitionTextureUsage,
     };
 
     struct BeginComputePassCmd {};
@@ -149,18 +147,6 @@ namespace backend {
     struct SetVertexBuffersCmd {
         uint32_t startSlot;
         uint32_t count;
-    };
-
-    struct TransitionBufferUsageCmd {
-        Ref<BufferBase> buffer;
-        nxt::BufferUsageBit usage;
-    };
-
-    struct TransitionTextureUsageCmd {
-        Ref<TextureBase> texture;
-        uint32_t startLevel;
-        uint32_t levelCount;
-        nxt::TextureUsageBit usage;
     };
 
     // This needs to be called before the CommandIterator is freed so that the Ref<> present in

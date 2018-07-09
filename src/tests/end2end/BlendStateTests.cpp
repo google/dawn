@@ -95,7 +95,7 @@ class BlendStateTest : public NXTTest {
 
             uint32_t bufferSize = static_cast<uint32_t>(4 * N * sizeof(float));
 
-            nxt::Buffer buffer = utils::CreateFrozenBufferFromData(device, &data, bufferSize, nxt::BufferUsageBit::Uniform);
+            nxt::Buffer buffer = utils::CreateBufferFromData(device, &data, bufferSize, nxt::BufferUsageBit::Uniform);
 
             nxt::BufferView view = buffer.CreateBufferViewBuilder()
                 .SetExtent(0, bufferSize)
@@ -110,8 +110,6 @@ class BlendStateTest : public NXTTest {
 
         // Test that after drawing a triangle with the base color, and then the given triangle spec, the color is as expected
         void DoSingleSourceTest(RGBA8 base, const TriangleSpec& triangle, const RGBA8& expected) {
-            renderPass.color.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
-
             nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
                 .BeginRenderPass(renderPass.renderPassInfo)
                     // First use the base pipeline to draw a triangle with no blending
@@ -700,7 +698,6 @@ TEST_P(BlendStateTest, IndependentBlendState) {
             .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
             .SetMipLevels(1)
             .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-            .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
             .GetResult();
         renderTargetViews[i] = renderTargets[i].CreateTextureViewBuilder().GetResult();
     }
@@ -788,11 +785,6 @@ TEST_P(BlendStateTest, IndependentBlendState) {
         RGBA8 expected1 = color1 - base;
         RGBA8 expected2 = color2;
         RGBA8 expected3 = min(color3, base);
-
-        renderTargets[0].TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
-        renderTargets[1].TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
-        renderTargets[2].TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
-        renderTargets[3].TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
 
         nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
             .BeginRenderPass(renderpass)

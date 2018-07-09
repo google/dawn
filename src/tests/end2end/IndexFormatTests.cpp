@@ -66,14 +66,14 @@ class IndexFormatTest : public NXTTest {
 TEST_P(IndexFormatTest, Uint32) {
     nxt::RenderPipeline pipeline = MakeTestPipeline(nxt::IndexFormat::Uint32);
 
-    nxt::Buffer vertexBuffer = utils::CreateFrozenBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+    nxt::Buffer vertexBuffer = utils::CreateBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
         -1.0f,  1.0f, 0.0f, 1.0f, // Note Vertices[0] = Vertices[1]
         -1.0f,  1.0f, 0.0f, 1.0f,
          1.0f,  1.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, 0.0f, 1.0f
     });
     // If this is interpreted as Uint16, then it would be 0, 1, 0, ... and would draw nothing.
-    nxt::Buffer indexBuffer = utils::CreateFrozenBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
+    nxt::Buffer indexBuffer = utils::CreateBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
         1, 2, 3
     });
 
@@ -96,13 +96,13 @@ TEST_P(IndexFormatTest, Uint32) {
 TEST_P(IndexFormatTest, Uint16) {
     nxt::RenderPipeline pipeline = MakeTestPipeline(nxt::IndexFormat::Uint16);
 
-    nxt::Buffer vertexBuffer = utils::CreateFrozenBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+    nxt::Buffer vertexBuffer = utils::CreateBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
         -1.0f,  1.0f, 0.0f, 1.0f,
          1.0f,  1.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, 0.0f, 1.0f
     });
     // If this is interpreted as uint32, it will have index 1 and 2 be both 0 and render nothing
-    nxt::Buffer indexBuffer = utils::CreateFrozenBufferFromData<uint16_t>(device, nxt::BufferUsageBit::Index, {
+    nxt::Buffer indexBuffer = utils::CreateBufferFromData<uint16_t>(device, nxt::BufferUsageBit::Index, {
         1, 2, 0, 0, 0, 0
     });
 
@@ -137,14 +137,14 @@ TEST_P(IndexFormatTest, Uint16) {
 TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
     nxt::RenderPipeline pipeline = MakeTestPipeline(nxt::IndexFormat::Uint32);
 
-    nxt::Buffer vertexBuffer = utils::CreateFrozenBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+    nxt::Buffer vertexBuffer = utils::CreateBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
          0.0f,  1.0f, 0.0f, 1.0f,
          1.0f,  0.0f, 0.0f, 1.0f,
          0.0f,  0.0f, 0.0f, 1.0f,
          0.0f, -1.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, 0.0f, 1.0f,
     });
-    nxt::Buffer indexBuffer = utils::CreateFrozenBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
+    nxt::Buffer indexBuffer = utils::CreateBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
         0, 1, 2, 0xFFFFFFFFu, 3, 4, 2,
     });
 
@@ -169,14 +169,14 @@ TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
 TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
     nxt::RenderPipeline pipeline = MakeTestPipeline(nxt::IndexFormat::Uint16);
 
-    nxt::Buffer vertexBuffer = utils::CreateFrozenBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+    nxt::Buffer vertexBuffer = utils::CreateBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
          0.0f,  1.0f, 0.0f, 1.0f,
          1.0f,  0.0f, 0.0f, 1.0f,
          0.0f,  0.0f, 0.0f, 1.0f,
          0.0f, -1.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, 0.0f, 1.0f,
     });
-    nxt::Buffer indexBuffer = utils::CreateFrozenBufferFromData<uint16_t>(device, nxt::BufferUsageBit::Index, {
+    nxt::Buffer indexBuffer = utils::CreateBufferFromData<uint16_t>(device, nxt::BufferUsageBit::Index, {
         0, 1, 2, 0xFFFFu, 3, 4, 2,
     });
 
@@ -209,14 +209,14 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
     nxt::RenderPipeline pipeline32 = MakeTestPipeline(nxt::IndexFormat::Uint32);
     nxt::RenderPipeline pipeline16 = MakeTestPipeline(nxt::IndexFormat::Uint16);
 
-    nxt::Buffer vertexBuffer = utils::CreateFrozenBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+    nxt::Buffer vertexBuffer = utils::CreateBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
         -1.0f,  1.0f, 0.0f, 1.0f, // Note Vertices[0] = Vertices[1]
         -1.0f,  1.0f, 0.0f, 1.0f,
          1.0f,  1.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, 0.0f, 1.0f
     });
     // If this is interpreted as Uint16, then it would be 0, 1, 0, ... and would draw nothing.
-    nxt::Buffer indexBuffer = utils::CreateFrozenBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
+    nxt::Buffer indexBuffer = utils::CreateBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
         1, 2, 3
     });
 
@@ -244,12 +244,12 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
 TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
     nxt::RenderPipeline pipeline = MakeTestPipeline(nxt::IndexFormat::Uint32);
 
-    nxt::Buffer vertexBuffer = utils::CreateFrozenBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+    nxt::Buffer vertexBuffer = utils::CreateBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
         -1.0f,  1.0f, 0.0f, 1.0f,
          1.0f,  1.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, 0.0f, 1.0f
     });
-    nxt::Buffer indexBuffer = utils::CreateFrozenBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
+    nxt::Buffer indexBuffer = utils::CreateBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
         0, 1, 2
     });
 

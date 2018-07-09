@@ -77,7 +77,6 @@ nxt::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
             .SetMipLevels(1)
             .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
             .GetResult();
-        colorBuffer.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
         auto colorView = colorBuffer.CreateTextureViewBuilder()
             .GetResult();
 
@@ -126,7 +125,6 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
         .SetMipLevels(1)
         .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
         .GetResult();
-    dummy.attachment.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
 
     nxt::TextureView view = AssertWillBeSuccess(dummy.attachment.CreateTextureViewBuilder()).GetResult();
 

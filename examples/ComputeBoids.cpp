@@ -63,10 +63,10 @@ void initBuffers() {
         {0.01, -0.02},
         {0.00, 0.02},
     };
-    modelBuffer = utils::CreateFrozenBufferFromData(device, model, sizeof(model), nxt::BufferUsageBit::Vertex);
+    modelBuffer = utils::CreateBufferFromData(device, model, sizeof(model), nxt::BufferUsageBit::Vertex);
 
     SimParams params = { 0.04f, 0.1f, 0.025f, 0.025f, 0.02f, 0.05f, 0.005f, kNumParticles };
-    updateParams = utils::CreateFrozenBufferFromData(device, &params, sizeof(params), nxt::BufferUsageBit::Uniform);
+    updateParams = utils::CreateBufferFromData(device, &params, sizeof(params), nxt::BufferUsageBit::Uniform);
 
     std::vector<Particle> initialParticles(kNumParticles);
     {
@@ -82,7 +82,6 @@ void initBuffers() {
     for (size_t i = 0; i < 2; i++) {
         particleBuffers[i] = device.CreateBufferBuilder()
             .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Storage)
-            .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
             .SetSize(sizeof(Particle) * kNumParticles)
             .GetResult();
 
@@ -261,20 +260,16 @@ void initSim() {
 
 nxt::CommandBuffer createCommandBuffer(const nxt::RenderPassDescriptor& renderPass, size_t i) {
     static const uint32_t zeroOffsets[1] = {0};
-    auto& bufferSrc = particleBuffers[i];
     auto& bufferDst = particleBuffers[(i + 1) % 2];
     return device.CreateCommandBufferBuilder()
         .BeginComputePass()
             .SetComputePipeline(updatePipeline)
-            .TransitionBufferUsage(bufferSrc, nxt::BufferUsageBit::Storage)
-            .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Storage)
             .SetBindGroup(0, updateBGs[i])
             .Dispatch(kNumParticles, 1, 1)
         .EndComputePass()
 
         .BeginRenderPass(renderPass)
             .SetRenderPipeline(renderPipeline)
-            .TransitionBufferUsage(bufferDst, nxt::BufferUsageBit::Vertex)
             .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
             .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)
             .DrawArrays(3, kNumParticles, 0, 0)
@@ -303,7 +298,6 @@ void frame() {
 
     nxt::CommandBuffer commandBuffer = createCommandBuffer(renderPass, pingpong);
     queue.Submit(1, &commandBuffer);
-    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
     swapchain.Present(backbuffer);
     DoFlush();
 

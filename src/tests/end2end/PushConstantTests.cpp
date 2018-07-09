@@ -33,7 +33,6 @@ class PushConstantTest: public NXTTest {
             nxt::Buffer buf1 = device.CreateBufferBuilder()
                 .SetSize(4)
                 .SetAllowedUsage(nxt::BufferUsageBit::Storage | nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
-                .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
                 .GetResult();
             uint32_t one = 1;
             buf1.SetSubData(0, sizeof(one), reinterpret_cast<uint8_t*>(&one));
@@ -42,7 +41,6 @@ class PushConstantTest: public NXTTest {
                 .SetSize(4)
                 .SetAllowedUsage(nxt::BufferUsageBit::Storage)
                 .GetResult();
-            buf2.FreezeUsage(nxt::BufferUsageBit::Storage);
 
             nxt::ShaderStageBit kAllStages = nxt::ShaderStageBit::Compute | nxt::ShaderStageBit::Fragment | nxt::ShaderStageBit::Vertex;
             constexpr nxt::ShaderStageBit kNoStages{};
@@ -213,7 +211,6 @@ TEST_P(PushConstantTest, ComputePassDefaultsToZero) {
 
     uint32_t notZero = 42;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .TransitionBufferUsage(binding.resultBuffer, nxt::BufferUsageBit::Storage)
         .BeginComputePass()
             // Test compute push constants are set to zero by default.
             .SetComputePipeline(pipeline)
@@ -273,7 +270,6 @@ TEST_P(PushConstantTest, VariousConstantTypes) {
 
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .TransitionBufferUsage(binding.resultBuffer, nxt::BufferUsageBit::Storage)
         .BeginComputePass()
             .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 3, reinterpret_cast<uint32_t*>(&values))
             .SetComputePipeline(pipeline)
@@ -300,8 +296,6 @@ TEST_P(PushConstantTest, InheritThroughPipelineLayoutChange) {
     uint32_t one = 1;
     uint32_t two = 2;
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .TransitionBufferUsage(binding1.resultBuffer, nxt::BufferUsageBit::Storage)
-        .TransitionBufferUsage(binding2.resultBuffer, nxt::BufferUsageBit::Storage)
         .BeginComputePass()
             // Set Push constant before there is a pipeline set
             .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, &one)
@@ -335,7 +329,6 @@ TEST_P(PushConstantTest, SetAllConstantsToNonZero) {
     nxt::ComputePipeline pipeline = MakeTestComputePipeline(binding.layout, spec);
 
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .TransitionBufferUsage(binding.resultBuffer, nxt::BufferUsageBit::Storage)
         .BeginComputePass()
             .SetPushConstants(nxt::ShaderStageBit::Compute, 0, kMaxPushConstants, &values[0])
             .SetComputePipeline(pipeline)

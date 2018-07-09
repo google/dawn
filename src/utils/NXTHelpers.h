@@ -24,17 +24,16 @@ namespace utils {
     nxt::ShaderModule CreateShaderModule(const nxt::Device& device,
                                          nxt::ShaderStage stage,
                                          const char* source);
-    nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device,
-                                           const void* data,
-                                           uint32_t size,
-                                           nxt::BufferUsageBit usage);
+    nxt::Buffer CreateBufferFromData(const nxt::Device& device,
+                                     const void* data,
+                                     uint32_t size,
+                                     nxt::BufferUsageBit usage);
 
     template <typename T>
-    nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device,
-                                           nxt::BufferUsageBit usage,
-                                           std::initializer_list<T> data) {
-        return CreateFrozenBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()),
-                                          usage);
+    nxt::Buffer CreateBufferFromData(const nxt::Device& device,
+                                     nxt::BufferUsageBit usage,
+                                     std::initializer_list<T> data) {
+        return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage);
     }
 
     struct BasicRenderPass {

@@ -212,8 +212,6 @@ std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, co
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the buffer might have been modified.
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .TransitionBufferUsage(source, nxt::BufferUsageBit::TransferSrc)
-        .TransitionBufferUsage(readback.buffer, nxt::BufferUsageBit::TransferDst)
         .CopyBufferToBuffer(source, offset, readback.buffer, readback.offset, size)
         .GetResult();
 
@@ -244,8 +242,6 @@ std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, c
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
     nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .TransitionTextureUsage(source, nxt::TextureUsageBit::TransferSrc)
-        .TransitionBufferUsage(readback.buffer, nxt::BufferUsageBit::TransferDst)
         .CopyTextureToBuffer(source, x, y, 0, width, height, 1, level, readback.buffer, readback.offset, rowPitch)
         .GetResult();
 
@@ -276,7 +272,6 @@ void NXTTest::WaitABit() {
 void NXTTest::SwapBuffersForCapture() {
     // Insert a frame boundary for API capture tools.
     nxt::Texture backBuffer = swapchain.GetNextTexture();
-    backBuffer.TransitionUsage(nxt::TextureUsageBit::Present);
     swapchain.Present(backBuffer);
 }
 
@@ -295,7 +290,6 @@ NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {
     slot.buffer = device.CreateBufferBuilder()
         .SetSize(readbackSize)
         .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     ReadbackReservation reservation;
@@ -316,7 +310,6 @@ void NXTTest::MapSlotsSynchronously() {
         auto userdata = new MapReadUserdata{this, i};
 
         auto& slot = mReadbackSlots[i];
-        slot.buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
         slot.buffer.MapReadAsync(0, slot.bufferSize, SlotMapReadCallback, static_cast<nxt::CallbackUserdata>(reinterpret_cast<uintptr_t>(userdata)));
     }
 

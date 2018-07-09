@@ -42,14 +42,11 @@ namespace backend {
     class CommandBufferBase : public RefCounted {
       public:
         CommandBufferBase(CommandBufferBuilder* builder);
-        bool ValidateResourceUsagesImmediate();
 
         DeviceBase* GetDevice();
 
       private:
         DeviceBase* mDevice;
-        std::set<BufferBase*> mBuffersTransitioned;
-        std::set<TextureBase*> mTexturesTransitioned;
     };
 
     class CommandBufferBuilder : public Builder<CommandBufferBase> {
@@ -130,7 +127,6 @@ namespace backend {
                               uint32_t const* offsets);
 
         void TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage);
-        void TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
 
       private:
         friend class CommandBufferBase;

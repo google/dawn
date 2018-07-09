@@ -304,20 +304,6 @@ namespace backend { namespace metal {
                           destinationBytesPerImage:copy->rowPitch * src.height];
                 } break;
 
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionBufferUsageCmd>();
-
-                    cmd->buffer->UpdateUsageInternal(cmd->usage);
-                } break;
-
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionTextureUsageCmd>();
-
-                    cmd->texture->UpdateUsageInternal(cmd->usage);
-                } break;
-
                 default: { UNREACHABLE(); } break;
             }
         }

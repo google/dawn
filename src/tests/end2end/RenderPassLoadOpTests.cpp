@@ -61,7 +61,6 @@ class RenderPassLoadOpTests : public NXTTest {
                 .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
                 .SetMipLevels(1)
                 .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
                 .GetResult();
 
             renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();

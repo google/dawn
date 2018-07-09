@@ -54,9 +54,6 @@ namespace backend { namespace opengl {
         glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
-    }
-
     // BufferView
 
     BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {

@@ -46,13 +46,11 @@ TEST_P(BufferMapReadTests, SmallReadAtZero) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(1)
         .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t myData = 187;
     buffer.SetSubData(0, sizeof(myData), &myData);
 
-    buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
     const void* mappedData = MapReadAsyncAndWait(buffer, 0, 1);
     ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
 
@@ -64,13 +62,11 @@ TEST_P(BufferMapReadTests, SmallReadAtOffset) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4000)
         .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t myData = 234;
     buffer.SetSubData(2048, sizeof(myData), &myData);
 
-    buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
     const void* mappedData = MapReadAsyncAndWait(buffer, 2048, 4);
     ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
 
@@ -82,13 +78,11 @@ TEST_P(BufferMapReadTests, SmallReadAtUnalignedOffset) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4000)
         .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t myData = 213;
     buffer.SetSubData(3, 1, &myData);
 
-    buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
     const void* mappedData = MapReadAsyncAndWait(buffer, 3, 1);
     ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
 
@@ -106,12 +100,10 @@ TEST_P(BufferMapReadTests, LargeRead) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(static_cast<uint32_t>(kDataSize * sizeof(uint32_t)))
         .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     buffer.SetSubData(0, kDataSize * sizeof(uint32_t), reinterpret_cast<uint8_t*>(myData.data()));
 
-    buffer.TransitionUsage(nxt::BufferUsageBit::MapRead);
     const void* mappedData = MapReadAsyncAndWait(buffer, 0, static_cast<uint32_t>(kDataSize * sizeof(uint32_t)));
     ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
 
@@ -150,7 +142,6 @@ TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4)
         .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
-        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
         .GetResult();
 
     uint32_t myData = 2934875;
@@ -166,7 +157,6 @@ TEST_P(BufferMapWriteTests, SmallWriteAtOffset) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4000)
         .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
-        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
         .GetResult();
 
     uint32_t myData = 2934875;
@@ -188,7 +178,6 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(static_cast<uint32_t>(kDataSize * sizeof(uint32_t)))
         .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
-        .SetInitialUsage(nxt::BufferUsageBit::MapWrite)
         .GetResult();
 
     void* mappedData = MapWriteAsyncAndWait(buffer, 0, kDataSize * sizeof(uint32_t));
@@ -208,7 +197,6 @@ TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(1)
         .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t value = 171;
@@ -222,7 +210,6 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4000)
         .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     constexpr uint32_t kOffset = 2000;
@@ -246,7 +233,6 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(kSize)
         .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     std::vector<uint32_t> expectedData;
@@ -265,7 +251,6 @@ TEST_P(BufferSetSubDataTests, LargeSetSubData) {
     nxt::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(kSize)
         .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
-        .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
         .GetResult();
 
     std::vector<uint32_t> expectedData;

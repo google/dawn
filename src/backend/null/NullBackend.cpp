@@ -171,9 +171,6 @@ namespace backend { namespace null {
     void Buffer::UnmapImpl() {
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
-    }
-
     // CommandBuffer
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
@@ -184,27 +181,6 @@ namespace backend { namespace null {
         FreeCommands(&mCommands);
     }
 
-    void CommandBuffer::Execute() {
-        Command type;
-        while (mCommands.NextCommandId(&type)) {
-            switch (type) {
-                case Command::TransitionBufferUsage: {
-                    TransitionBufferUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionBufferUsageCmd>();
-                    cmd->buffer->UpdateUsageInternal(cmd->usage);
-                } break;
-                case Command::TransitionTextureUsage: {
-                    TransitionTextureUsageCmd* cmd =
-                        mCommands.NextCommand<TransitionTextureUsageCmd>();
-                    cmd->texture->UpdateUsageInternal(cmd->usage);
-                } break;
-                default:
-                    SkipCommand(&mCommands, type);
-                    break;
-            }
-        }
-    }
-
     // Queue
 
     Queue::Queue(Device* device) : QueueBase(device) {
@@ -213,29 +189,14 @@ namespace backend { namespace null {
     Queue::~Queue() {
     }
 
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
+    void Queue::Submit(uint32_t, CommandBuffer* const*) {
         auto operations = ToBackend(GetDevice())->AcquirePendingOperations();
 
         for (auto& operation : operations) {
             operation->Execute();
         }
 
-        for (uint32_t i = 0; i < numCommands; ++i) {
-            commands[i]->Execute();
-        }
-
         operations.clear();
-    }
-
-    // Texture
-
-    Texture::Texture(TextureBuilder* builder) : TextureBase(builder) {
-    }
-
-    Texture::~Texture() {
-    }
-
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
     // SwapChain

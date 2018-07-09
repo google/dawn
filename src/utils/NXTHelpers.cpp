@@ -97,17 +97,15 @@ namespace utils {
         return builder.GetResult();
     }
 
-    nxt::Buffer CreateFrozenBufferFromData(const nxt::Device& device,
-                                           const void* data,
-                                           uint32_t size,
-                                           nxt::BufferUsageBit usage) {
+    nxt::Buffer CreateBufferFromData(const nxt::Device& device,
+                                     const void* data,
+                                     uint32_t size,
+                                     nxt::BufferUsageBit usage) {
         nxt::Buffer buffer = device.CreateBufferBuilder()
                                  .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | usage)
-                                 .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
                                  .SetSize(size)
                                  .GetResult();
         buffer.SetSubData(0, size, reinterpret_cast<const uint8_t*>(data));
-        buffer.FreezeUsage(usage);
         return buffer;
     }
 
@@ -126,7 +124,6 @@ namespace utils {
                            .SetMipLevels(1)
                            .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment |
                                             nxt::TextureUsageBit::TransferSrc)
-                           .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
                            .GetResult();
 
         nxt::TextureView colorView = result.color.CreateTextureViewBuilder().GetResult();

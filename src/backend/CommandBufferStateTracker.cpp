@@ -33,24 +33,6 @@ namespace backend {
         : mBuilder(mBuilder) {
     }
 
-    bool CommandBufferStateTracker::ValidateCanUseBufferAs(BufferBase* buffer,
-                                                           nxt::BufferUsageBit usage) const {
-        if (!BufferHasGuaranteedUsageBit(buffer, usage)) {
-            mBuilder->HandleError("Buffer is not in the necessary usage");
-            return false;
-        }
-        return true;
-    }
-
-    bool CommandBufferStateTracker::ValidateCanUseTextureAs(TextureBase* texture,
-                                                            nxt::TextureUsageBit usage) const {
-        if (!TextureHasGuaranteedUsageBit(texture, usage)) {
-            mBuilder->HandleError("Texture is not in the necessary usage");
-            return false;
-        }
-        return true;
-    }
-
     bool CommandBufferStateTracker::ValidateCanDispatch() {
         constexpr ValidationAspects requiredAspects =
             1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS;
@@ -99,32 +81,7 @@ namespace backend {
         return RevalidateCanDraw();
     }
 
-    bool CommandBufferStateTracker::BeginRenderPass(RenderPassDescriptorBase* info) {
-        for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
-            TextureBase* texture = info->GetColorAttachment(i).view->GetTexture();
-            if (!EnsureTextureUsage(texture, nxt::TextureUsageBit::OutputAttachment)) {
-                mBuilder->HandleError("Unable to ensure texture has OutputAttachment usage");
-                return false;
-            }
-            mTexturesAttached.insert(texture);
-        }
-
-        if (info->HasDepthStencilAttachment()) {
-            TextureBase* texture = info->GetDepthStencilAttachment().view->GetTexture();
-            if (!EnsureTextureUsage(texture, nxt::TextureUsageBit::OutputAttachment)) {
-                mBuilder->HandleError("Unable to ensure texture has OutputAttachment usage");
-                return false;
-            }
-            mTexturesAttached.insert(texture);
-        }
-
-        return true;
-    }
-
     void CommandBufferStateTracker::EndPass() {
-        // Everything in mTexturesAttached should be for the current render pass.
-        mTexturesAttached.clear();
-
         mInputsSet.reset();
         mAspects = 0;
         mBindgroups.fill(nullptr);
@@ -141,25 +98,14 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::SetBindGroup(uint32_t index, BindGroupBase* bindgroup) {
-        if (!ValidateBindGroupUsages(bindgroup)) {
-            return false;
-        }
+    void CommandBufferStateTracker::SetBindGroup(uint32_t index, BindGroupBase* bindgroup) {
         mBindgroupsSet.set(index);
         mBindgroups[index] = bindgroup;
-
-        return true;
     }
 
-    bool CommandBufferStateTracker::SetIndexBuffer(BufferBase* buffer) {
+    bool CommandBufferStateTracker::SetIndexBuffer() {
         if (!HavePipeline()) {
             mBuilder->HandleError("Can't set the index buffer without a pipeline");
-            return false;
-        }
-
-        auto usage = nxt::BufferUsageBit::Index;
-        if (!BufferHasGuaranteedUsageBit(buffer, usage)) {
-            mBuilder->HandleError("Buffer needs the index usage bit to be guaranteed");
             return false;
         }
 
@@ -167,113 +113,14 @@ namespace backend {
         return true;
     }
 
-    bool CommandBufferStateTracker::SetVertexBuffer(uint32_t index, BufferBase* buffer) {
+    bool CommandBufferStateTracker::SetVertexBuffer(uint32_t index) {
         if (!HavePipeline()) {
             mBuilder->HandleError("Can't set vertex buffers without a pipeline");
             return false;
         }
 
-        auto usage = nxt::BufferUsageBit::Vertex;
-        if (!BufferHasGuaranteedUsageBit(buffer, usage)) {
-            mBuilder->HandleError("Buffer needs vertex usage bit to be guaranteed");
-            return false;
-        }
-
         mInputsSet.set(index);
         return true;
-    }
-
-    bool CommandBufferStateTracker::TransitionBufferUsage(BufferBase* buffer,
-                                                          nxt::BufferUsageBit usage) {
-        if (!buffer->IsTransitionPossible(usage)) {
-            if (buffer->IsFrozen()) {
-                mBuilder->HandleError("Buffer transition not possible (usage is frozen)");
-            } else if (!BufferBase::IsUsagePossible(buffer->GetAllowedUsage(), usage)) {
-                mBuilder->HandleError("Buffer transition not possible (usage not allowed)");
-            } else {
-                mBuilder->HandleError("Buffer transition not possible");
-            }
-            return false;
-        }
-
-        mMostRecentBufferUsages[buffer] = usage;
-        mBuffersTransitioned.insert(buffer);
-        return true;
-    }
-
-    bool CommandBufferStateTracker::TransitionTextureUsage(TextureBase* texture,
-                                                           nxt::TextureUsageBit usage) {
-        if (!IsExplicitTextureTransitionPossible(texture, usage)) {
-            if (texture->IsFrozen()) {
-                mBuilder->HandleError("Texture transition not possible (usage is frozen)");
-            } else if (!TextureBase::IsUsagePossible(texture->GetAllowedUsage(), usage)) {
-                mBuilder->HandleError("Texture transition not possible (usage not allowed)");
-            } else if (mTexturesAttached.find(texture) != mTexturesAttached.end()) {
-                mBuilder->HandleError(
-                    "Texture transition not possible (texture is in use as a framebuffer "
-                    "attachment)");
-            } else {
-                mBuilder->HandleError("Texture transition not possible");
-            }
-            return false;
-        }
-
-        mMostRecentTextureUsages[texture] = usage;
-        mTexturesTransitioned.insert(texture);
-        return true;
-    }
-
-    bool CommandBufferStateTracker::EnsureTextureUsage(TextureBase* texture,
-                                                       nxt::TextureUsageBit usage) {
-        if (texture->HasFrozenUsage(usage)) {
-            return true;
-        }
-        if (!IsInternalTextureTransitionPossible(texture, usage)) {
-            return false;
-        }
-        mMostRecentTextureUsages[texture] = usage;
-        mTexturesTransitioned.insert(texture);
-        return true;
-    }
-
-    bool CommandBufferStateTracker::BufferHasGuaranteedUsageBit(BufferBase* buffer,
-                                                                nxt::BufferUsageBit usage) const {
-        ASSERT(usage != nxt::BufferUsageBit::None && nxt::HasZeroOrOneBits(usage));
-        if (buffer->HasFrozenUsage(usage)) {
-            return true;
-        }
-        auto it = mMostRecentBufferUsages.find(buffer);
-        return it != mMostRecentBufferUsages.end() && (it->second & usage);
-    }
-
-    bool CommandBufferStateTracker::TextureHasGuaranteedUsageBit(TextureBase* texture,
-                                                                 nxt::TextureUsageBit usage) const {
-        ASSERT(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
-        if (texture->HasFrozenUsage(usage)) {
-            return true;
-        }
-        auto it = mMostRecentTextureUsages.find(texture);
-        return it != mMostRecentTextureUsages.end() && (it->second & usage);
-    }
-
-    bool CommandBufferStateTracker::IsInternalTextureTransitionPossible(
-        TextureBase* texture,
-        nxt::TextureUsageBit usage) const {
-        ASSERT(usage != nxt::TextureUsageBit::None && nxt::HasZeroOrOneBits(usage));
-        if (mTexturesAttached.find(texture) != mTexturesAttached.end()) {
-            return false;
-        }
-        return texture->IsTransitionPossible(usage);
-    }
-
-    bool CommandBufferStateTracker::IsExplicitTextureTransitionPossible(
-        TextureBase* texture,
-        nxt::TextureUsageBit usage) const {
-        const nxt::TextureUsageBit attachmentUsages = nxt::TextureUsageBit::OutputAttachment;
-        if (usage & attachmentUsages) {
-            return false;
-        }
-        return IsInternalTextureTransitionPossible(texture, usage);
     }
 
     bool CommandBufferStateTracker::RecomputeHaveAspectBindGroups() {
@@ -312,53 +159,6 @@ namespace backend {
 
     bool CommandBufferStateTracker::HavePipeline() const {
         return mAspects[VALIDATION_ASPECT_PIPELINE];
-    }
-
-    bool CommandBufferStateTracker::ValidateBindGroupUsages(BindGroupBase* group) const {
-        const auto& layoutInfo = group->GetLayout()->GetBindingInfo();
-        for (size_t i = 0; i < kMaxBindingsPerGroup; ++i) {
-            if (!layoutInfo.mask[i]) {
-                continue;
-            }
-
-            nxt::BindingType type = layoutInfo.types[i];
-            switch (type) {
-                case nxt::BindingType::UniformBuffer:
-                case nxt::BindingType::StorageBuffer: {
-                    nxt::BufferUsageBit requiredUsage = nxt::BufferUsageBit::None;
-                    switch (type) {
-                        case nxt::BindingType::UniformBuffer:
-                            requiredUsage = nxt::BufferUsageBit::Uniform;
-                            break;
-
-                        case nxt::BindingType::StorageBuffer:
-                            requiredUsage = nxt::BufferUsageBit::Storage;
-                            break;
-
-                        default:
-                            UNREACHABLE();
-                    }
-
-                    auto buffer = group->GetBindingAsBufferView(i)->GetBuffer();
-                    if (!BufferHasGuaranteedUsageBit(buffer, requiredUsage)) {
-                        mBuilder->HandleError("Can't guarantee buffer usage needed by bind group");
-                        return false;
-                    }
-                } break;
-                case nxt::BindingType::SampledTexture: {
-                    auto requiredUsage = nxt::TextureUsageBit::Sampled;
-
-                    auto texture = group->GetBindingAsTextureView(i)->GetTexture();
-                    if (!TextureHasGuaranteedUsageBit(texture, requiredUsage)) {
-                        mBuilder->HandleError("Can't guarantee texture usage needed by bind group");
-                        return false;
-                    }
-                } break;
-                case nxt::BindingType::Sampler:
-                    continue;
-            }
-        }
-        return true;
     }
 
     bool CommandBufferStateTracker::RevalidateCanDraw() {

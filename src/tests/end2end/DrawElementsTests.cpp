@@ -55,13 +55,13 @@ class DrawElementsTest : public NXTTest {
                 .SetInputState(inputState)
                 .GetResult();
 
-            vertexBuffer = utils::CreateFrozenBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+            vertexBuffer = utils::CreateBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
                 -1.0f, -1.0f, 0.0f, 1.0f,
                  1.0f,  1.0f, 0.0f, 1.0f,
                 -1.0f,  1.0f, 0.0f, 1.0f,
                  1.0f, -1.0f, 0.0f, 1.0f
             });
-            indexBuffer = utils::CreateFrozenBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
+            indexBuffer = utils::CreateBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
                 0, 1, 2, 0, 3, 1
             });
         }

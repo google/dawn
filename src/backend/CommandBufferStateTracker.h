@@ -31,29 +31,17 @@ namespace backend {
 
         // Non-state-modifying validation functions
         bool ValidateCanCopy() const;
-        bool ValidateCanUseBufferAs(BufferBase* buffer, nxt::BufferUsageBit usage) const;
-        bool ValidateCanUseTextureAs(TextureBase* texture, nxt::TextureUsageBit usage) const;
         bool ValidateCanDispatch();
         bool ValidateCanDrawArrays();
         bool ValidateCanDrawElements();
 
         // State-modifying methods
         void EndPass();
-        bool BeginRenderPass(RenderPassDescriptorBase* info);
         bool SetComputePipeline(ComputePipelineBase* pipeline);
         bool SetRenderPipeline(RenderPipelineBase* pipeline);
-        bool SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
-        bool SetIndexBuffer(BufferBase* buffer);
-        bool SetVertexBuffer(uint32_t index, BufferBase* buffer);
-        bool TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage);
-        bool TransitionTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
-        bool EnsureTextureUsage(TextureBase* texture, nxt::TextureUsageBit usage);
-
-        // These collections are copied to the CommandBuffer at build time. These pointers will
-        // remain valid since they are referenced by the bind groups which are referenced by this
-        // command buffer.
-        std::set<BufferBase*> mBuffersTransitioned;
-        std::set<TextureBase*> mTexturesTransitioned;
+        void SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
+        bool SetIndexBuffer();
+        bool SetVertexBuffer(uint32_t index);
 
       private:
         enum ValidationAspect {
@@ -66,20 +54,11 @@ namespace backend {
         };
         using ValidationAspects = std::bitset<VALIDATION_ASPECT_COUNT>;
 
-        // Usage helper functions
-        bool BufferHasGuaranteedUsageBit(BufferBase* buffer, nxt::BufferUsageBit usage) const;
-        bool TextureHasGuaranteedUsageBit(TextureBase* texture, nxt::TextureUsageBit usage) const;
-        bool IsInternalTextureTransitionPossible(TextureBase* texture,
-                                                 nxt::TextureUsageBit usage) const;
-        bool IsExplicitTextureTransitionPossible(TextureBase* texture,
-                                                 nxt::TextureUsageBit usage) const;
-
         // Queries for lazily evaluated aspects
         bool RecomputeHaveAspectBindGroups();
         bool RecomputeHaveAspectVertexBuffers();
 
         bool HavePipeline() const;
-        bool ValidateBindGroupUsages(BindGroupBase* group) const;
         bool RevalidateCanDraw();
 
         void SetPipelineCommon(PipelineBase* pipeline);
@@ -93,10 +72,6 @@ namespace backend {
         std::bitset<kMaxVertexInputs> mInputsSet;
         PipelineBase* mLastPipeline = nullptr;
         RenderPipelineBase* mLastRenderPipeline = nullptr;
-
-        std::map<BufferBase*, nxt::BufferUsageBit> mMostRecentBufferUsages;
-        std::map<TextureBase*, nxt::TextureUsageBit> mMostRecentTextureUsages;
-        std::set<TextureBase*> mTexturesAttached;
     };
 
 }  // namespace backend

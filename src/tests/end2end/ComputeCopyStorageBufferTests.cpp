@@ -48,7 +48,6 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
             .SetSize(kNumUints * sizeof(uint32_t))
             .SetAllowedUsage(nxt::BufferUsageBit::Storage | nxt::BufferUsageBit::TransferSrc |
                              nxt::BufferUsageBit::TransferDst)
-            .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
             .GetResult();
     std::array<uint32_t, kNumUints> expected;
     for (uint32_t i = 0; i < kNumUints; ++i) {
@@ -65,7 +64,6 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
             .SetSize(kNumUints * sizeof(uint32_t))
             .SetAllowedUsage(nxt::BufferUsageBit::Storage | nxt::BufferUsageBit::TransferSrc |
                              nxt::BufferUsageBit::TransferDst)
-            .SetInitialUsage(nxt::BufferUsageBit::TransferDst)
             .GetResult();
     std::array<uint32_t, kNumUints> zero{};
     dst.SetSubData(0, sizeof(zero), reinterpret_cast<const uint8_t*>(zero.data()));
@@ -80,8 +78,6 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
                          .SetBufferViews(1, 1, &dstView)
                          .GetResult();
     auto commands = device.CreateCommandBufferBuilder()
-                        .TransitionBufferUsage(src, nxt::BufferUsageBit::Storage)
-                        .TransitionBufferUsage(dst, nxt::BufferUsageBit::Storage)
                         .BeginComputePass()
                         .SetComputePipeline(pipeline)
                         .SetBindGroup(0, bindGroup)

@@ -41,7 +41,6 @@ class VertexBufferValidationTest : public ValidationTest {
                     .SetSize(256)
                     .SetAllowedUsage(nxt::BufferUsageBit::Vertex)
                     .GetResult();
-                buffer.FreezeUsage(nxt::BufferUsageBit::Vertex);
             }
             return buffers;
         }

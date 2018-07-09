@@ -111,9 +111,6 @@ namespace backend { namespace opengl {
         return GetGLFormatInfo(GetFormat());
     }
 
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
-    }
-
     // TextureView
 
     TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {

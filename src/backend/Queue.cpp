@@ -28,8 +28,9 @@ namespace backend {
         return mDevice;
     }
 
-    bool QueueBase::ValidateSubmitCommand(CommandBufferBase* command) {
-        return command->ValidateResourceUsagesImmediate();
+    bool QueueBase::ValidateSubmitCommand(CommandBufferBase*) {
+        // TODO(cwallez@chromium.org): Validate resources referenced by command buffers can be used
+        return true;
     }
 
 }  // namespace backend

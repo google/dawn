@@ -38,8 +38,6 @@ namespace backend { namespace metal {
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;
-        void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
-                                 nxt::BufferUsageBit targetUsage) override;
 
         id<MTLBuffer> mMtlBuffer = nil;
     };

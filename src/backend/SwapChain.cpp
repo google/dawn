@@ -77,10 +77,6 @@ namespace backend {
             mDevice->HandleError("Tried to present something other than the last NextTexture");
             return;
         }
-        if (texture->GetUsage() != nxt::TextureUsageBit::Present) {
-            mDevice->HandleError("Texture has not been transitioned to the Present usage");
-            return;
-        }
 
         OnBeforePresent(texture);
 

@@ -45,8 +45,6 @@ namespace backend { namespace vulkan {
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;
-        void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
-                                 nxt::BufferUsageBit targetUsage) override;
 
         VkBuffer mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;

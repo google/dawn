@@ -343,9 +343,6 @@ namespace backend { namespace vulkan {
         mLastUsage = usage;
     }
 
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
-    }
-
     TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
         Device* device = ToBackend(builder->GetDevice());
 

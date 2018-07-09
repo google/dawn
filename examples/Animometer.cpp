@@ -156,7 +156,6 @@ void frame() {
     }
 
     queue.Submit(1, &commands);
-    backbuffer.TransitionUsage(nxt::TextureUsageBit::Present);
     swapchain.Present(backbuffer);
     DoFlush();
     fprintf(stderr, "frame %i\n", f);

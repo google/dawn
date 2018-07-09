@@ -143,7 +143,6 @@ nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device) {
         .SetMipLevels(1)
         .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
         .GetResult();
-    depthStencilTexture.FreezeUsage(nxt::TextureUsageBit::OutputAttachment);
     return depthStencilTexture.CreateTextureViewBuilder()
         .GetResult();
 }

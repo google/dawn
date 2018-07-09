@@ -483,8 +483,8 @@ TEST_F(WireTests, CallsSkippedAfterBuilderError) {
     nxtBuffer buffer = nxtBufferBuilderGetResult(bufferBuilder); // Hey look an error!
 
     // These calls will be skipped because of the error
-    nxtBufferTransitionUsage(buffer, NXT_BUFFER_USAGE_BIT_UNIFORM);
-    nxtCommandBufferBuilderTransitionBufferUsage(cmdBufBuilder, buffer, NXT_BUFFER_USAGE_BIT_UNIFORM);
+    nxtBufferSetSubData(buffer, 0, 0, nullptr);
+    nxtCommandBufferBuilderSetIndexBuffer(cmdBufBuilder, buffer, 0);
     nxtCommandBufferBuilderGetResult(cmdBufBuilder);
 
     nxtCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
@@ -502,8 +502,8 @@ TEST_F(WireTests, CallsSkippedAfterBuilderError) {
             return nullptr;
         }));
 
-    EXPECT_CALL(api, BufferTransitionUsage(_, _)).Times(0);
-    EXPECT_CALL(api, CommandBufferBuilderTransitionBufferUsage(_, _, _)).Times(0);
+    EXPECT_CALL(api, BufferSetSubData(_, _, _, _)).Times(0);
+    EXPECT_CALL(api, CommandBufferBuilderSetIndexBuffer(_, _, _)).Times(0);
     EXPECT_CALL(api, CommandBufferBuilderGetResult(_)).Times(0);
 
     FlushClient();

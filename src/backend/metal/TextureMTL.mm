@@ -70,7 +70,7 @@ namespace backend { namespace metal {
         auto desc = [MTLTextureDescriptor new];
         [desc autorelease];
         desc.textureType = MetalTextureType(GetDimension());
-        desc.usage = MetalTextureUsage(GetUsage());
+        desc.usage = MetalTextureUsage(GetAllowedUsage());
         desc.pixelFormat = MetalPixelFormat(GetFormat());
         desc.width = GetWidth();
         desc.height = GetHeight();
@@ -94,9 +94,6 @@ namespace backend { namespace metal {
 
     id<MTLTexture> Texture::GetMTLTexture() {
         return mMtlTexture;
-    }
-
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
     TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {

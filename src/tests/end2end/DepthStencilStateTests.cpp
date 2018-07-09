@@ -30,7 +30,6 @@ class DepthStencilStateTest : public NXTTest {
                 .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
                 .SetMipLevels(1)
                 .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
-                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
                 .GetResult();
 
             renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
@@ -41,7 +40,6 @@ class DepthStencilStateTest : public NXTTest {
                 .SetFormat(nxt::TextureFormat::D32FloatS8Uint)
                 .SetMipLevels(1)
                 .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
-                .SetInitialUsage(nxt::TextureUsageBit::OutputAttachment)
                 .GetResult();
 
             depthTextureView = depthTexture.CreateTextureViewBuilder().GetResult();
@@ -193,7 +191,6 @@ class DepthStencilStateTest : public NXTTest {
                 float depth;
             };
 
-            renderTarget.TransitionUsage(nxt::TextureUsageBit::OutputAttachment);
             builder.BeginRenderPass(renderpass);
 
             for (size_t i = 0; i < testParams.size(); ++i) {
@@ -204,7 +201,7 @@ class DepthStencilStateTest : public NXTTest {
                     test.depth,
                 };
                 // Upload a buffer for each triangle's depth and color data
-                nxt::Buffer buffer = utils::CreateFrozenBufferFromData(device, &data, sizeof(TriangleData), nxt::BufferUsageBit::Uniform);
+                nxt::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(TriangleData), nxt::BufferUsageBit::Uniform);
 
                 nxt::BufferView view = buffer.CreateBufferViewBuilder()
                     .SetExtent(0, sizeof(TriangleData))
