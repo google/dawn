@@ -280,7 +280,7 @@ namespace backend { namespace d3d12 {
         return new BufferView(builder);
     }
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
-        return new CommandBuffer(this, builder);
+        return new CommandBuffer(builder);
     }
     ComputePipelineBase* Device::CreateComputePipeline(ComputePipelineBuilder* builder) {
         return new ComputePipeline(builder);

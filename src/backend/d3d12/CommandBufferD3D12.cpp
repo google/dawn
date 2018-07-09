@@ -44,116 +44,116 @@ namespace backend { namespace d3d12 {
                     UNREACHABLE();
             }
         }
+    }  // anonymous namespace
 
-        struct BindGroupStateTracker {
-            uint32_t cbvSrvUavDescriptorIndex = 0;
-            uint32_t samplerDescriptorIndex = 0;
-            DescriptorHeapHandle cbvSrvUavCPUDescriptorHeap = {};
-            DescriptorHeapHandle samplerCPUDescriptorHeap = {};
-            DescriptorHeapHandle cbvSrvUavGPUDescriptorHeap = {};
-            DescriptorHeapHandle samplerGPUDescriptorHeap = {};
-            std::array<BindGroup*, kMaxBindGroups> bindGroups = {};
-            bool inCompute = false;
+    struct BindGroupStateTracker {
+        uint32_t cbvSrvUavDescriptorIndex = 0;
+        uint32_t samplerDescriptorIndex = 0;
+        DescriptorHeapHandle cbvSrvUavCPUDescriptorHeap = {};
+        DescriptorHeapHandle samplerCPUDescriptorHeap = {};
+        DescriptorHeapHandle cbvSrvUavGPUDescriptorHeap = {};
+        DescriptorHeapHandle samplerGPUDescriptorHeap = {};
+        std::array<BindGroup*, kMaxBindGroups> bindGroups = {};
+        bool inCompute = false;
 
-            Device* device;
+        Device* device;
 
-            BindGroupStateTracker(Device* device) : device(device) {
+        BindGroupStateTracker(Device* device) : device(device) {
+        }
+
+        void SetInComputePass(bool inCompute_) {
+            inCompute = inCompute_;
+        }
+
+        void TrackSetBindGroup(BindGroup* group, uint32_t index) {
+            if (bindGroups[index] != group) {
+                bindGroups[index] = group;
+
+                // Descriptors don't need to be recorded if they have already been recorded in
+                // the heap. Indices are only updated when descriptors are recorded
+                const uint64_t serial = device->GetSerial();
+                if (group->GetHeapSerial() != serial) {
+                    group->RecordDescriptors(cbvSrvUavCPUDescriptorHeap, &cbvSrvUavDescriptorIndex,
+                                             samplerCPUDescriptorHeap, &samplerDescriptorIndex,
+                                             serial);
+                }
+            }
+        }
+
+        void TrackInheritedGroups(PipelineLayout* oldLayout, PipelineLayout* newLayout) {
+            if (oldLayout == nullptr) {
+                return;
             }
 
-            void SetInComputePass(bool inCompute_) {
-                inCompute = inCompute_;
+            uint32_t inheritUntil = oldLayout->GroupsInheritUpTo(newLayout);
+            for (uint32_t i = 0; i < inheritUntil; ++i) {
+                TrackSetBindGroup(bindGroups[i], i);
             }
+        }
 
-            void TrackSetBindGroup(BindGroup* group, uint32_t index) {
-                if (bindGroups[index] != group) {
-                    bindGroups[index] = group;
+        void SetBindGroup(ComPtr<ID3D12GraphicsCommandList> commandList,
+                          PipelineLayout* pipelineLayout,
+                          BindGroup* group,
+                          uint32_t index,
+                          bool force = false) {
+            if (bindGroups[index] != group || force) {
+                bindGroups[index] = group;
 
-                    // Descriptors don't need to be recorded if they have already been recorded in
-                    // the heap. Indices are only updated when descriptors are recorded
-                    const uint64_t serial = device->GetSerial();
-                    if (group->GetHeapSerial() != serial) {
-                        group->RecordDescriptors(
-                            cbvSrvUavCPUDescriptorHeap, &cbvSrvUavDescriptorIndex,
-                            samplerCPUDescriptorHeap, &samplerDescriptorIndex, serial);
+                uint32_t cbvUavSrvCount =
+                    ToBackend(group->GetLayout())->GetCbvUavSrvDescriptorCount();
+                uint32_t samplerCount = ToBackend(group->GetLayout())->GetSamplerDescriptorCount();
+
+                if (cbvUavSrvCount > 0) {
+                    uint32_t parameterIndex = pipelineLayout->GetCbvUavSrvRootParameterIndex(index);
+
+                    if (inCompute) {
+                        commandList->SetComputeRootDescriptorTable(
+                            parameterIndex, cbvSrvUavGPUDescriptorHeap.GetGPUHandle(
+                                                group->GetCbvUavSrvHeapOffset()));
+                    } else {
+                        commandList->SetGraphicsRootDescriptorTable(
+                            parameterIndex, cbvSrvUavGPUDescriptorHeap.GetGPUHandle(
+                                                group->GetCbvUavSrvHeapOffset()));
+                    }
+                }
+
+                if (samplerCount > 0) {
+                    uint32_t parameterIndex = pipelineLayout->GetSamplerRootParameterIndex(index);
+
+                    if (inCompute) {
+                        commandList->SetComputeRootDescriptorTable(
+                            parameterIndex,
+                            samplerGPUDescriptorHeap.GetGPUHandle(group->GetSamplerHeapOffset()));
+                    } else {
+                        commandList->SetGraphicsRootDescriptorTable(
+                            parameterIndex,
+                            samplerGPUDescriptorHeap.GetGPUHandle(group->GetSamplerHeapOffset()));
                     }
                 }
             }
+        }
 
-            void TrackInheritedGroups(PipelineLayout* oldLayout, PipelineLayout* newLayout) {
-                if (oldLayout == nullptr) {
-                    return;
-                }
-
-                uint32_t inheritUntil = oldLayout->GroupsInheritUpTo(newLayout);
-                for (uint32_t i = 0; i < inheritUntil; ++i) {
-                    TrackSetBindGroup(bindGroups[i], i);
-                }
+        void SetInheritedBindGroups(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                    PipelineLayout* oldLayout,
+                                    PipelineLayout* newLayout) {
+            if (oldLayout == nullptr) {
+                return;
             }
 
-            void SetBindGroup(ComPtr<ID3D12GraphicsCommandList> commandList,
-                              PipelineLayout* pipelineLayout,
-                              BindGroup* group,
-                              uint32_t index,
-                              bool force = false) {
-                if (bindGroups[index] != group || force) {
-                    bindGroups[index] = group;
-
-                    uint32_t cbvUavSrvCount =
-                        ToBackend(group->GetLayout())->GetCbvUavSrvDescriptorCount();
-                    uint32_t samplerCount =
-                        ToBackend(group->GetLayout())->GetSamplerDescriptorCount();
-
-                    if (cbvUavSrvCount > 0) {
-                        uint32_t parameterIndex =
-                            pipelineLayout->GetCbvUavSrvRootParameterIndex(index);
-
-                        if (inCompute) {
-                            commandList->SetComputeRootDescriptorTable(
-                                parameterIndex, cbvSrvUavGPUDescriptorHeap.GetGPUHandle(
-                                                    group->GetCbvUavSrvHeapOffset()));
-                        } else {
-                            commandList->SetGraphicsRootDescriptorTable(
-                                parameterIndex, cbvSrvUavGPUDescriptorHeap.GetGPUHandle(
-                                                    group->GetCbvUavSrvHeapOffset()));
-                        }
-                    }
-
-                    if (samplerCount > 0) {
-                        uint32_t parameterIndex =
-                            pipelineLayout->GetSamplerRootParameterIndex(index);
-
-                        if (inCompute) {
-                            commandList->SetComputeRootDescriptorTable(
-                                parameterIndex, samplerGPUDescriptorHeap.GetGPUHandle(
-                                                    group->GetSamplerHeapOffset()));
-                        } else {
-                            commandList->SetGraphicsRootDescriptorTable(
-                                parameterIndex, samplerGPUDescriptorHeap.GetGPUHandle(
-                                                    group->GetSamplerHeapOffset()));
-                        }
-                    }
-                }
+            uint32_t inheritUntil = oldLayout->GroupsInheritUpTo(newLayout);
+            for (uint32_t i = 0; i < inheritUntil; ++i) {
+                SetBindGroup(commandList, newLayout, bindGroups[i], i, true);
             }
+        }
 
-            void SetInheritedBindGroups(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                        PipelineLayout* oldLayout,
-                                        PipelineLayout* newLayout) {
-                if (oldLayout == nullptr) {
-                    return;
-                }
-
-                uint32_t inheritUntil = oldLayout->GroupsInheritUpTo(newLayout);
-                for (uint32_t i = 0; i < inheritUntil; ++i) {
-                    SetBindGroup(commandList, newLayout, bindGroups[i], i, true);
-                }
+        void Reset() {
+            for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
+                bindGroups[i] = nullptr;
             }
+        }
+    };
 
-            void Reset() {
-                for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
-                    bindGroups[i] = nullptr;
-                }
-            }
-        };
+    namespace {
 
         void AllocateAndSetDescriptorHeaps(Device* device,
                                            BindGroupStateTracker* bindingTracker,
@@ -226,130 +226,54 @@ namespace backend { namespace d3d12 {
                     D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
             }
         }
-    }  // namespace
 
-    CommandBuffer::CommandBuffer(Device* device, CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), mDevice(device), mCommands(builder->AcquireCommands()) {
+    }  // anonymous namespace
+
+    CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
+        : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {
         FreeCommands(&mCommands);
     }
 
-    void CommandBuffer::FillCommands(ComPtr<ID3D12GraphicsCommandList> commandList) {
-        BindGroupStateTracker bindingTracker(mDevice);
-        AllocateAndSetDescriptorHeaps(mDevice, &bindingTracker, &mCommands);
-        bindingTracker.Reset();
+    void CommandBuffer::RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList) {
+        Device* device = ToBackend(GetDevice());
+        BindGroupStateTracker bindingTracker(device);
 
-        ID3D12DescriptorHeap* descriptorHeaps[2] = {bindingTracker.cbvSrvUavGPUDescriptorHeap.Get(),
-                                                    bindingTracker.samplerGPUDescriptorHeap.Get()};
-        if (descriptorHeaps[0] && descriptorHeaps[1]) {
-            commandList->SetDescriptorHeaps(2, descriptorHeaps);
-        } else if (descriptorHeaps[0]) {
-            commandList->SetDescriptorHeaps(1, descriptorHeaps);
-        } else if (descriptorHeaps[1]) {
-            commandList->SetDescriptorHeaps(2, &descriptorHeaps[1]);
+        // Precompute the allocation of bindgroups in descriptor heaps
+        // TODO(cwallez@chromium.org): Iterating over all the commands here is inefficient. We
+        // should have a system where commands and descriptors are recorded in parallel then the
+        // heaps set using a small CommandList inserted just before the main CommandList.
+        {
+            AllocateAndSetDescriptorHeaps(device, &bindingTracker, &mCommands);
+            bindingTracker.Reset();
+
+            ID3D12DescriptorHeap* descriptorHeaps[2] = {
+                bindingTracker.cbvSrvUavGPUDescriptorHeap.Get(),
+                bindingTracker.samplerGPUDescriptorHeap.Get()};
+            if (descriptorHeaps[0] && descriptorHeaps[1]) {
+                commandList->SetDescriptorHeaps(2, descriptorHeaps);
+            } else if (descriptorHeaps[0]) {
+                commandList->SetDescriptorHeaps(1, descriptorHeaps);
+            } else if (descriptorHeaps[1]) {
+                commandList->SetDescriptorHeaps(2, &descriptorHeaps[1]);
+            }
         }
 
         Command type;
-        RenderPipeline* lastRenderPipeline = nullptr;
-        PipelineLayout* lastLayout = nullptr;
-
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
-                    bindingTracker.SetInComputePass(true);
+                    RecordComputePass(commandList, &bindingTracker);
                 } break;
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* beginRenderPassCmd =
                         mCommands.NextCommand<BeginRenderPassCmd>();
-                    RenderPassDescriptor* info = ToBackend(beginRenderPassCmd->info.Get());
-
-                    RenderPassDescriptor::OMSetRenderTargetArgs args =
-                        info->GetSubpassOMSetRenderTargetArgs();
-                    if (args.dsv.ptr) {
-                        commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE,
-                                                        &args.dsv);
-                    } else {
-                        commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE,
-                                                        nullptr);
-                    }
-
-                    // Clear framebuffer attachments as needed and transition to render target
-
-                    for (uint32_t i : IterateBitSet(info->GetColorAttachmentMask())) {
-                        auto& attachmentInfo = info->GetColorAttachment(i);
-                        Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
-
-                        // It's already validated that this texture is either frozen to the correct
-                        // usage, or not frozen.
-                        if (!texture->IsFrozen()) {
-                            texture->TransitionUsageImpl(texture->GetUsage(),
-                                                         nxt::TextureUsageBit::OutputAttachment);
-                            texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
-                        }
-
-                        // Load op - color
-                        if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
-                            D3D12_CPU_DESCRIPTOR_HANDLE handle = info->GetRTVDescriptor(i);
-                            commandList->ClearRenderTargetView(
-                                handle, attachmentInfo.clearColor.data(), 0, nullptr);
-                        }
-                    }
-
-                    if (info->HasDepthStencilAttachment()) {
-                        auto& attachmentInfo = info->GetDepthStencilAttachment();
-                        Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
-
-                        // It's already validated that this texture is either frozen to the correct
-                        // usage, or not frozen.
-                        if (!texture->IsFrozen()) {
-                            texture->TransitionUsageImpl(texture->GetUsage(),
-                                                         nxt::TextureUsageBit::OutputAttachment);
-                            texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
-                        }
-
-                        // Load op - depth/stencil
-                        bool doDepthClear = TextureFormatHasDepth(texture->GetFormat()) &&
-                                            (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
-                        bool doStencilClear = TextureFormatHasStencil(texture->GetFormat()) &&
-                                              (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
-
-                        D3D12_CLEAR_FLAGS clearFlags = {};
-                        if (doDepthClear) {
-                            clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
-                        }
-                        if (doStencilClear) {
-                            clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
-                        }
-
-                        if (clearFlags) {
-                            auto handle = info->GetDSVDescriptor();
-                            // TODO(kainino@chromium.org): investigate: should the NXT clear
-                            // stencil type be uint8_t?
-                            uint8_t clearStencil =
-                                static_cast<uint8_t>(attachmentInfo.clearStencil);
-                            commandList->ClearDepthStencilView(handle, clearFlags,
-                                                               attachmentInfo.clearDepth,
-                                                               clearStencil, 0, nullptr);
-                        }
-                    }
-
-                    // Set up the default render pass dynamic state
-
-                    uint32_t width = info->GetWidth();
-                    uint32_t height = info->GetHeight();
-                    D3D12_VIEWPORT viewport = {
-                        0.f, 0.f, static_cast<float>(width), static_cast<float>(height), 0.f, 1.f};
-                    D3D12_RECT scissorRect = {0, 0, static_cast<long>(width),
-                                              static_cast<long>(height)};
-                    commandList->RSSetViewports(1, &viewport);
-                    commandList->RSSetScissorRects(1, &scissorRect);
-
-                    static constexpr std::array<float, 4> defaultBlendFactor = {0, 0, 0, 0};
-                    commandList->OMSetBlendFactor(&defaultBlendFactor[0]);
+                    RecordRenderPass(commandList, &bindingTracker,
+                                     ToBackend(beginRenderPassCmd->info.Get()));
                 } break;
 
                 case Command::CopyBufferToBuffer: {
@@ -446,129 +370,6 @@ namespace backend { namespace d3d12 {
                     }
                 } break;
 
-                case Command::Dispatch: {
-                    DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
-                    commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
-                } break;
-
-                case Command::DrawArrays: {
-                    DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
-                    commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
-                                               draw->firstVertex, draw->firstInstance);
-                } break;
-
-                case Command::DrawElements: {
-                    DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
-
-                    commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
-                                                      draw->firstIndex, 0, draw->firstInstance);
-                } break;
-
-                case Command::EndComputePass: {
-                    mCommands.NextCommand<EndComputePassCmd>();
-                    bindingTracker.SetInComputePass(false);
-                } break;
-
-                case Command::EndRenderPass: {
-                    mCommands.NextCommand<EndRenderPassCmd>();
-                } break;
-
-                case Command::SetComputePipeline: {
-                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
-                    ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
-                    PipelineLayout* layout = ToBackend(pipeline->GetLayout());
-
-                    commandList->SetComputeRootSignature(layout->GetRootSignature().Get());
-                    commandList->SetPipelineState(pipeline->GetPipelineState().Get());
-
-                    // TODO(enga@google.com): Implement compute pipelines
-                    bindingTracker.SetInheritedBindGroups(commandList, lastLayout, layout);
-                    lastLayout = layout;
-                } break;
-
-                case Command::SetRenderPipeline: {
-                    SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
-                    RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
-                    PipelineLayout* layout = ToBackend(pipeline->GetLayout());
-
-                    commandList->SetGraphicsRootSignature(layout->GetRootSignature().Get());
-                    commandList->SetPipelineState(pipeline->GetPipelineState().Get());
-                    commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
-
-                    bindingTracker.SetInheritedBindGroups(commandList, lastLayout, layout);
-
-                    lastRenderPipeline = pipeline;
-                    lastLayout = layout;
-                } break;
-
-                case Command::SetPushConstants: {
-                    mCommands.NextCommand<SetPushConstantsCmd>();
-                } break;
-
-                case Command::SetStencilReference: {
-                    SetStencilReferenceCmd* cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
-
-                    commandList->OMSetStencilRef(cmd->reference);
-                } break;
-
-                case Command::SetScissorRect: {
-                    SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
-                    D3D12_RECT rect;
-                    rect.left = cmd->x;
-                    rect.top = cmd->y;
-                    rect.right = cmd->x + cmd->width;
-                    rect.bottom = cmd->y + cmd->height;
-
-                    commandList->RSSetScissorRects(1, &rect);
-                } break;
-
-                case Command::SetBlendColor: {
-                    SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
-                    ASSERT(lastRenderPipeline);
-                    commandList->OMSetBlendFactor(static_cast<const FLOAT*>(&cmd->r));
-                } break;
-
-                case Command::SetBindGroup: {
-                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    BindGroup* group = ToBackend(cmd->group.Get());
-                    bindingTracker.SetBindGroup(commandList, lastLayout, group, cmd->index);
-                } break;
-
-                case Command::SetIndexBuffer: {
-                    SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
-
-                    Buffer* buffer = ToBackend(cmd->buffer.Get());
-                    D3D12_INDEX_BUFFER_VIEW bufferView;
-                    bufferView.BufferLocation = buffer->GetVA() + cmd->offset;
-                    bufferView.SizeInBytes = buffer->GetSize() - cmd->offset;
-                    // TODO(cwallez@chromium.org): Make index buffers lazily applied, right now
-                    // this will break if the pipeline is changed for one with a different index
-                    // format after SetIndexBuffer
-                    bufferView.Format = DXGIIndexFormat(lastRenderPipeline->GetIndexFormat());
-
-                    commandList->IASetIndexBuffer(&bufferView);
-                } break;
-
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
-                    auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
-                    auto offsets = mCommands.NextData<uint32_t>(cmd->count);
-
-                    auto inputState = ToBackend(lastRenderPipeline->GetInputState());
-
-                    std::array<D3D12_VERTEX_BUFFER_VIEW, kMaxVertexInputs> d3d12BufferViews;
-                    for (uint32_t i = 0; i < cmd->count; ++i) {
-                        auto input = inputState->GetInput(cmd->startSlot + i);
-                        Buffer* buffer = ToBackend(buffers[i].Get());
-                        d3d12BufferViews[i].BufferLocation = buffer->GetVA() + offsets[i];
-                        d3d12BufferViews[i].StrideInBytes = input.stride;
-                        d3d12BufferViews[i].SizeInBytes = buffer->GetSize() - offsets[i];
-                    }
-
-                    commandList->IASetVertexBuffers(cmd->startSlot, cmd->count,
-                                                    d3d12BufferViews.data());
-                } break;
-
                 case Command::TransitionBufferUsage: {
                     TransitionBufferUsageCmd* cmd =
                         mCommands.NextCommand<TransitionBufferUsageCmd>();
@@ -598,7 +399,242 @@ namespace backend { namespace d3d12 {
 
                     texture->UpdateUsageInternal(cmd->usage);
                 } break;
+
+                default: { UNREACHABLE(); } break;
             }
         }
     }
+
+    void CommandBuffer::RecordComputePass(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                          BindGroupStateTracker* bindingTracker) {
+        PipelineLayout* lastLayout = nullptr;
+
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::Dispatch: {
+                    DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
+                    commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
+                } break;
+
+                case Command::EndComputePass: {
+                    mCommands.NextCommand<EndComputePassCmd>();
+                    return;
+                } break;
+
+                case Command::SetComputePipeline: {
+                    SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
+                    ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
+                    PipelineLayout* layout = ToBackend(pipeline->GetLayout());
+
+                    commandList->SetComputeRootSignature(layout->GetRootSignature().Get());
+                    commandList->SetPipelineState(pipeline->GetPipelineState().Get());
+
+                    bindingTracker->SetInheritedBindGroups(commandList, lastLayout, layout);
+                    lastLayout = layout;
+                } break;
+
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+                    BindGroup* group = ToBackend(cmd->group.Get());
+                    bindingTracker->SetBindGroup(commandList, lastLayout, group, cmd->index);
+                } break;
+
+                default: { UNREACHABLE(); } break;
+            }
+        }
+    }
+    void CommandBuffer::RecordRenderPass(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                         BindGroupStateTracker* bindingTracker,
+                                         RenderPassDescriptor* renderPass) {
+        // Clear framebuffer attachments as needed and transition to render target
+        {
+            for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
+                auto& attachmentInfo = renderPass->GetColorAttachment(i);
+                Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
+
+                // It's already validated that this texture is either frozen to the correct
+                // usage, or not frozen.
+                if (!texture->IsFrozen()) {
+                    texture->TransitionUsageImpl(texture->GetUsage(),
+                                                 nxt::TextureUsageBit::OutputAttachment);
+                    texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
+                }
+
+                // Load op - color
+                if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                    D3D12_CPU_DESCRIPTOR_HANDLE handle = renderPass->GetRTVDescriptor(i);
+                    commandList->ClearRenderTargetView(handle, attachmentInfo.clearColor.data(), 0,
+                                                       nullptr);
+                }
+            }
+
+            if (renderPass->HasDepthStencilAttachment()) {
+                auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
+                Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
+
+                // It's already validated that this texture is either frozen to the correct
+                // usage, or not frozen.
+                if (!texture->IsFrozen()) {
+                    texture->TransitionUsageImpl(texture->GetUsage(),
+                                                 nxt::TextureUsageBit::OutputAttachment);
+                    texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
+                }
+
+                // Load op - depth/stencil
+                bool doDepthClear = TextureFormatHasDepth(texture->GetFormat()) &&
+                                    (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
+                bool doStencilClear = TextureFormatHasStencil(texture->GetFormat()) &&
+                                      (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+
+                D3D12_CLEAR_FLAGS clearFlags = {};
+                if (doDepthClear) {
+                    clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+                }
+                if (doStencilClear) {
+                    clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+                }
+
+                if (clearFlags) {
+                    auto handle = renderPass->GetDSVDescriptor();
+                    // TODO(kainino@chromium.org): investigate: should the NXT clear
+                    // stencil type be uint8_t?
+                    uint8_t clearStencil = static_cast<uint8_t>(attachmentInfo.clearStencil);
+                    commandList->ClearDepthStencilView(
+                        handle, clearFlags, attachmentInfo.clearDepth, clearStencil, 0, nullptr);
+                }
+            }
+        }
+
+        // Set up render targets
+        {
+            RenderPassDescriptor::OMSetRenderTargetArgs args =
+                renderPass->GetSubpassOMSetRenderTargetArgs();
+            if (args.dsv.ptr) {
+                commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE, &args.dsv);
+            } else {
+                commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE, nullptr);
+            }
+        }
+
+        // Set up default dynamic state
+        {
+            uint32_t width = renderPass->GetWidth();
+            uint32_t height = renderPass->GetHeight();
+            D3D12_VIEWPORT viewport = {
+                0.f, 0.f, static_cast<float>(width), static_cast<float>(height), 0.f, 1.f};
+            D3D12_RECT scissorRect = {0, 0, static_cast<long>(width), static_cast<long>(height)};
+            commandList->RSSetViewports(1, &viewport);
+            commandList->RSSetScissorRects(1, &scissorRect);
+
+            static constexpr std::array<float, 4> defaultBlendFactor = {0, 0, 0, 0};
+            commandList->OMSetBlendFactor(&defaultBlendFactor[0]);
+        }
+
+        RenderPipeline* lastPipeline = nullptr;
+        PipelineLayout* lastLayout = nullptr;
+
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndRenderPass: {
+                    mCommands.NextCommand<EndRenderPassCmd>();
+                    return;
+                } break;
+
+                case Command::DrawArrays: {
+                    DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
+                    commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
+                                               draw->firstVertex, draw->firstInstance);
+                } break;
+
+                case Command::DrawElements: {
+                    DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
+                    commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
+                                                      draw->firstIndex, 0, draw->firstInstance);
+                } break;
+
+                case Command::SetRenderPipeline: {
+                    SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
+                    RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
+                    PipelineLayout* layout = ToBackend(pipeline->GetLayout());
+
+                    commandList->SetGraphicsRootSignature(layout->GetRootSignature().Get());
+                    commandList->SetPipelineState(pipeline->GetPipelineState().Get());
+                    commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
+
+                    bindingTracker->SetInheritedBindGroups(commandList, lastLayout, layout);
+
+                    lastPipeline = pipeline;
+                    lastLayout = layout;
+                } break;
+
+                case Command::SetStencilReference: {
+                    SetStencilReferenceCmd* cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
+
+                    commandList->OMSetStencilRef(cmd->reference);
+                } break;
+
+                case Command::SetScissorRect: {
+                    SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
+                    D3D12_RECT rect;
+                    rect.left = cmd->x;
+                    rect.top = cmd->y;
+                    rect.right = cmd->x + cmd->width;
+                    rect.bottom = cmd->y + cmd->height;
+
+                    commandList->RSSetScissorRects(1, &rect);
+                } break;
+
+                case Command::SetBlendColor: {
+                    SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
+                    commandList->OMSetBlendFactor(static_cast<const FLOAT*>(&cmd->r));
+                } break;
+
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+                    BindGroup* group = ToBackend(cmd->group.Get());
+                    bindingTracker->SetBindGroup(commandList, lastLayout, group, cmd->index);
+                } break;
+
+                case Command::SetIndexBuffer: {
+                    SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
+
+                    Buffer* buffer = ToBackend(cmd->buffer.Get());
+                    D3D12_INDEX_BUFFER_VIEW bufferView;
+                    bufferView.BufferLocation = buffer->GetVA() + cmd->offset;
+                    bufferView.SizeInBytes = buffer->GetSize() - cmd->offset;
+                    // TODO(cwallez@chromium.org): Make index buffers lazily applied, right now
+                    // this will break if the pipeline is changed for one with a different index
+                    // format after SetIndexBuffer
+                    bufferView.Format = DXGIIndexFormat(lastPipeline->GetIndexFormat());
+
+                    commandList->IASetIndexBuffer(&bufferView);
+                } break;
+
+                case Command::SetVertexBuffers: {
+                    SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
+                    auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
+                    auto offsets = mCommands.NextData<uint32_t>(cmd->count);
+
+                    auto inputState = ToBackend(lastPipeline->GetInputState());
+
+                    std::array<D3D12_VERTEX_BUFFER_VIEW, kMaxVertexInputs> d3d12BufferViews;
+                    for (uint32_t i = 0; i < cmd->count; ++i) {
+                        auto input = inputState->GetInput(cmd->startSlot + i);
+                        Buffer* buffer = ToBackend(buffers[i].Get());
+                        d3d12BufferViews[i].BufferLocation = buffer->GetVA() + offsets[i];
+                        d3d12BufferViews[i].StrideInBytes = input.stride;
+                        d3d12BufferViews[i].SizeInBytes = buffer->GetSize() - offsets[i];
+                    }
+
+                    commandList->IASetVertexBuffers(cmd->startSlot, cmd->count,
+                                                    d3d12BufferViews.data());
+                } break;
+
+                default: { UNREACHABLE(); } break;
+            }
+        }
+    }
+
 }}  // namespace backend::d3d12

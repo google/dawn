@@ -23,16 +23,24 @@
 namespace backend { namespace d3d12 {
 
     class Device;
+    class RenderPassDescriptor;
+
+    struct BindGroupStateTracker;
 
     class CommandBuffer : public CommandBufferBase {
       public:
-        CommandBuffer(Device* device, CommandBufferBuilder* builder);
+        CommandBuffer(CommandBufferBuilder* builder);
         ~CommandBuffer();
 
-        void FillCommands(ComPtr<ID3D12GraphicsCommandList> commandList);
+        void RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList);
 
       private:
-        Device* mDevice;
+        void RecordComputePass(ComPtr<ID3D12GraphicsCommandList> commandList,
+                               BindGroupStateTracker* bindingTracker);
+        void RecordRenderPass(ComPtr<ID3D12GraphicsCommandList> commandList,
+                              BindGroupStateTracker* bindingTracker,
+                              RenderPassDescriptor* renderPass);
+
         CommandIterator mCommands;
     };
 

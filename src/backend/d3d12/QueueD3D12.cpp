@@ -29,7 +29,7 @@ namespace backend { namespace d3d12 {
 
         device->OpenCommandList(&mCommandList);
         for (uint32_t i = 0; i < numCommands; ++i) {
-            commands[i]->FillCommands(mCommandList);
+            commands[i]->RecordCommands(mCommandList);
         }
         ASSERT_SUCCESS(mCommandList->Close());
 
