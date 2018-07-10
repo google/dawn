@@ -149,6 +149,7 @@ namespace utils {
 
         return desc;
     }
+
     nxt::PipelineLayout MakeBasicPipelineLayout(const nxt::Device& device,
                                                 const nxt::BindGroupLayout* bindGroupLayout) {
         nxt::PipelineLayoutDescriptor descriptor;
@@ -160,6 +161,23 @@ namespace utils {
             descriptor.bindGroupLayouts = nullptr;
         }
         return device.CreatePipelineLayout(&descriptor);
+    }
+
+    nxt::BindGroupLayout MakeBindGroupLayout(
+        const nxt::Device& device,
+        std::initializer_list<nxt::BindGroupBinding> bindingsInitializer) {
+        std::vector<nxt::BindGroupBinding> bindings;
+        nxt::ShaderStageBit kNoStages{};
+        for (const nxt::BindGroupBinding& binding : bindingsInitializer) {
+            if (binding.visibility != kNoStages) {
+                bindings.push_back(binding);
+            }
+        }
+
+        nxt::BindGroupLayoutDescriptor descriptor;
+        descriptor.numBindings = static_cast<uint32_t>(bindings.size());
+        descriptor.bindings = bindings.data();
+        return device.CreateBindGroupLayout(&descriptor);
     }
 
 }  // namespace utils

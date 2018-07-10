@@ -25,7 +25,7 @@ namespace backend { namespace d3d12 {
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
-        BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder);
+        BindGroupLayout(Device* device, const nxt::BindGroupLayoutDescriptor* descriptor);
 
         enum DescriptorType {
             CBV,
@@ -44,7 +44,6 @@ namespace backend { namespace d3d12 {
         const D3D12_DESCRIPTOR_RANGE* GetSamplerDescriptorRanges() const;
 
       private:
-        Device* mDevice;
         std::array<uint32_t, kMaxBindingsPerGroup> mBindingOffsets;
         std::array<uint32_t, DescriptorType::Count> mDescriptorCounts;
         D3D12_DESCRIPTOR_RANGE mRanges[DescriptorType::Count];

@@ -50,6 +50,7 @@ class LambdaMatcherImpl : public MatcherInterface<Arg> {
     bool MatchAndExplain(Arg value, MatchResultListener* listener) const override {
         if (!mLambda(value)) {
             *listener << "which doesn't satisfy the custom predicate";
+            return false;
         }
         return true;
     }
@@ -410,15 +411,13 @@ TEST_F(WireTests, StructureOfValuesArgument) {
 
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireTests, StructureOfObjectArrayArgument) {
-    nxtBindGroupLayoutBuilder bglBuilder = nxtDeviceCreateBindGroupLayoutBuilder(device);
-    nxtBindGroupLayout bgl = nxtBindGroupLayoutBuilderGetResult(bglBuilder);
+    nxtBindGroupLayoutDescriptor bglDescriptor;
+    bglDescriptor.numBindings = 0;
+    bglDescriptor.bindings = nullptr;
 
-    nxtBindGroupLayoutBuilder apiBglBuilder = api.GetNewBindGroupLayoutBuilder();
-    EXPECT_CALL(api, DeviceCreateBindGroupLayoutBuilder(apiDevice))
-          .WillOnce(Return(apiBglBuilder));
+    nxtBindGroupLayout bgl = nxtDeviceCreateBindGroupLayout(device, &bglDescriptor);
     nxtBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
-    EXPECT_CALL(api, BindGroupLayoutBuilderGetResult(apiBglBuilder))
-        .WillOnce(Return(apiBgl));
+    EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _)).WillOnce(Return(apiBgl));
 
     nxtPipelineLayoutDescriptor descriptor;
     descriptor.nextInChain = nullptr;
@@ -432,6 +431,42 @@ TEST_F(WireTests, StructureOfObjectArrayArgument) {
             desc->bindGroupLayouts[0] == apiBgl;
     })))
         .WillOnce(Return(nullptr));
+
+    FlushClient();
+}
+
+// Test that the wire is able to send structures that contain objects
+TEST_F(WireTests, StructureOfStructureArrayArgument) {
+    static constexpr int NUM_BINDINGS = 3;
+    nxtBindGroupBinding bindings[NUM_BINDINGS]{
+        {0, NXT_SHADER_STAGE_BIT_VERTEX, NXT_BINDING_TYPE_SAMPLER},
+        {1, NXT_SHADER_STAGE_BIT_VERTEX, NXT_BINDING_TYPE_SAMPLED_TEXTURE},
+        {2,
+         static_cast<nxtShaderStageBit>(NXT_SHADER_STAGE_BIT_VERTEX |
+                                        NXT_SHADER_STAGE_BIT_FRAGMENT),
+         NXT_BINDING_TYPE_UNIFORM_BUFFER},
+    };
+    nxtBindGroupLayoutDescriptor bglDescriptor;
+    bglDescriptor.numBindings = NUM_BINDINGS;
+    bglDescriptor.bindings = bindings;
+
+    nxtDeviceCreateBindGroupLayout(device, &bglDescriptor);
+    nxtBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
+    EXPECT_CALL(
+        api,
+        DeviceCreateBindGroupLayout(
+            apiDevice, MatchesLambda([bindings](const nxtBindGroupLayoutDescriptor* desc) -> bool {
+                for (int i = 0; i < NUM_BINDINGS; ++i) {
+                    const auto& a = desc->bindings[i];
+                    const auto& b = bindings[i];
+                    if (a.binding != b.binding || a.visibility != b.visibility ||
+                        a.type != b.type) {
+                        return false;
+                    }
+                }
+                return desc->nextInChain == nullptr && desc->numBindings == 3;
+            })))
+        .WillOnce(Return(apiBgl));
 
     FlushClient();
 }

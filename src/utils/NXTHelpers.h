@@ -51,5 +51,8 @@ namespace utils {
     nxt::SamplerDescriptor GetDefaultSamplerDescriptor();
     nxt::PipelineLayout MakeBasicPipelineLayout(const nxt::Device& device,
                                                 const nxt::BindGroupLayout* bindGroupLayout);
+    nxt::BindGroupLayout MakeBindGroupLayout(
+        const nxt::Device& device,
+        std::initializer_list<nxt::BindGroupBinding> bindingsInitializer);
 
 }  // namespace utils

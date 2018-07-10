@@ -27,7 +27,6 @@ namespace backend { namespace opengl {
     class Device : public DeviceBase {
       public:
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
-        BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         BufferBase* CreateBuffer(BufferBuilder* builder) override;
         BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
@@ -46,6 +45,8 @@ namespace backend { namespace opengl {
         void TickImpl() override;
 
       private:
+        ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
+            const nxt::BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const nxt::PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;

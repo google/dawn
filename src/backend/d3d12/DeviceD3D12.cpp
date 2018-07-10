@@ -261,8 +261,9 @@ namespace backend { namespace d3d12 {
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
         return new BindGroup(this, builder);
     }
-    BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
-        return new BindGroupLayout(this, builder);
+    ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
+        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        return new BindGroupLayout(this, descriptor);
     }
     BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
         return new BlendState(builder);

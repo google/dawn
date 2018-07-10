@@ -13,21 +13,23 @@
 // limitations under the License.
 
 #include "tests/unittests/validation/ValidationTest.h"
+#include "utils/NXTHelpers.h"
 
 class BindGroupValidationTest : public ValidationTest {
 };
 
 TEST_F(BindGroupValidationTest, BufferViewOffset) {
-    auto layout = device.CreateBindGroupLayoutBuilder()
-        .SetBindingsType(nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer, 0, 1)
-        .GetResult();
+    auto layout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                });
 
     auto buffer = device.CreateBufferBuilder()
         .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
         .SetInitialUsage(nxt::BufferUsageBit::Uniform)
         .SetSize(512)
         .GetResult();
-    
+
     // Check that offset 0 is valid
     {
         auto bufferView = buffer.CreateBufferViewBuilder()
@@ -102,4 +104,22 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
+}
+
+// This test verifies that the BindGroupLayout cache is successfully caching/deduplicating objects.
+//
+// NOTE: This test only works currently because unittests are run without the wire - so the returned
+// BindGroupLayout pointers are actually visibly equivalent. With the wire, this would not be true.
+TEST_F(BindGroupValidationTest, BindGroupLayoutCache) {
+    auto layout1 = utils::MakeBindGroupLayout(
+        device, {
+                    {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                });
+    auto layout2 = utils::MakeBindGroupLayout(
+        device, {
+                    {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                });
+
+    // Caching should cause these to be the same.
+    ASSERT_EQ(layout1.Get(), layout2.Get());
 }

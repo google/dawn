@@ -161,9 +161,11 @@ void init() {
         .SetInput(0, 6 * sizeof(float), nxt::InputStepMode::Vertex)
         .GetResult();
 
-    nxt::BindGroupLayout bgl = device.CreateBindGroupLayoutBuilder()
-        .SetBindingsType(nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer, 0, 2)
-        .GetResult();
+    auto bgl = utils::MakeBindGroupLayout(
+        device, {
+                    {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                    {1, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                });
 
     nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 

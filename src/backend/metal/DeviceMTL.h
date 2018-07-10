@@ -36,7 +36,6 @@ namespace backend { namespace metal {
         ~Device();
 
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
-        BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         BufferBase* CreateBuffer(BufferBuilder* builder) override;
         BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
@@ -64,6 +63,8 @@ namespace backend { namespace metal {
         ResourceUploader* GetResourceUploader() const;
 
       private:
+        ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
+            const nxt::BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const nxt::PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;

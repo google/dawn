@@ -217,8 +217,9 @@ namespace backend { namespace vulkan {
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
         return new BindGroup(builder);
     }
-    BindGroupLayoutBase* Device::CreateBindGroupLayout(BindGroupLayoutBuilder* builder) {
-        return new BindGroupLayout(builder);
+    ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
+        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        return new BindGroupLayout(this, descriptor);
     }
     BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
         return new BlendState(builder);

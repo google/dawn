@@ -45,9 +45,14 @@ class PushConstantTest: public NXTTest {
             buf2.FreezeUsage(nxt::BufferUsageBit::Storage);
 
             nxt::ShaderStageBit kAllStages = nxt::ShaderStageBit::Compute | nxt::ShaderStageBit::Fragment | nxt::ShaderStageBit::Vertex;
-            nxt::BindGroupLayout bgl = device.CreateBindGroupLayoutBuilder()
-                .SetBindingsType(kAllStages, nxt::BindingType::StorageBuffer, 0, extraBuffer ? 2 : 1)
-                .GetResult();
+            constexpr nxt::ShaderStageBit kNoStages{};
+
+            nxt::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device,
+                {
+                    {0, kAllStages, nxt::BindingType::StorageBuffer},
+                    {1, extraBuffer ? kAllStages : kNoStages, nxt::BindingType::StorageBuffer},
+                });
 
             nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 

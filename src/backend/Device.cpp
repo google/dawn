@@ -73,20 +73,18 @@ namespace backend {
         return this;
     }
 
-    BindGroupLayoutBase* DeviceBase::GetOrCreateBindGroupLayout(
-        const BindGroupLayoutBase* blueprint,
-        BindGroupLayoutBuilder* builder) {
-        // The blueprint is only used to search in the cache and is not modified. However cached
-        // objects can be modified, and unordered_set cannot search for a const pointer in a non
-        // const pointer set. That's why we do a const_cast here, but the blueprint won't be
-        // modified.
-        auto iter = mCaches->bindGroupLayouts.find(const_cast<BindGroupLayoutBase*>(blueprint));
+    ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateBindGroupLayout(
+        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        BindGroupLayoutBase blueprint(this, descriptor, true);
+
+        auto iter = mCaches->bindGroupLayouts.find(&blueprint);
         if (iter != mCaches->bindGroupLayouts.end()) {
             (*iter)->Reference();
             return *iter;
         }
 
-        BindGroupLayoutBase* backendObj = CreateBindGroupLayout(builder);
+        BindGroupLayoutBase* backendObj;
+        NXT_TRY_ASSIGN(backendObj, CreateBindGroupLayoutImpl(descriptor));
         mCaches->bindGroupLayouts.insert(backendObj);
         return backendObj;
     }
@@ -98,8 +96,22 @@ namespace backend {
     BindGroupBuilder* DeviceBase::CreateBindGroupBuilder() {
         return new BindGroupBuilder(this);
     }
-    BindGroupLayoutBuilder* DeviceBase::CreateBindGroupLayoutBuilder() {
-        return new BindGroupLayoutBuilder(this);
+    BindGroupLayoutBase* DeviceBase::CreateBindGroupLayout(
+        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        MaybeError validation = ValidateBindGroupLayoutDescriptor(this, descriptor);
+        if (validation.IsError()) {
+            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
+            delete validation.AcquireError();
+            return nullptr;
+        }
+
+        auto maybeBindGroupLayout = GetOrCreateBindGroupLayout(descriptor);
+        if (maybeBindGroupLayout.IsError()) {
+            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
+            delete maybeBindGroupLayout.AcquireError();
+            return nullptr;
+        }
+        return maybeBindGroupLayout.AcquireSuccess();
     }
     BlendStateBuilder* DeviceBase::CreateBlendStateBuilder() {
         return new BlendStateBuilder(this);

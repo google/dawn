@@ -54,8 +54,9 @@ namespace backend { namespace vulkan {
         }
     }
 
-    BindGroupLayout::BindGroupLayout(BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder) {
+    BindGroupLayout::BindGroupLayout(Device* device,
+                                     const nxt::BindGroupLayoutDescriptor* descriptor)
+        : BindGroupLayoutBase(device, descriptor) {
         const auto& info = GetBindingInfo();
 
         // Compute the bindings that will be chained in the DescriptorSetLayout create info. We add
@@ -81,7 +82,6 @@ namespace backend { namespace vulkan {
         createInfo.bindingCount = numBindings;
         createInfo.pBindings = bindings.data();
 
-        Device* device = ToBackend(GetDevice());
         if (device->fn.CreateDescriptorSetLayout(device->GetVkDevice(), &createInfo, nullptr,
                                                  &mHandle) != VK_SUCCESS) {
             ASSERT(false);

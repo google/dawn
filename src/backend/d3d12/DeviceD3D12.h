@@ -39,7 +39,6 @@ namespace backend { namespace d3d12 {
         ~Device();
 
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
-        BindGroupLayoutBase* CreateBindGroupLayout(BindGroupLayoutBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         BufferBase* CreateBuffer(BufferBuilder* builder) override;
         BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
@@ -78,6 +77,8 @@ namespace backend { namespace d3d12 {
         void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
       private:
+        ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
+            const nxt::BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const nxt::PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;

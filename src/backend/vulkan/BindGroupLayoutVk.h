@@ -27,7 +27,7 @@ namespace backend { namespace vulkan {
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
-        BindGroupLayout(BindGroupLayoutBuilder* builder);
+        BindGroupLayout(Device* device, const nxt::BindGroupLayoutDescriptor* descriptor);
         ~BindGroupLayout();
 
         VkDescriptorSetLayout GetHandle() const;

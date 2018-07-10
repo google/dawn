@@ -15,7 +15,7 @@
 #ifndef BACKEND_BINDGROUPLAYOUT_H_
 #define BACKEND_BINDGROUPLAYOUT_H_
 
-#include "backend/Builder.h"
+#include "backend/Error.h"
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
 #include "common/Constants.h"
@@ -27,9 +27,14 @@
 
 namespace backend {
 
+    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
+                                                 const nxt::BindGroupLayoutDescriptor* descriptor);
+
     class BindGroupLayoutBase : public RefCounted {
       public:
-        BindGroupLayoutBase(BindGroupLayoutBuilder* builder, bool blueprint = false);
+        BindGroupLayoutBase(DeviceBase* device,
+                            const nxt::BindGroupLayoutDescriptor* descriptor,
+                            bool blueprint = false);
         ~BindGroupLayoutBase() override;
 
         struct LayoutBindingInfo {
@@ -45,26 +50,6 @@ namespace backend {
         DeviceBase* mDevice;
         LayoutBindingInfo mBindingInfo;
         bool mIsBlueprint = false;
-    };
-
-    class BindGroupLayoutBuilder : public Builder<BindGroupLayoutBase> {
-      public:
-        BindGroupLayoutBuilder(DeviceBase* device);
-
-        const BindGroupLayoutBase::LayoutBindingInfo& GetBindingInfo() const;
-
-        // NXT API
-        void SetBindingsType(nxt::ShaderStageBit visibility,
-                             nxt::BindingType bindingType,
-                             uint32_t start,
-                             uint32_t count);
-
-      private:
-        friend class BindGroupLayoutBase;
-
-        BindGroupLayoutBase* GetResultImpl() override;
-
-        BindGroupLayoutBase::LayoutBindingInfo mBindingInfo;
     };
 
     // Implements the functors necessary for the unordered_set<BGL*>-based cache.

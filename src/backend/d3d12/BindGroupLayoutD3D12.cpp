@@ -19,8 +19,9 @@
 
 namespace backend { namespace d3d12 {
 
-    BindGroupLayout::BindGroupLayout(Device* device, BindGroupLayoutBuilder* builder)
-        : BindGroupLayoutBase(builder), mDevice(device), mDescriptorCounts{} {
+    BindGroupLayout::BindGroupLayout(Device* device,
+                                     const nxt::BindGroupLayoutDescriptor* descriptor)
+        : BindGroupLayoutBase(device, descriptor), mDescriptorCounts{} {
         const auto& groupInfo = GetBindingInfo();
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {

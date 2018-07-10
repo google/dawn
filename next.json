@@ -78,22 +78,21 @@
     "bind group layout": {
         "category": "object"
     },
-    "bind group layout builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "bind group layout"
-            },
-            {
-                "name": "set bindings type",
-                "args": [
-                    {"name": "visibility", "type": "shader stage bit"},
-                    {"name": "binding type", "type": "binding type"},
-                    {"name": "start", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"}
-                ]
-            }
+    "bind group binding": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "binding", "type": "uint32_t"},
+            {"name": "visibility", "type": "shader stage bit"},
+            {"name": "type", "type": "binding type"}
+        ]
+    },
+    "bind group layout descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "num bindings", "type": "uint32_t"},
+            {"name": "bindings", "type": "bind group binding", "annotation": "const*", "length": "num bindings"}
         ]
     },
     "binding type": {
@@ -572,8 +571,11 @@
                 "returns": "bind group builder"
             },
             {
-                "name": "create bind group layout builder",
-                "returns": "bind group layout builder"
+                "name": "create bind group layout",
+                "returns": "bind group layout",
+                "args": [
+                    {"name": "descriptor", "type": "bind group layout descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create blend state builder",

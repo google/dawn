@@ -78,9 +78,11 @@ class DepthStencilStateTest : public NXTTest {
                 }
             )");
 
-            bindGroupLayout = device.CreateBindGroupLayoutBuilder()
-                .SetBindingsType(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment, nxt::BindingType::UniformBuffer, 0, 1)
-                .GetResult();
+            bindGroupLayout = utils::MakeBindGroupLayout(
+                device, {
+                            {0, nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment,
+                             nxt::BindingType::UniformBuffer},
+                        });
 
             pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
         }
