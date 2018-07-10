@@ -154,12 +154,12 @@ void initSim() {
         } params;
 
         layout(std140, set = 0, binding = 1) buffer ParticlesA {
-            Particle particle;
-        } particlesA[1000];
+            Particle particles[1000];
+        } particlesA;
 
         layout(std140, set = 0, binding = 2) buffer ParticlesB {
-            Particle particle;
-        } particlesB[1000];
+            Particle particles[1000];
+        } particlesB;
 
         void main() {
             // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
@@ -167,8 +167,8 @@ void initSim() {
             uint index = gl_GlobalInvocationID.x;
             if (index >= params.particleCount) { return; }
 
-            vec2 vPos = particlesA[index].particle.pos;
-            vec2 vVel = particlesA[index].particle.vel;
+            vec2 vPos = particlesA.particles[index].pos;
+            vec2 vVel = particlesA.particles[index].vel;
 
             vec2 cMass = vec2(0.0, 0.0);
             vec2 cVel = vec2(0.0, 0.0);
@@ -180,8 +180,8 @@ void initSim() {
             vec2 vel;
             for (int i = 0; i < params.particleCount; ++i) {
                 if (i == index) { continue; }
-                pos = particlesA[i].particle.pos.xy;
-                vel = particlesA[i].particle.vel.xy;
+                pos = particlesA.particles[i].pos.xy;
+                vel = particlesA.particles[i].vel.xy;
 
                 if (distance(pos, vPos) < params.rule1Distance) {
                     cMass += pos;
@@ -216,10 +216,10 @@ void initSim() {
             if (vPos.y < -1.0) vPos.y = 1.0;
             if (vPos.y > 1.0) vPos.y = -1.0;
 
-            particlesB[index].particle.pos = vPos;
+            particlesB.particles[index].pos = vPos;
 
             // Write back
-            particlesB[index].particle.vel = vVel;
+            particlesB.particles[index].vel = vVel;
         }
     )");
 
