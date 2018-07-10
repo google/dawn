@@ -26,6 +26,7 @@ namespace backend { namespace d3d12 {
 
       protected:
         TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+        void OnBeforePresent(TextureBase* texture) override;
     };
 
 }}  // namespace backend::d3d12

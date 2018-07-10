@@ -69,8 +69,14 @@ namespace backend { namespace vulkan {
 
     nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, VkSurfaceKHR surface) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
-        return CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, surface));
+
+        nxtSwapChainImplementation impl;
+        impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, surface));
+        impl.textureUsage = NXT_TEXTURE_USAGE_BIT_PRESENT;
+
+        return impl;
     }
+
     nxtTextureFormat GetNativeSwapChainPreferredFormat(
         const nxtSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);

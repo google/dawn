@@ -122,6 +122,142 @@ namespace backend {
             return true;
         }
 
+        enum class PassType {
+            Render,
+            Compute,
+        };
+
+        // Helper class to encapsulate the logic of tracking per-resource usage during the
+        // validation of command buffer passes. It is used both to know if there are validation
+        // errors, and to get a list of resources used per pass for backends that need the
+        // information.
+        class PassResourceUsageTracker {
+          public:
+            void BufferUsedAs(BufferBase* buffer, nxt::BufferUsageBit usage) {
+                // std::map's operator[] will create the key and return 0 if the key didn't exist
+                // before.
+                nxt::BufferUsageBit& storedUsage = mBufferUsages[buffer];
+
+                if (usage == nxt::BufferUsageBit::Storage &&
+                    storedUsage & nxt::BufferUsageBit::Storage) {
+                    mStorageUsedMultipleTimes = true;
+                }
+
+                storedUsage |= usage;
+            }
+
+            void TextureUsedAs(TextureBase* texture, nxt::TextureUsageBit usage) {
+                // std::map's operator[] will create the key and return 0 if the key didn't exist
+                // before.
+                nxt::TextureUsageBit& storedUsage = mTextureUsages[texture];
+
+                if (usage == nxt::TextureUsageBit::Storage &&
+                    storedUsage & nxt::TextureUsageBit::Storage) {
+                    mStorageUsedMultipleTimes = true;
+                }
+
+                storedUsage |= usage;
+            }
+
+            // Performs the per-pass usage validation checks
+            bool AreUsagesValid(PassType pass) const {
+                // Storage resources cannot be used twice in the same compute pass
+                if (pass == PassType::Compute && mStorageUsedMultipleTimes) {
+                    return false;
+                }
+
+                // Buffers can only be used as single-write or multiple read.
+                for (auto& it : mBufferUsages) {
+                    BufferBase* buffer = it.first;
+                    nxt::BufferUsageBit usage = it.second;
+
+                    if (usage & ~buffer->GetAllowedUsage()) {
+                        return false;
+                    }
+
+                    bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
+                    bool singleUse = nxt::HasZeroOrOneBits(usage);
+
+                    if (!readOnly && !singleUse) {
+                        return false;
+                    }
+                }
+
+                // Textures can only be used as single-write or multiple read.
+                // TODO(cwallez@chromium.org): implement per-subresource tracking
+                for (auto& it : mTextureUsages) {
+                    TextureBase* texture = it.first;
+                    nxt::TextureUsageBit usage = it.second;
+
+                    if (usage & ~texture->GetAllowedUsage()) {
+                        return false;
+                    }
+
+                    // For textures the only read-only usage in a pass is Sampled, so checking the
+                    // usage constraint simplifies to checking a single usage bit is set.
+                    if (!nxt::HasZeroOrOneBits(it.second)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // Returns the per-pass usage for use by backends for APIs with explicit barriers.
+            PassResourceUsage AcquireResourceUsage() {
+                PassResourceUsage result;
+                result.buffers.reserve(mBufferUsages.size());
+                result.bufferUsages.reserve(mBufferUsages.size());
+                result.textures.reserve(mTextureUsages.size());
+                result.textureUsages.reserve(mTextureUsages.size());
+
+                for (auto& it : mBufferUsages) {
+                    result.buffers.push_back(it.first);
+                    result.bufferUsages.push_back(it.second);
+                }
+
+                for (auto& it : mTextureUsages) {
+                    result.textures.push_back(it.first);
+                    result.textureUsages.push_back(it.second);
+                }
+
+                return result;
+            }
+
+          private:
+            std::map<BufferBase*, nxt::BufferUsageBit> mBufferUsages;
+            std::map<TextureBase*, nxt::TextureUsageBit> mTextureUsages;
+            bool mStorageUsedMultipleTimes = false;
+        };
+
+        void TrackBindGroupResourceUsage(BindGroupBase* group, PassResourceUsageTracker* tracker) {
+            const auto& layoutInfo = group->GetLayout()->GetBindingInfo();
+
+            for (uint32_t i : IterateBitSet(layoutInfo.mask)) {
+                nxt::BindingType type = layoutInfo.types[i];
+
+                switch (type) {
+                    case nxt::BindingType::UniformBuffer: {
+                        BufferBase* buffer = group->GetBindingAsBufferView(i)->GetBuffer();
+                        tracker->BufferUsedAs(buffer, nxt::BufferUsageBit::Uniform);
+                    } break;
+
+                    case nxt::BindingType::StorageBuffer: {
+                        BufferBase* buffer = group->GetBindingAsBufferView(i)->GetBuffer();
+                        tracker->BufferUsedAs(buffer, nxt::BufferUsageBit::Storage);
+                    } break;
+
+                    case nxt::BindingType::SampledTexture: {
+                        TextureBase* texture = group->GetBindingAsTextureView(i)->GetTexture();
+                        tracker->TextureUsedAs(texture, nxt::TextureUsageBit::Sampled);
+                    } break;
+
+                    case nxt::BindingType::Sampler:
+                        break;
+                }
+            }
+        }
+
     }  // namespace
 
     // CommandBuffer
@@ -169,6 +305,12 @@ namespace backend {
         ASSERT(!mWereCommandsAcquired);
         mWereCommandsAcquired = true;
         return std::move(mIterator);
+    }
+
+    std::vector<PassResourceUsage> CommandBufferBuilder::AcquirePassResourceUsage() {
+        ASSERT(!mWerePassUsagesAcquired);
+        mWerePassUsagesAcquired = true;
+        return std::move(mPassResourceUsages);
     }
 
     CommandBufferBase* CommandBufferBuilder::GetResultImpl() {
@@ -283,11 +425,19 @@ namespace backend {
     }
 
     bool CommandBufferBuilder::ValidateComputePass() {
+        PassResourceUsageTracker usageTracker;
+
         Command type;
         while (mIterator.NextCommandId(&type)) {
             switch (type) {
                 case Command::EndComputePass: {
                     mIterator.NextCommand<EndComputePassCmd>();
+
+                    if (!usageTracker.AreUsagesValid(PassType::Compute)) {
+                        return false;
+                    }
+                    mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
+
                     mState->EndPass();
                     return true;
                 } break;
@@ -322,6 +472,8 @@ namespace backend {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
+
+                    TrackBindGroupResourceUsage(cmd->group.Get(), &usageTracker);
                     if (!mState->SetBindGroup(cmd->index, cmd->group.Get())) {
                         return false;
                     }
@@ -342,11 +494,30 @@ namespace backend {
             return false;
         }
 
+        PassResourceUsageTracker usageTracker;
+
+        // Track usage of the render pass attachments
+        for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
+            TextureBase* texture = renderPass->GetColorAttachment(i).view->GetTexture();
+            usageTracker.TextureUsedAs(texture, nxt::TextureUsageBit::OutputAttachment);
+        }
+
+        if (renderPass->HasDepthStencilAttachment()) {
+            TextureBase* texture = renderPass->GetDepthStencilAttachment().view->GetTexture();
+            usageTracker.TextureUsedAs(texture, nxt::TextureUsageBit::OutputAttachment);
+        }
+
         Command type;
         while (mIterator.NextCommandId(&type)) {
             switch (type) {
                 case Command::EndRenderPass: {
                     mIterator.NextCommand<EndRenderPassCmd>();
+
+                    if (!usageTracker.AreUsagesValid(PassType::Render)) {
+                        return false;
+                    }
+                    mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
+
                     mState->EndPass();
                     return true;
                 } break;
@@ -408,6 +579,8 @@ namespace backend {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
+
+                    TrackBindGroupResourceUsage(cmd->group.Get(), &usageTracker);
                     if (!mState->SetBindGroup(cmd->index, cmd->group.Get())) {
                         return false;
                     }
@@ -415,6 +588,8 @@ namespace backend {
 
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = mIterator.NextCommand<SetIndexBufferCmd>();
+
+                    usageTracker.BufferUsedAs(cmd->buffer.Get(), nxt::BufferUsageBit::Index);
                     if (!mState->SetIndexBuffer(cmd->buffer.Get())) {
                         return false;
                     }
@@ -426,6 +601,7 @@ namespace backend {
                     mIterator.NextData<uint32_t>(cmd->count);
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
+                        usageTracker.BufferUsedAs(buffers[i].Get(), nxt::BufferUsageBit::Vertex);
                         mState->SetVertexBuffer(cmd->startSlot + i, buffers[i].Get());
                     }
                 } break;

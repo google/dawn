@@ -28,6 +28,7 @@
 #include "common/BitSetIterator.h"
 
 namespace backend {
+
     CommandBufferStateTracker::CommandBufferStateTracker(CommandBufferBuilder* mBuilder)
         : mBuilder(mBuilder) {
     }

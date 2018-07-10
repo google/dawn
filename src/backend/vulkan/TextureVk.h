@@ -34,9 +34,10 @@ namespace backend { namespace vulkan {
         VkImage GetHandle() const;
         VkImageAspectFlags GetVkAspectMask() const;
 
-        void RecordBarrier(VkCommandBuffer commands,
-                           nxt::TextureUsageBit currentUsage,
-                           nxt::TextureUsageBit targetUsage) const;
+        // Transitions the texture to be used as `usage`, recording any necessary barrier in
+        // `commands`.
+        // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
+        void TransitionUsageNow(VkCommandBuffer commands, nxt::TextureUsageBit usage);
 
       private:
         void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
@@ -44,6 +45,10 @@ namespace backend { namespace vulkan {
 
         VkImage mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;
+
+        // A usage of none will make sure the texture is transitioned before its first use as
+        // required by the spec.
+        nxt::TextureUsageBit mLastUsage = nxt::TextureUsageBit::None;
     };
 
     class TextureView : public TextureViewBase {

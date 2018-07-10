@@ -30,6 +30,7 @@ namespace backend { namespace opengl {
 
       protected:
         TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+        void OnBeforePresent(TextureBase* texture) override;
     };
 
 }}  // namespace backend::opengl

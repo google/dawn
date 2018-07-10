@@ -162,17 +162,29 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
-    void Buffer::RecordBarrier(VkCommandBuffer commands,
-                               nxt::BufferUsageBit currentUsage,
-                               nxt::BufferUsageBit targetUsage) const {
-        VkPipelineStageFlags srcStages = VulkanPipelineStage(currentUsage);
-        VkPipelineStageFlags dstStages = VulkanPipelineStage(targetUsage);
+    void Buffer::TransitionUsageNow(VkCommandBuffer commands, nxt::BufferUsageBit usage) {
+        bool lastIncludesTarget = (mLastUsage & usage) == usage;
+        bool lastReadOnly = (mLastUsage & kReadOnlyBufferUsages) == mLastUsage;
+
+        // We can skip transitions to already current read-only usages.
+        if (lastIncludesTarget && lastReadOnly) {
+            return;
+        }
+
+        // Special-case for the initial transition: Vulkan doesn't allow access flags to be 0.
+        if (mLastUsage == nxt::BufferUsageBit::None) {
+            mLastUsage = usage;
+            return;
+        }
+
+        VkPipelineStageFlags srcStages = VulkanPipelineStage(mLastUsage);
+        VkPipelineStageFlags dstStages = VulkanPipelineStage(usage);
 
         VkBufferMemoryBarrier barrier;
         barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
         barrier.pNext = nullptr;
-        barrier.srcAccessMask = VulkanAccessFlags(currentUsage);
-        barrier.dstAccessMask = VulkanAccessFlags(targetUsage);
+        barrier.srcAccessMask = VulkanAccessFlags(mLastUsage);
+        barrier.dstAccessMask = VulkanAccessFlags(usage);
         barrier.srcQueueFamilyIndex = 0;
         barrier.dstQueueFamilyIndex = 0;
         barrier.buffer = mHandle;
@@ -182,26 +194,43 @@ namespace backend { namespace vulkan {
         ToBackend(GetDevice())
             ->fn.CmdPipelineBarrier(commands, srcStages, dstStages, 0, 0, nullptr, 1, &barrier, 0,
                                     nullptr);
+
+        mLastUsage = usage;
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
-        BufferUploader* uploader = ToBackend(GetDevice())->GetBufferUploader();
+        Device* device = ToBackend(GetDevice());
+
+        VkCommandBuffer commands = device->GetPendingCommandBuffer();
+        TransitionUsageNow(commands, nxt::BufferUsageBit::TransferDst);
+
+        BufferUploader* uploader = device->GetBufferUploader();
         uploader->BufferSubData(mHandle, start, count, data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
+        Device* device = ToBackend(GetDevice());
+
+        VkCommandBuffer commands = device->GetPendingCommandBuffer();
+        TransitionUsageNow(commands, nxt::BufferUsageBit::MapRead);
+
         uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);
 
-        MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
+        MapRequestTracker* tracker = device->GetMapRequestTracker();
         tracker->Track(this, serial, memory + start, false);
     }
 
     void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
+        Device* device = ToBackend(GetDevice());
+
+        VkCommandBuffer commands = device->GetPendingCommandBuffer();
+        TransitionUsageNow(commands, nxt::BufferUsageBit::MapWrite);
+
         uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);
 
-        MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
+        MapRequestTracker* tracker = device->GetMapRequestTracker();
         tracker->Track(this, serial, memory + start, true);
     }
 
@@ -209,11 +238,10 @@ namespace backend { namespace vulkan {
         // No need to do anything, we keep CPU-visible memory mapped at all time.
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
-                                     nxt::BufferUsageBit targetUsage) {
-        VkCommandBuffer commands = ToBackend(GetDevice())->GetPendingCommandBuffer();
-        RecordBarrier(commands, currentUsage, targetUsage);
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
     }
+
+    // MapRequestTracker
 
     MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {
     }

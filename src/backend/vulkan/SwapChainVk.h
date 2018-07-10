@@ -28,6 +28,10 @@ namespace backend { namespace vulkan {
 
       protected:
         TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+        void OnBeforePresent(TextureBase* texture) override;
+
+      private:
+        nxt::TextureUsageBit mTextureUsage;
     };
 
 }}  // namespace backend::vulkan

@@ -251,4 +251,8 @@ namespace backend { namespace null {
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
         return GetDevice()->CreateTexture(builder);
     }
+
+    void SwapChain::OnBeforePresent(TextureBase*) {
+    }
+
 }}  // namespace backend::null

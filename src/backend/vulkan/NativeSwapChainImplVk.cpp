@@ -178,13 +178,12 @@ namespace backend { namespace vulkan {
     }
 
     nxtSwapChainError NativeSwapChainImpl::Present() {
-        // Since we're going to do a queue operations we need to flush pending commands such as
-        // layout transitions of the swapchain images to the PRESENT layout.
-        mDevice->SubmitPendingCommands();
+        // This assumes that the image has already been transitioned to the PRESENT layout and
+        // writes were made available to the stage.
 
         // Assuming that the present queue is the same as the graphics queue, the proper
-        // synchronization has already been done by the usage transition to present so we don't
-        // need to wait on any semaphores.
+        // synchronization has already been done on the queue so we don't need to wait on any
+        // semaphores.
         VkPresentInfoKHR presentInfo;
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfo.pNext = nullptr;

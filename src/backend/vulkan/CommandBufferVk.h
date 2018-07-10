@@ -35,6 +35,7 @@ namespace backend { namespace vulkan {
         void RecordRenderPass(VkCommandBuffer commands, RenderPassDescriptor* renderPass);
 
         CommandIterator mCommands;
+        std::vector<PassResourceUsage> mPassResourceUsages;
     };
 
 }}  // namespace backend::vulkan

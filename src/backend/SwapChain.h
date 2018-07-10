@@ -42,6 +42,7 @@ namespace backend {
       protected:
         const nxtSwapChainImplementation& GetImplementation();
         virtual TextureBase* GetNextTextureImpl(TextureBuilder* builder) = 0;
+        virtual void OnBeforePresent(TextureBase* texture) = 0;
 
       private:
         DeviceBase* mDevice = nullptr;

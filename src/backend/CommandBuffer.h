@@ -19,6 +19,7 @@
 
 #include "backend/Builder.h"
 #include "backend/CommandAllocator.h"
+#include "backend/PassResourceUsage.h"
 #include "backend/RefCounted.h"
 
 #include <memory>
@@ -59,6 +60,7 @@ namespace backend {
         bool ValidateGetResult();
 
         CommandIterator AcquireCommands();
+        std::vector<PassResourceUsage> AcquirePassResourceUsage();
 
         // NXT API
         void BeginComputePass();
@@ -144,6 +146,9 @@ namespace backend {
         CommandIterator mIterator;
         bool mWasMovedToIterator = false;
         bool mWereCommandsAcquired = false;
+        bool mWerePassUsagesAcquired = false;
+
+        std::vector<PassResourceUsage> mPassResourceUsages;
     };
 
 }  // namespace backend

@@ -28,6 +28,14 @@ namespace backend {
     bool TextureFormatHasStencil(nxt::TextureFormat format);
     bool TextureFormatHasDepthOrStencil(nxt::TextureFormat format);
 
+    static constexpr nxt::TextureUsageBit kReadOnlyTextureUsages =
+        nxt::TextureUsageBit::TransferSrc | nxt::TextureUsageBit::Sampled |
+        nxt::TextureUsageBit::Present;
+
+    static constexpr nxt::TextureUsageBit kWritableTextureUsages =
+        nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::Storage |
+        nxt::TextureUsageBit::OutputAttachment;
+
     class TextureBase : public RefCounted {
       public:
         TextureBase(TextureBuilder* builder);

@@ -111,7 +111,9 @@ namespace backend { namespace vulkan {
     }  // anonymous namespace
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
+        : CommandBufferBase(builder),
+          mCommands(builder->AcquireCommands()),
+          mPassResourceUsages(builder->AcquirePassResourceUsage()) {
     }
 
     CommandBuffer::~CommandBuffer() {
@@ -121,6 +123,20 @@ namespace backend { namespace vulkan {
     void CommandBuffer::RecordCommands(VkCommandBuffer commands) {
         Device* device = ToBackend(GetDevice());
 
+        // Records the necessary barriers for the resource usage pre-computed by the frontend
+        auto TransitionForPass = [](VkCommandBuffer commands, const PassResourceUsage& usages) {
+            for (size_t i = 0; i < usages.buffers.size(); ++i) {
+                Buffer* buffer = ToBackend(usages.buffers[i]);
+                buffer->TransitionUsageNow(commands, usages.bufferUsages[i]);
+            }
+            for (size_t i = 0; i < usages.textures.size(); ++i) {
+                Texture* texture = ToBackend(usages.textures[i]);
+                texture->TransitionUsageNow(commands, usages.textureUsages[i]);
+            }
+        };
+
+        size_t nextPassNumber = 0;
+
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
@@ -128,6 +144,11 @@ namespace backend { namespace vulkan {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
                     auto& src = copy->source;
                     auto& dst = copy->destination;
+
+                    ToBackend(src.buffer)
+                        ->TransitionUsageNow(commands, nxt::BufferUsageBit::TransferSrc);
+                    ToBackend(dst.buffer)
+                        ->TransitionUsageNow(commands, nxt::BufferUsageBit::TransferDst);
 
                     VkBufferCopy region;
                     region.srcOffset = src.offset;
@@ -144,8 +165,14 @@ namespace backend { namespace vulkan {
                     auto& src = copy->source;
                     auto& dst = copy->destination;
 
+                    ToBackend(src.buffer)
+                        ->TransitionUsageNow(commands, nxt::BufferUsageBit::TransferSrc);
+                    ToBackend(dst.texture)
+                        ->TransitionUsageNow(commands, nxt::TextureUsageBit::TransferDst);
+
                     VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
+
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(copy->rowPitch, src, dst);
 
@@ -161,8 +188,14 @@ namespace backend { namespace vulkan {
                     auto& src = copy->source;
                     auto& dst = copy->destination;
 
+                    ToBackend(src.texture)
+                        ->TransitionUsageNow(commands, nxt::TextureUsageBit::TransferSrc);
+                    ToBackend(dst.buffer)
+                        ->TransitionUsageNow(commands, nxt::BufferUsageBit::TransferDst);
+
                     VkImage srcImage = ToBackend(src.texture)->GetHandle();
                     VkBuffer dstBuffer = ToBackend(dst.buffer)->GetHandle();
+
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(copy->rowPitch, dst, src);
 
@@ -173,12 +206,20 @@ namespace backend { namespace vulkan {
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
+
+                    TransitionForPass(commands, mPassResourceUsages[nextPassNumber]);
                     RecordRenderPass(commands, ToBackend(cmd->info.Get()));
+
+                    nextPassNumber++;
                 } break;
 
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
+
+                    TransitionForPass(commands, mPassResourceUsages[nextPassNumber]);
                     RecordComputePass(commands);
+
+                    nextPassNumber++;
                 } break;
 
                 case Command::TransitionBufferUsage: {
@@ -186,7 +227,6 @@ namespace backend { namespace vulkan {
                         mCommands.NextCommand<TransitionBufferUsageCmd>();
 
                     Buffer* buffer = ToBackend(cmd->buffer.Get());
-                    buffer->RecordBarrier(commands, buffer->GetUsage(), cmd->usage);
                     buffer->UpdateUsageInternal(cmd->usage);
                 } break;
 
@@ -195,7 +235,6 @@ namespace backend { namespace vulkan {
                         mCommands.NextCommand<TransitionTextureUsageCmd>();
 
                     Texture* texture = ToBackend(cmd->texture.Get());
-                    texture->RecordBarrier(commands, texture->GetUsage(), cmd->usage);
                     texture->UpdateUsageInternal(cmd->usage);
                 } break;
 
@@ -249,31 +288,6 @@ namespace backend { namespace vulkan {
     void CommandBuffer::RecordRenderPass(VkCommandBuffer commands,
                                          RenderPassDescriptor* renderPass) {
         Device* device = ToBackend(GetDevice());
-
-        // NXT has an implicit transition to color attachment on render passes.
-        // Transition the attachments now before we start the render pass.
-        {
-            for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
-                Texture* attachment =
-                    ToBackend(renderPass->GetColorAttachment(i).view->GetTexture());
-
-                if (!(attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment)) {
-                    attachment->RecordBarrier(commands, attachment->GetUsage(),
-                                              nxt::TextureUsageBit::OutputAttachment);
-                    attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
-                }
-            }
-            if (renderPass->HasDepthStencilAttachment()) {
-                Texture* attachment =
-                    ToBackend(renderPass->GetDepthStencilAttachment().view->GetTexture());
-
-                if (!(attachment->GetUsage() & nxt::TextureUsageBit::OutputAttachment)) {
-                    attachment->RecordBarrier(commands, attachment->GetUsage(),
-                                              nxt::TextureUsageBit::OutputAttachment);
-                    attachment->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
-                }
-            }
-        }
 
         renderPass->RecordBeginRenderPass(commands);
 

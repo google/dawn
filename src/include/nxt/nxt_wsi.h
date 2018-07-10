@@ -48,7 +48,10 @@ typedef struct {
     nxtSwapChainError (*Present)(void* userData);
 
     /// Each function is called with userData as its first argument.
-    void* userData = nullptr;
+    void* userData;
+
+    /// For use by the D3D12 and Vulkan backends: how the swapchain will use the texture.
+    nxtTextureUsageBit textureUsage;
 } nxtSwapChainImplementation;
 
 #if defined(NXT_ENABLE_BACKEND_D3D12) && defined(__cplusplus)

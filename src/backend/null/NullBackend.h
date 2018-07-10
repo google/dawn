@@ -184,6 +184,7 @@ namespace backend { namespace null {
 
       protected:
         TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+        void OnBeforePresent(TextureBase*) override;
     };
 
 }}  // namespace backend::null

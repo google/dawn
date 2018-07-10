@@ -44,4 +44,7 @@ namespace backend { namespace d3d12 {
         return new Texture(builder, nativeTexture);
     }
 
+    void SwapChain::OnBeforePresent(TextureBase*) {
+    }
+
 }}  // namespace backend::d3d12

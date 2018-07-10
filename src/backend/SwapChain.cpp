@@ -82,6 +82,8 @@ namespace backend {
             return;
         }
 
+        OnBeforePresent(texture);
+
         mImplementation.Present(mImplementation.userData);
     }
 

@@ -276,12 +276,6 @@ namespace backend { namespace vulkan {
                                        mMemoryAllocation.GetMemoryOffset()) != VK_SUCCESS) {
             ASSERT(false);
         }
-
-        // Vulkan requires images to be transitioned to their first usage. Do the transition if the
-        // texture has an initial usage.
-        if (GetUsage() != nxt::TextureUsageBit::None) {
-            TransitionUsageImpl(nxt::TextureUsageBit::None, GetUsage());
-        }
     }
 
     Texture::Texture(TextureBuilder* builder, VkImage nativeImage)
@@ -312,22 +306,25 @@ namespace backend { namespace vulkan {
         return VulkanAspectMask(GetFormat());
     }
 
-    // Helper function to add a texture barrier to a command buffer. This is inefficient because we
-    // should be coalescing barriers as much as possible.
-    void Texture::RecordBarrier(VkCommandBuffer commands,
-                                nxt::TextureUsageBit currentUsage,
-                                nxt::TextureUsageBit targetUsage) const {
+    void Texture::TransitionUsageNow(VkCommandBuffer commands, nxt::TextureUsageBit usage) {
+        // Avoid encoding barriers when it isn't needed.
+        bool lastReadOnly = (mLastUsage & kReadOnlyTextureUsages) == mLastUsage;
+        if (lastReadOnly && mLastUsage == usage) {
+            return;
+        }
+
         nxt::TextureFormat format = GetFormat();
-        VkPipelineStageFlags srcStages = VulkanPipelineStage(currentUsage, format);
-        VkPipelineStageFlags dstStages = VulkanPipelineStage(targetUsage, format);
+
+        VkPipelineStageFlags srcStages = VulkanPipelineStage(mLastUsage, format);
+        VkPipelineStageFlags dstStages = VulkanPipelineStage(usage, format);
 
         VkImageMemoryBarrier barrier;
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.pNext = nullptr;
-        barrier.srcAccessMask = VulkanAccessFlags(currentUsage, format);
-        barrier.dstAccessMask = VulkanAccessFlags(targetUsage, format);
-        barrier.oldLayout = VulkanImageLayout(currentUsage, format);
-        barrier.newLayout = VulkanImageLayout(targetUsage, format);
+        barrier.srcAccessMask = VulkanAccessFlags(mLastUsage, format);
+        barrier.dstAccessMask = VulkanAccessFlags(usage, format);
+        barrier.oldLayout = VulkanImageLayout(mLastUsage, format);
+        barrier.newLayout = VulkanImageLayout(usage, format);
         barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = mHandle;
@@ -342,12 +339,11 @@ namespace backend { namespace vulkan {
         ToBackend(GetDevice())
             ->fn.CmdPipelineBarrier(commands, srcStages, dstStages, 0, 0, nullptr, 0, nullptr, 1,
                                     &barrier);
+
+        mLastUsage = usage;
     }
 
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                      nxt::TextureUsageBit targetUsage) {
-        VkCommandBuffer commands = ToBackend(GetDevice())->GetPendingCommandBuffer();
-        RecordBarrier(commands, currentUsage, targetUsage);
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
     TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {

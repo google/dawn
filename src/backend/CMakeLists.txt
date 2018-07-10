@@ -364,6 +364,7 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/InputState.h
     ${BACKEND_DIR}/RenderPipeline.cpp
     ${BACKEND_DIR}/RenderPipeline.h
+    ${BACKEND_DIR}/PassResourceUsage.h
     ${BACKEND_DIR}/PerStage.cpp
     ${BACKEND_DIR}/PerStage.h
     ${BACKEND_DIR}/Pipeline.cpp

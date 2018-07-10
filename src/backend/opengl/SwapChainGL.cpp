@@ -41,4 +41,7 @@ namespace backend { namespace opengl {
         return new Texture(builder, nativeTexture);
     }
 
+    void SwapChain::OnBeforePresent(TextureBase*) {
+    }
+
 }}  // namespace backend::opengl

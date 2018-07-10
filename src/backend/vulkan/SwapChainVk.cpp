@@ -23,6 +23,9 @@ namespace backend { namespace vulkan {
         const auto& im = GetImplementation();
         nxtWSIContextVulkan wsiContext = {};
         im.Init(im.userData, &wsiContext);
+
+        ASSERT(im.textureUsage != NXT_TEXTURE_USAGE_BIT_NONE);
+        mTextureUsage = static_cast<nxt::TextureUsageBit>(im.textureUsage);
     }
 
     SwapChain::~SwapChain() {
@@ -32,6 +35,7 @@ namespace backend { namespace vulkan {
         const auto& im = GetImplementation();
         nxtSwapChainNextTexture next = {};
         nxtSwapChainError error = im.GetNextTexture(im.userData, &next);
+
         if (error) {
             GetDevice()->HandleError(error);
             return nullptr;
@@ -39,6 +43,17 @@ namespace backend { namespace vulkan {
 
         VkImage nativeTexture = VkImage::CreateFromHandle(next.texture.u64);
         return new Texture(builder, nativeTexture);
+    }
+
+    void SwapChain::OnBeforePresent(TextureBase* texture) {
+        Device* device = ToBackend(GetDevice());
+
+        // Perform the necessary pipeline barriers for the texture to be used with the usage
+        // requested by the implementation.
+        VkCommandBuffer commands = device->GetPendingCommandBuffer();
+        ToBackend(texture)->TransitionUsageNow(commands, mTextureUsage);
+
+        device->SubmitPendingCommands();
     }
 
 }}  // namespace backend::vulkan

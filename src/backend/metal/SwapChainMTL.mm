@@ -44,4 +44,7 @@ namespace backend { namespace metal {
         return new Texture(builder, nativeTexture);
     }
 
+    void SwapChain::OnBeforePresent(TextureBase*) {
+    }
+
 }}  // namespace backend::metal

@@ -24,6 +24,7 @@
 #include <set>
 
 namespace backend {
+
     class CommandBufferStateTracker {
       public:
         explicit CommandBufferStateTracker(CommandBufferBuilder* builder);
@@ -97,6 +98,7 @@ namespace backend {
         std::map<TextureBase*, nxt::TextureUsageBit> mMostRecentTextureUsages;
         std::set<TextureBase*> mTexturesAttached;
     };
+
 }  // namespace backend
 
 #endif  // BACKEND_COMMANDBUFFERSTATETRACKER_H
