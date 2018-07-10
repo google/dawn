@@ -552,6 +552,16 @@ namespace nxt { namespace wire {
                         return false;
                     }
 
+                    //* Unconditionnally get the data from the buffer so that the correct amount of data is
+                    //* consumed from the buffer, even when we ignore the command and early out.
+                    const char* requestData = nullptr;
+                    if (cmd->status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+                        requestData = GetData<char>(commands, size, cmd->dataLength);
+                        if (requestData == nullptr) {
+                            return false;
+                        }
+                    }
+
                     auto* buffer = mDevice->buffer.GetObject(cmd->bufferId);
                     uint32_t bufferSerial = mDevice->buffer.GetSerial(cmd->bufferId);
 
@@ -572,7 +582,8 @@ namespace nxt { namespace wire {
                     }
 
                     auto request = requestIt->second;
-                    //* Delete the request before calling the callback otherwise the callback could be fired a second time. If, for example, buffer.Unmap() is called inside the callback.
+                    //* Delete the request before calling the callback otherwise the callback could be fired a
+                    //* second time. If, for example, buffer.Unmap() is called inside the callback.
                     buffer->requests.erase(requestIt);
 
                     //* On success, we copy the data locally because the IPC buffer isn't valid outside of this function
@@ -583,12 +594,9 @@ namespace nxt { namespace wire {
                             return false;
                         }
 
-                        if (buffer->mappedData != nullptr) {
-                            return false;
-                        }
+                        ASSERT(requestData != nullptr);
 
-                        const char* requestData = GetData<char>(commands, size, request.size);
-                        if (requestData == nullptr) {
+                        if (buffer->mappedData != nullptr) {
                             return false;
                         }
 
