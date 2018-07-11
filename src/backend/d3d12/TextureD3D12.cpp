@@ -150,32 +150,31 @@ namespace backend { namespace d3d12 {
         return mResourcePtr;
     }
 
-    bool Texture::GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage,
-                                               nxt::TextureUsageBit targetUsage,
-                                               D3D12_RESOURCE_BARRIER* barrier) {
-        D3D12_RESOURCE_STATES stateBefore = D3D12TextureUsage(currentUsage, GetFormat());
-        D3D12_RESOURCE_STATES stateAfter = D3D12TextureUsage(targetUsage, GetFormat());
-
-        if (stateBefore == stateAfter) {
-            return false;
+    void Texture::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                     nxt::TextureUsageBit usage) {
+        // Avoid transitioning the texture when it isn't needed.
+        // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
+        if (usage == mLastUsage) {
+            return;
         }
 
-        barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier->Transition.pResource = mResourcePtr;
-        barrier->Transition.StateBefore = stateBefore;
-        barrier->Transition.StateAfter = stateAfter;
-        barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        D3D12_RESOURCE_STATES lastState = D3D12TextureUsage(mLastUsage, GetFormat());
+        D3D12_RESOURCE_STATES newState = D3D12TextureUsage(usage, GetFormat());
 
-        return true;
+        D3D12_RESOURCE_BARRIER barrier;
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = mResourcePtr;
+        barrier.Transition.StateBefore = lastState;
+        barrier.Transition.StateAfter = newState;
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+        commandList->ResourceBarrier(1, &barrier);
+
+        mLastUsage = usage;
     }
 
-    void Texture::TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
-                                      nxt::TextureUsageBit targetUsage) {
-        D3D12_RESOURCE_BARRIER barrier;
-        if (GetResourceTransitionBarrier(currentUsage, targetUsage, &barrier)) {
-            mDevice->GetPendingCommandList()->ResourceBarrier(1, &barrier);
-        }
+    void Texture::TransitionUsageImpl(nxt::TextureUsageBit, nxt::TextureUsageBit) {
     }
 
     TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {

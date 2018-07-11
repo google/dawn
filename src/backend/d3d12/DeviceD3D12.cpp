@@ -274,7 +274,7 @@ namespace backend { namespace d3d12 {
         return new BlendState(builder);
     }
     BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
-        return new Buffer(this, builder);
+        return new Buffer(builder);
     }
     BufferViewBase* Device::CreateBufferView(BufferViewBuilder* builder) {
         return new BufferView(builder);

@@ -33,17 +33,18 @@ namespace backend { namespace d3d12 {
 
         DXGI_FORMAT GetD3D12Format() const;
         ID3D12Resource* GetD3D12Resource();
-        bool GetResourceTransitionBarrier(nxt::TextureUsageBit currentUsage,
-                                          nxt::TextureUsageBit targetUsage,
-                                          D3D12_RESOURCE_BARRIER* barrier);
 
+        void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                nxt::TextureUsageBit usage);
+
+      private:
         void TransitionUsageImpl(nxt::TextureUsageBit currentUsage,
                                  nxt::TextureUsageBit targetUsage) override;
 
-      private:
         Device* mDevice;
         ComPtr<ID3D12Resource> mResource = {};
         ID3D12Resource* mResourcePtr = nullptr;
+        nxt::TextureUsageBit mLastUsage = nxt::TextureUsageBit::None;
     };
 
     class TextureView : public TextureViewBase {

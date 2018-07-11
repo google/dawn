@@ -101,8 +101,7 @@ namespace backend { namespace d3d12 {
     }
 
     nxtSwapChainError NativeSwapChainImpl::Present() {
-        // Flush pending commands that include the transition of the texture to present.
-        mDevice->ExecuteCommandLists({});
+        // This assumes the texture has already been transition to the PRESENT state.
 
         ASSERT_SUCCESS(mSwapChain->Present(1, 0));
         // TODO(cwallez@chromium.org): Make the serial ticking implicit.

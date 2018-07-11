@@ -67,7 +67,7 @@ namespace backend { namespace d3d12 {
         }
     }  // namespace
 
-    Buffer::Buffer(Device* device, BufferBuilder* builder) : BufferBase(builder), mDevice(device) {
+    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         resourceDescriptor.Alignment = 0;
@@ -82,26 +82,31 @@ namespace backend { namespace d3d12 {
         resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage());
 
         auto heapType = D3D12HeapType(GetAllowedUsage());
-        auto bufferUsage = D3D12BufferUsage(GetUsage());
+        auto bufferUsage = D3D12_RESOURCE_STATE_COMMON;
 
         // D3D12 requires buffers on the READBACK heap to have the D3D12_RESOURCE_STATE_COPY_DEST
         // state
         if (heapType == D3D12_HEAP_TYPE_READBACK) {
             bufferUsage |= D3D12_RESOURCE_STATE_COPY_DEST;
+            mFixedResourceState = true;
+            mLastUsage = nxt::BufferUsageBit::TransferDst;
         }
 
         // D3D12 requires buffers on the UPLOAD heap to have the D3D12_RESOURCE_STATE_GENERIC_READ
         // state
         if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
             bufferUsage |= D3D12_RESOURCE_STATE_GENERIC_READ;
+            mFixedResourceState = true;
+            mLastUsage = nxt::BufferUsageBit::TransferSrc;
         }
 
-        mResource =
-            device->GetResourceAllocator()->Allocate(heapType, resourceDescriptor, bufferUsage);
+        mResource = ToBackend(GetDevice())
+                        ->GetResourceAllocator()
+                        ->Allocate(heapType, resourceDescriptor, bufferUsage);
     }
 
     Buffer::~Buffer() {
-        mDevice->GetResourceAllocator()->Release(mResource);
+        ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
     }
 
     uint32_t Buffer::GetD3D12Size() const {
@@ -113,31 +118,35 @@ namespace backend { namespace d3d12 {
         return mResource;
     }
 
-    bool Buffer::GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage,
-                                              nxt::BufferUsageBit targetUsage,
-                                              D3D12_RESOURCE_BARRIER* barrier) {
-        if (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
-            // Transitions are never needed for mapped buffers because they are created with and
-            // always need the Transfer(Dst|Src) state. Mapped buffers cannot have states outside of
-            // (MapRead|TransferDst) and (MapWrite|TransferSrc)
-            return false;
+    void Buffer::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                    nxt::BufferUsageBit usage) {
+        // Resources in upload and readback heaps must be kept in the COPY_SOURCE/DEST state
+        if (mFixedResourceState) {
+            ASSERT(usage == mLastUsage);
+            return;
         }
 
-        D3D12_RESOURCE_STATES stateBefore = D3D12BufferUsage(currentUsage);
-        D3D12_RESOURCE_STATES stateAfter = D3D12BufferUsage(targetUsage);
-
-        if (stateBefore == stateAfter) {
-            return false;
+        // We can skip transitions to already current usages.
+        // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
+        bool lastIncludesTarget = (mLastUsage & usage) == usage;
+        if (lastIncludesTarget) {
+            return;
         }
 
-        barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier->Transition.pResource = mResource.Get();
-        barrier->Transition.StateBefore = stateBefore;
-        barrier->Transition.StateAfter = stateAfter;
-        barrier->Transition.Subresource = 0;
+        D3D12_RESOURCE_STATES lastState = D3D12BufferUsage(mLastUsage);
+        D3D12_RESOURCE_STATES newState = D3D12BufferUsage(usage);
 
-        return true;
+        D3D12_RESOURCE_BARRIER barrier;
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = mResource.Get();
+        barrier.Transition.StateBefore = lastState;
+        barrier.Transition.StateAfter = newState;
+        barrier.Transition.Subresource = 0;
+
+        commandList->ResourceBarrier(1, &barrier);
+
+        mLastUsage = usage;
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS Buffer::GetVA() const {
@@ -153,7 +162,10 @@ namespace backend { namespace d3d12 {
     }
 
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
-        mDevice->GetResourceUploader()->BufferSubData(mResource, start, count, data);
+        Device* device = ToBackend(GetDevice());
+
+        TransitionUsageNow(device->GetPendingCommandList(), nxt::BufferUsageBit::TransferDst);
+        device->GetResourceUploader()->BufferSubData(mResource, start, count, data);
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
@@ -161,6 +173,8 @@ namespace backend { namespace d3d12 {
         char* data = nullptr;
         ASSERT_SUCCESS(mResource->Map(0, &readRange, reinterpret_cast<void**>(&data)));
 
+        // There is no need to transition the resource to a new state: D3D12 seems to make the GPU
+        // writes available when the fence is passed.
         MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
         tracker->Track(this, serial, data + start, false);
     }
@@ -170,6 +184,8 @@ namespace backend { namespace d3d12 {
         char* data = nullptr;
         ASSERT_SUCCESS(mResource->Map(0, &readRange, reinterpret_cast<void**>(&data)));
 
+        // There is no need to transition the resource to a new state: D3D12 seems to make the CPU
+        // writes available on queue submission.
         MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
         tracker->Track(this, serial, data + start, true);
     }
@@ -179,15 +195,10 @@ namespace backend { namespace d3d12 {
         // modified
         D3D12_RANGE writeRange = {};
         mResource->Unmap(0, &writeRange);
-        mDevice->GetResourceAllocator()->Release(mResource);
+        ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
     }
 
-    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
-                                     nxt::BufferUsageBit targetUsage) {
-        D3D12_RESOURCE_BARRIER barrier;
-        if (GetResourceTransitionBarrier(currentUsage, targetUsage, &barrier)) {
-            mDevice->GetPendingCommandList()->ResourceBarrier(1, &barrier);
-        }
+    void Buffer::TransitionUsageImpl(nxt::BufferUsageBit, nxt::BufferUsageBit) {
     }
 
     BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {

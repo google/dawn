@@ -230,7 +230,9 @@ namespace backend { namespace d3d12 {
     }  // anonymous namespace
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
+        : CommandBufferBase(builder),
+          mCommands(builder->AcquireCommands()),
+          mPassResourceUsages(builder->AcquirePassResourceUsage()) {
     }
 
     CommandBuffer::~CommandBuffer() {
@@ -261,33 +263,64 @@ namespace backend { namespace d3d12 {
             }
         }
 
+        // Records the necessary barriers for the resource usage pre-computed by the frontend
+        auto TransitionForPass = [](ComPtr<ID3D12GraphicsCommandList> commandList,
+                                    const PassResourceUsage& usages) {
+            for (size_t i = 0; i < usages.buffers.size(); ++i) {
+                Buffer* buffer = ToBackend(usages.buffers[i]);
+                buffer->TransitionUsageNow(commandList, usages.bufferUsages[i]);
+            }
+            for (size_t i = 0; i < usages.textures.size(); ++i) {
+                Texture* texture = ToBackend(usages.textures[i]);
+                texture->TransitionUsageNow(commandList, usages.textureUsages[i]);
+            }
+        };
+
+        uint32_t nextPassNumber = 0;
+
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
+
+                    TransitionForPass(commandList, mPassResourceUsages[nextPassNumber]);
                     RecordComputePass(commandList, &bindingTracker);
+
+                    nextPassNumber++;
                 } break;
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* beginRenderPassCmd =
                         mCommands.NextCommand<BeginRenderPassCmd>();
+
+                    TransitionForPass(commandList, mPassResourceUsages[nextPassNumber]);
                     RecordRenderPass(commandList, &bindingTracker,
                                      ToBackend(beginRenderPassCmd->info.Get()));
+
+                    nextPassNumber++;
                 } break;
 
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
-                    auto src = ToBackend(copy->source.buffer.Get())->GetD3D12Resource();
-                    auto dst = ToBackend(copy->destination.buffer.Get())->GetD3D12Resource();
-                    commandList->CopyBufferRegion(dst.Get(), copy->destination.offset, src.Get(),
-                                                  copy->source.offset, copy->size);
+                    Buffer* srcBuffer = ToBackend(copy->source.buffer.Get());
+                    Buffer* dstBuffer = ToBackend(copy->destination.buffer.Get());
+
+                    srcBuffer->TransitionUsageNow(commandList, nxt::BufferUsageBit::TransferSrc);
+                    dstBuffer->TransitionUsageNow(commandList, nxt::BufferUsageBit::TransferDst);
+
+                    commandList->CopyBufferRegion(
+                        dstBuffer->GetD3D12Resource().Get(), copy->destination.offset,
+                        srcBuffer->GetD3D12Resource().Get(), copy->source.offset, copy->size);
                 } break;
 
                 case Command::CopyBufferToTexture: {
                     CopyBufferToTextureCmd* copy = mCommands.NextCommand<CopyBufferToTextureCmd>();
                     Buffer* buffer = ToBackend(copy->source.buffer.Get());
                     Texture* texture = ToBackend(copy->destination.texture.Get());
+
+                    buffer->TransitionUsageNow(commandList, nxt::BufferUsageBit::TransferSrc);
+                    texture->TransitionUsageNow(commandList, nxt::TextureUsageBit::TransferDst);
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->destination.x, copy->destination.y, copy->destination.z,
@@ -332,6 +365,9 @@ namespace backend { namespace d3d12 {
                     Texture* texture = ToBackend(copy->source.texture.Get());
                     Buffer* buffer = ToBackend(copy->destination.buffer.Get());
 
+                    texture->TransitionUsageNow(commandList, nxt::TextureUsageBit::TransferSrc);
+                    buffer->TransitionUsageNow(commandList, nxt::BufferUsageBit::TransferDst);
+
                     auto copySplit = ComputeTextureCopySplit(
                         copy->source.x, copy->source.y, copy->source.z, copy->source.width,
                         copy->source.height, copy->source.depth,
@@ -373,31 +409,13 @@ namespace backend { namespace d3d12 {
                 case Command::TransitionBufferUsage: {
                     TransitionBufferUsageCmd* cmd =
                         mCommands.NextCommand<TransitionBufferUsageCmd>();
-
-                    Buffer* buffer = ToBackend(cmd->buffer.Get());
-
-                    D3D12_RESOURCE_BARRIER barrier;
-                    if (buffer->GetResourceTransitionBarrier(buffer->GetUsage(), cmd->usage,
-                                                             &barrier)) {
-                        commandList->ResourceBarrier(1, &barrier);
-                    }
-
-                    buffer->UpdateUsageInternal(cmd->usage);
+                    cmd->buffer->UpdateUsageInternal(cmd->usage);
                 } break;
 
                 case Command::TransitionTextureUsage: {
                     TransitionTextureUsageCmd* cmd =
                         mCommands.NextCommand<TransitionTextureUsageCmd>();
-
-                    Texture* texture = ToBackend(cmd->texture.Get());
-
-                    D3D12_RESOURCE_BARRIER barrier;
-                    if (texture->GetResourceTransitionBarrier(texture->GetUsage(), cmd->usage,
-                                                              &barrier)) {
-                        commandList->ResourceBarrier(1, &barrier);
-                    }
-
-                    texture->UpdateUsageInternal(cmd->usage);
+                    cmd->texture->UpdateUsageInternal(cmd->usage);
                 } break;
 
                 default: { UNREACHABLE(); } break;
@@ -456,8 +474,6 @@ namespace backend { namespace d3d12 {
                 // It's already validated that this texture is either frozen to the correct
                 // usage, or not frozen.
                 if (!texture->IsFrozen()) {
-                    texture->TransitionUsageImpl(texture->GetUsage(),
-                                                 nxt::TextureUsageBit::OutputAttachment);
                     texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
                 }
 
@@ -476,8 +492,6 @@ namespace backend { namespace d3d12 {
                 // It's already validated that this texture is either frozen to the correct
                 // usage, or not frozen.
                 if (!texture->IsFrozen()) {
-                    texture->TransitionUsageImpl(texture->GetUsage(),
-                                                 nxt::TextureUsageBit::OutputAttachment);
                     texture->UpdateUsageInternal(nxt::TextureUsageBit::OutputAttachment);
                 }
 

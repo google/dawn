@@ -26,6 +26,9 @@ namespace backend { namespace d3d12 {
         nxtWSIContextD3D12 wsiContext = {};
         wsiContext.device = reinterpret_cast<nxtDevice>(GetDevice());
         im.Init(im.userData, &wsiContext);
+
+        ASSERT(im.textureUsage != NXT_TEXTURE_USAGE_BIT_NONE);
+        mTextureUsage = static_cast<nxt::TextureUsageBit>(im.textureUsage);
     }
 
     SwapChain::~SwapChain() {
@@ -44,7 +47,13 @@ namespace backend { namespace d3d12 {
         return new Texture(builder, nativeTexture);
     }
 
-    void SwapChain::OnBeforePresent(TextureBase*) {
+    void SwapChain::OnBeforePresent(TextureBase* texture) {
+        Device* device = ToBackend(GetDevice());
+
+        // Perform the necessary transition for the texture to be presented.
+        ToBackend(texture)->TransitionUsageNow(device->GetPendingCommandList(), mTextureUsage);
+
+        device->ExecuteCommandLists({});
     }
 
 }}  // namespace backend::d3d12

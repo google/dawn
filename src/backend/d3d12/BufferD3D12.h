@@ -26,21 +26,18 @@ namespace backend { namespace d3d12 {
 
     class Buffer : public BufferBase {
       public:
-        Buffer(Device* device, BufferBuilder* builder);
+        Buffer(BufferBuilder* builder);
         ~Buffer();
 
         uint32_t GetD3D12Size() const;
         ComPtr<ID3D12Resource> GetD3D12Resource();
         D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
-        bool GetResourceTransitionBarrier(nxt::BufferUsageBit currentUsage,
-                                          nxt::BufferUsageBit targetUsage,
-                                          D3D12_RESOURCE_BARRIER* barrier);
         void OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite);
 
-      private:
-        Device* mDevice;
-        ComPtr<ID3D12Resource> mResource;
+        void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                nxt::BufferUsageBit usage);
 
+      private:
         // NXT API
         void SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
@@ -48,6 +45,10 @@ namespace backend { namespace d3d12 {
         void UnmapImpl() override;
         void TransitionUsageImpl(nxt::BufferUsageBit currentUsage,
                                  nxt::BufferUsageBit targetUsage) override;
+
+        ComPtr<ID3D12Resource> mResource;
+        bool mFixedResourceState = false;
+        nxt::BufferUsageBit mLastUsage = nxt::BufferUsageBit::None;
     };
 
     class BufferView : public BufferViewBase {

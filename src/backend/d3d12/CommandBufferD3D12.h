@@ -42,6 +42,7 @@ namespace backend { namespace d3d12 {
                               RenderPassDescriptor* renderPass);
 
         CommandIterator mCommands;
+        std::vector<PassResourceUsage> mPassResourceUsages;
     };
 
 }}  // namespace backend::d3d12
