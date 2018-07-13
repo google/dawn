@@ -285,6 +285,7 @@ namespace backend { namespace d3d12 {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
                     TransitionForPass(commandList, mPassResourceUsages[nextPassNumber]);
+                    bindingTracker.SetInComputePass(true);
                     RecordComputePass(commandList, &bindingTracker);
 
                     nextPassNumber++;
@@ -295,6 +296,7 @@ namespace backend { namespace d3d12 {
                         mCommands.NextCommand<BeginRenderPassCmd>();
 
                     TransitionForPass(commandList, mPassResourceUsages[nextPassNumber]);
+                    bindingTracker.SetInComputePass(false);
                     RecordRenderPass(commandList, &bindingTracker,
                                      ToBackend(beginRenderPassCmd->info.Get()));
 
