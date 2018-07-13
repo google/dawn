@@ -259,7 +259,7 @@ namespace backend { namespace d3d12 {
             } else if (descriptorHeaps[0]) {
                 commandList->SetDescriptorHeaps(1, descriptorHeaps);
             } else if (descriptorHeaps[1]) {
-                commandList->SetDescriptorHeaps(2, &descriptorHeaps[1]);
+                commandList->SetDescriptorHeaps(1, &descriptorHeaps[1]);
             }
         }
 
