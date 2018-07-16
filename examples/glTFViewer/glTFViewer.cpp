@@ -274,7 +274,8 @@ namespace {
         nxt::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {
                         {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
-                        {1, nxt::ShaderStageBit::Fragment, nxt::BindingType::Sampler},
+                        {1, hasTexture ? nxt::ShaderStageBit::Fragment : kNoStages,
+                         nxt::BindingType::Sampler},
                         {2, hasTexture ? nxt::ShaderStageBit::Fragment : kNoStages,
                          nxt::BindingType::SampledTexture},
                     });
@@ -608,7 +609,7 @@ namespace {
         if (buttons[2] || (buttons[0] && buttons[1])) {
             camera.pan(-dX * 0.002f, dY * 0.002f);
         } else if (buttons[0]) {
-            camera.rotate(dX * -0.01f, dY * 0.01f);
+            camera.rotate(dX * 0.01f, dY * 0.01f);
         } else if (buttons[1]) {
             camera.zoom(dY * -0.005f);
         }

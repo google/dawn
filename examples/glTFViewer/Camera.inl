@@ -54,7 +54,7 @@ class Camera {
             eye4 = glm::rotate(glm::mat4(), _azimuth, glm::vec3(0, 1, 0)) * eye4;
             _eyeDir = glm::vec3(eye4);
 
-            _view = glm::lookAt(_center + _eyeDir * _radius, _center, glm::vec3(0, 1, 0));
+            _view = glm::lookAt(_center + _eyeDir * _radius, _center, glm::vec3(0, -1, 0));
             _dirty = false;
         }
         float _azimuth;
