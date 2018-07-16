@@ -16,6 +16,7 @@
 #define BACKEND_QUEUE_H_
 
 #include "backend/Builder.h"
+#include "backend/Error.h"
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
@@ -30,20 +31,18 @@ namespace backend {
         DeviceBase* GetDevice();
 
         template <typename T>
-        bool ValidateSubmit(uint32_t numCommands, T* const* commands) {
+        MaybeError ValidateSubmit(uint32_t numCommands, T* const* commands) {
             static_assert(std::is_base_of<CommandBufferBase, T>::value,
                           "invalid command buffer type");
 
             for (uint32_t i = 0; i < numCommands; ++i) {
-                if (!ValidateSubmitCommand(commands[i])) {
-                    return false;
-                }
+                NXT_TRY(ValidateSubmitCommand(commands[i]));
             }
-            return true;
+            return {};
         }
 
       private:
-        bool ValidateSubmitCommand(CommandBufferBase* command);
+        MaybeError ValidateSubmitCommand(CommandBufferBase* command);
 
         DeviceBase* mDevice;
     };

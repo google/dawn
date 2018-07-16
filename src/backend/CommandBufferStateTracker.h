@@ -27,21 +27,19 @@ namespace backend {
 
     class CommandBufferStateTracker {
       public:
-        explicit CommandBufferStateTracker(CommandBufferBuilder* builder);
-
         // Non-state-modifying validation functions
-        bool ValidateCanCopy() const;
-        bool ValidateCanDispatch();
-        bool ValidateCanDrawArrays();
-        bool ValidateCanDrawElements();
+        MaybeError ValidateCanCopy() const;
+        MaybeError ValidateCanDispatch();
+        MaybeError ValidateCanDrawArrays();
+        MaybeError ValidateCanDrawElements();
 
         // State-modifying methods
         void EndPass();
-        bool SetComputePipeline(ComputePipelineBase* pipeline);
-        bool SetRenderPipeline(RenderPipelineBase* pipeline);
+        void SetComputePipeline(ComputePipelineBase* pipeline);
+        void SetRenderPipeline(RenderPipelineBase* pipeline);
         void SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
-        bool SetIndexBuffer();
-        bool SetVertexBuffer(uint32_t index);
+        MaybeError SetIndexBuffer();
+        MaybeError SetVertexBuffer(uint32_t index);
 
       private:
         enum ValidationAspect {
@@ -59,11 +57,9 @@ namespace backend {
         bool RecomputeHaveAspectVertexBuffers();
 
         bool HavePipeline() const;
-        bool RevalidateCanDraw();
+        MaybeError RevalidateCanDraw();
 
         void SetPipelineCommon(PipelineBase* pipeline);
-
-        CommandBufferBuilder* mBuilder;
 
         ValidationAspects mAspects;
 

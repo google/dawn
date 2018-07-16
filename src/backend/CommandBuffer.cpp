@@ -32,12 +32,10 @@ namespace backend {
 
     namespace {
 
-        bool ValidateCopyLocationFitsInTexture(CommandBufferBuilder* builder,
-                                               const TextureCopyLocation& location) {
+        MaybeError ValidateCopyLocationFitsInTexture(const TextureCopyLocation& location) {
             const TextureBase* texture = location.texture.Get();
             if (location.level >= texture->GetNumMipLevels()) {
-                builder->HandleError("Copy mip-level out of range");
-                return false;
+                NXT_RETURN_ERROR("Copy mip-level out of range");
             }
 
             // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
@@ -47,18 +45,16 @@ namespace backend {
                     (static_cast<uint64_t>(texture->GetWidth()) >> level) ||
                 uint64_t(location.y) + uint64_t(location.height) >
                     (static_cast<uint64_t>(texture->GetHeight()) >> level)) {
-                builder->HandleError("Copy would touch outside of the texture");
-                return false;
+                NXT_RETURN_ERROR("Copy would touch outside of the texture");
             }
 
             // TODO(cwallez@chromium.org): Check the depth bound differently for 2D arrays and 3D
             // textures
             if (location.z != 0 || location.depth != 1) {
-                builder->HandleError("No support for z != 0 and depth != 1 for now");
-                return false;
+                NXT_RETURN_ERROR("No support for z != 0 and depth != 1 for now");
             }
 
-            return true;
+            return {};
         }
 
         bool FitsInBuffer(const BufferBase* buffer, uint32_t offset, uint32_t size) {
@@ -66,38 +62,33 @@ namespace backend {
             return offset <= bufferSize && (size <= (bufferSize - offset));
         }
 
-        bool ValidateCopySizeFitsInBuffer(CommandBufferBuilder* builder,
-                                          const BufferCopyLocation& location,
-                                          uint32_t dataSize) {
+        MaybeError ValidateCopySizeFitsInBuffer(const BufferCopyLocation& location,
+                                                uint32_t dataSize) {
             if (!FitsInBuffer(location.buffer.Get(), location.offset, dataSize)) {
-                builder->HandleError("Copy would overflow the buffer");
-                return false;
+                NXT_RETURN_ERROR("Copy would overflow the buffer");
             }
 
-            return true;
+            return {};
         }
 
-        bool ValidateTexelBufferOffset(CommandBufferBuilder* builder,
-                                       TextureBase* texture,
-                                       const BufferCopyLocation& location) {
+        MaybeError ValidateTexelBufferOffset(TextureBase* texture,
+                                             const BufferCopyLocation& location) {
             uint32_t texelSize =
                 static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat()));
             if (location.offset % texelSize != 0) {
-                builder->HandleError("Buffer offset must be a multiple of the texel size");
-                return false;
+                NXT_RETURN_ERROR("Buffer offset must be a multiple of the texel size");
             }
 
-            return true;
+            return {};
         }
 
-        bool ComputeTextureCopyBufferSize(CommandBufferBuilder*,
-                                          const TextureCopyLocation& location,
-                                          uint32_t rowPitch,
-                                          uint32_t* bufferSize) {
+        MaybeError ComputeTextureCopyBufferSize(const TextureCopyLocation& location,
+                                                uint32_t rowPitch,
+                                                uint32_t* bufferSize) {
             // TODO(cwallez@chromium.org): check for overflows
             *bufferSize = (rowPitch * (location.height - 1) + location.width) * location.depth;
 
-            return true;
+            return {};
         }
 
         uint32_t ComputeDefaultRowPitch(TextureBase* texture, uint32_t width) {
@@ -105,45 +96,35 @@ namespace backend {
             return texelSize * width;
         }
 
-        bool ValidateRowPitch(CommandBufferBuilder* builder,
-                              const TextureCopyLocation& location,
-                              uint32_t rowPitch) {
+        MaybeError ValidateRowPitch(const TextureCopyLocation& location, uint32_t rowPitch) {
             if (rowPitch % kTextureRowPitchAlignment != 0) {
-                builder->HandleError("Row pitch must be a multiple of 256");
-                return false;
+                NXT_RETURN_ERROR("Row pitch must be a multiple of 256");
             }
 
             uint32_t texelSize = TextureFormatPixelSize(location.texture.Get()->GetFormat());
             if (rowPitch < location.width * texelSize) {
-                builder->HandleError("Row pitch must not be less than the number of bytes per row");
-                return false;
+                NXT_RETURN_ERROR("Row pitch must not be less than the number of bytes per row");
             }
 
-            return true;
+            return {};
         }
 
-        bool ValidateCanUseAs(CommandBufferBuilder* builder,
-                              BufferBase* buffer,
-                              nxt::BufferUsageBit usage) {
+        MaybeError ValidateCanUseAs(BufferBase* buffer, nxt::BufferUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(buffer->GetAllowedUsage() & usage)) {
-                builder->HandleError("buffer doesn't have the required usage.");
-                return false;
+                NXT_RETURN_ERROR("buffer doesn't have the required usage.");
             }
 
-            return true;
+            return {};
         }
 
-        bool ValidateCanUseAs(CommandBufferBuilder* builder,
-                              TextureBase* texture,
-                              nxt::TextureUsageBit usage) {
+        MaybeError ValidateCanUseAs(TextureBase* texture, nxt::TextureUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(texture->GetAllowedUsage() & usage)) {
-                builder->HandleError("texture doesn't have the required usage.");
-                return false;
+                NXT_RETURN_ERROR("texture doesn't have the required usage.");
             }
 
-            return true;
+            return {};
         }
 
         enum class PassType {
@@ -184,10 +165,10 @@ namespace backend {
             }
 
             // Performs the per-pass usage validation checks
-            bool AreUsagesValid(PassType pass) const {
+            MaybeError ValidateUsages(PassType pass) const {
                 // Storage resources cannot be used twice in the same compute pass
                 if (pass == PassType::Compute && mStorageUsedMultipleTimes) {
-                    return false;
+                    NXT_RETURN_ERROR("Storage resource used multiple times in compute pass");
                 }
 
                 // Buffers can only be used as single-write or multiple read.
@@ -196,14 +177,15 @@ namespace backend {
                     nxt::BufferUsageBit usage = it.second;
 
                     if (usage & ~buffer->GetAllowedUsage()) {
-                        return false;
+                        NXT_RETURN_ERROR("Buffer missing usage for the pass");
                     }
 
                     bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
                     bool singleUse = nxt::HasZeroOrOneBits(usage);
 
                     if (!readOnly && !singleUse) {
-                        return false;
+                        NXT_RETURN_ERROR(
+                            "Buffer used as writeable usage and another usage in pass");
                     }
                 }
 
@@ -214,17 +196,17 @@ namespace backend {
                     nxt::TextureUsageBit usage = it.second;
 
                     if (usage & ~texture->GetAllowedUsage()) {
-                        return false;
+                        NXT_RETURN_ERROR("Texture missing usage for the pass");
                     }
 
                     // For textures the only read-only usage in a pass is Sampled, so checking the
                     // usage constraint simplifies to checking a single usage bit is set.
                     if (!nxt::HasZeroOrOneBits(it.second)) {
-                        return false;
+                        NXT_RETURN_ERROR("Texture used with more than one usage in pass");
                     }
                 }
 
-                return true;
+                return {};
             }
 
             // Returns the per-pass usage for use by backends for APIs with explicit barriers.
@@ -297,7 +279,7 @@ namespace backend {
     // CommandBufferBuilder
 
     CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device)
-        : Builder(device), mState(std::make_unique<CommandBufferStateTracker>(this)) {
+        : Builder(device), mState(std::make_unique<CommandBufferStateTracker>()) {
     }
 
     CommandBufferBuilder::~CommandBufferBuilder() {
@@ -333,7 +315,7 @@ namespace backend {
 
     // Implementation of the command buffer validation that can be precomputed before submit
 
-    bool CommandBufferBuilder::ValidateGetResult() {
+    MaybeError CommandBufferBuilder::ValidateGetResult() {
         MoveToIterator();
         mIterator.Reset();
 
@@ -342,78 +324,73 @@ namespace backend {
             switch (type) {
                 case Command::BeginComputePass: {
                     mIterator.NextCommand<BeginComputePassCmd>();
-                    if (!ValidateComputePass()) {
-                        return false;
-                    }
+                    NXT_TRY(ValidateComputePass());
                 } break;
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mIterator.NextCommand<BeginRenderPassCmd>();
-                    if (!ValidateRenderPass(cmd->info.Get())) {
-                        return false;
-                    }
+                    NXT_TRY(ValidateRenderPass(cmd->info.Get()));
                 } break;
 
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mIterator.NextCommand<CopyBufferToBufferCmd>();
-                    if (!ValidateCopySizeFitsInBuffer(this, copy->source, copy->size) ||
-                        !ValidateCopySizeFitsInBuffer(this, copy->destination, copy->size) ||
-                        !ValidateCanUseAs(this, copy->source.buffer.Get(),
-                                          nxt::BufferUsageBit::TransferSrc) ||
-                        !ValidateCanUseAs(this, copy->destination.buffer.Get(),
-                                          nxt::BufferUsageBit::TransferDst)) {
-                        return false;
-                    }
+
+                    NXT_TRY(ValidateCopySizeFitsInBuffer(copy->source, copy->size));
+                    NXT_TRY(ValidateCopySizeFitsInBuffer(copy->destination, copy->size));
+
+                    NXT_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
+                                             nxt::BufferUsageBit::TransferSrc));
+                    NXT_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
+                                             nxt::BufferUsageBit::TransferDst));
                 } break;
 
                 case Command::CopyBufferToTexture: {
                     CopyBufferToTextureCmd* copy = mIterator.NextCommand<CopyBufferToTextureCmd>();
 
                     uint32_t bufferCopySize = 0;
-                    if (!ValidateRowPitch(this, copy->destination, copy->rowPitch) ||
-                        !ComputeTextureCopyBufferSize(this, copy->destination, copy->rowPitch,
-                                                      &bufferCopySize) ||
-                        !ValidateCopyLocationFitsInTexture(this, copy->destination) ||
-                        !ValidateCopySizeFitsInBuffer(this, copy->source, bufferCopySize) ||
-                        !ValidateTexelBufferOffset(this, copy->destination.texture.Get(),
-                                                   copy->source) ||
-                        !ValidateCanUseAs(this, copy->source.buffer.Get(),
-                                          nxt::BufferUsageBit::TransferSrc) ||
-                        !ValidateCanUseAs(this, copy->destination.texture.Get(),
-                                          nxt::TextureUsageBit::TransferDst)) {
-                        return false;
-                    }
+                    NXT_TRY(ValidateRowPitch(copy->destination, copy->rowPitch));
+                    NXT_TRY(ComputeTextureCopyBufferSize(copy->destination, copy->rowPitch,
+                                                         &bufferCopySize));
+
+                    NXT_TRY(ValidateCopyLocationFitsInTexture(copy->destination));
+                    NXT_TRY(ValidateCopySizeFitsInBuffer(copy->source, bufferCopySize));
+                    NXT_TRY(
+                        ValidateTexelBufferOffset(copy->destination.texture.Get(), copy->source));
+
+                    NXT_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
+                                             nxt::BufferUsageBit::TransferSrc));
+                    NXT_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
+                                             nxt::TextureUsageBit::TransferDst));
                 } break;
 
                 case Command::CopyTextureToBuffer: {
                     CopyTextureToBufferCmd* copy = mIterator.NextCommand<CopyTextureToBufferCmd>();
 
                     uint32_t bufferCopySize = 0;
-                    if (!ValidateRowPitch(this, copy->source, copy->rowPitch) ||
-                        !ComputeTextureCopyBufferSize(this, copy->source, copy->rowPitch,
-                                                      &bufferCopySize) ||
-                        !ValidateCopyLocationFitsInTexture(this, copy->source) ||
-                        !ValidateCopySizeFitsInBuffer(this, copy->destination, bufferCopySize) ||
-                        !ValidateTexelBufferOffset(this, copy->source.texture.Get(),
-                                                   copy->destination) ||
-                        !ValidateCanUseAs(this, copy->source.texture.Get(),
-                                          nxt::TextureUsageBit::TransferSrc) ||
-                        !ValidateCanUseAs(this, copy->destination.buffer.Get(),
-                                          nxt::BufferUsageBit::TransferDst)) {
-                        return false;
-                    }
+                    NXT_TRY(ValidateRowPitch(copy->source, copy->rowPitch));
+                    NXT_TRY(ComputeTextureCopyBufferSize(copy->source, copy->rowPitch,
+                                                         &bufferCopySize));
+
+                    NXT_TRY(ValidateCopyLocationFitsInTexture(copy->source));
+                    NXT_TRY(ValidateCopySizeFitsInBuffer(copy->destination, bufferCopySize));
+                    NXT_TRY(
+                        ValidateTexelBufferOffset(copy->source.texture.Get(), copy->destination));
+
+                    NXT_TRY(ValidateCanUseAs(copy->source.texture.Get(),
+                                             nxt::TextureUsageBit::TransferSrc));
+                    NXT_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
+                                             nxt::BufferUsageBit::TransferDst));
                 } break;
 
                 default:
-                    HandleError("Command disallowed outside of a pass");
-                    return false;
+                    NXT_RETURN_ERROR("Command disallowed outside of a pass");
             }
         }
 
-        return true;
+        return {};
     }
 
-    bool CommandBufferBuilder::ValidateComputePass() {
+    MaybeError CommandBufferBuilder::ValidateComputePass() {
         PassResourceUsageTracker usageTracker;
 
         Command type;
@@ -422,28 +399,22 @@ namespace backend {
                 case Command::EndComputePass: {
                     mIterator.NextCommand<EndComputePassCmd>();
 
-                    if (!usageTracker.AreUsagesValid(PassType::Compute)) {
-                        return false;
-                    }
+                    NXT_TRY(usageTracker.ValidateUsages(PassType::Compute));
                     mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
 
                     mState->EndPass();
-                    return true;
+                    return {};
                 } break;
 
                 case Command::Dispatch: {
                     mIterator.NextCommand<DispatchCmd>();
-                    if (!mState->ValidateCanDispatch()) {
-                        return false;
-                    }
+                    NXT_TRY(mState->ValidateCanDispatch());
                 } break;
 
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = mIterator.NextCommand<SetComputePipelineCmd>();
                     ComputePipelineBase* pipeline = cmd->pipeline.Get();
-                    if (!mState->SetComputePipeline(pipeline)) {
-                        return false;
-                    }
+                    mState->SetComputePipeline(pipeline);
                 } break;
 
                 case Command::SetPushConstants: {
@@ -453,9 +424,8 @@ namespace backend {
                     // recorded because it impacts the size of an allocation in the
                     // CommandAllocator.
                     if (cmd->stages & ~nxt::ShaderStageBit::Compute) {
-                        HandleError(
+                        NXT_RETURN_ERROR(
                             "SetPushConstants stage must be compute or 0 in compute passes");
-                        return false;
                     }
                 } break;
 
@@ -467,16 +437,14 @@ namespace backend {
                 } break;
 
                 default:
-                    HandleError("Command disallowed inside a compute pass");
-                    return false;
+                    NXT_RETURN_ERROR("Command disallowed inside a compute pass");
             }
         }
 
-        HandleError("Unfinished compute pass");
-        return false;
+        NXT_RETURN_ERROR("Unfinished compute pass");
     }
 
-    bool CommandBufferBuilder::ValidateRenderPass(RenderPassDescriptorBase* renderPass) {
+    MaybeError CommandBufferBuilder::ValidateRenderPass(RenderPassDescriptorBase* renderPass) {
         PassResourceUsageTracker usageTracker;
 
         // Track usage of the render pass attachments
@@ -496,27 +464,21 @@ namespace backend {
                 case Command::EndRenderPass: {
                     mIterator.NextCommand<EndRenderPassCmd>();
 
-                    if (!usageTracker.AreUsagesValid(PassType::Render)) {
-                        return false;
-                    }
+                    NXT_TRY(usageTracker.ValidateUsages(PassType::Render));
                     mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
 
                     mState->EndPass();
-                    return true;
+                    return {};
                 } break;
 
                 case Command::DrawArrays: {
                     mIterator.NextCommand<DrawArraysCmd>();
-                    if (!mState->ValidateCanDrawArrays()) {
-                        return false;
-                    }
+                    NXT_TRY(mState->ValidateCanDrawArrays());
                 } break;
 
                 case Command::DrawElements: {
                     mIterator.NextCommand<DrawElementsCmd>();
-                    if (!mState->ValidateCanDrawElements()) {
-                        return false;
-                    }
+                    NXT_TRY(mState->ValidateCanDrawElements());
                 } break;
 
                 case Command::SetRenderPipeline: {
@@ -524,13 +486,10 @@ namespace backend {
                     RenderPipelineBase* pipeline = cmd->pipeline.Get();
 
                     if (!pipeline->IsCompatibleWith(renderPass)) {
-                        HandleError("Pipeline is incompatible with this render pass");
-                        return false;
+                        NXT_RETURN_ERROR("Pipeline is incompatible with this render pass");
                     }
 
-                    if (!mState->SetRenderPipeline(pipeline)) {
-                        return false;
-                    }
+                    mState->SetRenderPipeline(pipeline);
                 } break;
 
                 case Command::SetPushConstants: {
@@ -541,10 +500,9 @@ namespace backend {
                     // CommandAllocator.
                     if (cmd->stages &
                         ~(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
-                        HandleError(
+                        NXT_RETURN_ERROR(
                             "SetPushConstants stage must be a subset of (vertex|fragment) in "
                             "render passes");
-                        return false;
                     }
                 } break;
 
@@ -571,9 +529,7 @@ namespace backend {
                     SetIndexBufferCmd* cmd = mIterator.NextCommand<SetIndexBufferCmd>();
 
                     usageTracker.BufferUsedAs(cmd->buffer.Get(), nxt::BufferUsageBit::Index);
-                    if (!mState->SetIndexBuffer()) {
-                        return false;
-                    }
+                    NXT_TRY(mState->SetIndexBuffer());
                 } break;
 
                 case Command::SetVertexBuffers: {
@@ -583,18 +539,16 @@ namespace backend {
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
                         usageTracker.BufferUsedAs(buffers[i].Get(), nxt::BufferUsageBit::Vertex);
-                        mState->SetVertexBuffer(cmd->startSlot + i);
+                        NXT_TRY(mState->SetVertexBuffer(cmd->startSlot + i));
                     }
                 } break;
 
                 default:
-                    HandleError("Command disallowed inside a render pass");
-                    return false;
+                    NXT_RETURN_ERROR("Command disallowed inside a render pass");
             }
         }
 
-        HandleError("Unfinished render pass");
-        return false;
+        NXT_RETURN_ERROR("Unfinished render pass");
     }
 
     // Implementation of the API's command recording methods

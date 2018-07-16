@@ -123,11 +123,24 @@ namespace {{namespace}} {
                     //* can be skipped in the NonValidatingEntryPoints.
                     {% if suffix in methodsWithExtraValidation %}
                         if (valid) {
-                            valid = self->Validate{{method.name.CamelCase()}}(
+                            MaybeError error = self->Validate{{method.name.CamelCase()}}(
                                 {%- for arg in method.arguments -%}
                                     {% if not loop.first %}, {% endif %}{{as_varName(arg.name)}}
                                 {%- endfor -%}
                             );
+                            //* Builders want to handle error themselves, unpack the error and make
+                            //* the builder handle it.
+                            {% if type.is_builder %}
+                                if (error.IsError()) {
+                                    ErrorData* errorData = error.AcquireError();
+                                    self->HandleError(errorData->GetMessage().c_str());
+                                    delete errorData;
+                                    valid = false;
+                                }
+                            {% else %}
+                                //* Non-builder errors are handled by the device
+                                valid = !self->GetDevice()->ConsumedError(std::move(error));
+                            {% endif %}
                         }
                     {% endif %}
 

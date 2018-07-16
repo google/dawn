@@ -19,6 +19,7 @@
 
 #include "backend/Builder.h"
 #include "backend/CommandAllocator.h"
+#include "backend/Error.h"
 #include "backend/PassResourceUsage.h"
 #include "backend/RefCounted.h"
 
@@ -54,7 +55,7 @@ namespace backend {
         CommandBufferBuilder(DeviceBase* device);
         ~CommandBufferBuilder();
 
-        bool ValidateGetResult();
+        MaybeError ValidateGetResult();
 
         CommandIterator AcquireCommands();
         std::vector<PassResourceUsage> AcquirePassResourceUsage();
@@ -134,8 +135,8 @@ namespace backend {
         CommandBufferBase* GetResultImpl() override;
         void MoveToIterator();
 
-        bool ValidateComputePass();
-        bool ValidateRenderPass(RenderPassDescriptorBase* renderPass);
+        MaybeError ValidateComputePass();
+        MaybeError ValidateRenderPass(RenderPassDescriptorBase* renderPass);
 
         std::unique_ptr<CommandBufferStateTracker> mState;
         CommandAllocator mAllocator;

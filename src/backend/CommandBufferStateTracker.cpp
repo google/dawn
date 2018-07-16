@@ -29,54 +29,47 @@
 
 namespace backend {
 
-    CommandBufferStateTracker::CommandBufferStateTracker(CommandBufferBuilder* mBuilder)
-        : mBuilder(mBuilder) {
-    }
-
-    bool CommandBufferStateTracker::ValidateCanDispatch() {
+    MaybeError CommandBufferStateTracker::ValidateCanDispatch() {
         constexpr ValidationAspects requiredAspects =
             1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
-            return true;
+            return {};
         }
 
         if (!mAspects[VALIDATION_ASPECT_PIPELINE]) {
-            mBuilder->HandleError("No active compute pipeline");
-            return false;
+            NXT_RETURN_ERROR("No active compute pipeline");
         }
         // Compute the lazily computed mAspects
         if (!RecomputeHaveAspectBindGroups()) {
-            mBuilder->HandleError("Bind group state not valid");
-            return false;
+            NXT_RETURN_ERROR("Bind group state not valid");
         }
-        return true;
+        return {};
     }
 
-    bool CommandBufferStateTracker::ValidateCanDrawArrays() {
+    MaybeError CommandBufferStateTracker::ValidateCanDrawArrays() {
         constexpr ValidationAspects requiredAspects = 1 << VALIDATION_ASPECT_PIPELINE |
                                                       1 << VALIDATION_ASPECT_BIND_GROUPS |
                                                       1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
-            return true;
+            return {};
         }
 
         return RevalidateCanDraw();
     }
 
-    bool CommandBufferStateTracker::ValidateCanDrawElements() {
+    MaybeError CommandBufferStateTracker::ValidateCanDrawElements() {
         constexpr ValidationAspects requiredAspects =
             1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
             1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
         if ((requiredAspects & ~mAspects).none()) {
             // Fast return-true path if everything is good
-            return true;
+            return {};
         }
 
         if (!mAspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-            mBuilder->HandleError("Cannot DrawElements without index buffer set");
-            return false;
+            NXT_RETURN_ERROR("Cannot DrawElements without index buffer set");
         }
         return RevalidateCanDraw();
     }
@@ -87,15 +80,13 @@ namespace backend {
         mBindgroups.fill(nullptr);
     }
 
-    bool CommandBufferStateTracker::SetComputePipeline(ComputePipelineBase* pipeline) {
+    void CommandBufferStateTracker::SetComputePipeline(ComputePipelineBase* pipeline) {
         SetPipelineCommon(pipeline);
-        return true;
     }
 
-    bool CommandBufferStateTracker::SetRenderPipeline(RenderPipelineBase* pipeline) {
+    void CommandBufferStateTracker::SetRenderPipeline(RenderPipelineBase* pipeline) {
         mLastRenderPipeline = pipeline;
         SetPipelineCommon(pipeline);
-        return true;
     }
 
     void CommandBufferStateTracker::SetBindGroup(uint32_t index, BindGroupBase* bindgroup) {
@@ -103,24 +94,22 @@ namespace backend {
         mBindgroups[index] = bindgroup;
     }
 
-    bool CommandBufferStateTracker::SetIndexBuffer() {
+    MaybeError CommandBufferStateTracker::SetIndexBuffer() {
         if (!HavePipeline()) {
-            mBuilder->HandleError("Can't set the index buffer without a pipeline");
-            return false;
+            NXT_RETURN_ERROR("Can't set the index buffer without a pipeline");
         }
 
         mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
-        return true;
+        return {};
     }
 
-    bool CommandBufferStateTracker::SetVertexBuffer(uint32_t index) {
+    MaybeError CommandBufferStateTracker::SetVertexBuffer(uint32_t index) {
         if (!HavePipeline()) {
-            mBuilder->HandleError("Can't set vertex buffers without a pipeline");
-            return false;
+            NXT_RETURN_ERROR("Can't set vertex buffers without a pipeline");
         }
 
         mInputsSet.set(index);
-        return true;
+        return {};
     }
 
     bool CommandBufferStateTracker::RecomputeHaveAspectBindGroups() {
@@ -161,21 +150,18 @@ namespace backend {
         return mAspects[VALIDATION_ASPECT_PIPELINE];
     }
 
-    bool CommandBufferStateTracker::RevalidateCanDraw() {
+    MaybeError CommandBufferStateTracker::RevalidateCanDraw() {
         if (!mAspects[VALIDATION_ASPECT_PIPELINE]) {
-            mBuilder->HandleError("No active render pipeline");
-            return false;
+            NXT_RETURN_ERROR("No active render pipeline");
         }
         // Compute the lazily computed mAspects
         if (!RecomputeHaveAspectBindGroups()) {
-            mBuilder->HandleError("Bind group state not valid");
-            return false;
+            NXT_RETURN_ERROR("Bind group state not valid");
         }
         if (!RecomputeHaveAspectVertexBuffers()) {
-            mBuilder->HandleError("Some vertex buffers are not set");
-            return false;
+            NXT_RETURN_ERROR("Some vertex buffers are not set");
         }
-        return true;
+        return {};
     }
 
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
