@@ -93,25 +93,20 @@ namespace backend {
         mCaches->bindGroupLayouts.erase(obj);
     }
 
+    // Object creation API methods
+
     BindGroupBuilder* DeviceBase::CreateBindGroupBuilder() {
         return new BindGroupBuilder(this);
     }
     BindGroupLayoutBase* DeviceBase::CreateBindGroupLayout(
         const nxt::BindGroupLayoutDescriptor* descriptor) {
-        MaybeError validation = ValidateBindGroupLayoutDescriptor(this, descriptor);
-        if (validation.IsError()) {
-            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
-            delete validation.AcquireError();
+        BindGroupLayoutBase* result = nullptr;
+
+        if (ConsumedError(CreateBindGroupLayoutInternal(&result, descriptor))) {
             return nullptr;
         }
 
-        auto maybeBindGroupLayout = GetOrCreateBindGroupLayout(descriptor);
-        if (maybeBindGroupLayout.IsError()) {
-            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
-            delete maybeBindGroupLayout.AcquireError();
-            return nullptr;
-        }
-        return maybeBindGroupLayout.AcquireSuccess();
+        return result;
     }
     BlendStateBuilder* DeviceBase::CreateBlendStateBuilder() {
         return new BlendStateBuilder(this);
@@ -133,30 +128,22 @@ namespace backend {
     }
     PipelineLayoutBase* DeviceBase::CreatePipelineLayout(
         const nxt::PipelineLayoutDescriptor* descriptor) {
-        MaybeError validation = ValidatePipelineLayoutDescriptor(this, descriptor);
-        if (validation.IsError()) {
-            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
-            delete validation.AcquireError();
+        PipelineLayoutBase* result = nullptr;
+
+        if (ConsumedError(CreatePipelineLayoutInternal(&result, descriptor))) {
             return nullptr;
         }
 
-        ResultOrError<PipelineLayoutBase*> maybePipelineLayout =
-            CreatePipelineLayoutImpl(descriptor);
-        if (maybePipelineLayout.IsError()) {
-            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
-            delete maybePipelineLayout.AcquireError();
-            return nullptr;
-        }
-        return maybePipelineLayout.AcquireSuccess();
+        return result;
     }
     QueueBase* DeviceBase::CreateQueue() {
-        ResultOrError<QueueBase*> maybeQueue = CreateQueueImpl();
-        if (maybeQueue.IsError()) {
-            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
-            delete maybeQueue.AcquireError();
+        QueueBase* result = nullptr;
+
+        if (ConsumedError(CreateQueueInternal(&result))) {
             return nullptr;
         }
-        return maybeQueue.AcquireSuccess();
+
+        return result;
     }
     RenderPassDescriptorBuilder* DeviceBase::CreateRenderPassDescriptorBuilder() {
         return new RenderPassDescriptorBuilder(this);
@@ -165,20 +152,13 @@ namespace backend {
         return new RenderPipelineBuilder(this);
     }
     SamplerBase* DeviceBase::CreateSampler(const nxt::SamplerDescriptor* descriptor) {
-        MaybeError validation = ValidateSamplerDescriptor(this, descriptor);
-        if (validation.IsError()) {
-            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
-            delete validation.AcquireError();
+        SamplerBase* result = nullptr;
+
+        if (ConsumedError(CreateSamplerInternal(&result, descriptor))) {
             return nullptr;
         }
 
-        ResultOrError<SamplerBase*> maybeSampler = CreateSamplerImpl(descriptor);
-        if (maybeSampler.IsError()) {
-            // TODO(cwallez@chromium.org): Implement the WebGPU error handling mechanism.
-            delete maybeSampler.AcquireError();
-            return nullptr;
-        }
-        return maybeSampler.AcquireSuccess();
+        return result;
     }
     ShaderModuleBuilder* DeviceBase::CreateShaderModuleBuilder() {
         return new ShaderModuleBuilder(this);
@@ -189,6 +169,8 @@ namespace backend {
     TextureBuilder* DeviceBase::CreateTextureBuilder() {
         return new TextureBuilder(this);
     }
+
+    // Other Device API methods
 
     void DeviceBase::Tick() {
         TickImpl();
@@ -205,6 +187,44 @@ namespace backend {
         if (mRefCount == 0) {
             delete this;
         }
+    }
+
+    // Implementation details of object creation
+
+    MaybeError DeviceBase::CreateBindGroupLayoutInternal(
+        BindGroupLayoutBase** result,
+        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        NXT_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
+        NXT_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
+        return {};
+    }
+
+    MaybeError DeviceBase::CreatePipelineLayoutInternal(
+        PipelineLayoutBase** result,
+        const nxt::PipelineLayoutDescriptor* descriptor) {
+        NXT_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
+        NXT_TRY_ASSIGN(*result, CreatePipelineLayoutImpl(descriptor));
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateQueueInternal(QueueBase** result) {
+        NXT_TRY_ASSIGN(*result, CreateQueueImpl());
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateSamplerInternal(SamplerBase** result,
+                                                 const nxt::SamplerDescriptor* descriptor) {
+        NXT_TRY(ValidateSamplerDescriptor(this, descriptor));
+        NXT_TRY_ASSIGN(*result, CreateSamplerImpl(descriptor));
+        return {};
+    }
+
+    // Other implementation details
+
+    void DeviceBase::ConsumeError(ErrorData* error) {
+        ASSERT(error != nullptr);
+        HandleError(error->GetMessage().c_str());
+        delete error;
     }
 
 }  // namespace backend

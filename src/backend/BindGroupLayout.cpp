@@ -88,7 +88,7 @@ namespace backend {
     }
 
     BindGroupLayoutBase::~BindGroupLayoutBase() {
-        // Do not register the actual cached object if we are a blueprint
+        // Do not uncache the actual cached object if we are a blueprint
         if (!mIsBlueprint) {
             mDevice->UncacheBindGroupLayout(this);
         }
