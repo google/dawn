@@ -91,7 +91,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
 }
 
 // Test that a trivial compute-shader memcpy implementation works.
-TEST_P(ComputeCopyStorageBufferTests, BasicTest) {
+TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
     BasicTest(R"(
         #version 450
         #define kInstances 4
@@ -105,7 +105,9 @@ TEST_P(ComputeCopyStorageBufferTests, BasicTest) {
 }
 
 // Test that a slightly-less-trivial compute-shader memcpy implementation works.
-TEST_P(ComputeCopyStorageBufferTests, StructTest) {
+//
+// TODO(kainino@chromium.org): Fails on D3D12 backend. Probably due to a limitation in SPIRV-Cross?
+TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
     BasicTest(R"(
         #version 450
         #define kInstances 4
@@ -121,10 +123,25 @@ TEST_P(ComputeCopyStorageBufferTests, StructTest) {
         })");
 }
 
-// Test with a sized array SSBO.
-TEST_P(ComputeCopyStorageBufferTests, DISABLED_SizedArray) {
-    // TODO(kainino@chromium.org): Fails on OpenGL (only copies one instance, not 4).
-    // TODO(kainino@chromium.org): Fails on Vulkan (program hangs).
+// Test that a trivial compute-shader memcpy implementation works.
+TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
+    BasicTest(R"(
+        #version 450
+        #define kInstances 4
+        layout(std140, set = 0, binding = 0) buffer Src { uvec4 s[]; } src;
+        layout(std140, set = 0, binding = 1) buffer Dst { uvec4 s[]; } dst;
+        void main() {
+            uint index = gl_GlobalInvocationID.x;
+            if (index >= kInstances) { return; }
+            dst.s[index] = src.s[index];
+        })");
+}
+
+// Test binding a sized array of SSBO descriptors.
+//
+// This is disabled because WebGPU doesn't currently have binding arrays (equivalent to
+// VkDescriptorSetLayoutBinding::descriptorCount). https://github.com/gpuweb/gpuweb/pull/61
+TEST_P(ComputeCopyStorageBufferTests, DISABLED_SizedDescriptorArray) {
     BasicTest(R"(
         #version 450
         #define kInstances 4
@@ -140,12 +157,15 @@ TEST_P(ComputeCopyStorageBufferTests, DISABLED_SizedArray) {
         })");
 }
 
-// Test with an unsized array SSBO.
-TEST_P(ComputeCopyStorageBufferTests, DISABLED_UnsizedArray) {
-    // TODO(kainino@chromium.org): On OpenGL, compilation fails but the test passes. Why?
-    // TODO(kainino@chromium.org): On Metal, compilation fails and test crashes.
+// Test binding an unsized array of SSBO descriptors.
+//
+// TODO(kainino@chromium.org): This test may be somewhat wrong. I'm not sure whether this is
+// supposed to be possible on the various native APIs.
+// Linking on OpenGL fails with "OpenGL requires constant indexes for unsized array access(dst)".
+TEST_P(ComputeCopyStorageBufferTests, DISABLED_UnsizedDescriptorArray) {
     BasicTest(R"(
         #version 450
+        #extension GL_EXT_nonuniform_qualifier : require
         #define kInstances 4
         struct S {
             uvec2 a, b;  // kUintsPerInstance = 4
