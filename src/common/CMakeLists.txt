@@ -30,6 +30,7 @@ list(APPEND COMMON_SOURCES
     ${COMMON_DIR}/SerialQueue.h
     ${COMMON_DIR}/SwapChainUtils.h
     ${COMMON_DIR}/vulkan_platform.h
+    ${COMMON_DIR}/windows_with_undefs.h
 )
 
 add_library(nxt_common STATIC ${COMMON_SOURCES})

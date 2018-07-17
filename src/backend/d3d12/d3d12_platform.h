@@ -25,4 +25,10 @@
 
 using Microsoft::WRL::ComPtr;
 
+// Remove windows.h macros after d3d12's include of windows.h
+#include "common/Platform.h"
+#if defined(NXT_PLATFORM_WINDOWS)
+#    include "common/windows_with_undefs.h"
+#endif
+
 #endif  // BACKEND_D3D12_D3D12PLATFORM_H_

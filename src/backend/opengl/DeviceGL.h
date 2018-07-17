@@ -19,8 +19,14 @@
 
 #include "backend/Device.h"
 #include "backend/opengl/Forward.h"
+#include "common/Platform.h"
 
 #include "glad/glad.h"
+
+// Remove windows.h macros after glad's include of windows.h
+#if defined(NXT_PLATFORM_WINDOWS)
+#    include "common/windows_with_undefs.h"
+#endif
 
 namespace backend { namespace opengl {
 

@@ -17,7 +17,7 @@
 #include "common/Platform.h"
 
 #if NXT_PLATFORM_WINDOWS
-#    include <windows.h>
+#    include "common/windows_with_undefs.h"
 #elif NXT_PLATFORM_POSIX
 #    include <dlfcn.h>
 #else

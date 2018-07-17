@@ -87,4 +87,10 @@ class VkNonDispatchableHandle {
 #    undef VK_NULL_HANDLE
 #    define VK_NULL_HANDLE nullptr
 
+// Remove windows.h macros after vulkan_platform's include of windows.h
+#include "common/Platform.h"
+#if defined(NXT_PLATFORM_WINDOWS)
+#    include "common/windows_with_undefs.h"
+#endif
+
 #endif  // COMMON_VULKANPLATFORM_H_
