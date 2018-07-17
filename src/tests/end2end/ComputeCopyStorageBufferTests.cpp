@@ -105,9 +105,13 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
 }
 
 // Test that a slightly-less-trivial compute-shader memcpy implementation works.
-//
-// TODO(kainino@chromium.org): Fails on D3D12 backend. Probably due to a limitation in SPIRV-Cross?
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
+    if (IsD3D12()) {
+        // TODO(kainino@chromium.org): Fails on D3D12. Probably due to a limitation in SPIRV-Cross?
+        std::cout << "Test skipped on D3D12" << std::endl;
+        return;
+    }
+
     BasicTest(R"(
         #version 450
         #define kInstances 4
