@@ -64,7 +64,6 @@ namespace gl {
 }
 
 struct MaterialInfo {
-    nxt::Buffer uniformBuffer;
     nxt::RenderPipeline pipeline;
     nxt::BindGroup bindGroup0;
     std::map<uint32_t, std::string> slotSemantics;
@@ -179,7 +178,7 @@ namespace {
         auto oVSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
             #version 450
 
-            layout(set = 0, binding = 0) uniform u_transform_block {
+            layout(push_constant) uniform u_transform_block {
                 mat4 modelViewProj;
                 mat4 modelInvTr;
             } u_transform;
@@ -273,10 +272,9 @@ namespace {
         constexpr nxt::ShaderStageBit kNoStages{};
         nxt::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                        {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
-                        {1, hasTexture ? nxt::ShaderStageBit::Fragment : kNoStages,
+                        {0, hasTexture ? nxt::ShaderStageBit::Fragment : kNoStages,
                          nxt::BindingType::Sampler},
-                        {2, hasTexture ? nxt::ShaderStageBit::Fragment : kNoStages,
+                        {1, hasTexture ? nxt::ShaderStageBit::Fragment : kNoStages,
                          nxt::BindingType::SampledTexture},
                     });
 
@@ -297,28 +295,17 @@ namespace {
             .SetDepthStencilState(depthStencilState)
             .GetResult();
 
-        auto uniformBuffer = device.CreateBufferBuilder()
-            .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Uniform)
-            .SetSize(sizeof(u_transform_block))
-            .GetResult();
-
-        auto uniformView = uniformBuffer.CreateBufferViewBuilder()
-            .SetExtent(0, sizeof(u_transform_block))
-            .GetResult();
-
         auto bindGroupBuilder = device.CreateBindGroupBuilder();
         bindGroupBuilder.SetLayout(bindGroupLayout)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
-            .SetBufferViews(0, 1, &uniformView);
+            .SetUsage(nxt::BindGroupUsage::Frozen);
         if (hasTexture) {
             const auto& textureView = textures[iTextureID];
             const auto& iSamplerID = scene.textures[iTextureID].sampler;
-            bindGroupBuilder.SetSamplers(1, 1, &samplers[iSamplerID]);
-            bindGroupBuilder.SetTextureViews(2, 1, &textureView);
+            bindGroupBuilder.SetSamplers(0, 1, &samplers[iSamplerID]);
+            bindGroupBuilder.SetTextureViews(1, 1, &textureView);
         }
 
         MaterialInfo material = {
-            uniformBuffer.Get(),
             pipeline.Get(),
             bindGroupBuilder.GetResult(),
             std::map<uint32_t, std::string>(),
@@ -491,14 +478,11 @@ namespace {
                 }
             }
             const MaterialInfo& material = getMaterial(iPrim.material, strides[0], strides[1], strides[2]);
-            // TODO(cwallez@google.com): This is updating the uniform buffer with a device-level command
-            // but the draw is queue level command that is pipelined. This causes bad rendering for models
-            // that use the same part multiple time.
-            material.uniformBuffer.SetSubData(0,
-                    sizeof(u_transform_block),
-                    reinterpret_cast<const uint8_t*>(&transforms));
             cmd.SetRenderPipeline(material.pipeline);
             cmd.SetBindGroup(0, material.bindGroup0);
+            cmd.SetPushConstants(nxt::ShaderStageBit::Vertex,
+                    0, sizeof(u_transform_block) / sizeof(uint32_t),
+                    reinterpret_cast<const uint32_t*>(&transforms));
 
             uint32_t vertexCount = 0;
             for (const auto& s : slotSemantics) {
