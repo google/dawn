@@ -278,8 +278,7 @@ namespace backend {
 
     // CommandBufferBuilder
 
-    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device)
-        : Builder(device), mState(std::make_unique<CommandBufferStateTracker>()) {
+    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : Builder(device) {
     }
 
     CommandBufferBuilder::~CommandBufferBuilder() {
@@ -392,6 +391,7 @@ namespace backend {
 
     MaybeError CommandBufferBuilder::ValidateComputePass() {
         PassResourceUsageTracker usageTracker;
+        CommandBufferStateTracker persistentState;
 
         Command type;
         while (mIterator.NextCommandId(&type)) {
@@ -401,20 +401,18 @@ namespace backend {
 
                     DAWN_TRY(usageTracker.ValidateUsages(PassType::Compute));
                     mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
-
-                    mState->EndPass();
                     return {};
                 } break;
 
                 case Command::Dispatch: {
                     mIterator.NextCommand<DispatchCmd>();
-                    DAWN_TRY(mState->ValidateCanDispatch());
+                    DAWN_TRY(persistentState.ValidateCanDispatch());
                 } break;
 
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = mIterator.NextCommand<SetComputePipelineCmd>();
                     ComputePipelineBase* pipeline = cmd->pipeline.Get();
-                    mState->SetComputePipeline(pipeline);
+                    persistentState.SetComputePipeline(pipeline);
                 } break;
 
                 case Command::SetPushConstants: {
@@ -433,7 +431,7 @@ namespace backend {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
 
                     TrackBindGroupResourceUsage(cmd->group.Get(), &usageTracker);
-                    mState->SetBindGroup(cmd->index, cmd->group.Get());
+                    persistentState.SetBindGroup(cmd->index, cmd->group.Get());
                 } break;
 
                 default:
@@ -446,6 +444,7 @@ namespace backend {
 
     MaybeError CommandBufferBuilder::ValidateRenderPass(RenderPassDescriptorBase* renderPass) {
         PassResourceUsageTracker usageTracker;
+        CommandBufferStateTracker persistentState;
 
         // Track usage of the render pass attachments
         for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
@@ -466,19 +465,17 @@ namespace backend {
 
                     DAWN_TRY(usageTracker.ValidateUsages(PassType::Render));
                     mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
-
-                    mState->EndPass();
                     return {};
                 } break;
 
                 case Command::DrawArrays: {
                     mIterator.NextCommand<DrawArraysCmd>();
-                    DAWN_TRY(mState->ValidateCanDrawArrays());
+                    DAWN_TRY(persistentState.ValidateCanDrawArrays());
                 } break;
 
                 case Command::DrawElements: {
                     mIterator.NextCommand<DrawElementsCmd>();
-                    DAWN_TRY(mState->ValidateCanDrawElements());
+                    DAWN_TRY(persistentState.ValidateCanDrawElements());
                 } break;
 
                 case Command::SetRenderPipeline: {
@@ -489,7 +486,7 @@ namespace backend {
                         DAWN_RETURN_ERROR("Pipeline is incompatible with this render pass");
                     }
 
-                    mState->SetRenderPipeline(pipeline);
+                    persistentState.SetRenderPipeline(pipeline);
                 } break;
 
                 case Command::SetPushConstants: {
@@ -522,14 +519,14 @@ namespace backend {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
 
                     TrackBindGroupResourceUsage(cmd->group.Get(), &usageTracker);
-                    mState->SetBindGroup(cmd->index, cmd->group.Get());
+                    persistentState.SetBindGroup(cmd->index, cmd->group.Get());
                 } break;
 
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = mIterator.NextCommand<SetIndexBufferCmd>();
 
                     usageTracker.BufferUsedAs(cmd->buffer.Get(), dawn::BufferUsageBit::Index);
-                    DAWN_TRY(mState->SetIndexBuffer());
+                    persistentState.SetIndexBuffer();
                 } break;
 
                 case Command::SetVertexBuffers: {
@@ -539,8 +536,8 @@ namespace backend {
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
                         usageTracker.BufferUsedAs(buffers[i].Get(), dawn::BufferUsageBit::Vertex);
-                        DAWN_TRY(mState->SetVertexBuffer(cmd->startSlot + i));
                     }
+                    persistentState.SetVertexBuffer(cmd->startSlot, cmd->count);
                 } break;
 
                 default:

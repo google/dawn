@@ -15,69 +15,124 @@
 #include "backend/CommandBufferStateTracker.h"
 
 #include "backend/BindGroup.h"
-#include "backend/BindGroupLayout.h"
-#include "backend/Buffer.h"
 #include "backend/ComputePipeline.h"
 #include "backend/Forward.h"
 #include "backend/InputState.h"
 #include "backend/PipelineLayout.h"
-#include "backend/RenderPassDescriptor.h"
 #include "backend/RenderPipeline.h"
-#include "backend/Texture.h"
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
 
 namespace backend {
 
-    MaybeError CommandBufferStateTracker::ValidateCanDispatch() {
-        constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS;
-        if ((requiredAspects & ~mAspects).none()) {
-            // Fast return-true path if everything is good
-            return {};
-        }
+    enum ValidationAspect {
+        VALIDATION_ASPECT_PIPELINE,
+        VALIDATION_ASPECT_BIND_GROUPS,
+        VALIDATION_ASPECT_VERTEX_BUFFERS,
+        VALIDATION_ASPECT_INDEX_BUFFER,
 
-        if (!mAspects[VALIDATION_ASPECT_PIPELINE]) {
-            DAWN_RETURN_ERROR("No active compute pipeline");
-        }
-        // Compute the lazily computed mAspects
-        if (!RecomputeHaveAspectBindGroups()) {
-            DAWN_RETURN_ERROR("Bind group state not valid");
-        }
-        return {};
+        VALIDATION_ASPECT_COUNT
+    };
+    static_assert(VALIDATION_ASPECT_COUNT == CommandBufferStateTracker::kNumAspects, "");
+
+    static constexpr CommandBufferStateTracker::ValidationAspects kDispatchAspects =
+        1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS;
+
+    static constexpr CommandBufferStateTracker::ValidationAspects kDrawArraysAspects =
+        1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
+        1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
+
+    static constexpr CommandBufferStateTracker::ValidationAspects kDrawElementsAspects =
+        1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
+        1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
+
+    static constexpr CommandBufferStateTracker::ValidationAspects kLazyAspects =
+        1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
+
+    MaybeError CommandBufferStateTracker::ValidateCanDispatch() {
+        return ValidateOperation(kDispatchAspects);
     }
 
     MaybeError CommandBufferStateTracker::ValidateCanDrawArrays() {
-        constexpr ValidationAspects requiredAspects = 1 << VALIDATION_ASPECT_PIPELINE |
-                                                      1 << VALIDATION_ASPECT_BIND_GROUPS |
-                                                      1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
-        if ((requiredAspects & ~mAspects).none()) {
-            // Fast return-true path if everything is good
-            return {};
-        }
-
-        return RevalidateCanDraw();
+        return ValidateOperation(kDrawArraysAspects);
     }
 
     MaybeError CommandBufferStateTracker::ValidateCanDrawElements() {
-        constexpr ValidationAspects requiredAspects =
-            1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
-            1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
-        if ((requiredAspects & ~mAspects).none()) {
-            // Fast return-true path if everything is good
+        return ValidateOperation(kDrawElementsAspects);
+    }
+
+    MaybeError CommandBufferStateTracker::ValidateOperation(ValidationAspects requiredAspects) {
+        // Fast return-true path if everything is good
+        ValidationAspects missingAspects = requiredAspects & ~mAspects;
+        if (missingAspects.none()) {
             return {};
         }
 
-        if (!mAspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-            DAWN_RETURN_ERROR("Cannot DrawElements without index buffer set");
+        // Generate an error immediately if a non-lazy aspect is missing as computing lazy aspects
+        // requires the pipeline to be set.
+        if ((missingAspects & ~kLazyAspects).any()) {
+            return GenerateAspectError(missingAspects);
         }
-        return RevalidateCanDraw();
+
+        RecomputeLazyAspects(missingAspects);
+
+        missingAspects = requiredAspects & ~mAspects;
+        if (missingAspects.any()) {
+            return GenerateAspectError(missingAspects);
+        }
+
+        return {};
     }
 
-    void CommandBufferStateTracker::EndPass() {
-        mInputsSet.reset();
-        mAspects = 0;
-        mBindgroups.fill(nullptr);
+    void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) {
+        ASSERT(mAspects[VALIDATION_ASPECT_PIPELINE]);
+        ASSERT((aspects & ~kLazyAspects).none());
+
+        if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
+            bool matches = true;
+
+            for (uint32_t i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+                if (mLastPipelineLayout->GetBindGroupLayout(i) != mBindgroups[i]->GetLayout()) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches) {
+                mAspects.set(VALIDATION_ASPECT_BIND_GROUPS);
+            }
+        }
+
+        if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
+            ASSERT(mLastRenderPipeline != nullptr);
+
+            auto requiredInputs = mLastRenderPipeline->GetInputState()->GetInputsSetMask();
+            if ((mInputsSet & requiredInputs) == requiredInputs) {
+                mAspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
+            }
+        }
+    }
+
+    MaybeError CommandBufferStateTracker::GenerateAspectError(ValidationAspects aspects) {
+        ASSERT(aspects.any());
+
+        if (aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
+            DAWN_RETURN_ERROR("Missing index buffer");
+        }
+
+        if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
+            DAWN_RETURN_ERROR("Missing vertex buffer");
+        }
+
+        if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
+            DAWN_RETURN_ERROR("Missing bind group");
+        }
+
+        if (aspects[VALIDATION_ASPECT_PIPELINE]) {
+            DAWN_RETURN_ERROR("Missing pipeline");
+        }
+
+        UNREACHABLE();
     }
 
     void CommandBufferStateTracker::SetComputePipeline(ComputePipelineBase* pipeline) {
@@ -90,96 +145,26 @@ namespace backend {
     }
 
     void CommandBufferStateTracker::SetBindGroup(uint32_t index, BindGroupBase* bindgroup) {
-        mBindgroupsSet.set(index);
         mBindgroups[index] = bindgroup;
     }
 
-    MaybeError CommandBufferStateTracker::SetIndexBuffer() {
-        if (!HavePipeline()) {
-            DAWN_RETURN_ERROR("Can't set the index buffer without a pipeline");
-        }
-
+    void CommandBufferStateTracker::SetIndexBuffer() {
         mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
-        return {};
     }
 
-    MaybeError CommandBufferStateTracker::SetVertexBuffer(uint32_t index) {
-        if (!HavePipeline()) {
-            DAWN_RETURN_ERROR("Can't set vertex buffers without a pipeline");
+    void CommandBufferStateTracker::SetVertexBuffer(uint32_t start, uint32_t count) {
+        for (uint32_t i = 0; i < count; ++i) {
+            mInputsSet.set(start + i);
         }
-
-        mInputsSet.set(index);
-        return {};
-    }
-
-    bool CommandBufferStateTracker::RecomputeHaveAspectBindGroups() {
-        if (mAspects[VALIDATION_ASPECT_BIND_GROUPS]) {
-            return true;
-        }
-        // Assumes we have a pipeline already
-        if (!mBindgroupsSet.all()) {
-            return false;
-        }
-        for (size_t i = 0; i < mBindgroups.size(); ++i) {
-            if (auto* bindgroup = mBindgroups[i]) {
-                // TODO(kainino@chromium.org): bind group compatibility
-                auto* pipelineBGL = mLastPipeline->GetLayout()->GetBindGroupLayout(i);
-                if (pipelineBGL && bindgroup->GetLayout() != pipelineBGL) {
-                    return false;
-                }
-            }
-        }
-        mAspects.set(VALIDATION_ASPECT_BIND_GROUPS);
-        return true;
-    }
-
-    bool CommandBufferStateTracker::RecomputeHaveAspectVertexBuffers() {
-        if (mAspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
-            return true;
-        }
-        // Assumes we have a pipeline already
-        auto requiredInputs = mLastRenderPipeline->GetInputState()->GetInputsSetMask();
-        if ((mInputsSet & requiredInputs) == requiredInputs) {
-            mAspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
-            return true;
-        }
-        return false;
-    }
-
-    bool CommandBufferStateTracker::HavePipeline() const {
-        return mAspects[VALIDATION_ASPECT_PIPELINE];
-    }
-
-    MaybeError CommandBufferStateTracker::RevalidateCanDraw() {
-        if (!mAspects[VALIDATION_ASPECT_PIPELINE]) {
-            DAWN_RETURN_ERROR("No active render pipeline");
-        }
-        // Compute the lazily computed mAspects
-        if (!RecomputeHaveAspectBindGroups()) {
-            DAWN_RETURN_ERROR("Bind group state not valid");
-        }
-        if (!RecomputeHaveAspectVertexBuffers()) {
-            DAWN_RETURN_ERROR("Some vertex buffers are not set");
-        }
-        return {};
     }
 
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
-        PipelineLayoutBase* layout = pipeline->GetLayout();
+        mLastPipelineLayout = pipeline->GetLayout();
 
         mAspects.set(VALIDATION_ASPECT_PIPELINE);
 
-        mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
-        mAspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
-        // Reset bindgroups but mark unused bindgroups as valid
-        mBindgroupsSet = ~layout->GetBindGroupLayoutsMask();
-
-        // Only bindgroups that were not the same layout in the last pipeline need to be set again.
-        if (mLastPipeline) {
-            mBindgroupsSet |= layout->InheritedGroupsMask(mLastPipeline->GetLayout());
-        }
-
-        mLastPipeline = pipeline;
+        // Reset lazy aspects so they get recomputed on the next operation.
+        mAspects &= ~kLazyAspects;
     }
 
 }  // namespace backend

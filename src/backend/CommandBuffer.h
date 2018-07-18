@@ -31,7 +31,6 @@ namespace backend {
 
     class BindGroupBase;
     class BufferBase;
-    class CommandBufferStateTracker;
     class FramebufferBase;
     class DeviceBase;
     class PipelineBase;
@@ -138,7 +137,6 @@ namespace backend {
         MaybeError ValidateComputePass();
         MaybeError ValidateRenderPass(RenderPassDescriptorBase* renderPass);
 
-        std::unique_ptr<CommandBufferStateTracker> mState;
         CommandAllocator mAllocator;
         CommandIterator mIterator;
         bool mWasMovedToIterator = false;

@@ -28,45 +28,33 @@ namespace backend {
     class CommandBufferStateTracker {
       public:
         // Non-state-modifying validation functions
-        MaybeError ValidateCanCopy() const;
         MaybeError ValidateCanDispatch();
         MaybeError ValidateCanDrawArrays();
         MaybeError ValidateCanDrawElements();
 
         // State-modifying methods
-        void EndPass();
         void SetComputePipeline(ComputePipelineBase* pipeline);
         void SetRenderPipeline(RenderPipelineBase* pipeline);
         void SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
-        MaybeError SetIndexBuffer();
-        MaybeError SetVertexBuffer(uint32_t index);
+        void SetIndexBuffer();
+        void SetVertexBuffer(uint32_t start, uint32_t count);
+
+        static constexpr size_t kNumAspects = 4;
+        using ValidationAspects = std::bitset<kNumAspects>;
 
       private:
-        enum ValidationAspect {
-            VALIDATION_ASPECT_PIPELINE,
-            VALIDATION_ASPECT_BIND_GROUPS,
-            VALIDATION_ASPECT_VERTEX_BUFFERS,
-            VALIDATION_ASPECT_INDEX_BUFFER,
-
-            VALIDATION_ASPECT_COUNT
-        };
-        using ValidationAspects = std::bitset<VALIDATION_ASPECT_COUNT>;
-
-        // Queries for lazily evaluated aspects
-        bool RecomputeHaveAspectBindGroups();
-        bool RecomputeHaveAspectVertexBuffers();
-
-        bool HavePipeline() const;
-        MaybeError RevalidateCanDraw();
+        MaybeError ValidateOperation(ValidationAspects requiredAspects);
+        void RecomputeLazyAspects(ValidationAspects aspects);
+        MaybeError GenerateAspectError(ValidationAspects aspects);
 
         void SetPipelineCommon(PipelineBase* pipeline);
 
         ValidationAspects mAspects;
 
-        std::bitset<kMaxBindGroups> mBindgroupsSet;
         std::array<BindGroupBase*, kMaxBindGroups> mBindgroups = {};
         std::bitset<kMaxVertexInputs> mInputsSet;
-        PipelineBase* mLastPipeline = nullptr;
+
+        PipelineLayoutBase* mLastPipelineLayout = nullptr;
         RenderPipelineBase* mLastRenderPipeline = nullptr;
     };
 
