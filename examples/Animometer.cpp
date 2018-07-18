@@ -21,11 +21,11 @@
 #include <cstdio>
 #include <vector>
 
-nxt::Device device;
-nxt::Queue queue;
-nxt::SwapChain swapchain;
-nxt::TextureView depthStencilView;
-nxt::RenderPipeline pipeline;
+dawn::Device device;
+dawn::Queue queue;
+dawn::SwapChain swapchain;
+dawn::TextureView depthStencilView;
+dawn::RenderPipeline pipeline;
 
 float RandomFloat(float min, float max) {
     float zeroOne = rand() / float(RAND_MAX);
@@ -49,9 +49,9 @@ void init() {
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
     swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                        nxt::TextureUsageBit::OutputAttachment, 640, 480);
+                        dawn::TextureUsageBit::OutputAttachment, 640, 480);
 
-    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
         #version 450
 
         layout(push_constant) uniform ConstantsBlock {
@@ -99,7 +99,7 @@ void init() {
         })"
     );
 
-    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         layout(location = 0) in vec4 v_color;
@@ -111,9 +111,9 @@ void init() {
 
     pipeline = device.CreateRenderPipelineBuilder()
         .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
-        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
+        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
         .GetResult();
 
     shaderData.resize(10000);
@@ -128,8 +128,8 @@ void init() {
 }
 
 void frame() {
-    nxt::Texture backbuffer;
-    nxt::RenderPassDescriptor renderPass;
+    dawn::Texture backbuffer;
+    dawn::RenderPassDescriptor renderPass;
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     static int f = 0;
@@ -137,16 +137,16 @@ void frame() {
 
     size_t i = 0;
 
-    nxt::CommandBuffer commands;
+    dawn::CommandBuffer commands;
     {
-        nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
             .BeginRenderPass(renderPass)
             .SetRenderPipeline(pipeline)
             .Clone();
 
         for (int k = 0; k < 10000; k++) {
             shaderData[i].time = f / 60.0f;
-            builder.SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 6, reinterpret_cast<uint32_t*>(&shaderData[i]))
+            builder.SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 6, reinterpret_cast<uint32_t*>(&shaderData[i]))
                    .DrawArrays(3, 1, 0, 0);
             i++;
         }

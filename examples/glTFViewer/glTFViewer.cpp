@@ -64,8 +64,8 @@ namespace gl {
 }
 
 struct MaterialInfo {
-    nxt::RenderPipeline pipeline;
-    nxt::BindGroup bindGroup0;
+    dawn::RenderPipeline pipeline;
+    dawn::BindGroup bindGroup0;
     std::map<uint32_t, std::string> slotSemantics;
 };
 
@@ -74,18 +74,18 @@ struct u_transform_block {
     glm::mat4 modelInvTr;
 };
 
-nxt::Device device;
-nxt::Queue queue;
-nxt::SwapChain swapchain;
-nxt::TextureView depthStencilView;
+dawn::Device device;
+dawn::Queue queue;
+dawn::SwapChain swapchain;
+dawn::TextureView depthStencilView;
 
-nxt::Buffer defaultBuffer;
-std::map<std::string, nxt::Buffer> buffers;
-std::map<std::string, nxt::CommandBuffer> commandBuffers;
+dawn::Buffer defaultBuffer;
+std::map<std::string, dawn::Buffer> buffers;
+std::map<std::string, dawn::CommandBuffer> commandBuffers;
 std::map<uint32_t, std::string> slotSemantics = {{0, "POSITION"}, {1, "NORMAL"}, {2, "TEXCOORD_0"}};
 
-std::map<std::string, nxt::Sampler> samplers;
-std::map<std::string, nxt::TextureView> textures;
+std::map<std::string, dawn::Sampler> samplers;
+std::map<std::string, dawn::TextureView> textures;
 
 tinygltf::Scene scene;
 glm::mat4 projection = glm::perspective(glm::radians(60.f), 640.f/480, 0.1f, 2000.f);
@@ -100,16 +100,16 @@ namespace {
         return "";
     }
 
-    bool techniqueParameterTypeToVertexFormat(int type, nxt::VertexFormat *format) {
+    bool techniqueParameterTypeToVertexFormat(int type, dawn::VertexFormat *format) {
         switch (type) {
             case gl::FloatVec2:
-                *format = nxt::VertexFormat::FloatR32G32;
+                *format = dawn::VertexFormat::FloatR32G32;
                 return true;
             case gl::FloatVec3:
-                *format = nxt::VertexFormat::FloatR32G32B32;
+                *format = dawn::VertexFormat::FloatR32G32B32;
                 return true;
             case gl::FloatVec4:
-                *format = nxt::VertexFormat::FloatR32G32B32A32;
+                *format = dawn::VertexFormat::FloatR32G32B32A32;
                 return true;
             default:
                 return false;
@@ -121,7 +121,7 @@ namespace {
 namespace {
     void initBuffers() {
         defaultBuffer = device.CreateBufferBuilder()
-            .SetAllowedUsage(nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Index)
+            .SetAllowedUsage(dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Index)
             .SetSize(256)
             .GetResult();
 
@@ -129,13 +129,13 @@ namespace {
             const auto& iBufferViewID = bv.first;
             const auto& iBufferView = bv.second;
 
-            nxt::BufferUsageBit usage = nxt::BufferUsageBit::None;
+            dawn::BufferUsageBit usage = dawn::BufferUsageBit::None;
             switch (iBufferView.target) {
                 case gl::ArrayBuffer:
-                    usage |= nxt::BufferUsageBit::Vertex;
+                    usage |= dawn::BufferUsageBit::Vertex;
                     break;
                 case gl::ElementArrayBuffer:
-                    usage |= nxt::BufferUsageBit::Index;
+                    usage |= dawn::BufferUsageBit::Index;
                     break;
                 case 0:
                     fprintf(stderr, "TODO: buffer view has no target; skipping\n");
@@ -175,7 +175,7 @@ namespace {
             }
         }
 
-        auto oVSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+        auto oVSModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
             #version 450
 
             layout(push_constant) uniform u_transform_block {
@@ -231,29 +231,29 @@ namespace {
                 fragcolor = vec4(vec3(diffamb), 1);
             })";
 
-        auto oFSModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, hasTexture ? oFSSourceTextured : oFSSourceUntextured);
+        auto oFSModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, hasTexture ? oFSSourceTextured : oFSSourceUntextured);
 
-        nxt::InputStateBuilder builder = device.CreateInputStateBuilder();
+        dawn::InputStateBuilder builder = device.CreateInputStateBuilder();
         std::bitset<3> slotsSet;
         for (const auto& a : iTechnique.attributes) {
             const auto iAttributeName = a.first;
             const auto iParameter = iTechnique.parameters.at(a.second);
-            nxt::VertexFormat format;
+            dawn::VertexFormat format;
             if (!techniqueParameterTypeToVertexFormat(iParameter.type, &format)) {
                 fprintf(stderr, "unsupported technique parameter type %d\n", iParameter.type);
                 continue;
             }
             if (iParameter.semantic == "POSITION") {
                 builder.SetAttribute(0, 0, format, 0);
-                builder.SetInput(0, static_cast<uint32_t>(stridePos), nxt::InputStepMode::Vertex);
+                builder.SetInput(0, static_cast<uint32_t>(stridePos), dawn::InputStepMode::Vertex);
                 slotsSet.set(0);
             } else if (iParameter.semantic == "NORMAL") {
                 builder.SetAttribute(1, 1, format, 0);
-                builder.SetInput(1, static_cast<uint32_t>(strideNor), nxt::InputStepMode::Vertex);
+                builder.SetInput(1, static_cast<uint32_t>(strideNor), dawn::InputStepMode::Vertex);
                 slotsSet.set(1);
             } else if (iParameter.semantic == "TEXCOORD_0") {
                 builder.SetAttribute(2, 2, format, 0);
-                builder.SetInput(2, static_cast<uint32_t>(strideTxc), nxt::InputStepMode::Vertex);
+                builder.SetInput(2, static_cast<uint32_t>(strideTxc), dawn::InputStepMode::Vertex);
                 slotsSet.set(2);
             } else {
                 fprintf(stderr, "unsupported technique attribute semantic %s\n", iParameter.semantic.c_str());
@@ -264,40 +264,40 @@ namespace {
             if (slotsSet[i]) {
                 continue;
             }
-            builder.SetAttribute(i, i, nxt::VertexFormat::FloatR32G32B32A32, 0);
-            builder.SetInput(i, 0, nxt::InputStepMode::Vertex);
+            builder.SetAttribute(i, i, dawn::VertexFormat::FloatR32G32B32A32, 0);
+            builder.SetInput(i, 0, dawn::InputStepMode::Vertex);
         }
         auto inputState = builder.GetResult();
 
-        constexpr nxt::ShaderStageBit kNoStages{};
-        nxt::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        constexpr dawn::ShaderStageBit kNoStages{};
+        dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                        {0, hasTexture ? nxt::ShaderStageBit::Fragment : kNoStages,
-                         nxt::BindingType::Sampler},
-                        {1, hasTexture ? nxt::ShaderStageBit::Fragment : kNoStages,
-                         nxt::BindingType::SampledTexture},
+                        {0, hasTexture ? dawn::ShaderStageBit::Fragment : kNoStages,
+                         dawn::BindingType::Sampler},
+                        {1, hasTexture ? dawn::ShaderStageBit::Fragment : kNoStages,
+                         dawn::BindingType::SampledTexture},
                     });
 
         auto depthStencilState = device.CreateDepthStencilStateBuilder()
-            .SetDepthCompareFunction(nxt::CompareFunction::Less)
+            .SetDepthCompareFunction(dawn::CompareFunction::Less)
             .SetDepthWriteEnabled(true)
             .GetResult();
 
         auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
         auto pipeline = device.CreateRenderPipelineBuilder()
             .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-            .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
+            .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
             .SetLayout(pipelineLayout)
-            .SetStage(nxt::ShaderStage::Vertex, oVSModule, "main")
-            .SetStage(nxt::ShaderStage::Fragment, oFSModule, "main")
-            .SetIndexFormat(nxt::IndexFormat::Uint16)
+            .SetStage(dawn::ShaderStage::Vertex, oVSModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, oFSModule, "main")
+            .SetIndexFormat(dawn::IndexFormat::Uint16)
             .SetInputState(inputState)
             .SetDepthStencilState(depthStencilState)
             .GetResult();
 
         auto bindGroupBuilder = device.CreateBindGroupBuilder();
         bindGroupBuilder.SetLayout(bindGroupLayout)
-            .SetUsage(nxt::BindGroupUsage::Frozen);
+            .SetUsage(dawn::BindGroupUsage::Frozen);
         if (hasTexture) {
             const auto& textureView = textures[iTextureID];
             const auto& iSamplerID = scene.textures[iTextureID].sampler;
@@ -319,15 +319,15 @@ namespace {
             const auto& iSamplerID = s.first;
             const auto& iSampler = s.second;
 
-            nxt::SamplerDescriptor desc = utils::GetDefaultSamplerDescriptor();
+            dawn::SamplerDescriptor desc = utils::GetDefaultSamplerDescriptor();
             // TODO: wrap modes
 
             switch (iSampler.magFilter) {
                 case gl::Nearest:
-                    desc.magFilter = nxt::FilterMode::Nearest;
+                    desc.magFilter = dawn::FilterMode::Nearest;
                     break;
                 case gl::Linear:
-                    desc.magFilter = nxt::FilterMode::Linear;
+                    desc.magFilter = dawn::FilterMode::Linear;
                     break;
                 default:
                     fprintf(stderr, "unsupported magFilter %d\n", iSampler.magFilter);
@@ -337,12 +337,12 @@ namespace {
                 case gl::Nearest:
                 case gl::NearestMipmapNearest:
                 case gl::NearestMipmapLinear:
-                    desc.minFilter = nxt::FilterMode::Nearest;
+                    desc.minFilter = dawn::FilterMode::Nearest;
                     break;
                 case gl::Linear:
                 case gl::LinearMipmapNearest:
                 case gl::LinearMipmapLinear:
-                    desc.minFilter = nxt::FilterMode::Linear;
+                    desc.minFilter = dawn::FilterMode::Linear;
                     break;
                 default:
                     fprintf(stderr, "unsupported minFilter %d\n", iSampler.magFilter);
@@ -351,11 +351,11 @@ namespace {
             switch (iSampler.minFilter) {
                 case gl::NearestMipmapNearest:
                 case gl::LinearMipmapNearest:
-                    desc.mipmapFilter = nxt::FilterMode::Nearest;
+                    desc.mipmapFilter = dawn::FilterMode::Nearest;
                     break;
                 case gl::NearestMipmapLinear:
                 case gl::LinearMipmapLinear:
-                    desc.mipmapFilter = nxt::FilterMode::Linear;
+                    desc.mipmapFilter = dawn::FilterMode::Linear;
                     break;
             }
 
@@ -369,10 +369,10 @@ namespace {
             const auto& iTexture = t.second;
             const auto& iImage = scene.images[iTexture.source];
 
-            nxt::TextureFormat format = nxt::TextureFormat::R8G8B8A8Unorm;
+            dawn::TextureFormat format = dawn::TextureFormat::R8G8B8A8Unorm;
             switch (iTexture.format) {
                 case gl::RGBA:
-                    format = nxt::TextureFormat::R8G8B8A8Unorm;
+                    format = dawn::TextureFormat::R8G8B8A8Unorm;
                     break;
                 default:
                     fprintf(stderr, "unsupported texture format %d\n", iTexture.format);
@@ -380,11 +380,11 @@ namespace {
             }
 
             auto oTexture = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
+                .SetDimension(dawn::TextureDimension::e2D)
                 .SetExtent(iImage.width, iImage.height, 1)
                 .SetFormat(format)
                 .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::Sampled)
+                .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled)
                 .GetResult();
                 // TODO: release this texture
 
@@ -426,7 +426,7 @@ namespace {
                 fprintf(stderr, "unsupported image.component %d\n", iImage.component);
             }
 
-            nxt::Buffer staging = utils::CreateBufferFromData(device, data, rowPitch * iImage.height, nxt::BufferUsageBit::TransferSrc);
+            dawn::Buffer staging = utils::CreateBufferFromData(device, data, rowPitch * iImage.height, dawn::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
                 .CopyBufferToTexture(staging, 0, rowPitch, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)
                 .GetResult();
@@ -442,7 +442,7 @@ namespace {
         queue = device.CreateQueue();
         swapchain = GetSwapChain(device);
         swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                            nxt::TextureUsageBit::OutputAttachment, 640, 480);
+                            dawn::TextureUsageBit::OutputAttachment, 640, 480);
 
         depthStencilView = CreateDefaultDepthStencilView(device);
 
@@ -454,7 +454,7 @@ namespace {
 
 // Drawing
 namespace {
-    void drawMesh(nxt::CommandBufferBuilder& cmd, const tinygltf::Mesh& iMesh, const glm::mat4& model) {
+    void drawMesh(dawn::CommandBufferBuilder& cmd, const tinygltf::Mesh& iMesh, const glm::mat4& model) {
         for (const auto& iPrim : iMesh.primitives) {
             if (iPrim.mode != gl::Triangles) {
                 fprintf(stderr, "unsupported primitive mode %d\n", iPrim.mode);
@@ -480,7 +480,7 @@ namespace {
             const MaterialInfo& material = getMaterial(iPrim.material, strides[0], strides[1], strides[2]);
             cmd.SetRenderPipeline(material.pipeline);
             cmd.SetBindGroup(0, material.bindGroup0);
-            cmd.SetPushConstants(nxt::ShaderStageBit::Vertex,
+            cmd.SetPushConstants(dawn::ShaderStageBit::Vertex,
                     0, sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));
 
@@ -525,7 +525,7 @@ namespace {
         }
     }
 
-    void drawNode(nxt::CommandBufferBuilder& cmd, const tinygltf::Node& node, const glm::mat4& parent = glm::mat4()) {
+    void drawNode(dawn::CommandBufferBuilder& cmd, const tinygltf::Node& node, const glm::mat4& parent = glm::mat4()) {
         glm::mat4 model;
         if (node.matrix.size() == 16) {
             model = glm::make_mat4(node.matrix.data());
@@ -554,12 +554,12 @@ namespace {
     }
 
     void frame() {
-        nxt::Texture backbuffer;
-        nxt::RenderPassDescriptor renderPass;
+        dawn::Texture backbuffer;
+        dawn::RenderPassDescriptor renderPass;
         GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
         const auto& defaultSceneNodes = scene.scenes.at(scene.defaultScene);
-        nxt::CommandBufferBuilder cmd = device.CreateCommandBufferBuilder()
+        dawn::CommandBufferBuilder cmd = device.CreateCommandBufferBuilder()
             .BeginRenderPass(renderPass)
             .Clone();
         for (const auto& n : defaultSceneNodes) {

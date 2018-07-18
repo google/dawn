@@ -27,7 +27,7 @@
 #include <cstring>
 #include <iostream>
 
-void PrintDeviceError(const char* message, nxt::CallbackUserdata) {
+void PrintDeviceError(const char* message, dawn::CallbackUserdata) {
     std::cout << "Device error: " << message << std::endl;
 }
 
@@ -60,26 +60,26 @@ static utils::BackendBinding* binding = nullptr;
 
 static GLFWwindow* window = nullptr;
 
-static nxt::wire::CommandHandler* wireServer = nullptr;
-static nxt::wire::CommandHandler* wireClient = nullptr;
-static nxt::wire::TerribleCommandBuffer* c2sBuf = nullptr;
-static nxt::wire::TerribleCommandBuffer* s2cBuf = nullptr;
+static dawn::wire::CommandHandler* wireServer = nullptr;
+static dawn::wire::CommandHandler* wireClient = nullptr;
+static dawn::wire::TerribleCommandBuffer* c2sBuf = nullptr;
+static dawn::wire::TerribleCommandBuffer* s2cBuf = nullptr;
 
-nxt::Device CreateCppNXTDevice() {
+dawn::Device CreateCppNXTDevice() {
     binding = utils::CreateBinding(backendType);
     if (binding == nullptr) {
-        return nxt::Device();
+        return dawn::Device();
     }
 
     glfwSetErrorCallback(PrintGLFWError);
     if (!glfwInit()) {
-        return nxt::Device();
+        return dawn::Device();
     }
 
     binding->SetupGLFWWindowHints();
     window = glfwCreateWindow(640, 480, "NXT window", nullptr, nullptr);
     if (!window) {
-        return nxt::Device();
+        return dawn::Device();
     }
 
     binding->SetWindow(window);
@@ -98,15 +98,15 @@ nxt::Device CreateCppNXTDevice() {
 
         case CmdBufType::Terrible:
             {
-                c2sBuf = new nxt::wire::TerribleCommandBuffer();
-                s2cBuf = new nxt::wire::TerribleCommandBuffer();
+                c2sBuf = new dawn::wire::TerribleCommandBuffer();
+                s2cBuf = new dawn::wire::TerribleCommandBuffer();
 
-                wireServer = nxt::wire::NewServerCommandHandler(backendDevice, backendProcs, s2cBuf);
+                wireServer = dawn::wire::NewServerCommandHandler(backendDevice, backendProcs, s2cBuf);
                 c2sBuf->SetHandler(wireServer);
 
                 nxtDevice clientDevice;
                 nxtProcTable clientProcs;
-                wireClient = nxt::wire::NewClientDevice(&clientProcs, &clientDevice, c2sBuf);
+                wireClient = dawn::wire::NewClientDevice(&clientProcs, &clientDevice, c2sBuf);
                 s2cBuf->SetHandler(wireClient);
 
                 procs = clientProcs;
@@ -117,46 +117,46 @@ nxt::Device CreateCppNXTDevice() {
 
     nxtSetProcs(&procs);
     procs.deviceSetErrorCallback(cDevice, PrintDeviceError, 0);
-    return nxt::Device::Acquire(cDevice);
+    return dawn::Device::Acquire(cDevice);
 }
 
 uint64_t GetSwapChainImplementation() {
     return binding->GetSwapChainImplementation();
 }
 
-nxt::TextureFormat GetPreferredSwapChainTextureFormat() {
+dawn::TextureFormat GetPreferredSwapChainTextureFormat() {
     DoFlush();
-    return static_cast<nxt::TextureFormat>(binding->GetPreferredSwapChainTextureFormat());
+    return static_cast<dawn::TextureFormat>(binding->GetPreferredSwapChainTextureFormat());
 }
 
-nxt::SwapChain GetSwapChain(const nxt::Device &device) {
+dawn::SwapChain GetSwapChain(const dawn::Device &device) {
     return device.CreateSwapChainBuilder()
         .SetImplementation(GetSwapChainImplementation())
         .GetResult();
 }
 
-nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device) {
+dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device) {
     auto depthStencilTexture = device.CreateTextureBuilder()
-        .SetDimension(nxt::TextureDimension::e2D)
+        .SetDimension(dawn::TextureDimension::e2D)
         .SetExtent(640, 480, 1)
-        .SetFormat(nxt::TextureFormat::D32FloatS8Uint)
+        .SetFormat(dawn::TextureFormat::D32FloatS8Uint)
         .SetMipLevels(1)
-        .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+        .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
         .GetResult();
     return depthStencilTexture.CreateTextureViewBuilder()
         .GetResult();
 }
 
-void GetNextRenderPassDescriptor(const nxt::Device& device,
-    const nxt::SwapChain& swapchain,
-    const nxt::TextureView& depthStencilView,
-    nxt::Texture* backbuffer,
-    nxt::RenderPassDescriptor* info) {
+void GetNextRenderPassDescriptor(const dawn::Device& device,
+    const dawn::SwapChain& swapchain,
+    const dawn::TextureView& depthStencilView,
+    dawn::Texture* backbuffer,
+    dawn::RenderPassDescriptor* info) {
     *backbuffer = swapchain.GetNextTexture();
     auto backbufferView = backbuffer->CreateTextureViewBuilder().GetResult();
     *info = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, backbufferView, nxt::LoadOp::Clear)
-        .SetDepthStencilAttachment(depthStencilView, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
+        .SetColorAttachment(0, backbufferView, dawn::LoadOp::Clear)
+        .SetDepthStencilAttachment(depthStencilView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
         .GetResult();
 }
 

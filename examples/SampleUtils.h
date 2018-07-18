@@ -22,13 +22,13 @@ bool ShouldQuit();
 struct GLFWwindow;
 struct GLFWwindow* GetGLFWWindow();
 
-nxt::Device CreateCppNXTDevice();
+dawn::Device CreateCppNXTDevice();
 uint64_t GetSwapChainImplementation();
-nxt::TextureFormat GetPreferredSwapChainTextureFormat();
-nxt::SwapChain GetSwapChain(const nxt::Device& device);
-nxt::TextureView CreateDefaultDepthStencilView(const nxt::Device& device);
-void GetNextRenderPassDescriptor(const nxt::Device& device,
-    const nxt::SwapChain& swapchain,
-    const nxt::TextureView& depthStencilView,
-    nxt::Texture* backbuffer,
-    nxt::RenderPassDescriptor* info);
+dawn::TextureFormat GetPreferredSwapChainTextureFormat();
+dawn::SwapChain GetSwapChain(const dawn::Device& device);
+dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device);
+void GetNextRenderPassDescriptor(const dawn::Device& device,
+    const dawn::SwapChain& swapchain,
+    const dawn::TextureView& depthStencilView,
+    dawn::Texture* backbuffer,
+    dawn::RenderPassDescriptor* info);

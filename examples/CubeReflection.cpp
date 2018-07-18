@@ -22,24 +22,24 @@
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
 
-nxt::Device device;
+dawn::Device device;
 
-nxt::Buffer indexBuffer;
-nxt::Buffer vertexBuffer;
-nxt::Buffer planeBuffer;
-nxt::Buffer cameraBuffer;
-nxt::Buffer transformBuffer[2];
+dawn::Buffer indexBuffer;
+dawn::Buffer vertexBuffer;
+dawn::Buffer planeBuffer;
+dawn::Buffer cameraBuffer;
+dawn::Buffer transformBuffer[2];
 
-nxt::BindGroup cameraBindGroup;
-nxt::BindGroup bindGroup[2];
-nxt::BindGroup cubeTransformBindGroup[2];
+dawn::BindGroup cameraBindGroup;
+dawn::BindGroup bindGroup[2];
+dawn::BindGroup cubeTransformBindGroup[2];
 
-nxt::Queue queue;
-nxt::SwapChain swapchain;
-nxt::TextureView depthStencilView;
-nxt::RenderPipeline pipeline;
-nxt::RenderPipeline planePipeline;
-nxt::RenderPipeline reflectionPipeline;
+dawn::Queue queue;
+dawn::SwapChain swapchain;
+dawn::TextureView depthStencilView;
+dawn::RenderPipeline pipeline;
+dawn::RenderPipeline planePipeline;
+dawn::RenderPipeline reflectionPipeline;
 
 void initBuffers() {
     static const uint32_t indexData[6*6] = {
@@ -61,7 +61,7 @@ void initBuffers() {
         20, 21, 22,
         20, 22, 23
     };
-    indexBuffer = utils::CreateBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
+    indexBuffer = utils::CreateBufferFromData(device, indexData, sizeof(indexData), dawn::BufferUsageBit::Index);
 
     static const float vertexData[6 * 4 * 6] = {
         -1.0, -1.0,  1.0,    1.0, 0.0, 0.0,
@@ -94,7 +94,7 @@ void initBuffers() {
         -1.0,  1.0,  1.0,    1.0, 1.0, 1.0,
         -1.0,  1.0, -1.0,    1.0, 1.0, 1.0
     };
-    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData), dawn::BufferUsageBit::Vertex);
 
     static const float planeData[6 * 4] = {
         -2.0, -1.0, -2.0,    0.5, 0.5, 0.5,
@@ -102,7 +102,7 @@ void initBuffers() {
         2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
         -2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
     };
-    planeBuffer = utils::CreateBufferFromData(device, planeData, sizeof(planeData), nxt::BufferUsageBit::Vertex);
+    planeBuffer = utils::CreateBufferFromData(device, planeData, sizeof(planeData), dawn::BufferUsageBit::Vertex);
 }
 
 struct CameraData {
@@ -116,11 +116,11 @@ void init() {
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
     swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                        nxt::TextureUsageBit::OutputAttachment, 640, 480);
+                        dawn::TextureUsageBit::OutputAttachment, 640, 480);
 
     initBuffers();
 
-    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
         #version 450
         layout(set = 0, binding = 0) uniform cameraData {
             mat4 view;
@@ -138,7 +138,7 @@ void init() {
         })"
     );
 
-    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
         layout(location = 0) out vec4 fragColor;
@@ -146,8 +146,8 @@ void init() {
             fragColor = vec4(f_col, 1.0);
         })");
 
-    nxt::ShaderModule fsReflectionModule =
-        utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsReflectionModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
         layout(location = 0) out vec4 fragColor;
@@ -156,35 +156,35 @@ void init() {
         })");
 
     auto inputState = device.CreateInputStateBuilder()
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32, 0)
-        .SetAttribute(1, 0, nxt::VertexFormat::FloatR32G32B32, 3 * sizeof(float))
-        .SetInput(0, 6 * sizeof(float), nxt::InputStepMode::Vertex)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32G32B32, 0)
+        .SetAttribute(1, 0, dawn::VertexFormat::FloatR32G32B32, 3 * sizeof(float))
+        .SetInput(0, 6 * sizeof(float), dawn::InputStepMode::Vertex)
         .GetResult();
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
-                    {1, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                 });
 
-    nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+    dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     cameraBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Uniform)
+        .SetAllowedUsage(dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::Uniform)
         .SetSize(sizeof(CameraData))
         .GetResult();
 
     glm::mat4 transform(1.0);
-    transformBuffer[0] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
+    transformBuffer[0] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), dawn::BufferUsageBit::Uniform);
 
     transform = glm::translate(transform, glm::vec3(0.f, -2.f, 0.f));
-    transformBuffer[1] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), nxt::BufferUsageBit::Uniform);
+    transformBuffer[1] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), dawn::BufferUsageBit::Uniform);
 
-    nxt::BufferView cameraBufferView = cameraBuffer.CreateBufferViewBuilder()
+    dawn::BufferView cameraBufferView = cameraBuffer.CreateBufferViewBuilder()
         .SetExtent(0, sizeof(CameraData))
         .GetResult();
 
-    nxt::BufferView transformBufferView[2] = {
+    dawn::BufferView transformBufferView[2] = {
         transformBuffer[0].CreateBufferViewBuilder()
             .SetExtent(0, sizeof(glm::mat4))
             .GetResult(),
@@ -195,14 +195,14 @@ void init() {
 
     bindGroup[0] = device.CreateBindGroupBuilder()
         .SetLayout(bgl)
-        .SetUsage(nxt::BindGroupUsage::Frozen)
+        .SetUsage(dawn::BindGroupUsage::Frozen)
         .SetBufferViews(0, 1, &cameraBufferView)
         .SetBufferViews(1, 1, &transformBufferView[0])
         .GetResult();
 
     bindGroup[1] = device.CreateBindGroupBuilder()
         .SetLayout(bgl)
-        .SetUsage(nxt::BindGroupUsage::Frozen)
+        .SetUsage(dawn::BindGroupUsage::Frozen)
         .SetBufferViews(0, 1, &cameraBufferView)
         .SetBufferViews(1, 1, &transformBufferView[1])
         .GetResult();
@@ -210,49 +210,49 @@ void init() {
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     auto depthStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        .SetDepthCompareFunction(dawn::CompareFunction::Less)
         .SetDepthWriteEnabled(true)
         .GetResult();
 
     pipeline = device.CreateRenderPipelineBuilder()
         .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
+        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
         .SetLayout(pl)
-        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-        .SetIndexFormat(nxt::IndexFormat::Uint32)
+        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+        .SetIndexFormat(dawn::IndexFormat::Uint32)
         .SetInputState(inputState)
         .SetDepthStencilState(depthStencilState)
         .GetResult();
 
     auto planeStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        .SetDepthCompareFunction(dawn::CompareFunction::Less)
         .SetDepthWriteEnabled(false)
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .GetResult();
 
     planePipeline = device.CreateRenderPipelineBuilder()
         .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
+        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
         .SetLayout(pl)
-        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
         .SetInputState(inputState)
         .SetDepthStencilState(planeStencilState)
         .GetResult();
 
     auto reflectionStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        .SetDepthCompareFunction(dawn::CompareFunction::Less)
         .SetDepthWriteEnabled(true)
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Equal, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .GetResult();
 
     reflectionPipeline = device.CreateRenderPipelineBuilder()
         .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
+        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
         .SetLayout(pl)
-        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(nxt::ShaderStage::Fragment, fsReflectionModule, "main")
+        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(dawn::ShaderStage::Fragment, fsReflectionModule, "main")
         .SetInputState(inputState)
         .SetDepthStencilState(reflectionStencilState)
         .GetResult();
@@ -275,11 +275,11 @@ void frame() {
 
     cameraBuffer.SetSubData(0, sizeof(CameraData), reinterpret_cast<uint8_t*>(&cameraData));
 
-    nxt::Texture backbuffer;
-    nxt::RenderPassDescriptor renderPass;
+    dawn::Texture backbuffer;
+    dawn::RenderPassDescriptor renderPass;
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass)
             .SetRenderPipeline(pipeline)
             .SetBindGroup(0, bindGroup[0])

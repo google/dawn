@@ -23,19 +23,19 @@
 
 #include <glm/glm.hpp>
 
-nxt::Device device;
-nxt::Queue queue;
-nxt::SwapChain swapchain;
-nxt::TextureView depthStencilView;
+dawn::Device device;
+dawn::Queue queue;
+dawn::SwapChain swapchain;
+dawn::TextureView depthStencilView;
 
-nxt::Buffer modelBuffer;
-std::array<nxt::Buffer, 2> particleBuffers;
+dawn::Buffer modelBuffer;
+std::array<dawn::Buffer, 2> particleBuffers;
 
-nxt::RenderPipeline renderPipeline;
+dawn::RenderPipeline renderPipeline;
 
-nxt::Buffer updateParams;
-nxt::ComputePipeline updatePipeline;
-std::array<nxt::BindGroup, 2> updateBGs;
+dawn::Buffer updateParams;
+dawn::ComputePipeline updatePipeline;
+std::array<dawn::BindGroup, 2> updateBGs;
 
 size_t pingpong = 0;
 
@@ -63,10 +63,10 @@ void initBuffers() {
         {0.01, -0.02},
         {0.00, 0.02},
     };
-    modelBuffer = utils::CreateBufferFromData(device, model, sizeof(model), nxt::BufferUsageBit::Vertex);
+    modelBuffer = utils::CreateBufferFromData(device, model, sizeof(model), dawn::BufferUsageBit::Vertex);
 
     SimParams params = { 0.04f, 0.1f, 0.025f, 0.025f, 0.02f, 0.05f, 0.005f, kNumParticles };
-    updateParams = utils::CreateBufferFromData(device, &params, sizeof(params), nxt::BufferUsageBit::Uniform);
+    updateParams = utils::CreateBufferFromData(device, &params, sizeof(params), dawn::BufferUsageBit::Uniform);
 
     std::vector<Particle> initialParticles(kNumParticles);
     {
@@ -81,7 +81,7 @@ void initBuffers() {
 
     for (size_t i = 0; i < 2; i++) {
         particleBuffers[i] = device.CreateBufferBuilder()
-            .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Storage)
+            .SetAllowedUsage(dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Storage)
             .SetSize(sizeof(Particle) * kNumParticles)
             .GetResult();
 
@@ -92,7 +92,7 @@ void initBuffers() {
 }
 
 void initRender() {
-    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec2 a_particlePos;
         layout(location = 1) in vec2 a_particleVel;
@@ -105,7 +105,7 @@ void initRender() {
         }
     )");
 
-    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         void main() {
@@ -113,27 +113,27 @@ void initRender() {
         }
     )");
 
-    nxt::InputState inputState = device.CreateInputStateBuilder()
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32, offsetof(Particle, pos))
-        .SetAttribute(1, 0, nxt::VertexFormat::FloatR32G32, offsetof(Particle, vel))
-        .SetInput(0, sizeof(Particle), nxt::InputStepMode::Instance)
-        .SetAttribute(2, 1, nxt::VertexFormat::FloatR32G32, 0)
-        .SetInput(1, sizeof(glm::vec2), nxt::InputStepMode::Vertex)
+    dawn::InputState inputState = device.CreateInputStateBuilder()
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32G32, offsetof(Particle, pos))
+        .SetAttribute(1, 0, dawn::VertexFormat::FloatR32G32, offsetof(Particle, vel))
+        .SetInput(0, sizeof(Particle), dawn::InputStepMode::Instance)
+        .SetAttribute(2, 1, dawn::VertexFormat::FloatR32G32, 0)
+        .SetInput(1, sizeof(glm::vec2), dawn::InputStepMode::Vertex)
         .GetResult();
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     renderPipeline = device.CreateRenderPipelineBuilder()
         .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
-        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
+        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
         .SetInputState(inputState)
         .GetResult();
 }
 
 void initSim() {
-    nxt::ShaderModule module = utils::CreateShaderModule(device, nxt::ShaderStage::Compute, R"(
+    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
         #version 450
 
         struct Particle {
@@ -224,23 +224,23 @@ void initSim() {
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, nxt::ShaderStageBit::Compute, nxt::BindingType::UniformBuffer},
-                    {1, nxt::ShaderStageBit::Compute, nxt::BindingType::StorageBuffer},
-                    {2, nxt::ShaderStageBit::Compute, nxt::BindingType::StorageBuffer},
+                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
+                    {2, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
                 });
 
-    nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+    dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     updatePipeline = device.CreateComputePipelineBuilder()
         .SetLayout(pl)
-        .SetStage(nxt::ShaderStage::Compute, module, "main")
+        .SetStage(dawn::ShaderStage::Compute, module, "main")
         .GetResult();
 
-    nxt::BufferView updateParamsView = updateParams.CreateBufferViewBuilder()
+    dawn::BufferView updateParamsView = updateParams.CreateBufferViewBuilder()
         .SetExtent(0, sizeof(SimParams))
         .GetResult();
 
-    std::array<nxt::BufferView, 2> views;
+    std::array<dawn::BufferView, 2> views;
     for (uint32_t i = 0; i < 2; ++i) {
         views[i] = particleBuffers[i].CreateBufferViewBuilder()
             .SetExtent(0, kNumParticles * sizeof(Particle))
@@ -250,7 +250,7 @@ void initSim() {
     for (uint32_t i = 0; i < 2; ++i) {
         updateBGs[i] = device.CreateBindGroupBuilder()
             .SetLayout(bgl)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
+            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &updateParamsView)
             .SetBufferViews(1, 1, &views[i])
             .SetBufferViews(2, 1, &views[(i + 1) % 2])
@@ -258,7 +258,7 @@ void initSim() {
     }
 }
 
-nxt::CommandBuffer createCommandBuffer(const nxt::RenderPassDescriptor& renderPass, size_t i) {
+dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& renderPass, size_t i) {
     static const uint32_t zeroOffsets[1] = {0};
     auto& bufferDst = particleBuffers[(i + 1) % 2];
     return device.CreateCommandBufferBuilder()
@@ -284,7 +284,7 @@ void init() {
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
     swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                        nxt::TextureUsageBit::OutputAttachment, 640, 480);
+                        dawn::TextureUsageBit::OutputAttachment, 640, 480);
 
     initBuffers();
     initRender();
@@ -292,11 +292,11 @@ void init() {
 }
 
 void frame() {
-    nxt::Texture backbuffer;
-    nxt::RenderPassDescriptor renderPass;
+    dawn::Texture backbuffer;
+    dawn::RenderPassDescriptor renderPass;
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
-    nxt::CommandBuffer commandBuffer = createCommandBuffer(renderPass, pingpong);
+    dawn::CommandBuffer commandBuffer = createCommandBuffer(renderPass, pingpong);
     queue.Submit(1, &commandBuffer);
     swapchain.Present(backbuffer);
     DoFlush();

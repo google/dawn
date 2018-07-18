@@ -19,44 +19,44 @@
 
 #include <vector>
 
-nxt::Device device;
+dawn::Device device;
 
-nxt::Buffer indexBuffer;
-nxt::Buffer vertexBuffer;
+dawn::Buffer indexBuffer;
+dawn::Buffer vertexBuffer;
 
-nxt::Texture texture;
-nxt::Sampler sampler;
+dawn::Texture texture;
+dawn::Sampler sampler;
 
-nxt::Queue queue;
-nxt::SwapChain swapchain;
-nxt::TextureView depthStencilView;
-nxt::RenderPipeline pipeline;
-nxt::BindGroup bindGroup;
+dawn::Queue queue;
+dawn::SwapChain swapchain;
+dawn::TextureView depthStencilView;
+dawn::RenderPipeline pipeline;
+dawn::BindGroup bindGroup;
 
 void initBuffers() {
     static const uint32_t indexData[3] = {
         0, 1, 2,
     };
-    indexBuffer = utils::CreateBufferFromData(device, indexData, sizeof(indexData), nxt::BufferUsageBit::Index);
+    indexBuffer = utils::CreateBufferFromData(device, indexData, sizeof(indexData), dawn::BufferUsageBit::Index);
 
     static const float vertexData[12] = {
         0.0f, 0.5f, 0.0f, 1.0f,
         -0.5f, -0.5f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData), nxt::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData), dawn::BufferUsageBit::Vertex);
 }
 
 void initTextures() {
     texture = device.CreateTextureBuilder()
-        .SetDimension(nxt::TextureDimension::e2D)
+        .SetDimension(dawn::TextureDimension::e2D)
         .SetExtent(1024, 1024, 1)
-        .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+        .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
         .SetMipLevels(1)
-        .SetAllowedUsage(nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::Sampled)
+        .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled)
         .GetResult();
 
-    nxt::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
     sampler = device.CreateSampler(&samplerDesc);
 
     // Initialize the texture with arbitrary data until we can load images
@@ -66,8 +66,8 @@ void initTextures() {
     }
 
 
-    nxt::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), static_cast<uint32_t>(data.size()), nxt::BufferUsageBit::TransferSrc);
-    nxt::CommandBuffer copy = device.CreateCommandBufferBuilder()
+    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::TransferSrc);
+    dawn::CommandBuffer copy = device.CreateCommandBufferBuilder()
         .CopyBufferToTexture(stagingBuffer, 0, 0, texture, 0, 0, 0, 1024, 1024, 1, 0)
         .GetResult();
 
@@ -80,12 +80,12 @@ void init() {
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
     swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                        nxt::TextureUsageBit::OutputAttachment, 640, 480);
+                        dawn::TextureUsageBit::OutputAttachment, 640, 480);
 
     initBuffers();
     initTextures();
 
-    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec4 pos;
         void main() {
@@ -93,7 +93,7 @@ void init() {
         })"
     );
 
-    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
         #version 450
         layout(set = 0, binding = 0) uniform sampler mySampler;
         layout(set = 0, binding = 1) uniform texture2D myTexture;
@@ -104,35 +104,35 @@ void init() {
         })");
 
     auto inputState = device.CreateInputStateBuilder()
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32A32, 0)
-        .SetInput(0, 4 * sizeof(float), nxt::InputStepMode::Vertex)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32G32B32A32, 0)
+        .SetInput(0, 4 * sizeof(float), dawn::InputStepMode::Vertex)
         .GetResult();
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, nxt::ShaderStageBit::Fragment, nxt::BindingType::Sampler},
-                    {1, nxt::ShaderStageBit::Fragment, nxt::BindingType::SampledTexture},
+                    {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
+                    {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture},
                 });
 
-    nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+    dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     pipeline = device.CreateRenderPipelineBuilder()
         .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
+        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
         .SetLayout(pl)
-        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-        .SetIndexFormat(nxt::IndexFormat::Uint32)
+        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+        .SetIndexFormat(dawn::IndexFormat::Uint32)
         .SetInputState(inputState)
         .GetResult();
 
-    nxt::TextureView view = texture.CreateTextureViewBuilder().GetResult();
+    dawn::TextureView view = texture.CreateTextureViewBuilder().GetResult();
 
     bindGroup = device.CreateBindGroupBuilder()
         .SetLayout(bgl)
-        .SetUsage(nxt::BindGroupUsage::Frozen)
+        .SetUsage(dawn::BindGroupUsage::Frozen)
         .SetSamplers(0, 1, &sampler)
         .SetTextureViews(1, 1, &view)
         .GetResult();
@@ -144,12 +144,12 @@ void frame() {
     s.b += 0.02f;
     if (s.b >= 1.0f) {s.b = 0.0f;}
 
-    nxt::Texture backbuffer;
-    nxt::RenderPassDescriptor renderPass;
+    dawn::Texture backbuffer;
+    dawn::RenderPassDescriptor renderPass;
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     static const uint32_t vertexBufferOffsets[1] = {0};
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass)
             .SetRenderPipeline(pipeline)
             .SetBindGroup(0, bindGroup)
