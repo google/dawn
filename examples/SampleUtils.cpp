@@ -19,8 +19,8 @@
 #include "utils/BackendBinding.h"
 #include "wire/TerribleCommandBuffer.h"
 
-#include <nxt/nxt.h>
-#include <nxt/nxtcpp.h>
+#include <dawn/dawn.h>
+#include <dawn/dawncpp.h>
 #include <nxt/nxt_wsi.h>
 #include "GLFW/glfw3.h"
 

@@ -18,7 +18,7 @@
 #include "backend/vulkan/VulkanInfo.h"
 
 #include "nxt/nxt_wsi.h"
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 namespace backend { namespace vulkan {
 

@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-#include "nxt/nxt.h"
+#include "dawn/dawn.h"
 
 namespace nxt { namespace wire {
 

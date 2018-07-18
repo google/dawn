@@ -15,7 +15,7 @@
 #ifndef BACKEND_D3D12_TEXTURECOPYSPLITTER_H_
 #define BACKEND_D3D12_TEXTURECOPYSPLITTER_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include <array>
 

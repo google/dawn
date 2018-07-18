@@ -20,7 +20,7 @@
 #include "backend/InputState.h"
 #include "backend/Pipeline.h"
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include <array>
 #include <bitset>

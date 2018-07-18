@@ -15,7 +15,7 @@
 #ifndef BACKEND_COMMANDBUFFER_H_
 #define BACKEND_COMMANDBUFFER_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include "backend/Builder.h"
 #include "backend/CommandAllocator.h"

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <nxt/nxtcpp.h>
+#include <dawn/dawncpp.h>
 #include <nxt/nxt_wsi.h>
 
 bool InitSample(int argc, const char** argv);

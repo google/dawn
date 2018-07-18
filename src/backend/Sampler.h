@@ -18,7 +18,7 @@
 #include "backend/Error.h"
 #include "backend/RefCounted.h"
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 namespace backend {
 

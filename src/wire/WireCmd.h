@@ -15,7 +15,7 @@
 #ifndef WIRE_WIRECMD_H_
 #define WIRE_WIRECMD_H_
 
-#include <nxt/nxt.h>
+#include <dawn/dawn.h>
 
 #include "wire/WireCmd_autogen.h"
 

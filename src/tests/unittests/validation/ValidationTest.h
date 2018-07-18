@@ -16,8 +16,8 @@
 #define TESTS_UNITTESTS_VALIDATIONTEST_H_
 
 #include "gtest/gtest.h"
-#include "nxt/nxtcpp.h"
-#include "nxt/nxtcpp_traits.h"
+#include "dawn/dawncpp.h"
+#include "dawn/dawncpp_traits.h"
 
 #define ASSERT_DEVICE_ERROR(statement) \
     StartExpectDeviceError(); \

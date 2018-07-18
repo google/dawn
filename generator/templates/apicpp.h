@@ -15,7 +15,7 @@
 #ifndef NXTCPP_H
 #define NXTCPP_H
 
-#include "nxt.h"
+#include "dawn.h"
 
 #include "nxt/EnumClassBitmasks.h"
 

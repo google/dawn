@@ -15,7 +15,7 @@
 #ifndef BACKEND_NULL_NULLBACKEND_H_
 #define BACKEND_NULL_NULLBACKEND_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include "backend/BindGroup.h"
 #include "backend/BindGroupLayout.h"

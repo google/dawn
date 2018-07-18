@@ -18,7 +18,7 @@
 #include "backend/RenderPassDescriptor.h"
 #include "backend/Texture.h"
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 namespace backend {
 

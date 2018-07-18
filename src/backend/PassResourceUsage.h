@@ -15,7 +15,7 @@
 #ifndef BACKEND_PASSRESOURCEUSAGE_H
 #define BACKEND_PASSRESOURCEUSAGE_H
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include <vector>
 

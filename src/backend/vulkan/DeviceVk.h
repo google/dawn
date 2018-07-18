@@ -15,7 +15,7 @@
 #ifndef BACKEND_VULKAN_DEVICEVK_H_
 #define BACKEND_VULKAN_DEVICEVK_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include "backend/Device.h"
 #include "backend/vulkan/Forward.h"

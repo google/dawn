@@ -15,7 +15,7 @@
 #ifndef BACKEND_OPENGL_PERSISTENTPIPELINESTATEGL_H_
 #define BACKEND_OPENGL_PERSISTENTPIPELINESTATEGL_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include "glad/glad.h"
 

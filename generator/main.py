@@ -439,18 +439,18 @@ def main():
     c_params = {'native_methods': lambda typ: c_native_methods(api_params['types'], typ)}
 
     if 'dawn' in targets:
-        renders.append(FileRender('api.h', 'nxt/nxt.h', [base_params, api_params, c_params]))
-        renders.append(FileRender('api.c', 'nxt/nxt.c', [base_params, api_params, c_params]))
+        renders.append(FileRender('api.h', 'dawn/dawn.h', [base_params, api_params, c_params]))
+        renders.append(FileRender('api.c', 'dawn/dawn.c', [base_params, api_params, c_params]))
 
     if 'dawncpp' in targets:
         additional_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
-        renders.append(FileRender('apicpp.h', 'nxt/nxtcpp.h', [base_params, api_params, additional_params]))
-        renders.append(FileRender('apicpp.cpp', 'nxt/nxtcpp.cpp', [base_params, api_params, additional_params]))
-        renders.append(FileRender('apicpp_traits.h', 'nxt/nxtcpp_traits.h', [base_params, api_params, additional_params]))
+        renders.append(FileRender('apicpp.h', 'dawn/dawncpp.h', [base_params, api_params, additional_params]))
+        renders.append(FileRender('apicpp.cpp', 'dawn/dawncpp.cpp', [base_params, api_params, additional_params]))
+        renders.append(FileRender('apicpp_traits.h', 'dawn/dawncpp_traits.h', [base_params, api_params, additional_params]))
 
     if 'mock_dawn' in targets:
-        renders.append(FileRender('mock_api.h', 'mock/mock_nxt.h', [base_params, api_params, c_params]))
-        renders.append(FileRender('mock_api.cpp', 'mock/mock_nxt.cpp', [base_params, api_params, c_params]))
+        renders.append(FileRender('mock_api.h', 'mock/mock_dawn.h', [base_params, api_params, c_params]))
+        renders.append(FileRender('mock_api.cpp', 'mock/mock_dawn.cpp', [base_params, api_params, c_params]))
 
     base_backend_params = [
         base_params,

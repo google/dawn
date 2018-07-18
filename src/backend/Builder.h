@@ -18,7 +18,7 @@
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include <string>
 

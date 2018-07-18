@@ -15,7 +15,7 @@
 #ifndef BACKEND_D3D12_DEVICED3D12_H_
 #define BACKEND_D3D12_DEVICED3D12_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include "backend/Device.h"
 #include "backend/d3d12/Forward.h"

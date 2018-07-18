@@ -15,7 +15,7 @@
 #ifndef BACKEND_METAL_DEVICEMTL_H_
 #define BACKEND_METAL_DEVICEMTL_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include "backend/Device.h"
 #include "backend/metal/Forward.h"

@@ -18,7 +18,7 @@
 #include "backend/d3d12/d3d12_platform.h"
 
 #include "nxt/nxt_wsi.h"
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include <vector>
 

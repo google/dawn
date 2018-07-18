@@ -14,7 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "nxt/nxt.h"
+#include "dawn/dawn.h"
 
 namespace backend {
     namespace null {

@@ -15,7 +15,7 @@
 #ifndef NXTCPP_TRAITS_H
 #define NXTCPP_TRAITS_H
 
-#include "nxtcpp.h"
+#include "dawncpp.h"
 
 #include <type_traits>
 

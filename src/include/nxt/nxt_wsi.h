@@ -15,7 +15,7 @@
 #ifndef NXT_WSI_H
 #define NXT_WSI_H
 
-#include <nxt/nxt.h>
+#include <dawn/dawn.h>
 
 // Error message (or nullptr if there was no error)
 typedef const char* nxtSwapChainError;

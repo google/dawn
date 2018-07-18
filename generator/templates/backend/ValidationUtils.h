@@ -15,7 +15,7 @@
 #ifndef BACKEND_VALIDATIONUTILS_H_
 #define BACKEND_VALIDATIONUTILS_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include "backend/Error.h"
 

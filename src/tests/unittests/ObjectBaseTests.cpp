@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 class Object : public dawn::ObjectBase<Object, int*> {
     public:

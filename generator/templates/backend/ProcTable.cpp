@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "nxt/nxt.h"
-#include "nxt/nxtcpp.h"
+#include "dawn/dawn.h"
+#include "dawn/dawncpp.h"
 
 #include "common/Assert.h"
 

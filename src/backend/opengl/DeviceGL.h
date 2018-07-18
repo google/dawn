@@ -15,7 +15,7 @@
 #ifndef BACKEND_OPENGL_DEVICEGL_H_
 #define BACKEND_OPENGL_DEVICEGL_H_
 
-#include "nxt/nxtcpp.h"
+#include "dawn/dawncpp.h"
 
 #include "backend/Device.h"
 #include "backend/opengl/Forward.h"

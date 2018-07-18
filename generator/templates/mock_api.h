@@ -16,7 +16,7 @@
 #define MOCK_NXT_H
 
 #include <gmock/gmock.h>
-#include <nxt/nxt.h>
+#include <dawn/dawn.h>
 
 #include <memory>
 
