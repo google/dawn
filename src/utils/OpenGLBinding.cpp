@@ -32,7 +32,7 @@ namespace backend { namespace opengl {
 namespace utils {
     class SwapChainImplGL {
       public:
-        using WSIContext = nxtWSIContextGL;
+        using WSIContext = dawnWSIContextGL;
 
         SwapChainImplGL(GLFWwindow* window) : mWindow(window) {
         }
@@ -42,7 +42,7 @@ namespace utils {
             glDeleteFramebuffers(1, &mBackFBO);
         }
 
-        void Init(nxtWSIContextGL*) {
+        void Init(dawnWSIContextGL*) {
             glGenTextures(1, &mBackTexture);
             glBindTexture(GL_TEXTURE_2D, mBackTexture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -53,10 +53,10 @@ namespace utils {
                                    mBackTexture, 0);
         }
 
-        nxtSwapChainError Configure(nxtTextureFormat format,
-                                    nxtTextureUsageBit,
-                                    uint32_t width,
-                                    uint32_t height) {
+        dawnSwapChainError Configure(nxtTextureFormat format,
+                                     nxtTextureUsageBit,
+                                     uint32_t width,
+                                     uint32_t height) {
             if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
                 return "unsupported format";
             }
@@ -70,22 +70,22 @@ namespace utils {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                          nullptr);
 
-            return NXT_SWAP_CHAIN_NO_ERROR;
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
-        nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
+        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
             nextTexture->texture.u32 = mBackTexture;
-            return NXT_SWAP_CHAIN_NO_ERROR;
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
-        nxtSwapChainError Present() {
+        dawnSwapChainError Present() {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
             glBlitFramebuffer(0, 0, mWidth, mHeight, 0, mHeight, mWidth, 0, GL_COLOR_BUFFER_BIT,
                               GL_NEAREST);
             glfwSwapBuffers(mWindow);
 
-            return NXT_SWAP_CHAIN_NO_ERROR;
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
       private:
@@ -132,7 +132,7 @@ namespace utils {
 
       private:
         nxtDevice mBackendDevice = nullptr;
-        nxtSwapChainImplementation mSwapchainImpl = {};
+        dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
     BackendBinding* CreateOpenGLBinding() {

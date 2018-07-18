@@ -57,7 +57,7 @@ namespace backend { namespace vulkan {
         }
     }
 
-    void NativeSwapChainImpl::Init(nxtWSIContextVulkan* /*context*/) {
+    void NativeSwapChainImpl::Init(dawnWSIContextVulkan* /*context*/) {
         if (!GatherSurfaceInfo(*mDevice, mSurface, &mInfo)) {
             ASSERT(false);
         }
@@ -67,10 +67,10 @@ namespace backend { namespace vulkan {
         }
     }
 
-    nxtSwapChainError NativeSwapChainImpl::Configure(nxtTextureFormat format,
-                                                     nxtTextureUsageBit usage,
-                                                     uint32_t width,
-                                                     uint32_t height) {
+    dawnSwapChainError NativeSwapChainImpl::Configure(nxtTextureFormat format,
+                                                      nxtTextureUsageBit usage,
+                                                      uint32_t width,
+                                                      uint32_t height) {
         ASSERT(mInfo.capabilities.minImageExtent.width <= width);
         ASSERT(mInfo.capabilities.maxImageExtent.width >= width);
         ASSERT(mInfo.capabilities.minImageExtent.height <= height);
@@ -147,10 +147,10 @@ namespace backend { namespace vulkan {
                                            nullptr, 1, &barrier);
         }
 
-        return NXT_SWAP_CHAIN_NO_ERROR;
+        return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    nxtSwapChainError NativeSwapChainImpl::GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
+    dawnSwapChainError NativeSwapChainImpl::GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
         // Transiently create a semaphore that will be signaled when the presentation engine is done
         // with the swapchain image. Further operations on the image will wait for this semaphore.
         VkSemaphore semaphore = VK_NULL_HANDLE;
@@ -174,10 +174,10 @@ namespace backend { namespace vulkan {
         nextTexture->texture.u64 = mSwapChainImages[mLastImageIndex].GetHandle();
         mDevice->AddWaitSemaphore(semaphore);
 
-        return NXT_SWAP_CHAIN_NO_ERROR;
+        return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    nxtSwapChainError NativeSwapChainImpl::Present() {
+    dawnSwapChainError NativeSwapChainImpl::Present() {
         // This assumes that the image has already been transitioned to the PRESENT layout and
         // writes were made available to the stage.
 
@@ -199,7 +199,7 @@ namespace backend { namespace vulkan {
             ASSERT(false);
         }
 
-        return NXT_SWAP_CHAIN_NO_ERROR;
+        return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
     dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {

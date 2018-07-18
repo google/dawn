@@ -49,10 +49,10 @@ namespace backend { namespace d3d12 {
         *device = reinterpret_cast<nxtDevice>(new Device());
     }
 
-    nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window) {
+    dawnSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
 
-        nxtSwapChainImplementation impl;
+        dawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, window));
         impl.textureUsage = NXT_TEXTURE_USAGE_BIT_PRESENT;
 
@@ -60,7 +60,7 @@ namespace backend { namespace d3d12 {
     }
 
     nxtTextureFormat GetNativeSwapChainPreferredFormat(
-        const nxtSwapChainImplementation* swapChain) {
+        const dawnSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
         return static_cast<nxtTextureFormat>(impl->GetPreferredFormat());
     }

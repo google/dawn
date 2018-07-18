@@ -12,14 +12,14 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef NXT_WSI_H
-#define NXT_WSI_H
+#ifndef DAWN_WSI_H
+#define DAWN_WSI_H
 
 #include <dawn/dawn.h>
 
 // Error message (or nullptr if there was no error)
-typedef const char* nxtSwapChainError;
-constexpr nxtSwapChainError NXT_SWAP_CHAIN_NO_ERROR = nullptr;
+typedef const char* dawnSwapChainError;
+constexpr dawnSwapChainError DAWN_SWAP_CHAIN_NO_ERROR = nullptr;
 
 typedef struct {
     /// Backend-specific texture id/name/pointer
@@ -28,54 +28,58 @@ typedef struct {
         uint64_t u64;
         uint32_t u32;
     } texture;
-} nxtSwapChainNextTexture;
+} dawnSwapChainNextTexture;
 
 typedef struct {
     /// Initialize the swap chain implementation.
-    ///   (*wsiContext) is one of nxtWSIContext{D3D12,Metal,GL}
+    ///   (*wsiContext) is one of dawnWSIContext{D3D12,Metal,GL}
     void (*Init)(void* userData, void* wsiContext);
 
     /// Destroy the swap chain implementation.
     void (*Destroy)(void* userData);
 
     /// Configure/reconfigure the swap chain.
-    nxtSwapChainError (*Configure)(void* userData, nxtTextureFormat format, nxtTextureUsageBit allowedUsage, uint32_t width, uint32_t height);
+    dawnSwapChainError (*Configure)(void* userData,
+                                    nxtTextureFormat format,
+                                    nxtTextureUsageBit allowedUsage,
+                                    uint32_t width,
+                                    uint32_t height);
 
     /// Acquire the next texture from the swap chain.
-    nxtSwapChainError (*GetNextTexture)(void* userData, nxtSwapChainNextTexture* nextTexture);
+    dawnSwapChainError (*GetNextTexture)(void* userData, dawnSwapChainNextTexture* nextTexture);
 
     /// Present the last acquired texture to the screen.
-    nxtSwapChainError (*Present)(void* userData);
+    dawnSwapChainError (*Present)(void* userData);
 
     /// Each function is called with userData as its first argument.
     void* userData;
 
     /// For use by the D3D12 and Vulkan backends: how the swapchain will use the texture.
     nxtTextureUsageBit textureUsage;
-} nxtSwapChainImplementation;
+} dawnSwapChainImplementation;
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12) && defined(__cplusplus)
 typedef struct {
     nxtDevice device = nullptr;
-} nxtWSIContextD3D12;
+} dawnWSIContextD3D12;
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_METAL) && defined(__OBJC__)
-#import <Metal/Metal.h>
+#    import <Metal/Metal.h>
 
 typedef struct {
     id<MTLDevice> device = nil;
-} nxtWSIContextMetal;
+} dawnWSIContextMetal;
 #endif
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGL
 typedef struct {
-} nxtWSIContextGL;
+} dawnWSIContextGL;
 #endif
 
 #ifdef DAWN_ENABLE_BACKEND_VULKAN
 typedef struct {
-} nxtWSIContextVulkan;
+} dawnWSIContextVulkan;
 #endif
 
-#endif // NXT_WSI_H
+#endif  // DAWN_WSI_H

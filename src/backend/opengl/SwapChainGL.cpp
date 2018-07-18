@@ -31,8 +31,8 @@ namespace backend { namespace opengl {
 
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
         const auto& im = GetImplementation();
-        nxtSwapChainNextTexture next = {};
-        nxtSwapChainError error = im.GetNextTexture(im.userData, &next);
+        dawnSwapChainNextTexture next = {};
+        dawnSwapChainError error = im.GetNextTexture(im.userData, &next);
         if (error) {
             GetDevice()->HandleError(error);
             return nullptr;

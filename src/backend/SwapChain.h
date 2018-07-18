@@ -19,8 +19,8 @@
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
-#include "dawn/dawncpp.h"
 #include "dawn/dawn_wsi.h"
+#include "dawn/dawncpp.h"
 
 namespace backend {
 
@@ -40,13 +40,13 @@ namespace backend {
         void Present(TextureBase* texture);
 
       protected:
-        const nxtSwapChainImplementation& GetImplementation();
+        const dawnSwapChainImplementation& GetImplementation();
         virtual TextureBase* GetNextTextureImpl(TextureBuilder* builder) = 0;
         virtual void OnBeforePresent(TextureBase* texture) = 0;
 
       private:
         DeviceBase* mDevice = nullptr;
-        nxtSwapChainImplementation mImplementation = {};
+        dawnSwapChainImplementation mImplementation = {};
         dawn::TextureFormat mFormat = {};
         dawn::TextureUsageBit mAllowedUsage;
         uint32_t mWidth = 0;
@@ -65,7 +65,7 @@ namespace backend {
       private:
         friend class SwapChainBase;
 
-        nxtSwapChainImplementation mImplementation = {};
+        dawnSwapChainImplementation mImplementation = {};
     };
 
 }  // namespace backend

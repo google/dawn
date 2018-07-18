@@ -17,8 +17,8 @@
 
 #include "backend/vulkan/VulkanInfo.h"
 
-#include "dawn/dawncpp.h"
 #include "dawn/dawn_wsi.h"
+#include "dawn/dawncpp.h"
 
 namespace backend { namespace vulkan {
 
@@ -26,18 +26,18 @@ namespace backend { namespace vulkan {
 
     class NativeSwapChainImpl {
       public:
-        using WSIContext = nxtWSIContextVulkan;
+        using WSIContext = dawnWSIContextVulkan;
 
         NativeSwapChainImpl(Device* device, VkSurfaceKHR surface);
         ~NativeSwapChainImpl();
 
-        void Init(nxtWSIContextVulkan* context);
-        nxtSwapChainError Configure(nxtTextureFormat format,
-                                    nxtTextureUsageBit,
-                                    uint32_t width,
-                                    uint32_t height);
-        nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture);
-        nxtSwapChainError Present();
+        void Init(dawnWSIContextVulkan* context);
+        dawnSwapChainError Configure(nxtTextureFormat format,
+                                     nxtTextureUsageBit,
+                                     uint32_t width,
+                                     uint32_t height);
+        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture* nextTexture);
+        dawnSwapChainError Present();
 
         dawn::TextureFormat GetPreferredFormat() const;
 

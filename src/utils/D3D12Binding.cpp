@@ -24,8 +24,9 @@
 namespace backend { namespace d3d12 {
     void Init(nxtProcTable* procs, nxtDevice* device);
 
-    nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window);
-    nxtTextureFormat GetNativeSwapChainPreferredFormat(const nxtSwapChainImplementation* swapChain);
+    dawnSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window);
+    nxtTextureFormat GetNativeSwapChainPreferredFormat(
+        const dawnSwapChainImplementation* swapChain);
 }}  // namespace backend::d3d12
 
 namespace utils {
@@ -57,7 +58,7 @@ namespace utils {
 
       private:
         nxtDevice mBackendDevice = nullptr;
-        nxtSwapChainImplementation mSwapchainImpl = {};
+        dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
     BackendBinding* CreateD3D12Binding() {

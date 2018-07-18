@@ -23,7 +23,7 @@ namespace backend { namespace d3d12 {
 
     SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
-        nxtWSIContextD3D12 wsiContext = {};
+        dawnWSIContextD3D12 wsiContext = {};
         wsiContext.device = reinterpret_cast<nxtDevice>(GetDevice());
         im.Init(im.userData, &wsiContext);
 
@@ -36,8 +36,8 @@ namespace backend { namespace d3d12 {
 
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
         const auto& im = GetImplementation();
-        nxtSwapChainNextTexture next = {};
-        nxtSwapChainError error = im.GetNextTexture(im.userData, &next);
+        dawnSwapChainNextTexture next = {};
+        dawnSwapChainError error = im.GetNextTexture(im.userData, &next);
         if (error) {
             GetDevice()->HandleError(error);
             return nullptr;

@@ -29,15 +29,16 @@ namespace backend { namespace vulkan {
 
     VkInstance GetInstance(nxtDevice device);
 
-    nxtSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, VkSurfaceKHR surface);
-    nxtTextureFormat GetNativeSwapChainPreferredFormat(const nxtSwapChainImplementation* swapChain);
+    dawnSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, VkSurfaceKHR surface);
+    nxtTextureFormat GetNativeSwapChainPreferredFormat(
+        const dawnSwapChainImplementation* swapChain);
 }}  // namespace backend::vulkan
 
 namespace utils {
 
     class SwapChainImplVulkan {
       public:
-        using WSIContext = nxtWSIContextVulkan;
+        using WSIContext = dawnWSIContextVulkan;
 
         SwapChainImplVulkan(GLFWwindow* /*window*/) {
         }
@@ -45,19 +46,19 @@ namespace utils {
         ~SwapChainImplVulkan() {
         }
 
-        void Init(nxtWSIContextVulkan*) {
+        void Init(dawnWSIContextVulkan*) {
         }
 
-        nxtSwapChainError Configure(nxtTextureFormat, nxtTextureUsageBit, uint32_t, uint32_t) {
-            return NXT_SWAP_CHAIN_NO_ERROR;
+        dawnSwapChainError Configure(nxtTextureFormat, nxtTextureUsageBit, uint32_t, uint32_t) {
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
-        nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture*) {
-            return NXT_SWAP_CHAIN_NO_ERROR;
+        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture*) {
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
-        nxtSwapChainError Present() {
-            return NXT_SWAP_CHAIN_NO_ERROR;
+        dawnSwapChainError Present() {
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
     };
 
@@ -95,7 +96,7 @@ namespace utils {
 
       private:
         nxtDevice mDevice;
-        nxtSwapChainImplementation mSwapchainImpl = {};
+        dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
     BackendBinding* CreateVulkanBinding() {

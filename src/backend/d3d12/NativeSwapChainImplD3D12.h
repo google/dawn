@@ -17,8 +17,8 @@
 
 #include "backend/d3d12/d3d12_platform.h"
 
-#include "dawn/dawncpp.h"
 #include "dawn/dawn_wsi.h"
+#include "dawn/dawncpp.h"
 
 #include <vector>
 
@@ -28,18 +28,18 @@ namespace backend { namespace d3d12 {
 
     class NativeSwapChainImpl {
       public:
-        using WSIContext = nxtWSIContextD3D12;
+        using WSIContext = dawnWSIContextD3D12;
 
         NativeSwapChainImpl(Device* device, HWND window);
         ~NativeSwapChainImpl();
 
-        void Init(nxtWSIContextD3D12* context);
-        nxtSwapChainError Configure(nxtTextureFormat format,
-                                    nxtTextureUsageBit,
-                                    uint32_t width,
-                                    uint32_t height);
-        nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture);
-        nxtSwapChainError Present();
+        void Init(dawnWSIContextD3D12* context);
+        dawnSwapChainError Configure(nxtTextureFormat format,
+                                     nxtTextureUsageBit,
+                                     uint32_t width,
+                                     uint32_t height);
+        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture* nextTexture);
+        dawnSwapChainError Present();
 
         dawn::TextureFormat GetPreferredFormat() const;
 

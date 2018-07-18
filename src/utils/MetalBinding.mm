@@ -34,7 +34,7 @@ namespace backend { namespace metal {
 namespace utils {
     class SwapChainImplMTL {
       public:
-        using WSIContext = nxtWSIContextMetal;
+        using WSIContext = dawnWSIContextMetal;
 
         SwapChainImplMTL(id nsWindow) : mNsWindow(nsWindow) {
         }
@@ -44,15 +44,15 @@ namespace utils {
             [mCurrentDrawable release];
         }
 
-        void Init(nxtWSIContextMetal* ctx) {
+        void Init(dawnWSIContextMetal* ctx) {
             mMtlDevice = ctx->device;
             mCommandQueue = [mMtlDevice newCommandQueue];
         }
 
-        nxtSwapChainError Configure(nxtTextureFormat format,
-                                    nxtTextureUsageBit,
-                                    uint32_t width,
-                                    uint32_t height) {
+        dawnSwapChainError Configure(nxtTextureFormat format,
+                                     nxtTextureUsageBit,
+                                     uint32_t width,
+                                     uint32_t height) {
             if (format != NXT_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM) {
                 return "unsupported format";
             }
@@ -74,10 +74,10 @@ namespace utils {
 
             [contentView setLayer:mLayer];
 
-            return NXT_SWAP_CHAIN_NO_ERROR;
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
-        nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
+        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
             [mCurrentDrawable release];
             mCurrentDrawable = [mLayer nextDrawable];
             [mCurrentDrawable retain];
@@ -88,15 +88,15 @@ namespace utils {
 
             nextTexture->texture.ptr = reinterpret_cast<void*>(mCurrentTexture);
 
-            return NXT_SWAP_CHAIN_NO_ERROR;
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
-        nxtSwapChainError Present() {
+        dawnSwapChainError Present() {
             id<MTLCommandBuffer> commandBuffer = [mCommandQueue commandBuffer];
             [commandBuffer presentDrawable:mCurrentDrawable];
             [commandBuffer commit];
 
-            return NXT_SWAP_CHAIN_NO_ERROR;
+            return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
       private:
@@ -136,7 +136,7 @@ namespace utils {
       private:
         id<MTLDevice> mMetalDevice = nil;
         nxtDevice mBackendDevice = nullptr;
-        nxtSwapChainImplementation mSwapchainImpl = {};
+        dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
     BackendBinding* CreateMetalBinding() {

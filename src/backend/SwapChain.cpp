@@ -83,7 +83,7 @@ namespace backend {
         mImplementation.Present(mImplementation.userData);
     }
 
-    const nxtSwapChainImplementation& SwapChainBase::GetImplementation() {
+    const dawnSwapChainImplementation& SwapChainBase::GetImplementation() {
         return mImplementation;
     }
 
@@ -106,8 +106,8 @@ namespace backend {
             return;
         }
 
-        nxtSwapChainImplementation& impl =
-            *reinterpret_cast<nxtSwapChainImplementation*>(implementation);
+        dawnSwapChainImplementation& impl =
+            *reinterpret_cast<dawnSwapChainImplementation*>(implementation);
 
         if (!impl.Init || !impl.Destroy || !impl.Configure || !impl.GetNextTexture ||
             !impl.Present) {

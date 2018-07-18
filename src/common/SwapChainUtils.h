@@ -16,8 +16,8 @@
 #define COMMON_SWAPCHAINUTILS_H_
 
 template <typename T>
-nxtSwapChainImplementation CreateSwapChainImplementation(T* swapChain) {
-    nxtSwapChainImplementation impl = {};
+dawnSwapChainImplementation CreateSwapChainImplementation(T* swapChain) {
+    dawnSwapChainImplementation impl = {};
     impl.userData = swapChain;
     impl.Init = [](void* userData, void* wsiContext) {
         auto* ctx = reinterpret_cast<typename T::WSIContext*>(wsiContext);
@@ -28,7 +28,7 @@ nxtSwapChainImplementation CreateSwapChainImplementation(T* swapChain) {
                         uint32_t width, uint32_t height) {
         return reinterpret_cast<T*>(userData)->Configure(format, allowedUsage, width, height);
     };
-    impl.GetNextTexture = [](void* userData, nxtSwapChainNextTexture* nextTexture) {
+    impl.GetNextTexture = [](void* userData, dawnSwapChainNextTexture* nextTexture) {
         return reinterpret_cast<T*>(userData)->GetNextTexture(nextTexture);
     };
     impl.Present = [](void* userData) { return reinterpret_cast<T*>(userData)->Present(); };

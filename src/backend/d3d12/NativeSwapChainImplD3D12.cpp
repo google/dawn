@@ -45,13 +45,13 @@ namespace backend { namespace d3d12 {
     NativeSwapChainImpl::~NativeSwapChainImpl() {
     }
 
-    void NativeSwapChainImpl::Init(nxtWSIContextD3D12* /*context*/) {
+    void NativeSwapChainImpl::Init(dawnWSIContextD3D12* /*context*/) {
     }
 
-    nxtSwapChainError NativeSwapChainImpl::Configure(nxtTextureFormat format,
-                                                     nxtTextureUsageBit usage,
-                                                     uint32_t width,
-                                                     uint32_t height) {
+    dawnSwapChainError NativeSwapChainImpl::Configure(nxtTextureFormat format,
+                                                      nxtTextureUsageBit usage,
+                                                      uint32_t width,
+                                                      uint32_t height) {
         ASSERT(width > 0);
         ASSERT(height > 0);
         ASSERT(format == static_cast<nxtTextureFormat>(GetPreferredFormat()));
@@ -86,10 +86,10 @@ namespace backend { namespace d3d12 {
         // used
         mBufferSerials.resize(kFrameCount, 0);
 
-        return NXT_SWAP_CHAIN_NO_ERROR;
+        return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    nxtSwapChainError NativeSwapChainImpl::GetNextTexture(nxtSwapChainNextTexture* nextTexture) {
+    dawnSwapChainError NativeSwapChainImpl::GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
         mCurrentBuffer = mSwapChain->GetCurrentBackBufferIndex();
         nextTexture->texture.ptr = mBuffers[mCurrentBuffer].Get();
 
@@ -97,10 +97,10 @@ namespace backend { namespace d3d12 {
         // with the buffer. Ideally the synchronization should be all done on the GPU.
         mDevice->WaitForSerial(mBufferSerials[mCurrentBuffer]);
 
-        return NXT_SWAP_CHAIN_NO_ERROR;
+        return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    nxtSwapChainError NativeSwapChainImpl::Present() {
+    dawnSwapChainError NativeSwapChainImpl::Present() {
         // This assumes the texture has already been transition to the PRESENT state.
 
         ASSERT_SUCCESS(mSwapChain->Present(1, 0));
@@ -108,7 +108,7 @@ namespace backend { namespace d3d12 {
         mDevice->NextSerial();
 
         mBufferSerials[mCurrentBuffer] = mDevice->GetSerial();
-        return NXT_SWAP_CHAIN_NO_ERROR;
+        return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
     dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {

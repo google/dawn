@@ -21,7 +21,7 @@ namespace backend { namespace vulkan {
 
     SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
-        nxtWSIContextVulkan wsiContext = {};
+        dawnWSIContextVulkan wsiContext = {};
         im.Init(im.userData, &wsiContext);
 
         ASSERT(im.textureUsage != NXT_TEXTURE_USAGE_BIT_NONE);
@@ -33,8 +33,8 @@ namespace backend { namespace vulkan {
 
     TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
         const auto& im = GetImplementation();
-        nxtSwapChainNextTexture next = {};
-        nxtSwapChainError error = im.GetNextTexture(im.userData, &next);
+        dawnSwapChainNextTexture next = {};
+        dawnSwapChainError error = im.GetNextTexture(im.userData, &next);
 
         if (error) {
             GetDevice()->HandleError(error);
