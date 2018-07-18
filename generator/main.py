@@ -389,7 +389,7 @@ def debug(text):
     print(text)
 
 def main():
-    targets = ['dawn', 'dawncpp', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'wire', 'blink']
+    targets = ['dawn', 'dawncpp', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'wire']
 
     parser = argparse.ArgumentParser(
         description = 'Generates code for various target for Dawn.',
@@ -484,19 +484,6 @@ def main():
         renders.append(FileRender('wire/WireCmd.cpp', 'wire/WireCmd_autogen.cpp', base_backend_params))
         renders.append(FileRender('wire/WireClient.cpp', 'wire/WireClient.cpp', base_backend_params))
         renders.append(FileRender('wire/WireServer.cpp', 'wire/WireServer.cpp', base_backend_params))
-
-    if 'blink' in targets:
-        js_params = {'native_methods': lambda typ: js_native_methods(api_params['types'], typ)}
-        renders.append(FileRender('autogen.gni', 'autogen.gni', [base_params, api_params, js_params]))
-        renders.append(FileRender('Objects.cpp', 'NXT.cpp', [base_params, api_params, js_params]))
-        renders.append(FileRender('Forward.h', 'Forward.h', [base_params, api_params, js_params]))
-
-        for typ in api_params['by_category']['object']:
-            file_prefix = 'NXT' + typ.name.CamelCase()
-            params = [base_params, api_params, js_params, {'type': typ}]
-
-            renders.append(FileRender('Object.h', file_prefix + '.h', params))
-            renders.append(FileRender('Object.idl', file_prefix + '.idl', params))
 
     output_separator = '\n' if args.gn else ';'
     if args.print_dependencies:
