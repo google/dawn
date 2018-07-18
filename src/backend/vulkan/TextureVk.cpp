@@ -20,7 +20,7 @@
 namespace backend { namespace vulkan {
 
     namespace {
-        // Converts an NXT texture dimension to a Vulkan image type.
+        // Converts an Dawn texture dimension to a Vulkan image type.
         // Note that in Vulkan dimensionality is only 1D, 2D, 3D. Arrays and cube maps are expressed
         // via the array size and a "cubemap compatible" flag.
         VkImageType VulkanImageType(dawn::TextureDimension dimension) {
@@ -32,7 +32,7 @@ namespace backend { namespace vulkan {
             }
         }
 
-        // Converts an NXT texture dimension to a Vulkan image view type.
+        // Converts an Dawn texture dimension to a Vulkan image view type.
         // Contrary to image types, image view types include arrayness and cubemapness
         VkImageViewType VulkanImageViewType(dawn::TextureDimension dimension) {
             switch (dimension) {
@@ -43,7 +43,7 @@ namespace backend { namespace vulkan {
             }
         }
 
-        // Computes which vulkan access type could be required for the given NXT usage.
+        // Computes which vulkan access type could be required for the given Dawn usage.
         VkAccessFlags VulkanAccessFlags(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
             VkAccessFlags flags = 0;
 
@@ -80,7 +80,7 @@ namespace backend { namespace vulkan {
             return flags;
         }
 
-        // Chooses which Vulkan image layout should be used for the given NXT usage
+        // Chooses which Vulkan image layout should be used for the given Dawn usage
         VkImageLayout VulkanImageLayout(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
             if (usage == dawn::TextureUsageBit::None) {
                 return VK_IMAGE_LAYOUT_UNDEFINED;
@@ -119,7 +119,7 @@ namespace backend { namespace vulkan {
             }
         }
 
-        // Computes which Vulkan pipeline stage can access a texture in the given NXT usage
+        // Computes which Vulkan pipeline stage can access a texture in the given Dawn usage
         VkPipelineStageFlags VulkanPipelineStage(dawn::TextureUsageBit usage,
                                                  dawn::TextureFormat format) {
             VkPipelineStageFlags flags = 0;
@@ -162,7 +162,7 @@ namespace backend { namespace vulkan {
             return flags;
         }
 
-        // Computes which Vulkan texture aspects are relevant for the given NXT format
+        // Computes which Vulkan texture aspects are relevant for the given Dawn format
         VkImageAspectFlags VulkanAspectMask(dawn::TextureFormat format) {
             bool isDepth = TextureFormatHasDepth(format);
             bool isStencil = TextureFormatHasStencil(format);
@@ -183,7 +183,7 @@ namespace backend { namespace vulkan {
 
     }  // namespace
 
-    // Converts NXT texture format to Vulkan formats.
+    // Converts Dawn texture format to Vulkan formats.
     VkFormat VulkanImageFormat(dawn::TextureFormat format) {
         switch (format) {
             case dawn::TextureFormat::R8G8B8A8Unorm:
@@ -207,7 +207,7 @@ namespace backend { namespace vulkan {
         }
     }
 
-    // Converts the NXT usage flags to Vulkan usage flags. Also needs the format to choose
+    // Converts the Dawn usage flags to Vulkan usage flags. Also needs the format to choose
     // between color and depth attachment usages.
     VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
         VkImageUsageFlags flags = 0;

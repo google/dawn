@@ -176,7 +176,7 @@ namespace backend { namespace vulkan {
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(copy->rowPitch, src, dst);
 
-                    // The image is written to so the NXT guarantees make sure it is in the
+                    // The image is written to so the Dawn guarantees make sure it is in the
                     // TRANSFER_DST_OPTIMAL layout
                     device->fn.CmdCopyBufferToImage(commands, srcBuffer, dstImage,
                                                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
@@ -199,7 +199,7 @@ namespace backend { namespace vulkan {
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(copy->rowPitch, dst, src);
 
-                    // The NXT TransferSrc usage is always mapped to GENERAL
+                    // The Dawn TransferSrc usage is always mapped to GENERAL
                     device->fn.CmdCopyImageToBuffer(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
                                                     dstBuffer, 1, &region);
                 } break;

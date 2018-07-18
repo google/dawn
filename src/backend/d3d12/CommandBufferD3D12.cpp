@@ -489,7 +489,7 @@ namespace backend { namespace d3d12 {
 
                 if (clearFlags) {
                     auto handle = renderPass->GetDSVDescriptor();
-                    // TODO(kainino@chromium.org): investigate: should the NXT clear
+                    // TODO(kainino@chromium.org): investigate: should the Dawn clear
                     // stencil type be uint8_t?
                     uint8_t clearStencil = static_cast<uint8_t>(attachmentInfo.clearStencil);
                     commandList->ClearDepthStencilView(

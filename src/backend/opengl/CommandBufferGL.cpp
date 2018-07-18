@@ -148,7 +148,7 @@ namespace backend { namespace opengl {
         };
 
         // Vertex buffers and index buffers are implemented as part of an OpenGL VAO that
-        // corresponds to an InputState. On the contrary in NXT they are part of the global state.
+        // corresponds to an InputState. On the contrary in Dawn they are part of the global state.
         // This means that we have to re-apply these buffers on an InputState change.
         class InputBufferTracker {
           public:

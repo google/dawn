@@ -609,7 +609,7 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s model.gltf [... NXT Options]\n", argv[0]);
+        fprintf(stderr, "Usage: %s model.gltf [... Dawn Options]\n", argv[0]);
         return 1;
     }
 

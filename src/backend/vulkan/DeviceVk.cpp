@@ -491,7 +491,7 @@ namespace backend { namespace vulkan {
             usedKnobs->swapchain = true;
         }
 
-        // Always require independentBlend because it is a core NXT feature,
+        // Always require independentBlend because it is a core Dawn feature,
         usedKnobs->features.independentBlend = VK_TRUE;
 
         // Find a universal queue family

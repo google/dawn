@@ -94,7 +94,7 @@ namespace backend { namespace vulkan {
         mCreateInfo.back.depthFailOp = VulkanStencilOp(stencil.back.depthFail);
         mCreateInfo.back.compareOp = VulkanCompareOp(stencil.back.compareFunction);
 
-        // NXT doesn't have separate front and back stencil masks.
+        // Dawn doesn't have separate front and back stencil masks.
         mCreateInfo.front.compareMask = stencil.readMask;
         mCreateInfo.back.compareMask = stencil.readMask;
         mCreateInfo.front.writeMask = stencil.writeMask;

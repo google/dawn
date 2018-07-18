@@ -68,7 +68,7 @@ namespace dawn { namespace wire {
             {% set Suffix = as_MethodSuffix(type.name, method.name) %}
             {% set Cmd = Suffix + "Cmd" %}
 
-            //* These are "structure" version of the list of arguments to the different NXT methods.
+            //* These are "structure" version of the list of arguments to the different Dawn methods.
             //* They provide helpers to serialize/deserialize to/from a buffer.
             struct {{Cmd}} {
                 //* From a filled structure, compute how much size will be used in the serialization buffer.

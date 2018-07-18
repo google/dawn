@@ -62,7 +62,7 @@ namespace backend {
 
         virtual void TickImpl() = 0;
 
-        // Many NXT objects are completely immutable once created which means that if two
+        // Many Dawn objects are completely immutable once created which means that if two
         // builders are given the same arguments, they can return the same object. Reusing
         // objects will help make comparisons between objects by a single pointer comparison.
         //

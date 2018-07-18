@@ -26,7 +26,7 @@ namespace backend { namespace vulkan {
         : PipelineLayoutBase(device, descriptor) {
         // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
         // TODO(cwallez@chromium.org) Vulkan doesn't allow holes in this array, should we expose
-        // this constraints at the NXT level?
+        // this constraints at the Dawn level?
         uint32_t numSetLayouts = 0;
         std::array<VkDescriptorSetLayout, kMaxBindGroups> setLayouts;
         for (uint32_t setIndex : IterateBitSet(GetBindGroupLayoutsMask())) {

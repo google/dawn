@@ -149,7 +149,7 @@ protected:
         EXPECT_PIXEL_RGBA8_EQ(expectedU3, mRenderPass.color, 3, 0);
         EXPECT_PIXEL_RGBA8_EQ(expectedV2, mRenderPass.color, 0, 2);
         EXPECT_PIXEL_RGBA8_EQ(expectedV3, mRenderPass.color, 0, 3);
-        // TODO: add tests for W address mode, once NXT supports 3D textures
+        // TODO: add tests for W address mode, once Dawn supports 3D textures
     }
 
     utils::BasicRenderPass mRenderPass;

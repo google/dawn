@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-// Getting data back from NXT is done in an async manners so all expectations are "deferred"
+// Getting data back from Dawn is done in an async manners so all expectations are "deferred"
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
 // so resources should have the TransferSrc allowed usage bit if you want to add expectations on
 // them.

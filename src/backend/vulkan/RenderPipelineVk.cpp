@@ -80,7 +80,7 @@ namespace backend { namespace vulkan {
         inputAssembly.pNext = nullptr;
         inputAssembly.flags = 0;
         inputAssembly.topology = VulkanPrimitiveTopology(GetPrimitiveTopology());
-        // Primitive restart is always enabled in NXT (because of Metal)
+        // Primitive restart is always enabled in Dawn (because of Metal)
         inputAssembly.primitiveRestartEnable = VK_TRUE;
 
         // A dummy viewport/scissor info. The validation layers force use to provide at least one

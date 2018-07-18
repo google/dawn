@@ -145,7 +145,7 @@ namespace backend {
     //    in Allocate
     //  - Be able to optimize allocation to one block, for command buffers expected to live long to
     //    avoid cache misses
-    //  - Better block allocation, maybe have NXT API to say command buffer is going to have size
+    //  - Better block allocation, maybe have Dawn API to say command buffer is going to have size
     //    close to another
 
     CommandAllocator::CommandAllocator()

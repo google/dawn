@@ -1,6 +1,6 @@
 # NXT, standalone part
 
-NXT is an unoriginal name for Chromium’s investigation and prototyping of a NeXT generation graphics API for the Web. This repository contains a native library implementing NXT on multiple backends, as well as some code generators used for the integration in Chromium. NXT is not an official Google product.
+NXT is an unoriginal name for Chromium’s investigation and prototyping of a NeXT generation graphics API for the Web. This repository contains a native library implementing Dawn on multiple backends, as well as some code generators used for the integration in Chromium. Dawn is not an official Google product.
 
 We focused on efforts on two axis:
 
@@ -64,9 +64,9 @@ What we call the wire is an API command buffer for NXT. The name was chosen to a
 
 Originally OpenGL was designed as a client-server architecture with asynchronous errors and objects that could be used by the client before they were created by server. Over time more client state-tracking was added but the core asynchronous structure remained. This enabled OpenGL ES 2 / WebGL to be implemented in Chromium in which the web page and the GPU driver live in different processes. In addition to security this separation helps with performance in CPU-bound WebGL apps.
 
-For this reason we built NXT as a network-transparent API so that it could integrate nicely in the Chromium architecture, and we believe any next-generation Web API would have to be network-transparent too.
+For this reason we built Dawn as a network-transparent API so that it could integrate nicely in the Chromium architecture, and we believe any next-generation Web API would have to be network-transparent too.
 
-In NXT, as in OpenGL, API objects can be used immediately after they have been created on the client, even if the server hasn’t seen the creation command yet. If object creation succeeds, everything happens transparently otherwise the object is tagged as being an error. NXT calls with error-tagged objects use the following rules:
+In NXT, as in OpenGL, API objects can be used immediately after they have been created on the client, even if the server hasn’t seen the creation command yet. If object creation succeeds, everything happens transparently otherwise the object is tagged as being an error. Dawn calls with error-tagged objects use the following rules:
 
 - Functions result in a noop.
 - Functions returning an object return an error value.
@@ -80,11 +80,11 @@ Currently the wire only has client to server communication and there is no way t
 
 Our prototype heavily relies on code generation. It greatly improved iteration time on the API as the generators kept the Javascript bindings, IDL files, wire, C++ bindings and friends up to date. But it reduced flexibility in the API shape as adding as changing the shape required modifying all generators in non-trivial ways.
 
-For example, NXT can only return objects which prevents mapping buffers or even reading back single pixel values. There is currently no way to know the error status on the client side. These improvements, and more, are planned, and contributions are welcome.
+For example, Dawn can only return objects which prevents mapping buffers or even reading back single pixel values. There is currently no way to know the error status on the client side. These improvements, and more, are planned, and contributions are welcome.
 
 Other generators include:
 
-- A C-header with the definition of dawnProcTable that is the “real” underlying NXT API exposed by the backends.
+- A C-header with the definition of dawnProcTable that is the “real” underlying Dawn API exposed by the backends.
 - Glue code generating dawnProcTable for a backend with simple validation included (enum value checks etc.)
 - A mock API for testing
 

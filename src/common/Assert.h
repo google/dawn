@@ -17,7 +17,7 @@
 
 #include "common/Compiler.h"
 
-// NXT asserts to be used instead of the regular C stdlib assert function (if you don't use assert
+// Dawn asserts to be used instead of the regular C stdlib assert function (if you don't use assert
 // yet, you should start now!). In debug ASSERT(condition) will trigger an error, otherwise in
 // release it does nothing at runtime.
 //

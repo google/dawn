@@ -70,7 +70,7 @@ namespace backend { namespace vulkan {
         }
 
         VkColorComponentFlagBits VulkanColorWriteMask(dawn::ColorWriteMask mask) {
-            // Vulkan and NXT color write masks match, static assert it and return the mask
+            // Vulkan and Dawn color write masks match, static assert it and return the mask
             static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Red) ==
                               VK_COLOR_COMPONENT_R_BIT,
                           "");

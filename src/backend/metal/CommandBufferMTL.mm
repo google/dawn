@@ -503,7 +503,7 @@ namespace backend { namespace metal {
                     std::array<NSUInteger, kMaxVertexInputs> mtlOffsets;
 
                     // Perhaps an "array of vertex buffers(+offsets?)" should be
-                    // a NXT API primitive to avoid reconstructing this array?
+                    // a Dawn API primitive to avoid reconstructing this array?
                     for (uint32_t i = 0; i < cmd->count; ++i) {
                         Buffer* buffer = ToBackend(buffers[i].Get());
                         mtlBuffers[i] = buffer->GetMTLBuffer();

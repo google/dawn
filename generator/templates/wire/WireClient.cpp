@@ -192,7 +192,7 @@ namespace dawn { namespace wire {
                 Device* mDevice;
         };
 
-        //* The client wire uses the global NXT device to store its global data such as the serializer
+        //* The client wire uses the global Dawn device to store its global data such as the serializer
         //* and the object id allocators.
         class Device : public ObjectBase, public wire::ObjectIdProvider {
             public:
