@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "utils/DawnHelpers.h"
 
-class ScissorTest: public NXTTest {
+class ScissorTest: public DawnTest {
   protected:
     dawn::RenderPipeline CreateQuadPipeline(dawn::TextureFormat format) {
         dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(

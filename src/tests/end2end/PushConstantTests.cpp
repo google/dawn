@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "common/Assert.h"
 #include "common/Constants.h"
@@ -20,7 +20,7 @@
 
 #include <array>
 
-class PushConstantTest: public NXTTest {
+class PushConstantTest: public DawnTest {
     protected:
         // Layout, bind group and friends to store results for compute tests, can have an extra buffer
         // so that two different pipeline layout can be created.

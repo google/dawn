@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "utils/DawnHelpers.h"
 
@@ -50,10 +50,10 @@ class DrawQuad {
         dawn::PipelineLayout pipelineLayout = {};
 };
 
-class RenderPassLoadOpTests : public NXTTest {
+class RenderPassLoadOpTests : public DawnTest {
     protected:
         void SetUp() override {
-            NXTTest::SetUp();
+            DawnTest::SetUp();
 
             renderTarget = device.CreateTextureBuilder()
                 .SetDimension(dawn::TextureDimension::e2D)

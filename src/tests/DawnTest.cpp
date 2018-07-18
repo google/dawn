@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "common/Assert.h"
 #include "common/Constants.h"
@@ -29,7 +29,7 @@
 namespace {
 
     utils::BackendType ParamToBackendType(BackendType type) {
-        switch(type) {
+        switch (type) {
             case D3D12Backend:
                 return utils::BackendType::D3D12;
             case MetalBackend:
@@ -44,7 +44,7 @@ namespace {
     }
 
     std::string ParamName(BackendType type) {
-        switch(type) {
+        switch (type) {
             case D3D12Backend:
                 return "D3D12";
             case MetalBackend:
@@ -87,16 +87,16 @@ namespace {
     // End2end tests should test valid commands produce the expected result so no error
     // should happen. Failure cases should be tested in the validation tests.
     void DeviceErrorCauseTestFailure(const char* message, dawnCallbackUserdata) {
-         FAIL() << "Device level failure: " << message;
+        FAIL() << "Device level failure: " << message;
     }
 
     struct MapReadUserdata {
-        NXTTest* test;
+        DawnTest* test;
         size_t slot;
     };
-}
+}  // namespace
 
-NXTTest::~NXTTest() {
+DawnTest::~DawnTest() {
     // We need to destroy child objects before the Device
     mReadbackSlots.clear();
     queue = dawn::Queue();
@@ -109,25 +109,25 @@ NXTTest::~NXTTest() {
     dawnSetProcs(nullptr);
 }
 
-bool NXTTest::IsD3D12() const {
+bool DawnTest::IsD3D12() const {
     return GetParam() == D3D12Backend;
 }
 
-bool NXTTest::IsMetal() const {
+bool DawnTest::IsMetal() const {
     return GetParam() == MetalBackend;
 }
 
-bool NXTTest::IsOpenGL() const {
+bool DawnTest::IsOpenGL() const {
     return GetParam() == OpenGLBackend;
 }
 
-bool NXTTest::IsVulkan() const {
+bool DawnTest::IsVulkan() const {
     return GetParam() == VulkanBackend;
 }
 
 bool gTestUsesWire = false;
 
-void NXTTest::SetUp() {
+void DawnTest::SetUp() {
     mBinding = utils::CreateBinding(ParamToBackendType(GetParam()));
     DAWN_ASSERT(mBinding != nullptr);
 
@@ -163,7 +163,7 @@ void NXTTest::SetUp() {
         cDevice = backendDevice;
     }
 
-    // Set up the device and queue because all tests need them, and NXTTest needs them too for the
+    // Set up the device and queue because all tests need them, and DawnTest needs them too for the
     // deferred expectations.
     dawnSetProcs(&procs);
     device = dawn::Device::Acquire(cDevice);
@@ -172,16 +172,17 @@ void NXTTest::SetUp() {
     // The swapchain isn't used by tests but is useful when debugging with graphics debuggers that
     // capture at frame boundaries.
     swapchain = device.CreateSwapChainBuilder()
-        .SetImplementation(mBinding->GetSwapChainImplementation())
-        .GetResult();
-    swapchain.Configure(static_cast<dawn::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
-                        dawn::TextureUsageBit::OutputAttachment, 400, 400);
+                    .SetImplementation(mBinding->GetSwapChainImplementation())
+                    .GetResult();
+    swapchain.Configure(
+        static_cast<dawn::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
+        dawn::TextureUsageBit::OutputAttachment, 400, 400);
 
     // The end2end tests should never cause validation errors. These should be tested in unittests.
     device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
 }
 
-void NXTTest::TearDown() {
+void DawnTest::TearDown() {
     FlushWire();
 
     MapSlotsSynchronously();
@@ -204,16 +205,22 @@ void NXTTest::TearDown() {
     }
 }
 
-std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, const dawn::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation) {
+std::ostringstream& DawnTest::AddBufferExpectation(const char* file,
+                                                   int line,
+                                                   const dawn::Buffer& buffer,
+                                                   uint32_t offset,
+                                                   uint32_t size,
+                                                   detail::Expectation* expectation) {
     dawn::Buffer source = buffer.Clone();
 
     auto readback = ReserveReadback(size);
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the buffer might have been modified.
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .CopyBufferToBuffer(source, offset, readback.buffer, readback.offset, size)
-        .GetResult();
+    dawn::CommandBuffer commands =
+        device.CreateCommandBufferBuilder()
+            .CopyBufferToBuffer(source, offset, readback.buffer, readback.offset, size)
+            .GetResult();
 
     queue.Submit(1, &commands);
 
@@ -232,7 +239,16 @@ std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, co
     return *(mDeferredExpectations.back().message.get());
 }
 
-std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, const dawn::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t level, uint32_t pixelSize, detail::Expectation* expectation) {
+std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
+                                                    int line,
+                                                    const dawn::Texture& texture,
+                                                    uint32_t x,
+                                                    uint32_t y,
+                                                    uint32_t width,
+                                                    uint32_t height,
+                                                    uint32_t level,
+                                                    uint32_t pixelSize,
+                                                    detail::Expectation* expectation) {
     dawn::Texture source = texture.Clone();
     uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
     uint32_t size = rowPitch * (height - 1) + width * pixelSize;
@@ -241,9 +257,11 @@ std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, c
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .CopyTextureToBuffer(source, x, y, 0, width, height, 1, level, readback.buffer, readback.offset, rowPitch)
-        .GetResult();
+    dawn::CommandBuffer commands =
+        device.CreateCommandBufferBuilder()
+            .CopyTextureToBuffer(source, x, y, 0, width, height, 1, level, readback.buffer,
+                                 readback.offset, rowPitch)
+            .GetResult();
 
     queue.Submit(1, &commands);
 
@@ -262,35 +280,36 @@ std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, c
     return *(mDeferredExpectations.back().message.get());
 }
 
-void NXTTest::WaitABit() {
+void DawnTest::WaitABit() {
     device.Tick();
     FlushWire();
 
     utils::USleep(100);
 }
 
-void NXTTest::SwapBuffersForCapture() {
+void DawnTest::SwapBuffersForCapture() {
     // Insert a frame boundary for API capture tools.
     dawn::Texture backBuffer = swapchain.GetNextTexture();
     swapchain.Present(backBuffer);
 }
 
-void NXTTest::FlushWire() {
+void DawnTest::FlushWire() {
     if (gTestUsesWire) {
         ASSERT(mC2sBuf->Flush());
         ASSERT(mS2cBuf->Flush());
     }
 }
 
-NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {
+DawnTest::ReadbackReservation DawnTest::ReserveReadback(uint32_t readbackSize) {
     // For now create a new MapRead buffer for each readback
     // TODO(cwallez@chromium.org): eventually make bigger buffers and allocate linearly?
     ReadbackSlot slot;
     slot.bufferSize = readbackSize;
-    slot.buffer = device.CreateBufferBuilder()
-        .SetSize(readbackSize)
-        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    slot.buffer =
+        device.CreateBufferBuilder()
+            .SetSize(readbackSize)
+            .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
+            .GetResult();
 
     ReadbackReservation reservation;
     reservation.buffer = slot.buffer.Clone();
@@ -301,8 +320,9 @@ NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {
     return reservation;
 }
 
-void NXTTest::MapSlotsSynchronously() {
-    // Initialize numPendingMapOperations before mapping, just in case the callback is called immediately.
+void DawnTest::MapSlotsSynchronously() {
+    // Initialize numPendingMapOperations before mapping, just in case the callback is called
+    // immediately.
     mNumPendingMapOperations = mReadbackSlots.size();
 
     // Map all readback slots
@@ -310,7 +330,9 @@ void NXTTest::MapSlotsSynchronously() {
         auto userdata = new MapReadUserdata{this, i};
 
         auto& slot = mReadbackSlots[i];
-        slot.buffer.MapReadAsync(0, slot.bufferSize, SlotMapReadCallback, static_cast<dawn::CallbackUserdata>(reinterpret_cast<uintptr_t>(userdata)));
+        slot.buffer.MapReadAsync(
+            0, slot.bufferSize, SlotMapReadCallback,
+            static_cast<dawn::CallbackUserdata>(reinterpret_cast<uintptr_t>(userdata)));
     }
 
     // Busy wait until all map operations are done.
@@ -320,31 +342,33 @@ void NXTTest::MapSlotsSynchronously() {
 }
 
 // static
-void NXTTest::SlotMapReadCallback(dawnBufferMapAsyncStatus status,
-                                  const void* data,
-                                  dawnCallbackUserdata userdata_) {
+void DawnTest::SlotMapReadCallback(dawnBufferMapAsyncStatus status,
+                                   const void* data,
+                                   dawnCallbackUserdata userdata_) {
     DAWN_ASSERT(status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
 
     auto userdata = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata_));
     userdata->test->mReadbackSlots[userdata->slot].mappedData = data;
-    userdata->test->mNumPendingMapOperations --;
+    userdata->test->mNumPendingMapOperations--;
 
     delete userdata;
 }
 
-void NXTTest::ResolveExpectations() {
+void DawnTest::ResolveExpectations() {
     for (const auto& expectation : mDeferredExpectations) {
         DAWN_ASSERT(mReadbackSlots[expectation.readbackSlot].mappedData != nullptr);
 
         // Get a pointer to the mapped copy of the data for the expectation.
-        const char* data = reinterpret_cast<const char*>(mReadbackSlots[expectation.readbackSlot].mappedData);
+        const char* data =
+            reinterpret_cast<const char*>(mReadbackSlots[expectation.readbackSlot].mappedData);
         data += expectation.readbackOffset;
 
         uint32_t size;
         std::vector<char> packedData;
         if (expectation.rowBytes != expectation.rowPitch) {
             DAWN_ASSERT(expectation.rowPitch > expectation.rowBytes);
-            uint32_t rowCount = (expectation.size + expectation.rowPitch - 1) / expectation.rowPitch;
+            uint32_t rowCount =
+                (expectation.size + expectation.rowPitch - 1) / expectation.rowPitch;
             uint32_t packedSize = rowCount * expectation.rowBytes;
             packedData.resize(packedSize);
             for (uint32_t r = 0; r < rowCount; ++r) {
@@ -361,7 +385,8 @@ void NXTTest::ResolveExpectations() {
         // Get the result for the expectation and add context to failures
         testing::AssertionResult result = expectation.expectation->Check(data, size);
         if (!result) {
-            result << " Expectation created at " << expectation.file << ":" << expectation.line << std::endl;
+            result << " Expectation created at " << expectation.file << ":" << expectation.line
+                   << std::endl;
             result << expectation.message->str();
         }
 
@@ -377,33 +402,30 @@ bool RGBA8::operator!=(const RGBA8& other) const {
     return !(*this == other);
 }
 
-std::ostream& operator<< (std::ostream& stream, const RGBA8& color) {
-    return stream << "RGBA8(" <<
-        static_cast<int>(color.r) << ", " <<
-        static_cast<int>(color.g) << ", " <<
-        static_cast<int>(color.b) << ", " <<
-        static_cast<int>(color.a) << ")";
+std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
+    return stream << "RGBA8(" << static_cast<int>(color.r) << ", " << static_cast<int>(color.g)
+                  << ", " << static_cast<int>(color.b) << ", " << static_cast<int>(color.a) << ")";
 }
 
-std::ostream &operator<<(std::ostream& stream, BackendType backend) {
+std::ostream& operator<<(std::ostream& stream, BackendType backend) {
     return stream << ParamName(backend);
 }
 
 namespace detail {
     bool IsBackendAvailable(BackendType type) {
         switch (type) {
-            #if defined(DAWN_ENABLE_BACKEND_D3D12)
-                case D3D12Backend:
-            #endif
-            #if defined(DAWN_ENABLE_BACKEND_METAL)
-                case MetalBackend:
-            #endif
-            #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-                case OpenGLBackend:
-            #endif
-            #if defined(DAWN_ENABLE_BACKEND_VULKAN)
-                case VulkanBackend:
-            #endif
+#if defined(DAWN_ENABLE_BACKEND_D3D12)
+            case D3D12Backend:
+#endif
+#if defined(DAWN_ENABLE_BACKEND_METAL)
+            case MetalBackend:
+#endif
+#if defined(DAWN_ENABLE_BACKEND_OPENGL)
+            case OpenGLBackend:
+#endif
+#if defined(DAWN_ENABLE_BACKEND_VULKAN)
+            case VulkanBackend:
+#endif
                 return true;
 
             default:
@@ -424,17 +446,17 @@ namespace detail {
 
     // Helper classes to set expectations
 
-    template<typename T>
+    template <typename T>
     ExpectEq<T>::ExpectEq(T singleValue) {
         mExpected.push_back(singleValue);
     }
 
-    template<typename T>
+    template <typename T>
     ExpectEq<T>::ExpectEq(const T* values, const unsigned int count) {
         mExpected.assign(values, values + count);
     }
 
-    template<typename T>
+    template <typename T>
     testing::AssertionResult ExpectEq<T>::Check(const void* data, size_t size) {
         DAWN_ASSERT(size == sizeof(T) * mExpected.size());
 
@@ -443,7 +465,10 @@ namespace detail {
         testing::AssertionResult failure = testing::AssertionFailure();
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (actual[i] != mExpected[i]) {
-                testing::AssertionResult result = testing::AssertionFailure() << "Expected data[" << i << "] to be " << mExpected[i] << ", actual " << actual[i] << std::endl;
+                testing::AssertionResult result = testing::AssertionFailure()
+                                                  << "Expected data[" << i << "] to be "
+                                                  << mExpected[i] << ", actual " << actual[i]
+                                                  << std::endl;
 
                 auto printBuffer = [&](const T* buffer) {
                     static constexpr unsigned int kBytes = sizeof(T);
@@ -477,4 +502,4 @@ namespace detail {
     template class ExpectEq<uint8_t>;
     template class ExpectEq<uint32_t>;
     template class ExpectEq<RGBA8>;
-}
+}  // namespace detail

@@ -15,7 +15,7 @@
 #include <array>
 #include <cmath>
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "common/Assert.h"
 #include "common/Constants.h"
@@ -36,10 +36,10 @@ namespace {
     };
 }
 
-class SamplerTest : public NXTTest {
+class SamplerTest : public DawnTest {
 protected:
     void SetUp() override {
-        NXTTest::SetUp();
+        DawnTest::SetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         mBindGroupLayout = utils::MakeBindGroupLayout(

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "utils/DawnHelpers.h"
 
-class ViewportOrientationTests : public NXTTest {};
+class ViewportOrientationTests : public DawnTest {};
 
 // Test that the pixel in viewport coordinate (-1, -1) matches texel (0, 0)
 TEST_P(ViewportOrientationTests, OriginAt0x0) {

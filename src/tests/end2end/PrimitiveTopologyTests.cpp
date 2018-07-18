@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "common/Assert.h"
 #include "utils/DawnHelpers.h"
@@ -142,10 +142,10 @@ constexpr static float kVertices[] = {
 };
 // clang-format on
 
-class PrimitiveTopologyTest : public NXTTest {
+class PrimitiveTopologyTest : public DawnTest {
     protected:
         void SetUp() override {
-            NXTTest::SetUp();
+            DawnTest::SetUp();
 
             renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 

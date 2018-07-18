@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "common/Assert.h"
 #include "utils/DawnHelpers.h"
 
 constexpr static unsigned int kRTSize = 64;
 
-class DepthStencilStateTest : public NXTTest {
+class DepthStencilStateTest : public DawnTest {
     protected:
         void SetUp() override {
-            NXTTest::SetUp();
+            DawnTest::SetUp();
 
             renderTarget = device.CreateTextureBuilder()
                 .SetDimension(dawn::TextureDimension::e2D)

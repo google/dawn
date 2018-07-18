@@ -15,7 +15,7 @@
 #include <array>
 #include <cmath>
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "common/Assert.h"
 #include "common/Constants.h"
@@ -23,10 +23,10 @@
 
 constexpr static unsigned int kRTSize = 64;
 
-class BlendStateTest : public NXTTest {
+class BlendStateTest : public DawnTest {
     protected:
         void SetUp() override {
-            NXTTest::SetUp();
+            DawnTest::SetUp();
 
             vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450

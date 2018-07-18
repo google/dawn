@@ -19,34 +19,40 @@
 
 // Getting data back from NXT is done in an async manners so all expectations are "deferred"
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
-// so resources should have the TransferSrc allowed usage bit if you want to add expectations on them.
-#define EXPECT_BUFFER_U32_EQ(expected, buffer, offset) \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), new detail::ExpectEq<uint32_t>(expected))
+// so resources should have the TransferSrc allowed usage bit if you want to add expectations on
+// them.
+#define EXPECT_BUFFER_U32_EQ(expected, buffer, offset)                         \
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), \
+                         new detail::ExpectEq<uint32_t>(expected))
 
-#define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count) \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * count, new detail::ExpectEq<uint32_t>(expected, count))
+#define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count)                    \
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * count, \
+                         new detail::ExpectEq<uint32_t>(expected, count))
 
 #define EXPECT_BUFFER_U8_EQ(expected, buffer, offset)                         \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint8_t), \
                          new detail::ExpectEq<uint8_t>(expected))
 
 // Test a pixel of the mip level 0 of a 2D texture.
-#define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected))
+#define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y)                               \
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, sizeof(RGBA8), \
+                          new detail::ExpectEq<RGBA8>(expected))
 
-#define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, x, y, width, height, level) \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, sizeof(RGBA8), new detail::ExpectEq<RGBA8>(expected, (width) * (height)))
+#define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, x, y, width, height, level)                    \
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, sizeof(RGBA8), \
+                          new detail::ExpectEq<RGBA8>(expected, (width) * (height)))
 
 struct RGBA8 {
-    constexpr RGBA8() : RGBA8(0,0,0,0) {}
-    constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a): r(r), g(g), b(b), a(a) {
+    constexpr RGBA8() : RGBA8(0, 0, 0, 0) {
+    }
+    constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
     }
     bool operator==(const RGBA8& other) const;
     bool operator!=(const RGBA8& other) const;
 
     uint8_t r, g, b, a;
 };
-std::ostream& operator<< (std::ostream& stream, const RGBA8& color);
+std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
 
 // Backend types used in the DAWN_INSTANTIATE_TEST
 enum BackendType {
@@ -56,7 +62,7 @@ enum BackendType {
     VulkanBackend,
     NumBackendTypes,
 };
-std::ostream &operator<<(std::ostream& stream, BackendType backend);
+std::ostream& operator<<(std::ostream& stream, BackendType backend);
 
 namespace utils {
     class BackendBinding;
@@ -71,9 +77,9 @@ namespace dawn { namespace wire {
     class TerribleCommandBuffer;
 }}  // namespace dawn::wire
 
-class NXTTest : public ::testing::TestWithParam<BackendType> {
+class DawnTest : public ::testing::TestWithParam<BackendType> {
   public:
-    ~NXTTest();
+    ~DawnTest();
 
     void SetUp() override;
     void TearDown() override;
@@ -164,11 +170,12 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
 //     DAWN_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
-#define DAWN_INSTANTIATE_TEST(testName, firstParam, ...) \
-    const decltype(firstParam) testName##params[] = { firstParam, ##__VA_ARGS__ }; \
-    INSTANTIATE_TEST_CASE_P(, testName, \
-        testing::ValuesIn(::detail::FilterBackends(testName##params, sizeof(testName##params) / sizeof(firstParam))), \
-        testing::PrintToStringParamName());
+#define DAWN_INSTANTIATE_TEST(testName, firstParam, ...)                                           \
+    const decltype(firstParam) testName##params[] = {firstParam, ##__VA_ARGS__};                   \
+    INSTANTIATE_TEST_CASE_P(, testName,                                                            \
+                            testing::ValuesIn(::detail::FilterBackends(                            \
+                                testName##params, sizeof(testName##params) / sizeof(firstParam))), \
+                            testing::PrintToStringParamName());
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST
@@ -177,27 +184,26 @@ namespace detail {
 
     // All classes used to implement the deferred expectations should inherit from this.
     class Expectation {
-        public:
-            virtual ~Expectation() = default;
+      public:
+        virtual ~Expectation() = default;
 
-            // Will be called with the buffer or texture data the expectation should check.
-            virtual testing::AssertionResult Check(const void* data, size_t size) = 0;
+        // Will be called with the buffer or texture data the expectation should check.
+        virtual testing::AssertionResult Check(const void* data, size_t size) = 0;
     };
 
     // Expectation that checks the data is equal to some expected values.
-    template<typename T>
+    template <typename T>
     class ExpectEq : public Expectation {
-        public:
-            ExpectEq(T singleValue);
-            ExpectEq(const T* values, const unsigned int count);
+      public:
+        ExpectEq(T singleValue);
+        ExpectEq(const T* values, const unsigned int count);
 
-            testing::AssertionResult Check(const void* data, size_t size) override;
+        testing::AssertionResult Check(const void* data, size_t size) override;
 
-        private:
-            std::vector<T> mExpected;
+      private:
+        std::vector<T> mExpected;
     };
     extern template class ExpectEq<uint8_t>;
     extern template class ExpectEq<uint32_t>;
     extern template class ExpectEq<RGBA8>;
-}
-
+}  // namespace detail

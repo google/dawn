@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include <cstring>
 
-class BufferMapReadTests : public NXTTest {
+class BufferMapReadTests : public DawnTest {
     protected:
 
         static void MapReadCallback(dawnBufferMapAsyncStatus status, const void* data, dawnCallbackUserdata userdata) {
@@ -112,7 +112,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
 
 DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
 
-class BufferMapWriteTests : public NXTTest {
+class BufferMapWriteTests : public DawnTest {
     protected:
 
         static void MapWriteCallback(dawnBufferMapAsyncStatus status, void* data, dawnCallbackUserdata userdata) {
@@ -189,7 +189,7 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
 
 DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
 
-class BufferSetSubDataTests : public NXTTest {
+class BufferSetSubDataTests : public DawnTest {
 };
 
 // Test the simplest set sub data: setting one u8 at offset 0.

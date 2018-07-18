@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "utils/DawnHelpers.h"
 
 #include <array>
 
-class ComputeCopyStorageBufferTests : public NXTTest {
+class ComputeCopyStorageBufferTests : public DawnTest {
   public:
     static constexpr int kInstances = 4;
     static constexpr int kUintsPerInstance = 4;

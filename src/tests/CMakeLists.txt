@@ -87,8 +87,8 @@ add_executable(dawn_end2end_tests
     ${END2END_TESTS_DIR}/SamplerTests.cpp
     ${END2END_TESTS_DIR}/ViewportOrientationTests.cpp
     ${TESTS_DIR}/End2EndTestsMain.cpp
-    ${TESTS_DIR}/NXTTest.cpp
-    ${TESTS_DIR}/NXTTest.h
+    ${TESTS_DIR}/DawnTest.cpp
+    ${TESTS_DIR}/DawnTest.h
 )
 target_link_libraries(dawn_end2end_tests dawn_common dawn_wire gtest utils)
 DawnInternalTarget("tests" dawn_end2end_tests)

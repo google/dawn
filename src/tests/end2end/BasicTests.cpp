@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include "utils/DawnHelpers.h"
 
-class BasicTests : public NXTTest {
+class BasicTests : public DawnTest {
 };
 
 // Test Buffer::SetSubData changes the content of the buffer, but really this is the most

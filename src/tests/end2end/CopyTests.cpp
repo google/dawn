@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/NXTTest.h"
+#include "tests/DawnTest.h"
 
 #include <array>
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/DawnHelpers.h"
 
-class CopyTests : public NXTTest {
+class CopyTests : public DawnTest {
     protected:
         static constexpr unsigned int kBytesPerTexel = 4;
 
