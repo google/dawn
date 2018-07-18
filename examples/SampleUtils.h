@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include <dawn/dawncpp.h>
-#include <nxt/nxt_wsi.h>
+#include <dawn/dawn_wsi.h>
 
 bool InitSample(int argc, const char** argv);
 void DoFlush();

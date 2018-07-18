@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 #include "common/vulkan_platform.h"
-#include "nxt/nxt_wsi.h"
+#include "dawn/dawn_wsi.h"
 
 #include "GLFW/glfw3.h"
 

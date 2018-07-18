@@ -17,7 +17,7 @@
 #include "backend/metal/DeviceMTL.h"
 #include "backend/metal/TextureMTL.h"
 
-#include <nxt/nxt_wsi.h>
+#include <dawn/dawn_wsi.h>
 
 namespace backend { namespace metal {
 

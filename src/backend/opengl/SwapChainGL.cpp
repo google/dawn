@@ -17,7 +17,7 @@
 #include "backend/Device.h"
 #include "backend/opengl/TextureGL.h"
 
-#include <nxt/nxt_wsi.h>
+#include <dawn/dawn_wsi.h>
 
 namespace backend { namespace opengl {
 

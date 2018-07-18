@@ -15,7 +15,7 @@
 #ifndef UTILS_BACKENDBINDING_H_
 #define UTILS_BACKENDBINDING_H_
 
-#include <nxt/nxt_wsi.h>
+#include <dawn/dawn_wsi.h>
 
 struct GLFWwindow;
 typedef struct nxtProcTable_s nxtProcTable;

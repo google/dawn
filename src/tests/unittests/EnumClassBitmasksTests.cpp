@@ -14,7 +14,7 @@
 
 #include "gtest/gtest.h"
 
-#include "nxt/EnumClassBitmasks.h"
+#include "dawn/EnumClassBitmasks.h"
 
 namespace nxt {
 

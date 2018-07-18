@@ -17,7 +17,7 @@
 
 #include "dawn.h"
 
-#include "nxt/EnumClassBitmasks.h"
+#include "dawn/EnumClassBitmasks.h"
 
 // Temporary define to rename NXT to Dawn
 #define dawn nxt

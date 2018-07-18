@@ -21,7 +21,7 @@
 
 #include <dawn/dawn.h>
 #include <dawn/dawncpp.h>
-#include <nxt/nxt_wsi.h>
+#include <dawn/dawn_wsi.h>
 #include "GLFW/glfw3.h"
 
 #include <cstring>

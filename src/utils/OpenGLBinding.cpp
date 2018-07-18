@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "common/Platform.h"
 #include "common/SwapChainUtils.h"
-#include "nxt/nxt_wsi.h"
+#include "dawn/dawn_wsi.h"
 
 // Glad needs to be included before GLFW otherwise it complain that GL.h was already included
 #include "glad/glad.h"

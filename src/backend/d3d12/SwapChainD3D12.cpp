@@ -17,7 +17,7 @@
 #include "backend/d3d12/DeviceD3D12.h"
 #include "backend/d3d12/TextureD3D12.h"
 
-#include <nxt/nxt_wsi.h>
+#include <dawn/dawn_wsi.h>
 
 namespace backend { namespace d3d12 {
 
