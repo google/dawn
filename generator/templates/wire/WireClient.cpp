@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
 
     //* Client side implementation of the API, will serialize everything to memory to send to the server side.
     namespace client {
@@ -673,4 +673,4 @@ namespace nxt { namespace wire {
         return new client::Client(clientDevice);
     }
 
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire

@@ -53,8 +53,8 @@ In addition to the improved type-safety and subjective prettiness compared to gi
 Here’s an example of buffer creation:
 
 ```cpp
-nxt::Buffer buffer = device.CreateBufferBuilder()
-    .SetUsage(nxt::BufferUsageBit::Uniform | nxt::BufferUsageBit::Mapped)
+dawn::Buffer buffer = device.CreateBufferBuilder()
+    .SetUsage(dawn::BufferUsageBit::Uniform | dawn::BufferUsageBit::Mapped)
     .SetSize(42)
     .GetResult();
 ```

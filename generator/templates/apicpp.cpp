@@ -14,7 +14,7 @@
 
 #include "dawncpp.h"
 
-namespace nxt {
+namespace dawn {
 
     {% for type in by_category["enum"] + by_category["bitmask"] %}
         {% set CppType = as_cppType(type.name) %}

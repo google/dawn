@@ -19,10 +19,7 @@
 
 #include "dawn/EnumClassBitmasks.h"
 
-// Temporary define to rename NXT to Dawn
-#define dawn nxt
-
-namespace nxt {
+namespace dawn {
 
     {% for type in by_category["enum"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {
@@ -161,6 +158,6 @@ namespace nxt {
 
     {% endfor %}
 
-} // namespace nxt
+} // namespace dawn
 
 #endif // NXTCPP_H

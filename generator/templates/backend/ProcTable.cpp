@@ -49,9 +49,9 @@ namespace {{namespace}} {
                         {%- for arg in method.arguments -%}
                             {%- if not loop.first %}, {% endif -%}
                             {%- if arg.type.category in ["enum", "bitmask"] -%}
-                                static_cast<nxt::{{as_cppType(arg.type.name)}}>({{as_varName(arg.name)}})
+                                static_cast<dawn::{{as_cppType(arg.type.name)}}>({{as_varName(arg.name)}})
                             {%- elif arg.type.category == "structure" and arg.annotation != "value" -%}
-                                reinterpret_cast<const nxt::{{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
+                                reinterpret_cast<const dawn::{{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
                             {%- else -%}
                                 {{as_varName(arg.name)}}
                             {%- endif -%}
@@ -85,7 +85,7 @@ namespace {{namespace}} {
                         {% set cppType = as_cppType(arg.type.name) %}
                         {% set argName = as_varName(arg.name) %}
                         {% if arg.type.category in ["enum", "bitmask"] %}
-                            MaybeError {{argName}}Valid = Validate{{cppType}}(static_cast<nxt::{{cppType}}>({{argName}}));
+                            MaybeError {{argName}}Valid = Validate{{cppType}}(static_cast<dawn::{{cppType}}>({{argName}}));
                             if ({{argName}}Valid.IsError()) {
                                 delete {{argName}}Valid.AcquireError();
                                 error = true;
@@ -167,9 +167,9 @@ namespace {{namespace}} {
                         {%- for arg in method.arguments -%}
                             {%- if not loop.first %}, {% endif -%}
                             {%- if arg.type.category in ["enum", "bitmask"] -%}
-                                static_cast<nxt::{{as_cppType(arg.type.name)}}>({{as_varName(arg.name)}})
+                                static_cast<dawn::{{as_cppType(arg.type.name)}}>({{as_varName(arg.name)}})
                             {%- elif arg.type.category == "structure" and arg.annotation != "value" -%}
-                                reinterpret_cast<const nxt::{{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
+                                reinterpret_cast<const dawn::{{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
                             {%- else -%}
                                 {{as_varName(arg.name)}}
                             {%- endif -%}

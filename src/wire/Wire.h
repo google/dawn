@@ -19,7 +19,7 @@
 
 #include "dawn/dawn.h"
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
 
     class CommandSerializer {
       public:
@@ -41,6 +41,6 @@ namespace nxt { namespace wire {
                                             const nxtProcTable& procs,
                                             CommandSerializer* serializer);
 
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire
 
 #endif  // WIRE_WIRE_H_

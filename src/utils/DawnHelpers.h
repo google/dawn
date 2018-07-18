@@ -18,40 +18,40 @@
 
 namespace utils {
 
-    void FillShaderModuleBuilder(const nxt::ShaderModuleBuilder& builder,
-                                 nxt::ShaderStage stage,
+    void FillShaderModuleBuilder(const dawn::ShaderModuleBuilder& builder,
+                                 dawn::ShaderStage stage,
                                  const char* source);
-    nxt::ShaderModule CreateShaderModule(const nxt::Device& device,
-                                         nxt::ShaderStage stage,
-                                         const char* source);
-    nxt::Buffer CreateBufferFromData(const nxt::Device& device,
-                                     const void* data,
-                                     uint32_t size,
-                                     nxt::BufferUsageBit usage);
+    dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
+                                          dawn::ShaderStage stage,
+                                          const char* source);
+    dawn::Buffer CreateBufferFromData(const dawn::Device& device,
+                                      const void* data,
+                                      uint32_t size,
+                                      dawn::BufferUsageBit usage);
 
     template <typename T>
-    nxt::Buffer CreateBufferFromData(const nxt::Device& device,
-                                     nxt::BufferUsageBit usage,
-                                     std::initializer_list<T> data) {
+    dawn::Buffer CreateBufferFromData(const dawn::Device& device,
+                                      dawn::BufferUsageBit usage,
+                                      std::initializer_list<T> data) {
         return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage);
     }
 
     struct BasicRenderPass {
         uint32_t width;
         uint32_t height;
-        nxt::Texture color;
-        nxt::TextureFormat colorFormat;
-        nxt::RenderPassDescriptor renderPassInfo;
+        dawn::Texture color;
+        dawn::TextureFormat colorFormat;
+        dawn::RenderPassDescriptor renderPassInfo;
     };
-    BasicRenderPass CreateBasicRenderPass(const nxt::Device& device,
+    BasicRenderPass CreateBasicRenderPass(const dawn::Device& device,
                                           uint32_t width,
                                           uint32_t height);
 
-    nxt::SamplerDescriptor GetDefaultSamplerDescriptor();
-    nxt::PipelineLayout MakeBasicPipelineLayout(const nxt::Device& device,
-                                                const nxt::BindGroupLayout* bindGroupLayout);
-    nxt::BindGroupLayout MakeBindGroupLayout(
-        const nxt::Device& device,
-        std::initializer_list<nxt::BindGroupBinding> bindingsInitializer);
+    dawn::SamplerDescriptor GetDefaultSamplerDescriptor();
+    dawn::PipelineLayout MakeBasicPipelineLayout(const dawn::Device& device,
+                                                 const dawn::BindGroupLayout* bindGroupLayout);
+    dawn::BindGroupLayout MakeBindGroupLayout(
+        const dawn::Device& device,
+        std::initializer_list<dawn::BindGroupBinding> bindingsInitializer);
 
 }  // namespace utils

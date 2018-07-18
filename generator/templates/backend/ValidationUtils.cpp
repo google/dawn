@@ -17,10 +17,10 @@
 namespace backend {
 
     {% for type in by_category["enum"] %}
-        MaybeError Validate{{type.name.CamelCase()}}(nxt::{{as_cppType(type.name)}} value) {
+        MaybeError Validate{{type.name.CamelCase()}}(dawn::{{as_cppType(type.name)}} value) {
             switch (value) {
                 {% for value in type.values %}
-                    case nxt::{{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}:
+                    case dawn::{{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}:
                         return {};
                 {% endfor %}
                 default:
@@ -31,8 +31,8 @@ namespace backend {
     {% endfor %}
 
     {% for type in by_category["bitmask"] %}
-        MaybeError Validate{{type.name.CamelCase()}}(nxt::{{as_cppType(type.name)}} value) {
-            if ((value & static_cast<nxt::{{as_cppType(type.name)}}>(~{{type.full_mask}})) == 0) {
+        MaybeError Validate{{type.name.CamelCase()}}(dawn::{{as_cppType(type.name)}} value) {
+            if ((value & static_cast<dawn::{{as_cppType(type.name)}}>(~{{type.full_mask}})) == 0) {
                 return {};
             }
             DAWN_RETURN_ERROR("Invalid value for {{as_cType(type.name)}}");

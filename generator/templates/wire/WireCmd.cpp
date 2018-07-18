@@ -258,7 +258,7 @@
     }
 {% endmacro %}
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
 
     // Macro to simplify error handling, similar to DAWN_TRY but for DeserializeResult.
 #define DESERIALIZE_TRY(EXPR) \
@@ -344,4 +344,4 @@ namespace nxt { namespace wire {
         {% endfor %}
     {% endfor %}
 
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire

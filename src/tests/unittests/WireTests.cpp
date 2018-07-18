@@ -20,7 +20,7 @@
 #include "wire/Wire.h"
 
 using namespace testing;
-using namespace nxt::wire;
+using namespace dawn::wire;
 
 // Definition of a "Lambda predicate matcher" for GMock to allow checking deep structures
 // are passed correctly by the wire.

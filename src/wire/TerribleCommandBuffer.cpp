@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
 
     TerribleCommandBuffer::TerribleCommandBuffer() {
     }
@@ -56,4 +56,4 @@ namespace nxt { namespace wire {
         return success;
     }
 
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire

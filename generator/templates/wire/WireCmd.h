@@ -15,7 +15,7 @@
 #ifndef WIRE_WIRECMD_AUTOGEN_H_
 #define WIRE_WIRECMD_AUTOGEN_H_
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
 
     using ObjectId = uint32_t;
     using ObjectSerial = uint32_t;
@@ -140,6 +140,6 @@ namespace nxt { namespace wire {
         };
     {% endfor %}
 
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire
 
 #endif // WIRE_WIRECMD_AUTOGEN_H_

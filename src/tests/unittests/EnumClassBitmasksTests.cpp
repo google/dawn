@@ -16,7 +16,7 @@
 
 #include "dawn/EnumClassBitmasks.h"
 
-namespace nxt {
+namespace dawn {
 
     enum class Color : uint32_t {
         R = 1,
@@ -90,4 +90,4 @@ namespace nxt {
         ASSERT_FALSE(HasZeroOrOneBits(static_cast<Color>(Color::B | Color::A)));
     }
 
-}
+}  // namespace dawn

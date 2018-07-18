@@ -17,7 +17,7 @@
 
 #include <type_traits>
 
-namespace nxt {
+namespace dawn {
 
 // std::underlying_type doesn't work in old GLIBC still used in Chrome
 #define CR_GLIBCXX_4_7_0 20120322
@@ -157,6 +157,6 @@ namespace nxt {
         l = l ^ r;
         return l;
     }
-}  // namespace nxt
+}  // namespace dawn
 
 #endif  // NXT_ENUM_CLASS_BITMASKS_H_

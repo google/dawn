@@ -25,21 +25,21 @@
 
 namespace utils {
 
-    void FillShaderModuleBuilder(const nxt::ShaderModuleBuilder& builder,
-                                 nxt::ShaderStage stage,
+    void FillShaderModuleBuilder(const dawn::ShaderModuleBuilder& builder,
+                                 dawn::ShaderStage stage,
                                  const char* source) {
         shaderc::Compiler compiler;
         shaderc::CompileOptions options;
 
         shaderc_shader_kind kind;
         switch (stage) {
-            case nxt::ShaderStage::Vertex:
+            case dawn::ShaderStage::Vertex:
                 kind = shaderc_glsl_vertex_shader;
                 break;
-            case nxt::ShaderStage::Fragment:
+            case dawn::ShaderStage::Fragment:
                 kind = shaderc_glsl_fragment_shader;
                 break;
-            case nxt::ShaderStage::Compute:
+            case dawn::ShaderStage::Compute:
                 kind = shaderc_glsl_compute_shader;
                 break;
             default:
@@ -89,67 +89,67 @@ namespace utils {
 #endif
     }
 
-    nxt::ShaderModule CreateShaderModule(const nxt::Device& device,
-                                         nxt::ShaderStage stage,
-                                         const char* source) {
-        nxt::ShaderModuleBuilder builder = device.CreateShaderModuleBuilder();
+    dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
+                                          dawn::ShaderStage stage,
+                                          const char* source) {
+        dawn::ShaderModuleBuilder builder = device.CreateShaderModuleBuilder();
         FillShaderModuleBuilder(builder, stage, source);
         return builder.GetResult();
     }
 
-    nxt::Buffer CreateBufferFromData(const nxt::Device& device,
-                                     const void* data,
-                                     uint32_t size,
-                                     nxt::BufferUsageBit usage) {
-        nxt::Buffer buffer = device.CreateBufferBuilder()
-                                 .SetAllowedUsage(nxt::BufferUsageBit::TransferDst | usage)
-                                 .SetSize(size)
-                                 .GetResult();
+    dawn::Buffer CreateBufferFromData(const dawn::Device& device,
+                                      const void* data,
+                                      uint32_t size,
+                                      dawn::BufferUsageBit usage) {
+        dawn::Buffer buffer = device.CreateBufferBuilder()
+                                  .SetAllowedUsage(dawn::BufferUsageBit::TransferDst | usage)
+                                  .SetSize(size)
+                                  .GetResult();
         buffer.SetSubData(0, size, reinterpret_cast<const uint8_t*>(data));
         return buffer;
     }
 
-    BasicRenderPass CreateBasicRenderPass(const nxt::Device& device,
+    BasicRenderPass CreateBasicRenderPass(const dawn::Device& device,
                                           uint32_t width,
                                           uint32_t height) {
         BasicRenderPass result;
         result.width = width;
         result.height = height;
 
-        result.colorFormat = nxt::TextureFormat::R8G8B8A8Unorm;
+        result.colorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
         result.color = device.CreateTextureBuilder()
-                           .SetDimension(nxt::TextureDimension::e2D)
+                           .SetDimension(dawn::TextureDimension::e2D)
                            .SetExtent(width, height, 1)
                            .SetFormat(result.colorFormat)
                            .SetMipLevels(1)
-                           .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment |
-                                            nxt::TextureUsageBit::TransferSrc)
+                           .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment |
+                                            dawn::TextureUsageBit::TransferSrc)
                            .GetResult();
 
-        nxt::TextureView colorView = result.color.CreateTextureViewBuilder().GetResult();
+        dawn::TextureView colorView = result.color.CreateTextureViewBuilder().GetResult();
         result.renderPassInfo = device.CreateRenderPassDescriptorBuilder()
-                                    .SetColorAttachment(0, colorView, nxt::LoadOp::Clear)
+                                    .SetColorAttachment(0, colorView, dawn::LoadOp::Clear)
                                     .GetResult();
 
         return result;
     }
 
-    nxt::SamplerDescriptor GetDefaultSamplerDescriptor() {
-        nxt::SamplerDescriptor desc;
+    dawn::SamplerDescriptor GetDefaultSamplerDescriptor() {
+        dawn::SamplerDescriptor desc;
 
-        desc.minFilter = nxt::FilterMode::Linear;
-        desc.magFilter = nxt::FilterMode::Linear;
-        desc.mipmapFilter = nxt::FilterMode::Linear;
-        desc.addressModeU = nxt::AddressMode::Repeat;
-        desc.addressModeV = nxt::AddressMode::Repeat;
-        desc.addressModeW = nxt::AddressMode::Repeat;
+        desc.minFilter = dawn::FilterMode::Linear;
+        desc.magFilter = dawn::FilterMode::Linear;
+        desc.mipmapFilter = dawn::FilterMode::Linear;
+        desc.addressModeU = dawn::AddressMode::Repeat;
+        desc.addressModeV = dawn::AddressMode::Repeat;
+        desc.addressModeW = dawn::AddressMode::Repeat;
 
         return desc;
     }
 
-    nxt::PipelineLayout MakeBasicPipelineLayout(const nxt::Device& device,
-                                                const nxt::BindGroupLayout* bindGroupLayout) {
-        nxt::PipelineLayoutDescriptor descriptor;
+    dawn::PipelineLayout MakeBasicPipelineLayout(const dawn::Device& device,
+                                                 const dawn::BindGroupLayout* bindGroupLayout) {
+        dawn::PipelineLayoutDescriptor descriptor;
         if (bindGroupLayout) {
             descriptor.numBindGroupLayouts = 1;
             descriptor.bindGroupLayouts = bindGroupLayout;
@@ -160,18 +160,18 @@ namespace utils {
         return device.CreatePipelineLayout(&descriptor);
     }
 
-    nxt::BindGroupLayout MakeBindGroupLayout(
-        const nxt::Device& device,
-        std::initializer_list<nxt::BindGroupBinding> bindingsInitializer) {
-        std::vector<nxt::BindGroupBinding> bindings;
-        nxt::ShaderStageBit kNoStages{};
-        for (const nxt::BindGroupBinding& binding : bindingsInitializer) {
+    dawn::BindGroupLayout MakeBindGroupLayout(
+        const dawn::Device& device,
+        std::initializer_list<dawn::BindGroupBinding> bindingsInitializer) {
+        std::vector<dawn::BindGroupBinding> bindings;
+        dawn::ShaderStageBit kNoStages{};
+        for (const dawn::BindGroupBinding& binding : bindingsInitializer) {
             if (binding.visibility != kNoStages) {
                 bindings.push_back(binding);
             }
         }
 
-        nxt::BindGroupLayoutDescriptor descriptor;
+        dawn::BindGroupLayoutDescriptor descriptor;
         descriptor.numBindings = static_cast<uint32_t>(bindings.size());
         descriptor.bindings = bindings.data();
         return device.CreateBindGroupLayout(&descriptor);

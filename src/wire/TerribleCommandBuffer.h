@@ -19,7 +19,7 @@
 
 #include "wire/Wire.h"
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
 
     class TerribleCommandBuffer : public CommandSerializer {
       public:
@@ -37,6 +37,6 @@ namespace nxt { namespace wire {
         char mBuffer[10000000];
     };
 
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire
 
 #endif  // WIRE_TERRIBLE_COMMAND_BUFFER_H_

@@ -22,7 +22,7 @@
 #include <cstring>
 #include <vector>
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
 
     namespace server {
         class Server;
@@ -626,4 +626,4 @@ namespace nxt { namespace wire {
         return new server::Server(device, procs, serializer);
     }
 
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire

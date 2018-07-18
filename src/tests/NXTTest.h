@@ -66,7 +66,7 @@ namespace detail {
     class Expectation;
 }
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
     class CommandHandler;
     class TerribleCommandBuffer;
 }}  // namespace dawn::wire

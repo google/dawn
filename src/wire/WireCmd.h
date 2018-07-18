@@ -19,7 +19,7 @@
 
 #include "wire/WireCmd_autogen.h"
 
-namespace nxt { namespace wire {
+namespace dawn { namespace wire {
 
     struct ReturnDeviceErrorCallbackCmd {
         wire::ReturnWireCmd commandId = ReturnWireCmd::DeviceErrorCallback;
@@ -63,6 +63,6 @@ namespace nxt { namespace wire {
         uint32_t dataLength;
     };
 
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire
 
 #endif  // WIRE_WIRECMD_H_

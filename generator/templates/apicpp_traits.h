@@ -19,7 +19,7 @@
 
 #include <type_traits>
 
-namespace nxt {
+namespace dawn {
 
     template<typename Builder>
     using BuiltObject = decltype(std::declval<Builder>().GetResult());
