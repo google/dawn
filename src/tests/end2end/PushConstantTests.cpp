@@ -390,4 +390,4 @@ TEST_P(PushConstantTest, SimultaneousVertexAndFragmentConstants) {
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(1, 1, 0, 0), renderPass.color, 0, 0);
 }
-NXT_INSTANTIATE_TEST(PushConstantTest, MetalBackend, OpenGLBackend)
+DAWN_INSTANTIATE_TEST(PushConstantTest, MetalBackend, OpenGLBackend)

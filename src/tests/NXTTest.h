@@ -48,7 +48,7 @@ struct RGBA8 {
 };
 std::ostream& operator<< (std::ostream& stream, const RGBA8& color);
 
-// Backend types used in the NXT_INSTANTIATE_TEST
+// Backend types used in the DAWN_INSTANTIATE_TEST
 enum BackendType {
     D3D12Backend,
     MetalBackend,
@@ -163,15 +163,15 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 };
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
-//     NXT_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
-#define NXT_INSTANTIATE_TEST(testName, firstParam, ...) \
+//     DAWN_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
+#define DAWN_INSTANTIATE_TEST(testName, firstParam, ...) \
     const decltype(firstParam) testName##params[] = { firstParam, ##__VA_ARGS__ }; \
     INSTANTIATE_TEST_CASE_P(, testName, \
         testing::ValuesIn(::detail::FilterBackends(testName##params, sizeof(testName##params) / sizeof(firstParam))), \
         testing::PrintToStringParamName());
 
 namespace detail {
-    // Helper functions used for NXT_INSTANTIATE_TEST
+    // Helper functions used for DAWN_INSTANTIATE_TEST
     bool IsBackendAvailable(BackendType type);
     std::vector<BackendType> FilterBackends(const BackendType* types, size_t numParams);
 

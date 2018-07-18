@@ -183,7 +183,7 @@ TEST_P(ComputeCopyStorageBufferTests, DISABLED_UnsizedDescriptorArray) {
         })");
 }
 
-NXT_INSTANTIATE_TEST(ComputeCopyStorageBufferTests,
+DAWN_INSTANTIATE_TEST(ComputeCopyStorageBufferTests,
                      D3D12Backend,
                      MetalBackend,
                      OpenGLBackend,

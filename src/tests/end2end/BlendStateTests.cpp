@@ -908,4 +908,4 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
     }
 }
 
-NXT_INSTANTIATE_TEST(BlendStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(BlendStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

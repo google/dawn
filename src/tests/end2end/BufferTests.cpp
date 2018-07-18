@@ -110,7 +110,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
     buffer.Unmap();
 }
 
-NXT_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
 
 class BufferMapWriteTests : public NXTTest {
     protected:
@@ -187,7 +187,7 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
 }
 
-NXT_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
 
 class BufferSetSubDataTests : public NXTTest {
 };
@@ -263,7 +263,7 @@ TEST_P(BufferSetSubDataTests, LargeSetSubData) {
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
 }
 
-NXT_INSTANTIATE_TEST(BufferSetSubDataTests,
+DAWN_INSTANTIATE_TEST(BufferSetSubDataTests,
                      D3D12Backend,
                      MetalBackend,
                      OpenGLBackend,

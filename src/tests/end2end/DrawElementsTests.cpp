@@ -106,4 +106,4 @@ TEST_P(DrawElementsTest, Uint32) {
     Test(6, 1, 0, 0, filled, filled);
 }
 
-NXT_INSTANTIATE_TEST(DrawElementsTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(DrawElementsTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

@@ -347,7 +347,7 @@ TEST_P(CopyTests_T2B, RowPitchUnaligned) {
     }
 }
 
-NXT_INSTANTIATE_TEST(CopyTests_T2B, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(CopyTests_T2B, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
 
 // Test that copying an entire texture with 256-byte aligned dimensions works
 TEST_P(CopyTests_B2T, FullTextureAligned) {
@@ -490,4 +490,4 @@ TEST_P(CopyTests_B2T, RowPitchUnaligned) {
     }
 }
 
-NXT_INSTANTIATE_TEST(CopyTests_B2T, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(CopyTests_B2T, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

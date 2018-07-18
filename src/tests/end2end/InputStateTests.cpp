@@ -412,7 +412,7 @@ TEST_P(InputStateTest, MixedEverything) {
     DoTestDraw(pipeline, 1, 1, {{0, &buffer0}, {1, &buffer1}});
 }
 
-NXT_INSTANTIATE_TEST(InputStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(InputStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
 
 // TODO for the input state:
 //  - Add more vertex formats
