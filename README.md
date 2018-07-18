@@ -93,7 +93,7 @@ Other generators include:
 Here are the main files and directories:
 
 ```
-/next.json - the JSON file describing the API that is used by the code generators
+/dawn.json - the JSON file describing the API that is used by the code generators
 /examples - example code that was also used for end2end testing (it is not possible to do automated testing without being able to read back data)
 /generator - The code generator and its templates
 /generator/templates - The code generator templates
