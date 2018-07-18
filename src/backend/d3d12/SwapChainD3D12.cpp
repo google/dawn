@@ -24,10 +24,10 @@ namespace backend { namespace d3d12 {
     SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
         dawnWSIContextD3D12 wsiContext = {};
-        wsiContext.device = reinterpret_cast<nxtDevice>(GetDevice());
+        wsiContext.device = reinterpret_cast<dawnDevice>(GetDevice());
         im.Init(im.userData, &wsiContext);
 
-        ASSERT(im.textureUsage != NXT_TEXTURE_USAGE_BIT_NONE);
+        ASSERT(im.textureUsage != DAWN_TEXTURE_USAGE_BIT_NONE);
         mTextureUsage = static_cast<dawn::TextureUsageBit>(im.textureUsage);
     }
 

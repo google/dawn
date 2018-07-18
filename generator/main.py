@@ -314,7 +314,7 @@ def as_cType(name):
     if name.native:
         return name.concatcase()
     else:
-        return 'nxt' + name.CamelCase()
+        return 'dawn' + name.CamelCase()
 
 def as_cppType(name):
     if name.native:
@@ -338,7 +338,7 @@ def annotated(typ, arg):
 
 def as_cEnum(type_name, value_name):
     assert(not type_name.native and not value_name.native)
-    return 'NXT' + '_' + type_name.SNAKE_CASE() + '_' + value_name.SNAKE_CASE()
+    return 'DAWN' + '_' + type_name.SNAKE_CASE() + '_' + value_name.SNAKE_CASE()
 
 def as_cppEnum(value_name):
     assert(not value_name.native)
@@ -348,7 +348,7 @@ def as_cppEnum(value_name):
 
 def as_cMethod(type_name, method_name):
     assert(not type_name.native and not method_name.native)
-    return 'nxt' + type_name.CamelCase() + method_name.CamelCase()
+    return 'dawn' + type_name.CamelCase() + method_name.CamelCase()
 
 def as_MethodSuffix(type_name, method_name):
     assert(not type_name.native and not method_name.native)
@@ -356,7 +356,7 @@ def as_MethodSuffix(type_name, method_name):
 
 def as_cProc(type_name, method_name):
     assert(not type_name.native and not method_name.native)
-    return 'nxt' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+    return 'dawn' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
 def as_backendType(typ):
     if typ.category == 'object':

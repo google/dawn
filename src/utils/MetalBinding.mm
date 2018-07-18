@@ -26,9 +26,9 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 namespace backend { namespace metal {
-    void Init(id<MTLDevice> metalDevice, nxtProcTable* procs, nxtDevice* device);
-    void SetNextDrawable(nxtDevice device, id<CAMetalDrawable> drawable);
-    void Present(nxtDevice device);
+    void Init(id<MTLDevice> metalDevice, nxtProcTable* procs, dawnDevice* device);
+    void SetNextDrawable(dawnDevice device, id<CAMetalDrawable> drawable);
+    void Present(dawnDevice device);
 }}
 
 namespace utils {
@@ -49,11 +49,11 @@ namespace utils {
             mCommandQueue = [mMtlDevice newCommandQueue];
         }
 
-        dawnSwapChainError Configure(nxtTextureFormat format,
-                                     nxtTextureUsageBit,
+        dawnSwapChainError Configure(dawnTextureFormat format,
+                                     dawnTextureUsageBit,
                                      uint32_t width,
                                      uint32_t height) {
-            if (format != NXT_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM) {
+            if (format != DAWN_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM) {
                 return "unsupported format";
             }
             ASSERT(width > 0);
@@ -114,7 +114,7 @@ namespace utils {
         void SetupGLFWWindowHints() override {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
-        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
             mMetalDevice = MTLCreateSystemDefaultDevice();
 
             backend::metal::Init(mMetalDevice, procs, device);
@@ -129,13 +129,13 @@ namespace utils {
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
-        nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return NXT_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM;
+        dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
+            return DAWN_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM;
         }
 
       private:
         id<MTLDevice> mMetalDevice = nil;
-        nxtDevice mBackendDevice = nullptr;
+        dawnDevice mBackendDevice = nullptr;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 

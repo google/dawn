@@ -26,7 +26,7 @@
 #include "GLFW/glfw3.h"
 
 namespace backend { namespace opengl {
-    void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device);
+    void Init(void* (*getProc)(const char*), nxtProcTable* procs, dawnDevice* device);
 }}  // namespace backend::opengl
 
 namespace utils {
@@ -53,11 +53,11 @@ namespace utils {
                                    mBackTexture, 0);
         }
 
-        dawnSwapChainError Configure(nxtTextureFormat format,
-                                     nxtTextureUsageBit,
+        dawnSwapChainError Configure(dawnTextureFormat format,
+                                     dawnTextureUsageBit,
                                      uint32_t width,
                                      uint32_t height) {
-            if (format != NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
+            if (format != DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
                 return "unsupported format";
             }
             ASSERT(width > 0);
@@ -111,7 +111,7 @@ namespace utils {
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
         }
-        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
             glfwMakeContextCurrent(mWindow);
             backend::opengl::Init(reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress),
                                   procs, device);
@@ -126,12 +126,12 @@ namespace utils {
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
-        nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+        dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
+            return DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
         }
 
       private:
-        nxtDevice mBackendDevice = nullptr;
+        dawnDevice mBackendDevice = nullptr;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 

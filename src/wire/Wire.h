@@ -35,9 +35,9 @@ namespace dawn { namespace wire {
     };
 
     CommandHandler* NewClientDevice(nxtProcTable* procs,
-                                    nxtDevice* device,
+                                    dawnDevice* device,
                                     CommandSerializer* serializer);
-    CommandHandler* NewServerCommandHandler(nxtDevice device,
+    CommandHandler* NewServerCommandHandler(dawnDevice device,
                                             const nxtProcTable& procs,
                                             CommandSerializer* serializer);
 

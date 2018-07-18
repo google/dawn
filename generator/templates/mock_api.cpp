@@ -38,7 +38,7 @@ namespace {
 ProcTableAsClass::~ProcTableAsClass() {
 }
 
-void ProcTableAsClass::GetProcTableAndDevice(nxtProcTable* table, nxtDevice* device) {
+void ProcTableAsClass::GetProcTableAndDevice(nxtProcTable* table, dawnDevice* device) {
     *device = GetNewDevice();
 
     {% for type in by_category["object"] %}
@@ -48,7 +48,7 @@ void ProcTableAsClass::GetProcTableAndDevice(nxtProcTable* table, nxtDevice* dev
     {% endfor %}
 }
 
-void ProcTableAsClass::DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) {
+void ProcTableAsClass::DeviceSetErrorCallback(dawnDevice self, dawnDeviceErrorCallback callback, dawnCallbackUserdata userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->deviceErrorCallback = callback;
     object->userdata1 = userdata;
@@ -56,7 +56,7 @@ void ProcTableAsClass::DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCall
     OnDeviceSetErrorCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapReadAsync(nxtBuffer self, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
+void ProcTableAsClass::BufferMapReadAsync(dawnBuffer self, uint32_t start, uint32_t size, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapReadCallback = callback;
     object->userdata1 = userdata;
@@ -64,7 +64,7 @@ void ProcTableAsClass::BufferMapReadAsync(nxtBuffer self, uint32_t start, uint32
     OnBufferMapReadAsyncCallback(self, start, size, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapWriteAsync(nxtBuffer self, uint32_t start, uint32_t size, nxtBufferMapWriteCallback callback, nxtCallbackUserdata userdata) {
+void ProcTableAsClass::BufferMapWriteAsync(dawnBuffer self, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapWriteCallback = callback;
     object->userdata1 = userdata;
@@ -72,32 +72,32 @@ void ProcTableAsClass::BufferMapWriteAsync(nxtBuffer self, uint32_t start, uint3
     OnBufferMapWriteAsyncCallback(self, start, size, callback, userdata);
 }
 
-void ProcTableAsClass::CallDeviceErrorCallback(nxtDevice device, const char* message) {
+void ProcTableAsClass::CallDeviceErrorCallback(dawnDevice device, const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->deviceErrorCallback(message, object->userdata1);
 }
-void ProcTableAsClass::CallBuilderErrorCallback(void* builder , nxtBuilderErrorStatus status, const char* message) {
+void ProcTableAsClass::CallBuilderErrorCallback(void* builder , dawnBuilderErrorStatus status, const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(builder);
     object->builderErrorCallback(status, message, object->userdata1, object->userdata2);
 }
-void ProcTableAsClass::CallMapReadCallback(nxtBuffer buffer, nxtBufferMapAsyncStatus status, const void* data) {
+void ProcTableAsClass::CallMapReadCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, const void* data) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapReadCallback(status, data, object->userdata1);
 }
 
-void ProcTableAsClass::CallMapWriteCallback(nxtBuffer buffer, nxtBufferMapAsyncStatus status, void* data) {
+void ProcTableAsClass::CallMapWriteCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, void* data) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapWriteCallback(status, data, object->userdata1);
 }
 
 {% for type in by_category["object"] if type.is_builder %}
-    void ProcTableAsClass::{{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) {
+    void ProcTableAsClass::{{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, dawnBuilderErrorCallback callback, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2) {
         auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
         object->builderErrorCallback = callback;
         object->userdata1 = userdata1;
         object->userdata2 = userdata2;
 
-        OnBuilderSetErrorCallback(reinterpret_cast<nxtBufferBuilder>(self), callback, userdata1, userdata2);
+        OnBuilderSetErrorCallback(reinterpret_cast<dawnBufferBuilder>(self), callback, userdata1, userdata2);
     }
 {% endfor %}
 

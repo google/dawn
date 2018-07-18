@@ -24,7 +24,7 @@ dawnSwapChainImplementation CreateSwapChainImplementation(T* swapChain) {
         reinterpret_cast<T*>(userData)->Init(ctx);
     };
     impl.Destroy = [](void* userData) { delete reinterpret_cast<T*>(userData); };
-    impl.Configure = [](void* userData, nxtTextureFormat format, nxtTextureUsageBit allowedUsage,
+    impl.Configure = [](void* userData, dawnTextureFormat format, dawnTextureUsageBit allowedUsage,
                         uint32_t width, uint32_t height) {
         return reinterpret_cast<T*>(userData)->Configure(format, allowedUsage, width, height);
     };

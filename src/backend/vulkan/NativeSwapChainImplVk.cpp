@@ -67,8 +67,8 @@ namespace backend { namespace vulkan {
         }
     }
 
-    dawnSwapChainError NativeSwapChainImpl::Configure(nxtTextureFormat format,
-                                                      nxtTextureUsageBit usage,
+    dawnSwapChainError NativeSwapChainImpl::Configure(dawnTextureFormat format,
+                                                      dawnTextureUsageBit usage,
                                                       uint32_t width,
                                                       uint32_t height) {
         ASSERT(mInfo.capabilities.minImageExtent.width <= width);
@@ -76,7 +76,7 @@ namespace backend { namespace vulkan {
         ASSERT(mInfo.capabilities.minImageExtent.height <= height);
         ASSERT(mInfo.capabilities.maxImageExtent.height >= height);
 
-        ASSERT(format == static_cast<nxtTextureFormat>(GetPreferredFormat()));
+        ASSERT(format == static_cast<dawnTextureFormat>(GetPreferredFormat()));
         // TODO(cwallez@chromium.org): need to check usage works too
 
         // Create the swapchain with the configuration we chose

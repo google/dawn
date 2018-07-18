@@ -32,8 +32,8 @@ namespace backend { namespace vulkan {
         ~NativeSwapChainImpl();
 
         void Init(dawnWSIContextVulkan* context);
-        dawnSwapChainError Configure(nxtTextureFormat format,
-                                     nxtTextureUsageBit,
+        dawnSwapChainError Configure(dawnTextureFormat format,
+                                     dawnTextureUsageBit,
                                      uint32_t width,
                                      uint32_t height);
         dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture* nextTexture);

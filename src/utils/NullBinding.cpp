@@ -15,7 +15,7 @@
 #include "utils/BackendBinding.h"
 
 namespace backend { namespace null {
-    void Init(nxtProcTable* procs, nxtDevice* device);
+    void Init(nxtProcTable* procs, dawnDevice* device);
 }}  // namespace backend::null
 
 namespace utils {
@@ -24,14 +24,14 @@ namespace utils {
       public:
         void SetupGLFWWindowHints() override {
         }
-        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
             backend::null::Init(procs, device);
         }
         uint64_t GetSwapChainImplementation() override {
             return 0;
         }
-        nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return NXT_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+        dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
+            return DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
         }
     };
 

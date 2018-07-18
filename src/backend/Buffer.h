@@ -46,19 +46,19 @@ namespace backend {
         void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);
         void MapReadAsync(uint32_t start,
                           uint32_t size,
-                          nxtBufferMapReadCallback callback,
-                          nxtCallbackUserdata userdata);
+                          dawnBufferMapReadCallback callback,
+                          dawnCallbackUserdata userdata);
         void MapWriteAsync(uint32_t start,
                            uint32_t size,
-                           nxtBufferMapWriteCallback callback,
-                           nxtCallbackUserdata userdata);
+                           dawnBufferMapWriteCallback callback,
+                           dawnCallbackUserdata userdata);
         void Unmap();
 
       protected:
         void CallMapReadCallback(uint32_t serial,
-                                 nxtBufferMapAsyncStatus status,
+                                 dawnBufferMapAsyncStatus status,
                                  const void* pointer);
-        void CallMapWriteCallback(uint32_t serial, nxtBufferMapAsyncStatus status, void* pointer);
+        void CallMapWriteCallback(uint32_t serial, dawnBufferMapAsyncStatus status, void* pointer);
 
       private:
         virtual void SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) = 0;
@@ -72,9 +72,9 @@ namespace backend {
         uint32_t mSize;
         dawn::BufferUsageBit mAllowedUsage = dawn::BufferUsageBit::None;
 
-        nxtBufferMapReadCallback mMapReadCallback = nullptr;
-        nxtBufferMapWriteCallback mMapWriteCallback = nullptr;
-        nxtCallbackUserdata mMapUserdata = 0;
+        dawnBufferMapReadCallback mMapReadCallback = nullptr;
+        dawnBufferMapWriteCallback mMapWriteCallback = nullptr;
+        dawnCallbackUserdata mMapUserdata = 0;
         uint32_t mMapSerial = 0;
 
         bool mIsMapped = false;

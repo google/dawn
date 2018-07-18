@@ -56,31 +56,31 @@ namespace backend { namespace vulkan {
     nxtProcTable GetValidatingProcs();
 
     void Init(nxtProcTable* procs,
-              nxtDevice* device,
+              dawnDevice* device,
               const std::vector<const char*>& requiredInstanceExtensions) {
         *procs = GetValidatingProcs();
-        *device = reinterpret_cast<nxtDevice>(new Device(requiredInstanceExtensions));
+        *device = reinterpret_cast<dawnDevice>(new Device(requiredInstanceExtensions));
     }
 
-    VkInstance GetInstance(nxtDevice device) {
+    VkInstance GetInstance(dawnDevice device) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         return backendDevice->GetInstance();
     }
 
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, VkSurfaceKHR surface) {
+    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHR surface) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
 
         dawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, surface));
-        impl.textureUsage = NXT_TEXTURE_USAGE_BIT_PRESENT;
+        impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
 
         return impl;
     }
 
-    nxtTextureFormat GetNativeSwapChainPreferredFormat(
+    dawnTextureFormat GetNativeSwapChainPreferredFormat(
         const dawnSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-        return static_cast<nxtTextureFormat>(impl->GetPreferredFormat());
+        return static_cast<dawnTextureFormat>(impl->GetPreferredFormat());
     }
 
     // Device

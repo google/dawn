@@ -30,8 +30,8 @@ namespace backend {
 
     BufferBase::~BufferBase() {
         if (mIsMapped) {
-            CallMapReadCallback(mMapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
-            CallMapWriteCallback(mMapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
+            CallMapReadCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
+            CallMapWriteCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         }
     }
 
@@ -52,26 +52,26 @@ namespace backend {
     }
 
     void BufferBase::CallMapReadCallback(uint32_t serial,
-                                         nxtBufferMapAsyncStatus status,
+                                         dawnBufferMapAsyncStatus status,
                                          const void* pointer) {
         if (mMapReadCallback != nullptr && serial == mMapSerial) {
             ASSERT(mMapWriteCallback == nullptr);
             // Tag the callback as fired before firing it, otherwise it could fire a second time if
             // for example buffer.Unmap() is called inside the application-provided callback.
-            nxtBufferMapReadCallback callback = mMapReadCallback;
+            dawnBufferMapReadCallback callback = mMapReadCallback;
             mMapReadCallback = nullptr;
             callback(status, pointer, mMapUserdata);
         }
     }
 
     void BufferBase::CallMapWriteCallback(uint32_t serial,
-                                          nxtBufferMapAsyncStatus status,
+                                          dawnBufferMapAsyncStatus status,
                                           void* pointer) {
         if (mMapWriteCallback != nullptr && serial == mMapSerial) {
             ASSERT(mMapReadCallback == nullptr);
             // Tag the callback as fired before firing it, otherwise it could fire a second time if
             // for example buffer.Unmap() is called inside the application-provided callback.
-            nxtBufferMapWriteCallback callback = mMapWriteCallback;
+            dawnBufferMapWriteCallback callback = mMapWriteCallback;
             mMapWriteCallback = nullptr;
             callback(status, pointer, mMapUserdata);
         }
@@ -93,10 +93,10 @@ namespace backend {
 
     void BufferBase::MapReadAsync(uint32_t start,
                                   uint32_t size,
-                                  nxtBufferMapReadCallback callback,
-                                  nxtCallbackUserdata userdata) {
+                                  dawnBufferMapReadCallback callback,
+                                  dawnCallbackUserdata userdata) {
         if (!ValidateMapBase(start, size, dawn::BufferUsageBit::MapRead)) {
-            callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
@@ -113,10 +113,10 @@ namespace backend {
 
     void BufferBase::MapWriteAsync(uint32_t start,
                                    uint32_t size,
-                                   nxtBufferMapWriteCallback callback,
-                                   nxtCallbackUserdata userdata) {
+                                   dawnBufferMapWriteCallback callback,
+                                   dawnCallbackUserdata userdata) {
         if (!ValidateMapBase(start, size, dawn::BufferUsageBit::MapWrite)) {
-            callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
 
@@ -139,8 +139,8 @@ namespace backend {
 
         // A map request can only be called once, so this will fire only if the request wasn't
         // completed before the Unmap
-        CallMapReadCallback(mMapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
-        CallMapWriteCallback(mMapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
+        CallMapReadCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
+        CallMapWriteCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         UnmapImpl();
         mIsMapped = false;
         mMapReadCallback = nullptr;

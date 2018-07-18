@@ -141,14 +141,14 @@ namespace dawn { namespace wire {
                 std::vector<Data> mKnown;
         };
 
-        void ForwardDeviceErrorToServer(const char* message, nxtCallbackUserdata userdata);
+        void ForwardDeviceErrorToServer(const char* message, dawnCallbackUserdata userdata);
 
         {% for type in by_category["object"] if type.is_builder%}
-            void Forward{{type.name.CamelCase()}}ToClient(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2);
+            void Forward{{type.name.CamelCase()}}ToClient(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2);
         {% endfor %}
 
-        void ForwardBufferMapReadAsync(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata);
-        void ForwardBufferMapWriteAsync(nxtBufferMapAsyncStatus status, void* ptr, nxtCallbackUserdata userdata);
+        void ForwardBufferMapReadAsync(dawnBufferMapAsyncStatus status, const void* ptr, dawnCallbackUserdata userdata);
+        void ForwardBufferMapWriteAsync(dawnBufferMapAsyncStatus status, void* ptr, dawnCallbackUserdata userdata);
 
         // A really really simple implementation of the DeserializeAllocator. It's main feature
         // is that it has some inline storage so as to avoid allocations for the majority of
@@ -205,14 +205,14 @@ namespace dawn { namespace wire {
 
         class Server : public CommandHandler, public ObjectIdResolver {
             public:
-                Server(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer)
+                Server(dawnDevice device, const nxtProcTable& procs, CommandSerializer* serializer)
                     : mProcs(procs), mSerializer(serializer) {
                     //* The client-server knowledge is bootstrapped with device 1.
                     auto* deviceData = mKnownDevice.Allocate(1);
                     deviceData->handle = device;
                     deviceData->valid = true;
 
-                    auto userdata = static_cast<nxtCallbackUserdata>(reinterpret_cast<intptr_t>(this));
+                    auto userdata = static_cast<dawnCallbackUserdata>(reinterpret_cast<intptr_t>(this));
                     procs.deviceSetErrorCallback(device, ForwardDeviceErrorToServer, userdata);
                 }
 
@@ -229,18 +229,18 @@ namespace dawn { namespace wire {
 
                 {% for type in by_category["object"] if type.is_builder%}
                     {% set Type = type.name.CamelCase() %}
-                    void On{{Type}}Error(nxtBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial) {
+                    void On{{Type}}Error(dawnBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial) {
                         auto* builder = mKnown{{Type}}.Get(id);
 
                         if (builder == nullptr || builder->serial != serial) {
                             return;
                         }
 
-                        if (status != NXT_BUILDER_ERROR_STATUS_SUCCESS) {
+                        if (status != DAWN_BUILDER_ERROR_STATUS_SUCCESS) {
                             builder->valid = false;
                         }
 
-                        if (status != NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
+                        if (status != DAWN_BUILDER_ERROR_STATUS_UNKNOWN) {
                             //* Unknown is the only status that can be returned without a call to GetResult
                             //* so we are guaranteed to have created an object.
                             ASSERT(builder->builtObjectId != 0);
@@ -259,7 +259,7 @@ namespace dawn { namespace wire {
                     }
                 {% endfor %}
 
-                void OnMapReadAsyncCallback(nxtBufferMapAsyncStatus status, const void* ptr, MapUserdata* data) {
+                void OnMapReadAsyncCallback(dawnBufferMapAsyncStatus status, const void* ptr, MapUserdata* data) {
                     ReturnBufferMapReadAsyncCallbackCmd cmd;
                     cmd.bufferId = data->bufferId;
                     cmd.bufferSerial = data->bufferSerial;
@@ -270,7 +270,7 @@ namespace dawn { namespace wire {
                     auto allocCmd = static_cast<ReturnBufferMapReadAsyncCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
                     *allocCmd = cmd;
 
-                    if (status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+                    if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
                         allocCmd->dataLength = data->size;
 
                         void* dataAlloc = GetCmdSpace(data->size);
@@ -280,7 +280,7 @@ namespace dawn { namespace wire {
                     delete data;
                 }
 
-                void OnMapWriteAsyncCallback(nxtBufferMapAsyncStatus status, void* ptr, MapUserdata* data) {
+                void OnMapWriteAsyncCallback(dawnBufferMapAsyncStatus status, void* ptr, MapUserdata* data) {
                     ReturnBufferMapWriteAsyncCallbackCmd cmd;
                     cmd.bufferId = data->bufferId;
                     cmd.bufferSerial = data->bufferSerial;
@@ -290,7 +290,7 @@ namespace dawn { namespace wire {
                     auto allocCmd = static_cast<ReturnBufferMapWriteAsyncCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
                     *allocCmd = cmd;
 
-                    if (status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+                    if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
                         auto* selfData = mKnownBuffer.Get(data->bufferId);
                         ASSERT(selfData != nullptr);
 
@@ -459,7 +459,7 @@ namespace dawn { namespace wire {
                                     selfData->valid = false;
                                     //* If we are in GetResult, fake an error callback
                                     {% if returns %}
-                                        On{{type.name.CamelCase()}}Error(NXT_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd.selfId, selfData->serial);
+                                        On{{type.name.CamelCase()}}Error(DAWN_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd.selfId, selfData->serial);
                                     {% endif %}
                                 {% endif %}
                                 return true;
@@ -555,9 +555,9 @@ namespace dawn { namespace wire {
                     if (!buffer->valid) {
                         //* Fake the buffer returning a failure, data will be freed in this call.
                         if (isWrite) {
-                            ForwardBufferMapWriteAsync(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+                            ForwardBufferMapWriteAsync(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
                         } else {
-                            ForwardBufferMapReadAsync(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+                            ForwardBufferMapReadAsync(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
                         }
                         return true;
                     }
@@ -597,13 +597,13 @@ namespace dawn { namespace wire {
                 }
         };
 
-        void ForwardDeviceErrorToServer(const char* message, nxtCallbackUserdata userdata) {
+        void ForwardDeviceErrorToServer(const char* message, dawnCallbackUserdata userdata) {
             auto server = reinterpret_cast<Server*>(static_cast<intptr_t>(userdata));
             server->OnDeviceError(message);
         }
 
         {% for type in by_category["object"] if type.is_builder%}
-            void Forward{{type.name.CamelCase()}}ToClient(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) {
+            void Forward{{type.name.CamelCase()}}ToClient(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2) {
                 auto server = reinterpret_cast<Server*>(static_cast<uintptr_t>(userdata1));
                 uint32_t id = userdata2 & 0xFFFFFFFFu;
                 uint32_t serial = userdata2 >> uint64_t(32);
@@ -611,18 +611,18 @@ namespace dawn { namespace wire {
             }
         {% endfor %}
 
-        void ForwardBufferMapReadAsync(nxtBufferMapAsyncStatus status, const void* ptr, nxtCallbackUserdata userdata) {
+        void ForwardBufferMapReadAsync(dawnBufferMapAsyncStatus status, const void* ptr, dawnCallbackUserdata userdata) {
             auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
             data->server->OnMapReadAsyncCallback(status, ptr, data);
         }
 
-        void ForwardBufferMapWriteAsync(nxtBufferMapAsyncStatus status, void* ptr, nxtCallbackUserdata userdata) {
+        void ForwardBufferMapWriteAsync(dawnBufferMapAsyncStatus status, void* ptr, dawnCallbackUserdata userdata) {
             auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
             data->server->OnMapWriteAsyncCallback(status, ptr, data);
         }
     }
 
-    CommandHandler* NewServerCommandHandler(nxtDevice device, const nxtProcTable& procs, CommandSerializer* serializer) {
+    CommandHandler* NewServerCommandHandler(dawnDevice device, const nxtProcTable& procs, CommandSerializer* serializer) {
         return new server::Server(device, procs, serializer);
     }
 

@@ -38,7 +38,7 @@ namespace backend { namespace opengl {
         // version of OpenGL that would let us map the buffer unsynchronized.
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_READ_BIT);
-        CallMapReadCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+        CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
     }
 
     void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
@@ -46,7 +46,7 @@ namespace backend { namespace opengl {
         // version of OpenGL that would let us map the buffer unsynchronized.
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_WRITE_BIT);
-        CallMapWriteCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+        CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
     }
 
     void Buffer::UnmapImpl() {

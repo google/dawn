@@ -128,9 +128,9 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 
     // Maps all the buffers and fill ReadbackSlot::mappedData
     void MapSlotsSynchronously();
-    static void SlotMapReadCallback(nxtBufferMapAsyncStatus status,
+    static void SlotMapReadCallback(dawnBufferMapAsyncStatus status,
                                     const void* data,
-                                    nxtCallbackUserdata userdata);
+                                    dawnCallbackUserdata userdata);
     size_t mNumPendingMapOperations = 0;
 
     // Reserve space where the data for an expectation can be copied

@@ -150,11 +150,11 @@ namespace backend { namespace vulkan {
     }
 
     void Buffer::OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data) {
-        CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+        CallMapReadCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
     }
 
     void Buffer::OnMapWriteCommandSerialFinished(uint32_t mapSerial, void* data) {
-        CallMapWriteCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+        CallMapWriteCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
     }
 
     VkBuffer Buffer::GetHandle() const {

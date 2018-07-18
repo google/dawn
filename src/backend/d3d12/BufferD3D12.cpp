@@ -155,9 +155,9 @@ namespace backend { namespace d3d12 {
 
     void Buffer::OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite) {
         if (isWrite) {
-            CallMapWriteCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+            CallMapWriteCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
         } else {
-            CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+            CallMapReadCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
         }
     }
 

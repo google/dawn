@@ -86,7 +86,7 @@ namespace {
 
     // End2end tests should test valid commands produce the expected result so no error
     // should happen. Failure cases should be tested in the validation tests.
-    void DeviceErrorCauseTestFailure(const char* message, nxtCallbackUserdata) {
+    void DeviceErrorCauseTestFailure(const char* message, dawnCallbackUserdata) {
          FAIL() << "Device level failure: " << message;
     }
 
@@ -136,12 +136,12 @@ void NXTTest::SetUp() {
 
     mBinding->SetWindow(testWindow);
 
-    nxtDevice backendDevice;
+    dawnDevice backendDevice;
     nxtProcTable backendProcs;
     mBinding->GetProcAndDevice(&backendProcs, &backendDevice);
 
     // Choose whether to use the backend procs and devices directly, or set up the wire.
-    nxtDevice cDevice = nullptr;
+    dawnDevice cDevice = nullptr;
     nxtProcTable procs;
 
     if (gTestUsesWire) {
@@ -151,7 +151,7 @@ void NXTTest::SetUp() {
         mWireServer = dawn::wire::NewServerCommandHandler(backendDevice, backendProcs, mS2cBuf);
         mC2sBuf->SetHandler(mWireServer);
 
-        nxtDevice clientDevice;
+        dawnDevice clientDevice;
         nxtProcTable clientProcs;
         mWireClient = dawn::wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf);
         mS2cBuf->SetHandler(mWireClient);
@@ -320,10 +320,10 @@ void NXTTest::MapSlotsSynchronously() {
 }
 
 // static
-void NXTTest::SlotMapReadCallback(nxtBufferMapAsyncStatus status,
+void NXTTest::SlotMapReadCallback(dawnBufferMapAsyncStatus status,
                                   const void* data,
-                                  nxtCallbackUserdata userdata_) {
-    DAWN_ASSERT(status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
+                                  dawnCallbackUserdata userdata_) {
+    DAWN_ASSERT(status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
 
     auto userdata = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata_));
     userdata->test->mReadbackSlots[userdata->slot].mappedData = data;

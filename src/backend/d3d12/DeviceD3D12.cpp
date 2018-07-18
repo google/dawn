@@ -43,26 +43,26 @@ namespace backend { namespace d3d12 {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
-    void Init(nxtProcTable* procs, nxtDevice* device) {
+    void Init(nxtProcTable* procs, dawnDevice* device) {
         *device = nullptr;
         *procs = GetValidatingProcs();
-        *device = reinterpret_cast<nxtDevice>(new Device());
+        *device = reinterpret_cast<dawnDevice>(new Device());
     }
 
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window) {
+    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, HWND window) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
 
         dawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, window));
-        impl.textureUsage = NXT_TEXTURE_USAGE_BIT_PRESENT;
+        impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
 
         return impl;
     }
 
-    nxtTextureFormat GetNativeSwapChainPreferredFormat(
+    dawnTextureFormat GetNativeSwapChainPreferredFormat(
         const dawnSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-        return static_cast<nxtTextureFormat>(impl->GetPreferredFormat());
+        return static_cast<dawnTextureFormat>(impl->GetPreferredFormat());
     }
 
     void ASSERT_SUCCESS(HRESULT hr) {

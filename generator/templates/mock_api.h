@@ -27,7 +27,7 @@ class ProcTableAsClass {
     public:
         virtual ~ProcTableAsClass();
 
-        void GetProcTableAndDevice(nxtProcTable* table, nxtDevice* device);
+        void GetProcTableAndDevice(nxtProcTable* table, dawnDevice* device);
 
         // Creates an object that can be returned by a mocked call as in WillOnce(Return(foo)).
         // It returns an object of the write type that isn't equal to any previously returned object.
@@ -51,36 +51,36 @@ class ProcTableAsClass {
 
             // Stores callback and userdata and calls OnBuilderSetErrorCallback
             {% if type.is_builder %}
-                void {{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2);
+                void {{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, dawnBuilderErrorCallback callback, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2);
             {% endif %}
         {% endfor %}
 
         // Stores callback and userdata and calls the On* methods
-        void DeviceSetErrorCallback(nxtDevice self, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata);
-        void BufferMapReadAsync(nxtBuffer self, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata);
-        void BufferMapWriteAsync(nxtBuffer self, uint32_t start, uint32_t size, nxtBufferMapWriteCallback callback, nxtCallbackUserdata userdata);
+        void DeviceSetErrorCallback(dawnDevice self, dawnDeviceErrorCallback callback, dawnCallbackUserdata userdata);
+        void BufferMapReadAsync(dawnBuffer self, uint32_t start, uint32_t size, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata);
+        void BufferMapWriteAsync(dawnBuffer self, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata);
 
 
         // Special cased mockable methods
-        virtual void OnDeviceSetErrorCallback(nxtDevice device, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) = 0;
-        virtual void OnBuilderSetErrorCallback(nxtBufferBuilder builder, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2) = 0;
-        virtual void OnBufferMapReadAsyncCallback(nxtBuffer buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) = 0;
-        virtual void OnBufferMapWriteAsyncCallback(nxtBuffer buffer, uint32_t start, uint32_t size, nxtBufferMapWriteCallback callback, nxtCallbackUserdata userdata) = 0;
+        virtual void OnDeviceSetErrorCallback(dawnDevice device, dawnDeviceErrorCallback callback, dawnCallbackUserdata userdata) = 0;
+        virtual void OnBuilderSetErrorCallback(dawnBufferBuilder builder, dawnBuilderErrorCallback callback, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2) = 0;
+        virtual void OnBufferMapReadAsyncCallback(dawnBuffer buffer, uint32_t start, uint32_t size, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata) = 0;
+        virtual void OnBufferMapWriteAsyncCallback(dawnBuffer buffer, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata) = 0;
 
         // Calls the stored callbacks
-        void CallDeviceErrorCallback(nxtDevice device, const char* message);
-        void CallBuilderErrorCallback(void* builder , nxtBuilderErrorStatus status, const char* message);
-        void CallMapReadCallback(nxtBuffer buffer, nxtBufferMapAsyncStatus status, const void* data);
-        void CallMapWriteCallback(nxtBuffer buffer, nxtBufferMapAsyncStatus status, void* data);
+        void CallDeviceErrorCallback(dawnDevice device, const char* message);
+        void CallBuilderErrorCallback(void* builder , dawnBuilderErrorStatus status, const char* message);
+        void CallMapReadCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, const void* data);
+        void CallMapWriteCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, void* data);
 
         struct Object {
             ProcTableAsClass* procs = nullptr;
-            nxtDeviceErrorCallback deviceErrorCallback = nullptr;
-            nxtBuilderErrorCallback builderErrorCallback = nullptr;
-            nxtBufferMapReadCallback mapReadCallback = nullptr;
-            nxtBufferMapWriteCallback mapWriteCallback = nullptr;
-            nxtCallbackUserdata userdata1 = 0;
-            nxtCallbackUserdata userdata2 = 0;
+            dawnDeviceErrorCallback deviceErrorCallback = nullptr;
+            dawnBuilderErrorCallback builderErrorCallback = nullptr;
+            dawnBufferMapReadCallback mapReadCallback = nullptr;
+            dawnBufferMapWriteCallback mapWriteCallback = nullptr;
+            dawnCallbackUserdata userdata1 = 0;
+            dawnCallbackUserdata userdata2 = 0;
         };
 
     private:
@@ -106,10 +106,10 @@ class MockProcTable : public ProcTableAsClass {
             MOCK_METHOD1({{as_MethodSuffix(type.name, Name("release"))}}, void({{as_cType(type.name)}} self));
         {% endfor %}
 
-        MOCK_METHOD3(OnDeviceSetErrorCallback, void(nxtDevice device, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata));
-        MOCK_METHOD4(OnBuilderSetErrorCallback, void(nxtBufferBuilder builder, nxtBuilderErrorCallback callback, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2));
-        MOCK_METHOD5(OnBufferMapReadAsyncCallback, void(nxtBuffer buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata));
-        MOCK_METHOD5(OnBufferMapWriteAsyncCallback, void(nxtBuffer buffer, uint32_t start, uint32_t size, nxtBufferMapWriteCallback callback, nxtCallbackUserdata userdata));
+        MOCK_METHOD3(OnDeviceSetErrorCallback, void(dawnDevice device, dawnDeviceErrorCallback callback, dawnCallbackUserdata userdata));
+        MOCK_METHOD4(OnBuilderSetErrorCallback, void(dawnBufferBuilder builder, dawnBuilderErrorCallback callback, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2));
+        MOCK_METHOD5(OnBufferMapReadAsyncCallback, void(dawnBuffer buffer, uint32_t start, uint32_t size, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata));
+        MOCK_METHOD5(OnBufferMapWriteAsyncCallback, void(dawnBuffer buffer, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata));
 };
 
 #endif // MOCK_NXT_H

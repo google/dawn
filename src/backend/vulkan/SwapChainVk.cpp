@@ -24,7 +24,7 @@ namespace backend { namespace vulkan {
         dawnWSIContextVulkan wsiContext = {};
         im.Init(im.userData, &wsiContext);
 
-        ASSERT(im.textureUsage != NXT_TEXTURE_USAGE_BIT_NONE);
+        ASSERT(im.textureUsage != DAWN_TEXTURE_USAGE_BIT_NONE);
         mTextureUsage = static_cast<dawn::TextureUsageBit>(im.textureUsage);
     }
 

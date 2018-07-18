@@ -44,7 +44,7 @@ namespace backend {
 
     BuilderBase::~BuilderBase() {
         if (!mIsConsumed && mCallback != nullptr) {
-            mCallback(NXT_BUILDER_ERROR_STATUS_UNKNOWN, "Builder destroyed before GetResult",
+            mCallback(DAWN_BUILDER_ERROR_STATUS_UNKNOWN, "Builder destroyed before GetResult",
                       mUserdata1, mUserdata2);
         }
     }
@@ -87,7 +87,7 @@ namespace backend {
         }
 
         if (mCallback != nullptr) {
-            mCallback(static_cast<nxtBuilderErrorStatus>(mStoredStatus), mStoredMessage.c_str(),
+            mCallback(static_cast<dawnBuilderErrorStatus>(mStoredStatus), mStoredMessage.c_str(),
                       mUserdata1, mUserdata2);
         }
 

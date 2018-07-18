@@ -48,8 +48,8 @@ namespace backend {
         mAllowedUsage = allowedUsage;
         mWidth = width;
         mHeight = height;
-        mImplementation.Configure(mImplementation.userData, static_cast<nxtTextureFormat>(format),
-                                  static_cast<nxtTextureUsageBit>(allowedUsage), width, height);
+        mImplementation.Configure(mImplementation.userData, static_cast<dawnTextureFormat>(format),
+                                  static_cast<dawnTextureUsageBit>(allowedUsage), width, height);
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {

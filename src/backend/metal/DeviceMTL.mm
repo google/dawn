@@ -38,11 +38,11 @@ namespace backend { namespace metal {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
-    void Init(id<MTLDevice> metalDevice, nxtProcTable* procs, nxtDevice* device) {
+    void Init(id<MTLDevice> metalDevice, nxtProcTable* procs, dawnDevice* device) {
         *device = nullptr;
 
         *procs = GetValidatingProcs();
-        *device = reinterpret_cast<nxtDevice>(new Device(metalDevice));
+        *device = reinterpret_cast<dawnDevice>(new Device(metalDevice));
     }
 
     // Device

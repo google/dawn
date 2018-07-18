@@ -17,26 +17,26 @@
 #include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
 
-nxtDevice device;
-nxtQueue queue;
-nxtSwapChain swapchain;
-nxtRenderPipeline pipeline;
+dawnDevice device;
+dawnQueue queue;
+dawnSwapChain swapchain;
+dawnRenderPipeline pipeline;
 
-nxtTextureFormat swapChainFormat;
+dawnTextureFormat swapChainFormat;
 
 void init() {
     device = CreateCppDawnDevice().Release();
-    queue = nxtDeviceCreateQueue(device);
+    queue = dawnDeviceCreateQueue(device);
 
     {
-        nxtSwapChainBuilder builder = nxtDeviceCreateSwapChainBuilder(device);
+        dawnSwapChainBuilder builder = dawnDeviceCreateSwapChainBuilder(device);
         uint64_t swapchainImpl = GetSwapChainImplementation();
-        nxtSwapChainBuilderSetImplementation(builder, swapchainImpl);
-        swapchain = nxtSwapChainBuilderGetResult(builder);
-        nxtSwapChainBuilderRelease(builder);
+        dawnSwapChainBuilderSetImplementation(builder, swapchainImpl);
+        swapchain = dawnSwapChainBuilderGetResult(builder);
+        dawnSwapChainBuilderRelease(builder);
     }
-    swapChainFormat = static_cast<nxtTextureFormat>(GetPreferredSwapChainTextureFormat());
-    nxtSwapChainConfigure(swapchain, swapChainFormat, NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT, 640,
+    swapChainFormat = static_cast<dawnTextureFormat>(GetPreferredSwapChainTextureFormat());
+    dawnSwapChainConfigure(swapchain, swapChainFormat, DAWN_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT, 640,
                           480);
 
     const char* vs =
@@ -45,7 +45,7 @@ void init() {
         "void main() {\n"
         "   gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);\n"
         "}\n";
-    nxtShaderModule vsModule = utils::CreateShaderModule(dawn::Device(device), dawn::ShaderStage::Vertex, vs).Release();
+    dawnShaderModule vsModule = utils::CreateShaderModule(dawn::Device(device), dawn::ShaderStage::Vertex, vs).Release();
 
     const char* fs =
         "#version 450\n"
@@ -53,52 +53,52 @@ void init() {
         "void main() {\n"
         "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
         "}\n";
-    nxtShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fs).Release();
+    dawnShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fs).Release();
 
     {
-        nxtRenderPipelineBuilder builder = nxtDeviceCreateRenderPipelineBuilder(device);
-        nxtRenderPipelineBuilderSetColorAttachmentFormat(builder, 0, swapChainFormat);
-        nxtRenderPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_VERTEX, vsModule, "main");
-        nxtRenderPipelineBuilderSetStage(builder, NXT_SHADER_STAGE_FRAGMENT, fsModule, "main");
-        pipeline = nxtRenderPipelineBuilderGetResult(builder);
-        nxtRenderPipelineBuilderRelease(builder);
+        dawnRenderPipelineBuilder builder = dawnDeviceCreateRenderPipelineBuilder(device);
+        dawnRenderPipelineBuilderSetColorAttachmentFormat(builder, 0, swapChainFormat);
+        dawnRenderPipelineBuilderSetStage(builder, DAWN_SHADER_STAGE_VERTEX, vsModule, "main");
+        dawnRenderPipelineBuilderSetStage(builder, DAWN_SHADER_STAGE_FRAGMENT, fsModule, "main");
+        pipeline = dawnRenderPipelineBuilderGetResult(builder);
+        dawnRenderPipelineBuilderRelease(builder);
     }
 
-    nxtShaderModuleRelease(vsModule);
-    nxtShaderModuleRelease(fsModule);
+    dawnShaderModuleRelease(vsModule);
+    dawnShaderModuleRelease(fsModule);
 }
 
 void frame() {
-    nxtTexture backbuffer = nxtSwapChainGetNextTexture(swapchain);
-    nxtTextureView backbufferView;
+    dawnTexture backbuffer = dawnSwapChainGetNextTexture(swapchain);
+    dawnTextureView backbufferView;
     {
-        nxtTextureViewBuilder builder = nxtTextureCreateTextureViewBuilder(backbuffer);
-        backbufferView = nxtTextureViewBuilderGetResult(builder);
-        nxtTextureViewBuilderRelease(builder);
+        dawnTextureViewBuilder builder = dawnTextureCreateTextureViewBuilder(backbuffer);
+        backbufferView = dawnTextureViewBuilderGetResult(builder);
+        dawnTextureViewBuilderRelease(builder);
     }
-    nxtRenderPassDescriptor renderpassInfo;
+    dawnRenderPassDescriptor renderpassInfo;
     {
-        nxtRenderPassDescriptorBuilder builder = nxtDeviceCreateRenderPassDescriptorBuilder(device);
-        nxtRenderPassDescriptorBuilderSetColorAttachment(builder, 0, backbufferView, NXT_LOAD_OP_CLEAR);
-        renderpassInfo = nxtRenderPassDescriptorBuilderGetResult(builder);
-        nxtRenderPassDescriptorBuilderRelease(builder);
+        dawnRenderPassDescriptorBuilder builder = dawnDeviceCreateRenderPassDescriptorBuilder(device);
+        dawnRenderPassDescriptorBuilderSetColorAttachment(builder, 0, backbufferView, DAWN_LOAD_OP_CLEAR);
+        renderpassInfo = dawnRenderPassDescriptorBuilderGetResult(builder);
+        dawnRenderPassDescriptorBuilderRelease(builder);
     }
-    nxtCommandBuffer commands;
+    dawnCommandBuffer commands;
     {
-        nxtCommandBufferBuilder builder = nxtDeviceCreateCommandBufferBuilder(device);
-        nxtCommandBufferBuilderBeginRenderPass(builder, renderpassInfo);
-        nxtCommandBufferBuilderSetRenderPipeline(builder, pipeline);
-        nxtCommandBufferBuilderDrawArrays(builder, 3, 1, 0, 0);
-        nxtCommandBufferBuilderEndRenderPass(builder);
-        commands = nxtCommandBufferBuilderGetResult(builder);
-        nxtCommandBufferBuilderRelease(builder);
+        dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
+        dawnCommandBufferBuilderBeginRenderPass(builder, renderpassInfo);
+        dawnCommandBufferBuilderSetRenderPipeline(builder, pipeline);
+        dawnCommandBufferBuilderDrawArrays(builder, 3, 1, 0, 0);
+        dawnCommandBufferBuilderEndRenderPass(builder);
+        commands = dawnCommandBufferBuilderGetResult(builder);
+        dawnCommandBufferBuilderRelease(builder);
     }
 
-    nxtQueueSubmit(queue, 1, &commands);
-    nxtCommandBufferRelease(commands);
-    nxtSwapChainPresent(swapchain, backbuffer);
-    nxtRenderPassDescriptorRelease(renderpassInfo);
-    nxtTextureViewRelease(backbufferView);
+    dawnQueueSubmit(queue, 1, &commands);
+    dawnCommandBufferRelease(commands);
+    dawnSwapChainPresent(swapchain, backbuffer);
+    dawnRenderPassDescriptorRelease(renderpassInfo);
+    dawnTextureViewRelease(backbufferView);
 
     DoFlush();
 }

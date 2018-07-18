@@ -18,19 +18,19 @@
 
 namespace backend {
     namespace null {
-        void Init(nxtProcTable* procs, nxtDevice* device);
+        void Init(nxtProcTable* procs, dawnDevice* device);
     }
 }
 
 ValidationTest::ValidationTest() {
     nxtProcTable procs;
-    nxtDevice cDevice;
+    dawnDevice cDevice;
     backend::null::Init(&procs, &cDevice);
 
     nxtSetProcs(&procs);
     device = dawn::Device::Acquire(cDevice);
 
-    device.SetErrorCallback(ValidationTest::OnDeviceError, static_cast<nxtCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+    device.SetErrorCallback(ValidationTest::OnDeviceError, static_cast<dawnCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
 }
 
 ValidationTest::~ValidationTest() {
@@ -51,9 +51,9 @@ void ValidationTest::TearDown() {
 
         ASSERT_TRUE(expectation.gotStatus) << "Didn't get a status for " << name;
 
-        ASSERT_NE(NXT_BUILDER_ERROR_STATUS_UNKNOWN, expectation.status) << "Got unknown status for " << name;
+        ASSERT_NE(DAWN_BUILDER_ERROR_STATUS_UNKNOWN, expectation.status) << "Got unknown status for " << name;
 
-        bool wasSuccess = expectation.status == NXT_BUILDER_ERROR_STATUS_SUCCESS;
+        bool wasSuccess = expectation.status == DAWN_BUILDER_ERROR_STATUS_SUCCESS;
         ASSERT_EQ(expectation.expectSuccess, wasSuccess)
             << "Got wrong status value for " << name
             << ", status was " << expectation.status << " with \"" << expectation.statusMessage << "\"";
@@ -85,7 +85,7 @@ dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
             .GetResult();
 }
 
-void ValidationTest::OnDeviceError(const char* message, nxtCallbackUserdata userdata) {
+void ValidationTest::OnDeviceError(const char* message, dawnCallbackUserdata userdata) {
     // Skip this one specific error that is raised when a builder is used after it got an error
     // this is important because we don't want to wrap all creation tests in ASSERT_DEVICE_ERROR.
     // Yes the error message is misleading.
@@ -99,7 +99,7 @@ void ValidationTest::OnDeviceError(const char* message, nxtCallbackUserdata user
     self->mError = true;
 }
 
-void ValidationTest::OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, dawn::CallbackUserdata userdata1, dawn::CallbackUserdata userdata2) {
+void ValidationTest::OnBuilderErrorStatus(dawnBuilderErrorStatus status, const char* message, dawn::CallbackUserdata userdata1, dawn::CallbackUserdata userdata2) {
     auto* self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata1));
     size_t index = static_cast<size_t>(userdata2);
 

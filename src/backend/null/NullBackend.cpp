@@ -23,9 +23,9 @@ namespace backend { namespace null {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
-    void Init(nxtProcTable* procs, nxtDevice* device) {
+    void Init(nxtProcTable* procs, dawnDevice* device) {
         *procs = GetValidatingProcs();
-        *device = reinterpret_cast<nxtDevice>(new Device);
+        *device = reinterpret_cast<dawnDevice>(new Device);
     }
 
     // Device
@@ -135,9 +135,9 @@ namespace backend { namespace null {
 
     void Buffer::MapReadOperationCompleted(uint32_t serial, void* ptr, bool isWrite) {
         if (isWrite) {
-            CallMapWriteCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
+            CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
         } else {
-            CallMapReadCallback(serial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
+            CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
         }
     }
 

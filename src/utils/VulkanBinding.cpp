@@ -24,13 +24,13 @@
 
 namespace backend { namespace vulkan {
     void Init(nxtProcTable* procs,
-              nxtDevice* device,
+              dawnDevice* device,
               const std::vector<const char*>& requiredInstanceExtensions);
 
-    VkInstance GetInstance(nxtDevice device);
+    VkInstance GetInstance(dawnDevice device);
 
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, VkSurfaceKHR surface);
-    nxtTextureFormat GetNativeSwapChainPreferredFormat(
+    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHR surface);
+    dawnTextureFormat GetNativeSwapChainPreferredFormat(
         const dawnSwapChainImplementation* swapChain);
 }}  // namespace backend::vulkan
 
@@ -49,7 +49,7 @@ namespace utils {
         void Init(dawnWSIContextVulkan*) {
         }
 
-        dawnSwapChainError Configure(nxtTextureFormat, nxtTextureUsageBit, uint32_t, uint32_t) {
+        dawnSwapChainError Configure(dawnTextureFormat, dawnTextureUsageBit, uint32_t, uint32_t) {
             return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
@@ -67,7 +67,7 @@ namespace utils {
         void SetupGLFWWindowHints() override {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
-        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
             uint32_t extensionCount = 0;
             const char** glfwInstanceExtensions =
                 glfwGetRequiredInstanceExtensions(&extensionCount);
@@ -89,13 +89,13 @@ namespace utils {
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
-        nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
+        dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
             ASSERT(mSwapchainImpl.userData != nullptr);
             return backend::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:
-        nxtDevice mDevice;
+        dawnDevice mDevice;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 

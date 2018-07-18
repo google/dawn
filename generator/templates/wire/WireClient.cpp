@@ -32,7 +32,7 @@ namespace dawn { namespace wire {
         class Device;
 
         struct BuilderCallbackData {
-            bool Call(nxtBuilderErrorStatus status, const char* message) {
+            bool Call(dawnBuilderErrorStatus status, const char* message) {
                 if (canCall && callback != nullptr) {
                     canCall = true;
                     callback(status, message, userdata1, userdata2);
@@ -43,9 +43,9 @@ namespace dawn { namespace wire {
             }
 
             //* For help with development, prints all builder errors by default.
-            nxtBuilderErrorCallback callback = nullptr;
-            nxtCallbackUserdata userdata1 = 0;
-            nxtCallbackUserdata userdata2 = 0;
+            dawnBuilderErrorCallback callback = nullptr;
+            dawnCallbackUserdata userdata1 = 0;
+            dawnCallbackUserdata userdata2 = 0;
             bool canCall = true;
         };
 
@@ -81,14 +81,14 @@ namespace dawn { namespace wire {
             ~Buffer() {
                 //* Callbacks need to be fired in all cases, as they can handle freeing resources
                 //* so we call them with "Unknown" status.
-                ClearMapRequests(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN);
+                ClearMapRequests(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN);
 
                 if (mappedData) {
                     free(mappedData);
                 }
             }
 
-            void ClearMapRequests(nxtBufferMapAsyncStatus status) {
+            void ClearMapRequests(dawnBufferMapAsyncStatus status) {
                 for (auto& it : requests) {
                     if (it.second.isWrite) {
                         it.second.writeCallback(status, nullptr, it.second.userdata);
@@ -103,9 +103,9 @@ namespace dawn { namespace wire {
             //* map request in flight at a single time and need to track them separately.
             //* On well-behaved applications, only one request should exist at a single time.
             struct MapRequestData {
-                nxtBufferMapReadCallback readCallback = nullptr;
-                nxtBufferMapWriteCallback writeCallback = nullptr;
-                nxtCallbackUserdata userdata = 0;
+                dawnBufferMapReadCallback readCallback = nullptr;
+                dawnBufferMapWriteCallback writeCallback = nullptr;
+                dawnCallbackUserdata userdata = 0;
                 uint32_t size = 0;
                 bool isWrite = false;
             };
@@ -225,8 +225,8 @@ namespace dawn { namespace wire {
                     }
                 }
 
-                nxtDeviceErrorCallback errorCallback = nullptr;
-                nxtCallbackUserdata errorUserdata;
+                dawnDeviceErrorCallback errorCallback = nullptr;
+                dawnCallbackUserdata errorUserdata;
 
             private:
                CommandSerializer* mSerializer = nullptr;
@@ -286,9 +286,9 @@ namespace dawn { namespace wire {
 
             {% if type.is_builder %}
                 void Client{{as_MethodSuffix(type.name, Name("set error callback"))}}({{Type}}* self,
-                                                                                      nxtBuilderErrorCallback callback,
-                                                                                      nxtCallbackUserdata userdata1,
-                                                                                      nxtCallbackUserdata userdata2) {
+                                                                                      dawnBuilderErrorCallback callback,
+                                                                                      dawnCallbackUserdata userdata1,
+                                                                                      dawnCallbackUserdata userdata2) {
                     self->builderCallback.callback = callback;
                     self->builderCallback.userdata1 = userdata1;
                     self->builderCallback.userdata2 = userdata2;
@@ -304,7 +304,7 @@ namespace dawn { namespace wire {
                         return;
                     }
 
-                    obj->builderCallback.Call(NXT_BUILDER_ERROR_STATUS_UNKNOWN, "Unknown");
+                    obj->builderCallback.Call(DAWN_BUILDER_ERROR_STATUS_UNKNOWN, "Unknown");
 
                     wire::{{as_MethodSuffix(type.name, Name("destroy"))}}Cmd cmd;
                     cmd.objectId = obj->id;
@@ -321,7 +321,7 @@ namespace dawn { namespace wire {
             {% endif %}
         {% endfor %}
 
-        void ClientBufferMapReadAsync(Buffer* buffer, uint32_t start, uint32_t size, nxtBufferMapReadCallback callback, nxtCallbackUserdata userdata) {
+        void ClientBufferMapReadAsync(Buffer* buffer, uint32_t start, uint32_t size, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata) {
             uint32_t serial = buffer->requestSerial++;
             ASSERT(buffer->requests.find(serial) == buffer->requests.end());
 
@@ -343,7 +343,7 @@ namespace dawn { namespace wire {
             *allocCmd = cmd;
         }
 
-        void ClientBufferMapWriteAsync(Buffer* buffer, uint32_t start, uint32_t size, nxtBufferMapWriteCallback callback, nxtCallbackUserdata userdata) {
+        void ClientBufferMapWriteAsync(Buffer* buffer, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata) {
             uint32_t serial = buffer->requestSerial++;
             ASSERT(buffer->requests.find(serial) == buffer->requests.end());
 
@@ -365,7 +365,7 @@ namespace dawn { namespace wire {
             *allocCmd = cmd;
         }
 
-        void ProxyClientBufferUnmap(nxtBuffer cBuffer) {
+        void ProxyClientBufferUnmap(dawnBuffer cBuffer) {
             Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 
             //* Invalidate the local pointer, and cancel all other in-flight requests that would turn into
@@ -393,7 +393,7 @@ namespace dawn { namespace wire {
                 free(buffer->mappedData);
                 buffer->mappedData = nullptr;
             }
-            buffer->ClearMapRequests(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN);
+            buffer->ClearMapRequests(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN);
 
             ClientBufferUnmap(cBuffer);
         }
@@ -404,7 +404,7 @@ namespace dawn { namespace wire {
         void ClientDeviceRelease(Device*) {
         }
 
-        void ClientDeviceSetErrorCallback(Device* self, nxtDeviceErrorCallback callback, nxtCallbackUserdata userdata) {
+        void ClientDeviceSetErrorCallback(Device* self, dawnDeviceErrorCallback callback, dawnCallbackUserdata userdata) {
             self->errorCallback = callback;
             self->errorUserdata = userdata;
         }
@@ -535,10 +535,10 @@ namespace dawn { namespace wire {
                             return true;
                         }
 
-                        bool called = builtObject->builderCallback.Call(static_cast<nxtBuilderErrorStatus>(cmd->status), message);
+                        bool called = builtObject->builderCallback.Call(static_cast<dawnBuilderErrorStatus>(cmd->status), message);
 
                         // Unhandled builder errors are forwarded to the device
-                        if (!called && cmd->status != NXT_BUILDER_ERROR_STATUS_SUCCESS && cmd->status != NXT_BUILDER_ERROR_STATUS_UNKNOWN) {
+                        if (!called && cmd->status != DAWN_BUILDER_ERROR_STATUS_SUCCESS && cmd->status != DAWN_BUILDER_ERROR_STATUS_UNKNOWN) {
                             mDevice->HandleError(("Unhandled builder error: " + std::string(message)).c_str());
                         }
 
@@ -555,7 +555,7 @@ namespace dawn { namespace wire {
                     //* Unconditionnally get the data from the buffer so that the correct amount of data is
                     //* consumed from the buffer, even when we ignore the command and early out.
                     const char* requestData = nullptr;
-                    if (cmd->status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+                    if (cmd->status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
                         requestData = GetData<char>(commands, size, cmd->dataLength);
                         if (requestData == nullptr) {
                             return false;
@@ -587,7 +587,7 @@ namespace dawn { namespace wire {
                     buffer->requests.erase(requestIt);
 
                     //* On success, we copy the data locally because the IPC buffer isn't valid outside of this function
-                    if (cmd->status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+                    if (cmd->status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
                         //* The server didn't send the right amount of data, this is an error and could cause
                         //* the application to crash if we did call the callback.
                         if (request.size != cmd->dataLength) {
@@ -605,9 +605,9 @@ namespace dawn { namespace wire {
                         buffer->mappedData = malloc(request.size);
                         memcpy(buffer->mappedData, requestData, request.size);
 
-                        request.readCallback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
+                        request.readCallback(static_cast<dawnBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
                     } else {
-                        request.readCallback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
+                        request.readCallback(static_cast<dawnBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
                     }
 
                     return true;
@@ -643,7 +643,7 @@ namespace dawn { namespace wire {
                     buffer->requests.erase(requestIt);
 
                     //* On success, we copy the data locally because the IPC buffer isn't valid outside of this function
-                    if (cmd->status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+                    if (cmd->status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
                         if (buffer->mappedData != nullptr) {
                             return false;
                         }
@@ -653,9 +653,9 @@ namespace dawn { namespace wire {
                         buffer->mappedData = malloc(request.size);
                         memset(buffer->mappedData, 0, request.size);
 
-                        request.writeCallback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
+                        request.writeCallback(static_cast<dawnBufferMapAsyncStatus>(cmd->status), buffer->mappedData, request.userdata);
                     } else {
-                        request.writeCallback(static_cast<nxtBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
+                        request.writeCallback(static_cast<dawnBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
                     }
 
                     return true;
@@ -664,10 +664,10 @@ namespace dawn { namespace wire {
 
     }
 
-    CommandHandler* NewClientDevice(nxtProcTable* procs, nxtDevice* device, CommandSerializer* serializer) {
+    CommandHandler* NewClientDevice(nxtProcTable* procs, dawnDevice* device, CommandSerializer* serializer) {
         auto clientDevice = new client::Device(serializer);
 
-        *device = reinterpret_cast<nxtDeviceImpl*>(clientDevice);
+        *device = reinterpret_cast<dawnDeviceImpl*>(clientDevice);
         *procs = client::GetProcs();
 
         return new client::Client(clientDevice);

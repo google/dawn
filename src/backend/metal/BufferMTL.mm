@@ -43,9 +43,9 @@ namespace backend { namespace metal {
     void Buffer::OnMapCommandSerialFinished(uint32_t mapSerial, uint32_t offset, bool isWrite) {
         char* data = reinterpret_cast<char*>([mMtlBuffer contents]);
         if (isWrite) {
-            CallMapWriteCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data + offset);
+            CallMapWriteCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data + offset);
         } else {
-            CallMapReadCallback(mapSerial, NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data + offset);
+            CallMapReadCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data + offset);
         }
     }
 

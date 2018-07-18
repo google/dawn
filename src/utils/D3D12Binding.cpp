@@ -22,10 +22,10 @@
 #include "GLFW/glfw3native.h"
 
 namespace backend { namespace d3d12 {
-    void Init(nxtProcTable* procs, nxtDevice* device);
+    void Init(nxtProcTable* procs, dawnDevice* device);
 
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(nxtDevice device, HWND window);
-    nxtTextureFormat GetNativeSwapChainPreferredFormat(
+    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, HWND window);
+    dawnTextureFormat GetNativeSwapChainPreferredFormat(
         const dawnSwapChainImplementation* swapChain);
 }}  // namespace backend::d3d12
 
@@ -37,7 +37,7 @@ namespace utils {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
 
-        void GetProcAndDevice(nxtProcTable* procs, nxtDevice* device) override {
+        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
             backend::d3d12::Init(procs, device);
             mBackendDevice = *device;
         }
@@ -51,13 +51,13 @@ namespace utils {
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
-        nxtTextureFormat GetPreferredSwapChainTextureFormat() override {
+        dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
             ASSERT(mSwapchainImpl.userData != nullptr);
             return backend::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:
-        nxtDevice mBackendDevice = nullptr;
+        dawnDevice mBackendDevice = nullptr;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 

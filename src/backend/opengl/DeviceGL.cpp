@@ -35,13 +35,13 @@ namespace backend { namespace opengl {
     nxtProcTable GetNonValidatingProcs();
     nxtProcTable GetValidatingProcs();
 
-    void Init(void* (*getProc)(const char*), nxtProcTable* procs, nxtDevice* device) {
+    void Init(void* (*getProc)(const char*), nxtProcTable* procs, dawnDevice* device) {
         *device = nullptr;
 
         gladLoadGLLoader(reinterpret_cast<GLADloadproc>(getProc));
 
         *procs = GetValidatingProcs();
-        *device = reinterpret_cast<nxtDevice>(new Device);
+        *device = reinterpret_cast<dawnDevice>(new Device);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_SCISSOR_TEST);

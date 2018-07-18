@@ -45,11 +45,11 @@
 {% endfor %}
 
 // Custom types depending on the target language
-typedef uint64_t nxtCallbackUserdata;
-typedef void (*nxtDeviceErrorCallback)(const char* message, nxtCallbackUserdata userdata);
-typedef void (*nxtBuilderErrorCallback)(nxtBuilderErrorStatus status, const char* message, nxtCallbackUserdata userdata1, nxtCallbackUserdata userdata2);
-typedef void (*nxtBufferMapReadCallback)(nxtBufferMapAsyncStatus status, const void* data, nxtCallbackUserdata userdata);
-typedef void (*nxtBufferMapWriteCallback)(nxtBufferMapAsyncStatus status, void* data, nxtCallbackUserdata userdata);
+typedef uint64_t dawnCallbackUserdata;
+typedef void (*dawnDeviceErrorCallback)(const char* message, dawnCallbackUserdata userdata);
+typedef void (*dawnBuilderErrorCallback)(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2);
+typedef void (*dawnBufferMapReadCallback)(dawnBufferMapAsyncStatus status, const void* data, dawnCallbackUserdata userdata);
+typedef void (*dawnBufferMapWriteCallback)(dawnBufferMapAsyncStatus status, void* data, dawnCallbackUserdata userdata);
 
 #ifdef __cplusplus
 extern "C" {

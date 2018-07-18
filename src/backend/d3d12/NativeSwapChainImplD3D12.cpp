@@ -21,15 +21,15 @@
 namespace backend { namespace d3d12 {
 
     namespace {
-        DXGI_USAGE D3D12SwapChainBufferUsage(nxtTextureUsageBit allowedUsages) {
+        DXGI_USAGE D3D12SwapChainBufferUsage(dawnTextureUsageBit allowedUsages) {
             DXGI_USAGE usage = DXGI_CPU_ACCESS_NONE;
-            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_SAMPLED) {
+            if (allowedUsages & DAWN_TEXTURE_USAGE_BIT_SAMPLED) {
                 usage |= DXGI_USAGE_SHADER_INPUT;
             }
-            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_STORAGE) {
+            if (allowedUsages & DAWN_TEXTURE_USAGE_BIT_STORAGE) {
                 usage |= DXGI_USAGE_UNORDERED_ACCESS;
             }
-            if (allowedUsages & NXT_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT) {
+            if (allowedUsages & DAWN_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT) {
                 usage |= DXGI_USAGE_RENDER_TARGET_OUTPUT;
             }
             return usage;
@@ -48,13 +48,13 @@ namespace backend { namespace d3d12 {
     void NativeSwapChainImpl::Init(dawnWSIContextD3D12* /*context*/) {
     }
 
-    dawnSwapChainError NativeSwapChainImpl::Configure(nxtTextureFormat format,
-                                                      nxtTextureUsageBit usage,
+    dawnSwapChainError NativeSwapChainImpl::Configure(dawnTextureFormat format,
+                                                      dawnTextureUsageBit usage,
                                                       uint32_t width,
                                                       uint32_t height) {
         ASSERT(width > 0);
         ASSERT(height > 0);
-        ASSERT(format == static_cast<nxtTextureFormat>(GetPreferredFormat()));
+        ASSERT(format == static_cast<dawnTextureFormat>(GetPreferredFormat()));
 
         ComPtr<IDXGIFactory4> factory = mDevice->GetFactory();
         ComPtr<ID3D12CommandQueue> queue = mDevice->GetCommandQueue();
