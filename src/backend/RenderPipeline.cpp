@@ -37,14 +37,14 @@ namespace backend {
           mColorAttachmentFormats(builder->mColorAttachmentFormats),
           mDepthStencilFormatSet(builder->mDepthStencilFormatSet),
           mDepthStencilFormat(builder->mDepthStencilFormat) {
-        if (GetStageMask() != (nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
+        if (GetStageMask() != (dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment)) {
             builder->HandleError("Render pipeline should have exactly a vertex and fragment stage");
             return;
         }
 
         // TODO(kainino@chromium.org): Need to verify the pipeline against its render subpass.
 
-        if ((builder->GetStageInfo(nxt::ShaderStage::Vertex).module->GetUsedVertexAttributes() &
+        if ((builder->GetStageInfo(dawn::ShaderStage::Vertex).module->GetUsedVertexAttributes() &
              ~mInputState->GetAttributesSetMask())
                 .any()) {
             builder->HandleError("Pipeline vertex stage uses inputs not in the input state");
@@ -74,7 +74,7 @@ namespace backend {
         return mDepthStencilState.Get();
     }
 
-    nxt::IndexFormat RenderPipelineBase::GetIndexFormat() const {
+    dawn::IndexFormat RenderPipelineBase::GetIndexFormat() const {
         return mIndexFormat;
     }
 
@@ -82,7 +82,7 @@ namespace backend {
         return mInputState.Get();
     }
 
-    nxt::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
+    dawn::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
         return mPrimitiveTopology;
     }
 
@@ -94,11 +94,11 @@ namespace backend {
         return mDepthStencilFormatSet;
     }
 
-    nxt::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(uint32_t attachment) const {
+    dawn::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(uint32_t attachment) const {
         return mColorAttachmentFormats[attachment];
     }
 
-    nxt::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
+    dawn::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
         return mDepthStencilFormat;
     }
 
@@ -172,7 +172,7 @@ namespace backend {
     }
 
     void RenderPipelineBuilder::SetColorAttachmentFormat(uint32_t attachmentSlot,
-                                                         nxt::TextureFormat format) {
+                                                         dawn::TextureFormat format) {
         if (attachmentSlot >= kMaxColorAttachments) {
             HandleError("Attachment index out of bounds");
             return;
@@ -201,12 +201,12 @@ namespace backend {
         mDepthStencilState = depthStencilState;
     }
 
-    void RenderPipelineBuilder::SetDepthStencilAttachmentFormat(nxt::TextureFormat format) {
+    void RenderPipelineBuilder::SetDepthStencilAttachmentFormat(dawn::TextureFormat format) {
         mDepthStencilFormatSet = true;
         mDepthStencilFormat = format;
     }
 
-    void RenderPipelineBuilder::SetIndexFormat(nxt::IndexFormat format) {
+    void RenderPipelineBuilder::SetIndexFormat(dawn::IndexFormat format) {
         mIndexFormat = format;
     }
 
@@ -214,7 +214,7 @@ namespace backend {
         mInputState = inputState;
     }
 
-    void RenderPipelineBuilder::SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
+    void RenderPipelineBuilder::SetPrimitiveTopology(dawn::PrimitiveTopology primitiveTopology) {
         mPrimitiveTopology = primitiveTopology;
     }
 

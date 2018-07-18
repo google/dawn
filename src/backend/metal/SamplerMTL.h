@@ -25,7 +25,7 @@ namespace backend { namespace metal {
 
     class Sampler : public SamplerBase {
       public:
-        Sampler(Device* device, const nxt::SamplerDescriptor* descriptor);
+        Sampler(Device* device, const dawn::SamplerDescriptor* descriptor);
         ~Sampler();
 
         id<MTLSamplerState> GetMTLSamplerState();

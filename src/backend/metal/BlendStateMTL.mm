@@ -18,64 +18,64 @@ namespace backend { namespace metal {
 
     namespace {
 
-        MTLBlendFactor MetalBlendFactor(nxt::BlendFactor factor, bool alpha) {
+        MTLBlendFactor MetalBlendFactor(dawn::BlendFactor factor, bool alpha) {
             switch (factor) {
-                case nxt::BlendFactor::Zero:
+                case dawn::BlendFactor::Zero:
                     return MTLBlendFactorZero;
-                case nxt::BlendFactor::One:
+                case dawn::BlendFactor::One:
                     return MTLBlendFactorOne;
-                case nxt::BlendFactor::SrcColor:
+                case dawn::BlendFactor::SrcColor:
                     return MTLBlendFactorSourceColor;
-                case nxt::BlendFactor::OneMinusSrcColor:
+                case dawn::BlendFactor::OneMinusSrcColor:
                     return MTLBlendFactorOneMinusSourceColor;
-                case nxt::BlendFactor::SrcAlpha:
+                case dawn::BlendFactor::SrcAlpha:
                     return MTLBlendFactorSourceAlpha;
-                case nxt::BlendFactor::OneMinusSrcAlpha:
+                case dawn::BlendFactor::OneMinusSrcAlpha:
                     return MTLBlendFactorOneMinusSourceAlpha;
-                case nxt::BlendFactor::DstColor:
+                case dawn::BlendFactor::DstColor:
                     return MTLBlendFactorDestinationColor;
-                case nxt::BlendFactor::OneMinusDstColor:
+                case dawn::BlendFactor::OneMinusDstColor:
                     return MTLBlendFactorOneMinusDestinationColor;
-                case nxt::BlendFactor::DstAlpha:
+                case dawn::BlendFactor::DstAlpha:
                     return MTLBlendFactorDestinationAlpha;
-                case nxt::BlendFactor::OneMinusDstAlpha:
+                case dawn::BlendFactor::OneMinusDstAlpha:
                     return MTLBlendFactorOneMinusDestinationAlpha;
-                case nxt::BlendFactor::SrcAlphaSaturated:
+                case dawn::BlendFactor::SrcAlphaSaturated:
                     return MTLBlendFactorSourceAlphaSaturated;
-                case nxt::BlendFactor::BlendColor:
+                case dawn::BlendFactor::BlendColor:
                     return alpha ? MTLBlendFactorBlendAlpha : MTLBlendFactorBlendColor;
-                case nxt::BlendFactor::OneMinusBlendColor:
+                case dawn::BlendFactor::OneMinusBlendColor:
                     return alpha ? MTLBlendFactorOneMinusBlendAlpha
                                  : MTLBlendFactorOneMinusBlendColor;
             }
         }
 
-        MTLBlendOperation MetalBlendOperation(nxt::BlendOperation operation) {
+        MTLBlendOperation MetalBlendOperation(dawn::BlendOperation operation) {
             switch (operation) {
-                case nxt::BlendOperation::Add:
+                case dawn::BlendOperation::Add:
                     return MTLBlendOperationAdd;
-                case nxt::BlendOperation::Subtract:
+                case dawn::BlendOperation::Subtract:
                     return MTLBlendOperationSubtract;
-                case nxt::BlendOperation::ReverseSubtract:
+                case dawn::BlendOperation::ReverseSubtract:
                     return MTLBlendOperationReverseSubtract;
-                case nxt::BlendOperation::Min:
+                case dawn::BlendOperation::Min:
                     return MTLBlendOperationMin;
-                case nxt::BlendOperation::Max:
+                case dawn::BlendOperation::Max:
                     return MTLBlendOperationMax;
             }
         }
 
-        MTLColorWriteMask MetalColorWriteMask(nxt::ColorWriteMask colorWriteMask) {
-            return (((colorWriteMask & nxt::ColorWriteMask::Red) != nxt::ColorWriteMask::None
+        MTLColorWriteMask MetalColorWriteMask(dawn::ColorWriteMask colorWriteMask) {
+            return (((colorWriteMask & dawn::ColorWriteMask::Red) != dawn::ColorWriteMask::None
                          ? MTLColorWriteMaskRed
                          : MTLColorWriteMaskNone) |
-                    ((colorWriteMask & nxt::ColorWriteMask::Green) != nxt::ColorWriteMask::None
+                    ((colorWriteMask & dawn::ColorWriteMask::Green) != dawn::ColorWriteMask::None
                          ? MTLColorWriteMaskGreen
                          : MTLColorWriteMaskNone) |
-                    ((colorWriteMask & nxt::ColorWriteMask::Blue) != nxt::ColorWriteMask::None
+                    ((colorWriteMask & dawn::ColorWriteMask::Blue) != dawn::ColorWriteMask::None
                          ? MTLColorWriteMaskBlue
                          : MTLColorWriteMaskNone) |
-                    ((colorWriteMask & nxt::ColorWriteMask::Alpha) != nxt::ColorWriteMask::None
+                    ((colorWriteMask & dawn::ColorWriteMask::Alpha) != dawn::ColorWriteMask::None
                          ? MTLColorWriteMaskAlpha
                          : MTLColorWriteMaskNone));
         }

@@ -126,7 +126,7 @@ namespace backend {
 
     void RenderPassDescriptorBuilder::SetColorAttachment(uint32_t attachment,
                                                          TextureViewBase* textureView,
-                                                         nxt::LoadOp loadOp) {
+                                                         dawn::LoadOp loadOp) {
         if (attachment >= kMaxColorAttachments) {
             HandleError("Setting color attachment out of bounds");
             return;
@@ -159,8 +159,8 @@ namespace backend {
     }
 
     void RenderPassDescriptorBuilder::SetDepthStencilAttachment(TextureViewBase* textureView,
-                                                                nxt::LoadOp depthLoadOp,
-                                                                nxt::LoadOp stencilLoadOp) {
+                                                                dawn::LoadOp depthLoadOp,
+                                                                dawn::LoadOp stencilLoadOp) {
         if (!TextureFormatHasDepthOrStencil(textureView->GetTexture()->GetFormat())) {
             HandleError("Using color texture as depth stencil attachment");
             return;

@@ -28,13 +28,13 @@
 namespace backend {
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
-                                                const nxt::PipelineLayoutDescriptor* descriptor);
+                                                const dawn::PipelineLayoutDescriptor* descriptor);
 
     using BindGroupLayoutArray = std::array<Ref<BindGroupLayoutBase>, kMaxBindGroups>;
 
     class PipelineLayoutBase : public RefCounted {
       public:
-        PipelineLayoutBase(DeviceBase* device, const nxt::PipelineLayoutDescriptor* descriptor);
+        PipelineLayoutBase(DeviceBase* device, const dawn::PipelineLayoutDescriptor* descriptor);
 
         const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
         const std::bitset<kMaxBindGroups> GetBindGroupLayoutsMask() const;

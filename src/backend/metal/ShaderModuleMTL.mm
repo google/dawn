@@ -26,13 +26,13 @@ namespace backend { namespace metal {
 
     namespace {
 
-        spv::ExecutionModel SpirvExecutionModelForStage(nxt::ShaderStage stage) {
+        spv::ExecutionModel SpirvExecutionModelForStage(dawn::ShaderStage stage) {
             switch (stage) {
-                case nxt::ShaderStage::Vertex:
+                case dawn::ShaderStage::Vertex:
                     return spv::ExecutionModelVertex;
-                case nxt::ShaderStage::Fragment:
+                case dawn::ShaderStage::Fragment:
                     return spv::ExecutionModelFragment;
-                case nxt::ShaderStage::Compute:
+                case dawn::ShaderStage::Compute:
                     return spv::ExecutionModelGLCompute;
                 default:
                     UNREACHABLE();

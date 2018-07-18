@@ -25,40 +25,40 @@
 namespace backend { namespace metal {
 
     namespace {
-        MTLPrimitiveType MTLPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
+        MTLPrimitiveType MTLPrimitiveTopology(dawn::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::PointList:
+                case dawn::PrimitiveTopology::PointList:
                     return MTLPrimitiveTypePoint;
-                case nxt::PrimitiveTopology::LineList:
+                case dawn::PrimitiveTopology::LineList:
                     return MTLPrimitiveTypeLine;
-                case nxt::PrimitiveTopology::LineStrip:
+                case dawn::PrimitiveTopology::LineStrip:
                     return MTLPrimitiveTypeLineStrip;
-                case nxt::PrimitiveTopology::TriangleList:
+                case dawn::PrimitiveTopology::TriangleList:
                     return MTLPrimitiveTypeTriangle;
-                case nxt::PrimitiveTopology::TriangleStrip:
+                case dawn::PrimitiveTopology::TriangleStrip:
                     return MTLPrimitiveTypeTriangleStrip;
             }
         }
 
         MTLPrimitiveTopologyClass MTLInputPrimitiveTopology(
-            nxt::PrimitiveTopology primitiveTopology) {
+            dawn::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::PointList:
+                case dawn::PrimitiveTopology::PointList:
                     return MTLPrimitiveTopologyClassPoint;
-                case nxt::PrimitiveTopology::LineList:
-                case nxt::PrimitiveTopology::LineStrip:
+                case dawn::PrimitiveTopology::LineList:
+                case dawn::PrimitiveTopology::LineStrip:
                     return MTLPrimitiveTopologyClassLine;
-                case nxt::PrimitiveTopology::TriangleList:
-                case nxt::PrimitiveTopology::TriangleStrip:
+                case dawn::PrimitiveTopology::TriangleList:
+                case dawn::PrimitiveTopology::TriangleStrip:
                     return MTLPrimitiveTopologyClassTriangle;
             }
         }
 
-        MTLIndexType MTLIndexFormat(nxt::IndexFormat format) {
+        MTLIndexType MTLIndexFormat(dawn::IndexFormat format) {
             switch (format) {
-                case nxt::IndexFormat::Uint16:
+                case dawn::IndexFormat::Uint16:
                     return MTLIndexTypeUInt16;
-                case nxt::IndexFormat::Uint32:
+                case dawn::IndexFormat::Uint32:
                     return MTLIndexTypeUInt32;
             }
         }
@@ -81,20 +81,20 @@ namespace backend { namespace metal {
             id<MTLFunction> function = data.function;
 
             switch (stage) {
-                case nxt::ShaderStage::Vertex:
+                case dawn::ShaderStage::Vertex:
                     descriptor.vertexFunction = function;
                     break;
-                case nxt::ShaderStage::Fragment:
+                case dawn::ShaderStage::Fragment:
                     descriptor.fragmentFunction = function;
                     break;
-                case nxt::ShaderStage::Compute:
+                case dawn::ShaderStage::Compute:
                     UNREACHABLE();
             }
         }
 
         if (HasDepthStencilAttachment()) {
             // TODO(kainino@chromium.org): Handle depth-only and stencil-only formats.
-            nxt::TextureFormat depthStencilFormat = GetDepthStencilFormat();
+            dawn::TextureFormat depthStencilFormat = GetDepthStencilFormat();
             descriptor.depthAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
             descriptor.stencilAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
         }

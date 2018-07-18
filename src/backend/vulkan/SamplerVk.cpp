@@ -20,35 +20,35 @@
 namespace backend { namespace vulkan {
 
     namespace {
-        VkSamplerAddressMode VulkanSamplerAddressMode(nxt::AddressMode mode) {
+        VkSamplerAddressMode VulkanSamplerAddressMode(dawn::AddressMode mode) {
             switch (mode) {
-                case nxt::AddressMode::Repeat:
+                case dawn::AddressMode::Repeat:
                     return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-                case nxt::AddressMode::MirroredRepeat:
+                case dawn::AddressMode::MirroredRepeat:
                     return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-                case nxt::AddressMode::ClampToEdge:
+                case dawn::AddressMode::ClampToEdge:
                     return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkFilter VulkanSamplerFilter(nxt::FilterMode filter) {
+        VkFilter VulkanSamplerFilter(dawn::FilterMode filter) {
             switch (filter) {
-                case nxt::FilterMode::Linear:
+                case dawn::FilterMode::Linear:
                     return VK_FILTER_LINEAR;
-                case nxt::FilterMode::Nearest:
+                case dawn::FilterMode::Nearest:
                     return VK_FILTER_NEAREST;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkSamplerMipmapMode VulkanMipMapMode(nxt::FilterMode filter) {
+        VkSamplerMipmapMode VulkanMipMapMode(dawn::FilterMode filter) {
             switch (filter) {
-                case nxt::FilterMode::Linear:
+                case dawn::FilterMode::Linear:
                     return VK_SAMPLER_MIPMAP_MODE_LINEAR;
-                case nxt::FilterMode::Nearest:
+                case dawn::FilterMode::Nearest:
                     return VK_SAMPLER_MIPMAP_MODE_NEAREST;
                 default:
                     UNREACHABLE();
@@ -56,7 +56,7 @@ namespace backend { namespace vulkan {
         }
     }  // anonymous namespace
 
-    Sampler::Sampler(Device* device, const nxt::SamplerDescriptor* descriptor)
+    Sampler::Sampler(Device* device, const dawn::SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor), mDevice(device) {
         VkSamplerCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

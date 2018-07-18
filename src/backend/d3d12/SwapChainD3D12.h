@@ -28,7 +28,7 @@ namespace backend { namespace d3d12 {
         TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
         void OnBeforePresent(TextureBase* texture) override;
 
-        nxt::TextureUsageBit mTextureUsage;
+        dawn::TextureUsageBit mTextureUsage;
     };
 
 }}  // namespace backend::d3d12

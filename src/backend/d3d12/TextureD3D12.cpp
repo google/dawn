@@ -20,29 +20,29 @@
 namespace backend { namespace d3d12 {
 
     namespace {
-        D3D12_RESOURCE_STATES D3D12TextureUsage(nxt::TextureUsageBit usage,
-                                                nxt::TextureFormat format) {
+        D3D12_RESOURCE_STATES D3D12TextureUsage(dawn::TextureUsageBit usage,
+                                                dawn::TextureFormat format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
             // Present is an exclusive flag.
-            if (usage & nxt::TextureUsageBit::Present) {
+            if (usage & dawn::TextureUsageBit::Present) {
                 return D3D12_RESOURCE_STATE_PRESENT;
             }
 
-            if (usage & nxt::TextureUsageBit::TransferSrc) {
+            if (usage & dawn::TextureUsageBit::TransferSrc) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
             }
-            if (usage & nxt::TextureUsageBit::TransferDst) {
+            if (usage & dawn::TextureUsageBit::TransferDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
-            if (usage & nxt::TextureUsageBit::Sampled) {
+            if (usage & dawn::TextureUsageBit::Sampled) {
                 resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
                                   D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
             }
-            if (usage & nxt::TextureUsageBit::Storage) {
+            if (usage & dawn::TextureUsageBit::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
-            if (usage & nxt::TextureUsageBit::OutputAttachment) {
+            if (usage & dawn::TextureUsageBit::OutputAttachment) {
                 if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
                     resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
                 } else {
@@ -53,14 +53,14 @@ namespace backend { namespace d3d12 {
             return resourceState;
         }
 
-        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(nxt::TextureUsageBit usage,
-                                                nxt::TextureFormat format) {
+        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::TextureUsageBit usage,
+                                                dawn::TextureFormat format) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
-            if (usage & nxt::TextureUsageBit::Storage) {
+            if (usage & dawn::TextureUsageBit::Storage) {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
             }
-            if (usage & nxt::TextureUsageBit::OutputAttachment) {
+            if (usage & dawn::TextureUsageBit::OutputAttachment) {
                 if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
                 } else {
@@ -73,9 +73,9 @@ namespace backend { namespace d3d12 {
             return flags;
         }
 
-        D3D12_RESOURCE_DIMENSION D3D12TextureDimension(nxt::TextureDimension dimension) {
+        D3D12_RESOURCE_DIMENSION D3D12TextureDimension(dawn::TextureDimension dimension) {
             switch (dimension) {
-                case nxt::TextureDimension::e2D:
+                case dawn::TextureDimension::e2D:
                     return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
                 default:
                     UNREACHABLE();
@@ -84,23 +84,23 @@ namespace backend { namespace d3d12 {
 
     }  // namespace
 
-    DXGI_FORMAT D3D12TextureFormat(nxt::TextureFormat format) {
+    DXGI_FORMAT D3D12TextureFormat(dawn::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::R8G8B8A8Unorm:
                 return DXGI_FORMAT_R8G8B8A8_UNORM;
-            case nxt::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::R8G8Unorm:
                 return DXGI_FORMAT_R8G8_UNORM;
-            case nxt::TextureFormat::R8Unorm:
+            case dawn::TextureFormat::R8Unorm:
                 return DXGI_FORMAT_R8_UNORM;
-            case nxt::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::R8G8B8A8Uint:
                 return DXGI_FORMAT_R8G8B8A8_UINT;
-            case nxt::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::R8G8Uint:
                 return DXGI_FORMAT_R8G8_UINT;
-            case nxt::TextureFormat::R8Uint:
+            case dawn::TextureFormat::R8Uint:
                 return DXGI_FORMAT_R8_UINT;
-            case nxt::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::B8G8R8A8Unorm:
                 return DXGI_FORMAT_B8G8R8A8_UNORM;
-            case nxt::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::D32FloatS8Uint:
                 return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
             default:
                 UNREACHABLE();
@@ -150,7 +150,7 @@ namespace backend { namespace d3d12 {
     }
 
     void Texture::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                     nxt::TextureUsageBit usage) {
+                                     dawn::TextureUsageBit usage) {
         // Avoid transitioning the texture when it isn't needed.
         // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
         if (usage == mLastUsage) {
@@ -177,7 +177,7 @@ namespace backend { namespace d3d12 {
         mSrvDesc.Format = D3D12TextureFormat(GetTexture()->GetFormat());
         mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         switch (GetTexture()->GetDimension()) {
-            case nxt::TextureDimension::e2D:
+            case dawn::TextureDimension::e2D:
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
                 mSrvDesc.Texture2D.MostDetailedMip = 0;
                 mSrvDesc.Texture2D.MipLevels = GetTexture()->GetNumMipLevels();

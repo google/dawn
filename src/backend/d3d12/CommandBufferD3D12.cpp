@@ -34,11 +34,11 @@
 namespace backend { namespace d3d12 {
 
     namespace {
-        DXGI_FORMAT DXGIIndexFormat(nxt::IndexFormat format) {
+        DXGI_FORMAT DXGIIndexFormat(dawn::IndexFormat format) {
             switch (format) {
-                case nxt::IndexFormat::Uint16:
+                case dawn::IndexFormat::Uint16:
                     return DXGI_FORMAT_R16_UINT;
-                case nxt::IndexFormat::Uint32:
+                case dawn::IndexFormat::Uint32:
                     return DXGI_FORMAT_R32_UINT;
                 default:
                     UNREACHABLE();
@@ -308,8 +308,8 @@ namespace backend { namespace d3d12 {
                     Buffer* srcBuffer = ToBackend(copy->source.buffer.Get());
                     Buffer* dstBuffer = ToBackend(copy->destination.buffer.Get());
 
-                    srcBuffer->TransitionUsageNow(commandList, nxt::BufferUsageBit::TransferSrc);
-                    dstBuffer->TransitionUsageNow(commandList, nxt::BufferUsageBit::TransferDst);
+                    srcBuffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferSrc);
+                    dstBuffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferDst);
 
                     commandList->CopyBufferRegion(
                         dstBuffer->GetD3D12Resource().Get(), copy->destination.offset,
@@ -321,8 +321,8 @@ namespace backend { namespace d3d12 {
                     Buffer* buffer = ToBackend(copy->source.buffer.Get());
                     Texture* texture = ToBackend(copy->destination.texture.Get());
 
-                    buffer->TransitionUsageNow(commandList, nxt::BufferUsageBit::TransferSrc);
-                    texture->TransitionUsageNow(commandList, nxt::TextureUsageBit::TransferDst);
+                    buffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferSrc);
+                    texture->TransitionUsageNow(commandList, dawn::TextureUsageBit::TransferDst);
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->destination.x, copy->destination.y, copy->destination.z,
@@ -367,8 +367,8 @@ namespace backend { namespace d3d12 {
                     Texture* texture = ToBackend(copy->source.texture.Get());
                     Buffer* buffer = ToBackend(copy->destination.buffer.Get());
 
-                    texture->TransitionUsageNow(commandList, nxt::TextureUsageBit::TransferSrc);
-                    buffer->TransitionUsageNow(commandList, nxt::BufferUsageBit::TransferDst);
+                    texture->TransitionUsageNow(commandList, dawn::TextureUsageBit::TransferSrc);
+                    buffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferDst);
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->source.x, copy->source.y, copy->source.z, copy->source.width,
@@ -462,7 +462,7 @@ namespace backend { namespace d3d12 {
                 auto& attachmentInfo = renderPass->GetColorAttachment(i);
 
                 // Load op - color
-                if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
                     D3D12_CPU_DESCRIPTOR_HANDLE handle = renderPass->GetRTVDescriptor(i);
                     commandList->ClearRenderTargetView(handle, attachmentInfo.clearColor.data(), 0,
                                                        nullptr);
@@ -475,9 +475,9 @@ namespace backend { namespace d3d12 {
 
                 // Load op - depth/stencil
                 bool doDepthClear = TextureFormatHasDepth(texture->GetFormat()) &&
-                                    (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
+                                    (attachmentInfo.depthLoadOp == dawn::LoadOp::Clear);
                 bool doStencilClear = TextureFormatHasStencil(texture->GetFormat()) &&
-                                      (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+                                      (attachmentInfo.stencilLoadOp == dawn::LoadOp::Clear);
 
                 D3D12_CLEAR_FLAGS clearFlags = {};
                 if (doDepthClear) {

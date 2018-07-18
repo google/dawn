@@ -25,11 +25,11 @@ namespace backend {
     class DeviceBase;
 
     MaybeError ValidateSamplerDescriptor(DeviceBase* device,
-                                         const nxt::SamplerDescriptor* descriptor);
+                                         const dawn::SamplerDescriptor* descriptor);
 
     class SamplerBase : public RefCounted {
       public:
-        SamplerBase(DeviceBase* device, const nxt::SamplerDescriptor* descriptor);
+        SamplerBase(DeviceBase* device, const dawn::SamplerDescriptor* descriptor);
     };
 
 }  // namespace backend

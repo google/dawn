@@ -20,7 +20,7 @@
 
 namespace backend { namespace metal {
 
-    PipelineLayout::PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor)
+    PipelineLayout::PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
         // Each stage has its own numbering namespace in CompilerMSL.
         for (auto stage : IterateStages(kAllStages)) {
@@ -40,16 +40,16 @@ namespace backend { namespace metal {
                     }
 
                     switch (groupInfo.types[binding]) {
-                        case nxt::BindingType::UniformBuffer:
-                        case nxt::BindingType::StorageBuffer:
+                        case dawn::BindingType::UniformBuffer:
+                        case dawn::BindingType::StorageBuffer:
                             mIndexInfo[stage][group][binding] = bufferIndex;
                             bufferIndex++;
                             break;
-                        case nxt::BindingType::Sampler:
+                        case dawn::BindingType::Sampler:
                             mIndexInfo[stage][group][binding] = samplerIndex;
                             samplerIndex++;
                             break;
-                        case nxt::BindingType::SampledTexture:
+                        case dawn::BindingType::SampledTexture:
                             mIndexInfo[stage][group][binding] = textureIndex;
                             textureIndex++;
                             break;
@@ -60,7 +60,7 @@ namespace backend { namespace metal {
     }
 
     const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
-        nxt::ShaderStage stage) const {
+        dawn::ShaderStage stage) const {
         return mIndexInfo[stage];
     }
 

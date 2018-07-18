@@ -47,7 +47,7 @@ namespace backend {
         return mSize;
     }
 
-    nxt::BufferUsageBit BufferBase::GetAllowedUsage() const {
+    dawn::BufferUsageBit BufferBase::GetAllowedUsage() const {
         return mAllowedUsage;
     }
 
@@ -83,7 +83,7 @@ namespace backend {
             return;
         }
 
-        if (!(mAllowedUsage & nxt::BufferUsageBit::TransferDst)) {
+        if (!(mAllowedUsage & dawn::BufferUsageBit::TransferDst)) {
             mDevice->HandleError("Buffer needs the transfer dst usage bit");
             return;
         }
@@ -95,7 +95,7 @@ namespace backend {
                                   uint32_t size,
                                   nxtBufferMapReadCallback callback,
                                   nxtCallbackUserdata userdata) {
-        if (!ValidateMapBase(start, size, nxt::BufferUsageBit::MapRead)) {
+        if (!ValidateMapBase(start, size, dawn::BufferUsageBit::MapRead)) {
             callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
@@ -115,7 +115,7 @@ namespace backend {
                                    uint32_t size,
                                    nxtBufferMapWriteCallback callback,
                                    nxtCallbackUserdata userdata) {
-        if (!ValidateMapBase(start, size, nxt::BufferUsageBit::MapWrite)) {
+        if (!ValidateMapBase(start, size, dawn::BufferUsageBit::MapWrite)) {
             callback(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
@@ -150,7 +150,7 @@ namespace backend {
 
     bool BufferBase::ValidateMapBase(uint32_t start,
                                      uint32_t size,
-                                     nxt::BufferUsageBit requiredUsage) {
+                                     dawn::BufferUsageBit requiredUsage) {
         // TODO(cwallez@chromium.org): check for overflows.
         if (start + size > GetSize()) {
             mDevice->HandleError("Buffer map read out of range");
@@ -187,17 +187,17 @@ namespace backend {
             return nullptr;
         }
 
-        const nxt::BufferUsageBit kMapWriteAllowedUsages =
-            nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc;
-        if (mAllowedUsage & nxt::BufferUsageBit::MapWrite &&
+        const dawn::BufferUsageBit kMapWriteAllowedUsages =
+            dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+        if (mAllowedUsage & dawn::BufferUsageBit::MapWrite &&
             (mAllowedUsage & kMapWriteAllowedUsages) != mAllowedUsage) {
             HandleError("Only TransferSrc is allowed with MapWrite");
             return nullptr;
         }
 
-        const nxt::BufferUsageBit kMapReadAllowedUsages =
-            nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst;
-        if (mAllowedUsage & nxt::BufferUsageBit::MapRead &&
+        const dawn::BufferUsageBit kMapReadAllowedUsages =
+            dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+        if (mAllowedUsage & dawn::BufferUsageBit::MapRead &&
             (mAllowedUsage & kMapReadAllowedUsages) != mAllowedUsage) {
             HandleError("Only TransferDst is allowed with MapRead");
             return nullptr;
@@ -206,7 +206,7 @@ namespace backend {
         return mDevice->CreateBuffer(this);
     }
 
-    void BufferBuilder::SetAllowedUsage(nxt::BufferUsageBit usage) {
+    void BufferBuilder::SetAllowedUsage(dawn::BufferUsageBit usage) {
         if ((mPropertiesSet & BUFFER_PROPERTY_ALLOWED_USAGE) != 0) {
             HandleError("Buffer allowedUsage property set multiple times");
             return;

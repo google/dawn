@@ -19,46 +19,46 @@
 
 namespace backend {
 
-    uint32_t TextureFormatPixelSize(nxt::TextureFormat format) {
+    uint32_t TextureFormatPixelSize(dawn::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::R8Unorm:
-            case nxt::TextureFormat::R8Uint:
+            case dawn::TextureFormat::R8Unorm:
+            case dawn::TextureFormat::R8Uint:
                 return 1;
-            case nxt::TextureFormat::R8G8Unorm:
-            case nxt::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::R8G8Uint:
                 return 2;
-            case nxt::TextureFormat::R8G8B8A8Unorm:
-            case nxt::TextureFormat::R8G8B8A8Uint:
-            case nxt::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::B8G8R8A8Unorm:
                 return 4;
-            case nxt::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::D32FloatS8Uint:
                 return 8;
             default:
                 UNREACHABLE();
         }
     }
 
-    bool TextureFormatHasDepth(nxt::TextureFormat format) {
+    bool TextureFormatHasDepth(dawn::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::D32FloatS8Uint:
                 return true;
             default:
                 return false;
         }
     }
 
-    bool TextureFormatHasStencil(nxt::TextureFormat format) {
+    bool TextureFormatHasStencil(dawn::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::D32FloatS8Uint:
                 return true;
             default:
                 return false;
         }
     }
 
-    bool TextureFormatHasDepthOrStencil(nxt::TextureFormat format) {
+    bool TextureFormatHasDepthOrStencil(dawn::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::D32FloatS8Uint:
                 return true;
             default:
                 return false;
@@ -82,10 +82,10 @@ namespace backend {
         return mDevice;
     }
 
-    nxt::TextureDimension TextureBase::GetDimension() const {
+    dawn::TextureDimension TextureBase::GetDimension() const {
         return mDimension;
     }
-    nxt::TextureFormat TextureBase::GetFormat() const {
+    dawn::TextureFormat TextureBase::GetFormat() const {
         return mFormat;
     }
     uint32_t TextureBase::GetWidth() const {
@@ -100,7 +100,7 @@ namespace backend {
     uint32_t TextureBase::GetNumMipLevels() const {
         return mNumMipLevels;
     }
-    nxt::TextureUsageBit TextureBase::GetAllowedUsage() const {
+    dawn::TextureUsageBit TextureBase::GetAllowedUsage() const {
         return mAllowedUsage;
     }
 
@@ -135,7 +135,7 @@ namespace backend {
         return mDevice->CreateTexture(this);
     }
 
-    void TextureBuilder::SetDimension(nxt::TextureDimension dimension) {
+    void TextureBuilder::SetDimension(dawn::TextureDimension dimension) {
         if ((mPropertiesSet & TEXTURE_PROPERTY_DIMENSION) != 0) {
             HandleError("Texture dimension property set multiple times");
             return;
@@ -162,7 +162,7 @@ namespace backend {
         mDepth = depth;
     }
 
-    void TextureBuilder::SetFormat(nxt::TextureFormat format) {
+    void TextureBuilder::SetFormat(dawn::TextureFormat format) {
         if ((mPropertiesSet & TEXTURE_PROPERTY_FORMAT) != 0) {
             HandleError("Texture format property set multiple times");
             return;
@@ -182,7 +182,7 @@ namespace backend {
         mNumMipLevels = numMipLevels;
     }
 
-    void TextureBuilder::SetAllowedUsage(nxt::TextureUsageBit usage) {
+    void TextureBuilder::SetAllowedUsage(dawn::TextureUsageBit usage) {
         if ((mPropertiesSet & TEXTURE_PROPERTY_ALLOWED_USAGE) != 0) {
             HandleError("Texture allowed usage property set multiple times");
             return;

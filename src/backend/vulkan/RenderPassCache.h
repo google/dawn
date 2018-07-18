@@ -34,19 +34,19 @@ namespace backend { namespace vulkan {
     struct RenderPassCacheQuery {
         // Use these helpers to build the query, they make sure all relevant data is initialized and
         // masks set.
-        void SetColor(uint32_t index, nxt::TextureFormat format, nxt::LoadOp loadOp);
-        void SetDepthStencil(nxt::TextureFormat format,
-                             nxt::LoadOp depthLoadOp,
-                             nxt::LoadOp stencilLoadOp);
+        void SetColor(uint32_t index, dawn::TextureFormat format, dawn::LoadOp loadOp);
+        void SetDepthStencil(dawn::TextureFormat format,
+                             dawn::LoadOp depthLoadOp,
+                             dawn::LoadOp stencilLoadOp);
 
         std::bitset<kMaxColorAttachments> colorMask;
-        std::array<nxt::TextureFormat, kMaxColorAttachments> colorFormats;
-        std::array<nxt::LoadOp, kMaxColorAttachments> colorLoadOp;
+        std::array<dawn::TextureFormat, kMaxColorAttachments> colorFormats;
+        std::array<dawn::LoadOp, kMaxColorAttachments> colorLoadOp;
 
         bool hasDepthStencil = false;
-        nxt::TextureFormat depthStencilFormat;
-        nxt::LoadOp depthLoadOp;
-        nxt::LoadOp stencilLoadOp;
+        dawn::TextureFormat depthStencilFormat;
+        dawn::LoadOp depthLoadOp;
+        dawn::LoadOp stencilLoadOp;
     };
 
     // Caches VkRenderPasses so that we don't create duplicate ones for every RenderPipeline or

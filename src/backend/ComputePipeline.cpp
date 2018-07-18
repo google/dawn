@@ -22,7 +22,7 @@ namespace backend {
 
     ComputePipelineBase::ComputePipelineBase(ComputePipelineBuilder* builder)
         : PipelineBase(builder) {
-        if (GetStageMask() != nxt::ShaderStageBit::Compute) {
+        if (GetStageMask() != dawn::ShaderStageBit::Compute) {
             builder->HandleError("Compute pipeline should have exactly a compute stage");
             return;
         }

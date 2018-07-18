@@ -78,12 +78,12 @@ namespace backend { namespace d3d12 {
 
       private:
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
-            const nxt::BindGroupLayoutDescriptor* descriptor) override;
+            const dawn::BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
-            const nxt::PipelineLayoutDescriptor* descriptor) override;
+            const dawn::PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(
-            const nxt::SamplerDescriptor* descriptor) override;
+            const dawn::SamplerDescriptor* descriptor) override;
 
         uint64_t mSerial = 0;
         ComPtr<ID3D12Fence> mFence;

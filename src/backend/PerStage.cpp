@@ -16,14 +16,14 @@
 
 namespace backend {
 
-    BitSetIterator<kNumStages, nxt::ShaderStage> IterateStages(nxt::ShaderStageBit stages) {
+    BitSetIterator<kNumStages, dawn::ShaderStage> IterateStages(dawn::ShaderStageBit stages) {
         std::bitset<kNumStages> bits(static_cast<uint32_t>(stages));
-        return BitSetIterator<kNumStages, nxt::ShaderStage>(bits);
+        return BitSetIterator<kNumStages, dawn::ShaderStage>(bits);
     }
 
-    nxt::ShaderStageBit StageBit(nxt::ShaderStage stage) {
+    dawn::ShaderStageBit StageBit(dawn::ShaderStage stage) {
         ASSERT(static_cast<uint32_t>(stage) < kNumStages);
-        return static_cast<nxt::ShaderStageBit>(1 << static_cast<uint32_t>(stage));
+        return static_cast<dawn::ShaderStageBit>(1 << static_cast<uint32_t>(stage));
     }
 
 }  // namespace backend

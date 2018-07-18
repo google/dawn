@@ -63,8 +63,8 @@ namespace backend {
         }
     }
 
-    void DeviceBase::SetErrorCallback(nxt::DeviceErrorCallback callback,
-                                      nxt::CallbackUserdata userdata) {
+    void DeviceBase::SetErrorCallback(dawn::DeviceErrorCallback callback,
+                                      dawn::CallbackUserdata userdata) {
         mErrorCallback = callback;
         mErrorUserdata = userdata;
     }
@@ -74,7 +74,7 @@ namespace backend {
     }
 
     ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateBindGroupLayout(
-        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        const dawn::BindGroupLayoutDescriptor* descriptor) {
         BindGroupLayoutBase blueprint(this, descriptor, true);
 
         auto iter = mCaches->bindGroupLayouts.find(&blueprint);
@@ -99,7 +99,7 @@ namespace backend {
         return new BindGroupBuilder(this);
     }
     BindGroupLayoutBase* DeviceBase::CreateBindGroupLayout(
-        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        const dawn::BindGroupLayoutDescriptor* descriptor) {
         BindGroupLayoutBase* result = nullptr;
 
         if (ConsumedError(CreateBindGroupLayoutInternal(&result, descriptor))) {
@@ -127,7 +127,7 @@ namespace backend {
         return new InputStateBuilder(this);
     }
     PipelineLayoutBase* DeviceBase::CreatePipelineLayout(
-        const nxt::PipelineLayoutDescriptor* descriptor) {
+        const dawn::PipelineLayoutDescriptor* descriptor) {
         PipelineLayoutBase* result = nullptr;
 
         if (ConsumedError(CreatePipelineLayoutInternal(&result, descriptor))) {
@@ -151,7 +151,7 @@ namespace backend {
     RenderPipelineBuilder* DeviceBase::CreateRenderPipelineBuilder() {
         return new RenderPipelineBuilder(this);
     }
-    SamplerBase* DeviceBase::CreateSampler(const nxt::SamplerDescriptor* descriptor) {
+    SamplerBase* DeviceBase::CreateSampler(const dawn::SamplerDescriptor* descriptor) {
         SamplerBase* result = nullptr;
 
         if (ConsumedError(CreateSamplerInternal(&result, descriptor))) {
@@ -193,7 +193,7 @@ namespace backend {
 
     MaybeError DeviceBase::CreateBindGroupLayoutInternal(
         BindGroupLayoutBase** result,
-        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        const dawn::BindGroupLayoutDescriptor* descriptor) {
         NXT_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
         NXT_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
         return {};
@@ -201,7 +201,7 @@ namespace backend {
 
     MaybeError DeviceBase::CreatePipelineLayoutInternal(
         PipelineLayoutBase** result,
-        const nxt::PipelineLayoutDescriptor* descriptor) {
+        const dawn::PipelineLayoutDescriptor* descriptor) {
         NXT_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
         NXT_TRY_ASSIGN(*result, CreatePipelineLayoutImpl(descriptor));
         return {};
@@ -213,7 +213,7 @@ namespace backend {
     }
 
     MaybeError DeviceBase::CreateSamplerInternal(SamplerBase** result,
-                                                 const nxt::SamplerDescriptor* descriptor) {
+                                                 const dawn::SamplerDescriptor* descriptor) {
         NXT_TRY(ValidateSamplerDescriptor(this, descriptor));
         NXT_TRY_ASSIGN(*result, CreateSamplerImpl(descriptor));
         return {};

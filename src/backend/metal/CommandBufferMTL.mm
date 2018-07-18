@@ -54,7 +54,7 @@ namespace backend { namespace metal {
             for (uint32_t i : IterateBitSet(desc->GetColorAttachmentMask())) {
                 auto& attachmentInfo = desc->GetColorAttachment(i);
 
-                if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
                     descriptor.colorAttachments[i].loadAction = MTLLoadActionClear;
                     descriptor.colorAttachments[i].clearColor = MTLClearColorMake(
                         attachmentInfo.clearColor[0], attachmentInfo.clearColor[1],
@@ -73,13 +73,13 @@ namespace backend { namespace metal {
 
                 id<MTLTexture> texture =
                     ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
-                nxt::TextureFormat format = attachmentInfo.view->GetTexture()->GetFormat();
+                dawn::TextureFormat format = attachmentInfo.view->GetTexture()->GetFormat();
 
                 if (TextureFormatHasDepth(format)) {
                     descriptor.depthAttachment.texture = texture;
                     descriptor.depthAttachment.storeAction = MTLStoreActionStore;
 
-                    if (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear) {
+                    if (attachmentInfo.depthLoadOp == dawn::LoadOp::Clear) {
                         descriptor.depthAttachment.loadAction = MTLLoadActionClear;
                         descriptor.depthAttachment.clearDepth = attachmentInfo.clearDepth;
                     } else {
@@ -91,7 +91,7 @@ namespace backend { namespace metal {
                     descriptor.stencilAttachment.texture = texture;
                     descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
 
-                    if (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear) {
+                    if (attachmentInfo.stencilLoadOp == dawn::LoadOp::Clear) {
                         descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
                         descriptor.stencilAttachment.clearStencil = attachmentInfo.clearStencil;
                     } else {
@@ -123,9 +123,9 @@ namespace backend { namespace metal {
                 }
 
                 auto stage = layout.visibilities[binding];
-                bool hasVertStage = stage & nxt::ShaderStageBit::Vertex && render != nil;
-                bool hasFragStage = stage & nxt::ShaderStageBit::Fragment && render != nil;
-                bool hasComputeStage = stage & nxt::ShaderStageBit::Compute && compute != nil;
+                bool hasVertStage = stage & dawn::ShaderStageBit::Vertex && render != nil;
+                bool hasFragStage = stage & dawn::ShaderStageBit::Fragment && render != nil;
+                bool hasComputeStage = stage & dawn::ShaderStageBit::Compute && compute != nil;
 
                 uint32_t vertIndex = 0;
                 uint32_t fragIndex = 0;
@@ -133,20 +133,20 @@ namespace backend { namespace metal {
 
                 if (hasVertStage) {
                     vertIndex = pipelineLayout->GetBindingIndexInfo(
-                        nxt::ShaderStage::Vertex)[index][binding];
+                        dawn::ShaderStage::Vertex)[index][binding];
                 }
                 if (hasFragStage) {
                     fragIndex = pipelineLayout->GetBindingIndexInfo(
-                        nxt::ShaderStage::Fragment)[index][binding];
+                        dawn::ShaderStage::Fragment)[index][binding];
                 }
                 if (hasComputeStage) {
                     computeIndex = pipelineLayout->GetBindingIndexInfo(
-                        nxt::ShaderStage::Compute)[index][binding];
+                        dawn::ShaderStage::Compute)[index][binding];
                 }
 
                 switch (layout.types[binding]) {
-                    case nxt::BindingType::UniformBuffer:
-                    case nxt::BindingType::StorageBuffer: {
+                    case dawn::BindingType::UniformBuffer:
+                    case dawn::BindingType::StorageBuffer: {
                         BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
                         auto b = ToBackend(view->GetBuffer());
                         const id<MTLBuffer> buffer = b->GetMTLBuffer();
@@ -170,7 +170,7 @@ namespace backend { namespace metal {
 
                     } break;
 
-                    case nxt::BindingType::Sampler: {
+                    case dawn::BindingType::Sampler: {
                         auto sampler = ToBackend(group->GetBindingAsSampler(binding));
                         if (hasVertStage) {
                             [render setVertexSamplerState:sampler->GetMTLSamplerState()
@@ -186,7 +186,7 @@ namespace backend { namespace metal {
                         }
                     } break;
 
-                    case nxt::BindingType::SampledTexture: {
+                    case dawn::BindingType::SampledTexture: {
                         auto texture =
                             ToBackend(group->GetBindingAsTextureView(binding)->GetTexture());
                         if (hasVertStage) {
@@ -348,7 +348,7 @@ namespace backend { namespace metal {
                     SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
                     uint32_t* values = mCommands.NextData<uint32_t>(cmd->count);
 
-                    if (cmd->stages & nxt::ShaderStageBit::Compute) {
+                    if (cmd->stages & dawn::ShaderStageBit::Compute) {
                         memcpy(&pushConstants[cmd->offset], values, cmd->count * sizeof(uint32_t));
 
                         [encoder setBytes:&pushConstants
@@ -443,7 +443,7 @@ namespace backend { namespace metal {
                     SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
                     uint32_t* values = mCommands.NextData<uint32_t>(cmd->count);
 
-                    if (cmd->stages & nxt::ShaderStageBit::Vertex) {
+                    if (cmd->stages & dawn::ShaderStageBit::Vertex) {
                         memcpy(&vertexPushConstants[cmd->offset], values,
                                cmd->count * sizeof(uint32_t));
                         [encoder setVertexBytes:&vertexPushConstants
@@ -451,7 +451,7 @@ namespace backend { namespace metal {
                                         atIndex:0];
                     }
 
-                    if (cmd->stages & nxt::ShaderStageBit::Fragment) {
+                    if (cmd->stages & dawn::ShaderStageBit::Fragment) {
                         memcpy(&fragmentPushConstants[cmd->offset], values,
                                cmd->count * sizeof(uint32_t));
                         [encoder setFragmentBytes:&fragmentPushConstants

@@ -27,10 +27,10 @@
 
 namespace backend {
 
-    size_t IndexFormatSize(nxt::IndexFormat format);
-    uint32_t VertexFormatNumComponents(nxt::VertexFormat format);
-    size_t VertexFormatComponentSize(nxt::VertexFormat format);
-    size_t VertexFormatSize(nxt::VertexFormat format);
+    size_t IndexFormatSize(dawn::IndexFormat format);
+    uint32_t VertexFormatNumComponents(dawn::VertexFormat format);
+    size_t VertexFormatComponentSize(dawn::VertexFormat format);
+    size_t VertexFormatSize(dawn::VertexFormat format);
 
     class InputStateBase : public RefCounted {
       public:
@@ -38,13 +38,13 @@ namespace backend {
 
         struct AttributeInfo {
             uint32_t bindingSlot;
-            nxt::VertexFormat format;
+            dawn::VertexFormat format;
             uint32_t offset;
         };
 
         struct InputInfo {
             uint32_t stride;
-            nxt::InputStepMode stepMode;
+            dawn::InputStepMode stepMode;
         };
 
         const std::bitset<kMaxVertexAttributes>& GetAttributesSetMask() const;
@@ -66,9 +66,9 @@ namespace backend {
         // NXT API
         void SetAttribute(uint32_t shaderLocation,
                           uint32_t bindingSlot,
-                          nxt::VertexFormat format,
+                          dawn::VertexFormat format,
                           uint32_t offset);
-        void SetInput(uint32_t bindingSlot, uint32_t stride, nxt::InputStepMode stepMode);
+        void SetInput(uint32_t bindingSlot, uint32_t stride, dawn::InputStepMode stepMode);
 
       private:
         friend class InputStateBase;

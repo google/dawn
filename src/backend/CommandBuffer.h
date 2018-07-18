@@ -101,7 +101,7 @@ namespace backend {
                           uint32_t firstInstance);
         void EndComputePass();
         void EndRenderPass();
-        void SetPushConstants(nxt::ShaderStageBit stages,
+        void SetPushConstants(dawn::ShaderStageBit stages,
                               uint32_t offset,
                               uint32_t count,
                               const void* data);
@@ -127,7 +127,7 @@ namespace backend {
                               BufferBase* const* buffers,
                               uint32_t const* offsets);
 
-        void TransitionBufferUsage(BufferBase* buffer, nxt::BufferUsageBit usage);
+        void TransitionBufferUsage(BufferBase* buffer, dawn::BufferUsageBit usage);
 
       private:
         friend class CommandBufferBase;

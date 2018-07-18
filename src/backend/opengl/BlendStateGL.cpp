@@ -19,50 +19,50 @@
 namespace backend { namespace opengl {
 
     namespace {
-        GLenum GLBlendFactor(nxt::BlendFactor factor, bool alpha) {
+        GLenum GLBlendFactor(dawn::BlendFactor factor, bool alpha) {
             switch (factor) {
-                case nxt::BlendFactor::Zero:
+                case dawn::BlendFactor::Zero:
                     return GL_ZERO;
-                case nxt::BlendFactor::One:
+                case dawn::BlendFactor::One:
                     return GL_ONE;
-                case nxt::BlendFactor::SrcColor:
+                case dawn::BlendFactor::SrcColor:
                     return GL_SRC_COLOR;
-                case nxt::BlendFactor::OneMinusSrcColor:
+                case dawn::BlendFactor::OneMinusSrcColor:
                     return GL_ONE_MINUS_SRC_COLOR;
-                case nxt::BlendFactor::SrcAlpha:
+                case dawn::BlendFactor::SrcAlpha:
                     return GL_SRC_ALPHA;
-                case nxt::BlendFactor::OneMinusSrcAlpha:
+                case dawn::BlendFactor::OneMinusSrcAlpha:
                     return GL_ONE_MINUS_SRC_ALPHA;
-                case nxt::BlendFactor::DstColor:
+                case dawn::BlendFactor::DstColor:
                     return GL_DST_COLOR;
-                case nxt::BlendFactor::OneMinusDstColor:
+                case dawn::BlendFactor::OneMinusDstColor:
                     return GL_ONE_MINUS_DST_COLOR;
-                case nxt::BlendFactor::DstAlpha:
+                case dawn::BlendFactor::DstAlpha:
                     return GL_DST_ALPHA;
-                case nxt::BlendFactor::OneMinusDstAlpha:
+                case dawn::BlendFactor::OneMinusDstAlpha:
                     return GL_ONE_MINUS_DST_ALPHA;
-                case nxt::BlendFactor::SrcAlphaSaturated:
+                case dawn::BlendFactor::SrcAlphaSaturated:
                     return GL_SRC_ALPHA_SATURATE;
-                case nxt::BlendFactor::BlendColor:
+                case dawn::BlendFactor::BlendColor:
                     return alpha ? GL_CONSTANT_ALPHA : GL_CONSTANT_COLOR;
-                case nxt::BlendFactor::OneMinusBlendColor:
+                case dawn::BlendFactor::OneMinusBlendColor:
                     return alpha ? GL_ONE_MINUS_CONSTANT_ALPHA : GL_ONE_MINUS_CONSTANT_COLOR;
                 default:
                     UNREACHABLE();
             }
         }
 
-        GLenum GLBlendMode(nxt::BlendOperation operation) {
+        GLenum GLBlendMode(dawn::BlendOperation operation) {
             switch (operation) {
-                case nxt::BlendOperation::Add:
+                case dawn::BlendOperation::Add:
                     return GL_FUNC_ADD;
-                case nxt::BlendOperation::Subtract:
+                case dawn::BlendOperation::Subtract:
                     return GL_FUNC_SUBTRACT;
-                case nxt::BlendOperation::ReverseSubtract:
+                case dawn::BlendOperation::ReverseSubtract:
                     return GL_FUNC_REVERSE_SUBTRACT;
-                case nxt::BlendOperation::Min:
+                case dawn::BlendOperation::Min:
                     return GL_MIN;
-                case nxt::BlendOperation::Max:
+                case dawn::BlendOperation::Max:
                     return GL_MAX;
                 default:
                     UNREACHABLE();
@@ -87,10 +87,10 @@ namespace backend { namespace opengl {
         } else {
             glDisablei(GL_BLEND, attachment);
         }
-        glColorMaski(attachment, info.colorWriteMask & nxt::ColorWriteMask::Red,
-                     info.colorWriteMask & nxt::ColorWriteMask::Green,
-                     info.colorWriteMask & nxt::ColorWriteMask::Blue,
-                     info.colorWriteMask & nxt::ColorWriteMask::Alpha);
+        glColorMaski(attachment, info.colorWriteMask & dawn::ColorWriteMask::Red,
+                     info.colorWriteMask & dawn::ColorWriteMask::Green,
+                     info.colorWriteMask & dawn::ColorWriteMask::Blue,
+                     info.colorWriteMask & dawn::ColorWriteMask::Alpha);
     }
 
 }}  // namespace backend::opengl

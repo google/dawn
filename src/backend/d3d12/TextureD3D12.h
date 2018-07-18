@@ -23,7 +23,7 @@ namespace backend { namespace d3d12 {
 
     class Device;
 
-    DXGI_FORMAT D3D12TextureFormat(nxt::TextureFormat format);
+    DXGI_FORMAT D3D12TextureFormat(dawn::TextureFormat format);
 
     class Texture : public TextureBase {
       public:
@@ -35,13 +35,13 @@ namespace backend { namespace d3d12 {
         ID3D12Resource* GetD3D12Resource();
 
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                nxt::TextureUsageBit usage);
+                                dawn::TextureUsageBit usage);
 
       private:
         Device* mDevice;
         ComPtr<ID3D12Resource> mResource = {};
         ID3D12Resource* mResourcePtr = nullptr;
-        nxt::TextureUsageBit mLastUsage = nxt::TextureUsageBit::None;
+        dawn::TextureUsageBit mLastUsage = dawn::TextureUsageBit::None;
     };
 
     class TextureView : public TextureViewBase {

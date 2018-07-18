@@ -28,7 +28,7 @@ namespace backend { namespace d3d12 {
         im.Init(im.userData, &wsiContext);
 
         ASSERT(im.textureUsage != NXT_TEXTURE_USAGE_BIT_NONE);
-        mTextureUsage = static_cast<nxt::TextureUsageBit>(im.textureUsage);
+        mTextureUsage = static_cast<dawn::TextureUsageBit>(im.textureUsage);
     }
 
     SwapChain::~SwapChain() {

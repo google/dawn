@@ -111,8 +111,8 @@ namespace backend { namespace d3d12 {
         return NXT_SWAP_CHAIN_NO_ERROR;
     }
 
-    nxt::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
-        return nxt::TextureFormat::R8G8B8A8Unorm;
+    dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
+        return dawn::TextureFormat::R8G8B8A8Unorm;
     }
 
 }}  // namespace backend::d3d12

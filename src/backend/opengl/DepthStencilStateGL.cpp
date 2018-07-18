@@ -20,46 +20,46 @@
 namespace backend { namespace opengl {
 
     namespace {
-        GLuint OpenGLCompareFunction(nxt::CompareFunction compareFunction) {
+        GLuint OpenGLCompareFunction(dawn::CompareFunction compareFunction) {
             switch (compareFunction) {
-                case nxt::CompareFunction::Never:
+                case dawn::CompareFunction::Never:
                     return GL_NEVER;
-                case nxt::CompareFunction::Less:
+                case dawn::CompareFunction::Less:
                     return GL_LESS;
-                case nxt::CompareFunction::LessEqual:
+                case dawn::CompareFunction::LessEqual:
                     return GL_LEQUAL;
-                case nxt::CompareFunction::Greater:
+                case dawn::CompareFunction::Greater:
                     return GL_GREATER;
-                case nxt::CompareFunction::GreaterEqual:
+                case dawn::CompareFunction::GreaterEqual:
                     return GL_GEQUAL;
-                case nxt::CompareFunction::NotEqual:
+                case dawn::CompareFunction::NotEqual:
                     return GL_NOTEQUAL;
-                case nxt::CompareFunction::Equal:
+                case dawn::CompareFunction::Equal:
                     return GL_EQUAL;
-                case nxt::CompareFunction::Always:
+                case dawn::CompareFunction::Always:
                     return GL_ALWAYS;
                 default:
                     UNREACHABLE();
             }
         }
 
-        GLuint OpenGLStencilOperation(nxt::StencilOperation stencilOperation) {
+        GLuint OpenGLStencilOperation(dawn::StencilOperation stencilOperation) {
             switch (stencilOperation) {
-                case nxt::StencilOperation::Keep:
+                case dawn::StencilOperation::Keep:
                     return GL_KEEP;
-                case nxt::StencilOperation::Zero:
+                case dawn::StencilOperation::Zero:
                     return GL_ZERO;
-                case nxt::StencilOperation::Replace:
+                case dawn::StencilOperation::Replace:
                     return GL_REPLACE;
-                case nxt::StencilOperation::Invert:
+                case dawn::StencilOperation::Invert:
                     return GL_INVERT;
-                case nxt::StencilOperation::IncrementClamp:
+                case dawn::StencilOperation::IncrementClamp:
                     return GL_INCR;
-                case nxt::StencilOperation::DecrementClamp:
+                case dawn::StencilOperation::DecrementClamp:
                     return GL_DECR;
-                case nxt::StencilOperation::IncrementWrap:
+                case dawn::StencilOperation::IncrementWrap:
                     return GL_INCR_WRAP;
-                case nxt::StencilOperation::DecrementWrap:
+                case dawn::StencilOperation::DecrementWrap:
                     return GL_DECR_WRAP;
                 default:
                     UNREACHABLE();
@@ -75,7 +75,7 @@ namespace backend { namespace opengl {
         auto& depthInfo = GetDepth();
 
         // Depth writes only occur if depth is enabled
-        if (depthInfo.compareFunction == nxt::CompareFunction::Always &&
+        if (depthInfo.compareFunction == dawn::CompareFunction::Always &&
             !depthInfo.depthWriteEnabled) {
             glDisable(GL_DEPTH_TEST);
         } else {

@@ -19,44 +19,44 @@
 namespace backend { namespace metal {
 
     namespace {
-        MTLCompareFunction MetalDepthStencilCompareFunction(nxt::CompareFunction compareFunction) {
+        MTLCompareFunction MetalDepthStencilCompareFunction(dawn::CompareFunction compareFunction) {
             switch (compareFunction) {
-                case nxt::CompareFunction::Never:
+                case dawn::CompareFunction::Never:
                     return MTLCompareFunctionNever;
-                case nxt::CompareFunction::Less:
+                case dawn::CompareFunction::Less:
                     return MTLCompareFunctionLess;
-                case nxt::CompareFunction::LessEqual:
+                case dawn::CompareFunction::LessEqual:
                     return MTLCompareFunctionLessEqual;
-                case nxt::CompareFunction::Greater:
+                case dawn::CompareFunction::Greater:
                     return MTLCompareFunctionGreater;
-                case nxt::CompareFunction::GreaterEqual:
+                case dawn::CompareFunction::GreaterEqual:
                     return MTLCompareFunctionGreaterEqual;
-                case nxt::CompareFunction::NotEqual:
+                case dawn::CompareFunction::NotEqual:
                     return MTLCompareFunctionNotEqual;
-                case nxt::CompareFunction::Equal:
+                case dawn::CompareFunction::Equal:
                     return MTLCompareFunctionEqual;
-                case nxt::CompareFunction::Always:
+                case dawn::CompareFunction::Always:
                     return MTLCompareFunctionAlways;
             }
         }
 
-        MTLStencilOperation MetalStencilOperation(nxt::StencilOperation stencilOperation) {
+        MTLStencilOperation MetalStencilOperation(dawn::StencilOperation stencilOperation) {
             switch (stencilOperation) {
-                case nxt::StencilOperation::Keep:
+                case dawn::StencilOperation::Keep:
                     return MTLStencilOperationKeep;
-                case nxt::StencilOperation::Zero:
+                case dawn::StencilOperation::Zero:
                     return MTLStencilOperationZero;
-                case nxt::StencilOperation::Replace:
+                case dawn::StencilOperation::Replace:
                     return MTLStencilOperationReplace;
-                case nxt::StencilOperation::Invert:
+                case dawn::StencilOperation::Invert:
                     return MTLStencilOperationInvert;
-                case nxt::StencilOperation::IncrementClamp:
+                case dawn::StencilOperation::IncrementClamp:
                     return MTLStencilOperationIncrementClamp;
-                case nxt::StencilOperation::DecrementClamp:
+                case dawn::StencilOperation::DecrementClamp:
                     return MTLStencilOperationDecrementClamp;
-                case nxt::StencilOperation::IncrementWrap:
+                case dawn::StencilOperation::IncrementWrap:
                     return MTLStencilOperationIncrementWrap;
-                case nxt::StencilOperation::DecrementWrap:
+                case dawn::StencilOperation::DecrementWrap:
                     return MTLStencilOperationDecrementWrap;
             }
         }

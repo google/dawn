@@ -28,15 +28,15 @@ namespace backend {
         DepthStencilStateBase(DepthStencilStateBuilder* builder);
 
         struct DepthInfo {
-            nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
+            dawn::CompareFunction compareFunction = dawn::CompareFunction::Always;
             bool depthWriteEnabled = false;
         };
 
         struct StencilFaceInfo {
-            nxt::CompareFunction compareFunction = nxt::CompareFunction::Always;
-            nxt::StencilOperation stencilFail = nxt::StencilOperation::Keep;
-            nxt::StencilOperation depthFail = nxt::StencilOperation::Keep;
-            nxt::StencilOperation depthStencilPass = nxt::StencilOperation::Keep;
+            dawn::CompareFunction compareFunction = dawn::CompareFunction::Always;
+            dawn::StencilOperation stencilFail = dawn::StencilOperation::Keep;
+            dawn::StencilOperation depthFail = dawn::StencilOperation::Keep;
+            dawn::StencilOperation depthStencilPass = dawn::StencilOperation::Keep;
         };
 
         struct StencilInfo {
@@ -60,13 +60,13 @@ namespace backend {
         DepthStencilStateBuilder(DeviceBase* device);
 
         // NXT API
-        void SetDepthCompareFunction(nxt::CompareFunction depthCompareFunction);
+        void SetDepthCompareFunction(dawn::CompareFunction depthCompareFunction);
         void SetDepthWriteEnabled(bool enabled);
-        void SetStencilFunction(nxt::Face face,
-                                nxt::CompareFunction stencilCompareFunction,
-                                nxt::StencilOperation stencilFail,
-                                nxt::StencilOperation depthFail,
-                                nxt::StencilOperation depthStencilPass);
+        void SetStencilFunction(dawn::Face face,
+                                dawn::CompareFunction stencilCompareFunction,
+                                dawn::StencilOperation stencilFail,
+                                dawn::StencilOperation depthFail,
+                                dawn::StencilOperation depthStencilPass);
         void SetStencilMask(uint32_t readMask, uint32_t writeMask);
 
       private:

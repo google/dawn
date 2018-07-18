@@ -38,9 +38,9 @@ namespace backend { namespace opengl {
                 glVertexAttribDivisor(location, 0xffffffff);
             } else {
                 switch (input.stepMode) {
-                    case nxt::InputStepMode::Vertex:
+                    case dawn::InputStepMode::Vertex:
                         break;
-                    case nxt::InputStepMode::Instance:
+                    case dawn::InputStepMode::Instance:
                         glVertexAttribDivisor(location, 1);
                         break;
                     default:

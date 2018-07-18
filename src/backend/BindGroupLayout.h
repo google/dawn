@@ -28,18 +28,18 @@
 namespace backend {
 
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
-                                                 const nxt::BindGroupLayoutDescriptor* descriptor);
+                                                 const dawn::BindGroupLayoutDescriptor* descriptor);
 
     class BindGroupLayoutBase : public RefCounted {
       public:
         BindGroupLayoutBase(DeviceBase* device,
-                            const nxt::BindGroupLayoutDescriptor* descriptor,
+                            const dawn::BindGroupLayoutDescriptor* descriptor,
                             bool blueprint = false);
         ~BindGroupLayoutBase() override;
 
         struct LayoutBindingInfo {
-            std::array<nxt::ShaderStageBit, kMaxBindingsPerGroup> visibilities;
-            std::array<nxt::BindingType, kMaxBindingsPerGroup> types;
+            std::array<dawn::ShaderStageBit, kMaxBindingsPerGroup> visibilities;
+            std::array<dawn::BindingType, kMaxBindingsPerGroup> types;
             std::bitset<kMaxBindingsPerGroup> mask;
         };
         const LayoutBindingInfo& GetBindingInfo() const;

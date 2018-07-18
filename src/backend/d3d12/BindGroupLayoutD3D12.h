@@ -25,7 +25,7 @@ namespace backend { namespace d3d12 {
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
-        BindGroupLayout(Device* device, const nxt::BindGroupLayoutDescriptor* descriptor);
+        BindGroupLayout(Device* device, const dawn::BindGroupLayoutDescriptor* descriptor);
 
         enum DescriptorType {
             CBV,

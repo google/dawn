@@ -28,12 +28,12 @@ namespace backend {
     }
 
     void BuilderBase::HandleError(const char* message) {
-        SetStatus(nxt::BuilderErrorStatus::Error, message);
+        SetStatus(dawn::BuilderErrorStatus::Error, message);
     }
 
-    void BuilderBase::SetErrorCallback(nxt::BuilderErrorCallback callback,
-                                       nxt::CallbackUserdata userdata1,
-                                       nxt::CallbackUserdata userdata2) {
+    void BuilderBase::SetErrorCallback(dawn::BuilderErrorCallback callback,
+                                       dawn::CallbackUserdata userdata1,
+                                       dawn::CallbackUserdata userdata2) {
         mCallback = callback;
         mUserdata1 = userdata1;
         mUserdata2 = userdata2;
@@ -49,9 +49,9 @@ namespace backend {
         }
     }
 
-    void BuilderBase::SetStatus(nxt::BuilderErrorStatus status, const char* message) {
-        ASSERT(status != nxt::BuilderErrorStatus::Success);
-        ASSERT(status != nxt::BuilderErrorStatus::Unknown);
+    void BuilderBase::SetStatus(dawn::BuilderErrorStatus status, const char* message) {
+        ASSERT(status != dawn::BuilderErrorStatus::Success);
+        ASSERT(status != dawn::BuilderErrorStatus::Unknown);
         ASSERT(!mGotStatus);  // This is not strictly necessary but something to strive for.
         mGotStatus = true;
 
@@ -69,7 +69,7 @@ namespace backend {
 
         // If we have any error, then we have to return nullptr
         if (mGotStatus) {
-            ASSERT(mStoredStatus != nxt::BuilderErrorStatus::Success);
+            ASSERT(mStoredStatus != dawn::BuilderErrorStatus::Success);
 
             // The application will never see "result" so we need to remove the
             // external ref here.
@@ -82,7 +82,7 @@ namespace backend {
             if (!mCallback)
                 mDevice->HandleError(("Unhandled builder error: " + mStoredMessage).c_str());
         } else {
-            ASSERT(mStoredStatus == nxt::BuilderErrorStatus::Success);
+            ASSERT(mStoredStatus == dawn::BuilderErrorStatus::Success);
             ASSERT(mStoredMessage.empty());
         }
 

@@ -52,7 +52,7 @@ namespace backend {
             // The SPIRV ID of the resource.
             uint32_t id;
             uint32_t base_type_id;
-            nxt::BindingType type;
+            dawn::BindingType type;
             bool used = false;
         };
         using ModuleBindingInfo =
@@ -61,7 +61,7 @@ namespace backend {
         const PushConstantInfo& GetPushConstants() const;
         const ModuleBindingInfo& GetBindingInfo() const;
         const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
-        nxt::ShaderStage GetExecutionModel() const;
+        dawn::ShaderStage GetExecutionModel() const;
 
         bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout);
 
@@ -72,7 +72,7 @@ namespace backend {
         PushConstantInfo mPushConstants = {};
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
-        nxt::ShaderStage mExecutionModel;
+        dawn::ShaderStage mExecutionModel;
     };
 
     class ShaderModuleBuilder : public Builder<ShaderModuleBase> {

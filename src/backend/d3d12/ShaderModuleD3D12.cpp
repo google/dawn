@@ -24,15 +24,15 @@ namespace backend { namespace d3d12 {
     template <typename T>
     class BindingTypeMap {
       public:
-        T& operator[](nxt::BindingType type) {
+        T& operator[](dawn::BindingType type) {
             switch (type) {
-                case nxt::BindingType::UniformBuffer:
+                case dawn::BindingType::UniformBuffer:
                     return mMap[0];
-                case nxt::BindingType::Sampler:
+                case dawn::BindingType::Sampler:
                     return mMap[1];
-                case nxt::BindingType::SampledTexture:
+                case dawn::BindingType::SampledTexture:
                     return mMap[2];
-                case nxt::BindingType::StorageBuffer:
+                case dawn::BindingType::StorageBuffer:
                     return mMap[3];
                 default:
                     NXT_UNREACHABLE();

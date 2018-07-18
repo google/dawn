@@ -31,7 +31,7 @@ namespace backend { namespace vulkan {
         void OnBeforePresent(TextureBase* texture) override;
 
       private:
-        nxt::TextureUsageBit mTextureUsage;
+        dawn::TextureUsageBit mTextureUsage;
     };
 
 }}  // namespace backend::vulkan

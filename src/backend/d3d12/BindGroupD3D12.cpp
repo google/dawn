@@ -46,14 +46,14 @@ namespace backend { namespace d3d12 {
         auto d3d12Device = mDevice->GetD3D12Device();
         for (uint32_t binding : IterateBitSet(layout.mask)) {
             switch (layout.types[binding]) {
-                case nxt::BindingType::UniformBuffer: {
+                case dawn::BindingType::UniformBuffer: {
                     auto* view = ToBackend(GetBindingAsBufferView(binding));
                     auto& cbv = view->GetCBVDescriptor();
                     d3d12Device->CreateConstantBufferView(
                         &cbv, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
                                                               bindingOffsets[binding]));
                 } break;
-                case nxt::BindingType::StorageBuffer: {
+                case dawn::BindingType::StorageBuffer: {
                     auto* view = ToBackend(GetBindingAsBufferView(binding));
                     auto& uav = view->GetUAVDescriptor();
                     d3d12Device->CreateUnorderedAccessView(
@@ -61,7 +61,7 @@ namespace backend { namespace d3d12 {
                         cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
                                                         bindingOffsets[binding]));
                 } break;
-                case nxt::BindingType::SampledTexture: {
+                case dawn::BindingType::SampledTexture: {
                     auto* view = ToBackend(GetBindingAsTextureView(binding));
                     auto& srv = view->GetSRVDescriptor();
                     d3d12Device->CreateShaderResourceView(
@@ -69,7 +69,7 @@ namespace backend { namespace d3d12 {
                         cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
                                                         bindingOffsets[binding]));
                 } break;
-                case nxt::BindingType::Sampler: {
+                case dawn::BindingType::Sampler: {
                     auto* sampler = ToBackend(GetBindingAsSampler(binding));
                     auto& samplerDesc = sampler->GetSamplerDescriptor();
                     d3d12Device->CreateSampler(

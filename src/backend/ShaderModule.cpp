@@ -37,13 +37,13 @@ namespace backend {
 
         switch (compiler.get_execution_model()) {
             case spv::ExecutionModelVertex:
-                mExecutionModel = nxt::ShaderStage::Vertex;
+                mExecutionModel = dawn::ShaderStage::Vertex;
                 break;
             case spv::ExecutionModelFragment:
-                mExecutionModel = nxt::ShaderStage::Fragment;
+                mExecutionModel = dawn::ShaderStage::Fragment;
                 break;
             case spv::ExecutionModelGLCompute:
-                mExecutionModel = nxt::ShaderStage::Compute;
+                mExecutionModel = dawn::ShaderStage::Compute;
                 break;
             default:
                 UNREACHABLE();
@@ -103,7 +103,7 @@ namespace backend {
         // Fill in bindingInfo with the SPIRV bindings
         auto ExtractResourcesBinding = [this](const std::vector<spirv_cross::Resource>& resources,
                                               const spirv_cross::Compiler& compiler,
-                                              nxt::BindingType bindingType) {
+                                              dawn::BindingType bindingType) {
             constexpr uint64_t requiredBindingDecorationMask =
                 (1ull << spv::DecorationBinding) | (1ull << spv::DecorationDescriptorSet);
 
@@ -127,15 +127,15 @@ namespace backend {
         };
 
         ExtractResourcesBinding(resources.uniform_buffers, compiler,
-                                nxt::BindingType::UniformBuffer);
+                                dawn::BindingType::UniformBuffer);
         ExtractResourcesBinding(resources.separate_images, compiler,
-                                nxt::BindingType::SampledTexture);
-        ExtractResourcesBinding(resources.separate_samplers, compiler, nxt::BindingType::Sampler);
+                                dawn::BindingType::SampledTexture);
+        ExtractResourcesBinding(resources.separate_samplers, compiler, dawn::BindingType::Sampler);
         ExtractResourcesBinding(resources.storage_buffers, compiler,
-                                nxt::BindingType::StorageBuffer);
+                                dawn::BindingType::StorageBuffer);
 
         // Extract the vertex attributes
-        if (mExecutionModel == nxt::ShaderStage::Vertex) {
+        if (mExecutionModel == dawn::ShaderStage::Vertex) {
             for (const auto& attrib : resources.stage_inputs) {
                 ASSERT(compiler.get_decoration_mask(attrib.id) & (1ull << spv::DecorationLocation));
                 uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
@@ -159,7 +159,7 @@ namespace backend {
             }
         }
 
-        if (mExecutionModel == nxt::ShaderStage::Fragment) {
+        if (mExecutionModel == dawn::ShaderStage::Fragment) {
             // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives them
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
@@ -184,7 +184,7 @@ namespace backend {
         return mUsedVertexAttributes;
     }
 
-    nxt::ShaderStage ShaderModuleBase::GetExecutionModel() const {
+    dawn::ShaderStage ShaderModuleBase::GetExecutionModel() const {
         return mExecutionModel;
     }
 

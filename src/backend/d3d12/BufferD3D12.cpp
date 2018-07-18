@@ -24,42 +24,42 @@
 namespace backend { namespace d3d12 {
 
     namespace {
-        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(nxt::BufferUsageBit usage) {
+        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::BufferUsageBit usage) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
-            if (usage & nxt::BufferUsageBit::Storage) {
+            if (usage & dawn::BufferUsageBit::Storage) {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
             }
 
             return flags;
         }
 
-        D3D12_RESOURCE_STATES D3D12BufferUsage(nxt::BufferUsageBit usage) {
+        D3D12_RESOURCE_STATES D3D12BufferUsage(dawn::BufferUsageBit usage) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
-            if (usage & nxt::BufferUsageBit::TransferSrc) {
+            if (usage & dawn::BufferUsageBit::TransferSrc) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
             }
-            if (usage & nxt::BufferUsageBit::TransferDst) {
+            if (usage & dawn::BufferUsageBit::TransferDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
-            if (usage & (nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Uniform)) {
+            if (usage & (dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Uniform)) {
                 resourceState |= D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
             }
-            if (usage & nxt::BufferUsageBit::Index) {
+            if (usage & dawn::BufferUsageBit::Index) {
                 resourceState |= D3D12_RESOURCE_STATE_INDEX_BUFFER;
             }
-            if (usage & nxt::BufferUsageBit::Storage) {
+            if (usage & dawn::BufferUsageBit::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
 
             return resourceState;
         }
 
-        D3D12_HEAP_TYPE D3D12HeapType(nxt::BufferUsageBit allowedUsage) {
-            if (allowedUsage & nxt::BufferUsageBit::MapRead) {
+        D3D12_HEAP_TYPE D3D12HeapType(dawn::BufferUsageBit allowedUsage) {
+            if (allowedUsage & dawn::BufferUsageBit::MapRead) {
                 return D3D12_HEAP_TYPE_READBACK;
-            } else if (allowedUsage & nxt::BufferUsageBit::MapWrite) {
+            } else if (allowedUsage & dawn::BufferUsageBit::MapWrite) {
                 return D3D12_HEAP_TYPE_UPLOAD;
             } else {
                 return D3D12_HEAP_TYPE_DEFAULT;
@@ -89,7 +89,7 @@ namespace backend { namespace d3d12 {
         if (heapType == D3D12_HEAP_TYPE_READBACK) {
             bufferUsage |= D3D12_RESOURCE_STATE_COPY_DEST;
             mFixedResourceState = true;
-            mLastUsage = nxt::BufferUsageBit::TransferDst;
+            mLastUsage = dawn::BufferUsageBit::TransferDst;
         }
 
         // D3D12 requires buffers on the UPLOAD heap to have the D3D12_RESOURCE_STATE_GENERIC_READ
@@ -97,7 +97,7 @@ namespace backend { namespace d3d12 {
         if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
             bufferUsage |= D3D12_RESOURCE_STATE_GENERIC_READ;
             mFixedResourceState = true;
-            mLastUsage = nxt::BufferUsageBit::TransferSrc;
+            mLastUsage = dawn::BufferUsageBit::TransferSrc;
         }
 
         mResource = ToBackend(GetDevice())
@@ -119,7 +119,7 @@ namespace backend { namespace d3d12 {
     }
 
     void Buffer::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                    nxt::BufferUsageBit usage) {
+                                    dawn::BufferUsageBit usage) {
         // Resources in upload and readback heaps must be kept in the COPY_SOURCE/DEST state
         if (mFixedResourceState) {
             ASSERT(usage == mLastUsage);
@@ -164,7 +164,7 @@ namespace backend { namespace d3d12 {
     void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         Device* device = ToBackend(GetDevice());
 
-        TransitionUsageNow(device->GetPendingCommandList(), nxt::BufferUsageBit::TransferDst);
+        TransitionUsageNow(device->GetPendingCommandList(), dawn::BufferUsageBit::TransferDst);
         device->GetResourceUploader()->BufferSubData(mResource, start, count, data);
     }
 

@@ -35,7 +35,7 @@ namespace backend { namespace opengl {
         using BindingLocations =
             std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
 
-        const GLPushConstantInfo& GetGLPushConstants(nxt::ShaderStage stage) const;
+        const GLPushConstantInfo& GetGLPushConstants(dawn::ShaderStage stage) const;
         const std::vector<GLuint>& GetTextureUnitsForSampler(GLuint index) const;
         const std::vector<GLuint>& GetTextureUnitsForTexture(GLuint index) const;
         GLuint GetProgramHandle() const;

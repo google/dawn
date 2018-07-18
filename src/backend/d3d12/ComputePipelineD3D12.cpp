@@ -33,8 +33,8 @@ namespace backend { namespace d3d12 {
         // SPRIV-cross does matrix multiplication expecting row major matrices
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-        const auto& module = ToBackend(builder->GetStageInfo(nxt::ShaderStage::Compute).module);
-        const auto& entryPoint = builder->GetStageInfo(nxt::ShaderStage::Compute).entryPoint;
+        const auto& module = ToBackend(builder->GetStageInfo(dawn::ShaderStage::Compute).module);
+        const auto& entryPoint = builder->GetStageInfo(dawn::ShaderStage::Compute).entryPoint;
         const auto& hlslSource = module->GetHLSLSource();
 
         ComPtr<ID3DBlob> compiledShader;

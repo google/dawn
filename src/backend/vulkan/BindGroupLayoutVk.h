@@ -23,11 +23,11 @@ namespace backend { namespace vulkan {
 
     class Device;
 
-    VkDescriptorType VulkanDescriptorType(nxt::BindingType type);
+    VkDescriptorType VulkanDescriptorType(dawn::BindingType type);
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
-        BindGroupLayout(Device* device, const nxt::BindGroupLayoutDescriptor* descriptor);
+        BindGroupLayout(Device* device, const dawn::BindGroupLayoutDescriptor* descriptor);
         ~BindGroupLayout();
 
         VkDescriptorSetLayout GetHandle() const;

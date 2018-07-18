@@ -20,42 +20,42 @@ namespace backend { namespace vulkan {
 
     namespace {
 
-        VkVertexInputRate VulkanInputRate(nxt::InputStepMode stepMode) {
+        VkVertexInputRate VulkanInputRate(dawn::InputStepMode stepMode) {
             switch (stepMode) {
-                case nxt::InputStepMode::Vertex:
+                case dawn::InputStepMode::Vertex:
                     return VK_VERTEX_INPUT_RATE_VERTEX;
-                case nxt::InputStepMode::Instance:
+                case dawn::InputStepMode::Instance:
                     return VK_VERTEX_INPUT_RATE_INSTANCE;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkFormat VulkanVertexFormat(nxt::VertexFormat format) {
+        VkFormat VulkanVertexFormat(dawn::VertexFormat format) {
             switch (format) {
-                case nxt::VertexFormat::FloatR32G32B32A32:
+                case dawn::VertexFormat::FloatR32G32B32A32:
                     return VK_FORMAT_R32G32B32A32_SFLOAT;
-                case nxt::VertexFormat::FloatR32G32B32:
+                case dawn::VertexFormat::FloatR32G32B32:
                     return VK_FORMAT_R32G32B32_SFLOAT;
-                case nxt::VertexFormat::FloatR32G32:
+                case dawn::VertexFormat::FloatR32G32:
                     return VK_FORMAT_R32G32_SFLOAT;
-                case nxt::VertexFormat::FloatR32:
+                case dawn::VertexFormat::FloatR32:
                     return VK_FORMAT_R32_SFLOAT;
-                case nxt::VertexFormat::IntR32G32B32A32:
+                case dawn::VertexFormat::IntR32G32B32A32:
                     return VK_FORMAT_R32G32B32A32_SINT;
-                case nxt::VertexFormat::IntR32G32B32:
+                case dawn::VertexFormat::IntR32G32B32:
                     return VK_FORMAT_R32G32B32_SINT;
-                case nxt::VertexFormat::IntR32G32:
+                case dawn::VertexFormat::IntR32G32:
                     return VK_FORMAT_R32G32_SINT;
-                case nxt::VertexFormat::IntR32:
+                case dawn::VertexFormat::IntR32:
                     return VK_FORMAT_R32_SINT;
-                case nxt::VertexFormat::UshortR16G16B16A16:
+                case dawn::VertexFormat::UshortR16G16B16A16:
                     return VK_FORMAT_R16G16B16A16_UINT;
-                case nxt::VertexFormat::UshortR16G16:
+                case dawn::VertexFormat::UshortR16G16:
                     return VK_FORMAT_R16G16_UINT;
-                case nxt::VertexFormat::UnormR8G8B8A8:
+                case dawn::VertexFormat::UnormR8G8B8A8:
                     return VK_FORMAT_R8G8B8A8_UNORM;
-                case nxt::VertexFormat::UnormR8G8:
+                case dawn::VertexFormat::UnormR8G8:
                     return VK_FORMAT_R8G8_UNORM;
                 default:
                     UNREACHABLE();

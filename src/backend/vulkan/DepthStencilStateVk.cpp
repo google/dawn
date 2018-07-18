@@ -19,46 +19,46 @@
 namespace backend { namespace vulkan {
 
     namespace {
-        VkCompareOp VulkanCompareOp(nxt::CompareFunction op) {
+        VkCompareOp VulkanCompareOp(dawn::CompareFunction op) {
             switch (op) {
-                case nxt::CompareFunction::Always:
+                case dawn::CompareFunction::Always:
                     return VK_COMPARE_OP_ALWAYS;
-                case nxt::CompareFunction::Equal:
+                case dawn::CompareFunction::Equal:
                     return VK_COMPARE_OP_EQUAL;
-                case nxt::CompareFunction::Greater:
+                case dawn::CompareFunction::Greater:
                     return VK_COMPARE_OP_GREATER;
-                case nxt::CompareFunction::GreaterEqual:
+                case dawn::CompareFunction::GreaterEqual:
                     return VK_COMPARE_OP_GREATER_OR_EQUAL;
-                case nxt::CompareFunction::Less:
+                case dawn::CompareFunction::Less:
                     return VK_COMPARE_OP_LESS;
-                case nxt::CompareFunction::LessEqual:
+                case dawn::CompareFunction::LessEqual:
                     return VK_COMPARE_OP_LESS_OR_EQUAL;
-                case nxt::CompareFunction::Never:
+                case dawn::CompareFunction::Never:
                     return VK_COMPARE_OP_NEVER;
-                case nxt::CompareFunction::NotEqual:
+                case dawn::CompareFunction::NotEqual:
                     return VK_COMPARE_OP_NOT_EQUAL;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkStencilOp VulkanStencilOp(nxt::StencilOperation op) {
+        VkStencilOp VulkanStencilOp(dawn::StencilOperation op) {
             switch (op) {
-                case nxt::StencilOperation::Keep:
+                case dawn::StencilOperation::Keep:
                     return VK_STENCIL_OP_KEEP;
-                case nxt::StencilOperation::Zero:
+                case dawn::StencilOperation::Zero:
                     return VK_STENCIL_OP_ZERO;
-                case nxt::StencilOperation::Replace:
+                case dawn::StencilOperation::Replace:
                     return VK_STENCIL_OP_REPLACE;
-                case nxt::StencilOperation::IncrementClamp:
+                case dawn::StencilOperation::IncrementClamp:
                     return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
-                case nxt::StencilOperation::DecrementClamp:
+                case dawn::StencilOperation::DecrementClamp:
                     return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
-                case nxt::StencilOperation::Invert:
+                case dawn::StencilOperation::Invert:
                     return VK_STENCIL_OP_INVERT;
-                case nxt::StencilOperation::IncrementWrap:
+                case dawn::StencilOperation::IncrementWrap:
                     return VK_STENCIL_OP_INCREMENT_AND_WRAP;
-                case nxt::StencilOperation::DecrementWrap:
+                case dawn::StencilOperation::DecrementWrap:
                     return VK_STENCIL_OP_DECREMENT_AND_WRAP;
                 default:
                     UNREACHABLE();

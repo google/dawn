@@ -23,9 +23,9 @@ namespace backend { namespace vulkan {
         // Converts an NXT texture dimension to a Vulkan image type.
         // Note that in Vulkan dimensionality is only 1D, 2D, 3D. Arrays and cube maps are expressed
         // via the array size and a "cubemap compatible" flag.
-        VkImageType VulkanImageType(nxt::TextureDimension dimension) {
+        VkImageType VulkanImageType(dawn::TextureDimension dimension) {
             switch (dimension) {
-                case nxt::TextureDimension::e2D:
+                case dawn::TextureDimension::e2D:
                     return VK_IMAGE_TYPE_2D;
                 default:
                     UNREACHABLE();
@@ -34,9 +34,9 @@ namespace backend { namespace vulkan {
 
         // Converts an NXT texture dimension to a Vulkan image view type.
         // Contrary to image types, image view types include arrayness and cubemapness
-        VkImageViewType VulkanImageViewType(nxt::TextureDimension dimension) {
+        VkImageViewType VulkanImageViewType(dawn::TextureDimension dimension) {
             switch (dimension) {
-                case nxt::TextureDimension::e2D:
+                case dawn::TextureDimension::e2D:
                     return VK_IMAGE_VIEW_TYPE_2D;
                 default:
                     UNREACHABLE();
@@ -44,22 +44,22 @@ namespace backend { namespace vulkan {
         }
 
         // Computes which vulkan access type could be required for the given NXT usage.
-        VkAccessFlags VulkanAccessFlags(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
+        VkAccessFlags VulkanAccessFlags(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
             VkAccessFlags flags = 0;
 
-            if (usage & nxt::TextureUsageBit::TransferSrc) {
+            if (usage & dawn::TextureUsageBit::TransferSrc) {
                 flags |= VK_ACCESS_TRANSFER_READ_BIT;
             }
-            if (usage & nxt::TextureUsageBit::TransferDst) {
+            if (usage & dawn::TextureUsageBit::TransferDst) {
                 flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
             }
-            if (usage & nxt::TextureUsageBit::Sampled) {
+            if (usage & dawn::TextureUsageBit::Sampled) {
                 flags |= VK_ACCESS_SHADER_READ_BIT;
             }
-            if (usage & nxt::TextureUsageBit::Storage) {
+            if (usage & dawn::TextureUsageBit::Storage) {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             }
-            if (usage & nxt::TextureUsageBit::OutputAttachment) {
+            if (usage & dawn::TextureUsageBit::OutputAttachment) {
                 if (TextureFormatHasDepthOrStencil(format)) {
                     flags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
                              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
@@ -68,7 +68,7 @@ namespace backend { namespace vulkan {
                         VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 }
             }
-            if (usage & nxt::TextureUsageBit::Present) {
+            if (usage & dawn::TextureUsageBit::Present) {
                 // There is no access flag for present because the VK_KHR_SWAPCHAIN extension says
                 // that vkQueuePresentKHR makes the memory of the image visible to the presentation
                 // engine. There's also a note explicitly saying dstAccessMask should be 0. On the
@@ -81,38 +81,38 @@ namespace backend { namespace vulkan {
         }
 
         // Chooses which Vulkan image layout should be used for the given NXT usage
-        VkImageLayout VulkanImageLayout(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
-            if (usage == nxt::TextureUsageBit::None) {
+        VkImageLayout VulkanImageLayout(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
+            if (usage == dawn::TextureUsageBit::None) {
                 return VK_IMAGE_LAYOUT_UNDEFINED;
             }
 
-            if (!nxt::HasZeroOrOneBits(usage)) {
+            if (!dawn::HasZeroOrOneBits(usage)) {
                 return VK_IMAGE_LAYOUT_GENERAL;
             }
 
             // Usage has a single bit so we can switch on its value directly.
             switch (usage) {
-                case nxt::TextureUsageBit::TransferDst:
+                case dawn::TextureUsageBit::TransferDst:
                     return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                case nxt::TextureUsageBit::Sampled:
+                case dawn::TextureUsageBit::Sampled:
                     return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 // Vulkan texture copy functions require the image to be in _one_  known layout.
                 // Depending on whether parts of the texture have been transitioned to only
                 // TransferSrc or a combination with something else, the texture could be in a
                 // combination of GENERAL and TRANSFER_SRC_OPTIMAL. This would be a problem, so we
                 // make TransferSrc use GENERAL.
-                case nxt::TextureUsageBit::TransferSrc:
+                case dawn::TextureUsageBit::TransferSrc:
                 // Writable storage textures must use general. If we could know the texture is read
                 // only we could use SHADER_READ_ONLY_OPTIMAL
-                case nxt::TextureUsageBit::Storage:
+                case dawn::TextureUsageBit::Storage:
                     return VK_IMAGE_LAYOUT_GENERAL;
-                case nxt::TextureUsageBit::OutputAttachment:
+                case dawn::TextureUsageBit::OutputAttachment:
                     if (TextureFormatHasDepthOrStencil(format)) {
                         return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
                     } else {
                         return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                     }
-                case nxt::TextureUsageBit::Present:
+                case dawn::TextureUsageBit::Present:
                     return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
                 default:
                     UNREACHABLE();
@@ -120,24 +120,24 @@ namespace backend { namespace vulkan {
         }
 
         // Computes which Vulkan pipeline stage can access a texture in the given NXT usage
-        VkPipelineStageFlags VulkanPipelineStage(nxt::TextureUsageBit usage,
-                                                 nxt::TextureFormat format) {
+        VkPipelineStageFlags VulkanPipelineStage(dawn::TextureUsageBit usage,
+                                                 dawn::TextureFormat format) {
             VkPipelineStageFlags flags = 0;
 
-            if (usage == nxt::TextureUsageBit::None) {
+            if (usage == dawn::TextureUsageBit::None) {
                 // This only happens when a texture is initially created (and for srcAccessMask) in
                 // which case there is no need to wait on anything to stop accessing this texture.
                 return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             }
-            if (usage & (nxt::TextureUsageBit::TransferSrc | nxt::TextureUsageBit::TransferDst)) {
+            if (usage & (dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
-            if (usage & (nxt::TextureUsageBit::Sampled | nxt::TextureUsageBit::Storage)) {
+            if (usage & (dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::Storage)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
-            if (usage & nxt::TextureUsageBit::OutputAttachment) {
+            if (usage & dawn::TextureUsageBit::OutputAttachment) {
                 if (TextureFormatHasDepthOrStencil(format)) {
                     flags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                              VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
@@ -147,7 +147,7 @@ namespace backend { namespace vulkan {
                     flags |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
                 }
             }
-            if (usage & nxt::TextureUsageBit::Present) {
+            if (usage & dawn::TextureUsageBit::Present) {
                 // There is no pipeline stage for present but a pipeline stage is required so we use
                 // "bottom of pipe" to block as little as possible and vkQueuePresentKHR will make
                 // the memory visible to the presentation engine. The spec explicitly mentions that
@@ -163,7 +163,7 @@ namespace backend { namespace vulkan {
         }
 
         // Computes which Vulkan texture aspects are relevant for the given NXT format
-        VkImageAspectFlags VulkanAspectMask(nxt::TextureFormat format) {
+        VkImageAspectFlags VulkanAspectMask(dawn::TextureFormat format) {
             bool isDepth = TextureFormatHasDepth(format);
             bool isStencil = TextureFormatHasStencil(format);
 
@@ -184,23 +184,23 @@ namespace backend { namespace vulkan {
     }  // namespace
 
     // Converts NXT texture format to Vulkan formats.
-    VkFormat VulkanImageFormat(nxt::TextureFormat format) {
+    VkFormat VulkanImageFormat(dawn::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::R8G8B8A8Unorm:
                 return VK_FORMAT_R8G8B8A8_UNORM;
-            case nxt::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::R8G8Unorm:
                 return VK_FORMAT_R8G8_UNORM;
-            case nxt::TextureFormat::R8Unorm:
+            case dawn::TextureFormat::R8Unorm:
                 return VK_FORMAT_R8_UNORM;
-            case nxt::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::R8G8B8A8Uint:
                 return VK_FORMAT_R8G8B8A8_UINT;
-            case nxt::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::R8G8Uint:
                 return VK_FORMAT_R8G8_UINT;
-            case nxt::TextureFormat::R8Uint:
+            case dawn::TextureFormat::R8Uint:
                 return VK_FORMAT_R8_UINT;
-            case nxt::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::B8G8R8A8Unorm:
                 return VK_FORMAT_B8G8R8A8_UNORM;
-            case nxt::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::D32FloatS8Uint:
                 return VK_FORMAT_D32_SFLOAT_S8_UINT;
             default:
                 UNREACHABLE();
@@ -209,22 +209,22 @@ namespace backend { namespace vulkan {
 
     // Converts the NXT usage flags to Vulkan usage flags. Also needs the format to choose
     // between color and depth attachment usages.
-    VkImageUsageFlags VulkanImageUsage(nxt::TextureUsageBit usage, nxt::TextureFormat format) {
+    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
         VkImageUsageFlags flags = 0;
 
-        if (usage & nxt::TextureUsageBit::TransferSrc) {
+        if (usage & dawn::TextureUsageBit::TransferSrc) {
             flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         }
-        if (usage & nxt::TextureUsageBit::TransferDst) {
+        if (usage & dawn::TextureUsageBit::TransferDst) {
             flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         }
-        if (usage & nxt::TextureUsageBit::Sampled) {
+        if (usage & dawn::TextureUsageBit::Sampled) {
             flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
         }
-        if (usage & nxt::TextureUsageBit::Storage) {
+        if (usage & dawn::TextureUsageBit::Storage) {
             flags |= VK_IMAGE_USAGE_STORAGE_BIT;
         }
-        if (usage & nxt::TextureUsageBit::OutputAttachment) {
+        if (usage & dawn::TextureUsageBit::OutputAttachment) {
             if (TextureFormatHasDepthOrStencil(format)) {
                 flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             } else {
@@ -306,14 +306,14 @@ namespace backend { namespace vulkan {
         return VulkanAspectMask(GetFormat());
     }
 
-    void Texture::TransitionUsageNow(VkCommandBuffer commands, nxt::TextureUsageBit usage) {
+    void Texture::TransitionUsageNow(VkCommandBuffer commands, dawn::TextureUsageBit usage) {
         // Avoid encoding barriers when it isn't needed.
         bool lastReadOnly = (mLastUsage & kReadOnlyTextureUsages) == mLastUsage;
         if (lastReadOnly && mLastUsage == usage) {
             return;
         }
 
-        nxt::TextureFormat format = GetFormat();
+        dawn::TextureFormat format = GetFormat();
 
         VkPipelineStageFlags srcStages = VulkanPipelineStage(mLastUsage, format);
         VkPipelineStageFlags dstStages = VulkanPipelineStage(usage, format);
@@ -329,7 +329,7 @@ namespace backend { namespace vulkan {
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = mHandle;
         // This transitions the whole resource but assumes it is a 2D texture
-        ASSERT(GetDimension() == nxt::TextureDimension::e2D);
+        ASSERT(GetDimension() == dawn::TextureDimension::e2D);
         barrier.subresourceRange.aspectMask = VulkanAspectMask(format);
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = GetNumMipLevels();

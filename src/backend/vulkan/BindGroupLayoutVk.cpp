@@ -21,16 +21,16 @@ namespace backend { namespace vulkan {
 
     namespace {
 
-        VkShaderStageFlags VulkanShaderStageFlags(nxt::ShaderStageBit stages) {
+        VkShaderStageFlags VulkanShaderStageFlags(dawn::ShaderStageBit stages) {
             VkShaderStageFlags flags = 0;
 
-            if (stages & nxt::ShaderStageBit::Vertex) {
+            if (stages & dawn::ShaderStageBit::Vertex) {
                 flags |= VK_SHADER_STAGE_VERTEX_BIT;
             }
-            if (stages & nxt::ShaderStageBit::Fragment) {
+            if (stages & dawn::ShaderStageBit::Fragment) {
                 flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
             }
-            if (stages & nxt::ShaderStageBit::Compute) {
+            if (stages & dawn::ShaderStageBit::Compute) {
                 flags |= VK_SHADER_STAGE_COMPUTE_BIT;
             }
 
@@ -39,15 +39,15 @@ namespace backend { namespace vulkan {
 
     }  // anonymous namespace
 
-    VkDescriptorType VulkanDescriptorType(nxt::BindingType type) {
+    VkDescriptorType VulkanDescriptorType(dawn::BindingType type) {
         switch (type) {
-            case nxt::BindingType::UniformBuffer:
+            case dawn::BindingType::UniformBuffer:
                 return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            case nxt::BindingType::Sampler:
+            case dawn::BindingType::Sampler:
                 return VK_DESCRIPTOR_TYPE_SAMPLER;
-            case nxt::BindingType::SampledTexture:
+            case dawn::BindingType::SampledTexture:
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-            case nxt::BindingType::StorageBuffer:
+            case dawn::BindingType::StorageBuffer:
                 return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             default:
                 UNREACHABLE();
@@ -55,7 +55,7 @@ namespace backend { namespace vulkan {
     }
 
     BindGroupLayout::BindGroupLayout(Device* device,
-                                     const nxt::BindGroupLayoutDescriptor* descriptor)
+                                     const dawn::BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor) {
         const auto& info = GetBindingInfo();
 
@@ -116,15 +116,15 @@ namespace backend { namespace vulkan {
             MAX_TYPE,
         };
         static_assert(MAX_TYPE == kMaxPoolSizesNeeded, "");
-        auto ToDescriptorType = [](nxt::BindingType type) -> DescriptorType {
+        auto ToDescriptorType = [](dawn::BindingType type) -> DescriptorType {
             switch (type) {
-                case nxt::BindingType::UniformBuffer:
+                case dawn::BindingType::UniformBuffer:
                     return UNIFORM_BUFFER;
-                case nxt::BindingType::Sampler:
+                case dawn::BindingType::Sampler:
                     return SAMPLER;
-                case nxt::BindingType::SampledTexture:
+                case dawn::BindingType::SampledTexture:
                     return SAMPLED_IMAGE;
-                case nxt::BindingType::StorageBuffer:
+                case dawn::BindingType::StorageBuffer:
                     return STORAGE_BUFFER;
                 default:
                     UNREACHABLE();

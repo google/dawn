@@ -31,11 +31,11 @@ namespace backend { namespace metal {
 
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor);
+        PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
             std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;
-        const BindingIndexInfo& GetBindingIndexInfo(nxt::ShaderStage stage) const;
+        const BindingIndexInfo& GetBindingIndexInfo(dawn::ShaderStage stage) const;
 
       private:
         PerStage<BindingIndexInfo> mIndexInfo;

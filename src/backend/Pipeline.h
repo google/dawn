@@ -45,13 +45,13 @@ namespace backend {
             std::bitset<kMaxPushConstants> mask;
             std::array<PushConstantType, kMaxPushConstants> types;
         };
-        const PushConstantInfo& GetPushConstants(nxt::ShaderStage stage) const;
-        nxt::ShaderStageBit GetStageMask() const;
+        const PushConstantInfo& GetPushConstants(dawn::ShaderStage stage) const;
+        dawn::ShaderStageBit GetStageMask() const;
 
         PipelineLayoutBase* GetLayout();
 
       private:
-        nxt::ShaderStageBit mStageMask;
+        dawn::ShaderStageBit mStageMask;
         Ref<PipelineLayoutBase> mLayout;
         PerStage<PushConstantInfo> mPushConstants;
     };
@@ -64,19 +64,19 @@ namespace backend {
             std::string entryPoint;
             Ref<ShaderModuleBase> module;
         };
-        const StageInfo& GetStageInfo(nxt::ShaderStage stage) const;
+        const StageInfo& GetStageInfo(dawn::ShaderStage stage) const;
         BuilderBase* GetParentBuilder() const;
 
         // NXT API
         void SetLayout(PipelineLayoutBase* layout);
-        void SetStage(nxt::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
+        void SetStage(dawn::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
 
       private:
         friend class PipelineBase;
 
         BuilderBase* mParentBuilder;
         Ref<PipelineLayoutBase> mLayout;
-        nxt::ShaderStageBit mStageMask;
+        dawn::ShaderStageBit mStageMask;
         PerStage<StageInfo> mStages;
     };
 

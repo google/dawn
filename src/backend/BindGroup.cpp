@@ -35,29 +35,29 @@ namespace backend {
         return mLayout.Get();
     }
 
-    nxt::BindGroupUsage BindGroupBase::GetUsage() const {
+    dawn::BindGroupUsage BindGroupBase::GetUsage() const {
         return mUsage;
     }
 
     BufferViewBase* BindGroupBase::GetBindingAsBufferView(size_t binding) {
         ASSERT(binding < kMaxBindingsPerGroup);
         ASSERT(mLayout->GetBindingInfo().mask[binding]);
-        ASSERT(mLayout->GetBindingInfo().types[binding] == nxt::BindingType::UniformBuffer ||
-               mLayout->GetBindingInfo().types[binding] == nxt::BindingType::StorageBuffer);
+        ASSERT(mLayout->GetBindingInfo().types[binding] == dawn::BindingType::UniformBuffer ||
+               mLayout->GetBindingInfo().types[binding] == dawn::BindingType::StorageBuffer);
         return reinterpret_cast<BufferViewBase*>(mBindings[binding].Get());
     }
 
     SamplerBase* BindGroupBase::GetBindingAsSampler(size_t binding) {
         ASSERT(binding < kMaxBindingsPerGroup);
         ASSERT(mLayout->GetBindingInfo().mask[binding]);
-        ASSERT(mLayout->GetBindingInfo().types[binding] == nxt::BindingType::Sampler);
+        ASSERT(mLayout->GetBindingInfo().types[binding] == dawn::BindingType::Sampler);
         return reinterpret_cast<SamplerBase*>(mBindings[binding].Get());
     }
 
     TextureViewBase* BindGroupBase::GetBindingAsTextureView(size_t binding) {
         ASSERT(binding < kMaxBindingsPerGroup);
         ASSERT(mLayout->GetBindingInfo().mask[binding]);
-        ASSERT(mLayout->GetBindingInfo().types[binding] == nxt::BindingType::SampledTexture);
+        ASSERT(mLayout->GetBindingInfo().types[binding] == dawn::BindingType::SampledTexture);
         return reinterpret_cast<TextureViewBase*>(mBindings[binding].Get());
     }
 
@@ -100,7 +100,7 @@ namespace backend {
         mPropertiesSet |= BINDGROUP_PROPERTY_LAYOUT;
     }
 
-    void BindGroupBuilder::SetUsage(nxt::BindGroupUsage usage) {
+    void BindGroupBuilder::SetUsage(dawn::BindGroupUsage usage) {
         if ((mPropertiesSet & BINDGROUP_PROPERTY_USAGE) != 0) {
             HandleError("Bindgroup usage property set multiple times");
             return;
@@ -119,18 +119,18 @@ namespace backend {
 
         const auto& layoutInfo = mLayout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
-            nxt::BufferUsageBit requiredBit = nxt::BufferUsageBit::None;
+            dawn::BufferUsageBit requiredBit = dawn::BufferUsageBit::None;
             switch (layoutInfo.types[i]) {
-                case nxt::BindingType::UniformBuffer:
-                    requiredBit = nxt::BufferUsageBit::Uniform;
+                case dawn::BindingType::UniformBuffer:
+                    requiredBit = dawn::BufferUsageBit::Uniform;
                     break;
 
-                case nxt::BindingType::StorageBuffer:
-                    requiredBit = nxt::BufferUsageBit::Storage;
+                case dawn::BindingType::StorageBuffer:
+                    requiredBit = dawn::BufferUsageBit::Storage;
                     break;
 
-                case nxt::BindingType::Sampler:
-                case nxt::BindingType::SampledTexture:
+                case dawn::BindingType::Sampler:
+                case dawn::BindingType::SampledTexture:
                     HandleError("Setting buffer for a wrong binding type");
                     return;
             }
@@ -158,7 +158,7 @@ namespace backend {
 
         const auto& layoutInfo = mLayout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
-            if (layoutInfo.types[i] != nxt::BindingType::Sampler) {
+            if (layoutInfo.types[i] != dawn::BindingType::Sampler) {
                 HandleError("Setting binding for a wrong layout binding type");
                 return;
             }
@@ -176,13 +176,13 @@ namespace backend {
 
         const auto& layoutInfo = mLayout->GetBindingInfo();
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
-            if (layoutInfo.types[i] != nxt::BindingType::SampledTexture) {
+            if (layoutInfo.types[i] != dawn::BindingType::SampledTexture) {
                 HandleError("Setting binding for a wrong layout binding type");
                 return;
             }
 
             if (!(textureViews[j]->GetTexture()->GetAllowedUsage() &
-                  nxt::TextureUsageBit::Sampled)) {
+                  dawn::TextureUsageBit::Sampled)) {
                 HandleError("Texture needs to allow the sampled usage bit");
                 return;
             }

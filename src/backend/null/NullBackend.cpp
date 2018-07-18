@@ -40,7 +40,7 @@ namespace backend { namespace null {
         return new BindGroup(builder);
     }
     ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
-        const nxt::BindGroupLayoutDescriptor* descriptor) {
+        const dawn::BindGroupLayoutDescriptor* descriptor) {
         return new BindGroupLayout(this, descriptor);
     }
     BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
@@ -65,7 +65,7 @@ namespace backend { namespace null {
         return new InputState(builder);
     }
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
-        const nxt::PipelineLayoutDescriptor* descriptor) {
+        const dawn::PipelineLayoutDescriptor* descriptor) {
         return new PipelineLayout(this, descriptor);
     }
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
@@ -79,7 +79,7 @@ namespace backend { namespace null {
         return new RenderPipeline(builder);
     }
     ResultOrError<SamplerBase*> Device::CreateSamplerImpl(
-        const nxt::SamplerDescriptor* descriptor) {
+        const dawn::SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
@@ -124,8 +124,8 @@ namespace backend { namespace null {
     };
 
     Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
-        if (GetAllowedUsage() & (nxt::BufferUsageBit::TransferDst | nxt::BufferUsageBit::MapRead |
-                                 nxt::BufferUsageBit::MapWrite)) {
+        if (GetAllowedUsage() & (dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead |
+                                 dawn::BufferUsageBit::MapWrite)) {
             mBackingData = std::unique_ptr<char[]>(new char[GetSize()]);
         }
     }

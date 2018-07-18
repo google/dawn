@@ -20,67 +20,67 @@
 namespace backend { namespace d3d12 {
 
     namespace {
-        D3D12_BLEND D3D12Blend(nxt::BlendFactor factor) {
+        D3D12_BLEND D3D12Blend(dawn::BlendFactor factor) {
             switch (factor) {
-                case nxt::BlendFactor::Zero:
+                case dawn::BlendFactor::Zero:
                     return D3D12_BLEND_ZERO;
-                case nxt::BlendFactor::One:
+                case dawn::BlendFactor::One:
                     return D3D12_BLEND_ONE;
-                case nxt::BlendFactor::SrcColor:
+                case dawn::BlendFactor::SrcColor:
                     return D3D12_BLEND_SRC_COLOR;
-                case nxt::BlendFactor::OneMinusSrcColor:
+                case dawn::BlendFactor::OneMinusSrcColor:
                     return D3D12_BLEND_INV_SRC_COLOR;
-                case nxt::BlendFactor::SrcAlpha:
+                case dawn::BlendFactor::SrcAlpha:
                     return D3D12_BLEND_SRC_ALPHA;
-                case nxt::BlendFactor::OneMinusSrcAlpha:
+                case dawn::BlendFactor::OneMinusSrcAlpha:
                     return D3D12_BLEND_INV_SRC_ALPHA;
-                case nxt::BlendFactor::DstColor:
+                case dawn::BlendFactor::DstColor:
                     return D3D12_BLEND_DEST_COLOR;
-                case nxt::BlendFactor::OneMinusDstColor:
+                case dawn::BlendFactor::OneMinusDstColor:
                     return D3D12_BLEND_INV_DEST_COLOR;
-                case nxt::BlendFactor::DstAlpha:
+                case dawn::BlendFactor::DstAlpha:
                     return D3D12_BLEND_DEST_ALPHA;
-                case nxt::BlendFactor::OneMinusDstAlpha:
+                case dawn::BlendFactor::OneMinusDstAlpha:
                     return D3D12_BLEND_INV_DEST_ALPHA;
-                case nxt::BlendFactor::SrcAlphaSaturated:
+                case dawn::BlendFactor::SrcAlphaSaturated:
                     return D3D12_BLEND_SRC_ALPHA_SAT;
-                case nxt::BlendFactor::BlendColor:
+                case dawn::BlendFactor::BlendColor:
                     return D3D12_BLEND_BLEND_FACTOR;
-                case nxt::BlendFactor::OneMinusBlendColor:
+                case dawn::BlendFactor::OneMinusBlendColor:
                     return D3D12_BLEND_INV_BLEND_FACTOR;
                 default:
                     UNREACHABLE();
             }
         }
 
-        D3D12_BLEND_OP D3D12BlendOperation(nxt::BlendOperation operation) {
+        D3D12_BLEND_OP D3D12BlendOperation(dawn::BlendOperation operation) {
             switch (operation) {
-                case nxt::BlendOperation::Add:
+                case dawn::BlendOperation::Add:
                     return D3D12_BLEND_OP_ADD;
-                case nxt::BlendOperation::Subtract:
+                case dawn::BlendOperation::Subtract:
                     return D3D12_BLEND_OP_SUBTRACT;
-                case nxt::BlendOperation::ReverseSubtract:
+                case dawn::BlendOperation::ReverseSubtract:
                     return D3D12_BLEND_OP_REV_SUBTRACT;
-                case nxt::BlendOperation::Min:
+                case dawn::BlendOperation::Min:
                     return D3D12_BLEND_OP_MIN;
-                case nxt::BlendOperation::Max:
+                case dawn::BlendOperation::Max:
                     return D3D12_BLEND_OP_MAX;
                 default:
                     UNREACHABLE();
             }
         }
 
-        uint8_t D3D12RenderTargetWriteMask(nxt::ColorWriteMask colorWriteMask) {
-            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Red) ==
+        uint8_t D3D12RenderTargetWriteMask(dawn::ColorWriteMask colorWriteMask) {
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Red) ==
                               D3D12_COLOR_WRITE_ENABLE_RED,
                           "ColorWriteMask values must match");
-            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Green) ==
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Green) ==
                               D3D12_COLOR_WRITE_ENABLE_GREEN,
                           "ColorWriteMask values must match");
-            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Blue) ==
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Blue) ==
                               D3D12_COLOR_WRITE_ENABLE_BLUE,
                           "ColorWriteMask values must match");
-            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(nxt::ColorWriteMask::Alpha) ==
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Alpha) ==
                               D3D12_COLOR_WRITE_ENABLE_ALPHA,
                           "ColorWriteMask values must match");
             return static_cast<uint8_t>(colorWriteMask);

@@ -23,30 +23,30 @@
 
 namespace backend {
 
-    uint32_t TextureFormatPixelSize(nxt::TextureFormat format);
-    bool TextureFormatHasDepth(nxt::TextureFormat format);
-    bool TextureFormatHasStencil(nxt::TextureFormat format);
-    bool TextureFormatHasDepthOrStencil(nxt::TextureFormat format);
+    uint32_t TextureFormatPixelSize(dawn::TextureFormat format);
+    bool TextureFormatHasDepth(dawn::TextureFormat format);
+    bool TextureFormatHasStencil(dawn::TextureFormat format);
+    bool TextureFormatHasDepthOrStencil(dawn::TextureFormat format);
 
-    static constexpr nxt::TextureUsageBit kReadOnlyTextureUsages =
-        nxt::TextureUsageBit::TransferSrc | nxt::TextureUsageBit::Sampled |
-        nxt::TextureUsageBit::Present;
+    static constexpr dawn::TextureUsageBit kReadOnlyTextureUsages =
+        dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::Sampled |
+        dawn::TextureUsageBit::Present;
 
-    static constexpr nxt::TextureUsageBit kWritableTextureUsages =
-        nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::Storage |
-        nxt::TextureUsageBit::OutputAttachment;
+    static constexpr dawn::TextureUsageBit kWritableTextureUsages =
+        dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Storage |
+        dawn::TextureUsageBit::OutputAttachment;
 
     class TextureBase : public RefCounted {
       public:
         TextureBase(TextureBuilder* builder);
 
-        nxt::TextureDimension GetDimension() const;
-        nxt::TextureFormat GetFormat() const;
+        dawn::TextureDimension GetDimension() const;
+        dawn::TextureFormat GetFormat() const;
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;
         uint32_t GetDepth() const;
         uint32_t GetNumMipLevels() const;
-        nxt::TextureUsageBit GetAllowedUsage() const;
+        dawn::TextureUsageBit GetAllowedUsage() const;
         DeviceBase* GetDevice() const;
 
         // NXT API
@@ -55,11 +55,11 @@ namespace backend {
       private:
         DeviceBase* mDevice;
 
-        nxt::TextureDimension mDimension;
-        nxt::TextureFormat mFormat;
+        dawn::TextureDimension mDimension;
+        dawn::TextureFormat mFormat;
         uint32_t mWidth, mHeight, mDepth;
         uint32_t mNumMipLevels;
-        nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
+        dawn::TextureUsageBit mAllowedUsage = dawn::TextureUsageBit::None;
     };
 
     class TextureBuilder : public Builder<TextureBase> {
@@ -67,12 +67,12 @@ namespace backend {
         TextureBuilder(DeviceBase* device);
 
         // NXT API
-        void SetDimension(nxt::TextureDimension dimension);
+        void SetDimension(dawn::TextureDimension dimension);
         void SetExtent(uint32_t width, uint32_t height, uint32_t depth);
-        void SetFormat(nxt::TextureFormat format);
+        void SetFormat(dawn::TextureFormat format);
         void SetMipLevels(uint32_t numMipLevels);
-        void SetAllowedUsage(nxt::TextureUsageBit usage);
-        void SetInitialUsage(nxt::TextureUsageBit usage);
+        void SetAllowedUsage(dawn::TextureUsageBit usage);
+        void SetInitialUsage(dawn::TextureUsageBit usage);
 
       private:
         friend class TextureBase;
@@ -81,11 +81,11 @@ namespace backend {
 
         int mPropertiesSet = 0;
 
-        nxt::TextureDimension mDimension;
+        dawn::TextureDimension mDimension;
         uint32_t mWidth, mHeight, mDepth;
-        nxt::TextureFormat mFormat;
+        dawn::TextureFormat mFormat;
         uint32_t mNumMipLevels;
-        nxt::TextureUsageBit mAllowedUsage = nxt::TextureUsageBit::None;
+        dawn::TextureUsageBit mAllowedUsage = dawn::TextureUsageBit::None;
     };
 
     class TextureViewBase : public RefCounted {

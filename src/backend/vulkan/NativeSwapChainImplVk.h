@@ -39,11 +39,11 @@ namespace backend { namespace vulkan {
         nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture);
         nxtSwapChainError Present();
 
-        nxt::TextureFormat GetPreferredFormat() const;
+        dawn::TextureFormat GetPreferredFormat() const;
 
         struct ChosenConfig {
             VkFormat nativeFormat;
-            nxt::TextureFormat format;
+            dawn::TextureFormat format;
             VkColorSpaceKHR colorSpace;
             VkSurfaceTransformFlagBitsKHR preTransform;
             uint32_t minImageCount;

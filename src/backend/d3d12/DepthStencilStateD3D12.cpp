@@ -18,46 +18,46 @@
 
 namespace backend { namespace d3d12 {
 
-    static D3D12_STENCIL_OP StencilOp(nxt::StencilOperation op) {
+    static D3D12_STENCIL_OP StencilOp(dawn::StencilOperation op) {
         switch (op) {
-            case nxt::StencilOperation::Keep:
+            case dawn::StencilOperation::Keep:
                 return D3D12_STENCIL_OP_KEEP;
-            case nxt::StencilOperation::Zero:
+            case dawn::StencilOperation::Zero:
                 return D3D12_STENCIL_OP_ZERO;
-            case nxt::StencilOperation::Replace:
+            case dawn::StencilOperation::Replace:
                 return D3D12_STENCIL_OP_REPLACE;
-            case nxt::StencilOperation::IncrementClamp:
+            case dawn::StencilOperation::IncrementClamp:
                 return D3D12_STENCIL_OP_INCR_SAT;
-            case nxt::StencilOperation::DecrementClamp:
+            case dawn::StencilOperation::DecrementClamp:
                 return D3D12_STENCIL_OP_DECR_SAT;
-            case nxt::StencilOperation::Invert:
+            case dawn::StencilOperation::Invert:
                 return D3D12_STENCIL_OP_INVERT;
-            case nxt::StencilOperation::IncrementWrap:
+            case dawn::StencilOperation::IncrementWrap:
                 return D3D12_STENCIL_OP_INCR;
-            case nxt::StencilOperation::DecrementWrap:
+            case dawn::StencilOperation::DecrementWrap:
                 return D3D12_STENCIL_OP_DECR;
             default:
                 UNREACHABLE();
         }
     }
 
-    static D3D12_COMPARISON_FUNC ComparisonFunc(nxt::CompareFunction func) {
+    static D3D12_COMPARISON_FUNC ComparisonFunc(dawn::CompareFunction func) {
         switch (func) {
-            case nxt::CompareFunction::Always:
+            case dawn::CompareFunction::Always:
                 return D3D12_COMPARISON_FUNC_ALWAYS;
-            case nxt::CompareFunction::Equal:
+            case dawn::CompareFunction::Equal:
                 return D3D12_COMPARISON_FUNC_EQUAL;
-            case nxt::CompareFunction::Greater:
+            case dawn::CompareFunction::Greater:
                 return D3D12_COMPARISON_FUNC_GREATER;
-            case nxt::CompareFunction::GreaterEqual:
+            case dawn::CompareFunction::GreaterEqual:
                 return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
-            case nxt::CompareFunction::Less:
+            case dawn::CompareFunction::Less:
                 return D3D12_COMPARISON_FUNC_LESS;
-            case nxt::CompareFunction::LessEqual:
+            case dawn::CompareFunction::LessEqual:
                 return D3D12_COMPARISON_FUNC_LESS_EQUAL;
-            case nxt::CompareFunction::Never:
+            case dawn::CompareFunction::Never:
                 return D3D12_COMPARISON_FUNC_NEVER;
-            case nxt::CompareFunction::NotEqual:
+            case dawn::CompareFunction::NotEqual:
                 return D3D12_COMPARISON_FUNC_NOT_EQUAL;
             default:
                 UNREACHABLE();

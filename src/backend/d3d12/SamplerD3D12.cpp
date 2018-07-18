@@ -19,13 +19,13 @@
 namespace backend { namespace d3d12 {
 
     namespace {
-        D3D12_TEXTURE_ADDRESS_MODE AddressMode(nxt::AddressMode mode) {
+        D3D12_TEXTURE_ADDRESS_MODE AddressMode(dawn::AddressMode mode) {
             switch (mode) {
-                case nxt::AddressMode::Repeat:
+                case dawn::AddressMode::Repeat:
                     return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-                case nxt::AddressMode::MirroredRepeat:
+                case dawn::AddressMode::MirroredRepeat:
                     return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-                case nxt::AddressMode::ClampToEdge:
+                case dawn::AddressMode::ClampToEdge:
                     return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
                 default:
                     UNREACHABLE();
@@ -33,7 +33,7 @@ namespace backend { namespace d3d12 {
         }
     }  // namespace
 
-    Sampler::Sampler(Device* device, const nxt::SamplerDescriptor* descriptor)
+    Sampler::Sampler(Device* device, const dawn::SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dn770367(v=vs.85).aspx
         // hex value, decimal value, min linear, mag linear, mip linear
@@ -53,25 +53,25 @@ namespace backend { namespace d3d12 {
         uint8_t mode = 0;
 
         switch (descriptor->minFilter) {
-            case nxt::FilterMode::Nearest:
+            case dawn::FilterMode::Nearest:
                 break;
-            case nxt::FilterMode::Linear:
+            case dawn::FilterMode::Linear:
                 mode += 16;
                 break;
         }
 
         switch (descriptor->magFilter) {
-            case nxt::FilterMode::Nearest:
+            case dawn::FilterMode::Nearest:
                 break;
-            case nxt::FilterMode::Linear:
+            case dawn::FilterMode::Linear:
                 mode += 4;
                 break;
         }
 
         switch (descriptor->mipmapFilter) {
-            case nxt::FilterMode::Nearest:
+            case dawn::FilterMode::Nearest:
                 break;
-            case nxt::FilterMode::Linear:
+            case dawn::FilterMode::Linear:
                 mode += 1;
                 break;
         }

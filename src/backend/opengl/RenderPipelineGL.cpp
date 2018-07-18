@@ -23,17 +23,17 @@
 namespace backend { namespace opengl {
 
     namespace {
-        GLenum GLPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
+        GLenum GLPrimitiveTopology(dawn::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::PointList:
+                case dawn::PrimitiveTopology::PointList:
                     return GL_POINTS;
-                case nxt::PrimitiveTopology::LineList:
+                case dawn::PrimitiveTopology::LineList:
                     return GL_LINES;
-                case nxt::PrimitiveTopology::LineStrip:
+                case dawn::PrimitiveTopology::LineStrip:
                     return GL_LINE_STRIP;
-                case nxt::PrimitiveTopology::TriangleList:
+                case dawn::PrimitiveTopology::TriangleList:
                     return GL_TRIANGLES;
-                case nxt::PrimitiveTopology::TriangleStrip:
+                case dawn::PrimitiveTopology::TriangleStrip:
                     return GL_TRIANGLE_STRIP;
                 default:
                     UNREACHABLE();

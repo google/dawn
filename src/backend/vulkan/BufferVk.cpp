@@ -24,44 +24,44 @@ namespace backend { namespace vulkan {
 
     namespace {
 
-        VkBufferUsageFlags VulkanBufferUsage(nxt::BufferUsageBit usage) {
+        VkBufferUsageFlags VulkanBufferUsage(dawn::BufferUsageBit usage) {
             VkBufferUsageFlags flags = 0;
 
-            if (usage & nxt::BufferUsageBit::TransferSrc) {
+            if (usage & dawn::BufferUsageBit::TransferSrc) {
                 flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
             }
-            if (usage & nxt::BufferUsageBit::TransferDst) {
+            if (usage & dawn::BufferUsageBit::TransferDst) {
                 flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
             }
-            if (usage & nxt::BufferUsageBit::Index) {
+            if (usage & dawn::BufferUsageBit::Index) {
                 flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
             }
-            if (usage & nxt::BufferUsageBit::Vertex) {
+            if (usage & dawn::BufferUsageBit::Vertex) {
                 flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
             }
-            if (usage & nxt::BufferUsageBit::Uniform) {
+            if (usage & dawn::BufferUsageBit::Uniform) {
                 flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
             }
-            if (usage & nxt::BufferUsageBit::Storage) {
+            if (usage & dawn::BufferUsageBit::Storage) {
                 flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
             }
 
             return flags;
         }
 
-        VkPipelineStageFlags VulkanPipelineStage(nxt::BufferUsageBit usage) {
+        VkPipelineStageFlags VulkanPipelineStage(dawn::BufferUsageBit usage) {
             VkPipelineStageFlags flags = 0;
 
-            if (usage & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) {
+            if (usage & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
                 flags |= VK_PIPELINE_STAGE_HOST_BIT;
             }
-            if (usage & (nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)) {
+            if (usage & (dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
-            if (usage & (nxt::BufferUsageBit::Index | nxt::BufferUsageBit::Vertex)) {
+            if (usage & (dawn::BufferUsageBit::Index | dawn::BufferUsageBit::Vertex)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
             }
-            if (usage & (nxt::BufferUsageBit::Uniform | nxt::BufferUsageBit::Storage)) {
+            if (usage & (dawn::BufferUsageBit::Uniform | dawn::BufferUsageBit::Storage)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
@@ -70,31 +70,31 @@ namespace backend { namespace vulkan {
             return flags;
         }
 
-        VkAccessFlags VulkanAccessFlags(nxt::BufferUsageBit usage) {
+        VkAccessFlags VulkanAccessFlags(dawn::BufferUsageBit usage) {
             VkAccessFlags flags = 0;
 
-            if (usage & nxt::BufferUsageBit::MapRead) {
+            if (usage & dawn::BufferUsageBit::MapRead) {
                 flags |= VK_ACCESS_HOST_READ_BIT;
             }
-            if (usage & nxt::BufferUsageBit::MapWrite) {
+            if (usage & dawn::BufferUsageBit::MapWrite) {
                 flags |= VK_ACCESS_HOST_WRITE_BIT;
             }
-            if (usage & nxt::BufferUsageBit::TransferSrc) {
+            if (usage & dawn::BufferUsageBit::TransferSrc) {
                 flags |= VK_ACCESS_TRANSFER_READ_BIT;
             }
-            if (usage & nxt::BufferUsageBit::TransferDst) {
+            if (usage & dawn::BufferUsageBit::TransferDst) {
                 flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
             }
-            if (usage & nxt::BufferUsageBit::Index) {
+            if (usage & dawn::BufferUsageBit::Index) {
                 flags |= VK_ACCESS_INDEX_READ_BIT;
             }
-            if (usage & nxt::BufferUsageBit::Vertex) {
+            if (usage & dawn::BufferUsageBit::Vertex) {
                 flags |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
             }
-            if (usage & nxt::BufferUsageBit::Uniform) {
+            if (usage & dawn::BufferUsageBit::Uniform) {
                 flags |= VK_ACCESS_UNIFORM_READ_BIT;
             }
-            if (usage & nxt::BufferUsageBit::Storage) {
+            if (usage & dawn::BufferUsageBit::Storage) {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             }
 
@@ -124,9 +124,8 @@ namespace backend { namespace vulkan {
         VkMemoryRequirements requirements;
         device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
-        bool requestMappable =
-            (GetAllowedUsage() & (nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::MapWrite)) !=
-            0;
+        bool requestMappable = (GetAllowedUsage() & (dawn::BufferUsageBit::MapRead |
+                                                     dawn::BufferUsageBit::MapWrite)) != 0;
         if (!device->GetMemoryAllocator()->Allocate(requirements, requestMappable,
                                                     &mMemoryAllocation)) {
             ASSERT(false);
@@ -162,7 +161,7 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
-    void Buffer::TransitionUsageNow(VkCommandBuffer commands, nxt::BufferUsageBit usage) {
+    void Buffer::TransitionUsageNow(VkCommandBuffer commands, dawn::BufferUsageBit usage) {
         bool lastIncludesTarget = (mLastUsage & usage) == usage;
         bool lastReadOnly = (mLastUsage & kReadOnlyBufferUsages) == mLastUsage;
 
@@ -172,7 +171,7 @@ namespace backend { namespace vulkan {
         }
 
         // Special-case for the initial transition: Vulkan doesn't allow access flags to be 0.
-        if (mLastUsage == nxt::BufferUsageBit::None) {
+        if (mLastUsage == dawn::BufferUsageBit::None) {
             mLastUsage = usage;
             return;
         }
@@ -202,7 +201,7 @@ namespace backend { namespace vulkan {
         Device* device = ToBackend(GetDevice());
 
         VkCommandBuffer commands = device->GetPendingCommandBuffer();
-        TransitionUsageNow(commands, nxt::BufferUsageBit::TransferDst);
+        TransitionUsageNow(commands, dawn::BufferUsageBit::TransferDst);
 
         BufferUploader* uploader = device->GetBufferUploader();
         uploader->BufferSubData(mHandle, start, count, data);
@@ -212,7 +211,7 @@ namespace backend { namespace vulkan {
         Device* device = ToBackend(GetDevice());
 
         VkCommandBuffer commands = device->GetPendingCommandBuffer();
-        TransitionUsageNow(commands, nxt::BufferUsageBit::MapRead);
+        TransitionUsageNow(commands, dawn::BufferUsageBit::MapRead);
 
         uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);
@@ -225,7 +224,7 @@ namespace backend { namespace vulkan {
         Device* device = ToBackend(GetDevice());
 
         VkCommandBuffer commands = device->GetPendingCommandBuffer();
-        TransitionUsageNow(commands, nxt::BufferUsageBit::MapWrite);
+        TransitionUsageNow(commands, dawn::BufferUsageBit::MapWrite);
 
         uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);

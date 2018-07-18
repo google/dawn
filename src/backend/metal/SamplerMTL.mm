@@ -19,37 +19,37 @@
 namespace backend { namespace metal {
 
     namespace {
-        MTLSamplerMinMagFilter FilterModeToMinMagFilter(nxt::FilterMode mode) {
+        MTLSamplerMinMagFilter FilterModeToMinMagFilter(dawn::FilterMode mode) {
             switch (mode) {
-                case nxt::FilterMode::Nearest:
+                case dawn::FilterMode::Nearest:
                     return MTLSamplerMinMagFilterNearest;
-                case nxt::FilterMode::Linear:
+                case dawn::FilterMode::Linear:
                     return MTLSamplerMinMagFilterLinear;
             }
         }
 
-        MTLSamplerMipFilter FilterModeToMipFilter(nxt::FilterMode mode) {
+        MTLSamplerMipFilter FilterModeToMipFilter(dawn::FilterMode mode) {
             switch (mode) {
-                case nxt::FilterMode::Nearest:
+                case dawn::FilterMode::Nearest:
                     return MTLSamplerMipFilterNearest;
-                case nxt::FilterMode::Linear:
+                case dawn::FilterMode::Linear:
                     return MTLSamplerMipFilterLinear;
             }
         }
 
-        MTLSamplerAddressMode AddressMode(nxt::AddressMode mode) {
+        MTLSamplerAddressMode AddressMode(dawn::AddressMode mode) {
             switch (mode) {
-                case nxt::AddressMode::Repeat:
+                case dawn::AddressMode::Repeat:
                     return MTLSamplerAddressModeRepeat;
-                case nxt::AddressMode::MirroredRepeat:
+                case dawn::AddressMode::MirroredRepeat:
                     return MTLSamplerAddressModeMirrorRepeat;
-                case nxt::AddressMode::ClampToEdge:
+                case dawn::AddressMode::ClampToEdge:
                     return MTLSamplerAddressModeClampToEdge;
             }
         }
     }
 
-    Sampler::Sampler(Device* device, const nxt::SamplerDescriptor* descriptor)
+    Sampler::Sampler(Device* device, const dawn::SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
         MTLSamplerDescriptor* mtlDesc = [MTLSamplerDescriptor new];
         [mtlDesc autorelease];

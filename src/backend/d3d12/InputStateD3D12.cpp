@@ -18,42 +18,42 @@
 
 namespace backend { namespace d3d12 {
 
-    static DXGI_FORMAT VertexFormatType(nxt::VertexFormat format) {
+    static DXGI_FORMAT VertexFormatType(dawn::VertexFormat format) {
         switch (format) {
-            case nxt::VertexFormat::FloatR32G32B32A32:
+            case dawn::VertexFormat::FloatR32G32B32A32:
                 return DXGI_FORMAT_R32G32B32A32_FLOAT;
-            case nxt::VertexFormat::FloatR32G32B32:
+            case dawn::VertexFormat::FloatR32G32B32:
                 return DXGI_FORMAT_R32G32B32_FLOAT;
-            case nxt::VertexFormat::FloatR32G32:
+            case dawn::VertexFormat::FloatR32G32:
                 return DXGI_FORMAT_R32G32_FLOAT;
-            case nxt::VertexFormat::FloatR32:
+            case dawn::VertexFormat::FloatR32:
                 return DXGI_FORMAT_R32_FLOAT;
-            case nxt::VertexFormat::IntR32G32B32A32:
+            case dawn::VertexFormat::IntR32G32B32A32:
                 return DXGI_FORMAT_R32G32B32A32_SINT;
-            case nxt::VertexFormat::IntR32G32B32:
+            case dawn::VertexFormat::IntR32G32B32:
                 return DXGI_FORMAT_R32G32B32_SINT;
-            case nxt::VertexFormat::IntR32G32:
+            case dawn::VertexFormat::IntR32G32:
                 return DXGI_FORMAT_R32G32_SINT;
-            case nxt::VertexFormat::IntR32:
+            case dawn::VertexFormat::IntR32:
                 return DXGI_FORMAT_R32_SINT;
-            case nxt::VertexFormat::UshortR16G16B16A16:
+            case dawn::VertexFormat::UshortR16G16B16A16:
                 return DXGI_FORMAT_R16G16B16A16_UINT;
-            case nxt::VertexFormat::UshortR16G16:
+            case dawn::VertexFormat::UshortR16G16:
                 return DXGI_FORMAT_R16G16_UINT;
-            case nxt::VertexFormat::UnormR8G8B8A8:
+            case dawn::VertexFormat::UnormR8G8B8A8:
                 return DXGI_FORMAT_R8G8B8A8_UNORM;
-            case nxt::VertexFormat::UnormR8G8:
+            case dawn::VertexFormat::UnormR8G8:
                 return DXGI_FORMAT_R8G8_UNORM;
             default:
                 UNREACHABLE();
         }
     }
 
-    static D3D12_INPUT_CLASSIFICATION InputStepModeFunction(nxt::InputStepMode mode) {
+    static D3D12_INPUT_CLASSIFICATION InputStepModeFunction(dawn::InputStepMode mode) {
         switch (mode) {
-            case nxt::InputStepMode::Vertex:
+            case dawn::InputStepMode::Vertex:
                 return D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-            case nxt::InputStepMode::Instance:
+            case dawn::InputStepMode::Instance:
                 return D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
             default:
                 UNREACHABLE();

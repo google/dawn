@@ -22,8 +22,8 @@
 
 namespace backend { namespace vulkan {
 
-    VkFormat VulkanImageFormat(nxt::TextureFormat format);
-    VkImageUsageFlags VulkanImageUsage(nxt::TextureUsageBit usage, nxt::TextureFormat format);
+    VkFormat VulkanImageFormat(dawn::TextureFormat format);
+    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, dawn::TextureFormat format);
 
     class Texture : public TextureBase {
       public:
@@ -37,7 +37,7 @@ namespace backend { namespace vulkan {
         // Transitions the texture to be used as `usage`, recording any necessary barrier in
         // `commands`.
         // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
-        void TransitionUsageNow(VkCommandBuffer commands, nxt::TextureUsageBit usage);
+        void TransitionUsageNow(VkCommandBuffer commands, dawn::TextureUsageBit usage);
 
       private:
         VkImage mHandle = VK_NULL_HANDLE;
@@ -45,7 +45,7 @@ namespace backend { namespace vulkan {
 
         // A usage of none will make sure the texture is transitioned before its first use as
         // required by the spec.
-        nxt::TextureUsageBit mLastUsage = nxt::TextureUsageBit::None;
+        dawn::TextureUsageBit mLastUsage = dawn::TextureUsageBit::None;
     };
 
     class TextureView : public TextureViewBase {

@@ -109,7 +109,7 @@ namespace backend {
             return {};
         }
 
-        MaybeError ValidateCanUseAs(BufferBase* buffer, nxt::BufferUsageBit usage) {
+        MaybeError ValidateCanUseAs(BufferBase* buffer, dawn::BufferUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(buffer->GetAllowedUsage() & usage)) {
                 NXT_RETURN_ERROR("buffer doesn't have the required usage.");
@@ -118,7 +118,7 @@ namespace backend {
             return {};
         }
 
-        MaybeError ValidateCanUseAs(TextureBase* texture, nxt::TextureUsageBit usage) {
+        MaybeError ValidateCanUseAs(TextureBase* texture, dawn::TextureUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(texture->GetAllowedUsage() & usage)) {
                 NXT_RETURN_ERROR("texture doesn't have the required usage.");
@@ -138,26 +138,26 @@ namespace backend {
         // information.
         class PassResourceUsageTracker {
           public:
-            void BufferUsedAs(BufferBase* buffer, nxt::BufferUsageBit usage) {
+            void BufferUsedAs(BufferBase* buffer, dawn::BufferUsageBit usage) {
                 // std::map's operator[] will create the key and return 0 if the key didn't exist
                 // before.
-                nxt::BufferUsageBit& storedUsage = mBufferUsages[buffer];
+                dawn::BufferUsageBit& storedUsage = mBufferUsages[buffer];
 
-                if (usage == nxt::BufferUsageBit::Storage &&
-                    storedUsage & nxt::BufferUsageBit::Storage) {
+                if (usage == dawn::BufferUsageBit::Storage &&
+                    storedUsage & dawn::BufferUsageBit::Storage) {
                     mStorageUsedMultipleTimes = true;
                 }
 
                 storedUsage |= usage;
             }
 
-            void TextureUsedAs(TextureBase* texture, nxt::TextureUsageBit usage) {
+            void TextureUsedAs(TextureBase* texture, dawn::TextureUsageBit usage) {
                 // std::map's operator[] will create the key and return 0 if the key didn't exist
                 // before.
-                nxt::TextureUsageBit& storedUsage = mTextureUsages[texture];
+                dawn::TextureUsageBit& storedUsage = mTextureUsages[texture];
 
-                if (usage == nxt::TextureUsageBit::Storage &&
-                    storedUsage & nxt::TextureUsageBit::Storage) {
+                if (usage == dawn::TextureUsageBit::Storage &&
+                    storedUsage & dawn::TextureUsageBit::Storage) {
                     mStorageUsedMultipleTimes = true;
                 }
 
@@ -174,14 +174,14 @@ namespace backend {
                 // Buffers can only be used as single-write or multiple read.
                 for (auto& it : mBufferUsages) {
                     BufferBase* buffer = it.first;
-                    nxt::BufferUsageBit usage = it.second;
+                    dawn::BufferUsageBit usage = it.second;
 
                     if (usage & ~buffer->GetAllowedUsage()) {
                         NXT_RETURN_ERROR("Buffer missing usage for the pass");
                     }
 
                     bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
-                    bool singleUse = nxt::HasZeroOrOneBits(usage);
+                    bool singleUse = dawn::HasZeroOrOneBits(usage);
 
                     if (!readOnly && !singleUse) {
                         NXT_RETURN_ERROR(
@@ -193,7 +193,7 @@ namespace backend {
                 // TODO(cwallez@chromium.org): implement per-subresource tracking
                 for (auto& it : mTextureUsages) {
                     TextureBase* texture = it.first;
-                    nxt::TextureUsageBit usage = it.second;
+                    dawn::TextureUsageBit usage = it.second;
 
                     if (usage & ~texture->GetAllowedUsage()) {
                         NXT_RETURN_ERROR("Texture missing usage for the pass");
@@ -201,7 +201,7 @@ namespace backend {
 
                     // For textures the only read-only usage in a pass is Sampled, so checking the
                     // usage constraint simplifies to checking a single usage bit is set.
-                    if (!nxt::HasZeroOrOneBits(it.second)) {
+                    if (!dawn::HasZeroOrOneBits(it.second)) {
                         NXT_RETURN_ERROR("Texture used with more than one usage in pass");
                     }
                 }
@@ -231,8 +231,8 @@ namespace backend {
             }
 
           private:
-            std::map<BufferBase*, nxt::BufferUsageBit> mBufferUsages;
-            std::map<TextureBase*, nxt::TextureUsageBit> mTextureUsages;
+            std::map<BufferBase*, dawn::BufferUsageBit> mBufferUsages;
+            std::map<TextureBase*, dawn::TextureUsageBit> mTextureUsages;
             bool mStorageUsedMultipleTimes = false;
         };
 
@@ -240,25 +240,25 @@ namespace backend {
             const auto& layoutInfo = group->GetLayout()->GetBindingInfo();
 
             for (uint32_t i : IterateBitSet(layoutInfo.mask)) {
-                nxt::BindingType type = layoutInfo.types[i];
+                dawn::BindingType type = layoutInfo.types[i];
 
                 switch (type) {
-                    case nxt::BindingType::UniformBuffer: {
+                    case dawn::BindingType::UniformBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferView(i)->GetBuffer();
-                        tracker->BufferUsedAs(buffer, nxt::BufferUsageBit::Uniform);
+                        tracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Uniform);
                     } break;
 
-                    case nxt::BindingType::StorageBuffer: {
+                    case dawn::BindingType::StorageBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferView(i)->GetBuffer();
-                        tracker->BufferUsedAs(buffer, nxt::BufferUsageBit::Storage);
+                        tracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Storage);
                     } break;
 
-                    case nxt::BindingType::SampledTexture: {
+                    case dawn::BindingType::SampledTexture: {
                         TextureBase* texture = group->GetBindingAsTextureView(i)->GetTexture();
-                        tracker->TextureUsedAs(texture, nxt::TextureUsageBit::Sampled);
+                        tracker->TextureUsedAs(texture, dawn::TextureUsageBit::Sampled);
                     } break;
 
-                    case nxt::BindingType::Sampler:
+                    case dawn::BindingType::Sampler:
                         break;
                 }
             }
@@ -339,9 +339,9 @@ namespace backend {
                     NXT_TRY(ValidateCopySizeFitsInBuffer(copy->destination, copy->size));
 
                     NXT_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
-                                             nxt::BufferUsageBit::TransferSrc));
+                                             dawn::BufferUsageBit::TransferSrc));
                     NXT_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
-                                             nxt::BufferUsageBit::TransferDst));
+                                             dawn::BufferUsageBit::TransferDst));
                 } break;
 
                 case Command::CopyBufferToTexture: {
@@ -358,9 +358,9 @@ namespace backend {
                         ValidateTexelBufferOffset(copy->destination.texture.Get(), copy->source));
 
                     NXT_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
-                                             nxt::BufferUsageBit::TransferSrc));
+                                             dawn::BufferUsageBit::TransferSrc));
                     NXT_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
-                                             nxt::TextureUsageBit::TransferDst));
+                                             dawn::TextureUsageBit::TransferDst));
                 } break;
 
                 case Command::CopyTextureToBuffer: {
@@ -377,9 +377,9 @@ namespace backend {
                         ValidateTexelBufferOffset(copy->source.texture.Get(), copy->destination));
 
                     NXT_TRY(ValidateCanUseAs(copy->source.texture.Get(),
-                                             nxt::TextureUsageBit::TransferSrc));
+                                             dawn::TextureUsageBit::TransferSrc));
                     NXT_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
-                                             nxt::BufferUsageBit::TransferDst));
+                                             dawn::BufferUsageBit::TransferDst));
                 } break;
 
                 default:
@@ -423,7 +423,7 @@ namespace backend {
                     // Validation of count and offset has already been done when the command was
                     // recorded because it impacts the size of an allocation in the
                     // CommandAllocator.
-                    if (cmd->stages & ~nxt::ShaderStageBit::Compute) {
+                    if (cmd->stages & ~dawn::ShaderStageBit::Compute) {
                         NXT_RETURN_ERROR(
                             "SetPushConstants stage must be compute or 0 in compute passes");
                     }
@@ -450,12 +450,12 @@ namespace backend {
         // Track usage of the render pass attachments
         for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
             TextureBase* texture = renderPass->GetColorAttachment(i).view->GetTexture();
-            usageTracker.TextureUsedAs(texture, nxt::TextureUsageBit::OutputAttachment);
+            usageTracker.TextureUsedAs(texture, dawn::TextureUsageBit::OutputAttachment);
         }
 
         if (renderPass->HasDepthStencilAttachment()) {
             TextureBase* texture = renderPass->GetDepthStencilAttachment().view->GetTexture();
-            usageTracker.TextureUsedAs(texture, nxt::TextureUsageBit::OutputAttachment);
+            usageTracker.TextureUsedAs(texture, dawn::TextureUsageBit::OutputAttachment);
         }
 
         Command type;
@@ -499,7 +499,7 @@ namespace backend {
                     // recorded because it impacts the size of an allocation in the
                     // CommandAllocator.
                     if (cmd->stages &
-                        ~(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment)) {
+                        ~(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment)) {
                         NXT_RETURN_ERROR(
                             "SetPushConstants stage must be a subset of (vertex|fragment) in "
                             "render passes");
@@ -528,7 +528,7 @@ namespace backend {
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = mIterator.NextCommand<SetIndexBufferCmd>();
 
-                    usageTracker.BufferUsedAs(cmd->buffer.Get(), nxt::BufferUsageBit::Index);
+                    usageTracker.BufferUsedAs(cmd->buffer.Get(), dawn::BufferUsageBit::Index);
                     NXT_TRY(mState->SetIndexBuffer());
                 } break;
 
@@ -538,7 +538,7 @@ namespace backend {
                     mIterator.NextData<uint32_t>(cmd->count);
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
-                        usageTracker.BufferUsedAs(buffers[i].Get(), nxt::BufferUsageBit::Vertex);
+                        usageTracker.BufferUsedAs(buffers[i].Get(), dawn::BufferUsageBit::Vertex);
                         NXT_TRY(mState->SetVertexBuffer(cmd->startSlot + i));
                     }
                 } break;
@@ -692,7 +692,7 @@ namespace backend {
         cmd->pipeline = pipeline;
     }
 
-    void CommandBufferBuilder::SetPushConstants(nxt::ShaderStageBit stages,
+    void CommandBufferBuilder::SetPushConstants(dawn::ShaderStageBit stages,
                                                 uint32_t offset,
                                                 uint32_t count,
                                                 const void* data) {

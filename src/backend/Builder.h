@@ -50,9 +50,9 @@ namespace backend {
         bool HandleResult(RefCounted* result);
 
         // NXT API
-        void SetErrorCallback(nxt::BuilderErrorCallback callback,
-                              nxt::CallbackUserdata userdata1,
-                              nxt::CallbackUserdata userdata2);
+        void SetErrorCallback(dawn::BuilderErrorCallback callback,
+                              dawn::CallbackUserdata userdata1,
+                              dawn::CallbackUserdata userdata2);
 
       protected:
         BuilderBase(DeviceBase* device);
@@ -62,13 +62,13 @@ namespace backend {
         bool mGotStatus = false;
 
       private:
-        void SetStatus(nxt::BuilderErrorStatus status, const char* message);
+        void SetStatus(dawn::BuilderErrorStatus status, const char* message);
 
-        nxt::BuilderErrorCallback mCallback = nullptr;
-        nxt::CallbackUserdata mUserdata1 = 0;
-        nxt::CallbackUserdata mUserdata2 = 0;
+        dawn::BuilderErrorCallback mCallback = nullptr;
+        dawn::CallbackUserdata mUserdata1 = 0;
+        dawn::CallbackUserdata mUserdata2 = 0;
 
-        nxt::BuilderErrorStatus mStoredStatus = nxt::BuilderErrorStatus::Success;
+        dawn::BuilderErrorStatus mStoredStatus = dawn::BuilderErrorStatus::Success;
         std::string mStoredMessage;
 
         bool mIsConsumed = false;

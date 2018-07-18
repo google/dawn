@@ -28,17 +28,17 @@ namespace backend { namespace vulkan {
 
     namespace {
 
-        VkPrimitiveTopology VulkanPrimitiveTopology(nxt::PrimitiveTopology topology) {
+        VkPrimitiveTopology VulkanPrimitiveTopology(dawn::PrimitiveTopology topology) {
             switch (topology) {
-                case nxt::PrimitiveTopology::PointList:
+                case dawn::PrimitiveTopology::PointList:
                     return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-                case nxt::PrimitiveTopology::LineList:
+                case dawn::PrimitiveTopology::LineList:
                     return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-                case nxt::PrimitiveTopology::LineStrip:
+                case dawn::PrimitiveTopology::LineStrip:
                     return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-                case nxt::PrimitiveTopology::TriangleList:
+                case dawn::PrimitiveTopology::TriangleList:
                     return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-                case nxt::PrimitiveTopology::TriangleStrip:
+                case dawn::PrimitiveTopology::TriangleStrip:
                     return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
                 default:
                     UNREACHABLE();
@@ -55,8 +55,8 @@ namespace backend { namespace vulkan {
 
         VkPipelineShaderStageCreateInfo shaderStages[2];
         {
-            const auto& vertexStageInfo = builder->GetStageInfo(nxt::ShaderStage::Vertex);
-            const auto& fragmentStageInfo = builder->GetStageInfo(nxt::ShaderStage::Fragment);
+            const auto& vertexStageInfo = builder->GetStageInfo(dawn::ShaderStage::Vertex);
+            const auto& fragmentStageInfo = builder->GetStageInfo(dawn::ShaderStage::Fragment);
 
             shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStages[0].pNext = nullptr;
@@ -178,12 +178,12 @@ namespace backend { namespace vulkan {
             RenderPassCacheQuery query;
 
             for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
-                query.SetColor(i, GetColorAttachmentFormat(i), nxt::LoadOp::Load);
+                query.SetColor(i, GetColorAttachmentFormat(i), dawn::LoadOp::Load);
             }
 
             if (HasDepthStencilAttachment()) {
-                query.SetDepthStencil(GetDepthStencilFormat(), nxt::LoadOp::Load,
-                                      nxt::LoadOp::Load);
+                query.SetDepthStencil(GetDepthStencilFormat(), dawn::LoadOp::Load,
+                                      dawn::LoadOp::Load);
             }
 
             renderPass = mDevice->GetRenderPassCache()->GetRenderPass(query);

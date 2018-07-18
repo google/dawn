@@ -33,14 +33,14 @@ namespace backend {
 
         BlendStateBase* GetBlendState(uint32_t attachmentSlot);
         DepthStencilStateBase* GetDepthStencilState();
-        nxt::IndexFormat GetIndexFormat() const;
+        dawn::IndexFormat GetIndexFormat() const;
         InputStateBase* GetInputState();
-        nxt::PrimitiveTopology GetPrimitiveTopology() const;
+        dawn::PrimitiveTopology GetPrimitiveTopology() const;
 
         std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
         bool HasDepthStencilAttachment() const;
-        nxt::TextureFormat GetColorAttachmentFormat(uint32_t attachment) const;
-        nxt::TextureFormat GetDepthStencilFormat() const;
+        dawn::TextureFormat GetColorAttachmentFormat(uint32_t attachment) const;
+        dawn::TextureFormat GetDepthStencilFormat() const;
 
         // A pipeline can be used in a render pass if its attachment info matches the actual
         // attachments in the render pass. This returns whether it is the case.
@@ -48,15 +48,15 @@ namespace backend {
 
       private:
         Ref<DepthStencilStateBase> mDepthStencilState;
-        nxt::IndexFormat mIndexFormat;
+        dawn::IndexFormat mIndexFormat;
         Ref<InputStateBase> mInputState;
-        nxt::PrimitiveTopology mPrimitiveTopology;
+        dawn::PrimitiveTopology mPrimitiveTopology;
         std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
 
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
-        std::array<nxt::TextureFormat, kMaxColorAttachments> mColorAttachmentFormats;
+        std::array<dawn::TextureFormat, kMaxColorAttachments> mColorAttachmentFormats;
         bool mDepthStencilFormatSet = false;
-        nxt::TextureFormat mDepthStencilFormat;
+        dawn::TextureFormat mDepthStencilFormat;
     };
 
     class RenderPipelineBuilder : public Builder<RenderPipelineBase>, public PipelineBuilder {
@@ -64,12 +64,12 @@ namespace backend {
         RenderPipelineBuilder(DeviceBase* device);
 
         // NXT API
-        void SetColorAttachmentFormat(uint32_t attachmentSlot, nxt::TextureFormat format);
+        void SetColorAttachmentFormat(uint32_t attachmentSlot, dawn::TextureFormat format);
         void SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState);
-        void SetDepthStencilAttachmentFormat(nxt::TextureFormat format);
+        void SetDepthStencilAttachmentFormat(dawn::TextureFormat format);
         void SetDepthStencilState(DepthStencilStateBase* depthStencilState);
-        void SetPrimitiveTopology(nxt::PrimitiveTopology primitiveTopology);
-        void SetIndexFormat(nxt::IndexFormat format);
+        void SetPrimitiveTopology(dawn::PrimitiveTopology primitiveTopology);
+        void SetIndexFormat(dawn::IndexFormat format);
         void SetInputState(InputStateBase* inputState);
 
       private:
@@ -81,14 +81,14 @@ namespace backend {
         Ref<InputStateBase> mInputState;
         // TODO(enga@google.com): Remove default when we validate that all required properties are
         // set
-        nxt::PrimitiveTopology mPrimitiveTopology = nxt::PrimitiveTopology::TriangleList;
-        nxt::IndexFormat mIndexFormat = nxt::IndexFormat::Uint32;
+        dawn::PrimitiveTopology mPrimitiveTopology = dawn::PrimitiveTopology::TriangleList;
+        dawn::IndexFormat mIndexFormat = dawn::IndexFormat::Uint32;
         std::bitset<kMaxColorAttachments> mBlendStatesSet;
         std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
-        std::array<nxt::TextureFormat, kMaxColorAttachments> mColorAttachmentFormats;
+        std::array<dawn::TextureFormat, kMaxColorAttachments> mColorAttachmentFormats;
         bool mDepthStencilFormatSet = false;
-        nxt::TextureFormat mDepthStencilFormat;
+        dawn::TextureFormat mDepthStencilFormat;
     };
 
 }  // namespace backend

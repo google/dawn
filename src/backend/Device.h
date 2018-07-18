@@ -77,49 +77,49 @@ namespace backend {
         // instead of a backend Foo object. If the blueprint doesn't match an object in the
         // cache, then the builder is used to make a new object.
         ResultOrError<BindGroupLayoutBase*> GetOrCreateBindGroupLayout(
-            const nxt::BindGroupLayoutDescriptor* descriptor);
+            const dawn::BindGroupLayoutDescriptor* descriptor);
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
         // NXT API
         BindGroupBuilder* CreateBindGroupBuilder();
         BindGroupLayoutBase* CreateBindGroupLayout(
-            const nxt::BindGroupLayoutDescriptor* descriptor);
+            const dawn::BindGroupLayoutDescriptor* descriptor);
         BlendStateBuilder* CreateBlendStateBuilder();
         BufferBuilder* CreateBufferBuilder();
         CommandBufferBuilder* CreateCommandBufferBuilder();
         ComputePipelineBuilder* CreateComputePipelineBuilder();
         DepthStencilStateBuilder* CreateDepthStencilStateBuilder();
         InputStateBuilder* CreateInputStateBuilder();
-        PipelineLayoutBase* CreatePipelineLayout(const nxt::PipelineLayoutDescriptor* descriptor);
+        PipelineLayoutBase* CreatePipelineLayout(const dawn::PipelineLayoutDescriptor* descriptor);
         QueueBase* CreateQueue();
         RenderPassDescriptorBuilder* CreateRenderPassDescriptorBuilder();
         RenderPipelineBuilder* CreateRenderPipelineBuilder();
-        SamplerBase* CreateSampler(const nxt::SamplerDescriptor* descriptor);
+        SamplerBase* CreateSampler(const dawn::SamplerDescriptor* descriptor);
         ShaderModuleBuilder* CreateShaderModuleBuilder();
         SwapChainBuilder* CreateSwapChainBuilder();
         TextureBuilder* CreateTextureBuilder();
 
         void Tick();
-        void SetErrorCallback(nxt::DeviceErrorCallback callback, nxt::CallbackUserdata userdata);
+        void SetErrorCallback(dawn::DeviceErrorCallback callback, dawn::CallbackUserdata userdata);
         void Reference();
         void Release();
 
       private:
         virtual ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
-            const nxt::BindGroupLayoutDescriptor* descriptor) = 0;
+            const dawn::BindGroupLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
-            const nxt::PipelineLayoutDescriptor* descriptor) = 0;
+            const dawn::PipelineLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<QueueBase*> CreateQueueImpl() = 0;
         virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
-            const nxt::SamplerDescriptor* descriptor) = 0;
+            const dawn::SamplerDescriptor* descriptor) = 0;
 
         MaybeError CreateBindGroupLayoutInternal(BindGroupLayoutBase** result,
-                                                 const nxt::BindGroupLayoutDescriptor* descriptor);
+                                                 const dawn::BindGroupLayoutDescriptor* descriptor);
         MaybeError CreatePipelineLayoutInternal(PipelineLayoutBase** result,
-                                                const nxt::PipelineLayoutDescriptor* descriptor);
+                                                const dawn::PipelineLayoutDescriptor* descriptor);
         MaybeError CreateQueueInternal(QueueBase** result);
         MaybeError CreateSamplerInternal(SamplerBase** result,
-                                         const nxt::SamplerDescriptor* descriptor);
+                                         const dawn::SamplerDescriptor* descriptor);
 
         void ConsumeError(ErrorData* error);
 
@@ -128,8 +128,8 @@ namespace backend {
         struct Caches;
         Caches* mCaches = nullptr;
 
-        nxt::DeviceErrorCallback mErrorCallback = nullptr;
-        nxt::CallbackUserdata mErrorUserdata = 0;
+        dawn::DeviceErrorCallback mErrorCallback = nullptr;
+        dawn::CallbackUserdata mErrorUserdata = 0;
         uint32_t mRefCount = 1;
     };
 

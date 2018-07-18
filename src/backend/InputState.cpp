@@ -21,64 +21,64 @@ namespace backend {
 
     // InputState helpers
 
-    size_t IndexFormatSize(nxt::IndexFormat format) {
+    size_t IndexFormatSize(dawn::IndexFormat format) {
         switch (format) {
-            case nxt::IndexFormat::Uint16:
+            case dawn::IndexFormat::Uint16:
                 return sizeof(uint16_t);
-            case nxt::IndexFormat::Uint32:
+            case dawn::IndexFormat::Uint32:
                 return sizeof(uint32_t);
             default:
                 UNREACHABLE();
         }
     }
 
-    uint32_t VertexFormatNumComponents(nxt::VertexFormat format) {
+    uint32_t VertexFormatNumComponents(dawn::VertexFormat format) {
         switch (format) {
-            case nxt::VertexFormat::FloatR32G32B32A32:
-            case nxt::VertexFormat::IntR32G32B32A32:
-            case nxt::VertexFormat::UshortR16G16B16A16:
-            case nxt::VertexFormat::UnormR8G8B8A8:
+            case dawn::VertexFormat::FloatR32G32B32A32:
+            case dawn::VertexFormat::IntR32G32B32A32:
+            case dawn::VertexFormat::UshortR16G16B16A16:
+            case dawn::VertexFormat::UnormR8G8B8A8:
                 return 4;
-            case nxt::VertexFormat::FloatR32G32B32:
-            case nxt::VertexFormat::IntR32G32B32:
+            case dawn::VertexFormat::FloatR32G32B32:
+            case dawn::VertexFormat::IntR32G32B32:
                 return 3;
-            case nxt::VertexFormat::FloatR32G32:
-            case nxt::VertexFormat::IntR32G32:
-            case nxt::VertexFormat::UshortR16G16:
-            case nxt::VertexFormat::UnormR8G8:
+            case dawn::VertexFormat::FloatR32G32:
+            case dawn::VertexFormat::IntR32G32:
+            case dawn::VertexFormat::UshortR16G16:
+            case dawn::VertexFormat::UnormR8G8:
                 return 2;
-            case nxt::VertexFormat::FloatR32:
-            case nxt::VertexFormat::IntR32:
+            case dawn::VertexFormat::FloatR32:
+            case dawn::VertexFormat::IntR32:
                 return 1;
             default:
                 UNREACHABLE();
         }
     }
 
-    size_t VertexFormatComponentSize(nxt::VertexFormat format) {
+    size_t VertexFormatComponentSize(dawn::VertexFormat format) {
         switch (format) {
-            case nxt::VertexFormat::FloatR32G32B32A32:
-            case nxt::VertexFormat::FloatR32G32B32:
-            case nxt::VertexFormat::FloatR32G32:
-            case nxt::VertexFormat::FloatR32:
+            case dawn::VertexFormat::FloatR32G32B32A32:
+            case dawn::VertexFormat::FloatR32G32B32:
+            case dawn::VertexFormat::FloatR32G32:
+            case dawn::VertexFormat::FloatR32:
                 return sizeof(float);
-            case nxt::VertexFormat::IntR32G32B32A32:
-            case nxt::VertexFormat::IntR32G32B32:
-            case nxt::VertexFormat::IntR32G32:
-            case nxt::VertexFormat::IntR32:
+            case dawn::VertexFormat::IntR32G32B32A32:
+            case dawn::VertexFormat::IntR32G32B32:
+            case dawn::VertexFormat::IntR32G32:
+            case dawn::VertexFormat::IntR32:
                 return sizeof(int32_t);
-            case nxt::VertexFormat::UshortR16G16B16A16:
-            case nxt::VertexFormat::UshortR16G16:
+            case dawn::VertexFormat::UshortR16G16B16A16:
+            case dawn::VertexFormat::UshortR16G16:
                 return sizeof(uint16_t);
-            case nxt::VertexFormat::UnormR8G8B8A8:
-            case nxt::VertexFormat::UnormR8G8:
+            case dawn::VertexFormat::UnormR8G8B8A8:
+            case dawn::VertexFormat::UnormR8G8:
                 return sizeof(uint8_t);
             default:
                 UNREACHABLE();
         }
     }
 
-    size_t VertexFormatSize(nxt::VertexFormat format) {
+    size_t VertexFormatSize(dawn::VertexFormat format) {
         return VertexFormatNumComponents(format) * VertexFormatComponentSize(format);
     }
 
@@ -128,7 +128,7 @@ namespace backend {
 
     void InputStateBuilder::SetAttribute(uint32_t shaderLocation,
                                          uint32_t bindingSlot,
-                                         nxt::VertexFormat format,
+                                         dawn::VertexFormat format,
                                          uint32_t offset) {
         if (shaderLocation >= kMaxVertexAttributes) {
             HandleError("Setting attribute out of bounds");
@@ -152,7 +152,7 @@ namespace backend {
 
     void InputStateBuilder::SetInput(uint32_t bindingSlot,
                                      uint32_t stride,
-                                     nxt::InputStepMode stepMode) {
+                                     dawn::InputStepMode stepMode) {
         if (bindingSlot >= kMaxVertexInputs) {
             HandleError("Setting input out of bounds");
             return;

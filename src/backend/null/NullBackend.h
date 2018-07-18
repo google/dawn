@@ -118,12 +118,12 @@ namespace backend { namespace null {
 
       private:
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
-            const nxt::BindGroupLayoutDescriptor* descriptor) override;
+            const dawn::BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
-            const nxt::PipelineLayoutDescriptor* descriptor) override;
+            const dawn::PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(
-            const nxt::SamplerDescriptor* descriptor) override;
+            const dawn::SamplerDescriptor* descriptor) override;
 
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
     };

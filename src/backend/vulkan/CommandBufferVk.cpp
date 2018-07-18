@@ -28,11 +28,11 @@ namespace backend { namespace vulkan {
 
     namespace {
 
-        VkIndexType VulkanIndexType(nxt::IndexFormat format) {
+        VkIndexType VulkanIndexType(dawn::IndexFormat format) {
             switch (format) {
-                case nxt::IndexFormat::Uint16:
+                case dawn::IndexFormat::Uint16:
                     return VK_INDEX_TYPE_UINT16;
-                case nxt::IndexFormat::Uint32:
+                case dawn::IndexFormat::Uint32:
                     return VK_INDEX_TYPE_UINT32;
                 default:
                     UNREACHABLE();
@@ -146,9 +146,9 @@ namespace backend { namespace vulkan {
                     auto& dst = copy->destination;
 
                     ToBackend(src.buffer)
-                        ->TransitionUsageNow(commands, nxt::BufferUsageBit::TransferSrc);
+                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferSrc);
                     ToBackend(dst.buffer)
-                        ->TransitionUsageNow(commands, nxt::BufferUsageBit::TransferDst);
+                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferDst);
 
                     VkBufferCopy region;
                     region.srcOffset = src.offset;
@@ -166,9 +166,9 @@ namespace backend { namespace vulkan {
                     auto& dst = copy->destination;
 
                     ToBackend(src.buffer)
-                        ->TransitionUsageNow(commands, nxt::BufferUsageBit::TransferSrc);
+                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferSrc);
                     ToBackend(dst.texture)
-                        ->TransitionUsageNow(commands, nxt::TextureUsageBit::TransferDst);
+                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
 
                     VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
@@ -189,9 +189,9 @@ namespace backend { namespace vulkan {
                     auto& dst = copy->destination;
 
                     ToBackend(src.texture)
-                        ->TransitionUsageNow(commands, nxt::TextureUsageBit::TransferSrc);
+                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferSrc);
                     ToBackend(dst.buffer)
-                        ->TransitionUsageNow(commands, nxt::BufferUsageBit::TransferDst);
+                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferDst);
 
                     VkImage srcImage = ToBackend(src.texture)->GetHandle();
                     VkBuffer dstBuffer = ToBackend(dst.buffer)->GetHandle();

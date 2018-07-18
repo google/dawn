@@ -41,7 +41,7 @@ namespace backend { namespace d3d12 {
         nxtSwapChainError GetNextTexture(nxtSwapChainNextTexture* nextTexture);
         nxtSwapChainError Present();
 
-        nxt::TextureFormat GetPreferredFormat() const;
+        dawn::TextureFormat GetPreferredFormat() const;
 
       private:
         HWND mWindow = nullptr;

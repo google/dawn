@@ -38,7 +38,7 @@ namespace backend { namespace vulkan {
         // Transitions the buffer to be used as `usage`, recording any necessary barrier in
         // `commands`.
         // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
-        void TransitionUsageNow(VkCommandBuffer commands, nxt::BufferUsageBit usage);
+        void TransitionUsageNow(VkCommandBuffer commands, dawn::BufferUsageBit usage);
 
       private:
         void SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
@@ -49,7 +49,7 @@ namespace backend { namespace vulkan {
         VkBuffer mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;
 
-        nxt::BufferUsageBit mLastUsage = nxt::BufferUsageBit::None;
+        dawn::BufferUsageBit mLastUsage = dawn::BufferUsageBit::None;
     };
 
     using BufferView = BufferViewBase;

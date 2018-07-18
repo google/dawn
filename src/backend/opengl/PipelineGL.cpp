@@ -28,13 +28,13 @@ namespace backend { namespace opengl {
 
     namespace {
 
-        GLenum GLShaderType(nxt::ShaderStage stage) {
+        GLenum GLShaderType(dawn::ShaderStage stage) {
             switch (stage) {
-                case nxt::ShaderStage::Vertex:
+                case dawn::ShaderStage::Vertex:
                     return GL_VERTEX_SHADER;
-                case nxt::ShaderStage::Fragment:
+                case dawn::ShaderStage::Fragment:
                     return GL_FRAGMENT_SHADER;
-                case nxt::ShaderStage::Compute:
+                case dawn::ShaderStage::Compute:
                     return GL_COMPUTE_SHADER;
                 default:
                     UNREACHABLE();
@@ -136,19 +136,19 @@ namespace backend { namespace opengl {
 
                 std::string name = GetBindingName(group, binding);
                 switch (groupInfo.types[binding]) {
-                    case nxt::BindingType::UniformBuffer: {
+                    case dawn::BindingType::UniformBuffer: {
                         GLint location = glGetUniformBlockIndex(mProgram, name.c_str());
                         glUniformBlockBinding(mProgram, location, indices[group][binding]);
                     } break;
 
-                    case nxt::BindingType::StorageBuffer: {
+                    case dawn::BindingType::StorageBuffer: {
                         GLuint location = glGetProgramResourceIndex(
                             mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
                         glShaderStorageBlockBinding(mProgram, location, indices[group][binding]);
                     } break;
 
-                    case nxt::BindingType::Sampler:
-                    case nxt::BindingType::SampledTexture:
+                    case dawn::BindingType::Sampler:
+                    case dawn::BindingType::SampledTexture:
                         // These binding types are handled in the separate sampler and texture
                         // emulation
                         break;
@@ -190,7 +190,7 @@ namespace backend { namespace opengl {
     }
 
     const PipelineGL::GLPushConstantInfo& PipelineGL::GetGLPushConstants(
-        nxt::ShaderStage stage) const {
+        dawn::ShaderStage stage) const {
         return mGlPushConstants[stage];
     }
 

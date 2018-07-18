@@ -27,7 +27,7 @@ namespace backend {
     PipelineBase::PipelineBase(PipelineBuilder* builder)
         : mStageMask(builder->mStageMask), mLayout(std::move(builder->mLayout)) {
         if (!mLayout) {
-            nxt::PipelineLayoutDescriptor descriptor;
+            dawn::PipelineLayoutDescriptor descriptor;
             descriptor.numBindGroupLayouts = 0;
             descriptor.bindGroupLayouts = nullptr;
             mLayout = builder->GetParentBuilder()->GetDevice()->CreatePipelineLayout(&descriptor);
@@ -63,11 +63,11 @@ namespace backend {
     }
 
     const PipelineBase::PushConstantInfo& PipelineBase::GetPushConstants(
-        nxt::ShaderStage stage) const {
+        dawn::ShaderStage stage) const {
         return mPushConstants[stage];
     }
 
-    nxt::ShaderStageBit PipelineBase::GetStageMask() const {
+    dawn::ShaderStageBit PipelineBase::GetStageMask() const {
         return mStageMask;
     }
 
@@ -78,10 +78,10 @@ namespace backend {
     // PipelineBuilder
 
     PipelineBuilder::PipelineBuilder(BuilderBase* parentBuilder)
-        : mParentBuilder(parentBuilder), mStageMask(static_cast<nxt::ShaderStageBit>(0)) {
+        : mParentBuilder(parentBuilder), mStageMask(static_cast<dawn::ShaderStageBit>(0)) {
     }
 
-    const PipelineBuilder::StageInfo& PipelineBuilder::GetStageInfo(nxt::ShaderStage stage) const {
+    const PipelineBuilder::StageInfo& PipelineBuilder::GetStageInfo(dawn::ShaderStage stage) const {
         ASSERT(mStageMask & StageBit(stage));
         return mStages[stage];
     }
@@ -94,7 +94,7 @@ namespace backend {
         mLayout = layout;
     }
 
-    void PipelineBuilder::SetStage(nxt::ShaderStage stage,
+    void PipelineBuilder::SetStage(dawn::ShaderStage stage,
                                    ShaderModuleBase* module,
                                    const char* entryPoint) {
         if (entryPoint != std::string("main")) {
@@ -107,7 +107,7 @@ namespace backend {
             return;
         }
 
-        nxt::ShaderStageBit bit = StageBit(stage);
+        dawn::ShaderStageBit bit = StageBit(stage);
         if (mStageMask & bit) {
             mParentBuilder->HandleError("Setting already set stage");
             return;

@@ -18,49 +18,49 @@
 
 namespace backend { namespace metal {
 
-    MTLPixelFormat MetalPixelFormat(nxt::TextureFormat format) {
+    MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format) {
         switch (format) {
-            case nxt::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::R8G8B8A8Unorm:
                 return MTLPixelFormatRGBA8Unorm;
-            case nxt::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::R8G8Unorm:
                 return MTLPixelFormatRG8Unorm;
-            case nxt::TextureFormat::R8Unorm:
+            case dawn::TextureFormat::R8Unorm:
                 return MTLPixelFormatR8Unorm;
-            case nxt::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::R8G8B8A8Uint:
                 return MTLPixelFormatRGBA8Uint;
-            case nxt::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::R8G8Uint:
                 return MTLPixelFormatRG8Uint;
-            case nxt::TextureFormat::R8Uint:
+            case dawn::TextureFormat::R8Uint:
                 return MTLPixelFormatR8Uint;
-            case nxt::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::B8G8R8A8Unorm:
                 return MTLPixelFormatBGRA8Unorm;
-            case nxt::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::D32FloatS8Uint:
                 return MTLPixelFormatDepth32Float_Stencil8;
         }
     }
 
     namespace {
-        MTLTextureUsage MetalTextureUsage(nxt::TextureUsageBit usage) {
+        MTLTextureUsage MetalTextureUsage(dawn::TextureUsageBit usage) {
             MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
-            if (usage & (nxt::TextureUsageBit::Storage)) {
+            if (usage & (dawn::TextureUsageBit::Storage)) {
                 result |= MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
             }
 
-            if (usage & (nxt::TextureUsageBit::Sampled)) {
+            if (usage & (dawn::TextureUsageBit::Sampled)) {
                 result |= MTLTextureUsageShaderRead;
             }
 
-            if (usage & (nxt::TextureUsageBit::OutputAttachment)) {
+            if (usage & (dawn::TextureUsageBit::OutputAttachment)) {
                 result |= MTLTextureUsageRenderTarget;
             }
 
             return result;
         }
 
-        MTLTextureType MetalTextureType(nxt::TextureDimension dimension) {
+        MTLTextureType MetalTextureType(dawn::TextureDimension dimension) {
             switch (dimension) {
-                case nxt::TextureDimension::e2D:
+                case dawn::TextureDimension::e2D:
                     return MTLTextureType2D;
             }
         }

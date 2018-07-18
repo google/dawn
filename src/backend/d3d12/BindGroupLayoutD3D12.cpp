@@ -20,22 +20,22 @@
 namespace backend { namespace d3d12 {
 
     BindGroupLayout::BindGroupLayout(Device* device,
-                                     const nxt::BindGroupLayoutDescriptor* descriptor)
+                                     const dawn::BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor), mDescriptorCounts{} {
         const auto& groupInfo = GetBindingInfo();
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
             switch (groupInfo.types[binding]) {
-                case nxt::BindingType::UniformBuffer:
+                case dawn::BindingType::UniformBuffer:
                     mBindingOffsets[binding] = mDescriptorCounts[CBV]++;
                     break;
-                case nxt::BindingType::StorageBuffer:
+                case dawn::BindingType::StorageBuffer:
                     mBindingOffsets[binding] = mDescriptorCounts[UAV]++;
                     break;
-                case nxt::BindingType::SampledTexture:
+                case dawn::BindingType::SampledTexture:
                     mBindingOffsets[binding] = mDescriptorCounts[SRV]++;
                     break;
-                case nxt::BindingType::Sampler:
+                case dawn::BindingType::Sampler:
                     mBindingOffsets[binding] = mDescriptorCounts[Sampler]++;
                     break;
             }
@@ -85,16 +85,16 @@ namespace backend { namespace d3d12 {
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
             switch (groupInfo.types[binding]) {
-                case nxt::BindingType::UniformBuffer:
+                case dawn::BindingType::UniformBuffer:
                     mBindingOffsets[binding] += descriptorOffsets[CBV];
                     break;
-                case nxt::BindingType::StorageBuffer:
+                case dawn::BindingType::StorageBuffer:
                     mBindingOffsets[binding] += descriptorOffsets[UAV];
                     break;
-                case nxt::BindingType::SampledTexture:
+                case dawn::BindingType::SampledTexture:
                     mBindingOffsets[binding] += descriptorOffsets[SRV];
                     break;
-                case nxt::BindingType::Sampler:
+                case dawn::BindingType::Sampler:
                     mBindingOffsets[binding] += descriptorOffsets[Sampler];
                     break;
             }

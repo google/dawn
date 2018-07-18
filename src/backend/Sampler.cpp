@@ -19,7 +19,7 @@
 
 namespace backend {
 
-    MaybeError ValidateSamplerDescriptor(DeviceBase*, const nxt::SamplerDescriptor* descriptor) {
+    MaybeError ValidateSamplerDescriptor(DeviceBase*, const dawn::SamplerDescriptor* descriptor) {
         NXT_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
         NXT_TRY(ValidateFilterMode(descriptor->minFilter));
         NXT_TRY(ValidateFilterMode(descriptor->magFilter));
@@ -32,7 +32,7 @@ namespace backend {
 
     // SamplerBase
 
-    SamplerBase::SamplerBase(DeviceBase*, const nxt::SamplerDescriptor*) {
+    SamplerBase::SamplerBase(DeviceBase*, const dawn::SamplerDescriptor*) {
     }
 
 }  // namespace backend

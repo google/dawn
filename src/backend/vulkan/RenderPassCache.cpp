@@ -22,11 +22,11 @@
 namespace backend { namespace vulkan {
 
     namespace {
-        VkAttachmentLoadOp VulkanAttachmentLoadOp(nxt::LoadOp op) {
+        VkAttachmentLoadOp VulkanAttachmentLoadOp(dawn::LoadOp op) {
             switch (op) {
-                case nxt::LoadOp::Load:
+                case dawn::LoadOp::Load:
                     return VK_ATTACHMENT_LOAD_OP_LOAD;
-                case nxt::LoadOp::Clear:
+                case dawn::LoadOp::Clear:
                     return VK_ATTACHMENT_LOAD_OP_CLEAR;
                 default:
                     UNREACHABLE();
@@ -37,16 +37,16 @@ namespace backend { namespace vulkan {
     // RenderPassCacheQuery
 
     void RenderPassCacheQuery::SetColor(uint32_t index,
-                                        nxt::TextureFormat format,
-                                        nxt::LoadOp loadOp) {
+                                        dawn::TextureFormat format,
+                                        dawn::LoadOp loadOp) {
         colorMask.set(index);
         colorFormats[index] = format;
         colorLoadOp[index] = loadOp;
     }
 
-    void RenderPassCacheQuery::SetDepthStencil(nxt::TextureFormat format,
-                                               nxt::LoadOp depthLoadOp,
-                                               nxt::LoadOp stencilLoadOp) {
+    void RenderPassCacheQuery::SetDepthStencil(dawn::TextureFormat format,
+                                               dawn::LoadOp depthLoadOp,
+                                               dawn::LoadOp stencilLoadOp) {
         hasDepthStencil = true;
         depthStencilFormat = format;
         this->depthLoadOp = depthLoadOp;

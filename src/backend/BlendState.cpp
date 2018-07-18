@@ -54,9 +54,9 @@ namespace backend {
         mBlendInfo.blendEnabled = blendEnabled;
     }
 
-    void BlendStateBuilder::SetAlphaBlend(nxt::BlendOperation blendOperation,
-                                          nxt::BlendFactor srcFactor,
-                                          nxt::BlendFactor dstFactor) {
+    void BlendStateBuilder::SetAlphaBlend(dawn::BlendOperation blendOperation,
+                                          dawn::BlendFactor srcFactor,
+                                          dawn::BlendFactor dstFactor) {
         if ((mPropertiesSet & BLEND_STATE_PROPERTY_ALPHA_BLEND) != 0) {
             HandleError("Alpha blend property set multiple times");
             return;
@@ -67,9 +67,9 @@ namespace backend {
         mBlendInfo.alphaBlend = {blendOperation, srcFactor, dstFactor};
     }
 
-    void BlendStateBuilder::SetColorBlend(nxt::BlendOperation blendOperation,
-                                          nxt::BlendFactor srcFactor,
-                                          nxt::BlendFactor dstFactor) {
+    void BlendStateBuilder::SetColorBlend(dawn::BlendOperation blendOperation,
+                                          dawn::BlendFactor srcFactor,
+                                          dawn::BlendFactor dstFactor) {
         if ((mPropertiesSet & BLEND_STATE_PROPERTY_COLOR_BLEND) != 0) {
             HandleError("Color blend property set multiple times");
             return;
@@ -80,7 +80,7 @@ namespace backend {
         mBlendInfo.colorBlend = {blendOperation, srcFactor, dstFactor};
     }
 
-    void BlendStateBuilder::SetColorWriteMask(nxt::ColorWriteMask colorWriteMask) {
+    void BlendStateBuilder::SetColorWriteMask(dawn::ColorWriteMask colorWriteMask) {
         if ((mPropertiesSet & BLEND_STATE_PROPERTY_COLOR_WRITE_MASK) != 0) {
             HandleError("Color write mask property set multiple times");
             return;

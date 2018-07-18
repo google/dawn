@@ -34,7 +34,7 @@ namespace backend {
         BindGroupBase(BindGroupBuilder* builder);
 
         const BindGroupLayoutBase* GetLayout() const;
-        nxt::BindGroupUsage GetUsage() const;
+        dawn::BindGroupUsage GetUsage() const;
         BufferViewBase* GetBindingAsBufferView(size_t binding);
         SamplerBase* GetBindingAsSampler(size_t binding);
         TextureViewBase* GetBindingAsTextureView(size_t binding);
@@ -43,7 +43,7 @@ namespace backend {
 
       private:
         Ref<BindGroupLayoutBase> mLayout;
-        nxt::BindGroupUsage mUsage;
+        dawn::BindGroupUsage mUsage;
         std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 
@@ -53,7 +53,7 @@ namespace backend {
 
         // NXT API
         void SetLayout(BindGroupLayoutBase* layout);
-        void SetUsage(nxt::BindGroupUsage usage);
+        void SetUsage(dawn::BindGroupUsage usage);
 
         template <typename T>
         void SetBufferViews(uint32_t start, uint32_t count, T* const* bufferViews) {
@@ -87,7 +87,7 @@ namespace backend {
         int mPropertiesSet = 0;
 
         Ref<BindGroupLayoutBase> mLayout;
-        nxt::BindGroupUsage mUsage;
+        dawn::BindGroupUsage mUsage;
         std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 

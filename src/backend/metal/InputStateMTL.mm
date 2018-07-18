@@ -19,40 +19,40 @@
 namespace backend { namespace metal {
 
     namespace {
-        MTLVertexFormat VertexFormatType(nxt::VertexFormat format) {
+        MTLVertexFormat VertexFormatType(dawn::VertexFormat format) {
             switch (format) {
-                case nxt::VertexFormat::FloatR32G32B32A32:
+                case dawn::VertexFormat::FloatR32G32B32A32:
                     return MTLVertexFormatFloat4;
-                case nxt::VertexFormat::FloatR32G32B32:
+                case dawn::VertexFormat::FloatR32G32B32:
                     return MTLVertexFormatFloat3;
-                case nxt::VertexFormat::FloatR32G32:
+                case dawn::VertexFormat::FloatR32G32:
                     return MTLVertexFormatFloat2;
-                case nxt::VertexFormat::FloatR32:
+                case dawn::VertexFormat::FloatR32:
                     return MTLVertexFormatFloat;
-                case nxt::VertexFormat::IntR32G32B32A32:
+                case dawn::VertexFormat::IntR32G32B32A32:
                     return MTLVertexFormatInt4;
-                case nxt::VertexFormat::IntR32G32B32:
+                case dawn::VertexFormat::IntR32G32B32:
                     return MTLVertexFormatInt3;
-                case nxt::VertexFormat::IntR32G32:
+                case dawn::VertexFormat::IntR32G32:
                     return MTLVertexFormatInt2;
-                case nxt::VertexFormat::IntR32:
+                case dawn::VertexFormat::IntR32:
                     return MTLVertexFormatInt;
-                case nxt::VertexFormat::UshortR16G16B16A16:
+                case dawn::VertexFormat::UshortR16G16B16A16:
                     return MTLVertexFormatUShort4;
-                case nxt::VertexFormat::UshortR16G16:
+                case dawn::VertexFormat::UshortR16G16:
                     return MTLVertexFormatUShort2;
-                case nxt::VertexFormat::UnormR8G8B8A8:
+                case dawn::VertexFormat::UnormR8G8B8A8:
                     return MTLVertexFormatUChar4Normalized;
-                case nxt::VertexFormat::UnormR8G8:
+                case dawn::VertexFormat::UnormR8G8:
                     return MTLVertexFormatUChar2Normalized;
             }
         }
 
-        MTLVertexStepFunction InputStepModeFunction(nxt::InputStepMode mode) {
+        MTLVertexStepFunction InputStepModeFunction(dawn::InputStepMode mode) {
             switch (mode) {
-                case nxt::InputStepMode::Vertex:
+                case dawn::InputStepMode::Vertex:
                     return MTLVertexStepFunctionPerVertex;
-                case nxt::InputStepMode::Instance:
+                case dawn::InputStepMode::Instance:
                     return MTLVertexStepFunctionPerInstance;
             }
         }

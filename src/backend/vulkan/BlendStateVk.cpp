@@ -19,68 +19,68 @@
 namespace backend { namespace vulkan {
 
     namespace {
-        VkBlendFactor VulkanBlendFactor(nxt::BlendFactor factor) {
+        VkBlendFactor VulkanBlendFactor(dawn::BlendFactor factor) {
             switch (factor) {
-                case nxt::BlendFactor::Zero:
+                case dawn::BlendFactor::Zero:
                     return VK_BLEND_FACTOR_ZERO;
-                case nxt::BlendFactor::One:
+                case dawn::BlendFactor::One:
                     return VK_BLEND_FACTOR_ONE;
-                case nxt::BlendFactor::SrcColor:
+                case dawn::BlendFactor::SrcColor:
                     return VK_BLEND_FACTOR_SRC_COLOR;
-                case nxt::BlendFactor::OneMinusSrcColor:
+                case dawn::BlendFactor::OneMinusSrcColor:
                     return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-                case nxt::BlendFactor::SrcAlpha:
+                case dawn::BlendFactor::SrcAlpha:
                     return VK_BLEND_FACTOR_SRC_ALPHA;
-                case nxt::BlendFactor::OneMinusSrcAlpha:
+                case dawn::BlendFactor::OneMinusSrcAlpha:
                     return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-                case nxt::BlendFactor::DstColor:
+                case dawn::BlendFactor::DstColor:
                     return VK_BLEND_FACTOR_DST_COLOR;
-                case nxt::BlendFactor::OneMinusDstColor:
+                case dawn::BlendFactor::OneMinusDstColor:
                     return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-                case nxt::BlendFactor::DstAlpha:
+                case dawn::BlendFactor::DstAlpha:
                     return VK_BLEND_FACTOR_DST_ALPHA;
-                case nxt::BlendFactor::OneMinusDstAlpha:
+                case dawn::BlendFactor::OneMinusDstAlpha:
                     return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-                case nxt::BlendFactor::SrcAlphaSaturated:
+                case dawn::BlendFactor::SrcAlphaSaturated:
                     return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-                case nxt::BlendFactor::BlendColor:
+                case dawn::BlendFactor::BlendColor:
                     return VK_BLEND_FACTOR_CONSTANT_COLOR;
-                case nxt::BlendFactor::OneMinusBlendColor:
+                case dawn::BlendFactor::OneMinusBlendColor:
                     return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkBlendOp VulkanBlendOperation(nxt::BlendOperation operation) {
+        VkBlendOp VulkanBlendOperation(dawn::BlendOperation operation) {
             switch (operation) {
-                case nxt::BlendOperation::Add:
+                case dawn::BlendOperation::Add:
                     return VK_BLEND_OP_ADD;
-                case nxt::BlendOperation::Subtract:
+                case dawn::BlendOperation::Subtract:
                     return VK_BLEND_OP_SUBTRACT;
-                case nxt::BlendOperation::ReverseSubtract:
+                case dawn::BlendOperation::ReverseSubtract:
                     return VK_BLEND_OP_REVERSE_SUBTRACT;
-                case nxt::BlendOperation::Min:
+                case dawn::BlendOperation::Min:
                     return VK_BLEND_OP_MIN;
-                case nxt::BlendOperation::Max:
+                case dawn::BlendOperation::Max:
                     return VK_BLEND_OP_MAX;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkColorComponentFlagBits VulkanColorWriteMask(nxt::ColorWriteMask mask) {
+        VkColorComponentFlagBits VulkanColorWriteMask(dawn::ColorWriteMask mask) {
             // Vulkan and NXT color write masks match, static assert it and return the mask
-            static_assert(static_cast<VkColorComponentFlagBits>(nxt::ColorWriteMask::Red) ==
+            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Red) ==
                               VK_COLOR_COMPONENT_R_BIT,
                           "");
-            static_assert(static_cast<VkColorComponentFlagBits>(nxt::ColorWriteMask::Green) ==
+            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Green) ==
                               VK_COLOR_COMPONENT_G_BIT,
                           "");
-            static_assert(static_cast<VkColorComponentFlagBits>(nxt::ColorWriteMask::Blue) ==
+            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Blue) ==
                               VK_COLOR_COMPONENT_B_BIT,
                           "");
-            static_assert(static_cast<VkColorComponentFlagBits>(nxt::ColorWriteMask::Alpha) ==
+            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Alpha) ==
                               VK_COLOR_COMPONENT_A_BIT,
                           "");
 

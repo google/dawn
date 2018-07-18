@@ -25,7 +25,7 @@ namespace backend { namespace d3d12 {
 
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor);
+        PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor);
 
         uint32_t GetCbvUavSrvRootParameterIndex(uint32_t group) const;
         uint32_t GetSamplerRootParameterIndex(uint32_t group) const;

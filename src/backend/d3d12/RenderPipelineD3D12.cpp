@@ -28,17 +28,17 @@
 namespace backend { namespace d3d12 {
 
     namespace {
-        D3D12_PRIMITIVE_TOPOLOGY D3D12PrimitiveTopology(nxt::PrimitiveTopology primitiveTopology) {
+        D3D12_PRIMITIVE_TOPOLOGY D3D12PrimitiveTopology(dawn::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::PointList:
+                case dawn::PrimitiveTopology::PointList:
                     return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-                case nxt::PrimitiveTopology::LineList:
+                case dawn::PrimitiveTopology::LineList:
                     return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
-                case nxt::PrimitiveTopology::LineStrip:
+                case dawn::PrimitiveTopology::LineStrip:
                     return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
-                case nxt::PrimitiveTopology::TriangleList:
+                case dawn::PrimitiveTopology::TriangleList:
                     return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-                case nxt::PrimitiveTopology::TriangleStrip:
+                case dawn::PrimitiveTopology::TriangleStrip:
                     return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
                 default:
                     UNREACHABLE();
@@ -46,15 +46,15 @@ namespace backend { namespace d3d12 {
         }
 
         D3D12_PRIMITIVE_TOPOLOGY_TYPE D3D12PrimitiveTopologyType(
-            nxt::PrimitiveTopology primitiveTopology) {
+            dawn::PrimitiveTopology primitiveTopology) {
             switch (primitiveTopology) {
-                case nxt::PrimitiveTopology::PointList:
+                case dawn::PrimitiveTopology::PointList:
                     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-                case nxt::PrimitiveTopology::LineList:
-                case nxt::PrimitiveTopology::LineStrip:
+                case dawn::PrimitiveTopology::LineList:
+                case dawn::PrimitiveTopology::LineStrip:
                     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-                case nxt::PrimitiveTopology::TriangleList:
-                case nxt::PrimitiveTopology::TriangleStrip:
+                case dawn::PrimitiveTopology::TriangleList:
+                case dawn::PrimitiveTopology::TriangleStrip:
                     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
                 default:
                     UNREACHABLE();
@@ -88,15 +88,15 @@ namespace backend { namespace d3d12 {
 
             D3D12_SHADER_BYTECODE* shader = nullptr;
             switch (stage) {
-                case nxt::ShaderStage::Vertex:
+                case dawn::ShaderStage::Vertex:
                     shader = &descriptor.VS;
                     compileTarget = "vs_5_1";
                     break;
-                case nxt::ShaderStage::Fragment:
+                case dawn::ShaderStage::Fragment:
                     shader = &descriptor.PS;
                     compileTarget = "ps_5_1";
                     break;
-                case nxt::ShaderStage::Compute:
+                case dawn::ShaderStage::Compute:
                     UNREACHABLE();
                     break;
             }

@@ -20,33 +20,33 @@
 namespace backend { namespace opengl {
 
     namespace {
-        GLenum MagFilterMode(nxt::FilterMode filter) {
+        GLenum MagFilterMode(dawn::FilterMode filter) {
             switch (filter) {
-                case nxt::FilterMode::Nearest:
+                case dawn::FilterMode::Nearest:
                     return GL_NEAREST;
-                case nxt::FilterMode::Linear:
+                case dawn::FilterMode::Linear:
                     return GL_LINEAR;
                 default:
                     UNREACHABLE();
             }
         }
 
-        GLenum MinFilterMode(nxt::FilterMode minFilter, nxt::FilterMode mipMapFilter) {
+        GLenum MinFilterMode(dawn::FilterMode minFilter, dawn::FilterMode mipMapFilter) {
             switch (minFilter) {
-                case nxt::FilterMode::Nearest:
+                case dawn::FilterMode::Nearest:
                     switch (mipMapFilter) {
-                        case nxt::FilterMode::Nearest:
+                        case dawn::FilterMode::Nearest:
                             return GL_NEAREST_MIPMAP_NEAREST;
-                        case nxt::FilterMode::Linear:
+                        case dawn::FilterMode::Linear:
                             return GL_NEAREST_MIPMAP_LINEAR;
                         default:
                             UNREACHABLE();
                     }
-                case nxt::FilterMode::Linear:
+                case dawn::FilterMode::Linear:
                     switch (mipMapFilter) {
-                        case nxt::FilterMode::Nearest:
+                        case dawn::FilterMode::Nearest:
                             return GL_LINEAR_MIPMAP_NEAREST;
-                        case nxt::FilterMode::Linear:
+                        case dawn::FilterMode::Linear:
                             return GL_LINEAR_MIPMAP_LINEAR;
                         default:
                             UNREACHABLE();
@@ -56,13 +56,13 @@ namespace backend { namespace opengl {
             }
         }
 
-        GLenum WrapMode(nxt::AddressMode mode) {
+        GLenum WrapMode(dawn::AddressMode mode) {
             switch (mode) {
-                case nxt::AddressMode::Repeat:
+                case dawn::AddressMode::Repeat:
                     return GL_REPEAT;
-                case nxt::AddressMode::MirroredRepeat:
+                case dawn::AddressMode::MirroredRepeat:
                     return GL_MIRRORED_REPEAT;
-                case nxt::AddressMode::ClampToEdge:
+                case dawn::AddressMode::ClampToEdge:
                     return GL_CLAMP_TO_EDGE;
                 default:
                     UNREACHABLE();
@@ -71,7 +71,7 @@ namespace backend { namespace opengl {
 
     }  // namespace
 
-    Sampler::Sampler(Device* device, const nxt::SamplerDescriptor* descriptor)
+    Sampler::Sampler(Device* device, const dawn::SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
         glGenSamplers(1, &mHandle);
         glSamplerParameteri(mHandle, GL_TEXTURE_MAG_FILTER, MagFilterMode(descriptor->magFilter));

@@ -20,7 +20,7 @@
 
 namespace backend { namespace opengl {
 
-    PipelineLayout::PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor)
+    PipelineLayout::PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
         GLuint uboIndex = 0;
         GLuint samplerIndex = 0;
@@ -36,20 +36,20 @@ namespace backend { namespace opengl {
                 }
 
                 switch (groupInfo.types[binding]) {
-                    case nxt::BindingType::UniformBuffer:
+                    case dawn::BindingType::UniformBuffer:
                         mIndexInfo[group][binding] = uboIndex;
                         uboIndex++;
                         break;
-                    case nxt::BindingType::Sampler:
+                    case dawn::BindingType::Sampler:
                         mIndexInfo[group][binding] = samplerIndex;
                         samplerIndex++;
                         break;
-                    case nxt::BindingType::SampledTexture:
+                    case dawn::BindingType::SampledTexture:
                         mIndexInfo[group][binding] = sampledTextureIndex;
                         sampledTextureIndex++;
                         break;
 
-                    case nxt::BindingType::StorageBuffer:
+                    case dawn::BindingType::StorageBuffer:
                         mIndexInfo[group][binding] = ssboIndex;
                         ssboIndex++;
                         break;

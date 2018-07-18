@@ -30,7 +30,7 @@ namespace backend { namespace vulkan {
             // driver. Need to generalize
             config->nativeFormat = VK_FORMAT_B8G8R8A8_UNORM;
             config->colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-            config->format = nxt::TextureFormat::B8G8R8A8Unorm;
+            config->format = dawn::TextureFormat::B8G8R8A8Unorm;
             config->minImageCount = 3;
             // TODO(cwallez@chromium.org): This is upside down compared to what we want, at least
             // on Linux
@@ -92,7 +92,7 @@ namespace backend { namespace vulkan {
         createInfo.imageExtent.height = height;
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage =
-            VulkanImageUsage(static_cast<nxt::TextureUsageBit>(usage), mConfig.format);
+            VulkanImageUsage(static_cast<dawn::TextureUsageBit>(usage), mConfig.format);
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;
@@ -202,7 +202,7 @@ namespace backend { namespace vulkan {
         return NXT_SWAP_CHAIN_NO_ERROR;
     }
 
-    nxt::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
+    dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
         return mConfig.format;
     }
 

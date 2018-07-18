@@ -32,44 +32,44 @@ namespace backend { namespace opengl {
 
     namespace {
 
-        GLenum IndexFormatType(nxt::IndexFormat format) {
+        GLenum IndexFormatType(dawn::IndexFormat format) {
             switch (format) {
-                case nxt::IndexFormat::Uint16:
+                case dawn::IndexFormat::Uint16:
                     return GL_UNSIGNED_SHORT;
-                case nxt::IndexFormat::Uint32:
+                case dawn::IndexFormat::Uint32:
                     return GL_UNSIGNED_INT;
                 default:
                     UNREACHABLE();
             }
         }
 
-        GLenum VertexFormatType(nxt::VertexFormat format) {
+        GLenum VertexFormatType(dawn::VertexFormat format) {
             switch (format) {
-                case nxt::VertexFormat::FloatR32G32B32A32:
-                case nxt::VertexFormat::FloatR32G32B32:
-                case nxt::VertexFormat::FloatR32G32:
-                case nxt::VertexFormat::FloatR32:
+                case dawn::VertexFormat::FloatR32G32B32A32:
+                case dawn::VertexFormat::FloatR32G32B32:
+                case dawn::VertexFormat::FloatR32G32:
+                case dawn::VertexFormat::FloatR32:
                     return GL_FLOAT;
-                case nxt::VertexFormat::IntR32G32B32A32:
-                case nxt::VertexFormat::IntR32G32B32:
-                case nxt::VertexFormat::IntR32G32:
-                case nxt::VertexFormat::IntR32:
+                case dawn::VertexFormat::IntR32G32B32A32:
+                case dawn::VertexFormat::IntR32G32B32:
+                case dawn::VertexFormat::IntR32G32:
+                case dawn::VertexFormat::IntR32:
                     return GL_INT;
-                case nxt::VertexFormat::UshortR16G16B16A16:
-                case nxt::VertexFormat::UshortR16G16:
+                case dawn::VertexFormat::UshortR16G16B16A16:
+                case dawn::VertexFormat::UshortR16G16:
                     return GL_UNSIGNED_SHORT;
-                case nxt::VertexFormat::UnormR8G8B8A8:
-                case nxt::VertexFormat::UnormR8G8:
+                case dawn::VertexFormat::UnormR8G8B8A8:
+                case dawn::VertexFormat::UnormR8G8:
                     return GL_UNSIGNED_BYTE;
                 default:
                     UNREACHABLE();
             }
         }
 
-        GLboolean VertexFormatIsNormalized(nxt::VertexFormat format) {
+        GLboolean VertexFormatIsNormalized(dawn::VertexFormat format) {
             switch (format) {
-                case nxt::VertexFormat::UnormR8G8B8A8:
-                case nxt::VertexFormat::UnormR8G8:
+                case dawn::VertexFormat::UnormR8G8B8A8:
+                case dawn::VertexFormat::UnormR8G8:
                     return GL_TRUE;
                 default:
                     return GL_FALSE;
@@ -92,7 +92,7 @@ namespace backend { namespace opengl {
                 }
             }
 
-            void OnSetPushConstants(nxt::ShaderStageBit stages,
+            void OnSetPushConstants(dawn::ShaderStageBit stages,
                                     uint32_t count,
                                     uint32_t offset,
                                     const uint32_t* data) {
@@ -237,7 +237,7 @@ namespace backend { namespace opengl {
 
             for (uint32_t binding : IterateBitSet(layout.mask)) {
                 switch (layout.types[binding]) {
-                    case nxt::BindingType::UniformBuffer: {
+                    case dawn::BindingType::UniformBuffer: {
                         BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
                         GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
                         GLuint uboIndex = indices[binding];
@@ -246,7 +246,7 @@ namespace backend { namespace opengl {
                                           view->GetSize());
                     } break;
 
-                    case nxt::BindingType::Sampler: {
+                    case dawn::BindingType::Sampler: {
                         GLuint sampler =
                             ToBackend(group->GetBindingAsSampler(binding))->GetHandle();
                         GLuint samplerIndex = indices[binding];
@@ -256,7 +256,7 @@ namespace backend { namespace opengl {
                         }
                     } break;
 
-                    case nxt::BindingType::SampledTexture: {
+                    case dawn::BindingType::SampledTexture: {
                         TextureView* view = ToBackend(group->GetBindingAsTextureView(binding));
                         Texture* texture = ToBackend(view->GetTexture());
                         GLuint handle = texture->GetHandle();
@@ -269,7 +269,7 @@ namespace backend { namespace opengl {
                         }
                     } break;
 
-                    case nxt::BindingType::StorageBuffer: {
+                    case dawn::BindingType::StorageBuffer: {
                         BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
                         GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
                         GLuint ssboIndex = indices[binding];
@@ -331,7 +331,7 @@ namespace backend { namespace opengl {
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(target, texture->GetHandle());
 
-                    ASSERT(texture->GetDimension() == nxt::TextureDimension::e2D);
+                    ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
                     glPixelStorei(GL_UNPACK_ROW_LENGTH,
                                   copy->rowPitch / TextureFormatPixelSize(texture->GetFormat()));
                     glTexSubImage2D(target, dst.level, dst.x, dst.y, dst.width, dst.height,
@@ -351,7 +351,7 @@ namespace backend { namespace opengl {
 
                     // The only way to move data from a texture to a buffer in GL is via
                     // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
-                    ASSERT(texture->GetDimension() == nxt::TextureDimension::e2D);
+                    ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
                     glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
 
                     GLuint readFBO = 0;
@@ -462,18 +462,18 @@ namespace backend { namespace opengl {
 
                 // TODO(kainino@chromium.org): the color clears (later in
                 // this function) may be undefined for non-normalized integer formats.
-                nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
-                ASSERT(format == nxt::TextureFormat::R8G8B8A8Unorm ||
-                       format == nxt::TextureFormat::R8G8Unorm ||
-                       format == nxt::TextureFormat::R8Unorm ||
-                       format == nxt::TextureFormat::B8G8R8A8Unorm);
+                dawn::TextureFormat format = textureView->GetTexture()->GetFormat();
+                ASSERT(format == dawn::TextureFormat::R8G8B8A8Unorm ||
+                       format == dawn::TextureFormat::R8G8Unorm ||
+                       format == dawn::TextureFormat::R8Unorm ||
+                       format == dawn::TextureFormat::B8G8R8A8Unorm);
             }
             glDrawBuffers(attachmentCount, drawBuffers.data());
 
             if (renderPass->HasDepthStencilAttachment()) {
                 TextureViewBase* textureView = renderPass->GetDepthStencilAttachment().view.Get();
                 GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
-                nxt::TextureFormat format = textureView->GetTexture()->GetFormat();
+                dawn::TextureFormat format = textureView->GetTexture()->GetFormat();
 
                 // Attach depth/stencil buffer.
                 GLenum glAttachment = 0;
@@ -494,7 +494,7 @@ namespace backend { namespace opengl {
 
                 // TODO(kainino@chromium.org): the depth/stencil clears (later in
                 // this function) may be undefined for other texture formats.
-                ASSERT(format == nxt::TextureFormat::D32FloatS8Uint);
+                ASSERT(format == dawn::TextureFormat::D32FloatS8Uint);
             }
         }
 
@@ -504,21 +504,21 @@ namespace backend { namespace opengl {
                 const auto& attachmentInfo = renderPass->GetColorAttachment(i);
 
                 // Load op - color
-                if (attachmentInfo.loadOp == nxt::LoadOp::Clear) {
+                if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
                     glClearBufferfv(GL_COLOR, i, attachmentInfo.clearColor.data());
                 }
             }
 
             if (renderPass->HasDepthStencilAttachment()) {
                 const auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
-                nxt::TextureFormat attachmentFormat =
+                dawn::TextureFormat attachmentFormat =
                     attachmentInfo.view->GetTexture()->GetFormat();
 
                 // Load op - depth/stencil
                 bool doDepthClear = TextureFormatHasDepth(attachmentFormat) &&
-                                    (attachmentInfo.depthLoadOp == nxt::LoadOp::Clear);
+                                    (attachmentInfo.depthLoadOp == dawn::LoadOp::Clear);
                 bool doStencilClear = TextureFormatHasStencil(attachmentFormat) &&
-                                      (attachmentInfo.stencilLoadOp == nxt::LoadOp::Clear);
+                                      (attachmentInfo.stencilLoadOp == dawn::LoadOp::Clear);
                 if (doDepthClear && doStencilClear) {
                     glClearBufferfi(GL_DEPTH_STENCIL, 0, attachmentInfo.clearDepth,
                                     attachmentInfo.clearStencil);
@@ -576,7 +576,7 @@ namespace backend { namespace opengl {
                     pushConstants.Apply(lastPipeline, lastPipeline);
                     inputBuffers.Apply();
 
-                    nxt::IndexFormat indexFormat = lastPipeline->GetIndexFormat();
+                    dawn::IndexFormat indexFormat = lastPipeline->GetIndexFormat();
                     size_t formatSize = IndexFormatSize(indexFormat);
                     GLenum formatType = IndexFormatType(indexFormat);
 

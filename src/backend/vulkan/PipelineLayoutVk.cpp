@@ -22,7 +22,7 @@
 
 namespace backend { namespace vulkan {
 
-    PipelineLayout::PipelineLayout(Device* device, const nxt::PipelineLayoutDescriptor* descriptor)
+    PipelineLayout::PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
         // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
         // TODO(cwallez@chromium.org) Vulkan doesn't allow holes in this array, should we expose

@@ -31,7 +31,7 @@ namespace backend { namespace vulkan {
         createInfo.basePipelineHandle = VK_NULL_HANDLE;
         createInfo.basePipelineIndex = -1;
 
-        const auto& stageInfo = builder->GetStageInfo(nxt::ShaderStage::Compute);
+        const auto& stageInfo = builder->GetStageInfo(dawn::ShaderStage::Compute);
         createInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         createInfo.stage.pNext = nullptr;
         createInfo.stage.flags = 0;

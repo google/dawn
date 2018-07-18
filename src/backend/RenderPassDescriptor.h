@@ -29,14 +29,14 @@
 namespace backend {
 
     struct RenderPassColorAttachmentInfo {
-        nxt::LoadOp loadOp;
+        dawn::LoadOp loadOp;
         std::array<float, 4> clearColor = {{0.0f, 0.0f, 0.0f, 0.0f}};
         Ref<TextureViewBase> view;
     };
 
     struct RenderPassDepthStencilAttachmentInfo {
-        nxt::LoadOp depthLoadOp;
-        nxt::LoadOp stencilLoadOp;
+        dawn::LoadOp depthLoadOp;
+        dawn::LoadOp stencilLoadOp;
         float clearDepth = 1.0f;
         uint32_t clearStencil = 0;
         Ref<TextureViewBase> view;
@@ -80,15 +80,15 @@ namespace backend {
         RenderPassDescriptorBase* GetResultImpl() override;
         void SetColorAttachment(uint32_t attachment,
                                 TextureViewBase* textureView,
-                                nxt::LoadOp loadOp);
+                                dawn::LoadOp loadOp);
         void SetColorAttachmentClearColor(uint32_t attachment,
                                           float clearR,
                                           float clearG,
                                           float clearB,
                                           float clearA);
         void SetDepthStencilAttachment(TextureViewBase* textureView,
-                                       nxt::LoadOp depthLoadOp,
-                                       nxt::LoadOp stencilLoadOp);
+                                       dawn::LoadOp depthLoadOp,
+                                       dawn::LoadOp stencilLoadOp);
         void SetDepthStencilAttachmentClearValue(float clearDepth, uint32_t clearStencil);
 
       private:

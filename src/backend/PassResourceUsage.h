@@ -29,10 +29,10 @@ namespace backend {
     // re-compute it.
     struct PassResourceUsage {
         std::vector<BufferBase*> buffers;
-        std::vector<nxt::BufferUsageBit> bufferUsages;
+        std::vector<dawn::BufferUsageBit> bufferUsages;
 
         std::vector<TextureBase*> textures;
-        std::vector<nxt::TextureUsageBit> textureUsages;
+        std::vector<dawn::TextureUsageBit> textureUsages;
     };
 
 }  // namespace backend

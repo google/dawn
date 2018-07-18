@@ -23,8 +23,9 @@
 
 namespace backend {
 
-    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
-                                                 const nxt::BindGroupLayoutDescriptor* descriptor) {
+    MaybeError ValidateBindGroupLayoutDescriptor(
+        DeviceBase*,
+        const dawn::BindGroupLayoutDescriptor* descriptor) {
         NXT_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
@@ -72,7 +73,7 @@ namespace backend {
     // BindGroupLayoutBase
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
-                                             const nxt::BindGroupLayoutDescriptor* descriptor,
+                                             const dawn::BindGroupLayoutDescriptor* descriptor,
                                              bool blueprint)
         : mDevice(device), mIsBlueprint(blueprint) {
         for (uint32_t i = 0; i < descriptor->numBindings; ++i) {

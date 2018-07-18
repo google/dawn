@@ -25,44 +25,44 @@
 
 namespace backend {
 
-    static_assert(static_cast<uint32_t>(nxt::ShaderStage::Vertex) < kNumStages, "");
-    static_assert(static_cast<uint32_t>(nxt::ShaderStage::Fragment) < kNumStages, "");
-    static_assert(static_cast<uint32_t>(nxt::ShaderStage::Compute) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Vertex) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Fragment) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Compute) < kNumStages, "");
 
-    static_assert(static_cast<uint32_t>(nxt::ShaderStageBit::Vertex) ==
-                      (1 << static_cast<uint32_t>(nxt::ShaderStage::Vertex)),
+    static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Vertex) ==
+                      (1 << static_cast<uint32_t>(dawn::ShaderStage::Vertex)),
                   "");
-    static_assert(static_cast<uint32_t>(nxt::ShaderStageBit::Fragment) ==
-                      (1 << static_cast<uint32_t>(nxt::ShaderStage::Fragment)),
+    static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Fragment) ==
+                      (1 << static_cast<uint32_t>(dawn::ShaderStage::Fragment)),
                   "");
-    static_assert(static_cast<uint32_t>(nxt::ShaderStageBit::Compute) ==
-                      (1 << static_cast<uint32_t>(nxt::ShaderStage::Compute)),
+    static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Compute) ==
+                      (1 << static_cast<uint32_t>(dawn::ShaderStage::Compute)),
                   "");
 
-    BitSetIterator<kNumStages, nxt::ShaderStage> IterateStages(nxt::ShaderStageBit stages);
-    nxt::ShaderStageBit StageBit(nxt::ShaderStage stage);
+    BitSetIterator<kNumStages, dawn::ShaderStage> IterateStages(dawn::ShaderStageBit stages);
+    dawn::ShaderStageBit StageBit(dawn::ShaderStage stage);
 
-    static constexpr nxt::ShaderStageBit kAllStages =
-        static_cast<nxt::ShaderStageBit>((1 << kNumStages) - 1);
+    static constexpr dawn::ShaderStageBit kAllStages =
+        static_cast<dawn::ShaderStageBit>((1 << kNumStages) - 1);
 
     template <typename T>
     class PerStage {
       public:
-        T& operator[](nxt::ShaderStage stage) {
+        T& operator[](dawn::ShaderStage stage) {
             NXT_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];
         }
-        const T& operator[](nxt::ShaderStage stage) const {
+        const T& operator[](dawn::ShaderStage stage) const {
             NXT_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];
         }
 
-        T& operator[](nxt::ShaderStageBit stageBit) {
+        T& operator[](dawn::ShaderStageBit stageBit) {
             uint32_t bit = static_cast<uint32_t>(stageBit);
             NXT_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
             return mData[Log2(bit)];
         }
-        const T& operator[](nxt::ShaderStageBit stageBit) const {
+        const T& operator[](dawn::ShaderStageBit stageBit) const {
             uint32_t bit = static_cast<uint32_t>(stageBit);
             NXT_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
             return mData[Log2(bit)];

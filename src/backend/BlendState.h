@@ -29,15 +29,15 @@ namespace backend {
 
         struct BlendInfo {
             struct BlendOpFactor {
-                nxt::BlendOperation operation = nxt::BlendOperation::Add;
-                nxt::BlendFactor srcFactor = nxt::BlendFactor::One;
-                nxt::BlendFactor dstFactor = nxt::BlendFactor::Zero;
+                dawn::BlendOperation operation = dawn::BlendOperation::Add;
+                dawn::BlendFactor srcFactor = dawn::BlendFactor::One;
+                dawn::BlendFactor dstFactor = dawn::BlendFactor::Zero;
             };
 
             bool blendEnabled = false;
             BlendOpFactor alphaBlend;
             BlendOpFactor colorBlend;
-            nxt::ColorWriteMask colorWriteMask = nxt::ColorWriteMask::All;
+            dawn::ColorWriteMask colorWriteMask = dawn::ColorWriteMask::All;
         };
 
         const BlendInfo& GetBlendInfo() const;
@@ -52,13 +52,13 @@ namespace backend {
 
         // NXT API
         void SetBlendEnabled(bool blendEnabled);
-        void SetAlphaBlend(nxt::BlendOperation blendOperation,
-                           nxt::BlendFactor srcFactor,
-                           nxt::BlendFactor dstFactor);
-        void SetColorBlend(nxt::BlendOperation blendOperation,
-                           nxt::BlendFactor srcFactor,
-                           nxt::BlendFactor dstFactor);
-        void SetColorWriteMask(nxt::ColorWriteMask colorWriteMask);
+        void SetAlphaBlend(dawn::BlendOperation blendOperation,
+                           dawn::BlendFactor srcFactor,
+                           dawn::BlendFactor dstFactor);
+        void SetColorBlend(dawn::BlendOperation blendOperation,
+                           dawn::BlendFactor srcFactor,
+                           dawn::BlendFactor dstFactor);
+        void SetColorWriteMask(dawn::ColorWriteMask colorWriteMask);
 
       private:
         friend class BlendStateBase;

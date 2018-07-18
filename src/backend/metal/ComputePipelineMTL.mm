@@ -23,8 +23,8 @@ namespace backend { namespace metal {
         : ComputePipelineBase(builder) {
         auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
 
-        const auto& module = ToBackend(builder->GetStageInfo(nxt::ShaderStage::Compute).module);
-        const auto& entryPoint = builder->GetStageInfo(nxt::ShaderStage::Compute).entryPoint;
+        const auto& module = ToBackend(builder->GetStageInfo(dawn::ShaderStage::Compute).module);
+        const auto& entryPoint = builder->GetStageInfo(dawn::ShaderStage::Compute).entryPoint;
 
         auto compilationData = module->GetFunction(entryPoint.c_str(), ToBackend(GetLayout()));
 

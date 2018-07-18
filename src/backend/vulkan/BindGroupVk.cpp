@@ -80,8 +80,8 @@ namespace backend { namespace vulkan {
             write.descriptorType = VulkanDescriptorType(layoutInfo.types[bindingIndex]);
 
             switch (layoutInfo.types[bindingIndex]) {
-                case nxt::BindingType::UniformBuffer:
-                case nxt::BindingType::StorageBuffer: {
+                case dawn::BindingType::UniformBuffer:
+                case dawn::BindingType::StorageBuffer: {
                     BufferViewBase* view = GetBindingAsBufferView(bindingIndex);
                     Buffer* buffer = ToBackend(view->GetBuffer());
 
@@ -92,13 +92,13 @@ namespace backend { namespace vulkan {
                     write.pBufferInfo = &writeBufferInfo[numWrites];
                 } break;
 
-                case nxt::BindingType::Sampler: {
+                case dawn::BindingType::Sampler: {
                     Sampler* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     writeImageInfo[numWrites].sampler = sampler->GetHandle();
                     write.pImageInfo = &writeImageInfo[numWrites];
                 } break;
 
-                case nxt::BindingType::SampledTexture: {
+                case dawn::BindingType::SampledTexture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                     writeImageInfo[numWrites].imageView = view->GetHandle();

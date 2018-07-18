@@ -35,7 +35,7 @@ namespace backend { namespace d3d12 {
         void OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite);
 
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                nxt::BufferUsageBit usage);
+                                dawn::BufferUsageBit usage);
 
       private:
         // NXT API
@@ -46,7 +46,7 @@ namespace backend { namespace d3d12 {
 
         ComPtr<ID3D12Resource> mResource;
         bool mFixedResourceState = false;
-        nxt::BufferUsageBit mLastUsage = nxt::BufferUsageBit::None;
+        dawn::BufferUsageBit mLastUsage = dawn::BufferUsageBit::None;
     };
 
     class BufferView : public BufferViewBase {

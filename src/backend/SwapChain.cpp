@@ -34,15 +34,15 @@ namespace backend {
         return mDevice;
     }
 
-    void SwapChainBase::Configure(nxt::TextureFormat format,
-                                  nxt::TextureUsageBit allowedUsage,
+    void SwapChainBase::Configure(dawn::TextureFormat format,
+                                  dawn::TextureUsageBit allowedUsage,
                                   uint32_t width,
                                   uint32_t height) {
         if (width == 0 || height == 0) {
             mDevice->HandleError("Swap chain cannot be configured to zero size");
             return;
         }
-        allowedUsage |= nxt::TextureUsageBit::Present;
+        allowedUsage |= dawn::TextureUsageBit::Present;
 
         mFormat = format;
         mAllowedUsage = allowedUsage;
@@ -60,7 +60,7 @@ namespace backend {
         }
 
         auto* builder = mDevice->CreateTextureBuilder();
-        builder->SetDimension(nxt::TextureDimension::e2D);
+        builder->SetDimension(dawn::TextureDimension::e2D);
         builder->SetExtent(mWidth, mHeight, 1);
         builder->SetFormat(mFormat);
         builder->SetMipLevels(1);

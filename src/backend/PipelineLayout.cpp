@@ -21,7 +21,7 @@
 namespace backend {
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
-                                                const nxt::PipelineLayoutDescriptor* descriptor) {
+                                                const dawn::PipelineLayoutDescriptor* descriptor) {
         NXT_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
         NXT_TRY_ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups,
                        "too many bind group layouts");
@@ -35,7 +35,7 @@ namespace backend {
     // PipelineLayoutBase
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
-                                           const nxt::PipelineLayoutDescriptor* descriptor)
+                                           const dawn::PipelineLayoutDescriptor* descriptor)
         : mDevice(device) {
         ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups);
         for (uint32_t group = 0; group < descriptor->numBindGroupLayouts; ++group) {

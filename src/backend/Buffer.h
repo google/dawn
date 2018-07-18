@@ -23,13 +23,13 @@
 
 namespace backend {
 
-    static constexpr nxt::BufferUsageBit kReadOnlyBufferUsages =
-        nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferSrc |
-        nxt::BufferUsageBit::Index | nxt::BufferUsageBit::Vertex | nxt::BufferUsageBit::Uniform;
+    static constexpr dawn::BufferUsageBit kReadOnlyBufferUsages =
+        dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferSrc |
+        dawn::BufferUsageBit::Index | dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Uniform;
 
-    static constexpr nxt::BufferUsageBit kWritableBufferUsages = nxt::BufferUsageBit::MapWrite |
-                                                                 nxt::BufferUsageBit::TransferDst |
-                                                                 nxt::BufferUsageBit::Storage;
+    static constexpr dawn::BufferUsageBit kWritableBufferUsages =
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferDst |
+        dawn::BufferUsageBit::Storage;
 
     class BufferBase : public RefCounted {
       public:
@@ -37,7 +37,7 @@ namespace backend {
         ~BufferBase();
 
         uint32_t GetSize() const;
-        nxt::BufferUsageBit GetAllowedUsage() const;
+        dawn::BufferUsageBit GetAllowedUsage() const;
 
         DeviceBase* GetDevice() const;
 
@@ -66,11 +66,11 @@ namespace backend {
         virtual void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
         virtual void UnmapImpl() = 0;
 
-        bool ValidateMapBase(uint32_t start, uint32_t size, nxt::BufferUsageBit requiredUsage);
+        bool ValidateMapBase(uint32_t start, uint32_t size, dawn::BufferUsageBit requiredUsage);
 
         DeviceBase* mDevice;
         uint32_t mSize;
-        nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
+        dawn::BufferUsageBit mAllowedUsage = dawn::BufferUsageBit::None;
 
         nxtBufferMapReadCallback mMapReadCallback = nullptr;
         nxtBufferMapWriteCallback mMapWriteCallback = nullptr;
@@ -85,8 +85,8 @@ namespace backend {
         BufferBuilder(DeviceBase* device);
 
         // NXT API
-        void SetAllowedUsage(nxt::BufferUsageBit usage);
-        void SetInitialUsage(nxt::BufferUsageBit usage);
+        void SetAllowedUsage(dawn::BufferUsageBit usage);
+        void SetInitialUsage(dawn::BufferUsageBit usage);
         void SetSize(uint32_t size);
 
       private:
@@ -95,8 +95,8 @@ namespace backend {
         BufferBase* GetResultImpl() override;
 
         uint32_t mSize;
-        nxt::BufferUsageBit mAllowedUsage = nxt::BufferUsageBit::None;
-        nxt::BufferUsageBit mCurrentUsage = nxt::BufferUsageBit::None;
+        dawn::BufferUsageBit mAllowedUsage = dawn::BufferUsageBit::None;
+        dawn::BufferUsageBit mCurrentUsage = dawn::BufferUsageBit::None;
         int mPropertiesSet = 0;
     };
 
