@@ -13,7 +13,7 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 2.8)
-project(nxt C CXX)
+project(dawn C CXX)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR
@@ -144,7 +144,7 @@ endif()
 function(NXTExternalTarget folder target)
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${DAWN_FLAGS})
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${DAWN_DEFS})
-    set_property(TARGET ${target} PROPERTY FOLDER "nxt/${folder}")
+    set_property(TARGET ${target} PROPERTY FOLDER "dawn/${folder}")
 endfunction()
 
 function(NXTInternalTarget folder target)
@@ -183,25 +183,25 @@ set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_subdirectory(generator)
 
 Generate(
-    LIB_NAME nxt
+    LIB_NAME dawn
     LIB_TYPE STATIC
     PRINT_NAME libNXT
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
-        -T nxt
+        -T dawn
 )
-target_include_directories(nxt PUBLIC ${GENERATED_DIR})
+target_include_directories(dawn PUBLIC ${GENERATED_DIR})
 
 Generate(
-    LIB_NAME nxtcpp
+    LIB_NAME dawncpp
     LIB_TYPE STATIC
     PRINT_NAME libNXT++
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
-        -T nxtcpp
+        -T dawncpp
 )
-target_include_directories(nxtcpp PUBLIC ${GENERATED_DIR} PUBLIC ${INCLUDE_DIR})
-target_link_libraries(nxtcpp nxt)
+target_include_directories(dawncpp PUBLIC ${GENERATED_DIR} PUBLIC ${INCLUDE_DIR})
+target_link_libraries(dawncpp dawn)
 
 ################################################################################
 # Call to other CMakeLists.txt

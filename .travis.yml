@@ -69,7 +69,7 @@ script:
  - cmake --build .
 
  # Test
- - ./nxt_unittests
+ - ./dawn_unittests
 
  # Get out of the build dir
  - cd ..

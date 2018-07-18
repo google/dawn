@@ -13,16 +13,16 @@
 # limitations under the License.
 
 Generate(
-    LIB_NAME mock_nxt
+    LIB_NAME mock_dawn
     LIB_TYPE STATIC
     FOLDER "tests"
     PRINT_NAME libMockNXT
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
-        -T mock_nxt
+        -T mock_dawn
 )
-target_include_directories(mock_nxt PUBLIC ${GENERATED_DIR})
-target_link_libraries(mock_nxt nxt gtest)
+target_include_directories(mock_dawn PUBLIC ${GENERATED_DIR})
+target_link_libraries(mock_dawn dawn gtest)
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UNITTESTS_DIR ${TESTS_DIR}/unittests)
@@ -66,11 +66,11 @@ if (DAWN_ENABLE_D3D12)
     )
 endif()
 
-add_executable(nxt_unittests ${UNITTEST_SOURCES})
-target_link_libraries(nxt_unittests nxt_common gtest nxt_backend mock_nxt nxt_wire utils)
-NXTInternalTarget("tests" nxt_unittests)
+add_executable(dawn_unittests ${UNITTEST_SOURCES})
+target_link_libraries(dawn_unittests dawn_common gtest dawn_backend mock_dawn dawn_wire utils)
+NXTInternalTarget("tests" dawn_unittests)
 
-add_executable(nxt_end2end_tests
+add_executable(dawn_end2end_tests
     ${END2END_TESTS_DIR}/BasicTests.cpp
     ${END2END_TESTS_DIR}/BufferTests.cpp
     ${END2END_TESTS_DIR}/BlendStateTests.cpp
@@ -90,5 +90,5 @@ add_executable(nxt_end2end_tests
     ${TESTS_DIR}/NXTTest.cpp
     ${TESTS_DIR}/NXTTest.h
 )
-target_link_libraries(nxt_end2end_tests nxt_common nxt_wire gtest utils)
-NXTInternalTarget("tests" nxt_end2end_tests)
+target_link_libraries(dawn_end2end_tests dawn_common dawn_wire gtest utils)
+NXTInternalTarget("tests" dawn_end2end_tests)

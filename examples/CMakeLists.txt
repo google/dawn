@@ -16,10 +16,10 @@ add_library(sample_utils
     SampleUtils.cpp
     SampleUtils.h
 )
-target_link_libraries(sample_utils utils nxt_wire)
+target_link_libraries(sample_utils utils dawn_wire)
 NXTInternalTarget("examples" sample_utils)
 
-function(add_nxt_sample target sources)
+function(add_dawn_sample target sources)
     add_executable(${target} ${sources})
     target_link_libraries(${target} sample_utils)
     target_include_directories(${target} SYSTEM PRIVATE ${GLM_INCLUDE_DIR})
@@ -44,10 +44,10 @@ function(add_nxt_sample target sources)
     endif()
 endfunction()
 
-add_nxt_sample(CHelloTriangle CHelloTriangle.cpp)
-add_nxt_sample(CppHelloTriangle CppHelloTriangle.cpp)
-add_nxt_sample(ComputeBoids ComputeBoids.cpp)
-add_nxt_sample(Animometer Animometer.cpp)
-add_nxt_sample(CubeReflection CubeReflection.cpp)
+add_dawn_sample(CHelloTriangle CHelloTriangle.cpp)
+add_dawn_sample(CppHelloTriangle CppHelloTriangle.cpp)
+add_dawn_sample(ComputeBoids ComputeBoids.cpp)
+add_dawn_sample(Animometer Animometer.cpp)
+add_dawn_sample(CubeReflection CubeReflection.cpp)
 
-add_nxt_sample(glTFViewer glTFViewer/glTFViewer.cpp)
+add_dawn_sample(glTFViewer glTFViewer/glTFViewer.cpp)

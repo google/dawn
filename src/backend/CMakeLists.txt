@@ -28,7 +28,7 @@ Generate(
         ${GENERATOR_COMMON_ARGS}
         -T backend_utils
 )
-target_link_libraries(backend_utils_autogen nxtcpp)
+target_link_libraries(backend_utils_autogen dawncpp)
 target_include_directories(backend_utils_autogen PUBLIC ${GENERATED_DIR})
 target_include_directories(backend_utils_autogen PRIVATE ${SRC_DIR})
 
@@ -42,7 +42,7 @@ function(GenerateProcTable backend)
             ${GENERATOR_COMMON_ARGS}
             -T ${backend}
     )
-    target_link_libraries(${backend}_autogen nxtcpp backend_utils_autogen)
+    target_link_libraries(${backend}_autogen dawncpp backend_utils_autogen)
     target_include_directories(${backend}_autogen PRIVATE ${SRC_DIR})
     target_include_directories(${backend}_autogen PUBLIC ${GENERATED_DIR})
 endfunction()
@@ -388,22 +388,22 @@ list(APPEND BACKEND_SOURCES
     ${BACKEND_DIR}/ToBackend.h
 )
 
-add_library(nxt_backend STATIC ${BACKEND_SOURCES})
-NXTInternalTarget("backend" nxt_backend)
-target_link_libraries(nxt_backend nxt_common glfw glad spirv_cross)
+add_library(dawn_backend STATIC ${BACKEND_SOURCES})
+NXTInternalTarget("backend" dawn_backend)
+target_link_libraries(dawn_backend dawn_common glfw glad spirv_cross)
 
 if (DAWN_ENABLE_D3D12)
-    target_link_libraries(nxt_backend d3d12_autogen)
+    target_link_libraries(dawn_backend d3d12_autogen)
 endif()
 if (DAWN_ENABLE_METAL)
-    target_link_libraries(nxt_backend metal_autogen)
+    target_link_libraries(dawn_backend metal_autogen)
 endif()
 if (DAWN_ENABLE_NULL)
-    target_link_libraries(nxt_backend null_autogen)
+    target_link_libraries(dawn_backend null_autogen)
 endif()
 if (DAWN_ENABLE_OPENGL)
-    target_link_libraries(nxt_backend opengl_autogen)
+    target_link_libraries(dawn_backend opengl_autogen)
 endif()
 if (DAWN_ENABLE_VULKAN)
-    target_link_libraries(nxt_backend vulkan_autogen)
+    target_link_libraries(dawn_backend vulkan_autogen)
 endif()

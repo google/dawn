@@ -33,6 +33,6 @@ list(APPEND COMMON_SOURCES
     ${COMMON_DIR}/windows_with_undefs.h
 )
 
-add_library(nxt_common STATIC ${COMMON_SOURCES})
-target_include_directories(nxt_common PUBLIC ${SRC_DIR})
-NXTInternalTarget("" nxt_common)
+add_library(dawn_common STATIC ${COMMON_SOURCES})
+target_include_directories(dawn_common PUBLIC ${SRC_DIR})
+NXTInternalTarget("" dawn_common)

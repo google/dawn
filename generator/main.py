@@ -389,13 +389,13 @@ def debug(text):
     print(text)
 
 def main():
-    targets = ['nxt', 'nxtcpp', 'mock_nxt', 'opengl', 'metal', 'd3d12', 'null', 'wire', 'blink']
+    targets = ['dawn', 'dawncpp', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'wire', 'blink']
 
     parser = argparse.ArgumentParser(
-        description = 'Generates code for various target for NXT.',
+        description = 'Generates code for various target for Dawn.',
         formatter_class = argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument('json', metavar='NXT_JSON', nargs=1, type=str, help ='The NXT JSON definition to use.')
+    parser.add_argument('json', metavar='DAWN_JSON', nargs=1, type=str, help ='The DAWN JSON definition to use.')
     parser.add_argument('-t', '--template-dir', default='templates', type=str, help='Directory with template files.')
     parser.add_argument('-o', '--output-dir', default=None, type=str, help='Output directory for the generated source files.')
     parser.add_argument('-T', '--targets', default=None, type=str, help='Comma-separated subset of targets to output. Available targets: ' + ', '.join(targets))
@@ -438,17 +438,17 @@ def main():
 
     c_params = {'native_methods': lambda typ: c_native_methods(api_params['types'], typ)}
 
-    if 'nxt' in targets:
+    if 'dawn' in targets:
         renders.append(FileRender('api.h', 'nxt/nxt.h', [base_params, api_params, c_params]))
         renders.append(FileRender('api.c', 'nxt/nxt.c', [base_params, api_params, c_params]))
 
-    if 'nxtcpp' in targets:
+    if 'dawncpp' in targets:
         additional_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
         renders.append(FileRender('apicpp.h', 'nxt/nxtcpp.h', [base_params, api_params, additional_params]))
         renders.append(FileRender('apicpp.cpp', 'nxt/nxtcpp.cpp', [base_params, api_params, additional_params]))
         renders.append(FileRender('apicpp_traits.h', 'nxt/nxtcpp_traits.h', [base_params, api_params, additional_params]))
 
-    if 'mock_nxt' in targets:
+    if 'mock_dawn' in targets:
         renders.append(FileRender('mock_api.h', 'mock/mock_nxt.h', [base_params, api_params, c_params]))
         renders.append(FileRender('mock_api.cpp', 'mock/mock_nxt.cpp', [base_params, api_params, c_params]))
 

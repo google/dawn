@@ -17,4 +17,4 @@ build_script:
  - cmake --build . -- /verbosity:minimal
 
  # TODO(cwallez@chromium.org) test on more than Debug.
- - Debug\nxt_unittests.exe
+ - Debug\dawn_unittests.exe

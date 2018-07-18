@@ -54,7 +54,7 @@ if (DAWN_ENABLE_VULKAN)
 endif()
 
 add_library(utils STATIC ${UTILS_SOURCES})
-target_link_libraries(utils nxt_backend shaderc_shared nxtcpp nxt)
+target_link_libraries(utils dawn_backend shaderc_shared dawncpp dawn)
 target_include_directories(utils PUBLIC ${SRC_DIR})
 NXTInternalTarget("" utils)
 if(NOT MSVC)
