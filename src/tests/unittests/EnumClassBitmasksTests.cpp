@@ -26,7 +26,7 @@ namespace dawn {
     };
 
     template<>
-    struct IsNXTBitmask<Color> {
+    struct IsDawnBitmask<Color> {
         static constexpr bool enable = true;
     };
 

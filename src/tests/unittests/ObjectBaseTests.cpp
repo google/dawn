@@ -21,11 +21,11 @@ class Object : public dawn::ObjectBase<Object, int*> {
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
-        static void NxtReference(int* handle) {
+        static void DawnReference(int* handle) {
             ASSERT_LT(0, *handle);
             *handle += 1;
         }
-        static void NxtRelease(int* handle) {
+        static void DawnRelease(int* handle) {
             ASSERT_LT(0, *handle);
             *handle -= 1;
         }

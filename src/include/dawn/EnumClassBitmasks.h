@@ -39,7 +39,7 @@ namespace dawn {
 #endif
 
     template <typename T>
-    struct IsNXTBitmask {
+    struct IsDawnBitmask {
         static constexpr bool enable = false;
     };
 
@@ -49,7 +49,7 @@ namespace dawn {
     };
 
     template <typename T>
-    struct LowerBitmask<T, typename std::enable_if<IsNXTBitmask<T>::enable>::type> {
+    struct LowerBitmask<T, typename std::enable_if<IsDawnBitmask<T>::enable>::type> {
         static constexpr bool enable = true;
         using type = T;
         constexpr static T Lower(T t) {
@@ -130,7 +130,7 @@ namespace dawn {
 
     template <typename T,
               typename T2,
-              typename = typename std::enable_if<IsNXTBitmask<T>::enable &&
+              typename = typename std::enable_if<IsDawnBitmask<T>::enable &&
                                                  LowerBitmask<T2>::enable>::type>
     constexpr T& operator&=(T& l, T2 right) {
         T r = LowerBitmask<T2>::Lower(right);
@@ -140,7 +140,7 @@ namespace dawn {
 
     template <typename T,
               typename T2,
-              typename = typename std::enable_if<IsNXTBitmask<T>::enable &&
+              typename = typename std::enable_if<IsDawnBitmask<T>::enable &&
                                                  LowerBitmask<T2>::enable>::type>
     constexpr T& operator|=(T& l, T2 right) {
         T r = LowerBitmask<T2>::Lower(right);
@@ -150,7 +150,7 @@ namespace dawn {
 
     template <typename T,
               typename T2,
-              typename = typename std::enable_if<IsNXTBitmask<T>::enable &&
+              typename = typename std::enable_if<IsDawnBitmask<T>::enable &&
                                                  LowerBitmask<T2>::enable>::type>
     constexpr T& operator^=(T& l, T2 right) {
         T r = LowerBitmask<T2>::Lower(right);

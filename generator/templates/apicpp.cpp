@@ -112,12 +112,12 @@ namespace dawn {
                 {% endif %}
             }
         {% endfor %}
-        void {{CppType}}::NxtReference({{CType}} handle) {
+        void {{CppType}}::DawnReference({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("reference"))}}(handle);
             }
         }
-        void {{CppType}}::NxtRelease({{CType}} handle) {
+        void {{CppType}}::DawnRelease({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("release"))}}(handle);
             }

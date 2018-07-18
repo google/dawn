@@ -41,7 +41,7 @@ namespace dawn {
 
     {% for type in by_category["bitmask"] %}
         template<>
-        struct IsNXTBitmask<{{as_cppType(type.name)}}> {
+        struct IsDawnBitmask<{{as_cppType(type.name)}}> {
             static constexpr bool enable = true;
         };
 
@@ -72,10 +72,10 @@ namespace dawn {
         public:
             ObjectBase() = default;
             ObjectBase(CType handle): mHandle(handle) {
-                if (mHandle) Derived::NxtReference(mHandle);
+                if (mHandle) Derived::DawnReference(mHandle);
             }
             ~ObjectBase() {
-                if (mHandle) Derived::NxtRelease(mHandle);
+                if (mHandle) Derived::DawnRelease(mHandle);
             }
 
             ObjectBase(ObjectBase const& other) = delete;
@@ -88,7 +88,7 @@ namespace dawn {
             Derived& operator=(ObjectBase&& other) {
                 if (&other == this) return static_cast<Derived&>(*this);
 
-                if (mHandle) Derived::NxtRelease(mHandle);
+                if (mHandle) Derived::DawnRelease(mHandle);
                 mHandle = other.mHandle;
                 other.mHandle = 0;
 
@@ -152,8 +152,8 @@ namespace dawn {
 
             private:
                 friend ObjectBase<{{CppType}}, {{CType}}>;
-                static void NxtReference({{CType}} handle);
-                static void NxtRelease({{CType}} handle);
+                static void DawnReference({{CType}} handle);
+                static void DawnRelease({{CType}} handle);
         };
 
     {% endfor %}
