@@ -16,6 +16,7 @@
 #define BACKEND_BUFFER_H_
 
 #include "backend/Builder.h"
+#include "backend/Error.h"
 #include "backend/Forward.h"
 #include "backend/RefCounted.h"
 
@@ -66,7 +67,11 @@ namespace backend {
         virtual void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
         virtual void UnmapImpl() = 0;
 
-        bool ValidateMapBase(uint32_t start, uint32_t size, dawn::BufferUsageBit requiredUsage);
+        MaybeError ValidateSetSubData(uint32_t start, uint32_t count) const;
+        MaybeError ValidateMap(uint32_t start,
+                               uint32_t size,
+                               dawn::BufferUsageBit requiredUsage) const;
+        MaybeError ValidateUnmap() const;
 
         DeviceBase* mDevice;
         uint32_t mSize;

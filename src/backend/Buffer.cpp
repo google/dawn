@@ -78,13 +78,7 @@ namespace backend {
     }
 
     void BufferBase::SetSubData(uint32_t start, uint32_t count, const uint8_t* data) {
-        if (start + count > GetSize()) {
-            mDevice->HandleError("Buffer subdata out of range");
-            return;
-        }
-
-        if (!(mAllowedUsage & dawn::BufferUsageBit::TransferDst)) {
-            mDevice->HandleError("Buffer needs the transfer dst usage bit");
+        if (mDevice->ConsumedError(ValidateSetSubData(start, count))) {
             return;
         }
 
@@ -95,7 +89,7 @@ namespace backend {
                                   uint32_t size,
                                   dawnBufferMapReadCallback callback,
                                   dawnCallbackUserdata userdata) {
-        if (!ValidateMapBase(start, size, dawn::BufferUsageBit::MapRead)) {
+        if (mDevice->ConsumedError(ValidateMap(start, size, dawn::BufferUsageBit::MapRead))) {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
@@ -115,7 +109,7 @@ namespace backend {
                                    uint32_t size,
                                    dawnBufferMapWriteCallback callback,
                                    dawnCallbackUserdata userdata) {
-        if (!ValidateMapBase(start, size, dawn::BufferUsageBit::MapWrite)) {
+        if (mDevice->ConsumedError(ValidateMap(start, size, dawn::BufferUsageBit::MapWrite))) {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
@@ -132,8 +126,7 @@ namespace backend {
     }
 
     void BufferBase::Unmap() {
-        if (!mIsMapped) {
-            mDevice->HandleError("Buffer wasn't mapped");
+        if (mDevice->ConsumedError(ValidateUnmap())) {
             return;
         }
 
@@ -148,26 +141,44 @@ namespace backend {
         mMapUserdata = 0;
     }
 
-    bool BufferBase::ValidateMapBase(uint32_t start,
-                                     uint32_t size,
-                                     dawn::BufferUsageBit requiredUsage) {
+    MaybeError BufferBase::ValidateSetSubData(uint32_t start, uint32_t count) const {
+        // TODO(cwallez@chromium.org): check for overflows.
+        if (start + count > GetSize()) {
+            DAWN_RETURN_ERROR("Buffer subdata out of range");
+        }
+
+        if (!(mAllowedUsage & dawn::BufferUsageBit::TransferDst)) {
+            DAWN_RETURN_ERROR("Buffer needs the transfer dst usage bit");
+        }
+
+        return {};
+    }
+
+    MaybeError BufferBase::ValidateMap(uint32_t start,
+                                       uint32_t size,
+                                       dawn::BufferUsageBit requiredUsage) const {
         // TODO(cwallez@chromium.org): check for overflows.
         if (start + size > GetSize()) {
-            mDevice->HandleError("Buffer map read out of range");
-            return false;
+            DAWN_RETURN_ERROR("Buffer map read out of range");
         }
 
         if (mIsMapped) {
-            mDevice->HandleError("Buffer already mapped");
-            return false;
+            DAWN_RETURN_ERROR("Buffer already mapped");
         }
 
         if (!(mAllowedUsage & requiredUsage)) {
-            mDevice->HandleError("Buffer needs the correct map usage bit");
-            return false;
+            DAWN_RETURN_ERROR("Buffer needs the correct map usage bit");
         }
 
-        return true;
+        return {};
+    }
+
+    MaybeError BufferBase::ValidateUnmap() const {
+        if (!mIsMapped) {
+            DAWN_RETURN_ERROR("Buffer wasn't mapped");
+        }
+
+        return {};
     }
 
     // BufferBuilder
