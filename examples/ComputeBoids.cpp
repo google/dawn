@@ -279,7 +279,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& render
 }
 
 void init() {
-    device = CreateCppNXTDevice();
+    device = CreateCppDawnDevice();
 
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);

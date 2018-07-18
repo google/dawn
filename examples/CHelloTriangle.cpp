@@ -25,7 +25,7 @@ nxtRenderPipeline pipeline;
 nxtTextureFormat swapChainFormat;
 
 void init() {
-    device = CreateCppNXTDevice().Release();
+    device = CreateCppDawnDevice().Release();
     queue = nxtDeviceCreateQueue(device);
 
     {

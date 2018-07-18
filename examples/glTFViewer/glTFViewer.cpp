@@ -437,7 +437,7 @@ namespace {
     }
 
     void init() {
-        device = CreateCppNXTDevice();
+        device = CreateCppDawnDevice();
 
         queue = device.CreateQueue();
         swapchain = GetSwapChain(device);

@@ -65,7 +65,7 @@ static dawn::wire::CommandHandler* wireClient = nullptr;
 static dawn::wire::TerribleCommandBuffer* c2sBuf = nullptr;
 static dawn::wire::TerribleCommandBuffer* s2cBuf = nullptr;
 
-dawn::Device CreateCppNXTDevice() {
+dawn::Device CreateCppDawnDevice() {
     binding = utils::CreateBinding(backendType);
     if (binding == nullptr) {
         return dawn::Device();
