@@ -37,4 +37,4 @@ add_library(dawn_wire STATIC
     ${WIRE_DIR}/Wire.h
 )
 target_link_libraries(dawn_wire wire_autogen)
-NXTInternalTarget("wire" dawn_wire)
+DawnInternalTarget("wire" dawn_wire)

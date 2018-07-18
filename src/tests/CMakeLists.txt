@@ -16,7 +16,7 @@ Generate(
     LIB_NAME mock_dawn
     LIB_TYPE STATIC
     FOLDER "tests"
-    PRINT_NAME libMockNXT
+    PRINT_NAME libMockDawn
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
         -T mock_dawn
@@ -68,7 +68,7 @@ endif()
 
 add_executable(dawn_unittests ${UNITTEST_SOURCES})
 target_link_libraries(dawn_unittests dawn_common gtest dawn_backend mock_dawn dawn_wire utils)
-NXTInternalTarget("tests" dawn_unittests)
+DawnInternalTarget("tests" dawn_unittests)
 
 add_executable(dawn_end2end_tests
     ${END2END_TESTS_DIR}/BasicTests.cpp
@@ -91,4 +91,4 @@ add_executable(dawn_end2end_tests
     ${TESTS_DIR}/NXTTest.h
 )
 target_link_libraries(dawn_end2end_tests dawn_common dawn_wire gtest utils)
-NXTInternalTarget("tests" dawn_end2end_tests)
+DawnInternalTarget("tests" dawn_end2end_tests)

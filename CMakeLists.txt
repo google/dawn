@@ -92,7 +92,7 @@ if (WIN32)
     list(APPEND DAWN_DEFS "NOMINMAX")
     # Avoid Windows.h including a lot of headers
     list(APPEND DAWN_DEFS "WIN32_LEAN_AND_MEAN")
-    # Remove compile error where the mock NXT creates too many sections for the old obj format.
+    # Remove compile error where the mock Dawn creates too many sections for the old obj format.
     list(APPEND DAWN_FLAGS "/bigobj")
 endif()
 
@@ -100,7 +100,7 @@ if (MSVC)
     list(APPEND DAWN_FLAGS "/std:c++14")
     list(APPEND DAWN_FLAGS "/EHsc")
     list(APPEND DAWN_INTERNAL_FLAGS "/W4")
-    # Allow declarations hiding members as it is used all over NXT
+    # Allow declarations hiding members as it is used all over Dawn
     list(APPEND DAWN_INTERNAL_FLAGS "/wd4458")
     list(APPEND DAWN_INTERNAL_FLAGS "/wd4996") # Allow deprecated functions like strncpy
 
@@ -141,14 +141,14 @@ else()
     endif()
 endif()
 
-function(NXTExternalTarget folder target)
+function(DawnExternalTarget folder target)
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${DAWN_FLAGS})
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${DAWN_DEFS})
     set_property(TARGET ${target} PROPERTY FOLDER "dawn/${folder}")
 endfunction()
 
-function(NXTInternalTarget folder target)
-    NXTExternalTarget("${folder}" ${target})
+function(DawnInternalTarget folder target)
+    DawnExternalTarget("${folder}" ${target})
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${DAWN_INTERNAL_FLAGS})
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${DAWN_INTERNAL_DEFS})
 
@@ -174,7 +174,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 ################################################################################
-# Generate the C and C++ NXT APIs
+# Generate the C and C++ Dawn APIs
 ################################################################################
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
@@ -185,7 +185,7 @@ add_subdirectory(generator)
 Generate(
     LIB_NAME dawn
     LIB_TYPE STATIC
-    PRINT_NAME libNXT
+    PRINT_NAME libDawn
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
         -T dawn
@@ -195,7 +195,7 @@ target_include_directories(dawn PUBLIC ${GENERATED_DIR})
 Generate(
     LIB_NAME dawncpp
     LIB_TYPE STATIC
-    PRINT_NAME libNXT++
+    PRINT_NAME libDawn++
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
         -T dawncpp

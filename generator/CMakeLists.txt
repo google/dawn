@@ -61,7 +61,7 @@ function(Generate)
         ${OUTPUTS}
     )
 
-    NXTInternalTarget("${G_FOLDER}" ${G_LIB_NAME})
+    DawnInternalTarget("${G_FOLDER}" ${G_LIB_NAME})
     set_property(TARGET ${G_LIB_NAME} APPEND PROPERTY COMPILE_OPTIONS ${DAWN_GENERATED_FLAGS})
 endfunction()
 

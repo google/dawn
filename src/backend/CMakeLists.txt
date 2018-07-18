@@ -389,7 +389,7 @@ list(APPEND BACKEND_SOURCES
 )
 
 add_library(dawn_backend STATIC ${BACKEND_SOURCES})
-NXTInternalTarget("backend" dawn_backend)
+DawnInternalTarget("backend" dawn_backend)
 target_link_libraries(dawn_backend dawn_common glfw glad spirv_cross)
 
 if (DAWN_ENABLE_D3D12)

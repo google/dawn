@@ -35,4 +35,4 @@ list(APPEND COMMON_SOURCES
 
 add_library(dawn_common STATIC ${COMMON_SOURCES})
 target_include_directories(dawn_common PUBLIC ${SRC_DIR})
-NXTInternalTarget("" dawn_common)
+DawnInternalTarget("" dawn_common)

@@ -17,14 +17,14 @@ add_library(sample_utils
     SampleUtils.h
 )
 target_link_libraries(sample_utils utils dawn_wire)
-NXTInternalTarget("examples" sample_utils)
+DawnInternalTarget("examples" sample_utils)
 
 function(add_dawn_sample target sources)
     add_executable(${target} ${sources})
     target_link_libraries(${target} sample_utils)
     target_include_directories(${target} SYSTEM PRIVATE ${GLM_INCLUDE_DIR})
     target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    NXTInternalTarget("examples" ${target})
+    DawnInternalTarget("examples" ${target})
 
     # Suppress some warnings in our sample dependencies
     if (MSVC)

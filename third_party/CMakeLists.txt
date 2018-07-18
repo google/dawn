@@ -18,7 +18,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(glfw)
-NXTExternalTarget("third_party" glfw)
+DawnExternalTarget("third_party" glfw)
 
 # GoogleTest
 set(GTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest/googletest)
@@ -28,7 +28,7 @@ target_include_directories(gtest SYSTEM PUBLIC ${GTEST_DIR}/include ${GMOCK_DIR}
 target_include_directories(gtest SYSTEM PRIVATE ${GTEST_DIR} ${GMOCK_DIR})
 find_package(Threads)
 target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
-NXTExternalTarget("third_party" gtest)
+DawnExternalTarget("third_party" gtest)
 
 # Glad
 add_library(glad STATIC
@@ -37,7 +37,7 @@ add_library(glad STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include/KHR/khrplatform.h
 )
 target_include_directories(glad SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
-NXTExternalTarget("third_party" glad)
+DawnExternalTarget("third_party" glad)
 
 # ShaderC
 # Prevent SPIRV-Tools from using Werror as it has a warning on MSVC
@@ -130,7 +130,7 @@ endif()
 
 add_library(spirv_cross STATIC ${SPIRV_CROSS_SOURCES})
 target_include_directories(spirv_cross SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-NXTExternalTarget("third_party" spirv_cross)
+DawnExternalTarget("third_party" spirv_cross)
 
 # STB, used for stb_image
 set(STB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/stb PARENT_SCOPE)

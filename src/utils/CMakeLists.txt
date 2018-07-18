@@ -56,7 +56,7 @@ endif()
 add_library(utils STATIC ${UTILS_SOURCES})
 target_link_libraries(utils dawn_backend shaderc_shared dawncpp dawn)
 target_include_directories(utils PUBLIC ${SRC_DIR})
-NXTInternalTarget("" utils)
+DawnInternalTarget("" utils)
 if(NOT MSVC)
     # allow C-style casts -- for shaderc
     set_property(TARGET utils APPEND PROPERTY COMPILE_OPTIONS "-Wno-old-style-cast")
