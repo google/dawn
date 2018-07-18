@@ -18,7 +18,7 @@
 #include <dawn/dawn_wsi.h>
 
 struct GLFWwindow;
-typedef struct nxtProcTable_s nxtProcTable;
+typedef struct dawnProcTable_s dawnProcTable;
 typedef struct dawnDeviceImpl* dawnDevice;
 
 namespace utils {
@@ -36,7 +36,7 @@ namespace utils {
         virtual ~BackendBinding() = default;
 
         virtual void SetupGLFWWindowHints() = 0;
-        virtual void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) = 0;
+        virtual void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) = 0;
         virtual uint64_t GetSwapChainImplementation() = 0;
         virtual dawnTextureFormat GetPreferredSwapChainTextureFormat() = 0;
 

@@ -26,7 +26,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 namespace backend { namespace metal {
-    void Init(id<MTLDevice> metalDevice, nxtProcTable* procs, dawnDevice* device);
+    void Init(id<MTLDevice> metalDevice, dawnProcTable* procs, dawnDevice* device);
     void SetNextDrawable(dawnDevice device, id<CAMetalDrawable> drawable);
     void Present(dawnDevice device);
 }}
@@ -114,7 +114,7 @@ namespace utils {
         void SetupGLFWWindowHints() override {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
-        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
+        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
             mMetalDevice = MTLCreateSystemDefaultDevice();
 
             backend::metal::Init(mMetalDevice, procs, device);

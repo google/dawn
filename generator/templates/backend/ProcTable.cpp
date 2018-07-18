@@ -183,8 +183,8 @@ namespace {{namespace}} {
         {% endfor %}
     }
 
-    nxtProcTable GetNonValidatingProcs() {
-        nxtProcTable table;
+    dawnProcTable GetNonValidatingProcs() {
+        dawnProcTable table;
         {% for type in by_category["object"] %}
             {% for method in native_methods(type) %}
                 table.{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(NonValidating{{as_MethodSuffix(type.name, method.name)}});
@@ -193,8 +193,8 @@ namespace {{namespace}} {
         return table;
     }
 
-    nxtProcTable GetValidatingProcs() {
-        nxtProcTable table;
+    dawnProcTable GetValidatingProcs() {
+        dawnProcTable table;
         {% for type in by_category["object"] %}
             {% for method in native_methods(type) %}
                 table.{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(Validating{{as_MethodSuffix(type.name, method.name)}});

@@ -40,10 +40,10 @@
 
 namespace backend { namespace d3d12 {
 
-    nxtProcTable GetNonValidatingProcs();
-    nxtProcTable GetValidatingProcs();
+    dawnProcTable GetNonValidatingProcs();
+    dawnProcTable GetValidatingProcs();
 
-    void Init(nxtProcTable* procs, dawnDevice* device) {
+    void Init(dawnProcTable* procs, dawnDevice* device) {
         *device = nullptr;
         *procs = GetValidatingProcs();
         *device = reinterpret_cast<dawnDevice>(new Device());

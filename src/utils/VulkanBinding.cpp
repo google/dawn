@@ -23,7 +23,7 @@
 #include <vector>
 
 namespace backend { namespace vulkan {
-    void Init(nxtProcTable* procs,
+    void Init(dawnProcTable* procs,
               dawnDevice* device,
               const std::vector<const char*>& requiredInstanceExtensions);
 
@@ -67,7 +67,7 @@ namespace utils {
         void SetupGLFWWindowHints() override {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
-        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
+        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
             uint32_t extensionCount = 0;
             const char** glfwInstanceExtensions =
                 glfwGetRequiredInstanceExtensions(&extensionCount);

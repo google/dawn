@@ -34,11 +34,11 @@ namespace dawn { namespace wire {
         virtual const char* HandleCommands(const char* commands, size_t size) = 0;
     };
 
-    CommandHandler* NewClientDevice(nxtProcTable* procs,
+    CommandHandler* NewClientDevice(dawnProcTable* procs,
                                     dawnDevice* device,
                                     CommandSerializer* serializer);
     CommandHandler* NewServerCommandHandler(dawnDevice device,
-                                            const nxtProcTable& procs,
+                                            const dawnProcTable& procs,
                                             CommandSerializer* serializer);
 
 }}  // namespace dawn::wire

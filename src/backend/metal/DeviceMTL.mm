@@ -35,10 +35,10 @@
 #include <unistd.h>
 
 namespace backend { namespace metal {
-    nxtProcTable GetNonValidatingProcs();
-    nxtProcTable GetValidatingProcs();
+    dawnProcTable GetNonValidatingProcs();
+    dawnProcTable GetValidatingProcs();
 
-    void Init(id<MTLDevice> metalDevice, nxtProcTable* procs, dawnDevice* device) {
+    void Init(id<MTLDevice> metalDevice, dawnProcTable* procs, dawnDevice* device) {
         *device = nullptr;
 
         *procs = GetValidatingProcs();

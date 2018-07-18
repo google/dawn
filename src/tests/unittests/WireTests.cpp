@@ -127,7 +127,7 @@ class WireTestsBase : public Test {
             mockBufferMapReadCallback = new MockBufferMapReadCallback;
             mockBufferMapWriteCallback = new MockBufferMapWriteCallback;
 
-            nxtProcTable mockProcs;
+            dawnProcTable mockProcs;
             dawnDevice mockDevice;
             api.GetProcTableAndDevice(&mockProcs, &mockDevice);
 
@@ -144,16 +144,16 @@ class WireTestsBase : public Test {
             mWireServer = NewServerCommandHandler(mockDevice, mockProcs, mS2cBuf);
             mC2sBuf->SetHandler(mWireServer);
 
-            nxtProcTable clientProcs;
+            dawnProcTable clientProcs;
             mWireClient = NewClientDevice(&clientProcs, &device, mC2sBuf);
-            nxtSetProcs(&clientProcs);
+            dawnSetProcs(&clientProcs);
             mS2cBuf->SetHandler(mWireClient);
 
             apiDevice = mockDevice;
         }
 
         void TearDown() override {
-            nxtSetProcs(nullptr);
+            dawnSetProcs(nullptr);
             delete mWireServer;
             delete mWireClient;
             delete mC2sBuf;

@@ -14,11 +14,11 @@
 
 #include "dawn/dawn.h"
 
-static nxtProcTable procs;
+static dawnProcTable procs;
 
-static nxtProcTable nullProcs;
+static dawnProcTable nullProcs;
 
-void nxtSetProcs(const nxtProcTable* procs_) {
+void dawnSetProcs(const dawnProcTable* procs_) {
     if (procs_) {
         procs = *procs_;
     } else {

@@ -26,7 +26,7 @@
 #include "GLFW/glfw3.h"
 
 namespace backend { namespace opengl {
-    void Init(void* (*getProc)(const char*), nxtProcTable* procs, dawnDevice* device);
+    void Init(void* (*getProc)(const char*), dawnProcTable* procs, dawnDevice* device);
 }}  // namespace backend::opengl
 
 namespace utils {
@@ -111,7 +111,7 @@ namespace utils {
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
         }
-        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
+        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
             glfwMakeContextCurrent(mWindow);
             backend::opengl::Init(reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress),
                                   procs, device);

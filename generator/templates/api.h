@@ -68,7 +68,7 @@ extern "C" {
 
 {% endfor %}
 
-struct nxtProcTable_s {
+struct dawnProcTable_s {
     {% for type in by_category["object"] %}
         {% for method in native_methods(type) %}
             {{as_cProc(type.name, method.name)}} {{as_varName(type.name, method.name)}};
@@ -76,12 +76,12 @@ struct nxtProcTable_s {
 
     {% endfor %}
 };
-typedef struct nxtProcTable_s nxtProcTable;
+typedef struct dawnProcTable_s dawnProcTable;
 
-// Stuff below is for convenience and will forward calls to a static nxtProcTable.
+// Stuff below is for convenience and will forward calls to a static dawnProcTable.
 
-// Set which nxtProcTable will be used
-void nxtSetProcs(const nxtProcTable* procs);
+// Set which dawnProcTable will be used
+void dawnSetProcs(const dawnProcTable* procs);
 
 {% for type in by_category["object"] %}
     // Methods of {{type.name.CamelCase()}}

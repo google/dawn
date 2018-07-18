@@ -20,10 +20,10 @@
 
 namespace backend { namespace null {
 
-    nxtProcTable GetNonValidatingProcs();
-    nxtProcTable GetValidatingProcs();
+    dawnProcTable GetNonValidatingProcs();
+    dawnProcTable GetValidatingProcs();
 
-    void Init(nxtProcTable* procs, dawnDevice* device) {
+    void Init(dawnProcTable* procs, dawnDevice* device) {
         *procs = GetValidatingProcs();
         *device = reinterpret_cast<dawnDevice>(new Device);
     }

@@ -22,7 +22,7 @@
 #include "GLFW/glfw3native.h"
 
 namespace backend { namespace d3d12 {
-    void Init(nxtProcTable* procs, dawnDevice* device);
+    void Init(dawnProcTable* procs, dawnDevice* device);
 
     dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, HWND window);
     dawnTextureFormat GetNativeSwapChainPreferredFormat(
@@ -37,7 +37,7 @@ namespace utils {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
 
-        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
+        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
             backend::d3d12::Init(procs, device);
             mBackendDevice = *device;
         }

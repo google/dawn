@@ -106,7 +106,7 @@ NXTTest::~NXTTest() {
     delete mBinding;
     mBinding = nullptr;
 
-    nxtSetProcs(nullptr);
+    dawnSetProcs(nullptr);
 }
 
 bool NXTTest::IsD3D12() const {
@@ -137,12 +137,12 @@ void NXTTest::SetUp() {
     mBinding->SetWindow(testWindow);
 
     dawnDevice backendDevice;
-    nxtProcTable backendProcs;
+    dawnProcTable backendProcs;
     mBinding->GetProcAndDevice(&backendProcs, &backendDevice);
 
     // Choose whether to use the backend procs and devices directly, or set up the wire.
     dawnDevice cDevice = nullptr;
-    nxtProcTable procs;
+    dawnProcTable procs;
 
     if (gTestUsesWire) {
         mC2sBuf = new dawn::wire::TerribleCommandBuffer();
@@ -152,7 +152,7 @@ void NXTTest::SetUp() {
         mC2sBuf->SetHandler(mWireServer);
 
         dawnDevice clientDevice;
-        nxtProcTable clientProcs;
+        dawnProcTable clientProcs;
         mWireClient = dawn::wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf);
         mS2cBuf->SetHandler(mWireClient);
 
@@ -165,7 +165,7 @@ void NXTTest::SetUp() {
 
     // Set up the device and queue because all tests need them, and NXTTest needs them too for the
     // deferred expectations.
-    nxtSetProcs(&procs);
+    dawnSetProcs(&procs);
     device = dawn::Device::Acquire(cDevice);
     queue = device.CreateQueue();
 

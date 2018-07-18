@@ -32,10 +32,10 @@
 #include "backend/opengl/TextureGL.h"
 
 namespace backend { namespace opengl {
-    nxtProcTable GetNonValidatingProcs();
-    nxtProcTable GetValidatingProcs();
+    dawnProcTable GetNonValidatingProcs();
+    dawnProcTable GetValidatingProcs();
 
-    void Init(void* (*getProc)(const char*), nxtProcTable* procs, dawnDevice* device) {
+    void Init(void* (*getProc)(const char*), dawnProcTable* procs, dawnDevice* device) {
         *device = nullptr;
 
         gladLoadGLLoader(reinterpret_cast<GLADloadproc>(getProc));

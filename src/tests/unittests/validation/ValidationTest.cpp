@@ -18,16 +18,16 @@
 
 namespace backend {
     namespace null {
-        void Init(nxtProcTable* procs, dawnDevice* device);
+        void Init(dawnProcTable* procs, dawnDevice* device);
     }
 }
 
 ValidationTest::ValidationTest() {
-    nxtProcTable procs;
+    dawnProcTable procs;
     dawnDevice cDevice;
     backend::null::Init(&procs, &cDevice);
 
-    nxtSetProcs(&procs);
+    dawnSetProcs(&procs);
     device = dawn::Device::Acquire(cDevice);
 
     device.SetErrorCallback(ValidationTest::OnDeviceError, static_cast<dawnCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
@@ -37,7 +37,7 @@ ValidationTest::~ValidationTest() {
     // We need to destroy NXT objects before setting the procs to null otherwise the nxt*Release
     // will call a nullptr
     device = dawn::Device();
-    nxtSetProcs(nullptr);
+    dawnSetProcs(nullptr);
 }
 
 void ValidationTest::TearDown() {

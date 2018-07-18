@@ -205,7 +205,7 @@ namespace dawn { namespace wire {
 
         class Server : public CommandHandler, public ObjectIdResolver {
             public:
-                Server(dawnDevice device, const nxtProcTable& procs, CommandSerializer* serializer)
+                Server(dawnDevice device, const dawnProcTable& procs, CommandSerializer* serializer)
                     : mProcs(procs), mSerializer(serializer) {
                     //* The client-server knowledge is bootstrapped with device 1.
                     auto* deviceData = mKnownDevice.Allocate(1);
@@ -346,7 +346,7 @@ namespace dawn { namespace wire {
                 }
 
             private:
-                nxtProcTable mProcs;
+                dawnProcTable mProcs;
                 CommandSerializer* mSerializer = nullptr;
 
                 ServerAllocator mAllocator;
@@ -622,7 +622,7 @@ namespace dawn { namespace wire {
         }
     }
 
-    CommandHandler* NewServerCommandHandler(dawnDevice device, const nxtProcTable& procs, CommandSerializer* serializer) {
+    CommandHandler* NewServerCommandHandler(dawnDevice device, const dawnProcTable& procs, CommandSerializer* serializer) {
         return new server::Server(device, procs, serializer);
     }
 

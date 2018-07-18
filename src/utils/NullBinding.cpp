@@ -15,7 +15,7 @@
 #include "utils/BackendBinding.h"
 
 namespace backend { namespace null {
-    void Init(nxtProcTable* procs, dawnDevice* device);
+    void Init(dawnProcTable* procs, dawnDevice* device);
 }}  // namespace backend::null
 
 namespace utils {
@@ -24,7 +24,7 @@ namespace utils {
       public:
         void SetupGLFWWindowHints() override {
         }
-        void GetProcAndDevice(nxtProcTable* procs, dawnDevice* device) override {
+        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
             backend::null::Init(procs, device);
         }
         uint64_t GetSwapChainImplementation() override {

@@ -85,11 +85,11 @@ dawn::Device CreateCppDawnDevice() {
     binding->SetWindow(window);
 
     dawnDevice backendDevice;
-    nxtProcTable backendProcs;
+    dawnProcTable backendProcs;
     binding->GetProcAndDevice(&backendProcs, &backendDevice);
 
     dawnDevice cDevice = nullptr;
-    nxtProcTable procs;
+    dawnProcTable procs;
     switch (cmdBufType) {
         case CmdBufType::None:
             procs = backendProcs;
@@ -105,7 +105,7 @@ dawn::Device CreateCppDawnDevice() {
                 c2sBuf->SetHandler(wireServer);
 
                 dawnDevice clientDevice;
-                nxtProcTable clientProcs;
+                dawnProcTable clientProcs;
                 wireClient = dawn::wire::NewClientDevice(&clientProcs, &clientDevice, c2sBuf);
                 s2cBuf->SetHandler(wireClient);
 
@@ -115,7 +115,7 @@ dawn::Device CreateCppDawnDevice() {
             break;
     }
 
-    nxtSetProcs(&procs);
+    dawnSetProcs(&procs);
     procs.deviceSetErrorCallback(cDevice, PrintDeviceError, 0);
     return dawn::Device::Acquire(cDevice);
 }

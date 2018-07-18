@@ -84,8 +84,8 @@ For example, NXT can only return objects which prevents mapping buffers or even 
 
 Other generators include:
 
-- A C-header with the definition of nxtProcTable that is the “real” underlying NXT API exposed by the backends.
-- Glue code generating nxtProcTable for a backend with simple validation included (enum value checks etc.)
+- A C-header with the definition of dawnProcTable that is the “real” underlying NXT API exposed by the backends.
+- Glue code generating dawnProcTable for a backend with simple validation included (enum value checks etc.)
 - A mock API for testing
 
 ## Structure of the code

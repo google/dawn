@@ -38,7 +38,7 @@ namespace {
 ProcTableAsClass::~ProcTableAsClass() {
 }
 
-void ProcTableAsClass::GetProcTableAndDevice(nxtProcTable* table, dawnDevice* device) {
+void ProcTableAsClass::GetProcTableAndDevice(dawnProcTable* table, dawnDevice* device) {
     *device = GetNewDevice();
 
     {% for type in by_category["object"] %}

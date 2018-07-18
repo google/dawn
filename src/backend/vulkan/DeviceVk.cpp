@@ -52,10 +52,10 @@ const char kVulkanLibName[] = "vulkan-1.dll";
 
 namespace backend { namespace vulkan {
 
-    nxtProcTable GetNonValidatingProcs();
-    nxtProcTable GetValidatingProcs();
+    dawnProcTable GetNonValidatingProcs();
+    dawnProcTable GetValidatingProcs();
 
-    void Init(nxtProcTable* procs,
+    void Init(dawnProcTable* procs,
               dawnDevice* device,
               const std::vector<const char*>& requiredInstanceExtensions) {
         *procs = GetValidatingProcs();
