@@ -19,6 +19,9 @@
 
 #include "nxt/EnumClassBitmasks.h"
 
+// Temporary define to rename NXT to Dawn
+#define dawn nxt
+
 namespace nxt {
 
     {% for type in by_category["enum"] %}
