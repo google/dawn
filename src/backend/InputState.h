@@ -63,7 +63,7 @@ namespace backend {
       public:
         InputStateBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         void SetAttribute(uint32_t shaderLocation,
                           uint32_t bindingSlot,
                           dawn::VertexFormat format,

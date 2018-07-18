@@ -50,7 +50,7 @@ namespace backend {
       public:
         BlendStateBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         void SetBlendEnabled(bool blendEnabled);
         void SetAlphaBlend(dawn::BlendOperation blendOperation,
                            dawn::BlendFactor srcFactor,

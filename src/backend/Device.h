@@ -80,7 +80,7 @@ namespace backend {
             const dawn::BindGroupLayoutDescriptor* descriptor);
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
-        // NXT API
+        // Dawn API
         BindGroupBuilder* CreateBindGroupBuilder();
         BindGroupLayoutBase* CreateBindGroupLayout(
             const dawn::BindGroupLayoutDescriptor* descriptor);

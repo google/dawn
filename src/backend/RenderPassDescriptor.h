@@ -76,7 +76,7 @@ namespace backend {
       public:
         RenderPassDescriptorBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         RenderPassDescriptorBase* GetResultImpl() override;
         void SetColorAttachment(uint32_t attachment,
                                 TextureViewBase* textureView,

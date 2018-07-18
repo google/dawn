@@ -63,7 +63,7 @@ namespace backend {
       public:
         RenderPipelineBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         void SetColorAttachmentFormat(uint32_t attachmentSlot, dawn::TextureFormat format);
         void SetColorAttachmentBlendState(uint32_t attachmentSlot, BlendStateBase* blendState);
         void SetDepthStencilAttachmentFormat(dawn::TextureFormat format);

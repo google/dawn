@@ -59,7 +59,7 @@ namespace backend {
       public:
         DepthStencilStateBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         void SetDepthCompareFunction(dawn::CompareFunction depthCompareFunction);
         void SetDepthWriteEnabled(bool enabled);
         void SetStencilFunction(dawn::Face face,

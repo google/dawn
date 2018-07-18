@@ -41,7 +41,7 @@ namespace backend {
 
         DeviceBase* GetDevice() const;
 
-        // NXT API
+        // Dawn API
         BufferViewBuilder* CreateBufferViewBuilder();
         void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);
         void MapReadAsync(uint32_t start,
@@ -84,7 +84,7 @@ namespace backend {
       public:
         BufferBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         void SetAllowedUsage(dawn::BufferUsageBit usage);
         void SetInitialUsage(dawn::BufferUsageBit usage);
         void SetSize(uint32_t size);
@@ -118,7 +118,7 @@ namespace backend {
       public:
         BufferViewBuilder(DeviceBase* device, BufferBase* buffer);
 
-        // NXT API
+        // Dawn API
         void SetExtent(uint32_t offset, uint32_t size);
 
       private:

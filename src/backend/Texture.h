@@ -49,7 +49,7 @@ namespace backend {
         dawn::TextureUsageBit GetAllowedUsage() const;
         DeviceBase* GetDevice() const;
 
-        // NXT API
+        // Dawn API
         TextureViewBuilder* CreateTextureViewBuilder();
 
       private:
@@ -66,7 +66,7 @@ namespace backend {
       public:
         TextureBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         void SetDimension(dawn::TextureDimension dimension);
         void SetExtent(uint32_t width, uint32_t height, uint32_t depth);
         void SetFormat(dawn::TextureFormat format);

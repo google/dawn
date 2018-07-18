@@ -62,7 +62,7 @@ namespace backend { namespace vulkan {
         void SubmitPendingCommands();
         void AddWaitSemaphore(VkSemaphore semaphore);
 
-        // NXT API
+        // Dawn API
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         BufferBase* CreateBuffer(BufferBuilder* builder) override;

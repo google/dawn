@@ -51,7 +51,7 @@ namespace backend {
       public:
         BindGroupBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         void SetLayout(BindGroupLayoutBase* layout);
         void SetUsage(dawn::BindGroupUsage usage);
 

@@ -31,7 +31,7 @@ namespace backend {
 
         DeviceBase* GetDevice();
 
-        // NXT API
+        // Dawn API
         void Configure(dawn::TextureFormat format,
                        dawn::TextureUsageBit allowedUsage,
                        uint32_t width,
@@ -58,7 +58,7 @@ namespace backend {
       public:
         SwapChainBuilder(DeviceBase* device);
 
-        // NXT API
+        // Dawn API
         SwapChainBase* GetResultImpl() override;
         void SetImplementation(uint64_t implementation);
 

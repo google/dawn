@@ -60,7 +60,7 @@ namespace backend {
         CommandIterator AcquireCommands();
         std::vector<PassResourceUsage> AcquirePassResourceUsage();
 
-        // NXT API
+        // Dawn API
         void BeginComputePass();
         void BeginRenderPass(RenderPassDescriptorBase* info);
         void CopyBufferToBuffer(BufferBase* source,

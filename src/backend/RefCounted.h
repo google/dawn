@@ -30,7 +30,7 @@ namespace backend {
         uint32_t GetExternalRefs() const;
         uint32_t GetInternalRefs() const;
 
-        // NXT API
+        // Dawn API
         void Reference();
         void Release();
 

@@ -160,7 +160,7 @@ namespace backend { namespace null {
         Queue(Device* device);
         ~Queue();
 
-        // NXT API
+        // Dawn API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 

@@ -27,7 +27,7 @@ namespace backend { namespace vulkan {
         Queue(Device* device);
         ~Queue();
 
-        // NXT API
+        // Dawn API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 

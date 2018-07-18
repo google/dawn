@@ -81,7 +81,7 @@ namespace backend {
 
         std::vector<uint32_t> AcquireSpirv();
 
-        // NXT API
+        // Dawn API
         void SetSource(uint32_t codeSize, const uint32_t* code);
 
       private:

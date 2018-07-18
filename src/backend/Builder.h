@@ -49,7 +49,7 @@ namespace backend {
         // Returns true for success cases, and calls the callback with appropriate status.
         bool HandleResult(RefCounted* result);
 
-        // NXT API
+        // Dawn API
         void SetErrorCallback(dawn::BuilderErrorCallback callback,
                               dawn::CallbackUserdata userdata1,
                               dawn::CallbackUserdata userdata2);
@@ -80,7 +80,7 @@ namespace backend {
     template <typename T>
     class Builder : public BuilderBase {
       public:
-        // NXT API
+        // Dawn API
         T* GetResult();
 
       protected:

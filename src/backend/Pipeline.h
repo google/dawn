@@ -67,7 +67,7 @@ namespace backend {
         const StageInfo& GetStageInfo(dawn::ShaderStage stage) const;
         BuilderBase* GetParentBuilder() const;
 
-        // NXT API
+        // Dawn API
         void SetLayout(PipelineLayoutBase* layout);
         void SetStage(dawn::ShaderStage stage, ShaderModuleBase* module, const char* entryPoint);
 

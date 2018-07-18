@@ -28,7 +28,7 @@ namespace backend { namespace d3d12 {
       public:
         Queue(Device* device);
 
-        // NXT API
+        // Dawn API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
 
       private:

@@ -26,7 +26,7 @@ namespace backend { namespace metal {
       public:
         Queue(Device* device);
 
-        // NXT API
+        // Dawn API
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
