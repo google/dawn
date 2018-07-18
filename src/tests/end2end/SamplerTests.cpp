@@ -19,7 +19,7 @@
 
 #include "common/Assert.h"
 #include "common/Constants.h"
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 constexpr static unsigned int kRTSize = 64;
 

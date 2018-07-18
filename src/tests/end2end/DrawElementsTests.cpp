@@ -14,7 +14,7 @@
 
 #include "tests/NXTTest.h"
 
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 constexpr uint32_t kRTSize = 4;
 

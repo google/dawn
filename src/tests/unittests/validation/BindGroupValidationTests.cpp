@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "tests/unittests/validation/ValidationTest.h"
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 class BindGroupValidationTest : public ValidationTest {
 };

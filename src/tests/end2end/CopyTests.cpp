@@ -17,7 +17,7 @@
 #include <array>
 #include "common/Constants.h"
 #include "common/Math.h"
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 class CopyTests : public NXTTest {
     protected:

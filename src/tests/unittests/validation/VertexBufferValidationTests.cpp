@@ -16,7 +16,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 class VertexBufferValidationTest : public ValidationTest {
     protected:

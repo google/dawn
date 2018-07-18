@@ -18,7 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/BackendBinding.h"
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
 #include "wire/TerribleCommandBuffer.h"
 #include "wire/Wire.h"

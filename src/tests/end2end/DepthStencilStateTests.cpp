@@ -15,7 +15,7 @@
 #include "tests/NXTTest.h"
 
 #include "common/Assert.h"
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 constexpr static unsigned int kRTSize = 64;
 

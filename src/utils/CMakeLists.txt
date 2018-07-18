@@ -17,8 +17,8 @@ set(UTILS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 list(APPEND UTILS_SOURCES
     ${UTILS_DIR}/BackendBinding.cpp
     ${UTILS_DIR}/BackendBinding.h
-    ${UTILS_DIR}/NXTHelpers.cpp
-    ${UTILS_DIR}/NXTHelpers.h
+    ${UTILS_DIR}/DawnHelpers.cpp
+    ${UTILS_DIR}/DawnHelpers.h
     ${UTILS_DIR}/SystemUtils.cpp
     ${UTILS_DIR}/SystemUtils.h
 )

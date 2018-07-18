@@ -15,7 +15,7 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "common/Constants.h"
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 #include <gmock/gmock.h>
 

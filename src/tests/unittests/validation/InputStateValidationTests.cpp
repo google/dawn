@@ -14,7 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 // Maximums for NXT, tests will start failing when this changes
 static constexpr uint32_t kMaxVertexAttributes = 16u;

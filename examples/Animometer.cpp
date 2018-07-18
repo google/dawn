@@ -14,7 +14,7 @@
 
 #include "SampleUtils.h"
 
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
 
 #include <cstdlib>

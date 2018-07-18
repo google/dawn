@@ -14,7 +14,7 @@
 
 #include "tests/NXTTest.h"
 
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 class BasicTests : public NXTTest {
 };

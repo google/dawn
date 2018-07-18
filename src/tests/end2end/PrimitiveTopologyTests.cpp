@@ -15,7 +15,7 @@
 #include "tests/NXTTest.h"
 
 #include "common/Assert.h"
-#include "utils/NXTHelpers.h"
+#include "utils/DawnHelpers.h"
 
 // Primitive topology tests work by drawing the following vertices with all the different primitive topology states:
 // -------------------------------------
