@@ -47,7 +47,7 @@ namespace backend { namespace vulkan {
             VkBufferImageCopy region;
 
             region.bufferOffset = bufferLocation.offset;
-            // In Vulkan the row length is in texels while it is in bytes for NXT
+            // In Vulkan the row length is in texels while it is in bytes for Dawn
             region.bufferRowLength = rowPitch / TextureFormatPixelSize(texture->GetFormat());
             region.bufferImageHeight = rowPitch * textureLocation.height;
 

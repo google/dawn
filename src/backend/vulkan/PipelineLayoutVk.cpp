@@ -34,7 +34,7 @@ namespace backend { namespace vulkan {
             numSetLayouts++;
         }
 
-        // Specify NXT's push constant range on all pipeline layouts because we don't know which
+        // Specify Dawn's push constant range on all pipeline layouts because we don't know which
         // pipelines might use it.
         VkPushConstantRange pushConstantRange;
         pushConstantRange.stageFlags = VK_SHADER_STAGE_ALL;

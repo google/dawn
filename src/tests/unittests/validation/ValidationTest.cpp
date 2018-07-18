@@ -34,7 +34,7 @@ ValidationTest::ValidationTest() {
 }
 
 ValidationTest::~ValidationTest() {
-    // We need to destroy Dawn objects before setting the procs to null otherwise the nxt*Release
+    // We need to destroy Dawn objects before setting the procs to null otherwise the dawn*Release
     // will call a nullptr
     device = dawn::Device();
     dawnSetProcs(nullptr);

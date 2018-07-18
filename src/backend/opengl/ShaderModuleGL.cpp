@@ -25,7 +25,7 @@ namespace backend { namespace opengl {
 
     std::string GetBindingName(uint32_t group, uint32_t binding) {
         std::ostringstream o;
-        o << "nxt_binding_" << group << "_" << binding;
+        o << "dawn_binding_" << group << "_" << binding;
         return o.str();
     }
 
@@ -40,7 +40,7 @@ namespace backend { namespace opengl {
 
     std::string CombinedSampler::GetName() const {
         std::ostringstream o;
-        o << "nxt_combined";
+        o << "dawn_combined";
         o << "_" << samplerLocation.group << "_" << samplerLocation.binding;
         o << "_with_" << textureLocation.group << "_" << textureLocation.binding;
         return o.str();
@@ -104,7 +104,7 @@ namespace backend { namespace opengl {
             compiler.set_name(combined.combined_id, info.GetName());
         }
 
-        // Change binding names to be "nxt_binding_<group>_<binding>".
+        // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which
         // isn't supported on OSX's OpenGL.
         for (uint32_t group = 0; group < kMaxBindGroups; ++group) {

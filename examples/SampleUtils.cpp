@@ -77,7 +77,7 @@ dawn::Device CreateCppDawnDevice() {
     }
 
     binding->SetupGLFWWindowHints();
-    window = glfwCreateWindow(640, 480, "NXT window", nullptr, nullptr);
+    window = glfwCreateWindow(640, 480, "Dawn window", nullptr, nullptr);
     if (!window) {
         return dawn::Device();
     }

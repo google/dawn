@@ -239,7 +239,7 @@ namespace backend { namespace vulkan {
         Device* device = ToBackend(GetDevice());
 
         // Create the Vulkan image "container". We don't need to check that the format supports the
-        // combination of sample, usage etc. because validation should have been done in the NXT
+        // combination of sample, usage etc. because validation should have been done in the Dawn
         // frontend already based on the minimum supported formats in the Vulkan spec
         VkImageCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

@@ -78,7 +78,7 @@ namespace {
         glfwDefaultWindowHints();
         binding->SetupGLFWWindowHints();
 
-        std::string windowName = "NXT " + ParamName(type) + " test window";
+        std::string windowName = "Dawn " + ParamName(type) + " test window";
         *window = glfwCreateWindow(400, 400, windowName.c_str(), nullptr, nullptr);
 
         return *window;

@@ -246,7 +246,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToError) {
     delete errorData;
 }
 
-// Check a MaybeError can be NXT_TRIED in a function that returns an ResultOrError
+// Check a MaybeError can be DAWN_TRIED in a function that returns an ResultOrError
 // Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_ConversionToErrorOrResult) {
     auto ReturnError = []() -> MaybeError {

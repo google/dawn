@@ -16,7 +16,7 @@
 
 #include "utils/DawnHelpers.h"
 
-// Maximums for NXT, tests will start failing when this changes
+// Maximums for Dawn, tests will start failing when this changes
 static constexpr uint32_t kMaxVertexAttributes = 16u;
 static constexpr uint32_t kMaxVertexInputs = 16u;
 

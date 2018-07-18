@@ -433,7 +433,7 @@ namespace backend { namespace vulkan {
         }
         // RenderDoc installs a layer at the system level for its capture but we don't want to use
         // it unless we are debugging in RenderDoc so we hide it behind a macro.
-#if defined(NXT_USE_RENDERDOC)
+#if defined(DAWN_USE_RENDERDOC)
         if (mGlobalInfo.renderDocCapture) {
             layersToRequest.push_back(kLayerNameRenderDocCapture);
             usedKnobs->renderDocCapture = true;
