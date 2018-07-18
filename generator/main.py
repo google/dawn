@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright 2017 The NXT Authors
+# Copyright 2017 The Dawn Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
