@@ -74,7 +74,7 @@ namespace backend { namespace d3d12 {
             ComPtr<IDXGIFactory4> factory;
 
             uint32_t dxgiFactoryFlags = 0;
-#if defined(NXT_ENABLE_ASSERTS)
+#if defined(DAWN_ENABLE_ASSERTS)
             // Enable the debug layer (requires the Graphics Tools "optional feature").
             {
                 ComPtr<ID3D12Debug> debugController;
@@ -91,7 +91,7 @@ namespace backend { namespace d3d12 {
                                                  DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
                 }
             }
-#endif  // defined(NXT_ENABLE_ASSERTS)
+#endif  // defined(DAWN_ENABLE_ASSERTS)
 
             ASSERT_SUCCESS(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
             return factory;

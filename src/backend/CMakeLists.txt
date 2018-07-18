@@ -51,7 +51,7 @@ endfunction()
 # OpenGL Backend
 ################################################################################
 
-if (NXT_ENABLE_OPENGL)
+if (DAWN_ENABLE_OPENGL)
     GenerateProcTable(opengl)
     target_link_libraries(opengl_autogen glfw glad)
 
@@ -96,7 +96,7 @@ endif()
 # Null Backend
 ################################################################################
 
-if (NXT_ENABLE_NULL)
+if (DAWN_ENABLE_NULL)
     GenerateProcTable(null)
 
     list(APPEND BACKEND_SOURCES
@@ -109,7 +109,7 @@ endif()
 # Metal Backend
 ################################################################################
 
-if (NXT_ENABLE_METAL)
+if (DAWN_ENABLE_METAL)
     GenerateProcTable(metal)
     target_link_libraries(metal_autogen "-framework QuartzCore" "-framework Metal")
 
@@ -152,7 +152,7 @@ endif()
 # D3D12 Backend
 ################################################################################
 
-if (NXT_ENABLE_D3D12)
+if (DAWN_ENABLE_D3D12)
     GenerateProcTable(d3d12)
 
     # WIN10_SDK_PATH will be something like C:\Program Files (x86)\Windows Kits\10
@@ -269,7 +269,7 @@ endif()
 # Vulkan Backend
 ################################################################################
 
-if (NXT_ENABLE_VULKAN)
+if (DAWN_ENABLE_VULKAN)
     GenerateProcTable(vulkan)
     target_include_directories(vulkan_autogen PUBLIC ${VULKAN_HEADERS_INCLUDE_DIR})
 
@@ -392,18 +392,18 @@ add_library(nxt_backend STATIC ${BACKEND_SOURCES})
 NXTInternalTarget("backend" nxt_backend)
 target_link_libraries(nxt_backend nxt_common glfw glad spirv_cross)
 
-if (NXT_ENABLE_D3D12)
+if (DAWN_ENABLE_D3D12)
     target_link_libraries(nxt_backend d3d12_autogen)
 endif()
-if (NXT_ENABLE_METAL)
+if (DAWN_ENABLE_METAL)
     target_link_libraries(nxt_backend metal_autogen)
 endif()
-if (NXT_ENABLE_NULL)
+if (DAWN_ENABLE_NULL)
     target_link_libraries(nxt_backend null_autogen)
 endif()
-if (NXT_ENABLE_OPENGL)
+if (DAWN_ENABLE_OPENGL)
     target_link_libraries(nxt_backend opengl_autogen)
 endif()
-if (NXT_ENABLE_VULKAN)
+if (DAWN_ENABLE_VULKAN)
     target_link_libraries(nxt_backend vulkan_autogen)
 endif()

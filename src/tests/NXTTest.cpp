@@ -392,16 +392,16 @@ std::ostream &operator<<(std::ostream& stream, BackendType backend) {
 namespace detail {
     bool IsBackendAvailable(BackendType type) {
         switch (type) {
-            #if defined(NXT_ENABLE_BACKEND_D3D12)
+            #if defined(DAWN_ENABLE_BACKEND_D3D12)
                 case D3D12Backend:
             #endif
-            #if defined(NXT_ENABLE_BACKEND_METAL)
+            #if defined(DAWN_ENABLE_BACKEND_METAL)
                 case MetalBackend:
             #endif
-            #if defined(NXT_ENABLE_BACKEND_OPENGL)
+            #if defined(DAWN_ENABLE_BACKEND_OPENGL)
                 case OpenGLBackend:
             #endif
-            #if defined(NXT_ENABLE_BACKEND_VULKAN)
+            #if defined(DAWN_ENABLE_BACKEND_VULKAN)
                 case VulkanBackend:
             #endif
                 return true;

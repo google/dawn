@@ -15,7 +15,7 @@
 #ifndef COMMON_VULKANPLATFORM_H_
 #define COMMON_VULKANPLATFORM_H_
 
-#if !defined(NXT_ENABLE_BACKEND_VULKAN)
+#if !defined(DAWN_ENABLE_BACKEND_VULKAN)
 #    error "vulkan_platform.h included without the Vulkan backend enabled"
 #endif
 

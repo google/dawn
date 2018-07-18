@@ -54,13 +54,13 @@ typedef struct {
     nxtTextureUsageBit textureUsage;
 } nxtSwapChainImplementation;
 
-#if defined(NXT_ENABLE_BACKEND_D3D12) && defined(__cplusplus)
+#if defined(DAWN_ENABLE_BACKEND_D3D12) && defined(__cplusplus)
 typedef struct {
     nxtDevice device = nullptr;
 } nxtWSIContextD3D12;
 #endif
 
-#if defined(NXT_ENABLE_BACKEND_METAL) && defined(__OBJC__)
+#if defined(DAWN_ENABLE_BACKEND_METAL) && defined(__OBJC__)
 #import <Metal/Metal.h>
 
 typedef struct {
@@ -68,12 +68,12 @@ typedef struct {
 } nxtWSIContextMetal;
 #endif
 
-#ifdef NXT_ENABLE_BACKEND_OPENGL
+#ifdef DAWN_ENABLE_BACKEND_OPENGL
 typedef struct {
 } nxtWSIContextGL;
 #endif
 
-#ifdef NXT_ENABLE_BACKEND_VULKAN
+#ifdef DAWN_ENABLE_BACKEND_VULKAN
 typedef struct {
 } nxtWSIContextVulkan;
 #endif

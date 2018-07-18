@@ -65,7 +65,7 @@ script:
  - mkdir -p build
  - cd build
  - cmake --version
- - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DNXT_USE_WERROR=1 -DNXT_ENABLE_VULKAN=$BUILD_VULKAN ..
+ - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DDAWN_USE_WERROR=1 -DDAWN_ENABLE_VULKAN=$BUILD_VULKAN ..
  - cmake --build .
 
  # Test

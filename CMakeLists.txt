@@ -32,7 +32,7 @@ endif()
 # Configuration options
 ################################################################################
 
-option(NXT_USE_WERROR "Treat warnings as error (useful for CI)" 0)
+option(DAWN_USE_WERROR "Treat warnings as error (useful for CI)" 0)
 
 # Default values for the backend-enabling options
 set(ENABLE_D3D12 OFF)
@@ -43,114 +43,114 @@ elseif(APPLE)
     set(ENABLE_METAL ON)
 endif()
 
-option(NXT_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
-option(NXT_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_METAL})
-option(NXT_ENABLE_NULL "Enable compilation of the Null backend" ON)
-option(NXT_ENABLE_OPENGL "Enable compilation of the OpenGL backend" ON)
-option(NXT_ENABLE_VULKAN "Enable compilation of the Vulkan backend" OFF)
-option(NXT_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
-option(NXT_USE_CPP17 "Use some optional C++17 features for compile-time checks" OFF)
+option(DAWN_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
+option(DAWN_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_METAL})
+option(DAWN_ENABLE_NULL "Enable compilation of the Null backend" ON)
+option(DAWN_ENABLE_OPENGL "Enable compilation of the OpenGL backend" ON)
+option(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backend" OFF)
+option(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
+option(DAWN_USE_CPP17 "Use some optional C++17 features for compile-time checks" OFF)
 
 ################################################################################
 # Precompute compile flags and defines, functions to set them
 ################################################################################
 
-set(NXT_FLAGS "")
-set(NXT_DEFS "")
-set(NXT_INTERNAL_FLAGS "")
-set(NXT_INTERNAL_DEFS "")
-set(NXT_GENERATED_FLAGS "")
+set(DAWN_FLAGS "")
+set(DAWN_DEFS "")
+set(DAWN_INTERNAL_FLAGS "")
+set(DAWN_INTERNAL_DEFS "")
+set(DAWN_GENERATED_FLAGS "")
 
-set(NXT_ENABLE_ASSERTS $<OR:$<CONFIG:Debug>,$<BOOL:${NXT_ALWAYS_ASSERT}>>)
+set(DAWN_ENABLE_ASSERTS $<OR:$<CONFIG:Debug>,$<BOOL:${DAWN_ALWAYS_ASSERT}>>)
 
-list(APPEND NXT_DEFS $<${NXT_ENABLE_ASSERTS}:NXT_ENABLE_ASSERTS>)
+list(APPEND DAWN_DEFS $<${DAWN_ENABLE_ASSERTS}:DAWN_ENABLE_ASSERTS>)
 
-if (NXT_USE_CPP17)
-    list(APPEND NXT_INTERNAL_DEFS "NXT_CPP_VERSION=17")
+if (DAWN_USE_CPP17)
+    list(APPEND DAWN_INTERNAL_DEFS "DAWN_CPP_VERSION=17")
 else()
-    list(APPEND NXT_INTERNAL_DEFS "NXT_CPP_VERSION=14")
+    list(APPEND DAWN_INTERNAL_DEFS "DAWN_CPP_VERSION=14")
 endif()
 
-if (NXT_ENABLE_D3D12)
-    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_D3D12")
+if (DAWN_ENABLE_D3D12)
+    list(APPEND DAWN_INTERNAL_DEFS "DAWN_ENABLE_BACKEND_D3D12")
 endif()
-if (NXT_ENABLE_METAL)
-    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_METAL")
+if (DAWN_ENABLE_METAL)
+    list(APPEND DAWN_INTERNAL_DEFS "DAWN_ENABLE_BACKEND_METAL")
 endif()
-if (NXT_ENABLE_NULL)
-    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_NULL")
+if (DAWN_ENABLE_NULL)
+    list(APPEND DAWN_INTERNAL_DEFS "DAWN_ENABLE_BACKEND_NULL")
 endif()
-if (NXT_ENABLE_OPENGL)
-    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_OPENGL")
+if (DAWN_ENABLE_OPENGL)
+    list(APPEND DAWN_INTERNAL_DEFS "DAWN_ENABLE_BACKEND_OPENGL")
 endif()
-if (NXT_ENABLE_VULKAN)
-    list(APPEND NXT_INTERNAL_DEFS "NXT_ENABLE_BACKEND_VULKAN")
+if (DAWN_ENABLE_VULKAN)
+    list(APPEND DAWN_INTERNAL_DEFS "DAWN_ENABLE_BACKEND_VULKAN")
 endif()
 
 if (WIN32)
     # Define NOMINMAX to prevent conflicts between std::min/max and the min/max macros in WinDef.h
-    list(APPEND NXT_DEFS "NOMINMAX")
+    list(APPEND DAWN_DEFS "NOMINMAX")
     # Avoid Windows.h including a lot of headers
-    list(APPEND NXT_DEFS "WIN32_LEAN_AND_MEAN")
+    list(APPEND DAWN_DEFS "WIN32_LEAN_AND_MEAN")
     # Remove compile error where the mock NXT creates too many sections for the old obj format.
-    list(APPEND NXT_FLAGS "/bigobj")
+    list(APPEND DAWN_FLAGS "/bigobj")
 endif()
 
 if (MSVC)
-    list(APPEND NXT_FLAGS "/std:c++14")
-    list(APPEND NXT_FLAGS "/EHsc")
-    list(APPEND NXT_INTERNAL_FLAGS "/W4")
+    list(APPEND DAWN_FLAGS "/std:c++14")
+    list(APPEND DAWN_FLAGS "/EHsc")
+    list(APPEND DAWN_INTERNAL_FLAGS "/W4")
     # Allow declarations hiding members as it is used all over NXT
-    list(APPEND NXT_INTERNAL_FLAGS "/wd4458")
-    list(APPEND NXT_INTERNAL_FLAGS "/wd4996") # Allow deprecated functions like strncpy
+    list(APPEND DAWN_INTERNAL_FLAGS "/wd4458")
+    list(APPEND DAWN_INTERNAL_FLAGS "/wd4996") # Allow deprecated functions like strncpy
 
-    list(APPEND NXT_GENERATED_FLAGS "/wd4702") # Allow unreachable code
-    list(APPEND NXT_GENERATED_FLAGS "/wd4189") # Allow unused variable
+    list(APPEND DAWN_GENERATED_FLAGS "/wd4702") # Allow unreachable code
+    list(APPEND DAWN_GENERATED_FLAGS "/wd4189") # Allow unused variable
 
-    if(NXT_USE_WERROR)
-        list(APPEND NXT_INTERNAL_FLAGS "/WX")
+    if(DAWN_USE_WERROR)
+        list(APPEND DAWN_INTERNAL_FLAGS "/WX")
     endif()
 else()
     # Activate C++14 only on C++ files, not C files.
-    list(APPEND NXT_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-std=c++14>")
+    list(APPEND DAWN_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-std=c++14>")
     # enable -Wold-style-cast on C++
-    list(APPEND NXT_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wold-style-cast>")
-    list(APPEND NXT_FLAGS "-fPIC")
+    list(APPEND DAWN_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wold-style-cast>")
+    list(APPEND DAWN_FLAGS "-fPIC")
 
-    list(APPEND NXT_INTERNAL_FLAGS "-Wall" "-Wextra")
-    list(APPEND NXT_INTERNAL_FLAGS "-pedantic")
-    list(APPEND NXT_GENERATED_FLAGS "-Wno-unused-variable" "-Wno-unused-function")
+    list(APPEND DAWN_INTERNAL_FLAGS "-Wall" "-Wextra")
+    list(APPEND DAWN_INTERNAL_FLAGS "-pedantic")
+    list(APPEND DAWN_GENERATED_FLAGS "-Wno-unused-variable" "-Wno-unused-function")
 
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         # don't break the build on older clang versions
-        list(APPEND NXT_INTERNAL_FLAGS "-Wno-error=unknown-warning-option")
+        list(APPEND DAWN_INTERNAL_FLAGS "-Wno-error=unknown-warning-option")
         # GCC's conversion warnings are less useful than clang's
-        list(APPEND NXT_INTERNAL_FLAGS "-Wconversion" "-Wno-sign-conversion")
+        list(APPEND DAWN_INTERNAL_FLAGS "-Wconversion" "-Wno-sign-conversion")
         # disable a clang-only -pedantic warning
-        list(APPEND NXT_INTERNAL_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
+        list(APPEND DAWN_INTERNAL_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
         # additional potentially useful warnings (feel free to remove if they prove un-useful)
-        list(APPEND NXT_INTERNAL_FLAGS "-Wextra-semi")
-        list(APPEND NXT_INTERNAL_FLAGS "-Wstrict-aliasing")
-        list(APPEND NXT_INTERNAL_FLAGS "-Wunreachable-code")
-        list(APPEND NXT_GENERATED_FLAGS "-Wno-unreachable-code")
+        list(APPEND DAWN_INTERNAL_FLAGS "-Wextra-semi")
+        list(APPEND DAWN_INTERNAL_FLAGS "-Wstrict-aliasing")
+        list(APPEND DAWN_INTERNAL_FLAGS "-Wunreachable-code")
+        list(APPEND DAWN_GENERATED_FLAGS "-Wno-unreachable-code")
         # Probably okay to enable if we establish a field naming convention:
-        #list(APPEND NXT_INTERNAL_FLAGS "-Wshadow")
+        #list(APPEND DAWN_INTERNAL_FLAGS "-Wshadow")
     endif()
-    if(NXT_USE_WERROR)
-        list(APPEND NXT_INTERNAL_FLAGS "-Werror")
+    if(DAWN_USE_WERROR)
+        list(APPEND DAWN_INTERNAL_FLAGS "-Werror")
     endif()
 endif()
 
 function(NXTExternalTarget folder target)
-    set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${NXT_FLAGS})
-    set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${NXT_DEFS})
+    set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${DAWN_FLAGS})
+    set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${DAWN_DEFS})
     set_property(TARGET ${target} PROPERTY FOLDER "nxt/${folder}")
 endfunction()
 
 function(NXTInternalTarget folder target)
     NXTExternalTarget("${folder}" ${target})
-    set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${NXT_INTERNAL_FLAGS})
-    set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${NXT_INTERNAL_DEFS})
+    set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${DAWN_INTERNAL_FLAGS})
+    set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${DAWN_INTERNAL_DEFS})
 
     # Group the target sources by folder to have folders show in Visual Studio
     if (MSVC)

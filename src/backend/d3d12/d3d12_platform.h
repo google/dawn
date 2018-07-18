@@ -19,9 +19,9 @@
 #include <dxgi1_4.h>
 #include <wrl.h>
 
-#if defined(NXT_ENABLE_ASSERTS)
+#if defined(DAWN_ENABLE_ASSERTS)
 #    include <dxgidebug.h>
-#endif  // defined(NXT_ENABLE_ASSERTS)
+#endif  // defined(DAWN_ENABLE_ASSERTS)
 
 using Microsoft::WRL::ComPtr;
 

@@ -13,7 +13,7 @@ install:
 build_script:
  - mkdir build
  - cd build
- - cmake -DNXT_USE_WERROR=1 -DNXT_ENABLE_VULKAN=1 ..
+ - cmake -DDAWN_USE_WERROR=1 -DDAWN_ENABLE_VULKAN=1 ..
  - cmake --build . -- /verbosity:minimal
 
  # TODO(cwallez@chromium.org) test on more than Debug.

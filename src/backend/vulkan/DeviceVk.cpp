@@ -439,7 +439,7 @@ namespace backend { namespace vulkan {
             usedKnobs->renderDocCapture = true;
         }
 #endif
-#if defined(NXT_ENABLE_ASSERTS)
+#if defined(DAWN_ENABLE_ASSERTS)
         if (mGlobalInfo.standardValidation) {
             layersToRequest.push_back(kLayerNameLunargStandardValidation);
             usedKnobs->standardValidation = true;

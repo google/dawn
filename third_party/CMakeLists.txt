@@ -105,7 +105,7 @@ set(SPIRV_CROSS_SOURCES
 )
 
 set(NEED_SPIRV_CROSS_GLSL OFF)
-if (NXT_ENABLE_D3D12)
+if (DAWN_ENABLE_D3D12)
     list(APPEND SPIRV_CROSS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_hlsl.hpp
@@ -113,7 +113,7 @@ if (NXT_ENABLE_D3D12)
     set(NEED_SPIRV_CROSS_GLSL ON)
 endif()
 
-if (NXT_ENABLE_METAL)
+if (DAWN_ENABLE_METAL)
     list(APPEND SPIRV_CROSS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_msl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_msl.hpp
@@ -121,7 +121,7 @@ if (NXT_ENABLE_METAL)
     set(NEED_SPIRV_CROSS_GLSL ON)
 endif()
 
-if (NXT_ENABLE_OPENGL OR NEED_SPIRV_CROSS_GLSL)
+if (DAWN_ENABLE_OPENGL OR NEED_SPIRV_CROSS_GLSL)
     list(APPEND SPIRV_CROSS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_glsl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross/spirv_glsl.hpp

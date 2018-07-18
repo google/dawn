@@ -60,7 +60,7 @@ list(APPEND UNITTEST_SOURCES
     ${TESTS_DIR}/UnittestsMain.cpp
 )
 
-if (NXT_ENABLE_D3D12)
+if (DAWN_ENABLE_D3D12)
     list(APPEND UNITTEST_SOURCES
         ${UNITTESTS_DIR}/d3d12/CopySplitTests.cpp
     )

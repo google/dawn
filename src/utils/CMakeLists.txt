@@ -23,31 +23,31 @@ list(APPEND UTILS_SOURCES
     ${UTILS_DIR}/SystemUtils.h
 )
 
-if (NXT_ENABLE_D3D12)
+if (DAWN_ENABLE_D3D12)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/D3D12Binding.cpp
     )
 endif()
 
-if (NXT_ENABLE_METAL)
+if (DAWN_ENABLE_METAL)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/MetalBinding.mm
     )
 endif()
 
-if (NXT_ENABLE_NULL)
+if (DAWN_ENABLE_NULL)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/NullBinding.cpp
     )
 endif()
 
-if (NXT_ENABLE_OPENGL)
+if (DAWN_ENABLE_OPENGL)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/OpenGLBinding.cpp
     )
 endif()
 
-if (NXT_ENABLE_VULKAN)
+if (DAWN_ENABLE_VULKAN)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/VulkanBinding.cpp
     )
