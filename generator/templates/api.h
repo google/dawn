@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef NXT_H
-#define NXT_H
+#ifndef DAWN_H
+#define DAWN_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -100,4 +100,4 @@ void dawnSetProcs(const dawnProcTable* procs);
 } // extern "C"
 #endif
 
-#endif // NXT_H
+#endif // DAWN_H

@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef NXTCPP_TRAITS_H
-#define NXTCPP_TRAITS_H
+#ifndef DAWNCPP_TRAITS_H
+#define DAWNCPP_TRAITS_H
 
 #include "dawncpp.h"
 
@@ -40,4 +40,4 @@ namespace dawn {
 
 }
 
-#endif // NXTCPP_TRAITS_H
+#endif // DAWNCPP_TRAITS_H

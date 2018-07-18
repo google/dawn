@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef NXTCPP_H
-#define NXTCPP_H
+#ifndef DAWNCPP_H
+#define DAWNCPP_H
 
 #include "dawn.h"
 
@@ -160,4 +160,4 @@ namespace dawn {
 
 } // namespace dawn
 
-#endif // NXTCPP_H
+#endif // DAWNCPP_H

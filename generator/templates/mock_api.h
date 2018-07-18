@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef MOCK_NXT_H
-#define MOCK_NXT_H
+#ifndef MOCK_DAWN_H
+#define MOCK_DAWN_H
 
 #include <gmock/gmock.h>
 #include <dawn/dawn.h>
@@ -112,4 +112,4 @@ class MockProcTable : public ProcTableAsClass {
         MOCK_METHOD5(OnBufferMapWriteAsyncCallback, void(dawnBuffer buffer, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata));
 };
 
-#endif // MOCK_NXT_H
+#endif // MOCK_DAWN_H
