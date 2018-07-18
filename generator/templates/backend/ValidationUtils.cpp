@@ -24,7 +24,7 @@ namespace backend {
                         return {};
                 {% endfor %}
                 default:
-                    NXT_RETURN_ERROR("Invalid value for {{as_cType(type.name)}}");
+                    DAWN_RETURN_ERROR("Invalid value for {{as_cType(type.name)}}");
             }
         }
 
@@ -35,7 +35,7 @@ namespace backend {
             if ((value & static_cast<nxt::{{as_cppType(type.name)}}>(~{{type.full_mask}})) == 0) {
                 return {};
             }
-            NXT_RETURN_ERROR("Invalid value for {{as_cType(type.name)}}");
+            DAWN_RETURN_ERROR("Invalid value for {{as_cType(type.name)}}");
         }
 
     {% endfor %}

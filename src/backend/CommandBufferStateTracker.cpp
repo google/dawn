@@ -38,11 +38,11 @@ namespace backend {
         }
 
         if (!mAspects[VALIDATION_ASPECT_PIPELINE]) {
-            NXT_RETURN_ERROR("No active compute pipeline");
+            DAWN_RETURN_ERROR("No active compute pipeline");
         }
         // Compute the lazily computed mAspects
         if (!RecomputeHaveAspectBindGroups()) {
-            NXT_RETURN_ERROR("Bind group state not valid");
+            DAWN_RETURN_ERROR("Bind group state not valid");
         }
         return {};
     }
@@ -69,7 +69,7 @@ namespace backend {
         }
 
         if (!mAspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-            NXT_RETURN_ERROR("Cannot DrawElements without index buffer set");
+            DAWN_RETURN_ERROR("Cannot DrawElements without index buffer set");
         }
         return RevalidateCanDraw();
     }
@@ -96,7 +96,7 @@ namespace backend {
 
     MaybeError CommandBufferStateTracker::SetIndexBuffer() {
         if (!HavePipeline()) {
-            NXT_RETURN_ERROR("Can't set the index buffer without a pipeline");
+            DAWN_RETURN_ERROR("Can't set the index buffer without a pipeline");
         }
 
         mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
@@ -105,7 +105,7 @@ namespace backend {
 
     MaybeError CommandBufferStateTracker::SetVertexBuffer(uint32_t index) {
         if (!HavePipeline()) {
-            NXT_RETURN_ERROR("Can't set vertex buffers without a pipeline");
+            DAWN_RETURN_ERROR("Can't set vertex buffers without a pipeline");
         }
 
         mInputsSet.set(index);
@@ -152,14 +152,14 @@ namespace backend {
 
     MaybeError CommandBufferStateTracker::RevalidateCanDraw() {
         if (!mAspects[VALIDATION_ASPECT_PIPELINE]) {
-            NXT_RETURN_ERROR("No active render pipeline");
+            DAWN_RETURN_ERROR("No active render pipeline");
         }
         // Compute the lazily computed mAspects
         if (!RecomputeHaveAspectBindGroups()) {
-            NXT_RETURN_ERROR("Bind group state not valid");
+            DAWN_RETURN_ERROR("Bind group state not valid");
         }
         if (!RecomputeHaveAspectVertexBuffers()) {
-            NXT_RETURN_ERROR("Some vertex buffers are not set");
+            DAWN_RETURN_ERROR("Some vertex buffers are not set");
         }
         return {};
     }

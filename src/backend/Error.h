@@ -35,29 +35,29 @@ namespace backend {
     //   return SomethingOfTypeT; // for ResultOrError<T>
     //
     // Returning an error is done via:
-    //   NXT_RETURN_ERROR("My error message");
-#define NXT_RETURN_ERROR(MESSAGE) return MakeError(MESSAGE, __FILE__, __func__, __LINE__)
-#define NXT_TRY_ASSERT(EXPR, MESSAGE)  \
-    {                                  \
-        if (!(EXPR)) {                 \
-            NXT_RETURN_ERROR(MESSAGE); \
-        }                              \
-    }                                  \
-    for (;;)                           \
+    //   DAWN_RETURN_ERROR("My error message");
+#define DAWN_RETURN_ERROR(MESSAGE) return MakeError(MESSAGE, __FILE__, __func__, __LINE__)
+#define DAWN_TRY_ASSERT(EXPR, MESSAGE)  \
+    {                                   \
+        if (!(EXPR)) {                  \
+            DAWN_RETURN_ERROR(MESSAGE); \
+        }                               \
+    }                                   \
+    for (;;)                            \
     break
 
-#define NXT_CONCAT1(x, y) x##y
-#define NXT_CONCAT2(x, y) NXT_CONCAT1(x, y)
-#define NXT_LOCAL_VAR NXT_CONCAT2(_localVar, __LINE__)
+#define DAWN_CONCAT1(x, y) x##y
+#define DAWN_CONCAT2(x, y) DAWN_CONCAT1(x, y)
+#define DAWN_LOCAL_VAR DAWN_CONCAT2(_localVar, __LINE__)
 
     // When Errors aren't handled explicitly, calls to functions returning errors should be
-    // wrapped in an NXT_TRY. It will return the error if any, otherwise keep executing
+    // wrapped in an DAWN_TRY. It will return the error if any, otherwise keep executing
     // the current function.
-#define NXT_TRY(EXPR)                                             \
+#define DAWN_TRY(EXPR)                                            \
     {                                                             \
-        auto NXT_LOCAL_VAR = EXPR;                                \
-        if (NXT_UNLIKELY(NXT_LOCAL_VAR.IsError())) {              \
-            ErrorData* error = NXT_LOCAL_VAR.AcquireError();      \
+        auto DAWN_LOCAL_VAR = EXPR;                               \
+        if (NXT_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {             \
+            ErrorData* error = DAWN_LOCAL_VAR.AcquireError();     \
             AppendBacktrace(error, __FILE__, __func__, __LINE__); \
             return {error};                                       \
         }                                                         \
@@ -65,25 +65,25 @@ namespace backend {
     for (;;)                                                      \
     break
 
-    // NXT_TRY_ASSIGN is the same as NXT_TRY for ResultOrError and assigns the success value, if
+    // DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
     // any, to VAR.
-#define NXT_TRY_ASSIGN(VAR, EXPR)                                 \
+#define DAWN_TRY_ASSIGN(VAR, EXPR)                                \
     {                                                             \
-        auto NXT_LOCAL_VAR = EXPR;                                \
-        if (NXT_UNLIKELY(NXT_LOCAL_VAR.IsError())) {              \
-            ErrorData* error = NXT_LOCAL_VAR.AcquireError();      \
+        auto DAWN_LOCAL_VAR = EXPR;                               \
+        if (NXT_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {             \
+            ErrorData* error = DAWN_LOCAL_VAR.AcquireError();     \
             AppendBacktrace(error, __FILE__, __func__, __LINE__); \
             return {error};                                       \
         }                                                         \
-        VAR = NXT_LOCAL_VAR.AcquireSuccess();                     \
+        VAR = DAWN_LOCAL_VAR.AcquireSuccess();                    \
     }                                                             \
     for (;;)                                                      \
     break
 
-    // Implementation detail of NXT_TRY and NXT_TRY_ASSIGN's adding to the Error's backtrace.
+    // Implementation detail of DAWN_TRY and DAWN_TRY_ASSIGN's adding to the Error's backtrace.
     void AppendBacktrace(ErrorData* error, const char* file, const char* function, int line);
 
-    // Implementation detail of NXT_RETURN_ERROR
+    // Implementation detail of DAWN_RETURN_ERROR
     ErrorData* MakeError(const char* message, const char* file, const char* function, int line);
 
 }  // namespace backend

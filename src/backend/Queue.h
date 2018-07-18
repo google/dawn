@@ -36,7 +36,7 @@ namespace backend {
                           "invalid command buffer type");
 
             for (uint32_t i = 0; i < numCommands; ++i) {
-                NXT_TRY(ValidateSubmitCommand(commands[i]));
+                DAWN_TRY(ValidateSubmitCommand(commands[i]));
             }
             return {};
         }

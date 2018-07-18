@@ -22,12 +22,12 @@ namespace backend {
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
                                                 const dawn::PipelineLayoutDescriptor* descriptor) {
-        NXT_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
-        NXT_TRY_ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups,
-                       "too many bind group layouts");
+        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        DAWN_TRY_ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups,
+                        "too many bind group layouts");
         for (uint32_t i = 0; i < descriptor->numBindGroupLayouts; ++i) {
-            NXT_TRY_ASSERT(descriptor->bindGroupLayouts[i].Get() != nullptr,
-                           "bind group layouts may not be null");
+            DAWN_TRY_ASSERT(descriptor->bindGroupLayouts[i].Get() != nullptr,
+                            "bind group layouts may not be null");
         }
         return {};
     }

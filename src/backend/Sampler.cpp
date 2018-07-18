@@ -20,13 +20,13 @@
 namespace backend {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase*, const dawn::SamplerDescriptor* descriptor) {
-        NXT_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
-        NXT_TRY(ValidateFilterMode(descriptor->minFilter));
-        NXT_TRY(ValidateFilterMode(descriptor->magFilter));
-        NXT_TRY(ValidateFilterMode(descriptor->mipmapFilter));
-        NXT_TRY(ValidateAddressMode(descriptor->addressModeU));
-        NXT_TRY(ValidateAddressMode(descriptor->addressModeV));
-        NXT_TRY(ValidateAddressMode(descriptor->addressModeW));
+        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        DAWN_TRY(ValidateFilterMode(descriptor->minFilter));
+        DAWN_TRY(ValidateFilterMode(descriptor->magFilter));
+        DAWN_TRY(ValidateFilterMode(descriptor->mipmapFilter));
+        DAWN_TRY(ValidateAddressMode(descriptor->addressModeU));
+        DAWN_TRY(ValidateAddressMode(descriptor->addressModeV));
+        DAWN_TRY(ValidateAddressMode(descriptor->addressModeW));
         return {};
     }
 

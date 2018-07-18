@@ -260,7 +260,7 @@
 
 namespace nxt { namespace wire {
 
-    // Macro to simplify error handling, similar to NXT_TRY but for DeserializeResult.
+    // Macro to simplify error handling, similar to DAWN_TRY but for DeserializeResult.
 #define DESERIALIZE_TRY(EXPR) \
     { \
         DeserializeResult exprResult = EXPR; \

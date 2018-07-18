@@ -84,7 +84,7 @@ namespace backend {
         }
 
         BindGroupLayoutBase* backendObj;
-        NXT_TRY_ASSIGN(backendObj, CreateBindGroupLayoutImpl(descriptor));
+        DAWN_TRY_ASSIGN(backendObj, CreateBindGroupLayoutImpl(descriptor));
         mCaches->bindGroupLayouts.insert(backendObj);
         return backendObj;
     }
@@ -194,28 +194,28 @@ namespace backend {
     MaybeError DeviceBase::CreateBindGroupLayoutInternal(
         BindGroupLayoutBase** result,
         const dawn::BindGroupLayoutDescriptor* descriptor) {
-        NXT_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
-        NXT_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
+        DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
         return {};
     }
 
     MaybeError DeviceBase::CreatePipelineLayoutInternal(
         PipelineLayoutBase** result,
         const dawn::PipelineLayoutDescriptor* descriptor) {
-        NXT_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
-        NXT_TRY_ASSIGN(*result, CreatePipelineLayoutImpl(descriptor));
+        DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(*result, CreatePipelineLayoutImpl(descriptor));
         return {};
     }
 
     MaybeError DeviceBase::CreateQueueInternal(QueueBase** result) {
-        NXT_TRY_ASSIGN(*result, CreateQueueImpl());
+        DAWN_TRY_ASSIGN(*result, CreateQueueImpl());
         return {};
     }
 
     MaybeError DeviceBase::CreateSamplerInternal(SamplerBase** result,
                                                  const dawn::SamplerDescriptor* descriptor) {
-        NXT_TRY(ValidateSamplerDescriptor(this, descriptor));
-        NXT_TRY_ASSIGN(*result, CreateSamplerImpl(descriptor));
+        DAWN_TRY(ValidateSamplerDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(*result, CreateSamplerImpl(descriptor));
         return {};
     }
 

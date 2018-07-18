@@ -26,17 +26,17 @@ namespace backend {
     MaybeError ValidateBindGroupLayoutDescriptor(
         DeviceBase*,
         const dawn::BindGroupLayoutDescriptor* descriptor) {
-        NXT_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
         for (uint32_t i = 0; i < descriptor->numBindings; ++i) {
             auto& binding = descriptor->bindings[i];
-            NXT_TRY_ASSERT(binding.binding <= kMaxBindingsPerGroup,
-                           "some binding index exceeds the maximum value");
-            NXT_TRY(ValidateShaderStageBit(binding.visibility));
-            NXT_TRY(ValidateBindingType(binding.type));
+            DAWN_TRY_ASSERT(binding.binding <= kMaxBindingsPerGroup,
+                            "some binding index exceeds the maximum value");
+            DAWN_TRY(ValidateShaderStageBit(binding.visibility));
+            DAWN_TRY(ValidateBindingType(binding.type));
 
-            NXT_TRY_ASSERT(!bindingsSet[i], "some binding index was specified more than once");
+            DAWN_TRY_ASSERT(!bindingsSet[i], "some binding index was specified more than once");
             bindingsSet.set(binding.binding);
         }
         return {};

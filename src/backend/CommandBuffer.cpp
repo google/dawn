@@ -35,7 +35,7 @@ namespace backend {
         MaybeError ValidateCopyLocationFitsInTexture(const TextureCopyLocation& location) {
             const TextureBase* texture = location.texture.Get();
             if (location.level >= texture->GetNumMipLevels()) {
-                NXT_RETURN_ERROR("Copy mip-level out of range");
+                DAWN_RETURN_ERROR("Copy mip-level out of range");
             }
 
             // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
@@ -45,13 +45,13 @@ namespace backend {
                     (static_cast<uint64_t>(texture->GetWidth()) >> level) ||
                 uint64_t(location.y) + uint64_t(location.height) >
                     (static_cast<uint64_t>(texture->GetHeight()) >> level)) {
-                NXT_RETURN_ERROR("Copy would touch outside of the texture");
+                DAWN_RETURN_ERROR("Copy would touch outside of the texture");
             }
 
             // TODO(cwallez@chromium.org): Check the depth bound differently for 2D arrays and 3D
             // textures
             if (location.z != 0 || location.depth != 1) {
-                NXT_RETURN_ERROR("No support for z != 0 and depth != 1 for now");
+                DAWN_RETURN_ERROR("No support for z != 0 and depth != 1 for now");
             }
 
             return {};
@@ -65,7 +65,7 @@ namespace backend {
         MaybeError ValidateCopySizeFitsInBuffer(const BufferCopyLocation& location,
                                                 uint32_t dataSize) {
             if (!FitsInBuffer(location.buffer.Get(), location.offset, dataSize)) {
-                NXT_RETURN_ERROR("Copy would overflow the buffer");
+                DAWN_RETURN_ERROR("Copy would overflow the buffer");
             }
 
             return {};
@@ -76,7 +76,7 @@ namespace backend {
             uint32_t texelSize =
                 static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat()));
             if (location.offset % texelSize != 0) {
-                NXT_RETURN_ERROR("Buffer offset must be a multiple of the texel size");
+                DAWN_RETURN_ERROR("Buffer offset must be a multiple of the texel size");
             }
 
             return {};
@@ -98,12 +98,12 @@ namespace backend {
 
         MaybeError ValidateRowPitch(const TextureCopyLocation& location, uint32_t rowPitch) {
             if (rowPitch % kTextureRowPitchAlignment != 0) {
-                NXT_RETURN_ERROR("Row pitch must be a multiple of 256");
+                DAWN_RETURN_ERROR("Row pitch must be a multiple of 256");
             }
 
             uint32_t texelSize = TextureFormatPixelSize(location.texture.Get()->GetFormat());
             if (rowPitch < location.width * texelSize) {
-                NXT_RETURN_ERROR("Row pitch must not be less than the number of bytes per row");
+                DAWN_RETURN_ERROR("Row pitch must not be less than the number of bytes per row");
             }
 
             return {};
@@ -112,7 +112,7 @@ namespace backend {
         MaybeError ValidateCanUseAs(BufferBase* buffer, dawn::BufferUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(buffer->GetAllowedUsage() & usage)) {
-                NXT_RETURN_ERROR("buffer doesn't have the required usage.");
+                DAWN_RETURN_ERROR("buffer doesn't have the required usage.");
             }
 
             return {};
@@ -121,7 +121,7 @@ namespace backend {
         MaybeError ValidateCanUseAs(TextureBase* texture, dawn::TextureUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(texture->GetAllowedUsage() & usage)) {
-                NXT_RETURN_ERROR("texture doesn't have the required usage.");
+                DAWN_RETURN_ERROR("texture doesn't have the required usage.");
             }
 
             return {};
@@ -168,7 +168,7 @@ namespace backend {
             MaybeError ValidateUsages(PassType pass) const {
                 // Storage resources cannot be used twice in the same compute pass
                 if (pass == PassType::Compute && mStorageUsedMultipleTimes) {
-                    NXT_RETURN_ERROR("Storage resource used multiple times in compute pass");
+                    DAWN_RETURN_ERROR("Storage resource used multiple times in compute pass");
                 }
 
                 // Buffers can only be used as single-write or multiple read.
@@ -177,14 +177,14 @@ namespace backend {
                     dawn::BufferUsageBit usage = it.second;
 
                     if (usage & ~buffer->GetAllowedUsage()) {
-                        NXT_RETURN_ERROR("Buffer missing usage for the pass");
+                        DAWN_RETURN_ERROR("Buffer missing usage for the pass");
                     }
 
                     bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
                     bool singleUse = dawn::HasZeroOrOneBits(usage);
 
                     if (!readOnly && !singleUse) {
-                        NXT_RETURN_ERROR(
+                        DAWN_RETURN_ERROR(
                             "Buffer used as writeable usage and another usage in pass");
                     }
                 }
@@ -196,13 +196,13 @@ namespace backend {
                     dawn::TextureUsageBit usage = it.second;
 
                     if (usage & ~texture->GetAllowedUsage()) {
-                        NXT_RETURN_ERROR("Texture missing usage for the pass");
+                        DAWN_RETURN_ERROR("Texture missing usage for the pass");
                     }
 
                     // For textures the only read-only usage in a pass is Sampled, so checking the
                     // usage constraint simplifies to checking a single usage bit is set.
                     if (!dawn::HasZeroOrOneBits(it.second)) {
-                        NXT_RETURN_ERROR("Texture used with more than one usage in pass");
+                        DAWN_RETURN_ERROR("Texture used with more than one usage in pass");
                     }
                 }
 
@@ -324,66 +324,66 @@ namespace backend {
             switch (type) {
                 case Command::BeginComputePass: {
                     mIterator.NextCommand<BeginComputePassCmd>();
-                    NXT_TRY(ValidateComputePass());
+                    DAWN_TRY(ValidateComputePass());
                 } break;
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mIterator.NextCommand<BeginRenderPassCmd>();
-                    NXT_TRY(ValidateRenderPass(cmd->info.Get()));
+                    DAWN_TRY(ValidateRenderPass(cmd->info.Get()));
                 } break;
 
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mIterator.NextCommand<CopyBufferToBufferCmd>();
 
-                    NXT_TRY(ValidateCopySizeFitsInBuffer(copy->source, copy->size));
-                    NXT_TRY(ValidateCopySizeFitsInBuffer(copy->destination, copy->size));
+                    DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->source, copy->size));
+                    DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->destination, copy->size));
 
-                    NXT_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
-                                             dawn::BufferUsageBit::TransferSrc));
-                    NXT_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
-                                             dawn::BufferUsageBit::TransferDst));
+                    DAWN_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
+                                              dawn::BufferUsageBit::TransferSrc));
+                    DAWN_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
+                                              dawn::BufferUsageBit::TransferDst));
                 } break;
 
                 case Command::CopyBufferToTexture: {
                     CopyBufferToTextureCmd* copy = mIterator.NextCommand<CopyBufferToTextureCmd>();
 
                     uint32_t bufferCopySize = 0;
-                    NXT_TRY(ValidateRowPitch(copy->destination, copy->rowPitch));
-                    NXT_TRY(ComputeTextureCopyBufferSize(copy->destination, copy->rowPitch,
-                                                         &bufferCopySize));
+                    DAWN_TRY(ValidateRowPitch(copy->destination, copy->rowPitch));
+                    DAWN_TRY(ComputeTextureCopyBufferSize(copy->destination, copy->rowPitch,
+                                                          &bufferCopySize));
 
-                    NXT_TRY(ValidateCopyLocationFitsInTexture(copy->destination));
-                    NXT_TRY(ValidateCopySizeFitsInBuffer(copy->source, bufferCopySize));
-                    NXT_TRY(
+                    DAWN_TRY(ValidateCopyLocationFitsInTexture(copy->destination));
+                    DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->source, bufferCopySize));
+                    DAWN_TRY(
                         ValidateTexelBufferOffset(copy->destination.texture.Get(), copy->source));
 
-                    NXT_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
-                                             dawn::BufferUsageBit::TransferSrc));
-                    NXT_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
-                                             dawn::TextureUsageBit::TransferDst));
+                    DAWN_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
+                                              dawn::BufferUsageBit::TransferSrc));
+                    DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
+                                              dawn::TextureUsageBit::TransferDst));
                 } break;
 
                 case Command::CopyTextureToBuffer: {
                     CopyTextureToBufferCmd* copy = mIterator.NextCommand<CopyTextureToBufferCmd>();
 
                     uint32_t bufferCopySize = 0;
-                    NXT_TRY(ValidateRowPitch(copy->source, copy->rowPitch));
-                    NXT_TRY(ComputeTextureCopyBufferSize(copy->source, copy->rowPitch,
-                                                         &bufferCopySize));
+                    DAWN_TRY(ValidateRowPitch(copy->source, copy->rowPitch));
+                    DAWN_TRY(ComputeTextureCopyBufferSize(copy->source, copy->rowPitch,
+                                                          &bufferCopySize));
 
-                    NXT_TRY(ValidateCopyLocationFitsInTexture(copy->source));
-                    NXT_TRY(ValidateCopySizeFitsInBuffer(copy->destination, bufferCopySize));
-                    NXT_TRY(
+                    DAWN_TRY(ValidateCopyLocationFitsInTexture(copy->source));
+                    DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->destination, bufferCopySize));
+                    DAWN_TRY(
                         ValidateTexelBufferOffset(copy->source.texture.Get(), copy->destination));
 
-                    NXT_TRY(ValidateCanUseAs(copy->source.texture.Get(),
-                                             dawn::TextureUsageBit::TransferSrc));
-                    NXT_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
-                                             dawn::BufferUsageBit::TransferDst));
+                    DAWN_TRY(ValidateCanUseAs(copy->source.texture.Get(),
+                                              dawn::TextureUsageBit::TransferSrc));
+                    DAWN_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
+                                              dawn::BufferUsageBit::TransferDst));
                 } break;
 
                 default:
-                    NXT_RETURN_ERROR("Command disallowed outside of a pass");
+                    DAWN_RETURN_ERROR("Command disallowed outside of a pass");
             }
         }
 
@@ -399,7 +399,7 @@ namespace backend {
                 case Command::EndComputePass: {
                     mIterator.NextCommand<EndComputePassCmd>();
 
-                    NXT_TRY(usageTracker.ValidateUsages(PassType::Compute));
+                    DAWN_TRY(usageTracker.ValidateUsages(PassType::Compute));
                     mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
 
                     mState->EndPass();
@@ -408,7 +408,7 @@ namespace backend {
 
                 case Command::Dispatch: {
                     mIterator.NextCommand<DispatchCmd>();
-                    NXT_TRY(mState->ValidateCanDispatch());
+                    DAWN_TRY(mState->ValidateCanDispatch());
                 } break;
 
                 case Command::SetComputePipeline: {
@@ -424,7 +424,7 @@ namespace backend {
                     // recorded because it impacts the size of an allocation in the
                     // CommandAllocator.
                     if (cmd->stages & ~dawn::ShaderStageBit::Compute) {
-                        NXT_RETURN_ERROR(
+                        DAWN_RETURN_ERROR(
                             "SetPushConstants stage must be compute or 0 in compute passes");
                     }
                 } break;
@@ -437,11 +437,11 @@ namespace backend {
                 } break;
 
                 default:
-                    NXT_RETURN_ERROR("Command disallowed inside a compute pass");
+                    DAWN_RETURN_ERROR("Command disallowed inside a compute pass");
             }
         }
 
-        NXT_RETURN_ERROR("Unfinished compute pass");
+        DAWN_RETURN_ERROR("Unfinished compute pass");
     }
 
     MaybeError CommandBufferBuilder::ValidateRenderPass(RenderPassDescriptorBase* renderPass) {
@@ -464,7 +464,7 @@ namespace backend {
                 case Command::EndRenderPass: {
                     mIterator.NextCommand<EndRenderPassCmd>();
 
-                    NXT_TRY(usageTracker.ValidateUsages(PassType::Render));
+                    DAWN_TRY(usageTracker.ValidateUsages(PassType::Render));
                     mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
 
                     mState->EndPass();
@@ -473,12 +473,12 @@ namespace backend {
 
                 case Command::DrawArrays: {
                     mIterator.NextCommand<DrawArraysCmd>();
-                    NXT_TRY(mState->ValidateCanDrawArrays());
+                    DAWN_TRY(mState->ValidateCanDrawArrays());
                 } break;
 
                 case Command::DrawElements: {
                     mIterator.NextCommand<DrawElementsCmd>();
-                    NXT_TRY(mState->ValidateCanDrawElements());
+                    DAWN_TRY(mState->ValidateCanDrawElements());
                 } break;
 
                 case Command::SetRenderPipeline: {
@@ -486,7 +486,7 @@ namespace backend {
                     RenderPipelineBase* pipeline = cmd->pipeline.Get();
 
                     if (!pipeline->IsCompatibleWith(renderPass)) {
-                        NXT_RETURN_ERROR("Pipeline is incompatible with this render pass");
+                        DAWN_RETURN_ERROR("Pipeline is incompatible with this render pass");
                     }
 
                     mState->SetRenderPipeline(pipeline);
@@ -500,7 +500,7 @@ namespace backend {
                     // CommandAllocator.
                     if (cmd->stages &
                         ~(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment)) {
-                        NXT_RETURN_ERROR(
+                        DAWN_RETURN_ERROR(
                             "SetPushConstants stage must be a subset of (vertex|fragment) in "
                             "render passes");
                     }
@@ -529,7 +529,7 @@ namespace backend {
                     SetIndexBufferCmd* cmd = mIterator.NextCommand<SetIndexBufferCmd>();
 
                     usageTracker.BufferUsedAs(cmd->buffer.Get(), dawn::BufferUsageBit::Index);
-                    NXT_TRY(mState->SetIndexBuffer());
+                    DAWN_TRY(mState->SetIndexBuffer());
                 } break;
 
                 case Command::SetVertexBuffers: {
@@ -539,16 +539,16 @@ namespace backend {
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
                         usageTracker.BufferUsedAs(buffers[i].Get(), dawn::BufferUsageBit::Vertex);
-                        NXT_TRY(mState->SetVertexBuffer(cmd->startSlot + i));
+                        DAWN_TRY(mState->SetVertexBuffer(cmd->startSlot + i));
                     }
                 } break;
 
                 default:
-                    NXT_RETURN_ERROR("Command disallowed inside a render pass");
+                    DAWN_RETURN_ERROR("Command disallowed inside a render pass");
             }
         }
 
-        NXT_RETURN_ERROR("Unfinished render pass");
+        DAWN_RETURN_ERROR("Unfinished render pass");
     }
 
     // Implementation of the API's command recording methods

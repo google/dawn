@@ -34,10 +34,10 @@ TEST(ErrorTests, Error_Success) {
     ASSERT_TRUE(result.IsSuccess());
 }
 
-// Check returning an error MaybeError with NXT_RETURN_ERROR
+// Check returning an error MaybeError with DAWN_RETURN_ERROR
 TEST(ErrorTests, Error_Error) {
     auto ReturnError = []() -> MaybeError {
-        NXT_RETURN_ERROR(dummyErrorMessage);
+        DAWN_RETURN_ERROR(dummyErrorMessage);
     };
 
     MaybeError result = ReturnError();
@@ -59,10 +59,10 @@ TEST(ErrorTests, ResultOrError_Success) {
     ASSERT_EQ(result.AcquireSuccess(), &dummySuccess);
 }
 
-// Check returning an error ResultOrError with NXT_RETURN_ERROR
+// Check returning an error ResultOrError with DAWN_RETURN_ERROR
 TEST(ErrorTests, ResultOrError_Error) {
     auto ReturnError = []() -> ResultOrError<int*> {
-        NXT_RETURN_ERROR(dummyErrorMessage);
+        DAWN_RETURN_ERROR(dummyErrorMessage);
     };
 
     ResultOrError<int*> result = ReturnError();
@@ -73,17 +73,17 @@ TEST(ErrorTests, ResultOrError_Error) {
     delete errorData;
 }
 
-// Check NXT_TRY handles successes correctly.
+// Check DAWN_TRY handles successes correctly.
 TEST(ErrorTests, TRY_Success) {
     auto ReturnSuccess = []() -> MaybeError {
         return {};
     };
 
-    // We need to check that NXT_TRY doesn't return on successes
+    // We need to check that DAWN_TRY doesn't return on successes
     bool tryReturned = true;
 
     auto Try = [ReturnSuccess, &tryReturned]() -> MaybeError {
-        NXT_TRY(ReturnSuccess());
+        DAWN_TRY(ReturnSuccess());
         tryReturned = false;
         return {};
     };
@@ -93,15 +93,15 @@ TEST(ErrorTests, TRY_Success) {
     ASSERT_FALSE(tryReturned);
 }
 
-// Check NXT_TRY handles errors correctly.
+// Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_Error) {
     auto ReturnError = []() -> MaybeError {
-        NXT_RETURN_ERROR(dummyErrorMessage);
+        DAWN_RETURN_ERROR(dummyErrorMessage);
     };
 
     auto Try = [ReturnError]() -> MaybeError {
-        NXT_TRY(ReturnError());
-        // NXT_TRY should return before this point
+        DAWN_TRY(ReturnError());
+        // DAWN_TRY should return before this point
         EXPECT_FALSE(true);
         return {};
     };
@@ -114,19 +114,19 @@ TEST(ErrorTests, TRY_Error) {
     delete errorData;
 }
 
-// Check NXT_TRY adds to the backtrace.
+// Check DAWN_TRY adds to the backtrace.
 TEST(ErrorTests, TRY_AddsToBacktrace) {
     auto ReturnError = []() -> MaybeError {
-        NXT_RETURN_ERROR(dummyErrorMessage);
+        DAWN_RETURN_ERROR(dummyErrorMessage);
     };
 
     auto SingleTry = [ReturnError]() -> MaybeError {
-        NXT_TRY(ReturnError());
+        DAWN_TRY(ReturnError());
         return {};
     };
 
     auto DoubleTry = [SingleTry]() -> MaybeError {
-        NXT_TRY(SingleTry());
+        DAWN_TRY(SingleTry());
         return {};
     };
 
@@ -145,18 +145,18 @@ TEST(ErrorTests, TRY_AddsToBacktrace) {
     delete doubleData;
 }
 
-// Check NXT_TRY_ASSIGN handles successes correctly.
+// Check DAWN_TRY_ASSIGN handles successes correctly.
 TEST(ErrorTests, TRY_RESULT_Success) {
     auto ReturnSuccess = []() -> ResultOrError<int*> {
         return &dummySuccess;
     };
 
-    // We need to check that NXT_TRY doesn't return on successes
+    // We need to check that DAWN_TRY doesn't return on successes
     bool tryReturned = true;
 
     auto Try = [ReturnSuccess, &tryReturned]() -> ResultOrError<int*> {
         int* result = nullptr;
-        NXT_TRY_ASSIGN(result, ReturnSuccess());
+        DAWN_TRY_ASSIGN(result, ReturnSuccess());
         tryReturned = false;
 
         EXPECT_EQ(result, &dummySuccess);
@@ -169,18 +169,18 @@ TEST(ErrorTests, TRY_RESULT_Success) {
     ASSERT_EQ(result.AcquireSuccess(), &dummySuccess);
 }
 
-// Check NXT_TRY_ASSIGN handles errors correctly.
+// Check DAWN_TRY_ASSIGN handles errors correctly.
 TEST(ErrorTests, TRY_RESULT_Error) {
     auto ReturnError = []() -> ResultOrError<int*> {
-        NXT_RETURN_ERROR(dummyErrorMessage);
+        DAWN_RETURN_ERROR(dummyErrorMessage);
     };
 
     auto Try = [ReturnError]() -> ResultOrError<int*> {
         int* result = nullptr;
-        NXT_TRY_ASSIGN(result, ReturnError());
+        DAWN_TRY_ASSIGN(result, ReturnError());
         NXT_UNUSED(result);
 
-        // NXT_TRY should return before this point
+        // DAWN_TRY should return before this point
         EXPECT_FALSE(true);
         return &dummySuccess;
     };
@@ -193,19 +193,19 @@ TEST(ErrorTests, TRY_RESULT_Error) {
     delete errorData;
 }
 
-// Check NXT_TRY_ASSIGN adds to the backtrace.
+// Check DAWN_TRY_ASSIGN adds to the backtrace.
 TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
     auto ReturnError = []() -> ResultOrError<int*> {
-        NXT_RETURN_ERROR(dummyErrorMessage);
+        DAWN_RETURN_ERROR(dummyErrorMessage);
     };
 
     auto SingleTry = [ReturnError]() -> ResultOrError<int*> {
-        NXT_TRY(ReturnError());
+        DAWN_TRY(ReturnError());
         return &dummySuccess;
     };
 
     auto DoubleTry = [SingleTry]() -> ResultOrError<int*> {
-        NXT_TRY(SingleTry());
+        DAWN_TRY(SingleTry());
         return &dummySuccess;
     };
 
@@ -224,15 +224,15 @@ TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
     delete doubleData;
 }
 
-// Check a ResultOrError can be NXT_TRY_ASSIGNED in a function that returns an Error
+// Check a ResultOrError can be DAWN_TRY_ASSIGNED in a function that returns an Error
 TEST(ErrorTests, TRY_RESULT_ConversionToError) {
     auto ReturnError = []() -> ResultOrError<int*> {
-        NXT_RETURN_ERROR(dummyErrorMessage);
+        DAWN_RETURN_ERROR(dummyErrorMessage);
     };
 
     auto Try = [ReturnError]() -> MaybeError {
         int* result = nullptr;
-        NXT_TRY_ASSIGN(result, ReturnError());
+        DAWN_TRY_ASSIGN(result, ReturnError());
         NXT_UNUSED(result);
 
         return {};
@@ -247,14 +247,14 @@ TEST(ErrorTests, TRY_RESULT_ConversionToError) {
 }
 
 // Check a MaybeError can be NXT_TRIED in a function that returns an ResultOrError
-// Check NXT_TRY handles errors correctly.
+// Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_ConversionToErrorOrResult) {
     auto ReturnError = []() -> MaybeError {
-        NXT_RETURN_ERROR(dummyErrorMessage);
+        DAWN_RETURN_ERROR(dummyErrorMessage);
     };
 
     auto Try = [ReturnError]() -> ResultOrError<int*>{
-        NXT_TRY(ReturnError());
+        DAWN_TRY(ReturnError());
         return &dummySuccess;
     };
 
