@@ -20,70 +20,70 @@ using namespace backend;
 
 // Tests for StageBit
 TEST(PerStage, StageBit) {
-    ASSERT_EQ(StageBit(nxt::ShaderStage::Vertex), nxt::ShaderStageBit::Vertex);
-    ASSERT_EQ(StageBit(nxt::ShaderStage::Fragment), nxt::ShaderStageBit::Fragment);
-    ASSERT_EQ(StageBit(nxt::ShaderStage::Compute), nxt::ShaderStageBit::Compute);
+    ASSERT_EQ(StageBit(dawn::ShaderStage::Vertex), dawn::ShaderStageBit::Vertex);
+    ASSERT_EQ(StageBit(dawn::ShaderStage::Fragment), dawn::ShaderStageBit::Fragment);
+    ASSERT_EQ(StageBit(dawn::ShaderStage::Compute), dawn::ShaderStageBit::Compute);
 }
 
 // Basic test for the PerStage container
 TEST(PerStage, PerStage) {
     PerStage<int> data;
 
-    // Store data using nxt::ShaderStage
-    data[nxt::ShaderStage::Vertex] = 42;
-    data[nxt::ShaderStage::Fragment] = 3;
-    data[nxt::ShaderStage::Compute] = -1;
+    // Store data using dawn::ShaderStage
+    data[dawn::ShaderStage::Vertex] = 42;
+    data[dawn::ShaderStage::Fragment] = 3;
+    data[dawn::ShaderStage::Compute] = -1;
 
-    // Load it using nxt::ShaderStageBit
-    ASSERT_EQ(data[nxt::ShaderStageBit::Vertex], 42);
-    ASSERT_EQ(data[nxt::ShaderStageBit::Fragment], 3);
-    ASSERT_EQ(data[nxt::ShaderStageBit::Compute], -1);
+    // Load it using dawn::ShaderStageBit
+    ASSERT_EQ(data[dawn::ShaderStageBit::Vertex], 42);
+    ASSERT_EQ(data[dawn::ShaderStageBit::Fragment], 3);
+    ASSERT_EQ(data[dawn::ShaderStageBit::Compute], -1);
 }
 
 // Test IterateStages with kAllStages
 TEST(PerStage, IterateAllStages) {
     PerStage<int> counts;
-    counts[nxt::ShaderStage::Vertex] = 0;
-    counts[nxt::ShaderStage::Fragment] = 0;
-    counts[nxt::ShaderStage::Compute] = 0;
+    counts[dawn::ShaderStage::Vertex] = 0;
+    counts[dawn::ShaderStage::Fragment] = 0;
+    counts[dawn::ShaderStage::Compute] = 0;
 
     for (auto stage : IterateStages(kAllStages)) {
         counts[stage] ++;
     }
 
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Vertex], 1);
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Fragment], 1);
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Compute], 1);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Vertex], 1);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Fragment], 1);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Compute], 1);
 }
 
 // Test IterateStages with one stage
 TEST(PerStage, IterateOneStage) {
     PerStage<int> counts;
-    counts[nxt::ShaderStage::Vertex] = 0;
-    counts[nxt::ShaderStage::Fragment] = 0;
-    counts[nxt::ShaderStage::Compute] = 0;
+    counts[dawn::ShaderStage::Vertex] = 0;
+    counts[dawn::ShaderStage::Fragment] = 0;
+    counts[dawn::ShaderStage::Compute] = 0;
 
-    for (auto stage : IterateStages(nxt::ShaderStageBit::Fragment)) {
+    for (auto stage : IterateStages(dawn::ShaderStageBit::Fragment)) {
         counts[stage] ++;
     }
 
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Vertex], 0);
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Fragment], 1);
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Compute], 0);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Vertex], 0);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Fragment], 1);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Compute], 0);
 }
 
 // Test IterateStages with no stage
 TEST(PerStage, IterateNoStages) {
     PerStage<int> counts;
-    counts[nxt::ShaderStage::Vertex] = 0;
-    counts[nxt::ShaderStage::Fragment] = 0;
-    counts[nxt::ShaderStage::Compute] = 0;
+    counts[dawn::ShaderStage::Vertex] = 0;
+    counts[dawn::ShaderStage::Fragment] = 0;
+    counts[dawn::ShaderStage::Compute] = 0;
 
-    for (auto stage : IterateStages(nxt::ShaderStageBit::Fragment & nxt::ShaderStageBit::Vertex)) {
+    for (auto stage : IterateStages(dawn::ShaderStageBit::Fragment & dawn::ShaderStageBit::Vertex)) {
         counts[stage] ++;
     }
 
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Vertex], 0);
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Fragment], 0);
-    ASSERT_EQ(counts[nxt::ShaderStageBit::Compute], 0);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Vertex], 0);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Fragment], 0);
+    ASSERT_EQ(counts[dawn::ShaderStageBit::Compute], 0);
 }

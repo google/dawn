@@ -21,17 +21,17 @@ class BlendStateValidationTest : public ValidationTest {
 TEST_F(BlendStateValidationTest, CreationSuccess) {
     // Success for setting all properties
     {
-        nxt::BlendState state = AssertWillBeSuccess(device.CreateBlendStateBuilder())
+        dawn::BlendState state = AssertWillBeSuccess(device.CreateBlendStateBuilder())
             .SetBlendEnabled(true)
-            .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::One)
-            .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::One)
-            .SetColorWriteMask(nxt::ColorWriteMask::Red)
+            .SetAlphaBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
+            .SetColorBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
+            .SetColorWriteMask(dawn::ColorWriteMask::Red)
             .GetResult();
     }
 
     // Success for empty builder
     {
-        nxt::BlendState state = AssertWillBeSuccess(device.CreateBlendStateBuilder())
+        dawn::BlendState state = AssertWillBeSuccess(device.CreateBlendStateBuilder())
             .GetResult();
     }
 }
@@ -40,7 +40,7 @@ TEST_F(BlendStateValidationTest, CreationSuccess) {
 TEST_F(BlendStateValidationTest, CreationDuplicates) {
     // Test failure when specifying blend enabled multiple times
     {
-        nxt::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
+        dawn::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
             .SetBlendEnabled(true)
             .SetBlendEnabled(false)
             .GetResult();
@@ -48,25 +48,25 @@ TEST_F(BlendStateValidationTest, CreationDuplicates) {
 
     // Test failure when specifying alpha blend multiple times
     {
-        nxt::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
-            .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::One)
-            .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::Zero, nxt::BlendFactor::Zero)
+        dawn::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
+            .SetAlphaBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
+            .SetAlphaBlend(dawn::BlendOperation::Add, dawn::BlendFactor::Zero, dawn::BlendFactor::Zero)
             .GetResult();
     }
 
     // Test failure when specifying color blend multiple times
     {
-        nxt::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
-            .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::One)
-            .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::Zero, nxt::BlendFactor::Zero)
+        dawn::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
+            .SetColorBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
+            .SetColorBlend(dawn::BlendOperation::Add, dawn::BlendFactor::Zero, dawn::BlendFactor::Zero)
             .GetResult();
     }
 
     // Test failure when specifying color write mask multiple times
     {
-        nxt::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
-            .SetColorWriteMask(nxt::ColorWriteMask::Red)
-            .SetColorWriteMask(nxt::ColorWriteMask::Green)
+        dawn::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
+            .SetColorWriteMask(dawn::ColorWriteMask::Red)
+            .SetColorWriteMask(dawn::ColorWriteMask::Green)
             .GetResult();
     }
 

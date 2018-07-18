@@ -34,7 +34,7 @@ class ValidationTest : public testing::Test {
         // Use these methods to add expectations on the validation of a builder. The expectations are
         // checked on test teardown. Adding an expectation is done like the following:
         //
-        //     nxt::Foo foo = AssertWillBe[Success|Error](device.CreateFooBuilder(), "my foo")
+        //     dawn::Foo foo = AssertWillBe[Success|Error](device.CreateFooBuilder(), "my foo")
         //         .SetBar(1)
         //         .GetResult();
         //
@@ -48,21 +48,21 @@ class ValidationTest : public testing::Test {
         void StartExpectDeviceError();
         bool EndExpectDeviceError();
 
-        nxt::RenderPassDescriptor CreateSimpleRenderPass();
+        dawn::RenderPassDescriptor CreateSimpleRenderPass();
 
         // Helper functions to create objects to test validation.
 
         struct DummyRenderPass {
-            nxt::RenderPassDescriptor renderPass;
-            nxt::Texture attachment;
-            nxt::TextureFormat attachmentFormat;
+            dawn::RenderPassDescriptor renderPass;
+            dawn::Texture attachment;
+            dawn::TextureFormat attachmentFormat;
             uint32_t width;
             uint32_t height;
         };
         DummyRenderPass CreateDummyRenderPass();
 
     protected:
-        nxt::Device device;
+        dawn::Device device;
 
     private:
         static void OnDeviceError(const char* message, nxtCallbackUserdata userdata);
@@ -82,7 +82,7 @@ class ValidationTest : public testing::Test {
         template<typename Builder>
         Builder AddExpectation(Builder& builder, std::string debugName, bool expectSuccess);
 
-        static void OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, nxt::CallbackUserdata userdata1, nxt::CallbackUserdata userdata2);
+        static void OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, dawn::CallbackUserdata userdata1, dawn::CallbackUserdata userdata2);
 };
 
 // Template implementation details

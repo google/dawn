@@ -149,7 +149,7 @@ class PrimitiveTopologyTest : public NXTTest {
 
             renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-            vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+            vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450
                 layout(location = 0) in vec4 pos;
                 void main() {
@@ -157,7 +157,7 @@ class PrimitiveTopologyTest : public NXTTest {
                 })"
             );
 
-            fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+            fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
@@ -165,11 +165,11 @@ class PrimitiveTopologyTest : public NXTTest {
                 })");
 
             inputState = device.CreateInputStateBuilder()
-                .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32A32, 0)
-                .SetInput(0, 4 * sizeof(float), nxt::InputStepMode::Vertex)
+                .SetAttribute(0, 0, dawn::VertexFormat::FloatR32G32B32A32, 0)
+                .SetInput(0, 4 * sizeof(float), dawn::InputStepMode::Vertex)
                 .GetResult();
 
-            vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices), nxt::BufferUsageBit::Vertex);
+            vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices), dawn::BufferUsageBit::Vertex);
         }
 
         struct LocationSpec {
@@ -184,17 +184,17 @@ class PrimitiveTopologyTest : public NXTTest {
         }
 
         // Draw the vertices with the given primitive topology and check the pixel values of the test locations
-        void DoTest(nxt::PrimitiveTopology primitiveTopology, const std::vector<LocationSpec> &locationSpecs) {
-            nxt::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
+        void DoTest(dawn::PrimitiveTopology primitiveTopology, const std::vector<LocationSpec> &locationSpecs) {
+            dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
                 .SetColorAttachmentFormat(0, renderPass.colorFormat)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)
                 .SetPrimitiveTopology(primitiveTopology)
                 .GetResult();
 
             static const uint32_t zeroOffset = 0;
-            nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+            dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
                 .BeginRenderPass(renderPass.renderPassInfo)
                     .SetRenderPipeline(pipeline)
                     .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
@@ -215,15 +215,15 @@ class PrimitiveTopologyTest : public NXTTest {
         }
 
         utils::BasicRenderPass renderPass;
-        nxt::ShaderModule vsModule;
-        nxt::ShaderModule fsModule;
-        nxt::InputState inputState;
-        nxt::Buffer vertexBuffer;
+        dawn::ShaderModule vsModule;
+        dawn::ShaderModule fsModule;
+        dawn::InputState inputState;
+        dawn::Buffer vertexBuffer;
 };
 
 // Test Point primitive topology
 TEST_P(PrimitiveTopologyTest, PointList) {
-    DoTest(nxt::PrimitiveTopology::PointList, {
+    DoTest(dawn::PrimitiveTopology::PointList, {
         // Check that the points are drawn
         TestPoints(kPointTestLocations, true),
 
@@ -237,7 +237,7 @@ TEST_P(PrimitiveTopologyTest, PointList) {
 
 // Test Line primitive topology
 TEST_P(PrimitiveTopologyTest, LineList) {
-    DoTest(nxt::PrimitiveTopology::LineList, {
+    DoTest(dawn::PrimitiveTopology::LineList, {
         // Check that lines are drawn
         TestPoints(kLineTestLocations, true),
 
@@ -250,7 +250,7 @@ TEST_P(PrimitiveTopologyTest, LineList) {
 
 // Test LineStrip primitive topology
 TEST_P(PrimitiveTopologyTest, LineStrip) {
-    DoTest(nxt::PrimitiveTopology::LineStrip, {
+    DoTest(dawn::PrimitiveTopology::LineStrip, {
         // Check that lines are drawn
         TestPoints(kLineTestLocations, true),
         TestPoints(kLineStripTestLocations, true),
@@ -263,7 +263,7 @@ TEST_P(PrimitiveTopologyTest, LineStrip) {
 
 // Test Triangle primitive topology
 TEST_P(PrimitiveTopologyTest, TriangleList) {
-    DoTest(nxt::PrimitiveTopology::TriangleList, {
+    DoTest(dawn::PrimitiveTopology::TriangleList, {
         // Check that triangles are drawn
         TestPoints(kTriangleTestLocations, true),
 
@@ -274,7 +274,7 @@ TEST_P(PrimitiveTopologyTest, TriangleList) {
 
 // Test TriangleStrip primitive topology
 TEST_P(PrimitiveTopologyTest, TriangleStrip) {
-    DoTest(nxt::PrimitiveTopology::TriangleStrip, {
+    DoTest(dawn::PrimitiveTopology::TriangleStrip, {
         TestPoints(kTriangleTestLocations, true),
         TestPoints(kTriangleStripTestLocations, true),
     });

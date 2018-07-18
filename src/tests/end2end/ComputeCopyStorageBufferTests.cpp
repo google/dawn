@@ -30,24 +30,24 @@ class ComputeCopyStorageBufferTests : public NXTTest {
 void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, nxt::ShaderStageBit::Compute, nxt::BindingType::StorageBuffer},
-                    {1, nxt::ShaderStageBit::Compute, nxt::BindingType::StorageBuffer},
+                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
+                    {1, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
                 });
 
     // Set up shader and pipeline
-    auto module = utils::CreateShaderModule(device, nxt::ShaderStage::Compute, shader);
+    auto module = utils::CreateShaderModule(device, dawn::ShaderStage::Compute, shader);
     auto pl = utils::MakeBasicPipelineLayout(device, &bgl);
     auto pipeline = device.CreateComputePipelineBuilder()
                         .SetLayout(pl)
-                        .SetStage(nxt::ShaderStage::Compute, module, "main")
+                        .SetStage(dawn::ShaderStage::Compute, module, "main")
                         .GetResult();
 
     // Set up src storage buffer
     auto src =
         device.CreateBufferBuilder()
             .SetSize(kNumUints * sizeof(uint32_t))
-            .SetAllowedUsage(nxt::BufferUsageBit::Storage | nxt::BufferUsageBit::TransferSrc |
-                             nxt::BufferUsageBit::TransferDst)
+            .SetAllowedUsage(dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc |
+                             dawn::BufferUsageBit::TransferDst)
             .GetResult();
     std::array<uint32_t, kNumUints> expected;
     for (uint32_t i = 0; i < kNumUints; ++i) {
@@ -62,8 +62,8 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     auto dst =
         device.CreateBufferBuilder()
             .SetSize(kNumUints * sizeof(uint32_t))
-            .SetAllowedUsage(nxt::BufferUsageBit::Storage | nxt::BufferUsageBit::TransferSrc |
-                             nxt::BufferUsageBit::TransferDst)
+            .SetAllowedUsage(dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc |
+                             dawn::BufferUsageBit::TransferDst)
             .GetResult();
     std::array<uint32_t, kNumUints> zero{};
     dst.SetSubData(0, sizeof(zero), reinterpret_cast<const uint8_t*>(zero.data()));
@@ -73,7 +73,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     // Set up bind group and issue dispatch
     auto bindGroup = device.CreateBindGroupBuilder()
                          .SetLayout(bgl)
-                         .SetUsage(nxt::BindGroupUsage::Frozen)
+                         .SetUsage(dawn::BindGroupUsage::Frozen)
                          .SetBufferViews(0, 1, &srcView)
                          .SetBufferViews(1, 1, &dstView)
                          .GetResult();

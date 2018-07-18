@@ -25,43 +25,43 @@ class PushConstantTest: public NXTTest {
         // Layout, bind group and friends to store results for compute tests, can have an extra buffer
         // so that two different pipeline layout can be created.
         struct TestBindings {
-            nxt::PipelineLayout layout;
-            nxt::BindGroup bindGroup;
-            nxt::Buffer resultBuffer;
+            dawn::PipelineLayout layout;
+            dawn::BindGroup bindGroup;
+            dawn::Buffer resultBuffer;
         };
         TestBindings MakeTestBindings(bool extraBuffer) {
-            nxt::Buffer buf1 = device.CreateBufferBuilder()
+            dawn::Buffer buf1 = device.CreateBufferBuilder()
                 .SetSize(4)
-                .SetAllowedUsage(nxt::BufferUsageBit::Storage | nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
+                .SetAllowedUsage(dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
                 .GetResult();
             uint32_t one = 1;
             buf1.SetSubData(0, sizeof(one), reinterpret_cast<uint8_t*>(&one));
 
-            nxt::Buffer buf2 = device.CreateBufferBuilder()
+            dawn::Buffer buf2 = device.CreateBufferBuilder()
                 .SetSize(4)
-                .SetAllowedUsage(nxt::BufferUsageBit::Storage)
+                .SetAllowedUsage(dawn::BufferUsageBit::Storage)
                 .GetResult();
 
-            nxt::ShaderStageBit kAllStages = nxt::ShaderStageBit::Compute | nxt::ShaderStageBit::Fragment | nxt::ShaderStageBit::Vertex;
-            constexpr nxt::ShaderStageBit kNoStages{};
+            dawn::ShaderStageBit kAllStages = dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment | dawn::ShaderStageBit::Vertex;
+            constexpr dawn::ShaderStageBit kNoStages{};
 
-            nxt::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
                 device,
                 {
-                    {0, kAllStages, nxt::BindingType::StorageBuffer},
-                    {1, extraBuffer ? kAllStages : kNoStages, nxt::BindingType::StorageBuffer},
+                    {0, kAllStages, dawn::BindingType::StorageBuffer},
+                    {1, extraBuffer ? kAllStages : kNoStages, dawn::BindingType::StorageBuffer},
                 });
 
-            nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+            dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
-            nxt::BufferView views[2] = {
+            dawn::BufferView views[2] = {
                 buf1.CreateBufferViewBuilder().SetExtent(0, 4).GetResult(),
                 buf2.CreateBufferViewBuilder().SetExtent(0, 4).GetResult(),
             };
 
-            nxt::BindGroup bg = device.CreateBindGroupBuilder()
+            dawn::BindGroup bg = device.CreateBindGroupBuilder()
                 .SetLayout(bgl)
-                .SetUsage(nxt::BindGroupUsage::Frozen)
+                .SetUsage(dawn::BindGroupUsage::Frozen)
                 .SetBufferViews(0, extraBuffer ? 2 : 1, views)
                 .GetResult();
 
@@ -132,8 +132,8 @@ class PushConstantTest: public NXTTest {
         }
 
         // The compute pipeline ANDs the result of the test in the SSBO
-        nxt::ComputePipeline MakeTestComputePipeline(const nxt::PipelineLayout& pl, PushConstantSpec spec) {
-            nxt::ShaderModule module = utils::CreateShaderModule(device, nxt::ShaderStage::Compute, (R"(
+        dawn::ComputePipeline MakeTestComputePipeline(const dawn::PipelineLayout& pl, PushConstantSpec spec) {
+            dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Compute, (R"(
                 #version 450
                 layout(set = 0, binding = 0) buffer Result {
                     int success;
@@ -151,18 +151,18 @@ class PushConstantTest: public NXTTest {
 
             return device.CreateComputePipelineBuilder()
                 .SetLayout(pl)
-                .SetStage(nxt::ShaderStage::Compute, module, "main")
+                .SetStage(dawn::ShaderStage::Compute, module, "main")
                 .GetResult();
         }
 
-        nxt::PipelineLayout MakeEmptyLayout() {
+        dawn::PipelineLayout MakeEmptyLayout() {
             return utils::MakeBasicPipelineLayout(device, nullptr);
         }
 
         // The render pipeline adds one to the red channel for successful vertex push constant test
         // and adds one to green for the frgament test.
-        nxt::RenderPipeline MakeTestRenderPipeline(nxt::PipelineLayout& layout, PushConstantSpec vsSpec, PushConstantSpec fsSpec) {
-            nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, (R"(
+        dawn::RenderPipeline MakeTestRenderPipeline(dawn::PipelineLayout& layout, PushConstantSpec vsSpec, PushConstantSpec fsSpec) {
+            dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, (R"(
                 #version 450
                 )" + MakePushConstantBlock(vsSpec) + R"(
                 layout(location = 0) out float red;
@@ -173,7 +173,7 @@ class PushConstantTest: public NXTTest {
                     gl_Position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
                 })").c_str()
             );
-            nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, (R"(
+            dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, (R"(
                 #version 450
                 )" + MakePushConstantBlock(fsSpec) + R"(
                 layout(location = 0) out vec4 color;
@@ -185,18 +185,18 @@ class PushConstantTest: public NXTTest {
                 })").c_str()
             );
 
-            nxt::BlendState blendState = device.CreateBlendStateBuilder()
+            dawn::BlendState blendState = device.CreateBlendStateBuilder()
                 .SetBlendEnabled(true)
-                .SetColorBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::One)
-                .SetAlphaBlend(nxt::BlendOperation::Add, nxt::BlendFactor::One, nxt::BlendFactor::One)
+                .SetColorBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
+                .SetAlphaBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
                 .GetResult();
 
             return device.CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+                .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
                 .SetLayout(layout)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-                .SetPrimitiveTopology(nxt::PrimitiveTopology::PointList)
+                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+                .SetPrimitiveTopology(dawn::PrimitiveTopology::PointList)
                 .SetColorAttachmentBlendState(0, blendState)
                 .GetResult();
         }
@@ -207,10 +207,10 @@ TEST_P(PushConstantTest, ComputePassDefaultsToZero) {
     auto binding = MakeTestBindings(false);
 
     // Expect push constants to be zero in all dispatches of this test.
-    nxt::ComputePipeline pipeline = MakeTestComputePipeline(binding.layout, MakeAllZeroSpec());
+    dawn::ComputePipeline pipeline = MakeTestComputePipeline(binding.layout, MakeAllZeroSpec());
 
     uint32_t notZero = 42;
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginComputePass()
             // Test compute push constants are set to zero by default.
             .SetComputePipeline(pipeline)
@@ -218,7 +218,7 @@ TEST_P(PushConstantTest, ComputePassDefaultsToZero) {
             .Dispatch(1, 1, 1)
             // Set push constants to non-zero value to check they will be reset to zero
             // on the next BeginComputePass
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, &notZero)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, &notZero)
         .EndComputePass()
         .BeginComputePass()
             .SetComputePipeline(pipeline)
@@ -238,10 +238,10 @@ TEST_P(PushConstantTest, RenderPassDefaultsToZero) {
 
     // Expect push constants to be zero in all draws of this test.
     PushConstantSpec allZeros = MakeAllZeroSpec();
-    nxt::PipelineLayout layout = MakeEmptyLayout();
-    nxt::RenderPipeline pipeline = MakeTestRenderPipeline(layout, MakeAllZeroSpec(), MakeAllZeroSpec());
+    dawn::PipelineLayout layout = MakeEmptyLayout();
+    dawn::RenderPipeline pipeline = MakeTestRenderPipeline(layout, MakeAllZeroSpec(), MakeAllZeroSpec());
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass.renderPassInfo)
             // Test render push constants are set to zero by default.
             .SetRenderPipeline(pipeline)
@@ -266,12 +266,12 @@ TEST_P(PushConstantTest, VariousConstantTypes) {
 
     auto binding = MakeTestBindings(false);
     PushConstantSpec spec = {{Int, -1}, {UInt, 3}, {Float, 4}};
-    nxt::ComputePipeline pipeline = MakeTestComputePipeline(binding.layout, spec);
+    dawn::ComputePipeline pipeline = MakeTestComputePipeline(binding.layout, spec);
 
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginComputePass()
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 3, reinterpret_cast<uint32_t*>(&values))
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, 3, reinterpret_cast<uint32_t*>(&values))
             .SetComputePipeline(pipeline)
             .SetBindGroup(0, binding.bindGroup)
             .Dispatch(1, 1, 1)
@@ -290,20 +290,20 @@ TEST_P(PushConstantTest, InheritThroughPipelineLayoutChange) {
     auto binding2 = MakeTestBindings(true);
     PushConstantSpec spec1 = {{Int, 1}};
     PushConstantSpec spec2 = {{Int, 2}};
-    nxt::ComputePipeline pipeline1 = MakeTestComputePipeline(binding1.layout, spec1);
-    nxt::ComputePipeline pipeline2 = MakeTestComputePipeline(binding2.layout, spec2);
+    dawn::ComputePipeline pipeline1 = MakeTestComputePipeline(binding1.layout, spec1);
+    dawn::ComputePipeline pipeline2 = MakeTestComputePipeline(binding2.layout, spec2);
 
     uint32_t one = 1;
     uint32_t two = 2;
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginComputePass()
             // Set Push constant before there is a pipeline set
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, &one)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, &one)
             .SetComputePipeline(pipeline1)
             .SetBindGroup(0, binding1.bindGroup)
             .Dispatch(1, 1, 1)
             // Change the push constant before changing pipeline layout
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, &two)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, &two)
             .SetComputePipeline(pipeline2)
             .SetBindGroup(0, binding2.bindGroup)
             .Dispatch(1, 1, 1)
@@ -326,11 +326,11 @@ TEST_P(PushConstantTest, SetAllConstantsToNonZero) {
     }
 
     auto binding = MakeTestBindings(false);
-    nxt::ComputePipeline pipeline = MakeTestComputePipeline(binding.layout, spec);
+    dawn::ComputePipeline pipeline = MakeTestComputePipeline(binding.layout, spec);
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginComputePass()
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, kMaxPushConstants, &values[0])
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, kMaxPushConstants, &values[0])
             .SetComputePipeline(pipeline)
             .SetBindGroup(0, binding.bindGroup)
             .Dispatch(1, 1, 1)
@@ -349,15 +349,15 @@ TEST_P(PushConstantTest, SeparateVertexAndFragmentConstants) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
-    nxt::PipelineLayout layout = MakeEmptyLayout();
-    nxt::RenderPipeline pipeline = MakeTestRenderPipeline(layout, vsSpec, fsSpec);
+    dawn::PipelineLayout layout = MakeEmptyLayout();
+    dawn::RenderPipeline pipeline = MakeTestRenderPipeline(layout, vsSpec, fsSpec);
 
     uint32_t one = 1;
     uint32_t two = 2;
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass.renderPassInfo)
-            .SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 1, &one)
-            .SetPushConstants(nxt::ShaderStageBit::Fragment, 0, 1, &two)
+            .SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 1, &one)
+            .SetPushConstants(dawn::ShaderStageBit::Fragment, 0, 1, &two)
             .SetRenderPipeline(pipeline)
             .DrawArrays(1, 1, 0, 0)
         .EndRenderPass()
@@ -374,13 +374,13 @@ TEST_P(PushConstantTest, SimultaneousVertexAndFragmentConstants) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
-    nxt::PipelineLayout layout = MakeEmptyLayout();
-    nxt::RenderPipeline pipeline = MakeTestRenderPipeline(layout, spec, spec);
+    dawn::PipelineLayout layout = MakeEmptyLayout();
+    dawn::RenderPipeline pipeline = MakeTestRenderPipeline(layout, spec, spec);
 
     uint32_t two = 2;
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass.renderPassInfo)
-            .SetPushConstants(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment, 0, 1, &two)
+            .SetPushConstants(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment, 0, 1, &two)
             .SetRenderPipeline(pipeline)
             .DrawArrays(1, 1, 0, 0)
         .EndRenderPass()

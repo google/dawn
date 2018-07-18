@@ -72,12 +72,12 @@ class CopyTests_T2B : public CopyTests {
 
         void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
             // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
-            nxt::Texture texture = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
+            dawn::Texture texture = device.CreateTextureBuilder()
+                .SetDimension(dawn::TextureDimension::e2D)
                 .SetExtent(textureSpec.width, textureSpec.height, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+                .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
                 .SetMipLevels(textureSpec.level + 1)
-                .SetAllowedUsage(nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::TransferSrc)
+                .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc)
                 .GetResult();
 
             uint32_t width = textureSpec.width >> textureSpec.level;
@@ -89,9 +89,9 @@ class CopyTests_T2B : public CopyTests {
             // Create an upload buffer and use it to populate the `level` mip of the texture
             std::vector<RGBA8> textureData(texelCount);
             FillTextureData(width, height, rowPitch / kBytesPerTexel, textureData.data());
-            nxt::Buffer uploadBuffer = utils::CreateBufferFromData(device, textureData.data(), static_cast<uint32_t>(sizeof(RGBA8) * textureData.size()), nxt::BufferUsageBit::TransferSrc);
+            dawn::Buffer uploadBuffer = utils::CreateBufferFromData(device, textureData.data(), static_cast<uint32_t>(sizeof(RGBA8) * textureData.size()), dawn::BufferUsageBit::TransferSrc);
 
-            nxt::CommandBuffer commands[2];
+            dawn::CommandBuffer commands[2];
 
             commands[0] = device.CreateCommandBufferBuilder()
                 .CopyBufferToTexture(uploadBuffer, 0, rowPitch, texture, 0, 0, 0, width, height, 1, textureSpec.level)
@@ -100,9 +100,9 @@ class CopyTests_T2B : public CopyTests {
             // Create a buffer of size `size` and populate it with empty data (0,0,0,0)
             // Note: Prepopulating the buffer with empty data ensures that there is not random data in the expectation
             // and helps ensure that the padding due to the row pitch is not modified by the copy
-            nxt::Buffer buffer = device.CreateBufferBuilder()
+            dawn::Buffer buffer = device.CreateBufferBuilder()
                 .SetSize(bufferSpec.size)
-                .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
+                .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
                 .GetResult();
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel);
             buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(emptyData.data()));
@@ -147,24 +147,24 @@ protected:
 
     void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
         // Create a buffer of size `size` and populate it with data
-        nxt::Buffer buffer = device.CreateBufferBuilder()
+        dawn::Buffer buffer = device.CreateBufferBuilder()
             .SetSize(bufferSpec.size)
-            .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
+            .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
             .GetResult();
         std::vector<RGBA8> bufferData(bufferSpec.size / kBytesPerTexel);
         FillBufferData(bufferData.data(), bufferData.size());
         buffer.SetSubData(0, static_cast<uint32_t>(bufferData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(bufferData.data()));
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
-        nxt::Texture texture = device.CreateTextureBuilder()
-            .SetDimension(nxt::TextureDimension::e2D)
+        dawn::Texture texture = device.CreateTextureBuilder()
+            .SetDimension(dawn::TextureDimension::e2D)
             .SetExtent(textureSpec.width, textureSpec.height, 1)
-            .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
             .SetMipLevels(textureSpec.level + 1)
-            .SetAllowedUsage(nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::TransferSrc)
+            .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc)
             .GetResult();
 
-        nxt::CommandBuffer commands[2];
+        dawn::CommandBuffer commands[2];
 
         // Create an upload buffer filled with empty data and use it to populate the `level` mip of the texture
         // Note: Prepopulating the texture with empty data ensures that there is not random data in the expectation
@@ -177,7 +177,7 @@ protected:
             uint32_t texelCount = texelsPerRow * (height - 1) + width;
 
             std::vector<RGBA8> emptyData(texelCount);
-            nxt::Buffer uploadBuffer = utils::CreateBufferFromData(device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()), nxt::BufferUsageBit::TransferSrc);
+            dawn::Buffer uploadBuffer = utils::CreateBufferFromData(device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()), dawn::BufferUsageBit::TransferSrc);
 
             commands[0] = device.CreateCommandBufferBuilder()
                 .CopyBufferToTexture(uploadBuffer, 0, rowPitch, texture, 0, 0, 0, width, height, 1, textureSpec.level)

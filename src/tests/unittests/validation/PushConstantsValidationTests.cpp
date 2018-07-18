@@ -23,17 +23,17 @@ using namespace testing;
 
 class PushConstantTest : public ValidationTest {
     protected:
-        nxt::Queue queue;
+        dawn::Queue queue;
         uint32_t constants[kMaxPushConstants] = {0};
 
         void TestCreateShaderModule(bool success, std::string vertexSource) {
-            nxt::ShaderModuleBuilder builder;
+            dawn::ShaderModuleBuilder builder;
             if (success) {
                 builder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
             } else {
                 builder = AssertWillBeError(device.CreateShaderModuleBuilder());
             }
-            utils::FillShaderModuleBuilder(builder, nxt::ShaderStage::Vertex, vertexSource.c_str());
+            utils::FillShaderModuleBuilder(builder, dawn::ShaderStage::Vertex, vertexSource.c_str());
             builder.GetResult();
         }
 
@@ -51,22 +51,22 @@ TEST_F(PushConstantTest, Success) {
     AssertWillBeSuccess(device.CreateCommandBufferBuilder())
         // PushConstants in a compute pass
         .BeginComputePass()
-        .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, constants)
+        .SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, constants)
         .EndComputePass()
 
         // PushConstants in a render pass
         .BeginRenderPass(renderpassData.renderPass)
-        .SetPushConstants(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment, 0, 1, constants)
+        .SetPushConstants(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment, 0, 1, constants)
         .EndRenderPass()
 
         // Setting all constants
         .BeginComputePass()
-        .SetPushConstants(nxt::ShaderStageBit::Compute, 0, kMaxPushConstants, constants)
+        .SetPushConstants(dawn::ShaderStageBit::Compute, 0, kMaxPushConstants, constants)
         .EndComputePass()
 
         // Setting constants at an offset
         .BeginComputePass()
-        .SetPushConstants(nxt::ShaderStageBit::Compute, kMaxPushConstants - 1, 1, constants)
+        .SetPushConstants(dawn::ShaderStageBit::Compute, kMaxPushConstants - 1, 1, constants)
         .EndComputePass()
 
         .GetResult();
@@ -80,7 +80,7 @@ TEST_F(PushConstantTest, SetPushConstantsOOB) {
     {
         AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .BeginComputePass()
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, kMaxPushConstants, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, kMaxPushConstants, constants)
             .EndComputePass()
             .GetResult();
     }
@@ -89,7 +89,7 @@ TEST_F(PushConstantTest, SetPushConstantsOOB) {
     {
         AssertWillBeError(device.CreateCommandBufferBuilder())
             .BeginComputePass()
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, kMaxPushConstants + 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, kMaxPushConstants + 1, constants)
             .EndComputePass()
             .GetResult();
     }
@@ -98,7 +98,7 @@ TEST_F(PushConstantTest, SetPushConstantsOOB) {
     {
         AssertWillBeError(device.CreateCommandBufferBuilder())
             .BeginComputePass()
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 1, kMaxPushConstants, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 1, kMaxPushConstants, constants)
             .EndComputePass()
             .GetResult();
     }
@@ -111,11 +111,11 @@ TEST_F(PushConstantTest, NotInPass) {
     // Setting outside of any pass is invalid.
     {
         AssertWillBeError(device.CreateCommandBufferBuilder())
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, constants)
             .GetResult();
 
         AssertWillBeError(device.CreateCommandBufferBuilder())
-            .SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 1, constants)
             .GetResult();
     }
 }
@@ -126,7 +126,7 @@ TEST_F(PushConstantTest, StageForComputePass) {
     {
         AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .BeginComputePass()
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, constants)
             .EndComputePass()
             .GetResult();
     }
@@ -135,7 +135,7 @@ TEST_F(PushConstantTest, StageForComputePass) {
     {
         AssertWillBeError(device.CreateCommandBufferBuilder())
             .BeginComputePass()
-            .SetPushConstants(nxt::ShaderStageBit::Vertex, 0, 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 1, constants)
             .EndComputePass()
             .GetResult();
     }
@@ -144,7 +144,7 @@ TEST_F(PushConstantTest, StageForComputePass) {
     {
         AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .BeginComputePass()
-            .SetPushConstants(nxt::ShaderStageBit::None, 0, 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::None, 0, 1, constants)
             .EndComputePass()
             .GetResult();
     }
@@ -158,7 +158,7 @@ TEST_F(PushConstantTest, StageForRenderPass) {
     {
         AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .BeginRenderPass(renderpassData.renderPass)
-            .SetPushConstants(nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment, 0, 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment, 0, 1, constants)
             .EndRenderPass()
             .GetResult();
     }
@@ -167,7 +167,7 @@ TEST_F(PushConstantTest, StageForRenderPass) {
     {
         AssertWillBeError(device.CreateCommandBufferBuilder())
             .BeginRenderPass(renderpassData.renderPass)
-            .SetPushConstants(nxt::ShaderStageBit::Compute, 0, 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, constants)
             .EndRenderPass()
             .GetResult();
     }
@@ -176,7 +176,7 @@ TEST_F(PushConstantTest, StageForRenderPass) {
     {
         AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .BeginRenderPass(renderpassData.renderPass)
-            .SetPushConstants(nxt::ShaderStageBit::None, 0, 1, constants)
+            .SetPushConstants(dawn::ShaderStageBit::None, 0, 1, constants)
             .EndRenderPass()
             .GetResult();
     }

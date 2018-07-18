@@ -24,20 +24,20 @@ class RenderPipelineValidationTest : public ValidationTest {
 
             renderpass = CreateSimpleRenderPass();
 
-            nxt::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
+            dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
 
             inputState = device.CreateInputStateBuilder().GetResult();
 
             blendState = device.CreateBlendStateBuilder().GetResult();
 
-            vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+            vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
                 })"
             );
 
-            fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+            fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
@@ -45,21 +45,21 @@ class RenderPipelineValidationTest : public ValidationTest {
                 })");
         }
 
-        nxt::RenderPipelineBuilder& AddDefaultStates(nxt::RenderPipelineBuilder&& builder) {
-            builder.SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+        dawn::RenderPipelineBuilder& AddDefaultStates(dawn::RenderPipelineBuilder&& builder) {
+            builder.SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
                 .SetLayout(pipelineLayout)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-                .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList);
+                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+                .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList);
             return builder;
         }
 
-        nxt::RenderPassDescriptor renderpass;
-        nxt::ShaderModule vsModule;
-        nxt::ShaderModule fsModule;
-        nxt::InputState inputState;
-        nxt::BlendState blendState;
-        nxt::PipelineLayout pipelineLayout;
+        dawn::RenderPassDescriptor renderpass;
+        dawn::ShaderModule vsModule;
+        dawn::ShaderModule fsModule;
+        dawn::InputState inputState;
+        dawn::BlendState blendState;
+        dawn::PipelineLayout pipelineLayout;
 };
 
 // Test cases where creation should succeed
@@ -81,20 +81,20 @@ TEST_F(RenderPipelineValidationTest, CreationMissingProperty) {
     // Vertex stage not set
     {
         AssertWillBeError(device.CreateRenderPipelineBuilder())
-            .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
             .SetLayout(pipelineLayout)
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+            .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 
     // Fragment stage not set
     {
         AssertWillBeError(device.CreateRenderPipelineBuilder())
-            .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
             .SetLayout(pipelineLayout)
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+            .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 
@@ -102,9 +102,9 @@ TEST_F(RenderPipelineValidationTest, CreationMissingProperty) {
     {
         AssertWillBeError(device.CreateRenderPipelineBuilder())
             .SetLayout(pipelineLayout)
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+            .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 }
@@ -114,21 +114,21 @@ TEST_F(RenderPipelineValidationTest, BlendState) {
     {
         // This one succeeds because attachment 0 is the color attachment
         AssertWillBeSuccess(device.CreateRenderPipelineBuilder())
-            .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
             .SetLayout(pipelineLayout)
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+            .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
             .SetColorAttachmentBlendState(0, blendState)
             .GetResult();
 
         // This fails because attachment 1 is not one of the color attachments
         AssertWillBeError(device.CreateRenderPipelineBuilder())
-            .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
             .SetLayout(pipelineLayout)
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+            .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
             .SetColorAttachmentBlendState(1, blendState)
             .GetResult();
     }
@@ -154,20 +154,20 @@ TEST_F(RenderPipelineValidationTest, DISABLED_TodoCreationMissingProperty) {
     // Fails because pipeline layout is not set
     {
         AssertWillBeError(device.CreateRenderPipelineBuilder())
-            .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+            .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 
     // Fails because primitive topology is not set
     {
         AssertWillBeError(device.CreateRenderPipelineBuilder())
-            .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
             .SetLayout(pipelineLayout)
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
             .GetResult();
     }
 }
@@ -184,21 +184,21 @@ TEST_F(RenderPipelineValidationTest, DISABLED_CreationDuplicates) {
     // Fails because primitive topology is set twice
     {
         AddDefaultStates(AssertWillBeError(device.CreateRenderPipelineBuilder()))
-            .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleList)
+            .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
             .GetResult();
     }
 
     // Fails because vertex stage is set twice
     {
         AddDefaultStates(AssertWillBeError(device.CreateRenderPipelineBuilder()))
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
             .GetResult();
     }
 
     // Fails because fragment stage is set twice
     {
         AddDefaultStates(AssertWillBeError(device.CreateRenderPipelineBuilder()))
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
             .GetResult();
     }
 

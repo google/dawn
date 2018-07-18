@@ -25,31 +25,31 @@ class DepthStencilStateTest : public NXTTest {
             NXTTest::SetUp();
 
             renderTarget = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
+                .SetDimension(dawn::TextureDimension::e2D)
                 .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+                .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
                 .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
+                .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc)
                 .GetResult();
 
             renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
 
             depthTexture = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
+                .SetDimension(dawn::TextureDimension::e2D)
                 .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(nxt::TextureFormat::D32FloatS8Uint)
+                .SetFormat(dawn::TextureFormat::D32FloatS8Uint)
                 .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+                .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
                 .GetResult();
 
             depthTextureView = depthTexture.CreateTextureViewBuilder().GetResult();
 
             renderpass = device.CreateRenderPassDescriptorBuilder()
-                .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
-                .SetDepthStencilAttachment(depthTextureView, nxt::LoadOp::Clear, nxt::LoadOp::Clear)
+                .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Clear)
+                .SetDepthStencilAttachment(depthTextureView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
                 .GetResult();
 
-            vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+            vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
                     vec3 color;
@@ -64,7 +64,7 @@ class DepthStencilStateTest : public NXTTest {
                 }
             )");
 
-            fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+            fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
                     vec3 color;
@@ -78,15 +78,15 @@ class DepthStencilStateTest : public NXTTest {
 
             bindGroupLayout = utils::MakeBindGroupLayout(
                 device, {
-                            {0, nxt::ShaderStageBit::Vertex | nxt::ShaderStageBit::Fragment,
-                             nxt::BindingType::UniformBuffer},
+                            {0, dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment,
+                             dawn::BindingType::UniformBuffer},
                         });
 
             pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
         }
 
         struct TestSpec {
-            const nxt::DepthStencilState& depthStencilState;
+            const dawn::DepthStencilState& depthStencilState;
             RGBA8 color;
             float depth;
             uint32_t stencil;
@@ -94,13 +94,13 @@ class DepthStencilStateTest : public NXTTest {
 
         // Check whether a depth comparison function works as expected
         // The less, equal, greater booleans denote wether the respective triangle should be visible based on the comparison function
-        void CheckDepthCompareFunction(nxt::CompareFunction compareFunction, bool less, bool equal, bool greater) {
-            nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-                .SetDepthCompareFunction(nxt::CompareFunction::Always)
+        void CheckDepthCompareFunction(dawn::CompareFunction compareFunction, bool less, bool equal, bool greater) {
+            dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+                .SetDepthCompareFunction(dawn::CompareFunction::Always)
                 .SetDepthWriteEnabled(true)
                 .GetResult();
 
-            nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+            dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
                 .SetDepthCompareFunction(compareFunction)
                 .SetDepthWriteEnabled(true)
                 .GetResult();
@@ -125,13 +125,13 @@ class DepthStencilStateTest : public NXTTest {
 
         // Check whether a stencil comparison function works as expected
         // The less, equal, greater booleans denote wether the respective triangle should be visible based on the comparison function
-        void CheckStencilCompareFunction(nxt::CompareFunction compareFunction, bool less, bool equal, bool greater) {
-            nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+        void CheckStencilCompareFunction(dawn::CompareFunction compareFunction, bool less, bool equal, bool greater) {
+            dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+                .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
                 .GetResult();
 
-            nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(nxt::Face::Both, compareFunction, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep)
+            dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+                .SetStencilFunction(dawn::Face::Both, compareFunction, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
                 .GetResult();
 
             RGBA8 baseColor = RGBA8(255, 255, 255, 255);
@@ -153,13 +153,13 @@ class DepthStencilStateTest : public NXTTest {
         }
 
         // Given the provided `initialStencil` and `reference`, check that applying the `stencilOperation` produces the `expectedStencil`
-        void CheckStencilOperation(nxt::StencilOperation stencilOperation, uint32_t initialStencil, uint32_t reference, uint32_t expectedStencil) {
-            nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+        void CheckStencilOperation(dawn::StencilOperation stencilOperation, uint32_t initialStencil, uint32_t reference, uint32_t expectedStencil) {
+            dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+                .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
                 .GetResult();
 
-            nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, stencilOperation)
+            dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+                .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, stencilOperation)
                 .GetResult();
 
             CheckStencil({
@@ -173,8 +173,8 @@ class DepthStencilStateTest : public NXTTest {
 
         // Draw a list of test specs, and check if the stencil value is equal to the expected value
         void CheckStencil(std::vector<TestSpec> testParams, uint32_t expectedStencil) {
-            nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Equal, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep)
+            dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+                .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
                 .GetResult();
 
             testParams.push_back({ state, RGBA8(0, 255, 0, 255), 0, expectedStencil });
@@ -184,7 +184,7 @@ class DepthStencilStateTest : public NXTTest {
         // Each test param represents a pair of triangles with a color, depth, stencil value, and depthStencil state, one frontfacing, one backfacing
         // Draw the triangles in order and check the expected colors for the frontfaces and backfaces
         void DoTest(const std::vector<TestSpec> &testParams, const RGBA8& expectedFront, const RGBA8& expectedBack) {
-            nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+            dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
             struct TriangleData {
                 float color[3];
@@ -201,26 +201,26 @@ class DepthStencilStateTest : public NXTTest {
                     test.depth,
                 };
                 // Upload a buffer for each triangle's depth and color data
-                nxt::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(TriangleData), nxt::BufferUsageBit::Uniform);
+                dawn::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(TriangleData), dawn::BufferUsageBit::Uniform);
 
-                nxt::BufferView view = buffer.CreateBufferViewBuilder()
+                dawn::BufferView view = buffer.CreateBufferViewBuilder()
                     .SetExtent(0, sizeof(TriangleData))
                     .GetResult();
 
                 // Create a bind group for the data
-                nxt::BindGroup bindGroup = device.CreateBindGroupBuilder()
+                dawn::BindGroup bindGroup = device.CreateBindGroupBuilder()
                     .SetLayout(bindGroupLayout)
-                    .SetUsage(nxt::BindGroupUsage::Frozen)
+                    .SetUsage(dawn::BindGroupUsage::Frozen)
                     .SetBufferViews(0, 1, &view)
                     .GetResult();
 
                 // Create a pipeline for the triangles with the test spec's depth stencil state
-                nxt::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-                    .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                    .SetDepthStencilAttachmentFormat(nxt::TextureFormat::D32FloatS8Uint)
+                dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
+                    .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
+                    .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
                     .SetLayout(pipelineLayout)
-                    .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                    .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+                    .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                    .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
                     .SetDepthStencilState(test.depthStencilState)
                     .GetResult();
 
@@ -230,7 +230,7 @@ class DepthStencilStateTest : public NXTTest {
                     .DrawArrays(6, 1, 0, 0);
             }
 
-            nxt::CommandBuffer commands = builder
+            dawn::CommandBuffer commands = builder
                 .EndRenderPass()
                 .GetResult();
 
@@ -244,20 +244,20 @@ class DepthStencilStateTest : public NXTTest {
             DoTest(testParams, expected, expected);
         }
 
-        nxt::RenderPassDescriptor renderpass;
-        nxt::Texture renderTarget;
-        nxt::Texture depthTexture;
-        nxt::TextureView renderTargetView;
-        nxt::TextureView depthTextureView;
-        nxt::ShaderModule vsModule;
-        nxt::ShaderModule fsModule;
-        nxt::BindGroupLayout bindGroupLayout;
-        nxt::PipelineLayout pipelineLayout;
+        dawn::RenderPassDescriptor renderpass;
+        dawn::Texture renderTarget;
+        dawn::Texture depthTexture;
+        dawn::TextureView renderTargetView;
+        dawn::TextureView depthTextureView;
+        dawn::ShaderModule vsModule;
+        dawn::ShaderModule fsModule;
+        dawn::BindGroupLayout bindGroupLayout;
+        dawn::PipelineLayout pipelineLayout;
 };
 
 // Test compilation and usage of the fixture
 TEST_P(DepthStencilStateTest, Basic) {
-    nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
         .GetResult();
 
     DoTest({
@@ -267,7 +267,7 @@ TEST_P(DepthStencilStateTest, Basic) {
 
 // Test defaults: depth and stencil tests disabled
 TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
-    nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
         .GetResult();
 
     TestSpec specs[3] = {
@@ -288,51 +288,51 @@ TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
 
 // The following tests check that each depth comparison function works
 TEST_P(DepthStencilStateTest, DepthAlways) {
-    CheckDepthCompareFunction(nxt::CompareFunction::Always , true, true, true);
+    CheckDepthCompareFunction(dawn::CompareFunction::Always , true, true, true);
 }
 
 TEST_P(DepthStencilStateTest, DepthEqual) {
-    CheckDepthCompareFunction(nxt::CompareFunction::Equal, false, true, false);
+    CheckDepthCompareFunction(dawn::CompareFunction::Equal, false, true, false);
 }
 
 TEST_P(DepthStencilStateTest, DepthGreater) {
-    CheckDepthCompareFunction(nxt::CompareFunction::Greater, false, false, true);
+    CheckDepthCompareFunction(dawn::CompareFunction::Greater, false, false, true);
 }
 
 TEST_P(DepthStencilStateTest, DepthGreaterEqual) {
-    CheckDepthCompareFunction(nxt::CompareFunction::GreaterEqual, false, true, true);
+    CheckDepthCompareFunction(dawn::CompareFunction::GreaterEqual, false, true, true);
 }
 
 TEST_P(DepthStencilStateTest, DepthLess) {
-    CheckDepthCompareFunction(nxt::CompareFunction::Less, true, false, false);
+    CheckDepthCompareFunction(dawn::CompareFunction::Less, true, false, false);
 }
 
 TEST_P(DepthStencilStateTest, DepthLessEqual) {
-    CheckDepthCompareFunction(nxt::CompareFunction::LessEqual, true, true, false);
+    CheckDepthCompareFunction(dawn::CompareFunction::LessEqual, true, true, false);
 }
 
 TEST_P(DepthStencilStateTest, DepthNever) {
-    CheckDepthCompareFunction(nxt::CompareFunction::Never, false, false, false);
+    CheckDepthCompareFunction(dawn::CompareFunction::Never, false, false, false);
 }
 
 TEST_P(DepthStencilStateTest, DepthNotEqual) {
-    CheckDepthCompareFunction(nxt::CompareFunction::NotEqual, true, false, true);
+    CheckDepthCompareFunction(dawn::CompareFunction::NotEqual, true, false, true);
 }
 
 // Test that disabling depth writes works and leaves the depth buffer unchanged
 TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
-    nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(nxt::CompareFunction::Always)
+    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+        .SetDepthCompareFunction(dawn::CompareFunction::Always)
         .SetDepthWriteEnabled(true)
         .GetResult();
 
-    nxt::DepthStencilState noDepthWrite = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(nxt::CompareFunction::Always)
+    dawn::DepthStencilState noDepthWrite = device.CreateDepthStencilStateBuilder()
+        .SetDepthCompareFunction(dawn::CompareFunction::Always)
         .SetDepthWriteEnabled(false)
         .GetResult();
 
-    nxt::DepthStencilState checkState = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(nxt::CompareFunction::Equal)
+    dawn::DepthStencilState checkState = device.CreateDepthStencilStateBuilder()
+        .SetDepthCompareFunction(dawn::CompareFunction::Equal)
         .GetResult();
 
     DoTest({
@@ -344,82 +344,82 @@ TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
 
 // The following tests check that each stencil comparison function works
 TEST_P(DepthStencilStateTest, StencilAlways) {
-    CheckStencilCompareFunction(nxt::CompareFunction::Always, true, true, true);
+    CheckStencilCompareFunction(dawn::CompareFunction::Always, true, true, true);
 }
 
 TEST_P(DepthStencilStateTest, StencilEqual) {
-    CheckStencilCompareFunction(nxt::CompareFunction::Equal, false, true, false);
+    CheckStencilCompareFunction(dawn::CompareFunction::Equal, false, true, false);
 }
 
 TEST_P(DepthStencilStateTest, StencilGreater) {
-    CheckStencilCompareFunction(nxt::CompareFunction::Greater, false, false, true);
+    CheckStencilCompareFunction(dawn::CompareFunction::Greater, false, false, true);
 }
 
 TEST_P(DepthStencilStateTest, StencilGreaterEqual) {
-    CheckStencilCompareFunction(nxt::CompareFunction::GreaterEqual, false, true, true);
+    CheckStencilCompareFunction(dawn::CompareFunction::GreaterEqual, false, true, true);
 }
 
 TEST_P(DepthStencilStateTest, StencilLess) {
-    CheckStencilCompareFunction(nxt::CompareFunction::Less, true, false, false);
+    CheckStencilCompareFunction(dawn::CompareFunction::Less, true, false, false);
 }
 
 TEST_P(DepthStencilStateTest, StencilLessEqual) {
-    CheckStencilCompareFunction(nxt::CompareFunction::LessEqual, true, true, false);
+    CheckStencilCompareFunction(dawn::CompareFunction::LessEqual, true, true, false);
 }
 
 TEST_P(DepthStencilStateTest, StencilNever) {
-    CheckStencilCompareFunction(nxt::CompareFunction::Never, false, false, false);
+    CheckStencilCompareFunction(dawn::CompareFunction::Never, false, false, false);
 }
 
 TEST_P(DepthStencilStateTest, StencilNotEqual) {
-    CheckStencilCompareFunction(nxt::CompareFunction::NotEqual, true, false, true);
+    CheckStencilCompareFunction(dawn::CompareFunction::NotEqual, true, false, true);
 }
 
 // The following tests check that each stencil operation works
 TEST_P(DepthStencilStateTest, StencilKeep) {
-    CheckStencilOperation(nxt::StencilOperation::Keep, 1, 3, 1);
+    CheckStencilOperation(dawn::StencilOperation::Keep, 1, 3, 1);
 }
 
 TEST_P(DepthStencilStateTest, StencilZero) {
-    CheckStencilOperation(nxt::StencilOperation::Zero, 1, 3, 0);
+    CheckStencilOperation(dawn::StencilOperation::Zero, 1, 3, 0);
 }
 
 TEST_P(DepthStencilStateTest, StencilReplace) {
-    CheckStencilOperation(nxt::StencilOperation::Replace, 1, 3, 3);
+    CheckStencilOperation(dawn::StencilOperation::Replace, 1, 3, 3);
 }
 
 TEST_P(DepthStencilStateTest, StencilInvert) {
-    CheckStencilOperation(nxt::StencilOperation::Invert, 0xf0, 3, 0x0f);
+    CheckStencilOperation(dawn::StencilOperation::Invert, 0xf0, 3, 0x0f);
 }
 
 TEST_P(DepthStencilStateTest, StencilIncrementClamp) {
-    CheckStencilOperation(nxt::StencilOperation::IncrementClamp, 1, 3, 2);
-    CheckStencilOperation(nxt::StencilOperation::IncrementClamp, 0xff, 3, 0xff);
+    CheckStencilOperation(dawn::StencilOperation::IncrementClamp, 1, 3, 2);
+    CheckStencilOperation(dawn::StencilOperation::IncrementClamp, 0xff, 3, 0xff);
 }
 
 TEST_P(DepthStencilStateTest, StencilIncrementWrap) {
-    CheckStencilOperation(nxt::StencilOperation::IncrementWrap, 1, 3, 2);
-    CheckStencilOperation(nxt::StencilOperation::IncrementWrap, 0xff, 3, 0);
+    CheckStencilOperation(dawn::StencilOperation::IncrementWrap, 1, 3, 2);
+    CheckStencilOperation(dawn::StencilOperation::IncrementWrap, 0xff, 3, 0);
 }
 
 TEST_P(DepthStencilStateTest, StencilDecrementClamp) {
-    CheckStencilOperation(nxt::StencilOperation::DecrementClamp, 1, 3, 0);
-    CheckStencilOperation(nxt::StencilOperation::DecrementClamp, 0, 3, 0);
+    CheckStencilOperation(dawn::StencilOperation::DecrementClamp, 1, 3, 0);
+    CheckStencilOperation(dawn::StencilOperation::DecrementClamp, 0, 3, 0);
 }
 
 TEST_P(DepthStencilStateTest, StencilDecrementWrap) {
-    CheckStencilOperation(nxt::StencilOperation::DecrementWrap, 1, 3, 0);
-    CheckStencilOperation(nxt::StencilOperation::DecrementWrap, 0, 3, 0xff);
+    CheckStencilOperation(dawn::StencilOperation::DecrementWrap, 1, 3, 0);
+    CheckStencilOperation(dawn::StencilOperation::DecrementWrap, 0, 3, 0xff);
 }
 
 // Check that the setting a stencil read mask works
 TEST_P(DepthStencilStateTest, StencilReadMask) {
-    nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .GetResult();
 
-    nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Equal, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep)
+    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
         .SetStencilMask(0x2, 0xff)
         .GetResult();
 
@@ -434,13 +434,13 @@ TEST_P(DepthStencilStateTest, StencilReadMask) {
 
 // Check that setting a stencil write mask works
 TEST_P(DepthStencilStateTest, StencilWriteMask) {
-    nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .SetStencilMask(0xff, 0x1)
         .GetResult();
 
-    nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Equal, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep)
+    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
         .GetResult();
 
     RGBA8 baseColor = RGBA8(255, 255, 255, 255);
@@ -453,12 +453,12 @@ TEST_P(DepthStencilStateTest, StencilWriteMask) {
 
 // Test that the stencil operation is executed on stencil fail
 TEST_P(DepthStencilStateTest, StencilFail) {
-    nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .GetResult();
 
-    nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Less, nxt::StencilOperation::Replace, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep)
+    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Less, dawn::StencilOperation::Replace, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
         .GetResult();
 
     CheckStencil({
@@ -469,15 +469,15 @@ TEST_P(DepthStencilStateTest, StencilFail) {
 
 // Test that the stencil operation is executed on stencil pass, depth fail
 TEST_P(DepthStencilStateTest, StencilDepthFail) {
-    nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .SetDepthWriteEnabled(true)
         .GetResult();
 
-    nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Greater, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace, nxt::StencilOperation::Keep)
+    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Greater, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace, dawn::StencilOperation::Keep)
         .SetDepthWriteEnabled(true)
-        .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        .SetDepthCompareFunction(dawn::CompareFunction::Less)
         .GetResult();
 
     CheckStencil({
@@ -488,15 +488,15 @@ TEST_P(DepthStencilStateTest, StencilDepthFail) {
 
 // Test that the stencil operation is executed on stencil pass, depth pass
 TEST_P(DepthStencilStateTest, StencilDepthPass) {
-    nxt::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Always, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .SetDepthWriteEnabled(true)
         .GetResult();
 
-    nxt::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Greater, nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
+        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Greater, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .SetDepthWriteEnabled(true)
-        .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        .SetDepthCompareFunction(dawn::CompareFunction::Less)
         .GetResult();
 
     CheckStencil({

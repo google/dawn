@@ -27,8 +27,8 @@ class BufferMapReadTests : public NXTTest {
             test->mappedData = data;
         }
 
-        const void* MapReadAsyncAndWait(const nxt::Buffer& buffer, uint32_t start, uint32_t offset) {
-            buffer.MapReadAsync(start, offset, MapReadCallback, static_cast<nxt::CallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+        const void* MapReadAsyncAndWait(const dawn::Buffer& buffer, uint32_t start, uint32_t offset) {
+            buffer.MapReadAsync(start, offset, MapReadCallback, static_cast<dawn::CallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
 
             while (mappedData == nullptr) {
                 WaitABit();
@@ -43,9 +43,9 @@ class BufferMapReadTests : public NXTTest {
 
 // Test that the simplest map read (one u8 at offset 0) works.
 TEST_P(BufferMapReadTests, SmallReadAtZero) {
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(1)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t myData = 187;
@@ -59,9 +59,9 @@ TEST_P(BufferMapReadTests, SmallReadAtZero) {
 
 // Test mapping a buffer at an offset.
 TEST_P(BufferMapReadTests, SmallReadAtOffset) {
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4000)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t myData = 234;
@@ -75,9 +75,9 @@ TEST_P(BufferMapReadTests, SmallReadAtOffset) {
 
 // Test mapping a buffer at an offset that's not uint32-aligned.
 TEST_P(BufferMapReadTests, SmallReadAtUnalignedOffset) {
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4000)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t myData = 213;
@@ -97,9 +97,9 @@ TEST_P(BufferMapReadTests, LargeRead) {
         myData.push_back(i);
     }
 
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(static_cast<uint32_t>(kDataSize * sizeof(uint32_t)))
-        .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     buffer.SetSubData(0, kDataSize * sizeof(uint32_t), reinterpret_cast<uint8_t*>(myData.data()));
@@ -123,8 +123,8 @@ class BufferMapWriteTests : public NXTTest {
             test->mappedData = data;
         }
 
-        void* MapWriteAsyncAndWait(const nxt::Buffer& buffer, uint32_t start, uint32_t offset) {
-            buffer.MapWriteAsync(start, offset, MapWriteCallback, static_cast<nxt::CallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+        void* MapWriteAsyncAndWait(const dawn::Buffer& buffer, uint32_t start, uint32_t offset) {
+            buffer.MapWriteAsync(start, offset, MapWriteCallback, static_cast<dawn::CallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
 
             while (mappedData == nullptr) {
                 WaitABit();
@@ -139,9 +139,9 @@ class BufferMapWriteTests : public NXTTest {
 
 // Test that the simplest map write (one u32 at offset 0) works.
 TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+        .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc)
         .GetResult();
 
     uint32_t myData = 2934875;
@@ -154,9 +154,9 @@ TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
 
 // Test mapping a buffer at an offset.
 TEST_P(BufferMapWriteTests, SmallWriteAtOffset) {
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4000)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+        .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc)
         .GetResult();
 
     uint32_t myData = 2934875;
@@ -175,9 +175,9 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
         myData.push_back(i);
     }
 
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(static_cast<uint32_t>(kDataSize * sizeof(uint32_t)))
-        .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+        .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc)
         .GetResult();
 
     void* mappedData = MapWriteAsyncAndWait(buffer, 0, kDataSize * sizeof(uint32_t));
@@ -194,9 +194,9 @@ class BufferSetSubDataTests : public NXTTest {
 
 // Test the simplest set sub data: setting one u8 at offset 0.
 TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(1)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t value = 171;
@@ -207,9 +207,9 @@ TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
 
 // Test that SetSubData offset works.
 TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4000)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     constexpr uint32_t kOffset = 2000;
@@ -230,9 +230,9 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 
     constexpr uint32_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 1000 * 1000;
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(kSize)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     std::vector<uint32_t> expectedData;
@@ -248,9 +248,9 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 TEST_P(BufferSetSubDataTests, LargeSetSubData) {
     constexpr uint32_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 1000 * 1000;
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(kSize)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     std::vector<uint32_t> expectedData;

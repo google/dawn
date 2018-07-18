@@ -42,26 +42,26 @@ static void ToMockBufferMapWriteCallback(nxtBufferMapAsyncStatus status, void* p
 
 class BufferValidationTest : public ValidationTest {
     protected:
-        nxt::Buffer CreateMapReadBuffer(uint32_t size) {
+        dawn::Buffer CreateMapReadBuffer(uint32_t size) {
             return device.CreateBufferBuilder()
                 .SetSize(size)
-                .SetAllowedUsage(nxt::BufferUsageBit::MapRead)
+                .SetAllowedUsage(dawn::BufferUsageBit::MapRead)
                 .GetResult();
         }
-        nxt::Buffer CreateMapWriteBuffer(uint32_t size) {
+        dawn::Buffer CreateMapWriteBuffer(uint32_t size) {
             return device.CreateBufferBuilder()
                 .SetSize(size)
-                .SetAllowedUsage(nxt::BufferUsageBit::MapWrite)
+                .SetAllowedUsage(dawn::BufferUsageBit::MapWrite)
                 .GetResult();
         }
-        nxt::Buffer CreateSetSubDataBuffer(uint32_t size) {
+        dawn::Buffer CreateSetSubDataBuffer(uint32_t size) {
             return device.CreateBufferBuilder()
                 .SetSize(size)
-                .SetAllowedUsage(nxt::BufferUsageBit::TransferDst)
+                .SetAllowedUsage(dawn::BufferUsageBit::TransferDst)
                 .GetResult();
         }
 
-        nxt::Queue queue;
+        dawn::Queue queue;
 
     private:
         void SetUp() override {
@@ -84,9 +84,9 @@ class BufferValidationTest : public ValidationTest {
 TEST_F(BufferValidationTest, CreationSuccess) {
     // Success
     {
-        nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder())
+        dawn::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder())
             .SetSize(4)
-            .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
+            .SetAllowedUsage(dawn::BufferUsageBit::Uniform)
             .GetResult();
     }
 }
@@ -95,19 +95,19 @@ TEST_F(BufferValidationTest, CreationSuccess) {
 TEST_F(BufferValidationTest, CreationDuplicates) {
     // When size is specified multiple times
     {
-        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
+        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
             .SetSize(4)
             .SetSize(3)
-            .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
+            .SetAllowedUsage(dawn::BufferUsageBit::Uniform)
             .GetResult();
     }
 
     // When allowed usage is specified multiple times
     {
-        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
+        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
             .SetSize(4)
-            .SetAllowedUsage(nxt::BufferUsageBit::Vertex)
-            .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
+            .SetAllowedUsage(dawn::BufferUsageBit::Vertex)
+            .SetAllowedUsage(dawn::BufferUsageBit::Uniform)
             .GetResult();
     }
 }
@@ -116,15 +116,15 @@ TEST_F(BufferValidationTest, CreationDuplicates) {
 TEST_F(BufferValidationTest, CreationMissingProperties) {
     // When allowed usage is missing
     {
-        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
+        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
             .SetSize(4)
             .GetResult();
     }
 
     // When size is missing
     {
-        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
-            .SetAllowedUsage(nxt::BufferUsageBit::Vertex)
+        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
+            .SetAllowedUsage(dawn::BufferUsageBit::Vertex)
             .GetResult();
     }
 }
@@ -133,32 +133,32 @@ TEST_F(BufferValidationTest, CreationMissingProperties) {
 TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
     // MapRead with TransferDst is ok
     {
-        nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder(), "1")
-            .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
+        dawn::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder(), "1")
+            .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
             .SetSize(4)
             .GetResult();
     }
 
     // MapRead with something else is an error
     {
-        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder(), "2")
-            .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::Uniform)
+        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder(), "2")
+            .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::Uniform)
             .SetSize(4)
             .GetResult();
     }
 
     // MapWrite with TransferSrc is ok
     {
-        nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder(), "3")
-            .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::TransferSrc)
+        dawn::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder(), "3")
+            .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc)
             .SetSize(4)
             .GetResult();
     }
 
     // MapWrite with something else is an error
     {
-        nxt::Buffer buf = AssertWillBeError(device.CreateBufferBuilder(), "4")
-            .SetAllowedUsage(nxt::BufferUsageBit::MapWrite | nxt::BufferUsageBit::Uniform)
+        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder(), "4")
+            .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::Uniform)
             .SetSize(4)
             .GetResult();
     }
@@ -166,9 +166,9 @@ TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
 
 // Test the success case for mapping buffer for reading
 TEST_F(BufferValidationTest, MapReadSuccess) {
-    nxt::Buffer buf = CreateMapReadBuffer(4);
+    dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40598;
+    dawn::CallbackUserdata userdata = 40598;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
@@ -180,9 +180,9 @@ TEST_F(BufferValidationTest, MapReadSuccess) {
 
 // Test the success case for mapping buffer for writing
 TEST_F(BufferValidationTest, MapWriteSuccess) {
-    nxt::Buffer buf = CreateMapWriteBuffer(4);
+    dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40598;
+    dawn::CallbackUserdata userdata = 40598;
     buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
@@ -194,9 +194,9 @@ TEST_F(BufferValidationTest, MapWriteSuccess) {
 
 // Test map reading out of range causes an error
 TEST_F(BufferValidationTest, MapReadOutOfRange) {
-    nxt::Buffer buf = CreateMapReadBuffer(4);
+    dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40599;
+    dawn::CallbackUserdata userdata = 40599;
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
@@ -205,9 +205,9 @@ TEST_F(BufferValidationTest, MapReadOutOfRange) {
 
 // Test map writing out of range causes an error
 TEST_F(BufferValidationTest, MapWriteOutOfRange) {
-    nxt::Buffer buf = CreateMapWriteBuffer(4);
+    dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40599;
+    dawn::CallbackUserdata userdata = 40599;
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
@@ -216,12 +216,12 @@ TEST_F(BufferValidationTest, MapWriteOutOfRange) {
 
 // Test map reading a buffer with wrong current usage
 TEST_F(BufferValidationTest, MapReadWrongUsage) {
-    nxt::Buffer buf = device.CreateBufferBuilder()
+    dawn::Buffer buf = device.CreateBufferBuilder()
         .SetSize(4)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
-    nxt::CallbackUserdata userdata = 40600;
+    dawn::CallbackUserdata userdata = 40600;
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
@@ -230,12 +230,12 @@ TEST_F(BufferValidationTest, MapReadWrongUsage) {
 
 // Test map writing a buffer with wrong current usage
 TEST_F(BufferValidationTest, MapWriteWrongUsage) {
-    nxt::Buffer buf = device.CreateBufferBuilder()
+    dawn::Buffer buf = device.CreateBufferBuilder()
         .SetSize(4)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc)
+        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc)
         .GetResult();
 
-    nxt::CallbackUserdata userdata = 40600;
+    dawn::CallbackUserdata userdata = 40600;
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
         .Times(1);
 
@@ -244,14 +244,14 @@ TEST_F(BufferValidationTest, MapWriteWrongUsage) {
 
 // Test map reading a buffer that is already mapped
 TEST_F(BufferValidationTest, MapReadAlreadyMapped) {
-    nxt::Buffer buf = CreateMapReadBuffer(4);
+    dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    nxt::CallbackUserdata userdata1 = 40601;
+    dawn::CallbackUserdata userdata1 = 40601;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata1);
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata1))
         .Times(1);
 
-    nxt::CallbackUserdata userdata2 = 40602;
+    dawn::CallbackUserdata userdata2 = 40602;
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata2))
         .Times(1);
     ASSERT_DEVICE_ERROR(buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata2));
@@ -261,14 +261,14 @@ TEST_F(BufferValidationTest, MapReadAlreadyMapped) {
 
 // Test map writing a buffer that is already mapped
 TEST_F(BufferValidationTest, MapWriteAlreadyMapped) {
-    nxt::Buffer buf = CreateMapWriteBuffer(4);
+    dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    nxt::CallbackUserdata userdata1 = 40601;
+    dawn::CallbackUserdata userdata1 = 40601;
     buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata1);
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata1))
         .Times(1);
 
-    nxt::CallbackUserdata userdata2 = 40602;
+    dawn::CallbackUserdata userdata2 = 40602;
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata2))
         .Times(1);
     ASSERT_DEVICE_ERROR(buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata2));
@@ -279,9 +279,9 @@ TEST_F(BufferValidationTest, MapWriteAlreadyMapped) {
 
 // Test unmapping before having the result gives UNKNOWN - for reading
 TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
-    nxt::Buffer buf = CreateMapReadBuffer(4);
+    dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40603;
+    dawn::CallbackUserdata userdata = 40603;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
@@ -295,9 +295,9 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
 
 // Test unmapping before having the result gives UNKNOWN - for writing
 TEST_F(BufferValidationTest, MapWriteUnmapBeforeResult) {
-    nxt::Buffer buf = CreateMapWriteBuffer(4);
+    dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40603;
+    dawn::CallbackUserdata userdata = 40603;
     buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
@@ -314,9 +314,9 @@ TEST_F(BufferValidationTest, MapWriteUnmapBeforeResult) {
 // when its external ref count reaches 0.
 TEST_F(BufferValidationTest, DISABLED_MapReadDestroyBeforeResult) {
     {
-        nxt::Buffer buf = CreateMapReadBuffer(4);
+        dawn::Buffer buf = CreateMapReadBuffer(4);
 
-        nxt::CallbackUserdata userdata = 40604;
+        dawn::CallbackUserdata userdata = 40604;
         buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
         EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
@@ -333,9 +333,9 @@ TEST_F(BufferValidationTest, DISABLED_MapReadDestroyBeforeResult) {
 // when its external ref count reaches 0.
 TEST_F(BufferValidationTest, DISABLED_MapWriteDestroyBeforeResult) {
     {
-        nxt::Buffer buf = CreateMapWriteBuffer(4);
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-        nxt::CallbackUserdata userdata = 40604;
+        dawn::CallbackUserdata userdata = 40604;
         buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
 
         EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
@@ -350,9 +350,9 @@ TEST_F(BufferValidationTest, DISABLED_MapWriteDestroyBeforeResult) {
 // When a MapRead is cancelled with Unmap it might still be in flight, test doing a new request
 // works as expected and we don't get the cancelled request's data.
 TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
-    nxt::Buffer buf = CreateMapReadBuffer(4);
+    dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40605;
+    dawn::CallbackUserdata userdata = 40605;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
@@ -372,9 +372,9 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
 // When a MapWrite is cancelled with Unmap it might still be in flight, test doing a new request
 // works as expected and we don't get the cancelled request's data.
 TEST_F(BufferValidationTest, MapWriteUnmapBeforeResultThenMapAgain) {
-    nxt::Buffer buf = CreateMapWriteBuffer(4);
+    dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40605;
+    dawn::CallbackUserdata userdata = 40605;
     buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
@@ -392,9 +392,9 @@ TEST_F(BufferValidationTest, MapWriteUnmapBeforeResultThenMapAgain) {
 
 // Test that the MapReadCallback isn't fired twice when unmap() is called inside the callback
 TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
-    nxt::Buffer buf = CreateMapReadBuffer(4);
+    dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40678;
+    dawn::CallbackUserdata userdata = 40678;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
@@ -407,9 +407,9 @@ TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
 
 // Test that the MapWriteCallback isn't fired twice when unmap() is called inside the callback
 TEST_F(BufferValidationTest, UnmapInsideMapWriteCallback) {
-    nxt::Buffer buf = CreateMapWriteBuffer(4);
+    dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40678;
+    dawn::CallbackUserdata userdata = 40678;
     buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
@@ -422,14 +422,14 @@ TEST_F(BufferValidationTest, UnmapInsideMapWriteCallback) {
 
 // Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the callback
 TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
-    nxt::Buffer buf = CreateMapReadBuffer(4);
+    dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40679;
+    dawn::CallbackUserdata userdata = 40679;
     buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
         .WillOnce(InvokeWithoutArgs([&]() {
-            buf = nxt::Buffer();
+            buf = dawn::Buffer();
         }));
 
     queue.Submit(0, nullptr);
@@ -437,14 +437,14 @@ TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
 
 // Test that the MapWriteCallback isn't fired twice the buffer external refcount reaches 0 in the callback
 TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
-    nxt::Buffer buf = CreateMapWriteBuffer(4);
+    dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    nxt::CallbackUserdata userdata = 40679;
+    dawn::CallbackUserdata userdata = 40679;
     buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
 
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), userdata))
         .WillOnce(InvokeWithoutArgs([&]() {
-            buf = nxt::Buffer();
+            buf = dawn::Buffer();
         }));
 
     queue.Submit(0, nullptr);
@@ -452,7 +452,7 @@ TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
 
 // Test the success case for Buffer::SetSubData
 TEST_F(BufferValidationTest, SetSubDataSuccess) {
-    nxt::Buffer buf = CreateSetSubDataBuffer(1);
+    dawn::Buffer buf = CreateSetSubDataBuffer(1);
 
     uint8_t foo = 0;
     buf.SetSubData(0, sizeof(foo), &foo);
@@ -460,7 +460,7 @@ TEST_F(BufferValidationTest, SetSubDataSuccess) {
 
 // Test error case for SetSubData out of bounds
 TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
-    nxt::Buffer buf = CreateSetSubDataBuffer(1);
+    dawn::Buffer buf = CreateSetSubDataBuffer(1);
 
     uint8_t foo = 0;
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, 2, &foo));
@@ -468,9 +468,9 @@ TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
 
 // Test error case for SetSubData with the wrong usage
 TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
-    nxt::Buffer buf = device.CreateBufferBuilder()
+    dawn::Buffer buf = device.CreateBufferBuilder()
         .SetSize(1)
-        .SetAllowedUsage(nxt::BufferUsageBit::Vertex)
+        .SetAllowedUsage(dawn::BufferUsageBit::Vertex)
         .GetResult();
 
     uint8_t foo = 0;

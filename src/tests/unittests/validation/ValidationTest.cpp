@@ -28,7 +28,7 @@ ValidationTest::ValidationTest() {
     backend::null::Init(&procs, &cDevice);
 
     nxtSetProcs(&procs);
-    device = nxt::Device::Acquire(cDevice);
+    device = dawn::Device::Acquire(cDevice);
 
     device.SetErrorCallback(ValidationTest::OnDeviceError, static_cast<nxtCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
 }
@@ -36,7 +36,7 @@ ValidationTest::ValidationTest() {
 ValidationTest::~ValidationTest() {
     // We need to destroy NXT objects before setting the procs to null otherwise the nxt*Release
     // will call a nullptr
-    device = nxt::Device();
+    device = dawn::Device();
     nxtSetProcs(nullptr);
 }
 
@@ -69,19 +69,19 @@ bool ValidationTest::EndExpectDeviceError() {
     return mError;
 }
 
-nxt::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
+dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
         auto colorBuffer = device.CreateTextureBuilder()
-            .SetDimension(nxt::TextureDimension::e2D)
+            .SetDimension(dawn::TextureDimension::e2D)
             .SetExtent(640, 480, 1)
-            .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
             .SetMipLevels(1)
-            .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+            .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
             .GetResult();
         auto colorView = colorBuffer.CreateTextureViewBuilder()
             .GetResult();
 
         return device.CreateRenderPassDescriptorBuilder()
-            .SetColorAttachment(0, colorView, nxt::LoadOp::Clear)
+            .SetColorAttachment(0, colorView, dawn::LoadOp::Clear)
             .GetResult();
 }
 
@@ -99,7 +99,7 @@ void ValidationTest::OnDeviceError(const char* message, nxtCallbackUserdata user
     self->mError = true;
 }
 
-void ValidationTest::OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, nxt::CallbackUserdata userdata1, nxt::CallbackUserdata userdata2) {
+void ValidationTest::OnBuilderErrorStatus(nxtBuilderErrorStatus status, const char* message, dawn::CallbackUserdata userdata1, dawn::CallbackUserdata userdata2) {
     auto* self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata1));
     size_t index = static_cast<size_t>(userdata2);
 
@@ -116,20 +116,20 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
     DummyRenderPass dummy;
     dummy.width = 400;
     dummy.height = 400;
-    dummy.attachmentFormat = nxt::TextureFormat::R8G8B8A8Unorm;
+    dummy.attachmentFormat = dawn::TextureFormat::R8G8B8A8Unorm;
 
     dummy.attachment = AssertWillBeSuccess(device.CreateTextureBuilder())
-        .SetDimension(nxt::TextureDimension::e2D)
+        .SetDimension(dawn::TextureDimension::e2D)
         .SetExtent(dummy.width, dummy.height, 1)
         .SetFormat(dummy.attachmentFormat)
         .SetMipLevels(1)
-        .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment)
+        .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
         .GetResult();
 
-    nxt::TextureView view = AssertWillBeSuccess(dummy.attachment.CreateTextureViewBuilder()).GetResult();
+    dawn::TextureView view = AssertWillBeSuccess(dummy.attachment.CreateTextureViewBuilder()).GetResult();
 
     dummy.renderPass = AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
-        .SetColorAttachment(0, view, nxt::LoadOp::Clear)
+        .SetColorAttachment(0, view, dawn::LoadOp::Clear)
         .GetResult();
 
     return dummy;

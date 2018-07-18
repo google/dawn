@@ -69,7 +69,7 @@ namespace detail {
 namespace nxt { namespace wire {
     class CommandHandler;
     class TerribleCommandBuffer;
-}}  // namespace nxt::wire
+}}  // namespace dawn::wire
 
 class NXTTest : public ::testing::TestWithParam<BackendType> {
   public:
@@ -84,20 +84,20 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
     bool IsVulkan() const;
 
   protected:
-    nxt::Device device;
-    nxt::Queue queue;
-    nxt::SwapChain swapchain;
+    dawn::Device device;
+    dawn::Queue queue;
+    dawn::SwapChain swapchain;
 
     // Helper methods to implement the EXPECT_ macros
     std::ostringstream& AddBufferExpectation(const char* file,
                                              int line,
-                                             const nxt::Buffer& buffer,
+                                             const dawn::Buffer& buffer,
                                              uint32_t offset,
                                              uint32_t size,
                                              detail::Expectation* expectation);
     std::ostringstream& AddTextureExpectation(const char* file,
                                               int line,
-                                              const nxt::Texture& texture,
+                                              const dawn::Texture& texture,
                                               uint32_t x,
                                               uint32_t y,
                                               uint32_t width,
@@ -112,15 +112,15 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 
   private:
     // Things used to set up testing through the Wire.
-    nxt::wire::CommandHandler* mWireServer = nullptr;
-    nxt::wire::CommandHandler* mWireClient = nullptr;
-    nxt::wire::TerribleCommandBuffer* mC2sBuf = nullptr;
-    nxt::wire::TerribleCommandBuffer* mS2cBuf = nullptr;
+    dawn::wire::CommandHandler* mWireServer = nullptr;
+    dawn::wire::CommandHandler* mWireClient = nullptr;
+    dawn::wire::TerribleCommandBuffer* mC2sBuf = nullptr;
+    dawn::wire::TerribleCommandBuffer* mS2cBuf = nullptr;
     void FlushWire();
 
     // MapRead buffers used to get data for the expectations
     struct ReadbackSlot {
-        nxt::Buffer buffer;
+        dawn::Buffer buffer;
         uint32_t bufferSize;
         const void* mappedData = nullptr;
     };
@@ -135,7 +135,7 @@ class NXTTest : public ::testing::TestWithParam<BackendType> {
 
     // Reserve space where the data for an expectation can be copied
     struct ReadbackReservation {
-        nxt::Buffer buffer;
+        dawn::Buffer buffer;
         size_t slot;
         uint32_t offset;
     };

@@ -21,11 +21,11 @@ class BindGroupValidationTest : public ValidationTest {
 TEST_F(BindGroupValidationTest, BufferViewOffset) {
     auto layout = utils::MakeBindGroupLayout(
         device, {
-                    {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                 });
 
     auto buffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(nxt::BufferUsageBit::Uniform)
+        .SetAllowedUsage(dawn::BufferUsageBit::Uniform)
         .SetSize(512)
         .GetResult();
 
@@ -37,7 +37,7 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeSuccess(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
+            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -50,7 +50,7 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeSuccess(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
+            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -63,7 +63,7 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeError(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
+            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -75,7 +75,7 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeError(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
+            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -87,7 +87,7 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeError(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
+            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -99,7 +99,7 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeError(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
+            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -112,11 +112,11 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 TEST_F(BindGroupValidationTest, BindGroupLayoutCache) {
     auto layout1 = utils::MakeBindGroupLayout(
         device, {
-                    {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                 });
     auto layout2 = utils::MakeBindGroupLayout(
         device, {
-                    {0, nxt::ShaderStageBit::Vertex, nxt::BindingType::UniformBuffer},
+                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                 });
 
     // Caching should cause these to be the same.

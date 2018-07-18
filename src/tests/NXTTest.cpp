@@ -99,9 +99,9 @@ namespace {
 NXTTest::~NXTTest() {
     // We need to destroy child objects before the Device
     mReadbackSlots.clear();
-    queue = nxt::Queue();
-    swapchain = nxt::SwapChain();
-    device = nxt::Device();
+    queue = dawn::Queue();
+    swapchain = dawn::SwapChain();
+    device = dawn::Device();
 
     delete mBinding;
     mBinding = nullptr;
@@ -145,15 +145,15 @@ void NXTTest::SetUp() {
     nxtProcTable procs;
 
     if (gTestUsesWire) {
-        mC2sBuf = new nxt::wire::TerribleCommandBuffer();
-        mS2cBuf = new nxt::wire::TerribleCommandBuffer();
+        mC2sBuf = new dawn::wire::TerribleCommandBuffer();
+        mS2cBuf = new dawn::wire::TerribleCommandBuffer();
 
-        mWireServer = nxt::wire::NewServerCommandHandler(backendDevice, backendProcs, mS2cBuf);
+        mWireServer = dawn::wire::NewServerCommandHandler(backendDevice, backendProcs, mS2cBuf);
         mC2sBuf->SetHandler(mWireServer);
 
         nxtDevice clientDevice;
         nxtProcTable clientProcs;
-        mWireClient = nxt::wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf);
+        mWireClient = dawn::wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf);
         mS2cBuf->SetHandler(mWireClient);
 
         procs = clientProcs;
@@ -166,7 +166,7 @@ void NXTTest::SetUp() {
     // Set up the device and queue because all tests need them, and NXTTest needs them too for the
     // deferred expectations.
     nxtSetProcs(&procs);
-    device = nxt::Device::Acquire(cDevice);
+    device = dawn::Device::Acquire(cDevice);
     queue = device.CreateQueue();
 
     // The swapchain isn't used by tests but is useful when debugging with graphics debuggers that
@@ -174,8 +174,8 @@ void NXTTest::SetUp() {
     swapchain = device.CreateSwapChainBuilder()
         .SetImplementation(mBinding->GetSwapChainImplementation())
         .GetResult();
-    swapchain.Configure(static_cast<nxt::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
-                        nxt::TextureUsageBit::OutputAttachment, 400, 400);
+    swapchain.Configure(static_cast<dawn::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
+                        dawn::TextureUsageBit::OutputAttachment, 400, 400);
 
     // The end2end tests should never cause validation errors. These should be tested in unittests.
     device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
@@ -204,14 +204,14 @@ void NXTTest::TearDown() {
     }
 }
 
-std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, const nxt::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation) {
-    nxt::Buffer source = buffer.Clone();
+std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, const dawn::Buffer& buffer, uint32_t offset, uint32_t size, detail::Expectation* expectation) {
+    dawn::Buffer source = buffer.Clone();
 
     auto readback = ReserveReadback(size);
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the buffer might have been modified.
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .CopyBufferToBuffer(source, offset, readback.buffer, readback.offset, size)
         .GetResult();
 
@@ -232,8 +232,8 @@ std::ostringstream& NXTTest::AddBufferExpectation(const char* file, int line, co
     return *(mDeferredExpectations.back().message.get());
 }
 
-std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, const nxt::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t level, uint32_t pixelSize, detail::Expectation* expectation) {
-    nxt::Texture source = texture.Clone();
+std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, const dawn::Texture& texture, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t level, uint32_t pixelSize, detail::Expectation* expectation) {
+    dawn::Texture source = texture.Clone();
     uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
     uint32_t size = rowPitch * (height - 1) + width * pixelSize;
 
@@ -241,7 +241,7 @@ std::ostringstream& NXTTest::AddTextureExpectation(const char* file, int line, c
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .CopyTextureToBuffer(source, x, y, 0, width, height, 1, level, readback.buffer, readback.offset, rowPitch)
         .GetResult();
 
@@ -271,7 +271,7 @@ void NXTTest::WaitABit() {
 
 void NXTTest::SwapBuffersForCapture() {
     // Insert a frame boundary for API capture tools.
-    nxt::Texture backBuffer = swapchain.GetNextTexture();
+    dawn::Texture backBuffer = swapchain.GetNextTexture();
     swapchain.Present(backBuffer);
 }
 
@@ -289,7 +289,7 @@ NXTTest::ReadbackReservation NXTTest::ReserveReadback(uint32_t readbackSize) {
     slot.bufferSize = readbackSize;
     slot.buffer = device.CreateBufferBuilder()
         .SetSize(readbackSize)
-        .SetAllowedUsage(nxt::BufferUsageBit::MapRead | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     ReadbackReservation reservation;
@@ -310,7 +310,7 @@ void NXTTest::MapSlotsSynchronously() {
         auto userdata = new MapReadUserdata{this, i};
 
         auto& slot = mReadbackSlots[i];
-        slot.buffer.MapReadAsync(0, slot.bufferSize, SlotMapReadCallback, static_cast<nxt::CallbackUserdata>(reinterpret_cast<uintptr_t>(userdata)));
+        slot.buffer.MapReadAsync(0, slot.bufferSize, SlotMapReadCallback, static_cast<dawn::CallbackUserdata>(reinterpret_cast<uintptr_t>(userdata)));
     }
 
     // Busy wait until all map operations are done.

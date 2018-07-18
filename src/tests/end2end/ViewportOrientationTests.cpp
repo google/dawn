@@ -22,27 +22,27 @@ class ViewportOrientationTests : public NXTTest {};
 TEST_P(ViewportOrientationTests, OriginAt0x0) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
 
-    nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
         #version 450
         void main() {
             gl_Position = vec4(-0.5f, -0.5f, 0.0f, 1.0f);
         })");
 
-    nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         void main() {
             fragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
         })");
 
-    nxt::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
+    dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
         .SetColorAttachmentFormat(0, renderPass.colorFormat)
-        .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-        .SetPrimitiveTopology(nxt::PrimitiveTopology::PointList)
+        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+        .SetPrimitiveTopology(dawn::PrimitiveTopology::PointList)
         .GetResult();
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .DrawArrays(1, 1, 0, 0)

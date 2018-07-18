@@ -25,12 +25,12 @@ class DrawElementsTest : public NXTTest {
 
             renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-            nxt::InputState inputState = device.CreateInputStateBuilder()
-                .SetInput(0, 4 * sizeof(float), nxt::InputStepMode::Vertex)
-                .SetAttribute(0, 0, nxt::VertexFormat::FloatR32G32B32A32, 0)
+            dawn::InputState inputState = device.CreateInputStateBuilder()
+                .SetInput(0, 4 * sizeof(float), dawn::InputStepMode::Vertex)
+                .SetAttribute(0, 0, dawn::VertexFormat::FloatR32G32B32A32, 0)
                 .GetResult();
 
-            nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+            dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450
                 layout(location = 0) in vec4 pos;
                 void main() {
@@ -38,7 +38,7 @@ class DrawElementsTest : public NXTTest {
                 })"
             );
 
-            nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+            dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
@@ -48,33 +48,33 @@ class DrawElementsTest : public NXTTest {
 
             pipeline = device.CreateRenderPipelineBuilder()
                 .SetColorAttachmentFormat(0, renderPass.colorFormat)
-                .SetPrimitiveTopology(nxt::PrimitiveTopology::TriangleStrip)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
-                .SetIndexFormat(nxt::IndexFormat::Uint32)
+                .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleStrip)
+                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
+                .SetIndexFormat(dawn::IndexFormat::Uint32)
                 .SetInputState(inputState)
                 .GetResult();
 
-            vertexBuffer = utils::CreateBufferFromData<float>(device, nxt::BufferUsageBit::Vertex, {
+            vertexBuffer = utils::CreateBufferFromData<float>(device, dawn::BufferUsageBit::Vertex, {
                 -1.0f, -1.0f, 0.0f, 1.0f,
                  1.0f,  1.0f, 0.0f, 1.0f,
                 -1.0f,  1.0f, 0.0f, 1.0f,
                  1.0f, -1.0f, 0.0f, 1.0f
             });
-            indexBuffer = utils::CreateBufferFromData<uint32_t>(device, nxt::BufferUsageBit::Index, {
+            indexBuffer = utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsageBit::Index, {
                 0, 1, 2, 0, 3, 1
             });
         }
 
         utils::BasicRenderPass renderPass;
-        nxt::RenderPipeline pipeline;
-        nxt::Buffer vertexBuffer;
-        nxt::Buffer indexBuffer;
+        dawn::RenderPipeline pipeline;
+        dawn::Buffer vertexBuffer;
+        dawn::Buffer indexBuffer;
 
         void Test(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex,
                   uint32_t firstInstance, RGBA8 bottomLeftExpected, RGBA8 topRightExpected) {
             uint32_t zeroOffset = 0;
-            nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+            dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
                 .BeginRenderPass(renderPass.renderPassInfo)
                     .SetRenderPipeline(pipeline)
                     .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)

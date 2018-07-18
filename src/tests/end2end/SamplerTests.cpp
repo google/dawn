@@ -25,14 +25,14 @@ constexpr static unsigned int kRTSize = 64;
 
 namespace {
     struct AddressModeTestCase {
-        nxt::AddressMode mMode;
+        dawn::AddressMode mMode;
         uint8_t mExpected2;
         uint8_t mExpected3;
     };
     AddressModeTestCase addressModes[] = {
-        { nxt::AddressMode::Repeat,           0, 255, },
-        { nxt::AddressMode::MirroredRepeat, 255,   0, },
-        { nxt::AddressMode::ClampToEdge,    255, 255, },
+        { dawn::AddressMode::Repeat,           0, 255, },
+        { dawn::AddressMode::MirroredRepeat, 255,   0, },
+        { dawn::AddressMode::ClampToEdge,    255, 255, },
     };
 }
 
@@ -44,13 +44,13 @@ protected:
 
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                        {0, nxt::ShaderStageBit::Fragment, nxt::BindingType::Sampler},
-                        {1, nxt::ShaderStageBit::Fragment, nxt::BindingType::SampledTexture},
+                        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
+                        {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture},
                     });
 
         auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
 
-        auto vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+        auto vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
             #version 450
             void main() {
                 const vec2 pos[6] = vec2[6](vec2(-2.f, -2.f),
@@ -62,7 +62,7 @@ protected:
                 gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
             }
         )");
-        auto fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+        auto fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
             #version 450
             layout(set = 0, binding = 0) uniform sampler sampler0;
             layout(set = 0, binding = 1) uniform texture2D texture0;
@@ -76,16 +76,16 @@ protected:
         mPipeline = device.CreateRenderPipelineBuilder()
             .SetColorAttachmentFormat(0, mRenderPass.colorFormat)
             .SetLayout(pipelineLayout)
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
             .GetResult();
 
         auto texture = device.CreateTextureBuilder()
-            .SetDimension(nxt::TextureDimension::e2D)
+            .SetDimension(dawn::TextureDimension::e2D)
             .SetExtent(2, 2, 1)
-            .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+            .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
             .SetMipLevels(1)
-            .SetAllowedUsage(nxt::TextureUsageBit::TransferDst | nxt::TextureUsageBit::Sampled)
+            .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled)
             .GetResult();
 
         // Create a 2x2 checkerboard texture, with black in the top left and bottom right corners.
@@ -96,8 +96,8 @@ protected:
         data[0] = data[rowPixels + 1] = black;
         data[1] = data[rowPixels] = white;
 
-        nxt::Buffer stagingBuffer = utils::CreateBufferFromData(device, data, sizeof(data), nxt::BufferUsageBit::TransferSrc);
-        nxt::CommandBuffer copy = device.CreateCommandBufferBuilder()
+        dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data, sizeof(data), dawn::BufferUsageBit::TransferSrc);
+        dawn::CommandBuffer copy = device.CreateCommandBufferBuilder()
             .CopyBufferToTexture(stagingBuffer, 0, 256, texture, 0, 0, 0, 2, 2, 1, 0)
             .GetResult();
 
@@ -106,12 +106,12 @@ protected:
     }
 
     void TestAddressModes(AddressModeTestCase u, AddressModeTestCase v, AddressModeTestCase w) {
-        nxt::Sampler sampler;
+        dawn::Sampler sampler;
         {
-            nxt::SamplerDescriptor descriptor;
-            descriptor.minFilter = nxt::FilterMode::Nearest;
-            descriptor.magFilter = nxt::FilterMode::Nearest;
-            descriptor.mipmapFilter = nxt::FilterMode::Nearest;
+            dawn::SamplerDescriptor descriptor;
+            descriptor.minFilter = dawn::FilterMode::Nearest;
+            descriptor.magFilter = dawn::FilterMode::Nearest;
+            descriptor.mipmapFilter = dawn::FilterMode::Nearest;
             descriptor.addressModeU = u.mMode;
             descriptor.addressModeV = v.mMode;
             descriptor.addressModeW = w.mMode;
@@ -120,12 +120,12 @@ protected:
 
         auto bindGroup = device.CreateBindGroupBuilder()
             .SetLayout(mBindGroupLayout)
-            .SetUsage(nxt::BindGroupUsage::Frozen)
+            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetSamplers(0, 1, &sampler)
             .SetTextureViews(1, 1, &mTextureView)
             .GetResult();
 
-        nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+        dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
             .BeginRenderPass(mRenderPass.renderPassInfo)
             .SetRenderPipeline(mPipeline)
             .SetBindGroup(0, bindGroup)
@@ -153,9 +153,9 @@ protected:
     }
 
     utils::BasicRenderPass mRenderPass;
-    nxt::BindGroupLayout mBindGroupLayout;
-    nxt::RenderPipeline mPipeline;
-    nxt::TextureView mTextureView;
+    dawn::BindGroupLayout mBindGroupLayout;
+    dawn::RenderPipeline mPipeline;
+    dawn::TextureView mTextureView;
 };
 
 // Test drawing a rect with a checkerboard texture with different address modes.

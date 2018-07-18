@@ -21,28 +21,28 @@ class DepthStencilStateValidationTest : public ValidationTest {
 TEST_F(DepthStencilStateValidationTest, CreationSuccess) {
     // Success for setting all properties
     {
-        nxt::DepthStencilState ds = AssertWillBeSuccess(device.CreateDepthStencilStateBuilder())
-            .SetDepthCompareFunction(nxt::CompareFunction::Less)
+        dawn::DepthStencilState ds = AssertWillBeSuccess(device.CreateDepthStencilStateBuilder())
+            .SetDepthCompareFunction(dawn::CompareFunction::Less)
             .SetDepthWriteEnabled(true)
-            .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Greater,
-                nxt::StencilOperation::Keep, nxt::StencilOperation::Keep, nxt::StencilOperation::Replace)
+            .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Greater,
+                dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
             .SetStencilMask(0x0, 0x1)
             .GetResult();
     }
 
     // Success for empty builder
     {
-        nxt::DepthStencilState ds = AssertWillBeSuccess(device.CreateDepthStencilStateBuilder())
+        dawn::DepthStencilState ds = AssertWillBeSuccess(device.CreateDepthStencilStateBuilder())
             .GetResult();
     }
 
     // Test success when setting stencil function on separate faces
     {
-        nxt::DepthStencilState ds = AssertWillBeSuccess(device.CreateDepthStencilStateBuilder())
-            .SetStencilFunction(nxt::Face::Front, nxt::CompareFunction::Less,
-                nxt::StencilOperation::Replace, nxt::StencilOperation::Replace, nxt::StencilOperation::Replace)
-            .SetStencilFunction(nxt::Face::Back, nxt::CompareFunction::Greater,
-                nxt::StencilOperation::Replace, nxt::StencilOperation::Replace, nxt::StencilOperation::Replace)
+        dawn::DepthStencilState ds = AssertWillBeSuccess(device.CreateDepthStencilStateBuilder())
+            .SetStencilFunction(dawn::Face::Front, dawn::CompareFunction::Less,
+                dawn::StencilOperation::Replace, dawn::StencilOperation::Replace, dawn::StencilOperation::Replace)
+            .SetStencilFunction(dawn::Face::Back, dawn::CompareFunction::Greater,
+                dawn::StencilOperation::Replace, dawn::StencilOperation::Replace, dawn::StencilOperation::Replace)
             .GetResult();
     }
 }
@@ -51,7 +51,7 @@ TEST_F(DepthStencilStateValidationTest, CreationSuccess) {
 TEST_F(DepthStencilStateValidationTest, CreationDuplicates) {
     // Test failure when specifying depth write enabled multiple times
     {
-        nxt::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
+        dawn::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
             .SetDepthWriteEnabled(true)
             .SetDepthWriteEnabled(false)
             .GetResult();
@@ -59,15 +59,15 @@ TEST_F(DepthStencilStateValidationTest, CreationDuplicates) {
 
     // Test failure when specifying depth compare function multiple times
     {
-        nxt::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
-            .SetDepthCompareFunction(nxt::CompareFunction::Less)
-            .SetDepthCompareFunction(nxt::CompareFunction::Greater)
+        dawn::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
+            .SetDepthCompareFunction(dawn::CompareFunction::Less)
+            .SetDepthCompareFunction(dawn::CompareFunction::Greater)
             .GetResult();
     }
 
     // Test failure when setting stencil mask  multiple times
     {
-        nxt::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
+        dawn::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
             .SetStencilMask(0x00, 0x00)
             .SetStencilMask(0xff, 0xff)
             .GetResult();
@@ -75,21 +75,21 @@ TEST_F(DepthStencilStateValidationTest, CreationDuplicates) {
 
     // Test failure when directly setting stencil function on a face multiple times
     {
-        nxt::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
-            .SetStencilFunction(nxt::Face::Back, nxt::CompareFunction::Less,
-                nxt::StencilOperation::Replace, nxt::StencilOperation::Replace, nxt::StencilOperation::Replace)
-            .SetStencilFunction(nxt::Face::Back, nxt::CompareFunction::Greater,
-                nxt::StencilOperation::Replace, nxt::StencilOperation::Replace, nxt::StencilOperation::Replace)
+        dawn::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
+            .SetStencilFunction(dawn::Face::Back, dawn::CompareFunction::Less,
+                dawn::StencilOperation::Replace, dawn::StencilOperation::Replace, dawn::StencilOperation::Replace)
+            .SetStencilFunction(dawn::Face::Back, dawn::CompareFunction::Greater,
+                dawn::StencilOperation::Replace, dawn::StencilOperation::Replace, dawn::StencilOperation::Replace)
             .GetResult();
     }
 
     // Test failure when indirectly setting stencil function on a face multiple times
     {
-        nxt::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
-            .SetStencilFunction(nxt::Face::Both, nxt::CompareFunction::Less,
-                nxt::StencilOperation::Replace, nxt::StencilOperation::Replace, nxt::StencilOperation::Replace)
-            .SetStencilFunction(nxt::Face::Back, nxt::CompareFunction::Greater,
-                nxt::StencilOperation::Replace, nxt::StencilOperation::Replace, nxt::StencilOperation::Replace)
+        dawn::DepthStencilState ds = AssertWillBeError(device.CreateDepthStencilStateBuilder())
+            .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Less,
+                dawn::StencilOperation::Replace, dawn::StencilOperation::Replace, dawn::StencilOperation::Replace)
+            .SetStencilFunction(dawn::Face::Back, dawn::CompareFunction::Greater,
+                dawn::StencilOperation::Replace, dawn::StencilOperation::Replace, dawn::StencilOperation::Replace)
             .GetResult();
     }
 }

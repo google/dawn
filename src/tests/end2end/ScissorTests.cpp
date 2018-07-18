@@ -18,8 +18,8 @@
 
 class ScissorTest: public NXTTest {
   protected:
-    nxt::RenderPipeline CreateQuadPipeline(nxt::TextureFormat format) {
-        nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, R"(
+    dawn::RenderPipeline CreateQuadPipeline(dawn::TextureFormat format) {
+        dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
             #version 450
             const vec2 pos[6] = vec2[6](
                 vec2(-1.0f, -1.0f), vec2(-1.0f, 1.0f), vec2(1.0f, -1.0f),
@@ -29,17 +29,17 @@ class ScissorTest: public NXTTest {
                 gl_Position = vec4(pos[gl_VertexIndex], 0.5, 1.0);
             })");
 
-        nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+        dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
             #version 450
             layout(location = 0) out vec4 fragColor;
             void main() {
                 fragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
             })");
 
-        nxt::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
+        dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
             .SetColorAttachmentFormat(0, format)
-            .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
             .GetResult();
 
         return pipeline;
@@ -49,9 +49,9 @@ class ScissorTest: public NXTTest {
 // Test that by default the scissor test is disabled and the whole attachment can be drawn to.
 TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .DrawArrays(6, 1, 0, 0)
@@ -69,9 +69,9 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
 // Test setting the scissor to something larger than the attachments.
 TEST_P(ScissorTest, LargerThanAttachment) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .SetScissorRect(0, 0, 200, 200)
@@ -95,9 +95,9 @@ TEST_P(ScissorTest, EmptyRect) {
     }
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .SetScissorRect(0, 0, 0, 0)
@@ -116,14 +116,14 @@ TEST_P(ScissorTest, EmptyRect) {
 // Test setting a partial scissor (not empty, not full attachment)
 TEST_P(ScissorTest, PartialRect) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
     constexpr uint32_t kX = 3;
     constexpr uint32_t kY = 7;
     constexpr uint32_t kW = 5;
     constexpr uint32_t kH = 13;
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         .BeginRenderPass(renderPass.renderPassInfo)
         .SetRenderPipeline(pipeline)
         .SetScissorRect(kX, kY, kW, kH)
@@ -144,9 +144,9 @@ TEST_P(ScissorTest, PartialRect) {
 // Test that the scissor setting doesn't get inherited between renderpasses
 TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    nxt::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    nxt::CommandBuffer commands = device.CreateCommandBufferBuilder()
+    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
         // RenderPass 1 set the scissor
         .BeginRenderPass(renderPass.renderPassInfo)
         .SetScissorRect(0, 0, 0, 0)

@@ -22,9 +22,9 @@ class BasicTests : public NXTTest {
 // Test Buffer::SetSubData changes the content of the buffer, but really this is the most
 // basic test possible, and tests the test harness
 TEST_P(BasicTests, BufferSetSubData) {
-    nxt::Buffer buffer = device.CreateBufferBuilder()
+    dawn::Buffer buffer = device.CreateBufferBuilder()
         .SetSize(4)
-        .SetAllowedUsage(nxt::BufferUsageBit::TransferSrc | nxt::BufferUsageBit::TransferDst)
+        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
         .GetResult();
 
     uint8_t value = 187;

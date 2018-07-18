@@ -18,18 +18,18 @@
 
 class CopyCommandTest : public ValidationTest {
     protected:
-        nxt::Buffer CreateFrozenBuffer(uint32_t size, nxt::BufferUsageBit usage) {
-            nxt::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder())
+        dawn::Buffer CreateFrozenBuffer(uint32_t size, dawn::BufferUsageBit usage) {
+            dawn::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder())
                 .SetSize(size)
                 .SetAllowedUsage(usage)
                 .GetResult();
             return buf;
         }
 
-        nxt::Texture Create2DTexture(uint32_t width, uint32_t height, uint32_t levels,
-                                         nxt::TextureFormat format, nxt::TextureUsageBit usage) {
-            nxt::Texture tex = AssertWillBeSuccess(device.CreateTextureBuilder())
-                .SetDimension(nxt::TextureDimension::e2D)
+        dawn::Texture Create2DTexture(uint32_t width, uint32_t height, uint32_t levels,
+                                         dawn::TextureFormat format, dawn::TextureUsageBit usage) {
+            dawn::Texture tex = AssertWillBeSuccess(device.CreateTextureBuilder())
+                .SetDimension(dawn::TextureDimension::e2D)
                 .SetExtent(width, height, 1)
                 .SetFormat(format)
                 .SetMipLevels(levels)
@@ -51,12 +51,12 @@ class CopyCommandTest_B2B : public CopyCommandTest {
 
 // Test a successfull B2B copy
 TEST_F(CopyCommandTest_B2B, Success) {
-    nxt::Buffer source = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferSrc);
-    nxt::Buffer destination = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferDst);
+    dawn::Buffer source = CreateFrozenBuffer(16, dawn::BufferUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateFrozenBuffer(16, dawn::BufferUsageBit::TransferDst);
 
     // Copy different copies, including some that touch the OOB condition
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .CopyBufferToBuffer(source, 0, destination, 0, 16)
             .CopyBufferToBuffer(source, 8, destination, 0, 8)
             .CopyBufferToBuffer(source, 0, destination, 8, 8)
@@ -65,7 +65,7 @@ TEST_F(CopyCommandTest_B2B, Success) {
 
     // Empty copies are valid
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .CopyBufferToBuffer(source, 0, destination, 0, 0)
             .CopyBufferToBuffer(source, 0, destination, 16, 0)
             .CopyBufferToBuffer(source, 16, destination, 0, 0)
@@ -75,19 +75,19 @@ TEST_F(CopyCommandTest_B2B, Success) {
 
 // Test B2B copies with OOB
 TEST_F(CopyCommandTest_B2B, OutOfBounds) {
-    nxt::Buffer source = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferSrc);
-    nxt::Buffer destination = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferDst);
+    dawn::Buffer source = CreateFrozenBuffer(16, dawn::BufferUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateFrozenBuffer(16, dawn::BufferUsageBit::TransferDst);
 
     // OOB on the source
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToBuffer(source, 8, destination, 0, 12)
             .GetResult();
     }
 
     // OOB on the destination
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToBuffer(source, 0, destination, 8, 12)
             .GetResult();
     }
@@ -95,20 +95,20 @@ TEST_F(CopyCommandTest_B2B, OutOfBounds) {
 
 // Test B2B copies with incorrect buffer usage
 TEST_F(CopyCommandTest_B2B, BadUsage) {
-    nxt::Buffer source = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferSrc);
-    nxt::Buffer destination = CreateFrozenBuffer(16, nxt::BufferUsageBit::TransferDst);
-    nxt::Buffer vertex = CreateFrozenBuffer(16, nxt::BufferUsageBit::Vertex);
+    dawn::Buffer source = CreateFrozenBuffer(16, dawn::BufferUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateFrozenBuffer(16, dawn::BufferUsageBit::TransferDst);
+    dawn::Buffer vertex = CreateFrozenBuffer(16, dawn::BufferUsageBit::Vertex);
 
     // Source with incorrect usage
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToBuffer(vertex, 0, destination, 0, 16)
             .GetResult();
     }
 
     // Destination with incorrect usage
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToBuffer(source, 0, vertex, 0, 16)
             .GetResult();
     }
@@ -120,13 +120,13 @@ class CopyCommandTest_B2T : public CopyCommandTest {
 // Test a successfull B2T copy
 TEST_F(CopyCommandTest_B2T, Success) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                     nxt::TextureUsageBit::TransferDst);
+    dawn::Buffer source = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                     dawn::TextureUsageBit::TransferDst);
 
     // Different copies, including some that touch the OOB condition
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // Copy 4x4 block in corner of first mip.
             .CopyBufferToTexture(source, 0, 256, destination, 0, 0, 0, 4, 4, 1, 0)
             // Copy 4x4 block in opposite corner of first mip.
@@ -140,7 +140,7 @@ TEST_F(CopyCommandTest_B2T, Success) {
 
     // Copies with a 256-byte aligned row pitch but unaligned texture region
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // Unaligned region
             .CopyBufferToTexture(source, 0, 256, destination, 0, 0, 0, 3, 4, 1, 0)
             // Unaligned region with texture offset
@@ -152,7 +152,7 @@ TEST_F(CopyCommandTest_B2T, Success) {
 
     // Empty copies are valid
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // An empty copy
             .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 0, 0, 1, 0)
             // An empty copy touching the end of the buffer
@@ -166,27 +166,27 @@ TEST_F(CopyCommandTest_B2T, Success) {
 // Test OOB conditions on the buffer
 TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                     nxt::TextureUsageBit::TransferDst);
+    dawn::Buffer source = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                     dawn::TextureUsageBit::TransferDst);
 
     // OOB on the buffer because we copy too many pixels
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 256, destination, 0, 0, 0, 4, 5, 1, 0)
             .GetResult();
     }
 
     // OOB on the buffer because of the offset
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 4, 256, destination, 0, 0, 0, 4, 4, 1, 0)
             .GetResult();
     }
 
     // OOB on the buffer because (row pitch * (height - 1) + width) * depth overflows
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 512, destination, 0, 0, 0, 4, 3, 1, 0)
             .GetResult();
     }
@@ -196,8 +196,8 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
     {
         uint32_t sourceBufferSize = BufferSizeForTextureCopy(7, 3, 1);
         ASSERT_TRUE(256 * 3 > sourceBufferSize) << "row pitch * height should overflow buffer";
-        nxt::Buffer sourceBuffer = CreateFrozenBuffer(sourceBufferSize, nxt::BufferUsageBit::TransferSrc);
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::Buffer sourceBuffer = CreateFrozenBuffer(sourceBufferSize, dawn::BufferUsageBit::TransferSrc);
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(sourceBuffer, 0, 256, destination, 0, 0, 0, 7, 3, 1, 0)
             .GetResult();
     }
@@ -206,34 +206,34 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
 // Test OOB conditions on the texture
 TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                     nxt::TextureUsageBit::TransferDst);
+    dawn::Buffer source = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                     dawn::TextureUsageBit::TransferDst);
 
     // OOB on the texture because x + width overflows
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 256, destination, 13, 12, 0, 4, 4, 1, 0)
             .GetResult();
     }
 
     // OOB on the texture because y + width overflows
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 256, destination, 12, 13, 0, 4, 4, 1, 0)
             .GetResult();
     }
 
     // OOB on the texture because we overflow a non-zero mip
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 256, destination, 1, 0, 0, 4, 4, 1, 2)
             .GetResult();
     }
 
     // OOB on the texture even on an empty copy when we copy to a non-existent mip.
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 0, 0, 1, 5)
             .GetResult();
     }
@@ -241,20 +241,20 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
 
 // Test that we force Z=0 and Depth=1 on copies to 2D textures
 TEST_F(CopyCommandTest_B2T, ZDepthConstraintFor2DTextures) {
-    nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                     nxt::TextureUsageBit::TransferDst);
+    dawn::Buffer source = CreateFrozenBuffer(16 * 4, dawn::BufferUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                     dawn::TextureUsageBit::TransferDst);
 
     // Z=1 on an empty copy still errors
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 1, 0, 0, 1, 0)
             .GetResult();
     }
 
     // Depth=0 on an empty copy still errors
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 0, 0, 0, 0)
             .GetResult();
     }
@@ -262,23 +262,23 @@ TEST_F(CopyCommandTest_B2T, ZDepthConstraintFor2DTextures) {
 
 // Test B2T copies with incorrect buffer usage
 TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
-    nxt::Buffer source = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::TransferSrc);
-    nxt::Buffer vertex = CreateFrozenBuffer(16 * 4, nxt::BufferUsageBit::Vertex);
-    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                     nxt::TextureUsageBit::TransferDst);
-    nxt::Texture sampled = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                 nxt::TextureUsageBit::Sampled);
+    dawn::Buffer source = CreateFrozenBuffer(16 * 4, dawn::BufferUsageBit::TransferSrc);
+    dawn::Buffer vertex = CreateFrozenBuffer(16 * 4, dawn::BufferUsageBit::Vertex);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                     dawn::TextureUsageBit::TransferDst);
+    dawn::Texture sampled = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                 dawn::TextureUsageBit::Sampled);
 
     // Incorrect source usage
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(vertex, 0, 256, destination, 0, 0, 0, 4, 4, 1, 0)
             .GetResult();
     }
 
     // Incorrect destination usage
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 256, sampled, 0, 0, 0, 4, 4, 1, 0)
             .GetResult();
     }
@@ -286,27 +286,27 @@ TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
 
 TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
     uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
-    nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = Create2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-        nxt::TextureUsageBit::TransferDst);
+    dawn::Buffer source = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(128, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+        dawn::TextureUsageBit::TransferDst);
 
     // Default row pitch is not 256-byte aligned
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 0, destination, 0, 0, 0, 3, 4, 1, 0)
             .GetResult();
     }
 
     // Row pitch is not 256-byte aligned
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 128, destination, 0, 0, 0, 4, 4, 1, 0)
             .GetResult();
     }
 
     // Row pitch is less than width * bytesPerPixel
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, 0, 256, destination, 0, 0, 0, 65, 1, 1, 0)
             .GetResult();
     }
@@ -315,29 +315,29 @@ TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
 // Test B2T copies with incorrect buffer offset usage
 TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Buffer source = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
-    nxt::Texture destination = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                     nxt::TextureUsageBit::TransferDst);
+    dawn::Buffer source = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                     dawn::TextureUsageBit::TransferDst);
 
     // Correct usage
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, bufferSize - 4, 256, destination, 0, 0, 0, 1, 1, 1, 0)
             .GetResult();
     }
     // Incorrect usages
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, bufferSize - 5, 256, destination, 0, 0, 0, 1, 1, 1, 0)
             .GetResult();
     }
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, bufferSize - 6, 256, destination, 0, 0, 0, 1, 1, 1, 0)
             .GetResult();
     }
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyBufferToTexture(source, bufferSize - 7, 256, destination, 0, 0, 0, 1, 1, 1, 0)
             .GetResult();
     }
@@ -349,13 +349,13 @@ class CopyCommandTest_T2B : public CopyCommandTest {
 // Test a successfull T2B copy
 TEST_F(CopyCommandTest_T2B, Success) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                nxt::TextureUsageBit::TransferSrc);
-    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
+    dawn::Texture source = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // Different copies, including some that touch the OOB condition
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // Copy from 4x4 block in corner of first mip.
             .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 0, 256)
             // Copy from 4x4 block in opposite corner of first mip.
@@ -369,7 +369,7 @@ TEST_F(CopyCommandTest_T2B, Success) {
 
     // Copies with a 256-byte aligned row pitch but unaligned texture region
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // Unaligned region
             .CopyTextureToBuffer(source, 0, 0, 0, 3, 4, 1, 0, destination, 0, 256)
             // Unaligned region with texture offset
@@ -381,7 +381,7 @@ TEST_F(CopyCommandTest_T2B, Success) {
 
     // Empty copies are valid
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             // An empty copy
             .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 1, 0, destination, 0, 0)
             // An empty copy touching the end of the buffer
@@ -395,34 +395,34 @@ TEST_F(CopyCommandTest_T2B, Success) {
 // Test OOB conditions on the texture
 TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                nxt::TextureUsageBit::TransferSrc);
-    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
+    dawn::Texture source = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // OOB on the texture because x + width overflows
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 13, 12, 0, 4, 4, 1, 0, destination, 0, 256)
             .GetResult();
     }
 
     // OOB on the texture because y + width overflows
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 12, 13, 0, 4, 4, 1, 0, destination, 0, 256)
             .GetResult();
     }
 
     // OOB on the texture because we overflow a non-zero mip
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 1, 0, 0, 4, 4, 1, 2, destination, 0, 256)
             .GetResult();
     }
 
     // OOB on the texture even on an empty copy when we copy from a non-existent mip.
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 1, 5, destination, 0, 0)
             .GetResult();
     }
@@ -431,27 +431,27 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
 // Test OOB conditions on the buffer
 TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                nxt::TextureUsageBit::TransferSrc);
-    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
+    dawn::Texture source = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // OOB on the buffer because we copy too many pixels
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 4, 5, 1, 0, destination, 0, 256)
             .GetResult();
     }
 
     // OOB on the buffer because of the offset
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 4, 256)
             .GetResult();
     }
 
     // OOB on the buffer because (row pitch * (height - 1) + width) * depth overflows
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 4, 3, 1, 0, destination, 0, 512)
             .GetResult();
     }
@@ -461,8 +461,8 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     {
         uint32_t destinationBufferSize = BufferSizeForTextureCopy(7, 3, 1);
         ASSERT_TRUE(256 * 3 > destinationBufferSize) << "row pitch * height should overflow buffer";
-        nxt::Buffer destinationBuffer = CreateFrozenBuffer(destinationBufferSize, nxt::BufferUsageBit::TransferDst);
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::Buffer destinationBuffer = CreateFrozenBuffer(destinationBufferSize, dawn::BufferUsageBit::TransferDst);
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 7, 3, 1, 0, destinationBuffer, 0, 256)
             .GetResult();
     }
@@ -471,20 +471,20 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
 // Test that we force Z=0 and Depth=1 on copies from to 2D textures
 TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                nxt::TextureUsageBit::TransferSrc);
-    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
+    dawn::Texture source = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // Z=1 on an empty copy still errors
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 1, 0, 0, 1, 0, destination, 0, 0)
             .GetResult();
     }
 
     // Depth=0 on an empty copy still errors
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 0, 0, 0, 0, destination, 0, 0)
             .GetResult();
     }
@@ -493,23 +493,23 @@ TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
 // Test T2B copies with incorrect buffer usage
 TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
-    nxt::Texture source = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                nxt::TextureUsageBit::TransferSrc);
-    nxt::Texture sampled = Create2DTexture(16, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-                                                 nxt::TextureUsageBit::Sampled);
-    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
-    nxt::Buffer vertex = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::Vertex);
+    dawn::Texture source = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferSrc);
+    dawn::Texture sampled = Create2DTexture(16, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                 dawn::TextureUsageBit::Sampled);
+    dawn::Buffer destination = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
+    dawn::Buffer vertex = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::Vertex);
 
     // Incorrect source usage
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(sampled, 0, 0, 0, 4, 4, 1, 0, destination, 0, 256)
             .GetResult();
     }
 
     // Incorrect destination usage
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, vertex, 0, 256)
             .GetResult();
     }
@@ -517,27 +517,27 @@ TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
 
 TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
     uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
-    nxt::Texture source = Create2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-        nxt::TextureUsageBit::TransferDst);
-    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferSrc);
+    dawn::Texture source = Create2DTexture(128, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+        dawn::TextureUsageBit::TransferDst);
+    dawn::Buffer destination = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
 
     // Default row pitch is not 256-byte aligned
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 3, 4, 1, 0, destination, 0, 256)
             .GetResult();
     }
 
     // Row pitch is not 256-byte aligned
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 4, 4, 1, 0, destination, 0, 257)
             .GetResult();
     }
 
     // Row pitch is less than width * bytesPerPixel
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 65, 1, 1, 0, destination, 0, 256)
             .GetResult();
     }
@@ -546,29 +546,29 @@ TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
 // Test T2B copies with incorrect buffer offset usage
 TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
     uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
-    nxt::Texture source = Create2DTexture(128, 16, 5, nxt::TextureFormat::R8G8B8A8Unorm,
-        nxt::TextureUsageBit::TransferSrc);
-    nxt::Buffer destination = CreateFrozenBuffer(bufferSize, nxt::BufferUsageBit::TransferDst);
+    dawn::Texture source = Create2DTexture(128, 16, 5, dawn::TextureFormat::R8G8B8A8Unorm,
+        dawn::TextureUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateFrozenBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // Correct usage
     {
-        nxt::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 4, 256)
             .GetResult();
     }
     // Incorrect usages
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 5, 256)
             .GetResult();
     }
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 6, 256)
             .GetResult();
     }
     {
-        nxt::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
+        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
             .CopyTextureToBuffer(source, 0, 0, 0, 1, 1, 1, 0, destination, bufferSize - 7, 256)
             .GetResult();
     }

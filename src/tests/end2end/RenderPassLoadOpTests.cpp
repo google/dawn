@@ -23,20 +23,20 @@ constexpr static unsigned int kRTSize = 16;
 class DrawQuad {
     public:
         DrawQuad() {}
-        DrawQuad(nxt::Device* device, const char* vsSource, const char* fsSource)
+        DrawQuad(dawn::Device* device, const char* vsSource, const char* fsSource)
             : device(device) {
-                vsModule = utils::CreateShaderModule(*device, nxt::ShaderStage::Vertex, vsSource);
-                fsModule = utils::CreateShaderModule(*device, nxt::ShaderStage::Fragment, fsSource);
+                vsModule = utils::CreateShaderModule(*device, dawn::ShaderStage::Vertex, vsSource);
+                fsModule = utils::CreateShaderModule(*device, dawn::ShaderStage::Fragment, fsSource);
 
                 pipelineLayout = utils::MakeBasicPipelineLayout(*device, nullptr);
             }
 
-        void Draw(nxt::CommandBufferBuilder* builder) {
+        void Draw(dawn::CommandBufferBuilder* builder) {
             auto renderPipeline = device->CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
+                .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
                 .SetLayout(pipelineLayout)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
                 .GetResult();
 
             builder->SetRenderPipeline(renderPipeline);
@@ -44,10 +44,10 @@ class DrawQuad {
         }
 
     private:
-        nxt::Device* device = nullptr;
-        nxt::ShaderModule vsModule = {};
-        nxt::ShaderModule fsModule = {};
-        nxt::PipelineLayout pipelineLayout = {};
+        dawn::Device* device = nullptr;
+        dawn::ShaderModule vsModule = {};
+        dawn::ShaderModule fsModule = {};
+        dawn::PipelineLayout pipelineLayout = {};
 };
 
 class RenderPassLoadOpTests : public NXTTest {
@@ -56,11 +56,11 @@ class RenderPassLoadOpTests : public NXTTest {
             NXTTest::SetUp();
 
             renderTarget = device.CreateTextureBuilder()
-                .SetDimension(nxt::TextureDimension::e2D)
+                .SetDimension(dawn::TextureDimension::e2D)
                 .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(nxt::TextureFormat::R8G8B8A8Unorm)
+                .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
                 .SetMipLevels(1)
-                .SetAllowedUsage(nxt::TextureUsageBit::OutputAttachment | nxt::TextureUsageBit::TransferSrc)
+                .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc)
                 .GetResult();
 
             renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
@@ -94,8 +94,8 @@ class RenderPassLoadOpTests : public NXTTest {
             blueQuad = DrawQuad(&device, vsSource, fsSource);
         }
 
-        nxt::Texture renderTarget;
-        nxt::TextureView renderTargetView;
+        dawn::Texture renderTarget;
+        dawn::TextureView renderTargetView;
 
         std::array<RGBA8, kRTSize * kRTSize> expectZero;
         std::array<RGBA8, kRTSize * kRTSize> expectGreen;
@@ -110,7 +110,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     // Part 1: clear once, check to make sure it's cleared
 
     auto renderPassClearZero = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
+        .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Clear)
         .SetColorAttachmentClearColor(0, 0.0f, 0.0f, 0.0f, 0.0f)
         .GetResult();
 
@@ -122,7 +122,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
         .GetResult();
 
     auto renderPassClearGreen = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Clear)
+        .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Clear)
         .SetColorAttachmentClearColor(0, 0.0f, 1.0f, 0.0f, 1.0f)
         .GetResult();
 
@@ -142,10 +142,10 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     // Part 2: draw a blue quad into the right half of the render target, and check result
 
     auto renderPassLoad = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, renderTargetView, nxt::LoadOp::Load)
+        .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Load)
         .GetResult();
 
-    nxt::CommandBuffer commandsLoad;
+    dawn::CommandBuffer commandsLoad;
     {
         auto builder = device.CreateCommandBufferBuilder()
             .BeginRenderPass(renderPassLoad)

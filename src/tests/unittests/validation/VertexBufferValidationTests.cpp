@@ -25,7 +25,7 @@ class VertexBufferValidationTest : public ValidationTest {
 
             renderpass = CreateSimpleRenderPass();
 
-            fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+            fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
@@ -34,18 +34,18 @@ class VertexBufferValidationTest : public ValidationTest {
         }
 
         template <unsigned int N>
-        std::array<nxt::Buffer, N> MakeVertexBuffers() {
-            std::array<nxt::Buffer, N> buffers;
+        std::array<dawn::Buffer, N> MakeVertexBuffers() {
+            std::array<dawn::Buffer, N> buffers;
             for (auto& buffer : buffers) {
                 buffer = device.CreateBufferBuilder()
                     .SetSize(256)
-                    .SetAllowedUsage(nxt::BufferUsageBit::Vertex)
+                    .SetAllowedUsage(dawn::BufferUsageBit::Vertex)
                     .GetResult();
             }
             return buffers;
         }
 
-        nxt::ShaderModule MakeVertexShader(unsigned int numInputs) {
+        dawn::ShaderModule MakeVertexShader(unsigned int numInputs) {
             std::ostringstream vs;
             vs << "#version 450\n";
             for (unsigned int i = 0; i < numInputs; ++i) {
@@ -64,29 +64,29 @@ class VertexBufferValidationTest : public ValidationTest {
 
             vs << "}\n";
 
-            return utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, vs.str().c_str());
+            return utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vs.str().c_str());
         }
 
-        nxt::InputState MakeInputState(unsigned int numInputs) {
+        dawn::InputState MakeInputState(unsigned int numInputs) {
             auto builder = device.CreateInputStateBuilder();
             for (unsigned int i = 0; i < numInputs; ++i) {
-                builder.SetAttribute(i, i, nxt::VertexFormat::FloatR32G32B32, 0);
-                builder.SetInput(i, 0, nxt::InputStepMode::Vertex);
+                builder.SetAttribute(i, i, dawn::VertexFormat::FloatR32G32B32, 0);
+                builder.SetInput(i, 0, dawn::InputStepMode::Vertex);
             }
             return builder.GetResult();
         }
 
-        nxt::RenderPipeline MakeRenderPipeline(const nxt::ShaderModule& vsModule, const nxt::InputState& inputState) {
+        dawn::RenderPipeline MakeRenderPipeline(const dawn::ShaderModule& vsModule, const dawn::InputState& inputState) {
             return device.CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, nxt::TextureFormat::R8G8B8A8Unorm)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+                .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
+                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)
                 .GetResult();
         }
 
-        nxt::RenderPassDescriptor renderpass;
-        nxt::ShaderModule fsModule;
+        dawn::RenderPassDescriptor renderpass;
+        dawn::ShaderModule fsModule;
 };
 
 TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {

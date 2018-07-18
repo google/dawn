@@ -17,8 +17,8 @@
 #include "common/Assert.h"
 #include "utils/NXTHelpers.h"
 
-using nxt::InputStepMode;
-using nxt::VertexFormat;
+using dawn::InputStepMode;
+using dawn::VertexFormat;
 
 // Input state tests all work the same way: the test will render triangles in a grid up to 4x4. Each triangle
 // is position in the grid such that X will correspond to the "triangle number" and the Y to the instance number.
@@ -63,7 +63,7 @@ class InputStateTest : public NXTTest {
             VertexFormat format;
             InputStepMode step;
         };
-        nxt::RenderPipeline MakeTestPipeline(const nxt::InputState& inputState, int multiplier, std::vector<ShaderTestSpec> testSpec) {
+        dawn::RenderPipeline MakeTestPipeline(const dawn::InputState& inputState, int multiplier, std::vector<ShaderTestSpec> testSpec) {
             std::ostringstream vs;
             vs << "#version 450\n";
 
@@ -110,8 +110,8 @@ class InputStateTest : public NXTTest {
             vs << "    }\n;";
             vs << "}\n";
 
-            nxt::ShaderModule vsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Vertex, vs.str().c_str());
-            nxt::ShaderModule fsModule = utils::CreateShaderModule(device, nxt::ShaderStage::Fragment, R"(
+            dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vs.str().c_str());
+            dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) in vec4 color;
                 layout(location = 0) out vec4 fragColor;
@@ -122,8 +122,8 @@ class InputStateTest : public NXTTest {
 
             return device.CreateRenderPipelineBuilder()
                 .SetColorAttachmentFormat(0, renderPass.colorFormat)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)
                 .GetResult();
         }
@@ -139,8 +139,8 @@ class InputStateTest : public NXTTest {
             uint32_t offset;
             VertexFormat format;
         };
-        nxt::InputState MakeInputState(std::vector<InputSpec> inputs, std::vector<AttributeSpec> attributes) {
-            nxt::InputStateBuilder builder = device.CreateInputStateBuilder();
+        dawn::InputState MakeInputState(std::vector<InputSpec> inputs, std::vector<AttributeSpec> attributes) {
+            dawn::InputStateBuilder builder = device.CreateInputStateBuilder();
 
             for (const auto& input : inputs) {
                 builder.SetInput(input.slot, input.stride, input.step);
@@ -154,19 +154,19 @@ class InputStateTest : public NXTTest {
         }
 
         template<typename T>
-        nxt::Buffer MakeVertexBuffer(std::vector<T> data) {
-            return utils::CreateBufferFromData(device, data.data(), static_cast<uint32_t>(data.size() * sizeof(T)), nxt::BufferUsageBit::Vertex);
+        dawn::Buffer MakeVertexBuffer(std::vector<T> data) {
+            return utils::CreateBufferFromData(device, data.data(), static_cast<uint32_t>(data.size() * sizeof(T)), dawn::BufferUsageBit::Vertex);
         }
 
         struct DrawVertexBuffer {
             uint32_t location;
-            nxt::Buffer* buffer;
+            dawn::Buffer* buffer;
         };
-        void DoTestDraw(const nxt::RenderPipeline& pipeline, unsigned int triangles, unsigned int instances, std::vector<DrawVertexBuffer> vertexBuffers) {
+        void DoTestDraw(const dawn::RenderPipeline& pipeline, unsigned int triangles, unsigned int instances, std::vector<DrawVertexBuffer> vertexBuffers) {
             EXPECT_LE(triangles, 4u);
             EXPECT_LE(instances, 4u);
 
-            nxt::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+            dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
             builder.BeginRenderPass(renderPass.renderPassInfo)
                 .SetRenderPipeline(pipeline);
@@ -176,7 +176,7 @@ class InputStateTest : public NXTTest {
                 builder.SetVertexBuffers(buffer.location, 1, buffer.buffer, &zeroOffset);
             }
 
-            nxt::CommandBuffer commands = builder
+            dawn::CommandBuffer commands = builder
                 .DrawArrays(triangles * 3, instances, 0, 0)
                 .EndRenderPass()
                 .GetResult();
@@ -203,17 +203,17 @@ class InputStateTest : public NXTTest {
 
 // Test compilation and usage of the fixture :)
 TEST_P(InputStateTest, Basic) {
-    nxt::InputState inputState = MakeInputState({
+    dawn::InputState inputState = MakeInputState({
             {0, 4 * sizeof(float), InputStepMode::Vertex}
         }, {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
+    dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}
     });
 
-    nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3,
         1, 2, 3, 4,
         2, 3, 4, 5
@@ -223,17 +223,17 @@ TEST_P(InputStateTest, Basic) {
 
 // Test a stride of 0 works
 TEST_P(InputStateTest, ZeroStride) {
-    nxt::InputState inputState = MakeInputState({
+    dawn::InputState inputState = MakeInputState({
             {0, 0, InputStepMode::Vertex}
         }, {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
+    dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}
     });
 
-    nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3,
     });
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
@@ -243,51 +243,51 @@ TEST_P(InputStateTest, ZeroStride) {
 TEST_P(InputStateTest, AttributeExpanding) {
     // R32F case
     {
-        nxt::InputState inputState = MakeInputState({
+        dawn::InputState inputState = MakeInputState({
                 {0, 0, InputStepMode::Vertex}
             }, {
                 {0, 0, 0, VertexFormat::FloatR32}
             }
         );
-        nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
+        dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::FloatR32, InputStepMode::Vertex}
         });
 
-        nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+        dawn::Buffer buffer0 = MakeVertexBuffer<float>({
             0, 1, 2, 3
         });
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
     }
     // RG32F case
     {
-        nxt::InputState inputState = MakeInputState({
+        dawn::InputState inputState = MakeInputState({
                 {0, 0, InputStepMode::Vertex}
             }, {
                 {0, 0, 0, VertexFormat::FloatR32G32}
             }
         );
-        nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
+        dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::FloatR32G32, InputStepMode::Vertex}
         });
 
-        nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+        dawn::Buffer buffer0 = MakeVertexBuffer<float>({
             0, 1, 2, 3
         });
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
     }
     // RGB32F case
     {
-        nxt::InputState inputState = MakeInputState({
+        dawn::InputState inputState = MakeInputState({
                 {0, 0, InputStepMode::Vertex}
             }, {
                 {0, 0, 0, VertexFormat::FloatR32G32B32}
             }
         );
-        nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
+        dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::FloatR32G32B32, InputStepMode::Vertex}
         });
 
-        nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+        dawn::Buffer buffer0 = MakeVertexBuffer<float>({
             0, 1, 2, 3
         });
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
@@ -296,17 +296,17 @@ TEST_P(InputStateTest, AttributeExpanding) {
 
 // Test a stride larger than the attributes
 TEST_P(InputStateTest, StrideLargerThanAttributes) {
-    nxt::InputState inputState = MakeInputState({
+    dawn::InputState inputState = MakeInputState({
             {0, 8 * sizeof(float), InputStepMode::Vertex}
         }, {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
+    dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}
     });
 
-    nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 0, 0, 0,
         1, 2, 3, 4, 0, 0, 0, 0,
         2, 3, 4, 5, 0, 0, 0, 0,
@@ -316,18 +316,18 @@ TEST_P(InputStateTest, StrideLargerThanAttributes) {
 
 // Test two attributes at an offset, vertex version
 TEST_P(InputStateTest, TwoAttributesAtAnOffsetVertex) {
-    nxt::InputState inputState = MakeInputState({
+    dawn::InputState inputState = MakeInputState({
             {0, 8 * sizeof(float), InputStepMode::Vertex}
         }, {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32},
             {1, 0, 4  * sizeof(float), VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
+    dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}
     });
 
-    nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 1, 2, 3,
         1, 2, 3, 4, 1, 2, 3, 4,
         2, 3, 4, 5, 2, 3, 4, 5,
@@ -337,18 +337,18 @@ TEST_P(InputStateTest, TwoAttributesAtAnOffsetVertex) {
 
 // Test two attributes at an offset, instance version
 TEST_P(InputStateTest, TwoAttributesAtAnOffsetInstance) {
-    nxt::InputState inputState = MakeInputState({
+    dawn::InputState inputState = MakeInputState({
             {0, 8 * sizeof(float), InputStepMode::Instance}
         }, {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32},
             {1, 0, 4  * sizeof(float), VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
+    dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Instance}
     });
 
-    nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 1, 2, 3,
         1, 2, 3, 4, 1, 2, 3, 4,
         2, 3, 4, 5, 2, 3, 4, 5,
@@ -358,17 +358,17 @@ TEST_P(InputStateTest, TwoAttributesAtAnOffsetInstance) {
 
 // Test a pure-instance input state
 TEST_P(InputStateTest, PureInstance) {
-    nxt::InputState inputState = MakeInputState({
+    dawn::InputState inputState = MakeInputState({
             {0, 4 * sizeof(float), InputStepMode::Instance}
         }, {
             {0, 0, 0, VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
+    dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32G32B32A32, InputStepMode::Instance}
     });
 
-    nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3,
         1, 2, 3, 4,
         2, 3, 4, 5,
@@ -380,7 +380,7 @@ TEST_P(InputStateTest, PureInstance) {
 // Test with mixed everything, vertex vs. instance, different stride and offsets
 // different attribute types
 TEST_P(InputStateTest, MixedEverything) {
-    nxt::InputState inputState = MakeInputState({
+    dawn::InputState inputState = MakeInputState({
             {0, 12 * sizeof(float), InputStepMode::Vertex},
             {1, 10 * sizeof(float), InputStepMode::Instance},
         }, {
@@ -390,20 +390,20 @@ TEST_P(InputStateTest, MixedEverything) {
             {3, 1, 5  * sizeof(float), VertexFormat::FloatR32G32B32A32}
         }
     );
-    nxt::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
+    dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::FloatR32, InputStepMode::Vertex},
         {1, VertexFormat::FloatR32G32, InputStepMode::Vertex},
         {2, VertexFormat::FloatR32G32B32, InputStepMode::Instance},
         {3, VertexFormat::FloatR32G32B32A32, InputStepMode::Instance}
     });
 
-    nxt::Buffer buffer0 = MakeVertexBuffer<float>({
+    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 0, 0, 1, 2, 3, 0, 0,
         1, 2, 3, 4, 0, 0, 1, 2, 3, 4, 0, 0,
         2, 3, 4, 5, 0, 0, 2, 3, 4, 5, 0, 0,
         3, 4, 5, 6, 0, 0, 3, 4, 5, 6, 0, 0,
     });
-    nxt::Buffer buffer1 = MakeVertexBuffer<float>({
+    dawn::Buffer buffer1 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 0, 1, 2, 3, 0,
         1, 2, 3, 4, 0, 1, 2, 3, 4, 0,
         2, 3, 4, 5, 0, 2, 3, 4, 5, 0,

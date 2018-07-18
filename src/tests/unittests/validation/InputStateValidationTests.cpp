@@ -22,24 +22,24 @@ static constexpr uint32_t kMaxVertexInputs = 16u;
 
 class InputStateTest : public ValidationTest {
     protected:
-        nxt::RenderPipeline CreatePipeline(bool success, const nxt::InputState& inputState, std::string vertexSource) {
+        dawn::RenderPipeline CreatePipeline(bool success, const dawn::InputState& inputState, std::string vertexSource) {
             DummyRenderPass renderpassData = CreateDummyRenderPass();
 
-            nxt::ShaderModuleBuilder vsModuleBuilder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
-            utils::FillShaderModuleBuilder(vsModuleBuilder, nxt::ShaderStage::Vertex, vertexSource.c_str());
-            nxt::ShaderModule vsModule = vsModuleBuilder.GetResult();
+            dawn::ShaderModuleBuilder vsModuleBuilder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
+            utils::FillShaderModuleBuilder(vsModuleBuilder, dawn::ShaderStage::Vertex, vertexSource.c_str());
+            dawn::ShaderModule vsModule = vsModuleBuilder.GetResult();
 
-            nxt::ShaderModuleBuilder fsModuleBuilder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
-            utils::FillShaderModuleBuilder(fsModuleBuilder, nxt::ShaderStage::Fragment, R"(
+            dawn::ShaderModuleBuilder fsModuleBuilder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
+            utils::FillShaderModuleBuilder(fsModuleBuilder, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(1.0, 0.0, 0.0, 1.0);
                 }
             )");
-            nxt::ShaderModule fsModule = fsModuleBuilder.GetResult();
+            dawn::ShaderModule fsModule = fsModuleBuilder.GetResult();
 
-            nxt::RenderPipelineBuilder builder;
+            dawn::RenderPipelineBuilder builder;
             if (success) {
                 builder = AssertWillBeSuccess(device.CreateRenderPipelineBuilder());
             } else {
@@ -47,8 +47,8 @@ class InputStateTest : public ValidationTest {
             }
 
             return builder.SetColorAttachmentFormat(0, renderpassData.attachmentFormat)
-                .SetStage(nxt::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(nxt::ShaderStage::Fragment, fsModule, "main")
+                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
+                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
                 .SetInputState(inputState)
                 .GetResult();
         }
@@ -56,7 +56,7 @@ class InputStateTest : public ValidationTest {
 
 // Check an empty input state is valid
 TEST_F(InputStateTest, EmptyIsOk) {
-    nxt::InputState state = AssertWillBeSuccess(device.CreateInputStateBuilder())
+    dawn::InputState state = AssertWillBeSuccess(device.CreateInputStateBuilder())
         .GetResult();
 
     CreatePipeline(true, state, R"(
@@ -69,10 +69,10 @@ TEST_F(InputStateTest, EmptyIsOk) {
 
 // Check validation that pipeline vertex inputs are backed by attributes in the input state
 TEST_F(InputStateTest, PipelineCompatibility) {
-    nxt::InputState state = AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(0, 2 * sizeof(float), nxt::InputStepMode::Vertex)
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32, 0)
-        .SetAttribute(1, 0, nxt::VertexFormat::FloatR32, sizeof(float))
+    dawn::InputState state = AssertWillBeSuccess(device.CreateInputStateBuilder())
+        .SetInput(0, 2 * sizeof(float), dawn::InputStepMode::Vertex)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32, 0)
+        .SetAttribute(1, 0, dawn::VertexFormat::FloatR32, sizeof(float))
         .GetResult();
 
     // Control case: pipeline with one input per attribute
@@ -108,13 +108,13 @@ TEST_F(InputStateTest, PipelineCompatibility) {
 TEST_F(InputStateTest, StrideZero) {
     // Works ok without attributes
     AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
         .GetResult();
 
     // Works ok with attributes at a large-ish offset
     AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32, 128)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32, 128)
         .GetResult();
 }
 
@@ -122,13 +122,13 @@ TEST_F(InputStateTest, StrideZero) {
 TEST_F(InputStateTest, AlreadySetInput) {
     // Control case
     AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
         .GetResult();
 
     // Oh no, input 0 is set twice
     AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
         .GetResult();
 }
 
@@ -136,12 +136,12 @@ TEST_F(InputStateTest, AlreadySetInput) {
 TEST_F(InputStateTest, SetInputOutOfBounds) {
     // Control case, setting last input
     AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(kMaxVertexInputs - 1, 0, nxt::InputStepMode::Vertex)
+        .SetInput(kMaxVertexInputs - 1, 0, dawn::InputStepMode::Vertex)
         .GetResult();
 
     // Test OOB
     AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(kMaxVertexInputs, 0, nxt::InputStepMode::Vertex)
+        .SetInput(kMaxVertexInputs, 0, dawn::InputStepMode::Vertex)
         .GetResult();
 }
 
@@ -149,15 +149,15 @@ TEST_F(InputStateTest, SetInputOutOfBounds) {
 TEST_F(InputStateTest, AlreadySetAttribute) {
     // Control case, setting last attribute
     AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32, 0)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32, 0)
         .GetResult();
 
     // Oh no, attribute 0 is set twice
     AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32, 0)
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32, 0)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32, 0)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32, 0)
         .GetResult();
 }
 
@@ -165,14 +165,14 @@ TEST_F(InputStateTest, AlreadySetAttribute) {
 TEST_F(InputStateTest, SetAttributeOutOfBounds) {
     // Control case, setting last attribute
     AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(kMaxVertexAttributes - 1, 0, nxt::VertexFormat::FloatR32, 0)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(kMaxVertexAttributes - 1, 0, dawn::VertexFormat::FloatR32, 0)
         .GetResult();
 
     // Test OOB
     AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(kMaxVertexAttributes, 0, nxt::VertexFormat::FloatR32, 0)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(kMaxVertexAttributes, 0, dawn::VertexFormat::FloatR32, 0)
         .GetResult();
 }
 
@@ -180,14 +180,14 @@ TEST_F(InputStateTest, SetAttributeOutOfBounds) {
 TEST_F(InputStateTest, RequireInputForAttribute) {
     // Control case
     AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32, 0)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32, 0)
         .GetResult();
 
     // Attribute 0 uses input 1 which doesn't exist
     AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(0, 1, nxt::VertexFormat::FloatR32, 0)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(0, 1, dawn::VertexFormat::FloatR32, 0)
         .GetResult();
 }
 
@@ -195,13 +195,13 @@ TEST_F(InputStateTest, RequireInputForAttribute) {
 TEST_F(InputStateTest, SetAttributeOOBCheckForInputs) {
     // Control case
     AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(0, 0, nxt::VertexFormat::FloatR32, 0)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32, 0)
         .GetResult();
 
     // Could crash if we didn't check for OOB
     AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(0, 0, nxt::InputStepMode::Vertex)
-        .SetAttribute(0, 1000000, nxt::VertexFormat::FloatR32, 0)
+        .SetInput(0, 0, dawn::InputStepMode::Vertex)
+        .SetAttribute(0, 1000000, dawn::VertexFormat::FloatR32, 0)
         .GetResult();
 }

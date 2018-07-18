@@ -16,7 +16,7 @@
 
 #include "nxt/nxtcpp.h"
 
-class Object : public nxt::ObjectBase<Object, int*> {
+class Object : public dawn::ObjectBase<Object, int*> {
     public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
