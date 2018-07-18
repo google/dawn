@@ -109,7 +109,7 @@
 
     //* Returns the required transfer size for `record` in addition to the transfer structure.
     size_t {{name}}GetExtraRequiredSize(const {{name}}& record) {
-        NXT_UNUSED(record);
+        DAWN_UNUSED(record);
 
         size_t result = 0;
 
@@ -140,8 +140,8 @@
     //* and `provider` to serialize objects.
     void {{name}}Serialize(const {{name}}& record, {{name}}Transfer* transfer,
                            char* buffer, const ObjectIdProvider& provider) {
-        NXT_UNUSED(provider);
-        NXT_UNUSED(buffer);
+        DAWN_UNUSED(provider);
+        DAWN_UNUSED(buffer);
 
         //* Handle special transfer members of methods.
         {% if is_method %}
@@ -189,10 +189,10 @@
     //* Ids to actual objects.
     DeserializeResult {{name}}Deserialize({{name}}* record, const {{name}}Transfer* transfer,
                                           const char** buffer, size_t* size, DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
-        NXT_UNUSED(allocator);
-        NXT_UNUSED(resolver);
-        NXT_UNUSED(buffer);
-        NXT_UNUSED(size);
+        DAWN_UNUSED(allocator);
+        DAWN_UNUSED(resolver);
+        DAWN_UNUSED(buffer);
+        DAWN_UNUSED(size);
 
         //* Handle special transfer members for methods
         {% if is_method %}

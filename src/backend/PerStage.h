@@ -49,22 +49,22 @@ namespace backend {
     class PerStage {
       public:
         T& operator[](dawn::ShaderStage stage) {
-            NXT_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
+            DAWN_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];
         }
         const T& operator[](dawn::ShaderStage stage) const {
-            NXT_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
+            DAWN_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];
         }
 
         T& operator[](dawn::ShaderStageBit stageBit) {
             uint32_t bit = static_cast<uint32_t>(stageBit);
-            NXT_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
+            DAWN_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
             return mData[Log2(bit)];
         }
         const T& operator[](dawn::ShaderStageBit stageBit) const {
             uint32_t bit = static_cast<uint32_t>(stageBit);
-            NXT_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
+            DAWN_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
             return mData[Log2(bit)];
         }
 

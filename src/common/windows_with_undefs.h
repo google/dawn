@@ -17,7 +17,7 @@
 
 #include "common/Compiler.h"
 
-#if !defined(NXT_PLATFORM_WINDOWS)
+#if !defined(DAWN_PLATFORM_WINDOWS)
 #    error "windows_with_undefs.h included on non-Windows"
 #endif
 

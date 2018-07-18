@@ -94,7 +94,7 @@ BitSetIterator<N, T>::Iterator::Iterator(const std::bitset<N>& bits)
 
 template <size_t N, typename T>
 typename BitSetIterator<N, T>::Iterator& BitSetIterator<N, T>::Iterator::operator++() {
-    NXT_ASSERT(mBits.any());
+    DAWN_ASSERT(mBits.any());
     mBits.set(mCurrentBit - mOffset, 0);
     mCurrentBit = getNextBit();
     return *this;

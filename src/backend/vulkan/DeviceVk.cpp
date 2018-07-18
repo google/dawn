@@ -42,9 +42,9 @@
 
 #include <iostream>
 
-#if NXT_PLATFORM_LINUX
+#if DAWN_PLATFORM_LINUX
 const char kVulkanLibName[] = "libvulkan.so.1";
-#elif NXT_PLATFORM_WINDOWS
+#elif DAWN_PLATFORM_WINDOWS
 const char kVulkanLibName[] = "vulkan-1.dll";
 #else
 #    error "Unimplemented Vulkan backend platform"

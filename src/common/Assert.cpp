@@ -22,5 +22,5 @@ void HandleAssertionFailure(const char* file,
                             const char* condition) {
     std::cerr << "Assertion failure at " << file << ":" << line << " (" << function
               << "): " << condition << std::endl;
-    NXT_BREAKPOINT();
+    DAWN_BREAKPOINT();
 }

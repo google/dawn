@@ -117,7 +117,7 @@ class SerialQueue {
 
 template <typename T>
 void SerialQueue<T>::Enqueue(const T& value, Serial serial) {
-    NXT_ASSERT(Empty() || mStorage.back().first <= serial);
+    DAWN_ASSERT(Empty() || mStorage.back().first <= serial);
 
     if (Empty() || mStorage.back().first < serial) {
         mStorage.emplace_back(SerialPair(serial, {}));
@@ -127,7 +127,7 @@ void SerialQueue<T>::Enqueue(const T& value, Serial serial) {
 
 template <typename T>
 void SerialQueue<T>::Enqueue(T&& value, Serial serial) {
-    NXT_ASSERT(Empty() || mStorage.back().first <= serial);
+    DAWN_ASSERT(Empty() || mStorage.back().first <= serial);
 
     if (Empty() || mStorage.back().first < serial) {
         mStorage.emplace_back(SerialPair(serial, {}));
@@ -137,15 +137,15 @@ void SerialQueue<T>::Enqueue(T&& value, Serial serial) {
 
 template <typename T>
 void SerialQueue<T>::Enqueue(const std::vector<T>& values, Serial serial) {
-    NXT_ASSERT(values.size() > 0);
-    NXT_ASSERT(Empty() || mStorage.back().first <= serial);
+    DAWN_ASSERT(values.size() > 0);
+    DAWN_ASSERT(Empty() || mStorage.back().first <= serial);
     mStorage.emplace_back(SerialPair(serial, {values}));
 }
 
 template <typename T>
 void SerialQueue<T>::Enqueue(std::vector<T>&& values, Serial serial) {
-    NXT_ASSERT(values.size() > 0);
-    NXT_ASSERT(Empty() || mStorage.back().first <= serial);
+    DAWN_ASSERT(values.size() > 0);
+    DAWN_ASSERT(Empty() || mStorage.back().first <= serial);
     mStorage.emplace_back(SerialPair(serial, {values}));
 }
 
@@ -186,7 +186,7 @@ void SerialQueue<T>::ClearUpTo(Serial serial) {
 
 template <typename T>
 Serial SerialQueue<T>::FirstSerial() const {
-    NXT_ASSERT(!Empty());
+    DAWN_ASSERT(!Empty());
     return mStorage.front().first;
 }
 

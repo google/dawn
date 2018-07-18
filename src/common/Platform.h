@@ -16,22 +16,22 @@
 #define COMMON_PLATFORM_H_
 
 #if defined(_WIN32) || defined(_WIN64)
-#    define NXT_PLATFORM_WINDOWS 1
+#    define DAWN_PLATFORM_WINDOWS 1
 #elif defined(__linux__)
-#    define NXT_PLATFORM_LINUX 1
-#    define NXT_PLATFORM_POSIX 1
+#    define DAWN_PLATFORM_LINUX 1
+#    define DAWN_PLATFORM_POSIX 1
 #elif defined(__APPLE__)
-#    define NXT_PLATFORM_APPLE 1
-#    define NXT_PLATFORM_POSIX 1
+#    define DAWN_PLATFORM_APPLE 1
+#    define DAWN_PLATFORM_POSIX 1
 #else
 #    error "Unsupported platform."
 #endif
 
 #if defined(_WIN64) || defined(__aarch64__) || defined(__x86_64__)
-#    define NXT_PLATFORM_64_BIT 1
+#    define DAWN_PLATFORM_64_BIT 1
 static_assert(sizeof(sizeof(char)) == 8, "Expect sizeof(size_t) == 8");
 #elif defined(_WIN32) || defined(__i386__) || defined(__arm__)
-#    define NXT_PLATFORM_32_BIT 1
+#    define DAWN_PLATFORM_32_BIT 1
 static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
 #else
 #    error "Unsupported platform"

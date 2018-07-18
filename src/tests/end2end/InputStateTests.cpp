@@ -54,7 +54,7 @@ class InputStateTest : public NXTTest {
                 case VertexFormat::FloatR32:
                     return component >= 1;
                 default:
-                    NXT_UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         }
 

@@ -35,7 +35,7 @@ namespace backend { namespace d3d12 {
                 case dawn::BindingType::StorageBuffer:
                     return mMap[3];
                 default:
-                    NXT_UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         }
 

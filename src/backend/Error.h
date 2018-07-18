@@ -56,7 +56,7 @@ namespace backend {
 #define DAWN_TRY(EXPR)                                            \
     {                                                             \
         auto DAWN_LOCAL_VAR = EXPR;                               \
-        if (NXT_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {             \
+        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {            \
             ErrorData* error = DAWN_LOCAL_VAR.AcquireError();     \
             AppendBacktrace(error, __FILE__, __func__, __LINE__); \
             return {error};                                       \
@@ -70,7 +70,7 @@ namespace backend {
 #define DAWN_TRY_ASSIGN(VAR, EXPR)                                \
     {                                                             \
         auto DAWN_LOCAL_VAR = EXPR;                               \
-        if (NXT_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {             \
+        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {            \
             ErrorData* error = DAWN_LOCAL_VAR.AcquireError();     \
             AppendBacktrace(error, __FILE__, __func__, __LINE__); \
             return {error};                                       \

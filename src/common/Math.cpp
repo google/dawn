@@ -16,13 +16,13 @@
 
 #include "common/Assert.h"
 
-#if defined(NXT_COMPILER_MSVC)
+#if defined(DAWN_COMPILER_MSVC)
 #    include <intrin.h>
 #endif
 
 uint32_t ScanForward(uint32_t bits) {
     ASSERT(bits != 0);
-#if defined(NXT_COMPILER_MSVC)
+#if defined(DAWN_COMPILER_MSVC)
     unsigned long firstBitIndex = 0ul;
     unsigned char ret = _BitScanForward(&firstBitIndex, bits);
     ASSERT(ret != 0);
@@ -34,7 +34,7 @@ uint32_t ScanForward(uint32_t bits) {
 
 uint32_t Log2(uint32_t value) {
     ASSERT(value != 0);
-#if defined(NXT_COMPILER_MSVC)
+#if defined(DAWN_COMPILER_MSVC)
     unsigned long firstBitIndex = 0ul;
     unsigned char ret = _BitScanReverse(&firstBitIndex, value);
     ASSERT(ret != 0);

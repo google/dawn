@@ -14,9 +14,9 @@
 
 #include "common/Platform.h"
 
-#if defined(NXT_PLATFORM_WINDOWS)
+#if defined(DAWN_PLATFORM_WINDOWS)
 #    include <Windows.h>
-#elif defined(NXT_PLATFORM_POSIX)
+#elif defined(DAWN_PLATFORM_POSIX)
 #    include <unistd.h>
 #else
 #    error "Unsupported platform."
@@ -24,11 +24,11 @@
 
 namespace utils {
 
-#if defined(NXT_PLATFORM_WINDOWS)
+#if defined(DAWN_PLATFORM_WINDOWS)
     void USleep(unsigned int usecs) {
         Sleep(static_cast<DWORD>(usecs / 1000));
     }
-#elif defined(NXT_PLATFORM_POSIX)
+#elif defined(DAWN_PLATFORM_POSIX)
     void USleep(unsigned int usecs) {
         usleep(usecs);
     }

@@ -129,10 +129,10 @@ bool gTestUsesWire = false;
 
 void NXTTest::SetUp() {
     mBinding = utils::CreateBinding(ParamToBackendType(GetParam()));
-    NXT_ASSERT(mBinding != nullptr);
+    DAWN_ASSERT(mBinding != nullptr);
 
     GLFWwindow* testWindow = GetWindowForBackend(mBinding, GetParam());
-    NXT_ASSERT(testWindow != nullptr);
+    DAWN_ASSERT(testWindow != nullptr);
 
     mBinding->SetWindow(testWindow);
 
@@ -323,7 +323,7 @@ void NXTTest::MapSlotsSynchronously() {
 void NXTTest::SlotMapReadCallback(nxtBufferMapAsyncStatus status,
                                   const void* data,
                                   nxtCallbackUserdata userdata_) {
-    NXT_ASSERT(status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
+    DAWN_ASSERT(status == NXT_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
 
     auto userdata = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata_));
     userdata->test->mReadbackSlots[userdata->slot].mappedData = data;
@@ -334,7 +334,7 @@ void NXTTest::SlotMapReadCallback(nxtBufferMapAsyncStatus status,
 
 void NXTTest::ResolveExpectations() {
     for (const auto& expectation : mDeferredExpectations) {
-        NXT_ASSERT(mReadbackSlots[expectation.readbackSlot].mappedData != nullptr);
+        DAWN_ASSERT(mReadbackSlots[expectation.readbackSlot].mappedData != nullptr);
 
         // Get a pointer to the mapped copy of the data for the expectation.
         const char* data = reinterpret_cast<const char*>(mReadbackSlots[expectation.readbackSlot].mappedData);
@@ -343,7 +343,7 @@ void NXTTest::ResolveExpectations() {
         uint32_t size;
         std::vector<char> packedData;
         if (expectation.rowBytes != expectation.rowPitch) {
-            NXT_ASSERT(expectation.rowPitch > expectation.rowBytes);
+            DAWN_ASSERT(expectation.rowPitch > expectation.rowBytes);
             uint32_t rowCount = (expectation.size + expectation.rowPitch - 1) / expectation.rowPitch;
             uint32_t packedSize = rowCount * expectation.rowBytes;
             packedData.resize(packedSize);
@@ -436,7 +436,7 @@ namespace detail {
 
     template<typename T>
     testing::AssertionResult ExpectEq<T>::Check(const void* data, size_t size) {
-        NXT_ASSERT(size == sizeof(T) * mExpected.size());
+        DAWN_ASSERT(size == sizeof(T) * mExpected.size());
 
         const T* actual = reinterpret_cast<const T*>(data);
 

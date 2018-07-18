@@ -16,31 +16,31 @@
 #define COMMON_COMPILER_H_
 
 // Defines macros for compiler-specific functionality
-//  - NXT_COMPILER_[CLANG|GCC|MSVC]: Compiler detection
-//  - NXT_BREAKPOINT(): Raises an exception and breaks in the debugger
-//  - NXT_BUILTIN_UNREACHABLE(): Hints the compiler that a code path is unreachable
-//  - NXT_NO_DISCARD: An attribute that is C++17 [[nodiscard]] where available
-//  - NXT_(UN)?LIKELY(EXPR): Where available, hints the compiler that the expression will be true
+//  - DAWN_COMPILER_[CLANG|GCC|MSVC]: Compiler detection
+//  - DAWN_BREAKPOINT(): Raises an exception and breaks in the debugger
+//  - DAWN_BUILTIN_UNREACHABLE(): Hints the compiler that a code path is unreachable
+//  - DAWN_NO_DISCARD: An attribute that is C++17 [[nodiscard]] where available
+//  - DAWN_(UN)?LIKELY(EXPR): Where available, hints the compiler that the expression will be true
 //      (resp. false) to help it generate code that leads to better branch prediction.
-//  - NXT_UNUSED(EXPR): Prevents unused variable/expression warnings on EXPR.
+//  - DAWN_UNUSED(EXPR): Prevents unused variable/expression warnings on EXPR.
 
 // Clang and GCC
 #if defined(__GNUC__)
 #    if defined(__clang__)
-#        define NXT_COMPILER_CLANG
+#        define DAWN_COMPILER_CLANG
 #    else
-#        define NXT_COMPILER_GCC
+#        define DAWN_COMPILER_GCC
 #    endif
 
 #    if defined(__i386__) || defined(__x86_64__)
-#        define NXT_BREAKPOINT() __asm__ __volatile__("int $3\n\t")
+#        define DAWN_BREAKPOINT() __asm__ __volatile__("int $3\n\t")
 #    else
 #        error "Implement BREAKPOINT on your platform"
 #    endif
 
-#    define NXT_BUILTIN_UNREACHABLE() __builtin_unreachable()
-#    define NXT_LIKELY(x) __builtin_expect(!!(x), 1)
-#    define NXT_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#    define DAWN_BUILTIN_UNREACHABLE() __builtin_unreachable()
+#    define DAWN_LIKELY(x) __builtin_expect(!!(x), 1)
+#    define DAWN_UNLIKELY(x) __builtin_expect(!!(x), 0)
 
 #    if !defined(__has_cpp_attribute)
 #        define __has_cpp_attribute(name) 0
@@ -50,23 +50,23 @@
 // Also avoid warn_unused_result with GCC because it is only a function attribute and not a type
 // attribute.
 #    if __has_cpp_attribute(warn_unused_result) && defined(__clang__)
-#        define NXT_NO_DISCARD __attribute__((warn_unused_result))
-#    elif NXT_CPP_VERSION >= 17 && __has_cpp_attribute(nodiscard)
-#        define NXT_NO_DISCARD [[nodiscard]]
+#        define DAWN_NO_DISCARD __attribute__((warn_unused_result))
+#    elif DAWN_CPP_VERSION >= 17 && __has_cpp_attribute(nodiscard)
+#        define DAWN_NO_DISCARD [[nodiscard]]
 #    endif
 
 // MSVC
 #elif defined(_MSC_VER)
-#    define NXT_COMPILER_MSVC
+#    define DAWN_COMPILER_MSVC
 
 extern void __cdecl __debugbreak(void);
-#    define NXT_BREAKPOINT() __debugbreak()
+#    define DAWN_BREAKPOINT() __debugbreak()
 
-#    define NXT_BUILTIN_UNREACHABLE() __assume(false)
+#    define DAWN_BUILTIN_UNREACHABLE() __assume(false)
 
 // Visual Studio 2017 15.3 adds support for [[nodiscard]]
-#    if _MSC_VER >= 1911 && NXT_CPP_VERSION >= 17
-#        define NXT_NO_DISCARD [[nodiscard]]
+#    if _MSC_VER >= 1911 && DAWN_CPP_VERSION >= 17
+#        define DAWN_NO_DISCARD [[nodiscard]]
 #    endif
 
 #else
@@ -74,17 +74,17 @@ extern void __cdecl __debugbreak(void);
 #endif
 
 // It seems that (void) EXPR works on all compilers to silence the unused variable warning.
-#define NXT_UNUSED(EXPR) (void)EXPR
+#define DAWN_UNUSED(EXPR) (void)EXPR
 
 // Add noop replacements for macros for features that aren't supported by the compiler.
-#if !defined(NXT_LIKELY)
-#    define NXT_LIKELY(X) X
+#if !defined(DAWN_LIKELY)
+#    define DAWN_LIKELY(X) X
 #endif
-#if !defined(NXT_UNLIKELY)
-#    define NXT_UNLIKELY(X) X
+#if !defined(DAWN_UNLIKELY)
+#    define DAWN_UNLIKELY(X) X
 #endif
-#if !defined(NXT_NO_DISCARD)
-#    define NXT_NO_DISCARD
+#if !defined(DAWN_NO_DISCARD)
+#    define DAWN_NO_DISCARD
 #endif
 
 #endif  // COMMON_COMPILER_H_

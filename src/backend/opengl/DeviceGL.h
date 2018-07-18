@@ -24,7 +24,7 @@
 #include "glad/glad.h"
 
 // Remove windows.h macros after glad's include of windows.h
-#if defined(NXT_PLATFORM_WINDOWS)
+#if defined(DAWN_PLATFORM_WINDOWS)
 #    include "common/windows_with_undefs.h"
 #endif
 

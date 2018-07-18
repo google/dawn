@@ -33,7 +33,7 @@ namespace backend {
         void HandleError(const char* message);
 
         bool ConsumedError(MaybeError maybeError) {
-            if (NXT_UNLIKELY(maybeError.IsError())) {
+            if (DAWN_UNLIKELY(maybeError.IsError())) {
                 ConsumeError(maybeError.AcquireError());
                 return true;
             }

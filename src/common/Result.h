@@ -55,7 +55,7 @@ class Result;
 // Specialization of Result for returning errors only via pointers. It is basically a pointer
 // where nullptr is both Success and Empty.
 template <typename E>
-class NXT_NO_DISCARD Result<void, E*> {
+class DAWN_NO_DISCARD Result<void, E*> {
   public:
     Result();
     Result(E* error);
@@ -85,7 +85,7 @@ constexpr size_t alignof_if_defined_else_default<T, Default, decltype(alignof(T)
 // Specialization of Result when both the error an success are pointers. It is implemented as a
 // tagged pointer. The tag for Success is 0 so that returning the value is fastest.
 template <typename T, typename E>
-class NXT_NO_DISCARD Result<T*, E*> {
+class DAWN_NO_DISCARD Result<T*, E*> {
   public:
     static_assert(alignof_if_defined_else_default<T, 4> >= 4,
                   "Result<T*, E*> reserves two bits for tagging pointers");

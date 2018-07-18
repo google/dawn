@@ -22,7 +22,7 @@
 // release it does nothing at runtime.
 //
 // In case of name clashes (with for example a testing library), you can define the
-// NXT_SKIP_ASSERT_SHORTHANDS to only define the NXT_ prefixed macros.
+// DAWN_SKIP_ASSERT_SHORTHANDS to only define the DAWN_ prefixed macros.
 //
 // These asserts feature:
 //     - Logging of the error with file, line and function information.
@@ -31,45 +31,45 @@
 
 // MSVC triggers a warning in /W4 for do {} while(0). SDL worked around this by using (0,0) and
 // points out that it looks like an owl face.
-#if defined(NXT_COMPILER_MSVC)
-#    define NXT_ASSERT_LOOP_CONDITION (0, 0)
+#if defined(DAWN_COMPILER_MSVC)
+#    define DAWN_ASSERT_LOOP_CONDITION (0, 0)
 #else
-#    define NXT_ASSERT_LOOP_CONDITION (0)
+#    define DAWN_ASSERT_LOOP_CONDITION (0)
 #endif
 
-// NXT_ASSERT_CALLSITE_HELPER generates the actual assert code. In Debug it does what you would
+// DAWN_ASSERT_CALLSITE_HELPER generates the actual assert code. In Debug it does what you would
 // expect of an assert and in release it tries to give hints to make the compiler generate better
 // code.
-#if defined(NXT_ENABLE_ASSERTS)
-#    define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition)   \
+#if defined(DAWN_ENABLE_ASSERTS)
+#    define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)  \
         do {                                                          \
             if (!(condition)) {                                       \
                 HandleAssertionFailure(file, func, line, #condition); \
             }                                                         \
-        } while (NXT_ASSERT_LOOP_CONDITION)
+        } while (DAWN_ASSERT_LOOP_CONDITION)
 #else
-#    if defined(NXT_COMPILER_MSVC)
-#        define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) __assume(condition)
-#    elif defined(NXT_COMPILER_CLANG) && defined(__builtin_assume)
-#        define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) __builtin_assume(condition)
+#    if defined(DAWN_COMPILER_MSVC)
+#        define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __assume(condition)
+#    elif defined(DAWN_COMPILER_CLANG) && defined(__builtin_assume)
+#        define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __builtin_assume(condition)
 #    else
-#        define NXT_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
-            do {                                                        \
-                NXT_UNUSED(sizeof(condition));                          \
-            } while (NXT_ASSERT_LOOP_CONDITION)
+#        define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
+            do {                                                         \
+                DAWN_UNUSED(sizeof(condition));                          \
+            } while (DAWN_ASSERT_LOOP_CONDITION)
 #    endif
 #endif
 
-#define NXT_ASSERT(condition) NXT_ASSERT_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
-#define NXT_UNREACHABLE()                                                \
-    do {                                                                 \
-        NXT_ASSERT(NXT_ASSERT_LOOP_CONDITION && "Unreachable code hit"); \
-        NXT_BUILTIN_UNREACHABLE();                                       \
-    } while (NXT_ASSERT_LOOP_CONDITION)
+#define DAWN_ASSERT(condition) DAWN_ASSERT_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
+#define DAWN_UNREACHABLE()                                                 \
+    do {                                                                   \
+        DAWN_ASSERT(DAWN_ASSERT_LOOP_CONDITION && "Unreachable code hit"); \
+        DAWN_BUILTIN_UNREACHABLE();                                        \
+    } while (DAWN_ASSERT_LOOP_CONDITION)
 
-#if !defined(NXT_SKIP_ASSERT_SHORTHANDS)
-#    define ASSERT NXT_ASSERT
-#    define UNREACHABLE NXT_UNREACHABLE
+#if !defined(DAWN_SKIP_ASSERT_SHORTHANDS)
+#    define ASSERT DAWN_ASSERT
+#    define UNREACHABLE DAWN_UNREACHABLE
 #endif
 
 void HandleAssertionFailure(const char* file,

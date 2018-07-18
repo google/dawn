@@ -89,7 +89,7 @@ class VkNonDispatchableHandle {
 
 // Remove windows.h macros after vulkan_platform's include of windows.h
 #include "common/Platform.h"
-#if defined(NXT_PLATFORM_WINDOWS)
+#if defined(DAWN_PLATFORM_WINDOWS)
 #    include "common/windows_with_undefs.h"
 #endif
 

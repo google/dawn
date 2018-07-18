@@ -36,9 +36,9 @@ size_t Hash(const T& value) {
 //    return hash;
 template <typename T>
 void HashCombine(size_t* hash, const T& value) {
-#if defined(NXT_PLATFORM_64_BIT)
+#if defined(DAWN_PLATFORM_64_BIT)
     const size_t offset = 0x9e3779b97f4a7c16;
-#elif defined(NXT_PLATFORM_32_BIT)
+#elif defined(DAWN_PLATFORM_32_BIT)
     const size_t offset = 0x9e3779b9;
 #else
 #    error "Unsupported platform"
