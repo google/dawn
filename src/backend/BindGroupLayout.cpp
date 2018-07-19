@@ -36,7 +36,8 @@ namespace backend {
             DAWN_TRY(ValidateShaderStageBit(binding.visibility));
             DAWN_TRY(ValidateBindingType(binding.type));
 
-            DAWN_TRY_ASSERT(!bindingsSet[i], "some binding index was specified more than once");
+            DAWN_TRY_ASSERT(!bindingsSet[binding.binding],
+                            "some binding index was specified more than once");
             bindingsSet.set(binding.binding);
         }
         return {};

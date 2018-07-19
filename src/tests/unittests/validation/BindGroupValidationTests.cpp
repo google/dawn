@@ -122,3 +122,13 @@ TEST_F(BindGroupValidationTest, BindGroupLayoutCache) {
     // Caching should cause these to be the same.
     ASSERT_EQ(layout1.Get(), layout2.Get());
 }
+
+// This test verifies that the BindGroupLayout bindings are correctly validated, even if the
+// binding ids are out-of-order.
+TEST_F(BindGroupValidationTest, BindGroupBinding) {
+    auto layout = utils::MakeBindGroupLayout(
+        device, {
+                    {1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
+                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
+                });
+}
