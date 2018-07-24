@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_COMPUTEPIPELINEVK_H_
-#define BACKEND_VULKAN_COMPUTEPIPELINEVK_H_
+#ifndef DAWNNATIVE_VULKAN_COMPUTEPIPELINEVK_H_
+#define DAWNNATIVE_VULKAN_COMPUTEPIPELINEVK_H_
 
 #include "dawn_native/ComputePipeline.h"
 
@@ -37,4 +37,4 @@ namespace backend { namespace vulkan {
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_COMPUTEPIPELINEVK_H_
+#endif  // DAWNNATIVE_VULKAN_COMPUTEPIPELINEVK_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_COMMANDBUFFERSTATETRACKER_H
-#define BACKEND_COMMANDBUFFERSTATETRACKER_H
+#ifndef DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H
+#define DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H
 
 #include "common/Constants.h"
 #include "dawn_native/CommandBuffer.h"
@@ -60,4 +60,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_COMMANDBUFFERSTATETRACKER_H
+#endif  // DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H

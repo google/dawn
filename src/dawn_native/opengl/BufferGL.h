@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_OPENGL_BUFFERGL_H_
-#define BACKEND_OPENGL_BUFFERGL_H_
+#ifndef DAWNNATIVE_OPENGL_BUFFERGL_H_
+#define DAWNNATIVE_OPENGL_BUFFERGL_H_
 
 #include "dawn_native/Buffer.h"
 
@@ -45,4 +45,4 @@ namespace backend { namespace opengl {
 
 }}  // namespace backend::opengl
 
-#endif  // BACKEND_OPENGL_BUFFERGL_H_
+#endif  // DAWNNATIVE_OPENGL_BUFFERGL_H_

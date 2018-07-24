@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_BINDGROUP_H_
-#define BACKEND_BINDGROUP_H_
+#ifndef DAWNNATIVE_BINDGROUP_H_
+#define DAWNNATIVE_BINDGROUP_H_
 
 #include "common/Constants.h"
 #include "dawn_native/BindGroupLayout.h"
@@ -93,4 +93,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_BINDGROUP_H_
+#endif  // DAWNNATIVE_BINDGROUP_H_

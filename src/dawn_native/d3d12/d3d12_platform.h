@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_D3D12PLATFORM_H_
-#define BACKEND_D3D12_D3D12PLATFORM_H_
+#ifndef DAWNNATIVE_D3D12_D3D12PLATFORM_H_
+#define DAWNNATIVE_D3D12_D3D12PLATFORM_H_
 
 #include <d3d12.h>
 #include <dxgi1_4.h>
@@ -31,4 +31,4 @@ using Microsoft::WRL::ComPtr;
 #    include "common/windows_with_undefs.h"
 #endif
 
-#endif  // BACKEND_D3D12_D3D12PLATFORM_H_
+#endif  // DAWNNATIVE_D3D12_D3D12PLATFORM_H_

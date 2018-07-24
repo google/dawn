@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_D3D12_RESOURCEALLOCATIONMANAGER_H_
-#define BACKEND_D3D12_RESOURCEALLOCATIONMANAGER_H_
+#ifndef DAWNNATIVE_D3D12_RESOURCEALLOCATIONMANAGER_H_
+#define DAWNNATIVE_D3D12_RESOURCEALLOCATIONMANAGER_H_
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
@@ -41,4 +41,4 @@ namespace backend { namespace d3d12 {
 
 }}  // namespace backend::d3d12
 
-#endif  // BACKEND_D3D12_RESOURCEALLOCATIONMANAGER_H_
+#endif  // DAWNNATIVE_D3D12_RESOURCEALLOCATIONMANAGER_H_

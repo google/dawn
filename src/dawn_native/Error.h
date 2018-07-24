@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_ERROR_H_
-#define BACKEND_ERROR_H_
+#ifndef DAWNNATIVE_ERROR_H_
+#define DAWNNATIVE_ERROR_H_
 
 #include "common/Result.h"
 
@@ -88,4 +88,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_ERROR_H_
+#endif  // DAWNNATIVE_ERROR_H_

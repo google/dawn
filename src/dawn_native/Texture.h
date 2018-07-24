@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_TEXTURE_H_
-#define BACKEND_TEXTURE_H_
+#ifndef DAWNNATIVE_TEXTURE_H_
+#define DAWNNATIVE_TEXTURE_H_
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
@@ -113,4 +113,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_TEXTURE_H_
+#endif  // DAWNNATIVE_TEXTURE_H_

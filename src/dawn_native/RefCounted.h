@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_REFCOUNTED_H_
-#define BACKEND_REFCOUNTED_H_
+#ifndef DAWNNATIVE_REFCOUNTED_H_
+#define DAWNNATIVE_REFCOUNTED_H_
 
 #include <cstdint>
 
@@ -126,4 +126,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_REFCOUNTED_H_
+#endif  // DAWNNATIVE_REFCOUNTED_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_PIPELINELAYOUT_H_
-#define BACKEND_PIPELINELAYOUT_H_
+#ifndef DAWNNATIVE_PIPELINELAYOUT_H_
+#define DAWNNATIVE_PIPELINELAYOUT_H_
 
 #include "common/Constants.h"
 #include "dawn_native/Error.h"
@@ -57,4 +57,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_PIPELINELAYOUT_H_
+#endif  // DAWNNATIVE_PIPELINELAYOUT_H_

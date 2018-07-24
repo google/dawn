@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_COMMANDBUFFER_H_
-#define BACKEND_COMMANDBUFFER_H_
+#ifndef DAWNNATIVE_COMMANDBUFFER_H_
+#define DAWNNATIVE_COMMANDBUFFER_H_
 
 #include "dawn/dawncpp.h"
 
@@ -148,4 +148,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_COMMANDBUFFER_H_
+#endif  // DAWNNATIVE_COMMANDBUFFER_H_

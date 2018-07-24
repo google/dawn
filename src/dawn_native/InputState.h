@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_INPUTSTATE_H_
-#define BACKEND_INPUTSTATE_H_
+#ifndef DAWNNATIVE_INPUTSTATE_H_
+#define DAWNNATIVE_INPUTSTATE_H_
 
 #include "common/Constants.h"
 #include "dawn_native/Builder.h"
@@ -83,4 +83,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_INPUTSTATE_H_
+#endif  // DAWNNATIVE_INPUTSTATE_H_

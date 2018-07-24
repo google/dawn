@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_PASSRESOURCEUSAGE_H
-#define BACKEND_PASSRESOURCEUSAGE_H
+#ifndef DAWNNATIVE_PASSRESOURCEUSAGE_H
+#define DAWNNATIVE_PASSRESOURCEUSAGE_H
 
 #include "dawn/dawncpp.h"
 
@@ -37,4 +37,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_PASSRESOURCEUSAGE_H
+#endif  // DAWNNATIVE_PASSRESOURCEUSAGE_H

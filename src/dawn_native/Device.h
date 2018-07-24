@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_DEVICEBASE_H_
-#define BACKEND_DEVICEBASE_H_
+#ifndef DAWNNATIVE_DEVICEBASE_H_
+#define DAWNNATIVE_DEVICEBASE_H_
 
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
@@ -135,4 +135,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_DEVICEBASE_H_
+#endif  // DAWNNATIVE_DEVICEBASE_H_

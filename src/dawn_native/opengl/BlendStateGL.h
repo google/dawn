@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_OPENGL_BLENDSTATEGL_H_
-#define BACKEND_OPENGL_BLENDSTATEGL_H_
+#ifndef DAWNNATIVE_OPENGL_BLENDSTATEGL_H_
+#define DAWNNATIVE_OPENGL_BLENDSTATEGL_H_
 
 #include "dawn_native/BlendState.h"
 
@@ -30,4 +30,4 @@ namespace backend { namespace opengl {
 
 }}  // namespace backend::opengl
 
-#endif  // BACKEND_OPENGL_BLENDSTATEGL_H_
+#endif  // DAWNNATIVE_OPENGL_BLENDSTATEGL_H_

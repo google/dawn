@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_RENDERPIPELINEVK_H_
-#define BACKEND_VULKAN_RENDERPIPELINEVK_H_
+#ifndef DAWNNATIVE_VULKAN_RENDERPIPELINEVK_H_
+#define DAWNNATIVE_VULKAN_RENDERPIPELINEVK_H_
 
 #include "dawn_native/RenderPipeline.h"
 
@@ -37,4 +37,4 @@ namespace backend { namespace vulkan {
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_RENDERPIPELINEVK_H_
+#endif  // DAWNNATIVE_VULKAN_RENDERPIPELINEVK_H_

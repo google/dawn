@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_METAL_BLENDSTATEMTL_H_
-#define BACKEND_METAL_BLENDSTATEMTL_H_
+#ifndef DAWNNATIVE_METAL_BLENDSTATEMTL_H_
+#define DAWNNATIVE_METAL_BLENDSTATEMTL_H_
 
 #include "dawn_native/BlendState.h"
 
@@ -29,4 +29,4 @@ namespace backend { namespace metal {
 
 }}  // namespace backend::metal
 
-#endif  // BACKEND_METAL_BLENDSTATEMTL_H_
+#endif  // DAWNNATIVE_METAL_BLENDSTATEMTL_H_

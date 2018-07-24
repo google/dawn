@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_METAL_RESOURCEUPLOADER_H_
-#define BACKEND_METAL_RESOURCEUPLOADER_H_
+#ifndef DAWNNATIVE_METAL_RESOURCEUPLOADER_H_
+#define DAWNNATIVE_METAL_RESOURCEUPLOADER_H_
 
 #include "common/Serial.h"
 #include "common/SerialQueue.h"
@@ -39,4 +39,4 @@ namespace backend { namespace metal {
 
 }}  // namespace backend::metal
 
-#endif  // BACKEND_METAL_RESOURCEUPLOADER_H_
+#endif  // DAWNNATIVE_METAL_RESOURCEUPLOADER_H_

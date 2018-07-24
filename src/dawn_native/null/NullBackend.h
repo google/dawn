@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_NULL_NULLBACKEND_H_
-#define BACKEND_NULL_NULLBACKEND_H_
+#ifndef DAWNNATIVE_NULL_NULLBACKEND_H_
+#define DAWNNATIVE_NULL_NULLBACKEND_H_
 
 #include "dawn/dawncpp.h"
 
@@ -176,4 +176,4 @@ namespace backend { namespace null {
 
 }}  // namespace backend::null
 
-#endif  // BACKEND_NULL_NULLBACKEND_H_
+#endif  // DAWNNATIVE_NULL_NULLBACKEND_H_

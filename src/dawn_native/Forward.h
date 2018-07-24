@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_FORWARD_H_
-#define BACKEND_FORWARD_H_
+#ifndef DAWNNATIVE_FORWARD_H_
+#define DAWNNATIVE_FORWARD_H_
 
 #include <cstdint>
 
@@ -65,4 +65,4 @@ namespace backend {
     enum PushConstantType : uint8_t;
 }  // namespace backend
 
-#endif  // BACKEND_FORWARD_H_
+#endif  // DAWNNATIVE_FORWARD_H_

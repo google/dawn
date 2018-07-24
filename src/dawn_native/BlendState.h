@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_BLENDSTATE_H_
-#define BACKEND_BLENDSTATE_H_
+#ifndef DAWNNATIVE_BLENDSTATE_H_
+#define DAWNNATIVE_BLENDSTATE_H_
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
@@ -72,4 +72,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_BLENDSTATE_H_
+#endif  // DAWNNATIVE_BLENDSTATE_H_

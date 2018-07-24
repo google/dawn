@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_SWAPCHAIN_H_
-#define BACKEND_SWAPCHAIN_H_
+#ifndef DAWNNATIVE_SWAPCHAIN_H_
+#define DAWNNATIVE_SWAPCHAIN_H_
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
@@ -70,4 +70,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_SWAPCHAIN_H_
+#endif  // DAWNNATIVE_SWAPCHAIN_H_

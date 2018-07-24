@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_PERSTAGE_H_
-#define BACKEND_PERSTAGE_H_
+#ifndef DAWNNATIVE_PERSTAGE_H_
+#define DAWNNATIVE_PERSTAGE_H_
 
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
@@ -74,4 +74,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_PERSTAGE_H_
+#endif  // DAWNNATIVE_PERSTAGE_H_

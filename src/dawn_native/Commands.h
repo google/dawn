@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_COMMANDS_H_
-#define BACKEND_COMMANDS_H_
+#ifndef DAWNNATIVE_COMMANDS_H_
+#define DAWNNATIVE_COMMANDS_H_
 
 #include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/Texture.h"
@@ -160,4 +160,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_COMMANDS_H_
+#endif  // DAWNNATIVE_COMMANDS_H_

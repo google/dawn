@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_VULKAN_SAMPLERVK_H_
-#define BACKEND_VULKAN_SAMPLERVK_H_
+#ifndef DAWNNATIVE_VULKAN_SAMPLERVK_H_
+#define DAWNNATIVE_VULKAN_SAMPLERVK_H_
 
 #include "dawn_native/Sampler.h"
 
@@ -36,4 +36,4 @@ namespace backend { namespace vulkan {
 
 }}  // namespace backend::vulkan
 
-#endif  // BACKEND_VULKAN_SAMPLERVK_H_
+#endif  // DAWNNATIVE_VULKAN_SAMPLERVK_H_

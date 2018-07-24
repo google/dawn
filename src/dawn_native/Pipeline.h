@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_PIPELINE_H_
-#define BACKEND_PIPELINE_H_
+#ifndef DAWNNATIVE_PIPELINE_H_
+#define DAWNNATIVE_PIPELINE_H_
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
@@ -82,4 +82,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_PIPELINE_H_
+#endif  // DAWNNATIVE_PIPELINE_H_

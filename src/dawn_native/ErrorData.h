@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_ERRORDATA_H_
-#define BACKEND_ERRORDATA_H_
+#ifndef DAWNNATIVE_ERRORDATA_H_
+#define DAWNNATIVE_ERRORDATA_H_
 
 #include <string>
 #include <vector>
@@ -42,4 +42,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_ERRORDATA_H_
+#endif  // DAWNNATIVE_ERRORDATA_H_

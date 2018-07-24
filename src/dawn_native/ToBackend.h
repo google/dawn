@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BACKEND_TOBACKEND_H_
-#define BACKEND_TOBACKEND_H_
+#ifndef DAWNNATIVE_TOBACKEND_H_
+#define DAWNNATIVE_TOBACKEND_H_
 
 #include "dawn_native/Forward.h"
 
@@ -151,4 +151,4 @@ namespace backend {
 
 }  // namespace backend
 
-#endif  // BACKEND_TOBACKEND_H_
+#endif  // DAWNNATIVE_TOBACKEND_H_
