@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "backend/RefCounted.h"
-#include "backend/ToBackend.h"
+#include "dawn_native/RefCounted.h"
+#include "dawn_native/ToBackend.h"
 
 #include <type_traits>
 

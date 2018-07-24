@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "backend/d3d12/d3d12_platform.h"
-#include "backend/d3d12/TextureCopySplitter.h"
+#include "dawn_native/d3d12/d3d12_platform.h"
+#include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"

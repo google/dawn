@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "backend/Error.h"
-#include "backend/ErrorData.h"
+#include "dawn_native/Error.h"
+#include "dawn_native/ErrorData.h"
 
 using namespace backend;
 

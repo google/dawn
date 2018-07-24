@@ -210,7 +210,7 @@ target_link_libraries(dawncpp dawn)
 add_subdirectory(third_party)
 
 add_subdirectory(src/common)
-add_subdirectory(src/backend)
+add_subdirectory(src/dawn_native)
 add_subdirectory(src/wire)
 add_subdirectory(src/utils)
 add_subdirectory(src/tests)

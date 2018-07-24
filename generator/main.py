@@ -389,7 +389,7 @@ def debug(text):
     print(text)
 
 def main():
-    targets = ['dawn', 'dawncpp', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'wire']
+    targets = ['dawn', 'dawncpp', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'wire', "dawn_native_utils"]
 
     parser = argparse.ArgumentParser(
         description = 'Generates code for various target for Dawn.',
@@ -473,11 +473,11 @@ def main():
         backend_params = {
             'namespace': backend,
         }
-        renders.append(FileRender('backend/ProcTable.cpp', 'backend/' + backend + '/ProcTable.' + extension, base_backend_params + [backend_params]))
+        renders.append(FileRender('dawn_native/ProcTable.cpp', 'dawn_native/' + backend + '/ProcTable.' + extension, base_backend_params + [backend_params]))
 
-    if 'backend_utils' in targets:
-        renders.append(FileRender('backend/ValidationUtils.h', 'backend/ValidationUtils_autogen.h', base_backend_params))
-        renders.append(FileRender('backend/ValidationUtils.cpp', 'backend/ValidationUtils_autogen.cpp', base_backend_params))
+    if 'dawn_native_utils' in targets:
+        renders.append(FileRender('dawn_native/ValidationUtils.h', 'dawn_native/ValidationUtils_autogen.h', base_backend_params))
+        renders.append(FileRender('dawn_native/ValidationUtils.cpp', 'dawn_native/ValidationUtils_autogen.cpp', base_backend_params))
 
     if 'wire' in targets:
         renders.append(FileRender('wire/WireCmd.h', 'wire/WireCmd_autogen.h', base_backend_params))

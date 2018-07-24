@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "backend/CommandAllocator.h"
+#include "dawn_native/CommandAllocator.h"
 
 using namespace backend;
 

@@ -67,7 +67,7 @@ if (DAWN_ENABLE_D3D12)
 endif()
 
 add_executable(dawn_unittests ${UNITTEST_SOURCES})
-target_link_libraries(dawn_unittests dawn_common gtest dawn_backend mock_dawn dawn_wire utils)
+target_link_libraries(dawn_unittests dawn_common gtest lib_dawn_native mock_dawn dawn_wire utils)
 DawnInternalTarget("tests" dawn_unittests)
 
 add_executable(dawn_end2end_tests

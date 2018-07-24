@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "backend/RefCounted.h"
+#include "dawn_native/RefCounted.h"
 
 using namespace backend;
 

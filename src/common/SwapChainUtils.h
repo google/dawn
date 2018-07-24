@@ -15,6 +15,8 @@
 #ifndef COMMON_SWAPCHAINUTILS_H_
 #define COMMON_SWAPCHAINUTILS_H_
 
+#include "dawn/dawn_wsi.h"
+
 template <typename T>
 dawnSwapChainImplementation CreateSwapChainImplementation(T* swapChain) {
     dawnSwapChainImplementation impl = {};

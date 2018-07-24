@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "backend/PerStage.h"
+#include "dawn_native/PerStage.h"
 
 using namespace backend;
 
