@@ -15,6 +15,9 @@
 cmake_minimum_required(VERSION 2.8)
 project(dawn C CXX)
 
+# List TARGET_OBJECTS in SOURCES target property.
+cmake_policy(SET CMP0051 NEW)
+
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR
         "In-source builds are unsupported. Use another directory, like build/, "
@@ -113,9 +116,9 @@ if (MSVC)
     endif()
 else()
     # Activate C++14 only on C++ files, not C files.
-    list(APPEND DAWN_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-std=c++14>")
+    list(APPEND DAWN_FLAGS "$<$<COMPILE_LANGUAGE:CXX>:-std=c++14>")
     # enable -Wold-style-cast on C++
-    list(APPEND DAWN_FLAGS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wold-style-cast>")
+    list(APPEND DAWN_FLAGS "$<$<COMPILE_LANGUAGE:CXX>:-Wold-style-cast>")
     list(APPEND DAWN_FLAGS "-fPIC")
 
     list(APPEND DAWN_INTERNAL_FLAGS "-Wall" "-Wextra")
@@ -153,6 +156,12 @@ function(DawnInternalTarget folder target)
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_OPTIONS ${DAWN_INTERNAL_FLAGS})
     set_property(TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS ${DAWN_INTERNAL_DEFS})
 
+    # Common include directories shared by all internal targets
+    target_include_directories(${target} PRIVATE ${SRC_DIR} ${GENERATED_DIR} ${INCLUDE_DIR})
+
+    # All internal targets require the headers to have been generated
+    add_dependencies(${target} dawn_headers)
+
     # Group the target sources by folder to have folders show in Visual Studio
     if (MSVC)
         get_target_property(targetSources ${target} SOURCES)
@@ -183,26 +192,39 @@ set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_subdirectory(generator)
 
+# Dawn header generation is in its own target so that it can be set as a build dependency for all
+# internal targets
 Generate(
-    LIB_NAME dawn
-    LIB_TYPE STATIC
-    PRINT_NAME libDawn
+    LIB_NAME dawn_headers
+    LIB_TYPE OBJECT
+    FOLDER ""
+    PRINT_NAME "Dawn headers"
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
-        -T dawn
+        -T dawn_headers
 )
-target_include_directories(dawn PUBLIC ${GENERATED_DIR})
+# Older versions of CMake aren't able to know which linker to use without this and fail.
+set_property(TARGET dawn_headers PROPERTY LINKER_LANGUAGE "CXX")
 
+# libdawn.so/dll/dylib which contains the static proctable C interface and its C++ wrapper
 Generate(
-    LIB_NAME dawncpp
-    LIB_TYPE STATIC
-    PRINT_NAME libDawn++
+    LIB_NAME libdawn_autogen
+    LIB_TYPE OBJECT
+    FOLDER "libdawn"
+    PRINT_NAME "libdawn"
     COMMAND_LINE_ARGS
         ${GENERATOR_COMMON_ARGS}
-        -T dawncpp
+        -T libdawn
 )
-target_include_directories(dawncpp PUBLIC ${GENERATED_DIR} PUBLIC ${INCLUDE_DIR})
-target_link_libraries(dawncpp dawn)
+
+add_library(libdawn STATIC
+    $<TARGET_OBJECTS:libdawn_autogen>
+    ${INCLUDE_DIR}/dawn/dawn_wsi.h
+    ${INCLUDE_DIR}/dawn/EnumClassBitmasks.h
+)
+set_property(TARGET libdawn PROPERTY OUTPUT_NAME "dawn")
+target_include_directories(libdawn PUBLIC ${GENERATED_DIR} ${INCLUDE_DIR})
+DawnInternalTarget("libdawn" libdawn)
 
 ################################################################################
 # Call to other CMakeLists.txt

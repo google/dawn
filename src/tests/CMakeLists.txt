@@ -21,8 +21,7 @@ Generate(
         ${GENERATOR_COMMON_ARGS}
         -T mock_dawn
 )
-target_include_directories(mock_dawn PUBLIC ${GENERATED_DIR})
-target_link_libraries(mock_dawn dawn gtest)
+target_link_libraries(mock_dawn gtest)
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UNITTESTS_DIR ${TESTS_DIR}/unittests)
@@ -67,7 +66,7 @@ if (DAWN_ENABLE_D3D12)
 endif()
 
 add_executable(dawn_unittests ${UNITTEST_SOURCES})
-target_link_libraries(dawn_unittests dawn_common gtest lib_dawn_native mock_dawn dawn_wire utils)
+target_link_libraries(dawn_unittests dawn_common gtest libdawn_native mock_dawn dawn_wire utils)
 DawnInternalTarget("tests" dawn_unittests)
 
 add_executable(dawn_end2end_tests

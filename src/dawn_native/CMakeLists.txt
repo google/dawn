@@ -28,9 +28,7 @@ Generate(
         ${GENERATOR_COMMON_ARGS}
         -T dawn_native_utils
 )
-target_link_libraries(dawn_native_utils_autogen dawncpp)
-target_include_directories(dawn_native_utils_autogen PUBLIC ${GENERATED_DIR})
-target_include_directories(dawn_native_utils_autogen PRIVATE ${SRC_DIR})
+target_link_libraries(dawn_native_utils_autogen)
 
 function(GenerateProcTable backend)
     Generate(
@@ -42,9 +40,7 @@ function(GenerateProcTable backend)
             ${GENERATOR_COMMON_ARGS}
             -T ${backend}
     )
-    target_link_libraries(${backend}_autogen dawncpp dawn_native_utils_autogen)
-    target_include_directories(${backend}_autogen PRIVATE ${SRC_DIR})
-    target_include_directories(${backend}_autogen PUBLIC ${GENERATED_DIR})
+    target_link_libraries(${backend}_autogen dawn_native_utils_autogen)
 endfunction()
 
 ################################################################################
@@ -388,22 +384,22 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/ToBackend.h
 )
 
-add_library(lib_dawn_native STATIC ${DAWN_NATIVE_SOURCES})
-DawnInternalTarget("dawn_native" lib_dawn_native)
-target_link_libraries(lib_dawn_native dawn_common glfw glad spirv_cross)
+add_library(libdawn_native STATIC ${DAWN_NATIVE_SOURCES})
+DawnInternalTarget("dawn_native" libdawn_native)
+target_link_libraries(libdawn_native dawn_common glfw glad spirv_cross)
 
 if (DAWN_ENABLE_D3D12)
-    target_link_libraries(lib_dawn_native d3d12_autogen)
+    target_link_libraries(libdawn_native d3d12_autogen)
 endif()
 if (DAWN_ENABLE_METAL)
-    target_link_libraries(lib_dawn_native metal_autogen)
+    target_link_libraries(libdawn_native metal_autogen)
 endif()
 if (DAWN_ENABLE_NULL)
-    target_link_libraries(lib_dawn_native null_autogen)
+    target_link_libraries(libdawn_native null_autogen)
 endif()
 if (DAWN_ENABLE_OPENGL)
-    target_link_libraries(lib_dawn_native opengl_autogen)
+    target_link_libraries(libdawn_native opengl_autogen)
 endif()
 if (DAWN_ENABLE_VULKAN)
-    target_link_libraries(lib_dawn_native vulkan_autogen)
+    target_link_libraries(libdawn_native vulkan_autogen)
 endif()

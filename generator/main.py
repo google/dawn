@@ -389,7 +389,7 @@ def debug(text):
     print(text)
 
 def main():
-    targets = ['dawn', 'dawncpp', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'wire', "dawn_native_utils"]
+    targets = ['dawn_headers', 'libdawn', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'wire', "dawn_native_utils"]
 
     parser = argparse.ArgumentParser(
         description = 'Generates code for various target for Dawn.',
@@ -437,16 +437,17 @@ def main():
     renders = []
 
     c_params = {'native_methods': lambda typ: c_native_methods(api_params['types'], typ)}
+    cpp_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
 
-    if 'dawn' in targets:
+    if 'dawn_headers' in targets:
         renders.append(FileRender('api.h', 'dawn/dawn.h', [base_params, api_params, c_params]))
-        renders.append(FileRender('api.c', 'dawn/dawn.c', [base_params, api_params, c_params]))
+        renders.append(FileRender('apicpp.h', 'dawn/dawncpp.h', [base_params, api_params, cpp_params]))
+        renders.append(FileRender('apicpp_traits.h', 'dawn/dawncpp_traits.h', [base_params, api_params, cpp_params]))
 
-    if 'dawncpp' in targets:
+    if 'libdawn' in targets:
         additional_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
-        renders.append(FileRender('apicpp.h', 'dawn/dawncpp.h', [base_params, api_params, additional_params]))
-        renders.append(FileRender('apicpp.cpp', 'dawn/dawncpp.cpp', [base_params, api_params, additional_params]))
-        renders.append(FileRender('apicpp_traits.h', 'dawn/dawncpp_traits.h', [base_params, api_params, additional_params]))
+        renders.append(FileRender('api.c', 'dawn/dawn.c', [base_params, api_params, c_params]))
+        renders.append(FileRender('apicpp.cpp', 'dawn/dawncpp.cpp', [base_params, api_params, cpp_params]))
 
     if 'mock_dawn' in targets:
         renders.append(FileRender('mock_api.h', 'mock/mock_dawn.h', [base_params, api_params, c_params]))
