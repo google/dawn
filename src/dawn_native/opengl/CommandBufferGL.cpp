@@ -28,7 +28,7 @@
 
 #include <cstring>
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     namespace {
 
@@ -653,4 +653,4 @@ namespace backend { namespace opengl {
         UNREACHABLE();
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

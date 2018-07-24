@@ -19,7 +19,7 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     class Device;
 
@@ -55,6 +55,6 @@ namespace backend { namespace d3d12 {
       private:
         D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;
     };
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_TEXTURED3D12_H_

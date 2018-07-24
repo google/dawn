@@ -23,7 +23,7 @@
 
 #include "common/BitSetIterator.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     BindGroup::BindGroup(BindGroupBuilder* builder) : BindGroupBase(builder) {
         // Create a pool to hold our descriptor set.
@@ -135,4 +135,4 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

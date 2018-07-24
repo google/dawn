@@ -19,7 +19,7 @@
 
 #include "common/vulkan_platform.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class RenderPassDescriptor;
 
@@ -38,6 +38,6 @@ namespace backend { namespace vulkan {
         std::vector<PassResourceUsage> mPassResourceUsages;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_COMMANDBUFFERVK_H_

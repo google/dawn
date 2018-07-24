@@ -25,7 +25,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 #include <type_traits>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class MapRequestTracker;
     class ResourceUploader;
@@ -83,6 +83,6 @@ namespace backend { namespace metal {
         id<MTLCommandBuffer> mPendingCommands = nil;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_DEVICEMTL_H_

@@ -34,7 +34,7 @@
 
 #include <unordered_set>
 
-namespace backend {
+namespace dawn_native {
 
     // DeviceBase::Caches
 
@@ -227,4 +227,4 @@ namespace backend {
         delete error;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

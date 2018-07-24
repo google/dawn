@@ -17,7 +17,7 @@
 #include "common/BitSetIterator.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     namespace {
 
@@ -151,4 +151,4 @@ namespace backend { namespace vulkan {
         *numPoolSizes = numSizes;
         return result;
     }
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

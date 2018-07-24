@@ -25,7 +25,7 @@
 #include <array>
 #include <bitset>
 
-namespace backend {
+namespace dawn_native {
 
     class RenderPipelineBase : public RefCounted, public PipelineBase {
       public:
@@ -91,6 +91,6 @@ namespace backend {
         dawn::TextureFormat mDepthStencilFormat;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_RENDERPIPELINE_H_

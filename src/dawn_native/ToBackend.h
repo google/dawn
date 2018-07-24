@@ -17,7 +17,7 @@
 
 #include "dawn_native/Forward.h"
 
-namespace backend {
+namespace dawn_native {
 
     // ToBackendTraits implements the mapping from base type to member type of BackendTraits
     template <typename T, typename BackendTraits>
@@ -149,6 +149,6 @@ namespace backend {
             common);
     }
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_TOBACKEND_H_

@@ -16,7 +16,7 @@
 
 #include "dawn_native/vulkan/DeviceVk.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     FencedDeleter::FencedDeleter(Device* device) : mDevice(device) {
     }
@@ -170,4 +170,4 @@ namespace backend { namespace vulkan {
         mSamplersToDelete.ClearUpTo(completedSerial);
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

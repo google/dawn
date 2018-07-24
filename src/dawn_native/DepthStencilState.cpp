@@ -16,7 +16,7 @@
 
 #include "dawn_native/Device.h"
 
-namespace backend {
+namespace dawn_native {
 
     // DepthStencilStateBase
 
@@ -132,4 +132,4 @@ namespace backend {
         mStencilInfo.writeMask = writeMask;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

@@ -20,7 +20,7 @@
 
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     // Definition of the commands that are present in the CommandIterator given by the
     // CommandBufferBuilder. There are not defined in CommandBuffer.h to break some header
@@ -158,6 +158,6 @@ namespace backend {
     // consuming the correct amount of data from the command iterator.
     void SkipCommand(CommandIterator* commands, Command type);
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMMANDS_H_

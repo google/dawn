@@ -19,11 +19,11 @@
 
 #import <Metal/Metal.h>
 
-namespace backend {
+namespace dawn_native {
     class RenderPassDescriptorBase;
 }
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class Device;
 
@@ -43,6 +43,6 @@ namespace backend { namespace metal {
         CommandIterator mCommands;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_COMMANDBUFFERMTL_H_

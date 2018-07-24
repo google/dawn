@@ -21,7 +21,7 @@
 
 #include <d3dcompiler.h>
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
         : ComputePipelineBase(builder), mDevice(ToBackend(builder->GetDevice())) {
@@ -65,4 +65,4 @@ namespace backend { namespace d3d12 {
         return mPipelineState;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

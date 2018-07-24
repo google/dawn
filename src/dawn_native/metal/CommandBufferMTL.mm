@@ -26,7 +26,7 @@
 #include "dawn_native/metal/SamplerMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     namespace {
 
@@ -524,4 +524,4 @@ namespace backend { namespace metal {
         UNREACHABLE();
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

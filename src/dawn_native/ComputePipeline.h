@@ -17,7 +17,7 @@
 
 #include "dawn_native/Pipeline.h"
 
-namespace backend {
+namespace dawn_native {
 
     class ComputePipelineBase : public RefCounted, public PipelineBase {
       public:
@@ -32,6 +32,6 @@ namespace backend {
         ComputePipelineBase* GetResultImpl() override;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMPUTEPIPELINE_H_

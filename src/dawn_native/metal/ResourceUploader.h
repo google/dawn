@@ -20,7 +20,7 @@
 
 #import <Metal/Metal.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class Device;
 
@@ -37,6 +37,6 @@ namespace backend { namespace metal {
         SerialQueue<id<MTLBuffer>> mInflightUploadBuffers;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_RESOURCEUPLOADER_H_

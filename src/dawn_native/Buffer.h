@@ -22,7 +22,7 @@
 
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     static constexpr dawn::BufferUsageBit kReadOnlyBufferUsages =
         dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferSrc |
@@ -137,6 +137,6 @@ namespace backend {
         int mPropertiesSet = 0;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_BUFFER_H_

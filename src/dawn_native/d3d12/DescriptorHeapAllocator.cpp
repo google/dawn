@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     DescriptorHeapHandle::DescriptorHeapHandle()
         : mDescriptorHeap(nullptr), mSizeIncrement(0), mOffset(0) {
@@ -129,4 +129,4 @@ namespace backend { namespace d3d12 {
     void DescriptorHeapAllocator::Release(DescriptorHeapHandle handle) {
         mReleasedHandles.Enqueue(handle, mDevice->GetSerial());
     }
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

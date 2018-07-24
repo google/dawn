@@ -34,7 +34,7 @@
 
 #include <unistd.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
     dawnProcTable GetNonValidatingProcs();
     dawnProcTable GetValidatingProcs();
 
@@ -199,4 +199,4 @@ namespace backend { namespace metal {
         return mResourceUploader;
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

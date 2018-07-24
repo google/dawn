@@ -20,7 +20,7 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/vulkan/MemoryAllocator.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class Sampler : public SamplerBase {
       public:
@@ -34,6 +34,6 @@ namespace backend { namespace vulkan {
         Device* mDevice = nullptr;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_SAMPLERVK_H_

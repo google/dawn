@@ -20,7 +20,7 @@
 
 #include "common/BitSetIterator.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     PipelineLayout::PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
@@ -67,4 +67,4 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

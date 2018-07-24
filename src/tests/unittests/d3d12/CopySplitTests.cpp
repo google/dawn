@@ -20,7 +20,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 
-using namespace backend::d3d12;
+using namespace dawn_native::d3d12;
 
 namespace {
 

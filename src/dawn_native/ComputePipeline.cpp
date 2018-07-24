@@ -16,7 +16,7 @@
 
 #include "dawn_native/Device.h"
 
-namespace backend {
+namespace dawn_native {
 
     // ComputePipelineBase
 
@@ -38,4 +38,4 @@ namespace backend {
         return mDevice->CreateComputePipeline(this);
     }
 
-}  // namespace backend
+}  // namespace dawn_native

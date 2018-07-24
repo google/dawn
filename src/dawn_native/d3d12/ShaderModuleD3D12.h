@@ -17,7 +17,7 @@
 
 #include "dawn_native/ShaderModule.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     class Device;
 
@@ -33,6 +33,6 @@ namespace backend { namespace d3d12 {
         std::string mHlslSource;
     };
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_SHADERMODULED3D12_H_

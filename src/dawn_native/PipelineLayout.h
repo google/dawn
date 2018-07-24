@@ -25,7 +25,7 @@
 #include <array>
 #include <bitset>
 
-namespace backend {
+namespace dawn_native {
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
                                                 const dawn::PipelineLayoutDescriptor* descriptor);
@@ -55,6 +55,6 @@ namespace backend {
         std::bitset<kMaxBindGroups> mMask;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_PIPELINELAYOUT_H_

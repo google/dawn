@@ -17,7 +17,7 @@
 
 #include "dawn_native/SwapChain.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     class SwapChain : public SwapChainBase {
       public:
@@ -31,6 +31,6 @@ namespace backend { namespace d3d12 {
         dawn::TextureUsageBit mTextureUsage;
     };
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_SWAPCHAIN_D3D12_H_

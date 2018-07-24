@@ -16,7 +16,7 @@
 
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         D3D12_TEXTURE_ADDRESS_MODE AddressMode(dawn::AddressMode mode) {
@@ -93,4 +93,4 @@ namespace backend { namespace d3d12 {
         return mSamplerDesc;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

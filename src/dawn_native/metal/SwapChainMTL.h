@@ -17,7 +17,7 @@
 
 #include "dawn_native/SwapChain.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class Device;
 
@@ -31,6 +31,6 @@ namespace backend { namespace metal {
         void OnBeforePresent(TextureBase* texture) override;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_SWAPCHAINMTL_H_

@@ -21,7 +21,7 @@
 #include <vector>
 #include "common/SerialQueue.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     class Device;
 
@@ -78,6 +78,6 @@ namespace backend { namespace d3d12 {
         SerialQueue<DescriptorHeapHandle> mReleasedHandles;
     };
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_DESCRIPTORHEAPALLOCATOR_H_

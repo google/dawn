@@ -19,7 +19,7 @@
 
 #include <vector>
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class Device;
 
@@ -83,6 +83,6 @@ namespace backend { namespace vulkan {
                           VulkanDeviceInfo* info);
     bool GatherSurfaceInfo(const Device& device, VkSurfaceKHR surface, VulkanSurfaceInfo* info);
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANINFO_H_

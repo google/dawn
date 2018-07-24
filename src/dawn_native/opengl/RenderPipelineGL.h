@@ -23,7 +23,7 @@
 
 #include <vector>
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class PersistentPipelineState;
 
@@ -39,6 +39,6 @@ namespace backend { namespace opengl {
         GLenum mGlPrimitiveTopology;
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_RENDERPIPELINEGL_H_

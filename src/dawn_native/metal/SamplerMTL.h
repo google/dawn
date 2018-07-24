@@ -19,7 +19,7 @@
 
 #import <Metal/Metal.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class Device;
 
@@ -34,6 +34,6 @@ namespace backend { namespace metal {
         id<MTLSamplerState> mMtlSamplerState = nil;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_SAMPLERMTL_H_

@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/Device.h"
 
-namespace backend {
+namespace dawn_native {
 
     // InputState helpers
 
@@ -168,4 +168,4 @@ namespace backend {
         info.stepMode = stepMode;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

@@ -20,7 +20,7 @@
 #include "dawn_native/opengl/InputStateGL.h"
 #include "dawn_native/opengl/PersistentPipelineStateGL.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     namespace {
         GLenum GLPrimitiveTopology(dawn::PrimitiveTopology primitiveTopology) {
@@ -65,4 +65,4 @@ namespace backend { namespace opengl {
         }
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

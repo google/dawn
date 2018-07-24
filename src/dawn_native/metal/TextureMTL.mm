@@ -16,7 +16,7 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format) {
         switch (format) {
@@ -99,4 +99,4 @@ namespace backend { namespace metal {
     TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

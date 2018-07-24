@@ -17,7 +17,7 @@
 #include "dawn_native/vulkan/CommandBufferVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     Queue::Queue(Device* device) : QueueBase(device) {
     }
@@ -36,4 +36,4 @@ namespace backend { namespace vulkan {
         device->SubmitPendingCommands();
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

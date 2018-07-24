@@ -16,7 +16,7 @@
 
 #include "common/BitSetIterator.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     static DXGI_FORMAT VertexFormatType(dawn::VertexFormat format) {
         switch (format) {
@@ -101,4 +101,4 @@ namespace backend { namespace d3d12 {
         return mInputLayoutDescriptor;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

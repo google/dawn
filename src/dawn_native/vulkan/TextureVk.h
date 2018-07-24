@@ -20,7 +20,7 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/vulkan/MemoryAllocator.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     VkFormat VulkanImageFormat(dawn::TextureFormat format);
     VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, dawn::TextureFormat format);
@@ -59,6 +59,6 @@ namespace backend { namespace vulkan {
         VkImageView mHandle = VK_NULL_HANDLE;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_TEXTUREVK_H_

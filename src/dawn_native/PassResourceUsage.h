@@ -19,7 +19,7 @@
 
 #include <vector>
 
-namespace backend {
+namespace dawn_native {
 
     class BufferBase;
     class TextureBase;
@@ -35,6 +35,6 @@ namespace backend {
         std::vector<dawn::TextureUsageBit> textureUsages;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_PASSRESOURCEUSAGE_H

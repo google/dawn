@@ -23,7 +23,7 @@
 
 #include <array>
 
-namespace backend {
+namespace dawn_native {
 
     static_assert(static_cast<uint32_t>(dawn::ShaderStage::Vertex) < kNumStages, "");
     static_assert(static_cast<uint32_t>(dawn::ShaderStage::Fragment) < kNumStages, "");
@@ -72,6 +72,6 @@ namespace backend {
         std::array<T, kNumStages> mData;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_PERSTAGE_H_

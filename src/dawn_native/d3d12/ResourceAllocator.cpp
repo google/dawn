@@ -16,7 +16,7 @@
 
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         static constexpr D3D12_HEAP_PROPERTIES kDefaultHeapProperties = {
@@ -74,4 +74,4 @@ namespace backend { namespace d3d12 {
         mReleasedResources.ClearUpTo(lastCompletedSerial);
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

@@ -19,7 +19,7 @@
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/ShaderModuleVk.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
         : ComputePipelineBase(builder), mDevice(ToBackend(builder->GetDevice())) {
@@ -57,4 +57,4 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

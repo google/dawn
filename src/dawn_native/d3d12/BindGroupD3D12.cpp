@@ -21,7 +21,7 @@
 
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     BindGroup::BindGroup(Device* device, BindGroupBuilder* builder)
         : BindGroupBase(builder), mDevice(device) {
@@ -96,4 +96,4 @@ namespace backend { namespace d3d12 {
         return mHeapSerial;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

@@ -18,11 +18,11 @@
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/CommandBuffer.h"
 
-namespace backend {
+namespace dawn_native {
     class RenderPassDescriptorBase;
-}  // namespace backend
+}  // namespace dawn_native
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class Device;
 
@@ -40,6 +40,6 @@ namespace backend { namespace opengl {
         CommandIterator mCommands;
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_COMMANDBUFFERGL_H_

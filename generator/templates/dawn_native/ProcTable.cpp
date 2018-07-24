@@ -21,7 +21,7 @@
 #include "dawn_native/ValidationUtils_autogen.h"
 #include "dawn_native/{{namespace}}/GeneratedCodeIncludes.h"
 
-namespace backend {
+namespace dawn_native {
 namespace {{namespace}} {
 
     namespace {

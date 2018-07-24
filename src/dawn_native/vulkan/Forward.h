@@ -17,11 +17,11 @@
 
 #include "dawn_native/ToBackend.h"
 
-namespace backend {
+namespace dawn_native {
     class BufferViewBase;
 }
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class BindGroup;
     class BindGroupLayout;
@@ -70,6 +70,6 @@ namespace backend { namespace vulkan {
         return ToBackendBase<VulkanBackendTraits>(common);
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_FORWARD_H_

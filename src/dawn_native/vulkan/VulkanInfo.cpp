@@ -28,7 +28,7 @@ namespace {
     }
 }  // namespace
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     const char kLayerNameLunargStandardValidation[] = "VK_LAYER_LUNARG_standard_validation";
     const char kLayerNameLunargVKTrace[] = "VK_LAYER_LUNARG_vktrace";
@@ -258,4 +258,4 @@ namespace backend { namespace vulkan {
         return true;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

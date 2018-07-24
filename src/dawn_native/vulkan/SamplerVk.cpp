@@ -17,7 +17,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     namespace {
         VkSamplerAddressMode VulkanSamplerAddressMode(dawn::AddressMode mode) {
@@ -95,4 +95,4 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

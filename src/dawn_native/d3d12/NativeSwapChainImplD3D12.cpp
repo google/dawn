@@ -18,7 +18,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         DXGI_USAGE D3D12SwapChainBufferUsage(dawnTextureUsageBit allowedUsages) {
@@ -115,4 +115,4 @@ namespace backend { namespace d3d12 {
         return dawn::TextureFormat::R8G8B8A8Unorm;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

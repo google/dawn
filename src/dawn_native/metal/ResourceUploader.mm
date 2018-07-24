@@ -16,7 +16,7 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     ResourceUploader::ResourceUploader(Device* device) : mDevice(device) {
     }
@@ -54,4 +54,4 @@ namespace backend { namespace metal {
         mInflightUploadBuffers.ClearUpTo(finishedSerial);
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

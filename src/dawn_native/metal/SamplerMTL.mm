@@ -16,7 +16,7 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     namespace {
         MTLSamplerMinMagFilter FilterModeToMinMagFilter(dawn::FilterMode mode) {
@@ -72,4 +72,4 @@ namespace backend { namespace metal {
         return mMtlSamplerState;
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

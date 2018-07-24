@@ -19,7 +19,7 @@
 
 #include "common/vulkan_platform.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class SwapChain : public SwapChainBase {
       public:
@@ -34,6 +34,6 @@ namespace backend { namespace vulkan {
         dawn::TextureUsageBit mTextureUsage;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_SWAPCHAINVK_H_

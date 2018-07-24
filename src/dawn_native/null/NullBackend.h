@@ -36,7 +36,7 @@
 #include "dawn_native/Texture.h"
 #include "dawn_native/ToBackend.h"
 
-namespace backend { namespace null {
+namespace dawn_native { namespace null {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
@@ -174,6 +174,6 @@ namespace backend { namespace null {
         void OnBeforePresent(TextureBase*) override;
     };
 
-}}  // namespace backend::null
+}}  // namespace dawn_native::null
 
 #endif  // DAWNNATIVE_NULL_NULLBACKEND_H_

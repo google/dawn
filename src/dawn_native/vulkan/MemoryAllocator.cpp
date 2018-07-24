@@ -17,7 +17,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     DeviceMemoryAllocation::~DeviceMemoryAllocation() {
         ASSERT(mMemory == VK_NULL_HANDLE);
@@ -130,4 +130,4 @@ namespace backend { namespace vulkan {
 
     void MemoryAllocator::Tick(Serial) {
     }
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

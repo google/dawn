@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/Device.h"
 
-namespace backend {
+namespace dawn_native {
 
     bool BuilderBase::CanBeUsed() const {
         return !mIsConsumed && !mGotStatus;
@@ -94,4 +94,4 @@ namespace backend {
         return result != nullptr;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

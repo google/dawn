@@ -22,7 +22,7 @@
 #include "dawn_native/metal/ShaderModuleMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     namespace {
         MTLPrimitiveType MTLPrimitiveTopology(dawn::PrimitiveTopology primitiveTopology) {
@@ -141,4 +141,4 @@ namespace backend { namespace metal {
         [encoder setRenderPipelineState:mMtlRenderPipelineState];
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

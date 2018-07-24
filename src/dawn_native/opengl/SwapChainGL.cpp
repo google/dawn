@@ -19,7 +19,7 @@
 
 #include <dawn/dawn_wsi.h>
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
@@ -44,4 +44,4 @@ namespace backend { namespace opengl {
     void SwapChain::OnBeforePresent(TextureBase*) {
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

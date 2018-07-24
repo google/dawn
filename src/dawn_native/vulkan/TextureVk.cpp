@@ -17,7 +17,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     namespace {
         // Converts an Dawn texture dimension to a Vulkan image type.
@@ -380,4 +380,4 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

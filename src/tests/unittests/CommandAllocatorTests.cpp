@@ -16,7 +16,7 @@
 
 #include "dawn_native/CommandAllocator.h"
 
-using namespace backend;
+using namespace dawn_native;
 
 // Definition of the command types used in the tests
 enum class CommandType {

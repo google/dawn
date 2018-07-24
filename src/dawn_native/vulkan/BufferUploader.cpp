@@ -20,7 +20,7 @@
 
 #include <cstring>
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     BufferUploader::BufferUploader(Device* device) : mDevice(device) {
     }
@@ -99,4 +99,4 @@ namespace backend { namespace vulkan {
     void BufferUploader::Tick(Serial) {
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

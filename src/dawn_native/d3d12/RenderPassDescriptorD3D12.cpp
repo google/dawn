@@ -18,7 +18,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     RenderPassDescriptor::RenderPassDescriptor(Device* device, RenderPassDescriptorBuilder* builder)
         : RenderPassDescriptorBase(builder), mDevice(device) {
@@ -79,4 +79,4 @@ namespace backend { namespace d3d12 {
         return mDsvHeap.GetCPUHandle(0);
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

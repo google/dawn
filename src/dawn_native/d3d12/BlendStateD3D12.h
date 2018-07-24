@@ -19,7 +19,7 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     class BlendState : public BlendStateBase {
       public:
@@ -31,6 +31,6 @@ namespace backend { namespace d3d12 {
         D3D12_RENDER_TARGET_BLEND_DESC mBlendDesc;
     };
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_BLENDSTATED3D12_H_

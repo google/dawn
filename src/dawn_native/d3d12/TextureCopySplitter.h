@@ -19,7 +19,7 @@
 
 #include <array>
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     struct TextureCopySplit {
         static constexpr unsigned int kMaxTextureCopyRegions = 2;
@@ -59,6 +59,6 @@ namespace backend { namespace d3d12 {
                                              uint32_t offset,
                                              uint32_t rowPitch);
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_TEXTURECOPYSPLITTER_H_

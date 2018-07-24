@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/BufferGL.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     // Buffer
 
@@ -59,4 +59,4 @@ namespace backend { namespace opengl {
     BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

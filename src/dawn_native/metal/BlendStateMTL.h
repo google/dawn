@@ -18,7 +18,7 @@
 #include "dawn_native/BlendState.h"
 
 #import <Metal/Metal.h>
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class BlendState : public BlendStateBase {
       public:
@@ -27,6 +27,6 @@ namespace backend { namespace metal {
         void ApplyBlendState(MTLRenderPipelineColorAttachmentDescriptor* descriptor) const;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_BLENDSTATEMTL_H_

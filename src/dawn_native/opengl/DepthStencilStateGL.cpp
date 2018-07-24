@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/opengl/PersistentPipelineStateGL.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     namespace {
         GLuint OpenGLCompareFunction(dawn::CompareFunction compareFunction) {
@@ -113,4 +113,4 @@ namespace backend { namespace opengl {
         glStencilMask(stencilInfo.writeMask);
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

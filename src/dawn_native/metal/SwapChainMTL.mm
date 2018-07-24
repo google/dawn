@@ -19,7 +19,7 @@
 
 #include <dawn/dawn_wsi.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
@@ -47,4 +47,4 @@ namespace backend { namespace metal {
     void SwapChain::OnBeforePresent(TextureBase*) {
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

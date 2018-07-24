@@ -17,7 +17,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/ErrorData.h"
 
-using namespace backend;
+using namespace dawn_native;
 
 namespace {
 

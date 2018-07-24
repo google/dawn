@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-namespace backend {
+namespace dawn_native {
 
     class RefCounted {
       public:
@@ -124,6 +124,6 @@ namespace backend {
         T* mPointee = nullptr;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_REFCOUNTED_H_

@@ -27,7 +27,7 @@
 
 #include <queue>
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class BufferUploader;
     class FencedDeleter;
@@ -155,6 +155,6 @@ namespace backend { namespace vulkan {
         std::vector<VkSemaphore> mWaitSemaphores;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_DEVICEVK_H_

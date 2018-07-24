@@ -21,7 +21,7 @@
 
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     uint32_t TextureFormatPixelSize(dawn::TextureFormat format);
     bool TextureFormatHasDepth(dawn::TextureFormat format);
@@ -111,6 +111,6 @@ namespace backend {
         Ref<TextureBase> mTexture;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_TEXTURE_H_

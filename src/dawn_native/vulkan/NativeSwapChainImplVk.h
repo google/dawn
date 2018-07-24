@@ -20,7 +20,7 @@
 #include "dawn/dawn_wsi.h"
 #include "dawn/dawncpp.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class Device;
 
@@ -64,6 +64,6 @@ namespace backend { namespace vulkan {
         Device* mDevice = nullptr;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_NATIVESWAPCHAINIMPLVK_H_

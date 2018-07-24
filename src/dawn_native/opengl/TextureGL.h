@@ -19,7 +19,7 @@
 
 #include "glad/glad.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     struct TextureFormatInfo {
         GLenum internalFormat;
@@ -47,6 +47,6 @@ namespace backend { namespace opengl {
         TextureView(TextureViewBuilder* builder);
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_TEXTUREGL_H_

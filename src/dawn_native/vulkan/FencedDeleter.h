@@ -18,7 +18,7 @@
 #include "common/SerialQueue.h"
 #include "common/vulkan_platform.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class Device;
 
@@ -62,6 +62,6 @@ namespace backend { namespace vulkan {
         SerialQueue<VkSwapchainKHR> mSwapChainsToDelete;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_FENCEDDELETER_H_

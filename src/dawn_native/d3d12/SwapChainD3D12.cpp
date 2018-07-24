@@ -19,7 +19,7 @@
 
 #include <dawn/dawn_wsi.h>
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
@@ -56,4 +56,4 @@ namespace backend { namespace d3d12 {
         device->ExecuteCommandLists({});
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

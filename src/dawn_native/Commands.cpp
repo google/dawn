@@ -21,7 +21,7 @@
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Texture.h"
 
-namespace backend {
+namespace dawn_native {
 
     void FreeCommands(CommandIterator* commands) {
         commands->Reset();
@@ -199,4 +199,4 @@ namespace backend {
         }
     }
 
-}  // namespace backend
+}  // namespace dawn_native

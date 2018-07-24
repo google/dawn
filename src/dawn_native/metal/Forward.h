@@ -23,7 +23,7 @@ namespace {
     class RenderPassDescriptor;
 }  // namespace
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
@@ -73,6 +73,6 @@ namespace backend { namespace metal {
         return ToBackendBase<MetalBackendTraits>(common);
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_FORWARD_H_

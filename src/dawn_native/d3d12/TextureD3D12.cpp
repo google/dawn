@@ -17,7 +17,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocator.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         D3D12_RESOURCE_STATES D3D12TextureUsage(dawn::TextureUsageBit usage,
@@ -209,4 +209,4 @@ namespace backend { namespace d3d12 {
         return dsvDesc;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

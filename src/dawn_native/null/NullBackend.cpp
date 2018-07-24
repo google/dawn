@@ -18,7 +18,7 @@
 
 #include <spirv-cross/spirv_cross.hpp>
 
-namespace backend { namespace null {
+namespace dawn_native { namespace null {
 
     dawnProcTable GetNonValidatingProcs();
     dawnProcTable GetValidatingProcs();
@@ -216,4 +216,4 @@ namespace backend { namespace null {
     void SwapChain::OnBeforePresent(TextureBase*) {
     }
 
-}}  // namespace backend::null
+}}  // namespace dawn_native::null

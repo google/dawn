@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     namespace {
         VkCompareOp VulkanCompareOp(dawn::CompareFunction op) {
@@ -109,4 +109,4 @@ namespace backend { namespace vulkan {
         return &mCreateInfo;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

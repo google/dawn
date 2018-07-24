@@ -17,7 +17,7 @@
 
 #include "dawn_native/Queue.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class CommandBuffer;
     class Device;
@@ -31,6 +31,6 @@ namespace backend { namespace vulkan {
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_QUEUEVK_H_

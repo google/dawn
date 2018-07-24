@@ -26,7 +26,7 @@
 #include <bitset>
 #include <vector>
 
-namespace backend {
+namespace dawn_native {
 
     struct RenderPassColorAttachmentInfo {
         dawn::LoadOp loadOp;
@@ -104,6 +104,6 @@ namespace backend {
         uint32_t mHeight = 0;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_RENDERPASS_H_

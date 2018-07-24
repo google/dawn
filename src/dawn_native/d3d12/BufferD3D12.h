@@ -20,7 +20,7 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     class Device;
 
@@ -82,6 +82,6 @@ namespace backend { namespace d3d12 {
         SerialQueue<Request> mInflightRequests;
     };
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_BUFFERD3D12_H_

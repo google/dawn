@@ -16,7 +16,7 @@
 
 #include "dawn_native/PerStage.h"
 
-using namespace backend;
+using namespace dawn_native;
 
 // Tests for StageBit
 TEST(PerStage, StageBit) {

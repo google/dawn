@@ -16,7 +16,7 @@
 
 #include "dawn_native/RefCounted.h"
 
-using namespace backend;
+using namespace dawn_native;
 
 struct RCTest : public RefCounted {
     RCTest() {

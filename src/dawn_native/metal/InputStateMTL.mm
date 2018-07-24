@@ -16,7 +16,7 @@
 
 #include "common/BitSetIterator.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     namespace {
         MTLVertexFormat VertexFormatType(dawn::VertexFormat format) {
@@ -108,4 +108,4 @@ namespace backend { namespace metal {
         return mMtlVertexDescriptor;
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

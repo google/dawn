@@ -21,7 +21,7 @@
 #include "dawn_native/d3d12/ResourceAllocator.h"
 #include "dawn_native/d3d12/ResourceUploader.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::BufferUsageBit usage) {
@@ -249,4 +249,4 @@ namespace backend { namespace d3d12 {
         mInflightRequests.ClearUpTo(finishedSerial);
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

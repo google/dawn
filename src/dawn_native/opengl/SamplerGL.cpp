@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     namespace {
         GLenum MagFilterMode(dawn::FilterMode filter) {
@@ -86,4 +86,4 @@ namespace backend { namespace opengl {
         return mHandle;
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

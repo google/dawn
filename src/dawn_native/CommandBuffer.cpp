@@ -28,7 +28,7 @@
 #include <cstring>
 #include <map>
 
-namespace backend {
+namespace dawn_native {
 
     namespace {
 
@@ -780,4 +780,4 @@ namespace backend {
         memcpy(cmdOffsets, offsets, count * sizeof(uint32_t));
     }
 
-}  // namespace backend
+}  // namespace dawn_native

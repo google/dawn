@@ -31,7 +31,7 @@
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         DXGI_FORMAT DXGIIndexFormat(dawn::IndexFormat format) {
@@ -629,4 +629,4 @@ namespace backend { namespace d3d12 {
         }
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

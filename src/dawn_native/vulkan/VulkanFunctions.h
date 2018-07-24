@@ -19,7 +19,7 @@
 
 class DynamicLib;
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     struct VulkanGlobalKnobs;
     struct VulkanDeviceKnobs;
@@ -210,6 +210,6 @@ namespace backend { namespace vulkan {
         PFN_vkQueuePresentKHR QueuePresentKHR = nullptr;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANFUNCTIONS_H_

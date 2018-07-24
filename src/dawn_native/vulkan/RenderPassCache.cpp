@@ -19,7 +19,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     namespace {
         VkAttachmentLoadOp VulkanAttachmentLoadOp(dawn::LoadOp op) {
@@ -206,4 +206,4 @@ namespace backend { namespace vulkan {
 
         return true;
     }
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

@@ -21,7 +21,7 @@
 
 #include <spirv-cross/spirv_cross.hpp>
 
-namespace backend {
+namespace dawn_native {
 
     ShaderModuleBase::ShaderModuleBase(ShaderModuleBuilder* builder) : mDevice(builder->mDevice) {
     }
@@ -238,4 +238,4 @@ namespace backend {
         mSpirv.assign(code, code + codeSize);
     }
 
-}  // namespace backend
+}  // namespace dawn_native

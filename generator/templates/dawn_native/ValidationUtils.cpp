@@ -14,7 +14,7 @@
 
 #include "dawn_native/ValidationUtils_autogen.h"
 
-namespace backend {
+namespace dawn_native {
 
     {% for type in by_category["enum"] %}
         MaybeError Validate{{type.name.CamelCase()}}(dawn::{{as_cppType(type.name)}} value) {
@@ -40,4 +40,4 @@ namespace backend {
 
     {% endfor %}
 
-} // namespace backend
+} // namespace dawn_native

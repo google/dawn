@@ -19,7 +19,7 @@
 
 #include "glad/glad.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class PersistentPipelineState {
       public:
@@ -38,6 +38,6 @@ namespace backend { namespace opengl {
         GLuint mStencilReference = 0;
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_PERSISTENTPIPELINESTATEGL_H_

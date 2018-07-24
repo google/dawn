@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         D3D12_BLEND D3D12Blend(dawn::BlendFactor factor) {
@@ -105,4 +105,4 @@ namespace backend { namespace d3d12 {
         return mBlendDesc;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

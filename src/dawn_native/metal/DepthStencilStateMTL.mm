@@ -16,7 +16,7 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     namespace {
         MTLCompareFunction MetalDepthStencilCompareFunction(dawn::CompareFunction compareFunction) {
@@ -117,4 +117,4 @@ namespace backend { namespace metal {
         return mMtlDepthStencilState;
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

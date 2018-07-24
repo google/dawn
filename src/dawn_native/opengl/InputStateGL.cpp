@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     InputState::InputState(InputStateBuilder* builder) : InputStateBase(builder) {
         glGenVertexArrays(1, &mVertexArrayObject);
@@ -58,4 +58,4 @@ namespace backend { namespace opengl {
         return mVertexArrayObject;
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

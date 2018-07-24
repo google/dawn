@@ -17,7 +17,7 @@
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/ShaderModuleMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
         : ComputePipelineBase(builder) {
@@ -53,4 +53,4 @@ namespace backend { namespace metal {
         return mLocalWorkgroupSize;
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

@@ -27,7 +27,7 @@
 #include <bitset>
 #include <type_traits>
 
-namespace backend {
+namespace dawn_native {
 
     class BindGroupBase : public RefCounted {
       public:
@@ -91,6 +91,6 @@ namespace backend {
         std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_BINDGROUP_H_

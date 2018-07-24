@@ -18,7 +18,7 @@
 #include "common/SerialQueue.h"
 #include "common/vulkan_platform.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class Device;
     class MemoryAllocator;
@@ -53,6 +53,6 @@ namespace backend { namespace vulkan {
         Device* mDevice = nullptr;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_MEMORYALLOCATOR_H_

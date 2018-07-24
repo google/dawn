@@ -19,7 +19,7 @@
 
 #import <Metal/Metal.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format);
 
@@ -40,6 +40,6 @@ namespace backend { namespace metal {
         TextureView(TextureViewBuilder* builder);
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_TEXTUREMTL_H_

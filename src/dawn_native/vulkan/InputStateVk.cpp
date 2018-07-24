@@ -16,7 +16,7 @@
 
 #include "common/BitSetIterator.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     namespace {
 
@@ -106,4 +106,4 @@ namespace backend { namespace vulkan {
         return &mCreateInfo;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

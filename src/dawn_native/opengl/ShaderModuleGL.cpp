@@ -21,7 +21,7 @@
 
 #include <sstream>
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     std::string GetBindingName(uint32_t group, uint32_t binding) {
         std::ostringstream o;
@@ -129,4 +129,4 @@ namespace backend { namespace opengl {
         return mCombinedInfo;
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

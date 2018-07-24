@@ -21,7 +21,7 @@
 
 #include <vector>
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class Device;
     class PersistentPipelineState;
@@ -49,6 +49,6 @@ namespace backend { namespace opengl {
         std::vector<std::vector<GLuint>> mUnitsForTextures;
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_PIPELINEGL_H_

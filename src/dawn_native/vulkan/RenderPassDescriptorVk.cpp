@@ -20,7 +20,7 @@
 #include "dawn_native/vulkan/RenderPassCache.h"
 #include "dawn_native/vulkan/TextureVk.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     RenderPassDescriptor::RenderPassDescriptor(RenderPassDescriptorBuilder* builder)
         : RenderPassDescriptorBase(builder), mDevice(ToBackend(builder->GetDevice())) {
@@ -119,4 +119,4 @@ namespace backend { namespace vulkan {
         mDevice->fn.CmdBeginRenderPass(commands, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

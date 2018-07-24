@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace backend {
+namespace dawn_native {
 
     class ErrorData {
       public:
@@ -40,6 +40,6 @@ namespace backend {
         std::vector<BacktraceRecord> mBacktrace;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_ERRORDATA_H_

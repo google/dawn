@@ -19,7 +19,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/Texture.h"
 
-namespace backend {
+namespace dawn_native {
 
     // RenderPassDescriptor
 
@@ -178,4 +178,4 @@ namespace backend {
         mDepthStencilAttachment.clearStencil = clearStencil;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

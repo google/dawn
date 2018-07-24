@@ -23,7 +23,7 @@
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/RenderPipeline.h"
 
-namespace backend {
+namespace dawn_native {
 
     enum ValidationAspect {
         VALIDATION_ASPECT_PIPELINE,
@@ -167,4 +167,4 @@ namespace backend {
         mAspects &= ~kLazyAspects;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

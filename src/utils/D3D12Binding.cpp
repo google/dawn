@@ -21,13 +21,13 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3native.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
     void Init(dawnProcTable* procs, dawnDevice* device);
 
     dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, HWND window);
     dawnTextureFormat GetNativeSwapChainPreferredFormat(
         const dawnSwapChainImplementation* swapChain);
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 namespace utils {
 
@@ -38,7 +38,7 @@ namespace utils {
         }
 
         void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
-            backend::d3d12::Init(procs, device);
+            dawn_native::d3d12::Init(procs, device);
             mBackendDevice = *device;
         }
 
@@ -46,14 +46,14 @@ namespace utils {
             if (mSwapchainImpl.userData == nullptr) {
                 HWND win32Window = glfwGetWin32Window(mWindow);
                 mSwapchainImpl =
-                    backend::d3d12::CreateNativeSwapChainImpl(mBackendDevice, win32Window);
+                    dawn_native::d3d12::CreateNativeSwapChainImpl(mBackendDevice, win32Window);
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
         dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
             ASSERT(mSwapchainImpl.userData != nullptr);
-            return backend::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+            return dawn_native::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:

@@ -18,7 +18,7 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
 
-namespace backend {
+namespace dawn_native {
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
                                                 const dawn::PipelineLayoutDescriptor* descriptor) {
@@ -72,4 +72,4 @@ namespace backend {
         return mDevice;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

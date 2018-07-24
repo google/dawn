@@ -27,7 +27,7 @@
 #include <set>
 #include <utility>
 
-namespace backend {
+namespace dawn_native {
 
     class BindGroupBase;
     class BufferBase;
@@ -146,6 +146,6 @@ namespace backend {
         std::vector<PassResourceUsage> mPassResourceUsages;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMMANDBUFFER_H_

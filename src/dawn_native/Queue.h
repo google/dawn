@@ -22,7 +22,7 @@
 
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     class QueueBase : public RefCounted {
       public:
@@ -47,6 +47,6 @@ namespace backend {
         DeviceBase* mDevice;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_QUEUE_H_

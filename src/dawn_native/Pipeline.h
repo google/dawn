@@ -27,7 +27,7 @@
 #include <array>
 #include <bitset>
 
-namespace backend {
+namespace dawn_native {
 
     enum PushConstantType : uint8_t {
         Int,
@@ -80,6 +80,6 @@ namespace backend {
         PerStage<StageInfo> mStages;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_PIPELINE_H_

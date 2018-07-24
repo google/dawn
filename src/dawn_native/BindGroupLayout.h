@@ -25,7 +25,7 @@
 #include <array>
 #include <bitset>
 
-namespace backend {
+namespace dawn_native {
 
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
                                                  const dawn::BindGroupLayoutDescriptor* descriptor);
@@ -61,6 +61,6 @@ namespace backend {
         bool operator()(const BindGroupLayoutBase* a, const BindGroupLayoutBase* b) const;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_BINDGROUPLAYOUT_H_

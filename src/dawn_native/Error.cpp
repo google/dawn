@@ -16,7 +16,7 @@
 
 #include "dawn_native/ErrorData.h"
 
-namespace backend {
+namespace dawn_native {
 
     ErrorData* MakeError(const char* message, const char* file, const char* function, int line) {
         ErrorData* error = new ErrorData(message);
@@ -28,4 +28,4 @@ namespace backend {
         error->AppendBacktrace(file, function, line);
     }
 
-}  // namespace backend
+}  // namespace dawn_native

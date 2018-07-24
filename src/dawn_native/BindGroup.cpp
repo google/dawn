@@ -21,7 +21,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/Texture.h"
 
-namespace backend {
+namespace dawn_native {
 
     // BindGroup
 
@@ -226,4 +226,4 @@ namespace backend {
 
         return true;
     }
-}  // namespace backend
+}  // namespace dawn_native

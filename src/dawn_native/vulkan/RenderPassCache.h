@@ -24,7 +24,7 @@
 #include <bitset>
 #include <unordered_map>
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class Device;
 
@@ -76,6 +76,6 @@ namespace backend { namespace vulkan {
         Cache mCache;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_RENDERPASSCACHE_H_

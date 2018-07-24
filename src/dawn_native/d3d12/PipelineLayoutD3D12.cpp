@@ -21,7 +21,7 @@
 
 using Microsoft::WRL::ComPtr;
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     PipelineLayout::PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
@@ -112,4 +112,4 @@ namespace backend { namespace d3d12 {
     ComPtr<ID3D12RootSignature> PipelineLayout::GetRootSignature() {
         return mRootSignature;
     }
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

@@ -17,7 +17,7 @@
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/ResourceUploader.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
         MTLResourceOptions storageMode;
@@ -99,4 +99,4 @@ namespace backend { namespace metal {
         mInflightRequests.ClearUpTo(finishedSerial);
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

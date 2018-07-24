@@ -21,7 +21,7 @@
 
 #include "glad/glad.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class ComputePipeline : public ComputePipelineBase, public PipelineGL {
       public:
@@ -30,6 +30,6 @@ namespace backend { namespace opengl {
         void ApplyNow();
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_COMPUTEPIPELINEGL_H_

@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         void ComputeTexelOffsets(uint32_t offset,
@@ -206,4 +206,4 @@ namespace backend { namespace d3d12 {
         return copy;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

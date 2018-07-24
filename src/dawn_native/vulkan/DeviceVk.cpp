@@ -50,7 +50,7 @@ const char kVulkanLibName[] = "vulkan-1.dll";
 #    error "Unimplemented Vulkan backend platform"
 #endif
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     dawnProcTable GetNonValidatingProcs();
     dawnProcTable GetValidatingProcs();
@@ -684,4 +684,4 @@ namespace backend { namespace vulkan {
         commands->commandBuffer = VK_NULL_HANDLE;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

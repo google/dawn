@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/ComputePipelineGL.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
         : ComputePipelineBase(builder), PipelineGL(this, builder) {
@@ -24,4 +24,4 @@ namespace backend { namespace opengl {
         PipelineGL::ApplyNow();
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

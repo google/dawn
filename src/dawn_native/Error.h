@@ -17,7 +17,7 @@
 
 #include "common/Result.h"
 
-namespace backend {
+namespace dawn_native {
 
     // This is the content of an error value for MaybeError or ResultOrError, split off to its own
     // file to avoid having all files including headers like <string> and <vector>
@@ -86,6 +86,6 @@ namespace backend {
     // Implementation detail of DAWN_RETURN_ERROR
     ErrorData* MakeError(const char* message, const char* file, const char* function, int line);
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_ERROR_H_

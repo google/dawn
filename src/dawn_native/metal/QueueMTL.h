@@ -17,7 +17,7 @@
 
 #include "dawn_native/Queue.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class CommandBuffer;
     class Device;
@@ -30,6 +30,6 @@ namespace backend { namespace metal {
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_QUEUEMTL_H_

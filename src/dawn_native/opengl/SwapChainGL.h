@@ -19,7 +19,7 @@
 
 #include "glad/glad.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class Device;
 
@@ -33,6 +33,6 @@ namespace backend { namespace opengl {
         void OnBeforePresent(TextureBase* texture) override;
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_SWAPCHAINGL_H_

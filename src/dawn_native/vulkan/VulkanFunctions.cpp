@@ -17,7 +17,7 @@
 #include "common/DynamicLib.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
 #define GET_GLOBAL_PROC(name)                                                          \
     name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(nullptr, "vk" #name)); \
@@ -218,4 +218,4 @@ namespace backend { namespace vulkan {
         return true;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

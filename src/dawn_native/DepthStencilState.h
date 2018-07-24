@@ -21,7 +21,7 @@
 
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     class DepthStencilStateBase : public RefCounted {
       public:
@@ -80,6 +80,6 @@ namespace backend {
         DepthStencilStateBase::StencilInfo mStencilInfo;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DEPTHSTENCILSTATE_H_

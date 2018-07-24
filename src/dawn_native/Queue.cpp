@@ -17,7 +17,7 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Device.h"
 
-namespace backend {
+namespace dawn_native {
 
     // QueueBase
 
@@ -33,4 +33,4 @@ namespace backend {
         return {};
     }
 
-}  // namespace backend
+}  // namespace dawn_native

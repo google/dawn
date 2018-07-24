@@ -28,7 +28,7 @@
 #    include "common/windows_with_undefs.h"
 #endif
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class Device : public DeviceBase {
       public:
@@ -60,6 +60,6 @@ namespace backend { namespace opengl {
             const dawn::SamplerDescriptor* descriptor) override;
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_DEVICEGL_H_

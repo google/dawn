@@ -19,7 +19,7 @@
 
 #import <Metal/Metal.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class InputState : public InputStateBase {
       public:
@@ -32,6 +32,6 @@ namespace backend { namespace metal {
         MTLVertexDescriptor* mMtlVertexDescriptor = nil;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_COMMANDINPUTSTATEMTL_H_

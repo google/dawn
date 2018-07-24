@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <utility>
 
-namespace backend {
+namespace dawn_native {
 
     // Buffer
 
@@ -292,4 +292,4 @@ namespace backend {
         mPropertiesSet |= BUFFER_VIEW_PROPERTY_EXTENT;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

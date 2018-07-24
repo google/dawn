@@ -20,7 +20,7 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     class Device;
     class RenderPassDescriptor;
@@ -45,6 +45,6 @@ namespace backend { namespace d3d12 {
         std::vector<PassResourceUsage> mPassResourceUsages;
     };
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_COMMANDBUFFERD3D12_H_

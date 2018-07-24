@@ -19,7 +19,7 @@
 
 #include "glad/glad.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class Device;
 
@@ -41,6 +41,6 @@ namespace backend { namespace opengl {
         size_t mNumSampledTextures;
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_PIPELINELAYOUTGL_H_

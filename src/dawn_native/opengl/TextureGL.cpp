@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     namespace {
 
@@ -116,4 +116,4 @@ namespace backend { namespace opengl {
     TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

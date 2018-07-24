@@ -25,7 +25,7 @@
 #include <array>
 #include <bitset>
 
-namespace backend {
+namespace dawn_native {
 
     size_t IndexFormatSize(dawn::IndexFormat format);
     uint32_t VertexFormatNumComponents(dawn::VertexFormat format);
@@ -81,6 +81,6 @@ namespace backend {
         std::array<InputStateBase::InputInfo, kMaxVertexInputs> mInputInfos;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_INPUTSTATE_H_

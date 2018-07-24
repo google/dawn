@@ -23,7 +23,7 @@ namespace {
     class RenderPassDescriptor;
 }  // namespace
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
@@ -73,6 +73,6 @@ namespace backend { namespace opengl {
         return ToBackendBase<OpenGLBackendTraits>(common);
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_FORWARD_H_

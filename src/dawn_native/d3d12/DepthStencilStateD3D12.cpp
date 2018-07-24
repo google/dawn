@@ -16,7 +16,7 @@
 
 #include "common/BitSetIterator.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     static D3D12_STENCIL_OP StencilOp(dawn::StencilOperation op) {
         switch (op) {
@@ -65,7 +65,7 @@ namespace backend { namespace d3d12 {
     }
 
     static D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(
-        backend::DepthStencilStateBase::StencilFaceInfo faceInfo) {
+        DepthStencilStateBase::StencilFaceInfo faceInfo) {
         D3D12_DEPTH_STENCILOP_DESC desc;
 
         desc.StencilFailOp = StencilOp(faceInfo.stencilFail);
@@ -95,4 +95,4 @@ namespace backend { namespace d3d12 {
         return mDepthStencilDescriptor;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

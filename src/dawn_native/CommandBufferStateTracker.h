@@ -23,7 +23,7 @@
 #include <map>
 #include <set>
 
-namespace backend {
+namespace dawn_native {
 
     class CommandBufferStateTracker {
       public:
@@ -58,6 +58,6 @@ namespace backend {
         RenderPipelineBase* mLastRenderPipeline = nullptr;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H

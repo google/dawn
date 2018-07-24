@@ -19,7 +19,7 @@
 
 #include "common/vulkan_platform.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     class Device;
 
@@ -34,6 +34,6 @@ namespace backend { namespace vulkan {
         VkPipelineLayout mHandle = VK_NULL_HANDLE;
     };
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_PIPELINELAYOUTVK_H_

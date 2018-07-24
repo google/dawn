@@ -23,7 +23,7 @@ namespace spirv_cross {
     class CompilerMSL;
 }
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class PipelineLayout;
 
@@ -47,6 +47,6 @@ namespace backend { namespace metal {
         std::vector<uint32_t> mSpirv;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_SHADERMODULEMTL_H_

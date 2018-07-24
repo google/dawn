@@ -17,7 +17,7 @@
 
 #include "dawn_native/Queue.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class CommandBuffer;
     class Device;
@@ -30,6 +30,6 @@ namespace backend { namespace opengl {
         void Submit(uint32_t numCommands, CommandBuffer* const* commands);
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_QUEUEGL_H_

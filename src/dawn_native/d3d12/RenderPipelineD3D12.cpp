@@ -25,7 +25,7 @@
 
 #include <d3dcompiler.h>
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     namespace {
         D3D12_PRIMITIVE_TOPOLOGY D3D12PrimitiveTopology(dawn::PrimitiveTopology primitiveTopology) {
@@ -174,4 +174,4 @@ namespace backend { namespace d3d12 {
         return mPipelineState;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

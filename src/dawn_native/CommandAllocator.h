@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace backend {
+namespace dawn_native {
 
     // Allocation for command buffers should be fast. To avoid doing an allocation per command
     // or to avoid copying commands when reallocing, we use a linear allocator in a growing set
@@ -145,6 +145,6 @@ namespace backend {
         uint32_t mDummyEnum[1] = {0};
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMMAND_ALLOCATOR_H_

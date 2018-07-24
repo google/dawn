@@ -14,7 +14,7 @@
 
 #include "dawn_native/ErrorData.h"
 
-namespace backend {
+namespace dawn_native {
 
     ErrorData::ErrorData() = default;
 
@@ -38,4 +38,4 @@ namespace backend {
         return mBacktrace;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

@@ -21,7 +21,7 @@
 
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     class BlendStateBase : public RefCounted {
       public:
@@ -70,6 +70,6 @@ namespace backend {
         BlendStateBase::BlendInfo mBlendInfo;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_BLENDSTATE_H_

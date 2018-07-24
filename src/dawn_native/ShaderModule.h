@@ -30,7 +30,7 @@ namespace spirv_cross {
     class Compiler;
 }
 
-namespace backend {
+namespace dawn_native {
 
     class ShaderModuleBase : public RefCounted {
       public:
@@ -92,6 +92,6 @@ namespace backend {
         std::vector<uint32_t> mSpirv;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_SHADERMODULE_H_

@@ -21,7 +21,7 @@
 
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     using ErrorCallback = void (*)(const char* errorMessage, void* userData);
 
@@ -133,6 +133,6 @@ namespace backend {
         uint32_t mRefCount = 1;
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DEVICEBASE_H_

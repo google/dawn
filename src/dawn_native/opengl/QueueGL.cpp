@@ -17,7 +17,7 @@
 #include "dawn_native/opengl/CommandBufferGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     Queue::Queue(Device* device) : QueueBase(device) {
     }
@@ -28,4 +28,4 @@ namespace backend { namespace opengl {
         }
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

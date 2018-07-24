@@ -38,7 +38,7 @@
 #include "dawn_native/d3d12/SwapChainD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     dawnProcTable GetNonValidatingProcs();
     dawnProcTable GetValidatingProcs();
@@ -322,4 +322,4 @@ namespace backend { namespace d3d12 {
         return new TextureView(builder);
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

@@ -22,7 +22,7 @@
 #include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/Texture.h"
 
-namespace backend {
+namespace dawn_native {
 
     // RenderPipelineBase
 
@@ -218,4 +218,4 @@ namespace backend {
         mPrimitiveTopology = primitiveTopology;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

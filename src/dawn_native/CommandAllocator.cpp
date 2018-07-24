@@ -21,7 +21,7 @@
 #include <climits>
 #include <cstdlib>
 
-namespace backend {
+namespace dawn_native {
 
     constexpr uint32_t EndOfBlock = UINT_MAX;          // std::numeric_limits<uint32_t>::max();
     constexpr uint32_t AdditionalData = UINT_MAX - 1;  // std::numeric_limits<uint32_t>::max() - 1;
@@ -225,4 +225,4 @@ namespace backend {
         return true;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

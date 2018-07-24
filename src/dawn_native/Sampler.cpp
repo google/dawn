@@ -17,7 +17,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
-namespace backend {
+namespace dawn_native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase*, const dawn::SamplerDescriptor* descriptor) {
         DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
@@ -35,4 +35,4 @@ namespace backend {
     SamplerBase::SamplerBase(DeviceBase*, const dawn::SamplerDescriptor*) {
     }
 
-}  // namespace backend
+}  // namespace dawn_native

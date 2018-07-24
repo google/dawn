@@ -25,9 +25,9 @@
 #include <cstdio>
 #include "GLFW/glfw3.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
     void Init(void* (*getProc)(const char*), dawnProcTable* procs, dawnDevice* device);
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 namespace utils {
     class SwapChainImplGL {
@@ -113,8 +113,8 @@ namespace utils {
         }
         void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
             glfwMakeContextCurrent(mWindow);
-            backend::opengl::Init(reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress),
-                                  procs, device);
+            dawn_native::opengl::Init(reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress),
+                                      procs, device);
 
             mBackendDevice = *device;
         }

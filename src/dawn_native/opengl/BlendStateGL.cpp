@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     namespace {
         GLenum GLBlendFactor(dawn::BlendFactor factor, bool alpha) {
@@ -93,4 +93,4 @@ namespace backend { namespace opengl {
                      info.colorWriteMask & dawn::ColorWriteMask::Alpha);
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl

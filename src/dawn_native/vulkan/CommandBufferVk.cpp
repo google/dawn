@@ -24,7 +24,7 @@
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     namespace {
 
@@ -421,4 +421,4 @@ namespace backend { namespace vulkan {
         UNREACHABLE();
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

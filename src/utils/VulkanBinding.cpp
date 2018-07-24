@@ -22,7 +22,7 @@
 
 #include <vector>
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
     void Init(dawnProcTable* procs,
               dawnDevice* device,
               const std::vector<const char*>& requiredInstanceExtensions);
@@ -32,7 +32,7 @@ namespace backend { namespace vulkan {
     dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHR surface);
     dawnTextureFormat GetNativeSwapChainPreferredFormat(
         const dawnSwapChainImplementation* swapChain);
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan
 
 namespace utils {
 
@@ -74,24 +74,24 @@ namespace utils {
             std::vector<const char*> requiredExtensions(glfwInstanceExtensions,
                                                         glfwInstanceExtensions + extensionCount);
 
-            backend::vulkan::Init(procs, device, requiredExtensions);
+            dawn_native::vulkan::Init(procs, device, requiredExtensions);
             mDevice = *device;
         }
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
                 VkSurfaceKHR surface = VK_NULL_HANDLE;
-                if (glfwCreateWindowSurface(backend::vulkan::GetInstance(mDevice), mWindow, nullptr,
-                                            &surface) != VK_SUCCESS) {
+                if (glfwCreateWindowSurface(dawn_native::vulkan::GetInstance(mDevice), mWindow,
+                                            nullptr, &surface) != VK_SUCCESS) {
                     ASSERT(false);
                 }
 
-                mSwapchainImpl = backend::vulkan::CreateNativeSwapChainImpl(mDevice, surface);
+                mSwapchainImpl = dawn_native::vulkan::CreateNativeSwapChainImpl(mDevice, surface);
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
         dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
             ASSERT(mSwapchainImpl.userData != nullptr);
-            return backend::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+            return dawn_native::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:

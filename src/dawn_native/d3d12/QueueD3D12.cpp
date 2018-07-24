@@ -17,7 +17,7 @@
 #include "dawn_native/d3d12/CommandBufferD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     Queue::Queue(Device* device) : QueueBase(device) {
     }
@@ -38,4 +38,4 @@ namespace backend { namespace d3d12 {
         device->NextSerial();
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

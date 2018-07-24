@@ -19,7 +19,7 @@
 
 #import <Metal/Metal.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class RenderPipeline : public RenderPipelineBase {
       public:
@@ -37,6 +37,6 @@ namespace backend { namespace metal {
         id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_RENDERPIPELINEMTL_H_

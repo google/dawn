@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     namespace {
         VkBlendFactor VulkanBlendFactor(dawn::BlendFactor factor) {
@@ -107,4 +107,4 @@ namespace backend { namespace vulkan {
         return mState;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

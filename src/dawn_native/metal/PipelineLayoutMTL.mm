@@ -18,7 +18,7 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     PipelineLayout::PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
@@ -64,4 +64,4 @@ namespace backend { namespace metal {
         return mIndexInfo[stage];
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

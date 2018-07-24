@@ -19,7 +19,7 @@
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     CommandAllocatorManager::CommandAllocatorManager(Device* device)
         : device(device), mAllocatorCount(0) {
@@ -66,4 +66,4 @@ namespace backend { namespace d3d12 {
         mInFlightCommandAllocators.ClearUpTo(lastCompletedSerial);
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

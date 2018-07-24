@@ -25,7 +25,7 @@
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
     void Init(id<MTLDevice> metalDevice, dawnProcTable* procs, dawnDevice* device);
     void SetNextDrawable(dawnDevice device, id<CAMetalDrawable> drawable);
     void Present(dawnDevice device);
@@ -117,7 +117,7 @@ namespace utils {
         void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
             mMetalDevice = MTLCreateSystemDefaultDevice();
 
-            backend::metal::Init(mMetalDevice, procs, device);
+            dawn_native::metal::Init(mMetalDevice, procs, device);
             mBackendDevice = *device;
         }
 

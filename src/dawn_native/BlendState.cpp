@@ -16,7 +16,7 @@
 
 #include "dawn_native/Device.h"
 
-namespace backend {
+namespace dawn_native {
 
     // BlendStateBase
 
@@ -90,4 +90,4 @@ namespace backend {
 
         mBlendInfo.colorWriteMask = colorWriteMask;
     }
-}  // namespace backend
+}  // namespace dawn_native

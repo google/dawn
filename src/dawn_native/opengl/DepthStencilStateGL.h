@@ -17,7 +17,7 @@
 
 #include "dawn_native/DepthStencilState.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class Device;
     class PersistentPipelineState;
@@ -29,6 +29,6 @@ namespace backend { namespace opengl {
         void ApplyNow(PersistentPipelineState& persistentPipelineState) const;
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_DEPTHSTENCILSTATEGL_H_

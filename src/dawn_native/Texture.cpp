@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/Device.h"
 
-namespace backend {
+namespace dawn_native {
 
     uint32_t TextureFormatPixelSize(dawn::TextureFormat format) {
         switch (format) {
@@ -215,4 +215,4 @@ namespace backend {
         return mDevice->CreateTextureView(this);
     }
 
-}  // namespace backend
+}  // namespace dawn_native

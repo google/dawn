@@ -22,7 +22,7 @@
 #include "dawn/dawn_wsi.h"
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     class SwapChainBase : public RefCounted {
       public:
@@ -68,6 +68,6 @@ namespace backend {
         dawnSwapChainImplementation mImplementation = {};
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_SWAPCHAIN_H_

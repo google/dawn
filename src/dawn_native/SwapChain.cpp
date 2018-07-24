@@ -17,7 +17,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/Texture.h"
 
-namespace backend {
+namespace dawn_native {
 
     // SwapChain
 
@@ -117,4 +117,4 @@ namespace backend {
 
         mImplementation = impl;
     }
-}  // namespace backend
+}  // namespace dawn_native

@@ -17,7 +17,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
         const auto& im = GetImplementation();
@@ -56,4 +56,4 @@ namespace backend { namespace vulkan {
         device->SubmitPendingCommands();
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

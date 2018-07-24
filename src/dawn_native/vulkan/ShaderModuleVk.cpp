@@ -19,7 +19,7 @@
 
 #include <spirv-cross/spirv_cross.hpp>
 
-namespace backend { namespace vulkan {
+namespace dawn_native { namespace vulkan {
 
     ShaderModule::ShaderModule(ShaderModuleBuilder* builder) : ShaderModuleBase(builder) {
         std::vector<uint32_t> spirv = builder->AcquireSpirv();
@@ -57,4 +57,4 @@ namespace backend { namespace vulkan {
         return mHandle;
     }
 
-}}  // namespace backend::vulkan
+}}  // namespace dawn_native::vulkan

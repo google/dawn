@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-namespace backend {
+namespace dawn_native {
 
     class BindGroupBase;
     class BindGroupBuilder;
@@ -63,6 +63,6 @@ namespace backend {
     class PerStage;
 
     enum PushConstantType : uint8_t;
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_FORWARD_H_

@@ -21,7 +21,7 @@
 
 #include <functional>
 
-namespace backend {
+namespace dawn_native {
 
     MaybeError ValidateBindGroupLayoutDescriptor(
         DeviceBase*,
@@ -115,4 +115,4 @@ namespace backend {
         return a->GetBindingInfo() == b->GetBindingInfo();
     }
 
-}  // namespace backend
+}  // namespace dawn_native

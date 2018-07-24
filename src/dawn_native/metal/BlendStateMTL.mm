@@ -14,7 +14,7 @@
 
 #include "dawn_native/metal/BlendStateMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     namespace {
 
@@ -96,4 +96,4 @@ namespace backend { namespace metal {
         descriptor.writeMask = MetalColorWriteMask(info.colorWriteMask);
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

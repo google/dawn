@@ -19,7 +19,7 @@
 
 #import <Metal/Metal.h>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     class ComputePipeline : public ComputePipelineBase {
       public:
@@ -34,6 +34,6 @@ namespace backend { namespace metal {
         MTLSize mLocalWorkgroupSize;
     };
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_COMPUTEPIPELINEMTL_H_

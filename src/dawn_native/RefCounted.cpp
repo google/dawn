@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace backend {
+namespace dawn_native {
 
     RefCounted::RefCounted() {
     }
@@ -74,4 +74,4 @@ namespace backend {
         }
     }
 
-}  // namespace backend
+}  // namespace dawn_native

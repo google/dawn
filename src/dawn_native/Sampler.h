@@ -20,7 +20,7 @@
 
 #include "dawn/dawncpp.h"
 
-namespace backend {
+namespace dawn_native {
 
     class DeviceBase;
 
@@ -32,6 +32,6 @@ namespace backend {
         SamplerBase(DeviceBase* device, const dawn::SamplerDescriptor* descriptor);
     };
 
-}  // namespace backend
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_SAMPLER_H_

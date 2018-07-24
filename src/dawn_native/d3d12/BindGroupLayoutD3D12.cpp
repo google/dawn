@@ -17,7 +17,7 @@
 #include "common/BitSetIterator.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     BindGroupLayout::BindGroupLayout(Device* device,
                                      const dawn::BindGroupLayoutDescriptor* descriptor)
@@ -131,4 +131,4 @@ namespace backend { namespace d3d12 {
         return &mRanges[Sampler];
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

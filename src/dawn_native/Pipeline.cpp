@@ -20,7 +20,7 @@
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/ShaderModule.h"
 
-namespace backend {
+namespace dawn_native {
 
     // PipelineBase
 
@@ -118,4 +118,4 @@ namespace backend {
         mStages[stage].entryPoint = entryPoint;
     }
 
-}  // namespace backend
+}  // namespace dawn_native

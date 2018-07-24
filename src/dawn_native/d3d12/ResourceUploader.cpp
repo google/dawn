@@ -17,7 +17,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocator.h"
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     ResourceUploader::ResourceUploader(Device* device) : mDevice(device) {
     }
@@ -70,4 +70,4 @@ namespace backend { namespace d3d12 {
         mDevice->GetResourceAllocator()->Release(uploadHandle.resource);
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

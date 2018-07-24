@@ -14,7 +14,7 @@
 
 #include "dawn_native/PerStage.h"
 
-namespace backend {
+namespace dawn_native {
 
     BitSetIterator<kNumStages, dawn::ShaderStage> IterateStages(dawn::ShaderStageBit stages) {
         std::bitset<kNumStages> bits(static_cast<uint32_t>(stages));
@@ -26,4 +26,4 @@ namespace backend {
         return static_cast<dawn::ShaderStageBit>(1 << static_cast<uint32_t>(stage));
     }
 
-}  // namespace backend
+}  // namespace dawn_native

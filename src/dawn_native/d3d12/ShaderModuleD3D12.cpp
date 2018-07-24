@@ -18,7 +18,7 @@
 
 #include <spirv-cross/spirv_hlsl.hpp>
 
-namespace backend { namespace d3d12 {
+namespace dawn_native { namespace d3d12 {
 
     // TODO(kainino@chromium.org): Consider replacing this with a generic enum_map.
     template <typename T>
@@ -83,4 +83,4 @@ namespace backend { namespace d3d12 {
         return mHlslSource;
     }
 
-}}  // namespace backend::d3d12
+}}  // namespace dawn_native::d3d12

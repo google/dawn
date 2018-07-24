@@ -19,7 +19,7 @@
 
 #include "glad/glad.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
 
     class BlendState : public BlendStateBase {
       public:
@@ -28,6 +28,6 @@ namespace backend { namespace opengl {
         void ApplyNow(uint32_t attachment);
     };
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_BLENDSTATEGL_H_

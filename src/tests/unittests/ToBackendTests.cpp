@@ -20,12 +20,12 @@
 #include <type_traits>
 
 // Make our own Base - Backend object pair, reusing the CommandBuffer name
-namespace backend {
+namespace dawn_native {
     class CommandBufferBase : public RefCounted {
     };
 }
 
-using namespace backend;
+using namespace dawn_native;
 
 class MyCommandBuffer : public CommandBufferBase {
 };

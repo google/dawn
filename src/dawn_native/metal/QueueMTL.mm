@@ -17,7 +17,7 @@
 #include "dawn_native/metal/CommandBufferMTL.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     Queue::Queue(Device* device) : QueueBase(device) {
     }
@@ -34,4 +34,4 @@ namespace backend { namespace metal {
         device->SubmitPendingCommandBuffer();
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

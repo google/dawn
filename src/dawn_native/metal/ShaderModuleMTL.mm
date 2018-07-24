@@ -22,7 +22,7 @@
 
 #include <sstream>
 
-namespace backend { namespace metal {
+namespace dawn_native { namespace metal {
 
     namespace {
 
@@ -125,4 +125,4 @@ namespace backend { namespace metal {
         return result;
     }
 
-}}  // namespace backend::metal
+}}  // namespace dawn_native::metal

@@ -16,7 +16,7 @@
 
 #include "dawn/dawn.h"
 
-namespace backend {
+namespace dawn_native {
     namespace null {
         void Init(dawnProcTable* procs, dawnDevice* device);
     }
@@ -25,7 +25,7 @@ namespace backend {
 ValidationTest::ValidationTest() {
     dawnProcTable procs;
     dawnDevice cDevice;
-    backend::null::Init(&procs, &cDevice);
+    dawn_native::null::Init(&procs, &cDevice);
 
     dawnSetProcs(&procs);
     device = dawn::Device::Acquire(cDevice);

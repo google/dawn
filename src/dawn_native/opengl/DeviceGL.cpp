@@ -31,7 +31,7 @@
 #include "dawn_native/opengl/SwapChainGL.h"
 #include "dawn_native/opengl/TextureGL.h"
 
-namespace backend { namespace opengl {
+namespace dawn_native { namespace opengl {
     dawnProcTable GetNonValidatingProcs();
     dawnProcTable GetValidatingProcs();
 
@@ -112,4 +112,4 @@ namespace backend { namespace opengl {
     void Device::TickImpl() {
     }
 
-}}  // namespace backend::opengl
+}}  // namespace dawn_native::opengl
