@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef DAWN_H
-#define DAWN_H
+#ifndef DAWN_DAWN_H_
+#define DAWN_DAWN_H_
 
 #include <stdint.h>
 #include <stddef.h>
@@ -100,4 +100,4 @@ void dawnSetProcs(const dawnProcTable* procs);
 } // extern "C"
 #endif
 
-#endif // DAWN_H
+#endif // DAWN_DAWN_H_

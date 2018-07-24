@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef DAWNCPP_H
-#define DAWNCPP_H
+#ifndef DAWN_DAWNCPP_H_
+#define DAWN_DAWNCPP_H_
 
 #include "dawn.h"
 
@@ -160,4 +160,4 @@ namespace dawn {
 
 } // namespace dawn
 
-#endif // DAWNCPP_H
+#endif // DAWN_DAWNCPP_H_
