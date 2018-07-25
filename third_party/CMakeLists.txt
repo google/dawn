@@ -36,7 +36,9 @@ add_library(glad STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include/glad/glad.h
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include/KHR/khrplatform.h
 )
-target_include_directories(glad SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
+set(GLAD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
+set(GLAD_INCLUDE_DIR ${GLAD_INCLUDE_DIR} PARENT_SCOPE)
+target_include_directories(glad SYSTEM PUBLIC ${GLAD_INCLUDE_DIR})
 DawnExternalTarget("third_party" glad)
 
 # ShaderC
@@ -129,7 +131,7 @@ if (DAWN_ENABLE_OPENGL OR NEED_SPIRV_CROSS_GLSL)
 endif()
 
 add_library(spirv_cross STATIC ${SPIRV_CROSS_SOURCES})
-target_include_directories(spirv_cross SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+set(SPIRV_CROSS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 DawnExternalTarget("third_party" spirv_cross)
 
 # STB, used for stb_image
@@ -137,6 +139,9 @@ set(STB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/stb PARENT_SCOPE)
 
 # glm matrix math library
 set(GLM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glm PARENT_SCOPE)
+
+# Tiny glTF loader library
+set(TINYGLTFLOADER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
 # Vulkan headers
 set(VULKAN_HEADERS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

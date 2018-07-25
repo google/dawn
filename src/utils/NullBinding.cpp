@@ -14,9 +14,7 @@
 
 #include "utils/BackendBinding.h"
 
-namespace dawn_native { namespace null {
-    void Init(dawnProcTable* procs, dawnDevice* device);
-}}  // namespace dawn_native::null
+#include "dawn_native/NullBackend.h"
 
 namespace utils {
 

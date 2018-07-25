@@ -54,8 +54,7 @@ if (DAWN_ENABLE_VULKAN)
 endif()
 
 add_library(utils STATIC ${UTILS_SOURCES})
-target_link_libraries(utils libdawn_native shaderc_shared libdawn)
-target_include_directories(utils PUBLIC ${SRC_DIR})
+target_link_libraries(utils libdawn_native shaderc_shared libdawn glfw)
 DawnInternalTarget("" utils)
 if(NOT MSVC)
     # allow C-style casts -- for shaderc

@@ -17,6 +17,7 @@
 #include "common/Platform.h"
 #include "common/SwapChainUtils.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
 #include "dawn_native/vulkan/BlendStateVk.h"
@@ -67,7 +68,8 @@ namespace dawn_native { namespace vulkan {
         return backendDevice->GetInstance();
     }
 
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHRNative surfaceNative) {
+    DAWN_NATIVE_EXPORT dawnSwapChainImplementation
+    CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHRNative surfaceNative) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         VkSurfaceKHR surface = VkSurfaceKHR::CreateFromHandle(surfaceNative);
 

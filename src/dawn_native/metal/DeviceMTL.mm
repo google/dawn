@@ -16,6 +16,7 @@
 
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
+#include "dawn_native/MetalBackend.h"
 #include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/metal/BlendStateMTL.h"
 #include "dawn_native/metal/BufferMTL.h"

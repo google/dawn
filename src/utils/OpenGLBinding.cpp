@@ -18,16 +18,13 @@
 #include "common/Platform.h"
 #include "common/SwapChainUtils.h"
 #include "dawn/dawn_wsi.h"
+#include "dawn_native/OpenGLBackend.h"
 
 // Glad needs to be included before GLFW otherwise it complain that GL.h was already included
 #include "glad/glad.h"
 
 #include <cstdio>
 #include "GLFW/glfw3.h"
-
-namespace dawn_native { namespace opengl {
-    void Init(void* (*getProc)(const char*), dawnProcTable* procs, dawnDevice* device);
-}}  // namespace dawn_native::opengl
 
 namespace utils {
     class SwapChainImplGL {

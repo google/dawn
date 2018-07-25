@@ -24,6 +24,7 @@ function(add_dawn_sample target sources)
     target_link_libraries(${target} sample_utils)
     target_include_directories(${target} SYSTEM PRIVATE ${GLM_INCLUDE_DIR})
     target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(${target} PRIVATE ${GLM_INCLUDE_DIR} ${TINYGLTFLOADER_INCLUDE_DIR})
     DawnInternalTarget("examples" ${target})
 
     # Suppress some warnings in our sample dependencies

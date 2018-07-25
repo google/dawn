@@ -18,6 +18,7 @@ set(METAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/metal)
 set(NULL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/null)
 set(OPENGL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opengl)
 set(VULKAN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vulkan)
+set(DAWN_NATIVE_INCLUDE_DIR ${INCLUDE_DIR}/dawn_native)
 
 Generate(
     LIB_NAME dawn_native_utils_autogen
@@ -42,14 +43,20 @@ function(GenerateProcTable backend)
     target_link_libraries(${backend}_autogen dawn_native_utils_autogen)
 endfunction()
 
+set(DAWN_NATIVE_SOURCES)
+set(DAWN_NATIVE_DEPS dawn_common spirv_cross)
+set(DAWN_NATIVE_INCLUDE_DIRS ${SPIRV_CROSS_INCLUDE_DIR})
+
 ################################################################################
 # OpenGL Backend
 ################################################################################
 
 if (DAWN_ENABLE_OPENGL)
     GenerateProcTable(opengl)
-    target_link_libraries(opengl_autogen glfw glad)
+    target_link_libraries(opengl_autogen glad)
 
+    list(APPEND DAWN_NATIVE_DEPS opengl_autogen glad)
+    list(APPEND DAWN_NATIVE_INCLUDE_DIRS ${GLAD_INCLUDE_DIR})
     list(APPEND DAWN_NATIVE_SOURCES
         ${OPENGL_DIR}/BlendStateGL.cpp
         ${OPENGL_DIR}/BlendStateGL.h
@@ -84,6 +91,7 @@ if (DAWN_ENABLE_OPENGL)
         ${OPENGL_DIR}/SwapChainGL.h
         ${OPENGL_DIR}/TextureGL.cpp
         ${OPENGL_DIR}/TextureGL.h
+        ${DAWN_NATIVE_INCLUDE_DIR}/OpenGLBackend.h
     )
 endif()
 
@@ -93,10 +101,12 @@ endif()
 
 if (DAWN_ENABLE_NULL)
     GenerateProcTable(null)
+    list(APPEND DAWN_NATIVE_DEPS null_autogen)
 
     list(APPEND DAWN_NATIVE_SOURCES
         ${NULL_DIR}/NullBackend.cpp
         ${NULL_DIR}/NullBackend.h
+        ${DAWN_NATIVE_INCLUDE_DIR}/NullBackend.h
     )
 endif()
 
@@ -106,7 +116,7 @@ endif()
 
 if (DAWN_ENABLE_METAL)
     GenerateProcTable(metal)
-    target_link_libraries(metal_autogen "-framework QuartzCore" "-framework Metal")
+    list(APPEND DAWN_NATIVE_DEPS metal_autogen "-framework QuartzCore" "-framework Metal" "-framework Cocoa")
 
     list(APPEND DAWN_NATIVE_SOURCES
         ${METAL_DIR}/BlendStateMTL.mm
@@ -140,6 +150,7 @@ if (DAWN_ENABLE_METAL)
         ${METAL_DIR}/SwapChainMTL.h
         ${METAL_DIR}/TextureMTL.mm
         ${METAL_DIR}/TextureMTL.h
+        ${DAWN_NATIVE_INCLUDE_DIR}/MetalBackend.h
     )
 endif()
 
@@ -205,8 +216,8 @@ if (DAWN_ENABLE_D3D12)
         list(APPEND D3D12_LIBRARIES ${DXGUID_LIBRARY})
     endif()
 
-    target_link_libraries(d3d12_autogen ${D3D12_LIBRARIES})
-    target_include_directories(d3d12_autogen SYSTEM PRIVATE ${D3D12_INCLUDE_DIR} ${DXGI_INCLUDE_DIR})
+    list(APPEND DAWN_NATIVE_DEPS d3d12_autogen ${D3D12_LIBRARIES})
+    target_include_directories(d3d12_autogen SYSTEM PUBLIC ${D3D12_INCLUDE_DIR} ${DXGI_INCLUDE_DIR})
 
     list(APPEND DAWN_NATIVE_SOURCES
         ${D3D12_DIR}/d3d12_platform.h
@@ -257,6 +268,7 @@ if (DAWN_ENABLE_D3D12)
         ${D3D12_DIR}/TextureCopySplitter.h
         ${D3D12_DIR}/TextureD3D12.cpp
         ${D3D12_DIR}/TextureD3D12.h
+        ${DAWN_NATIVE_INCLUDE_DIR}/D3D12Backend.h
     )
 endif()
 
@@ -266,6 +278,7 @@ endif()
 
 if (DAWN_ENABLE_VULKAN)
     GenerateProcTable(vulkan)
+    list(APPEND DAWN_NATIVE_DEPS vulkan_autogen)
     target_include_directories(vulkan_autogen PUBLIC ${VULKAN_HEADERS_INCLUDE_DIR})
 
     list(APPEND DAWN_NATIVE_SOURCES
@@ -318,6 +331,7 @@ if (DAWN_ENABLE_VULKAN)
         ${VULKAN_DIR}/VulkanFunctions.h
         ${VULKAN_DIR}/VulkanInfo.cpp
         ${VULKAN_DIR}/VulkanInfo.h
+        ${DAWN_NATIVE_INCLUDE_DIR}/VulkanBackend.h
     )
 endif()
 
@@ -382,24 +396,28 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/Texture.cpp
     ${DAWN_NATIVE_DIR}/Texture.h
     ${DAWN_NATIVE_DIR}/ToBackend.h
+    ${DAWN_NATIVE_INCLUDE_DIR}/dawn_native_export.h
 )
 
-add_library(libdawn_native STATIC ${DAWN_NATIVE_SOURCES})
-DawnInternalTarget("dawn_native" libdawn_native)
-target_link_libraries(libdawn_native dawn_common glfw glad spirv_cross)
+# We want to produce both a static and a shared libdawn_native library. The static one is for
+# unittests that need access to all the symbols of the library. The shared one is for the other
+# users that access libdawn_native through the regular interface.
+# We use a CMake "OBJECT" library type which allows precompiling the source files and reusing
+# them for both the static and the shared library. Recent CMake versions make it so if you
+# depend on an OBJECT library you get its dependencies and source files, which is very similar to
+# GN's source_set. However the versions of CMake on our test bots is too old and doesn't support
+# this, so instead we duplicate the deps everywhere.
+add_library(libdawn_native_objects OBJECT ${DAWN_NATIVE_SOURCES})
+DawnInternalTarget("dawn_native" libdawn_native_objects)
+target_compile_definitions(libdawn_native_objects PRIVATE DAWN_NATIVE_IMPLEMENTATION)
+target_include_directories(libdawn_native_objects PRIVATE ${DAWN_NATIVE_INCLUDE_DIRS})
+add_dependencies(libdawn_native_objects dawn_native_utils_autogen)
 
-if (DAWN_ENABLE_D3D12)
-    target_link_libraries(libdawn_native d3d12_autogen)
-endif()
-if (DAWN_ENABLE_METAL)
-    target_link_libraries(libdawn_native metal_autogen)
-endif()
-if (DAWN_ENABLE_NULL)
-    target_link_libraries(libdawn_native null_autogen)
-endif()
-if (DAWN_ENABLE_OPENGL)
-    target_link_libraries(libdawn_native opengl_autogen)
-endif()
-if (DAWN_ENABLE_VULKAN)
-    target_link_libraries(libdawn_native vulkan_autogen)
-endif()
+add_library(libdawn_native SHARED $<TARGET_OBJECTS:libdawn_native_objects>)
+DawnInternalTarget("dawn_native" libdawn_native)
+target_link_libraries(libdawn_native ${DAWN_NATIVE_DEPS})
+set_property(TARGET libdawn_native PROPERTY OUTPUT_NAME "dawn_native")
+
+add_library(libdawn_native_static STATIC $<TARGET_OBJECTS:libdawn_native_objects>)
+DawnInternalTarget("dawn_native" libdawn_native_static)
+target_link_libraries(libdawn_native_static ${DAWN_NATIVE_DEPS})

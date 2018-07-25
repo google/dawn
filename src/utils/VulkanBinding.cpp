@@ -15,26 +15,10 @@
 #include "utils/BackendBinding.h"
 
 #include "common/Assert.h"
-#include "dawn/dawn_wsi.h"
+#include "dawn_native/VulkanBackend.h"
 
-#include <vulkan/vulkan.h>
-
-// Include GLFW after Vulkan so that it declares the Vulkan-specific functions
+// Include GLFW after VulkanBackend so that it declares the Vulkan-specific functions
 #include "GLFW/glfw3.h"
-
-#include <vector>
-
-namespace dawn_native { namespace vulkan {
-    void Init(dawnProcTable* procs,
-              dawnDevice* device,
-              const std::vector<const char*>& requiredInstanceExtensions);
-
-    VkInstance GetInstance(dawnDevice device);
-
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHR surface);
-    dawnTextureFormat GetNativeSwapChainPreferredFormat(
-        const dawnSwapChainImplementation* swapChain);
-}}  // namespace dawn_native::vulkan
 
 namespace utils {
 

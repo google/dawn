@@ -15,19 +15,11 @@
 #include "utils/BackendBinding.h"
 
 #include "common/Assert.h"
-#include "dawn/dawn_wsi.h"
+#include "dawn_native/D3D12Backend.h"
 
 #include "GLFW/glfw3.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3native.h"
-
-namespace dawn_native { namespace d3d12 {
-    void Init(dawnProcTable* procs, dawnDevice* device);
-
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, HWND window);
-    dawnTextureFormat GetNativeSwapChainPreferredFormat(
-        const dawnSwapChainImplementation* swapChain);
-}}  // namespace dawn_native::d3d12
 
 namespace utils {
 

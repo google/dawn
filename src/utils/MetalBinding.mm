@@ -16,20 +16,11 @@
 
 #include "common/Assert.h"
 #include "common/SwapChainUtils.h"
-#include "dawn/dawn_wsi.h"
+#include "dawn_native/MetalBackend.h"
 
 #define GLFW_EXPOSE_NATIVE_COCOA
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
-
-#import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
-
-namespace dawn_native { namespace metal {
-    void Init(id<MTLDevice> metalDevice, dawnProcTable* procs, dawnDevice* device);
-    void SetNextDrawable(dawnDevice device, id<CAMetalDrawable> drawable);
-    void Present(dawnDevice device);
-}}
 
 namespace utils {
     class SwapChainImplMTL {

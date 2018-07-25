@@ -15,6 +15,7 @@
 #include "dawn_native/null/NullBackend.h"
 
 #include "dawn_native/Commands.h"
+#include "dawn_native/NullBackend.h"
 
 #include <spirv-cross/spirv_cross.hpp>
 
