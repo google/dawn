@@ -216,9 +216,11 @@ Generate(
         ${GENERATOR_COMMON_ARGS}
         -T libdawn
 )
+target_compile_definitions(libdawn_autogen PRIVATE DAWN_IMPLEMENTATION)
 
-add_library(libdawn STATIC
+add_library(libdawn SHARED
     $<TARGET_OBJECTS:libdawn_autogen>
+    ${INCLUDE_DIR}/dawn/dawn_export.h
     ${INCLUDE_DIR}/dawn/dawn_wsi.h
     ${INCLUDE_DIR}/dawn/EnumClassBitmasks.h
 )

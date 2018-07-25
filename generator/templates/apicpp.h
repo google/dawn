@@ -15,8 +15,8 @@
 #ifndef DAWN_DAWNCPP_H_
 #define DAWN_DAWNCPP_H_
 
-#include "dawn.h"
-
+#include "dawn/dawn.h"
+#include "dawn/dawn_export.h"
 #include "dawn/EnumClassBitmasks.h"
 
 namespace dawn {
@@ -141,7 +141,7 @@ namespace dawn {
     {% for type in by_category["object"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
-        class {{CppType}} : public ObjectBase<{{CppType}}, {{CType}}> {
+        class DAWN_EXPORT {{CppType}} : public ObjectBase<{{CppType}}, {{CType}}> {
             public:
                 using ObjectBase::ObjectBase;
                 using ObjectBase::operator=;

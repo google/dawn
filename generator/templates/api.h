@@ -15,6 +15,8 @@
 #ifndef DAWN_DAWN_H_
 #define DAWN_DAWN_H_
 
+#include "dawn/dawn_export.h"
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -81,12 +83,12 @@ typedef struct dawnProcTable_s dawnProcTable;
 // Stuff below is for convenience and will forward calls to a static dawnProcTable.
 
 // Set which dawnProcTable will be used
-void dawnSetProcs(const dawnProcTable* procs);
+DAWN_EXPORT void dawnSetProcs(const dawnProcTable* procs);
 
 {% for type in by_category["object"] %}
     // Methods of {{type.name.CamelCase()}}
     {% for method in native_methods(type) %}
-        {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
+        DAWN_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}
