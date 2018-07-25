@@ -99,6 +99,7 @@ endif()
 if (MSVC)
     list(APPEND DAWN_FLAGS "/std:c++14")
     list(APPEND DAWN_FLAGS "/EHsc")
+    list(APPEND DAWN_FLAGS "/MP")
     list(APPEND DAWN_INTERNAL_FLAGS "/W4")
     # Allow declarations hiding members as it is used all over Dawn
     list(APPEND DAWN_INTERNAL_FLAGS "/wd4458")
