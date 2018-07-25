@@ -54,8 +54,7 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    BindGroupLayout::BindGroupLayout(Device* device,
-                                     const dawn::BindGroupLayoutDescriptor* descriptor)
+    BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor) {
         const auto& info = GetBindingInfo();
 

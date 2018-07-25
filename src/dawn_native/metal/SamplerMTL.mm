@@ -49,7 +49,7 @@ namespace dawn_native { namespace metal {
         }
     }
 
-    Sampler::Sampler(Device* device, const dawn::SamplerDescriptor* descriptor)
+    Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
         MTLSamplerDescriptor* mtlDesc = [MTLSamplerDescriptor new];
         [mtlDesc autorelease];

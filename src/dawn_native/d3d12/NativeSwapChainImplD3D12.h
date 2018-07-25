@@ -18,7 +18,7 @@
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 #include "dawn/dawn_wsi.h"
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <vector>
 

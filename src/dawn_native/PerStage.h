@@ -19,7 +19,7 @@
 #include "common/BitSetIterator.h"
 #include "common/Constants.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <array>
 

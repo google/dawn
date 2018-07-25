@@ -31,7 +31,7 @@ namespace dawn_native { namespace metal {
 
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor);
+        PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
             std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;

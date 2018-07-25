@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_OPENGL_PERSISTENTPIPELINESTATEGL_H_
 #define DAWNNATIVE_OPENGL_PERSISTENTPIPELINESTATEGL_H_
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include "glad/glad.h"
 

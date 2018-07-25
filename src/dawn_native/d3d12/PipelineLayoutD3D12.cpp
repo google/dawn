@@ -23,7 +23,7 @@ using Microsoft::WRL::ComPtr;
 
 namespace dawn_native { namespace d3d12 {
 
-    PipelineLayout::PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor)
+    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
         D3D12_ROOT_PARAMETER rootParameters[kMaxBindGroups * 2];
 

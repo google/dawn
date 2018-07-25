@@ -19,8 +19,7 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    BindGroupLayout::BindGroupLayout(Device* device,
-                                     const dawn::BindGroupLayoutDescriptor* descriptor)
+    BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor), mDescriptorCounts{} {
         const auto& groupInfo = GetBindingInfo();
 

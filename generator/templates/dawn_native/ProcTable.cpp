@@ -12,11 +12,9 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "dawn/dawn.h"
-#include "dawn/dawncpp.h"
-
 #include "common/Assert.h"
 
+#include "dawn_native/dawn_platform.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 #include "dawn_native/{{namespace}}/GeneratedCodeIncludes.h"
@@ -51,7 +49,7 @@ namespace {{namespace}} {
                             {%- if arg.type.category in ["enum", "bitmask"] -%}
                                 static_cast<dawn::{{as_cppType(arg.type.name)}}>({{as_varName(arg.name)}})
                             {%- elif arg.type.category == "structure" and arg.annotation != "value" -%}
-                                reinterpret_cast<const dawn::{{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
+                                reinterpret_cast<const {{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
                             {%- else -%}
                                 {{as_varName(arg.name)}}
                             {%- endif -%}
@@ -169,7 +167,7 @@ namespace {{namespace}} {
                             {%- if arg.type.category in ["enum", "bitmask"] -%}
                                 static_cast<dawn::{{as_cppType(arg.type.name)}}>({{as_varName(arg.name)}})
                             {%- elif arg.type.category == "structure" and arg.annotation != "value" -%}
-                                reinterpret_cast<const dawn::{{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
+                                reinterpret_cast<const {{as_cppType(arg.type.name)}}*>({{as_varName(arg.name)}})
                             {%- else -%}
                                 {{as_varName(arg.name)}}
                             {%- endif -%}

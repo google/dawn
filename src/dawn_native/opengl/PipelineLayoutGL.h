@@ -25,7 +25,7 @@ namespace dawn_native { namespace opengl {
 
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor);
+        PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
             std::array<std::array<GLuint, kMaxBindingsPerGroup>, kMaxBindGroups>;

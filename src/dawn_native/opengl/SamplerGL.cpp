@@ -71,7 +71,7 @@ namespace dawn_native { namespace opengl {
 
     }  // namespace
 
-    Sampler::Sampler(Device* device, const dawn::SamplerDescriptor* descriptor)
+    Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
         glGenSamplers(1, &mHandle);
         glSamplerParameteri(mHandle, GL_TEXTURE_MAG_FILTER, MagFilterMode(descriptor->magFilter));

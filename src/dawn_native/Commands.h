@@ -18,7 +18,7 @@
 #include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/Texture.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 

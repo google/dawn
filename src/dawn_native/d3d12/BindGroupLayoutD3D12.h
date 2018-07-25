@@ -25,7 +25,7 @@ namespace dawn_native { namespace d3d12 {
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
-        BindGroupLayout(Device* device, const dawn::BindGroupLayoutDescriptor* descriptor);
+        BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
 
         enum DescriptorType {
             CBV,

@@ -479,6 +479,8 @@ def main():
     if 'dawn_native_utils' in targets:
         renders.append(FileRender('dawn_native/ValidationUtils.h', 'dawn_native/ValidationUtils_autogen.h', base_backend_params))
         renders.append(FileRender('dawn_native/ValidationUtils.cpp', 'dawn_native/ValidationUtils_autogen.cpp', base_backend_params))
+        renders.append(FileRender('dawn_native/api_structs.h', 'dawn_native/dawn_structs_autogen.h', base_backend_params))
+        renders.append(FileRender('dawn_native/api_structs.cpp', 'dawn_native/dawn_structs_autogen.cpp', base_backend_params))
 
     if 'wire' in targets:
         renders.append(FileRender('wire/WireCmd.h', 'wire/WireCmd_autogen.h', base_backend_params))

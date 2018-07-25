@@ -27,7 +27,7 @@ namespace dawn_native {
     PipelineBase::PipelineBase(PipelineBuilder* builder)
         : mStageMask(builder->mStageMask), mLayout(std::move(builder->mLayout)) {
         if (!mLayout) {
-            dawn::PipelineLayoutDescriptor descriptor;
+            PipelineLayoutDescriptor descriptor;
             descriptor.numBindGroupLayouts = 0;
             descriptor.bindGroupLayouts = nullptr;
             mLayout = builder->GetParentBuilder()->GetDevice()->CreatePipelineLayout(&descriptor);

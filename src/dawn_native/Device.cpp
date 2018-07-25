@@ -74,7 +74,7 @@ namespace dawn_native {
     }
 
     ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateBindGroupLayout(
-        const dawn::BindGroupLayoutDescriptor* descriptor) {
+        const BindGroupLayoutDescriptor* descriptor) {
         BindGroupLayoutBase blueprint(this, descriptor, true);
 
         auto iter = mCaches->bindGroupLayouts.find(&blueprint);
@@ -99,7 +99,7 @@ namespace dawn_native {
         return new BindGroupBuilder(this);
     }
     BindGroupLayoutBase* DeviceBase::CreateBindGroupLayout(
-        const dawn::BindGroupLayoutDescriptor* descriptor) {
+        const BindGroupLayoutDescriptor* descriptor) {
         BindGroupLayoutBase* result = nullptr;
 
         if (ConsumedError(CreateBindGroupLayoutInternal(&result, descriptor))) {
@@ -127,7 +127,7 @@ namespace dawn_native {
         return new InputStateBuilder(this);
     }
     PipelineLayoutBase* DeviceBase::CreatePipelineLayout(
-        const dawn::PipelineLayoutDescriptor* descriptor) {
+        const PipelineLayoutDescriptor* descriptor) {
         PipelineLayoutBase* result = nullptr;
 
         if (ConsumedError(CreatePipelineLayoutInternal(&result, descriptor))) {
@@ -151,7 +151,7 @@ namespace dawn_native {
     RenderPipelineBuilder* DeviceBase::CreateRenderPipelineBuilder() {
         return new RenderPipelineBuilder(this);
     }
-    SamplerBase* DeviceBase::CreateSampler(const dawn::SamplerDescriptor* descriptor) {
+    SamplerBase* DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
         SamplerBase* result = nullptr;
 
         if (ConsumedError(CreateSamplerInternal(&result, descriptor))) {
@@ -193,7 +193,7 @@ namespace dawn_native {
 
     MaybeError DeviceBase::CreateBindGroupLayoutInternal(
         BindGroupLayoutBase** result,
-        const dawn::BindGroupLayoutDescriptor* descriptor) {
+        const BindGroupLayoutDescriptor* descriptor) {
         DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
         return {};
@@ -201,7 +201,7 @@ namespace dawn_native {
 
     MaybeError DeviceBase::CreatePipelineLayoutInternal(
         PipelineLayoutBase** result,
-        const dawn::PipelineLayoutDescriptor* descriptor) {
+        const PipelineLayoutDescriptor* descriptor) {
         DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, CreatePipelineLayoutImpl(descriptor));
         return {};
@@ -213,7 +213,7 @@ namespace dawn_native {
     }
 
     MaybeError DeviceBase::CreateSamplerInternal(SamplerBase** result,
-                                                 const dawn::SamplerDescriptor* descriptor) {
+                                                 const SamplerDescriptor* descriptor) {
         DAWN_TRY(ValidateSamplerDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, CreateSamplerImpl(descriptor));
         return {};

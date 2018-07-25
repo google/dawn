@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_PASSRESOURCEUSAGE_H
 #define DAWNNATIVE_PASSRESOURCEUSAGE_H
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <vector>
 

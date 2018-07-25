@@ -54,7 +54,7 @@ namespace dawn_native { namespace opengl {
         return new BindGroup(builder);
     }
     ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
-        const dawn::BindGroupLayoutDescriptor* descriptor) {
+        const BindGroupLayoutDescriptor* descriptor) {
         return new BindGroupLayout(this, descriptor);
     }
     BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
@@ -79,7 +79,7 @@ namespace dawn_native { namespace opengl {
         return new InputState(builder);
     }
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
-        const dawn::PipelineLayoutDescriptor* descriptor) {
+        const PipelineLayoutDescriptor* descriptor) {
         return new PipelineLayout(this, descriptor);
     }
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
@@ -92,8 +92,7 @@ namespace dawn_native { namespace opengl {
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
     }
-    ResultOrError<SamplerBase*> Device::CreateSamplerImpl(
-        const dawn::SamplerDescriptor* descriptor) {
+    ResultOrError<SamplerBase*> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {

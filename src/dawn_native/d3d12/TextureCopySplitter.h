@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_TEXTURECOPYSPLITTER_H_
 #define DAWNNATIVE_D3D12_TEXTURECOPYSPLITTER_H_
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <array>
 

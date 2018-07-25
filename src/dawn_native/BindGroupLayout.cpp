@@ -23,9 +23,8 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateBindGroupLayoutDescriptor(
-        DeviceBase*,
-        const dawn::BindGroupLayoutDescriptor* descriptor) {
+    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
+                                                 const BindGroupLayoutDescriptor* descriptor) {
         DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
@@ -74,7 +73,7 @@ namespace dawn_native {
     // BindGroupLayoutBase
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
-                                             const dawn::BindGroupLayoutDescriptor* descriptor,
+                                             const BindGroupLayoutDescriptor* descriptor,
                                              bool blueprint)
         : mDevice(device), mIsBlueprint(blueprint) {
         for (uint32_t i = 0; i < descriptor->numBindings; ++i) {

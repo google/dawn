@@ -20,7 +20,7 @@
 
 namespace dawn_native { namespace opengl {
 
-    PipelineLayout::PipelineLayout(Device* device, const dawn::PipelineLayoutDescriptor* descriptor)
+    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
         GLuint uboIndex = 0;
         GLuint samplerIndex = 0;

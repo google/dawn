@@ -18,18 +18,17 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/RefCounted.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 
     class DeviceBase;
 
-    MaybeError ValidateSamplerDescriptor(DeviceBase* device,
-                                         const dawn::SamplerDescriptor* descriptor);
+    MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor);
 
     class SamplerBase : public RefCounted {
       public:
-        SamplerBase(DeviceBase* device, const dawn::SamplerDescriptor* descriptor);
+        SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor);
     };
 
 }  // namespace dawn_native

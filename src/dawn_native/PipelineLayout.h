@@ -20,7 +20,7 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/RefCounted.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <array>
 #include <bitset>
@@ -28,13 +28,13 @@
 namespace dawn_native {
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
-                                                const dawn::PipelineLayoutDescriptor* descriptor);
+                                                const PipelineLayoutDescriptor* descriptor);
 
     using BindGroupLayoutArray = std::array<Ref<BindGroupLayoutBase>, kMaxBindGroups>;
 
     class PipelineLayoutBase : public RefCounted {
       public:
-        PipelineLayoutBase(DeviceBase* device, const dawn::PipelineLayoutDescriptor* descriptor);
+        PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDescriptor* descriptor);
 
         const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
         const std::bitset<kMaxBindGroups> GetBindGroupLayoutsMask() const;

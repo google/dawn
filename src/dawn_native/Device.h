@@ -19,7 +19,7 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/RefCounted.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 
@@ -77,24 +77,23 @@ namespace dawn_native {
         // instead of a backend Foo object. If the blueprint doesn't match an object in the
         // cache, then the builder is used to make a new object.
         ResultOrError<BindGroupLayoutBase*> GetOrCreateBindGroupLayout(
-            const dawn::BindGroupLayoutDescriptor* descriptor);
+            const BindGroupLayoutDescriptor* descriptor);
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
         // Dawn API
         BindGroupBuilder* CreateBindGroupBuilder();
-        BindGroupLayoutBase* CreateBindGroupLayout(
-            const dawn::BindGroupLayoutDescriptor* descriptor);
+        BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
         BlendStateBuilder* CreateBlendStateBuilder();
         BufferBuilder* CreateBufferBuilder();
         CommandBufferBuilder* CreateCommandBufferBuilder();
         ComputePipelineBuilder* CreateComputePipelineBuilder();
         DepthStencilStateBuilder* CreateDepthStencilStateBuilder();
         InputStateBuilder* CreateInputStateBuilder();
-        PipelineLayoutBase* CreatePipelineLayout(const dawn::PipelineLayoutDescriptor* descriptor);
+        PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
         QueueBase* CreateQueue();
         RenderPassDescriptorBuilder* CreateRenderPassDescriptorBuilder();
         RenderPipelineBuilder* CreateRenderPipelineBuilder();
-        SamplerBase* CreateSampler(const dawn::SamplerDescriptor* descriptor);
+        SamplerBase* CreateSampler(const SamplerDescriptor* descriptor);
         ShaderModuleBuilder* CreateShaderModuleBuilder();
         SwapChainBuilder* CreateSwapChainBuilder();
         TextureBuilder* CreateTextureBuilder();
@@ -106,20 +105,19 @@ namespace dawn_native {
 
       private:
         virtual ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
-            const dawn::BindGroupLayoutDescriptor* descriptor) = 0;
+            const BindGroupLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
-            const dawn::PipelineLayoutDescriptor* descriptor) = 0;
+            const PipelineLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<QueueBase*> CreateQueueImpl() = 0;
         virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
-            const dawn::SamplerDescriptor* descriptor) = 0;
+            const SamplerDescriptor* descriptor) = 0;
 
         MaybeError CreateBindGroupLayoutInternal(BindGroupLayoutBase** result,
-                                                 const dawn::BindGroupLayoutDescriptor* descriptor);
+                                                 const BindGroupLayoutDescriptor* descriptor);
         MaybeError CreatePipelineLayoutInternal(PipelineLayoutBase** result,
-                                                const dawn::PipelineLayoutDescriptor* descriptor);
+                                                const PipelineLayoutDescriptor* descriptor);
         MaybeError CreateQueueInternal(QueueBase** result);
-        MaybeError CreateSamplerInternal(SamplerBase** result,
-                                         const dawn::SamplerDescriptor* descriptor);
+        MaybeError CreateSamplerInternal(SamplerBase** result, const SamplerDescriptor* descriptor);
 
         void ConsumeError(ErrorData* error);
 

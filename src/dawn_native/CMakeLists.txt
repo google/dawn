@@ -28,7 +28,6 @@ Generate(
         ${GENERATOR_COMMON_ARGS}
         -T dawn_native_utils
 )
-target_link_libraries(dawn_native_utils_autogen)
 
 function(GenerateProcTable backend)
     Generate(
@@ -327,6 +326,7 @@ endif()
 ################################################################################
 
 list(APPEND DAWN_NATIVE_SOURCES
+    ${DAWN_NATIVE_DIR}/dawn_platform.h
     ${DAWN_NATIVE_DIR}/BindGroup.cpp
     ${DAWN_NATIVE_DIR}/BindGroup.h
     ${DAWN_NATIVE_DIR}/BindGroupLayout.cpp
@@ -337,18 +337,18 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/Builder.h
     ${DAWN_NATIVE_DIR}/Buffer.cpp
     ${DAWN_NATIVE_DIR}/Buffer.h
+    ${DAWN_NATIVE_DIR}/Commands.cpp
+    ${DAWN_NATIVE_DIR}/Commands.h
     ${DAWN_NATIVE_DIR}/CommandAllocator.cpp
     ${DAWN_NATIVE_DIR}/CommandAllocator.h
     ${DAWN_NATIVE_DIR}/CommandBuffer.cpp
     ${DAWN_NATIVE_DIR}/CommandBuffer.h
-    ${DAWN_NATIVE_DIR}/Commands.cpp
-    ${DAWN_NATIVE_DIR}/Commands.h
     ${DAWN_NATIVE_DIR}/ComputePipeline.cpp
     ${DAWN_NATIVE_DIR}/ComputePipeline.h
-    ${DAWN_NATIVE_DIR}/DepthStencilState.cpp
-    ${DAWN_NATIVE_DIR}/DepthStencilState.h
     ${DAWN_NATIVE_DIR}/CommandBufferStateTracker.cpp
     ${DAWN_NATIVE_DIR}/CommandBufferStateTracker.h
+    ${DAWN_NATIVE_DIR}/DepthStencilState.cpp
+    ${DAWN_NATIVE_DIR}/DepthStencilState.h
     ${DAWN_NATIVE_DIR}/Device.cpp
     ${DAWN_NATIVE_DIR}/Device.h
     ${DAWN_NATIVE_DIR}/Error.cpp

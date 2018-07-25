@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_DEVICED3D12_H_
 #define DAWNNATIVE_D3D12_DEVICED3D12_H_
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include "common/SerialQueue.h"
 #include "dawn_native/Device.h"
@@ -78,12 +78,11 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
-            const dawn::BindGroupLayoutDescriptor* descriptor) override;
+            const BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
-            const dawn::PipelineLayoutDescriptor* descriptor) override;
+            const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;
-        ResultOrError<SamplerBase*> CreateSamplerImpl(
-            const dawn::SamplerDescriptor* descriptor) override;
+        ResultOrError<SamplerBase*> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
 
         uint64_t mSerial = 0;
         ComPtr<ID3D12Fence> mFence;

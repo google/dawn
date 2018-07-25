@@ -86,7 +86,7 @@ namespace dawn_native { namespace metal {
         return new BindGroup(builder);
     }
     ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
-        const dawn::BindGroupLayoutDescriptor* descriptor) {
+        const BindGroupLayoutDescriptor* descriptor) {
         return new BindGroupLayout(this, descriptor);
     }
     BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
@@ -111,7 +111,7 @@ namespace dawn_native { namespace metal {
         return new InputState(builder);
     }
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
-        const dawn::PipelineLayoutDescriptor* descriptor) {
+        const PipelineLayoutDescriptor* descriptor) {
         return new PipelineLayout(this, descriptor);
     }
     RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
@@ -124,8 +124,7 @@ namespace dawn_native { namespace metal {
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
         return new Queue(this);
     }
-    ResultOrError<SamplerBase*> Device::CreateSamplerImpl(
-        const dawn::SamplerDescriptor* descriptor) {
+    ResultOrError<SamplerBase*> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {

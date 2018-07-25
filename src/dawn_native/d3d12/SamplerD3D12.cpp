@@ -33,7 +33,7 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // namespace
 
-    Sampler::Sampler(Device* device, const dawn::SamplerDescriptor* descriptor)
+    Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dn770367(v=vs.85).aspx
         // hex value, decimal value, min linear, mag linear, mip linear

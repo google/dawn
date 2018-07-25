@@ -27,7 +27,7 @@ namespace dawn_native { namespace vulkan {
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
-        BindGroupLayout(Device* device, const dawn::BindGroupLayoutDescriptor* descriptor);
+        BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
         ~BindGroupLayout();
 
         VkDescriptorSetLayout GetHandle() const;

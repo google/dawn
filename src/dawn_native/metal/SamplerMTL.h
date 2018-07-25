@@ -25,7 +25,7 @@ namespace dawn_native { namespace metal {
 
     class Sampler : public SamplerBase {
       public:
-        Sampler(Device* device, const dawn::SamplerDescriptor* descriptor);
+        Sampler(Device* device, const SamplerDescriptor* descriptor);
         ~Sampler();
 
         id<MTLSamplerState> GetMTLSamplerState();

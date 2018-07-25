@@ -56,7 +56,7 @@ namespace dawn_native { namespace vulkan {
         }
     }  // anonymous namespace
 
-    Sampler::Sampler(Device* device, const dawn::SamplerDescriptor* descriptor)
+    Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor), mDevice(device) {
         VkSamplerCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

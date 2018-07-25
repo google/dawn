@@ -21,12 +21,12 @@
 namespace dawn_native {
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
-                                                const dawn::PipelineLayoutDescriptor* descriptor) {
+                                                const PipelineLayoutDescriptor* descriptor) {
         DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
         DAWN_TRY_ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups,
                         "too many bind group layouts");
         for (uint32_t i = 0; i < descriptor->numBindGroupLayouts; ++i) {
-            DAWN_TRY_ASSERT(descriptor->bindGroupLayouts[i].Get() != nullptr,
+            DAWN_TRY_ASSERT(descriptor->bindGroupLayouts[i] != nullptr,
                             "bind group layouts may not be null");
         }
         return {};
@@ -35,12 +35,11 @@ namespace dawn_native {
     // PipelineLayoutBase
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
-                                           const dawn::PipelineLayoutDescriptor* descriptor)
+                                           const PipelineLayoutDescriptor* descriptor)
         : mDevice(device) {
         ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups);
         for (uint32_t group = 0; group < descriptor->numBindGroupLayouts; ++group) {
-            mBindGroupLayouts[group] =
-                reinterpret_cast<BindGroupLayoutBase*>(descriptor->bindGroupLayouts[group].Get());
+            mBindGroupLayouts[group] = descriptor->bindGroupLayouts[group];
             mMask.set(group);
         }
     }

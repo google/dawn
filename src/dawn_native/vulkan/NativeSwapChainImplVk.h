@@ -18,7 +18,7 @@
 #include "dawn_native/vulkan/VulkanInfo.h"
 
 #include "dawn/dawn_wsi.h"
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 namespace dawn_native { namespace vulkan {
 

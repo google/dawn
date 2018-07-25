@@ -20,7 +20,7 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/RefCounted.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 

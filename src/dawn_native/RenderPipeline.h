@@ -20,7 +20,7 @@
 #include "dawn_native/InputState.h"
 #include "dawn_native/Pipeline.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <array>
 #include <bitset>

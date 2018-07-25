@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_NULL_NULLBACKEND_H_
 #define DAWNNATIVE_NULL_NULLBACKEND_H_
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
@@ -118,12 +118,11 @@ namespace dawn_native { namespace null {
 
       private:
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
-            const dawn::BindGroupLayoutDescriptor* descriptor) override;
+            const BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
-            const dawn::PipelineLayoutDescriptor* descriptor) override;
+            const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;
-        ResultOrError<SamplerBase*> CreateSamplerImpl(
-            const dawn::SamplerDescriptor* descriptor) override;
+        ResultOrError<SamplerBase*> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
 
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
     };

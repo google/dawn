@@ -20,7 +20,7 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/RefCounted.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <array>
 #include <bitset>
@@ -28,12 +28,12 @@
 namespace dawn_native {
 
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
-                                                 const dawn::BindGroupLayoutDescriptor* descriptor);
+                                                 const BindGroupLayoutDescriptor* descriptor);
 
     class BindGroupLayoutBase : public RefCounted {
       public:
         BindGroupLayoutBase(DeviceBase* device,
-                            const dawn::BindGroupLayoutDescriptor* descriptor,
+                            const BindGroupLayoutDescriptor* descriptor,
                             bool blueprint = false);
         ~BindGroupLayoutBase() override;
 

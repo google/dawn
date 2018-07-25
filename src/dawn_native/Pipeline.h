@@ -22,7 +22,7 @@
 #include "dawn_native/RefCounted.h"
 #include "dawn_native/ShaderModule.h"
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <array>
 #include <bitset>

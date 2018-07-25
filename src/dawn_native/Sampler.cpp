@@ -19,7 +19,7 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateSamplerDescriptor(DeviceBase*, const dawn::SamplerDescriptor* descriptor) {
+    MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descriptor) {
         DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
         DAWN_TRY(ValidateFilterMode(descriptor->minFilter));
         DAWN_TRY(ValidateFilterMode(descriptor->magFilter));
@@ -32,7 +32,7 @@ namespace dawn_native {
 
     // SamplerBase
 
-    SamplerBase::SamplerBase(DeviceBase*, const dawn::SamplerDescriptor*) {
+    SamplerBase::SamplerBase(DeviceBase*, const SamplerDescriptor*) {
     }
 
 }  // namespace dawn_native

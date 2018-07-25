@@ -24,7 +24,7 @@ namespace dawn_native { namespace vulkan {
 
     class Sampler : public SamplerBase {
       public:
-        Sampler(Device* device, const dawn::SamplerDescriptor* descriptor);
+        Sampler(Device* device, const SamplerDescriptor* descriptor);
         ~Sampler();
 
         VkSampler GetHandle() const;

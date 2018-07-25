@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_COMMANDBUFFER_H_
 #define DAWNNATIVE_COMMANDBUFFER_H_
 
-#include "dawn/dawncpp.h"
+#include "dawn_native/dawn_platform.h"
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/CommandAllocator.h"
