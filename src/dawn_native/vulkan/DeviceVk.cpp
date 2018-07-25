@@ -67,8 +67,9 @@ namespace dawn_native { namespace vulkan {
         return backendDevice->GetInstance();
     }
 
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHR surface) {
+    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHRNative surfaceNative) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
+        VkSurfaceKHR surface = VkSurfaceKHR::CreateFromHandle(surfaceNative);
 
         dawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, surface));

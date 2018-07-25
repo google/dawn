@@ -19,6 +19,8 @@
 #    error "vulkan_platform.h included without the Vulkan backend enabled"
 #endif
 
+#include "common/Platform.h"
+
 #include <cstddef>
 #include <cstdint>
 
@@ -31,7 +33,7 @@
 // (like vulkan.h on 64 bit) but makes sure the types are different on 32 bit architectures.
 
 // Simple handle types that supports "nullptr_t" as a 0 value.
-template <typename Tag>
+template <typename Tag, typename HandleType>
 class VkNonDispatchableHandle {
   public:
     // Default constructor and assigning of VK_NULL_HANDLE
@@ -40,14 +42,14 @@ class VkNonDispatchableHandle {
     }
 
     // Use default copy constructor/assignment
-    VkNonDispatchableHandle(const VkNonDispatchableHandle<Tag>& other) = default;
-    VkNonDispatchableHandle& operator=(const VkNonDispatchableHandle<Tag>&) = default;
+    VkNonDispatchableHandle(const VkNonDispatchableHandle<Tag, HandleType>& other) = default;
+    VkNonDispatchableHandle& operator=(const VkNonDispatchableHandle<Tag, HandleType>&) = default;
 
     // Comparisons between handles
-    bool operator==(VkNonDispatchableHandle<Tag> other) {
+    bool operator==(VkNonDispatchableHandle<Tag, HandleType> other) {
         return mHandle == other.mHandle;
     }
-    bool operator!=(VkNonDispatchableHandle<Tag> other) {
+    bool operator!=(VkNonDispatchableHandle<Tag, HandleType> other) {
         return mHandle != other.mHandle;
     }
 
@@ -59,13 +61,41 @@ class VkNonDispatchableHandle {
         return mHandle != 0;
     }
 
-    static VkNonDispatchableHandle<Tag> CreateFromHandle(uint64_t handle) {
+    // The regular Vulkan handle type depends on the pointer width but is always 64 bits wide.
+    //  - On 64bit it is an opaque pointer type, probably to help with type safety
+    //  - On 32bit it is a uint64_t because pointers aren't wide enough (and non dispatchable
+    //    handles can be optimized to not be pointer but contain GPU virtual addresses or the
+    //    data in a packed form).
+    // Because of this we need two types of conversions from our handle type: to uint64_t and to
+    // the "native" Vulkan type that may not be an uint64_t
+
+    static VkNonDispatchableHandle<Tag, HandleType> CreateFromU64(uint64_t handle) {
         return {handle};
     }
 
-    uint64_t GetHandle() const {
+    uint64_t GetU64() const {
         return mHandle;
     }
+
+#if DAWN_PLATFORM_64_BIT
+    static VkNonDispatchableHandle<Tag, HandleType> CreateFromHandle(HandleType handle) {
+        return CreateFromU64(static_cast<uint64_t>(reinterpret_cast<intptr_t>(handle)));
+    }
+
+    HandleType GetHandle() const {
+        return mHandle;
+    }
+#elif DAWN_PLATFORM_32_BIT
+    static VkNonDispatchableHandle<Tag, HandleType> CreateFromHandle(HandleType handle) {
+        return {handle};
+    }
+
+    HandleType GetHandle() const {
+        return mHandle;
+    }
+#else
+#    error "Unsupported platform"
+#endif
 
   private:
     VkNonDispatchableHandle(uint64_t handle) : mHandle(handle) {
@@ -74,11 +104,23 @@ class VkNonDispatchableHandle {
     uint64_t mHandle = 0;
 };
 
-#    define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object)          \
-        struct VkTag##object;                                  \
-        using object = VkNonDispatchableHandle<VkTag##object>; \
-        static_assert(sizeof(object) == sizeof(uint64_t), ""); \
-        static_assert(alignof(object) == alignof(uint64_t), "");
+#if DAWN_PLATFORM_64_BIT
+#    define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) \
+        using object##Native = struct object##_T*;
+#elif DAWN_PLATFORM_32_BIT
+#    define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object##Native = uint64_t;
+#else
+#    error "Unsupported platform"
+#endif
+
+#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object)                          \
+    struct VkTag##object;                                                  \
+    DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object)                     \
+    using object = VkNonDispatchableHandle<VkTag##object, object##Native>; \
+    static_assert(sizeof(object) == sizeof(uint64_t), "");                 \
+    static_assert(alignof(object) == alignof(uint64_t), "");               \
+    static_assert(sizeof(object) == sizeof(object##Native), "");           \
+    static_assert(alignof(object) == alignof(object##Native), "");
 
 #    include <vulkan/vulkan.h>
 
@@ -88,7 +130,6 @@ class VkNonDispatchableHandle {
 #    define VK_NULL_HANDLE nullptr
 
 // Remove windows.h macros after vulkan_platform's include of windows.h
-#include "common/Platform.h"
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    include "common/windows_with_undefs.h"
 #endif

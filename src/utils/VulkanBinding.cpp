@@ -15,9 +15,11 @@
 #include "utils/BackendBinding.h"
 
 #include "common/Assert.h"
-#include "common/vulkan_platform.h"
 #include "dawn/dawn_wsi.h"
 
+#include <vulkan/vulkan.h>
+
+// Include GLFW after Vulkan so that it declares the Vulkan-specific functions
 #include "GLFW/glfw3.h"
 
 #include <vector>

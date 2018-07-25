@@ -171,7 +171,7 @@ namespace dawn_native { namespace vulkan {
             ASSERT(false);
         }
 
-        nextTexture->texture.u64 = mSwapChainImages[mLastImageIndex].GetHandle();
+        nextTexture->texture.u64 = mSwapChainImages[mLastImageIndex].GetU64();
         mDevice->AddWaitSemaphore(semaphore);
 
         return DAWN_SWAP_CHAIN_NO_ERROR;

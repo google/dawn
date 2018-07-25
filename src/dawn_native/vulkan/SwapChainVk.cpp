@@ -41,7 +41,7 @@ namespace dawn_native { namespace vulkan {
             return nullptr;
         }
 
-        VkImage nativeTexture = VkImage::CreateFromHandle(next.texture.u64);
+        VkImage nativeTexture = VkImage::CreateFromU64(next.texture.u64);
         return new Texture(builder, nativeTexture);
     }
 
