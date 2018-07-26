@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "wire/TerribleCommandBuffer.h"
+#include "utils/TerribleCommandBuffer.h"
 
 #include "common/Assert.h"
 
-namespace dawn { namespace wire {
+namespace utils {
 
     TerribleCommandBuffer::TerribleCommandBuffer() {
     }
 
-    TerribleCommandBuffer::TerribleCommandBuffer(CommandHandler* handler) : mHandler(handler) {
+    TerribleCommandBuffer::TerribleCommandBuffer(dawn_wire::CommandHandler* handler)
+        : mHandler(handler) {
     }
 
-    void TerribleCommandBuffer::SetHandler(CommandHandler* handler) {
+    void TerribleCommandBuffer::SetHandler(dawn_wire::CommandHandler* handler) {
         mHandler = handler;
     }
 
@@ -56,4 +57,4 @@ namespace dawn { namespace wire {
         return success;
     }
 
-}}  // namespace dawn::wire
+}  // namespace utils

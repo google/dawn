@@ -21,6 +21,8 @@ list(APPEND UTILS_SOURCES
     ${UTILS_DIR}/DawnHelpers.h
     ${UTILS_DIR}/SystemUtils.cpp
     ${UTILS_DIR}/SystemUtils.h
+    ${UTILS_DIR}/TerribleCommandBuffer.cpp
+    ${UTILS_DIR}/TerribleCommandBuffer.h
 )
 
 if (DAWN_ENABLE_D3D12)

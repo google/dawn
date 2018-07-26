@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "wire/Wire.h"
-#include "wire/WireCmd.h"
+#include "dawn_wire/Wire.h"
+#include "dawn_wire/WireCmd.h"
 
 #include "common/Assert.h"
 
@@ -22,7 +22,7 @@
 #include <cstring>
 #include <vector>
 
-namespace dawn { namespace wire {
+namespace dawn_wire {
 
     namespace server {
         class Server;
@@ -626,4 +626,4 @@ namespace dawn { namespace wire {
         return new server::Server(device, procs, serializer);
     }
 
-}}  // namespace dawn::wire
+}  // namespace dawn_wire

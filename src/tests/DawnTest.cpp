@@ -17,11 +17,11 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "dawn_wire/Wire.h"
 #include "utils/BackendBinding.h"
 #include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
-#include "wire/TerribleCommandBuffer.h"
-#include "wire/Wire.h"
+#include "utils/TerribleCommandBuffer.h"
 
 #include <iostream>
 #include "GLFW/glfw3.h"
@@ -145,15 +145,15 @@ void DawnTest::SetUp() {
     dawnProcTable procs;
 
     if (gTestUsesWire) {
-        mC2sBuf = new dawn::wire::TerribleCommandBuffer();
-        mS2cBuf = new dawn::wire::TerribleCommandBuffer();
+        mC2sBuf = new utils::TerribleCommandBuffer();
+        mS2cBuf = new utils::TerribleCommandBuffer();
 
-        mWireServer = dawn::wire::NewServerCommandHandler(backendDevice, backendProcs, mS2cBuf);
+        mWireServer = dawn_wire::NewServerCommandHandler(backendDevice, backendProcs, mS2cBuf);
         mC2sBuf->SetHandler(mWireServer);
 
         dawnDevice clientDevice;
         dawnProcTable clientProcs;
-        mWireClient = dawn::wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf);
+        mWireClient = dawn_wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf);
         mS2cBuf->SetHandler(mWireClient);
 
         procs = clientProcs;

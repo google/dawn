@@ -66,16 +66,16 @@ std::ostream& operator<<(std::ostream& stream, BackendType backend);
 
 namespace utils {
     class BackendBinding;
+    class TerribleCommandBuffer;
 }
 
 namespace detail {
     class Expectation;
 }
 
-namespace dawn { namespace wire {
+namespace dawn_wire {
     class CommandHandler;
-    class TerribleCommandBuffer;
-}}  // namespace dawn::wire
+}  // namespace dawn_wire
 
 class DawnTest : public ::testing::TestWithParam<BackendType> {
   public:
@@ -118,10 +118,10 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
 
   private:
     // Things used to set up testing through the Wire.
-    dawn::wire::CommandHandler* mWireServer = nullptr;
-    dawn::wire::CommandHandler* mWireClient = nullptr;
-    dawn::wire::TerribleCommandBuffer* mC2sBuf = nullptr;
-    dawn::wire::TerribleCommandBuffer* mS2cBuf = nullptr;
+    dawn_wire::CommandHandler* mWireServer = nullptr;
+    dawn_wire::CommandHandler* mWireClient = nullptr;
+    utils::TerribleCommandBuffer* mC2sBuf = nullptr;
+    utils::TerribleCommandBuffer* mS2cBuf = nullptr;
     void FlushWire();
 
     // MapRead buffers used to get data for the expectations

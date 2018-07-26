@@ -12,7 +12,7 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "wire/WireCmd.h"
+#include "dawn_wire/WireCmd.h"
 
 #include "common/Assert.h"
 
@@ -83,7 +83,7 @@
     struct {{name}}Transfer {
         {% if is_method %}
             //* Start the transfer structure with the command ID, so that casting to WireCmd gives the ID.
-            wire::{{Return}}WireCmd commandId;
+            {{Return}}WireCmd commandId;
 
             //* Methods always have an implicit "self" argument.
             ObjectId self;
@@ -150,7 +150,7 @@
                 transfer->resultSerial = record.resultSerial;
             {% endif %}
 
-            transfer->commandId = wire::{{Return}}WireCmd::{{name}};
+            transfer->commandId = {{Return}}WireCmd::{{name}};
             transfer->self = provider.GetId(record.self);
         {% endif %}
 
@@ -201,7 +201,7 @@
                 record->resultSerial = transfer->resultSerial;
             {% endif %}
 
-            ASSERT(transfer->commandId == wire::{{Return}}WireCmd::{{name}});
+            ASSERT(transfer->commandId == {{Return}}WireCmd::{{name}});
 
             record->selfId = transfer->self;
             //* This conversion is done after the copying of result* and selfId: Deserialize
@@ -258,7 +258,7 @@
     }
 {% endmacro %}
 
-namespace dawn { namespace wire {
+namespace dawn_wire {
 
     // Macro to simplify error handling, similar to DAWN_TRY but for DeserializeResult.
 #define DESERIALIZE_TRY(EXPR) \
@@ -344,4 +344,4 @@ namespace dawn { namespace wire {
         {% endfor %}
     {% endfor %}
 
-}}  // namespace dawn::wire
+}  // namespace dawn_wire

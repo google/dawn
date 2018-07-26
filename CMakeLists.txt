@@ -238,7 +238,7 @@ add_subdirectory(third_party)
 
 add_subdirectory(src/common)
 add_subdirectory(src/dawn_native)
-add_subdirectory(src/wire)
+add_subdirectory(src/dawn_wire)
 add_subdirectory(src/utils)
 add_subdirectory(src/tests)
 

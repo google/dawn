@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "wire/Wire.h"
-#include "wire/WireCmd.h"
+#include "dawn_wire/Wire.h"
+#include "dawn_wire/WireCmd.h"
 
 #include "common/Assert.h"
 
@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-namespace dawn { namespace wire {
+namespace dawn_wire {
 
     //* Client side implementation of the API, will serialize everything to memory to send to the server side.
     namespace client {
@@ -194,7 +194,7 @@ namespace dawn { namespace wire {
 
         //* The client wire uses the global Dawn device to store its global data such as the serializer
         //* and the object id allocators.
-        class Device : public ObjectBase, public wire::ObjectIdProvider {
+        class Device : public ObjectBase, public ObjectIdProvider {
             public:
                 Device(CommandSerializer* serializer)
                     : ObjectBase(this, 1, 1),
@@ -247,7 +247,7 @@ namespace dawn { namespace wire {
                 ) {
                     {{as_backendType(type)}} self = reinterpret_cast<{{as_backendType(type)}}>(cSelf);
                     Device* device = self->device;
-                    wire::{{Suffix}}Cmd cmd;
+                    {{Suffix}}Cmd cmd;
 
                     //* Create the structure going on the wire on the stack and fill it with the value
                     //* arguments so it can compute its size.
@@ -306,7 +306,7 @@ namespace dawn { namespace wire {
 
                     obj->builderCallback.Call(DAWN_BUILDER_ERROR_STATUS_UNKNOWN, "Unknown");
 
-                    wire::{{as_MethodSuffix(type.name, Name("destroy"))}}Cmd cmd;
+                    {{as_MethodSuffix(type.name, Name("destroy"))}}Cmd cmd;
                     cmd.objectId = obj->id;
 
                     auto allocCmd = static_cast<decltype(cmd)*>(obj->device->GetCmdSpace(sizeof(cmd)));
@@ -332,7 +332,7 @@ namespace dawn { namespace wire {
             request.isWrite = false;
             buffer->requests[serial] = request;
 
-            wire::BufferMapAsyncCmd cmd;
+            BufferMapAsyncCmd cmd;
             cmd.bufferId = buffer->id;
             cmd.requestSerial = serial;
             cmd.start = start;
@@ -354,7 +354,7 @@ namespace dawn { namespace wire {
             request.isWrite = true;
             buffer->requests[serial] = request;
 
-            wire::BufferMapAsyncCmd cmd;
+            BufferMapAsyncCmd cmd;
             cmd.bufferId = buffer->id;
             cmd.requestSerial = serial;
             cmd.start = start;
@@ -379,7 +379,7 @@ namespace dawn { namespace wire {
 
                 // If the buffer was mapped for writing, send the update to the data to the server
                 if (buffer->isWriteMapped) {
-                    wire::BufferUpdateMappedDataCmd cmd;
+                    BufferUpdateMappedDataCmd cmd;
                     cmd.bufferId = buffer->id;
                     cmd.dataLength = static_cast<uint32_t>(buffer->mappedDataSize);
 
@@ -673,4 +673,4 @@ namespace dawn { namespace wire {
         return new client::Client(clientDevice);
     }
 
-}}  // namespace dawn::wire
+}  // namespace dawn_wire

@@ -12,31 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef WIRE_TERRIBLE_COMMAND_BUFFER_H_
-#define WIRE_TERRIBLE_COMMAND_BUFFER_H_
+#ifndef UTILS_TERRIBLE_COMMAND_BUFFER_H_
+#define UTILS_TERRIBLE_COMMAND_BUFFER_H_
 
 #include <vector>
 
-#include "wire/Wire.h"
+#include "dawn_wire/Wire.h"
 
-namespace dawn { namespace wire {
+namespace utils {
 
-    class TerribleCommandBuffer : public CommandSerializer {
+    class TerribleCommandBuffer : public dawn_wire::CommandSerializer {
       public:
         TerribleCommandBuffer();
-        TerribleCommandBuffer(CommandHandler* handler);
+        TerribleCommandBuffer(dawn_wire::CommandHandler* handler);
 
-        void SetHandler(CommandHandler* handler);
+        void SetHandler(dawn_wire::CommandHandler* handler);
 
         void* GetCmdSpace(size_t size) override;
         bool Flush() override;
 
       private:
-        CommandHandler* mHandler = nullptr;
+        dawn_wire::CommandHandler* mHandler = nullptr;
         size_t mOffset = 0;
         char mBuffer[10000000];
     };
 
-}}  // namespace dawn::wire
+}  // namespace utils
 
-#endif  // WIRE_TERRIBLE_COMMAND_BUFFER_H_
+#endif  // UTILS_TERRIBLE_COMMAND_BUFFER_H_

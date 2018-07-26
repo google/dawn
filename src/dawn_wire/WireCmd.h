@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef WIRE_WIRECMD_H_
-#define WIRE_WIRECMD_H_
+#ifndef DAWNWIRE_WIRECMD_H_
+#define DAWNWIRE_WIRECMD_H_
 
 #include <dawn/dawn.h>
 
-#include "wire/WireCmd_autogen.h"
+#include "dawn_wire/WireCmd_autogen.h"
 
-namespace dawn { namespace wire {
+namespace dawn_wire {
 
     struct ReturnDeviceErrorCallbackCmd {
-        wire::ReturnWireCmd commandId = ReturnWireCmd::DeviceErrorCallback;
+        ReturnWireCmd commandId = ReturnWireCmd::DeviceErrorCallback;
 
         size_t messageStrlen;
     };
 
     struct BufferMapAsyncCmd {
-        wire::WireCmd commandId = WireCmd::BufferMapAsync;
+        WireCmd commandId = WireCmd::BufferMapAsync;
 
         ObjectId bufferId;
         ObjectSerial requestSerial;
@@ -38,7 +38,7 @@ namespace dawn { namespace wire {
     };
 
     struct ReturnBufferMapReadAsyncCallbackCmd {
-        wire::ReturnWireCmd commandId = ReturnWireCmd::BufferMapReadAsyncCallback;
+        ReturnWireCmd commandId = ReturnWireCmd::BufferMapReadAsyncCallback;
 
         ObjectId bufferId;
         ObjectSerial bufferSerial;
@@ -48,7 +48,7 @@ namespace dawn { namespace wire {
     };
 
     struct ReturnBufferMapWriteAsyncCallbackCmd {
-        wire::ReturnWireCmd commandId = ReturnWireCmd::BufferMapWriteAsyncCallback;
+        ReturnWireCmd commandId = ReturnWireCmd::BufferMapWriteAsyncCallback;
 
         ObjectId bufferId;
         ObjectSerial bufferSerial;
@@ -57,12 +57,12 @@ namespace dawn { namespace wire {
     };
 
     struct BufferUpdateMappedDataCmd {
-        wire::WireCmd commandId = WireCmd::BufferUpdateMappedDataCmd;
+        WireCmd commandId = WireCmd::BufferUpdateMappedDataCmd;
 
         ObjectId bufferId;
         uint32_t dataLength;
     };
 
-}}  // namespace dawn::wire
+}  // namespace dawn_wire
 
-#endif  // WIRE_WIRECMD_H_
+#endif  // DAWNWIRE_WIRECMD_H_

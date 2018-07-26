@@ -16,11 +16,11 @@
 #include "mock/mock_dawn.h"
 
 #include "common/Assert.h"
-#include "wire/TerribleCommandBuffer.h"
-#include "wire/Wire.h"
+#include "dawn_wire/Wire.h"
+#include "utils/TerribleCommandBuffer.h"
 
 using namespace testing;
-using namespace dawn::wire;
+using namespace dawn_wire;
 
 // Definition of a "Lambda predicate matcher" for GMock to allow checking deep structures
 // are passed correctly by the wire.
@@ -138,8 +138,8 @@ class WireTestsBase : public Test {
             }
             EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
 
-            mS2cBuf = new TerribleCommandBuffer();
-            mC2sBuf = new TerribleCommandBuffer(mWireServer);
+            mS2cBuf = new utils::TerribleCommandBuffer();
+            mC2sBuf = new utils::TerribleCommandBuffer(mWireServer);
 
             mWireServer = NewServerCommandHandler(mockDevice, mockProcs, mS2cBuf);
             mC2sBuf->SetHandler(mWireServer);
@@ -181,8 +181,8 @@ class WireTestsBase : public Test {
 
         CommandHandler* mWireServer = nullptr;
         CommandHandler* mWireClient = nullptr;
-        TerribleCommandBuffer* mS2cBuf = nullptr;
-        TerribleCommandBuffer* mC2sBuf = nullptr;
+        utils::TerribleCommandBuffer* mS2cBuf = nullptr;
+        utils::TerribleCommandBuffer* mC2sBuf = nullptr;
 };
 
 class WireTests : public WireTestsBase {

@@ -12,10 +12,10 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef WIRE_WIRECMD_AUTOGEN_H_
-#define WIRE_WIRECMD_AUTOGEN_H_
+#ifndef DAWNWIRE_WIRECMD_AUTOGEN_H_
+#define DAWNWIRE_WIRECMD_AUTOGEN_H_
 
-namespace dawn { namespace wire {
+namespace dawn_wire {
 
     using ObjectId = uint32_t;
     using ObjectSerial = uint32_t;
@@ -131,7 +131,7 @@ namespace dawn { namespace wire {
     //* Command for the server calling a builder status callback.
     {% for type in by_category["object"] if type.is_builder %}
         struct Return{{type.name.CamelCase()}}ErrorCallbackCmd {
-            wire::ReturnWireCmd commandId = ReturnWireCmd::{{type.name.CamelCase()}}ErrorCallback;
+            ReturnWireCmd commandId = ReturnWireCmd::{{type.name.CamelCase()}}ErrorCallback;
 
             ObjectId builtObjectId;
             ObjectSerial builtObjectSerial;
@@ -140,6 +140,6 @@ namespace dawn { namespace wire {
         };
     {% endfor %}
 
-}}  // namespace dawn::wire
+}  // namespace dawn_wire
 
-#endif // WIRE_WIRECMD_AUTOGEN_H_
+#endif // DAWNWIRE_WIRECMD_AUTOGEN_H_

@@ -389,7 +389,7 @@ def debug(text):
     print(text)
 
 def main():
-    targets = ['dawn_headers', 'libdawn', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'wire', "dawn_native_utils"]
+    targets = ['dawn_headers', 'libdawn', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'dawn_wire', "dawn_native_utils"]
 
     parser = argparse.ArgumentParser(
         description = 'Generates code for various target for Dawn.',
@@ -482,11 +482,11 @@ def main():
         renders.append(FileRender('dawn_native/api_structs.h', 'dawn_native/dawn_structs_autogen.h', base_backend_params))
         renders.append(FileRender('dawn_native/api_structs.cpp', 'dawn_native/dawn_structs_autogen.cpp', base_backend_params))
 
-    if 'wire' in targets:
-        renders.append(FileRender('wire/WireCmd.h', 'wire/WireCmd_autogen.h', base_backend_params))
-        renders.append(FileRender('wire/WireCmd.cpp', 'wire/WireCmd_autogen.cpp', base_backend_params))
-        renders.append(FileRender('wire/WireClient.cpp', 'wire/WireClient.cpp', base_backend_params))
-        renders.append(FileRender('wire/WireServer.cpp', 'wire/WireServer.cpp', base_backend_params))
+    if 'dawn_wire' in targets:
+        renders.append(FileRender('dawn_wire/WireCmd.h', 'dawn_wire/WireCmd_autogen.h', base_backend_params))
+        renders.append(FileRender('dawn_wire/WireCmd.cpp', 'dawn_wire/WireCmd_autogen.cpp', base_backend_params))
+        renders.append(FileRender('dawn_wire/WireClient.cpp', 'dawn_wire/WireClient.cpp', base_backend_params))
+        renders.append(FileRender('dawn_wire/WireServer.cpp', 'dawn_wire/WireServer.cpp', base_backend_params))
 
     output_separator = '\n' if args.gn else ';'
     if args.print_dependencies:

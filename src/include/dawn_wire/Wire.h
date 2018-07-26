@@ -12,35 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef WIRE_WIRE_H_
-#define WIRE_WIRE_H_
+#ifndef DAWNWIRE_WIRE_H_
+#define DAWNWIRE_WIRE_H_
 
 #include <cstdint>
 
 #include "dawn/dawn.h"
+#include "dawn_wire/dawn_wire_export.h"
 
-namespace dawn { namespace wire {
+namespace dawn_wire {
 
-    class CommandSerializer {
+    class DAWN_WIRE_EXPORT CommandSerializer {
       public:
         virtual ~CommandSerializer() = default;
         virtual void* GetCmdSpace(size_t size) = 0;
         virtual bool Flush() = 0;
     };
 
-    class CommandHandler {
+    class DAWN_WIRE_EXPORT CommandHandler {
       public:
         virtual ~CommandHandler() = default;
         virtual const char* HandleCommands(const char* commands, size_t size) = 0;
     };
 
-    CommandHandler* NewClientDevice(dawnProcTable* procs,
-                                    dawnDevice* device,
-                                    CommandSerializer* serializer);
-    CommandHandler* NewServerCommandHandler(dawnDevice device,
-                                            const dawnProcTable& procs,
-                                            CommandSerializer* serializer);
+    DAWN_WIRE_EXPORT CommandHandler* NewClientDevice(dawnProcTable* procs,
+                                                     dawnDevice* device,
+                                                     CommandSerializer* serializer);
+    DAWN_WIRE_EXPORT CommandHandler* NewServerCommandHandler(dawnDevice device,
+                                                             const dawnProcTable& procs,
+                                                             CommandSerializer* serializer);
 
-}}  // namespace dawn::wire
+}  // namespace dawn_wire
 
-#endif  // WIRE_WIRE_H_
+#endif  // DAWNWIRE_WIRE_H_
