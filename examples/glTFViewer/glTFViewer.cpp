@@ -20,6 +20,7 @@
 
 #include "SampleUtils.h"
 
+#include "common/Assert.h"
 #include "common/Math.h"
 #include "common/Constants.h"
 #include "utils/DawnHelpers.h"
@@ -34,6 +35,7 @@
 
 #define TINYGLTF_LOADER_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+#define PICOJSON_ASSERT ASSERT
 #include <tinygltfloader/tiny_gltf_loader.h>
 
 #include "GLFW/glfw3.h"

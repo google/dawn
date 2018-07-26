@@ -409,7 +409,7 @@ list(APPEND DAWN_NATIVE_SOURCES
 # this, so instead we duplicate the deps everywhere.
 add_library(libdawn_native_objects OBJECT ${DAWN_NATIVE_SOURCES})
 DawnInternalTarget("dawn_native" libdawn_native_objects)
-target_compile_definitions(libdawn_native_objects PRIVATE DAWN_NATIVE_IMPLEMENTATION)
+target_compile_definitions(libdawn_native_objects PRIVATE DAWN_NATIVE_IMPLEMENTATION SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
 target_include_directories(libdawn_native_objects PRIVATE ${DAWN_NATIVE_INCLUDE_DIRS})
 add_dependencies(libdawn_native_objects dawn_native_utils_autogen)
 

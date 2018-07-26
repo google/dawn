@@ -216,7 +216,8 @@ namespace picojson {
         isnan(n) || isinf(n)
 #endif
         ) {
-      throw std::overflow_error("");
+      // throw std::overflow_error("");
+      PICOJSON_ASSERT(false);
     }
     u_.number_ = n;
   }

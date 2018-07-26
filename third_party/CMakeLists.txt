@@ -131,6 +131,7 @@ if (DAWN_ENABLE_OPENGL OR NEED_SPIRV_CROSS_GLSL)
 endif()
 
 add_library(spirv_cross STATIC ${SPIRV_CROSS_SOURCES})
+target_compile_definitions(spirv_cross PUBLIC SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
 set(SPIRV_CROSS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 DawnExternalTarget("third_party" spirv_cross)
 

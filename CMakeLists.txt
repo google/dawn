@@ -119,6 +119,8 @@ else()
     list(APPEND DAWN_FLAGS "$<$<COMPILE_LANGUAGE:CXX>:-std=c++14>")
     # enable -Wold-style-cast on C++
     list(APPEND DAWN_FLAGS "$<$<COMPILE_LANGUAGE:CXX>:-Wold-style-cast>")
+
+    list(APPEND DAWN_FLAGS "-fvisibility=hidden" "$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>" "-fno-exceptions")
     list(APPEND DAWN_FLAGS "-fPIC")
 
     list(APPEND DAWN_INTERNAL_FLAGS "-Wall" "-Wextra")
