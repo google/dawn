@@ -117,7 +117,7 @@ namespace {{namespace}} {
                         {%- endfor -%}
                     );
 
-                    //* Some function have very heavy checks in a seperate method, so that they
+                    //* Some function have very heavy checks in a separate method, so that they
                     //* can be skipped in the NonValidatingEntryPoints.
                     {% if suffix in methodsWithExtraValidation %}
                         if (valid) {
