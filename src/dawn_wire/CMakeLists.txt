@@ -32,6 +32,6 @@ add_library(dawn_wire SHARED
     ${DAWN_WIRE_INCLUDE_DIR}/Wire.h
     ${DAWN_WIRE_INCLUDE_DIR}/dawn_wire_export.h
 )
-target_link_libraries(dawn_wire dawn_common)
+target_link_libraries(dawn_wire PRIVATE dawn_common)
 target_compile_definitions(dawn_wire PRIVATE DAWN_WIRE_IMPLEMENTATION)
 DawnInternalTarget("wire" dawn_wire)

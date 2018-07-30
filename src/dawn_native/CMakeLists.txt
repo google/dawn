@@ -116,7 +116,7 @@ endif()
 
 if (DAWN_ENABLE_METAL)
     GenerateProcTable(metal)
-    list(APPEND DAWN_NATIVE_DEPS metal_autogen "-framework QuartzCore" "-framework Metal" "-framework Cocoa")
+    list(APPEND DAWN_NATIVE_DEPS metal_autogen "-framework Metal" "-framework Cocoa")
 
     list(APPEND DAWN_NATIVE_SOURCES
         ${METAL_DIR}/BlendStateMTL.mm
@@ -415,7 +415,7 @@ add_dependencies(libdawn_native_objects dawn_native_utils_autogen)
 
 add_library(libdawn_native SHARED $<TARGET_OBJECTS:libdawn_native_objects>)
 DawnInternalTarget("dawn_native" libdawn_native)
-target_link_libraries(libdawn_native ${DAWN_NATIVE_DEPS})
+target_link_libraries(libdawn_native PRIVATE ${DAWN_NATIVE_DEPS})
 set_property(TARGET libdawn_native PROPERTY OUTPUT_NAME "dawn_native")
 
 add_library(libdawn_native_static STATIC $<TARGET_OBJECTS:libdawn_native_objects>)

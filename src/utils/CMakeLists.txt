@@ -25,6 +25,16 @@ list(APPEND UTILS_SOURCES
     ${UTILS_DIR}/TerribleCommandBuffer.h
 )
 
+list(APPEND UTILS_DEPS
+    dawn_common
+    libdawn_native
+    shaderc_shared
+    libdawn
+    glfw
+)
+
+set(UTILS_INCLUDE_DIRS)
+
 if (DAWN_ENABLE_D3D12)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/D3D12Binding.cpp
@@ -34,6 +44,10 @@ endif()
 if (DAWN_ENABLE_METAL)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/MetalBinding.mm
+    )
+    list(APPEND UTILS_DEPS
+        "-framework Metal"
+        "-framework QuartzCore"
     )
 endif()
 
@@ -47,16 +61,23 @@ if (DAWN_ENABLE_OPENGL)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/OpenGLBinding.cpp
     )
+    list(APPEND UTILS_DEPS
+        glad
+    )
 endif()
 
 if (DAWN_ENABLE_VULKAN)
     list(APPEND UTILS_SOURCES
         ${UTILS_DIR}/VulkanBinding.cpp
     )
+    list(APPEND UTILS_INCLUDE_DIRS
+        ${VULKAN_HEADERS_INCLUDE_DIR}
+    )
 endif()
 
 add_library(utils STATIC ${UTILS_SOURCES})
-target_link_libraries(utils libdawn_native shaderc_shared libdawn glfw)
+target_link_libraries(utils ${UTILS_DEPS})
+target_include_directories(utils PRIVATE ${UTILS_INCLUDE_DIRS})
 DawnInternalTarget("" utils)
 if(NOT MSVC)
     # allow C-style casts -- for shaderc
