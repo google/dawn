@@ -52,9 +52,10 @@ namespace dawn_native {
                             return false;
                         }
                     {% else %}
-                        (void) self;
+                        DAWN_UNUSED(self);
                     {% endif %}
                     bool error = false;
+                    DAWN_UNUSED(error);
                     {% for arg in method.arguments %}
                         {% set cppType = as_cppType(arg.type.name) %}
                         {% set argName = as_varName(arg.name) %}
@@ -65,7 +66,7 @@ namespace dawn_native {
                                 error = true;
                             }
                         {% else %}
-                            (void) {{argName}};
+                            DAWN_UNUSED({{argName}});
                         {% endif %}
                         if (error) {
                             {% if type.is_builder %}

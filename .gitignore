@@ -4,6 +4,16 @@
 x86
 x64
 
+# Directories added by the standalone GN build
+.gclient
+.gclient_entries
+build
+buildtools
+testing
+third_party/llvm-build
+tools
+out
+
 # Modified from https://www.gitignore.io/api/vim,macos,linux,emacs,cmake,windows,sublimetext,visualstudio,visualstudiocode
 
 ### CMake ###
