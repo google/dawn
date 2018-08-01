@@ -110,6 +110,9 @@ namespace utils {
         }
         void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
             glfwMakeContextCurrent(mWindow);
+            // Load the GL entry points in our copy of the glad static library
+            gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+
             dawn_native::opengl::Init(reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress),
                                       procs, device);
 
