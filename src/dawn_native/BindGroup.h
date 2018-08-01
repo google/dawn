@@ -25,7 +25,6 @@
 
 #include <array>
 #include <bitset>
-#include <type_traits>
 
 namespace dawn_native {
 
@@ -55,25 +54,8 @@ namespace dawn_native {
         void SetLayout(BindGroupLayoutBase* layout);
         void SetUsage(dawn::BindGroupUsage usage);
 
-        template <typename T>
-        void SetBufferViews(uint32_t start, uint32_t count, T* const* bufferViews) {
-            static_assert(std::is_base_of<BufferViewBase, T>::value, "");
-            SetBufferViews(start, count, reinterpret_cast<BufferViewBase* const*>(bufferViews));
-        }
         void SetBufferViews(uint32_t start, uint32_t count, BufferViewBase* const* bufferViews);
-
-        template <typename T>
-        void SetSamplers(uint32_t start, uint32_t count, T* const* samplers) {
-            static_assert(std::is_base_of<SamplerBase, T>::value, "");
-            SetSamplers(start, count, reinterpret_cast<SamplerBase* const*>(samplers));
-        }
         void SetSamplers(uint32_t start, uint32_t count, SamplerBase* const* samplers);
-
-        template <typename T>
-        void SetTextureViews(uint32_t start, uint32_t count, T* const* textureViews) {
-            static_assert(std::is_base_of<TextureViewBase, T>::value, "");
-            SetTextureViews(start, count, reinterpret_cast<TextureViewBase* const*>(textureViews));
-        }
         void SetTextureViews(uint32_t start, uint32_t count, TextureViewBase* const* textureViews);
 
       private:

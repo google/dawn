@@ -159,8 +159,8 @@ namespace dawn_native { namespace null {
         Queue(Device* device);
         ~Queue();
 
-        // Dawn API
-        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
+      private:
+        void SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) override;
     };
 
     class SwapChain : public SwapChainBase {

@@ -22,14 +22,14 @@ namespace dawn_native { namespace d3d12 {
     Queue::Queue(Device* device) : QueueBase(device) {
     }
 
-    void Queue::Submit(uint32_t numCommands, CommandBuffer* const* commands) {
+    void Queue::SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) {
         Device* device = ToBackend(GetDevice());
 
         device->Tick();
 
         device->OpenCommandList(&mCommandList);
         for (uint32_t i = 0; i < numCommands; ++i) {
-            commands[i]->RecordCommands(mCommandList);
+            ToBackend(commands[i])->RecordCommands(mCommandList);
         }
         ASSERT_SUCCESS(mCommandList->Close());
 

@@ -39,14 +39,15 @@
 #include "dawn_native/d3d12/SwapChainD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native {
+    dawnProcTable GetProcs();
+}  // namespace dawn_native
 
-    dawnProcTable GetNonValidatingProcs();
-    dawnProcTable GetValidatingProcs();
+namespace dawn_native { namespace d3d12 {
 
     void Init(dawnProcTable* procs, dawnDevice* device) {
         *device = nullptr;
-        *procs = GetValidatingProcs();
+        *procs = GetProcs();
         *device = reinterpret_cast<dawnDevice>(new Device());
     }
 

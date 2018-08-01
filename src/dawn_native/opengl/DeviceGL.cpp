@@ -32,16 +32,18 @@
 #include "dawn_native/opengl/SwapChainGL.h"
 #include "dawn_native/opengl/TextureGL.h"
 
+namespace dawn_native {
+    dawnProcTable GetProcs();
+}  // namespace dawn_native
+
 namespace dawn_native { namespace opengl {
-    dawnProcTable GetNonValidatingProcs();
-    dawnProcTable GetValidatingProcs();
 
     void Init(void* (*getProc)(const char*), dawnProcTable* procs, dawnDevice* device) {
         *device = nullptr;
 
         gladLoadGLLoader(reinterpret_cast<GLADloadproc>(getProc));
 
-        *procs = GetValidatingProcs();
+        *procs = GetProcs();
         *device = reinterpret_cast<dawnDevice>(new Device);
 
         glEnable(GL_DEPTH_TEST);

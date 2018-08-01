@@ -28,10 +28,9 @@ namespace dawn_native { namespace d3d12 {
       public:
         Queue(Device* device);
 
-        // Dawn API
-        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
-
       private:
+        void SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) override;
+
         ComPtr<ID3D12GraphicsCommandList> mCommandList;
     };
 

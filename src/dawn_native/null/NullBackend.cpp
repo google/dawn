@@ -19,13 +19,14 @@
 
 #include <spirv-cross/spirv_cross.hpp>
 
+namespace dawn_native {
+    dawnProcTable GetProcs();
+}  // namespace dawn_native
+
 namespace dawn_native { namespace null {
 
-    dawnProcTable GetNonValidatingProcs();
-    dawnProcTable GetValidatingProcs();
-
     void Init(dawnProcTable* procs, dawnDevice* device) {
-        *procs = GetValidatingProcs();
+        *procs = GetProcs();
         *device = reinterpret_cast<dawnDevice>(new Device);
     }
 
@@ -189,7 +190,7 @@ namespace dawn_native { namespace null {
     Queue::~Queue() {
     }
 
-    void Queue::Submit(uint32_t, CommandBuffer* const*) {
+    void Queue::SubmitImpl(uint32_t, CommandBufferBase* const*) {
         auto operations = ToBackend(GetDevice())->AcquirePendingOperations();
 
         for (auto& operation : operations) {

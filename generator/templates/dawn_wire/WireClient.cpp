@@ -215,7 +215,7 @@ namespace dawn_wire {
                 // Implementation of the ObjectIdProvider interface
                 {% for type in by_category["object"] %}
                     ObjectId GetId({{as_cType(type.name)}} object) const override {
-                        return reinterpret_cast<{{as_backendType(type)}}>(object)->id;
+                        return reinterpret_cast<{{as_wireType(type)}}>(object)->id;
                     }
                 {% endfor %}
 
@@ -239,13 +239,13 @@ namespace dawn_wire {
             {% for method in type.methods %}
                 {% set Suffix = as_MethodSuffix(type.name, method.name) %}
 
-                {{as_backendType(method.return_type)}} Client{{Suffix}}(
+                {{as_wireType(method.return_type)}} Client{{Suffix}}(
                     {{-as_cType(type.name)}} cSelf
                     {%- for arg in method.arguments -%}
                         , {{as_annotated_cType(arg)}}
                     {%- endfor -%}
                 ) {
-                    {{as_backendType(type)}} self = reinterpret_cast<{{as_backendType(type)}}>(cSelf);
+                    auto self = reinterpret_cast<{{as_wireType(type)}}>(cSelf);
                     Device* device = self->device;
                     {{Suffix}}Cmd cmd;
 

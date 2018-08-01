@@ -358,9 +358,16 @@ def as_cProc(type_name, method_name):
     assert(not type_name.native and not method_name.native)
     return 'dawn' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
-def as_backendType(typ):
+def as_frontendType(typ):
     if typ.category == 'object':
-        return typ.name.CamelCase() + '*'
+        if typ.is_builder:
+            return typ.name.CamelCase() + '*'
+        else:
+            return typ.name.CamelCase() + 'Base*'
+    elif typ.category in ['bitmask', 'enum']:
+        return 'dawn::' + typ.name.CamelCase()
+    elif typ.category == 'structure':
+        return as_cppType(typ.name)
     else:
         return as_cType(typ.name)
 
@@ -389,7 +396,7 @@ def debug(text):
     print(text)
 
 def main():
-    targets = ['dawn_headers', 'libdawn', 'mock_dawn', 'opengl', 'metal', 'd3d12', 'null', 'dawn_wire', "dawn_native_utils"]
+    targets = ['dawn_headers', 'libdawn', 'mock_dawn', 'dawn_wire', "dawn_native_utils"]
 
     parser = argparse.ArgumentParser(
         description = 'Generates code for various target for Dawn.',
@@ -453,40 +460,36 @@ def main():
         renders.append(FileRender('mock_api.h', 'mock/mock_dawn.h', [base_params, api_params, c_params]))
         renders.append(FileRender('mock_api.cpp', 'mock/mock_dawn.cpp', [base_params, api_params, c_params]))
 
-    base_backend_params = [
-        base_params,
-        api_params,
-        c_params,
-        {
-            'as_backendType': lambda typ: as_backendType(typ), # TODO as_backendType and friends take a Type and not a Name :(
-            'as_annotated_backendType': lambda arg: annotated(as_backendType(arg.type), arg)
-        }
-    ]
-
-    for backend in ['d3d12', 'metal', 'null', 'opengl', 'vulkan']:
-        if not backend in targets:
-            continue
-
-        extension = 'cpp'
-        if backend == 'metal':
-            extension = 'mm'
-
-        backend_params = {
-            'namespace': backend,
-        }
-        renders.append(FileRender('dawn_native/ProcTable.cpp', 'dawn_native/' + backend + '/ProcTable.' + extension, base_backend_params + [backend_params]))
-
     if 'dawn_native_utils' in targets:
-        renders.append(FileRender('dawn_native/ValidationUtils.h', 'dawn_native/ValidationUtils_autogen.h', base_backend_params))
-        renders.append(FileRender('dawn_native/ValidationUtils.cpp', 'dawn_native/ValidationUtils_autogen.cpp', base_backend_params))
-        renders.append(FileRender('dawn_native/api_structs.h', 'dawn_native/dawn_structs_autogen.h', base_backend_params))
-        renders.append(FileRender('dawn_native/api_structs.cpp', 'dawn_native/dawn_structs_autogen.cpp', base_backend_params))
+        frontend_params = [
+            base_params,
+            api_params,
+            c_params,
+            {
+                'as_frontendType': lambda typ: as_frontendType(typ), # TODO as_frontendType and friends take a Type and not a Name :(
+                'as_annotated_frontendType': lambda arg: annotated(as_frontendType(arg.type), arg)
+            }
+        ]
+
+        renders.append(FileRender('dawn_native/ValidationUtils.h', 'dawn_native/ValidationUtils_autogen.h', frontend_params))
+        renders.append(FileRender('dawn_native/ValidationUtils.cpp', 'dawn_native/ValidationUtils_autogen.cpp', frontend_params))
+        renders.append(FileRender('dawn_native/api_structs.h', 'dawn_native/dawn_structs_autogen.h', frontend_params))
+        renders.append(FileRender('dawn_native/api_structs.cpp', 'dawn_native/dawn_structs_autogen.cpp', frontend_params))
+        renders.append(FileRender('dawn_native/ProcTable.cpp', 'dawn_native/ProcTable.cpp', frontend_params))
 
     if 'dawn_wire' in targets:
-        renders.append(FileRender('dawn_wire/WireCmd.h', 'dawn_wire/WireCmd_autogen.h', base_backend_params))
-        renders.append(FileRender('dawn_wire/WireCmd.cpp', 'dawn_wire/WireCmd_autogen.cpp', base_backend_params))
-        renders.append(FileRender('dawn_wire/WireClient.cpp', 'dawn_wire/WireClient.cpp', base_backend_params))
-        renders.append(FileRender('dawn_wire/WireServer.cpp', 'dawn_wire/WireServer.cpp', base_backend_params))
+        wire_params = [
+            base_params,
+            api_params,
+            c_params,
+            {
+                'as_wireType': lambda typ: typ.name.CamelCase() + '*' if typ.category == 'object' else as_cppType(typ.name)
+            }
+        ]
+        renders.append(FileRender('dawn_wire/WireCmd.h', 'dawn_wire/WireCmd_autogen.h', wire_params))
+        renders.append(FileRender('dawn_wire/WireCmd.cpp', 'dawn_wire/WireCmd_autogen.cpp', wire_params))
+        renders.append(FileRender('dawn_wire/WireClient.cpp', 'dawn_wire/WireClient.cpp', wire_params))
+        renders.append(FileRender('dawn_wire/WireServer.cpp', 'dawn_wire/WireServer.cpp', wire_params))
 
     output_separator = '\n' if args.gn else ';'
     if args.print_dependencies:

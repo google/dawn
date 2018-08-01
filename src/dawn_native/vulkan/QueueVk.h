@@ -27,8 +27,8 @@ namespace dawn_native { namespace vulkan {
         Queue(Device* device);
         ~Queue();
 
-        // Dawn API
-        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
+      private:
+        void SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) override;
     };
 
 }}  // namespace dawn_native::vulkan

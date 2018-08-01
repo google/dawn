@@ -51,15 +51,16 @@ const char kVulkanLibName[] = "vulkan-1.dll";
 #    error "Unimplemented Vulkan backend platform"
 #endif
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native {
+    dawnProcTable GetProcs();
+}  // namespace dawn_native
 
-    dawnProcTable GetNonValidatingProcs();
-    dawnProcTable GetValidatingProcs();
+namespace dawn_native { namespace vulkan {
 
     void Init(dawnProcTable* procs,
               dawnDevice* device,
               const std::vector<const char*>& requiredInstanceExtensions) {
-        *procs = GetValidatingProcs();
+        *procs = GetProcs();
         *device = reinterpret_cast<dawnDevice>(new Device(requiredInstanceExtensions));
     }
 

@@ -30,19 +30,13 @@ namespace dawn_native {
 
         DeviceBase* GetDevice();
 
-        template <typename T>
-        MaybeError ValidateSubmit(uint32_t numCommands, T* const* commands) {
-            static_assert(std::is_base_of<CommandBufferBase, T>::value,
-                          "invalid command buffer type");
-
-            for (uint32_t i = 0; i < numCommands; ++i) {
-                DAWN_TRY(ValidateSubmitCommand(commands[i]));
-            }
-            return {};
-        }
+        // Dawn API
+        void Submit(uint32_t numCommands, CommandBufferBase* const* commands);
 
       private:
-        MaybeError ValidateSubmitCommand(CommandBufferBase* command);
+        virtual void SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) = 0;
+
+        MaybeError ValidateSubmit(uint32_t numCommands, CommandBufferBase* const* commands);
 
         DeviceBase* mDevice;
     };

@@ -28,8 +28,15 @@ namespace dawn_native {
         return mDevice;
     }
 
-    MaybeError QueueBase::ValidateSubmitCommand(CommandBufferBase*) {
-        // TODO(cwallez@chromium.org): Validate resources referenced by command buffers can be used
+    void QueueBase::Submit(uint32_t numCommands, CommandBufferBase* const* commands) {
+        if (mDevice->ConsumedError(ValidateSubmit(numCommands, commands))) {
+            return;
+        }
+
+        SubmitImpl(numCommands, commands);
+    }
+
+    MaybeError QueueBase::ValidateSubmit(uint32_t, CommandBufferBase* const*) {
         return {};
     }
 

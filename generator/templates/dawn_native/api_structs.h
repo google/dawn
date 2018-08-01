@@ -26,15 +26,7 @@ namespace dawn_native {
                 const void* nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
-                {% if member.type.category == "object" %}
-                    {{decorate(as_varName(member.name), as_cppType(member.type.name) + "Base*", member)}};
-                {% elif member.type.category == "structure" %}
-                    {{as_annotated_cppType(member)}};
-                {% elif member.type.category in ["enum", "bitmask"] %}
-                    {{decorate(as_varName(member.name), "dawn::" + as_cppType(member.type.name), member)}};
-                {% else %}
-                    {{as_annotated_cppType(member)}};
-                {% endif %}
+                {{as_annotated_frontendType(member)}};
             {% endfor %}
         };
 

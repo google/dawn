@@ -26,8 +26,8 @@ namespace dawn_native { namespace metal {
       public:
         Queue(Device* device);
 
-        // Dawn API
-        void Submit(uint32_t numCommands, CommandBuffer* const* commands);
+      private:
+        void SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) override;
     };
 
 }}  // namespace dawn_native::metal
