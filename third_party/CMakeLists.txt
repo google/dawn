@@ -40,10 +40,6 @@ set(GLAD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
 set(GLAD_INCLUDE_DIR ${GLAD_INCLUDE_DIR} PARENT_SCOPE)
 target_include_directories(glad SYSTEM PUBLIC ${GLAD_INCLUDE_DIR})
 DawnExternalTarget("third_party" glad)
-if(APPLE)
-    # Workaround https://github.com/Dav1dde/glad/issues/158
-    set_property(TARGET glad APPEND PROPERTY COMPILE_OPTIONS "-fno-common")
-endif()
 
 # ShaderC
 # Prevent SPIRV-Tools from using Werror as it has a warning on MSVC
