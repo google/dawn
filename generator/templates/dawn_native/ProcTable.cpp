@@ -15,6 +15,7 @@
 #include "common/Assert.h"
 
 #include "dawn_native/dawn_platform.h"
+#include "dawn_native/DawnNative.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
@@ -156,7 +157,7 @@ namespace dawn_native {
         {% endfor %}
     }
 
-    dawnProcTable GetProcs() {
+    dawnProcTable GetProcsAutogen() {
         dawnProcTable table;
         {% for type in by_category["object"] %}
             {% for method in native_methods(type) %}

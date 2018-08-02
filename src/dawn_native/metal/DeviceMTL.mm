@@ -35,17 +35,10 @@
 
 #include <unistd.h>
 
-namespace dawn_native {
-    dawnProcTable GetProcs();
-}  // namespace dawn_native
-
 namespace dawn_native { namespace metal {
 
-    void Init(id<MTLDevice> metalDevice, dawnProcTable* procs, dawnDevice* device) {
-        *device = nullptr;
-
-        *procs = GetProcs();
-        *device = reinterpret_cast<dawnDevice>(new Device(metalDevice));
+    dawnDevice CreateDevice(id<MTLDevice> metalDevice) {
+        return reinterpret_cast<dawnDevice>(new Device(metalDevice));
     }
 
     // Device

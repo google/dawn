@@ -29,9 +29,8 @@ namespace utils {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
 
-        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
-            dawn_native::d3d12::Init(procs, device);
-            mBackendDevice = *device;
+        dawnDevice CreateDevice() override {
+            return dawn_native::d3d12::CreateDevice();
         }
 
         uint64_t GetSwapChainImplementation() override {

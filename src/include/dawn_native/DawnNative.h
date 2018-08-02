@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_METALBACKEND_H_
-#define DAWNNATIVE_METALBACKEND_H_
+#ifndef DAWNNATIVE_DAWNNATIVE_H_
+#define DAWNNATIVE_DAWNNATIVE_H_
 
 #include <dawn/dawn.h>
-#include <dawn/dawn_wsi.h>
 #include <dawn_native/dawn_native_export.h>
 
-#import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
+namespace dawn_native {
 
-namespace dawn_native { namespace metal {
-    DAWN_NATIVE_EXPORT dawnDevice CreateDevice(id<MTLDevice> metalDevice);
-    DAWN_NATIVE_EXPORT void SetNextDrawable(dawnDevice device, id<CAMetalDrawable> drawable);
-    DAWN_NATIVE_EXPORT void Present(dawnDevice device);
-}}  // namespace dawn_native::metal
+    // Backend-agnostic API for dawn_native
+    DAWN_NATIVE_EXPORT dawnProcTable GetProcs();
 
-#endif  // DAWNNATIVE_METALBACKEND_H_
+}  // namespace dawn_native
+
+#endif  // DAWNNATIVE_DAWNNATIVE_H_

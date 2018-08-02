@@ -22,7 +22,7 @@
 #include <windows.h>
 
 namespace dawn_native { namespace d3d12 {
-    DAWN_NATIVE_EXPORT void Init(dawnProcTable* procs, dawnDevice* device);
+    DAWN_NATIVE_EXPORT dawnDevice CreateDevice();
 
     DAWN_NATIVE_EXPORT dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device,
                                                                              HWND window);

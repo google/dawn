@@ -335,6 +335,7 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/ComputePipeline.h
     ${DAWN_NATIVE_DIR}/CommandBufferStateTracker.cpp
     ${DAWN_NATIVE_DIR}/CommandBufferStateTracker.h
+    ${DAWN_NATIVE_DIR}/DawnNative.cpp
     ${DAWN_NATIVE_DIR}/DepthStencilState.cpp
     ${DAWN_NATIVE_DIR}/DepthStencilState.h
     ${DAWN_NATIVE_DIR}/Device.cpp
@@ -371,6 +372,7 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/Texture.h
     ${DAWN_NATIVE_DIR}/ToBackend.h
     ${DAWN_NATIVE_INCLUDE_DIR}/dawn_native_export.h
+    ${DAWN_NATIVE_INCLUDE_DIR}/DawnNative.h
 )
 
 # We want to produce both a static and a shared libdawn_native library. The static one is for

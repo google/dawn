@@ -108,15 +108,13 @@ namespace utils {
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
         }
-        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
+        dawnDevice CreateDevice() override {
             glfwMakeContextCurrent(mWindow);
             // Load the GL entry points in our copy of the glad static library
             gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
 
-            dawn_native::opengl::Init(reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress),
-                                      procs, device);
-
-            mBackendDevice = *device;
+            return dawn_native::opengl::CreateDevice(
+                reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress));
         }
 
         uint64_t GetSwapChainImplementation() override {
@@ -131,7 +129,6 @@ namespace utils {
         }
 
       private:
-        dawnDevice mBackendDevice = nullptr;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 

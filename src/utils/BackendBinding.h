@@ -36,7 +36,7 @@ namespace utils {
         virtual ~BackendBinding() = default;
 
         virtual void SetupGLFWWindowHints() = 0;
-        virtual void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) = 0;
+        virtual dawnDevice CreateDevice() = 0;
         virtual uint64_t GetSwapChainImplementation() = 0;
         virtual dawnTextureFormat GetPreferredSwapChainTextureFormat() = 0;
 

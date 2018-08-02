@@ -22,6 +22,7 @@
 #include <dawn/dawn.h>
 #include <dawn/dawncpp.h>
 #include <dawn/dawn_wsi.h>
+#include <dawn_native/DawnNative.h>
 #include "GLFW/glfw3.h"
 
 #include <cstring>
@@ -84,9 +85,8 @@ dawn::Device CreateCppDawnDevice() {
 
     binding->SetWindow(window);
 
-    dawnDevice backendDevice;
-    dawnProcTable backendProcs;
-    binding->GetProcAndDevice(&backendProcs, &backendDevice);
+    dawnDevice backendDevice = binding->CreateDevice();
+    dawnProcTable backendProcs = dawn_native::GetProcs();
 
     dawnDevice cDevice = nullptr;
     dawnProcTable procs;

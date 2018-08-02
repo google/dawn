@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "dawn_native/DawnNative.h"
 #include "dawn_wire/Wire.h"
 #include "utils/BackendBinding.h"
 #include "utils/DawnHelpers.h"
@@ -136,9 +137,8 @@ void DawnTest::SetUp() {
 
     mBinding->SetWindow(testWindow);
 
-    dawnDevice backendDevice;
-    dawnProcTable backendProcs;
-    mBinding->GetProcAndDevice(&backendProcs, &backendDevice);
+    dawnDevice backendDevice = mBinding->CreateDevice();
+    dawnProcTable backendProcs = dawn_native::GetProcs();
 
     // Choose whether to use the backend procs and devices directly, or set up the wire.
     dawnDevice cDevice = nullptr;

@@ -19,7 +19,7 @@
 #include <dawn_native/dawn_native_export.h>
 
 namespace dawn_native { namespace null {
-    DAWN_NATIVE_EXPORT void Init(dawnProcTable* procs, dawnDevice* device);
+    DAWN_NATIVE_EXPORT dawnDevice CreateDevice();
 }}  // namespace dawn_native::null
 
 #endif  // DAWNNATIVE_NULLBACKEND_H_

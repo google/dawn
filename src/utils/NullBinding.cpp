@@ -22,8 +22,8 @@ namespace utils {
       public:
         void SetupGLFWWindowHints() override {
         }
-        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
-            dawn_native::null::Init(procs, device);
+        dawnDevice CreateDevice() override {
+            return dawn_native::null::CreateDevice();
         }
         uint64_t GetSwapChainImplementation() override {
             return 0;

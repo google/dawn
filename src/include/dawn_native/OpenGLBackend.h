@@ -19,9 +19,7 @@
 #include <dawn_native/dawn_native_export.h>
 
 namespace dawn_native { namespace opengl {
-    DAWN_NATIVE_EXPORT void Init(void* (*getProc)(const char*),
-                                 dawnProcTable* procs,
-                                 dawnDevice* device);
+    DAWN_NATIVE_EXPORT dawnDevice CreateDevice(void* (*getProc)(const char*));
 }}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGLBACKEND_H_

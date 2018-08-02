@@ -19,15 +19,10 @@
 
 #include <spirv-cross/spirv_cross.hpp>
 
-namespace dawn_native {
-    dawnProcTable GetProcs();
-}  // namespace dawn_native
-
 namespace dawn_native { namespace null {
 
-    void Init(dawnProcTable* procs, dawnDevice* device) {
-        *procs = GetProcs();
-        *device = reinterpret_cast<dawnDevice>(new Device);
+    dawnDevice CreateDevice() {
+        return reinterpret_cast<dawnDevice>(new Device);
     }
 
     // Device

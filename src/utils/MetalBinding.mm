@@ -105,11 +105,9 @@ namespace utils {
         void SetupGLFWWindowHints() override {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
-        void GetProcAndDevice(dawnProcTable* procs, dawnDevice* device) override {
+        dawnDevice CreateDevice() override {
             mMetalDevice = MTLCreateSystemDefaultDevice();
-
-            dawn_native::metal::Init(mMetalDevice, procs, device);
-            mBackendDevice = *device;
+            return dawn_native::metal::CreateDevice(mMetalDevice);
         }
 
         uint64_t GetSwapChainImplementation() override {
@@ -126,7 +124,6 @@ namespace utils {
 
       private:
         id<MTLDevice> mMetalDevice = nil;
-        dawnDevice mBackendDevice = nullptr;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 

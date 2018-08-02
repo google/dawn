@@ -15,6 +15,8 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "dawn/dawn.h"
+#include "dawn_native/DawnNative.h"
+#include "dawn_native/NullBackend.h"
 
 namespace dawn_native {
     namespace null {
@@ -23,9 +25,8 @@ namespace dawn_native {
 }
 
 ValidationTest::ValidationTest() {
-    dawnProcTable procs;
-    dawnDevice cDevice;
-    dawn_native::null::Init(&procs, &cDevice);
+    dawnProcTable procs = dawn_native::GetProcs();
+    dawnDevice cDevice = dawn_native::null::CreateDevice();
 
     dawnSetProcs(&procs);
     device = dawn::Device::Acquire(cDevice);
