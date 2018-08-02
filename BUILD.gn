@@ -57,7 +57,16 @@ template("dawn_generator") {
     target,
   ]
 
-  # TODO(cwallez@chromium.org): Use depfile instead of this exec_script
+  # Gather the inputs and outputs of the code generator.
+  # TODO(cwallez@chromium.org): These exec_script are cheap but are done on
+  # every GN invocation. However we can't use a depfile because the generator
+  # can have multiple outputs which ninja doesn't support in depfiles.
+  # We could avoid exec_script by making the code generator generate a single
+  # output such as a tarball:
+  #  - The outputs would be the tarball
+  #  - The inputs could be handled via a depfile
+  # Then another action would depend on the generator target and decompress the
+  # tarball.
   script_inputs = exec_script(generator,
                               common_args + [
                                     "--print-dependencies",
@@ -65,8 +74,6 @@ template("dawn_generator") {
                                   ],
                               "list lines",
                               [ json ])
-
-  # Gather the outputs of the code generator for this target.
   script_outputs = exec_script(generator,
                                common_args + [
                                      "--print-outputs",
@@ -93,7 +100,9 @@ template("dawn_generator") {
     # Make a target with a custom target_type that will contain the outputs of
     # the code generator in sources.
     target(invoker.target_type, target_name) {
-      deps = [ ":" + target_name + "_gen" ]
+      deps = [
+        ":" + target_name + "_gen",
+      ]
       sources = script_outputs
 
       # Forward variables from the invoker. deps, configs and source are

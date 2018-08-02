@@ -291,16 +291,8 @@ def do_renders(renders, template_dir, output_dir):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        content = ""
-        try:
-            with open(output_file, 'r') as outfile:
-                content = outfile.read()
-        except:
-            pass
-
-        if output != content:
-            with open(output_file, 'w') as outfile:
-                outfile.write(output)
+        with open(output_file, 'w') as outfile:
+            outfile.write(output)
 
 #############################################################
 # MAIN SOMETHING WHATEVER
@@ -408,7 +400,7 @@ def main():
     parser.add_argument('-T', '--targets', default=None, type=str, help='Comma-separated subset of targets to output. Available targets: ' + ', '.join(targets))
     parser.add_argument('--print-dependencies', action='store_true', help='Prints a space separated list of file dependencies, used for CMake integration')
     parser.add_argument('--print-outputs', action='store_true', help='Prints a space separated list of file outputs, used for CMake integration')
-    parser.add_argument('--gn', action='store_true', help='Make the printing of dependencies by GN friendly')
+    parser.add_argument('--gn', action='store_true', help='Make the printing of dependencies/outputs GN-friendly')
 
     args = parser.parse_args()
 
@@ -418,7 +410,12 @@ def main():
     with open(args.json[0]) as f:
         loaded_json = json.loads(f.read())
 
-    api_params = parse_json(loaded_json)
+    # A fake api_params to avoid parsing the JSON when just querying dependencies and outputs
+    api_params = {
+        'types': {}
+    }
+    if not args.print_outputs and not args.print_dependencies:
+        api_params = parse_json(loaded_json)
 
     base_params = {
         'enumerate': enumerate,
