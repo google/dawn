@@ -16,4 +16,4 @@
 dawn_standalone = true
 
 # Where to find SPIRV-Cross if we aren't in standalone
-dawn_spirv_cross_dir = "//third_party/spirv-cross/"
+dawn_spirv_cross_dir = "//third_party/spirv-cross"

@@ -37,7 +37,7 @@ declare_args() {
 }
 
 ###############################################################################
-# template to wrap the Dawn code generator
+# Template to wrap the Dawn code generator
 ###############################################################################
 
 template("dawn_generator") {
@@ -89,7 +89,7 @@ template("dawn_generator") {
   }
 
   # Make an action to execute the code generator
-  action(target_name + "_gen") {
+  action("${target_name}_gen") {
     script = generator
     inputs = script_inputs
     outputs = rebased_outputs
@@ -101,7 +101,7 @@ template("dawn_generator") {
     # the code generator in sources.
     target(invoker.target_type, target_name) {
       deps = [
-        ":" + target_name + "_gen",
+        ":${target_name}_gen",
       ]
       sources = script_outputs
 
@@ -247,37 +247,37 @@ static_library("spirv_cross") {
   cflags_cc = [ "-Wno-implicit-fallthrough" ]
 
   sources = [
-    dawn_spirv_cross_dir + "GLSL.std.450.h",
-    dawn_spirv_cross_dir + "spirv_common.hpp",
-    dawn_spirv_cross_dir + "spirv_cfg.cpp",
-    dawn_spirv_cross_dir + "spirv_cfg.hpp",
-    dawn_spirv_cross_dir + "spirv_cross.cpp",
-    dawn_spirv_cross_dir + "spirv_cross.hpp",
-    dawn_spirv_cross_dir + "spirv.hpp",
+    "${dawn_spirv_cross_dir}/GLSL.std.450.h",
+    "${dawn_spirv_cross_dir}/spirv_common.hpp",
+    "${dawn_spirv_cross_dir}/spirv_cfg.cpp",
+    "${dawn_spirv_cross_dir}/spirv_cfg.hpp",
+    "${dawn_spirv_cross_dir}/spirv_cross.cpp",
+    "${dawn_spirv_cross_dir}/spirv_cross.hpp",
+    "${dawn_spirv_cross_dir}/spirv.hpp",
   ]
 
   need_glsl_cross = dawn_enable_opengl
 
   if (dawn_enable_d3d12) {
     sources += [
-      dawn_spirv_cross_dir + "spirv_hlsl.cpp",
-      dawn_spirv_cross_dir + "spirv_hlsl.hpp",
+      "${dawn_spirv_cross_dir}/spirv_hlsl.cpp",
+      "${dawn_spirv_cross_dir}/spirv_hlsl.hpp",
     ]
     need_glsl_cross = true
   }
 
   if (dawn_enable_metal) {
     sources += [
-      dawn_spirv_cross_dir + "spirv_msl.cpp",
-      dawn_spirv_cross_dir + "spirv_msl.hpp",
+      "${dawn_spirv_cross_dir}/spirv_msl.cpp",
+      "${dawn_spirv_cross_dir}/spirv_msl.hpp",
     ]
     need_glsl_cross = true
   }
 
   if (need_glsl_cross) {
     sources += [
-      dawn_spirv_cross_dir + "spirv_glsl.cpp",
-      dawn_spirv_cross_dir + "spirv_glsl.hpp",
+      "${dawn_spirv_cross_dir}/spirv_glsl.cpp",
+      "${dawn_spirv_cross_dir}/spirv_glsl.hpp",
     ]
   }
 }
