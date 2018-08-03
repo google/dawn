@@ -19,27 +19,27 @@
 // Tests for ScanForward
 TEST(Math, ScanForward) {
     // Test extrema
-    ASSERT_EQ(ScanForward(1), 0);
-    ASSERT_EQ(ScanForward(0x80000000), 31);
+    ASSERT_EQ(ScanForward(1), 0u);
+    ASSERT_EQ(ScanForward(0x80000000), 31u);
 
     // Test with more than one bit set.
-    ASSERT_EQ(ScanForward(256), 8);
-    ASSERT_EQ(ScanForward(256 + 32), 5);
-    ASSERT_EQ(ScanForward(1024 + 256 + 32), 5);
+    ASSERT_EQ(ScanForward(256), 8u);
+    ASSERT_EQ(ScanForward(256 + 32), 5u);
+    ASSERT_EQ(ScanForward(1024 + 256 + 32), 5u);
 }
 
 // Tests for Log2
 TEST(Math, Log2) {
     // Test extrema
-    ASSERT_EQ(Log2(1), 0);
-    ASSERT_EQ(Log2(0xFFFFFFFF), 31);
+    ASSERT_EQ(Log2(1), 0u);
+    ASSERT_EQ(Log2(0xFFFFFFFF), 31u);
 
     // Test boundary between two logs
-    ASSERT_EQ(Log2(0x80000000), 31);
-    ASSERT_EQ(Log2(0x7FFFFFFF), 30);
+    ASSERT_EQ(Log2(0x80000000), 31u);
+    ASSERT_EQ(Log2(0x7FFFFFFF), 30u);
 
-    ASSERT_EQ(Log2(16), 4);
-    ASSERT_EQ(Log2(15), 3);
+    ASSERT_EQ(Log2(16), 4u);
+    ASSERT_EQ(Log2(15), 3u);
 }
 
 // Tests for IsPowerOfTwo
@@ -64,24 +64,24 @@ TEST(Math, AlignPtr) {
 
         ASSERT_GE(aligned - unaligned, 0);
         ASSERT_LT(static_cast<size_t>(aligned - unaligned), kTestAlignment);
-        ASSERT_EQ(reinterpret_cast<uintptr_t>(aligned) & (kTestAlignment -1), 0);
+        ASSERT_EQ(reinterpret_cast<uintptr_t>(aligned) & (kTestAlignment -1), 0u);
     }
 }
 
 // Tests for Align
 TEST(Math, Align) {
     // 0 aligns to 0
-    ASSERT_EQ(Align(0, 4), 0);
-    ASSERT_EQ(Align(0, 256), 0);
-    ASSERT_EQ(Align(0, 512), 0);
+    ASSERT_EQ(Align(0, 4), 0u);
+    ASSERT_EQ(Align(0, 256), 0u);
+    ASSERT_EQ(Align(0, 512), 0u);
 
     // Multiples align to self
-    ASSERT_EQ(Align(8, 8), 8);
-    ASSERT_EQ(Align(16, 8), 16);
-    ASSERT_EQ(Align(24, 8), 24);
-    ASSERT_EQ(Align(256, 256), 256);
-    ASSERT_EQ(Align(512, 256), 512);
-    ASSERT_EQ(Align(768, 256), 768);
+    ASSERT_EQ(Align(8, 8), 8u);
+    ASSERT_EQ(Align(16, 8), 16u);
+    ASSERT_EQ(Align(24, 8), 24u);
+    ASSERT_EQ(Align(256, 256), 256u);
+    ASSERT_EQ(Align(512, 256), 512u);
+    ASSERT_EQ(Align(768, 256), 768u);
 
     // Alignment with 1 is self
     for (uint32_t i = 0; i < 128; ++i) {
@@ -90,7 +90,7 @@ TEST(Math, Align) {
 
     // Everything in the range (align, 2*align] aligns to 2*align
     for (uint32_t i = 1; i <= 64; ++i) {
-        ASSERT_EQ(Align(64 + i, 64), 128);
+        ASSERT_EQ(Align(64 + i, 64), 128u);
     }
 }
 

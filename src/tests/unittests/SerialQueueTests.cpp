@@ -132,12 +132,12 @@ TEST(SerialQueue, FirstSerial) {
     queue.Enqueue(std::move(vector2), 1);
     queue.Enqueue(vector3, 2);
 
-    EXPECT_EQ(queue.FirstSerial(), 0);
+    EXPECT_EQ(queue.FirstSerial(), 0u);
 
     queue.ClearUpTo(1);
-    EXPECT_EQ(queue.FirstSerial(), 2);
+    EXPECT_EQ(queue.FirstSerial(), 2u);
 
     queue.Clear();
     queue.Enqueue(vector1, 6);
-    EXPECT_EQ(queue.FirstSerial(), 6);
+    EXPECT_EQ(queue.FirstSerial(), 6u);
 }
