@@ -60,7 +60,8 @@ namespace utils {
             std::vector<const char*> requiredExtensions(glfwInstanceExtensions,
                                                         glfwInstanceExtensions + extensionCount);
 
-            return dawn_native::vulkan::CreateDevice(requiredExtensions);
+            mDevice = dawn_native::vulkan::CreateDevice(requiredExtensions);
+            return mDevice;
         }
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
