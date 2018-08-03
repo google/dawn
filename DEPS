@@ -21,16 +21,40 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # GTest and GMock
+  # Testing, GTest and GMock
   '{dawn_root}/testing': {
     'url': '{chromium_git}/chromium/src/testing@4d706fd80be9e8989aec5235540e7b46d0672826',
+    'condition': 'dawn_standalone',
+  },
+  'third_party/googletest': {
+    'url': '{github_git}/google/googletest.git@98a0d007d7092b72eea0e501bb9ad17908a1a036',
     'condition': 'dawn_standalone',
   },
 
   # SPIRV-Cross
   '{dawn_root}/third_party/spirv-cross': {
     'url': '{github_git}/Kangz/SPIRV-Cross.git@694cad533296df02b4562f4a5a20cba1d1a9dbaf',
+    'condition': 'dawn_standalone',
   },
+
+  # SPIRV compiler dependencies: SPIRV-Tools, SPIRV-headers, glslang and shaderc
+  '{dawn_root}/third_party/SPIRV-Tools': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools.git@eda2cfbe128e5b71e9a0131f816ade5186ad6420',
+    'condition': 'dawn_standalone',
+  },
+  '{dawn_root}/third_party/spirv-headers': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers.git@ff684ffc6a35d2a58f0f63108877d0064ea33feb',
+    'condition': 'dawn_standalone',
+  },
+  '{dawn_root}/third_party/glslang': {
+    'url': '{chromium_git}/external/github.com/google/glslang.git@29619b2312f7bc862221749f3f4d37c3e6a0dee2',
+    'condition': 'dawn_standalone',
+  },
+  '{dawn_root}/third_party/shaderc': {
+    'url': '{chromium_git}/external/github.com/google/shaderc.git@30af9f9899aefd018669e81a5b8e605d14d40431',
+    'condition': 'dawn_standalone',
+  },
+
 }
 
 hooks = [

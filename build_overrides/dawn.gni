@@ -12,8 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Whether we are building from Dawn's repository
+# These are variables that are overridable by projects that include Dawn.
+# The values in this file are the defaults for when we are building from
+# Dawn's repository.
+
+# Whether we are building from Dawn's repository.
+# MUST be set to false in other projects.
 dawn_standalone = true
 
-# Where to find SPIRV-Cross if we aren't in standalone
+# Defaults for these are set again in dawn_overrides_with_defaults.gni so that
+# users of Dawn don't have to set dirs if they happen to use the same as Dawn.
+
+# The paths to Dawn's dependencies
 dawn_spirv_cross_dir = "//third_party/spirv-cross"
+dawn_googletest_dir = "//third_party/googletest"
+dawn_glslang_dir = "//third_party/glslang"
+dawn_spirv_tools_dir = "//third_party/SPIRV-Tools"
+dawn_shaderc_dir = "//third_party/shaderc"
+dawn_glfw_dir = "//third_party/glfw"

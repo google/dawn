@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build_overrides/dawn.gni")
+import("scripts/dawn_overrides_with_defaults.gni")
+
+import("//testing/test.gni")
 
 declare_args() {
   # Enable Dawn's ASSERTs even in release builds
@@ -131,7 +133,7 @@ template("dawn_generator") {
 }
 
 ###############################################################################
-# Dawn headers and libdawn.so
+# Common dawn libraries and configs
 ###############################################################################
 
 config("libdawn_public") {
@@ -140,33 +142,6 @@ config("libdawn_public") {
     "src/include",
   ]
 }
-
-dawn_generator("dawn_headers") {
-  target = "dawn_headers"
-  target_type = "source_set"
-
-  public_configs = [ ":libdawn_public" ]
-}
-
-dawn_generator("libdawn") {
-  target = "libdawn"
-  target_type = "shared_library"
-
-  defines = [ "DAWN_IMPLEMENTATION" ]
-  sources = [
-    "src/include/dawn/EnumClassBitmasks.h",
-    "src/include/dawn/dawn_export.h",
-    "src/include/dawn/dawn_wsi.h",
-  ]
-
-  public_deps = [
-    ":dawn_headers",
-  ]
-}
-
-###############################################################################
-# Common dawn libraries and configs
-###############################################################################
 
 config("dawn_internal") {
   include_dirs = [ "src" ]
@@ -195,6 +170,16 @@ config("dawn_internal") {
   configs = [ ":libdawn_public" ]
 }
 
+# Executable needs an rpath to find our shared libraries on OSX
+config("dawn_shared_library_public") {
+  if (is_mac) {
+    ldflags = [
+      "-rpath",
+      "@executable_path/",
+    ]
+  }
+}
+
 static_library("dawn_common") {
   sources = [
     "src/common/Assert.cpp",
@@ -216,6 +201,42 @@ static_library("dawn_common") {
   ]
 
   configs += [ ":dawn_internal" ]
+}
+
+###############################################################################
+# Dawn headers and libdawn.so
+###############################################################################
+
+dawn_generator("dawn_headers") {
+  target = "dawn_headers"
+  target_type = "source_set"
+
+  public_configs = [ ":libdawn_public" ]
+}
+
+dawn_generator("libdawn") {
+  target = "libdawn"
+  target_type = "shared_library"
+
+  defines = [ "DAWN_IMPLEMENTATION" ]
+  sources = [
+    "src/include/dawn/EnumClassBitmasks.h",
+    "src/include/dawn/dawn_export.h",
+    "src/include/dawn/dawn_wsi.h",
+  ]
+
+  public_deps = [
+    ":dawn_headers",
+  ]
+
+  # Tell dependents where to find this shared library
+  if (is_mac) {
+    ldflags = [
+      "-install_name",
+      "@rpath/${target_name}.dylib",
+    ]
+    public_configs = [ ":dawn_shared_library_public" ]
+  }
 }
 
 ###############################################################################
@@ -248,12 +269,12 @@ static_library("spirv_cross") {
 
   sources = [
     "${dawn_spirv_cross_dir}/GLSL.std.450.h",
-    "${dawn_spirv_cross_dir}/spirv_common.hpp",
+    "${dawn_spirv_cross_dir}/spirv.hpp",
     "${dawn_spirv_cross_dir}/spirv_cfg.cpp",
     "${dawn_spirv_cross_dir}/spirv_cfg.hpp",
+    "${dawn_spirv_cross_dir}/spirv_common.hpp",
     "${dawn_spirv_cross_dir}/spirv_cross.cpp",
     "${dawn_spirv_cross_dir}/spirv_cross.hpp",
-    "${dawn_spirv_cross_dir}/spirv.hpp",
   ]
 
   need_glsl_cross = dawn_enable_opengl
@@ -610,6 +631,15 @@ shared_library("libdawn_native") {
     ":libdawn_native_sources",
   ]
   public_configs = [ ":libdawn_public" ]
+
+  # Tell dependents where to find this shared library
+  if (is_mac) {
+    ldflags = [
+      "-install_name",
+      "@rpath/${target_name}.dylib",
+    ]
+    public_configs += [ ":dawn_shared_library_public" ]
+  }
 }
 
 # The static library for libdawn_native for use by unittests
@@ -654,4 +684,176 @@ shared_library("libdawn_wire") {
     ":libdawn_wire_sources",
   ]
   public_configs = [ ":libdawn_public" ]
+
+  # Tell dependents where to find this shared library
+  if (is_mac) {
+    ldflags = [
+      "-install_name",
+      "@rpath/${target_name}.dylib",
+    ]
+    public_configs += [ ":dawn_shared_library_public" ]
+  }
+}
+
+###############################################################################
+# Utils for tests and samples
+###############################################################################
+
+static_library("dawn_utils") {
+  configs += [ ":dawn_internal" ]
+
+  sources = [
+    "src/utils/BackendBinding.cpp",
+    "src/utils/BackendBinding.h",
+    "src/utils/DawnHelpers.cpp",
+    "src/utils/DawnHelpers.h",
+    "src/utils/SystemUtils.cpp",
+    "src/utils/SystemUtils.h",
+    "src/utils/TerribleCommandBuffer.cpp",
+    "src/utils/TerribleCommandBuffer.h",
+  ]
+  libs = []
+  deps = [
+    ":dawn_common",
+    ":libdawn_native",
+    "third_party:glfw",
+    "third_party:libshaderc",
+  ]
+
+  if (dawn_enable_d3d12) {
+    sources += [ "src/utils/D3D12Binding.cpp" ]
+  }
+
+  if (dawn_enable_metal) {
+    sources += [ "src/utils/MetalBinding.mm" ]
+    libs += [
+      "Metal.framework",
+      "QuartzCore.framework",
+    ]
+
+    # Suppress warnings that Metal isn't in the deployment target of Chrome
+    if (is_mac) {
+      cflags_objcc = [ "-Wno-unguarded-availability" ]
+    }
+  }
+
+  if (dawn_enable_null) {
+    sources += [ "src/utils/NullBinding.cpp" ]
+  }
+
+  if (dawn_enable_opengl) {
+    sources += [ "src/utils/OpenGLBinding.cpp" ]
+    deps += [ ":glad" ]
+  }
+
+  if (dawn_enable_vulkan) {
+    sources += [ "src/utils/VulkanBinding.cpp" ]
+    deps += [ ":vulkan_headers" ]
+  }
+}
+
+###############################################################################
+# Dawn test targets
+###############################################################################
+
+dawn_generator("mock_dawn") {
+  testonly = true
+  target = "mock_dawn"
+  target_type = "source_set"
+
+  deps = [
+    ":dawn_headers",
+    "third_party:gmock",
+  ]
+}
+
+test("dawn_unittests") {
+  configs += [ ":dawn_internal" ]
+
+  if (is_linux) {
+    configs += [ "//build/config/gcc:rpath_for_built_shared_libraries" ]
+  }
+
+  deps = [
+    ":dawn_utils",
+    ":libdawn",
+    ":libdawn_native_static",
+    ":libdawn_wire",
+    ":mock_dawn",
+    "third_party:gmock",
+    "third_party:gtest",
+  ]
+
+  sources = [
+    "src/tests/UnittestsMain.cpp",
+    "src/tests/unittests/BitSetIteratorTests.cpp",
+    "src/tests/unittests/CommandAllocatorTests.cpp",
+    "src/tests/unittests/EnumClassBitmasksTests.cpp",
+    "src/tests/unittests/ErrorTests.cpp",
+    "src/tests/unittests/MathTests.cpp",
+    "src/tests/unittests/ObjectBaseTests.cpp",
+    "src/tests/unittests/PerStageTests.cpp",
+    "src/tests/unittests/RefCountedTests.cpp",
+    "src/tests/unittests/ResultTests.cpp",
+    "src/tests/unittests/SerialQueueTests.cpp",
+    "src/tests/unittests/ToBackendTests.cpp",
+    "src/tests/unittests/WireTests.cpp",
+    "src/tests/unittests/validation/BindGroupValidationTests.cpp",
+    "src/tests/unittests/validation/BlendStateValidationTests.cpp",
+    "src/tests/unittests/validation/BufferValidationTests.cpp",
+    "src/tests/unittests/validation/CommandBufferValidationTests.cpp",
+    "src/tests/unittests/validation/ComputeValidationTests.cpp",
+    "src/tests/unittests/validation/CopyCommandsValidationTests.cpp",
+    "src/tests/unittests/validation/DepthStencilStateValidationTests.cpp",
+    "src/tests/unittests/validation/DynamicStateCommandValidationTests.cpp",
+    "src/tests/unittests/validation/InputStateValidationTests.cpp",
+    "src/tests/unittests/validation/PushConstantsValidationTests.cpp",
+    "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
+    "src/tests/unittests/validation/RenderPipelineValidationTests.cpp",
+    "src/tests/unittests/validation/ValidationTest.cpp",
+    "src/tests/unittests/validation/ValidationTest.h",
+    "src/tests/unittests/validation/VertexBufferValidationTests.cpp",
+  ]
+
+  if (dawn_enable_d3d12) {
+    sources += [ "src/tests/unittests/d3d12CopySplitTests.cpp" ]
+  }
+}
+
+test("dawn_end2end_tests") {
+  configs += [ ":dawn_internal" ]
+
+  if (is_linux) {
+    configs += [ "//build/config/gcc:rpath_for_built_shared_libraries" ]
+  }
+
+  deps = [
+    ":dawn_utils",
+    ":libdawn",
+    ":libdawn_native",
+    ":libdawn_wire",
+    "third_party:glfw",
+    "third_party:gtest",
+  ]
+
+  sources = [
+    "src/tests/DawnTest.cpp",
+    "src/tests/DawnTest.h",
+    "src/tests/End2EndTestsMain.cpp",
+    "src/tests/end2end/BasicTests.cpp",
+    "src/tests/end2end/BlendStateTests.cpp",
+    "src/tests/end2end/BufferTests.cpp",
+    "src/tests/end2end/ComputeCopyStorageBufferTests.cpp",
+    "src/tests/end2end/CopyTests.cpp",
+    "src/tests/end2end/DepthStencilStateTests.cpp",
+    "src/tests/end2end/DrawElementsTests.cpp",
+    "src/tests/end2end/IndexFormatTests.cpp",
+    "src/tests/end2end/InputStateTests.cpp",
+    "src/tests/end2end/PrimitiveTopologyTests.cpp",
+    "src/tests/end2end/PushConstantTests.cpp",
+    "src/tests/end2end/RenderPassLoadOpTests.cpp",
+    "src/tests/end2end/SamplerTests.cpp",
+    "src/tests/end2end/ScissorTests.cpp",
+    "src/tests/end2end/ViewportOrientationTests.cpp",
+  ]
 }

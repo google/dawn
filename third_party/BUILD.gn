@@ -1,0 +1,371 @@
+# Copyright 2018 The Dawn Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../scripts/dawn_overrides_with_defaults.gni")
+
+###############################################################################
+# Gtest Gmock - build targets when outside of Chrome
+# TODO(cwallez@chromium.org): Adapt them to build with Chromium's harness
+###############################################################################
+
+googletest_dir = dawn_googletest_dir
+
+config("gtest_config") {
+  include_dirs = [
+    "${googletest_dir}/googletest",
+    "${googletest_dir}/googletest/include",
+  ]
+}
+
+static_library("gtest") {
+  testonly = true
+  sources = [
+    "${googletest_dir}/googletest/src/gtest-all.cc",
+  ]
+  public_configs = [ ":gtest_config" ]
+}
+
+config("gmock_config") {
+  include_dirs = [
+    "${googletest_dir}/googlemock",
+    "${googletest_dir}/googlemock/include",
+    "${googletest_dir}/googletest/include",
+  ]
+}
+
+static_library("gmock") {
+  testonly = true
+  sources = [
+    "${googletest_dir}/googlemock/src/gmock-all.cc",
+  ]
+  public_configs = [ ":gmock_config" ]
+}
+
+###############################################################################
+# GLSLang - good enough build targets
+###############################################################################
+
+glslang_dir = dawn_glslang_dir
+spirv_tools_dir = dawn_spirv_tools_dir
+
+config("glslang_public") {
+  include_dirs = [ glslang_dir ]
+}
+
+static_library("glslang_static") {
+  defines = []
+
+  public_configs = [ ":glslang_public" ]
+
+  sources = [
+    "${glslang_dir}/OGLCompilersDLL/InitializeDll.cpp",
+    "${glslang_dir}/OGLCompilersDLL/InitializeDll.h",
+    "${glslang_dir}/SPIRV/GLSL.ext.EXT.h",
+    "${glslang_dir}/SPIRV/GLSL.ext.KHR.h",
+    "${glslang_dir}/SPIRV/GLSL.std.450.h",
+    "${glslang_dir}/SPIRV/GlslangToSpv.cpp",
+    "${glslang_dir}/SPIRV/GlslangToSpv.h",
+    "${glslang_dir}/SPIRV/InReadableOrder.cpp",
+    "${glslang_dir}/SPIRV/Logger.cpp",
+    "${glslang_dir}/SPIRV/Logger.h",
+    "${glslang_dir}/SPIRV/SPVRemapper.cpp",
+    "${glslang_dir}/SPIRV/SPVRemapper.h",
+    "${glslang_dir}/SPIRV/SpvBuilder.cpp",
+    "${glslang_dir}/SPIRV/SpvBuilder.h",
+    "${glslang_dir}/SPIRV/bitutils.h",
+    "${glslang_dir}/SPIRV/disassemble.cpp",
+    "${glslang_dir}/SPIRV/disassemble.h",
+    "${glslang_dir}/SPIRV/doc.cpp",
+    "${glslang_dir}/SPIRV/doc.h",
+    "${glslang_dir}/SPIRV/hex_float.h",
+    "${glslang_dir}/SPIRV/spirv.hpp",
+    "${glslang_dir}/SPIRV/spvIR.h",
+    "${glslang_dir}/glslang/GenericCodeGen/CodeGen.cpp",
+    "${glslang_dir}/glslang/GenericCodeGen/Link.cpp",
+    "${glslang_dir}/glslang/Include/BaseTypes.h",
+    "${glslang_dir}/glslang/Include/Common.h",
+    "${glslang_dir}/glslang/Include/ConstantUnion.h",
+    "${glslang_dir}/glslang/Include/InfoSink.h",
+    "${glslang_dir}/glslang/Include/InitializeGlobals.h",
+    "${glslang_dir}/glslang/Include/PoolAlloc.h",
+    "${glslang_dir}/glslang/Include/ResourceLimits.h",
+    "${glslang_dir}/glslang/Include/ShHandle.h",
+    "${glslang_dir}/glslang/Include/Types.h",
+    "${glslang_dir}/glslang/Include/arrays.h",
+    "${glslang_dir}/glslang/Include/intermediate.h",
+    "${glslang_dir}/glslang/Include/revision.h",
+    "${glslang_dir}/glslang/MachineIndependent/Constant.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/InfoSink.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/Initialize.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/Initialize.h",
+    "${glslang_dir}/glslang/MachineIndependent/IntermTraverse.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/Intermediate.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/LiveTraverser.h",
+    "${glslang_dir}/glslang/MachineIndependent/ParseContextBase.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/ParseHelper.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/ParseHelper.h",
+    "${glslang_dir}/glslang/MachineIndependent/PoolAlloc.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/RemoveTree.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/RemoveTree.h",
+    "${glslang_dir}/glslang/MachineIndependent/Scan.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/Scan.h",
+    "${glslang_dir}/glslang/MachineIndependent/ScanContext.h",
+    "${glslang_dir}/glslang/MachineIndependent/ShaderLang.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/SymbolTable.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/SymbolTable.h",
+    "${glslang_dir}/glslang/MachineIndependent/Versions.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/Versions.h",
+    "${glslang_dir}/glslang/MachineIndependent/attribute.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/attribute.h",
+    "${glslang_dir}/glslang/MachineIndependent/gl_types.h",
+    "${glslang_dir}/glslang/MachineIndependent/glslang.y",
+    "${glslang_dir}/glslang/MachineIndependent/glslang_tab.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/glslang_tab.cpp.h",
+    "${glslang_dir}/glslang/MachineIndependent/intermOut.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/iomapper.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/iomapper.h",
+    "${glslang_dir}/glslang/MachineIndependent/limits.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/linkValidate.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/localintermediate.h",
+    "${glslang_dir}/glslang/MachineIndependent/parseConst.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/parseVersions.h",
+    "${glslang_dir}/glslang/MachineIndependent/preprocessor/Pp.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/preprocessor/PpAtom.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/preprocessor/PpContext.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/preprocessor/PpContext.h",
+    "${glslang_dir}/glslang/MachineIndependent/preprocessor/PpScanner.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/preprocessor/PpTokens.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/preprocessor/PpTokens.h",
+    "${glslang_dir}/glslang/MachineIndependent/propagateNoContraction.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/propagateNoContraction.h",
+    "${glslang_dir}/glslang/MachineIndependent/reflection.cpp",
+    "${glslang_dir}/glslang/MachineIndependent/reflection.h",
+    "${glslang_dir}/glslang/OSDependent/osinclude.h",
+    "${glslang_dir}/glslang/Public/ShaderLang.h",
+  ]
+
+  cflags_cc = [
+    "-Wno-ignored-qualifiers",
+    "-Wno-unused-variable",
+  ]
+
+  deps = [
+    "${spirv_tools_dir}:spvtools_opt",
+  ]
+
+  if (is_win) {
+    sources += [ "${glslang_dir}/glslang/OSDependent/Windows/ossource.cpp" ]
+    defines += [ "GLSLANG_OSINCLUDE_WIN32" ]
+  } else {
+    sources += [ "${glslang_dir}/glslang/OSDependent/Unix/ossource.cpp" ]
+    defines += [ "GLSLANG_OSINCLUDE_UNIX" ]
+  }
+}
+
+###############################################################################
+# Shaderc - good enough build targets
+###############################################################################
+
+shaderc_dir = dawn_shaderc_dir
+
+config("shaderc_util_public") {
+  include_dirs = [ "${shaderc_dir}/libshaderc_util/include" ]
+}
+
+static_library("shaderc_util") {
+  public_configs = [ ":shaderc_util_public" ]
+  deps = [
+    ":glslang_static",
+    "${spirv_tools_dir}:spvtools",
+  ]
+
+  sources = [
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/counting_includer.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/file_finder.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/format.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/io.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/message.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/mutex.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/resources.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/spirv_tools_wrapper.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/string_piece.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/universal_unistd.h",
+    "${shaderc_dir}/libshaderc_util/include/libshaderc_util/version_profile.h",
+    "${shaderc_dir}/libshaderc_util/src/compiler.cc",
+    "${shaderc_dir}/libshaderc_util/src/file_finder.cc",
+    "${shaderc_dir}/libshaderc_util/src/io.cc",
+    "${shaderc_dir}/libshaderc_util/src/message.cc",
+    "${shaderc_dir}/libshaderc_util/src/resources.cc",
+    "${shaderc_dir}/libshaderc_util/src/shader_stage.cc",
+    "${shaderc_dir}/libshaderc_util/src/spirv_tools_wrapper.cc",
+    "${shaderc_dir}/libshaderc_util/src/version_profile.cc",
+  ]
+}
+
+config("shaderc_public") {
+  include_dirs = [ "${shaderc_dir}/libshaderc/include" ]
+  defines = [ "SHADERC_SHAREDLIB" ]
+
+  # Executable needs an rpath to find our shared libraries on OSX
+  if (is_mac) {
+    ldflags = [
+      "-rpath",
+      "@executable_path/",
+    ]
+  }
+}
+
+shared_library("libshaderc") {
+  public_configs = [ ":shaderc_public" ]
+  deps = [
+    ":glslang_static",
+    ":shaderc_util",
+    "${spirv_tools_dir}:spvtools",
+    "${spirv_tools_dir}:spvtools_val",
+  ]
+  defines = [ "SHADERC_IMPLEMENTATION" ]
+
+  sources = [
+    "${shaderc_dir}/libshaderc/include/shaderc/shaderc.h",
+    "${shaderc_dir}/libshaderc/include/shaderc/shaderc.hpp",
+    "${shaderc_dir}/libshaderc/src/shaderc.cc",
+    "${shaderc_dir}/libshaderc/src/shaderc_private.h",
+  ]
+
+  # Tell dependents where to find this shared library
+  if (is_mac) {
+    ldflags = [
+      "-install_name",
+      "@rpath/${target_name}.dylib",
+    ]
+  }
+}
+
+###############################################################################
+# GLFW - good enough build targets
+###############################################################################
+
+glfw_dir = dawn_glfw_dir
+
+config("glfw_public") {
+  include_dirs = [ "${glfw_dir}/include" ]
+
+  if (is_win) {
+    defines = [ "_GLFW_WIN32" ]
+  }
+
+  if (is_mac) {
+    defines = [ "_GLFW_COCOA" ]
+  }
+
+  if (is_linux) {
+    defines = [ "_GLFW_X11" ]
+  }
+}
+
+static_library("glfw") {
+  public_configs = [ ":glfw_public" ]
+
+  cflags_c = [ "-Wno-sign-compare" ]
+
+  sources = [
+    "${glfw_dir}/include/GLFW/glfw3.h",
+    "${glfw_dir}/include/GLFW/glfw3native.h",
+    "${glfw_dir}/src/context.c",
+    "${glfw_dir}/src/glfw_config.h",
+    "${glfw_dir}/src/init.c",
+    "${glfw_dir}/src/input.c",
+    "${glfw_dir}/src/internal.h",
+    "${glfw_dir}/src/monitor.c",
+    "${glfw_dir}/src/vulkan.c",
+    "${glfw_dir}/src/window.c",
+  ]
+  libs = []
+
+  if (is_win) {
+    sources += [
+      "${glfw_dir}/src/egl_context.c",
+      "${glfw_dir}/src/egl_context.h",
+      "${glfw_dir}/src/wgl_context.c",
+      "${glfw_dir}/src/wgl_context.h",
+      "${glfw_dir}/src/win32_init.c",
+      "${glfw_dir}/src/win32_joystick.c",
+      "${glfw_dir}/src/win32_joystick.h",
+      "${glfw_dir}/src/win32_monitor.c",
+      "${glfw_dir}/src/win32_platform.h",
+      "${glfw_dir}/src/win32_time.c",
+      "${glfw_dir}/src/win32_tls.c",
+      "${glfw_dir}/src/win32_window.c",
+    ]
+  }
+
+  if (is_linux || is_mac) {
+    sources += [
+      "${glfw_dir}/src/posix_tls.c",
+      "${glfw_dir}/src/posix_tls.h",
+    ]
+  }
+
+  if (is_linux) {
+    sources += [
+      "${glfw_dir}/src/egl_context.c",
+      "${glfw_dir}/src/egl_context.h",
+      "${glfw_dir}/src/glx_context.c",
+      "${glfw_dir}/src/glx_context.h",
+      "${glfw_dir}/src/linux_joystick.c",
+      "${glfw_dir}/src/linux_joystick.h",
+      "${glfw_dir}/src/posix_time.c",
+      "${glfw_dir}/src/posix_time.h",
+      "${glfw_dir}/src/x11_init.c",
+      "${glfw_dir}/src/x11_monitor.c",
+      "${glfw_dir}/src/x11_platform.h",
+      "${glfw_dir}/src/x11_window.c",
+      "${glfw_dir}/src/xkb_unicode.c",
+      "${glfw_dir}/src/xkb_unicode.h",
+    ]
+
+    libs += [
+      "rt",
+      "dl",
+      "X11",
+      "Xcursor",
+      "Xinerama",
+      "Xrandr",
+    ]
+  }
+
+  if (is_mac) {
+    sources += [
+      "${glfw_dir}/src/cocoa_init.m",
+      "${glfw_dir}/src/cocoa_joystick.h",
+      "${glfw_dir}/src/cocoa_joystick.m",
+      "${glfw_dir}/src/cocoa_monitor.m",
+      "${glfw_dir}/src/cocoa_platform.h",
+      "${glfw_dir}/src/cocoa_time.c",
+      "${glfw_dir}/src/cocoa_window.m",
+      "${glfw_dir}/src/nsgl_context.h",
+      "${glfw_dir}/src/nsgl_context.m",
+    ]
+    libs += [
+      "Cocoa.framework",
+      "IOKit.framework",
+      "CoreFoundation.framework",
+      "CoreVideo.framework",
+    ]
+    cflags_objc = [
+      "-Wno-sign-compare",
+      "-Wno-unguarded-availability",
+    ]
+  }
+}
