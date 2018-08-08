@@ -26,15 +26,15 @@ addons:
  # Everything under apt is only used on linux
  apt:
   sources:
-   # PPA for clang 5.0
-   - llvm-toolchain-trusty-5.0
+   # PPA for clang 6.0
+   - llvm-toolchain-trusty-6.0
    # PPA for clang-format 7
    - llvm-toolchain-trusty
    # PPA for a more recen libstdc++
    - ubuntu-toolchain-r-test
   packages:
    # Get recent compilers
-   - clang-5.0
+   - clang-6.0
    # Pull a recent version of libstdc++
    - libstdc++-6-dev
    # Ninja builds are faster
@@ -56,14 +56,14 @@ install:
 
 script:
  # Use the more recent compilers we just installed
- - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$CXX" == "clang++" ]; then export CXX="clang++-5.0" CC="clang-5.0"; fi
+ - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$CXX" == "clang++" ]; then export CXX="clang++-6.0" CC="clang-6.0"; fi
 
  # Build
  - mkdir -p build
  - cd build
  - cmake --version
  - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DDAWN_USE_WERROR=1 ..
- - cmake --build .
+ - cmake --build . -- -j 1
 
  # Test
  - ./dawn_unittests
