@@ -30,7 +30,8 @@ namespace utils {
         }
 
         dawnDevice CreateDevice() override {
-            return dawn_native::d3d12::CreateDevice();
+            mBackendDevice = dawn_native::d3d12::CreateDevice();
+            return mBackendDevice;
         }
 
         uint64_t GetSwapChainImplementation() override {
