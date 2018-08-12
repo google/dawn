@@ -201,6 +201,9 @@ static_library("dawn_common") {
   ]
 
   configs += [ ":dawn_internal" ]
+  deps = [
+    ":dawn_headers",
+  ]
 }
 
 ###############################################################################
@@ -212,6 +215,11 @@ dawn_generator("dawn_headers") {
   target_type = "source_set"
 
   public_configs = [ ":libdawn_public" ]
+  sources = [
+    "src/include/dawn/EnumClassBitmasks.h",
+    "src/include/dawn/dawn_export.h",
+    "src/include/dawn/dawn_wsi.h",
+  ]
 }
 
 dawn_generator("libdawn") {
@@ -219,11 +227,6 @@ dawn_generator("libdawn") {
   target_type = "shared_library"
 
   defines = [ "DAWN_IMPLEMENTATION" ]
-  sources = [
-    "src/include/dawn/EnumClassBitmasks.h",
-    "src/include/dawn/dawn_export.h",
-    "src/include/dawn/dawn_wsi.h",
-  ]
 
   public_deps = [
     ":dawn_headers",
@@ -342,17 +345,43 @@ dawn_generator("libdawn_native_utils") {
   ]
 }
 
+# Public libdawn_native headers so they can be publically visible for
+# dependencies of libdawn_native
+source_set("libdawn_native_headers") {
+  public_deps = [
+    ":dawn_headers",
+  ]
+  sources = [
+    "src/include/dawn_native/DawnNative.h",
+    "src/include/dawn_native/dawn_native_export.h",
+
+    # Include all backend's public headers so that dependencies can include
+    # them even when the backends are disabled.
+    "src/include/dawn_native/D3D12Backend.h",
+    "src/include/dawn_native/MetalBackend.h",
+    "src/include/dawn_native/NullBackend.h",
+    "src/include/dawn_native/OpenGLBackend.h",
+    "src/include/dawn_native/VulkanBackend.h",
+  ]
+}
+
 # The meat of the compilation for libdawn_native so that we can cheaply have
 # shared_library / static_library / component versions of it.
 source_set("libdawn_native_sources") {
   deps = [
     ":dawn_common",
-    ":dawn_headers",
     ":libdawn_native_utils",
     ":spirv_cross",
   ]
 
-  configs += [ ":libdawn_native_internal" ]
+  # Put the internal config public so that unittests can see internal headers
+  public_configs = [ ":libdawn_native_internal" ]
+
+  # Set the headers as a public dependency so they are visible to unittests
+  public_deps = [
+    ":libdawn_native_headers",
+  ]
+
   libs = []
 
   sources = [
@@ -413,16 +442,6 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Texture.h",
     "src/dawn_native/ToBackend.h",
     "src/dawn_native/dawn_platform.h",
-    "src/include/dawn_native/DawnNative.h",
-    "src/include/dawn_native/dawn_native_export.h",
-
-    # Include all backend's public headers so that dependencies can include
-    # them even when the backends are disabled.
-    "src/include/dawn_native/D3D12Backend.h",
-    "src/include/dawn_native/MetalBackend.h",
-    "src/include/dawn_native/NullBackend.h",
-    "src/include/dawn_native/OpenGLBackend.h",
-    "src/include/dawn_native/VulkanBackend.h",
   ]
 
   if (dawn_enable_d3d12) {
@@ -630,6 +649,11 @@ shared_library("libdawn_native") {
   deps = [
     ":libdawn_native_sources",
   ]
+
+  #Make headers publically visible
+  public_deps = [
+    ":libdawn_native_headers",
+  ]
   public_configs = [ ":libdawn_public" ]
 
   # Tell dependents where to find this shared library
@@ -642,23 +666,21 @@ shared_library("libdawn_native") {
   }
 }
 
-# The static library for libdawn_native for use by unittests
-static_library("libdawn_native_static") {
-  deps = [
-    ":libdawn_native_sources",
-  ]
-
-  sources = [
-    "src/Empty.cpp",
-  ]
-
-  # Put the internal config public so that unittests can see internal headers
-  public_configs = [ ":libdawn_native_internal" ]
-}
-
 ###############################################################################
 # libdawn_wire.so
 ###############################################################################
+
+# Public libdawn_wire headers so they can be publically visible for
+# dependencies of libdawn_wire
+source_set("libdawn_wire_headers") {
+  public_deps = [
+    ":dawn_headers",
+  ]
+  sources = [
+    "src/include/dawn_wire/Wire.h",
+    "src/include/dawn_wire/dawn_wire_export.h",
+  ]
+}
 
 # The meat of the compilation for libdawn_wire so that we can cheaply have
 # shared_library / static_library / component versions of it.
@@ -669,19 +691,22 @@ dawn_generator("libdawn_wire_sources") {
   configs = [ ":dawn_internal" ]
   deps = [
     ":dawn_common",
-    ":dawn_headers",
+    ":libdawn_wire_headers",
   ]
   defines = [ "DAWN_WIRE_IMPLEMENTATION" ]
   sources = [
     "src/dawn_wire/WireCmd.h",
-    "src/include/dawn_wire/Wire.h",
-    "src/include/dawn_wire/dawn_wire_export.h",
   ]
 }
 
 shared_library("libdawn_wire") {
   deps = [
     ":libdawn_wire_sources",
+  ]
+
+  #Make headers publically visible
+  public_deps = [
+    ":libdawn_wire_headers",
   ]
   public_configs = [ ":libdawn_public" ]
 
@@ -716,6 +741,7 @@ static_library("dawn_utils") {
   deps = [
     ":dawn_common",
     ":libdawn_native",
+    ":libdawn_wire",
     "third_party:glfw",
     "third_party:libshaderc",
   ]
@@ -775,9 +801,10 @@ test("dawn_unittests") {
   }
 
   deps = [
+    ":dawn_common",
     ":dawn_utils",
     ":libdawn",
-    ":libdawn_native_static",
+    ":libdawn_native_sources",
     ":libdawn_wire",
     ":mock_dawn",
     "third_party:gmock",
@@ -828,6 +855,7 @@ test("dawn_end2end_tests") {
   }
 
   deps = [
+    ":dawn_common",
     ":dawn_utils",
     ":libdawn",
     ":libdawn_native",

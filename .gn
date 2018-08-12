@@ -19,3 +19,10 @@ default_args = {
   clang_use_chrome_plugins = false
   use_sysroot = true
 }
+
+check_targets = [
+  # Everything in BUILD.gn
+  "//:*",
+  # Everything in third_party/BUILD.gn
+  "//third_party/:*",
+]
