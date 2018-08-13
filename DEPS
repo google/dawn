@@ -9,21 +9,21 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   '{dawn_root}/build': {
-    'url': '{chromium_git}/chromium/src/build.git@b944b99e72923c5a6699235ed858e725db21f81f',
+    'url': '{chromium_git}/chromium/src/build.git@ddcfe1a1c6428569cb8c900735be3567358bc6ee',
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/buildtools': {
-    'url': '{chromium_git}/chromium/buildtools.git@94288c26d2ffe3aec9848c147839afee597acefd',
+    'url': '{chromium_git}/chromium/buildtools.git@9a90d9aaadeb5e04327ed05775f45132e4b3523f',
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang.git@c893c7eec4706f8c7fc244ee254b1dadd8f8d158',
+    'url': '{chromium_git}/chromium/src/tools/clang.git@d299f069f8d1dca337354ced634df7a78e4512f7',
     'condition': 'dawn_standalone',
   },
 
   # Testing, GTest and GMock
   '{dawn_root}/testing': {
-    'url': '{chromium_git}/chromium/src/testing@4d706fd80be9e8989aec5235540e7b46d0672826',
+    'url': '{chromium_git}/chromium/src/testing@b07830f6905ce9e33034ad14820bc0a58b6e9e41',
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/third_party/googletest': {
@@ -165,7 +165,7 @@ hooks = [
                '--arch=x64'],
   },
   {
-    # Update the Windows toolchain if necessary.  Must run before 'clang' below.
+    # Update the Windows toolchain if necessary. Must run before 'clang' below.
     'name': 'win_toolchain',
     'pattern': '.',
     'condition': 'checkout_win and dawn_standalone',
