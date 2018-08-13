@@ -31,6 +31,16 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  # Jinja2 and MarkupSafe for the code generator
+  '{dawn_root}/third_party/jinja2': {
+    'url': '{chromium_git}/chromium/src/third_party/jinja2@b41863e42637544c2941b574c7877d3e1f663e25',
+    'condition': 'dawn_standalone',
+  },
+  '{dawn_root}/third_party/markupsafe': {
+    'url': '{chromium_git}/chromium/src/third_party/markupsafe@8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
+    'condition': 'dawn_standalone',
+  },
+
   # SPIRV-Cross
   '{dawn_root}/third_party/spirv-cross': {
     'url': '{github_git}/Kangz/SPIRV-Cross.git@694cad533296df02b4562f4a5a20cba1d1a9dbaf',

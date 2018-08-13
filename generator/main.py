@@ -212,14 +212,16 @@ def parse_json(json):
 import re, os, sys
 from collections import OrderedDict
 
-try:
-    import jinja2
-except ImportError:
-    # Try using Chromium's Jinja2
-    dir, _ = os.path.split(os.path.realpath(__file__))
-    third_party_dir = os.path.normpath(dir + (os.path.sep + os.path.pardir) * 2)
-    sys.path.insert(1, third_party_dir)
-    import jinja2
+kExtraPythonPath = '--extra-python-path'
+
+# Try using an additional python path from the arguments if present. This
+# isn't done through the regular argparse because PreprocessingLoader uses
+# jinja2 in the global scope before "main" gets to run.
+if kExtraPythonPath in sys.argv:
+    path = sys.argv[sys.argv.index(kExtraPythonPath) + 1]
+    sys.path.insert(1, path)
+
+import jinja2
 
 # A custom Jinja2 template loader that removes the extra indentation
 # of the template blocks so that the output is correctly indented
@@ -398,6 +400,7 @@ def main():
     parser.add_argument('-t', '--template-dir', default='templates', type=str, help='Directory with template files.')
     parser.add_argument('-o', '--output-dir', default=None, type=str, help='Output directory for the generated source files.')
     parser.add_argument('-T', '--targets', default=None, type=str, help='Comma-separated subset of targets to output. Available targets: ' + ', '.join(targets))
+    parser.add_argument(kExtraPythonPath, default=None, type=str, help='Additional python path to set before loading Jinja2')
     parser.add_argument('--print-dependencies', action='store_true', help='Prints a space separated list of file dependencies, used for CMake integration')
     parser.add_argument('--print-outputs', action='store_true', help='Prints a space separated list of file outputs, used for CMake integration')
     parser.add_argument('--gn', action='store_true', help='Make the printing of dependencies/outputs GN-friendly')

@@ -21,6 +21,8 @@ import("//testing/test.gni")
 # Template to wrap the Dawn code generator
 ###############################################################################
 
+jinja2_python_path = rebase_path("${dawn_jinja2_dir}/..")
+
 template("dawn_generator") {
   generator = "generator/main.py"
   json = "dawn.json"
@@ -30,11 +32,13 @@ template("dawn_generator") {
 
   common_args = [
     rebase_path(json, root_build_dir),
-    "-t",
+    "--template-dir",
     rebase_path(template_dir, root_build_dir),
-    "-o",
+    "--output-dir",
     rebase_path(target_gen_dir, root_build_dir),
-    "-T",
+    "--extra-python-path",
+    jinja2_python_path,
+    "--targets",
     target,
   ]
 
