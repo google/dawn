@@ -18,7 +18,7 @@
 #define __STDC_FORMAT_MACROS
 #endif
 
-#include "SampleUtils.h"
+#include "../SampleUtils.h"
 
 #include "common/Assert.h"
 #include "common/Math.h"
@@ -36,6 +36,7 @@
 #define TINYGLTF_LOADER_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define PICOJSON_ASSERT ASSERT
+#undef __STDC_FORMAT_MACROS
 #include <tinygltfloader/tiny_gltf_loader.h>
 
 #include "GLFW/glfw3.h"

@@ -26,7 +26,7 @@ deps = {
     'url': '{chromium_git}/chromium/src/testing@4d706fd80be9e8989aec5235540e7b46d0672826',
     'condition': 'dawn_standalone',
   },
-  'third_party/googletest': {
+  '{dawn_root}/third_party/googletest': {
     'url': '{github_git}/google/googletest.git@98a0d007d7092b72eea0e501bb9ad17908a1a036',
     'condition': 'dawn_standalone',
   },
@@ -55,6 +55,21 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  # GLFW for tests and samples
+  '{dawn_root}/third_party/glfw': {
+    'url': '{github_git}/glfw/glfw.git@096efdf798896cff80a0b2db08d7398b703406fe',
+    'condition': 'dawn_standalone',
+  },
+
+  # Dependencies for samples: stb and GLM
+  '{dawn_root}/third_party/stb': {
+    'url': '{github_git}/nothings/stb.git@c7110588a4d24c4bb5155c184fbb77dd90b3116e',
+    'condition': 'dawn_standalone',
+  },
+  '{dawn_root}/third_party/glm': {
+    'url': '{github_git}/g-truc/glm.git@06f084063fd6d9aa2ef6904517650700ae47b63d',
+    'condition': 'dawn_standalone',
+  },
 }
 
 hooks = [
