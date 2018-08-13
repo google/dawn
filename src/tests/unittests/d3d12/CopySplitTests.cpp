@@ -192,18 +192,18 @@ namespace {
         };
 
         return {
-             alignNonPow2(0, textureSpec.texelSize), rowPitch,
-             alignNonPow2(512, textureSpec.texelSize), rowPitch,
-             alignNonPow2(1024, textureSpec.texelSize), rowPitch,
+             BufferSpec{alignNonPow2(0, textureSpec.texelSize), rowPitch},
+             BufferSpec{alignNonPow2(512, textureSpec.texelSize), rowPitch},
+             BufferSpec{alignNonPow2(1024, textureSpec.texelSize), rowPitch},
 
-             alignNonPow2(32, textureSpec.texelSize), rowPitch,
-             alignNonPow2(64, textureSpec.texelSize), rowPitch,
+             BufferSpec{alignNonPow2(32, textureSpec.texelSize), rowPitch},
+             BufferSpec{alignNonPow2(64, textureSpec.texelSize), rowPitch},
 
-             alignNonPow2(31, textureSpec.texelSize), rowPitch,
-             alignNonPow2(257, textureSpec.texelSize), rowPitch,
-             alignNonPow2(511, textureSpec.texelSize), rowPitch,
-             alignNonPow2(513, textureSpec.texelSize), rowPitch,
-             alignNonPow2(1023, textureSpec.texelSize), rowPitch,
+             BufferSpec{alignNonPow2(31, textureSpec.texelSize), rowPitch},
+             BufferSpec{alignNonPow2(257, textureSpec.texelSize), rowPitch},
+             BufferSpec{alignNonPow2(511, textureSpec.texelSize), rowPitch},
+             BufferSpec{alignNonPow2(513, textureSpec.texelSize), rowPitch},
+             BufferSpec{alignNonPow2(1023, textureSpec.texelSize), rowPitch},
         };
     }
 

@@ -44,8 +44,7 @@ namespace dawn_native { namespace d3d12 {
         std::array<T, kNumBindingTypes> mMap{};
     };
 
-    ShaderModule::ShaderModule(Device* device, ShaderModuleBuilder* builder)
-        : ShaderModuleBase(builder), mDevice(device) {
+    ShaderModule::ShaderModule(ShaderModuleBuilder* builder) : ShaderModuleBase(builder) {
         spirv_cross::CompilerHLSL compiler(builder->AcquireSpirv());
 
         spirv_cross::CompilerGLSL::Options options_glsl;

@@ -24,8 +24,8 @@
 //      (resp. false) to help it generate code that leads to better branch prediction.
 //  - DAWN_UNUSED(EXPR): Prevents unused variable/expression warnings on EXPR.
 
-// Clang and GCC
-#if defined(__GNUC__)
+// Clang and GCC, check for __clang__ too to catch clang-cl masquarading as MSVC
+#if defined(__GNUC__) || defined(__clang__)
 #    if defined(__clang__)
 #        define DAWN_COMPILER_CLANG
 #    else

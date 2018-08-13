@@ -356,6 +356,7 @@ source_set("libdawn_native_sources") {
     libs += [
       "d3d12.lib",
       "dxgi.lib",
+      "dxguid.lib",
       "d3dcompiler.lib",
     ]
     sources += [
@@ -751,7 +752,7 @@ test("dawn_unittests") {
   ]
 
   if (dawn_enable_d3d12) {
-    sources += [ "src/tests/unittests/d3d12CopySplitTests.cpp" ]
+    sources += [ "src/tests/unittests/d3d12/CopySplitTests.cpp" ]
   }
 }
 

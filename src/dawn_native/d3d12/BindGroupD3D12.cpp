@@ -23,8 +23,7 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    BindGroup::BindGroup(Device* device, BindGroupBuilder* builder)
-        : BindGroupBase(builder), mDevice(device) {
+    BindGroup::BindGroup(BindGroupBuilder* builder) : BindGroupBase(builder) {
     }
 
     void BindGroup::RecordDescriptors(const DescriptorHeapHandle& cbvUavSrvHeapStart,
@@ -43,7 +42,7 @@ namespace dawn_native { namespace d3d12 {
 
         const auto& bindingOffsets = bgl->GetBindingOffsets();
 
-        auto d3d12Device = mDevice->GetD3D12Device();
+        auto d3d12Device = ToBackend(GetDevice())->GetD3D12Device();
         for (uint32_t binding : IterateBitSet(layout.mask)) {
             switch (layout.types[binding]) {
                 case dawn::BindingType::UniformBuffer: {

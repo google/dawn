@@ -45,7 +45,11 @@ config("spirv_cross_public") {
 static_library("spirv_cross") {
   public_configs = [ ":spirv_cross_public" ]
 
-  cflags_cc = [ "-Wno-implicit-fallthrough" ]
+  cflags_cc = [
+    "-Wno-implicit-fallthrough",
+    "-Wno-return-type",
+    "-Wno-sign-compare",
+  ]
 
   sources = [
     "${spirv_cross_dir}/GLSL.std.450.h",

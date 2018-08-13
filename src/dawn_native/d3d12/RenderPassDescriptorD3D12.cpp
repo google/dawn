@@ -20,8 +20,10 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    RenderPassDescriptor::RenderPassDescriptor(Device* device, RenderPassDescriptorBuilder* builder)
-        : RenderPassDescriptorBase(builder), mDevice(device) {
+    RenderPassDescriptor::RenderPassDescriptor(RenderPassDescriptorBuilder* builder)
+        : RenderPassDescriptorBase(builder) {
+        Device* device = ToBackend(GetDevice());
+
         // Get and fill an RTV heap with the color attachments
         uint32_t colorAttachmentCount = static_cast<uint32_t>(GetColorAttachmentMask().count());
         if (colorAttachmentCount != 0) {

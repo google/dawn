@@ -25,12 +25,11 @@ namespace dawn_native { namespace d3d12 {
 
     class InputState : public InputStateBase {
       public:
-        InputState(Device* device, InputStateBuilder* builder);
+        InputState(InputStateBuilder* builder);
 
         const D3D12_INPUT_LAYOUT_DESC& GetD3D12InputLayoutDescriptor() const;
 
       private:
-        Device* mDevice;
         D3D12_INPUT_LAYOUT_DESC mInputLayoutDescriptor;
         D3D12_INPUT_ELEMENT_DESC mInputElementDescriptors[kMaxVertexAttributes];
     };

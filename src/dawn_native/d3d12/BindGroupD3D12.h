@@ -27,7 +27,7 @@ namespace dawn_native { namespace d3d12 {
 
     class BindGroup : public BindGroupBase {
       public:
-        BindGroup(Device* device, BindGroupBuilder* builder);
+        BindGroup(BindGroupBuilder* builder);
 
         void RecordDescriptors(const DescriptorHeapHandle& cbvSrvUavHeapStart,
                                uint32_t* cbvUavSrvHeapOffset,
@@ -39,11 +39,8 @@ namespace dawn_native { namespace d3d12 {
         uint64_t GetHeapSerial() const;
 
       private:
-        Device* mDevice;
         uint32_t mCbvUavSrvHeapOffset;
         uint32_t mSamplerHeapOffset;
-        uint32_t mCbvUavSrvCount = 0;
-        uint32_t mSamplerCount = 0;
         uint64_t mHeapSerial = 0;
     };
 

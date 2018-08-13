@@ -25,12 +25,11 @@ namespace dawn_native { namespace d3d12 {
 
     class DepthStencilState : public DepthStencilStateBase {
       public:
-        DepthStencilState(Device* device, DepthStencilStateBuilder* builder);
+        DepthStencilState(DepthStencilStateBuilder* builder);
 
         const D3D12_DEPTH_STENCIL_DESC& GetD3D12DepthStencilDescriptor() const;
 
       private:
-        Device* mDevice;
         D3D12_DEPTH_STENCIL_DESC mDepthStencilDescriptor;
     };
 

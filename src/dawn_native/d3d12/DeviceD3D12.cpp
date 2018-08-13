@@ -260,7 +260,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
-        return new BindGroup(this, builder);
+        return new BindGroup(builder);
     }
     ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
         const BindGroupLayoutDescriptor* descriptor) {
@@ -282,10 +282,10 @@ namespace dawn_native { namespace d3d12 {
         return new ComputePipeline(builder);
     }
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
-        return new DepthStencilState(this, builder);
+        return new DepthStencilState(builder);
     }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
-        return new InputState(this, builder);
+        return new InputState(builder);
     }
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
         const PipelineLayoutDescriptor* descriptor) {
@@ -296,7 +296,7 @@ namespace dawn_native { namespace d3d12 {
     }
     RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
         RenderPassDescriptorBuilder* builder) {
-        return new RenderPassDescriptor(this, builder);
+        return new RenderPassDescriptor(builder);
     }
     RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
         return new RenderPipeline(builder);
@@ -305,7 +305,7 @@ namespace dawn_native { namespace d3d12 {
         return new Sampler(this, descriptor);
     }
     ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
-        return new ShaderModule(this, builder);
+        return new ShaderModule(builder);
     }
     SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
         return new SwapChain(builder);

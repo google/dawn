@@ -29,7 +29,8 @@ namespace dawn_native {
           mDepthStencilAttachmentSet(builder->mDepthStencilAttachmentSet),
           mDepthStencilAttachment(builder->mDepthStencilAttachment),
           mWidth(builder->mWidth),
-          mHeight(builder->mHeight) {
+          mHeight(builder->mHeight),
+          mDevice(builder->GetDevice()) {
     }
 
     std::bitset<kMaxColorAttachments> RenderPassDescriptorBase::GetColorAttachmentMask() const {
@@ -75,6 +76,10 @@ namespace dawn_native {
 
     uint32_t RenderPassDescriptorBase::GetHeight() const {
         return mHeight;
+    }
+
+    DeviceBase* RenderPassDescriptorBase::GetDevice() const {
+        return mDevice;
     }
 
     // RenderPassDescriptorBuilder

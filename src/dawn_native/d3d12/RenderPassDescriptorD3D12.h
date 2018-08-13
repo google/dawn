@@ -36,13 +36,12 @@ namespace dawn_native { namespace d3d12 {
             D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
         };
 
-        RenderPassDescriptor(Device* device, RenderPassDescriptorBuilder* builder);
+        RenderPassDescriptor(RenderPassDescriptorBuilder* builder);
         OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs();
         D3D12_CPU_DESCRIPTOR_HANDLE GetRTVDescriptor(uint32_t attachmentSlot);
         D3D12_CPU_DESCRIPTOR_HANDLE GetDSVDescriptor();
 
       private:
-        Device* mDevice = nullptr;
         DescriptorHeapHandle mRtvHeap = {};
         DescriptorHeapHandle mDsvHeap = {};
     };

@@ -76,8 +76,8 @@ namespace dawn_native { namespace d3d12 {
         return desc;
     }
 
-    DepthStencilState::DepthStencilState(Device* device, DepthStencilStateBuilder* builder)
-        : DepthStencilStateBase(builder), mDevice(device) {
+    DepthStencilState::DepthStencilState(DepthStencilStateBuilder* builder)
+        : DepthStencilStateBase(builder) {
         mDepthStencilDescriptor.DepthEnable = TRUE;
         mDepthStencilDescriptor.DepthWriteMask =
             GetDepth().depthWriteEnabled ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;

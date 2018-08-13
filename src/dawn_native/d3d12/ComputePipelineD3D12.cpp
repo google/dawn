@@ -40,7 +40,7 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3DBlob> compiledShader;
         ComPtr<ID3DBlob> errors;
 
-        if (FAILED(D3DCompile(hlslSource.c_str(), hlslSource.length(), nullptr, {nullptr}, nullptr,
+        if (FAILED(D3DCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr, nullptr,
                               entryPoint.c_str(), "cs_5_1", compileFlags, 0, &compiledShader,
                               &errors))) {
             printf("%s\n", reinterpret_cast<char*>(errors->GetBufferPointer()));
