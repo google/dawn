@@ -13,30 +13,9 @@
 # limitations under the License.
 
 import("scripts/dawn_overrides_with_defaults.gni")
+import("scripts/dawn_features.gni")
 
 import("//testing/test.gni")
-
-declare_args() {
-  # Enable Dawn's ASSERTs even in release builds
-  dawn_always_assert = false
-
-  # Enables the compilation of Dawn's D3D12 backend
-  dawn_enable_d3d12 = is_win
-
-  # Enables the compilation of Dawn's Metal backend
-  dawn_enable_metal = is_mac
-
-  # Enables the compilation of Dawn's Null backend
-  # (required for unittests, obviously non-conformant)
-  dawn_enable_null = true
-
-  # Enables the compilation of Dawn's OpenGL backend
-  # (best effort, non-conformant)
-  dawn_enable_opengl = is_linux
-
-  # Enables the compilation of Dawn's Vulkan backend
-  dawn_enable_vulkan = is_linux || is_win
-}
 
 ###############################################################################
 # Template to wrap the Dawn code generator
@@ -247,85 +226,6 @@ dawn_generator("libdawn") {
 }
 
 ###############################################################################
-# Third-party dependencies needed by libdawn_native
-###############################################################################
-
-config("glad_public") {
-  include_dirs = [ "third_party/glad/include" ]
-}
-
-static_library("glad") {
-  sources = [
-    "third_party/glad/include/KHR/khrplatform.h",
-    "third_party/glad/include/glad/glad.h",
-    "third_party/glad/src/glad.c",
-  ]
-
-  public_configs = [ ":glad_public" ]
-}
-
-config("spirv_cross_public") {
-  include_dirs = [ "third_party" ]
-  defines = [ "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS" ]
-}
-
-static_library("spirv_cross") {
-  public_configs = [ ":spirv_cross_public" ]
-
-  cflags_cc = [ "-Wno-implicit-fallthrough" ]
-
-  sources = [
-    "${dawn_spirv_cross_dir}/GLSL.std.450.h",
-    "${dawn_spirv_cross_dir}/spirv.hpp",
-    "${dawn_spirv_cross_dir}/spirv_cfg.cpp",
-    "${dawn_spirv_cross_dir}/spirv_cfg.hpp",
-    "${dawn_spirv_cross_dir}/spirv_common.hpp",
-    "${dawn_spirv_cross_dir}/spirv_cross.cpp",
-    "${dawn_spirv_cross_dir}/spirv_cross.hpp",
-  ]
-
-  need_glsl_cross = dawn_enable_opengl
-
-  if (dawn_enable_d3d12) {
-    sources += [
-      "${dawn_spirv_cross_dir}/spirv_hlsl.cpp",
-      "${dawn_spirv_cross_dir}/spirv_hlsl.hpp",
-    ]
-    need_glsl_cross = true
-  }
-
-  if (dawn_enable_metal) {
-    sources += [
-      "${dawn_spirv_cross_dir}/spirv_msl.cpp",
-      "${dawn_spirv_cross_dir}/spirv_msl.hpp",
-    ]
-    need_glsl_cross = true
-  }
-
-  if (need_glsl_cross) {
-    sources += [
-      "${dawn_spirv_cross_dir}/spirv_glsl.cpp",
-      "${dawn_spirv_cross_dir}/spirv_glsl.hpp",
-    ]
-  }
-}
-
-# An empty Vulkan target to add the include dirs and list the sources
-# for the header inclusion check.
-config("vulkan_headers_public") {
-  include_dirs = [ "third_party" ]
-}
-
-source_set("vulkan_headers") {
-  sources = [
-    "third_party/vulkan/vk_platform.h",
-    "third_party/vulkan/vulkan.h",
-  ]
-
-  public_configs = [ ":vulkan_headers_public" ]
-}
-
-###############################################################################
 # libdawn_native.so
 ###############################################################################
 
@@ -375,7 +275,7 @@ source_set("libdawn_native_sources") {
   deps = [
     ":dawn_common",
     ":libdawn_native_utils",
-    ":spirv_cross",
+    "third_party:spirv_cross",
   ]
 
   # Put the internal config public so that unittests can see internal headers
@@ -554,7 +454,7 @@ source_set("libdawn_native_sources") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ ":glad" ]
+    deps += [ "third_party:glad" ]
     sources += [
       "src/dawn_native/opengl/BlendStateGL.cpp",
       "src/dawn_native/opengl/BlendStateGL.h",
@@ -593,7 +493,7 @@ source_set("libdawn_native_sources") {
   }
 
   if (dawn_enable_vulkan) {
-    deps += [ ":vulkan_headers" ]
+    deps += [ "third_party:vulkan_headers" ]
     sources += [
       "src/dawn_native/vulkan/BindGroupLayoutVk.cpp",
       "src/dawn_native/vulkan/BindGroupLayoutVk.h",
@@ -773,12 +673,12 @@ static_library("dawn_utils") {
 
   if (dawn_enable_opengl) {
     sources += [ "src/utils/OpenGLBinding.cpp" ]
-    deps += [ ":glad" ]
+    deps += [ "third_party:glad" ]
   }
 
   if (dawn_enable_vulkan) {
     sources += [ "src/utils/VulkanBinding.cpp" ]
-    deps += [ ":vulkan_headers" ]
+    deps += [ "third_party:vulkan_headers" ]
   }
 }
 

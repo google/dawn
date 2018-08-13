@@ -13,6 +13,90 @@
 # limitations under the License.
 
 import("../scripts/dawn_overrides_with_defaults.gni")
+import("../scripts/dawn_features.gni")
+
+###############################################################################
+# Third-party dependencies needed by libdawn_native
+###############################################################################
+
+# Glad
+config("glad_public") {
+  include_dirs = [ "glad/include" ]
+}
+
+static_library("glad") {
+  sources = [
+    "glad/include/KHR/khrplatform.h",
+    "glad/include/glad/glad.h",
+    "glad/src/glad.c",
+  ]
+
+  public_configs = [ ":glad_public" ]
+}
+
+# SPIRV-Cross
+spirv_cross_dir = dawn_spirv_cross_dir
+
+config("spirv_cross_public") {
+  include_dirs = [ "." ]
+  defines = [ "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS" ]
+}
+
+static_library("spirv_cross") {
+  public_configs = [ ":spirv_cross_public" ]
+
+  cflags_cc = [ "-Wno-implicit-fallthrough" ]
+
+  sources = [
+    "${spirv_cross_dir}/GLSL.std.450.h",
+    "${spirv_cross_dir}/spirv.hpp",
+    "${spirv_cross_dir}/spirv_cfg.cpp",
+    "${spirv_cross_dir}/spirv_cfg.hpp",
+    "${spirv_cross_dir}/spirv_common.hpp",
+    "${spirv_cross_dir}/spirv_cross.cpp",
+    "${spirv_cross_dir}/spirv_cross.hpp",
+  ]
+
+  need_glsl_cross = dawn_enable_opengl
+
+  if (dawn_enable_d3d12) {
+    sources += [
+      "${spirv_cross_dir}/spirv_hlsl.cpp",
+      "${spirv_cross_dir}/spirv_hlsl.hpp",
+    ]
+    need_glsl_cross = true
+  }
+
+  if (dawn_enable_metal) {
+    sources += [
+      "${spirv_cross_dir}/spirv_msl.cpp",
+      "${spirv_cross_dir}/spirv_msl.hpp",
+    ]
+    need_glsl_cross = true
+  }
+
+  if (need_glsl_cross) {
+    sources += [
+      "${spirv_cross_dir}/spirv_glsl.cpp",
+      "${spirv_cross_dir}/spirv_glsl.hpp",
+    ]
+  }
+}
+
+# An empty Vulkan target to add the include dirs and list the sources
+# for the header inclusion check.
+config("vulkan_headers_public") {
+  include_dirs = [ "." ]
+}
+
+source_set("vulkan_headers") {
+  sources = [
+    "vulkan/vk_platform.h",
+    "vulkan/vulkan.h",
+  ]
+
+  public_configs = [ ":vulkan_headers_public" ]
+}
 
 ###############################################################################
 # Gtest Gmock - build targets when outside of Chrome
