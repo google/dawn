@@ -212,8 +212,10 @@ bool InitSample(int argc, const char** argv) {
 
 void DoFlush() {
     if (cmdBufType == CmdBufType::Terrible) {
-        ASSERT(c2sBuf->Flush());
-        ASSERT(s2cBuf->Flush());
+        bool c2sSuccess = c2sBuf->Flush();
+        bool s2cSuccess = s2cBuf->Flush();
+
+        ASSERT(c2sSuccess && s2cSuccess);
     }
     glfwPollEvents();
 }
