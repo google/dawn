@@ -280,21 +280,20 @@ class PreprocessingLoader(jinja2.BaseLoader):
 
 FileRender = namedtuple('FileRender', ['template', 'output', 'params_dicts'])
 
-def do_renders(renders, template_dir, output_dir):
+FileOutput = namedtuple('FileOutput', ['name', 'content'])
+
+def do_renders(renders, template_dir):
     env = jinja2.Environment(loader=PreprocessingLoader(template_dir), trim_blocks=True, line_comment_prefix='//*')
+
+    outputs = []
     for render in renders:
         params = {}
         for param_dict in render.params_dicts:
             params.update(param_dict)
-        output = env.get_template(render.template).render(**params)
+        content = env.get_template(render.template).render(**params)
+        outputs.append(FileOutput(render.output, content))
 
-        output_file = output_dir + os.path.sep + render.output
-        directory = os.path.dirname(output_file)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        with open(output_file, 'w') as outfile:
-            outfile.write(output)
+    return outputs
 
 #############################################################
 # MAIN SOMETHING WHATEVER
@@ -389,37 +388,7 @@ def js_native_methods(types, typ):
 def debug(text):
     print(text)
 
-def main():
-    targets = ['dawn_headers', 'libdawn', 'mock_dawn', 'dawn_wire', "dawn_native_utils"]
-
-    parser = argparse.ArgumentParser(
-        description = 'Generates code for various target for Dawn.',
-        formatter_class = argparse.ArgumentDefaultsHelpFormatter
-    )
-    parser.add_argument('json', metavar='DAWN_JSON', nargs=1, type=str, help ='The DAWN JSON definition to use.')
-    parser.add_argument('-t', '--template-dir', default='templates', type=str, help='Directory with template files.')
-    parser.add_argument('-o', '--output-dir', default=None, type=str, help='Output directory for the generated source files.')
-    parser.add_argument('-T', '--targets', default=None, type=str, help='Comma-separated subset of targets to output. Available targets: ' + ', '.join(targets))
-    parser.add_argument(kExtraPythonPath, default=None, type=str, help='Additional python path to set before loading Jinja2')
-    parser.add_argument('--print-dependencies', action='store_true', help='Prints a space separated list of file dependencies, used for CMake integration')
-    parser.add_argument('--print-outputs', action='store_true', help='Prints a space separated list of file outputs, used for CMake integration')
-    parser.add_argument('--gn', action='store_true', help='Make the printing of dependencies/outputs GN-friendly')
-
-    args = parser.parse_args()
-
-    if args.targets != None:
-        targets = args.targets.split(',')
-
-    with open(args.json[0]) as f:
-        loaded_json = json.loads(f.read())
-
-    # A fake api_params to avoid parsing the JSON when just querying dependencies and outputs
-    api_params = {
-        'types': {}
-    }
-    if not args.print_outputs and not args.print_dependencies:
-        api_params = parse_json(loaded_json)
-
+def get_renders_for_targets(api_params, targets):
     base_params = {
         'enumerate': enumerate,
         'format': format,
@@ -491,7 +460,61 @@ def main():
         renders.append(FileRender('dawn_wire/WireClient.cpp', 'dawn_wire/WireClient.cpp', wire_params))
         renders.append(FileRender('dawn_wire/WireServer.cpp', 'dawn_wire/WireServer.cpp', wire_params))
 
-    output_separator = '\n' if args.gn else ';'
+    return renders
+
+def output_to_files(outputs, output_dir):
+    for output in outputs:
+        output_file = output_dir + os.path.sep + output.name
+        directory = os.path.dirname(output_file)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        with open(output_file, 'w') as outfile:
+            outfile.write(output.content)
+
+def output_to_json(outputs, output_json):
+    json_root = {}
+    for output in outputs:
+        json_root[output.name] = output.content
+
+    with open(output_json, 'w') as f:
+        f.write(json.dumps(json_root))
+
+def output_depfile(depfile, output, dependencies):
+    with open(depfile, 'w') as f:
+        f.write(output + ": " + " ".join(dependencies))
+
+def main():
+    allowed_targets = ['dawn_headers', 'libdawn', 'mock_dawn', 'dawn_wire', "dawn_native_utils"]
+
+    parser = argparse.ArgumentParser(
+        description = 'Generates code for various target for Dawn.',
+        formatter_class = argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument('json', metavar='DAWN_JSON', nargs=1, type=str, help ='The DAWN JSON definition to use.')
+    parser.add_argument('-t', '--template-dir', default='templates', type=str, help='Directory with template files.')
+    parser.add_argument('-T', '--targets', required=True, type=str, help='Comma-separated subset of targets to output. Available targets: ' + ', '.join(allowed_targets))
+    # Arguments used only for the GN build
+    parser.add_argument(kExtraPythonPath, default=None, type=str, help='Additional python path to set before loading Jinja2')
+    parser.add_argument('--output-json-tarball', default=None, type=str, help='Name of the "JSON tarball" to create (tar is too annoying to use in python).')
+    parser.add_argument('--depfile', default=None, type=str, help='Name of the Ninja depfile to create for the JSON tarball')
+    parser.add_argument('--expected-outputs-file', default=None, type=str, help="File to compare outputs with and fail if it doesn't match")
+    # Arguments used only for the CMake build
+    parser.add_argument('-o', '--output-dir', default=None, type=str, help='Output directory for the generated source files.')
+    parser.add_argument('--print-dependencies', action='store_true', help='Prints a space separated list of file dependencies, used for CMake integration')
+    parser.add_argument('--print-outputs', action='store_true', help='Prints a space separated list of file outputs, used for CMake integration')
+
+    args = parser.parse_args()
+
+    # Load and parse the API json file
+    with open(args.json[0]) as f:
+        loaded_json = json.loads(f.read())
+    api_params = parse_json(loaded_json)
+
+    targets = args.targets.split(',')
+    renders = get_renders_for_targets(api_params, targets)
+
+    # Print outputs and dependencies for CMake
     if args.print_dependencies:
         dependencies = set(
             [os.path.abspath(args.template_dir + os.path.sep + render.template) for render in renders] +
@@ -499,7 +522,7 @@ def main():
             [os.path.realpath(__file__)]
         )
         dependencies = [dependency.replace('\\', '/') for dependency in dependencies]
-        sys.stdout.write(output_separator.join(dependencies))
+        sys.stdout.write(';'.join(dependencies))
         return 0
 
     if args.print_outputs:
@@ -507,10 +530,36 @@ def main():
             [os.path.abspath(args.output_dir + os.path.sep + render.output) for render in renders]
         )
         outputs = [output.replace('\\', '/') for output in outputs]
-        sys.stdout.write(output_separator.join(outputs))
+        sys.stdout.write(';'.join(outputs))
         return 0
 
-    do_renders(renders, args.template_dir, args.output_dir)
+    # The caller wants to assert that the outputs are what it expects.
+    # Load the file and compare with our renders. GN-only.
+    if args.expected_outputs_file != None:
+        with open(args.expected_outputs_file) as f:
+            expected = set([line.strip() for line in f.readlines()])
+
+        actual = set()
+        actual.update([render.output for render in renders])
+
+        if actual != expected:
+            print("Wrong expected outputs, caller expected:\n    " + repr(list(expected)))
+            print("Actual output:\n    " + repr(list(actual)))
+            return 1
+
+    outputs = do_renders(renders, args.template_dir)
+
+    # CMake only: output all the files directly.
+    if args.output_dir != None:
+        output_to_files(outputs, args.output_dir)
+
+    # GN only: output the tarball and its depfile
+    if args.output_json_tarball != None:
+        output_to_json(outputs, args.output_json_tarball)
+
+        dependencies = [args.template_dir + os.path.sep + render.template for render in renders]
+        dependencies.append(args.json[0])
+        output_depfile(args.depfile, args.output_json_tarball, dependencies)
 
 if __name__ == '__main__':
     sys.exit(main())
