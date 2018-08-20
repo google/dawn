@@ -120,7 +120,6 @@ protected:
 
         auto bindGroup = device.CreateBindGroupBuilder()
             .SetLayout(mBindGroupLayout)
-            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetSamplers(0, 1, &sampler)
             .SetTextureViews(1, 1, &mTextureView)
             .GetResult();

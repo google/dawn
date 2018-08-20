@@ -27,16 +27,11 @@ namespace dawn_native {
 
     BindGroupBase::BindGroupBase(BindGroupBuilder* builder)
         : mLayout(std::move(builder->mLayout)),
-          mUsage(builder->mUsage),
           mBindings(std::move(builder->mBindings)) {
     }
 
     const BindGroupLayoutBase* BindGroupBase::GetLayout() const {
         return mLayout.Get();
-    }
-
-    dawn::BindGroupUsage BindGroupBase::GetUsage() const {
-        return mUsage;
     }
 
     BufferViewBase* BindGroupBase::GetBindingAsBufferView(size_t binding) {
@@ -68,15 +63,14 @@ namespace dawn_native {
     // BindGroupBuilder
 
     enum BindGroupSetProperties {
-        BINDGROUP_PROPERTY_USAGE = 0x1,
-        BINDGROUP_PROPERTY_LAYOUT = 0x2,
+        BINDGROUP_PROPERTY_LAYOUT = 0x1,
     };
 
     BindGroupBuilder::BindGroupBuilder(DeviceBase* device) : Builder(device) {
     }
 
     BindGroupBase* BindGroupBuilder::GetResultImpl() {
-        constexpr int allProperties = BINDGROUP_PROPERTY_USAGE | BINDGROUP_PROPERTY_LAYOUT;
+        constexpr int allProperties = BINDGROUP_PROPERTY_LAYOUT;
         if ((mPropertiesSet & allProperties) != allProperties) {
             HandleError("Bindgroup missing properties");
             return nullptr;
@@ -98,16 +92,6 @@ namespace dawn_native {
 
         mLayout = layout;
         mPropertiesSet |= BINDGROUP_PROPERTY_LAYOUT;
-    }
-
-    void BindGroupBuilder::SetUsage(dawn::BindGroupUsage usage) {
-        if ((mPropertiesSet & BINDGROUP_PROPERTY_USAGE) != 0) {
-            HandleError("Bindgroup usage property set multiple times");
-            return;
-        }
-
-        mUsage = usage;
-        mPropertiesSet |= BINDGROUP_PROPERTY_USAGE;
     }
 
     void BindGroupBuilder::SetBufferViews(uint32_t start,

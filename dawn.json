@@ -34,12 +34,6 @@
                 ]
             },
             {
-                "name": "set usage",
-                "args": [
-                    {"name": "usage", "type": "bind group usage"}
-                ]
-            },
-            {
                 "name": "set buffer views",
                 "args": [
                     {"name": "start", "type": "uint32_t"},
@@ -66,13 +60,6 @@
         ],
         "TODO": [
             "When resource are added, add methods for setting the content of the bind group"
-        ]
-    },
-    "bind group usage": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "frozen"},
-            {"value": 1, "name": "dynamic"}
         ]
     },
     "bind group layout": {

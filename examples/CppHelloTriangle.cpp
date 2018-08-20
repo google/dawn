@@ -132,7 +132,6 @@ void init() {
 
     bindGroup = device.CreateBindGroupBuilder()
         .SetLayout(bgl)
-        .SetUsage(dawn::BindGroupUsage::Frozen)
         .SetSamplers(0, 1, &sampler)
         .SetTextureViews(1, 1, &view)
         .GetResult();

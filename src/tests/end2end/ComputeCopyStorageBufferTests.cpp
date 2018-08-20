@@ -73,7 +73,6 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     // Set up bind group and issue dispatch
     auto bindGroup = device.CreateBindGroupBuilder()
                          .SetLayout(bgl)
-                         .SetUsage(dawn::BindGroupUsage::Frozen)
                          .SetBufferViews(0, 1, &srcView)
                          .SetBufferViews(1, 1, &dstView)
                          .GetResult();

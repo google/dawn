@@ -299,8 +299,8 @@ namespace {
             .GetResult();
 
         auto bindGroupBuilder = device.CreateBindGroupBuilder();
-        bindGroupBuilder.SetLayout(bindGroupLayout)
-            .SetUsage(dawn::BindGroupUsage::Frozen);
+        bindGroupBuilder.SetLayout(bindGroupLayout);
+
         if (hasTexture) {
             const auto& textureView = textures[iTextureID];
             const auto& iSamplerID = scene.textures[iTextureID].sampler;

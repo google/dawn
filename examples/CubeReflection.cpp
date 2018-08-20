@@ -195,14 +195,12 @@ void init() {
 
     bindGroup[0] = device.CreateBindGroupBuilder()
         .SetLayout(bgl)
-        .SetUsage(dawn::BindGroupUsage::Frozen)
         .SetBufferViews(0, 1, &cameraBufferView)
         .SetBufferViews(1, 1, &transformBufferView[0])
         .GetResult();
 
     bindGroup[1] = device.CreateBindGroupBuilder()
         .SetLayout(bgl)
-        .SetUsage(dawn::BindGroupUsage::Frozen)
         .SetBufferViews(0, 1, &cameraBufferView)
         .SetBufferViews(1, 1, &transformBufferView[1])
         .GetResult();

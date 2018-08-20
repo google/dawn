@@ -61,7 +61,6 @@ class PushConstantTest: public DawnTest {
 
             dawn::BindGroup bg = device.CreateBindGroupBuilder()
                 .SetLayout(bgl)
-                .SetUsage(dawn::BindGroupUsage::Frozen)
                 .SetBufferViews(0, extraBuffer ? 2 : 1, views)
                 .GetResult();
 

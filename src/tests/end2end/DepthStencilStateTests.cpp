@@ -210,7 +210,6 @@ class DepthStencilStateTest : public DawnTest {
                 // Create a bind group for the data
                 dawn::BindGroup bindGroup = device.CreateBindGroupBuilder()
                     .SetLayout(bindGroupLayout)
-                    .SetUsage(dawn::BindGroupUsage::Frozen)
                     .SetBufferViews(0, 1, &view)
                     .GetResult();
 

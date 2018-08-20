@@ -37,7 +37,6 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeSuccess(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -50,7 +49,6 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeSuccess(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -63,7 +61,6 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeError(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -75,7 +72,6 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeError(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -87,7 +83,6 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeError(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }
@@ -99,7 +94,6 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
 
         auto bindGroup = AssertWillBeError(device.CreateBindGroupBuilder())
             .SetLayout(layout)
-            .SetUsage(dawn::BindGroupUsage::Frozen)
             .SetBufferViews(0, 1, &bufferView)
             .GetResult();
     }

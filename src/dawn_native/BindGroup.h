@@ -33,7 +33,6 @@ namespace dawn_native {
         BindGroupBase(BindGroupBuilder* builder);
 
         const BindGroupLayoutBase* GetLayout() const;
-        dawn::BindGroupUsage GetUsage() const;
         BufferViewBase* GetBindingAsBufferView(size_t binding);
         SamplerBase* GetBindingAsSampler(size_t binding);
         TextureViewBase* GetBindingAsTextureView(size_t binding);
@@ -42,7 +41,6 @@ namespace dawn_native {
 
       private:
         Ref<BindGroupLayoutBase> mLayout;
-        dawn::BindGroupUsage mUsage;
         std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 
@@ -52,7 +50,6 @@ namespace dawn_native {
 
         // Dawn API
         void SetLayout(BindGroupLayoutBase* layout);
-        void SetUsage(dawn::BindGroupUsage usage);
 
         void SetBufferViews(uint32_t start, uint32_t count, BufferViewBase* const* bufferViews);
         void SetSamplers(uint32_t start, uint32_t count, SamplerBase* const* samplers);
@@ -69,7 +66,6 @@ namespace dawn_native {
         int mPropertiesSet = 0;
 
         Ref<BindGroupLayoutBase> mLayout;
-        dawn::BindGroupUsage mUsage;
         std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
     };
 

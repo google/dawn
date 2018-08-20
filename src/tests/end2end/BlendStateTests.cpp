@@ -103,7 +103,6 @@ class BlendStateTest : public DawnTest {
 
             return device.CreateBindGroupBuilder()
                 .SetLayout(bindGroupLayout)
-                .SetUsage(dawn::BindGroupUsage::Frozen)
                 .SetBufferViews(0, 1, &view)
                 .GetResult();
         }
