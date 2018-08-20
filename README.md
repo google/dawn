@@ -6,10 +6,10 @@ It exposes a C/C++ API that maps almost one-to-one to the WebGPU IDL and can be 
 Dawn provides several WebGPU building blocks:
  - **WebGPU C/C++ headers** that applications and other building blocks use.
  - **A "native" implementation of WebGPU** using platforms' GPU APIs:
-  - **D3D12** on Windows 10
-  - **Metal** on OSX (and eventually iOS)
-  - **Vulkan** on Windows, Linux (eventually ChromeOS and Android too)
-  - OpenGL as best effort where available
+   - **D3D12** on Windows 10
+   - **Metal** on OSX (and eventually iOS)
+   - **Vulkan** on Windows, Linux (eventually ChromeOS and Android too)
+   - OpenGL as best effort where available
  - **A client-server implementation of WebGPU** for applications that are in a sandbox without access to native drivers
 
 ## Directory structure
