@@ -52,4 +52,31 @@ void HashCombine(size_t* hash, const T& value, const Args&... args) {
     HashCombine(hash, args...);
 }
 
+// Workaround a bug between clang++ and libstdlibc++ by defining our own hashing for bitsets.
+// When _GLIBCXX_DEBUG is enabled libstdc++ wraps containers into debug containers. For bitset this
+// means what is normally std::bitset is defined as std::__cxx1988::bitset and is replaced by the
+// debug version of bitset.
+// When hashing, std::hash<std::bitset> proxies the call to std::hash<std::__cxx1998::bitset> and
+// fails on clang because the latter tries to access the private _M_getdata member of the bitset.
+// It looks like it should work because the non-debug bitset declares
+//
+//     friend struct std::hash<bitset> // bitset is the name of the class itself
+//
+// which should friend std::hash<std::__cxx1998::bitset> but somehow doesn't work on clang.
+#if defined(_GLIBCXX_DEBUG)
+template <size_t N>
+size_t Hash(const std::bitset<N>& value) {
+    constexpr size_t kWindowSize = sizeof(unsigned long long);
+
+    std::bitset<N> bits = value;
+    size_t hash = 0;
+    for (size_t processedBits = 0; processedBits < N; processedBits += kWindowSize) {
+        HashCombine(&hash, bits.to_ullong());
+        bits >>= kWindowSize;
+    }
+
+    return hash;
+}
+#endif
+
 #endif  // COMMON_HASHUTILS_H_
