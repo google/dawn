@@ -23,7 +23,7 @@ namespace dawn_native { namespace d3d12 {
 
     class ShaderModule : public ShaderModuleBase {
       public:
-        ShaderModule(ShaderModuleBuilder* builder);
+        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
 
         const std::string& GetHLSLSource() const;
 

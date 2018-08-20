@@ -25,19 +25,14 @@ class InputStateTest : public ValidationTest {
         dawn::RenderPipeline CreatePipeline(bool success, const dawn::InputState& inputState, std::string vertexSource) {
             DummyRenderPass renderpassData = CreateDummyRenderPass();
 
-            dawn::ShaderModuleBuilder vsModuleBuilder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
-            utils::FillShaderModuleBuilder(vsModuleBuilder, dawn::ShaderStage::Vertex, vertexSource.c_str());
-            dawn::ShaderModule vsModule = vsModuleBuilder.GetResult();
-
-            dawn::ShaderModuleBuilder fsModuleBuilder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
-            utils::FillShaderModuleBuilder(fsModuleBuilder, dawn::ShaderStage::Fragment, R"(
+            dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
+            dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(1.0, 0.0, 0.0, 1.0);
                 }
             )");
-            dawn::ShaderModule fsModule = fsModuleBuilder.GetResult();
 
             dawn::RenderPipelineBuilder builder;
             if (success) {

@@ -596,8 +596,11 @@
                 ]
             },
             {
-                "name": "create shader module builder",
-                "returns": "shader module builder"
+                "name": "create shader module",
+                "returns": "shader module",
+                "args": [
+                    {"name": "descriptor", "type": "shader module descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create swap chain builder",
@@ -910,20 +913,12 @@
     "shader module": {
         "category": "object"
     },
-    "shader module builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "shader module"
-            },
-            {
-                "name": "set source",
-                "args": [
-                    {"name": "code size", "type": "uint32_t"},
-                    {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
-                ]
-            }
+    "shader module descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "code size", "type": "uint32_t"},
+            {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
         ]
     },
     "shader stage": {

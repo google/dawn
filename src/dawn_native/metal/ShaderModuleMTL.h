@@ -25,11 +25,12 @@ namespace spirv_cross {
 
 namespace dawn_native { namespace metal {
 
+    class Device;
     class PipelineLayout;
 
     class ShaderModule : public ShaderModuleBase {
       public:
-        ShaderModule(ShaderModuleBuilder* builder);
+        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
 
         struct MetalFunctionData {
             id<MTLFunction> function;

@@ -18,9 +18,6 @@
 
 namespace utils {
 
-    void FillShaderModuleBuilder(const dawn::ShaderModuleBuilder& builder,
-                                 dawn::ShaderStage stage,
-                                 const char* source);
     dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
                                           dawn::ShaderStage stage,
                                           const char* source);

@@ -55,7 +55,6 @@ namespace dawn_native {
         virtual RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) = 0;
         virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
-        virtual ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) = 0;
         virtual SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) = 0;
         virtual TextureBase* CreateTexture(TextureBuilder* builder) = 0;
         virtual TextureViewBase* CreateTextureView(TextureViewBuilder* builder) = 0;
@@ -94,7 +93,7 @@ namespace dawn_native {
         RenderPassDescriptorBuilder* CreateRenderPassDescriptorBuilder();
         RenderPipelineBuilder* CreateRenderPipelineBuilder();
         SamplerBase* CreateSampler(const SamplerDescriptor* descriptor);
-        ShaderModuleBuilder* CreateShaderModuleBuilder();
+        ShaderModuleBase* CreateShaderModule(const ShaderModuleDescriptor* descriptor);
         SwapChainBuilder* CreateSwapChainBuilder();
         TextureBuilder* CreateTextureBuilder();
 
@@ -111,6 +110,8 @@ namespace dawn_native {
         virtual ResultOrError<QueueBase*> CreateQueueImpl() = 0;
         virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) = 0;
+        virtual ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
+            const ShaderModuleDescriptor* descriptor) = 0;
 
         MaybeError CreateBindGroupLayoutInternal(BindGroupLayoutBase** result,
                                                  const BindGroupLayoutDescriptor* descriptor);
@@ -118,6 +119,8 @@ namespace dawn_native {
                                                 const PipelineLayoutDescriptor* descriptor);
         MaybeError CreateQueueInternal(QueueBase** result);
         MaybeError CreateSamplerInternal(SamplerBase** result, const SamplerDescriptor* descriptor);
+        MaybeError CreateShaderModuleInternal(ShaderModuleBase** result,
+                                              const ShaderModuleDescriptor* descriptor);
 
         void ConsumeError(ErrorData* error);
 

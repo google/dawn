@@ -295,15 +295,13 @@ TEST_F(WireTests, ValueArrayArgument) {
 // Test that the wire is able to send C strings
 TEST_F(WireTests, CStringArgument) {
     // Create shader module
-    dawnShaderModuleBuilder shaderModuleBuilder = dawnDeviceCreateShaderModuleBuilder(device);
-    dawnShaderModule shaderModule = dawnShaderModuleBuilderGetResult(shaderModuleBuilder);
-
-    dawnShaderModuleBuilder apiShaderModuleBuilder = api.GetNewShaderModuleBuilder();
-    EXPECT_CALL(api, DeviceCreateShaderModuleBuilder(apiDevice))
-        .WillOnce(Return(apiShaderModuleBuilder));
+    dawnShaderModuleDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.codeSize = 0;
+    dawnShaderModule shaderModule = dawnDeviceCreateShaderModule(device, &descriptor);
 
     dawnShaderModule apiShaderModule = api.GetNewShaderModule();
-    EXPECT_CALL(api, ShaderModuleBuilderGetResult(apiShaderModuleBuilder))
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
         .WillOnce(Return(apiShaderModule));
 
     // Create pipeline

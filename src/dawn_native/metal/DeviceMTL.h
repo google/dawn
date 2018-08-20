@@ -46,7 +46,6 @@ namespace dawn_native { namespace metal {
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-        ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
         TextureBase* CreateTexture(TextureBuilder* builder) override;
         TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
@@ -69,6 +68,8 @@ namespace dawn_native { namespace metal {
             const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
+        ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
+            const ShaderModuleDescriptor* descriptor) override;
 
         void OnCompletedHandler();
 

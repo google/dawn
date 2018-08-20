@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 #include "common/Platform.h"
+#include "dawn_native/opengl/DeviceGL.h"
 
 #include <spirv-cross/spirv_glsl.hpp>
 
@@ -46,8 +47,9 @@ namespace dawn_native { namespace opengl {
         return o.str();
     }
 
-    ShaderModule::ShaderModule(ShaderModuleBuilder* builder) : ShaderModuleBase(builder) {
-        spirv_cross::CompilerGLSL compiler(builder->AcquireSpirv());
+    ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
+        : ShaderModuleBase(device, descriptor) {
+        spirv_cross::CompilerGLSL compiler(descriptor->code, descriptor->codeSize);
         spirv_cross::CompilerGLSL::Options options;
 
         // TODO(cwallez@chromium.org): discover the backing context version and use that.

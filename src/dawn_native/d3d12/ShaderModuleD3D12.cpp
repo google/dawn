@@ -15,6 +15,7 @@
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 
 #include "common/Assert.h"
+#include "dawn_native/d3d12/DeviceD3D12.h"
 
 #include <spirv-cross/spirv_hlsl.hpp>
 
@@ -44,8 +45,9 @@ namespace dawn_native { namespace d3d12 {
         std::array<T, kNumBindingTypes> mMap{};
     };
 
-    ShaderModule::ShaderModule(ShaderModuleBuilder* builder) : ShaderModuleBase(builder) {
-        spirv_cross::CompilerHLSL compiler(builder->AcquireSpirv());
+    ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
+        : ShaderModuleBase(device, descriptor) {
+        spirv_cross::CompilerHLSL compiler(descriptor->code, descriptor->codeSize);
 
         spirv_cross::CompilerGLSL::Options options_glsl;
         options_glsl.vertex.fixup_clipspace = true;

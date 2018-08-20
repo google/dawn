@@ -25,9 +25,9 @@
 
 namespace utils {
 
-    void FillShaderModuleBuilder(const dawn::ShaderModuleBuilder& builder,
-                                 dawn::ShaderStage stage,
-                                 const char* source) {
+    dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
+                                          dawn::ShaderStage stage,
+                                          const char* source) {
         shaderc::Compiler compiler;
         shaderc::CompileOptions options;
 
@@ -49,7 +49,7 @@ namespace utils {
         auto result = compiler.CompileGlslToSpv(source, strlen(source), kind, "myshader?", options);
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
             std::cerr << result.GetErrorMessage();
-            return;
+            return {};
         }
 
         // result.cend and result.cbegin return pointers to uint32_t.
@@ -58,7 +58,10 @@ namespace utils {
         // So this size is in units of sizeof(uint32_t).
         ptrdiff_t resultSize = resultEnd - resultBegin;
         // SetSource takes data as uint32_t*.
-        builder.SetSource(static_cast<uint32_t>(resultSize), result.cbegin());
+
+        dawn::ShaderModuleDescriptor descriptor;
+        descriptor.codeSize = static_cast<uint32_t>(resultSize);
+        descriptor.code = result.cbegin();
 
 #ifdef DUMP_SPIRV_ASSEMBLY
         {
@@ -87,14 +90,8 @@ namespace utils {
         printf("\n");
         printf("SPIRV JS ARRAY DUMP END\n");
 #endif
-    }
 
-    dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
-                                          dawn::ShaderStage stage,
-                                          const char* source) {
-        dawn::ShaderModuleBuilder builder = device.CreateShaderModuleBuilder();
-        FillShaderModuleBuilder(builder, stage, source);
-        return builder.GetResult();
+        return device.CreateShaderModule(&descriptor);
     }
 
     dawn::Buffer CreateBufferFromData(const dawn::Device& device,

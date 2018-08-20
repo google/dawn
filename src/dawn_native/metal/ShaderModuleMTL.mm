@@ -40,8 +40,9 @@ namespace dawn_native { namespace metal {
         }
     }
 
-    ShaderModule::ShaderModule(ShaderModuleBuilder* builder)
-        : ShaderModuleBase(builder), mSpirv(builder->AcquireSpirv()) {
+    ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
+        : ShaderModuleBase(device, descriptor) {
+        mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
         spirv_cross::CompilerMSL compiler(mSpirv);
         ExtractSpirvInfo(compiler);
     }

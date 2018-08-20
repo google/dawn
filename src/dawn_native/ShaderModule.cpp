@@ -23,7 +23,15 @@
 
 namespace dawn_native {
 
-    ShaderModuleBase::ShaderModuleBase(ShaderModuleBuilder* builder) : mDevice(builder->mDevice) {
+    MaybeError ValidateShaderModuleDescriptor(DeviceBase*, const ShaderModuleDescriptor*) {
+        // TODO(cwallez@chromium.org): Use spirv-val to check the module is well-formed
+        return {};
+    }
+
+    // ShaderModuleBase
+
+    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor*)
+        : mDevice(device) {
     }
 
     DeviceBase* ShaderModuleBase::GetDevice() const {
@@ -216,26 +224,6 @@ namespace dawn_native {
         }
 
         return true;
-    }
-
-    ShaderModuleBuilder::ShaderModuleBuilder(DeviceBase* device) : Builder(device) {
-    }
-
-    std::vector<uint32_t> ShaderModuleBuilder::AcquireSpirv() {
-        return std::move(mSpirv);
-    }
-
-    ShaderModuleBase* ShaderModuleBuilder::GetResultImpl() {
-        if (mSpirv.size() == 0) {
-            HandleError("Shader module needs to have the source set");
-            return nullptr;
-        }
-
-        return mDevice->CreateShaderModule(this);
-    }
-
-    void ShaderModuleBuilder::SetSource(uint32_t codeSize, const uint32_t* code) {
-        mSpirv.assign(code, code + codeSize);
     }
 
 }  // namespace dawn_native

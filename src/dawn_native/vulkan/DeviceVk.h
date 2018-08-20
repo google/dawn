@@ -74,7 +74,6 @@ namespace dawn_native { namespace vulkan {
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
-        ShaderModuleBase* CreateShaderModule(ShaderModuleBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
         TextureBase* CreateTexture(TextureBuilder* builder) override;
         TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
@@ -88,6 +87,8 @@ namespace dawn_native { namespace vulkan {
             const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
+        ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
+            const ShaderModuleDescriptor* descriptor) override;
 
         bool CreateInstance(VulkanGlobalKnobs* usedKnobs,
                             const std::vector<const char*>& requiredExtensions);

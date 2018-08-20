@@ -27,14 +27,12 @@ class PushConstantTest : public ValidationTest {
         uint32_t constants[kMaxPushConstants] = {0};
 
         void TestCreateShaderModule(bool success, std::string vertexSource) {
-            dawn::ShaderModuleBuilder builder;
+            dawn::ShaderModule module;
             if (success) {
-                builder = AssertWillBeSuccess(device.CreateShaderModuleBuilder());
+                module = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
             } else {
-                builder = AssertWillBeError(device.CreateShaderModuleBuilder());
+                ASSERT_DEVICE_ERROR(module = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str()));
             }
-            utils::FillShaderModuleBuilder(builder, dawn::ShaderStage::Vertex, vertexSource.c_str());
-            builder.GetResult();
         }
 
     private:

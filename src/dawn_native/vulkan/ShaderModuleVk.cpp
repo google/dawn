@@ -21,22 +21,19 @@
 
 namespace dawn_native { namespace vulkan {
 
-    ShaderModule::ShaderModule(ShaderModuleBuilder* builder) : ShaderModuleBase(builder) {
-        std::vector<uint32_t> spirv = builder->AcquireSpirv();
-
+    ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
+        : ShaderModuleBase(device, descriptor) {
         // Use SPIRV-Cross to extract info from the SPIRV even if Vulkan consumes SPIRV. We want to
         // have a translation step eventually anyway.
-        spirv_cross::Compiler compiler(spirv);
+        spirv_cross::Compiler compiler(descriptor->code, descriptor->codeSize);
         ExtractSpirvInfo(compiler);
 
         VkShaderModuleCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        createInfo.codeSize = spirv.size() * sizeof(uint32_t);
-        createInfo.pCode = spirv.data();
-
-        Device* device = ToBackend(GetDevice());
+        createInfo.codeSize = descriptor->codeSize * sizeof(uint32_t);
+        createInfo.pCode = descriptor->code;
 
         if (device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
             VK_SUCCESS) {

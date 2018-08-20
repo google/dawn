@@ -21,9 +21,11 @@
 
 namespace dawn_native { namespace vulkan {
 
+    class Device;
+
     class ShaderModule : public ShaderModuleBase {
       public:
-        ShaderModule(ShaderModuleBuilder* builder);
+        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule();
 
         VkShaderModule GetHandle() const;

@@ -17,6 +17,7 @@
 
 #include "common/Constants.h"
 #include "dawn_native/Builder.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/RefCounted.h"
 
@@ -32,9 +33,12 @@ namespace spirv_cross {
 
 namespace dawn_native {
 
+    MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
+                                              const ShaderModuleDescriptor* descriptor);
+
     class ShaderModuleBase : public RefCounted {
       public:
-        ShaderModuleBase(ShaderModuleBuilder* builder);
+        ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
 
         DeviceBase* GetDevice() const;
 
@@ -73,23 +77,6 @@ namespace dawn_native {
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
         dawn::ShaderStage mExecutionModel;
-    };
-
-    class ShaderModuleBuilder : public Builder<ShaderModuleBase> {
-      public:
-        ShaderModuleBuilder(DeviceBase* device);
-
-        std::vector<uint32_t> AcquireSpirv();
-
-        // Dawn API
-        void SetSource(uint32_t codeSize, const uint32_t* code);
-
-      private:
-        friend class ShaderModuleBase;
-
-        ShaderModuleBase* GetResultImpl() override;
-
-        std::vector<uint32_t> mSpirv;
     };
 
 }  // namespace dawn_native

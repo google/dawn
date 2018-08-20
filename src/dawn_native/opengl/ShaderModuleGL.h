@@ -40,7 +40,7 @@ namespace dawn_native { namespace opengl {
 
     class ShaderModule : public ShaderModuleBase {
       public:
-        ShaderModule(ShaderModuleBuilder* builder);
+        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
 
         using CombinedSamplerInfo = std::vector<CombinedSampler>;
 

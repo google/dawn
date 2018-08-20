@@ -91,8 +91,9 @@ namespace dawn_native { namespace opengl {
     ResultOrError<SamplerBase*> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);
     }
-    ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
-        return new ShaderModule(builder);
+    ResultOrError<ShaderModuleBase*> Device::CreateShaderModuleImpl(
+        const ShaderModuleDescriptor* descriptor) {
+        return new ShaderModule(this, descriptor);
     }
     SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
         return new SwapChain(builder);

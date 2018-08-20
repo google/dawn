@@ -78,10 +78,11 @@ namespace dawn_native { namespace null {
     ResultOrError<SamplerBase*> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);
     }
-    ShaderModuleBase* Device::CreateShaderModule(ShaderModuleBuilder* builder) {
-        auto module = new ShaderModule(builder);
+    ResultOrError<ShaderModuleBase*> Device::CreateShaderModuleImpl(
+        const ShaderModuleDescriptor* descriptor) {
+        auto module = new ShaderModule(this, descriptor);
 
-        spirv_cross::Compiler compiler(builder->AcquireSpirv());
+        spirv_cross::Compiler compiler(descriptor->code, descriptor->codeSize);
         module->ExtractSpirvInfo(compiler);
 
         return module;
