@@ -134,6 +134,20 @@ config("libdawn_public") {
   ]
 }
 
+# Executable needs an rpath to find our shared libraries on OSX and Linux
+config("dawn_shared_library_public") {
+  if (is_mac) {
+    ldflags = [
+      "-rpath",
+      "@executable_path/",
+    ]
+  }
+
+  if (is_linux) {
+    configs = [ "//build/config/gcc:rpath_for_built_shared_libraries" ]
+  }
+}
+
 config("dawn_internal") {
   include_dirs = [ "src" ]
 
@@ -158,21 +172,14 @@ config("dawn_internal") {
     defines += [ "DAWN_ENABLE_BACKEND_VULKAN" ]
   }
 
-  configs = [ ":libdawn_public" ]
+  configs = [
+    ":libdawn_public",
+    ":dawn_shared_library_public",
+  ]
 
   # Only internal Dawn targets can use this config, this means only targets in
   # this BUILD.gn file.
   visibility = [ ":*" ]
-}
-
-# Executable needs an rpath to find our shared libraries on OSX
-config("dawn_shared_library_public") {
-  if (is_mac) {
-    ldflags = [
-      "-rpath",
-      "@executable_path/",
-    ]
-  }
 }
 
 static_library("dawn_common") {
@@ -253,7 +260,6 @@ shared_library("libdawn") {
       "-install_name",
       "@rpath/${target_name}.dylib",
     ]
-    public_configs = [ ":dawn_shared_library_public" ]
   }
 }
 
@@ -601,7 +607,6 @@ shared_library("libdawn_native") {
       "-install_name",
       "@rpath/${target_name}.dylib",
     ]
-    public_configs += [ ":dawn_shared_library_public" ]
   }
 }
 
@@ -655,7 +660,6 @@ shared_library("libdawn_wire") {
       "-install_name",
       "@rpath/${target_name}.dylib",
     ]
-    public_configs += [ ":dawn_shared_library_public" ]
   }
 }
 
@@ -732,10 +736,6 @@ dawn_generator("mock_dawn_gen") {
 test("dawn_unittests") {
   configs += [ ":dawn_internal" ]
 
-  if (is_linux) {
-    configs += [ "//build/config/gcc:rpath_for_built_shared_libraries" ]
-  }
-
   deps = [
     ":dawn_common",
     ":dawn_headers",
@@ -787,10 +787,6 @@ test("dawn_unittests") {
 
 test("dawn_end2end_tests") {
   configs += [ ":dawn_internal" ]
-
-  if (is_linux) {
-    configs += [ "//build/config/gcc:rpath_for_built_shared_libraries" ]
-  }
 
   deps = [
     ":dawn_common",
