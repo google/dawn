@@ -75,7 +75,7 @@ namespace dawn_native {
           mHeight(builder->mHeight),
           mDepth(builder->mDepth),
           mNumMipLevels(builder->mNumMipLevels),
-          mAllowedUsage(builder->mAllowedUsage) {
+          mUsage(builder->mAllowedUsage) {
     }
 
     DeviceBase* TextureBase::GetDevice() const {
@@ -100,8 +100,8 @@ namespace dawn_native {
     uint32_t TextureBase::GetNumMipLevels() const {
         return mNumMipLevels;
     }
-    dawn::TextureUsageBit TextureBase::GetAllowedUsage() const {
-        return mAllowedUsage;
+    dawn::TextureUsageBit TextureBase::GetUsage() const {
+        return mUsage;
     }
 
     TextureViewBuilder* TextureBase::CreateTextureViewBuilder() {

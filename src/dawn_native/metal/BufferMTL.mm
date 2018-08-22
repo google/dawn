@@ -21,7 +21,7 @@ namespace dawn_native { namespace metal {
 
     Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
         MTLResourceOptions storageMode;
-        if (GetAllowedUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
+        if (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
             storageMode = MTLResourceStorageModeShared;
         } else {
             storageMode = MTLResourceStorageModePrivate;

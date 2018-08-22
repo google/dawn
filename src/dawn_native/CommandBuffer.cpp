@@ -111,7 +111,7 @@ namespace dawn_native {
 
         MaybeError ValidateCanUseAs(BufferBase* buffer, dawn::BufferUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
-            if (!(buffer->GetAllowedUsage() & usage)) {
+            if (!(buffer->GetUsage() & usage)) {
                 DAWN_RETURN_ERROR("buffer doesn't have the required usage.");
             }
 
@@ -120,7 +120,7 @@ namespace dawn_native {
 
         MaybeError ValidateCanUseAs(TextureBase* texture, dawn::TextureUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
-            if (!(texture->GetAllowedUsage() & usage)) {
+            if (!(texture->GetUsage() & usage)) {
                 DAWN_RETURN_ERROR("texture doesn't have the required usage.");
             }
 
@@ -176,7 +176,7 @@ namespace dawn_native {
                     BufferBase* buffer = it.first;
                     dawn::BufferUsageBit usage = it.second;
 
-                    if (usage & ~buffer->GetAllowedUsage()) {
+                    if (usage & ~buffer->GetUsage()) {
                         DAWN_RETURN_ERROR("Buffer missing usage for the pass");
                     }
 
@@ -195,7 +195,7 @@ namespace dawn_native {
                     TextureBase* texture = it.first;
                     dawn::TextureUsageBit usage = it.second;
 
-                    if (usage & ~texture->GetAllowedUsage()) {
+                    if (usage & ~texture->GetUsage()) {
                         DAWN_RETURN_ERROR("Texture missing usage for the pass");
                     }
 

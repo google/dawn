@@ -25,7 +25,7 @@ namespace dawn_native {
     // Buffer
 
     BufferBase::BufferBase(BufferBuilder* builder)
-        : mDevice(builder->mDevice), mSize(builder->mSize), mAllowedUsage(builder->mAllowedUsage) {
+        : mDevice(builder->mDevice), mSize(builder->mSize), mUsage(builder->mAllowedUsage) {
     }
 
     BufferBase::~BufferBase() {
@@ -47,8 +47,8 @@ namespace dawn_native {
         return mSize;
     }
 
-    dawn::BufferUsageBit BufferBase::GetAllowedUsage() const {
-        return mAllowedUsage;
+    dawn::BufferUsageBit BufferBase::GetUsage() const {
+        return mUsage;
     }
 
     void BufferBase::CallMapReadCallback(uint32_t serial,
@@ -147,7 +147,7 @@ namespace dawn_native {
             DAWN_RETURN_ERROR("Buffer subdata out of range");
         }
 
-        if (!(mAllowedUsage & dawn::BufferUsageBit::TransferDst)) {
+        if (!(mUsage & dawn::BufferUsageBit::TransferDst)) {
             DAWN_RETURN_ERROR("Buffer needs the transfer dst usage bit");
         }
 
@@ -166,7 +166,7 @@ namespace dawn_native {
             DAWN_RETURN_ERROR("Buffer already mapped");
         }
 
-        if (!(mAllowedUsage & requiredUsage)) {
+        if (!(mUsage & requiredUsage)) {
             DAWN_RETURN_ERROR("Buffer needs the correct map usage bit");
         }
 

@@ -120,7 +120,7 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage(), GetFormat());
+        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage(), GetFormat());
 
         mResource = mDevice->GetResourceAllocator()->Allocate(
             D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12_RESOURCE_STATE_COMMON);

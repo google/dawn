@@ -70,7 +70,7 @@ namespace dawn_native { namespace metal {
         auto desc = [MTLTextureDescriptor new];
         [desc autorelease];
         desc.textureType = MetalTextureType(GetDimension());
-        desc.usage = MetalTextureUsage(GetAllowedUsage());
+        desc.usage = MetalTextureUsage(GetUsage());
         desc.pixelFormat = MetalPixelFormat(GetFormat());
         desc.width = GetWidth();
         desc.height = GetHeight();

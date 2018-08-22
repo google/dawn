@@ -38,7 +38,7 @@ namespace dawn_native {
         ~BufferBase();
 
         uint32_t GetSize() const;
-        dawn::BufferUsageBit GetAllowedUsage() const;
+        dawn::BufferUsageBit GetUsage() const;
 
         DeviceBase* GetDevice() const;
 
@@ -75,7 +75,7 @@ namespace dawn_native {
 
         DeviceBase* mDevice;
         uint32_t mSize;
-        dawn::BufferUsageBit mAllowedUsage = dawn::BufferUsageBit::None;
+        dawn::BufferUsageBit mUsage = dawn::BufferUsageBit::None;
 
         dawnBufferMapReadCallback mMapReadCallback = nullptr;
         dawnBufferMapWriteCallback mMapWriteCallback = nullptr;
@@ -91,7 +91,6 @@ namespace dawn_native {
 
         // Dawn API
         void SetAllowedUsage(dawn::BufferUsageBit usage);
-        void SetInitialUsage(dawn::BufferUsageBit usage);
         void SetSize(uint32_t size);
 
       private:
@@ -101,7 +100,6 @@ namespace dawn_native {
 
         uint32_t mSize;
         dawn::BufferUsageBit mAllowedUsage = dawn::BufferUsageBit::None;
-        dawn::BufferUsageBit mCurrentUsage = dawn::BufferUsageBit::None;
         int mPropertiesSet = 0;
     };
 

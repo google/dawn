@@ -46,7 +46,7 @@ namespace dawn_native {
         uint32_t GetHeight() const;
         uint32_t GetDepth() const;
         uint32_t GetNumMipLevels() const;
-        dawn::TextureUsageBit GetAllowedUsage() const;
+        dawn::TextureUsageBit GetUsage() const;
         DeviceBase* GetDevice() const;
 
         // Dawn API
@@ -59,7 +59,7 @@ namespace dawn_native {
         dawn::TextureFormat mFormat;
         uint32_t mWidth, mHeight, mDepth;
         uint32_t mNumMipLevels;
-        dawn::TextureUsageBit mAllowedUsage = dawn::TextureUsageBit::None;
+        dawn::TextureUsageBit mUsage = dawn::TextureUsageBit::None;
     };
 
     class TextureBuilder : public Builder<TextureBase> {

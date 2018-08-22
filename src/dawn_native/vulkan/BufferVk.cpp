@@ -111,7 +111,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.size = GetSize();
-        createInfo.usage = VulkanBufferUsage(GetAllowedUsage());
+        createInfo.usage = VulkanBufferUsage(GetUsage());
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = 0;
@@ -124,8 +124,8 @@ namespace dawn_native { namespace vulkan {
         VkMemoryRequirements requirements;
         device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
-        bool requestMappable = (GetAllowedUsage() & (dawn::BufferUsageBit::MapRead |
-                                                     dawn::BufferUsageBit::MapWrite)) != 0;
+        bool requestMappable =
+            (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) != 0;
         if (!device->GetMemoryAllocator()->Allocate(requirements, requestMappable,
                                                     &mMemoryAllocation)) {
             ASSERT(false);

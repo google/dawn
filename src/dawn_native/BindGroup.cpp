@@ -119,7 +119,7 @@ namespace dawn_native {
                     return;
             }
 
-            if (!(bufferViews[j]->GetBuffer()->GetAllowedUsage() & requiredBit)) {
+            if (!(bufferViews[j]->GetBuffer()->GetUsage() & requiredBit)) {
                 HandleError("Buffer needs to allow the correct usage bit");
                 return;
             }
@@ -165,8 +165,7 @@ namespace dawn_native {
                 return;
             }
 
-            if (!(textureViews[j]->GetTexture()->GetAllowedUsage() &
-                  dawn::TextureUsageBit::Sampled)) {
+            if (!(textureViews[j]->GetTexture()->GetUsage() & dawn::TextureUsageBit::Sampled)) {
                 HandleError("Texture needs to allow the sampled usage bit");
                 return;
             }

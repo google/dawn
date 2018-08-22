@@ -79,9 +79,9 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        resourceDescriptor.Flags = D3D12ResourceFlags(GetAllowedUsage());
+        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage());
 
-        auto heapType = D3D12HeapType(GetAllowedUsage());
+        auto heapType = D3D12HeapType(GetUsage());
         auto bufferUsage = D3D12_RESOURCE_STATE_COMMON;
 
         // D3D12 requires buffers on the READBACK heap to have the D3D12_RESOURCE_STATE_COPY_DEST

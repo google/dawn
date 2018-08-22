@@ -252,7 +252,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.arrayLayers = 1;
         createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        createInfo.usage = VulkanImageUsage(GetAllowedUsage(), GetFormat());
+        createInfo.usage = VulkanImageUsage(GetUsage(), GetFormat());
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;

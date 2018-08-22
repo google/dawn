@@ -121,8 +121,8 @@ namespace dawn_native { namespace null {
     };
 
     Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
-        if (GetAllowedUsage() & (dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead |
-                                 dawn::BufferUsageBit::MapWrite)) {
+        if (GetUsage() & (dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead |
+                          dawn::BufferUsageBit::MapWrite)) {
             mBackingData = std::unique_ptr<char[]>(new char[GetSize()]);
         }
     }
