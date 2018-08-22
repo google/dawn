@@ -43,8 +43,8 @@ namespace dawn_native { namespace null {
     BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
         return new BlendState(builder);
     }
-    BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
-        return new Buffer(builder);
+    ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
+        return new Buffer(this, descriptor);
     }
     BufferViewBase* Device::CreateBufferView(BufferViewBuilder* builder) {
         return new BufferView(builder);
@@ -120,7 +120,8 @@ namespace dawn_native { namespace null {
         bool isWrite;
     };
 
-    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
+    Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
+        : BufferBase(device, descriptor) {
         if (GetUsage() & (dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead |
                           dawn::BufferUsageBit::MapWrite)) {
             mBackingData = std::unique_ptr<char[]>(new char[GetSize()]);

@@ -16,16 +16,38 @@
 
 #include "common/Assert.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 #include <cstdio>
 #include <utility>
 
 namespace dawn_native {
 
+    MaybeError ValidateBufferDescriptor(DeviceBase*, const BufferDescriptor* descriptor) {
+        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        DAWN_TRY(ValidateBufferUsageBit(descriptor->usage));
+
+        dawn::BufferUsageBit usage = descriptor->usage;
+
+        const dawn::BufferUsageBit kMapWriteAllowedUsages =
+            dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+        if (usage & dawn::BufferUsageBit::MapWrite && (usage & kMapWriteAllowedUsages) != usage) {
+            DAWN_RETURN_ERROR("Only TransferSrc is allowed with MapWrite");
+        }
+
+        const dawn::BufferUsageBit kMapReadAllowedUsages =
+            dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+        if (usage & dawn::BufferUsageBit::MapRead && (usage & kMapReadAllowedUsages) != usage) {
+            DAWN_RETURN_ERROR("Only TransferDst is allowed with MapRead");
+        }
+
+        return {};
+    }
+
     // Buffer
 
-    BufferBase::BufferBase(BufferBuilder* builder)
-        : mDevice(builder->mDevice), mSize(builder->mSize), mUsage(builder->mAllowedUsage) {
+    BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
+        : mDevice(device), mSize(descriptor->size), mUsage(descriptor->usage) {
     }
 
     BufferBase::~BufferBase() {
@@ -179,62 +201,6 @@ namespace dawn_native {
         }
 
         return {};
-    }
-
-    // BufferBuilder
-
-    enum BufferSetProperties {
-        BUFFER_PROPERTY_ALLOWED_USAGE = 0x1,
-        BUFFER_PROPERTY_SIZE = 0x2,
-    };
-
-    BufferBuilder::BufferBuilder(DeviceBase* device) : Builder(device) {
-    }
-
-    BufferBase* BufferBuilder::GetResultImpl() {
-        constexpr int allProperties = BUFFER_PROPERTY_ALLOWED_USAGE | BUFFER_PROPERTY_SIZE;
-        if ((mPropertiesSet & allProperties) != allProperties) {
-            HandleError("Buffer missing properties");
-            return nullptr;
-        }
-
-        const dawn::BufferUsageBit kMapWriteAllowedUsages =
-            dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
-        if (mAllowedUsage & dawn::BufferUsageBit::MapWrite &&
-            (mAllowedUsage & kMapWriteAllowedUsages) != mAllowedUsage) {
-            HandleError("Only TransferSrc is allowed with MapWrite");
-            return nullptr;
-        }
-
-        const dawn::BufferUsageBit kMapReadAllowedUsages =
-            dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
-        if (mAllowedUsage & dawn::BufferUsageBit::MapRead &&
-            (mAllowedUsage & kMapReadAllowedUsages) != mAllowedUsage) {
-            HandleError("Only TransferDst is allowed with MapRead");
-            return nullptr;
-        }
-
-        return mDevice->CreateBuffer(this);
-    }
-
-    void BufferBuilder::SetAllowedUsage(dawn::BufferUsageBit usage) {
-        if ((mPropertiesSet & BUFFER_PROPERTY_ALLOWED_USAGE) != 0) {
-            HandleError("Buffer allowedUsage property set multiple times");
-            return;
-        }
-
-        mAllowedUsage = usage;
-        mPropertiesSet |= BUFFER_PROPERTY_ALLOWED_USAGE;
-    }
-
-    void BufferBuilder::SetSize(uint32_t size) {
-        if ((mPropertiesSet & BUFFER_PROPERTY_SIZE) != 0) {
-            HandleError("Buffer size property set multiple times");
-            return;
-        }
-
-        mSize = size;
-        mPropertiesSet |= BUFFER_PROPERTY_SIZE;
     }
 
     // BufferViewBase

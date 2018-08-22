@@ -26,7 +26,7 @@ namespace dawn_native { namespace metal {
 
     class Buffer : public BufferBase {
       public:
-        Buffer(BufferBuilder* builder);
+        Buffer(Device* device, const BufferDescriptor* descriptor);
         ~Buffer();
 
         id<MTLBuffer> GetMTLBuffer();

@@ -24,6 +24,8 @@
 
 namespace dawn_native {
 
+    MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);
+
     static constexpr dawn::BufferUsageBit kReadOnlyBufferUsages =
         dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferSrc |
         dawn::BufferUsageBit::Index | dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Uniform;
@@ -34,7 +36,7 @@ namespace dawn_native {
 
     class BufferBase : public RefCounted {
       public:
-        BufferBase(BufferBuilder* builder);
+        BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
         ~BufferBase();
 
         uint32_t GetSize() const;
@@ -85,24 +87,6 @@ namespace dawn_native {
         bool mIsMapped = false;
     };
 
-    class BufferBuilder : public Builder<BufferBase> {
-      public:
-        BufferBuilder(DeviceBase* device);
-
-        // Dawn API
-        void SetAllowedUsage(dawn::BufferUsageBit usage);
-        void SetSize(uint32_t size);
-
-      private:
-        friend class BufferBase;
-
-        BufferBase* GetResultImpl() override;
-
-        uint32_t mSize;
-        dawn::BufferUsageBit mAllowedUsage = dawn::BufferUsageBit::None;
-        int mPropertiesSet = 0;
-    };
-
     class BufferViewBase : public RefCounted {
       public:
         BufferViewBase(BufferViewBuilder* builder);
@@ -133,6 +117,18 @@ namespace dawn_native {
         uint32_t mOffset = 0;
         uint32_t mSize = 0;
         int mPropertiesSet = 0;
+    };
+
+    // This builder class is kept around purely for testing but should not be used.
+    class BufferBuilder : public Builder<BufferViewBase> {
+      public:
+        BufferBuilder(DeviceBase* device) : Builder(device) {
+            UNREACHABLE();
+        }
+
+        void SetSize(uint32_t) {
+            UNREACHABLE();
+        }
     };
 
 }  // namespace dawn_native

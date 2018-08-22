@@ -19,7 +19,8 @@
 
 namespace dawn_native { namespace metal {
 
-    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
+    Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
+        : BufferBase(device, descriptor) {
         MTLResourceOptions storageMode;
         if (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
             storageMode = MTLResourceStorageModeShared;
@@ -27,8 +28,7 @@ namespace dawn_native { namespace metal {
             storageMode = MTLResourceStorageModePrivate;
         }
 
-        mMtlBuffer = [ToBackend(GetDevice())->GetMTLDevice() newBufferWithLength:GetSize()
-                                                                         options:storageMode];
+        mMtlBuffer = [device->GetMTLDevice() newBufferWithLength:GetSize() options:storageMode];
     }
 
     Buffer::~Buffer() {

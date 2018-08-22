@@ -26,7 +26,7 @@ namespace dawn_native { namespace d3d12 {
 
     class Buffer : public BufferBase {
       public:
-        Buffer(BufferBuilder* builder);
+        Buffer(Device* device, const BufferDescriptor* descriptor);
         ~Buffer();
 
         uint32_t GetD3D12Size() const;

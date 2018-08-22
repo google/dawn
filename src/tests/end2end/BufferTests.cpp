@@ -43,10 +43,10 @@ class BufferMapReadTests : public DawnTest {
 
 // Test that the simplest map read (one u8 at offset 0) works.
 TEST_P(BufferMapReadTests, SmallReadAtZero) {
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(1)
-        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 1;
+    descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint8_t myData = 187;
     buffer.SetSubData(0, sizeof(myData), &myData);
@@ -59,10 +59,10 @@ TEST_P(BufferMapReadTests, SmallReadAtZero) {
 
 // Test mapping a buffer at an offset.
 TEST_P(BufferMapReadTests, SmallReadAtOffset) {
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(4000)
-        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4000;
+    descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint8_t myData = 234;
     buffer.SetSubData(2048, sizeof(myData), &myData);
@@ -75,10 +75,10 @@ TEST_P(BufferMapReadTests, SmallReadAtOffset) {
 
 // Test mapping a buffer at an offset that's not uint32-aligned.
 TEST_P(BufferMapReadTests, SmallReadAtUnalignedOffset) {
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(4000)
-        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4000;
+    descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint8_t myData = 213;
     buffer.SetSubData(3, 1, &myData);
@@ -97,10 +97,10 @@ TEST_P(BufferMapReadTests, LargeRead) {
         myData.push_back(i);
     }
 
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(static_cast<uint32_t>(kDataSize * sizeof(uint32_t)))
-        .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
+    descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     buffer.SetSubData(0, kDataSize * sizeof(uint32_t), reinterpret_cast<uint8_t*>(myData.data()));
 
@@ -139,10 +139,10 @@ class BufferMapWriteTests : public DawnTest {
 
 // Test that the simplest map write (one u32 at offset 0) works.
 TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(4)
-        .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t myData = 2934875;
     void* mappedData = MapWriteAsyncAndWait(buffer, 0, 4);
@@ -154,10 +154,10 @@ TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
 
 // Test mapping a buffer at an offset.
 TEST_P(BufferMapWriteTests, SmallWriteAtOffset) {
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(4000)
-        .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4000;
+    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t myData = 2934875;
     void* mappedData = MapWriteAsyncAndWait(buffer, 2048, 4);
@@ -175,10 +175,10 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
         myData.push_back(i);
     }
 
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(static_cast<uint32_t>(kDataSize * sizeof(uint32_t)))
-        .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
+    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     void* mappedData = MapWriteAsyncAndWait(buffer, 0, kDataSize * sizeof(uint32_t));
     memcpy(mappedData, myData.data(), kDataSize * sizeof(uint32_t));
@@ -194,10 +194,10 @@ class BufferSetSubDataTests : public DawnTest {
 
 // Test the simplest set sub data: setting one u8 at offset 0.
 TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(1)
-        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 1;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint8_t value = 171;
     buffer.SetSubData(0, sizeof(value), &value);
@@ -207,10 +207,10 @@ TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
 
 // Test that SetSubData offset works.
 TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(4000)
-        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4000;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     constexpr uint32_t kOffset = 2000;
     uint8_t value = 231;
@@ -230,10 +230,10 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 
     constexpr uint32_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 1000 * 1000;
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(kSize)
-        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = kSize;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     std::vector<uint32_t> expectedData;
     for (uint32_t i = 0; i < kElements; ++i) {
@@ -248,10 +248,10 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 TEST_P(BufferSetSubDataTests, LargeSetSubData) {
     constexpr uint32_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 1000 * 1000;
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(kSize)
-        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = kSize;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     std::vector<uint32_t> expectedData;
     for (uint32_t i = 0; i < kElements; ++i) {

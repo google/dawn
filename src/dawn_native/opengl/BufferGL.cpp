@@ -14,11 +14,14 @@
 
 #include "dawn_native/opengl/BufferGL.h"
 
+#include "dawn_native/opengl/DeviceGL.h"
+
 namespace dawn_native { namespace opengl {
 
     // Buffer
 
-    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
+    Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
+        : BufferBase(device, descriptor) {
         glGenBuffers(1, &mBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glBufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);

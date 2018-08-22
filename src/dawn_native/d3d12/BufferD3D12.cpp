@@ -67,7 +67,8 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // namespace
 
-    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
+    Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
+        : BufferBase(device, descriptor) {
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         resourceDescriptor.Alignment = 0;
@@ -100,9 +101,8 @@ namespace dawn_native { namespace d3d12 {
             mLastUsage = dawn::BufferUsageBit::TransferSrc;
         }
 
-        mResource = ToBackend(GetDevice())
-                        ->GetResourceAllocator()
-                        ->Allocate(heapType, resourceDescriptor, bufferUsage);
+        mResource =
+            device->GetResourceAllocator()->Allocate(heapType, resourceDescriptor, bufferUsage);
     }
 
     Buffer::~Buffer() {

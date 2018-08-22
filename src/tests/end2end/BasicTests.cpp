@@ -22,10 +22,10 @@ class BasicTests : public DawnTest {
 // Test Buffer::SetSubData changes the content of the buffer, but really this is the most
 // basic test possible, and tests the test harness
 TEST_P(BasicTests, BufferSetSubData) {
-    dawn::Buffer buffer = device.CreateBufferBuilder()
-        .SetSize(4)
-        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint8_t value = 187;
     buffer.SetSubData(0, sizeof(value), &value);

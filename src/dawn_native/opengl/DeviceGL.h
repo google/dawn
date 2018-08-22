@@ -34,7 +34,6 @@ namespace dawn_native { namespace opengl {
       public:
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
-        BufferBase* CreateBuffer(BufferBuilder* builder) override;
         BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
         ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
@@ -52,6 +51,7 @@ namespace dawn_native { namespace opengl {
       private:
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
             const BindGroupLayoutDescriptor* descriptor) override;
+        ResultOrError<BufferBase*> CreateBufferImpl(const BufferDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;

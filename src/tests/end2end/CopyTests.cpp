@@ -100,10 +100,11 @@ class CopyTests_T2B : public CopyTests {
             // Create a buffer of size `size` and populate it with empty data (0,0,0,0)
             // Note: Prepopulating the buffer with empty data ensures that there is not random data in the expectation
             // and helps ensure that the padding due to the row pitch is not modified by the copy
-            dawn::Buffer buffer = device.CreateBufferBuilder()
-                .SetSize(bufferSpec.size)
-                .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
-                .GetResult();
+            dawn::BufferDescriptor bufDescriptor;
+            bufDescriptor.size = bufferSpec.size;
+            bufDescriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+            dawn::Buffer buffer = device.CreateBuffer(&bufDescriptor);
+
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel);
             buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(emptyData.data()));
 
@@ -147,10 +148,11 @@ protected:
 
     void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
         // Create a buffer of size `size` and populate it with data
-        dawn::Buffer buffer = device.CreateBufferBuilder()
-            .SetSize(bufferSpec.size)
-            .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
-            .GetResult();
+        dawn::BufferDescriptor bufDescriptor;
+        bufDescriptor.size = bufferSpec.size;
+        bufDescriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+        dawn::Buffer buffer = device.CreateBuffer(&bufDescriptor);
+
         std::vector<RGBA8> bufferData(bufferSpec.size / kBytesPerTexel);
         FillBufferData(bufferData.data(), bufferData.size());
         buffer.SetSubData(0, static_cast<uint32_t>(bufferData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(bufferData.data()));

@@ -303,13 +303,13 @@ void DawnTest::FlushWire() {
 DawnTest::ReadbackReservation DawnTest::ReserveReadback(uint32_t readbackSize) {
     // For now create a new MapRead buffer for each readback
     // TODO(cwallez@chromium.org): eventually make bigger buffers and allocate linearly?
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = readbackSize;
+    descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+
     ReadbackSlot slot;
     slot.bufferSize = readbackSize;
-    slot.buffer =
-        device.CreateBufferBuilder()
-            .SetSize(readbackSize)
-            .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
-            .GetResult();
+    slot.buffer = device.CreateBuffer(&descriptor);
 
     ReadbackReservation reservation;
     reservation.buffer = slot.buffer.Clone();

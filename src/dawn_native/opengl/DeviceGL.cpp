@@ -56,8 +56,8 @@ namespace dawn_native { namespace opengl {
     BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
         return new BlendState(builder);
     }
-    BufferBase* Device::CreateBuffer(BufferBuilder* builder) {
-        return new Buffer(builder);
+    ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
+        return new Buffer(this, descriptor);
     }
     BufferViewBase* Device::CreateBufferView(BufferViewBuilder* builder) {
         return new BufferView(builder);

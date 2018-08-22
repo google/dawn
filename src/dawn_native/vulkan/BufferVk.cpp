@@ -103,9 +103,8 @@ namespace dawn_native { namespace vulkan {
 
     }  // namespace
 
-    Buffer::Buffer(BufferBuilder* builder) : BufferBase(builder) {
-        Device* device = ToBackend(GetDevice());
-
+    Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
+        : BufferBase(device, descriptor) {
         VkBufferCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         createInfo.pNext = nullptr;

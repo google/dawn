@@ -43,12 +43,12 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
                         .GetResult();
 
     // Set up src storage buffer
-    auto src =
-        device.CreateBufferBuilder()
-            .SetSize(kNumUints * sizeof(uint32_t))
-            .SetAllowedUsage(dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc |
-                             dawn::BufferUsageBit::TransferDst)
-            .GetResult();
+    dawn::BufferDescriptor srcDesc;
+    srcDesc.size = kNumUints * sizeof(uint32_t);
+    srcDesc.usage = dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc |
+                    dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer src = device.CreateBuffer(&srcDesc);
+
     std::array<uint32_t, kNumUints> expected;
     for (uint32_t i = 0; i < kNumUints; ++i) {
         expected[i] = (i + 1u) * 0x11111111u;
@@ -59,12 +59,12 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
         src.CreateBufferViewBuilder().SetExtent(0, kNumUints * sizeof(uint32_t)).GetResult();
 
     // Set up dst storage buffer
-    auto dst =
-        device.CreateBufferBuilder()
-            .SetSize(kNumUints * sizeof(uint32_t))
-            .SetAllowedUsage(dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc |
-                             dawn::BufferUsageBit::TransferDst)
-            .GetResult();
+    dawn::BufferDescriptor dstDesc;
+    dstDesc.size = kNumUints * sizeof(uint32_t);
+    dstDesc.usage = dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc |
+                    dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer dst = device.CreateBuffer(&dstDesc);
+
     std::array<uint32_t, kNumUints> zero{};
     dst.SetSubData(0, sizeof(zero), reinterpret_cast<const uint8_t*>(zero.data()));
     auto dstView =

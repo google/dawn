@@ -30,17 +30,14 @@ class PushConstantTest: public DawnTest {
             dawn::Buffer resultBuffer;
         };
         TestBindings MakeTestBindings(bool extraBuffer) {
-            dawn::Buffer buf1 = device.CreateBufferBuilder()
-                .SetSize(4)
-                .SetAllowedUsage(dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)
-                .GetResult();
             uint32_t one = 1;
-            buf1.SetSubData(0, sizeof(one), reinterpret_cast<uint8_t*>(&one));
-
-            dawn::Buffer buf2 = device.CreateBufferBuilder()
-                .SetSize(4)
-                .SetAllowedUsage(dawn::BufferUsageBit::Storage)
-                .GetResult();
+            dawn::Buffer buf1 = utils::CreateBufferFromData(device, &one, 4, dawn::BufferUsageBit::Storage |
+                                                                             dawn::BufferUsageBit::TransferSrc |
+                                                                             dawn::BufferUsageBit::TransferDst);
+            dawn::BufferDescriptor buf2Desc;
+            buf2Desc.size = 4;
+            buf2Desc.usage = dawn::BufferUsageBit::Storage;
+            dawn::Buffer buf2 = device.CreateBuffer(&buf2Desc);
 
             dawn::ShaderStageBit kAllStages = dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment | dawn::ShaderStageBit::Vertex;
             constexpr dawn::ShaderStageBit kNoStages{};

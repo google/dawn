@@ -23,7 +23,8 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateShaderModuleDescriptor(DeviceBase*, const ShaderModuleDescriptor* descriptor) {
+    MaybeError ValidateShaderModuleDescriptor(DeviceBase*,
+                                              const ShaderModuleDescriptor* descriptor) {
         DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
         // TODO(cwallez@chromium.org): Use spirv-val to check the module is well-formed
         return {};

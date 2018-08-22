@@ -123,10 +123,10 @@ namespace {
 // Initialization
 namespace {
     void initBuffers() {
-        defaultBuffer = device.CreateBufferBuilder()
-            .SetAllowedUsage(dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Index)
-            .SetSize(256)
-            .GetResult();
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = 256;
+        descriptor.usage = dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Index;
+        defaultBuffer = device.CreateBuffer(&descriptor);
 
         for (const auto& bv : scene.bufferViews) {
             const auto& iBufferViewID = bv.first;

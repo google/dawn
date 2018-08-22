@@ -43,22 +43,25 @@ static void ToMockBufferMapWriteCallback(dawnBufferMapAsyncStatus status, void* 
 class BufferValidationTest : public ValidationTest {
     protected:
         dawn::Buffer CreateMapReadBuffer(uint32_t size) {
-            return device.CreateBufferBuilder()
-                .SetSize(size)
-                .SetAllowedUsage(dawn::BufferUsageBit::MapRead)
-                .GetResult();
+            dawn::BufferDescriptor descriptor;
+            descriptor.size = size;
+            descriptor.usage = dawn::BufferUsageBit::MapRead;
+
+            return device.CreateBuffer(&descriptor);
         }
         dawn::Buffer CreateMapWriteBuffer(uint32_t size) {
-            return device.CreateBufferBuilder()
-                .SetSize(size)
-                .SetAllowedUsage(dawn::BufferUsageBit::MapWrite)
-                .GetResult();
+            dawn::BufferDescriptor descriptor;
+            descriptor.size = size;
+            descriptor.usage = dawn::BufferUsageBit::MapWrite;
+
+            return device.CreateBuffer(&descriptor);
         }
         dawn::Buffer CreateSetSubDataBuffer(uint32_t size) {
-            return device.CreateBufferBuilder()
-                .SetSize(size)
-                .SetAllowedUsage(dawn::BufferUsageBit::TransferDst)
-                .GetResult();
+            dawn::BufferDescriptor descriptor;
+            descriptor.size = size;
+            descriptor.usage = dawn::BufferUsageBit::TransferDst;
+
+            return device.CreateBuffer(&descriptor);
         }
 
         dawn::Queue queue;
@@ -84,48 +87,11 @@ class BufferValidationTest : public ValidationTest {
 TEST_F(BufferValidationTest, CreationSuccess) {
     // Success
     {
-        dawn::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder())
-            .SetSize(4)
-            .SetAllowedUsage(dawn::BufferUsageBit::Uniform)
-            .GetResult();
-    }
-}
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = dawn::BufferUsageBit::Uniform;
 
-// Test failure when specifying properties multiple times
-TEST_F(BufferValidationTest, CreationDuplicates) {
-    // When size is specified multiple times
-    {
-        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
-            .SetSize(4)
-            .SetSize(3)
-            .SetAllowedUsage(dawn::BufferUsageBit::Uniform)
-            .GetResult();
-    }
-
-    // When allowed usage is specified multiple times
-    {
-        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
-            .SetSize(4)
-            .SetAllowedUsage(dawn::BufferUsageBit::Vertex)
-            .SetAllowedUsage(dawn::BufferUsageBit::Uniform)
-            .GetResult();
-    }
-}
-
-// Test failure when required properties are missing
-TEST_F(BufferValidationTest, CreationMissingProperties) {
-    // When allowed usage is missing
-    {
-        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
-            .SetSize(4)
-            .GetResult();
-    }
-
-    // When size is missing
-    {
-        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder())
-            .SetAllowedUsage(dawn::BufferUsageBit::Vertex)
-            .GetResult();
+        device.CreateBuffer(&descriptor);
     }
 }
 
@@ -133,34 +99,38 @@ TEST_F(BufferValidationTest, CreationMissingProperties) {
 TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
     // MapRead with TransferDst is ok
     {
-        dawn::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder(), "1")
-            .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst)
-            .SetSize(4)
-            .GetResult();
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+
+        device.CreateBuffer(&descriptor);
     }
 
     // MapRead with something else is an error
     {
-        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder(), "2")
-            .SetAllowedUsage(dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::Uniform)
-            .SetSize(4)
-            .GetResult();
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::Uniform;
+
+        ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
     }
 
     // MapWrite with TransferSrc is ok
     {
-        dawn::Buffer buf = AssertWillBeSuccess(device.CreateBufferBuilder(), "3")
-            .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc)
-            .SetSize(4)
-            .GetResult();
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+
+        device.CreateBuffer(&descriptor);
     }
 
     // MapWrite with something else is an error
     {
-        dawn::Buffer buf = AssertWillBeError(device.CreateBufferBuilder(), "4")
-            .SetAllowedUsage(dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::Uniform)
-            .SetSize(4)
-            .GetResult();
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::Uniform;
+
+        ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
     }
 }
 
@@ -216,10 +186,11 @@ TEST_F(BufferValidationTest, MapWriteOutOfRange) {
 
 // Test map reading a buffer with wrong current usage
 TEST_F(BufferValidationTest, MapReadWrongUsage) {
-    dawn::Buffer buf = device.CreateBufferBuilder()
-        .SetSize(4)
-        .SetAllowedUsage(dawn::BufferUsageBit::TransferDst)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::TransferDst;
+
+    dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
     dawn::CallbackUserdata userdata = 40600;
     EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
@@ -230,10 +201,11 @@ TEST_F(BufferValidationTest, MapReadWrongUsage) {
 
 // Test map writing a buffer with wrong current usage
 TEST_F(BufferValidationTest, MapWriteWrongUsage) {
-    dawn::Buffer buf = device.CreateBufferBuilder()
-        .SetSize(4)
-        .SetAllowedUsage(dawn::BufferUsageBit::TransferSrc)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc;
+
+    dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
     dawn::CallbackUserdata userdata = 40600;
     EXPECT_CALL(*mockBufferMapWriteCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
@@ -468,10 +440,11 @@ TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
 
 // Test error case for SetSubData with the wrong usage
 TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
-    dawn::Buffer buf = device.CreateBufferBuilder()
-        .SetSize(1)
-        .SetAllowedUsage(dawn::BufferUsageBit::Vertex)
-        .GetResult();
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::Vertex;
+
+    dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
     uint8_t foo = 0;
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));

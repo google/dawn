@@ -27,7 +27,7 @@ namespace dawn_native { namespace vulkan {
 
     class Buffer : public BufferBase {
       public:
-        Buffer(BufferBuilder* builder);
+        Buffer(Device* device, const BufferDescriptor* descriptor);
         ~Buffer();
 
         void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);

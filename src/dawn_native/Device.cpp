@@ -111,8 +111,14 @@ namespace dawn_native {
     BlendStateBuilder* DeviceBase::CreateBlendStateBuilder() {
         return new BlendStateBuilder(this);
     }
-    BufferBuilder* DeviceBase::CreateBufferBuilder() {
-        return new BufferBuilder(this);
+    BufferBase* DeviceBase::CreateBuffer(const BufferDescriptor* descriptor) {
+        BufferBase* result = nullptr;
+
+        if (ConsumedError(CreateBufferInternal(&result, descriptor))) {
+            return nullptr;
+        }
+
+        return result;
     }
     CommandBufferBuilder* DeviceBase::CreateCommandBufferBuilder() {
         return new CommandBufferBuilder(this);
@@ -202,6 +208,13 @@ namespace dawn_native {
         const BindGroupLayoutDescriptor* descriptor) {
         DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateBufferInternal(BufferBase** result,
+                                                const BufferDescriptor* descriptor) {
+        DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(*result, CreateBufferImpl(descriptor));
         return {};
     }
 

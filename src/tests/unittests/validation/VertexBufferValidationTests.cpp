@@ -37,10 +37,11 @@ class VertexBufferValidationTest : public ValidationTest {
         std::array<dawn::Buffer, N> MakeVertexBuffers() {
             std::array<dawn::Buffer, N> buffers;
             for (auto& buffer : buffers) {
-                buffer = device.CreateBufferBuilder()
-                    .SetSize(256)
-                    .SetAllowedUsage(dawn::BufferUsageBit::Vertex)
-                    .GetResult();
+                dawn::BufferDescriptor descriptor;
+                descriptor.size = 256;
+                descriptor.usage = dawn::BufferUsageBit::Vertex;
+
+                buffer = device.CreateBuffer(&descriptor);
             }
             return buffers;
         }

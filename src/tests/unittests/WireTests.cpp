@@ -476,7 +476,7 @@ TEST_F(WireTests, CallsSkippedAfterBuilderError) {
     dawnCommandBufferBuilder cmdBufBuilder = dawnDeviceCreateCommandBufferBuilder(device);
     dawnCommandBufferBuilderSetErrorCallback(cmdBufBuilder, ToMockBuilderErrorCallback, 1, 2);
 
-    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
+    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilderForTesting(device);
     dawnBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 3, 4);
     dawnBuffer buffer = dawnBufferBuilderGetResult(bufferBuilder); // Hey look an error!
 
@@ -490,7 +490,7 @@ TEST_F(WireTests, CallsSkippedAfterBuilderError) {
         .WillOnce(Return(apiCmdBufBuilder));
 
     dawnBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+    EXPECT_CALL(api, DeviceCreateBufferBuilderForTesting(apiDevice))
         .WillOnce(Return(apiBufferBuilder));
 
     // Hey look an error!
@@ -514,12 +514,12 @@ TEST_F(WireTests, CallsSkippedAfterBuilderError) {
 
 // Test that we get a success builder error status when no error happens
 TEST_F(WireTests, SuccessCallbackOnBuilderSuccess) {
-    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
+    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilderForTesting(device);
     dawnBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 1, 2);
     dawnBufferBuilderGetResult(bufferBuilder);
 
     dawnBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+    EXPECT_CALL(api, DeviceCreateBufferBuilderForTesting(apiDevice))
         .WillOnce(Return(apiBufferBuilder));
 
     dawnBuffer apiBuffer = api.GetNewBuffer();
@@ -541,7 +541,7 @@ TEST_F(WireTests, SuccessCallbackOnBuilderSuccess) {
 TEST_F(WireTests, UnknownBuilderErrorStatusCallback) {
     // The builder is destroyed before the object is built
     {
-        dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
+        dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilderForTesting(device);
         dawnBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 1, 2);
 
         EXPECT_CALL(*mockBuilderErrorCallback, Call(DAWN_BUILDER_ERROR_STATUS_UNKNOWN, _ , 1 ,2)).Times(1);
@@ -551,7 +551,7 @@ TEST_F(WireTests, UnknownBuilderErrorStatusCallback) {
 
     // If the builder has been consumed, it doesn't fire the callback with unknown
     {
-        dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
+        dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilderForTesting(device);
         dawnBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 3, 4);
         dawnBufferBuilderGetResult(bufferBuilder);
 
@@ -563,7 +563,7 @@ TEST_F(WireTests, UnknownBuilderErrorStatusCallback) {
     // If the builder has been consumed, and the object is destroyed before the result comes from the server,
     // then the callback is fired with unknown
     {
-        dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
+        dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilderForTesting(device);
         dawnBufferBuilderSetErrorCallback(bufferBuilder, ToMockBuilderErrorCallback, 5, 6);
         dawnBuffer buffer = dawnBufferBuilderGetResult(bufferBuilder);
 
@@ -577,11 +577,11 @@ TEST_F(WireTests, UnknownBuilderErrorStatusCallback) {
 TEST_F(WireTests, SuccessCallbackNotForwardedToDevice) {
     dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, 0);
 
-    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
+    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilderForTesting(device);
     dawnBufferBuilderGetResult(bufferBuilder);
 
     dawnBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+    EXPECT_CALL(api, DeviceCreateBufferBuilderForTesting(apiDevice))
         .WillOnce(Return(apiBufferBuilder));
 
     dawnBuffer apiBuffer = api.GetNewBuffer();
@@ -600,11 +600,11 @@ TEST_F(WireTests, ErrorCallbackForwardedToDevice) {
     uint64_t userdata = 30495;
     dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata);
 
-    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
+    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilderForTesting(device);
     dawnBufferBuilderGetResult(bufferBuilder);
 
     dawnBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+    EXPECT_CALL(api, DeviceCreateBufferBuilderForTesting(apiDevice))
         .WillOnce(Return(apiBufferBuilder));
 
     EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
@@ -649,10 +649,10 @@ TEST_F(WireSetCallbackTests, BuilderErrorCallback) {
     uint64_t userdata2 = 982734239028;
 
     // Create the buffer builder, the callback is set immediately on the server side
-    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
+    dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilderForTesting(device);
 
     dawnBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
+    EXPECT_CALL(api, DeviceCreateBufferBuilderForTesting(apiDevice))
         .WillOnce(Return(apiBufferBuilder));
 
     EXPECT_CALL(api, OnBuilderSetErrorCallback(apiBufferBuilder, _, _, _))
@@ -692,28 +692,24 @@ class WireBufferMappingTests : public WireTestsBase {
             WireTestsBase::SetUp();
 
             {
-                dawnBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
-                dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
-                EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
-                    .WillOnce(Return(apiBufferBuilder))
-                    .RetiresOnSaturation();
+                dawnBufferDescriptor descriptor;
+                descriptor.nextInChain = nullptr;
 
                 apiBuffer = api.GetNewBuffer();
-                buffer = dawnBufferBuilderGetResult(bufferBuilder);
-                EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
+                buffer = dawnDeviceCreateBuffer(device, &descriptor);
+
+                EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
                     .WillOnce(Return(apiBuffer))
                     .RetiresOnSaturation();
                 FlushClient();
             }
             {
-                dawnBufferBuilder apiBufferBuilder = api.GetNewBufferBuilder();
-                dawnBufferBuilder bufferBuilder = dawnDeviceCreateBufferBuilder(device);
-                EXPECT_CALL(api, DeviceCreateBufferBuilder(apiDevice))
-                    .WillOnce(Return(apiBufferBuilder))
-                    .RetiresOnSaturation();
+                dawnBufferDescriptor descriptor;
+                descriptor.nextInChain = nullptr;
 
-                errorBuffer = dawnBufferBuilderGetResult(bufferBuilder);
-                EXPECT_CALL(api, BufferBuilderGetResult(apiBufferBuilder))
+                errorBuffer = dawnDeviceCreateBuffer(device, &descriptor);
+
+                EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
                     .WillOnce(Return(nullptr))
                     .RetiresOnSaturation();
                 FlushClient();

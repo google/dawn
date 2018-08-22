@@ -108,3 +108,6 @@ void ProcTableAsClass::CallMapWriteCallback(dawnBuffer buffer, dawnBufferMapAsyn
         return reinterpret_cast<{{as_cType(type.name)}}>(mObjects.back().get());
     }
 {% endfor %}
+
+MockProcTable::MockProcTable() {
+}

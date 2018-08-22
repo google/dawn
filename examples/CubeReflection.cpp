@@ -169,10 +169,10 @@ void init() {
 
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    cameraBuffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::Uniform)
-        .SetSize(sizeof(CameraData))
-        .GetResult();
+    dawn::BufferDescriptor cameraBufDesc;
+    cameraBufDesc.size = sizeof(CameraData);
+    cameraBufDesc.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::Uniform;
+    cameraBuffer = device.CreateBuffer(&cameraBufDesc);
 
     glm::mat4 transform(1.0);
     transformBuffer[0] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), dawn::BufferUsageBit::Uniform);

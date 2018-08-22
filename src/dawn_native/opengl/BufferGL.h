@@ -25,7 +25,7 @@ namespace dawn_native { namespace opengl {
 
     class Buffer : public BufferBase {
       public:
-        Buffer(BufferBuilder* builder);
+        Buffer(Device* device, const BufferDescriptor* descriptor);
 
         GLuint GetHandle() const;
 

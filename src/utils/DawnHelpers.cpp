@@ -98,10 +98,11 @@ namespace utils {
                                       const void* data,
                                       uint32_t size,
                                       dawn::BufferUsageBit usage) {
-        dawn::Buffer buffer = device.CreateBufferBuilder()
-                                  .SetAllowedUsage(dawn::BufferUsageBit::TransferDst | usage)
-                                  .SetSize(size)
-                                  .GetResult();
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = usage | dawn::BufferUsageBit::TransferDst;
+
+        dawn::Buffer buffer = device.CreateBuffer(&descriptor);
         buffer.SetSubData(0, size, reinterpret_cast<const uint8_t*>(data));
         return buffer;
     }

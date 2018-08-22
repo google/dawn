@@ -24,10 +24,13 @@ TEST_F(BindGroupValidationTest, BufferViewOffset) {
                     {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                 });
 
-    auto buffer = device.CreateBufferBuilder()
-        .SetAllowedUsage(dawn::BufferUsageBit::Uniform)
-        .SetSize(512)
-        .GetResult();
+    dawn::Buffer buffer;
+    {
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = 512;
+        descriptor.usage = dawn::BufferUsageBit::Uniform;
+        buffer = device.CreateBuffer(&descriptor);
+    }
 
     // Check that offset 0 is valid
     {

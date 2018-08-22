@@ -45,7 +45,6 @@ namespace dawn_native {
 
         virtual BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) = 0;
         virtual BlendStateBase* CreateBlendState(BlendStateBuilder* builder) = 0;
-        virtual BufferBase* CreateBuffer(BufferBuilder* builder) = 0;
         virtual BufferViewBase* CreateBufferView(BufferViewBuilder* builder) = 0;
         virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
         virtual ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) = 0;
@@ -83,7 +82,7 @@ namespace dawn_native {
         BindGroupBuilder* CreateBindGroupBuilder();
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
         BlendStateBuilder* CreateBlendStateBuilder();
-        BufferBuilder* CreateBufferBuilder();
+        BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
         CommandBufferBuilder* CreateCommandBufferBuilder();
         ComputePipelineBuilder* CreateComputePipelineBuilder();
         DepthStencilStateBuilder* CreateDepthStencilStateBuilder();
@@ -102,9 +101,14 @@ namespace dawn_native {
         void Reference();
         void Release();
 
+        BufferBuilder* CreateBufferBuilderForTesting() {
+            return nullptr;
+        }
+
       private:
         virtual ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
             const BindGroupLayoutDescriptor* descriptor) = 0;
+        virtual ResultOrError<BufferBase*> CreateBufferImpl(const BufferDescriptor* descriptor) = 0;
         virtual ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<QueueBase*> CreateQueueImpl() = 0;
@@ -115,6 +119,7 @@ namespace dawn_native {
 
         MaybeError CreateBindGroupLayoutInternal(BindGroupLayoutBase** result,
                                                  const BindGroupLayoutDescriptor* descriptor);
+        MaybeError CreateBufferInternal(BufferBase** result, const BufferDescriptor* descriptor);
         MaybeError CreatePipelineLayoutInternal(PipelineLayoutBase** result,
                                                 const PipelineLayoutDescriptor* descriptor);
         MaybeError CreateQueueInternal(QueueBase** result);
