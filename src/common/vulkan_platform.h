@@ -32,9 +32,21 @@
 // redefined to be nullptr). This keeps the type-safety of having the handles be different types
 // (like vulkan.h on 64 bit) but makes sure the types are different on 32 bit architectures.
 
+// Force the handle type to have the same alignment as what would have been the Vulkan
+// non-dispatchable handle type.
+#if defined(DAWN_PLATFORM_64_BIT)
+// In 64 bit handles are pointers to some structure, we just declare one inline here.
+using NativeVulkanHandleType = struct VkSomeHandle*;
+#elif defined(DAWN_PLATFORM_32_BIT)
+using NativeVulkanHandleType = uint64_t;
+#    define ALIGNAS_VULKAN_HANDLE alignas(alignof(uint64_t))
+#else
+#    error "Unsupported platform"
+#endif
+
 // Simple handle types that supports "nullptr_t" as a 0 value.
 template <typename Tag, typename HandleType>
-class VkNonDispatchableHandle {
+class alignas(alignof(NativeVulkanHandleType)) VkNonDispatchableHandle {
   public:
     // Default constructor and assigning of VK_NULL_HANDLE
     VkNonDispatchableHandle() = default;
@@ -77,7 +89,7 @@ class VkNonDispatchableHandle {
         return mHandle;
     }
 
-#if DAWN_PLATFORM_64_BIT
+#if defined(DAWN_PLATFORM_64_BIT)
     static VkNonDispatchableHandle<Tag, HandleType> CreateFromHandle(HandleType handle) {
         return CreateFromU64(static_cast<uint64_t>(reinterpret_cast<intptr_t>(handle)));
     }
@@ -85,7 +97,7 @@ class VkNonDispatchableHandle {
     HandleType GetHandle() const {
         return mHandle;
     }
-#elif DAWN_PLATFORM_32_BIT
+#elif defined(DAWN_PLATFORM_32_BIT)
     static VkNonDispatchableHandle<Tag, HandleType> CreateFromHandle(HandleType handle) {
         return {handle};
     }
@@ -104,10 +116,10 @@ class VkNonDispatchableHandle {
     uint64_t mHandle = 0;
 };
 
-#if DAWN_PLATFORM_64_BIT
+#if defined(DAWN_PLATFORM_64_BIT)
 #    define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) \
         using object##Native = struct object##_T*;
-#elif DAWN_PLATFORM_32_BIT
+#elif defined(DAWN_PLATFORM_32_BIT)
 #    define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object##Native = uint64_t;
 #else
 #    error "Unsupported platform"
