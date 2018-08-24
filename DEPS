@@ -27,7 +27,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/third_party/googletest': {
-    'url': '{github_git}/google/googletest.git@98a0d007d7092b72eea0e501bb9ad17908a1a036',
+    'url': '{chromium_git}/external/github.com/google/googletest@98a0d007d7092b72eea0e501bb9ad17908a1a036',
     'condition': 'dawn_standalone',
   },
 
@@ -43,7 +43,7 @@ deps = {
 
   # SPIRV-Cross
   '{dawn_root}/third_party/spirv-cross': {
-    'url': '{github_git}/KhronosGroup/SPIRV-Cross.git@a7697446b12666da353bb2bdafa792d988fb268c',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Cross@a7697446b12666da353bb2bdafa792d988fb268c',
     'condition': 'dawn_standalone',
   },
 
@@ -53,21 +53,21 @@ deps = {
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/third_party/spirv-headers': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers.git@ff684ffc6a35d2a58f0f63108877d0064ea33feb',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers@ff684ffc6a35d2a58f0f63108877d0064ea33feb',
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/third_party/glslang': {
-    'url': '{chromium_git}/external/github.com/google/glslang.git@29619b2312f7bc862221749f3f4d37c3e6a0dee2',
+    'url': '{chromium_git}/external/github.com/google/glslang@29619b2312f7bc862221749f3f4d37c3e6a0dee2',
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/third_party/shaderc': {
-    'url': '{chromium_git}/external/github.com/google/shaderc.git@30af9f9899aefd018669e81a5b8e605d14d40431',
+    'url': '{chromium_git}/external/github.com/google/shaderc@30af9f9899aefd018669e81a5b8e605d14d40431',
     'condition': 'dawn_standalone',
   },
 
   # GLFW for tests and samples
   '{dawn_root}/third_party/glfw': {
-    'url': '{github_git}/glfw/glfw.git@096efdf798896cff80a0b2db08d7398b703406fe',
+    'url': '{chromium_git}/external/github.com/glfw/glfw@096efdf798896cff80a0b2db08d7398b703406fe',
     'condition': 'dawn_standalone',
   },
 
