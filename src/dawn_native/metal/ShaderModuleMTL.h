@@ -39,7 +39,9 @@ namespace dawn_native { namespace metal {
                 [function release];
             }
         };
-        MetalFunctionData GetFunction(const char* functionName, const PipelineLayout* layout) const;
+        MetalFunctionData GetFunction(const char* functionName,
+                                      dawn::ShaderStage functionStage,
+                                      const PipelineLayout* layout) const;
 
       private:
         // Calling compile on CompilerMSL somehow changes internal state that makes subsequent

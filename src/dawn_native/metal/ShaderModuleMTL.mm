@@ -48,12 +48,13 @@ namespace dawn_native { namespace metal {
     }
 
     ShaderModule::MetalFunctionData ShaderModule::GetFunction(const char* functionName,
+                                                              dawn::ShaderStage functionStage,
                                                               const PipelineLayout* layout) const {
         spirv_cross::CompilerMSL compiler(mSpirv);
 
         spirv_cross::CompilerGLSL::Options options_glsl;
         options_glsl.vertex.flip_vert_y = true;
-        compiler.spirv_cross::CompilerGLSL::set_options(options_glsl);
+        compiler.spirv_cross::CompilerGLSL::set_common_options(options_glsl);
 
         // By default SPIRV-Cross will give MSL resources indices in increasing order.
         // To make the MSL indices match the indices chosen in the PipelineLayout, we build
@@ -92,7 +93,8 @@ namespace dawn_native { namespace metal {
         MetalFunctionData result;
 
         {
-            auto size = compiler.get_entry_point(functionName).workgroup_size;
+            spv::ExecutionModel executionModel = SpirvExecutionModelForStage(functionStage);
+            auto size = compiler.get_entry_point(functionName, executionModel).workgroup_size;
             result.localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
         }
 

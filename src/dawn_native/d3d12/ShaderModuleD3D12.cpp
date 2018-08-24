@@ -52,11 +52,11 @@ namespace dawn_native { namespace d3d12 {
         spirv_cross::CompilerGLSL::Options options_glsl;
         options_glsl.vertex.fixup_clipspace = true;
         options_glsl.vertex.flip_vert_y = true;
-        compiler.spirv_cross::CompilerGLSL::set_options(options_glsl);
+        compiler.set_common_options(options_glsl);
 
         spirv_cross::CompilerHLSL::Options options_hlsl;
         options_hlsl.shader_model = 51;
-        compiler.spirv_cross::CompilerHLSL::set_options(options_hlsl);
+        compiler.set_hlsl_options(options_hlsl);
 
         ExtractSpirvInfo(compiler);
 

@@ -58,7 +58,7 @@ namespace dawn_native { namespace opengl {
 #else
         options.version = 440;
 #endif
-        compiler.set_options(options);
+        compiler.set_common_options(options);
 
         // Rename the push constant block to be prefixed with the shader stage type so that uniform
         // names don't match between the FS and the VS.

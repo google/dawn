@@ -71,8 +71,9 @@ namespace dawn_native {
             ASSERT(blockType.basetype == spirv_cross::SPIRType::Struct);
 
             for (uint32_t i = 0; i < blockType.member_types.size(); i++) {
-                ASSERT(compiler.get_member_decoration_mask(blockType.self, i) &
-                       1ull << spv::DecorationOffset);
+                ASSERT(compiler.get_member_decoration_bitset(blockType.self, i)
+                           .get(spv::DecorationOffset));
+
                 uint32_t offset =
                     compiler.get_member_decoration(blockType.self, i, spv::DecorationOffset);
                 ASSERT(offset % 4 == 0);
@@ -114,12 +115,11 @@ namespace dawn_native {
         auto ExtractResourcesBinding = [this](const std::vector<spirv_cross::Resource>& resources,
                                               const spirv_cross::Compiler& compiler,
                                               dawn::BindingType bindingType) {
-            constexpr uint64_t requiredBindingDecorationMask =
-                (1ull << spv::DecorationBinding) | (1ull << spv::DecorationDescriptorSet);
-
             for (const auto& resource : resources) {
-                ASSERT((compiler.get_decoration_mask(resource.id) &
-                        requiredBindingDecorationMask) == requiredBindingDecorationMask);
+                ASSERT(compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding));
+                ASSERT(
+                    compiler.get_decoration_bitset(resource.id).get(spv::DecorationDescriptorSet));
+
                 uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
                 uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 
@@ -147,7 +147,7 @@ namespace dawn_native {
         // Extract the vertex attributes
         if (mExecutionModel == dawn::ShaderStage::Vertex) {
             for (const auto& attrib : resources.stage_inputs) {
-                ASSERT(compiler.get_decoration_mask(attrib.id) & (1ull << spv::DecorationLocation));
+                ASSERT(compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation));
                 uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
 
                 if (location >= kMaxVertexAttributes) {
@@ -161,8 +161,7 @@ namespace dawn_native {
             // Without a location qualifier on vertex outputs, spirv_cross::CompilerMSL gives them
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_outputs) {
-                if (!(compiler.get_decoration_mask(attrib.id) &
-                      (1ull << spv::DecorationLocation))) {
+                if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
                     mDevice->HandleError("Need location qualifier on vertex output");
                     return;
                 }
@@ -173,8 +172,7 @@ namespace dawn_native {
             // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives them
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
-                if (!(compiler.get_decoration_mask(attrib.id) &
-                      (1ull << spv::DecorationLocation))) {
+                if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
                     mDevice->HandleError("Need location qualifier on fragment input");
                     return;
                 }

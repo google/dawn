@@ -26,7 +26,8 @@ namespace dawn_native { namespace metal {
         const auto& module = ToBackend(builder->GetStageInfo(dawn::ShaderStage::Compute).module);
         const auto& entryPoint = builder->GetStageInfo(dawn::ShaderStage::Compute).entryPoint;
 
-        auto compilationData = module->GetFunction(entryPoint.c_str(), ToBackend(GetLayout()));
+        auto compilationData = module->GetFunction(entryPoint.c_str(), dawn::ShaderStage::Compute,
+                                                   ToBackend(GetLayout()));
 
         NSError* error = nil;
         mMtlComputePipelineState =

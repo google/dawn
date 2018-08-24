@@ -77,7 +77,7 @@ namespace dawn_native { namespace metal {
 
             const auto& entryPoint = builder->GetStageInfo(stage).entryPoint;
             ShaderModule::MetalFunctionData data =
-                module->GetFunction(entryPoint.c_str(), ToBackend(GetLayout()));
+                module->GetFunction(entryPoint.c_str(), stage, ToBackend(GetLayout()));
             id<MTLFunction> function = data.function;
 
             switch (stage) {

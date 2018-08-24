@@ -43,7 +43,7 @@ deps = {
 
   # SPIRV-Cross
   '{dawn_root}/third_party/spirv-cross': {
-    'url': '{github_git}/Kangz/SPIRV-Cross.git@694cad533296df02b4562f4a5a20cba1d1a9dbaf',
+    'url': '{github_git}/KhronosGroup/SPIRV-Cross.git@a7697446b12666da353bb2bdafa792d988fb268c',
     'condition': 'dawn_standalone',
   },
 

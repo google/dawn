@@ -18,7 +18,7 @@
 	url = https://github.com/KhronosGroup/SPIRV-Headers.git
 [submodule "external/spirv-cross"]
 	path = third_party/spirv-cross
-	url = https://github.com/Kangz/SPIRV-Cross.git
+	url = https://github.com/KhronosGroup/SPIRV-Cross.git
 [submodule "external/stb"]
 	path = third_party/stb
 	url = https://github.com/nothings/stb.git
