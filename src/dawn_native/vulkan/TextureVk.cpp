@@ -235,9 +235,8 @@ namespace dawn_native { namespace vulkan {
         return flags;
     }
 
-    Texture::Texture(TextureBuilder* builder) : TextureBase(builder) {
-        Device* device = ToBackend(GetDevice());
-
+    Texture::Texture(Device* device, const TextureDescriptor* descriptor)
+        : TextureBase(device, descriptor) {
         // Create the Vulkan image "container". We don't need to check that the format supports the
         // combination of sample, usage etc. because validation should have been done in the Dawn
         // frontend already based on the minimum supported formats in the Vulkan spec
@@ -278,8 +277,8 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    Texture::Texture(TextureBuilder* builder, VkImage nativeImage)
-        : TextureBase(builder), mHandle(nativeImage) {
+    Texture::Texture(Device* device, const TextureDescriptor* descriptor, VkImage nativeImage)
+        : TextureBase(device, descriptor), mHandle(nativeImage) {
     }
 
     Texture::~Texture() {

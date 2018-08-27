@@ -28,13 +28,16 @@ class CopyCommandTest : public ValidationTest {
 
         dawn::Texture Create2DTexture(uint32_t width, uint32_t height, uint32_t levels,
                                          dawn::TextureFormat format, dawn::TextureUsageBit usage) {
-            dawn::Texture tex = AssertWillBeSuccess(device.CreateTextureBuilder())
-                .SetDimension(dawn::TextureDimension::e2D)
-                .SetExtent(width, height, 1)
-                .SetFormat(format)
-                .SetMipLevels(levels)
-                .SetAllowedUsage(usage)
-                .GetResult();
+            dawn::TextureDescriptor descriptor;
+            descriptor.dimension = dawn::TextureDimension::e2D;
+            descriptor.width = width;
+            descriptor.height = height;
+            descriptor.depth = 1;
+            descriptor.arrayLayer = 1;
+            descriptor.format = format;
+            descriptor.mipLevel = levels;
+            descriptor.usage = usage;
+            dawn::Texture tex = device.CreateTexture(&descriptor);
             return tex;
         }
 

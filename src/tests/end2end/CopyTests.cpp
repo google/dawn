@@ -72,13 +72,16 @@ class CopyTests_T2B : public CopyTests {
 
         void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
             // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
-            dawn::Texture texture = device.CreateTextureBuilder()
-                .SetDimension(dawn::TextureDimension::e2D)
-                .SetExtent(textureSpec.width, textureSpec.height, 1)
-                .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(textureSpec.level + 1)
-                .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc)
-                .GetResult();
+            dawn::TextureDescriptor descriptor;
+            descriptor.dimension = dawn::TextureDimension::e2D;
+            descriptor.width = textureSpec.width;
+            descriptor.height = textureSpec.height;
+            descriptor.depth = 1;
+            descriptor.arrayLayer = 1;
+            descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+            descriptor.mipLevel = textureSpec.level + 1;
+            descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;
+            dawn::Texture texture = device.CreateTexture(&descriptor);
 
             uint32_t width = textureSpec.width >> textureSpec.level;
             uint32_t height = textureSpec.height >> textureSpec.level;
@@ -158,13 +161,16 @@ protected:
         buffer.SetSubData(0, static_cast<uint32_t>(bufferData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(bufferData.data()));
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
-        dawn::Texture texture = device.CreateTextureBuilder()
-            .SetDimension(dawn::TextureDimension::e2D)
-            .SetExtent(textureSpec.width, textureSpec.height, 1)
-            .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
-            .SetMipLevels(textureSpec.level + 1)
-            .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc)
-            .GetResult();
+        dawn::TextureDescriptor descriptor;
+        descriptor.dimension = dawn::TextureDimension::e2D;
+        descriptor.width = textureSpec.width;
+        descriptor.height = textureSpec.height;
+        descriptor.depth = 1;
+        descriptor.arrayLayer = 1;
+        descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        descriptor.mipLevel = textureSpec.level + 1;
+        descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;
+        dawn::Texture texture = device.CreateTexture(&descriptor);
 
         dawn::CommandBuffer commands[2];
 

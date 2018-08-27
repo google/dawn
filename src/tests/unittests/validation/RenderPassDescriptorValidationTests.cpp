@@ -22,13 +22,16 @@ class RenderPassDescriptorValidationTest : public ValidationTest {
 };
 
 dawn::TextureView Create2DAttachment(dawn::Device& device, uint32_t width, uint32_t height, dawn::TextureFormat format) {
-    dawn::Texture attachment = device.CreateTextureBuilder()
-        .SetDimension(dawn::TextureDimension::e2D)
-        .SetExtent(width, height, 1)
-        .SetFormat(format)
-        .SetMipLevels(1)
-        .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
-        .GetResult();
+    dawn::TextureDescriptor descriptor;
+    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.width = width;
+    descriptor.height = height;
+    descriptor.depth = 1;
+    descriptor.arrayLayer = 1;
+    descriptor.format = format;
+    descriptor.mipLevel = 1;
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+    dawn::Texture attachment = device.CreateTexture(&descriptor);
 
     return attachment.CreateTextureViewBuilder()
         .GetResult();

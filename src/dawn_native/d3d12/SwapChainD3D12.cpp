@@ -34,7 +34,7 @@ namespace dawn_native { namespace d3d12 {
     SwapChain::~SwapChain() {
     }
 
-    TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
+    TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
         const auto& im = GetImplementation();
         dawnSwapChainNextTexture next = {};
         dawnSwapChainError error = im.GetNextTexture(im.userData, &next);
@@ -44,7 +44,7 @@ namespace dawn_native { namespace d3d12 {
         }
 
         ID3D12Resource* nativeTexture = reinterpret_cast<ID3D12Resource*>(next.texture.ptr);
-        return new Texture(builder, nativeTexture);
+        return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture);
     }
 
     void SwapChain::OnBeforePresent(TextureBase* texture) {

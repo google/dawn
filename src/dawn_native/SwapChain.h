@@ -41,7 +41,7 @@ namespace dawn_native {
 
       protected:
         const dawnSwapChainImplementation& GetImplementation();
-        virtual TextureBase* GetNextTextureImpl(TextureBuilder* builder) = 0;
+        virtual TextureBase* GetNextTextureImpl(const TextureDescriptor*) = 0;
         virtual void OnBeforePresent(TextureBase* texture) = 0;
 
       private:

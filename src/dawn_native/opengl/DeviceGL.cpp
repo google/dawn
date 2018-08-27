@@ -98,8 +98,8 @@ namespace dawn_native { namespace opengl {
     SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
         return new SwapChain(builder);
     }
-    TextureBase* Device::CreateTexture(TextureBuilder* builder) {
-        return new Texture(builder);
+    ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
+        return new Texture(this, descriptor);
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
         return new TextureView(builder);

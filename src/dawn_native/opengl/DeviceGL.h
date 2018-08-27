@@ -43,7 +43,6 @@ namespace dawn_native { namespace opengl {
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-        TextureBase* CreateTexture(TextureBuilder* builder) override;
         TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
         void TickImpl() override;
@@ -58,6 +57,7 @@ namespace dawn_native { namespace opengl {
         ResultOrError<SamplerBase*> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
         ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
             const ShaderModuleDescriptor* descriptor) override;
+        ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
     };
 
 }}  // namespace dawn_native::opengl

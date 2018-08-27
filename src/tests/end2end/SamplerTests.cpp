@@ -80,13 +80,16 @@ protected:
             .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
             .GetResult();
 
-        auto texture = device.CreateTextureBuilder()
-            .SetDimension(dawn::TextureDimension::e2D)
-            .SetExtent(2, 2, 1)
-            .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
-            .SetMipLevels(1)
-            .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled)
-            .GetResult();
+        dawn::TextureDescriptor descriptor;
+        descriptor.dimension = dawn::TextureDimension::e2D;
+        descriptor.width = 2;
+        descriptor.height = 2;
+        descriptor.depth = 1;
+        descriptor.arrayLayer = 1;
+        descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        descriptor.mipLevel = 1;
+        descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
+        dawn::Texture texture = device.CreateTexture(&descriptor);
 
         // Create a 2x2 checkerboard texture, with black in the top left and bottom right corners.
         const uint32_t rowPixels = kTextureRowPitchAlignment / sizeof(RGBA8);

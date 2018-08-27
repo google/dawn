@@ -55,7 +55,6 @@ namespace dawn_native {
             RenderPassDescriptorBuilder* builder) = 0;
         virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
         virtual SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) = 0;
-        virtual TextureBase* CreateTexture(TextureBuilder* builder) = 0;
         virtual TextureViewBase* CreateTextureView(TextureViewBuilder* builder) = 0;
 
         virtual void TickImpl() = 0;
@@ -94,7 +93,7 @@ namespace dawn_native {
         SamplerBase* CreateSampler(const SamplerDescriptor* descriptor);
         ShaderModuleBase* CreateShaderModule(const ShaderModuleDescriptor* descriptor);
         SwapChainBuilder* CreateSwapChainBuilder();
-        TextureBuilder* CreateTextureBuilder();
+        TextureBase* CreateTexture(const TextureDescriptor* descriptor);
 
         void Tick();
         void SetErrorCallback(dawn::DeviceErrorCallback callback, dawn::CallbackUserdata userdata);
@@ -116,6 +115,8 @@ namespace dawn_native {
             const SamplerDescriptor* descriptor) = 0;
         virtual ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
             const ShaderModuleDescriptor* descriptor) = 0;
+        virtual ResultOrError<TextureBase*> CreateTextureImpl(
+            const TextureDescriptor* descriptor) = 0;
 
         MaybeError CreateBindGroupLayoutInternal(BindGroupLayoutBase** result,
                                                  const BindGroupLayoutDescriptor* descriptor);
@@ -126,6 +127,7 @@ namespace dawn_native {
         MaybeError CreateSamplerInternal(SamplerBase** result, const SamplerDescriptor* descriptor);
         MaybeError CreateShaderModuleInternal(ShaderModuleBase** result,
                                               const ShaderModuleDescriptor* descriptor);
+        MaybeError CreateTextureInternal(TextureBase** result, const TextureDescriptor* descriptor);
 
         void ConsumeError(ErrorData* error);
 

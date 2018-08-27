@@ -27,8 +27,8 @@ namespace dawn_native { namespace vulkan {
 
     class Texture : public TextureBase {
       public:
-        Texture(TextureBuilder* builder);
-        Texture(TextureBuilder* builder, VkImage nativeImage);
+        Texture(Device* device, const TextureDescriptor* descriptor);
+        Texture(Device* device, const TextureDescriptor* descriptor, VkImage nativeImage);
         ~Texture();
 
         VkImage GetHandle() const;

@@ -90,8 +90,8 @@ namespace dawn_native { namespace null {
     SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
         return new SwapChain(builder);
     }
-    TextureBase* Device::CreateTexture(TextureBuilder* builder) {
-        return new Texture(builder);
+    ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
+        return new Texture(this, descriptor);
     }
     TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
         return new TextureView(builder);
@@ -207,8 +207,8 @@ namespace dawn_native { namespace null {
     SwapChain::~SwapChain() {
     }
 
-    TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
-        return GetDevice()->CreateTexture(builder);
+    TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
+        return GetDevice()->CreateTexture(descriptor);
     }
 
     void SwapChain::OnBeforePresent(TextureBase*) {

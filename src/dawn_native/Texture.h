@@ -16,12 +16,14 @@
 #define DAWNNATIVE_TEXTURE_H_
 
 #include "dawn_native/Builder.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/RefCounted.h"
 
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
+    MaybeError ValidateTextureDescriptor(DeviceBase* device, const TextureDescriptor* descriptor);
 
     uint32_t TextureFormatPixelSize(dawn::TextureFormat format);
     bool TextureFormatHasDepth(dawn::TextureFormat format);
@@ -38,13 +40,14 @@ namespace dawn_native {
 
     class TextureBase : public RefCounted {
       public:
-        TextureBase(TextureBuilder* builder);
+        TextureBase(DeviceBase* device, const TextureDescriptor* descriptor);
 
         dawn::TextureDimension GetDimension() const;
         dawn::TextureFormat GetFormat() const;
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;
         uint32_t GetDepth() const;
+        uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
         dawn::TextureUsageBit GetUsage() const;
         DeviceBase* GetDevice() const;
@@ -58,34 +61,9 @@ namespace dawn_native {
         dawn::TextureDimension mDimension;
         dawn::TextureFormat mFormat;
         uint32_t mWidth, mHeight, mDepth;
+        uint32_t mArrayLayers;
         uint32_t mNumMipLevels;
         dawn::TextureUsageBit mUsage = dawn::TextureUsageBit::None;
-    };
-
-    class TextureBuilder : public Builder<TextureBase> {
-      public:
-        TextureBuilder(DeviceBase* device);
-
-        // Dawn API
-        void SetDimension(dawn::TextureDimension dimension);
-        void SetExtent(uint32_t width, uint32_t height, uint32_t depth);
-        void SetFormat(dawn::TextureFormat format);
-        void SetMipLevels(uint32_t numMipLevels);
-        void SetAllowedUsage(dawn::TextureUsageBit usage);
-        void SetInitialUsage(dawn::TextureUsageBit usage);
-
-      private:
-        friend class TextureBase;
-
-        TextureBase* GetResultImpl() override;
-
-        int mPropertiesSet = 0;
-
-        dawn::TextureDimension mDimension;
-        uint32_t mWidth, mHeight, mDepth;
-        dawn::TextureFormat mFormat;
-        uint32_t mNumMipLevels;
-        dawn::TextureUsageBit mAllowedUsage = dawn::TextureUsageBit::None;
     };
 
     class TextureViewBase : public RefCounted {

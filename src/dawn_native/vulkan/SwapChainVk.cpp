@@ -31,7 +31,7 @@ namespace dawn_native { namespace vulkan {
     SwapChain::~SwapChain() {
     }
 
-    TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
+    TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
         const auto& im = GetImplementation();
         dawnSwapChainNextTexture next = {};
         dawnSwapChainError error = im.GetNextTexture(im.userData, &next);
@@ -42,7 +42,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         VkImage nativeTexture = VkImage::CreateFromU64(next.texture.u64);
-        return new Texture(builder, nativeTexture);
+        return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture);
     }
 
     void SwapChain::OnBeforePresent(TextureBase* texture) {

@@ -21,12 +21,14 @@
 
 namespace dawn_native { namespace metal {
 
+    class Device;
+
     MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format);
 
     class Texture : public TextureBase {
       public:
-        Texture(TextureBuilder* builder);
-        Texture(TextureBuilder* builder, id<MTLTexture> mtlTexture);
+        Texture(Device* device, const TextureDescriptor* descriptor);
+        Texture(Device* device, const TextureDescriptor* descriptor, id<MTLTexture> mtlTexture);
         ~Texture();
 
         id<MTLTexture> GetMTLTexture();

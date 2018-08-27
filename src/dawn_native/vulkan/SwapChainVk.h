@@ -27,7 +27,7 @@ namespace dawn_native { namespace vulkan {
         ~SwapChain();
 
       protected:
-        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+        TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         void OnBeforePresent(TextureBase* texture) override;
 
       private:

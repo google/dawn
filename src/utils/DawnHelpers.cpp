@@ -115,14 +115,17 @@ namespace utils {
         result.height = height;
 
         result.colorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
-        result.color = device.CreateTextureBuilder()
-                           .SetDimension(dawn::TextureDimension::e2D)
-                           .SetExtent(width, height, 1)
-                           .SetFormat(result.colorFormat)
-                           .SetMipLevels(1)
-                           .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment |
-                                            dawn::TextureUsageBit::TransferSrc)
-                           .GetResult();
+        dawn::TextureDescriptor descriptor;
+        descriptor.dimension = dawn::TextureDimension::e2D;
+        descriptor.width = width;
+        descriptor.height = height;
+        descriptor.depth = 1;
+        descriptor.arrayLayer = 1;
+        descriptor.format = result.colorFormat;
+        descriptor.mipLevel = 1;
+        descriptor.usage =
+            dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+        result.color = device.CreateTexture(&descriptor);
 
         dawn::TextureView colorView = result.color.CreateTextureViewBuilder().GetResult();
         result.renderPassInfo = device.CreateRenderPassDescriptorBuilder()

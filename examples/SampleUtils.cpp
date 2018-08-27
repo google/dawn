@@ -136,13 +136,16 @@ dawn::SwapChain GetSwapChain(const dawn::Device &device) {
 }
 
 dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device) {
-    auto depthStencilTexture = device.CreateTextureBuilder()
-        .SetDimension(dawn::TextureDimension::e2D)
-        .SetExtent(640, 480, 1)
-        .SetFormat(dawn::TextureFormat::D32FloatS8Uint)
-        .SetMipLevels(1)
-        .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
-        .GetResult();
+    dawn::TextureDescriptor descriptor;
+    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.width = 640;
+    descriptor.height = 480;
+    descriptor.depth = 1;
+    descriptor.arrayLayer = 1;
+    descriptor.format = dawn::TextureFormat::D32FloatS8Uint;
+    descriptor.mipLevel = 1;
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+    auto depthStencilTexture = device.CreateTexture(&descriptor);
     return depthStencilTexture.CreateTextureViewBuilder()
         .GetResult();
 }

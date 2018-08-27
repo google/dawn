@@ -71,13 +71,17 @@ bool ValidationTest::EndExpectDeviceError() {
 }
 
 dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
-        auto colorBuffer = device.CreateTextureBuilder()
-            .SetDimension(dawn::TextureDimension::e2D)
-            .SetExtent(640, 480, 1)
-            .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
-            .SetMipLevels(1)
-            .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
-            .GetResult();
+        dawn::TextureDescriptor descriptor;
+        descriptor.dimension = dawn::TextureDimension::e2D;
+        descriptor.width = 640;
+        descriptor.height = 480;
+        descriptor.depth = 1;
+        descriptor.arrayLayer = 1;
+        descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        descriptor.mipLevel = 1;
+        descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+
+        auto colorBuffer = device.CreateTexture(&descriptor);
         auto colorView = colorBuffer.CreateTextureViewBuilder()
             .GetResult();
 
@@ -119,13 +123,16 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
     dummy.height = 400;
     dummy.attachmentFormat = dawn::TextureFormat::R8G8B8A8Unorm;
 
-    dummy.attachment = AssertWillBeSuccess(device.CreateTextureBuilder())
-        .SetDimension(dawn::TextureDimension::e2D)
-        .SetExtent(dummy.width, dummy.height, 1)
-        .SetFormat(dummy.attachmentFormat)
-        .SetMipLevels(1)
-        .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
-        .GetResult();
+    dawn::TextureDescriptor descriptor;
+    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.width = dummy.width;
+    descriptor.height = dummy.height;
+    descriptor.depth = 1;
+    descriptor.arrayLayer = 1;
+    descriptor.format = dummy.attachmentFormat;
+    descriptor.mipLevel = 1;
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+    dummy.attachment = device.CreateTexture(&descriptor);
 
     dawn::TextureView view = AssertWillBeSuccess(dummy.attachment.CreateTextureViewBuilder()).GetResult();
 

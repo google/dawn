@@ -31,7 +31,7 @@ namespace dawn_native { namespace metal {
     SwapChain::~SwapChain() {
     }
 
-    TextureBase* SwapChain::GetNextTextureImpl(TextureBuilder* builder) {
+    TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
         const auto& im = GetImplementation();
         dawnSwapChainNextTexture next = {};
         dawnSwapChainError error = im.GetNextTexture(im.userData, &next);
@@ -41,7 +41,7 @@ namespace dawn_native { namespace metal {
         }
 
         id<MTLTexture> nativeTexture = reinterpret_cast<id<MTLTexture>>(next.texture.ptr);
-        return new Texture(builder, nativeTexture);
+        return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture);
     }
 
     void SwapChain::OnBeforePresent(TextureBase*) {

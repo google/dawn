@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "dawn_native/opengl/TextureGL.h"
+#include "dawn_native/opengl/DeviceGL.h"
 
 #include "common/Assert.h"
 
@@ -67,11 +68,12 @@ namespace dawn_native { namespace opengl {
 
     // Texture
 
-    Texture::Texture(TextureBuilder* builder) : Texture(builder, GenTexture()) {
+    Texture::Texture(Device* device, const TextureDescriptor* descriptor)
+        : Texture(device, descriptor, GenTexture()) {
     }
 
-    Texture::Texture(TextureBuilder* builder, GLuint handle)
-        : TextureBase(builder), mHandle(handle) {
+    Texture::Texture(Device* device, const TextureDescriptor* descriptor, GLuint handle)
+        : TextureBase(device, descriptor), mHandle(handle) {
         mTarget = TargetForDimension(GetDimension());
 
         uint32_t width = GetWidth();

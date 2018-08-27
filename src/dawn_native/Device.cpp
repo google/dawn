@@ -178,8 +178,13 @@ namespace dawn_native {
     SwapChainBuilder* DeviceBase::CreateSwapChainBuilder() {
         return new SwapChainBuilder(this);
     }
-    TextureBuilder* DeviceBase::CreateTextureBuilder() {
-        return new TextureBuilder(this);
+    TextureBase* DeviceBase::CreateTexture(const TextureDescriptor* descriptor) {
+        TextureBase* result = nullptr;
+
+        if (ConsumedError(CreateTextureInternal(&result, descriptor))) {
+            return nullptr;
+        }
+        return result;
     }
 
     // Other Device API methods
@@ -242,6 +247,13 @@ namespace dawn_native {
                                                       const ShaderModuleDescriptor* descriptor) {
         DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, CreateShaderModuleImpl(descriptor));
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateTextureInternal(TextureBase** result,
+                                                 const TextureDescriptor* descriptor) {
+        DAWN_TRY(ValidateTextureDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(*result, CreateTextureImpl(descriptor));
         return {};
     }
 

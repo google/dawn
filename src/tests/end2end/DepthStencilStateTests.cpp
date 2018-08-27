@@ -24,23 +24,29 @@ class DepthStencilStateTest : public DawnTest {
         void SetUp() override {
             DawnTest::SetUp();
 
-            renderTarget = device.CreateTextureBuilder()
-                .SetDimension(dawn::TextureDimension::e2D)
-                .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc)
-                .GetResult();
+            dawn::TextureDescriptor renderTargetDescriptor;
+            renderTargetDescriptor.dimension = dawn::TextureDimension::e2D;
+            renderTargetDescriptor.width = kRTSize;
+            renderTargetDescriptor.height = kRTSize;
+            renderTargetDescriptor.depth = 1;
+            renderTargetDescriptor.arrayLayer = 1;
+            renderTargetDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+            renderTargetDescriptor.mipLevel = 1;
+            renderTargetDescriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+            renderTarget = device.CreateTexture(&renderTargetDescriptor);
 
             renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
 
-            depthTexture = device.CreateTextureBuilder()
-                .SetDimension(dawn::TextureDimension::e2D)
-                .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(dawn::TextureFormat::D32FloatS8Uint)
-                .SetMipLevels(1)
-                .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment)
-                .GetResult();
+            dawn::TextureDescriptor depthDescriptor;
+            depthDescriptor.dimension = dawn::TextureDimension::e2D;
+            depthDescriptor.width = kRTSize;
+            depthDescriptor.height = kRTSize;
+            depthDescriptor.depth = 1;
+            depthDescriptor.arrayLayer = 1;
+            depthDescriptor.format = dawn::TextureFormat::D32FloatS8Uint;
+            depthDescriptor.mipLevel = 1;
+            depthDescriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+            depthTexture = device.CreateTexture(&depthDescriptor);
 
             depthTextureView = depthTexture.CreateTextureViewBuilder().GetResult();
 

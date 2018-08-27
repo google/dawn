@@ -690,14 +690,18 @@ TEST_P(BlendStateTest, IndependentBlendState) {
     std::array<dawn::Texture, 4> renderTargets;
     std::array<dawn::TextureView, 4> renderTargetViews;
 
+    dawn::TextureDescriptor descriptor;
+    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.width = kRTSize;
+    descriptor.height = kRTSize;
+    descriptor.depth = 1;
+    descriptor.arrayLayer = 1;
+    descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+    descriptor.mipLevel = 1;
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+
     for (uint32_t i = 0; i < 4; ++i) {
-        renderTargets[i] = device.CreateTextureBuilder()
-            .SetDimension(dawn::TextureDimension::e2D)
-            .SetExtent(kRTSize, kRTSize, 1)
-            .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
-            .SetMipLevels(1)
-            .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc)
-            .GetResult();
+        renderTargets[i] = device.CreateTexture(&descriptor);
         renderTargetViews[i] = renderTargets[i].CreateTextureViewBuilder().GetResult();
     }
 

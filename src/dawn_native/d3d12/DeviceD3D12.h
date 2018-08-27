@@ -49,7 +49,6 @@ namespace dawn_native { namespace d3d12 {
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-        TextureBase* CreateTexture(TextureBuilder* builder) override;
         TextureViewBase* CreateTextureView(TextureViewBuilder* builder) override;
 
         void TickImpl() override;
@@ -84,6 +83,7 @@ namespace dawn_native { namespace d3d12 {
         ResultOrError<SamplerBase*> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
         ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
             const ShaderModuleDescriptor* descriptor) override;
+        ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
 
         uint64_t mSerial = 0;
         ComPtr<ID3D12Fence> mFence;

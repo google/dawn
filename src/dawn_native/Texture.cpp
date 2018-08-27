@@ -16,8 +16,23 @@
 
 #include "common/Assert.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 namespace dawn_native {
+    MaybeError ValidateTextureDescriptor(DeviceBase*, const TextureDescriptor* descriptor) {
+        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
+        DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
+        DAWN_TRY(ValidateTextureFormat(descriptor->format));
+
+        // TODO(jiawei.shao@intel.com): check stuff based on the dimension
+        if (descriptor->width == 0 || descriptor->height == 0 || descriptor->depth == 0 ||
+            descriptor->arrayLayer == 0 || descriptor->mipLevel == 0) {
+            DAWN_RETURN_ERROR("Cannot create an empty texture");
+        }
+
+        return {};
+    }
 
     uint32_t TextureFormatPixelSize(dawn::TextureFormat format) {
         switch (format) {
@@ -67,15 +82,16 @@ namespace dawn_native {
 
     // TextureBase
 
-    TextureBase::TextureBase(TextureBuilder* builder)
-        : mDevice(builder->mDevice),
-          mDimension(builder->mDimension),
-          mFormat(builder->mFormat),
-          mWidth(builder->mWidth),
-          mHeight(builder->mHeight),
-          mDepth(builder->mDepth),
-          mNumMipLevels(builder->mNumMipLevels),
-          mUsage(builder->mAllowedUsage) {
+    TextureBase::TextureBase(DeviceBase* device, const TextureDescriptor* descriptor)
+        : mDevice(device),
+          mDimension(descriptor->dimension),
+          mFormat(descriptor->format),
+          mWidth(descriptor->width),
+          mHeight(descriptor->height),
+          mDepth(descriptor->depth),
+          mArrayLayers(descriptor->arrayLayer),
+          mNumMipLevels(descriptor->mipLevel),
+          mUsage(descriptor->usage) {
     }
 
     DeviceBase* TextureBase::GetDevice() const {
@@ -97,6 +113,9 @@ namespace dawn_native {
     uint32_t TextureBase::GetDepth() const {
         return mDepth;
     }
+    uint32_t TextureBase::GetArrayLayers() const {
+        return mArrayLayers;
+    }
     uint32_t TextureBase::GetNumMipLevels() const {
         return mNumMipLevels;
     }
@@ -106,90 +125,6 @@ namespace dawn_native {
 
     TextureViewBuilder* TextureBase::CreateTextureViewBuilder() {
         return new TextureViewBuilder(mDevice, this);
-    }
-
-    // TextureBuilder
-
-    enum TextureSetProperties {
-        TEXTURE_PROPERTY_DIMENSION = 0x1,
-        TEXTURE_PROPERTY_EXTENT = 0x2,
-        TEXTURE_PROPERTY_FORMAT = 0x4,
-        TEXTURE_PROPERTY_MIP_LEVELS = 0x8,
-        TEXTURE_PROPERTY_ALLOWED_USAGE = 0x10,
-    };
-
-    TextureBuilder::TextureBuilder(DeviceBase* device) : Builder(device) {
-    }
-
-    TextureBase* TextureBuilder::GetResultImpl() {
-        constexpr int allProperties = TEXTURE_PROPERTY_DIMENSION | TEXTURE_PROPERTY_EXTENT |
-                                      TEXTURE_PROPERTY_FORMAT | TEXTURE_PROPERTY_MIP_LEVELS |
-                                      TEXTURE_PROPERTY_ALLOWED_USAGE;
-        if ((mPropertiesSet & allProperties) != allProperties) {
-            HandleError("Texture missing properties");
-            return nullptr;
-        }
-
-        // TODO(cwallez@chromium.org): check stuff based on the dimension
-
-        return mDevice->CreateTexture(this);
-    }
-
-    void TextureBuilder::SetDimension(dawn::TextureDimension dimension) {
-        if ((mPropertiesSet & TEXTURE_PROPERTY_DIMENSION) != 0) {
-            HandleError("Texture dimension property set multiple times");
-            return;
-        }
-
-        mPropertiesSet |= TEXTURE_PROPERTY_DIMENSION;
-        mDimension = dimension;
-    }
-
-    void TextureBuilder::SetExtent(uint32_t width, uint32_t height, uint32_t depth) {
-        if ((mPropertiesSet & TEXTURE_PROPERTY_EXTENT) != 0) {
-            HandleError("Texture extent property set multiple times");
-            return;
-        }
-
-        if (width == 0 || height == 0 || depth == 0) {
-            HandleError("Cannot create an empty texture");
-            return;
-        }
-
-        mPropertiesSet |= TEXTURE_PROPERTY_EXTENT;
-        mWidth = width;
-        mHeight = height;
-        mDepth = depth;
-    }
-
-    void TextureBuilder::SetFormat(dawn::TextureFormat format) {
-        if ((mPropertiesSet & TEXTURE_PROPERTY_FORMAT) != 0) {
-            HandleError("Texture format property set multiple times");
-            return;
-        }
-
-        mPropertiesSet |= TEXTURE_PROPERTY_FORMAT;
-        mFormat = format;
-    }
-
-    void TextureBuilder::SetMipLevels(uint32_t numMipLevels) {
-        if ((mPropertiesSet & TEXTURE_PROPERTY_MIP_LEVELS) != 0) {
-            HandleError("Texture mip levels property set multiple times");
-            return;
-        }
-
-        mPropertiesSet |= TEXTURE_PROPERTY_MIP_LEVELS;
-        mNumMipLevels = numMipLevels;
-    }
-
-    void TextureBuilder::SetAllowedUsage(dawn::TextureUsageBit usage) {
-        if ((mPropertiesSet & TEXTURE_PROPERTY_ALLOWED_USAGE) != 0) {
-            HandleError("Texture allowed usage property set multiple times");
-            return;
-        }
-
-        mPropertiesSet |= TEXTURE_PROPERTY_ALLOWED_USAGE;
-        mAllowedUsage = usage;
     }
 
     // TextureViewBase

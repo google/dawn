@@ -29,7 +29,7 @@ namespace dawn_native { namespace opengl {
         ~SwapChain();
 
       protected:
-        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+        TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         void OnBeforePresent(TextureBase* texture) override;
     };
 

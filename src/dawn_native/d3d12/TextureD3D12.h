@@ -27,8 +27,8 @@ namespace dawn_native { namespace d3d12 {
 
     class Texture : public TextureBase {
       public:
-        Texture(TextureBuilder* builder);
-        Texture(TextureBuilder* builder, ID3D12Resource* nativeTexture);
+        Texture(Device* device, const TextureDescriptor* descriptor);
+        Texture(Device* device, const TextureDescriptor* descriptor, ID3D12Resource* nativeTexture);
         ~Texture();
 
         DXGI_FORMAT GetD3D12Format() const;
@@ -38,7 +38,6 @@ namespace dawn_native { namespace d3d12 {
                                 dawn::TextureUsageBit usage);
 
       private:
-        Device* mDevice;
         ComPtr<ID3D12Resource> mResource = {};
         ID3D12Resource* mResourcePtr = nullptr;
         dawn::TextureUsageBit mLastUsage = dawn::TextureUsageBit::None;

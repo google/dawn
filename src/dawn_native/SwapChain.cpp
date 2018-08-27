@@ -59,16 +59,18 @@ namespace dawn_native {
             return nullptr;
         }
 
-        auto* builder = mDevice->CreateTextureBuilder();
-        builder->SetDimension(dawn::TextureDimension::e2D);
-        builder->SetExtent(mWidth, mHeight, 1);
-        builder->SetFormat(mFormat);
-        builder->SetMipLevels(1);
-        builder->SetAllowedUsage(mAllowedUsage);
+        TextureDescriptor descriptor;
+        descriptor.dimension = dawn::TextureDimension::e2D;
+        descriptor.width = mWidth;
+        descriptor.height = mHeight;
+        descriptor.depth = 1;
+        descriptor.arrayLayer = 1;
+        descriptor.format = mFormat;
+        descriptor.mipLevel = 1;
+        descriptor.usage = mAllowedUsage;
 
-        auto* texture = GetNextTextureImpl(builder);
+        auto* texture = GetNextTextureImpl(&descriptor);
         mLastNextTexture = texture;
-        builder->Release();
         return texture;
     }
 

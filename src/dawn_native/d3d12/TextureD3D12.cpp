@@ -107,8 +107,8 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-    Texture::Texture(TextureBuilder* builder)
-        : TextureBase(builder), mDevice(ToBackend(builder->GetDevice())) {
+    Texture::Texture(Device* device, const TextureDescriptor* descriptor)
+        : TextureBase(device, descriptor) {
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12TextureDimension(GetDimension());
         resourceDescriptor.Alignment = 0;
@@ -122,22 +122,24 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage(), GetFormat());
 
-        mResource = mDevice->GetResourceAllocator()->Allocate(
-            D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor, D3D12_RESOURCE_STATE_COMMON);
+        mResource = ToBackend(GetDevice())
+                        ->GetResourceAllocator()
+                        ->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
+                                   D3D12_RESOURCE_STATE_COMMON);
         mResourcePtr = mResource.Get();
     }
 
     // With this constructor, the lifetime of the ID3D12Resource is externally managed.
-    Texture::Texture(TextureBuilder* builder, ID3D12Resource* nativeTexture)
-        : TextureBase(builder),
-          mDevice(ToBackend(builder->GetDevice())),
-          mResourcePtr(nativeTexture) {
+    Texture::Texture(Device* device,
+                     const TextureDescriptor* descriptor,
+                     ID3D12Resource* nativeTexture)
+        : TextureBase(device, descriptor), mResourcePtr(nativeTexture) {
     }
 
     Texture::~Texture() {
         if (mResource) {
             // If we own the resource, release it.
-            mDevice->GetResourceAllocator()->Release(mResource);
+            ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
         }
     }
 

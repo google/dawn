@@ -604,8 +604,11 @@
                 "returns": "swap chain builder"
             },
             {
-                "name": "create texture builder",
-                "returns": "texture builder"
+                "name": "create texture",
+                "returns": "texture",
+                "args": [
+                    {"name": "descriptor", "type": "texture descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "tick"
@@ -996,45 +999,18 @@
             }
         ]
     },
-    "texture builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "texture"
-            },
-            {
-                "name": "set dimension",
-                "args": [
-                    {"name": "dimension", "type": "texture dimension"}
-                ]
-            },
-            {
-                "name": "set extent",
-                "args": [
-                    {"name": "width", "type": "uint32_t"},
-                    {"name": "height", "type": "uint32_t"},
-                    {"name": "depth", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "set format",
-                "args": [
-                    {"name": "format", "type": "texture format"}
-                ]
-            },
-            {
-                "name": "set mip levels",
-                "args": [
-                    {"name": "num mip levels", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "set allowed usage",
-                "args": [
-                    {"name": "usage", "type": "texture usage bit"}
-                ]
-            }
+    "texture descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "usage", "type": "texture usage bit"},
+            {"name": "dimension", "type": "texture dimension"},
+            {"name": "width", "type": "uint32_t"},
+            {"name": "height", "type": "uint32_t"},
+            {"name": "depth", "type": "uint32_t"},
+            {"name": "arrayLayer", "type": "uint32_t"},
+            {"name": "format", "type": "texture format"},
+            {"name": "mipLevel", "type": "uint32_t"}
         ]
     },
     "texture dimension": {

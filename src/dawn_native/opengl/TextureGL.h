@@ -21,6 +21,8 @@
 
 namespace dawn_native { namespace opengl {
 
+    class Device;
+
     struct TextureFormatInfo {
         GLenum internalFormat;
         GLenum format;
@@ -29,8 +31,8 @@ namespace dawn_native { namespace opengl {
 
     class Texture : public TextureBase {
       public:
-        Texture(TextureBuilder* builder);
-        Texture(TextureBuilder* builder, GLuint handle);
+        Texture(Device* device, const TextureDescriptor* descriptor);
+        Texture(Device* device, const TextureDescriptor* descriptor, GLuint handle);
         ~Texture();
 
         GLuint GetHandle() const;

@@ -25,7 +25,7 @@ namespace dawn_native { namespace d3d12 {
         ~SwapChain();
 
       protected:
-        TextureBase* GetNextTextureImpl(TextureBuilder* builder) override;
+        TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         void OnBeforePresent(TextureBase* texture) override;
 
         dawn::TextureUsageBit mTextureUsage;

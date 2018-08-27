@@ -50,7 +50,6 @@ namespace dawn_native {
     class SwapChainBase;
     class SwapChainBuilder;
     class TextureBase;
-    class TextureBuilder;
     class TextureViewBase;
     class TextureViewBuilder;
 

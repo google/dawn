@@ -382,13 +382,16 @@ namespace {
                     continue;
             }
 
-            auto oTexture = device.CreateTextureBuilder()
-                .SetDimension(dawn::TextureDimension::e2D)
-                .SetExtent(iImage.width, iImage.height, 1)
-                .SetFormat(format)
-                .SetMipLevels(1)
-                .SetAllowedUsage(dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled)
-                .GetResult();
+            dawn::TextureDescriptor descriptor;
+            descriptor.dimension = dawn::TextureDimension::e2D;
+            descriptor.width = iImage.width;
+            descriptor.height = iImage.height;
+            descriptor.depth = 1;
+            descriptor.arrayLayer = 1;
+            descriptor.format = format;
+            descriptor.mipLevel = 1;
+            descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
+            auto oTexture = device.CreateTexture(&descriptor);
                 // TODO: release this texture
 
             const uint8_t* origData = iImage.image.data();

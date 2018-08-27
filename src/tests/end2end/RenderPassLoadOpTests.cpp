@@ -55,13 +55,16 @@ class RenderPassLoadOpTests : public DawnTest {
         void SetUp() override {
             DawnTest::SetUp();
 
-            renderTarget = device.CreateTextureBuilder()
-                .SetDimension(dawn::TextureDimension::e2D)
-                .SetExtent(kRTSize, kRTSize, 1)
-                .SetFormat(dawn::TextureFormat::R8G8B8A8Unorm)
-                .SetMipLevels(1)
-                .SetAllowedUsage(dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc)
-                .GetResult();
+            dawn::TextureDescriptor descriptor;
+            descriptor.dimension = dawn::TextureDimension::e2D;
+            descriptor.width = kRTSize;
+            descriptor.height = kRTSize;
+            descriptor.depth = 1;
+            descriptor.arrayLayer = 1;
+            descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+            descriptor.mipLevel = 1;
+            descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+            renderTarget = device.CreateTexture(&descriptor);
 
             renderTargetView = renderTarget.CreateTextureViewBuilder().GetResult();
 
