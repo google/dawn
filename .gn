@@ -21,6 +21,7 @@ default_args = {
 check_targets = [
   # Everything in BUILD.gn
   "//:*",
+
   # Everything in third_party/BUILD.gn
   "//third_party/:*",
 ]
