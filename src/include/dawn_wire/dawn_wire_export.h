@@ -15,7 +15,7 @@
 #ifndef DAWNWIRE_EXPORT_H_
 #define DAWNWIRE_EXPORT_H_
 
-#if defined(WIN32)
+#if defined(_WIN32)
 #    if defined(DAWN_WIRE_IMPLEMENTATION)
 #        define DAWN_WIRE_EXPORT __declspec(dllexport)
 #    else
