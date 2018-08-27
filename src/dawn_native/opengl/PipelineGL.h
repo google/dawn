@@ -25,11 +25,14 @@ namespace dawn_native { namespace opengl {
 
     class Device;
     class PersistentPipelineState;
+    class PipelineLayout;
     class ShaderModule;
 
     class PipelineGL {
       public:
-        PipelineGL(PipelineBase* parent, PipelineBuilder* builder);
+        PipelineGL();
+
+        void Initialize(const PipelineLayout* layout, const PerStage<const ShaderModule*>& modules);
 
         using GLPushConstantInfo = std::array<GLint, kMaxPushConstants>;
         using BindingLocations =

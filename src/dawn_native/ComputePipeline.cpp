@@ -18,24 +18,31 @@
 
 namespace dawn_native {
 
+    MaybeError ValidateComputePipelineDescriptor(DeviceBase*,
+                                                 const ComputePipelineDescriptor* descriptor) {
+        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+
+        if (descriptor->entryPoint != std::string("main")) {
+            DAWN_RETURN_ERROR("Currently the entry point has to be main()");
+        }
+
+        if (descriptor->module->GetExecutionModel() != dawn::ShaderStage::Compute) {
+            DAWN_RETURN_ERROR("Setting module with wrong execution model");
+        }
+
+        if (!descriptor->module->IsCompatibleWithPipelineLayout(descriptor->layout)) {
+            DAWN_RETURN_ERROR("Stage not compatible with layout");
+        }
+
+        return {};
+    }
+
     // ComputePipelineBase
 
-    ComputePipelineBase::ComputePipelineBase(ComputePipelineBuilder* builder)
-        : PipelineBase(builder) {
-        if (GetStageMask() != dawn::ShaderStageBit::Compute) {
-            builder->HandleError("Compute pipeline should have exactly a compute stage");
-            return;
-        }
-    }
-
-    // ComputePipelineBuilder
-
-    ComputePipelineBuilder::ComputePipelineBuilder(DeviceBase* device)
-        : Builder(device), PipelineBuilder(this) {
-    }
-
-    ComputePipelineBase* ComputePipelineBuilder::GetResultImpl() {
-        return mDevice->CreateComputePipeline(this);
+    ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
+                                             const ComputePipelineDescriptor* descriptor)
+        : PipelineBase(device, descriptor->layout, dawn::ShaderStageBit::Compute) {
+        ExtractModuleData(dawn::ShaderStage::Compute, descriptor->module);
     }
 
 }  // namespace dawn_native

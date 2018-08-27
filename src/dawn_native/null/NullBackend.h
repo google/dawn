@@ -99,7 +99,6 @@ namespace dawn_native { namespace null {
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-        ComputePipelineBase* CreateComputePipeline(ComputePipelineBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
@@ -117,6 +116,8 @@ namespace dawn_native { namespace null {
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
             const BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<BufferBase*> CreateBufferImpl(const BufferDescriptor* descriptor) override;
+        ResultOrError<ComputePipelineBase*> CreateComputePipelineImpl(
+            const ComputePipelineDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<QueueBase*> CreateQueueImpl() override;

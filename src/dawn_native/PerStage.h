@@ -48,6 +48,11 @@ namespace dawn_native {
     template <typename T>
     class PerStage {
       public:
+        PerStage() = default;
+        PerStage(const T& initialValue) {
+            mData.fill(initialValue);
+        }
+
         T& operator[](dawn::ShaderStage stage) {
             DAWN_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];

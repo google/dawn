@@ -145,10 +145,11 @@ class PushConstantTest: public DawnTest {
                 })").c_str()
             );
 
-            return device.CreateComputePipelineBuilder()
-                .SetLayout(pl)
-                .SetStage(dawn::ShaderStage::Compute, module, "main")
-                .GetResult();
+            dawn::ComputePipelineDescriptor descriptor;
+            descriptor.module = module.Clone();
+            descriptor.entryPoint = "main";
+            descriptor.layout = pl.Clone();
+            return device.CreateComputePipeline(&descriptor);
         }
 
         dawn::PipelineLayout MakeEmptyLayout() {

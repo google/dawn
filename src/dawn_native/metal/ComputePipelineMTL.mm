@@ -19,22 +19,22 @@
 
 namespace dawn_native { namespace metal {
 
-    ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
-        : ComputePipelineBase(builder) {
-        auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
+    ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor)
+        : ComputePipelineBase(device, descriptor) {
+        auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 
-        const auto& module = ToBackend(builder->GetStageInfo(dawn::ShaderStage::Compute).module);
-        const auto& entryPoint = builder->GetStageInfo(dawn::ShaderStage::Compute).entryPoint;
+        const auto& module = ToBackend(descriptor->module);
+        const char* entryPoint = descriptor->entryPoint;
 
-        auto compilationData = module->GetFunction(entryPoint.c_str(), dawn::ShaderStage::Compute,
-                                                   ToBackend(GetLayout()));
+        auto compilationData =
+            module->GetFunction(entryPoint, dawn::ShaderStage::Compute, ToBackend(GetLayout()));
 
         NSError* error = nil;
         mMtlComputePipelineState =
             [mtlDevice newComputePipelineStateWithFunction:compilationData.function error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
-            builder->HandleError("Error creating pipeline state");
+            GetDevice()->HandleError("Error creating pipeline state");
             return;
         }
 

@@ -56,15 +56,7 @@ namespace dawn {
     {% endfor %}
 
     {% for type in by_category["structure"] %}
-        struct {{as_cppType(type.name)}} {
-            {% if type.extensible %}
-                const void* nextInChain = nullptr;
-            {% endif %}
-            {% for member in type.members %}
-                {{as_annotated_cppType(member)}};
-            {% endfor %}
-        };
-
+        struct {{as_cppType(type.name)}};
     {% endfor %}
 
     template<typename Derived, typename CType>
@@ -154,6 +146,18 @@ namespace dawn {
                 friend ObjectBase<{{CppType}}, {{CType}}>;
                 static void DawnReference({{CType}} handle);
                 static void DawnRelease({{CType}} handle);
+        };
+
+    {% endfor %}
+
+    {% for type in by_category["structure"] %}
+        struct {{as_cppType(type.name)}} {
+            {% if type.extensible %}
+                const void* nextInChain = nullptr;
+            {% endif %}
+            {% for member in type.members %}
+                {{as_annotated_cppType(member)}};
+            {% endfor %}
         };
 
     {% endfor %}

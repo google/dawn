@@ -123,8 +123,15 @@ namespace dawn_native {
     CommandBufferBuilder* DeviceBase::CreateCommandBufferBuilder() {
         return new CommandBufferBuilder(this);
     }
-    ComputePipelineBuilder* DeviceBase::CreateComputePipelineBuilder() {
-        return new ComputePipelineBuilder(this);
+    ComputePipelineBase* DeviceBase::CreateComputePipeline(
+        const ComputePipelineDescriptor* descriptor) {
+        ComputePipelineBase* result = nullptr;
+
+        if (ConsumedError(CreateComputePipelineInternal(&result, descriptor))) {
+            return nullptr;
+        }
+
+        return result;
     }
     DepthStencilStateBuilder* DeviceBase::CreateDepthStencilStateBuilder() {
         return new DepthStencilStateBuilder(this);
@@ -220,6 +227,14 @@ namespace dawn_native {
                                                 const BufferDescriptor* descriptor) {
         DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, CreateBufferImpl(descriptor));
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateComputePipelineInternal(
+        ComputePipelineBase** result,
+        const ComputePipelineDescriptor* descriptor) {
+        DAWN_TRY(ValidateComputePipelineDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(*result, CreateComputePipelineImpl(descriptor));
         return {};
     }
 

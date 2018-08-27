@@ -19,17 +19,14 @@
 
 namespace dawn_native {
 
+    class DeviceBase;
+
+    MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
+                                                 const ComputePipelineDescriptor* descriptor);
+
     class ComputePipelineBase : public RefCounted, public PipelineBase {
       public:
-        ComputePipelineBase(ComputePipelineBuilder* builder);
-    };
-
-    class ComputePipelineBuilder : public Builder<ComputePipelineBase>, public PipelineBuilder {
-      public:
-        ComputePipelineBuilder(DeviceBase* device);
-
-      private:
-        ComputePipelineBase* GetResultImpl() override;
+        ComputePipelineBase(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
     };
 
 }  // namespace dawn_native

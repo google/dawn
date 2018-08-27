@@ -166,7 +166,10 @@ def link_structure(struct, types):
     for (member, m) in zip(members, struct.record['members']):
         # TODO(kainino@chromium.org): More robust pointer/length handling?
         if 'length' in m:
-            member.length = members_by_name[m['length']]
+            if m['length'] == 'strlen':
+                member.length = 'strlen'
+            else:
+                member.length = members_by_name[m['length']]
 
 def parse_json(json):
     category_to_parser = {

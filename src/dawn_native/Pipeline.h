@@ -39,7 +39,8 @@ namespace dawn_native {
 
     class PipelineBase {
       public:
-        PipelineBase(PipelineBuilder* builder);
+        PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, dawn::ShaderStageBit stages);
+        PipelineBase(DeviceBase* device, PipelineBuilder* builder);
 
         struct PushConstantInfo {
             std::bitset<kMaxPushConstants> mask;
@@ -49,11 +50,16 @@ namespace dawn_native {
         dawn::ShaderStageBit GetStageMask() const;
 
         PipelineLayoutBase* GetLayout();
+        DeviceBase* GetDevice() const;
+
+      protected:
+        void ExtractModuleData(dawn::ShaderStage stage, ShaderModuleBase* module);
 
       private:
         dawn::ShaderStageBit mStageMask;
         Ref<PipelineLayoutBase> mLayout;
         PerStage<PushConstantInfo> mPushConstants;
+        DeviceBase* mDevice;
     };
 
     class PipelineBuilder {

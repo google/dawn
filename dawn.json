@@ -500,27 +500,13 @@
     "compute pipeline": {
         "category": "object"
     },
-    "compute pipeline builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "compute pipeline"
-            },
-            {
-                "name": "set layout",
-                "args": [
-                    {"name": "layout", "type": "pipeline layout"}
-                ]
-            },
-            {
-                "name": "set stage",
-                "args": [
-                    {"name": "stage", "type": "shader stage"},
-                    {"name": "module", "type": "shader module"},
-                    {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"}
-                ]
-            }
+    "compute pipeline descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "layout", "type": "pipeline layout"},
+            {"name": "module", "type": "shader module"},
+            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
     },
     "device": {
@@ -569,8 +555,11 @@
                 "returns": "input state builder"
             },
             {
-                "name": "create compute pipeline builder",
-                "returns": "compute pipeline builder"
+                "name": "create compute pipeline",
+                "returns": "compute pipeline",
+                "args": [
+                    {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create render pipeline builder",

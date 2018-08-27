@@ -21,9 +21,11 @@
 
 namespace dawn_native { namespace metal {
 
+    class Device;
+
     class ComputePipeline : public ComputePipelineBase {
       public:
-        ComputePipeline(ComputePipelineBuilder* builder);
+        ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor);
         ~ComputePipeline();
 
         void Encode(id<MTLComputeCommandEncoder> encoder);

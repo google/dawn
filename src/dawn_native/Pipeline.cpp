@@ -24,8 +24,14 @@ namespace dawn_native {
 
     // PipelineBase
 
-    PipelineBase::PipelineBase(PipelineBuilder* builder)
-        : mStageMask(builder->mStageMask), mLayout(std::move(builder->mLayout)) {
+    PipelineBase::PipelineBase(DeviceBase* device,
+                               PipelineLayoutBase* layout,
+                               dawn::ShaderStageBit stages)
+        : mStageMask(stages), mLayout(layout), mDevice(device) {
+    }
+
+    PipelineBase::PipelineBase(DeviceBase* device, PipelineBuilder* builder)
+        : mStageMask(builder->mStageMask), mLayout(std::move(builder->mLayout)), mDevice(device) {
         if (!mLayout) {
             PipelineLayoutDescriptor descriptor;
             descriptor.numBindGroupLayouts = 0;
@@ -35,30 +41,32 @@ namespace dawn_native {
             mLayout->Release();
         }
 
-        auto FillPushConstants = [](const ShaderModuleBase* module, PushConstantInfo* info) {
-            const auto& moduleInfo = module->GetPushConstants();
-            info->mask = moduleInfo.mask;
-
-            for (uint32_t i = 0; i < moduleInfo.names.size(); i++) {
-                uint32_t size = moduleInfo.sizes[i];
-                if (size == 0) {
-                    continue;
-                }
-
-                for (uint32_t offset = 0; offset < size; offset++) {
-                    info->types[i + offset] = moduleInfo.types[i];
-                }
-                i += size - 1;
-            }
-        };
-
-        for (auto stageBit : IterateStages(builder->mStageMask)) {
-            if (!builder->mStages[stageBit].module->IsCompatibleWithPipelineLayout(mLayout.Get())) {
+        for (auto stage : IterateStages(builder->mStageMask)) {
+            if (!builder->mStages[stage].module->IsCompatibleWithPipelineLayout(mLayout.Get())) {
                 builder->GetParentBuilder()->HandleError("Stage not compatible with layout");
                 return;
             }
 
-            FillPushConstants(builder->mStages[stageBit].module.Get(), &mPushConstants[stageBit]);
+            ExtractModuleData(stage, builder->mStages[stage].module.Get());
+        }
+    }
+
+    void PipelineBase::ExtractModuleData(dawn::ShaderStage stage, ShaderModuleBase* module) {
+        PushConstantInfo* info = &mPushConstants[stage];
+
+        const auto& moduleInfo = module->GetPushConstants();
+        info->mask = moduleInfo.mask;
+
+        for (uint32_t i = 0; i < moduleInfo.names.size(); i++) {
+            uint32_t size = moduleInfo.sizes[i];
+            if (size == 0) {
+                continue;
+            }
+
+            for (uint32_t offset = 0; offset < size; offset++) {
+                info->types[i + offset] = moduleInfo.types[i];
+            }
+            i += size - 1;
         }
     }
 
@@ -73,6 +81,10 @@ namespace dawn_native {
 
     PipelineLayoutBase* PipelineBase::GetLayout() {
         return mLayout.Get();
+    }
+
+    DeviceBase* PipelineBase::GetDevice() const {
+        return mDevice;
     }
 
     // PipelineBuilder

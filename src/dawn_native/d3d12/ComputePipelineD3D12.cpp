@@ -22,8 +22,8 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
-        : ComputePipelineBase(builder), mDevice(ToBackend(builder->GetDevice())) {
+    ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor)
+        : ComputePipelineBase(device, descriptor) {
         uint32_t compileFlags = 0;
 #if defined(_DEBUG)
         // Enable better shader debugging with the graphics debugging tools.
@@ -32,33 +32,31 @@ namespace dawn_native { namespace d3d12 {
         // SPRIV-cross does matrix multiplication expecting row major matrices
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-        const auto& module = ToBackend(builder->GetStageInfo(dawn::ShaderStage::Compute).module);
-        const auto& entryPoint = builder->GetStageInfo(dawn::ShaderStage::Compute).entryPoint;
-        const auto& hlslSource = module->GetHLSLSource();
+        const ShaderModule* module = ToBackend(descriptor->module);
+        const std::string& hlslSource = module->GetHLSLSource();
 
         ComPtr<ID3DBlob> compiledShader;
         ComPtr<ID3DBlob> errors;
 
-        const PlatformFunctions* functions = ToBackend(builder->GetDevice())->GetFunctions();
+        const PlatformFunctions* functions = device->GetFunctions();
         if (FAILED(functions->d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr,
-                                         nullptr, entryPoint.c_str(), "cs_5_1", compileFlags, 0,
+                                         nullptr, descriptor->entryPoint, "cs_5_1", compileFlags, 0,
                                          &compiledShader, &errors))) {
             printf("%s\n", reinterpret_cast<char*>(errors->GetBufferPointer()));
             ASSERT(false);
         }
 
-        D3D12_COMPUTE_PIPELINE_STATE_DESC descriptor = {};
-        descriptor.pRootSignature = ToBackend(GetLayout())->GetRootSignature().Get();
-        descriptor.CS.pShaderBytecode = compiledShader->GetBufferPointer();
-        descriptor.CS.BytecodeLength = compiledShader->GetBufferSize();
+        D3D12_COMPUTE_PIPELINE_STATE_DESC d3dDesc = {};
+        d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature().Get();
+        d3dDesc.CS.pShaderBytecode = compiledShader->GetBufferPointer();
+        d3dDesc.CS.BytecodeLength = compiledShader->GetBufferSize();
 
-        Device* device = ToBackend(builder->GetDevice());
-        device->GetD3D12Device()->CreateComputePipelineState(&descriptor,
+        device->GetD3D12Device()->CreateComputePipelineState(&d3dDesc,
                                                              IID_PPV_ARGS(&mPipelineState));
     }
 
     ComputePipeline::~ComputePipeline() {
-        mDevice->ReferenceUntilUnused(mPipelineState);
+        ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
     }
 
     ComPtr<ID3D12PipelineState> ComputePipeline::GetPipelineState() {

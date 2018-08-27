@@ -27,7 +27,7 @@ namespace dawn_native {
     // RenderPipelineBase
 
     RenderPipelineBase::RenderPipelineBase(RenderPipelineBuilder* builder)
-        : PipelineBase(builder),
+        : PipelineBase(builder->mDevice, builder),
           mDepthStencilState(std::move(builder->mDepthStencilState)),
           mIndexFormat(builder->mIndexFormat),
           mInputState(std::move(builder->mInputState)),

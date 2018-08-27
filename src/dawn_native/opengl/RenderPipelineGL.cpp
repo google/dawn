@@ -43,8 +43,13 @@ namespace dawn_native { namespace opengl {
 
     RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
         : RenderPipelineBase(builder),
-          PipelineGL(this, builder),
           mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {
+        PerStage<const ShaderModule*> modules(nullptr);
+        for (dawn::ShaderStage stage : IterateStages(GetStageMask())) {
+            modules[stage] = ToBackend(builder->GetStageInfo(stage).module.Get());
+        }
+
+        PipelineGL::Initialize(ToBackend(GetLayout()), modules);
     }
 
     GLenum RenderPipeline::GetGLPrimitiveTopology() const {

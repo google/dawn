@@ -14,10 +14,16 @@
 
 #include "dawn_native/opengl/ComputePipelineGL.h"
 
+#include "dawn_native/opengl/DeviceGL.h"
+
 namespace dawn_native { namespace opengl {
 
-    ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
-        : ComputePipelineBase(builder), PipelineGL(this, builder) {
+    ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor)
+        : ComputePipelineBase(device, descriptor) {
+        PerStage<const ShaderModule*> modules(nullptr);
+        modules[dawn::ShaderStage::Compute] = ToBackend(descriptor->module);
+
+        PipelineGL::Initialize(ToBackend(descriptor->layout), modules);
     }
 
     void ComputePipeline::ApplyNow() {

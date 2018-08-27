@@ -43,7 +43,11 @@ namespace dawn_native { namespace opengl {
 
     }  // namespace
 
-    PipelineGL::PipelineGL(PipelineBase* parent, PipelineBuilder* builder) {
+    PipelineGL::PipelineGL() {
+    }
+
+    void PipelineGL::Initialize(const PipelineLayout* layout,
+                                const PerStage<const ShaderModule*>& modules) {
         auto CreateShader = [](GLenum type, const char* source) -> GLuint {
             GLuint shader = glCreateShader(type);
             glShaderSource(shader, 1, &source, nullptr);
@@ -91,10 +95,15 @@ namespace dawn_native { namespace opengl {
 
         mProgram = glCreateProgram();
 
-        for (auto stage : IterateStages(parent->GetStageMask())) {
-            const ShaderModule* module = ToBackend(builder->GetStageInfo(stage).module.Get());
+        dawn::ShaderStageBit activeStages = dawn::ShaderStageBit::None;
+        for (dawn::ShaderStage stage : IterateStages(kAllStages)) {
+            if (modules[stage] != nullptr) {
+                activeStages |= StageBit(stage);
+            }
+        }
 
-            GLuint shader = CreateShader(GLShaderType(stage), module->GetSource());
+        for (dawn::ShaderStage stage : IterateStages(activeStages)) {
+            GLuint shader = CreateShader(GLShaderType(stage), modules[stage]->GetSource());
             glAttachShader(mProgram, shader);
         }
 
@@ -114,16 +123,14 @@ namespace dawn_native { namespace opengl {
             }
         }
 
-        for (auto stage : IterateStages(parent->GetStageMask())) {
-            const ShaderModule* module = ToBackend(builder->GetStageInfo(stage).module.Get());
-            FillPushConstants(module, &mGlPushConstants[stage], mProgram);
+        for (dawn::ShaderStage stage : IterateStages(activeStages)) {
+            FillPushConstants(modules[stage], &mGlPushConstants[stage], mProgram);
         }
 
         glUseProgram(mProgram);
 
         // The uniforms are part of the program state so we can pre-bind buffer units, texture units
         // etc.
-        const auto& layout = ToBackend(parent->GetLayout());
         const auto& indices = layout->GetBindingIndexInfo();
 
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
@@ -159,10 +166,8 @@ namespace dawn_native { namespace opengl {
         // Compute links between stages for combined samplers, then bind them to texture units
         {
             std::set<CombinedSampler> combinedSamplersSet;
-            for (auto stage : IterateStages(parent->GetStageMask())) {
-                const auto& module = ToBackend(builder->GetStageInfo(stage).module);
-
-                for (const auto& combined : module->GetCombinedSamplerInfo()) {
+            for (dawn::ShaderStage stage : IterateStages(activeStages)) {
+                for (const auto& combined : modules[stage]->GetCombinedSamplerInfo()) {
                     combinedSamplersSet.insert(combined);
                 }
             }

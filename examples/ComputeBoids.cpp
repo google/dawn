@@ -231,10 +231,11 @@ void initSim() {
 
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    updatePipeline = device.CreateComputePipelineBuilder()
-        .SetLayout(pl)
-        .SetStage(dawn::ShaderStage::Compute, module, "main")
-        .GetResult();
+    dawn::ComputePipelineDescriptor csDesc;
+    csDesc.module = module.Clone();
+    csDesc.entryPoint = "main";
+    csDesc.layout = pl.Clone();
+    updatePipeline = device.CreateComputePipeline(&csDesc);
 
     dawn::BufferView updateParamsView = updateParams.CreateBufferViewBuilder()
         .SetExtent(0, sizeof(SimParams))

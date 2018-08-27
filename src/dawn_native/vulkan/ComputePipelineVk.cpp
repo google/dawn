@@ -21,34 +21,33 @@
 
 namespace dawn_native { namespace vulkan {
 
-    ComputePipeline::ComputePipeline(ComputePipelineBuilder* builder)
-        : ComputePipelineBase(builder), mDevice(ToBackend(builder->GetDevice())) {
+    ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor)
+        : ComputePipelineBase(device, descriptor) {
         VkComputePipelineCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        createInfo.layout = ToBackend(GetLayout())->GetHandle();
+        createInfo.layout = ToBackend(descriptor->layout)->GetHandle();
         createInfo.basePipelineHandle = VK_NULL_HANDLE;
         createInfo.basePipelineIndex = -1;
 
-        const auto& stageInfo = builder->GetStageInfo(dawn::ShaderStage::Compute);
         createInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         createInfo.stage.pNext = nullptr;
         createInfo.stage.flags = 0;
         createInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-        createInfo.stage.module = ToBackend(stageInfo.module)->GetHandle();
-        createInfo.stage.pName = stageInfo.entryPoint.c_str();
+        createInfo.stage.module = ToBackend(descriptor->module)->GetHandle();
+        createInfo.stage.pName = descriptor->entryPoint;
         createInfo.stage.pSpecializationInfo = nullptr;
 
-        if (mDevice->fn.CreateComputePipelines(mDevice->GetVkDevice(), VK_NULL_HANDLE, 1,
-                                               &createInfo, nullptr, &mHandle) != VK_SUCCESS) {
+        if (device->fn.CreateComputePipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1, &createInfo,
+                                              nullptr, &mHandle) != VK_SUCCESS) {
             ASSERT(false);
         }
     }
 
     ComputePipeline::~ComputePipeline() {
         if (mHandle != VK_NULL_HANDLE) {
-            mDevice->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;
         }
     }

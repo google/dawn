@@ -236,8 +236,9 @@ namespace dawn_native { namespace vulkan {
     CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
         return new CommandBuffer(builder);
     }
-    ComputePipelineBase* Device::CreateComputePipeline(ComputePipelineBuilder* builder) {
-        return new ComputePipeline(builder);
+    ResultOrError<ComputePipelineBase*> Device::CreateComputePipelineImpl(
+        const ComputePipelineDescriptor* descriptor) {
+        return new ComputePipeline(this, descriptor);
     }
     DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
         return new DepthStencilState(builder);
