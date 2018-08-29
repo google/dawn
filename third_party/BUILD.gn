@@ -15,6 +15,8 @@
 import("../scripts/dawn_overrides_with_defaults.gni")
 import("../scripts/dawn_features.gni")
 
+is_msvc = is_win && !is_clang
+
 ###############################################################################
 # Third-party dependencies needed by libdawn_native
 ###############################################################################
@@ -45,11 +47,13 @@ config("spirv_cross_public") {
 static_library("spirv_cross") {
   public_configs = [ ":spirv_cross_public" ]
 
-  cflags_cc = [
-    "-Wno-implicit-fallthrough",
-    "-Wno-return-type",
-    "-Wno-sign-compare",
-  ]
+  if (!is_msvc) {
+    cflags_cc = [
+      "-Wno-implicit-fallthrough",
+      "-Wno-return-type",
+      "-Wno-sign-compare",
+    ]
+  }
 
   sources = [
     "${spirv_cross_dir}/GLSL.std.450.h",
@@ -243,10 +247,20 @@ static_library("glslang_static") {
     "${glslang_dir}/glslang/Public/ShaderLang.h",
   ]
 
-  cflags_cc = [
-    "-Wno-ignored-qualifiers",
-    "-Wno-unused-variable",
-  ]
+  if (is_msvc) {
+    cflags_cc = [
+      # switch statement contains 'default' but no 'case' labels
+      "/wd4065",
+
+      # local variable is initialized but not referenced
+      "/wd4189",
+    ]
+  } else {
+    cflags_cc = [
+      "-Wno-ignored-qualifiers",
+      "-Wno-unused-variable",
+    ]
+  }
 
   deps = [
     "${spirv_tools_dir}:spvtools_opt",
@@ -365,7 +379,12 @@ config("glfw_public") {
 static_library("glfw") {
   public_configs = [ ":glfw_public" ]
 
-  cflags_c = [ "-Wno-sign-compare" ]
+  if (is_msvc) {
+    # nonstandard extension, function/data pointer conversion in expression
+    cflags_c = [ "/wd4152" ]
+  } else {
+    cflags_c = [ "-Wno-sign-compare" ]
+  }
 
   sources = [
     "${glfw_dir}/include/GLFW/glfw3.h",
@@ -474,7 +493,10 @@ if (dawn_standalone) {
   # STB
   config("stb_public_config") {
     include_dirs = [ "stb" ]
-    cflags_cc = [ "-Wno-implicit-fallthrough" ]
+
+    if (!is_msvc) {
+      cflags_cc = [ "-Wno-implicit-fallthrough" ]
+    }
   }
   source_set("stb") {
     public_configs = [ ":stb_public_config" ]
