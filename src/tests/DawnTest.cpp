@@ -259,7 +259,7 @@ std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
     // the texture might have been modified.
     dawn::CommandBuffer commands =
         device.CreateCommandBufferBuilder()
-            .CopyTextureToBuffer(source, x, y, 0, width, height, 1, level, readback.buffer,
+            .CopyTextureToBuffer(source, x, y, 0, width, height, 1, level, 0, readback.buffer,
                                  readback.offset, rowPitch)
             .GetResult();
 

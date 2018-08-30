@@ -248,7 +248,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.format = VulkanImageFormat(GetFormat());
         createInfo.extent = VkExtent3D{GetWidth(), GetHeight(), GetDepth()};
         createInfo.mipLevels = GetNumMipLevels();
-        createInfo.arrayLayers = 1;
+        createInfo.arrayLayers = GetArrayLayers();
         createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         createInfo.usage = VulkanImageUsage(GetUsage(), GetFormat());

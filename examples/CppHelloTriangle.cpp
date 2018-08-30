@@ -71,7 +71,7 @@ void initTextures() {
 
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::TransferSrc);
     dawn::CommandBuffer copy = device.CreateCommandBufferBuilder()
-        .CopyBufferToTexture(stagingBuffer, 0, 0, texture, 0, 0, 0, 1024, 1024, 1, 0)
+        .CopyBufferToTexture(stagingBuffer, 0, 0, texture, 0, 0, 0, 1024, 1024, 1, 0, 0)
         .GetResult();
 
     queue.Submit(1, &copy);

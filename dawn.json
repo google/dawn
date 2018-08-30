@@ -345,7 +345,8 @@
                     {"name": "width", "type": "uint32_t"},
                     {"name": "height", "type": "uint32_t"},
                     {"name": "depth", "type": "uint32_t"},
-                    {"name": "level", "type": "uint32_t"}
+                    {"name": "level", "type": "uint32_t"},
+                    {"name": "slice", "type": "uint32_t"}
                 ],
                 "TODO": [
                     "Make pretty with Offset and Extents structures",
@@ -365,6 +366,7 @@
                     {"name": "height", "type": "uint32_t"},
                     {"name": "depth", "type": "uint32_t"},
                     {"name": "level", "type": "uint32_t"},
+                    {"name": "slice", "type": "uint32_t"},
                     {"name": "buffer", "type": "buffer"},
                     {"name": "buffer offset", "type": "uint32_t"},
                     {"name": "row pitch", "type": "uint32_t"}

@@ -53,7 +53,7 @@ namespace dawn_native { namespace vulkan {
 
             region.imageSubresource.aspectMask = texture->GetVkAspectMask();
             region.imageSubresource.mipLevel = textureLocation.level;
-            region.imageSubresource.baseArrayLayer = 0;
+            region.imageSubresource.baseArrayLayer = textureLocation.slice;
             region.imageSubresource.layerCount = 1;
 
             region.imageOffset.x = textureLocation.x;

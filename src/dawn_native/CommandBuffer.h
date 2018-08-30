@@ -77,7 +77,8 @@ namespace dawn_native {
                                  uint32_t width,
                                  uint32_t height,
                                  uint32_t depth,
-                                 uint32_t level);
+                                 uint32_t level,
+                                 uint32_t slice);
         void CopyTextureToBuffer(TextureBase* texture,
                                  uint32_t x,
                                  uint32_t y,
@@ -86,6 +87,7 @@ namespace dawn_native {
                                  uint32_t height,
                                  uint32_t depth,
                                  uint32_t level,
+                                 uint32_t slice,
                                  BufferBase* buffer,
                                  uint32_t bufferOffset,
                                  uint32_t rowPitch);

@@ -434,7 +434,7 @@ namespace {
 
             dawn::Buffer staging = utils::CreateBufferFromData(device, data, rowPitch * iImage.height, dawn::BufferUsageBit::TransferSrc);
             auto cmdbuf = device.CreateCommandBufferBuilder()
-                .CopyBufferToTexture(staging, 0, rowPitch, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0)
+                .CopyBufferToTexture(staging, 0, rowPitch, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0, 0)
                 .GetResult();
             queue.Submit(1, &cmdbuf);
 

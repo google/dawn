@@ -64,6 +64,7 @@ namespace dawn_native {
         uint32_t x, y, z;
         uint32_t width, height, depth;
         uint32_t level;
+        uint32_t slice;
     };
 
     struct CopyBufferToBufferCmd {

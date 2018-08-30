@@ -101,7 +101,7 @@ protected:
 
         dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data, sizeof(data), dawn::BufferUsageBit::TransferSrc);
         dawn::CommandBuffer copy = device.CreateCommandBufferBuilder()
-            .CopyBufferToTexture(stagingBuffer, 0, 256, texture, 0, 0, 0, 2, 2, 1, 0)
+            .CopyBufferToTexture(stagingBuffer, 0, 256, texture, 0, 0, 0, 2, 2, 1, 0, 0)
             .GetResult();
 
         queue.Submit(1, &copy);
