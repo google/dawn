@@ -20,6 +20,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/InputStateD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
+#include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
@@ -101,9 +102,10 @@ namespace dawn_native { namespace d3d12 {
                     break;
             }
 
-            if (FAILED(D3DCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr,
-                                  nullptr, entryPoint.c_str(), compileTarget, compileFlags, 0,
-                                  &compiledShader[stage], &errors))) {
+            const PlatformFunctions* functions = ToBackend(builder->GetDevice())->GetFunctions();
+            if (FAILED(functions->d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr,
+                                             nullptr, nullptr, entryPoint.c_str(), compileTarget,
+                                             compileFlags, 0, &compiledShader[stage], &errors))) {
                 printf("%s\n", reinterpret_cast<char*>(errors->GetBufferPointer()));
                 ASSERT(false);
             }

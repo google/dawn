@@ -225,6 +225,8 @@ if (DAWN_ENABLE_D3D12)
         ${D3D12_DIR}/NativeSwapChainImplD3D12.h
         ${D3D12_DIR}/PipelineLayoutD3D12.cpp
         ${D3D12_DIR}/PipelineLayoutD3D12.h
+        ${D3D12_DIR}/PlatformFunctions.cpp
+        ${D3D12_DIR}/PlatformFunctions.h
         ${D3D12_DIR}/QueueD3D12.cpp
         ${D3D12_DIR}/QueueD3D12.h
         ${D3D12_DIR}/RenderPassDescriptorD3D12.cpp

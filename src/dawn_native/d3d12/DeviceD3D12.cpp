@@ -29,6 +29,7 @@
 #include "dawn_native/d3d12/InputStateD3D12.h"
 #include "dawn_native/d3d12/NativeSwapChainImplD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
+#include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/QueueD3D12.h"
 #include "dawn_native/d3d12/RenderPassDescriptorD3D12.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
@@ -66,7 +67,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     namespace {
-        ComPtr<IDXGIFactory4> CreateFactory() {
+        ComPtr<IDXGIFactory4> CreateFactory(const PlatformFunctions* functions) {
             ComPtr<IDXGIFactory4> factory;
 
             uint32_t dxgiFactoryFlags = 0;
@@ -74,7 +75,7 @@ namespace dawn_native { namespace d3d12 {
             // Enable the debug layer (requires the Graphics Tools "optional feature").
             {
                 ComPtr<ID3D12Debug> debugController;
-                if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+                if (SUCCEEDED(functions->d3d12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
                     debugController->EnableDebugLayer();
 
                     // Enable additional debug layers.
@@ -82,18 +83,19 @@ namespace dawn_native { namespace d3d12 {
                 }
 
                 ComPtr<IDXGIDebug1> dxgiDebug;
-                if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug)))) {
+                if (SUCCEEDED(functions->dxgiGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug)))) {
                     dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
                                                  DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
                 }
             }
 #endif  // defined(DAWN_ENABLE_ASSERTS)
 
-            ASSERT_SUCCESS(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
+            ASSERT_SUCCESS(functions->createDxgiFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
             return factory;
         }
 
-        ComPtr<IDXGIAdapter1> GetHardwareAdapter(ComPtr<IDXGIFactory4> factory) {
+        ComPtr<IDXGIAdapter1> GetHardwareAdapter(ComPtr<IDXGIFactory4> factory,
+                                                 const PlatformFunctions* functions) {
             for (uint32_t adapterIndex = 0;; ++adapterIndex) {
                 IDXGIAdapter1* adapter = nullptr;
                 if (factory->EnumAdapters1(adapterIndex, &adapter) == DXGI_ERROR_NOT_FOUND) {
@@ -102,8 +104,8 @@ namespace dawn_native { namespace d3d12 {
 
                 // Check to see if the adapter supports Direct3D 12, but don't create the actual
                 // device yet.
-                if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0,
-                                                _uuidof(ID3D12Device), nullptr))) {
+                if (SUCCEEDED(functions->d3d12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0,
+                                                           _uuidof(ID3D12Device), nullptr))) {
                     return adapter;
                 }
                 adapter->Release();
@@ -114,15 +116,22 @@ namespace dawn_native { namespace d3d12 {
     }  // anonymous namespace
 
     Device::Device() {
+        mFunctions = new PlatformFunctions();
+
+        {
+            MaybeError status = mFunctions->LoadFunctions();
+            ASSERT(status.IsSuccess());
+        }
+
         // Create the connection to DXGI and the D3D12 device
-        mFactory = CreateFactory();
+        mFactory = CreateFactory(mFunctions);
         ASSERT(mFactory.Get() != nullptr);
 
-        mHardwareAdapter = GetHardwareAdapter(mFactory);
+        mHardwareAdapter = GetHardwareAdapter(mFactory, mFunctions);
         ASSERT(mHardwareAdapter.Get() != nullptr);
 
-        ASSERT_SUCCESS(D3D12CreateDevice(mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0,
-                                         IID_PPV_ARGS(&mD3d12Device)));
+        ASSERT_SUCCESS(mFunctions->d3d12CreateDevice(mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0,
+                                                     IID_PPV_ARGS(&mD3d12Device)));
 
         // Create device-global objects
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -157,6 +166,7 @@ namespace dawn_native { namespace d3d12 {
         delete mMapRequestTracker;
         delete mResourceAllocator;
         delete mResourceUploader;
+        delete mFunctions;
     }
 
     ComPtr<IDXGIFactory4> Device::GetFactory() {
@@ -173,6 +183,10 @@ namespace dawn_native { namespace d3d12 {
 
     DescriptorHeapAllocator* Device::GetDescriptorHeapAllocator() {
         return mDescriptorHeapAllocator;
+    }
+
+    const PlatformFunctions* Device::GetFunctions() {
+        return mFunctions;
     }
 
     MapRequestTracker* Device::GetMapRequestTracker() const {

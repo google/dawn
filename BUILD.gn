@@ -389,12 +389,7 @@ source_set("libdawn_native_sources") {
   ]
 
   if (dawn_enable_d3d12) {
-    libs += [
-      "d3d12.lib",
-      "dxgi.lib",
-      "dxguid.lib",
-      "d3dcompiler.lib",
-    ]
+    libs += [ "dxguid.lib" ]
     sources += [
       "src/dawn_native/d3d12/BindGroupD3D12.cpp",
       "src/dawn_native/d3d12/BindGroupD3D12.h",
@@ -423,6 +418,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/NativeSwapChainImplD3D12.h",
       "src/dawn_native/d3d12/PipelineLayoutD3D12.cpp",
       "src/dawn_native/d3d12/PipelineLayoutD3D12.h",
+      "src/dawn_native/d3d12/PlatformFunctions.cpp",
+      "src/dawn_native/d3d12/PlatformFunctions.h",
       "src/dawn_native/d3d12/QueueD3D12.cpp",
       "src/dawn_native/d3d12/QueueD3D12.h",
       "src/dawn_native/d3d12/RenderPassDescriptorD3D12.cpp",

@@ -27,6 +27,7 @@ namespace dawn_native { namespace d3d12 {
     class CommandAllocatorManager;
     class DescriptorHeapAllocator;
     class MapRequestTracker;
+    class PlatformFunctions;
     class ResourceAllocator;
     class ResourceUploader;
 
@@ -59,6 +60,7 @@ namespace dawn_native { namespace d3d12 {
 
         DescriptorHeapAllocator* GetDescriptorHeapAllocator();
         MapRequestTracker* GetMapRequestTracker() const;
+        const PlatformFunctions* GetFunctions();
         ResourceAllocator* GetResourceAllocator();
         ResourceUploader* GetResourceUploader();
 
@@ -97,6 +99,7 @@ namespace dawn_native { namespace d3d12 {
         CommandAllocatorManager* mCommandAllocatorManager = nullptr;
         DescriptorHeapAllocator* mDescriptorHeapAllocator = nullptr;
         MapRequestTracker* mMapRequestTracker = nullptr;
+        PlatformFunctions* mFunctions = nullptr;
         ResourceAllocator* mResourceAllocator = nullptr;
         ResourceUploader* mResourceUploader = nullptr;
 

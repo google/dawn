@@ -18,6 +18,7 @@
 #include "common/BitSetIterator.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
+#include "dawn_native/d3d12/PlatformFunctions.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -92,7 +93,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3DBlob> signature;
         ComPtr<ID3DBlob> error;
-        ASSERT_SUCCESS(D3D12SerializeRootSignature(
+        ASSERT_SUCCESS(device->GetFunctions()->d3d12SerializeRootSignature(
             &rootSignatureDescriptor, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
         ASSERT_SUCCESS(device->GetD3D12Device()->CreateRootSignature(
             0, signature->GetBufferPointer(), signature->GetBufferSize(),
