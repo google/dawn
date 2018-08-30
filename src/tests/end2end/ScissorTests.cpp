@@ -89,10 +89,7 @@ TEST_P(ScissorTest, LargerThanAttachment) {
 
 // Test setting an empty scissor rect
 TEST_P(ScissorTest, EmptyRect) {
-    if (IsMetal()) {
-        std::cout << "Test skipped on Metal" << std::endl;
-        return;
-    }
+    DAWN_SKIP_TEST_IF(IsMetal());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
     dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);

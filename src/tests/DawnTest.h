@@ -177,6 +177,13 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
                                 testName##params, sizeof(testName##params) / sizeof(firstParam))), \
                             testing::PrintToStringParamName());
 
+// Skip a test when the given condition is satisfied.
+#define DAWN_SKIP_TEST_IF(condition)                               \
+    if (condition) {                                               \
+        std::cout << "Test skipped: " #condition "." << std::endl; \
+        return;                                                    \
+    }
+
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST
     bool IsBackendAvailable(BackendType type);

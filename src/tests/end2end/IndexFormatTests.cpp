@@ -201,10 +201,7 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
 // prevent a case in D3D12 where the index format would be captured from the last
 // pipeline on SetIndexBuffer.
 TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
-    if (IsD3D12() || IsVulkan()) {
-        std::cout << "Test skipped on D3D12 and Vulkan" << std::endl;
-        return;
-    }
+    DAWN_SKIP_TEST_IF(IsD3D12() || IsVulkan());
 
     dawn::RenderPipeline pipeline32 = MakeTestPipeline(dawn::IndexFormat::Uint32);
     dawn::RenderPipeline pipeline16 = MakeTestPipeline(dawn::IndexFormat::Uint16);
