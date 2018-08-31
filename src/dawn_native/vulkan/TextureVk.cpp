@@ -333,7 +333,7 @@ namespace dawn_native { namespace vulkan {
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = GetNumMipLevels();
         barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount = 1;
+        barrier.subresourceRange.layerCount = GetArrayLayers();
 
         ToBackend(GetDevice())
             ->fn.CmdPipelineBarrier(commands, srcStages, dstStages, 0, 0, nullptr, 0, nullptr, 1,
