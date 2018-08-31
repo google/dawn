@@ -365,11 +365,7 @@ TEST_P(CopyTests_T2B, RowPitchUnaligned) {
 }
 
 // Test that copying regions of each texture 2D array layer works
-TEST_P(CopyTests_T2B, Texture2DArrayRegion)
-{
-    // TODO(jiawei.shao@intel.com): support 2D array texture on OpenGL, D3D12 and Metal.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12() || IsMetal());
-
+TEST_P(CopyTests_T2B, Texture2DArrayRegion) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -378,9 +374,6 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegion)
 
 // Test that copying texture 2D array mips with 256-byte aligned sizes works
 TEST_P(CopyTests_T2B, Texture2DArrayMip) {
-    // TODO(jiawei.shao@intel.com): support 2D array texture on OpenGL, D3D12 and Metal.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12() || IsMetal());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;

@@ -114,7 +114,7 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.Alignment = 0;
         resourceDescriptor.Width = GetWidth();
         resourceDescriptor.Height = GetHeight();
-        resourceDescriptor.DepthOrArraySize = static_cast<UINT16>(GetDepth());
+        resourceDescriptor.DepthOrArraySize = GetDepthOrArraySize();
         resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
         resourceDescriptor.Format = D3D12TextureFormat(GetFormat());
         resourceDescriptor.SampleDesc.Count = 1;
@@ -149,6 +149,15 @@ namespace dawn_native { namespace d3d12 {
 
     ID3D12Resource* Texture::GetD3D12Resource() {
         return mResourcePtr;
+    }
+
+    UINT16 Texture::GetDepthOrArraySize() {
+        switch (GetDimension()) {
+            case dawn::TextureDimension::e2D:
+                return static_cast<UINT16>(GetArrayLayers());
+            default:
+                UNREACHABLE();
+        }
     }
 
     void Texture::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,

@@ -50,7 +50,7 @@ namespace dawn_native { namespace d3d12 {
         TextureCopySplit copy;
 
         if (z != 0 || depth > 1) {
-            // TODO(enga@google.com): Handle 3D / 2D arrays
+            // TODO(enga@google.com): Handle 3D
             ASSERT(false);
             return copy;
         }

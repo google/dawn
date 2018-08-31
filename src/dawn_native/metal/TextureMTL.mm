@@ -58,10 +58,11 @@ namespace dawn_native { namespace metal {
             return result;
         }
 
-        MTLTextureType MetalTextureType(dawn::TextureDimension dimension) {
+        MTLTextureType MetalTextureType(dawn::TextureDimension dimension,
+                                        unsigned int arrayLayers) {
             switch (dimension) {
                 case dawn::TextureDimension::e2D:
-                    return MTLTextureType2D;
+                    return (arrayLayers > 1) ? MTLTextureType2DArray : MTLTextureType2D;
             }
         }
     }
@@ -70,14 +71,14 @@ namespace dawn_native { namespace metal {
         : TextureBase(device, descriptor) {
         auto desc = [MTLTextureDescriptor new];
         [desc autorelease];
-        desc.textureType = MetalTextureType(GetDimension());
+        desc.textureType = MetalTextureType(GetDimension(), GetArrayLayers());
         desc.usage = MetalTextureUsage(GetUsage());
         desc.pixelFormat = MetalPixelFormat(GetFormat());
         desc.width = GetWidth();
         desc.height = GetHeight();
         desc.depth = GetDepth();
         desc.mipmapLevelCount = GetNumMipLevels();
-        desc.arrayLength = 1;
+        desc.arrayLength = GetArrayLayers();
         desc.storageMode = MTLStorageModePrivate;
 
         auto mtlDevice = device->GetMTLDevice();

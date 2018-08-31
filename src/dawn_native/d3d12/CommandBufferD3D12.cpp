@@ -333,7 +333,9 @@ namespace dawn_native { namespace d3d12 {
                     D3D12_TEXTURE_COPY_LOCATION textureLocation;
                     textureLocation.pResource = texture->GetD3D12Resource();
                     textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-                    textureLocation.SubresourceIndex = copy->destination.level;
+                    textureLocation.SubresourceIndex =
+                        texture->GetNumMipLevels() * copy->destination.slice +
+                        copy->destination.level;
 
                     for (uint32_t i = 0; i < copySplit.count; ++i) {
                         auto& info = copySplit.copies[i];
@@ -379,7 +381,8 @@ namespace dawn_native { namespace d3d12 {
                     D3D12_TEXTURE_COPY_LOCATION textureLocation;
                     textureLocation.pResource = texture->GetD3D12Resource();
                     textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-                    textureLocation.SubresourceIndex = copy->source.level;
+                    textureLocation.SubresourceIndex =
+                        texture->GetNumMipLevels() * copy->source.slice + copy->source.level;
 
                     for (uint32_t i = 0; i < copySplit.count; ++i) {
                         auto& info = copySplit.copies[i];

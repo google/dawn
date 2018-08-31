@@ -24,10 +24,11 @@ namespace dawn_native { namespace opengl {
 
     namespace {
 
-        GLenum TargetForDimension(dawn::TextureDimension dimension) {
+        GLenum TargetForDimensionAndArrayLayers(dawn::TextureDimension dimension,
+                                                uint32_t arrayLayer) {
             switch (dimension) {
                 case dawn::TextureDimension::e2D:
-                    return GL_TEXTURE_2D;
+                    return (arrayLayer > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
                 default:
                     UNREACHABLE();
             }
@@ -74,19 +75,32 @@ namespace dawn_native { namespace opengl {
 
     Texture::Texture(Device* device, const TextureDescriptor* descriptor, GLuint handle)
         : TextureBase(device, descriptor), mHandle(handle) {
-        mTarget = TargetForDimension(GetDimension());
+        mTarget = TargetForDimensionAndArrayLayers(GetDimension(), GetArrayLayers());
 
         uint32_t width = GetWidth();
         uint32_t height = GetHeight();
         uint32_t levels = GetNumMipLevels();
+        uint32_t arrayLayers = GetArrayLayers();
 
         auto formatInfo = GetGLFormatInfo(GetFormat());
 
         glBindTexture(mTarget, handle);
 
         for (uint32_t i = 0; i < levels; ++i) {
-            glTexImage2D(mTarget, i, formatInfo.internalFormat, width, height, 0, formatInfo.format,
-                         formatInfo.type, nullptr);
+            switch (GetDimension()) {
+                case dawn::TextureDimension::e2D:
+                    if (arrayLayers > 1) {
+                        glTexImage3D(mTarget, i, formatInfo.internalFormat, width, height,
+                                     arrayLayers, 0, formatInfo.format, formatInfo.type, nullptr);
+                    } else {
+                        glTexImage2D(mTarget, i, formatInfo.internalFormat, width, height, 0,
+                                     formatInfo.format, formatInfo.type, nullptr);
+                    }
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+
             width = std::max(uint32_t(1), width / 2);
             height = std::max(uint32_t(1), height / 2);
         }

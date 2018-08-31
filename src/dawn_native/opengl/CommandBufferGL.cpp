@@ -331,13 +331,28 @@ namespace dawn_native { namespace opengl {
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(target, texture->GetHandle());
 
-                    ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
                     glPixelStorei(GL_UNPACK_ROW_LENGTH,
                                   copy->rowPitch / TextureFormatPixelSize(texture->GetFormat()));
-                    glTexSubImage2D(target, dst.level, dst.x, dst.y, dst.width, dst.height,
+                    switch (texture->GetDimension()) {
+                        case dawn::TextureDimension::e2D:
+                            if (texture->GetArrayLayers() > 1) {
+                                glTexSubImage3D(
+                                    target, dst.level, dst.x, dst.y, dst.slice, dst.width,
+                                    dst.height, 1, format.format, format.type,
+                                    reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
+                            } else {
+                                glTexSubImage2D(
+                                    target, dst.level, dst.x, dst.y, dst.width, dst.height,
                                     format.format, format.type,
                                     reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
+                            }
+                            break;
+
+                        default:
+                            UNREACHABLE();
+                    }
                     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
                     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
                 } break;
 
@@ -348,18 +363,31 @@ namespace dawn_native { namespace opengl {
                     Texture* texture = ToBackend(src.texture.Get());
                     Buffer* buffer = ToBackend(dst.buffer.Get());
                     auto format = texture->GetGLFormat();
+                    GLenum target = texture->GetGLTarget();
 
                     // The only way to move data from a texture to a buffer in GL is via
                     // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
-                    ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
-                    glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
+                    glBindTexture(target, texture->GetHandle());
 
                     GLuint readFBO = 0;
                     glGenFramebuffers(1, &readFBO);
                     glBindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
+                    switch (texture->GetDimension()) {
+                        case dawn::TextureDimension::e2D:
+                            if (texture->GetArrayLayers() > 1) {
+                                glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                                          texture->GetHandle(), src.level,
+                                                          src.slice);
+                            } else {
+                                glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                                       GL_TEXTURE_2D, texture->GetHandle(),
+                                                       src.level);
+                            }
+                            break;
 
-                    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                           texture->GetHandle(), src.level);
+                        default:
+                            UNREACHABLE();
+                    }
 
                     glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
                     glPixelStorei(GL_PACK_ROW_LENGTH,

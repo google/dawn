@@ -270,7 +270,7 @@ namespace dawn_native { namespace metal {
                               sourceBytesPerImage:(copy->rowPitch * dst.height)
                                        sourceSize:size
                                         toTexture:texture->GetMTLTexture()
-                                 destinationSlice:0
+                                 destinationSlice:dst.slice
                                  destinationLevel:dst.level
                                 destinationOrigin:origin];
                 } break;
@@ -294,7 +294,7 @@ namespace dawn_native { namespace metal {
 
                     encoders.EnsureBlit(commandBuffer);
                     [encoders.blit copyFromTexture:texture->GetMTLTexture()
-                                       sourceSlice:0
+                                       sourceSlice:src.slice
                                        sourceLevel:src.level
                                       sourceOrigin:origin
                                         sourceSize:size

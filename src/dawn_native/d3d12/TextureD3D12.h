@@ -38,6 +38,8 @@ namespace dawn_native { namespace d3d12 {
                                 dawn::TextureUsageBit usage);
 
       private:
+        UINT16 GetDepthOrArraySize();
+
         ComPtr<ID3D12Resource> mResource = {};
         ID3D12Resource* mResourcePtr = nullptr;
         dawn::TextureUsageBit mLastUsage = dawn::TextureUsageBit::None;
