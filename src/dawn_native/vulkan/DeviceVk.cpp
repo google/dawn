@@ -421,13 +421,16 @@ namespace dawn_native { namespace vulkan {
             extensions->push_back(extension);
         };
 
-        // vktrace works by instering a layer, so we need to explicitly enable it if it is present.
+        // vktrace works by instering a layer, but we hide it behind a macro unless we are
+        // debugging in vktrace.
         // Also it is good to put it in first position so that it doesn't see Vulkan calls inserted
         // by other layers.
+#if defined(DAWN_USE_VKTRACE)
         if (mGlobalInfo.vktrace) {
             layersToRequest.push_back(kLayerNameLunargVKTrace);
             usedKnobs->vktrace = true;
         }
+#endif
         // RenderDoc installs a layer at the system level for its capture but we don't want to use
         // it unless we are debugging in RenderDoc so we hide it behind a macro.
 #if defined(DAWN_USE_RENDERDOC)
