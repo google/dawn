@@ -160,6 +160,14 @@ namespace dawn_native { namespace d3d12 {
         WaitForSerial(currentSerial);  // Wait for all in-flight commands to finish executing
         TickImpl();                    // Call tick one last time so resources are cleaned up
         ASSERT(mUsedComObjectRefs.Empty());
+        ASSERT(mPendingCommands.commandList == nullptr);
+
+        // Free all D3D12 and DXGI objects before unloading the DLLs
+        mFence = nullptr;
+        mFactory = nullptr;
+        mHardwareAdapter = nullptr;
+        mD3d12Device = nullptr;
+        mCommandQueue = nullptr;
 
         delete mCommandAllocatorManager;
         delete mDescriptorHeapAllocator;
@@ -266,6 +274,7 @@ namespace dawn_native { namespace d3d12 {
             std::copy(commandLists.begin(), commandLists.end(), lists.begin() + 1);
             mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size() + 1),
                                                lists.data());
+            mPendingCommands.commandList = nullptr;
         } else {
             std::vector<ID3D12CommandList*> lists(commandLists);
             mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()),
