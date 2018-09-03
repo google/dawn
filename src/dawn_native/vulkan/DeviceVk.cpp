@@ -421,8 +421,9 @@ namespace dawn_native { namespace vulkan {
             extensions->push_back(extension);
         };
 
-        // vktrace works by instering a layer, but we hide it behind a macro unless we are
-        // debugging in vktrace.
+        // vktrace works by instering a layer, but we hide it behind a macro due to the vktrace
+        // layer crashes when used without vktrace server started, see this vktrace issue:
+        // https://github.com/LunarG/VulkanTools/issues/254
         // Also it is good to put it in first position so that it doesn't see Vulkan calls inserted
         // by other layers.
 #if defined(DAWN_USE_VKTRACE)
