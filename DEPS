@@ -9,15 +9,19 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   '{dawn_root}/build': {
-    'url': '{chromium_git}/chromium/src/build.git@ddcfe1a1c6428569cb8c900735be3567358bc6ee',
+    'url': '{chromium_git}/chromium/src/build@ddcfe1a1c6428569cb8c900735be3567358bc6ee',
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/buildtools': {
-    'url': '{chromium_git}/chromium/buildtools.git@9a90d9aaadeb5e04327ed05775f45132e4b3523f',
+    'url': '{chromium_git}/chromium/buildtools@9a90d9aaadeb5e04327ed05775f45132e4b3523f',
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang.git@d299f069f8d1dca337354ced634df7a78e4512f7',
+    'url': '{chromium_git}/chromium/src/tools/clang@d299f069f8d1dca337354ced634df7a78e4512f7',
+    'condition': 'dawn_standalone',
+  },
+  '{dawn_root}/third_party/binutils': {
+    'url': '{chromium_git}/chromium/src/third_party/binutils@4110e09197116a9c5dedd4c827bbe95c224f87ac',
     'condition': 'dawn_standalone',
   },
 
@@ -49,7 +53,7 @@ deps = {
 
   # SPIRV compiler dependencies: SPIRV-Tools, SPIRV-headers, glslang and shaderc
   '{dawn_root}/third_party/SPIRV-Tools': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools.git@eda2cfbe128e5b71e9a0131f816ade5186ad6420',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@eda2cfbe128e5b71e9a0131f816ade5186ad6420',
     'condition': 'dawn_standalone',
   },
   '{dawn_root}/third_party/spirv-headers': {
@@ -200,4 +204,19 @@ hooks = [
                 '-s', '{dawn_root}/build/toolchain/win/rc/win/rc.exe.sha1',
     ],
   },
+  # Pull binutils for linux hermetic builds
+  {
+    'name': 'binutils',
+    'pattern': 'src/third_party/binutils',
+    'condition': 'host_os == "linux"',
+    'action': [
+        'python',
+        '{dawn_root}/third_party/binutils/download.py',
+    ],
+  },
+]
+
+recursedeps = [
+  # buildtools provides clang_format, libc++, and libc++abi
+  '{dawn_root}/buildtools',
 ]
