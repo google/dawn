@@ -257,6 +257,7 @@ static_library("glslang_static") {
     ]
   } else {
     cflags_cc = [
+      "-Wno-implicit-fallthrough",
       "-Wno-ignored-qualifiers",
       "-Wno-unused-variable",
     ]
