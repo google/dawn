@@ -25,46 +25,53 @@
 
 namespace utils {
 
+    namespace {
+
+        shaderc_shader_kind ShadercShaderKind(dawn::ShaderStage stage) {
+            switch (stage) {
+                case dawn::ShaderStage::Vertex:
+                    return shaderc_glsl_vertex_shader;
+                case dawn::ShaderStage::Fragment:
+                    return shaderc_glsl_fragment_shader;
+                case dawn::ShaderStage::Compute:
+                    return shaderc_glsl_compute_shader;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        dawn::ShaderModule CreateShaderModuleFromResult(
+            const dawn::Device& device,
+            const shaderc::SpvCompilationResult& result) {
+            // result.cend and result.cbegin return pointers to uint32_t.
+            const uint32_t* resultBegin = result.cbegin();
+            const uint32_t* resultEnd = result.cend();
+            // So this size is in units of sizeof(uint32_t).
+            ptrdiff_t resultSize = resultEnd - resultBegin;
+            // SetSource takes data as uint32_t*.
+
+            dawn::ShaderModuleDescriptor descriptor;
+            descriptor.codeSize = static_cast<uint32_t>(resultSize);
+            descriptor.code = result.cbegin();
+            return device.CreateShaderModule(&descriptor);
+        }
+
+    }  // anonymous namespace
+
     dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
                                           dawn::ShaderStage stage,
                                           const char* source) {
+        shaderc_shader_kind kind = ShadercShaderKind(stage);
+
         shaderc::Compiler compiler;
-        shaderc::CompileOptions options;
-
-        shaderc_shader_kind kind;
-        switch (stage) {
-            case dawn::ShaderStage::Vertex:
-                kind = shaderc_glsl_vertex_shader;
-                break;
-            case dawn::ShaderStage::Fragment:
-                kind = shaderc_glsl_fragment_shader;
-                break;
-            case dawn::ShaderStage::Compute:
-                kind = shaderc_glsl_compute_shader;
-                break;
-            default:
-                UNREACHABLE();
-        }
-
-        auto result = compiler.CompileGlslToSpv(source, strlen(source), kind, "myshader?", options);
+        auto result = compiler.CompileGlslToSpv(source, strlen(source), kind, "myshader?");
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
             std::cerr << result.GetErrorMessage();
             return {};
         }
-
-        // result.cend and result.cbegin return pointers to uint32_t.
-        const uint32_t* resultBegin = result.cbegin();
-        const uint32_t* resultEnd = result.cend();
-        // So this size is in units of sizeof(uint32_t).
-        ptrdiff_t resultSize = resultEnd - resultBegin;
-        // SetSource takes data as uint32_t*.
-
-        dawn::ShaderModuleDescriptor descriptor;
-        descriptor.codeSize = static_cast<uint32_t>(resultSize);
-        descriptor.code = result.cbegin();
-
 #ifdef DUMP_SPIRV_ASSEMBLY
         {
+            shaderc::CompileOptions options;
             auto resultAsm = compiler.CompileGlslToSpvAssembly(source, strlen(source), kind,
                                                                "myshader?", options);
             size_t sizeAsm = (resultAsm.cend() - resultAsm.cbegin());
@@ -91,7 +98,18 @@ namespace utils {
         printf("SPIRV JS ARRAY DUMP END\n");
 #endif
 
-        return device.CreateShaderModule(&descriptor);
+        return CreateShaderModuleFromResult(device, result);
+    }
+
+    dawn::ShaderModule CreateShaderModuleFromASM(const dawn::Device& device, const char* source) {
+        shaderc::Compiler compiler;
+        shaderc::SpvCompilationResult result = compiler.AssembleToSpv(source, strlen(source));
+        if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
+            std::cerr << result.GetErrorMessage();
+            return {};
+        }
+
+        return CreateShaderModuleFromResult(device, result);
     }
 
     dawn::Buffer CreateBufferFromData(const dawn::Device& device,

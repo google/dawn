@@ -314,6 +314,7 @@ source_set("libdawn_native_sources") {
   deps = [
     ":dawn_common",
     ":libdawn_native_utils_gen",
+    "${dawn_spirv_tools_dir}:spvtools_val",
     "third_party:spirv_cross",
   ]
 
@@ -772,6 +773,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/PushConstantsValidationTests.cpp",
     "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
     "src/tests/unittests/validation/RenderPipelineValidationTests.cpp",
+    "src/tests/unittests/validation/ShaderModuleValidationTests.cpp",
     "src/tests/unittests/validation/ValidationTest.cpp",
     "src/tests/unittests/validation/ValidationTest.h",
     "src/tests/unittests/validation/VertexBufferValidationTests.cpp",

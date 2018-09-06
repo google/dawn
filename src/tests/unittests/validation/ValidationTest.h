@@ -47,6 +47,7 @@ class ValidationTest : public testing::Test {
 
         void StartExpectDeviceError();
         bool EndExpectDeviceError();
+        std::string GetLastDeviceErrorMessage() const;
 
         dawn::RenderPassDescriptor CreateSimpleRenderPass();
 
@@ -66,6 +67,7 @@ class ValidationTest : public testing::Test {
 
     private:
         static void OnDeviceError(const char* message, dawnCallbackUserdata userdata);
+        std::string mDeviceErrorMessage;
         bool mExpectError = false;
         bool mError = false;
 

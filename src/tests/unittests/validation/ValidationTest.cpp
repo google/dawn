@@ -69,6 +69,9 @@ bool ValidationTest::EndExpectDeviceError() {
     mExpectError = false;
     return mError;
 }
+std::string ValidationTest::GetLastDeviceErrorMessage() const {
+    return mDeviceErrorMessage;
+}
 
 dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
         dawn::TextureDescriptor descriptor;
@@ -91,14 +94,16 @@ dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
 }
 
 void ValidationTest::OnDeviceError(const char* message, dawnCallbackUserdata userdata) {
+    auto self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata));
+    self->mDeviceErrorMessage = message;
+
     // Skip this one specific error that is raised when a builder is used after it got an error
     // this is important because we don't want to wrap all creation tests in ASSERT_DEVICE_ERROR.
     // Yes the error message is misleading.
-    if (std::string(message) == "Builder cannot be used after GetResult") {
+    if (self->mDeviceErrorMessage == "Builder cannot be used after GetResult") {
         return;
     }
 
-    auto self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata));
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
     ASSERT_FALSE(self->mError) << "Got two errors in expect block";
     self->mError = true;

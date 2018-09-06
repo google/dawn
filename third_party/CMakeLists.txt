@@ -41,6 +41,9 @@ set(GLAD_INCLUDE_DIR ${GLAD_INCLUDE_DIR} PARENT_SCOPE)
 target_include_directories(glad SYSTEM PUBLIC ${GLAD_INCLUDE_DIR})
 DawnExternalTarget("third_party" glad)
 
+# SPIRV-Tools
+set(SPIRV_TOOLS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools/include PARENT_SCOPE)
+
 # ShaderC
 # Prevent SPIRV-Tools from using Werror as it has a warning on MSVC
 set(SPIRV_WERROR OFF CACHE BOOL "" FORCE)

@@ -21,6 +21,8 @@ namespace utils {
     dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
                                           dawn::ShaderStage stage,
                                           const char* source);
+    dawn::ShaderModule CreateShaderModuleFromASM(const dawn::Device& device, const char* source);
+
     dawn::Buffer CreateBufferFromData(const dawn::Device& device,
                                       const void* data,
                                       uint32_t size,

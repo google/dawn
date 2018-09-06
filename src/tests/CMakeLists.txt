@@ -53,6 +53,7 @@ list(APPEND UNITTEST_SOURCES
     ${VALIDATION_TESTS_DIR}/PushConstantsValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/RenderPassDescriptorValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/RenderPipelineValidationTests.cpp
+    ${VALIDATION_TESTS_DIR}/ShaderModuleValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/VertexBufferValidationTests.cpp
     ${VALIDATION_TESTS_DIR}/ValidationTest.cpp
     ${VALIDATION_TESTS_DIR}/ValidationTest.h

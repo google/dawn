@@ -31,8 +31,8 @@ Generate(
 )
 
 set(DAWN_NATIVE_SOURCES)
-set(DAWN_NATIVE_DEPS dawn_common spirv_cross dawn_native_utils_autogen)
-set(DAWN_NATIVE_INCLUDE_DIRS ${SPIRV_CROSS_INCLUDE_DIR})
+set(DAWN_NATIVE_DEPS dawn_common spirv_cross dawn_native_utils_autogen SPIRV-Tools)
+set(DAWN_NATIVE_INCLUDE_DIRS ${SPIRV_CROSS_INCLUDE_DIR} ${SPIRV_TOOLS_INCLUDE_DIR})
 
 ################################################################################
 # OpenGL Backend

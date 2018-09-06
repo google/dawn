@@ -20,13 +20,44 @@
 #include "dawn_native/PipelineLayout.h"
 
 #include <spirv-cross/spirv_cross.hpp>
+#include <spirv-tools/libspirv.hpp>
 
 namespace dawn_native {
 
     MaybeError ValidateShaderModuleDescriptor(DeviceBase*,
                                               const ShaderModuleDescriptor* descriptor) {
         DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
-        // TODO(cwallez@chromium.org): Use spirv-val to check the module is well-formed
+
+        spvtools::SpirvTools spirvTools(SPV_ENV_WEBGPU_0);
+
+        std::ostringstream errorStream;
+        errorStream << "SPIRV Validation failure:" << std::endl;
+
+        spirvTools.SetMessageConsumer([&errorStream](spv_message_level_t level, const char*,
+                                                     const spv_position_t& position,
+                                                     const char* message) {
+            switch (level) {
+                case SPV_MSG_FATAL:
+                case SPV_MSG_INTERNAL_ERROR:
+                case SPV_MSG_ERROR:
+                    errorStream << "error: line " << position.index << ": " << message << std::endl;
+                    break;
+                case SPV_MSG_WARNING:
+                    errorStream << "warning: line " << position.index << ": " << message
+                                << std::endl;
+                    break;
+                case SPV_MSG_INFO:
+                    errorStream << "info: line " << position.index << ": " << message << std::endl;
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        if (!spirvTools.Validate(descriptor->code, descriptor->codeSize)) {
+            DAWN_RETURN_ERROR(errorStream.str().c_str());
+        }
+
         return {};
     }
 
