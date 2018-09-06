@@ -21,6 +21,8 @@
 
 #include "dawn_native/dawn_platform.h"
 
+#include <memory>
+
 namespace dawn_native {
 
     using ErrorCallback = void (*)(const char* errorMessage, void* userData);
@@ -137,7 +139,7 @@ namespace dawn_native {
         // The object caches aren't exposed in the header as they would require a lot of
         // additional includes.
         struct Caches;
-        Caches* mCaches = nullptr;
+        std::unique_ptr<Caches> mCaches;
 
         dawn::DeviceErrorCallback mErrorCallback = nullptr;
         dawn::CallbackUserdata mErrorUserdata = 0;

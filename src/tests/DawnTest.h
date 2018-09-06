@@ -79,6 +79,7 @@ namespace dawn_wire {
 
 class DawnTest : public ::testing::TestWithParam<BackendType> {
   public:
+    DawnTest();
     ~DawnTest();
 
     void SetUp() override;
@@ -118,10 +119,10 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
 
   private:
     // Things used to set up testing through the Wire.
-    dawn_wire::CommandHandler* mWireServer = nullptr;
-    dawn_wire::CommandHandler* mWireClient = nullptr;
-    utils::TerribleCommandBuffer* mC2sBuf = nullptr;
-    utils::TerribleCommandBuffer* mS2cBuf = nullptr;
+    std::unique_ptr<dawn_wire::CommandHandler> mWireServer;
+    std::unique_ptr<dawn_wire::CommandHandler> mWireClient;
+    std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
+    std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
     void FlushWire();
 
     // MapRead buffers used to get data for the expectations
@@ -155,7 +156,7 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
         uint32_t size;
         uint32_t rowBytes;
         uint32_t rowPitch;
-        detail::Expectation* expectation;
+        std::unique_ptr<detail::Expectation> expectation;
         // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54316
         // Use unique_ptr because of missing move/copy constructors on std::basic_ostringstream
         std::unique_ptr<std::ostringstream> message;
@@ -165,7 +166,7 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
     // Assuming the data is mapped, checks all expectations
     void ResolveExpectations();
 
-    utils::BackendBinding* mBinding = nullptr;
+    std::unique_ptr<utils::BackendBinding> mBinding;
 };
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:

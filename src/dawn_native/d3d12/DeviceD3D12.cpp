@@ -116,7 +116,7 @@ namespace dawn_native { namespace d3d12 {
     }  // anonymous namespace
 
     Device::Device() {
-        mFunctions = new PlatformFunctions();
+        mFunctions = std::make_unique<PlatformFunctions>();
 
         {
             MaybeError status = mFunctions->LoadFunctions();
@@ -124,10 +124,10 @@ namespace dawn_native { namespace d3d12 {
         }
 
         // Create the connection to DXGI and the D3D12 device
-        mFactory = CreateFactory(mFunctions);
+        mFactory = CreateFactory(mFunctions.get());
         ASSERT(mFactory.Get() != nullptr);
 
-        mHardwareAdapter = GetHardwareAdapter(mFactory, mFunctions);
+        mHardwareAdapter = GetHardwareAdapter(mFactory, mFunctions.get());
         ASSERT(mHardwareAdapter.Get() != nullptr);
 
         ASSERT_SUCCESS(mFunctions->d3d12CreateDevice(mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0,
@@ -145,11 +145,11 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(mFenceEvent != nullptr);
 
         // Initialize backend services
-        mCommandAllocatorManager = new CommandAllocatorManager(this);
-        mDescriptorHeapAllocator = new DescriptorHeapAllocator(this);
-        mMapRequestTracker = new MapRequestTracker(this);
-        mResourceAllocator = new ResourceAllocator(this);
-        mResourceUploader = new ResourceUploader(this);
+        mCommandAllocatorManager = std::make_unique<CommandAllocatorManager>(this);
+        mDescriptorHeapAllocator = std::make_unique<DescriptorHeapAllocator>(this);
+        mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
+        mResourceAllocator = std::make_unique<ResourceAllocator>(this);
+        mResourceUploader = std::make_unique<ResourceUploader>(this);
 
         NextSerial();
     }
@@ -159,22 +159,9 @@ namespace dawn_native { namespace d3d12 {
         NextSerial();
         WaitForSerial(currentSerial);  // Wait for all in-flight commands to finish executing
         TickImpl();                    // Call tick one last time so resources are cleaned up
+
         ASSERT(mUsedComObjectRefs.Empty());
         ASSERT(mPendingCommands.commandList == nullptr);
-
-        // Free all D3D12 and DXGI objects before unloading the DLLs
-        mFence = nullptr;
-        mFactory = nullptr;
-        mHardwareAdapter = nullptr;
-        mD3d12Device = nullptr;
-        mCommandQueue = nullptr;
-
-        delete mCommandAllocatorManager;
-        delete mDescriptorHeapAllocator;
-        delete mMapRequestTracker;
-        delete mResourceAllocator;
-        delete mResourceUploader;
-        delete mFunctions;
     }
 
     ComPtr<IDXGIFactory4> Device::GetFactory() {
@@ -190,23 +177,23 @@ namespace dawn_native { namespace d3d12 {
     }
 
     DescriptorHeapAllocator* Device::GetDescriptorHeapAllocator() {
-        return mDescriptorHeapAllocator;
+        return mDescriptorHeapAllocator.get();
     }
 
     const PlatformFunctions* Device::GetFunctions() {
-        return mFunctions;
+        return mFunctions.get();
     }
 
     MapRequestTracker* Device::GetMapRequestTracker() const {
-        return mMapRequestTracker;
+        return mMapRequestTracker.get();
     }
 
     ResourceAllocator* Device::GetResourceAllocator() {
-        return mResourceAllocator;
+        return mResourceAllocator.get();
     }
 
     ResourceUploader* Device::GetResourceUploader() {
-        return mResourceUploader;
+        return mResourceUploader.get();
     }
 
     void Device::OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList) {

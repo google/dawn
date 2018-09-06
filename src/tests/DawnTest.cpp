@@ -97,15 +97,14 @@ namespace {
     };
 }  // namespace
 
+DawnTest::DawnTest() = default;
+
 DawnTest::~DawnTest() {
     // We need to destroy child objects before the Device
     mReadbackSlots.clear();
     queue = dawn::Queue();
     swapchain = dawn::SwapChain();
     device = dawn::Device();
-
-    delete mBinding;
-    mBinding = nullptr;
 
     dawnSetProcs(nullptr);
 }
@@ -129,10 +128,10 @@ bool DawnTest::IsVulkan() const {
 bool gTestUsesWire = false;
 
 void DawnTest::SetUp() {
-    mBinding = utils::CreateBinding(ParamToBackendType(GetParam()));
+    mBinding.reset(utils::CreateBinding(ParamToBackendType(GetParam())));
     DAWN_ASSERT(mBinding != nullptr);
 
-    GLFWwindow* testWindow = GetWindowForBackend(mBinding, GetParam());
+    GLFWwindow* testWindow = GetWindowForBackend(mBinding.get(), GetParam());
     DAWN_ASSERT(testWindow != nullptr);
 
     mBinding->SetWindow(testWindow);
@@ -145,16 +144,17 @@ void DawnTest::SetUp() {
     dawnProcTable procs;
 
     if (gTestUsesWire) {
-        mC2sBuf = new utils::TerribleCommandBuffer();
-        mS2cBuf = new utils::TerribleCommandBuffer();
+        mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
+        mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
 
-        mWireServer = dawn_wire::NewServerCommandHandler(backendDevice, backendProcs, mS2cBuf);
-        mC2sBuf->SetHandler(mWireServer);
+        mWireServer.reset(
+            dawn_wire::NewServerCommandHandler(backendDevice, backendProcs, mS2cBuf.get()));
+        mC2sBuf->SetHandler(mWireServer.get());
 
         dawnDevice clientDevice;
         dawnProcTable clientProcs;
-        mWireClient = dawn_wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf);
-        mS2cBuf->SetHandler(mWireClient);
+        mWireClient.reset(dawn_wire::NewClientDevice(&clientProcs, &clientDevice, mC2sBuf.get()));
+        mS2cBuf->SetHandler(mWireClient.get());
 
         procs = clientProcs;
         cDevice = clientDevice;
@@ -191,18 +191,6 @@ void DawnTest::TearDown() {
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         mReadbackSlots[i].buffer.Unmap();
     }
-
-    for (auto& expectation : mDeferredExpectations) {
-        delete expectation.expectation;
-        expectation.expectation = nullptr;
-    }
-
-    if (gTestUsesWire) {
-        delete mC2sBuf;
-        delete mS2cBuf;
-        delete mWireClient;
-        delete mWireServer;
-    }
 }
 
 std::ostringstream& DawnTest::AddBufferExpectation(const char* file,
@@ -232,7 +220,7 @@ std::ostringstream& DawnTest::AddBufferExpectation(const char* file,
     deferred.size = size;
     deferred.rowBytes = size;
     deferred.rowPitch = size;
-    deferred.expectation = expectation;
+    deferred.expectation.reset(expectation);
 
     mDeferredExpectations.push_back(std::move(deferred));
     mDeferredExpectations.back().message = std::make_unique<std::ostringstream>();
@@ -273,7 +261,7 @@ std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
     deferred.size = size;
     deferred.rowBytes = width * pixelSize;
     deferred.rowPitch = rowPitch;
-    deferred.expectation = expectation;
+    deferred.expectation.reset(expectation);
 
     mDeferredExpectations.push_back(std::move(deferred));
     mDeferredExpectations.back().message = std::make_unique<std::ostringstream>();

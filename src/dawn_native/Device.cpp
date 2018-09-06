@@ -50,11 +50,10 @@ namespace dawn_native {
     // DeviceBase
 
     DeviceBase::DeviceBase() {
-        mCaches = new DeviceBase::Caches();
+        mCaches = std::make_unique<DeviceBase::Caches>();
     }
 
     DeviceBase::~DeviceBase() {
-        delete mCaches;
     }
 
     void DeviceBase::HandleError(const char* message) {

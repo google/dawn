@@ -16,6 +16,8 @@
 
 #include <gmock/gmock.h>
 
+#include <memory>
+
 using namespace testing;
 
 class MockBufferMapReadCallback {
@@ -23,7 +25,7 @@ class MockBufferMapReadCallback {
         MOCK_METHOD3(Call, void(dawnBufferMapAsyncStatus status, const uint32_t* ptr, dawnCallbackUserdata userdata));
 };
 
-static MockBufferMapReadCallback* mockBufferMapReadCallback = nullptr;
+static std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
 static void ToMockBufferMapReadCallback(dawnBufferMapAsyncStatus status, const void* ptr, dawnCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapReadCallback->Call(status, reinterpret_cast<const uint32_t*>(ptr), userdata);
@@ -34,7 +36,7 @@ class MockBufferMapWriteCallback {
         MOCK_METHOD3(Call, void(dawnBufferMapAsyncStatus status, uint32_t* ptr, dawnCallbackUserdata userdata));
 };
 
-static MockBufferMapWriteCallback* mockBufferMapWriteCallback = nullptr;
+static std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;
 static void ToMockBufferMapWriteCallback(dawnBufferMapAsyncStatus status, void* ptr, dawnCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapWriteCallback->Call(status, reinterpret_cast<uint32_t*>(ptr), userdata);
@@ -70,14 +72,15 @@ class BufferValidationTest : public ValidationTest {
         void SetUp() override {
             ValidationTest::SetUp();
 
-            mockBufferMapReadCallback = new MockBufferMapReadCallback;
-            mockBufferMapWriteCallback = new MockBufferMapWriteCallback;
+            mockBufferMapReadCallback = std::make_unique<MockBufferMapReadCallback>();
+            mockBufferMapWriteCallback = std::make_unique<MockBufferMapWriteCallback>();
             queue = device.CreateQueue();
         }
 
         void TearDown() override {
-            delete mockBufferMapReadCallback;
-            delete mockBufferMapWriteCallback;
+            // Delete mocks so that expectations are checked
+            mockBufferMapReadCallback = nullptr;
+            mockBufferMapWriteCallback = nullptr;
 
             ValidationTest::TearDown();
         }

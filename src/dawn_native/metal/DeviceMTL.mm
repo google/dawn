@@ -65,10 +65,7 @@ namespace dawn_native { namespace metal {
         [mPendingCommands release];
         mPendingCommands = nil;
 
-        delete mMapTracker;
         mMapTracker = nullptr;
-
-        delete mResourceUploader;
         mResourceUploader = nullptr;
 
         [mMtlDevice release];
@@ -189,11 +186,11 @@ namespace dawn_native { namespace metal {
     }
 
     MapRequestTracker* Device::GetMapTracker() const {
-        return mMapTracker;
+        return mMapTracker.get();
     }
 
     ResourceUploader* Device::GetResourceUploader() const {
-        return mResourceUploader;
+        return mResourceUploader.get();
     }
 
 }}  // namespace dawn_native::metal

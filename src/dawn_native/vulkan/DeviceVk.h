@@ -25,6 +25,7 @@
 #include "dawn_native/vulkan/VulkanFunctions.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
+#include <memory>
 #include <queue>
 
 namespace dawn_native { namespace vulkan {
@@ -123,11 +124,11 @@ namespace dawn_native { namespace vulkan {
         VkQueue mQueue = VK_NULL_HANDLE;
         VkDebugReportCallbackEXT mDebugReportCallback = VK_NULL_HANDLE;
 
-        BufferUploader* mBufferUploader = nullptr;
-        FencedDeleter* mDeleter = nullptr;
-        MapRequestTracker* mMapRequestTracker = nullptr;
-        MemoryAllocator* mMemoryAllocator = nullptr;
-        RenderPassCache* mRenderPassCache = nullptr;
+        std::unique_ptr<BufferUploader> mBufferUploader;
+        std::unique_ptr<FencedDeleter> mDeleter;
+        std::unique_ptr<MapRequestTracker> mMapRequestTracker;
+        std::unique_ptr<MemoryAllocator> mMemoryAllocator;
+        std::unique_ptr<RenderPassCache> mRenderPassCache;
 
         VkFence GetUnusedFence();
         void CheckPassedFences();

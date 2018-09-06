@@ -18,7 +18,6 @@
 
 class BufferMapReadTests : public DawnTest {
     protected:
-
         static void MapReadCallback(dawnBufferMapAsyncStatus status, const void* data, dawnCallbackUserdata userdata) {
             ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
             ASSERT_NE(nullptr, data);

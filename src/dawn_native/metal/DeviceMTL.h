@@ -23,6 +23,8 @@
 
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
+
+#include <memory>
 #include <type_traits>
 
 namespace dawn_native { namespace metal {
@@ -76,8 +78,8 @@ namespace dawn_native { namespace metal {
 
         id<MTLDevice> mMtlDevice = nil;
         id<MTLCommandQueue> mCommandQueue = nil;
-        MapRequestTracker* mMapTracker;
-        ResourceUploader* mResourceUploader;
+        std::unique_ptr<MapRequestTracker> mMapTracker;
+        std::unique_ptr<ResourceUploader> mResourceUploader;
 
         Serial mFinishedCommandSerial = 0;
         Serial mPendingCommandSerial = 1;

@@ -146,11 +146,11 @@ namespace dawn_native { namespace vulkan {
 
         GatherQueueFromDevice();
 
-        mBufferUploader = new BufferUploader(this);
-        mDeleter = new FencedDeleter(this);
-        mMapRequestTracker = new MapRequestTracker(this);
-        mMemoryAllocator = new MemoryAllocator(this);
-        mRenderPassCache = new RenderPassCache(this);
+        mBufferUploader = std::make_unique<BufferUploader>(this);
+        mDeleter = std::make_unique<FencedDeleter>(this);
+        mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
+        mMemoryAllocator = std::make_unique<MemoryAllocator>(this);
+        mRenderPassCache = std::make_unique<RenderPassCache>(this);
     }
 
     Device::~Device() {
@@ -182,21 +182,14 @@ namespace dawn_native { namespace vulkan {
         }
         mUnusedFences.clear();
 
-        delete mBufferUploader;
+        // Free services explicitly so that they can free Vulkan objects before vkDestroyDevice
         mBufferUploader = nullptr;
-
-        delete mDeleter;
         mDeleter = nullptr;
-
-        delete mMapRequestTracker;
         mMapRequestTracker = nullptr;
-
-        delete mMemoryAllocator;
         mMemoryAllocator = nullptr;
 
         // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
         // to them are guaranteed to be finished executing.
-        delete mRenderPassCache;
         mRenderPassCache = nullptr;
 
         // VkQueues are destroyed when the VkDevice is destroyed
@@ -322,23 +315,23 @@ namespace dawn_native { namespace vulkan {
     }
 
     MapRequestTracker* Device::GetMapRequestTracker() const {
-        return mMapRequestTracker;
+        return mMapRequestTracker.get();
     }
 
     MemoryAllocator* Device::GetMemoryAllocator() const {
-        return mMemoryAllocator;
+        return mMemoryAllocator.get();
     }
 
     BufferUploader* Device::GetBufferUploader() const {
-        return mBufferUploader;
+        return mBufferUploader.get();
     }
 
     FencedDeleter* Device::GetFencedDeleter() const {
-        return mDeleter;
+        return mDeleter.get();
     }
 
     RenderPassCache* Device::GetRenderPassCache() const {
-        return mRenderPassCache;
+        return mRenderPassCache.get();
     }
 
     Serial Device::GetSerial() const {

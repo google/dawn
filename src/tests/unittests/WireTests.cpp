@@ -19,6 +19,8 @@
 #include "dawn_wire/Wire.h"
 #include "utils/TerribleCommandBuffer.h"
 
+#include <memory>
+
 using namespace testing;
 using namespace dawn_wire;
 
@@ -76,7 +78,7 @@ class MockDeviceErrorCallback {
         MOCK_METHOD2(Call, void(const char* message, dawnCallbackUserdata userdata));
 };
 
-static MockDeviceErrorCallback* mockDeviceErrorCallback = nullptr;
+static std::unique_ptr<MockDeviceErrorCallback> mockDeviceErrorCallback;
 static void ToMockDeviceErrorCallback(const char* message, dawnCallbackUserdata userdata) {
     mockDeviceErrorCallback->Call(message, userdata);
 }
@@ -86,7 +88,7 @@ class MockBuilderErrorCallback {
         MOCK_METHOD4(Call, void(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2));
 };
 
-static MockBuilderErrorCallback* mockBuilderErrorCallback = nullptr;
+static std::unique_ptr<MockBuilderErrorCallback> mockBuilderErrorCallback;
 static void ToMockBuilderErrorCallback(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2) {
     mockBuilderErrorCallback->Call(status, message, userdata1, userdata2);
 }
@@ -96,7 +98,7 @@ class MockBufferMapReadCallback {
         MOCK_METHOD3(Call, void(dawnBufferMapAsyncStatus status, const uint32_t* ptr, dawnCallbackUserdata userdata));
 };
 
-static MockBufferMapReadCallback* mockBufferMapReadCallback = nullptr;
+static std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
 static void ToMockBufferMapReadCallback(dawnBufferMapAsyncStatus status, const void* ptr, dawnCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapReadCallback->Call(status, static_cast<const uint32_t*>(ptr), userdata);
@@ -107,7 +109,7 @@ class MockBufferMapWriteCallback {
         MOCK_METHOD3(Call, void(dawnBufferMapAsyncStatus status, uint32_t* ptr, dawnCallbackUserdata userdata));
 };
 
-static MockBufferMapWriteCallback* mockBufferMapWriteCallback = nullptr;
+static std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;
 uint32_t* lastMapWritePointer = nullptr;
 static void ToMockBufferMapWriteCallback(dawnBufferMapAsyncStatus status, void* ptr, dawnCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
@@ -122,10 +124,10 @@ class WireTestsBase : public Test {
         }
 
         void SetUp() override {
-            mockDeviceErrorCallback = new MockDeviceErrorCallback;
-            mockBuilderErrorCallback = new MockBuilderErrorCallback;
-            mockBufferMapReadCallback = new MockBufferMapReadCallback;
-            mockBufferMapWriteCallback = new MockBufferMapWriteCallback;
+            mockDeviceErrorCallback = std::make_unique<MockDeviceErrorCallback>();
+            mockBuilderErrorCallback = std::make_unique<MockBuilderErrorCallback>();
+            mockBufferMapReadCallback = std::make_unique<MockBufferMapReadCallback>();
+            mockBufferMapWriteCallback = std::make_unique<MockBufferMapWriteCallback>();
 
             dawnProcTable mockProcs;
             dawnDevice mockDevice;
@@ -138,30 +140,28 @@ class WireTestsBase : public Test {
             }
             EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
 
-            mS2cBuf = new utils::TerribleCommandBuffer();
-            mC2sBuf = new utils::TerribleCommandBuffer(mWireServer);
+            mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
+            mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>(mWireServer.get());
 
-            mWireServer = NewServerCommandHandler(mockDevice, mockProcs, mS2cBuf);
-            mC2sBuf->SetHandler(mWireServer);
+            mWireServer.reset(NewServerCommandHandler(mockDevice, mockProcs, mS2cBuf.get()));
+            mC2sBuf->SetHandler(mWireServer.get());
 
             dawnProcTable clientProcs;
-            mWireClient = NewClientDevice(&clientProcs, &device, mC2sBuf);
+            mWireClient.reset(NewClientDevice(&clientProcs, &device, mC2sBuf.get()));
             dawnSetProcs(&clientProcs);
-            mS2cBuf->SetHandler(mWireClient);
+            mS2cBuf->SetHandler(mWireClient.get());
 
             apiDevice = mockDevice;
         }
 
         void TearDown() override {
             dawnSetProcs(nullptr);
-            delete mWireServer;
-            delete mWireClient;
-            delete mC2sBuf;
-            delete mS2cBuf;
-            delete mockDeviceErrorCallback;
-            delete mockBuilderErrorCallback;
-            delete mockBufferMapReadCallback;
-            delete mockBufferMapWriteCallback;
+
+            // Delete mocks so that expectations are checked
+            mockDeviceErrorCallback = nullptr;
+            mockBuilderErrorCallback = nullptr;
+            mockBufferMapReadCallback = nullptr;
+            mockBufferMapWriteCallback = nullptr;
         }
 
         void FlushClient() {
@@ -179,10 +179,10 @@ class WireTestsBase : public Test {
     private:
         bool mIgnoreSetCallbackCalls = false;
 
-        CommandHandler* mWireServer = nullptr;
-        CommandHandler* mWireClient = nullptr;
-        utils::TerribleCommandBuffer* mS2cBuf = nullptr;
-        utils::TerribleCommandBuffer* mC2sBuf = nullptr;
+        std::unique_ptr<CommandHandler> mWireServer;
+        std::unique_ptr<CommandHandler> mWireClient;
+        std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
+        std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
 };
 
 class WireTests : public WireTestsBase {

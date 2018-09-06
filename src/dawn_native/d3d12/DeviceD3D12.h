@@ -22,6 +22,8 @@
 #include "dawn_native/d3d12/Forward.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
+#include <memory>
+
 namespace dawn_native { namespace d3d12 {
 
     class CommandAllocatorManager;
@@ -88,6 +90,10 @@ namespace dawn_native { namespace d3d12 {
             const ShaderModuleDescriptor* descriptor) override;
         ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
 
+        // Keep mFunctions as the first member so that in the destructor it is freed. Otherwise the
+        // D3D12 DLLs are unloaded before we are done using it.
+        std::unique_ptr<PlatformFunctions> mFunctions;
+
         uint64_t mSerial = 0;
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent;
@@ -97,19 +103,18 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12Device> mD3d12Device;
         ComPtr<ID3D12CommandQueue> mCommandQueue;
 
-        CommandAllocatorManager* mCommandAllocatorManager = nullptr;
-        DescriptorHeapAllocator* mDescriptorHeapAllocator = nullptr;
-        MapRequestTracker* mMapRequestTracker = nullptr;
-        PlatformFunctions* mFunctions = nullptr;
-        ResourceAllocator* mResourceAllocator = nullptr;
-        ResourceUploader* mResourceUploader = nullptr;
-
         struct PendingCommandList {
             ComPtr<ID3D12GraphicsCommandList> commandList;
             bool open = false;
         } mPendingCommands;
 
         SerialQueue<ComPtr<IUnknown>> mUsedComObjectRefs;
+
+        std::unique_ptr<CommandAllocatorManager> mCommandAllocatorManager;
+        std::unique_ptr<DescriptorHeapAllocator> mDescriptorHeapAllocator;
+        std::unique_ptr<MapRequestTracker> mMapRequestTracker;
+        std::unique_ptr<ResourceAllocator> mResourceAllocator;
+        std::unique_ptr<ResourceUploader> mResourceUploader;
     };
 
 }}  // namespace dawn_native::d3d12
