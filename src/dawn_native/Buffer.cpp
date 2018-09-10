@@ -24,7 +24,10 @@
 namespace dawn_native {
 
     MaybeError ValidateBufferDescriptor(DeviceBase*, const BufferDescriptor* descriptor) {
-        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        if (descriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
+
         DAWN_TRY(ValidateBufferUsageBit(descriptor->usage));
 
         dawn::BufferUsageBit usage = descriptor->usage;
@@ -32,13 +35,13 @@ namespace dawn_native {
         const dawn::BufferUsageBit kMapWriteAllowedUsages =
             dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
         if (usage & dawn::BufferUsageBit::MapWrite && (usage & kMapWriteAllowedUsages) != usage) {
-            DAWN_RETURN_ERROR("Only TransferSrc is allowed with MapWrite");
+            return DAWN_VALIDATION_ERROR("Only TransferSrc is allowed with MapWrite");
         }
 
         const dawn::BufferUsageBit kMapReadAllowedUsages =
             dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
         if (usage & dawn::BufferUsageBit::MapRead && (usage & kMapReadAllowedUsages) != usage) {
-            DAWN_RETURN_ERROR("Only TransferDst is allowed with MapRead");
+            return DAWN_VALIDATION_ERROR("Only TransferDst is allowed with MapRead");
         }
 
         return {};
@@ -166,11 +169,11 @@ namespace dawn_native {
     MaybeError BufferBase::ValidateSetSubData(uint32_t start, uint32_t count) const {
         // TODO(cwallez@chromium.org): check for overflows.
         if (start + count > GetSize()) {
-            DAWN_RETURN_ERROR("Buffer subdata out of range");
+            return DAWN_VALIDATION_ERROR("Buffer subdata out of range");
         }
 
         if (!(mUsage & dawn::BufferUsageBit::TransferDst)) {
-            DAWN_RETURN_ERROR("Buffer needs the transfer dst usage bit");
+            return DAWN_VALIDATION_ERROR("Buffer needs the transfer dst usage bit");
         }
 
         return {};
@@ -181,15 +184,15 @@ namespace dawn_native {
                                        dawn::BufferUsageBit requiredUsage) const {
         // TODO(cwallez@chromium.org): check for overflows.
         if (start + size > GetSize()) {
-            DAWN_RETURN_ERROR("Buffer map read out of range");
+            return DAWN_VALIDATION_ERROR("Buffer map read out of range");
         }
 
         if (mIsMapped) {
-            DAWN_RETURN_ERROR("Buffer already mapped");
+            return DAWN_VALIDATION_ERROR("Buffer already mapped");
         }
 
         if (!(mUsage & requiredUsage)) {
-            DAWN_RETURN_ERROR("Buffer needs the correct map usage bit");
+            return DAWN_VALIDATION_ERROR("Buffer needs the correct map usage bit");
         }
 
         return {};
@@ -197,7 +200,7 @@ namespace dawn_native {
 
     MaybeError BufferBase::ValidateUnmap() const {
         if (!mIsMapped) {
-            DAWN_RETURN_ERROR("Buffer wasn't mapped");
+            return DAWN_VALIDATION_ERROR("Buffer wasn't mapped");
         }
 
         return {};

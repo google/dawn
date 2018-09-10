@@ -117,19 +117,19 @@ namespace dawn_native {
         ASSERT(aspects.any());
 
         if (aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-            DAWN_RETURN_ERROR("Missing index buffer");
+            return DAWN_VALIDATION_ERROR("Missing index buffer");
         }
 
         if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
-            DAWN_RETURN_ERROR("Missing vertex buffer");
+            return DAWN_VALIDATION_ERROR("Missing vertex buffer");
         }
 
         if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
-            DAWN_RETURN_ERROR("Missing bind group");
+            return DAWN_VALIDATION_ERROR("Missing bind group");
         }
 
         if (aspects[VALIDATION_ASPECT_PIPELINE]) {
-            DAWN_RETURN_ERROR("Missing pipeline");
+            return DAWN_VALIDATION_ERROR("Missing pipeline");
         }
 
         UNREACHABLE();

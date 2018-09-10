@@ -34,10 +34,10 @@ TEST(ErrorTests, Error_Success) {
     ASSERT_TRUE(result.IsSuccess());
 }
 
-// Check returning an error MaybeError with DAWN_RETURN_ERROR
+// Check returning an error MaybeError with "return DAWN_VALIDATION_ERROR"
 TEST(ErrorTests, Error_Error) {
     auto ReturnError = []() -> MaybeError {
-        DAWN_RETURN_ERROR(dummyErrorMessage);
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
     };
 
     MaybeError result = ReturnError();
@@ -59,10 +59,10 @@ TEST(ErrorTests, ResultOrError_Success) {
     ASSERT_EQ(result.AcquireSuccess(), &dummySuccess);
 }
 
-// Check returning an error ResultOrError with DAWN_RETURN_ERROR
+// Check returning an error ResultOrError with "return DAWN_VALIDATION_ERROR"
 TEST(ErrorTests, ResultOrError_Error) {
     auto ReturnError = []() -> ResultOrError<int*> {
-        DAWN_RETURN_ERROR(dummyErrorMessage);
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
     };
 
     ResultOrError<int*> result = ReturnError();
@@ -96,7 +96,7 @@ TEST(ErrorTests, TRY_Success) {
 // Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_Error) {
     auto ReturnError = []() -> MaybeError {
-        DAWN_RETURN_ERROR(dummyErrorMessage);
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
     };
 
     auto Try = [ReturnError]() -> MaybeError {
@@ -117,7 +117,7 @@ TEST(ErrorTests, TRY_Error) {
 // Check DAWN_TRY adds to the backtrace.
 TEST(ErrorTests, TRY_AddsToBacktrace) {
     auto ReturnError = []() -> MaybeError {
-        DAWN_RETURN_ERROR(dummyErrorMessage);
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
     };
 
     auto SingleTry = [ReturnError]() -> MaybeError {
@@ -172,7 +172,7 @@ TEST(ErrorTests, TRY_RESULT_Success) {
 // Check DAWN_TRY_ASSIGN handles errors correctly.
 TEST(ErrorTests, TRY_RESULT_Error) {
     auto ReturnError = []() -> ResultOrError<int*> {
-        DAWN_RETURN_ERROR(dummyErrorMessage);
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
     };
 
     auto Try = [ReturnError]() -> ResultOrError<int*> {
@@ -196,7 +196,7 @@ TEST(ErrorTests, TRY_RESULT_Error) {
 // Check DAWN_TRY_ASSIGN adds to the backtrace.
 TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
     auto ReturnError = []() -> ResultOrError<int*> {
-        DAWN_RETURN_ERROR(dummyErrorMessage);
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
     };
 
     auto SingleTry = [ReturnError]() -> ResultOrError<int*> {
@@ -227,7 +227,7 @@ TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
 // Check a ResultOrError can be DAWN_TRY_ASSIGNED in a function that returns an Error
 TEST(ErrorTests, TRY_RESULT_ConversionToError) {
     auto ReturnError = []() -> ResultOrError<int*> {
-        DAWN_RETURN_ERROR(dummyErrorMessage);
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
     };
 
     auto Try = [ReturnError]() -> MaybeError {
@@ -250,7 +250,7 @@ TEST(ErrorTests, TRY_RESULT_ConversionToError) {
 // Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_ConversionToErrorOrResult) {
     auto ReturnError = []() -> MaybeError {
-        DAWN_RETURN_ERROR(dummyErrorMessage);
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
     };
 
     auto Try = [ReturnError]() -> ResultOrError<int*>{

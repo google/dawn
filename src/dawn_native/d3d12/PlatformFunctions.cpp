@@ -44,7 +44,7 @@ namespace dawn_native { namespace d3d12 {
                                "D3D12SerializeVersionedRootSignature", &error) ||
             !mD3D12Lib.GetProc(&d3d12CreateVersionedRootSignatureDeserializer,
                                "D3D12CreateVersionedRootSignatureDeserializer", &error)) {
-            DAWN_RETURN_ERROR(error.c_str());
+            return DAWN_CONTEXT_LOST_ERROR(error.c_str());
         }
 
         return {};
@@ -55,7 +55,7 @@ namespace dawn_native { namespace d3d12 {
         if (!mDXGILib.Open("dxgi.dll", &error) ||
             !mDXGILib.GetProc(&dxgiGetDebugInterface1, "DXGIGetDebugInterface1", &error) ||
             !mDXGILib.GetProc(&createDxgiFactory2, "CreateDXGIFactory2", &error)) {
-            DAWN_RETURN_ERROR(error.c_str());
+            return DAWN_CONTEXT_LOST_ERROR(error.c_str());
         }
 
         return {};
@@ -65,7 +65,7 @@ namespace dawn_native { namespace d3d12 {
         std::string error;
         if (!mD3DCompilerLib.Open("d3dcompiler_47.dll", &error) ||
             !mD3DCompilerLib.GetProc(&d3dCompile, "D3DCompile", &error)) {
-            DAWN_RETURN_ERROR(error.c_str());
+            return DAWN_CONTEXT_LOST_ERROR(error.c_str());
         }
 
         return {};

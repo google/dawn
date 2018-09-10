@@ -20,7 +20,10 @@
 
 namespace dawn_native {
     MaybeError ValidateTextureDescriptor(DeviceBase*, const TextureDescriptor* descriptor) {
-        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        if (descriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
+
         DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
         DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
@@ -28,7 +31,7 @@ namespace dawn_native {
         // TODO(jiawei.shao@intel.com): check stuff based on the dimension
         if (descriptor->width == 0 || descriptor->height == 0 || descriptor->depth == 0 ||
             descriptor->arrayLayer == 0 || descriptor->mipLevel == 0) {
-            DAWN_RETURN_ERROR("Cannot create an empty texture");
+            return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
 
         return {};

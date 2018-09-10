@@ -18,8 +18,12 @@
 
 namespace dawn_native {
 
-    ErrorData* MakeError(const char* message, const char* file, const char* function, int line) {
-        ErrorData* error = new ErrorData(message);
+    ErrorData* MakeError(ErrorType type,
+                         const char* message,
+                         const char* file,
+                         const char* function,
+                         int line) {
+        ErrorData* error = new ErrorData(type, message);
         error->AppendBacktrace(file, function, line);
         return error;
     }

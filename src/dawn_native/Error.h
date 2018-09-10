@@ -23,6 +23,11 @@ namespace dawn_native {
     // file to avoid having all files including headers like <string> and <vector>
     class ErrorData;
 
+    enum class ErrorType : uint32_t {
+        Validation,
+        ContextLost,
+    };
+
     // MaybeError and ResultOrError are meant to be used as return value for function that are not
     // expected to, but might fail. The handling of error is potentially much slower than successes.
     using MaybeError = Result<void, ErrorData*>;
@@ -35,16 +40,13 @@ namespace dawn_native {
     //   return SomethingOfTypeT; // for ResultOrError<T>
     //
     // Returning an error is done via:
-    //   DAWN_RETURN_ERROR("My error message");
-#define DAWN_RETURN_ERROR(MESSAGE) return MakeError(MESSAGE, __FILE__, __func__, __LINE__)
-#define DAWN_TRY_ASSERT(EXPR, MESSAGE)  \
-    {                                   \
-        if (!(EXPR)) {                  \
-            DAWN_RETURN_ERROR(MESSAGE); \
-        }                               \
-    }                                   \
-    for (;;)                            \
-    break
+    //   return DAWN_MAKE_ERROR(errorType, "My error message");
+    //
+    // but shorthand version for specific error types are preferred:
+    //   return DAWN_VALIDATION_ERROR("My error message");
+#define DAWN_MAKE_ERROR(TYPE, MESSAGE) MakeError(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
+#define DAWN_VALIDATION_ERROR(MESSAGE) DAWN_MAKE_ERROR(ErrorType::Validation, MESSAGE)
+#define DAWN_CONTEXT_LOST_ERROR(MESSAGE) DAWN_MAKE_ERROR(ErrorType::ContextLost, MESSAGE)
 
 #define DAWN_CONCAT1(x, y) x##y
 #define DAWN_CONCAT2(x, y) DAWN_CONCAT1(x, y)
@@ -83,8 +85,12 @@ namespace dawn_native {
     // Implementation detail of DAWN_TRY and DAWN_TRY_ASSIGN's adding to the Error's backtrace.
     void AppendBacktrace(ErrorData* error, const char* file, const char* function, int line);
 
-    // Implementation detail of DAWN_RETURN_ERROR
-    ErrorData* MakeError(const char* message, const char* file, const char* function, int line);
+    // Implementation detail of DAWN_MAKE_ERROR
+    ErrorData* MakeError(ErrorType type,
+                         const char* message,
+                         const char* file,
+                         const char* function,
+                         int line);
 
 }  // namespace dawn_native
 

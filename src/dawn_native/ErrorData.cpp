@@ -18,7 +18,8 @@ namespace dawn_native {
 
     ErrorData::ErrorData() = default;
 
-    ErrorData::ErrorData(std::string message) : mMessage(std::move(message)) {
+    ErrorData::ErrorData(ErrorType type, std::string message)
+        : mType(type), mMessage(std::move(message)) {
     }
 
     void ErrorData::AppendBacktrace(const char* file, const char* function, int line) {
@@ -28,6 +29,10 @@ namespace dawn_native {
         record.line = line;
 
         mBacktrace.push_back(std::move(record));
+    }
+
+    ErrorType ErrorData::GetType() const {
+        return mType;
     }
 
     const std::string& ErrorData::GetMessage() const {

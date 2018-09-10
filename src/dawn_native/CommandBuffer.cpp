@@ -35,11 +35,11 @@ namespace dawn_native {
         MaybeError ValidateCopyLocationFitsInTexture(const TextureCopyLocation& location) {
             const TextureBase* texture = location.texture.Get();
             if (location.level >= texture->GetNumMipLevels()) {
-                DAWN_RETURN_ERROR("Copy mip-level out of range");
+                return DAWN_VALIDATION_ERROR("Copy mip-level out of range");
             }
 
             if (location.slice >= texture->GetArrayLayers()) {
-                DAWN_RETURN_ERROR("Copy array-layer out of range");
+                return DAWN_VALIDATION_ERROR("Copy array-layer out of range");
             }
 
             // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
@@ -49,13 +49,13 @@ namespace dawn_native {
                     (static_cast<uint64_t>(texture->GetWidth()) >> level) ||
                 uint64_t(location.y) + uint64_t(location.height) >
                     (static_cast<uint64_t>(texture->GetHeight()) >> level)) {
-                DAWN_RETURN_ERROR("Copy would touch outside of the texture");
+                return DAWN_VALIDATION_ERROR("Copy would touch outside of the texture");
             }
 
             // TODO(cwallez@chromium.org): Check the depth bound differently for 2D arrays and 3D
             // textures
             if (location.z != 0 || location.depth != 1) {
-                DAWN_RETURN_ERROR("No support for z != 0 and depth != 1 for now");
+                return DAWN_VALIDATION_ERROR("No support for z != 0 and depth != 1 for now");
             }
 
             return {};
@@ -69,7 +69,7 @@ namespace dawn_native {
         MaybeError ValidateCopySizeFitsInBuffer(const BufferCopyLocation& location,
                                                 uint32_t dataSize) {
             if (!FitsInBuffer(location.buffer.Get(), location.offset, dataSize)) {
-                DAWN_RETURN_ERROR("Copy would overflow the buffer");
+                return DAWN_VALIDATION_ERROR("Copy would overflow the buffer");
             }
 
             return {};
@@ -80,7 +80,7 @@ namespace dawn_native {
             uint32_t texelSize =
                 static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat()));
             if (location.offset % texelSize != 0) {
-                DAWN_RETURN_ERROR("Buffer offset must be a multiple of the texel size");
+                return DAWN_VALIDATION_ERROR("Buffer offset must be a multiple of the texel size");
             }
 
             return {};
@@ -102,12 +102,13 @@ namespace dawn_native {
 
         MaybeError ValidateRowPitch(const TextureCopyLocation& location, uint32_t rowPitch) {
             if (rowPitch % kTextureRowPitchAlignment != 0) {
-                DAWN_RETURN_ERROR("Row pitch must be a multiple of 256");
+                return DAWN_VALIDATION_ERROR("Row pitch must be a multiple of 256");
             }
 
             uint32_t texelSize = TextureFormatPixelSize(location.texture.Get()->GetFormat());
             if (rowPitch < location.width * texelSize) {
-                DAWN_RETURN_ERROR("Row pitch must not be less than the number of bytes per row");
+                return DAWN_VALIDATION_ERROR(
+                    "Row pitch must not be less than the number of bytes per row");
             }
 
             return {};
@@ -116,7 +117,7 @@ namespace dawn_native {
         MaybeError ValidateCanUseAs(BufferBase* buffer, dawn::BufferUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(buffer->GetUsage() & usage)) {
-                DAWN_RETURN_ERROR("buffer doesn't have the required usage.");
+                return DAWN_VALIDATION_ERROR("buffer doesn't have the required usage.");
             }
 
             return {};
@@ -125,7 +126,7 @@ namespace dawn_native {
         MaybeError ValidateCanUseAs(TextureBase* texture, dawn::TextureUsageBit usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(texture->GetUsage() & usage)) {
-                DAWN_RETURN_ERROR("texture doesn't have the required usage.");
+                return DAWN_VALIDATION_ERROR("texture doesn't have the required usage.");
             }
 
             return {};
@@ -172,7 +173,8 @@ namespace dawn_native {
             MaybeError ValidateUsages(PassType pass) const {
                 // Storage resources cannot be used twice in the same compute pass
                 if (pass == PassType::Compute && mStorageUsedMultipleTimes) {
-                    DAWN_RETURN_ERROR("Storage resource used multiple times in compute pass");
+                    return DAWN_VALIDATION_ERROR(
+                        "Storage resource used multiple times in compute pass");
                 }
 
                 // Buffers can only be used as single-write or multiple read.
@@ -181,14 +183,14 @@ namespace dawn_native {
                     dawn::BufferUsageBit usage = it.second;
 
                     if (usage & ~buffer->GetUsage()) {
-                        DAWN_RETURN_ERROR("Buffer missing usage for the pass");
+                        return DAWN_VALIDATION_ERROR("Buffer missing usage for the pass");
                     }
 
                     bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
                     bool singleUse = dawn::HasZeroOrOneBits(usage);
 
                     if (!readOnly && !singleUse) {
-                        DAWN_RETURN_ERROR(
+                        return DAWN_VALIDATION_ERROR(
                             "Buffer used as writeable usage and another usage in pass");
                     }
                 }
@@ -200,13 +202,14 @@ namespace dawn_native {
                     dawn::TextureUsageBit usage = it.second;
 
                     if (usage & ~texture->GetUsage()) {
-                        DAWN_RETURN_ERROR("Texture missing usage for the pass");
+                        return DAWN_VALIDATION_ERROR("Texture missing usage for the pass");
                     }
 
                     // For textures the only read-only usage in a pass is Sampled, so checking the
                     // usage constraint simplifies to checking a single usage bit is set.
                     if (!dawn::HasZeroOrOneBits(it.second)) {
-                        DAWN_RETURN_ERROR("Texture used with more than one usage in pass");
+                        return DAWN_VALIDATION_ERROR(
+                            "Texture used with more than one usage in pass");
                     }
                 }
 
@@ -386,7 +389,7 @@ namespace dawn_native {
                 } break;
 
                 default:
-                    DAWN_RETURN_ERROR("Command disallowed outside of a pass");
+                    return DAWN_VALIDATION_ERROR("Command disallowed outside of a pass");
             }
         }
 
@@ -426,7 +429,7 @@ namespace dawn_native {
                     // recorded because it impacts the size of an allocation in the
                     // CommandAllocator.
                     if (cmd->stages & ~dawn::ShaderStageBit::Compute) {
-                        DAWN_RETURN_ERROR(
+                        return DAWN_VALIDATION_ERROR(
                             "SetPushConstants stage must be compute or 0 in compute passes");
                     }
                 } break;
@@ -439,11 +442,11 @@ namespace dawn_native {
                 } break;
 
                 default:
-                    DAWN_RETURN_ERROR("Command disallowed inside a compute pass");
+                    return DAWN_VALIDATION_ERROR("Command disallowed inside a compute pass");
             }
         }
 
-        DAWN_RETURN_ERROR("Unfinished compute pass");
+        return DAWN_VALIDATION_ERROR("Unfinished compute pass");
     }
 
     MaybeError CommandBufferBuilder::ValidateRenderPass(RenderPassDescriptorBase* renderPass) {
@@ -487,7 +490,8 @@ namespace dawn_native {
                     RenderPipelineBase* pipeline = cmd->pipeline.Get();
 
                     if (!pipeline->IsCompatibleWith(renderPass)) {
-                        DAWN_RETURN_ERROR("Pipeline is incompatible with this render pass");
+                        return DAWN_VALIDATION_ERROR(
+                            "Pipeline is incompatible with this render pass");
                     }
 
                     persistentState.SetRenderPipeline(pipeline);
@@ -501,7 +505,7 @@ namespace dawn_native {
                     // CommandAllocator.
                     if (cmd->stages &
                         ~(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment)) {
-                        DAWN_RETURN_ERROR(
+                        return DAWN_VALIDATION_ERROR(
                             "SetPushConstants stage must be a subset of (vertex|fragment) in "
                             "render passes");
                     }
@@ -545,11 +549,11 @@ namespace dawn_native {
                 } break;
 
                 default:
-                    DAWN_RETURN_ERROR("Command disallowed inside a render pass");
+                    return DAWN_VALIDATION_ERROR("Command disallowed inside a render pass");
             }
         }
 
-        DAWN_RETURN_ERROR("Unfinished render pass");
+        return DAWN_VALIDATION_ERROR("Unfinished render pass");
     }
 
     // Implementation of the API's command recording methods

@@ -26,7 +26,9 @@ namespace dawn_native {
 
     MaybeError ValidateShaderModuleDescriptor(DeviceBase*,
                                               const ShaderModuleDescriptor* descriptor) {
-        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        if (descriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
 
         spvtools::SpirvTools spirvTools(SPV_ENV_WEBGPU_0);
 
@@ -55,7 +57,7 @@ namespace dawn_native {
         });
 
         if (!spirvTools.Validate(descriptor->code, descriptor->codeSize)) {
-            DAWN_RETURN_ERROR(errorStream.str().c_str());
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
         return {};

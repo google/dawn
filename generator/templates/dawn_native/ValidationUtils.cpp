@@ -24,7 +24,7 @@ namespace dawn_native {
                         return {};
                 {% endfor %}
                 default:
-                    DAWN_RETURN_ERROR("Invalid value for {{as_cType(type.name)}}");
+                    return DAWN_VALIDATION_ERROR("Invalid value for {{as_cType(type.name)}}");
             }
         }
 
@@ -35,7 +35,7 @@ namespace dawn_native {
             if ((value & static_cast<dawn::{{as_cppType(type.name)}}>(~{{type.full_mask}})) == 0) {
                 return {};
             }
-            DAWN_RETURN_ERROR("Invalid value for {{as_cType(type.name)}}");
+            return DAWN_VALIDATION_ERROR("Invalid value for {{as_cType(type.name)}}");
         }
 
     {% endfor %}

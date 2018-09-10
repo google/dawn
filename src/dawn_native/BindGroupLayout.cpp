@@ -25,18 +25,22 @@ namespace dawn_native {
 
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
                                                  const BindGroupLayoutDescriptor* descriptor) {
-        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        if (descriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
         for (uint32_t i = 0; i < descriptor->numBindings; ++i) {
             auto& binding = descriptor->bindings[i];
-            DAWN_TRY_ASSERT(binding.binding <= kMaxBindingsPerGroup,
-                            "some binding index exceeds the maximum value");
             DAWN_TRY(ValidateShaderStageBit(binding.visibility));
             DAWN_TRY(ValidateBindingType(binding.type));
 
-            DAWN_TRY_ASSERT(!bindingsSet[binding.binding],
-                            "some binding index was specified more than once");
+            if (binding.binding > kMaxBindingsPerGroup) {
+                return DAWN_VALIDATION_ERROR("some binding index exceeds the maximum value");
+            }
+            if (bindingsSet[binding.binding]) {
+                return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
+            }
             bindingsSet.set(binding.binding);
         }
         return {};

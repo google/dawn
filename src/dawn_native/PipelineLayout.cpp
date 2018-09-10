@@ -22,12 +22,18 @@ namespace dawn_native {
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
                                                 const PipelineLayoutDescriptor* descriptor) {
-        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
-        DAWN_TRY_ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups,
-                        "too many bind group layouts");
+        if (descriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
+
+        if (descriptor->numBindGroupLayouts > kMaxBindGroups) {
+            return DAWN_VALIDATION_ERROR("too many bind group layouts");
+        }
+
         for (uint32_t i = 0; i < descriptor->numBindGroupLayouts; ++i) {
-            DAWN_TRY_ASSERT(descriptor->bindGroupLayouts[i] != nullptr,
-                            "bind group layouts may not be null");
+            if (descriptor->bindGroupLayouts[i] == nullptr) {
+                return DAWN_VALIDATION_ERROR("bind group layouts may not be null");
+            }
         }
         return {};
     }

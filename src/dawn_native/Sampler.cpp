@@ -20,7 +20,9 @@
 namespace dawn_native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descriptor) {
-        DAWN_TRY_ASSERT(descriptor->nextInChain == nullptr, "nextInChain must be nullptr");
+        if (descriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
         DAWN_TRY(ValidateFilterMode(descriptor->minFilter));
         DAWN_TRY(ValidateFilterMode(descriptor->magFilter));
         DAWN_TRY(ValidateFilterMode(descriptor->mipmapFilter));
