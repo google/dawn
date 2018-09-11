@@ -14,8 +14,13 @@
         "See the License for the specific language governing permissions and",
         "limitations under the License."
     ],
-    "bool": {
-        "category": "native"
+    "address mode": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name":"repeat"},
+            {"value": 1, "name":"mirrored repeat"},
+            {"value": 2, "name":"clamp to edge"}
+        ]
     },
     "bind group": {
         "category": "object"
@@ -158,6 +163,9 @@
                 ]
             }
         ]
+    },
+    "bool": {
+        "category": "native"
     },
     "builder error status": {
         "category": "enum",
@@ -673,14 +681,6 @@
             {"value": 1, "name":"linear"}
         ]
     },
-    "address mode": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name":"repeat"},
-            {"value": 1, "name":"mirrored repeat"},
-            {"value": 2, "name":"clamp to edge"}
-        ]
-    },
     "float": {
         "category": "native"
     },
@@ -1010,6 +1010,19 @@
             {"value": 0, "name": "2D"}
         ]
     },
+    "texture format": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "r8 g8 b8 a8 unorm"},
+            {"value": 1, "name": "r8 g8 unorm"},
+            {"value": 2, "name": "r8 unorm"},
+            {"value": 3, "name": "r8 g8 b8 a8 uint"},
+            {"value": 4, "name": "r8 g8 uint"},
+            {"value": 5, "name": "r8 uint"},
+            {"value": 6, "name": "b8 g8 r8 a8 unorm"},
+            {"value": 7, "name": "d32 float s8 uint"}
+        ]
+    },
     "texture usage bit": {
         "category": "bitmask",
         "values": [
@@ -1034,19 +1047,6 @@
             }
         ]
     },
-    "texture format": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "r8 g8 b8 a8 unorm"},
-            {"value": 1, "name": "r8 g8 unorm"},
-            {"value": 2, "name": "r8 unorm"},
-            {"value": 3, "name": "r8 g8 b8 a8 uint"},
-            {"value": 4, "name": "r8 g8 uint"},
-            {"value": 5, "name": "r8 uint"},
-            {"value": 6, "name": "b8 g8 r8 a8 unorm"},
-            {"value": 7, "name": "d32 float s8 uint"}
-        ]
-    },
     "vertex format": {
         "category": "enum",
         "values": [
@@ -1067,13 +1067,13 @@
     "void": {
         "category": "native"
     },
-    "uint8_t": {
-        "category": "native"
-    },
     "uint32_t": {
         "category": "native"
     },
     "uint64_t": {
+        "category": "native"
+    },
+    "uint8_t": {
         "category": "native"
     }
 }
