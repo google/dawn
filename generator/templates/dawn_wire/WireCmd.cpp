@@ -135,6 +135,9 @@
 
         return result;
     }
+    // GetExtraRequiredSize isn't used for structures that are value members of other structures
+    // because we assume they cannot contain pointers themselves.
+    DAWN_UNUSED_FUNC({{name}}GetExtraRequiredSize);
 
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.

@@ -23,6 +23,7 @@
 //  - DAWN_(UN)?LIKELY(EXPR): Where available, hints the compiler that the expression will be true
 //      (resp. false) to help it generate code that leads to better branch prediction.
 //  - DAWN_UNUSED(EXPR): Prevents unused variable/expression warnings on EXPR.
+//  - DAWN_UNUSED_FUNC(FUNC): Prevents unused function warnings on FUNC.
 
 // Clang and GCC, check for __clang__ too to catch clang-cl masquarading as MSVC
 #if defined(__GNUC__) || defined(__clang__)
@@ -75,6 +76,8 @@ extern void __cdecl __debugbreak(void);
 
 // It seems that (void) EXPR works on all compilers to silence the unused variable warning.
 #define DAWN_UNUSED(EXPR) (void)EXPR
+// Likewise using static asserting on sizeof(&FUNC) seems to make it tagged as used
+#define DAWN_UNUSED_FUNC(FUNC) static_assert(sizeof(&FUNC) == sizeof(void (*)()), "");
 
 // Add noop replacements for macros for features that aren't supported by the compiler.
 #if !defined(DAWN_LIKELY)
