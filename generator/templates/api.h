@@ -36,7 +36,7 @@
 {% endfor %}
 
 {% for type in by_category["structure"] %}
-    typedef struct {
+    typedef struct {{as_cType(type.name)}} {
         {% if type.extensible %}
             const void* nextInChain;
         {% endif %}
@@ -44,6 +44,7 @@
             {{as_annotated_cType(member)}};
         {% endfor %}
     } {{as_cType(type.name)}};
+
 {% endfor %}
 
 // Custom types depending on the target language
