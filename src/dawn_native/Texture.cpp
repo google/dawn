@@ -126,13 +126,13 @@ namespace dawn_native {
         return mUsage;
     }
 
-    TextureViewBuilder* TextureBase::CreateTextureViewBuilder() {
-        return new TextureViewBuilder(mDevice, this);
+    TextureViewBase* TextureBase::CreateDefaultTextureView() {
+        return mDevice->CreateDefaultTextureView(this);
     }
 
     // TextureViewBase
 
-    TextureViewBase::TextureViewBase(TextureViewBuilder* builder) : mTexture(builder->mTexture) {
+    TextureViewBase::TextureViewBase(TextureBase* texture) : mTexture(texture) {
     }
 
     const TextureBase* TextureViewBase::GetTexture() const {
@@ -141,16 +141,6 @@ namespace dawn_native {
 
     TextureBase* TextureViewBase::GetTexture() {
         return mTexture.Get();
-    }
-
-    // TextureViewBuilder
-
-    TextureViewBuilder::TextureViewBuilder(DeviceBase* device, TextureBase* texture)
-        : Builder(device), mTexture(texture) {
-    }
-
-    TextureViewBase* TextureViewBuilder::GetResultImpl() {
-        return mDevice->CreateTextureView(this);
     }
 
 }  // namespace dawn_native

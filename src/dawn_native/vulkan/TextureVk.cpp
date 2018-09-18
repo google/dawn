@@ -342,8 +342,8 @@ namespace dawn_native { namespace vulkan {
         mLastUsage = usage;
     }
 
-    TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
-        Device* device = ToBackend(builder->GetDevice());
+    TextureView::TextureView(TextureBase* texture) : TextureViewBase(texture) {
+        Device* device = ToBackend(texture->GetDevice());
 
         VkImageViewCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

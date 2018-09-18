@@ -47,7 +47,7 @@ namespace dawn_native { namespace d3d12 {
 
     class TextureView : public TextureViewBase {
       public:
-        TextureView(TextureViewBuilder* builder);
+        TextureView(TextureBase* builder);
 
         const D3D12_SHADER_RESOURCE_VIEW_DESC& GetSRVDescriptor() const;
         D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor();

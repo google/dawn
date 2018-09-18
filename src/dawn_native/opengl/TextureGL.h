@@ -46,7 +46,7 @@ namespace dawn_native { namespace opengl {
 
     class TextureView : public TextureViewBase {
       public:
-        TextureView(TextureViewBuilder* builder);
+        TextureView(TextureBase* texture);
     };
 
 }}  // namespace dawn_native::opengl

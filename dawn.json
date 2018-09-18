@@ -985,8 +985,8 @@
         "category": "object",
         "methods": [
             {
-                "name": "create texture view builder",
-                "returns": "texture view builder"
+                "name": "create default texture view",
+                "returns": "texture view"
             }
         ]
     },
@@ -1037,15 +1037,6 @@
     },
     "texture view": {
         "category": "object"
-    },
-    "texture view builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "texture view"
-            }
-        ]
     },
     "vertex format": {
         "category": "enum",

@@ -702,7 +702,7 @@ TEST_P(BlendStateTest, IndependentBlendState) {
 
     for (uint32_t i = 0; i < 4; ++i) {
         renderTargets[i] = device.CreateTexture(&descriptor);
-        renderTargetViews[i] = renderTargets[i].CreateTextureViewBuilder().GetResult();
+        renderTargetViews[i] = renderTargets[i].CreateDefaultTextureView();
     }
 
     dawn::RenderPassDescriptor renderpass = device.CreateRenderPassDescriptorBuilder()

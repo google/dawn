@@ -50,7 +50,7 @@ namespace dawn_native { namespace vulkan {
 
     class TextureView : public TextureViewBase {
       public:
-        TextureView(TextureViewBuilder* builder);
+        TextureView(TextureBase* texture);
         ~TextureView();
 
         VkImageView GetHandle() const;

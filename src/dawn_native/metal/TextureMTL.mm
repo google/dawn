@@ -98,7 +98,7 @@ namespace dawn_native { namespace metal {
         return mMtlTexture;
     }
 
-    TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
+    TextureView::TextureView(TextureBase* texture) : TextureViewBase(texture) {
     }
 
 }}  // namespace dawn_native::metal

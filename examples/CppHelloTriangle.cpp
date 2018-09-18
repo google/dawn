@@ -131,7 +131,7 @@ void init() {
         .SetInputState(inputState)
         .GetResult();
 
-    dawn::TextureView view = texture.CreateTextureViewBuilder().GetResult();
+    dawn::TextureView view = texture.CreateDefaultTextureView();
 
     bindGroup = device.CreateBindGroupBuilder()
         .SetLayout(bgl)

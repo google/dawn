@@ -146,8 +146,7 @@ dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device) {
     descriptor.mipLevel = 1;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
     auto depthStencilTexture = device.CreateTexture(&descriptor);
-    return depthStencilTexture.CreateTextureViewBuilder()
-        .GetResult();
+    return depthStencilTexture.CreateDefaultTextureView();
 }
 
 void GetNextRenderPassDescriptor(const dawn::Device& device,
@@ -156,7 +155,7 @@ void GetNextRenderPassDescriptor(const dawn::Device& device,
     dawn::Texture* backbuffer,
     dawn::RenderPassDescriptor* info) {
     *backbuffer = swapchain.GetNextTexture();
-    auto backbufferView = backbuffer->CreateTextureViewBuilder().GetResult();
+    auto backbufferView = backbuffer->CreateDefaultTextureView();
     *info = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, backbufferView, dawn::LoadOp::Clear)
         .SetDepthStencilAttachment(depthStencilView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)

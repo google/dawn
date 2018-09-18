@@ -184,7 +184,7 @@ namespace dawn_native { namespace d3d12 {
         mLastUsage = usage;
     }
 
-    TextureView::TextureView(TextureViewBuilder* builder) : TextureViewBase(builder) {
+    TextureView::TextureView(TextureBase* texture) : TextureViewBase(texture) {
         mSrvDesc.Format = D3D12TextureFormat(GetTexture()->GetFormat());
         mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         switch (GetTexture()->GetDimension()) {

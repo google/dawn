@@ -325,8 +325,8 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return new Texture(this, descriptor);
     }
-    TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
-        return new TextureView(builder);
+    TextureViewBase* Device::CreateDefaultTextureView(TextureBase* texture) {
+        return new TextureView(texture);
     }
 
 }}  // namespace dawn_native::d3d12

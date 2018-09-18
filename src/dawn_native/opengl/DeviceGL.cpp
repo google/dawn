@@ -102,8 +102,8 @@ namespace dawn_native { namespace opengl {
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return new Texture(this, descriptor);
     }
-    TextureViewBase* Device::CreateTextureView(TextureViewBuilder* builder) {
-        return new TextureView(builder);
+    TextureViewBase* Device::CreateDefaultTextureView(TextureBase* texture) {
+        return new TextureView(texture);
     }
 
     void Device::TickImpl() {

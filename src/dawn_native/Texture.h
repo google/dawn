@@ -53,7 +53,7 @@ namespace dawn_native {
         DeviceBase* GetDevice() const;
 
         // Dawn API
-        TextureViewBuilder* CreateTextureViewBuilder();
+        TextureViewBase* CreateDefaultTextureView();
 
       private:
         DeviceBase* mDevice;
@@ -68,24 +68,12 @@ namespace dawn_native {
 
     class TextureViewBase : public RefCounted {
       public:
-        TextureViewBase(TextureViewBuilder* builder);
+        TextureViewBase(TextureBase* texture);
 
         const TextureBase* GetTexture() const;
         TextureBase* GetTexture();
 
       private:
-        Ref<TextureBase> mTexture;
-    };
-
-    class TextureViewBuilder : public Builder<TextureViewBase> {
-      public:
-        TextureViewBuilder(DeviceBase* device, TextureBase* texture);
-
-      private:
-        friend class TextureViewBase;
-
-        TextureViewBase* GetResultImpl() override;
-
         Ref<TextureBase> mTexture;
     };
 

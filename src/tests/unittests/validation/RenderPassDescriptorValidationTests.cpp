@@ -33,8 +33,7 @@ dawn::TextureView Create2DAttachment(dawn::Device& device, uint32_t width, uint3
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
     dawn::Texture attachment = device.CreateTexture(&descriptor);
 
-    return attachment.CreateTextureViewBuilder()
-        .GetResult();
+    return attachment.CreateDefaultTextureView();
 }
 
 // A render pass with no attachments isn't valid

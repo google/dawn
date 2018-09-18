@@ -85,8 +85,7 @@ dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
         descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
 
         auto colorBuffer = device.CreateTexture(&descriptor);
-        auto colorView = colorBuffer.CreateTextureViewBuilder()
-            .GetResult();
+        auto colorView = colorBuffer.CreateDefaultTextureView();
 
         return device.CreateRenderPassDescriptorBuilder()
             .SetColorAttachment(0, colorView, dawn::LoadOp::Clear)
@@ -139,7 +138,7 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
     dummy.attachment = device.CreateTexture(&descriptor);
 
-    dawn::TextureView view = AssertWillBeSuccess(dummy.attachment.CreateTextureViewBuilder()).GetResult();
+    dawn::TextureView view = dummy.attachment.CreateDefaultTextureView();
 
     dummy.renderPass = AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
         .SetColorAttachment(0, view, dawn::LoadOp::Clear)
