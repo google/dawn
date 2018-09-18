@@ -74,9 +74,12 @@ namespace dawn_native { namespace metal {
         desc.textureType = MetalTextureType(GetDimension(), GetArrayLayers());
         desc.usage = MetalTextureUsage(GetUsage());
         desc.pixelFormat = MetalPixelFormat(GetFormat());
-        desc.width = GetWidth();
-        desc.height = GetHeight();
-        desc.depth = GetDepth();
+
+        const Extent3D& size = GetSize();
+        desc.width = size.width;
+        desc.height = size.height;
+        desc.depth = size.depth;
+
         desc.mipmapLevelCount = GetNumMipLevels();
         desc.arrayLength = GetArrayLayers();
         desc.storageMode = MTLStorageModePrivate;

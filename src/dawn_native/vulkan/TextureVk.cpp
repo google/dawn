@@ -181,6 +181,10 @@ namespace dawn_native { namespace vulkan {
             return VK_IMAGE_ASPECT_COLOR_BIT;
         }
 
+        VkExtent3D VulkanExtent3D(const Extent3D& extent) {
+            return {extent.width, extent.height, extent.depth};
+        }
+
     }  // namespace
 
     // Converts Dawn texture format to Vulkan formats.
@@ -246,7 +250,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
         createInfo.imageType = VulkanImageType(GetDimension());
         createInfo.format = VulkanImageFormat(GetFormat());
-        createInfo.extent = VkExtent3D{GetWidth(), GetHeight(), GetDepth()};
+        createInfo.extent = VulkanExtent3D(GetSize());
         createInfo.mipLevels = GetNumMipLevels();
         createInfo.arrayLayers = GetArrayLayers();
         createInfo.samples = VK_SAMPLE_COUNT_1_BIT;

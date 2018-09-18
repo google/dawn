@@ -92,16 +92,16 @@ namespace dawn_native {
             if (this->mWidth == 0) {
                 ASSERT(this->mHeight == 0);
 
-                this->mWidth = attachment->GetTexture()->GetWidth();
-                this->mHeight = attachment->GetTexture()->GetHeight();
+                this->mWidth = attachment->GetTexture()->GetSize().width;
+                this->mHeight = attachment->GetTexture()->GetSize().height;
                 ASSERT(this->mWidth != 0 && this->mHeight != 0);
 
                 return true;
             }
 
             ASSERT(this->mWidth != 0 && this->mHeight != 0);
-            return this->mWidth == attachment->GetTexture()->GetWidth() &&
-                   this->mHeight == attachment->GetTexture()->GetHeight();
+            return this->mWidth == attachment->GetTexture()->GetSize().width &&
+                   this->mHeight == attachment->GetTexture()->GetSize().height;
         };
 
         uint32_t attachmentCount = 0;

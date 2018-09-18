@@ -46,9 +46,9 @@ namespace dawn_native {
             // overflows.
             uint64_t level = location.level;
             if (uint64_t(location.x) + uint64_t(location.width) >
-                    (static_cast<uint64_t>(texture->GetWidth()) >> level) ||
+                    (static_cast<uint64_t>(texture->GetSize().width) >> level) ||
                 uint64_t(location.y) + uint64_t(location.height) >
-                    (static_cast<uint64_t>(texture->GetHeight()) >> level)) {
+                    (static_cast<uint64_t>(texture->GetSize().height) >> level)) {
                 return DAWN_VALIDATION_ERROR("Copy would touch outside of the texture");
             }
 

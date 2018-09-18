@@ -112,8 +112,11 @@ namespace dawn_native { namespace d3d12 {
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12TextureDimension(GetDimension());
         resourceDescriptor.Alignment = 0;
-        resourceDescriptor.Width = GetWidth();
-        resourceDescriptor.Height = GetHeight();
+
+        const Extent3D& size = GetSize();
+        resourceDescriptor.Width = size.width;
+        resourceDescriptor.Height = size.height;
+
         resourceDescriptor.DepthOrArraySize = GetDepthOrArraySize();
         resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
         resourceDescriptor.Format = D3D12TextureFormat(GetFormat());

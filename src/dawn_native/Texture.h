@@ -44,9 +44,7 @@ namespace dawn_native {
 
         dawn::TextureDimension GetDimension() const;
         dawn::TextureFormat GetFormat() const;
-        uint32_t GetWidth() const;
-        uint32_t GetHeight() const;
-        uint32_t GetDepth() const;
+        const Extent3D& GetSize() const;
         uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
         dawn::TextureUsageBit GetUsage() const;
@@ -60,7 +58,7 @@ namespace dawn_native {
 
         dawn::TextureDimension mDimension;
         dawn::TextureFormat mFormat;
-        uint32_t mWidth, mHeight, mDepth;
+        Extent3D mSize;
         uint32_t mArrayLayers;
         uint32_t mNumMipLevels;
         dawn::TextureUsageBit mUsage = dawn::TextureUsageBit::None;

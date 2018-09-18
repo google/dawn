@@ -77,8 +77,8 @@ namespace dawn_native { namespace opengl {
         : TextureBase(device, descriptor), mHandle(handle) {
         mTarget = TargetForDimensionAndArrayLayers(GetDimension(), GetArrayLayers());
 
-        uint32_t width = GetWidth();
-        uint32_t height = GetHeight();
+        uint32_t width = GetSize().width;
+        uint32_t height = GetSize().height;
         uint32_t levels = GetNumMipLevels();
         uint32_t arrayLayers = GetArrayLayers();
 

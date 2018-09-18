@@ -90,9 +90,7 @@ namespace dawn_native {
         : mDevice(device),
           mDimension(descriptor->dimension),
           mFormat(descriptor->format),
-          mWidth(descriptor->size.width),
-          mHeight(descriptor->size.height),
-          mDepth(descriptor->size.depth),
+          mSize(descriptor->size),
           mArrayLayers(descriptor->arrayLayer),
           mNumMipLevels(descriptor->mipLevel),
           mUsage(descriptor->usage) {
@@ -108,14 +106,8 @@ namespace dawn_native {
     dawn::TextureFormat TextureBase::GetFormat() const {
         return mFormat;
     }
-    uint32_t TextureBase::GetWidth() const {
-        return mWidth;
-    }
-    uint32_t TextureBase::GetHeight() const {
-        return mHeight;
-    }
-    uint32_t TextureBase::GetDepth() const {
-        return mDepth;
+    const Extent3D& TextureBase::GetSize() const {
+        return mSize;
     }
     uint32_t TextureBase::GetArrayLayers() const {
         return mArrayLayers;
