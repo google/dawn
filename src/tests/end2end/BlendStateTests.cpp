@@ -692,9 +692,9 @@ TEST_P(BlendStateTest, IndependentBlendState) {
 
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
-    descriptor.width = kRTSize;
-    descriptor.height = kRTSize;
-    descriptor.depth = 1;
+    descriptor.size.width = kRTSize;
+    descriptor.size.height = kRTSize;
+    descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
     descriptor.mipLevel = 1;

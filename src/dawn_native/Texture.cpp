@@ -29,8 +29,9 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
         // TODO(jiawei.shao@intel.com): check stuff based on the dimension
-        if (descriptor->width == 0 || descriptor->height == 0 || descriptor->depth == 0 ||
-            descriptor->arrayLayer == 0 || descriptor->mipLevel == 0) {
+        if (descriptor->size.width == 0 || descriptor->size.height == 0 ||
+            descriptor->size.depth == 0 || descriptor->arrayLayer == 0 ||
+            descriptor->mipLevel == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
 
@@ -89,9 +90,9 @@ namespace dawn_native {
         : mDevice(device),
           mDimension(descriptor->dimension),
           mFormat(descriptor->format),
-          mWidth(descriptor->width),
-          mHeight(descriptor->height),
-          mDepth(descriptor->depth),
+          mWidth(descriptor->size.width),
+          mHeight(descriptor->size.height),
+          mDepth(descriptor->size.depth),
           mArrayLayers(descriptor->arrayLayer),
           mNumMipLevels(descriptor->mipLevel),
           mUsage(descriptor->usage) {

@@ -61,9 +61,9 @@ namespace dawn_native {
 
         TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
-        descriptor.width = mWidth;
-        descriptor.height = mHeight;
-        descriptor.depth = 1;
+        descriptor.size.width = mWidth;
+        descriptor.size.height = mHeight;
+        descriptor.size.depth = 1;
         descriptor.arrayLayer = 1;
         descriptor.format = mFormat;
         descriptor.mipLevel = 1;

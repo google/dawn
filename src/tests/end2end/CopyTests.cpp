@@ -75,9 +75,9 @@ class CopyTests_T2B : public CopyTests {
             // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
             dawn::TextureDescriptor descriptor;
             descriptor.dimension = dawn::TextureDimension::e2D;
-            descriptor.width = textureSpec.width;
-            descriptor.height = textureSpec.height;
-            descriptor.depth = 1;
+            descriptor.size.width = textureSpec.width;
+            descriptor.size.height = textureSpec.height;
+            descriptor.size.depth = 1;
             descriptor.arrayLayer = textureSpec.arrayLayer;
             descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
             descriptor.mipLevel = textureSpec.level + 1;
@@ -175,9 +175,9 @@ protected:
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
-        descriptor.width = textureSpec.width;
-        descriptor.height = textureSpec.height;
-        descriptor.depth = 1;
+        descriptor.size.width = textureSpec.width;
+        descriptor.size.height = textureSpec.height;
+        descriptor.size.depth = 1;
         descriptor.arrayLayer = 1;
         descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
         descriptor.mipLevel = textureSpec.level + 1;

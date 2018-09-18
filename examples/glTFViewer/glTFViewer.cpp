@@ -384,9 +384,9 @@ namespace {
 
             dawn::TextureDescriptor descriptor;
             descriptor.dimension = dawn::TextureDimension::e2D;
-            descriptor.width = iImage.width;
-            descriptor.height = iImage.height;
-            descriptor.depth = 1;
+            descriptor.size.width = iImage.width;
+            descriptor.size.height = iImage.height;
+            descriptor.size.depth = 1;
             descriptor.arrayLayer = 1;
             descriptor.format = format;
             descriptor.mipLevel = 1;

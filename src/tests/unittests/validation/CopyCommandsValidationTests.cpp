@@ -30,9 +30,9 @@ class CopyCommandTest : public ValidationTest {
                                          dawn::TextureFormat format, dawn::TextureUsageBit usage) {
             dawn::TextureDescriptor descriptor;
             descriptor.dimension = dawn::TextureDimension::e2D;
-            descriptor.width = width;
-            descriptor.height = height;
-            descriptor.depth = 1;
+            descriptor.size.width = width;
+            descriptor.size.height = height;
+            descriptor.size.depth = 1;
             descriptor.arrayLayer = arrayLayer;
             descriptor.format = format;
             descriptor.mipLevel = levels;

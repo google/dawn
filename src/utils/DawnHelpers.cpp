@@ -135,9 +135,9 @@ namespace utils {
         result.colorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
-        descriptor.width = width;
-        descriptor.height = height;
-        descriptor.depth = 1;
+        descriptor.size.width = width;
+        descriptor.size.height = height;
+        descriptor.size.depth = 1;
         descriptor.arrayLayer = 1;
         descriptor.format = result.colorFormat;
         descriptor.mipLevel = 1;

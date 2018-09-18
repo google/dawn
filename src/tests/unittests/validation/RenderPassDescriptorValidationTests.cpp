@@ -24,9 +24,9 @@ class RenderPassDescriptorValidationTest : public ValidationTest {
 dawn::TextureView Create2DAttachment(dawn::Device& device, uint32_t width, uint32_t height, dawn::TextureFormat format) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
-    descriptor.width = width;
-    descriptor.height = height;
-    descriptor.depth = 1;
+    descriptor.size.width = width;
+    descriptor.size.height = height;
+    descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = format;
     descriptor.mipLevel = 1;

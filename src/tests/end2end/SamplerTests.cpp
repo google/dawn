@@ -82,9 +82,9 @@ protected:
 
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
-        descriptor.width = 2;
-        descriptor.height = 2;
-        descriptor.depth = 1;
+        descriptor.size.width = 2;
+        descriptor.size.height = 2;
+        descriptor.size.depth = 1;
         descriptor.arrayLayer = 1;
         descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
         descriptor.mipLevel = 1;

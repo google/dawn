@@ -665,6 +665,14 @@
     "device error callback": {
         "category": "natively defined"
     },
+    "extent 3D": {
+        "category": "structure",
+        "members": [
+            {"name": "width", "type": "uint32_t"},
+            {"name": "height", "type": "uint32_t"},
+            {"name": "depth", "type": "uint32_t"}
+        ]
+    },
     "face": {
         "category": "bitmask",
         "values": [
@@ -996,9 +1004,7 @@
         "members": [
             {"name": "usage", "type": "texture usage bit"},
             {"name": "dimension", "type": "texture dimension"},
-            {"name": "width", "type": "uint32_t"},
-            {"name": "height", "type": "uint32_t"},
-            {"name": "depth", "type": "uint32_t"},
+            {"name": "size", "type": "extent 3D"},
             {"name": "arrayLayer", "type": "uint32_t"},
             {"name": "format", "type": "texture format"},
             {"name": "mipLevel", "type": "uint32_t"}

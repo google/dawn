@@ -26,9 +26,9 @@ class DepthStencilStateTest : public DawnTest {
 
             dawn::TextureDescriptor renderTargetDescriptor;
             renderTargetDescriptor.dimension = dawn::TextureDimension::e2D;
-            renderTargetDescriptor.width = kRTSize;
-            renderTargetDescriptor.height = kRTSize;
-            renderTargetDescriptor.depth = 1;
+            renderTargetDescriptor.size.width = kRTSize;
+            renderTargetDescriptor.size.height = kRTSize;
+            renderTargetDescriptor.size.depth = 1;
             renderTargetDescriptor.arrayLayer = 1;
             renderTargetDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
             renderTargetDescriptor.mipLevel = 1;
@@ -39,9 +39,9 @@ class DepthStencilStateTest : public DawnTest {
 
             dawn::TextureDescriptor depthDescriptor;
             depthDescriptor.dimension = dawn::TextureDimension::e2D;
-            depthDescriptor.width = kRTSize;
-            depthDescriptor.height = kRTSize;
-            depthDescriptor.depth = 1;
+            depthDescriptor.size.width = kRTSize;
+            depthDescriptor.size.height = kRTSize;
+            depthDescriptor.size.depth = 1;
             depthDescriptor.arrayLayer = 1;
             depthDescriptor.format = dawn::TextureFormat::D32FloatS8Uint;
             depthDescriptor.mipLevel = 1;

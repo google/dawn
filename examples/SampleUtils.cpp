@@ -138,9 +138,9 @@ dawn::SwapChain GetSwapChain(const dawn::Device &device) {
 dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
-    descriptor.width = 640;
-    descriptor.height = 480;
-    descriptor.depth = 1;
+    descriptor.size.width = 640;
+    descriptor.size.height = 480;
+    descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = dawn::TextureFormat::D32FloatS8Uint;
     descriptor.mipLevel = 1;

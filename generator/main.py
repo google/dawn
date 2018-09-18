@@ -171,6 +171,42 @@ def link_structure(struct, types):
             else:
                 member.length = members_by_name[m['length']]
 
+# Sort structures so that if struct A has struct B as a member, then B is listed before A
+# This is a form of topological sort where we try to keep the order reasonably similar to the
+# original order (though th sort isn't technically stable).
+# It works by computing for each struct type what is the depth of its DAG of dependents, then
+# resorting based on that depth using Python's stable sort. This makes a toposort because if
+# A depends on B then its depth will be bigger than B's. It is also nice because all nodes
+# with the same depth are kept in the input order.
+def topo_sort_structure(structs):
+    for struct in structs:
+        struct.visited = False
+        struct.subdag_depth = 0
+
+    def compute_depth(struct):
+        if struct.visited:
+            return struct.subdag_depth
+
+        max_dependent_depth = 0
+        for member in struct.members:
+            if member.type.category == 'structure' and member.annotation == 'value':
+                max_dependent_depth = max(max_dependent_depth, compute_depth(member.type) + 1)
+
+        struct.subdag_depth = max_dependent_depth
+        struct.visited = True
+        return struct.subdag_depth
+
+    for struct in structs:
+        compute_depth(struct)
+
+    result = sorted(structs, key=lambda struct: struct.subdag_depth)
+
+    for struct in structs:
+        del struct.visited
+        del struct.subdag_depth
+
+    return result
+
 def parse_json(json):
     category_to_parser = {
         'bitmask': BitmaskType,
@@ -203,6 +239,8 @@ def parse_json(json):
 
     for category in by_category.keys():
         by_category[category] = sorted(by_category[category], key=lambda typ: typ.name.canonical_case())
+
+    by_category['structure'] = topo_sort_structure(by_category['structure'])
 
     return {
         'types': types,

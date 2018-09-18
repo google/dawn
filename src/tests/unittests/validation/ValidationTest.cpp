@@ -76,9 +76,9 @@ std::string ValidationTest::GetLastDeviceErrorMessage() const {
 dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
-        descriptor.width = 640;
-        descriptor.height = 480;
-        descriptor.depth = 1;
+        descriptor.size.width = 640;
+        descriptor.size.height = 480;
+        descriptor.size.depth = 1;
         descriptor.arrayLayer = 1;
         descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
         descriptor.mipLevel = 1;
@@ -129,9 +129,9 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
 
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
-    descriptor.width = dummy.width;
-    descriptor.height = dummy.height;
-    descriptor.depth = 1;
+    descriptor.size.width = dummy.width;
+    descriptor.size.height = dummy.height;
+    descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = dummy.attachmentFormat;
     descriptor.mipLevel = 1;

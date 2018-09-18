@@ -50,9 +50,9 @@ void initBuffers() {
 void initTextures() {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
-    descriptor.width = 1024;
-    descriptor.height = 1024;
-    descriptor.depth = 1;
+    descriptor.size.width = 1024;
+    descriptor.size.height = 1024;
+    descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
     descriptor.mipLevel = 1;
