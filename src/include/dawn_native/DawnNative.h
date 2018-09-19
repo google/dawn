@@ -18,10 +18,19 @@
 #include <dawn/dawn.h>
 #include <dawn_native/dawn_native_export.h>
 
+#include <string>
+
 namespace dawn_native {
+    struct PCIInfo {
+        uint32_t deviceId = 0;
+        uint32_t vendorId = 0;
+        std::string name;
+    };
 
     // Backend-agnostic API for dawn_native
     DAWN_NATIVE_EXPORT dawnProcTable GetProcs();
+
+    DAWN_NATIVE_EXPORT const PCIInfo& GetPCIInfo(dawnDevice device);
 
 }  // namespace dawn_native
 

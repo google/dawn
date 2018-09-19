@@ -46,6 +46,10 @@ namespace dawn_native { namespace opengl {
 
     // Device
 
+    Device::Device() {
+        CollectPCIInfo();
+    }
+
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
         return new BindGroup(builder);
     }
@@ -107,6 +111,14 @@ namespace dawn_native { namespace opengl {
     }
 
     void Device::TickImpl() {
+    }
+
+    const dawn_native::PCIInfo& Device::GetPCIInfo() const {
+        return mPCIInfo;
+    }
+
+    void Device::CollectPCIInfo() {
+        mPCIInfo.name = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
     }
 
 }}  // namespace dawn_native::opengl

@@ -40,6 +40,8 @@
 #include "dawn_native/d3d12/SwapChainD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
+#include <locale>
+
 namespace dawn_native { namespace d3d12 {
 
     dawnDevice CreateDevice() {
@@ -132,6 +134,9 @@ namespace dawn_native { namespace d3d12 {
 
         ASSERT_SUCCESS(mFunctions->d3d12CreateDevice(mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0,
                                                      IID_PPV_ARGS(&mD3d12Device)));
+
+        // Collect GPU information
+        CollectPCIInfo();
 
         // Create device-global objects
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -231,6 +236,10 @@ namespace dawn_native { namespace d3d12 {
         NextSerial();
     }
 
+    const dawn_native::PCIInfo& Device::GetPCIInfo() const {
+        return mPCIInfo;
+    }
+
     uint64_t Device::GetSerial() const {
         return mSerial;
     }
@@ -327,6 +336,20 @@ namespace dawn_native { namespace d3d12 {
     }
     TextureViewBase* Device::CreateDefaultTextureView(TextureBase* texture) {
         return new TextureView(texture);
+    }
+
+    void Device::CollectPCIInfo() {
+        memset(&mPCIInfo, 0, sizeof(mPCIInfo));
+
+        DXGI_ADAPTER_DESC1 adapterDesc;
+        mHardwareAdapter->GetDesc1(&adapterDesc);
+
+        mPCIInfo.deviceId = adapterDesc.DeviceId;
+        mPCIInfo.vendorId = adapterDesc.VendorId;
+
+        std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>> converter(
+            "Error converting");
+        mPCIInfo.name = converter.to_bytes(adapterDesc.Description);
     }
 
 }}  // namespace dawn_native::d3d12

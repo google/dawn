@@ -28,6 +28,7 @@ namespace dawn_native { namespace null {
     // Device
 
     Device::Device() {
+        InitFakePCIInfo();
     }
 
     Device::~Device() {
@@ -96,6 +97,14 @@ namespace dawn_native { namespace null {
     }
     TextureViewBase* Device::CreateDefaultTextureView(TextureBase* texture) {
         return new TextureView(texture);
+    }
+
+    void Device::InitFakePCIInfo() {
+        mPCIInfo.name = "Null backend";
+    }
+
+    const dawn_native::PCIInfo& Device::GetPCIInfo() const {
+        return mPCIInfo;
     }
 
     void Device::TickImpl() {

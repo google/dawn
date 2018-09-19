@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "dawn/dawncpp.h"
+#include "dawn_native/DawnNative.h"
 
 #include <gtest/gtest.h>
 #include <memory>
@@ -64,6 +65,13 @@ enum BackendType {
 };
 std::ostream& operator<<(std::ostream& stream, BackendType backend);
 
+constexpr uint32_t kVendorID_AMD = 0x1002;
+constexpr uint32_t kVendorID_ARM = 0x13B5;
+constexpr uint32_t kVendorID_ImgTec = 0x1010;
+constexpr uint32_t kVendorID_Intel = 0x8086;
+constexpr uint32_t kVendorID_Nvidia = 0x10DE;
+constexpr uint32_t kVendorID_Qualcomm = 0x5143;
+
 namespace utils {
     class BackendBinding;
     class TerribleCommandBuffer;
@@ -89,6 +97,17 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
     bool IsMetal() const;
     bool IsOpenGL() const;
     bool IsVulkan() const;
+
+    bool IsAMD() const;
+    bool IsARM() const;
+    bool IsImgTec() const;
+    bool IsIntel() const;
+    bool IsNvidia() const;
+    bool IsQualcomm() const;
+
+    bool IsWindows() const;
+    bool IsLinux() const;
+    bool IsMacOS() const;
 
   protected:
     dawn::Device device;
@@ -167,6 +186,8 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
     void ResolveExpectations();
 
     std::unique_ptr<utils::BackendBinding> mBinding;
+
+    dawn_native::PCIInfo mPCIInfo;
 };
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:

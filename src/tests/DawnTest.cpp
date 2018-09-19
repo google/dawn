@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "common/Platform.h"
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/Wire.h"
 #include "utils/BackendBinding.h"
@@ -125,6 +126,54 @@ bool DawnTest::IsVulkan() const {
     return GetParam() == VulkanBackend;
 }
 
+bool DawnTest::IsAMD() const {
+    return mPCIInfo.vendorId == kVendorID_AMD;
+}
+
+bool DawnTest::IsARM() const {
+    return mPCIInfo.vendorId == kVendorID_ARM;
+}
+
+bool DawnTest::IsImgTec() const {
+    return mPCIInfo.vendorId == kVendorID_ImgTec;
+}
+
+bool DawnTest::IsIntel() const {
+    return mPCIInfo.vendorId == kVendorID_Intel;
+}
+
+bool DawnTest::IsNvidia() const {
+    return mPCIInfo.vendorId == kVendorID_Nvidia;
+}
+
+bool DawnTest::IsQualcomm() const {
+    return mPCIInfo.vendorId == kVendorID_Qualcomm;
+}
+
+bool DawnTest::IsWindows() const {
+#ifdef DAWN_PLATFORM_WINDOWS
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool DawnTest::IsLinux() const {
+#ifdef DAWN_PLATFORM_LINUX
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool DawnTest::IsMacOS() const {
+#ifdef DAWN_PLATFORM_APPLE
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool gTestUsesWire = false;
 
 void DawnTest::SetUp() {
@@ -180,6 +229,8 @@ void DawnTest::SetUp() {
 
     // The end2end tests should never cause validation errors. These should be tested in unittests.
     device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
+
+    mPCIInfo = dawn_native::GetPCIInfo(backendDevice);
 }
 
 void DawnTest::TearDown() {

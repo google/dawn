@@ -109,6 +109,8 @@ namespace dawn_native { namespace null {
 
         void TickImpl() override;
 
+        const dawn_native::PCIInfo& GetPCIInfo() const override;
+
         void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
         std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
 
@@ -125,8 +127,10 @@ namespace dawn_native { namespace null {
         ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
             const ShaderModuleDescriptor* descriptor) override;
         ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
+        void InitFakePCIInfo();
 
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
+        dawn_native::PCIInfo mPCIInfo;
     };
 
     class Buffer : public BufferBase {

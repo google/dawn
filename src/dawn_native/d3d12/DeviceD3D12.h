@@ -55,6 +55,8 @@ namespace dawn_native { namespace d3d12 {
 
         void TickImpl() override;
 
+        const dawn_native::PCIInfo& GetPCIInfo() const override;
+
         ComPtr<IDXGIFactory4> GetFactory();
         ComPtr<ID3D12Device> GetD3D12Device();
         ComPtr<ID3D12CommandQueue> GetCommandQueue();
@@ -89,6 +91,7 @@ namespace dawn_native { namespace d3d12 {
         ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
             const ShaderModuleDescriptor* descriptor) override;
         ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
+        void CollectPCIInfo();
 
         // Keep mFunctions as the first member so that in the destructor it is freed. Otherwise the
         // D3D12 DLLs are unloaded before we are done using it.
@@ -115,6 +118,8 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceAllocator> mResourceAllocator;
         std::unique_ptr<ResourceUploader> mResourceUploader;
+
+        dawn_native::PCIInfo mPCIInfo;
     };
 
 }}  // namespace dawn_native::d3d12

@@ -19,6 +19,7 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/RefCounted.h"
 
+#include "dawn_native/DawnNative.h"
 #include "dawn_native/dawn_platform.h"
 
 #include <memory>
@@ -104,6 +105,8 @@ namespace dawn_native {
         BufferBuilder* CreateBufferBuilderForTesting() {
             return nullptr;
         }
+
+        virtual const PCIInfo& GetPCIInfo() const = 0;
 
       private:
         virtual ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(

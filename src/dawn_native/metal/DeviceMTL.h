@@ -51,6 +51,8 @@ namespace dawn_native { namespace metal {
 
         void TickImpl() override;
 
+        const dawn_native::PCIInfo& GetPCIInfo() const override;
+
         id<MTLDevice> GetMTLDevice();
 
         id<MTLCommandBuffer> GetPendingCommandBuffer();
@@ -73,6 +75,7 @@ namespace dawn_native { namespace metal {
         ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
             const ShaderModuleDescriptor* descriptor) override;
         ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
+        void CollectPCIInfo();
 
         void OnCompletedHandler();
 
@@ -84,6 +87,8 @@ namespace dawn_native { namespace metal {
         Serial mFinishedCommandSerial = 0;
         Serial mPendingCommandSerial = 1;
         id<MTLCommandBuffer> mPendingCommands = nil;
+
+        dawn_native::PCIInfo mPCIInfo;
     };
 
 }}  // namespace dawn_native::metal

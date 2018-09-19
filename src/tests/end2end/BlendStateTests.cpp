@@ -686,6 +686,7 @@ TEST_P(BlendStateTest, ColorWriteMaskBlendingDisabled) {
 
 // Test that independent blend states on render targets works
 TEST_P(BlendStateTest, IndependentBlendState) {
+    DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
     std::array<dawn::Texture, 4> renderTargets;
     std::array<dawn::TextureView, 4> renderTargetViews;

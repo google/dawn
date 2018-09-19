@@ -78,6 +78,8 @@ namespace dawn_native { namespace vulkan {
 
         void TickImpl() override;
 
+        const dawn_native::PCIInfo& GetPCIInfo() const override;
+
       private:
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
             const BindGroupLayoutDescriptor* descriptor) override;
@@ -155,6 +157,8 @@ namespace dawn_native { namespace vulkan {
         std::vector<CommandPoolAndBuffer> mUnusedCommands;
         CommandPoolAndBuffer mPendingCommands;
         std::vector<VkSemaphore> mWaitSemaphores;
+
+        dawn_native::PCIInfo mPCIInfo;
     };
 
 }}  // namespace dawn_native::vulkan

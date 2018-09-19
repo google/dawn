@@ -151,6 +151,10 @@ namespace dawn_native { namespace vulkan {
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mMemoryAllocator = std::make_unique<MemoryAllocator>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
+
+        mPCIInfo.deviceId = mDeviceInfo.properties.deviceID;
+        mPCIInfo.vendorId = mDeviceInfo.properties.vendorID;
+        mPCIInfo.name = mDeviceInfo.properties.deviceName;
     }
 
     Device::~Device() {
@@ -288,6 +292,10 @@ namespace dawn_native { namespace vulkan {
             mCompletedSerial++;
             mNextSerial++;
         }
+    }
+
+    const dawn_native::PCIInfo& Device::GetPCIInfo() const {
+        return mPCIInfo;
     }
 
     const VulkanDeviceInfo& Device::GetDeviceInfo() const {
