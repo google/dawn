@@ -58,7 +58,7 @@ namespace dawn {
 
         {% macro render_cpp_method_declaration(type, method) %}
             {% set CppType = as_cppType(type.name) %}
-            {% if method.return_type.name.concatcase() == "void" -%}
+            {% if method.return_type.name.concatcase() == "void" and type.is_builder -%}
                 {{CppType}} const&
             {%- else -%}
                 {{as_cppType(method.return_type.name)}}
@@ -99,7 +99,9 @@ namespace dawn {
             {{render_cpp_method_declaration(type, method)}} {
                 {% if method.return_type.name.concatcase() == "void" %}
                     {{render_cpp_to_c_method_call(type, method)}};
-                    return *this;
+                    {% if type.is_builder %}
+                        return *this;
+                    {% endif %}
                 {% else %}
                     auto result = {{render_cpp_to_c_method_call(type, method)}};
                     {% if method.return_type.category == "native" %} 
