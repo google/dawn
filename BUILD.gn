@@ -903,4 +903,15 @@ if (dawn_standalone) {
       "third_party:tiny_gltf_loader",
     ]
   }
+
+  group("dawn_samples") {
+    deps = [
+      ":CppHelloTriangle",
+      ":CHelloTriangle",
+      ":ComputeBoids",
+      ":Animometer",
+      ":CubeReflection",
+      ":glTFViewer",
+    ]
+  }
 }
