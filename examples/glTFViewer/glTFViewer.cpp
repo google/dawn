@@ -460,7 +460,7 @@ namespace {
 
 // Drawing
 namespace {
-    void drawMesh(dawn::CommandBufferBuilder& cmd, const tinygltf::Mesh& iMesh, const glm::mat4& model) {
+    void drawMesh(dawn::RenderPassEncoder& pass, const tinygltf::Mesh& iMesh, const glm::mat4& model) {
         for (const auto& iPrim : iMesh.primitives) {
             if (iPrim.mode != gl::Triangles) {
                 fprintf(stderr, "unsupported primitive mode %d\n", iPrim.mode);
@@ -484,9 +484,9 @@ namespace {
                 }
             }
             const MaterialInfo& material = getMaterial(iPrim.material, strides[0], strides[1], strides[2]);
-            cmd.SetRenderPipeline(material.pipeline);
-            cmd.SetBindGroup(0, material.bindGroup0);
-            cmd.SetPushConstants(dawn::ShaderStageBit::Vertex,
+            pass.SetRenderPipeline(material.pipeline);
+            pass.SetBindGroup(0, material.bindGroup0);
+            pass.SetPushConstants(dawn::ShaderStageBit::Vertex,
                     0, sizeof(u_transform_block) / sizeof(uint32_t),
                     reinterpret_cast<const uint32_t*>(&transforms));
 
@@ -496,7 +496,7 @@ namespace {
                 auto it = iPrim.attributes.find(s.second);
                 if (it == iPrim.attributes.end()) {
                     uint32_t zero = 0;
-                    cmd.SetVertexBuffers(slot, 1, &defaultBuffer, &zero);
+                    pass.SetVertexBuffers(slot, 1, &defaultBuffer, &zero);
                     continue;
                 }
                 const auto& iAccessor = scene.accessors.at(it->second);
@@ -511,7 +511,7 @@ namespace {
                 }
                 const auto& oBuffer = buffers.at(iAccessor.bufferView);
                 uint32_t iBufferOffset = static_cast<uint32_t>(iAccessor.byteOffset);
-                cmd.SetVertexBuffers(slot, 1, &oBuffer, &iBufferOffset);
+                pass.SetVertexBuffers(slot, 1, &oBuffer, &iBufferOffset);
             }
 
             if (!iPrim.indices.empty()) {
@@ -522,16 +522,16 @@ namespace {
                     continue;
                 }
                 const auto& oIndicesBuffer = buffers.at(iIndices.bufferView);
-                cmd.SetIndexBuffer(oIndicesBuffer, static_cast<uint32_t>(iIndices.byteOffset));
-                cmd.DrawElements(static_cast<uint32_t>(iIndices.count), 1, 0, 0);
+                pass.SetIndexBuffer(oIndicesBuffer, static_cast<uint32_t>(iIndices.byteOffset));
+                pass.DrawElements(static_cast<uint32_t>(iIndices.count), 1, 0, 0);
             } else {
                 // DrawArrays
-                cmd.DrawArrays(vertexCount, 1, 0, 0);
+                pass.DrawArrays(vertexCount, 1, 0, 0);
             }
         }
     }
 
-    void drawNode(dawn::CommandBufferBuilder& cmd, const tinygltf::Node& node, const glm::mat4& parent = glm::mat4()) {
+    void drawNode(dawn::RenderPassEncoder& pass, const tinygltf::Node& node, const glm::mat4& parent = glm::mat4()) {
         glm::mat4 model;
         if (node.matrix.size() == 16) {
             model = glm::make_mat4(node.matrix.data());
@@ -552,10 +552,10 @@ namespace {
         model = parent * model;
 
         for (const auto& meshID : node.meshes) {
-            drawMesh(cmd, scene.meshes[meshID], model);
+            drawMesh(pass, scene.meshes[meshID], model);
         }
         for (const auto& child : node.children) {
-            drawNode(cmd, scene.nodes.at(child), model);
+            drawNode(pass, scene.nodes.at(child), model);
         }
     }
 
@@ -565,15 +565,17 @@ namespace {
         GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
         const auto& defaultSceneNodes = scene.scenes.at(scene.defaultScene);
-        dawn::CommandBufferBuilder cmd = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderPass)
-            .Clone();
-        for (const auto& n : defaultSceneNodes) {
-            const auto& node = scene.nodes.at(n);
-            drawNode(cmd, node);
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        {
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
+            for (const auto& n : defaultSceneNodes) {
+                const auto& node = scene.nodes.at(n);
+                drawNode(pass, node);
+            }
+            pass.EndPass();
         }
-        auto commands = cmd.EndRenderPass()
-            .GetResult();
+
+        dawn::CommandBuffer commands = builder.GetResult();
         queue.Submit(1, &commands);
 
         swapchain.Present(backbuffer);

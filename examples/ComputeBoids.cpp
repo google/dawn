@@ -261,21 +261,26 @@ void initSim() {
 dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& renderPass, size_t i) {
     static const uint32_t zeroOffsets[1] = {0};
     auto& bufferDst = particleBuffers[(i + 1) % 2];
-    return device.CreateCommandBufferBuilder()
-        .BeginComputePass()
-            .SetComputePipeline(updatePipeline)
-            .SetBindGroup(0, updateBGs[i])
-            .Dispatch(kNumParticles, 1, 1)
-        .EndComputePass()
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
-        .BeginRenderPass(renderPass)
-            .SetRenderPipeline(renderPipeline)
-            .SetVertexBuffers(0, 1, &bufferDst, zeroOffsets)
-            .SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets)
-            .DrawArrays(3, kNumParticles, 0, 0)
-        .EndRenderPass()
+    {
+        dawn::ComputePassEncoder pass = builder.BeginComputePass();
+        pass.SetComputePipeline(updatePipeline);
+        pass.SetBindGroup(0, updateBGs[i]);
+        pass.Dispatch(kNumParticles, 1, 1);
+        pass.EndPass();
+    }
 
-        .GetResult();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
+        pass.SetRenderPipeline(renderPipeline);
+        pass.SetVertexBuffers(0, 1, &bufferDst, zeroOffsets);
+        pass.SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets);
+        pass.DrawArrays(3, kNumParticles, 0, 0);
+        pass.EndPass();
+    }
+
+    return builder.GetResult();
 }
 
 void init() {

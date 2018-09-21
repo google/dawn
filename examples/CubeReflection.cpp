@@ -277,27 +277,30 @@ void frame() {
     dawn::RenderPassDescriptor renderPass;
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass)
-            .SetRenderPipeline(pipeline)
-            .SetBindGroup(0, bindGroup[0])
-            .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
-            .SetIndexBuffer(indexBuffer, 0)
-            .DrawElements(36, 1, 0, 0)
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup[0]);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
+        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.DrawElements(36, 1, 0, 0);
 
-            .SetStencilReference(0x1)
-            .SetRenderPipeline(planePipeline)
-            .SetBindGroup(0, bindGroup[0])
-            .SetVertexBuffers(0, 1, &planeBuffer, vertexBufferOffsets)
-            .DrawElements(6, 1, 0, 0)
+        pass.SetStencilReference(0x1);
+        pass.SetRenderPipeline(planePipeline);
+        pass.SetBindGroup(0, bindGroup[0]);
+        pass.SetVertexBuffers(0, 1, &planeBuffer, vertexBufferOffsets);
+        pass.DrawElements(6, 1, 0, 0);
 
-            .SetRenderPipeline(reflectionPipeline)
-            .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
-            .SetBindGroup(0, bindGroup[1])
-            .DrawElements(36, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+        pass.SetRenderPipeline(reflectionPipeline);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
+        pass.SetBindGroup(0, bindGroup[1]);
+        pass.DrawElements(36, 1, 0, 0);
 
+        pass.EndPass();
+    }
+
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
     swapchain.Present(backbuffer);
     DoFlush();

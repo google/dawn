@@ -333,6 +333,8 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/CommandAllocator.h
     ${DAWN_NATIVE_DIR}/CommandBuffer.cpp
     ${DAWN_NATIVE_DIR}/CommandBuffer.h
+    ${DAWN_NATIVE_DIR}/ComputePassEncoder.cpp
+    ${DAWN_NATIVE_DIR}/ComputePassEncoder.h
     ${DAWN_NATIVE_DIR}/ComputePipeline.cpp
     ${DAWN_NATIVE_DIR}/ComputePipeline.h
     ${DAWN_NATIVE_DIR}/CommandBufferStateTracker.cpp
@@ -358,10 +360,14 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/Pipeline.h
     ${DAWN_NATIVE_DIR}/PipelineLayout.cpp
     ${DAWN_NATIVE_DIR}/PipelineLayout.h
+    ${DAWN_NATIVE_DIR}/ProgrammablePassEncoder.cpp
+    ${DAWN_NATIVE_DIR}/ProgrammablePassEncoder.h
     ${DAWN_NATIVE_DIR}/Queue.cpp
     ${DAWN_NATIVE_DIR}/Queue.h
     ${DAWN_NATIVE_DIR}/RenderPassDescriptor.cpp
     ${DAWN_NATIVE_DIR}/RenderPassDescriptor.h
+    ${DAWN_NATIVE_DIR}/RenderPassEncoder.cpp
+    ${DAWN_NATIVE_DIR}/RenderPassEncoder.h
     ${DAWN_NATIVE_DIR}/RefCounted.cpp
     ${DAWN_NATIVE_DIR}/RefCounted.h
     ${DAWN_NATIVE_DIR}/Sampler.cpp

@@ -109,22 +109,23 @@ class BlendStateTest : public DawnTest {
 
         // Test that after drawing a triangle with the base color, and then the given triangle spec, the color is as expected
         void DoSingleSourceTest(RGBA8 base, const TriangleSpec& triangle, const RGBA8& expected) {
-            dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-                .BeginRenderPass(renderPass.renderPassInfo)
-                    // First use the base pipeline to draw a triangle with no blending
-                    .SetRenderPipeline(basePipeline)
-                    .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { base } })))
-                    .DrawArrays(3, 1, 0, 0)
+            dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+            {
+                dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+                // First use the base pipeline to draw a triangle with no blending
+                pass.SetRenderPipeline(basePipeline);
+                pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { base } })));
+                pass.DrawArrays(3, 1, 0, 0);
 
-                    // Then use the test pipeline to draw the test triangle with blending
-                    .SetRenderPipeline(testPipeline)
-                    .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { triangle.color } })))
-                    .SetBlendColor(triangle.blendFactor[0], triangle.blendFactor[1], triangle.blendFactor[2], triangle.blendFactor[3])
-                    .DrawArrays(3, 1, 0, 0)
-                .EndRenderPass()
-                .GetResult();
+                // Then use the test pipeline to draw the test triangle with blending
+                pass.SetRenderPipeline(testPipeline);
+                pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { triangle.color } })));
+                pass.SetBlendColor(triangle.blendFactor[0], triangle.blendFactor[1], triangle.blendFactor[2], triangle.blendFactor[3]);
+                pass.DrawArrays(3, 1, 0, 0);
+                pass.EndPass();
+            }
 
-
+            dawn::CommandBuffer commands = builder.GetResult();
             queue.Submit(1, &commands);
 
             EXPECT_PIXEL_RGBA8_EQ(expected, renderPass.color, kRTSize / 2, kRTSize / 2);
@@ -671,14 +672,17 @@ TEST_P(BlendStateTest, ColorWriteMaskBlendingDisabled) {
 
         RGBA8 base(32, 64, 128, 192);
         RGBA8 expected(32, 0, 0, 0);
-        dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderPass.renderPassInfo)
-                .SetRenderPipeline(testPipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { base } })))
-                .DrawArrays(3, 1, 0, 0)
-            .EndRenderPass()
-            .GetResult();
 
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        {
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+            pass.SetRenderPipeline(testPipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { base } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.EndPass();
+        }
+
+        dawn::CommandBuffer commands = builder.GetResult();
         queue.Submit(1, &commands);
         EXPECT_PIXEL_RGBA8_EQ(expected, renderPass.color, kRTSize / 2, kRTSize / 2);
     }
@@ -790,18 +794,20 @@ TEST_P(BlendStateTest, IndependentBlendState) {
         RGBA8 expected2 = color2;
         RGBA8 expected3 = min(color3, base);
 
-        dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderpass)
-                .SetRenderPipeline(basePipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 4>({ { base, base, base, base } })))
-                .DrawArrays(3, 1, 0, 0)
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        {
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+            pass.SetRenderPipeline(basePipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 4>({ { base, base, base, base } })));
+            pass.DrawArrays(3, 1, 0, 0);
 
-                .SetRenderPipeline(testPipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 4>({ { color0, color1, color2, color3 } })))
-                .DrawArrays(3, 1, 0, 0)
-            .EndRenderPass()
-            .GetResult();
+            pass.SetRenderPipeline(testPipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 4>({ { color0, color1, color2, color3 } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.EndPass();
+        }
 
+        dawn::CommandBuffer commands = builder.GetResult();
         queue.Submit(1, &commands);
 
         EXPECT_PIXEL_RGBA8_EQ(expected0, renderTargets[0], kRTSize / 2, kRTSize / 2) << "Attachment slot 0 should have been " << color0 << " + " << base << " = " << expected0;
@@ -849,17 +855,19 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
 
     // Check that the initial blend color is (0,0,0,0)
     {
-        dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderPass.renderPassInfo)
-                .SetRenderPipeline(basePipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })))
-                .DrawArrays(3, 1, 0, 0)
-                .SetRenderPipeline(testPipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })))
-                .DrawArrays(3, 1, 0, 0)
-            .EndRenderPass()
-            .GetResult();
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        {
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+            pass.SetRenderPipeline(basePipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.SetRenderPipeline(testPipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.EndPass();
+        }
 
+        dawn::CommandBuffer commands = builder.GetResult();
         queue.Submit(1, &commands);
 
         EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, kRTSize / 2, kRTSize / 2);
@@ -867,18 +875,20 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
 
     // Check that setting the blend color works
     {
-        dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderPass.renderPassInfo)
-                .SetRenderPipeline(basePipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })))
-                .DrawArrays(3, 1, 0, 0)
-                .SetRenderPipeline(testPipeline)
-                .SetBlendColor(1, 1, 1, 1)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })))
-                .DrawArrays(3, 1, 0, 0)
-            .EndRenderPass()
-            .GetResult();
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        {
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+            pass.SetRenderPipeline(basePipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.SetRenderPipeline(testPipeline);
+            pass.SetBlendColor(1, 1, 1, 1);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.EndPass();
+        }
 
+        dawn::CommandBuffer commands = builder.GetResult();
         queue.Submit(1, &commands);
 
         EXPECT_PIXEL_RGBA8_EQ(RGBA8(255, 255, 255, 255), renderPass.color, kRTSize / 2, kRTSize / 2);
@@ -886,26 +896,30 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
 
     // Check that the blend color is not inherited between render passes
     {
-        dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderPass.renderPassInfo)
-                .SetRenderPipeline(basePipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })))
-                .DrawArrays(3, 1, 0, 0)
-                .SetRenderPipeline(testPipeline)
-                .SetBlendColor(1, 1, 1, 1)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })))
-                .DrawArrays(3, 1, 0, 0)
-            .EndRenderPass()
-            .BeginRenderPass(renderPass.renderPassInfo)
-                .SetRenderPipeline(basePipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })))
-                .DrawArrays(3, 1, 0, 0)
-                .SetRenderPipeline(testPipeline)
-                .SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })))
-                .DrawArrays(3, 1, 0, 0)
-            .EndRenderPass()
-            .GetResult();
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        {
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+            pass.SetRenderPipeline(basePipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.SetRenderPipeline(testPipeline);
+            pass.SetBlendColor(1, 1, 1, 1);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.EndPass();
+        }
+        {
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+            pass.SetRenderPipeline(basePipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.SetRenderPipeline(testPipeline);
+            pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
+            pass.DrawArrays(3, 1, 0, 0);
+            pass.EndPass();
+        }
 
+        dawn::CommandBuffer commands = builder.GetResult();
         queue.Submit(1, &commands);
 
         EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, kRTSize / 2, kRTSize / 2);

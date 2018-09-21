@@ -74,15 +74,17 @@ class DrawElementsTest : public DawnTest {
         void Test(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex,
                   uint32_t firstInstance, RGBA8 bottomLeftExpected, RGBA8 topRightExpected) {
             uint32_t zeroOffset = 0;
-            dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-                .BeginRenderPass(renderPass.renderPassInfo)
-                    .SetRenderPipeline(pipeline)
-                    .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
-                    .SetIndexBuffer(indexBuffer, 0)
-                    .DrawElements(indexCount, instanceCount, firstIndex, firstInstance)
-                .EndRenderPass()
-                .GetResult();
+            dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+            {
+                dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+                pass.SetRenderPipeline(pipeline);
+                pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+                pass.SetIndexBuffer(indexBuffer, 0);
+                pass.DrawElements(indexCount, instanceCount, firstIndex, firstInstance);
+                pass.EndPass();
+            }
 
+            dawn::CommandBuffer commands = builder.GetResult();
             queue.Submit(1, &commands);
 
             EXPECT_PIXEL_RGBA8_EQ(bottomLeftExpected, renderPass.color, 1, 3);

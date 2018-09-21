@@ -17,36 +17,30 @@
 class SetScissorRectTest : public ValidationTest {
 };
 
-// Test to check that SetScissor can only be used inside render passes
-TEST_F(SetScissorRectTest, AllowedOnlyInRenderPass) {
+// Test to check basic use of SetScissor
+TEST_F(SetScissorRectTest, Success) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass)
-        .SetScissorRect(0, 0, 1, 1)
-        .EndRenderPass()
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .SetScissorRect(0, 0, 1, 1)
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginComputePass()
-        .SetScissorRect(0, 0, 1, 1)
-        .EndComputePass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
+        pass.SetScissorRect(0, 0, 1, 1);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }
 
 // Test to check that an empty scissor is allowed
 TEST_F(SetScissorRectTest, EmptyScissor) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass)
-        .SetScissorRect(0, 0, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
+        pass.SetScissorRect(0, 0, 0, 0);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }
 
 // Test to check that a scissor larger than the framebuffer is allowed
@@ -55,79 +49,69 @@ TEST_F(SetScissorRectTest, EmptyScissor) {
 TEST_F(SetScissorRectTest, ScissorLargerThanFramebuffer) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass)
-        .SetScissorRect(0, 0, renderPass.width + 1, renderPass.height + 1)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
+        pass.SetScissorRect(0, 0, renderPass.width + 1, renderPass.height + 1);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }
 
 class SetBlendColorTest : public ValidationTest {
 };
 
-// Test to check that SetBlendColor can only be used inside render passes
-TEST_F(SetBlendColorTest, AllowedOnlyInRenderPass) {
+// Test to check basic use of SetBlendColor
+TEST_F(SetBlendColorTest, Success) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass)
-        .SetBlendColor(0.0f, 0.0f, 0.0f, 0.0f)
-        .EndRenderPass()
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .SetBlendColor(0.0f, 0.0f, 0.0f, 0.0f)
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginComputePass()
-        .SetBlendColor(0.0f, 0.0f, 0.0f, 0.0f)
-        .EndComputePass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
+        pass.SetBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }
 
 // Test that SetBlendColor allows any value, large, small or negative
 TEST_F(SetBlendColorTest, AnyValueAllowed) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass)
-        .SetBlendColor(-1.0f, 42.0f, -0.0f, 0.0f)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
+        pass.SetBlendColor(-1.0f, 42.0f, -0.0f, 0.0f);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }
 
 class SetStencilReferenceTest : public ValidationTest {
 };
 
-// Test to check that SetStencilReference can only be used inside render passes
-TEST_F(SetStencilReferenceTest, AllowedOnlyInRenderPass) {
+// Test to check basic use of SetBlendColor
+TEST_F(SetStencilReferenceTest, Success) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass)
-        .SetStencilReference(0)
-        .EndRenderPass()
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .SetStencilReference(0)
-        .GetResult();
-
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginComputePass()
-        .SetStencilReference(0)
-        .EndComputePass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
+        pass.SetStencilReference(0);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }
 
 // Test that SetStencilReference allows any bit to be set
 TEST_F(SetStencilReferenceTest, AllBitsAllowed) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderPass.renderPass)
-        .SetStencilReference(0xFFFFFFFF)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
+        pass.SetStencilReference(0xFFFFFFFF);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }

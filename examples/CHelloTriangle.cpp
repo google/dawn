@@ -84,10 +84,13 @@ void frame() {
     dawnCommandBuffer commands;
     {
         dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
-        dawnCommandBufferBuilderBeginRenderPass(builder, renderpassInfo);
-        dawnCommandBufferBuilderSetRenderPipeline(builder, pipeline);
-        dawnCommandBufferBuilderDrawArrays(builder, 3, 1, 0, 0);
-        dawnCommandBufferBuilderEndRenderPass(builder);
+
+        dawnRenderPassEncoder pass = dawnCommandBufferBuilderBeginRenderPass(builder, renderpassInfo);
+        dawnRenderPassEncoderSetRenderPipeline(pass, pipeline);
+        dawnRenderPassEncoderDrawArrays(pass, 3, 1, 0, 0);
+        dawnRenderPassEncoderEndPass(pass);
+        dawnRenderPassEncoderRelease(pass);
+
         commands = dawnCommandBufferBuilderGetResult(builder);
         dawnCommandBufferBuilderRelease(builder);
     }

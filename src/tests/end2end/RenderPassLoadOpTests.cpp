@@ -31,7 +31,7 @@ class DrawQuad {
                 pipelineLayout = utils::MakeBasicPipelineLayout(*device, nullptr);
             }
 
-        void Draw(dawn::CommandBufferBuilder* builder) {
+        void Draw(dawn::RenderPassEncoder* pass) {
             auto renderPipeline = device->CreateRenderPipelineBuilder()
                 .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
                 .SetLayout(pipelineLayout)
@@ -39,8 +39,8 @@ class DrawQuad {
                 .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
                 .GetResult();
 
-            builder->SetRenderPipeline(renderPipeline);
-            builder->DrawArrays(6, 1, 0, 0);
+            pass->SetRenderPipeline(renderPipeline);
+            pass->DrawArrays(6, 1, 0, 0);
         }
 
     private:
@@ -117,24 +117,20 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
         .SetColorAttachmentClearColor(0, 0.0f, 0.0f, 0.0f, 0.0f)
         .GetResult();
 
-    auto commandsClearZero = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPassClearZero)
-            // Clear should occur implicitly
-            // Store should occur implicitly
-        .EndRenderPass()
-        .GetResult();
+    auto commandsClearZeroBuilder = device.CreateCommandBufferBuilder();
+    auto clearZeroPass = commandsClearZeroBuilder.BeginRenderPass(renderPassClearZero);
+    clearZeroPass.EndPass();
+    auto commandsClearZero = commandsClearZeroBuilder.GetResult();
 
     auto renderPassClearGreen = device.CreateRenderPassDescriptorBuilder()
         .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Clear)
         .SetColorAttachmentClearColor(0, 0.0f, 1.0f, 0.0f, 1.0f)
         .GetResult();
 
-    auto commandsClearGreen = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPassClearGreen)
-            // Clear should occur implicitly
-            // Store should occur implicitly
-        .EndRenderPass()
-        .GetResult();
+    auto commandsClearGreenBuilder = device.CreateCommandBufferBuilder();
+    auto clearGreenPass = commandsClearGreenBuilder.BeginRenderPass(renderPassClearGreen);
+    clearGreenPass.EndPass();
+    auto commandsClearGreen = commandsClearGreenBuilder.GetResult();
 
     queue.Submit(1, &commandsClearZero);
     EXPECT_TEXTURE_RGBA8_EQ(expectZero.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0);
@@ -150,15 +146,11 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
 
     dawn::CommandBuffer commandsLoad;
     {
-        auto builder = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderPassLoad)
-                // Load should occur implicitly
-            .Clone();
-        blueQuad.Draw(&builder);
-        commandsLoad = builder
-                // Store should occur implicitly
-            .EndRenderPass()
-            .GetResult();
+        auto builder = device.CreateCommandBufferBuilder();
+        auto pass = builder.BeginRenderPass(renderPassLoad);
+        blueQuad.Draw(&pass);
+        pass.EndPass();
+        commandsLoad = builder.GetResult();
     }
 
     queue.Submit(1, &commandsLoad);

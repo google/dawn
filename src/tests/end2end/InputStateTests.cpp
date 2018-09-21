@@ -168,19 +168,18 @@ class InputStateTest : public DawnTest {
 
             dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
-            builder.BeginRenderPass(renderPass.renderPassInfo)
-                .SetRenderPipeline(pipeline);
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+            pass.SetRenderPipeline(pipeline);
 
             uint32_t zeroOffset = 0;
             for (const auto& buffer : vertexBuffers) {
-                builder.SetVertexBuffers(buffer.location, 1, buffer.buffer, &zeroOffset);
+                pass.SetVertexBuffers(buffer.location, 1, buffer.buffer, &zeroOffset);
             }
 
-            dawn::CommandBuffer commands = builder
-                .DrawArrays(triangles * 3, instances, 0, 0)
-                .EndRenderPass()
-                .GetResult();
+            pass.DrawArrays(triangles * 3, instances, 0, 0);
+            pass.EndPass();
 
+            dawn::CommandBuffer commands = builder.GetResult();
             queue.Submit(1, &commands);
 
             // Check that the center of each triangle is pure green, so that if a single vertex shader

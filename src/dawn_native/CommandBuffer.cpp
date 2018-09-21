@@ -18,10 +18,13 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/ComputePassEncoder.h"
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ErrorData.h"
 #include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"
+#include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Texture.h"
 
@@ -273,6 +276,13 @@ namespace dawn_native {
 
     }  // namespace
 
+    enum class CommandBufferBuilder::EncodingState : uint8_t {
+        TopLevel,
+        ComputePass,
+        RenderPass,
+        Finished
+    };
+
     // CommandBuffer
 
     CommandBufferBase::CommandBufferBase(CommandBufferBuilder* builder)
@@ -285,7 +295,8 @@ namespace dawn_native {
 
     // CommandBufferBuilder
 
-    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device) : Builder(device) {
+    CommandBufferBuilder::CommandBufferBuilder(DeviceBase* device)
+        : Builder(device), mEncodingState(EncodingState::TopLevel) {
     }
 
     CommandBufferBuilder::~CommandBufferBuilder() {
@@ -308,6 +319,8 @@ namespace dawn_native {
     }
 
     CommandBufferBase* CommandBufferBuilder::GetResultImpl() {
+        mEncodingState = EncodingState::Finished;
+
         MoveToIterator();
         return mDevice->CreateCommandBuffer(this);
     }
@@ -317,6 +330,21 @@ namespace dawn_native {
             mIterator = std::move(mAllocator);
             mWasMovedToIterator = true;
         }
+    }
+
+    void CommandBufferBuilder::PassEnded() {
+        if (mEncodingState == EncodingState::ComputePass) {
+            mAllocator.Allocate<EndComputePassCmd>(Command::EndComputePass);
+        } else {
+            ASSERT(mEncodingState == EncodingState::RenderPass);
+            mAllocator.Allocate<EndRenderPassCmd>(Command::EndRenderPass);
+        }
+        mEncodingState = EncodingState::TopLevel;
+    }
+
+    void CommandBufferBuilder::ConsumeError(ErrorData* error) {
+        HandleError(error->GetMessage().c_str());
+        delete error;
     }
 
     // Implementation of the command buffer validation that can be precomputed before submit
@@ -558,14 +586,20 @@ namespace dawn_native {
 
     // Implementation of the API's command recording methods
 
-    void CommandBufferBuilder::BeginComputePass() {
+    ComputePassEncoderBase* CommandBufferBuilder::BeginComputePass() {
         mAllocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
+
+        mEncodingState = EncodingState::ComputePass;
+        return new ComputePassEncoderBase(mDevice, this, &mAllocator);
     }
 
-    void CommandBufferBuilder::BeginRenderPass(RenderPassDescriptorBase* info) {
+    RenderPassEncoderBase* CommandBufferBuilder::BeginRenderPass(RenderPassDescriptorBase* info) {
         BeginRenderPassCmd* cmd = mAllocator.Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
         new (cmd) BeginRenderPassCmd;
         cmd->info = info;
+
+        mEncodingState = EncodingState::RenderPass;
+        return new RenderPassEncoderBase(mDevice, this, &mAllocator);
     }
 
     void CommandBufferBuilder::CopyBufferToBuffer(BufferBase* source,
@@ -645,151 +679,6 @@ namespace dawn_native {
         copy->destination.buffer = buffer;
         copy->destination.offset = bufferOffset;
         copy->rowPitch = rowPitch;
-    }
-
-    void CommandBufferBuilder::Dispatch(uint32_t x, uint32_t y, uint32_t z) {
-        DispatchCmd* dispatch = mAllocator.Allocate<DispatchCmd>(Command::Dispatch);
-        new (dispatch) DispatchCmd;
-        dispatch->x = x;
-        dispatch->y = y;
-        dispatch->z = z;
-    }
-
-    void CommandBufferBuilder::DrawArrays(uint32_t vertexCount,
-                                          uint32_t instanceCount,
-                                          uint32_t firstVertex,
-                                          uint32_t firstInstance) {
-        DrawArraysCmd* draw = mAllocator.Allocate<DrawArraysCmd>(Command::DrawArrays);
-        new (draw) DrawArraysCmd;
-        draw->vertexCount = vertexCount;
-        draw->instanceCount = instanceCount;
-        draw->firstVertex = firstVertex;
-        draw->firstInstance = firstInstance;
-    }
-
-    void CommandBufferBuilder::DrawElements(uint32_t indexCount,
-                                            uint32_t instanceCount,
-                                            uint32_t firstIndex,
-                                            uint32_t firstInstance) {
-        DrawElementsCmd* draw = mAllocator.Allocate<DrawElementsCmd>(Command::DrawElements);
-        new (draw) DrawElementsCmd;
-        draw->indexCount = indexCount;
-        draw->instanceCount = instanceCount;
-        draw->firstIndex = firstIndex;
-        draw->firstInstance = firstInstance;
-    }
-
-    void CommandBufferBuilder::EndComputePass() {
-        mAllocator.Allocate<EndComputePassCmd>(Command::EndComputePass);
-    }
-
-    void CommandBufferBuilder::EndRenderPass() {
-        mAllocator.Allocate<EndRenderPassCmd>(Command::EndRenderPass);
-    }
-
-    void CommandBufferBuilder::SetComputePipeline(ComputePipelineBase* pipeline) {
-        SetComputePipelineCmd* cmd =
-            mAllocator.Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);
-        new (cmd) SetComputePipelineCmd;
-        cmd->pipeline = pipeline;
-    }
-
-    void CommandBufferBuilder::SetRenderPipeline(RenderPipelineBase* pipeline) {
-        SetRenderPipelineCmd* cmd =
-            mAllocator.Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
-        new (cmd) SetRenderPipelineCmd;
-        cmd->pipeline = pipeline;
-    }
-
-    void CommandBufferBuilder::SetPushConstants(dawn::ShaderStageBit stages,
-                                                uint32_t offset,
-                                                uint32_t count,
-                                                const void* data) {
-        // TODO(cwallez@chromium.org): check for overflows
-        if (offset + count > kMaxPushConstants) {
-            HandleError("Setting too many push constants");
-            return;
-        }
-
-        SetPushConstantsCmd* cmd =
-            mAllocator.Allocate<SetPushConstantsCmd>(Command::SetPushConstants);
-        new (cmd) SetPushConstantsCmd;
-        cmd->stages = stages;
-        cmd->offset = offset;
-        cmd->count = count;
-
-        uint32_t* values = mAllocator.AllocateData<uint32_t>(count);
-        memcpy(values, data, count * sizeof(uint32_t));
-    }
-
-    void CommandBufferBuilder::SetStencilReference(uint32_t reference) {
-        SetStencilReferenceCmd* cmd =
-            mAllocator.Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
-        new (cmd) SetStencilReferenceCmd;
-        cmd->reference = reference;
-    }
-
-    void CommandBufferBuilder::SetBlendColor(float r, float g, float b, float a) {
-        SetBlendColorCmd* cmd = mAllocator.Allocate<SetBlendColorCmd>(Command::SetBlendColor);
-        new (cmd) SetBlendColorCmd;
-        cmd->r = r;
-        cmd->g = g;
-        cmd->b = b;
-        cmd->a = a;
-    }
-
-    void CommandBufferBuilder::SetScissorRect(uint32_t x,
-                                              uint32_t y,
-                                              uint32_t width,
-                                              uint32_t height) {
-        SetScissorRectCmd* cmd = mAllocator.Allocate<SetScissorRectCmd>(Command::SetScissorRect);
-        new (cmd) SetScissorRectCmd;
-        cmd->x = x;
-        cmd->y = y;
-        cmd->width = width;
-        cmd->height = height;
-    }
-
-    void CommandBufferBuilder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {
-        if (groupIndex >= kMaxBindGroups) {
-            HandleError("Setting bind group over the max");
-            return;
-        }
-
-        SetBindGroupCmd* cmd = mAllocator.Allocate<SetBindGroupCmd>(Command::SetBindGroup);
-        new (cmd) SetBindGroupCmd;
-        cmd->index = groupIndex;
-        cmd->group = group;
-    }
-
-    void CommandBufferBuilder::SetIndexBuffer(BufferBase* buffer, uint32_t offset) {
-        // TODO(kainino@chromium.org): validation
-
-        SetIndexBufferCmd* cmd = mAllocator.Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
-        new (cmd) SetIndexBufferCmd;
-        cmd->buffer = buffer;
-        cmd->offset = offset;
-    }
-
-    void CommandBufferBuilder::SetVertexBuffers(uint32_t startSlot,
-                                                uint32_t count,
-                                                BufferBase* const* buffers,
-                                                uint32_t const* offsets) {
-        // TODO(kainino@chromium.org): validation
-
-        SetVertexBuffersCmd* cmd =
-            mAllocator.Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);
-        new (cmd) SetVertexBuffersCmd;
-        cmd->startSlot = startSlot;
-        cmd->count = count;
-
-        Ref<BufferBase>* cmdBuffers = mAllocator.AllocateData<Ref<BufferBase>>(count);
-        for (size_t i = 0; i < count; ++i) {
-            new (&cmdBuffers[i]) Ref<BufferBase>(buffers[i]);
-        }
-
-        uint32_t* cmdOffsets = mAllocator.AllocateData<uint32_t>(count);
-        memcpy(cmdOffsets, offsets, count * sizeof(uint32_t));
     }
 
 }  // namespace dawn_native

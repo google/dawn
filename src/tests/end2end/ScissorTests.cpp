@@ -51,13 +51,15 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
     dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-        .SetRenderPipeline(pipeline)
-        .DrawArrays(6, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.DrawArrays(6, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
@@ -71,14 +73,16 @@ TEST_P(ScissorTest, LargerThanAttachment) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
     dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-        .SetRenderPipeline(pipeline)
-        .SetScissorRect(0, 0, 200, 200)
-        .DrawArrays(6, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetScissorRect(0, 0, 200, 200);
+        pass.DrawArrays(6, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
@@ -95,14 +99,16 @@ TEST_P(ScissorTest, EmptyRect) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
     dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-        .SetRenderPipeline(pipeline)
-        .SetScissorRect(0, 0, 0, 0)
-        .DrawArrays(6, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetScissorRect(0, 0, 0, 0);
+        pass.DrawArrays(6, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 0, 0);
@@ -121,14 +127,16 @@ TEST_P(ScissorTest, PartialRect) {
     constexpr uint32_t kW = 5;
     constexpr uint32_t kH = 13;
 
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-        .SetRenderPipeline(pipeline)
-        .SetScissorRect(kX, kY, kW, kH)
-        .DrawArrays(6, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetScissorRect(kX, kY, kW, kH);
+        pass.DrawArrays(6, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     // Test the two opposite corners of the scissor box. With one pixel inside and on outside
@@ -144,18 +152,22 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
     dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        // RenderPass 1 set the scissor
-        .BeginRenderPass(renderPass.renderPassInfo)
-        .SetScissorRect(0, 0, 0, 0)
-        .EndRenderPass()
-        // RenderPass 2 draw a full quad, it shouldn't be scissored
-        .BeginRenderPass(renderPass.renderPassInfo)
-        .SetRenderPipeline(pipeline)
-        .DrawArrays(6, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    // RenderPass 1 set the scissor
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetScissorRect(0, 0, 0, 0);
+        pass.EndPass();
+    }
+    // RenderPass 2 draw a full quad, it shouldn't be scissored
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.DrawArrays(6, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);

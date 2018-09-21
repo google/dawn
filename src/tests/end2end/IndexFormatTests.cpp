@@ -78,15 +78,17 @@ TEST_P(IndexFormatTest, Uint32) {
     });
 
     uint32_t zeroOffset = 0;
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-            .SetRenderPipeline(pipeline)
-            .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
-            .SetIndexBuffer(indexBuffer, 0)
-            .DrawElements(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.DrawElements(3, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
@@ -107,15 +109,17 @@ TEST_P(IndexFormatTest, Uint16) {
     });
 
     uint32_t zeroOffset = 0;
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-            .SetRenderPipeline(pipeline)
-            .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
-            .SetIndexBuffer(indexBuffer, 0)
-            .DrawElements(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.DrawElements(3, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
@@ -149,15 +153,17 @@ TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
     });
 
     uint32_t zeroOffset = 0;
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-            .SetRenderPipeline(pipeline)
-            .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
-            .SetIndexBuffer(indexBuffer, 0)
-            .DrawElements(7, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.DrawElements(7, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 190, 190);  // A
@@ -181,15 +187,17 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
     });
 
     uint32_t zeroOffset = 0;
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-            .SetRenderPipeline(pipeline)
-            .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
-            .SetIndexBuffer(indexBuffer, 0)
-            .DrawElements(7, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.DrawElements(7, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 190, 190);  // A
@@ -218,16 +226,18 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
     });
 
     uint32_t zeroOffset = 0;
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-            .SetRenderPipeline(pipeline16)
-            .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
-            .SetIndexBuffer(indexBuffer, 0)
-            .SetRenderPipeline(pipeline32)
-            .DrawElements(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline16);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.SetRenderPipeline(pipeline32);
+        pass.DrawElements(3, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
@@ -251,15 +261,17 @@ TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
     });
 
     uint32_t zeroOffset = 0;
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-            .SetIndexBuffer(indexBuffer, 0)
-            .SetRenderPipeline(pipeline)
-            .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
-            .DrawElements(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.DrawElements(3, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);

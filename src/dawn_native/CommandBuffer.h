@@ -60,8 +60,8 @@ namespace dawn_native {
         std::vector<PassResourceUsage> AcquirePassResourceUsage();
 
         // Dawn API
-        void BeginComputePass();
-        void BeginRenderPass(RenderPassDescriptorBase* info);
+        ComputePassEncoderBase* BeginComputePass();
+        RenderPassEncoderBase* BeginRenderPass(RenderPassDescriptorBase* info);
         void CopyBufferToBuffer(BufferBase* source,
                                 uint32_t sourceOffset,
                                 BufferBase* destination,
@@ -91,53 +91,31 @@ namespace dawn_native {
                                  BufferBase* buffer,
                                  uint32_t bufferOffset,
                                  uint32_t rowPitch);
-        void Dispatch(uint32_t x, uint32_t y, uint32_t z);
-        void DrawArrays(uint32_t vertexCount,
-                        uint32_t instanceCount,
-                        uint32_t firstVertex,
-                        uint32_t firstInstance);
-        void DrawElements(uint32_t vertexCount,
-                          uint32_t instanceCount,
-                          uint32_t firstIndex,
-                          uint32_t firstInstance);
-        void EndComputePass();
-        void EndRenderPass();
-        void SetPushConstants(dawn::ShaderStageBit stages,
-                              uint32_t offset,
-                              uint32_t count,
-                              const void* data);
-        void SetComputePipeline(ComputePipelineBase* pipeline);
-        void SetRenderPipeline(RenderPipelineBase* pipeline);
-        void SetStencilReference(uint32_t reference);
-        void SetBlendColor(float r, float g, float b, float a);
-        void SetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
-        void SetBindGroup(uint32_t groupIndex, BindGroupBase* group);
-        void SetIndexBuffer(BufferBase* buffer, uint32_t offset);
 
-        template <typename T>
-        void SetVertexBuffers(uint32_t startSlot,
-                              uint32_t count,
-                              T* const* buffers,
-                              uint32_t const* offsets) {
-            static_assert(std::is_base_of<BufferBase, T>::value, "");
-            SetVertexBuffers(startSlot, count, reinterpret_cast<BufferBase* const*>(buffers),
-                             offsets);
+        // Functions to interact with the encoders
+        bool ConsumedError(MaybeError maybeError) {
+            if (DAWN_UNLIKELY(maybeError.IsError())) {
+                ConsumeError(maybeError.AcquireError());
+                return true;
+            }
+            return false;
         }
-        void SetVertexBuffers(uint32_t startSlot,
-                              uint32_t count,
-                              BufferBase* const* buffers,
-                              uint32_t const* offsets);
 
-        void TransitionBufferUsage(BufferBase* buffer, dawn::BufferUsageBit usage);
+        void PassEnded();
 
       private:
         friend class CommandBufferBase;
+
+        enum class EncodingState : uint8_t;
+        EncodingState mEncodingState;
 
         CommandBufferBase* GetResultImpl() override;
         void MoveToIterator();
 
         MaybeError ValidateComputePass();
         MaybeError ValidateRenderPass(RenderPassDescriptorBase* renderPass);
+
+        void ConsumeError(ErrorData* error);
 
         CommandAllocator mAllocator;
         CommandIterator mIterator;

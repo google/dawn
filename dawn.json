@@ -319,13 +319,15 @@
                 "returns": "command buffer"
             },
             {
-                "name": "begin compute pass"
+                "name": "begin compute pass",
+                "returns": "compute pass encoder"
             },
             {
                 "name": "begin render pass",
                 "args": [
                     {"name": "info", "type": "render pass descriptor"}
-                ]
+                ],
+                "returns": "render pass encoder"
             },
             {
                 "name": "copy buffer to buffer",
@@ -385,66 +387,30 @@
                     "Add these arguments too",
                     {"name": "image height", "type": "uint32_t"}
                 ]
-            },
+            }
+        ]
+    },
+    "compare function": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "never"},
+            {"value": 1, "name": "less"},
+            {"value": 2, "name": "less equal"},
+            {"value": 3, "name": "greater"},
+            {"value": 4, "name": "greater equal"},
+            {"value": 5, "name": "equal"},
+            {"value": 6, "name": "not equal"},
+            {"value": 7, "name": "always"}
+        ]
+    },
+    "compute pass encoder": {
+        "category": "object",
+        "methods": [
             {
-                "name": "dispatch",
+                "name": "set compute pipeline",
+                "TODO": "This is called setPipeline in the WebGPU IDL",
                 "args": [
-                    {"name": "x", "type": "uint32_t"},
-                    {"name": "y", "type": "uint32_t"},
-                    {"name": "z", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "draw arrays",
-                "args": [
-                    {"name": "vertex count", "type": "uint32_t"},
-                    {"name": "instance count", "type": "uint32_t"},
-                    {"name": "first vertex", "type": "uint32_t"},
-                    {"name": "first instance", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "draw elements",
-                "args": [
-                    {"name": "index count", "type": "uint32_t"},
-                    {"name": "instance count", "type": "uint32_t"},
-                    {"name": "first index", "type": "uint32_t"},
-                    {"name": "first instance", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "end compute pass"
-            },
-            {
-                "name": "end render pass"
-            },
-            {
-                "name": "set stencil reference",
-                "args": [
-                    {"name": "reference", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "set blend color",
-                "args": [
-                    {"name": "r", "type": "float"},
-                    {"name": "g", "type": "float"},
-                    {"name": "b", "type": "float"},
-                    {"name": "a", "type": "float"}
-                ]
-            },
-            {
-                "name": "set bind group",
-                "args": [
-                    {"name": "group index", "type": "uint32_t"},
-                    {"name": "group", "type": "bind group"}
-                ]
-            },
-            {
-                "name": "set index buffer",
-                "args": [
-                    {"name": "buffer", "type": "buffer"},
-                    {"name": "offset", "type": "uint32_t"}
+                    {"name": "pipeline", "type": "compute pipeline"}
                 ]
             },
             {
@@ -461,48 +427,24 @@
                 ]
             },
             {
-                "name": "set compute pipeline",
+                "name": "set bind group",
                 "args": [
-                    {"name": "pipeline", "type": "compute pipeline"}
+                    {"name": "group index", "type": "uint32_t"},
+                    {"name": "group", "type": "bind group"}
                 ]
             },
             {
-                "name": "set render pipeline",
-                "args": [
-                    {"name": "pipeline", "type": "render pipeline"}
-                ]
-            },
-            {
-                "name": "set scissor rect",
+                "name": "dispatch",
                 "args": [
                     {"name": "x", "type": "uint32_t"},
                     {"name": "y", "type": "uint32_t"},
-                    {"name": "width", "type": "uint32_t"},
-                    {"name": "height", "type": "uint32_t"}
+                    {"name": "z", "type": "uint32_t"}
                 ]
             },
             {
-                "name": "set vertex buffers",
-                "args": [
-                    {"name": "start slot", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "buffers", "type": "buffer", "annotation": "const*", "length": "count"},
-                    {"name": "offsets", "type": "uint32_t", "annotation": "const*", "length": "count"}
-                ]
+                "name": "end pass",
+                "TODO": "This returns the top-level encoder in the WebGPU IDL"
             }
-        ]
-    },
-    "compare function": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "never"},
-            {"value": 1, "name": "less"},
-            {"value": 2, "name": "less equal"},
-            {"value": 3, "name": "greater"},
-            {"value": 4, "name": "greater equal"},
-            {"value": 5, "name": "equal"},
-            {"value": 6, "name": "not equal"},
-            {"value": 7, "name": "always"}
         ]
     },
     "compute pipeline": {
@@ -821,6 +763,100 @@
     },
     "render pass descriptor": {
         "category": "object"
+    },
+    "render pass encoder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "set render pipeline",
+                "TODO": "This is called setPipeline in the WebGPU IDL",
+                "args": [
+                    {"name": "pipeline", "type": "render pipeline"}
+                ]
+            },
+            {
+                "name": "set push constants",
+                "TODO": [
+                    "data should be void*",
+                    "TODO Vulkan has an additional stage mask"
+                ],
+                "args": [
+                    {"name": "stages", "type": "shader stage bit"},
+                    {"name": "offset", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "data", "type": "uint32_t", "annotation": "const*", "length": "count"}
+                ]
+            },
+            {
+                "name": "set bind group",
+                "args": [
+                    {"name": "group index", "type": "uint32_t"},
+                    {"name": "group", "type": "bind group"}
+                ]
+            },
+            {
+                "name": "draw arrays",
+                "args": [
+                    {"name": "vertex count", "type": "uint32_t"},
+                    {"name": "instance count", "type": "uint32_t"},
+                    {"name": "first vertex", "type": "uint32_t"},
+                    {"name": "first instance", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "draw elements",
+                "args": [
+                    {"name": "index count", "type": "uint32_t"},
+                    {"name": "instance count", "type": "uint32_t"},
+                    {"name": "first index", "type": "uint32_t"},
+                    {"name": "first instance", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set stencil reference",
+                "args": [
+                    {"name": "reference", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set blend color",
+                "args": [
+                    {"name": "r", "type": "float"},
+                    {"name": "g", "type": "float"},
+                    {"name": "b", "type": "float"},
+                    {"name": "a", "type": "float"}
+                ]
+            },
+            {
+                "name": "set scissor rect",
+                "args": [
+                    {"name": "x", "type": "uint32_t"},
+                    {"name": "y", "type": "uint32_t"},
+                    {"name": "width", "type": "uint32_t"},
+                    {"name": "height", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set vertex buffers",
+                "args": [
+                    {"name": "start slot", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "buffers", "type": "buffer", "annotation": "const*", "length": "count"},
+                    {"name": "offsets", "type": "uint32_t", "annotation": "const*", "length": "count"}
+                ]
+            },
+            {
+                "name": "set index buffer",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "offset", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "end pass",
+                "TODO": "This returns the top-level encoder in the WebGPU IDL"
+            }
+        ]
     },
     "render pipeline": {
         "category": "object"

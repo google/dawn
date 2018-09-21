@@ -104,23 +104,27 @@ TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
     uint32_t offsets[] = { 0, 0 };
 
     // Check failure when vertex buffer is not set
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass)
-            .SetRenderPipeline(pipeline1)
-            .DrawArrays(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.SetRenderPipeline(pipeline1);
+        pass.DrawArrays(3, 1, 0, 0);
+        pass.EndPass();
+    }
+    builder.GetResult();
 
     // Check success when vertex buffer is inherited from previous pipeline
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass)
-            .SetRenderPipeline(pipeline2)
-            .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
-            .DrawArrays(3, 1, 0, 0)
-            .SetRenderPipeline(pipeline1)
-            .DrawArrays(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.SetRenderPipeline(pipeline2);
+        pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
+        pass.DrawArrays(3, 1, 0, 0);
+        pass.SetRenderPipeline(pipeline1);
+        pass.DrawArrays(3, 1, 0, 0);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }
 
 TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
@@ -137,29 +141,37 @@ TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
     uint32_t offsets[] = { 0, 0 };
 
     // Check success when vertex buffer is set for each render pass
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass)
-            .SetRenderPipeline(pipeline2)
-            .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
-            .DrawArrays(3, 1, 0, 0)
-        .EndRenderPass()
-        .BeginRenderPass(renderpass)
-            .SetRenderPipeline(pipeline1)
-            .SetVertexBuffers(0, 1, vertexBuffers.data(), offsets)
-            .DrawArrays(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.SetRenderPipeline(pipeline2);
+        pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
+        pass.DrawArrays(3, 1, 0, 0);
+        pass.EndPass();
+    }
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.SetRenderPipeline(pipeline1);
+        pass.SetVertexBuffers(0, 1, vertexBuffers.data(), offsets);
+        pass.DrawArrays(3, 1, 0, 0);
+        pass.EndPass();
+    }
+    builder.GetResult();
 
     // Check failure because vertex buffer is not inherited in second subpass
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass)
-            .SetRenderPipeline(pipeline2)
-            .SetVertexBuffers(0, 2, vertexBuffers.data(), offsets)
-            .DrawArrays(3, 1, 0, 0)
-        .EndRenderPass()
-        .BeginRenderPass(renderpass)
-            .SetRenderPipeline(pipeline1)
-            .DrawArrays(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    builder = AssertWillBeError(device.CreateCommandBufferBuilder());
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.SetRenderPipeline(pipeline2);
+        pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
+        pass.DrawArrays(3, 1, 0, 0);
+        pass.EndPass();
+    }
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.SetRenderPipeline(pipeline1);
+        pass.DrawArrays(3, 1, 0, 0);
+        pass.EndPass();
+    }
+    builder.GetResult();
 }

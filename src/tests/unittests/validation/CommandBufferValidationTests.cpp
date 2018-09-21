@@ -27,11 +27,16 @@ TEST_F(CommandBufferValidationTest, Empty) {
 TEST_F(CommandBufferValidationTest, RenderPass) {
     auto renderpass = CreateSimpleRenderPass();
 
-    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass)
-        .EndRenderPass()
-        .GetResult();
-    AssertWillBeError(device.CreateCommandBufferBuilder())
-        .BeginRenderPass(renderpass)
-        .GetResult();
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.EndPass();
+        builder.GetResult();
+    }
+
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        builder.GetResult();
+    }
 }

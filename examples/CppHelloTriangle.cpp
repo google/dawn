@@ -151,16 +151,18 @@ void frame() {
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     static const uint32_t vertexBufferOffsets[1] = {0};
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass)
-            .SetRenderPipeline(pipeline)
-            .SetBindGroup(0, bindGroup)
-            .SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets)
-            .SetIndexBuffer(indexBuffer, 0)
-            .DrawElements(3, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
+        pass.SetRenderPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
+        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.DrawElements(3, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
     swapchain.Present(backbuffer);
     DoFlush();

@@ -197,7 +197,7 @@ class DepthStencilStateTest : public DawnTest {
                 float depth;
             };
 
-            builder.BeginRenderPass(renderpass);
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
 
             for (size_t i = 0; i < testParams.size(); ++i) {
                 const TestSpec& test = testParams[i];
@@ -229,16 +229,14 @@ class DepthStencilStateTest : public DawnTest {
                     .SetDepthStencilState(test.depthStencilState)
                     .GetResult();
 
-                builder.SetRenderPipeline(pipeline)
-                    .SetStencilReference(test.stencil)  // Set the stencil reference
-                    .SetBindGroup(0, bindGroup)         // Set the bind group which contains color and depth data
-                    .DrawArrays(6, 1, 0, 0);
+                pass.SetRenderPipeline(pipeline);
+                pass.SetStencilReference(test.stencil);  // Set the stencil reference
+                pass.SetBindGroup(0, bindGroup);         // Set the bind group which contains color and depth data
+                pass.DrawArrays(6, 1, 0, 0);
             }
+            pass.EndPass();
 
-            dawn::CommandBuffer commands = builder
-                .EndRenderPass()
-                .GetResult();
-
+            dawn::CommandBuffer commands = builder.GetResult();
             queue.Submit(1, &commands);
 
             EXPECT_PIXEL_RGBA8_EQ(expectedFront, renderTarget, kRTSize / 4, kRTSize / 2) << "Front face check failed";

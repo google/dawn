@@ -194,14 +194,16 @@ class PrimitiveTopologyTest : public DawnTest {
                 .GetResult();
 
             static const uint32_t zeroOffset = 0;
-            dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-                .BeginRenderPass(renderPass.renderPassInfo)
-                    .SetRenderPipeline(pipeline)
-                    .SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset)
-                    .DrawArrays(6, 1, 0, 0)
-                .EndRenderPass()
-                .GetResult();
+            dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+            {
+                dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+                pass.SetRenderPipeline(pipeline);
+                pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+                pass.DrawArrays(6, 1, 0, 0);
+                pass.EndPass();
+            }
 
+            dawn::CommandBuffer commands = builder.GetResult();
             queue.Submit(1, &commands);
 
             for (auto& locationSpec : locationSpecs) {

@@ -137,24 +137,22 @@ void frame() {
 
     size_t i = 0;
 
-    dawn::CommandBuffer commands;
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     {
-        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(renderPass)
-            .SetRenderPipeline(pipeline)
-            .Clone();
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
+        pass.SetRenderPipeline(pipeline);
 
         for (int k = 0; k < 10000; k++) {
             shaderData[i].time = f / 60.0f;
-            builder.SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 6, reinterpret_cast<uint32_t*>(&shaderData[i]))
-                   .DrawArrays(3, 1, 0, 0);
+            pass.SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 6, reinterpret_cast<uint32_t*>(&shaderData[i]));
+            pass.DrawArrays(3, 1, 0, 0);
             i++;
         }
 
-        builder.EndRenderPass();
-        commands = builder.GetResult();
+        pass.EndPass();
     }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
     swapchain.Present(backbuffer);
     DoFlush();

@@ -78,13 +78,18 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
                          .SetBufferViews(0, 1, &srcView)
                          .SetBufferViews(1, 1, &dstView)
                          .GetResult();
-    auto commands = device.CreateCommandBufferBuilder()
-                        .BeginComputePass()
-                        .SetComputePipeline(pipeline)
-                        .SetBindGroup(0, bindGroup)
-                        .Dispatch(kInstances, 1, 1)
-                        .EndComputePass()
-                        .GetResult();
+
+    dawn::CommandBuffer commands;
+    {
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        dawn::ComputePassEncoder pass = builder.BeginComputePass();
+        pass.SetComputePipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Dispatch(kInstances, 1, 1);
+        pass.EndPass();
+
+        commands = builder.GetResult();
+    }
 
     queue.Submit(1, &commands);
 

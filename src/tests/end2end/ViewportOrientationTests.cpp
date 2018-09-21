@@ -42,13 +42,15 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
         .SetPrimitiveTopology(dawn::PrimitiveTopology::PointList)
         .GetResult();
 
-    dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-        .BeginRenderPass(renderPass.renderPassInfo)
-        .SetRenderPipeline(pipeline)
-        .DrawArrays(1, 1, 0, 0)
-        .EndRenderPass()
-        .GetResult();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    {
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+        pass.SetRenderPipeline(pipeline);
+        pass.DrawArrays(1, 1, 0, 0);
+        pass.EndPass();
+    }
 
+    dawn::CommandBuffer commands = builder.GetResult();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);

@@ -127,14 +127,16 @@ protected:
             .SetTextureViews(1, 1, &mTextureView)
             .GetResult();
 
-        dawn::CommandBuffer commands = device.CreateCommandBufferBuilder()
-            .BeginRenderPass(mRenderPass.renderPassInfo)
-            .SetRenderPipeline(mPipeline)
-            .SetBindGroup(0, bindGroup)
-            .DrawArrays(6, 1, 0, 0)
-            .EndRenderPass()
-            .GetResult();
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        {
+            dawn::RenderPassEncoder pass = builder.BeginRenderPass(mRenderPass.renderPassInfo);
+            pass.SetRenderPipeline(mPipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.DrawArrays(6, 1, 0, 0);
+            pass.EndPass();
+        }
 
+        dawn::CommandBuffer commands = builder.GetResult();
         queue.Submit(1, &commands);
 
         RGBA8 expectedU2(u.mExpected2, u.mExpected2, u.mExpected2, 255);

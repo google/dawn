@@ -1,0 +1,123 @@
+// Copyright 2018 The Dawn Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "dawn_native/RenderPassEncoder.h"
+
+#include "dawn_native/Buffer.h"
+#include "dawn_native/CommandBuffer.h"
+#include "dawn_native/Commands.h"
+#include "dawn_native/RenderPipeline.h"
+
+namespace dawn_native {
+
+    RenderPassEncoderBase::RenderPassEncoderBase(DeviceBase* device,
+                                                 CommandBufferBuilder* topLevelBuilder,
+                                                 CommandAllocator* allocator)
+        : ProgrammablePassEncoder(device, topLevelBuilder, allocator) {
+    }
+
+    void RenderPassEncoderBase::DrawArrays(uint32_t vertexCount,
+                                           uint32_t instanceCount,
+                                           uint32_t firstVertex,
+                                           uint32_t firstInstance) {
+        DrawArraysCmd* draw = mAllocator->Allocate<DrawArraysCmd>(Command::DrawArrays);
+        new (draw) DrawArraysCmd;
+        draw->vertexCount = vertexCount;
+        draw->instanceCount = instanceCount;
+        draw->firstVertex = firstVertex;
+        draw->firstInstance = firstInstance;
+    }
+
+    void RenderPassEncoderBase::DrawElements(uint32_t indexCount,
+                                             uint32_t instanceCount,
+                                             uint32_t firstIndex,
+                                             uint32_t firstInstance) {
+        DrawElementsCmd* draw = mAllocator->Allocate<DrawElementsCmd>(Command::DrawElements);
+        new (draw) DrawElementsCmd;
+        draw->indexCount = indexCount;
+        draw->instanceCount = instanceCount;
+        draw->firstIndex = firstIndex;
+        draw->firstInstance = firstInstance;
+    }
+
+    void RenderPassEncoderBase::SetRenderPipeline(RenderPipelineBase* pipeline) {
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
+        SetRenderPipelineCmd* cmd =
+            mAllocator->Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
+        new (cmd) SetRenderPipelineCmd;
+        cmd->pipeline = pipeline;
+    }
+
+    void RenderPassEncoderBase::SetStencilReference(uint32_t reference) {
+        SetStencilReferenceCmd* cmd =
+            mAllocator->Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
+        new (cmd) SetStencilReferenceCmd;
+        cmd->reference = reference;
+    }
+
+    void RenderPassEncoderBase::SetBlendColor(float r, float g, float b, float a) {
+        SetBlendColorCmd* cmd = mAllocator->Allocate<SetBlendColorCmd>(Command::SetBlendColor);
+        new (cmd) SetBlendColorCmd;
+        cmd->r = r;
+        cmd->g = g;
+        cmd->b = b;
+        cmd->a = a;
+    }
+
+    void RenderPassEncoderBase::SetScissorRect(uint32_t x,
+                                               uint32_t y,
+                                               uint32_t width,
+                                               uint32_t height) {
+        SetScissorRectCmd* cmd = mAllocator->Allocate<SetScissorRectCmd>(Command::SetScissorRect);
+        new (cmd) SetScissorRectCmd;
+        cmd->x = x;
+        cmd->y = y;
+        cmd->width = width;
+        cmd->height = height;
+    }
+
+    void RenderPassEncoderBase::SetIndexBuffer(BufferBase* buffer, uint32_t offset) {
+        // TODO(kainino@chromium.org): validation
+
+        SetIndexBufferCmd* cmd = mAllocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
+        new (cmd) SetIndexBufferCmd;
+        cmd->buffer = buffer;
+        cmd->offset = offset;
+    }
+
+    void RenderPassEncoderBase::SetVertexBuffers(uint32_t startSlot,
+                                                 uint32_t count,
+                                                 BufferBase* const* buffers,
+                                                 uint32_t const* offsets) {
+        // TODO(kainino@chromium.org): validation
+
+        SetVertexBuffersCmd* cmd =
+            mAllocator->Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);
+        new (cmd) SetVertexBuffersCmd;
+        cmd->startSlot = startSlot;
+        cmd->count = count;
+
+        Ref<BufferBase>* cmdBuffers = mAllocator->AllocateData<Ref<BufferBase>>(count);
+        for (size_t i = 0; i < count; ++i) {
+            new (&cmdBuffers[i]) Ref<BufferBase>(buffers[i]);
+        }
+
+        uint32_t* cmdOffsets = mAllocator->AllocateData<uint32_t>(count);
+        memcpy(cmdOffsets, offsets, count * sizeof(uint32_t));
+    }
+
+}  // namespace dawn_native
