@@ -131,7 +131,7 @@ def link_object(obj, types):
                         arg.length = "constant"
                         arg.constant_length = 1
                     else:
-                        assert(false)
+                        assert(False)
                 elif a['length'] == 'strlen':
                     arg.length = 'strlen'
                 else:
