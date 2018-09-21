@@ -358,6 +358,11 @@ namespace dawn_wire {
                 // Implementation of the ObjectIdResolver interface
                 {% for type in by_category["object"] %}
                     DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const override {
+                        if (id == 0) {
+                            *out = nullptr;
+                            return DeserializeResult::Success;
+                        }
+
                         auto data = mKnown{{type.name.CamelCase()}}.Get(id);
                         if (data == nullptr) {
                             return DeserializeResult::FatalError;

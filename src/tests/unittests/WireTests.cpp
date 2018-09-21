@@ -328,7 +328,7 @@ TEST_F(WireTests, CStringArgument) {
 }
 
 // Test that the wire is able to send objects as value arguments
-TEST_F(WireTests, DISABLED_ObjectAsValueArgument) {
+TEST_F(WireTests, ObjectAsValueArgument) {
     // Create pipeline
     dawnComputePipelineDescriptor pipelineDesc;
     pipelineDesc.nextInChain = nullptr;
@@ -481,6 +481,46 @@ TEST_F(WireTests, StructureOfStructureArrayArgument) {
                 return desc->nextInChain == nullptr && desc->numBindings == 3;
             })))
         .WillOnce(Return(apiBgl));
+
+    FlushClient();
+}
+
+// Test passing nullptr instead of objects - object as value version
+TEST_F(WireTests, NullptrAsValue) {
+    dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
+    dawnComputePassEncoder pass = dawnCommandBufferBuilderBeginComputePass(builder);
+    dawnComputePassEncoderSetComputePipeline(pass, nullptr);
+
+    dawnCommandBufferBuilder apiBuilder = api.GetNewCommandBufferBuilder();
+    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
+        .WillOnce(Return(apiBuilder));
+
+    dawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
+    EXPECT_CALL(api, CommandBufferBuilderBeginComputePass(apiBuilder))
+        .WillOnce(Return(apiPass));
+
+    EXPECT_CALL(api, ComputePassEncoderSetComputePipeline(apiPass, nullptr))
+        .Times(1);
+
+    FlushClient();
+}
+
+// Test passing nullptr instead of objects - array of objects version
+TEST_F(WireTests, NullptrInArray) {
+    dawnBindGroupLayout nullBGL = nullptr;
+
+    dawnPipelineLayoutDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.numBindGroupLayouts = 1;
+    descriptor.bindGroupLayouts = &nullBGL;
+
+    dawnDeviceCreatePipelineLayout(device, &descriptor);
+    EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, MatchesLambda([](const dawnPipelineLayoutDescriptor* desc) -> bool {
+        return desc->nextInChain == nullptr &&
+            desc->numBindGroupLayouts == 1 &&
+            desc->bindGroupLayouts[0] == nullptr;
+    })))
+        .WillOnce(Return(nullptr));
 
     FlushClient();
 }
