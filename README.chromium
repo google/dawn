@@ -1,6 +1,6 @@
 Name: Dawn
 Short Name: dawn
-URL: https://github.com/google/nxt-standalone
+URL: https://dawn.googlesource.com/dawn
 License: Apache 2.0
 License File: LICENSE
 Security Critical: yes
