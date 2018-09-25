@@ -40,7 +40,7 @@ static_library("glad") {
 spirv_cross_dir = dawn_spirv_cross_dir
 
 config("spirv_cross_public") {
-  include_dirs = [ "." ]
+  include_dirs = [ "${spirv_cross_dir}/.." ]
   defines = [ "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS" ]
 }
 
