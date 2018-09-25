@@ -17,7 +17,7 @@
 # Dawn's repository.
 
 # Whether we are building from Dawn's repository.
-# MUST be set to false in other projects.
+# MUST be unset in other projects (will default to false).
 dawn_standalone = true
 
 # Defaults for these are set again in dawn_overrides_with_defaults.gni so that
