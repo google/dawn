@@ -202,8 +202,8 @@ namespace {
         auto oFSSourceTextured = R"(
             #version 450
 
-            layout(set = 0, binding = 1) uniform sampler u_samp;
-            layout(set = 0, binding = 2) uniform texture2D u_tex;
+            layout(set = 0, binding = 0) uniform sampler u_samp;
+            layout(set = 0, binding = 1) uniform texture2D u_tex;
 
             layout(location = 0) in vec3 v_normal;
             layout(location = 1) in vec2 v_texcoord;
