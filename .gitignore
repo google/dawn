@@ -10,7 +10,10 @@ x64
 build
 buildtools
 testing
+third_party/binutils/
+third_party/jinja2/
 third_party/llvm-build
+third_party/markupsafe/
 tools
 out
 

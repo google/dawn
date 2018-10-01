@@ -3,7 +3,7 @@
 
 solutions = [
   { "name"        : ".",
-    "url"         : "https://github.com/google/nxt-standalone.git",
+    "url"         : "https://dawn.googlesource.com/dawn",
     "deps_file"   : "DEPS",
     "managed"     : False,
   },
