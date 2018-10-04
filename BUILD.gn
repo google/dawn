@@ -808,6 +808,7 @@ test("dawn_end2end_tests") {
     "src/tests/DawnTest.h",
     "src/tests/End2EndTestsMain.cpp",
     "src/tests/end2end/BasicTests.cpp",
+    "src/tests/end2end/BindGroupTests.cpp",
     "src/tests/end2end/BlendStateTests.cpp",
     "src/tests/end2end/BufferTests.cpp",
     "src/tests/end2end/ComputeCopyStorageBufferTests.cpp",
@@ -912,10 +913,10 @@ if (dawn_standalone) {
 
   group("dawn_samples") {
     deps = [
-      ":CppHelloTriangle",
+      ":Animometer",
       ":CHelloTriangle",
       ":ComputeBoids",
-      ":Animometer",
+      ":CppHelloTriangle",
       ":CubeReflection",
       ":glTFViewer",
     ]

@@ -29,7 +29,7 @@ namespace dawn_native { namespace d3d12 {
 
         device->OpenCommandList(&mCommandList);
         for (uint32_t i = 0; i < numCommands; ++i) {
-            ToBackend(commands[i])->RecordCommands(mCommandList);
+            ToBackend(commands[i])->RecordCommands(mCommandList, i);
         }
         ASSERT_SUCCESS(mCommandList->Close());
 

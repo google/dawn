@@ -33,15 +33,18 @@ namespace dawn_native { namespace d3d12 {
                                uint32_t* cbvUavSrvHeapOffset,
                                const DescriptorHeapHandle& samplerHeapStart,
                                uint32_t* samplerHeapOffset,
-                               uint64_t serial);
+                               uint64_t serial,
+                               uint32_t indexInSubmit);
         uint32_t GetCbvUavSrvHeapOffset() const;
         uint32_t GetSamplerHeapOffset() const;
         uint64_t GetHeapSerial() const;
+        uint32_t GetIndexInSubmit() const;
 
       private:
         uint32_t mCbvUavSrvHeapOffset;
         uint32_t mSamplerHeapOffset;
         uint64_t mHeapSerial = 0;
+        uint32_t mIndexInSubmit;
     };
 
 }}  // namespace dawn_native::d3d12

@@ -32,7 +32,7 @@ namespace dawn_native { namespace d3d12 {
         CommandBuffer(CommandBufferBuilder* builder);
         ~CommandBuffer();
 
-        void RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList);
+        void RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList, uint32_t indexInSubmit);
 
       private:
         void RecordComputePass(ComPtr<ID3D12GraphicsCommandList> commandList,

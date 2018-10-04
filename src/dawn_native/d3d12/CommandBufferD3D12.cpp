@@ -65,29 +65,32 @@ namespace dawn_native { namespace d3d12 {
             inCompute = inCompute_;
         }
 
-        void TrackSetBindGroup(BindGroup* group, uint32_t index) {
+        void TrackSetBindGroup(BindGroup* group, uint32_t index, uint32_t indexInSubmit) {
             if (bindGroups[index] != group) {
                 bindGroups[index] = group;
 
                 // Descriptors don't need to be recorded if they have already been recorded in
                 // the heap. Indices are only updated when descriptors are recorded
                 const uint64_t serial = device->GetSerial();
-                if (group->GetHeapSerial() != serial) {
+                if (group->GetHeapSerial() != serial ||
+                    group->GetIndexInSubmit() != indexInSubmit) {
                     group->RecordDescriptors(cbvSrvUavCPUDescriptorHeap, &cbvSrvUavDescriptorIndex,
                                              samplerCPUDescriptorHeap, &samplerDescriptorIndex,
-                                             serial);
+                                             serial, indexInSubmit);
                 }
             }
         }
 
-        void TrackInheritedGroups(PipelineLayout* oldLayout, PipelineLayout* newLayout) {
+        void TrackInheritedGroups(PipelineLayout* oldLayout,
+                                  PipelineLayout* newLayout,
+                                  uint32_t indexInSubmit) {
             if (oldLayout == nullptr) {
                 return;
             }
 
             uint32_t inheritUntil = oldLayout->GroupsInheritUpTo(newLayout);
             for (uint32_t i = 0; i < inheritUntil; ++i) {
-                TrackSetBindGroup(bindGroups[i], i);
+                TrackSetBindGroup(bindGroups[i], i, indexInSubmit);
             }
         }
 
@@ -157,7 +160,8 @@ namespace dawn_native { namespace d3d12 {
 
         void AllocateAndSetDescriptorHeaps(Device* device,
                                            BindGroupStateTracker* bindingTracker,
-                                           CommandIterator* commands) {
+                                           CommandIterator* commands,
+                                           int indexInSubmit) {
             auto* descriptorHeapAllocator = device->GetDescriptorHeapAllocator();
 
             // TODO(enga@google.com): This currently allocates CPU heaps of arbitrarily chosen sizes
@@ -177,7 +181,7 @@ namespace dawn_native { namespace d3d12 {
                             SetComputePipelineCmd* cmd =
                                 commands->NextCommand<SetComputePipelineCmd>();
                             PipelineLayout* layout = ToBackend(cmd->pipeline->GetLayout());
-                            bindingTracker->TrackInheritedGroups(lastLayout, layout);
+                            bindingTracker->TrackInheritedGroups(lastLayout, layout, indexInSubmit);
                             lastLayout = layout;
                         } break;
 
@@ -185,14 +189,14 @@ namespace dawn_native { namespace d3d12 {
                             SetRenderPipelineCmd* cmd =
                                 commands->NextCommand<SetRenderPipelineCmd>();
                             PipelineLayout* layout = ToBackend(cmd->pipeline->GetLayout());
-                            bindingTracker->TrackInheritedGroups(lastLayout, layout);
+                            bindingTracker->TrackInheritedGroups(lastLayout, layout, indexInSubmit);
                             lastLayout = layout;
                         } break;
 
                         case Command::SetBindGroup: {
                             SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
                             BindGroup* group = ToBackend(cmd->group.Get());
-                            bindingTracker->TrackSetBindGroup(group, cmd->index);
+                            bindingTracker->TrackSetBindGroup(group, cmd->index, indexInSubmit);
                         } break;
                         default:
                             SkipCommand(commands, type);
@@ -239,7 +243,8 @@ namespace dawn_native { namespace d3d12 {
         FreeCommands(&mCommands);
     }
 
-    void CommandBuffer::RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList) {
+    void CommandBuffer::RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                       uint32_t indexInSubmit) {
         Device* device = ToBackend(GetDevice());
         BindGroupStateTracker bindingTracker(device);
 
@@ -248,7 +253,7 @@ namespace dawn_native { namespace d3d12 {
         // should have a system where commands and descriptors are recorded in parallel then the
         // heaps set using a small CommandList inserted just before the main CommandList.
         {
-            AllocateAndSetDescriptorHeaps(device, &bindingTracker, &mCommands);
+            AllocateAndSetDescriptorHeaps(device, &bindingTracker, &mCommands, indexInSubmit);
             bindingTracker.Reset();
 
             ID3D12DescriptorHeap* descriptorHeaps[2] = {
