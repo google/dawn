@@ -24,30 +24,26 @@ if (!defined(dawn_standalone)) {
   dawn_standalone = false
 }
 
-if (!defined(dawn_spirv_cross_dir)) {
-  dawn_spirv_cross_dir = "//third_party/spirv-cross"
-}
-
-if (!defined(dawn_googletest_dir)) {
-  dawn_googletest_dir = "//third_party/googletest"
-}
-
-if (!defined(dawn_glslang_dir)) {
-  dawn_glslang_dir = "//third_party/glslang"
-}
-
-if (!defined(dawn_spirv_tools_dir)) {
-  dawn_spirv_tools_dir = "//third_party/SPIRV-Tools"
-}
-
-if (!defined(dawn_shaderc_dir)) {
-  dawn_shaderc_dir = "//third_party/shaderc"
+if (!defined(dawn_jinja2_dir)) {
+  dawn_jinja2_dir = "//third_party/jinja2"
 }
 
 if (!defined(dawn_glfw_dir)) {
   dawn_glfw_dir = "//third_party/glfw"
 }
 
-if (!defined(dawn_jinja2_dir)) {
-  dawn_jinja2_dir = "//third_party/jinja2"
+if (!defined(dawn_googletest_dir)) {
+  dawn_googletest_dir = "//third_party/googletest"
+}
+
+if (!defined(dawn_shaderc_dir)) {
+  dawn_shaderc_dir = "//third_party/shaderc"
+}
+
+if (!defined(dawn_spirv_cross_dir)) {
+  dawn_spirv_cross_dir = "//third_party/spirv-cross"
+}
+
+if (!defined(dawn_spirv_tools_dir)) {
+  dawn_spirv_tools_dir = "//third_party/SPIRV-Tools"
 }

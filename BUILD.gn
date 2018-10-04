@@ -689,7 +689,7 @@ static_library("dawn_utils") {
     ":libdawn_native",
     ":libdawn_wire",
     "third_party:glfw",
-    "third_party:libshaderc",
+    "${dawn_shaderc_dir}:libshaderc",
   ]
   libs = []
 
