@@ -40,7 +40,7 @@ Then get the source as follows:
 
 ```sh
 # Clone the repo as "dawn"
-git clone https://github.com/google/nxt-standalone.git dawn && cd dawn
+git clone https://dawn.googlesource.com/dawn dawn && cd dawn
 
 # Bootstrap the gclient configuration
 cp scripts/standalone.gclient .gclient
@@ -59,6 +59,8 @@ Then use `ninja -C out/Release` to build dawn and for example `./out/Release/daw
 Please read and follow [CONTRIBUTING.md](/CONTRIBUTING.md).
 Dawn doesn't have a formal coding style yet, except what's defined by our clang format style.
 Overall try to use the same style and convention as code around your change.
+
+If you find issues with Dawn, please feel free to report them on the [bug tracker](https://bugs.chromium.org/p/dawn/issues/entry).
 
 ## License
 
