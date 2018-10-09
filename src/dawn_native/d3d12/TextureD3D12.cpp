@@ -192,12 +192,25 @@ namespace dawn_native { namespace d3d12 {
         mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         switch (GetTexture()->GetDimension()) {
             case dawn::TextureDimension::e2D:
-                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-                mSrvDesc.Texture2D.MostDetailedMip = 0;
-                mSrvDesc.Texture2D.MipLevels = GetTexture()->GetNumMipLevels();
-                mSrvDesc.Texture2D.PlaneSlice = 0;
-                mSrvDesc.Texture2D.ResourceMinLODClamp = 0;
+                if (GetTexture()->GetArrayLayers() == 1) {
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+                    mSrvDesc.Texture2D.MostDetailedMip = 0;
+                    mSrvDesc.Texture2D.MipLevels = GetTexture()->GetNumMipLevels();
+                    mSrvDesc.Texture2D.PlaneSlice = 0;
+                    mSrvDesc.Texture2D.ResourceMinLODClamp = 0;
+                } else {
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+                    mSrvDesc.Texture2DArray.ArraySize = GetTexture()->GetArrayLayers();
+                    mSrvDesc.Texture2DArray.FirstArraySlice = 0;
+                    mSrvDesc.Texture2DArray.MipLevels = GetTexture()->GetNumMipLevels();
+                    mSrvDesc.Texture2DArray.MostDetailedMip = 0;
+                    mSrvDesc.Texture2DArray.PlaneSlice = 0;
+                    mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
+                }
                 break;
+
+            default:
+                UNREACHABLE();
         }
     }
 

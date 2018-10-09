@@ -688,8 +688,8 @@ static_library("dawn_utils") {
     ":dawn_common",
     ":libdawn_native",
     ":libdawn_wire",
-    "third_party:glfw",
     "${dawn_shaderc_dir}:libshaderc",
+    "third_party:glfw",
   ]
   libs = []
 
@@ -822,6 +822,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/RenderPassLoadOpTests.cpp",
     "src/tests/end2end/SamplerTests.cpp",
     "src/tests/end2end/ScissorTests.cpp",
+    "src/tests/end2end/TextureViewTests.cpp",
     "src/tests/end2end/ViewportOrientationTests.cpp",
   ]
 }
