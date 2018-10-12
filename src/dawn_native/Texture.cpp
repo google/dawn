@@ -19,6 +19,68 @@
 #include "dawn_native/ValidationUtils_autogen.h"
 
 namespace dawn_native {
+    namespace {
+        // TODO(jiawei.shao@intel.com): implement texture view format compatibility rule
+        MaybeError ValidateTextureViewFormatCompatibility(const TextureBase* texture,
+                                                          const TextureViewDescriptor* descriptor) {
+            if (texture->GetFormat() != descriptor->format) {
+                return DAWN_VALIDATION_ERROR(
+                    "The format of texture view is not compatible to the original texture");
+            }
+
+            return {};
+        }
+
+        // TODO(jiawei.shao@intel.com): support validation on all texture view dimensions
+        bool IsTextureViewDimensionCompatibleWithTextureDimension(
+            dawn::TextureViewDimension textureViewDimension,
+            dawn::TextureDimension textureDimension) {
+            switch (textureViewDimension) {
+                case dawn::TextureViewDimension::e2D:
+                    return textureDimension == dawn::TextureDimension::e2D;
+                case dawn::TextureViewDimension::e2DArray:
+                    return textureDimension == dawn::TextureDimension::e2D;
+                default:
+                    UNREACHABLE();
+                    return false;
+            }
+        }
+
+        // TODO(jiawei.shao@intel.com): support validation on all texture view dimensions
+        bool IsArrayLayerValidForTextureViewDimension(
+            dawn::TextureViewDimension textureViewDimension,
+            uint32_t textureViewArrayLayer) {
+            switch (textureViewDimension) {
+                case dawn::TextureViewDimension::e2D:
+                    return textureViewArrayLayer == 1u;
+                case dawn::TextureViewDimension::e2DArray:
+                    return true;
+                default:
+                    UNREACHABLE();
+                    return false;
+            }
+        }
+
+        MaybeError ValidateTextureViewDimensionCompatibility(
+            const TextureBase* texture,
+            const TextureViewDescriptor* descriptor) {
+            if (!IsArrayLayerValidForTextureViewDimension(descriptor->dimension,
+                                                          descriptor->layerCount)) {
+                return DAWN_VALIDATION_ERROR(
+                    "The dimension of the texture view is not compatible to the layer count");
+            }
+
+            if (!IsTextureViewDimensionCompatibleWithTextureDimension(descriptor->dimension,
+                                                                      texture->GetDimension())) {
+                return DAWN_VALIDATION_ERROR(
+                    "The dimension of texture view is not compatible to the original texture");
+            }
+
+            return {};
+        }
+
+    }  // anonymous namespace
+
     MaybeError ValidateTextureDescriptor(DeviceBase*, const TextureDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -34,6 +96,37 @@ namespace dawn_native {
             descriptor->mipLevel == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
+
+        return {};
+    }
+
+    MaybeError ValidateTextureViewDescriptor(const DeviceBase*,
+                                             const TextureBase* texture,
+                                             const TextureViewDescriptor* descriptor) {
+        if (descriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
+
+        DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
+        DAWN_TRY(ValidateTextureFormat(descriptor->format));
+
+        // TODO(jiawei.shao@intel.com): check stuff based on resource limits
+        if (descriptor->layerCount == 0 || descriptor->levelCount == 0) {
+            return DAWN_VALIDATION_ERROR("Cannot create an empty texture view");
+        }
+
+        if (uint64_t(descriptor->baseArrayLayer) + uint64_t(descriptor->layerCount) >
+            uint64_t(texture->GetArrayLayers())) {
+            return DAWN_VALIDATION_ERROR("Texture view array-layer out of range");
+        }
+
+        if (uint64_t(descriptor->baseMipLevel) + uint64_t(descriptor->levelCount) >
+            uint64_t(texture->GetNumMipLevels())) {
+            return DAWN_VALIDATION_ERROR("Texture view mip-level out of range");
+        }
+
+        DAWN_TRY(ValidateTextureViewFormatCompatibility(texture, descriptor));
+        DAWN_TRY(ValidateTextureViewDimensionCompatibility(texture, descriptor));
 
         return {};
     }
@@ -120,7 +213,14 @@ namespace dawn_native {
     }
 
     TextureViewBase* TextureBase::CreateDefaultTextureView() {
+        // TODO(jiawei.shao@intel.com): remove Device->CreateDefaultTextureView in all back-ends
+        // and implement this function by creating a TextureViewDescriptor based on the texture
+        // and calling CreateTextureView(&descriptor) instead.
         return mDevice->CreateDefaultTextureView(this);
+    }
+
+    TextureViewBase* TextureBase::CreateTextureView(const TextureViewDescriptor* descriptor) {
+        return mDevice->CreateTextureView(this, descriptor);
     }
 
     // TextureViewBase

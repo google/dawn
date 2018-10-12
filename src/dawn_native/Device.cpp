@@ -192,6 +192,15 @@ namespace dawn_native {
         }
         return result;
     }
+    TextureViewBase* DeviceBase::CreateTextureView(TextureBase* texture,
+                                                   const TextureViewDescriptor* descriptor) {
+        TextureViewBase* result = nullptr;
+
+        if (ConsumedError(CreateTextureViewInternal(&result, texture, descriptor))) {
+            return nullptr;
+        }
+        return result;
+    }
 
     // Other Device API methods
 
@@ -268,6 +277,14 @@ namespace dawn_native {
                                                  const TextureDescriptor* descriptor) {
         DAWN_TRY(ValidateTextureDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, CreateTextureImpl(descriptor));
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateTextureViewInternal(TextureViewBase** result,
+                                                     TextureBase* texture,
+                                                     const TextureViewDescriptor* descriptor) {
+        DAWN_TRY(ValidateTextureViewDescriptor(this, texture, descriptor));
+        DAWN_TRY_ASSIGN(*result, CreateTextureViewImpl(texture, descriptor));
         return {};
     }
 

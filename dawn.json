@@ -1031,6 +1031,13 @@
             {
                 "name": "create default texture view",
                 "returns": "texture view"
+            },
+            {
+                "name": "create texture view",
+                "returns": "texture view",
+                "args": [
+                    {"name": "descriptor", "type": "texture view descriptor", "annotation": "const*"}
+                ]
             }
         ]
     },
@@ -1041,9 +1048,9 @@
             {"name": "usage", "type": "texture usage bit"},
             {"name": "dimension", "type": "texture dimension"},
             {"name": "size", "type": "extent 3D"},
-            {"name": "arrayLayer", "type": "uint32_t"},
+            {"name": "array layer", "type": "uint32_t"},
             {"name": "format", "type": "texture format"},
-            {"name": "mipLevel", "type": "uint32_t"}
+            {"name": "mip level", "type": "uint32_t"}
         ]
     },
     "texture dimension": {
@@ -1077,8 +1084,33 @@
             {"value": 32, "name": "present"}
         ]
     },
+    "texture view descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "format", "type": "texture format"},
+            {"name": "dimension", "type": "texture view dimension"},
+            {"name": "base mip level", "type": "uint32_t"},
+            {"name": "level count", "type": "uint32_t"},
+            {"name": "base array layer", "type": "uint32_t"},
+            {"name": "layer count", "type": "uint32_t"}
+        ],
+        "TODO": [
+            "jiawei.shao@intel.com: Allow choosing the aspect (depth vs. stencil)"
+        ]
+    },
     "texture view": {
         "category": "object"
+    },
+    "texture view dimension": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "2D"},
+            {"value": 1, "name": "2D array"}
+        ],
+        "TODO": [
+            "jiawei.shao@intel.com: support 1D, 3D, cube and cube array texture views"
+        ]
     },
     "vertex format": {
         "category": "enum",

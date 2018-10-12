@@ -780,6 +780,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
     "src/tests/unittests/validation/RenderPipelineValidationTests.cpp",
     "src/tests/unittests/validation/ShaderModuleValidationTests.cpp",
+    "src/tests/unittests/validation/TextureViewValidationTests.cpp",
     "src/tests/unittests/validation/ValidationTest.cpp",
     "src/tests/unittests/validation/ValidationTest.h",
     "src/tests/unittests/validation/VertexBufferValidationTests.cpp",
