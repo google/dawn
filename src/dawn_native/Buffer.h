@@ -18,7 +18,7 @@
 #include "dawn_native/Builder.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -34,15 +34,13 @@ namespace dawn_native {
         dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferDst |
         dawn::BufferUsageBit::Storage;
 
-    class BufferBase : public RefCounted {
+    class BufferBase : public ObjectBase {
       public:
         BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
         ~BufferBase();
 
         uint32_t GetSize() const;
         dawn::BufferUsageBit GetUsage() const;
-
-        DeviceBase* GetDevice() const;
 
         // Dawn API
         BufferViewBuilder* CreateBufferViewBuilder();
@@ -75,7 +73,6 @@ namespace dawn_native {
                                dawn::BufferUsageBit requiredUsage) const;
         MaybeError ValidateUnmap() const;
 
-        DeviceBase* mDevice;
         uint32_t mSize;
         dawn::BufferUsageBit mUsage = dawn::BufferUsageBit::None;
 
@@ -87,7 +84,7 @@ namespace dawn_native {
         bool mIsMapped = false;
     };
 
-    class BufferViewBase : public RefCounted {
+    class BufferViewBase : public ObjectBase {
       public:
         BufferViewBase(BufferViewBuilder* builder);
 

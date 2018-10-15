@@ -27,7 +27,7 @@
 
 namespace dawn_native {
 
-    class RenderPipelineBase : public RefCounted, public PipelineBase {
+    class RenderPipelineBase : public PipelineBase {
       public:
         RenderPipelineBase(RenderPipelineBuilder* builder);
 

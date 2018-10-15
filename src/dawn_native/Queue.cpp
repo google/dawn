@@ -21,15 +21,11 @@ namespace dawn_native {
 
     // QueueBase
 
-    QueueBase::QueueBase(DeviceBase* device) : mDevice(device) {
-    }
-
-    DeviceBase* QueueBase::GetDevice() {
-        return mDevice;
+    QueueBase::QueueBase(DeviceBase* device) : ObjectBase(device) {
     }
 
     void QueueBase::Submit(uint32_t numCommands, CommandBufferBase* const* commands) {
-        if (mDevice->ConsumedError(ValidateSubmit(numCommands, commands))) {
+        if (GetDevice()->ConsumedError(ValidateSubmit(numCommands, commands))) {
             return;
         }
 

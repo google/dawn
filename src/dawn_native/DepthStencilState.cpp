@@ -21,7 +21,9 @@ namespace dawn_native {
     // DepthStencilStateBase
 
     DepthStencilStateBase::DepthStencilStateBase(DepthStencilStateBuilder* builder)
-        : mDepthInfo(builder->mDepthInfo), mStencilInfo(builder->mStencilInfo) {
+        : ObjectBase(builder->GetDevice()),
+          mDepthInfo(builder->mDepthInfo),
+          mStencilInfo(builder->mStencilInfo) {
     }
 
     bool DepthStencilStateBase::StencilTestEnabled() const {
@@ -57,7 +59,7 @@ namespace dawn_native {
     }
 
     DepthStencilStateBase* DepthStencilStateBuilder::GetResultImpl() {
-        return mDevice->CreateDepthStencilState(this);
+        return GetDevice()->CreateDepthStencilState(this);
     }
 
     void DepthStencilStateBuilder::SetDepthCompareFunction(

@@ -23,7 +23,7 @@ namespace dawn_native {
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
                                                      CommandBufferBuilder* topLevelBuilder,
                                                      CommandAllocator* allocator)
-        : mDevice(device), mTopLevelBuilder(topLevelBuilder), mAllocator(allocator) {
+        : ObjectBase(device), mTopLevelBuilder(topLevelBuilder), mAllocator(allocator) {
     }
 
     void ProgrammablePassEncoder::EndPass() {
@@ -70,10 +70,6 @@ namespace dawn_native {
 
         uint32_t* values = mAllocator->AllocateData<uint32_t>(count);
         memcpy(values, data, count * sizeof(uint32_t));
-    }
-
-    DeviceBase* ProgrammablePassEncoder::GetDevice() const {
-        return mDevice;
     }
 
     MaybeError ProgrammablePassEncoder::ValidateCanRecordCommands() const {

@@ -66,14 +66,11 @@ namespace dawn_native {
     // ShaderModuleBase
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor*)
-        : mDevice(device) {
-    }
-
-    DeviceBase* ShaderModuleBase::GetDevice() const {
-        return mDevice;
+        : ObjectBase(device) {
     }
 
     void ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
+        DeviceBase* device = GetDevice();
         // TODO(cwallez@chromium.org): make errors here builder-level
         // currently errors here do not prevent the shadermodule from being used
         const auto& resources = compiler.get_shader_resources();
@@ -132,7 +129,7 @@ namespace dawn_native {
                 }
 
                 if (offset + size > kMaxPushConstants) {
-                    mDevice->HandleError("Push constant block too big in the SPIRV");
+                    device->HandleError("Push constant block too big in the SPIRV");
                     return;
                 }
 
@@ -157,7 +154,7 @@ namespace dawn_native {
                 uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 
                 if (binding >= kMaxBindingsPerGroup || set >= kMaxBindGroups) {
-                    mDevice->HandleError("Binding over limits in the SPIRV");
+                    GetDevice()->HandleError("Binding over limits in the SPIRV");
                     continue;
                 }
 
@@ -184,7 +181,7 @@ namespace dawn_native {
                 uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
 
                 if (location >= kMaxVertexAttributes) {
-                    mDevice->HandleError("Attribute location over limits in the SPIRV");
+                    device->HandleError("Attribute location over limits in the SPIRV");
                     return;
                 }
 
@@ -195,7 +192,7 @@ namespace dawn_native {
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_outputs) {
                 if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    mDevice->HandleError("Need location qualifier on vertex output");
+                    device->HandleError("Need location qualifier on vertex output");
                     return;
                 }
             }
@@ -206,7 +203,7 @@ namespace dawn_native {
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
                 if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    mDevice->HandleError("Need location qualifier on fragment input");
+                    device->HandleError("Need location qualifier on fragment input");
                     return;
                 }
             }

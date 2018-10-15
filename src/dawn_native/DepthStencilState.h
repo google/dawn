@@ -17,13 +17,13 @@
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 
-    class DepthStencilStateBase : public RefCounted {
+    class DepthStencilStateBase : public ObjectBase {
       public:
         DepthStencilStateBase(DepthStencilStateBuilder* builder);
 

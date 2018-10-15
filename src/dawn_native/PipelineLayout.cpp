@@ -42,7 +42,7 @@ namespace dawn_native {
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                            const PipelineLayoutDescriptor* descriptor)
-        : mDevice(device) {
+        : ObjectBase(device) {
         ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups);
         for (uint32_t group = 0; group < descriptor->numBindGroupLayouts; ++group) {
             mBindGroupLayouts[group] = descriptor->bindGroupLayouts[group];
@@ -71,10 +71,6 @@ namespace dawn_native {
             }
         }
         return kMaxBindGroups + 1;
-    }
-
-    DeviceBase* PipelineLayoutBase::GetDevice() const {
-        return mDevice;
     }
 
 }  // namespace dawn_native

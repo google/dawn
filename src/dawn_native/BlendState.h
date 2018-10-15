@@ -17,13 +17,13 @@
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 
-    class BlendStateBase : public RefCounted {
+    class BlendStateBase : public ObjectBase {
       public:
         BlendStateBase(BlendStateBuilder* builder);
 

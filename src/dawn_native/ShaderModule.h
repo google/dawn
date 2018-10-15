@@ -19,7 +19,7 @@
 #include "dawn_native/Builder.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -36,11 +36,9 @@ namespace dawn_native {
     MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
                                               const ShaderModuleDescriptor* descriptor);
 
-    class ShaderModuleBase : public RefCounted {
+    class ShaderModuleBase : public ObjectBase {
       public:
         ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
-
-        DeviceBase* GetDevice() const;
 
         void ExtractSpirvInfo(const spirv_cross::Compiler& compiler);
 
@@ -72,7 +70,6 @@ namespace dawn_native {
       private:
         bool IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout);
 
-        DeviceBase* mDevice;
         PushConstantInfo mPushConstants = {};
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;

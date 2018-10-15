@@ -18,17 +18,15 @@
 #include "dawn_native/Builder.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 
-    class QueueBase : public RefCounted {
+    class QueueBase : public ObjectBase {
       public:
         QueueBase(DeviceBase* device);
-
-        DeviceBase* GetDevice();
 
         // Dawn API
         void Submit(uint32_t numCommands, CommandBufferBase* const* commands);
@@ -37,8 +35,6 @@ namespace dawn_native {
         virtual void SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) = 0;
 
         MaybeError ValidateSubmit(uint32_t numCommands, CommandBufferBase* const* commands);
-
-        DeviceBase* mDevice;
     };
 
 }  // namespace dawn_native

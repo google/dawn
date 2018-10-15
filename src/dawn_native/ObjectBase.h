@@ -1,4 +1,4 @@
-// Copyright 2017 The Dawn Authors
+// Copyright 2018 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_COMPUTEPIPELINE_H_
-#define DAWNNATIVE_COMPUTEPIPELINE_H_
+#ifndef DAWNNATIVE_OBJECTBASE_H_
+#define DAWNNATIVE_OBJECTBASE_H_
 
-#include "dawn_native/Pipeline.h"
+#include "dawn_native/RefCounted.h"
 
 namespace dawn_native {
 
     class DeviceBase;
 
-    MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
-                                                 const ComputePipelineDescriptor* descriptor);
-
-    class ComputePipelineBase : public PipelineBase {
+    class ObjectBase : public RefCounted {
       public:
-        ComputePipelineBase(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
+        ObjectBase(DeviceBase* device);
+        virtual ~ObjectBase();
+
+        DeviceBase* GetDevice() const;
+
+      private:
+        DeviceBase* mDevice;
     };
 
 }  // namespace dawn_native
 
-#endif  // DAWNNATIVE_COMPUTEPIPELINE_H_
+#endif  // DAWNNATIVE_OBJECTBASE_H_

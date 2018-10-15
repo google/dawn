@@ -16,7 +16,7 @@
 #define DAWNNATIVE_PROGRAMMABLEPASSENCODER_H_
 
 #include "dawn_native/Error.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -26,7 +26,7 @@ namespace dawn_native {
     class DeviceBase;
 
     // Base class for shared functionality between ComputePassEncoder and RenderPassEncoder.
-    class ProgrammablePassEncoder : public RefCounted {
+    class ProgrammablePassEncoder : public ObjectBase {
       public:
         ProgrammablePassEncoder(DeviceBase* device,
                                 CommandBufferBuilder* topLevelBuilder,
@@ -40,12 +40,8 @@ namespace dawn_native {
                               uint32_t count,
                               const void* data);
 
-        DeviceBase* GetDevice() const;
-
       protected:
         MaybeError ValidateCanRecordCommands() const;
-
-        DeviceBase* mDevice;
 
         // The allocator is borrowed from the top level builder. Keep a reference to the builder
         // to make sure the allocator isn't freed.

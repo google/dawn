@@ -18,7 +18,7 @@
 #include "common/Constants.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -30,7 +30,7 @@ namespace dawn_native {
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
                                                  const BindGroupLayoutDescriptor* descriptor);
 
-    class BindGroupLayoutBase : public RefCounted {
+    class BindGroupLayoutBase : public ObjectBase {
       public:
         BindGroupLayoutBase(DeviceBase* device,
                             const BindGroupLayoutDescriptor* descriptor,
@@ -44,10 +44,7 @@ namespace dawn_native {
         };
         const LayoutBindingInfo& GetBindingInfo() const;
 
-        DeviceBase* GetDevice() const;
-
       private:
-        DeviceBase* mDevice;
         LayoutBindingInfo mBindingInfo;
         bool mIsBlueprint = false;
     };

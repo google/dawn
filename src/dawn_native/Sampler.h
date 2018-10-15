@@ -16,7 +16,7 @@
 #define DAWNNATIVE_SAMPLER_H_
 
 #include "dawn_native/Error.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -26,7 +26,7 @@ namespace dawn_native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor);
 
-    class SamplerBase : public RefCounted {
+    class SamplerBase : public ObjectBase {
       public:
         SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor);
     };

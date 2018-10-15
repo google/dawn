@@ -18,7 +18,7 @@
 #include "common/Constants.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -32,7 +32,7 @@ namespace dawn_native {
 
     using BindGroupLayoutArray = std::array<Ref<BindGroupLayoutBase>, kMaxBindGroups>;
 
-    class PipelineLayoutBase : public RefCounted {
+    class PipelineLayoutBase : public ObjectBase {
       public:
         PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDescriptor* descriptor);
 
@@ -47,10 +47,7 @@ namespace dawn_native {
         // [1, kMaxBindGroups + 1]
         uint32_t GroupsInheritUpTo(const PipelineLayoutBase* other) const;
 
-        DeviceBase* GetDevice() const;
-
       protected:
-        DeviceBase* mDevice;
         BindGroupLayoutArray mBindGroupLayouts;
         std::bitset<kMaxBindGroups> mMask;
     };

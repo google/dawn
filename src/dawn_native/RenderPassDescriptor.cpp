@@ -24,13 +24,13 @@ namespace dawn_native {
     // RenderPassDescriptor
 
     RenderPassDescriptorBase::RenderPassDescriptorBase(RenderPassDescriptorBuilder* builder)
-        : mColorAttachmentsSet(builder->mColorAttachmentsSet),
+        : ObjectBase(builder->GetDevice()),
+          mColorAttachmentsSet(builder->mColorAttachmentsSet),
           mColorAttachments(builder->mColorAttachments),
           mDepthStencilAttachmentSet(builder->mDepthStencilAttachmentSet),
           mDepthStencilAttachment(builder->mDepthStencilAttachment),
           mWidth(builder->mWidth),
-          mHeight(builder->mHeight),
-          mDevice(builder->GetDevice()) {
+          mHeight(builder->mHeight) {
     }
 
     std::bitset<kMaxColorAttachments> RenderPassDescriptorBase::GetColorAttachmentMask() const {
@@ -78,10 +78,6 @@ namespace dawn_native {
         return mHeight;
     }
 
-    DeviceBase* RenderPassDescriptorBase::GetDevice() const {
-        return mDevice;
-    }
-
     // RenderPassDescriptorBuilder
 
     RenderPassDescriptorBuilder::RenderPassDescriptorBuilder(DeviceBase* device) : Builder(device) {
@@ -126,7 +122,7 @@ namespace dawn_native {
             return nullptr;
         }
 
-        return mDevice->CreateRenderPassDescriptor(this);
+        return GetDevice()->CreateRenderPassDescriptor(this);
     }
 
     void RenderPassDescriptorBuilder::SetColorAttachment(uint32_t attachment,

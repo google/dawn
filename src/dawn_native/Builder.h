@@ -16,7 +16,7 @@
 #define DAWNNATIVE_BUILDER_H_
 
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -35,19 +35,18 @@ namespace dawn_native {
     // builder "set" function performance validation inline. Because of this we have to store the
     // status in the builder and defer calling the callback to GetResult.
 
-    class BuilderBase : public RefCounted {
+    class BuilderBase : public ObjectBase {
       public:
         // Used by the auto-generated validation to prevent usage of the builder
         // after GetResult or an error.
         bool CanBeUsed() const;
-        DeviceBase* GetDevice();
 
         // Set the status of the builder to an error.
         void HandleError(const char* message);
 
         // Internal API, to be used by builder and BackendProcTable only.
         // Returns true for success cases, and calls the callback with appropriate status.
-        bool HandleResult(RefCounted* result);
+        bool HandleResult(ObjectBase* result);
 
         // Dawn API
         void SetErrorCallback(dawn::BuilderErrorCallback callback,
@@ -58,7 +57,6 @@ namespace dawn_native {
         BuilderBase(DeviceBase* device);
         ~BuilderBase();
 
-        DeviceBase* const mDevice;
         bool mGotStatus = false;
 
       private:

@@ -79,7 +79,7 @@ namespace dawn_native {
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                              const BindGroupLayoutDescriptor* descriptor,
                                              bool blueprint)
-        : mDevice(device), mIsBlueprint(blueprint) {
+        : ObjectBase(device), mIsBlueprint(blueprint) {
         for (uint32_t i = 0; i < descriptor->numBindings; ++i) {
             auto& binding = descriptor->bindings[i];
 
@@ -95,16 +95,12 @@ namespace dawn_native {
     BindGroupLayoutBase::~BindGroupLayoutBase() {
         // Do not uncache the actual cached object if we are a blueprint
         if (!mIsBlueprint) {
-            mDevice->UncacheBindGroupLayout(this);
+            GetDevice()->UncacheBindGroupLayout(this);
         }
     }
 
     const BindGroupLayoutBase::LayoutBindingInfo& BindGroupLayoutBase::GetBindingInfo() const {
         return mBindingInfo;
-    }
-
-    DeviceBase* BindGroupLayoutBase::GetDevice() const {
-        return mDevice;
     }
 
     // BindGroupLayoutCacheFuncs

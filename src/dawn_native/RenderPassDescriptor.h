@@ -18,7 +18,7 @@
 #include "common/Constants.h"
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -45,7 +45,7 @@ namespace dawn_native {
     // RenderPassDescriptor contains the list of attachments for a renderpass along with data such
     // as the load operation and the clear values for the attachments.
 
-    class RenderPassDescriptorBase : public RefCounted {
+    class RenderPassDescriptorBase : public ObjectBase {
       public:
         RenderPassDescriptorBase(RenderPassDescriptorBuilder* builder);
 
@@ -61,8 +61,6 @@ namespace dawn_native {
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;
 
-        DeviceBase* GetDevice() const;
-
       private:
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
         std::array<RenderPassColorAttachmentInfo, kMaxColorAttachments> mColorAttachments;
@@ -72,8 +70,6 @@ namespace dawn_native {
 
         uint32_t mWidth;
         uint32_t mHeight;
-
-        DeviceBase* mDevice;
     };
 
     class RenderPassDescriptorBuilder : public Builder<RenderPassDescriptorBase> {

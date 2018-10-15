@@ -351,8 +351,8 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/Forward.h
     ${DAWN_NATIVE_DIR}/InputState.cpp
     ${DAWN_NATIVE_DIR}/InputState.h
-    ${DAWN_NATIVE_DIR}/RenderPipeline.cpp
-    ${DAWN_NATIVE_DIR}/RenderPipeline.h
+    ${DAWN_NATIVE_DIR}/ObjectBase.cpp
+    ${DAWN_NATIVE_DIR}/ObjectBase.h
     ${DAWN_NATIVE_DIR}/PassResourceUsage.h
     ${DAWN_NATIVE_DIR}/PerStage.cpp
     ${DAWN_NATIVE_DIR}/PerStage.h
@@ -364,12 +364,14 @@ list(APPEND DAWN_NATIVE_SOURCES
     ${DAWN_NATIVE_DIR}/ProgrammablePassEncoder.h
     ${DAWN_NATIVE_DIR}/Queue.cpp
     ${DAWN_NATIVE_DIR}/Queue.h
+    ${DAWN_NATIVE_DIR}/RefCounted.cpp
+    ${DAWN_NATIVE_DIR}/RefCounted.h
     ${DAWN_NATIVE_DIR}/RenderPassDescriptor.cpp
     ${DAWN_NATIVE_DIR}/RenderPassDescriptor.h
     ${DAWN_NATIVE_DIR}/RenderPassEncoder.cpp
     ${DAWN_NATIVE_DIR}/RenderPassEncoder.h
-    ${DAWN_NATIVE_DIR}/RefCounted.cpp
-    ${DAWN_NATIVE_DIR}/RefCounted.h
+    ${DAWN_NATIVE_DIR}/RenderPipeline.cpp
+    ${DAWN_NATIVE_DIR}/RenderPipeline.h
     ${DAWN_NATIVE_DIR}/Sampler.cpp
     ${DAWN_NATIVE_DIR}/Sampler.h
     ${DAWN_NATIVE_DIR}/ShaderModule.cpp

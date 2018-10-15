@@ -20,8 +20,8 @@
 #include "dawn_native/Builder.h"
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/ObjectBase.h"
 #include "dawn_native/PassResourceUsage.h"
-#include "dawn_native/RefCounted.h"
 
 #include <memory>
 #include <set>
@@ -39,14 +39,9 @@ namespace dawn_native {
 
     class CommandBufferBuilder;
 
-    class CommandBufferBase : public RefCounted {
+    class CommandBufferBase : public ObjectBase {
       public:
         CommandBufferBase(CommandBufferBuilder* builder);
-
-        DeviceBase* GetDevice();
-
-      private:
-        DeviceBase* mDevice;
     };
 
     class CommandBufferBuilder : public Builder<CommandBufferBase> {

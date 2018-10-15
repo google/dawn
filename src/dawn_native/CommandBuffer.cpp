@@ -286,11 +286,7 @@ namespace dawn_native {
     // CommandBuffer
 
     CommandBufferBase::CommandBufferBase(CommandBufferBuilder* builder)
-        : mDevice(builder->mDevice) {
-    }
-
-    DeviceBase* CommandBufferBase::GetDevice() {
-        return mDevice;
+        : ObjectBase(builder->GetDevice()) {
     }
 
     // CommandBufferBuilder
@@ -322,7 +318,7 @@ namespace dawn_native {
         mEncodingState = EncodingState::Finished;
 
         MoveToIterator();
-        return mDevice->CreateCommandBuffer(this);
+        return GetDevice()->CreateCommandBuffer(this);
     }
 
     void CommandBufferBuilder::MoveToIterator() {
@@ -590,7 +586,7 @@ namespace dawn_native {
         mAllocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
 
         mEncodingState = EncodingState::ComputePass;
-        return new ComputePassEncoderBase(mDevice, this, &mAllocator);
+        return new ComputePassEncoderBase(GetDevice(), this, &mAllocator);
     }
 
     RenderPassEncoderBase* CommandBufferBuilder::BeginRenderPass(RenderPassDescriptorBase* info) {
@@ -599,7 +595,7 @@ namespace dawn_native {
         cmd->info = info;
 
         mEncodingState = EncodingState::RenderPass;
-        return new RenderPassEncoderBase(mDevice, this, &mAllocator);
+        return new RenderPassEncoderBase(GetDevice(), this, &mAllocator);
     }
 
     void CommandBufferBuilder::CopyBufferToBuffer(BufferBase* source,

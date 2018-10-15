@@ -17,19 +17,17 @@
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn/dawn_wsi.h"
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 
-    class SwapChainBase : public RefCounted {
+    class SwapChainBase : public ObjectBase {
       public:
         SwapChainBase(SwapChainBuilder* builder);
         ~SwapChainBase();
-
-        DeviceBase* GetDevice();
 
         // Dawn API
         void Configure(dawn::TextureFormat format,
@@ -45,7 +43,6 @@ namespace dawn_native {
         virtual void OnBeforePresent(TextureBase* texture) = 0;
 
       private:
-        DeviceBase* mDevice = nullptr;
         dawnSwapChainImplementation mImplementation = {};
         dawn::TextureFormat mFormat = {};
         dawn::TextureUsageBit mAllowedUsage;

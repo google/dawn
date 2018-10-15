@@ -27,16 +27,19 @@ namespace dawn_native {
     PipelineBase::PipelineBase(DeviceBase* device,
                                PipelineLayoutBase* layout,
                                dawn::ShaderStageBit stages)
-        : mStageMask(stages), mLayout(layout), mDevice(device) {
+        : ObjectBase(device), mStageMask(stages), mLayout(layout), mDevice(device) {
     }
 
     PipelineBase::PipelineBase(DeviceBase* device, PipelineBuilder* builder)
-        : mStageMask(builder->mStageMask), mLayout(std::move(builder->mLayout)), mDevice(device) {
+        : ObjectBase(device),
+          mStageMask(builder->mStageMask),
+          mLayout(std::move(builder->mLayout)),
+          mDevice(device) {
         if (!mLayout) {
             PipelineLayoutDescriptor descriptor;
             descriptor.numBindGroupLayouts = 0;
             descriptor.bindGroupLayouts = nullptr;
-            mLayout = builder->GetParentBuilder()->GetDevice()->CreatePipelineLayout(&descriptor);
+            mLayout = device->CreatePipelineLayout(&descriptor);
             // Remove the external ref objects are created with
             mLayout->Release();
         }

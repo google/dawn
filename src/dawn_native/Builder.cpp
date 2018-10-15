@@ -23,10 +23,6 @@ namespace dawn_native {
         return !mIsConsumed && !mGotStatus;
     }
 
-    DeviceBase* BuilderBase::GetDevice() {
-        return mDevice;
-    }
-
     void BuilderBase::HandleError(const char* message) {
         SetStatus(dawn::BuilderErrorStatus::Error, message);
     }
@@ -39,7 +35,7 @@ namespace dawn_native {
         mUserdata2 = userdata2;
     }
 
-    BuilderBase::BuilderBase(DeviceBase* device) : mDevice(device) {
+    BuilderBase::BuilderBase(DeviceBase* device) : ObjectBase(device) {
     }
 
     BuilderBase::~BuilderBase() {
@@ -59,7 +55,7 @@ namespace dawn_native {
         mStoredMessage = message;
     }
 
-    bool BuilderBase::HandleResult(RefCounted* result) {
+    bool BuilderBase::HandleResult(ObjectBase* result) {
         // GetResult can only be called once.
         ASSERT(!mIsConsumed);
         mIsConsumed = true;
@@ -80,7 +76,7 @@ namespace dawn_native {
 
             // Unhandled builder errors are promoted to device errors
             if (!mCallback)
-                mDevice->HandleError(("Unhandled builder error: " + mStoredMessage).c_str());
+                GetDevice()->HandleError(("Unhandled builder error: " + mStoredMessage).c_str());
         } else {
             ASSERT(mStoredStatus == dawn::BuilderErrorStatus::Success);
             ASSERT(mStoredMessage.empty());

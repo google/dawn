@@ -364,6 +364,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Forward.h",
     "src/dawn_native/InputState.cpp",
     "src/dawn_native/InputState.h",
+    "src/dawn_native/ObjectBase.cpp",
+    "src/dawn_native/ObjectBase.h",
     "src/dawn_native/PassResourceUsage.h",
     "src/dawn_native/PerStage.cpp",
     "src/dawn_native/PerStage.h",

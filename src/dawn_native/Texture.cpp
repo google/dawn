@@ -180,17 +180,13 @@ namespace dawn_native {
     // TextureBase
 
     TextureBase::TextureBase(DeviceBase* device, const TextureDescriptor* descriptor)
-        : mDevice(device),
+        : ObjectBase(device),
           mDimension(descriptor->dimension),
           mFormat(descriptor->format),
           mSize(descriptor->size),
           mArrayLayers(descriptor->arrayLayer),
           mNumMipLevels(descriptor->mipLevel),
           mUsage(descriptor->usage) {
-    }
-
-    DeviceBase* TextureBase::GetDevice() const {
-        return mDevice;
     }
 
     dawn::TextureDimension TextureBase::GetDimension() const {
@@ -216,16 +212,17 @@ namespace dawn_native {
         // TODO(jiawei.shao@intel.com): remove Device->CreateDefaultTextureView in all back-ends
         // and implement this function by creating a TextureViewDescriptor based on the texture
         // and calling CreateTextureView(&descriptor) instead.
-        return mDevice->CreateDefaultTextureView(this);
+        return GetDevice()->CreateDefaultTextureView(this);
     }
 
     TextureViewBase* TextureBase::CreateTextureView(const TextureViewDescriptor* descriptor) {
-        return mDevice->CreateTextureView(this, descriptor);
+        return GetDevice()->CreateTextureView(this, descriptor);
     }
 
     // TextureViewBase
 
-    TextureViewBase::TextureViewBase(TextureBase* texture) : mTexture(texture) {
+    TextureViewBase::TextureViewBase(TextureBase* texture)
+        : ObjectBase(texture->GetDevice()), mTexture(texture) {
     }
 
     const TextureBase* TextureViewBase::GetTexture() const {

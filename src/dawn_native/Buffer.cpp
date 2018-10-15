@@ -50,7 +50,7 @@ namespace dawn_native {
     // Buffer
 
     BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
-        : mDevice(device), mSize(descriptor->size), mUsage(descriptor->usage) {
+        : ObjectBase(device), mSize(descriptor->size), mUsage(descriptor->usage) {
     }
 
     BufferBase::~BufferBase() {
@@ -61,11 +61,7 @@ namespace dawn_native {
     }
 
     BufferViewBuilder* BufferBase::CreateBufferViewBuilder() {
-        return new BufferViewBuilder(mDevice, this);
-    }
-
-    DeviceBase* BufferBase::GetDevice() const {
-        return mDevice;
+        return new BufferViewBuilder(GetDevice(), this);
     }
 
     uint32_t BufferBase::GetSize() const {
@@ -103,7 +99,7 @@ namespace dawn_native {
     }
 
     void BufferBase::SetSubData(uint32_t start, uint32_t count, const uint8_t* data) {
-        if (mDevice->ConsumedError(ValidateSetSubData(start, count))) {
+        if (GetDevice()->ConsumedError(ValidateSetSubData(start, count))) {
             return;
         }
 
@@ -114,7 +110,7 @@ namespace dawn_native {
                                   uint32_t size,
                                   dawnBufferMapReadCallback callback,
                                   dawnCallbackUserdata userdata) {
-        if (mDevice->ConsumedError(ValidateMap(start, size, dawn::BufferUsageBit::MapRead))) {
+        if (GetDevice()->ConsumedError(ValidateMap(start, size, dawn::BufferUsageBit::MapRead))) {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
@@ -134,7 +130,7 @@ namespace dawn_native {
                                    uint32_t size,
                                    dawnBufferMapWriteCallback callback,
                                    dawnCallbackUserdata userdata) {
-        if (mDevice->ConsumedError(ValidateMap(start, size, dawn::BufferUsageBit::MapWrite))) {
+        if (GetDevice()->ConsumedError(ValidateMap(start, size, dawn::BufferUsageBit::MapWrite))) {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
@@ -151,7 +147,7 @@ namespace dawn_native {
     }
 
     void BufferBase::Unmap() {
-        if (mDevice->ConsumedError(ValidateUnmap())) {
+        if (GetDevice()->ConsumedError(ValidateUnmap())) {
             return;
         }
 
@@ -209,7 +205,10 @@ namespace dawn_native {
     // BufferViewBase
 
     BufferViewBase::BufferViewBase(BufferViewBuilder* builder)
-        : mBuffer(std::move(builder->mBuffer)), mSize(builder->mSize), mOffset(builder->mOffset) {
+        : ObjectBase(builder->GetDevice()),
+          mBuffer(std::move(builder->mBuffer)),
+          mSize(builder->mSize),
+          mOffset(builder->mOffset) {
     }
 
     BufferBase* BufferViewBase::GetBuffer() {
@@ -241,7 +240,7 @@ namespace dawn_native {
             return nullptr;
         }
 
-        return mDevice->CreateBufferView(this);
+        return GetDevice()->CreateBufferView(this);
     }
 
     void BufferViewBuilder::SetExtent(uint32_t offset, uint32_t size) {

@@ -18,7 +18,7 @@
 #include "common/Constants.h"
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -32,7 +32,7 @@ namespace dawn_native {
     size_t VertexFormatComponentSize(dawn::VertexFormat format);
     size_t VertexFormatSize(dawn::VertexFormat format);
 
-    class InputStateBase : public RefCounted {
+    class InputStateBase : public ObjectBase {
       public:
         InputStateBase(InputStateBuilder* builder);
 

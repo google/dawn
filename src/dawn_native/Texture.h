@@ -18,7 +18,7 @@
 #include "dawn_native/Builder.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -41,7 +41,7 @@ namespace dawn_native {
         dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Storage |
         dawn::TextureUsageBit::OutputAttachment;
 
-    class TextureBase : public RefCounted {
+    class TextureBase : public ObjectBase {
       public:
         TextureBase(DeviceBase* device, const TextureDescriptor* descriptor);
 
@@ -51,15 +51,12 @@ namespace dawn_native {
         uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
         dawn::TextureUsageBit GetUsage() const;
-        DeviceBase* GetDevice() const;
 
         // Dawn API
         TextureViewBase* CreateDefaultTextureView();
         TextureViewBase* CreateTextureView(const TextureViewDescriptor* descriptor);
 
       private:
-        DeviceBase* mDevice;
-
         dawn::TextureDimension mDimension;
         dawn::TextureFormat mFormat;
         Extent3D mSize;
@@ -68,7 +65,7 @@ namespace dawn_native {
         dawn::TextureUsageBit mUsage = dawn::TextureUsageBit::None;
     };
 
-    class TextureViewBase : public RefCounted {
+    class TextureViewBase : public ObjectBase {
       public:
         TextureViewBase(TextureBase* texture);
 

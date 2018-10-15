@@ -17,9 +17,9 @@
 
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/ObjectBase.h"
 #include "dawn_native/PerStage.h"
 #include "dawn_native/PipelineLayout.h"
-#include "dawn_native/RefCounted.h"
 #include "dawn_native/ShaderModule.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -37,7 +37,7 @@ namespace dawn_native {
 
     class PipelineBuilder;
 
-    class PipelineBase {
+    class PipelineBase : public ObjectBase {
       public:
         PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, dawn::ShaderStageBit stages);
         PipelineBase(DeviceBase* device, PipelineBuilder* builder);

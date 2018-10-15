@@ -1,4 +1,4 @@
-// Copyright 2017 The Dawn Authors
+// Copyright 2018 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_COMPUTEPIPELINE_H_
-#define DAWNNATIVE_COMPUTEPIPELINE_H_
-
-#include "dawn_native/Pipeline.h"
+#include "dawn_native/ObjectBase.h"
 
 namespace dawn_native {
 
-    class DeviceBase;
+    ObjectBase::ObjectBase(DeviceBase* device) : mDevice(device) {
+    }
 
-    MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
-                                                 const ComputePipelineDescriptor* descriptor);
+    ObjectBase::~ObjectBase() {
+    }
 
-    class ComputePipelineBase : public PipelineBase {
-      public:
-        ComputePipelineBase(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
-    };
+    DeviceBase* ObjectBase::GetDevice() const {
+        return mDevice;
+    }
 
 }  // namespace dawn_native
-
-#endif  // DAWNNATIVE_COMPUTEPIPELINE_H_

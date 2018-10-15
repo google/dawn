@@ -19,7 +19,7 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -28,7 +28,7 @@
 
 namespace dawn_native {
 
-    class BindGroupBase : public RefCounted {
+    class BindGroupBase : public ObjectBase {
       public:
         BindGroupBase(BindGroupBuilder* builder);
 
@@ -37,11 +37,9 @@ namespace dawn_native {
         SamplerBase* GetBindingAsSampler(size_t binding);
         TextureViewBase* GetBindingAsTextureView(size_t binding);
 
-        DeviceBase* GetDevice() const;
-
       private:
         Ref<BindGroupLayoutBase> mLayout;
-        std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
+        std::array<Ref<ObjectBase>, kMaxBindingsPerGroup> mBindings;
     };
 
     class BindGroupBuilder : public Builder<BindGroupBase> {
@@ -59,14 +57,14 @@ namespace dawn_native {
         friend class BindGroupBase;
 
         BindGroupBase* GetResultImpl() override;
-        void SetBindingsBase(uint32_t start, uint32_t count, RefCounted* const* objects);
+        void SetBindingsBase(uint32_t start, uint32_t count, ObjectBase* const* objects);
         bool SetBindingsValidationBase(uint32_t start, uint32_t count);
 
         std::bitset<kMaxBindingsPerGroup> mSetMask;
         int mPropertiesSet = 0;
 
         Ref<BindGroupLayoutBase> mLayout;
-        std::array<Ref<RefCounted>, kMaxBindingsPerGroup> mBindings;
+        std::array<Ref<ObjectBase>, kMaxBindingsPerGroup> mBindings;
     };
 
 }  // namespace dawn_native

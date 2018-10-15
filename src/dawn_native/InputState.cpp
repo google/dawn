@@ -84,7 +84,7 @@ namespace dawn_native {
 
     // InputStateBase
 
-    InputStateBase::InputStateBase(InputStateBuilder* builder) {
+    InputStateBase::InputStateBase(InputStateBuilder* builder) : ObjectBase(builder->GetDevice()) {
         mAttributesSetMask = builder->mAttributesSetMask;
         mAttributeInfos = builder->mAttributeInfos;
         mInputsSetMask = builder->mInputsSetMask;
@@ -123,7 +123,7 @@ namespace dawn_native {
             }
         }
 
-        return mDevice->CreateInputState(this);
+        return GetDevice()->CreateInputState(this);
     }
 
     void InputStateBuilder::SetAttribute(uint32_t shaderLocation,

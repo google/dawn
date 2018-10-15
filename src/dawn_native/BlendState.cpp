@@ -20,7 +20,8 @@ namespace dawn_native {
 
     // BlendStateBase
 
-    BlendStateBase::BlendStateBase(BlendStateBuilder* builder) : mBlendInfo(builder->mBlendInfo) {
+    BlendStateBase::BlendStateBase(BlendStateBuilder* builder)
+        : ObjectBase(builder->GetDevice()), mBlendInfo(builder->mBlendInfo) {
     }
 
     const BlendStateBase::BlendInfo& BlendStateBase::GetBlendInfo() const {
@@ -40,7 +41,7 @@ namespace dawn_native {
     }
 
     BlendStateBase* BlendStateBuilder::GetResultImpl() {
-        return mDevice->CreateBlendState(this);
+        return GetDevice()->CreateBlendState(this);
     }
 
     void BlendStateBuilder::SetBlendEnabled(bool blendEnabled) {

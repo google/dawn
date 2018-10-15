@@ -22,7 +22,7 @@ namespace dawn_native {
     // SwapChain
 
     SwapChainBase::SwapChainBase(SwapChainBuilder* builder)
-        : mDevice(builder->mDevice), mImplementation(builder->mImplementation) {
+        : ObjectBase(builder->GetDevice()), mImplementation(builder->mImplementation) {
     }
 
     SwapChainBase::~SwapChainBase() {
@@ -30,16 +30,12 @@ namespace dawn_native {
         im.Destroy(im.userData);
     }
 
-    DeviceBase* SwapChainBase::GetDevice() {
-        return mDevice;
-    }
-
     void SwapChainBase::Configure(dawn::TextureFormat format,
                                   dawn::TextureUsageBit allowedUsage,
                                   uint32_t width,
                                   uint32_t height) {
         if (width == 0 || height == 0) {
-            mDevice->HandleError("Swap chain cannot be configured to zero size");
+            GetDevice()->HandleError("Swap chain cannot be configured to zero size");
             return;
         }
         allowedUsage |= dawn::TextureUsageBit::Present;
@@ -55,7 +51,7 @@ namespace dawn_native {
     TextureBase* SwapChainBase::GetNextTexture() {
         if (mWidth == 0) {
             // If width is 0, it implies swap chain has never been configured
-            mDevice->HandleError("Swap chain needs to be configured before GetNextTexture");
+            GetDevice()->HandleError("Swap chain needs to be configured before GetNextTexture");
             return nullptr;
         }
 
@@ -76,7 +72,7 @@ namespace dawn_native {
 
     void SwapChainBase::Present(TextureBase* texture) {
         if (texture != mLastNextTexture) {
-            mDevice->HandleError("Tried to present something other than the last NextTexture");
+            GetDevice()->HandleError("Tried to present something other than the last NextTexture");
             return;
         }
 
@@ -99,7 +95,7 @@ namespace dawn_native {
             HandleError("Implementation not set");
             return nullptr;
         }
-        return mDevice->CreateSwapChain(this);
+        return GetDevice()->CreateSwapChain(this);
     }
 
     void SwapChainBuilder::SetImplementation(uint64_t implementation) {

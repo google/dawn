@@ -27,7 +27,7 @@ namespace dawn_native {
     // RenderPipelineBase
 
     RenderPipelineBase::RenderPipelineBase(RenderPipelineBuilder* builder)
-        : PipelineBase(builder->mDevice, builder),
+        : PipelineBase(builder->GetDevice(), builder),
           mDepthStencilState(std::move(builder->mDepthStencilState)),
           mIndexFormat(builder->mIndexFormat),
           mInputState(std::move(builder->mInputState)),
@@ -138,17 +138,18 @@ namespace dawn_native {
     }
 
     RenderPipelineBase* RenderPipelineBuilder::GetResultImpl() {
+        DeviceBase* device = GetDevice();
         // TODO(cwallez@chromium.org): the layout should be required, and put the default objects in
         // the device
         if (!mInputState) {
-            auto builder = mDevice->CreateInputStateBuilder();
+            auto builder = device->CreateInputStateBuilder();
             mInputState = builder->GetResult();
             // Remove the external ref objects are created with
             mInputState->Release();
             builder->Release();
         }
         if (!mDepthStencilState) {
-            auto builder = mDevice->CreateDepthStencilStateBuilder();
+            auto builder = device->CreateDepthStencilStateBuilder();
             mDepthStencilState = builder->GetResult();
             // Remove the external ref objects are created with
             mDepthStencilState->Release();
@@ -163,12 +164,12 @@ namespace dawn_native {
         // Assign all color attachments without a blend state the default state
         // TODO(enga@google.com): Put the default objects in the device
         for (uint32_t attachmentSlot : IterateBitSet(mColorAttachmentsSet & ~mBlendStatesSet)) {
-            mBlendStates[attachmentSlot] = mDevice->CreateBlendStateBuilder()->GetResult();
+            mBlendStates[attachmentSlot] = device->CreateBlendStateBuilder()->GetResult();
             // Remove the external ref objects are created with
             mBlendStates[attachmentSlot]->Release();
         }
 
-        return mDevice->CreateRenderPipeline(this);
+        return device->CreateRenderPipeline(this);
     }
 
     void RenderPipelineBuilder::SetColorAttachmentFormat(uint32_t attachmentSlot,

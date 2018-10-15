@@ -26,7 +26,8 @@ namespace dawn_native {
     // BindGroup
 
     BindGroupBase::BindGroupBase(BindGroupBuilder* builder)
-        : mLayout(std::move(builder->mLayout)),
+        : ObjectBase(builder->GetDevice()),
+          mLayout(std::move(builder->mLayout)),
           mBindings(std::move(builder->mBindings)) {
     }
 
@@ -56,10 +57,6 @@ namespace dawn_native {
         return reinterpret_cast<TextureViewBase*>(mBindings[binding].Get());
     }
 
-    DeviceBase* BindGroupBase::GetDevice() const {
-        return mLayout->GetDevice();
-    }
-
     // BindGroupBuilder
 
     enum BindGroupSetProperties {
@@ -81,7 +78,7 @@ namespace dawn_native {
             return nullptr;
         }
 
-        return mDevice->CreateBindGroup(this);
+        return GetDevice()->CreateBindGroup(this);
     }
 
     void BindGroupBuilder::SetLayout(BindGroupLayoutBase* layout) {
@@ -130,7 +127,7 @@ namespace dawn_native {
             }
         }
 
-        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const*>(bufferViews));
+        SetBindingsBase(start, count, reinterpret_cast<ObjectBase* const*>(bufferViews));
     }
 
     void BindGroupBuilder::SetSamplers(uint32_t start,
@@ -148,7 +145,7 @@ namespace dawn_native {
             }
         }
 
-        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const*>(samplers));
+        SetBindingsBase(start, count, reinterpret_cast<ObjectBase* const*>(samplers));
     }
 
     void BindGroupBuilder::SetTextureViews(uint32_t start,
@@ -171,12 +168,12 @@ namespace dawn_native {
             }
         }
 
-        SetBindingsBase(start, count, reinterpret_cast<RefCounted* const*>(textureViews));
+        SetBindingsBase(start, count, reinterpret_cast<ObjectBase* const*>(textureViews));
     }
 
     void BindGroupBuilder::SetBindingsBase(uint32_t start,
                                            uint32_t count,
-                                           RefCounted* const* objects) {
+                                           ObjectBase* const* objects) {
         for (size_t i = start, j = 0; i < start + count; ++i, ++j) {
             mSetMask.set(i);
             mBindings[i] = objects[j];
