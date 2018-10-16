@@ -96,6 +96,14 @@ namespace {
         DawnTest* test;
         size_t slot;
     };
+
+    constexpr uint32_t kVendorID_AMD = 0x1002;
+    constexpr uint32_t kVendorID_ARM = 0x13B5;
+    constexpr uint32_t kVendorID_ImgTec = 0x1010;
+    constexpr uint32_t kVendorID_Intel = 0x8086;
+    constexpr uint32_t kVendorID_Nvidia = 0x10DE;
+    constexpr uint32_t kVendorID_Qualcomm = 0x5143;
+
 }  // namespace
 
 DawnTest::DawnTest() = default;
