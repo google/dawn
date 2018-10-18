@@ -132,14 +132,10 @@ namespace dawn_native { namespace metal {
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return new Texture(this, descriptor);
     }
-    TextureViewBase* Device::CreateDefaultTextureView(TextureBase* texture) {
-        return new TextureView(texture);
-    }
-    // TODO(jiawei.shao@intel.com): implement creating texture view with TextureViewDescriptor
     ResultOrError<TextureViewBase*> Device::CreateTextureViewImpl(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) {
-        return DAWN_UNIMPLEMENTED_ERROR("Creating texture view with descriptor is unimplemented.");
+        return new TextureView(texture, descriptor);
     }
 
     void Device::TickImpl() {

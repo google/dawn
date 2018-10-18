@@ -57,7 +57,6 @@ namespace dawn_native {
             RenderPassDescriptorBuilder* builder) = 0;
         virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
         virtual SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) = 0;
-        virtual TextureViewBase* CreateDefaultTextureView(TextureBase* texture) = 0;
 
         virtual void TickImpl() = 0;
 

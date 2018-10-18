@@ -101,7 +101,9 @@ namespace dawn_native { namespace metal {
         return mMtlTexture;
     }
 
-    TextureView::TextureView(TextureBase* texture) : TextureViewBase(texture) {
+    // TODO(jiawei.shao@intel.com): create texture view by texture view descriptor
+    TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
+        : TextureViewBase(texture, descriptor) {
     }
 
 }}  // namespace dawn_native::metal

@@ -39,7 +39,7 @@ namespace dawn_native { namespace metal {
 
     class TextureView : public TextureViewBase {
       public:
-        TextureView(TextureBase* texture);
+        TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
     };
 
 }}  // namespace dawn_native::metal

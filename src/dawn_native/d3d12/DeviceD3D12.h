@@ -51,7 +51,6 @@ namespace dawn_native { namespace d3d12 {
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-        TextureViewBase* CreateDefaultTextureView(TextureBase* texture) override;
 
         void TickImpl() override;
 

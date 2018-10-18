@@ -105,7 +105,6 @@ namespace dawn_native { namespace null {
             RenderPassDescriptorBuilder* builder) override;
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
-        TextureViewBase* CreateDefaultTextureView(TextureBase* texture) override;
 
         void TickImpl() override;
 

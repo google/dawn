@@ -79,6 +79,30 @@ namespace dawn_native {
             return {};
         }
 
+        TextureViewDescriptor MakeDefaultTextureViewDescriptor(const TextureBase* texture) {
+            TextureViewDescriptor descriptor;
+            descriptor.format = texture->GetFormat();
+            descriptor.baseArrayLayer = 0;
+            descriptor.layerCount = texture->GetArrayLayers();
+            descriptor.baseMipLevel = 0;
+            descriptor.levelCount = texture->GetNumMipLevels();
+
+            // TODO(jiawei.shao@intel.com): support all texture dimensions.
+            switch (texture->GetDimension()) {
+                case dawn::TextureDimension::e2D:
+                    if (texture->GetArrayLayers() == 1u) {
+                        descriptor.dimension = dawn::TextureViewDimension::e2D;
+                    } else {
+                        descriptor.dimension = dawn::TextureViewDimension::e2DArray;
+                    }
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+
+            return descriptor;
+        }
+
     }  // anonymous namespace
 
     MaybeError ValidateTextureDescriptor(DeviceBase*, const TextureDescriptor* descriptor) {
@@ -209,10 +233,8 @@ namespace dawn_native {
     }
 
     TextureViewBase* TextureBase::CreateDefaultTextureView() {
-        // TODO(jiawei.shao@intel.com): remove Device->CreateDefaultTextureView in all back-ends
-        // and implement this function by creating a TextureViewDescriptor based on the texture
-        // and calling CreateTextureView(&descriptor) instead.
-        return GetDevice()->CreateDefaultTextureView(this);
+        TextureViewDescriptor descriptor = MakeDefaultTextureViewDescriptor(this);
+        return GetDevice()->CreateTextureView(this, &descriptor);
     }
 
     TextureViewBase* TextureBase::CreateTextureView(const TextureViewDescriptor* descriptor) {
@@ -221,7 +243,7 @@ namespace dawn_native {
 
     // TextureViewBase
 
-    TextureViewBase::TextureViewBase(TextureBase* texture)
+    TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : ObjectBase(texture->GetDevice()), mTexture(texture) {
     }
 

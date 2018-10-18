@@ -129,7 +129,9 @@ namespace dawn_native { namespace opengl {
 
     // TextureView
 
-    TextureView::TextureView(TextureBase* texture) : TextureViewBase(texture) {
+    // TODO(jiawei.shao@intel.com): create texture view by TextureViewDescriptor
+    TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
+        : TextureViewBase(texture, descriptor) {
     }
 
 }}  // namespace dawn_native::opengl

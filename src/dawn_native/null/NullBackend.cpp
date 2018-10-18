@@ -95,14 +95,10 @@ namespace dawn_native { namespace null {
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return new Texture(this, descriptor);
     }
-    TextureViewBase* Device::CreateDefaultTextureView(TextureBase* texture) {
-        return new TextureView(texture);
-    }
-    // TODO(jiawei.shao@intel.com): implement creating texture view by TextureViewDescriptor
     ResultOrError<TextureViewBase*> Device::CreateTextureViewImpl(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) {
-        return new TextureView(texture);
+        return new TextureView(texture, descriptor);
     }
 
     void Device::InitFakePCIInfo() {
