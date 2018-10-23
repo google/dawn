@@ -34,10 +34,12 @@ namespace dawn_native { namespace vulkan {
 
         // Converts an Dawn texture dimension to a Vulkan image view type.
         // Contrary to image types, image view types include arrayness and cubemapness
-        VkImageViewType VulkanImageViewType(dawn::TextureDimension dimension) {
+        VkImageViewType VulkanImageViewType(dawn::TextureViewDimension dimension) {
             switch (dimension) {
-                case dawn::TextureDimension::e2D:
+                case dawn::TextureViewDimension::e2D:
                     return VK_IMAGE_VIEW_TYPE_2D;
+                case dawn::TextureViewDimension::e2DArray:
+                    return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
                 default:
                     UNREACHABLE();
             }
@@ -356,15 +358,15 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.image = ToBackend(GetTexture())->GetHandle();
-        createInfo.viewType = VulkanImageViewType(GetTexture()->GetDimension());
-        createInfo.format = VulkanImageFormat(GetTexture()->GetFormat());
+        createInfo.viewType = VulkanImageViewType(descriptor->dimension);
+        createInfo.format = VulkanImageFormat(descriptor->format);
         createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
                                                    VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-        createInfo.subresourceRange.aspectMask = VulkanAspectMask(GetTexture()->GetFormat());
-        createInfo.subresourceRange.baseMipLevel = 0;
-        createInfo.subresourceRange.levelCount = GetTexture()->GetNumMipLevels();
-        createInfo.subresourceRange.baseArrayLayer = 0;
-        createInfo.subresourceRange.layerCount = GetTexture()->GetArrayLayers();
+        createInfo.subresourceRange.aspectMask = VulkanAspectMask(descriptor->format);
+        createInfo.subresourceRange.baseMipLevel = descriptor->baseMipLevel;
+        createInfo.subresourceRange.levelCount = descriptor->levelCount;
+        createInfo.subresourceRange.baseArrayLayer = descriptor->baseArrayLayer;
+        createInfo.subresourceRange.layerCount = descriptor->layerCount;
 
         if (device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
             VK_SUCCESS) {
