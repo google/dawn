@@ -22,7 +22,7 @@ class Object : public dawn::ObjectBase<Object, int*> {
         using ObjectBase::operator=;
 
         static void DawnReference(int* handle) {
-            ASSERT_LT(0, *handle);
+            ASSERT_LE(0, *handle);
             *handle += 1;
         }
         static void DawnRelease(int* handle) {
@@ -52,16 +52,14 @@ TEST(ObjectBase, AcquireConstruction) {
     ASSERT_EQ(0, refcount);
 }
 
-// Test that cloning takes a new ref. Also test .Get().
-TEST(ObjectBase, Clone) {
+// Test .Get().
+TEST(ObjectBase, Get) {
     int refcount = 1;
     {
         Object obj1(&refcount);
-        Object obj2 = obj1.Clone();
 
-        ASSERT_EQ(3, refcount);
+        ASSERT_EQ(2, refcount);
         ASSERT_EQ(&refcount, obj1.Get());
-        ASSERT_EQ(&refcount, obj2.Get());
     }
     ASSERT_EQ(1, refcount);
 }
@@ -89,6 +87,51 @@ TEST(ObjectBase, OperatorBool) {
     if (falseObj || !trueObj) {
         ASSERT_TRUE(false);
     }
+}
+
+// Test the copy constructor of C++ objects
+TEST(ObjectBase, CopyConstructor) {
+    int refcount = 1;
+
+    Object source(&refcount);
+    Object destination(source);
+
+    ASSERT_EQ(source.Get(), &refcount);
+    ASSERT_EQ(destination.Get(), &refcount);
+    ASSERT_EQ(3, refcount);
+
+    destination = Object();
+    ASSERT_EQ(refcount, 2);
+}
+
+// Test the copy assignment of C++ objects
+TEST(ObjectBase, CopyAssignment) {
+    int refcount = 1;
+    Object source(&refcount);
+
+    Object destination;
+    destination = source;
+
+    ASSERT_EQ(source.Get(), &refcount);
+    ASSERT_EQ(destination.Get(), &refcount);
+    ASSERT_EQ(3, refcount);
+
+    destination = Object();
+    ASSERT_EQ(refcount, 2);
+}
+
+// Test the copy assignment of C++ objects onto themselves
+TEST(ObjectBase, CopyAssignmentSelf) {
+    int refcount = 1;
+
+    Object obj(&refcount);
+
+    // Fool the compiler to avoid a -Wself-assign-overload
+    Object* objPtr = &obj;
+    obj = *objPtr;
+
+    ASSERT_EQ(obj.Get(), &refcount);
+    ASSERT_EQ(refcount, 2);
 }
 
 // Test the move constructor of C++ objects
@@ -121,3 +164,16 @@ TEST(ObjectBase, MoveAssignment) {
     ASSERT_EQ(refcount, 1);
 }
 
+// Test the move assignment of C++ objects onto themselves
+TEST(ObjectBase, MoveAssignmentSelf) {
+    int refcount = 1;
+
+    Object obj(&refcount);
+
+    // Fool the compiler to avoid a -Wself-move
+    Object* objPtr = &obj;
+    obj = std::move(*objPtr);
+
+    ASSERT_EQ(obj.Get(), &refcount);
+    ASSERT_EQ(refcount, 2);
+}

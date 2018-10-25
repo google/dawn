@@ -232,9 +232,9 @@ void initSim() {
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     dawn::ComputePipelineDescriptor csDesc;
-    csDesc.module = module.Clone();
+    csDesc.module = module;
     csDesc.entryPoint = "main";
-    csDesc.layout = pl.Clone();
+    csDesc.layout = pl;
     updatePipeline = device.CreateComputePipeline(&csDesc);
 
     dawn::BufferView updateParamsView = updateParams.CreateBufferViewBuilder()

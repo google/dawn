@@ -70,19 +70,29 @@ namespace dawn {
                 if (mHandle) Derived::DawnRelease(mHandle);
             }
 
-            ObjectBase(ObjectBase const& other) = delete;
-            Derived& operator=(ObjectBase const& other) = delete;
+            ObjectBase(ObjectBase const& other)
+                : ObjectBase(other.Get()) {
+            }
+            Derived& operator=(ObjectBase const& other) {
+                if (&other != this) {
+                    if (mHandle) Derived::DawnRelease(mHandle);
+                    mHandle = other.mHandle;
+                    if (mHandle) Derived::DawnReference(mHandle);
+                }
+
+                return static_cast<Derived&>(*this);
+            }
 
             ObjectBase(ObjectBase&& other) {
                 mHandle = other.mHandle;
                 other.mHandle = 0;
             }
             Derived& operator=(ObjectBase&& other) {
-                if (&other == this) return static_cast<Derived&>(*this);
-
-                if (mHandle) Derived::DawnRelease(mHandle);
-                mHandle = other.mHandle;
-                other.mHandle = 0;
+                if (&other != this) {
+                    if (mHandle) Derived::DawnRelease(mHandle);
+                    mHandle = other.mHandle;
+                    other.mHandle = 0;
+                }
 
                 return static_cast<Derived&>(*this);
             }
@@ -97,9 +107,6 @@ namespace dawn {
                 CType result = mHandle;
                 mHandle = 0;
                 return result;
-            }
-            Derived Clone() const {
-                return Derived(mHandle);
             }
             static Derived Acquire(CType handle) {
                 Derived result;

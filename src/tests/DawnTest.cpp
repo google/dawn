@@ -258,15 +258,13 @@ std::ostringstream& DawnTest::AddBufferExpectation(const char* file,
                                                    uint32_t offset,
                                                    uint32_t size,
                                                    detail::Expectation* expectation) {
-    dawn::Buffer source = buffer.Clone();
-
     auto readback = ReserveReadback(size);
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the buffer might have been modified.
     dawn::CommandBuffer commands =
         device.CreateCommandBufferBuilder()
-            .CopyBufferToBuffer(source, offset, readback.buffer, readback.offset, size)
+            .CopyBufferToBuffer(buffer, offset, readback.buffer, readback.offset, size)
             .GetResult();
 
     queue.Submit(1, &commands);
@@ -296,7 +294,6 @@ std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
                                                     uint32_t level,
                                                     uint32_t pixelSize,
                                                     detail::Expectation* expectation) {
-    dawn::Texture source = texture.Clone();
     uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
     uint32_t size = rowPitch * (height - 1) + width * pixelSize;
 
@@ -306,7 +303,7 @@ std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
     // the texture might have been modified.
     dawn::CommandBuffer commands =
         device.CreateCommandBufferBuilder()
-            .CopyTextureToBuffer(source, x, y, 0, width, height, 1, level, 0, readback.buffer,
+            .CopyTextureToBuffer(texture, x, y, 0, width, height, 1, level, 0, readback.buffer,
                                  readback.offset, rowPitch)
             .GetResult();
 
@@ -359,7 +356,7 @@ DawnTest::ReadbackReservation DawnTest::ReserveReadback(uint32_t readbackSize) {
     slot.buffer = device.CreateBuffer(&descriptor);
 
     ReadbackReservation reservation;
-    reservation.buffer = slot.buffer.Clone();
+    reservation.buffer = slot.buffer;
     reservation.slot = mReadbackSlots.size();
     reservation.offset = 0;
 
