@@ -169,6 +169,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+        mWrittenMappedRange = {};
         D3D12_RANGE readRange = {start, start + count};
         char* data = nullptr;
         ASSERT_SUCCESS(mResource->Map(0, &readRange, reinterpret_cast<void**>(&data)));
@@ -180,9 +181,9 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
-        D3D12_RANGE readRange = {start, start + count};
+        mWrittenMappedRange = {start, start + count};
         char* data = nullptr;
-        ASSERT_SUCCESS(mResource->Map(0, &readRange, reinterpret_cast<void**>(&data)));
+        ASSERT_SUCCESS(mResource->Map(0, &mWrittenMappedRange, reinterpret_cast<void**>(&data)));
 
         // There is no need to transition the resource to a new state: D3D12 seems to make the CPU
         // writes available on queue submission.
@@ -191,11 +192,9 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Buffer::UnmapImpl() {
-        // TODO(enga@google.com): When MapWrite is implemented, this should state the range that was
-        // modified
-        D3D12_RANGE writeRange = {};
-        mResource->Unmap(0, &writeRange);
+        mResource->Unmap(0, &mWrittenMappedRange);
         ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
+        mWrittenMappedRange = {};
     }
 
     BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
