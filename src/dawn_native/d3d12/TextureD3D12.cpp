@@ -187,28 +187,28 @@ namespace dawn_native { namespace d3d12 {
         mLastUsage = usage;
     }
 
-    // TODO(jiawei.shao@intel.com): create texture view by TextureViewDescriptor
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor) {
-        mSrvDesc.Format = D3D12TextureFormat(GetTexture()->GetFormat());
+        mSrvDesc.Format = D3D12TextureFormat(descriptor->format);
         mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        switch (GetTexture()->GetDimension()) {
-            case dawn::TextureDimension::e2D:
-                if (GetTexture()->GetArrayLayers() == 1) {
-                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-                    mSrvDesc.Texture2D.MostDetailedMip = 0;
-                    mSrvDesc.Texture2D.MipLevels = GetTexture()->GetNumMipLevels();
-                    mSrvDesc.Texture2D.PlaneSlice = 0;
-                    mSrvDesc.Texture2D.ResourceMinLODClamp = 0;
-                } else {
-                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-                    mSrvDesc.Texture2DArray.ArraySize = GetTexture()->GetArrayLayers();
-                    mSrvDesc.Texture2DArray.FirstArraySlice = 0;
-                    mSrvDesc.Texture2DArray.MipLevels = GetTexture()->GetNumMipLevels();
-                    mSrvDesc.Texture2DArray.MostDetailedMip = 0;
-                    mSrvDesc.Texture2DArray.PlaneSlice = 0;
-                    mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
-                }
+
+        // Currently we always use D3D12_TEX2D_ARRAY_SRV because we cannot specify base array layer
+        // and layer count in D3D12_TEX2D_SRV. For 2D texture views, we treat them as 1-layer 2D
+        // array textures.
+        // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_srv
+        // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array_srv
+        // TODO(jiawei.shao@intel.com): support more texture view dimensions.
+        switch (descriptor->dimension) {
+            case dawn::TextureViewDimension::e2D:
+            case dawn::TextureViewDimension::e2DArray:
+                ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
+                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+                mSrvDesc.Texture2DArray.ArraySize = descriptor->layerCount;
+                mSrvDesc.Texture2DArray.FirstArraySlice = descriptor->baseArrayLayer;
+                mSrvDesc.Texture2DArray.MipLevels = descriptor->levelCount;
+                mSrvDesc.Texture2DArray.MostDetailedMip = descriptor->baseMipLevel;
+                mSrvDesc.Texture2DArray.PlaneSlice = 0;
+                mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
                 break;
 
             default:
@@ -220,6 +220,7 @@ namespace dawn_native { namespace d3d12 {
         return mSrvDesc;
     }
 
+    // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
     D3D12_RENDER_TARGET_VIEW_DESC TextureView::GetRTVDescriptor() {
         D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
         rtvDesc.Format = ToBackend(GetTexture())->GetD3D12Format();
@@ -229,6 +230,7 @@ namespace dawn_native { namespace d3d12 {
         return rtvDesc;
     }
 
+    // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
     D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor() {
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
         dsvDesc.Format = ToBackend(GetTexture())->GetD3D12Format();

@@ -40,6 +40,12 @@ namespace dawn_native { namespace metal {
     class TextureView : public TextureViewBase {
       public:
         TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+        ~TextureView();
+
+        id<MTLTexture> GetMTLTexture();
+
+      private:
+        id<MTLTexture> mMtlTextureView = nil;
     };
 
 }}  // namespace dawn_native::metal

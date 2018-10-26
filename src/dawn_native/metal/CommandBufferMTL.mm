@@ -63,6 +63,7 @@ namespace dawn_native { namespace metal {
                     descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
                 }
 
+                // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
                 descriptor.colorAttachments[i].texture =
                     ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
                 descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
@@ -71,6 +72,7 @@ namespace dawn_native { namespace metal {
             if (desc->HasDepthStencilAttachment()) {
                 auto& attachmentInfo = desc->GetDepthStencilAttachment();
 
+                // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
                 id<MTLTexture> texture =
                     ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
                 dawn::TextureFormat format = attachmentInfo.view->GetTexture()->GetFormat();
@@ -187,16 +189,17 @@ namespace dawn_native { namespace metal {
                     } break;
 
                     case dawn::BindingType::SampledTexture: {
-                        auto texture =
-                            ToBackend(group->GetBindingAsTextureView(binding)->GetTexture());
+                        auto textureView = ToBackend(group->GetBindingAsTextureView(binding));
                         if (hasVertStage) {
-                            [render setVertexTexture:texture->GetMTLTexture() atIndex:vertIndex];
+                            [render setVertexTexture:textureView->GetMTLTexture()
+                                             atIndex:vertIndex];
                         }
                         if (hasFragStage) {
-                            [render setFragmentTexture:texture->GetMTLTexture() atIndex:fragIndex];
+                            [render setFragmentTexture:textureView->GetMTLTexture()
+                                               atIndex:fragIndex];
                         }
                         if (hasComputeStage) {
-                            [compute setTexture:texture->GetMTLTexture() atIndex:computeIndex];
+                            [compute setTexture:textureView->GetMTLTexture() atIndex:computeIndex];
                         }
                     } break;
                 }

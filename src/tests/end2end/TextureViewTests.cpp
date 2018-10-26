@@ -164,8 +164,8 @@ protected:
                            uint32_t textureViewBaseLayer,
                            uint32_t textureViewBaseMipLevel) {
         // TODO(jiawei.shao@intel.com): support creating texture view with a texture view descriptor
-        // on D3D12, Metal and OpenGL.
-        DAWN_SKIP_TEST_IF(IsD3D12() || IsMetal() || IsOpenGL());
+        // on OpenGL.
+        DAWN_SKIP_TEST_IF(IsOpenGL());
 
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
@@ -201,8 +201,8 @@ protected:
                                 uint32_t textureViewBaseLayer,
                                 uint32_t textureViewBaseMipLevel) {
         // TODO(jiawei.shao@intel.com): support creating texture view with a texture view descriptor
-        // on D3D12, Metal and OpenGL.
-        DAWN_SKIP_TEST_IF(IsD3D12() || IsMetal() || IsOpenGL());
+        // on OpenGL.
+        DAWN_SKIP_TEST_IF(IsOpenGL());
 
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
