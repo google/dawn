@@ -21,10 +21,15 @@ class BlendStateValidationTest : public ValidationTest {
 TEST_F(BlendStateValidationTest, CreationSuccess) {
     // Success for setting all properties
     {
+        dawn::BlendDescriptor blend;
+        blend.operation = dawn::BlendOperation::Add;
+        blend.srcFactor = dawn::BlendFactor::One;
+        blend.dstFactor = dawn::BlendFactor::One;
+
         dawn::BlendState state = AssertWillBeSuccess(device.CreateBlendStateBuilder())
             .SetBlendEnabled(true)
-            .SetAlphaBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
-            .SetColorBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
+            .SetAlphaBlend(&blend)
+            .SetColorBlend(&blend)
             .SetColorWriteMask(dawn::ColorWriteMask::Red)
             .GetResult();
     }
@@ -46,19 +51,29 @@ TEST_F(BlendStateValidationTest, CreationDuplicates) {
             .GetResult();
     }
 
+    dawn::BlendDescriptor blend1;
+    blend1.operation = dawn::BlendOperation::Add;
+    blend1.srcFactor = dawn::BlendFactor::One;
+    blend1.dstFactor = dawn::BlendFactor::One;
+
+    dawn::BlendDescriptor blend2;
+    blend2.operation = dawn::BlendOperation::Add;
+    blend2.srcFactor = dawn::BlendFactor::Zero;
+    blend2.dstFactor = dawn::BlendFactor::Zero;
+
     // Test failure when specifying alpha blend multiple times
     {
         dawn::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
-            .SetAlphaBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
-            .SetAlphaBlend(dawn::BlendOperation::Add, dawn::BlendFactor::Zero, dawn::BlendFactor::Zero)
+            .SetAlphaBlend(&blend1)
+            .SetAlphaBlend(&blend2)
             .GetResult();
     }
 
     // Test failure when specifying color blend multiple times
     {
         dawn::BlendState state = AssertWillBeError(device.CreateBlendStateBuilder())
-            .SetColorBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
-            .SetColorBlend(dawn::BlendOperation::Add, dawn::BlendFactor::Zero, dawn::BlendFactor::Zero)
+            .SetColorBlend(&blend1)
+            .SetColorBlend(&blend2)
             .GetResult();
     }
 

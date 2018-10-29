@@ -55,9 +55,7 @@ namespace dawn_native {
         mBlendInfo.blendEnabled = blendEnabled;
     }
 
-    void BlendStateBuilder::SetAlphaBlend(dawn::BlendOperation blendOperation,
-                                          dawn::BlendFactor srcFactor,
-                                          dawn::BlendFactor dstFactor) {
+    void BlendStateBuilder::SetAlphaBlend(const BlendDescriptor* alphaBlend) {
         if ((mPropertiesSet & BLEND_STATE_PROPERTY_ALPHA_BLEND) != 0) {
             HandleError("Alpha blend property set multiple times");
             return;
@@ -65,12 +63,14 @@ namespace dawn_native {
 
         mPropertiesSet |= BLEND_STATE_PROPERTY_ALPHA_BLEND;
 
-        mBlendInfo.alphaBlend = {blendOperation, srcFactor, dstFactor};
+        // TODO(yunchao.he@intel.com): validate the enum values in
+        // ValidateBlendStateDescriptor when it is added.
+        mBlendInfo.alphaBlend.operation = alphaBlend->operation;
+        mBlendInfo.alphaBlend.srcFactor = alphaBlend->srcFactor;
+        mBlendInfo.alphaBlend.dstFactor = alphaBlend->dstFactor;
     }
 
-    void BlendStateBuilder::SetColorBlend(dawn::BlendOperation blendOperation,
-                                          dawn::BlendFactor srcFactor,
-                                          dawn::BlendFactor dstFactor) {
+    void BlendStateBuilder::SetColorBlend(const BlendDescriptor* colorBlend) {
         if ((mPropertiesSet & BLEND_STATE_PROPERTY_COLOR_BLEND) != 0) {
             HandleError("Color blend property set multiple times");
             return;
@@ -78,7 +78,11 @@ namespace dawn_native {
 
         mPropertiesSet |= BLEND_STATE_PROPERTY_COLOR_BLEND;
 
-        mBlendInfo.colorBlend = {blendOperation, srcFactor, dstFactor};
+        // TODO(yunchao.he@intel.com): validate the enum values in
+        // ValidateBlendStateDescriptor when it is added.
+        mBlendInfo.colorBlend.operation = colorBlend->operation;
+        mBlendInfo.colorBlend.srcFactor = colorBlend->srcFactor;
+        mBlendInfo.colorBlend.dstFactor = colorBlend->dstFactor;
     }
 
     void BlendStateBuilder::SetColorWriteMask(dawn::ColorWriteMask colorWriteMask) {

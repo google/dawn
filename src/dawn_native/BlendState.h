@@ -28,15 +28,9 @@ namespace dawn_native {
         BlendStateBase(BlendStateBuilder* builder);
 
         struct BlendInfo {
-            struct BlendOpFactor {
-                dawn::BlendOperation operation = dawn::BlendOperation::Add;
-                dawn::BlendFactor srcFactor = dawn::BlendFactor::One;
-                dawn::BlendFactor dstFactor = dawn::BlendFactor::Zero;
-            };
-
             bool blendEnabled = false;
-            BlendOpFactor alphaBlend;
-            BlendOpFactor colorBlend;
+            BlendDescriptor alphaBlend;
+            BlendDescriptor colorBlend;
             dawn::ColorWriteMask colorWriteMask = dawn::ColorWriteMask::All;
         };
 
@@ -52,12 +46,8 @@ namespace dawn_native {
 
         // Dawn API
         void SetBlendEnabled(bool blendEnabled);
-        void SetAlphaBlend(dawn::BlendOperation blendOperation,
-                           dawn::BlendFactor srcFactor,
-                           dawn::BlendFactor dstFactor);
-        void SetColorBlend(dawn::BlendOperation blendOperation,
-                           dawn::BlendFactor srcFactor,
-                           dawn::BlendFactor dstFactor);
+        void SetAlphaBlend(const BlendDescriptor* alphaBlend);
+        void SetColorBlend(const BlendDescriptor* colorBlend);
         void SetColorWriteMask(dawn::ColorWriteMask colorWriteMask);
 
       private:

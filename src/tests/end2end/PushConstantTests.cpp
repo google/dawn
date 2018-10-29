@@ -182,10 +182,15 @@ class PushConstantTest: public DawnTest {
                 })").c_str()
             );
 
+            dawn::BlendDescriptor blend;
+            blend.operation = dawn::BlendOperation::Add;
+            blend.srcFactor = dawn::BlendFactor::One;
+            blend.dstFactor = dawn::BlendFactor::One;
+
             dawn::BlendState blendState = device.CreateBlendStateBuilder()
                 .SetBlendEnabled(true)
-                .SetColorBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
-                .SetAlphaBlend(dawn::BlendOperation::Add, dawn::BlendFactor::One, dawn::BlendFactor::One)
+                .SetColorBlend(&blend)
+                .SetAlphaBlend(&blend)
                 .GetResult();
 
             return device.CreateRenderPipelineBuilder()

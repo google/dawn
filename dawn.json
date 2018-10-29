@@ -96,6 +96,15 @@
             {"value": 3, "name": "storage buffer"}
         ]
     },
+    "blend descriptor": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "operation", "type": "blend operation"},
+            {"name": "src factor", "type": "blend factor"},
+            {"name": "dst factor", "type": "blend factor"}
+        ]
+    },
     "blend factor": {
         "category": "enum",
         "values": [
@@ -143,17 +152,13 @@
             {
                 "name": "set alpha blend",
                 "args": [
-                    {"name": "blend operation", "type": "blend operation"},
-                    {"name": "src factor",  "type": "blend factor"},
-                    {"name": "dst factor", "type": "blend factor"}
+                    {"name": "alpha blend", "type": "blend descriptor", "annotation": "const*"}
                 ]
             },
             {
                 "name": "set color blend",
                 "args": [
-                    {"name": "blend operation", "type": "blend operation"},
-                    {"name": "src factor",  "type": "blend factor"},
-                    {"name": "dst factor", "type": "blend factor"}
+                    {"name": "color blend", "type": "blend descriptor", "annotation": "const*"}
                 ]
             },
             {
