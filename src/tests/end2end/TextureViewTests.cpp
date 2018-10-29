@@ -163,10 +163,6 @@ protected:
                            uint32_t textureMipLevels,
                            uint32_t textureViewBaseLayer,
                            uint32_t textureViewBaseMipLevel) {
-        // TODO(jiawei.shao@intel.com): support creating texture view with a texture view descriptor
-        // on OpenGL.
-        DAWN_SKIP_TEST_IF(IsOpenGL());
-
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
@@ -200,10 +196,6 @@ protected:
                                 uint32_t textureMipLevels,
                                 uint32_t textureViewBaseLayer,
                                 uint32_t textureViewBaseMipLevel) {
-        // TODO(jiawei.shao@intel.com): support creating texture view with a texture view descriptor
-        // on OpenGL.
-        DAWN_SKIP_TEST_IF(IsOpenGL());
-
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
 

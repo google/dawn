@@ -40,7 +40,7 @@ namespace dawn_native { namespace opengl {
 
         const GLPushConstantInfo& GetGLPushConstants(dawn::ShaderStage stage) const;
         const std::vector<GLuint>& GetTextureUnitsForSampler(GLuint index) const;
-        const std::vector<GLuint>& GetTextureUnitsForTexture(GLuint index) const;
+        const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
         GLuint GetProgramHandle() const;
 
         void ApplyNow();

@@ -204,7 +204,7 @@ namespace dawn_native { namespace opengl {
         return mUnitsForSamplers[index];
     }
 
-    const std::vector<GLuint>& PipelineGL::GetTextureUnitsForTexture(GLuint index) const {
+    const std::vector<GLuint>& PipelineGL::GetTextureUnitsForTextureView(GLuint index) const {
         ASSERT(index < mUnitsForSamplers.size());
         return mUnitsForTextures[index];
     }

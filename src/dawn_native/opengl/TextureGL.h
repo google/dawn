@@ -47,6 +47,14 @@ namespace dawn_native { namespace opengl {
     class TextureView : public TextureViewBase {
       public:
         TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+        ~TextureView();
+
+        GLuint GetHandle() const;
+        GLenum GetGLTarget() const;
+
+      private:
+        GLuint mHandle;
+        GLenum mTarget;
     };
 
 }}  // namespace dawn_native::opengl

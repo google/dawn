@@ -258,12 +258,11 @@ namespace dawn_native { namespace opengl {
 
                     case dawn::BindingType::SampledTexture: {
                         TextureView* view = ToBackend(group->GetBindingAsTextureView(binding));
-                        Texture* texture = ToBackend(view->GetTexture());
-                        GLuint handle = texture->GetHandle();
-                        GLenum target = texture->GetGLTarget();
-                        GLuint textureIndex = indices[binding];
+                        GLuint handle = view->GetHandle();
+                        GLenum target = view->GetGLTarget();
+                        GLuint viewIndex = indices[binding];
 
-                        for (auto unit : pipeline->GetTextureUnitsForTexture(textureIndex)) {
+                        for (auto unit : pipeline->GetTextureUnitsForTextureView(viewIndex)) {
                             glActiveTexture(GL_TEXTURE0 + unit);
                             glBindTexture(target, handle);
                         }
