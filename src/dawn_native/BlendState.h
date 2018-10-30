@@ -29,8 +29,10 @@ namespace dawn_native {
 
         struct BlendInfo {
             bool blendEnabled = false;
-            BlendDescriptor alphaBlend;
-            BlendDescriptor colorBlend;
+            BlendDescriptor alphaBlend = {dawn::BlendOperation::Add, dawn::BlendFactor::One,
+                                          dawn::BlendFactor::Zero};
+            BlendDescriptor colorBlend = {dawn::BlendOperation::Add, dawn::BlendFactor::One,
+                                          dawn::BlendFactor::Zero};
             dawn::ColorWriteMask colorWriteMask = dawn::ColorWriteMask::All;
         };
 
