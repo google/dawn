@@ -503,16 +503,6 @@ def get_renders_for_targets(api_params, targets):
 
     return renders
 
-def output_to_files(outputs, output_dir):
-    for output in outputs:
-        output_file = output_dir + os.path.sep + output.name
-        directory = os.path.dirname(output_file)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        with open(output_file, 'w') as outfile:
-            outfile.write(output.content)
-
 def output_to_json(outputs, output_json):
     json_root = {}
     for output in outputs:
@@ -535,15 +525,10 @@ def main():
     parser.add_argument('json', metavar='DAWN_JSON', nargs=1, type=str, help ='The DAWN JSON definition to use.')
     parser.add_argument('-t', '--template-dir', default='templates', type=str, help='Directory with template files.')
     parser.add_argument('-T', '--targets', required=True, type=str, help='Comma-separated subset of targets to output. Available targets: ' + ', '.join(allowed_targets))
-    # Arguments used only for the GN build
     parser.add_argument(kExtraPythonPath, default=None, type=str, help='Additional python path to set before loading Jinja2')
     parser.add_argument('--output-json-tarball', default=None, type=str, help='Name of the "JSON tarball" to create (tar is too annoying to use in python).')
     parser.add_argument('--depfile', default=None, type=str, help='Name of the Ninja depfile to create for the JSON tarball')
     parser.add_argument('--expected-outputs-file', default=None, type=str, help="File to compare outputs with and fail if it doesn't match")
-    # Arguments used only for the CMake build
-    parser.add_argument('-o', '--output-dir', default=None, type=str, help='Output directory for the generated source files.')
-    parser.add_argument('--print-dependencies', action='store_true', help='Prints a space separated list of file dependencies, used for CMake integration')
-    parser.add_argument('--print-outputs', action='store_true', help='Prints a space separated list of file outputs, used for CMake integration')
 
     args = parser.parse_args()
 
@@ -555,27 +540,8 @@ def main():
     targets = args.targets.split(',')
     renders = get_renders_for_targets(api_params, targets)
 
-    # Print outputs and dependencies for CMake
-    if args.print_dependencies:
-        dependencies = set(
-            [os.path.abspath(args.template_dir + os.path.sep + render.template) for render in renders] +
-            [os.path.abspath(args.json[0])] +
-            [os.path.realpath(__file__)]
-        )
-        dependencies = [dependency.replace('\\', '/') for dependency in dependencies]
-        sys.stdout.write(';'.join(dependencies))
-        return 0
-
-    if args.print_outputs:
-        outputs = set(
-            [os.path.abspath(args.output_dir + os.path.sep + render.output) for render in renders]
-        )
-        outputs = [output.replace('\\', '/') for output in outputs]
-        sys.stdout.write(';'.join(outputs))
-        return 0
-
     # The caller wants to assert that the outputs are what it expects.
-    # Load the file and compare with our renders. GN-only.
+    # Load the file and compare with our renders.
     if args.expected_outputs_file != None:
         with open(args.expected_outputs_file) as f:
             expected = set([line.strip() for line in f.readlines()])
@@ -590,11 +556,7 @@ def main():
 
     outputs = do_renders(renders, args.template_dir)
 
-    # CMake only: output all the files directly.
-    if args.output_dir != None:
-        output_to_files(outputs, args.output_dir)
-
-    # GN only: output the tarball and its depfile
+    # Output the tarball and its depfile
     if args.output_json_tarball != None:
         output_to_json(outputs, args.output_json_tarball)
 
