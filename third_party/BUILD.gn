@@ -14,6 +14,7 @@
 
 import("../scripts/dawn_overrides_with_defaults.gni")
 import("../scripts/dawn_features.gni")
+import("//build_overrides/build.gni")
 
 is_msvc = is_win && !is_clang
 
@@ -107,41 +108,69 @@ source_set("vulkan_headers") {
 }
 
 ###############################################################################
-# Gtest Gmock - build targets when outside of Chrome
-# TODO(cwallez@chromium.org): Adapt them to build with Chromium's harness
+# Gtest Gmock - Handle building inside and outside of Chromium.
 ###############################################################################
 
-googletest_dir = dawn_googletest_dir
+# When building outside of Chromium we need to define our own targets for GTest
+# and GMock. However when compiling inside of Chromium we need to reuse the
+# existing targets, both because Chromium has a special harness for swarming
+# and because otherwise the "gn check" fails.
 
-config("gtest_config") {
-  include_dirs = [
-    "${googletest_dir}/googletest",
-    "${googletest_dir}/googletest/include",
-  ]
-}
+if (!build_with_chromium) {
+  # When we aren't in Chromium we define out own targets based on the location
+  # of the googletest repo.
+  googletest_dir = dawn_googletest_dir
 
-static_library("gtest") {
-  testonly = true
-  sources = [
-    "${googletest_dir}/googletest/src/gtest-all.cc",
-  ]
-  public_configs = [ ":gtest_config" ]
-}
+  config("gtest_config") {
+    include_dirs = [
+      "${googletest_dir}/googletest",
+      "${googletest_dir}/googletest/include",
+    ]
+  }
 
-config("gmock_config") {
-  include_dirs = [
-    "${googletest_dir}/googlemock",
-    "${googletest_dir}/googlemock/include",
-    "${googletest_dir}/googletest/include",
-  ]
-}
+  static_library("gtest") {
+    testonly = true
+    sources = [
+      "${googletest_dir}/googletest/src/gtest-all.cc",
+    ]
+    public_configs = [ ":gtest_config" ]
+  }
 
-static_library("gmock") {
-  testonly = true
-  sources = [
-    "${googletest_dir}/googlemock/src/gmock-all.cc",
-  ]
-  public_configs = [ ":gmock_config" ]
+  config("gmock_config") {
+    include_dirs = [
+      "${googletest_dir}/googlemock",
+      "${googletest_dir}/googlemock/include",
+      "${googletest_dir}/googletest/include",
+    ]
+  }
+
+  static_library("gmock") {
+    testonly = true
+    sources = [
+      "${googletest_dir}/googlemock/src/gmock-all.cc",
+    ]
+    public_configs = [ ":gmock_config" ]
+  }
+
+  group("gmock_and_gtest") {
+    testonly = true
+    public_deps = [
+      ":gmock",
+      ":gtest",
+    ]
+  }
+} else {
+  # When we are in Chromium we reuse its targets, and also add some deps that
+  # are needed to launch the test in swarming mode.
+  group("gmock_and_gtest") {
+    testonly = true
+    public_deps = [
+      "//base",
+      "//base/test:test_support",
+      "//testing/gmock",
+      "//testing/gtest",
+    ]
+  }
 }
 
 ###############################################################################

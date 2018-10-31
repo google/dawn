@@ -14,6 +14,7 @@
 
 import("scripts/dawn_overrides_with_defaults.gni")
 import("scripts/dawn_features.gni")
+import("//build_overrides/build.gni")
 
 import("//testing/test.gni")
 
@@ -750,13 +751,11 @@ test("dawn_unittests") {
     ":libdawn_native_sources",
     ":libdawn_wire",
     ":mock_dawn_gen",
-    "third_party:gmock",
-    "third_party:gtest",
+    "third_party:gmock_and_gtest",
   ]
 
   sources = get_target_outputs(":mock_dawn_gen")
   sources += [
-    "src/tests/UnittestsMain.cpp",
     "src/tests/unittests/BitSetIteratorTests.cpp",
     "src/tests/unittests/CommandAllocatorTests.cpp",
     "src/tests/unittests/EnumClassBitmasksTests.cpp",
@@ -791,6 +790,14 @@ test("dawn_unittests") {
   if (dawn_enable_d3d12) {
     sources += [ "src/tests/unittests/d3d12/CopySplitTests.cpp" ]
   }
+
+  # When building inside Chromium, use their gtest main function because it is
+  # needed to run in swarming correctly.
+  if (build_with_chromium) {
+    sources += [ "//gpu/dawn_unittests_main.cc" ]
+  } else {
+    sources += [ "src/tests/UnittestsMain.cpp" ]
+  }
 }
 
 test("dawn_end2end_tests") {
@@ -803,13 +810,12 @@ test("dawn_end2end_tests") {
     ":libdawn_native",
     ":libdawn_wire",
     "third_party:glfw",
-    "third_party:gtest",
+    "third_party:gmock_and_gtest",
   ]
 
   sources = [
     "src/tests/DawnTest.cpp",
     "src/tests/DawnTest.h",
-    "src/tests/End2EndTestsMain.cpp",
     "src/tests/end2end/BasicTests.cpp",
     "src/tests/end2end/BindGroupTests.cpp",
     "src/tests/end2end/BlendStateTests.cpp",
@@ -828,6 +834,14 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/TextureViewTests.cpp",
     "src/tests/end2end/ViewportOrientationTests.cpp",
   ]
+
+  # When building inside Chromium, use their gtest main function because it is
+  # needed to run in swarming correctly.
+  if (build_with_chromium) {
+    sources += [ "//gpu/dawn_end2end_tests_main.cc" ]
+  } else {
+    sources += [ "src/tests/End2EndTestsMain.cpp" ]
+  }
 }
 
 ###############################################################################
