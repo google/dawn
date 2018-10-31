@@ -62,7 +62,7 @@ namespace dawn_native {
         descriptor.size.depth = 1;
         descriptor.arrayLayer = 1;
         descriptor.format = mFormat;
-        descriptor.mipLevel = 1;
+        descriptor.levelCount = 1;
         descriptor.usage = mAllowedUsage;
 
         auto* texture = GetNextTextureImpl(&descriptor);

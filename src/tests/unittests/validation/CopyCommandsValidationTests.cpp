@@ -35,7 +35,7 @@ class CopyCommandTest : public ValidationTest {
             descriptor.size.depth = 1;
             descriptor.arrayLayer = arrayLayer;
             descriptor.format = format;
-            descriptor.mipLevel = levels;
+            descriptor.levelCount = levels;
             descriptor.usage = usage;
             dawn::Texture tex = device.CreateTexture(&descriptor);
             return tex;

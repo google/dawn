@@ -1055,7 +1055,7 @@
             {"name": "size", "type": "extent 3D"},
             {"name": "array layer", "type": "uint32_t"},
             {"name": "format", "type": "texture format"},
-            {"name": "mip level", "type": "uint32_t"}
+            {"name": "level count", "type": "uint32_t"}
         ]
     },
     "texture dimension": {

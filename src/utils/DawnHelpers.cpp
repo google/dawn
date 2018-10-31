@@ -140,7 +140,7 @@ namespace utils {
         descriptor.size.depth = 1;
         descriptor.arrayLayer = 1;
         descriptor.format = result.colorFormat;
-        descriptor.mipLevel = 1;
+        descriptor.levelCount = 1;
         descriptor.usage =
             dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
         result.color = device.CreateTexture(&descriptor);

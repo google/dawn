@@ -29,7 +29,7 @@ dawn::TextureView Create2DAttachment(dawn::Device& device, uint32_t width, uint3
     descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = format;
-    descriptor.mipLevel = 1;
+    descriptor.levelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
     dawn::Texture attachment = device.CreateTexture(&descriptor);
 

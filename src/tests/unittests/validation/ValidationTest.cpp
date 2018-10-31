@@ -81,7 +81,7 @@ dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
         descriptor.size.depth = 1;
         descriptor.arrayLayer = 1;
         descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
-        descriptor.mipLevel = 1;
+        descriptor.levelCount = 1;
         descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
 
         auto colorBuffer = device.CreateTexture(&descriptor);
@@ -134,7 +134,7 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
     descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = dummy.attachmentFormat;
-    descriptor.mipLevel = 1;
+    descriptor.levelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
     dummy.attachment = device.CreateTexture(&descriptor);
 

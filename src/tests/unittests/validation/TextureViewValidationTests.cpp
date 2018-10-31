@@ -35,7 +35,7 @@ dawn::Texture Create2DArrayTexture(dawn::Device& device,
     descriptor.size.depth = 1;
     descriptor.arrayLayer = arrayLayers;
     descriptor.format = format;
-    descriptor.mipLevel = kDefaultMipLevels;
+    descriptor.levelCount = kDefaultMipLevels;
     descriptor.usage = dawn::TextureUsageBit::Sampled;
     return device.CreateTexture(&descriptor);
 }

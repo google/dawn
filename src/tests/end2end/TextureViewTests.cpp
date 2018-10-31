@@ -82,7 +82,7 @@ protected:
         descriptor.size.depth = 1;
         descriptor.arrayLayer = layerCount;
         descriptor.format = kFormat;
-        descriptor.mipLevel = levelCount;
+        descriptor.levelCount = levelCount;
         descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
         mTexture = device.CreateTexture(&descriptor);
 

@@ -143,7 +143,7 @@ dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device) {
     descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = dawn::TextureFormat::D32FloatS8Uint;
-    descriptor.mipLevel = 1;
+    descriptor.levelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
     auto depthStencilTexture = device.CreateTexture(&descriptor);
     return depthStencilTexture.CreateDefaultTextureView();

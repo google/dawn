@@ -722,7 +722,7 @@ TEST_P(BlendStateTest, IndependentBlendState) {
     descriptor.size.depth = 1;
     descriptor.arrayLayer = 1;
     descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
-    descriptor.mipLevel = 1;
+    descriptor.levelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
 
     for (uint32_t i = 0; i < 4; ++i) {

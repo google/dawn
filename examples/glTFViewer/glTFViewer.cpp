@@ -389,7 +389,7 @@ namespace {
             descriptor.size.depth = 1;
             descriptor.arrayLayer = 1;
             descriptor.format = format;
-            descriptor.mipLevel = 1;
+            descriptor.levelCount = 1;
             descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
             auto oTexture = device.CreateTexture(&descriptor);
                 // TODO: release this texture
