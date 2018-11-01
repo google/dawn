@@ -40,7 +40,7 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        auto SetDescriptorRange = [&](uint32_t index, uint32_t count,
+        auto SetDescriptorRange = [&](uint32_t index, uint32_t count, uint32_t* baseRegister,
                                       D3D12_DESCRIPTOR_RANGE_TYPE type) -> bool {
             if (count == 0) {
                 return false;
@@ -51,36 +51,35 @@ namespace dawn_native { namespace d3d12 {
             range.NumDescriptors = count;
             range.RegisterSpace = 0;
             range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range.BaseShaderRegister = *baseRegister;
+            *baseRegister += count;
             // These ranges will be copied and range.BaseShaderRegister will be set in
             // d3d12::PipelineLayout to account for bind group register offsets
             return true;
         };
 
         uint32_t rangeIndex = 0;
+        uint32_t baseRegister = 0;
 
+        std::array<uint32_t, DescriptorType::Count> descriptorOffsets;
         // Ranges 0-2 contain the CBV, UAV, and SRV ranges, if they exist, tightly packed
         // Range 3 contains the Sampler range, if there is one
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[CBV],
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[CBV], &baseRegister,
                                D3D12_DESCRIPTOR_RANGE_TYPE_CBV)) {
-            rangeIndex++;
+            descriptorOffsets[CBV] = mRanges[rangeIndex++].BaseShaderRegister;
         }
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[UAV],
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[UAV], &baseRegister,
                                D3D12_DESCRIPTOR_RANGE_TYPE_UAV)) {
-            rangeIndex++;
+            descriptorOffsets[UAV] = mRanges[rangeIndex++].BaseShaderRegister;
         }
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[SRV],
+        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[SRV], &baseRegister,
                                D3D12_DESCRIPTOR_RANGE_TYPE_SRV)) {
-            rangeIndex++;
+            descriptorOffsets[SRV] = mRanges[rangeIndex++].BaseShaderRegister;
         }
-        SetDescriptorRange(Sampler, mDescriptorCounts[Sampler],
+        uint32_t zero = 0;
+        SetDescriptorRange(Sampler, mDescriptorCounts[Sampler], &zero,
                            D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
-
-        // descriptors ranges are offset by the offset + size of the previous range
-        std::array<uint32_t, DescriptorType::Count> descriptorOffsets;
-        descriptorOffsets[CBV] = 0;
-        descriptorOffsets[UAV] = descriptorOffsets[CBV] + mDescriptorCounts[CBV];
-        descriptorOffsets[SRV] = descriptorOffsets[UAV] + mDescriptorCounts[UAV];
-        descriptorOffsets[Sampler] = 0;  // samplers are in a different heap
+        descriptorOffsets[Sampler] = 0;
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
             switch (groupInfo.types[binding]) {

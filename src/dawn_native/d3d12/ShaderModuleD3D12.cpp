@@ -15,39 +15,23 @@
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 
 #include "common/Assert.h"
+#include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
+#include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 
 #include <spirv-cross/spirv_hlsl.hpp>
 
 namespace dawn_native { namespace d3d12 {
 
-    // TODO(kainino@chromium.org): Consider replacing this with a generic enum_map.
-    template <typename T>
-    class BindingTypeMap {
-      public:
-        T& operator[](dawn::BindingType type) {
-            switch (type) {
-                case dawn::BindingType::UniformBuffer:
-                    return mMap[0];
-                case dawn::BindingType::Sampler:
-                    return mMap[1];
-                case dawn::BindingType::SampledTexture:
-                    return mMap[2];
-                case dawn::BindingType::StorageBuffer:
-                    return mMap[3];
-                default:
-                    DAWN_UNREACHABLE();
-            }
-        }
-
-      private:
-        static constexpr int kNumBindingTypes = 4;
-        std::array<T, kNumBindingTypes> mMap{};
-    };
-
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
         : ShaderModuleBase(device, descriptor) {
-        spirv_cross::CompilerHLSL compiler(descriptor->code, descriptor->codeSize);
+        mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
+        spirv_cross::CompilerHLSL compiler(mSpirv);
+        ExtractSpirvInfo(compiler);
+    }
+
+    const std::string ShaderModule::GetHLSLSource(PipelineLayout* layout) const {
+        spirv_cross::CompilerHLSL compiler(mSpirv);
 
         spirv_cross::CompilerGLSL::Options options_glsl;
         options_glsl.vertex.fixup_clipspace = true;
@@ -58,30 +42,22 @@ namespace dawn_native { namespace d3d12 {
         options_hlsl.shader_model = 51;
         compiler.set_hlsl_options(options_hlsl);
 
-        ExtractSpirvInfo(compiler);
-
-        // rename bindings so that each register type c/u/t/s starts at 0 and then offset by
-        // kMaxBindingsPerGroup * bindGroupIndex
-        const auto& moduleBindingInfo = GetBindingInfo();
+        const ModuleBindingInfo& moduleBindingInfo = GetBindingInfo();
         for (uint32_t group = 0; group < moduleBindingInfo.size(); ++group) {
+            const auto& bindingOffsets =
+                ToBackend(layout->GetBindGroupLayout(group))->GetBindingOffsets();
             const auto& groupBindingInfo = moduleBindingInfo[group];
-
-            BindingTypeMap<uint32_t> baseRegisters{};
-            for (const auto& bindingInfo : groupBindingInfo) {
+            for (uint32_t binding = 0; binding < groupBindingInfo.size(); ++binding) {
+                const BindingInfo& bindingInfo = groupBindingInfo[binding];
                 if (bindingInfo.used) {
-                    uint32_t& baseRegister = baseRegisters[bindingInfo.type];
                     uint32_t bindGroupOffset = group * kMaxBindingsPerGroup;
+                    uint32_t bindingOffset = bindingOffsets[binding];
                     compiler.set_decoration(bindingInfo.id, spv::DecorationBinding,
-                                            bindGroupOffset + baseRegister++);
+                                            bindGroupOffset + bindingOffset);
                 }
             }
         }
-
-        mHlslSource = compiler.compile();
-    }
-
-    const std::string& ShaderModule::GetHLSLSource() const {
-        return mHlslSource;
+        return compiler.compile();
     }
 
 }}  // namespace dawn_native::d3d12

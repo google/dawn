@@ -33,7 +33,7 @@ namespace dawn_native { namespace d3d12 {
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
         const ShaderModule* module = ToBackend(descriptor->module);
-        const std::string& hlslSource = module->GetHLSLSource();
+        const std::string& hlslSource = module->GetHLSLSource(ToBackend(GetLayout()));
 
         ComPtr<ID3DBlob> compiledShader;
         ComPtr<ID3DBlob> errors;

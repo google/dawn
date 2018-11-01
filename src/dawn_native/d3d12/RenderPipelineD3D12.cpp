@@ -83,7 +83,7 @@ namespace dawn_native { namespace d3d12 {
         for (auto stage : IterateStages(GetStageMask())) {
             const auto& module = ToBackend(builder->GetStageInfo(stage).module);
             const auto& entryPoint = builder->GetStageInfo(stage).entryPoint;
-            const auto& hlslSource = module->GetHLSLSource();
+            const auto& hlslSource = module->GetHLSLSource(ToBackend(GetLayout()));
 
             const char* compileTarget = nullptr;
 

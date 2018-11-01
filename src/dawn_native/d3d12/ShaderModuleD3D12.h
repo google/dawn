@@ -20,15 +20,16 @@
 namespace dawn_native { namespace d3d12 {
 
     class Device;
+    class PipelineLayout;
 
     class ShaderModule : public ShaderModuleBase {
       public:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
 
-        const std::string& GetHLSLSource() const;
+        const std::string GetHLSLSource(PipelineLayout* layout) const;
 
       private:
-        std::string mHlslSource;
+        std::vector<uint32_t> mSpirv;
     };
 
 }}  // namespace dawn_native::d3d12
