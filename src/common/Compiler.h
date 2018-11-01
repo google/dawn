@@ -36,7 +36,8 @@
 #    if defined(__i386__) || defined(__x86_64__)
 #        define DAWN_BREAKPOINT() __asm__ __volatile__("int $3\n\t")
 #    else
-#        error "Implement BREAKPOINT on your platform"
+// TODO(cwallez@chromium.org): Implement breakpoint on all supported architectures
+#        define DAWN_BREAKPOINT()
 #    endif
 
 #    define DAWN_BUILTIN_UNREACHABLE() __builtin_unreachable()

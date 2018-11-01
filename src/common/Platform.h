@@ -27,10 +27,22 @@
 #    error "Unsupported platform."
 #endif
 
-#if defined(_WIN64) || defined(__aarch64__) || defined(__x86_64__)
+// Distinguish mips32.
+#if defined(__mips__) && (_MIPS_SIM == _ABIO32) && !defined(__mips32__)
+#    define __mips32__
+#endif
+
+// Distinguish mips64.
+#if defined(__mips__) && (_MIPS_SIM == _ABI64) && !defined(__mips64__)
+#    define __mips64__
+#endif
+
+#if defined(_WIN64) || defined(__aarch64__) || defined(__x86_64__) || defined(__mips64__) || \
+    defined(__s390x__) || defined(__PPC64__)
 #    define DAWN_PLATFORM_64_BIT 1
 static_assert(sizeof(sizeof(char)) == 8, "Expect sizeof(size_t) == 8");
-#elif defined(_WIN32) || defined(__i386__) || defined(__arm__)
+#elif defined(_WIN32) || defined(__arm__) || defined(__i386__) || defined(__mips32__) || \
+    defined(__s390__)
 #    define DAWN_PLATFORM_32_BIT 1
 static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
 #else
