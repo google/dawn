@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "common/Assert.h"
 #include "common/Constants.h"
 #include "tests/DawnTest.h"
 #include "utils/DawnHelpers.h"
@@ -124,9 +125,10 @@ TEST_P(BindGroupTests, ReusedUBO) {
         .GetResult();
     struct Data {
         float transform[8];
-        char padding[256 - sizeof(Data::transform)];
+        char padding[256 - 8 * sizeof(float)];
         float color[4];
     };
+    ASSERT(offsetof(Data, color) == 256);
     constexpr float dummy = 0.0f;
     Data data {
         { 1.f, 0.f, dummy, dummy, 0.f, 1.0f, dummy, dummy },
@@ -135,9 +137,9 @@ TEST_P(BindGroupTests, ReusedUBO) {
     };
     dawn::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(data), dawn::BufferUsageBit::Uniform);
     dawn::BufferView vertUBOBufferView =
-        buffer.CreateBufferViewBuilder().SetExtent(offsetof(Data, transform), sizeof(Data::transform)).GetResult();
+        buffer.CreateBufferViewBuilder().SetExtent(0, sizeof(Data::transform)).GetResult();
     dawn::BufferView fragUBOBufferView =
-        buffer.CreateBufferViewBuilder().SetExtent(offsetof(Data, color), sizeof(Data::color)).GetResult();
+        buffer.CreateBufferViewBuilder().SetExtent(256, sizeof(Data::color)).GetResult();
     dawn::BindGroup bindGroup = device.CreateBindGroupBuilder()
         .SetLayout(bgl)
         .SetBufferViews(0, 1, &vertUBOBufferView)
