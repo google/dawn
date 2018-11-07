@@ -136,6 +136,48 @@ TEST_F(TextureViewValidationTest, CreateTextureViewOnTexture2DArray) {
     }
 }
 
+// Test creating cube map texture view
+TEST_F(TextureViewValidationTest, CreateCubeMapTextureView) {
+    constexpr uint32_t kDefaultArrayLayers = 16;
+
+    dawn::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
+
+    dawn::TextureViewDescriptor base2DArrayTextureViewDescriptor =
+        CreateDefaultTextureViewDescriptor(dawn::TextureViewDimension::e2DArray);
+
+    // It is OK to create a cube map texture view with layerCount == 6.
+    {
+        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = dawn::TextureViewDimension::Cube;
+        descriptor.layerCount = 6;
+        texture.CreateTextureView(&descriptor);
+    }
+
+    // It is an error to create a cube map texture view with layerCount != 6.
+    {
+        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = dawn::TextureViewDimension::Cube;
+        descriptor.layerCount = 3;
+        ASSERT_DEVICE_ERROR(texture.CreateTextureView(&descriptor));
+    }
+
+    // It is OK to create a cube map array texture view with layerCount % 6 == 0.
+    {
+        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = dawn::TextureViewDimension::CubeArray;
+        descriptor.layerCount = 12;
+        texture.CreateTextureView(&descriptor);
+    }
+
+    // It is an error create a cube map array texture view with layerCount % 6 != 0.
+    {
+        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = dawn::TextureViewDimension::CubeArray;
+        descriptor.layerCount = 11;
+        ASSERT_DEVICE_ERROR(texture.CreateTextureView(&descriptor));
+    }
+}
+
 // Test the format compatibility rules when creating a texture view.
 // TODO(jiawei.shao@intel.com): add more tests when the rules are fully implemented.
 TEST_F(TextureViewValidationTest, TextureViewFormatCompatibility) {

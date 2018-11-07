@@ -1111,10 +1111,12 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "2D"},
-            {"value": 1, "name": "2D array"}
+            {"value": 1, "name": "2D array"},
+            {"value": 2, "name": "cube"},
+            {"value": 3, "name": "cube array"}
         ],
         "TODO": [
-            "jiawei.shao@intel.com: support 1D, 3D, cube and cube array texture views"
+            "jiawei.shao@intel.com: support 1D and 3D texture views"
         ]
     },
     "vertex format": {
