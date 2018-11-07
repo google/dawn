@@ -42,6 +42,11 @@ namespace dawn_native {
     class CommandBufferBase : public ObjectBase {
       public:
         CommandBufferBase(CommandBufferBuilder* builder);
+
+        const CommandBufferResourceUsage& GetResourceUsages() const;
+
+      private:
+        CommandBufferResourceUsage mResourceUsages;
     };
 
     class CommandBufferBuilder : public Builder<CommandBufferBase> {
@@ -52,7 +57,7 @@ namespace dawn_native {
         MaybeError ValidateGetResult();
 
         CommandIterator AcquireCommands();
-        std::vector<PassResourceUsage> AcquirePassResourceUsage();
+        CommandBufferResourceUsage AcquireResourceUsages();
 
         // Dawn API
         ComputePassEncoderBase* BeginComputePass();
@@ -116,9 +121,9 @@ namespace dawn_native {
         CommandIterator mIterator;
         bool mWasMovedToIterator = false;
         bool mWereCommandsAcquired = false;
-        bool mWerePassUsagesAcquired = false;
 
-        std::vector<PassResourceUsage> mPassResourceUsages;
+        bool mWereResourceUsagesAcquired = false;
+        CommandBufferResourceUsage mResourceUsages;
     };
 
 }  // namespace dawn_native

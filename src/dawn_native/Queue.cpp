@@ -14,8 +14,10 @@
 
 #include "dawn_native/Queue.h"
 
+#include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/Texture.h"
 
 namespace dawn_native {
 
@@ -32,7 +34,27 @@ namespace dawn_native {
         SubmitImpl(numCommands, commands);
     }
 
-    MaybeError QueueBase::ValidateSubmit(uint32_t, CommandBufferBase* const*) {
+    MaybeError QueueBase::ValidateSubmit(uint32_t numCommands, CommandBufferBase* const* commands) {
+        for (uint32_t i = 0; i < numCommands; ++i) {
+            const CommandBufferResourceUsage& usages = commands[i]->GetResourceUsages();
+
+            for (const PassResourceUsage& passUsages : usages.perPass) {
+                for (const BufferBase* buffer : passUsages.buffers) {
+                    DAWN_TRY(buffer->ValidateCanUseInSubmitNow());
+                }
+                for (const TextureBase* texture : passUsages.textures) {
+                    DAWN_TRY(texture->ValidateCanUseInSubmitNow());
+                }
+            }
+
+            for (const BufferBase* buffer : usages.topLevelBuffers) {
+                DAWN_TRY(buffer->ValidateCanUseInSubmitNow());
+            }
+            for (const TextureBase* texture : usages.topLevelTextures) {
+                DAWN_TRY(texture->ValidateCanUseInSubmitNow());
+            }
+        }
+
         return {};
     }
 

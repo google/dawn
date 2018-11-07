@@ -237,6 +237,10 @@ namespace dawn_native {
         return mUsage;
     }
 
+    MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
+        return {};
+    }
+
     TextureViewBase* TextureBase::CreateDefaultTextureView() {
         TextureViewDescriptor descriptor = MakeDefaultTextureViewDescriptor(this);
         return GetDevice()->CreateTextureView(this, &descriptor);

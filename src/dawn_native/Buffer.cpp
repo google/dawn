@@ -72,6 +72,13 @@ namespace dawn_native {
         return mUsage;
     }
 
+    MaybeError BufferBase::ValidateCanUseInSubmitNow() const {
+        if (mIsMapped) {
+            return DAWN_VALIDATION_ERROR("Buffer used in a submit while mapped");
+        }
+        return {};
+    }
+
     void BufferBase::CallMapReadCallback(uint32_t serial,
                                          dawnBufferMapAsyncStatus status,
                                          const void* pointer) {

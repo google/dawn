@@ -52,6 +52,8 @@ namespace dawn_native {
         uint32_t GetNumMipLevels() const;
         dawn::TextureUsageBit GetUsage() const;
 
+        MaybeError ValidateCanUseInSubmitNow() const;
+
         // Dawn API
         TextureViewBase* CreateDefaultTextureView();
         TextureViewBase* CreateTextureView(const TextureViewDescriptor* descriptor);

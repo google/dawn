@@ -42,7 +42,6 @@ namespace dawn_native { namespace d3d12 {
                               RenderPassDescriptor* renderPass);
 
         CommandIterator mCommands;
-        std::vector<PassResourceUsage> mPassResourceUsages;
     };
 
 }}  // namespace dawn_native::d3d12

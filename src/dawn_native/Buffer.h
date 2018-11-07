@@ -42,6 +42,8 @@ namespace dawn_native {
         uint32_t GetSize() const;
         dawn::BufferUsageBit GetUsage() const;
 
+        MaybeError ValidateCanUseInSubmitNow() const;
+
         // Dawn API
         BufferViewBuilder* CreateBufferViewBuilder();
         void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);

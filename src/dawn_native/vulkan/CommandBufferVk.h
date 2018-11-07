@@ -35,7 +35,6 @@ namespace dawn_native { namespace vulkan {
         void RecordRenderPass(VkCommandBuffer commands, RenderPassDescriptor* renderPass);
 
         CommandIterator mCommands;
-        std::vector<PassResourceUsage> mPassResourceUsages;
     };
 
 }}  // namespace dawn_native::vulkan

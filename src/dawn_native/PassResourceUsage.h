@@ -17,6 +17,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
+#include <set>
 #include <vector>
 
 namespace dawn_native {
@@ -33,6 +34,12 @@ namespace dawn_native {
 
         std::vector<TextureBase*> textures;
         std::vector<dawn::TextureUsageBit> textureUsages;
+    };
+
+    struct CommandBufferResourceUsage {
+        std::vector<PassResourceUsage> perPass;
+        std::set<BufferBase*> topLevelBuffers;
+        std::set<TextureBase*> topLevelTextures;
     };
 
 }  // namespace dawn_native

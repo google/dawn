@@ -111,9 +111,7 @@ namespace dawn_native { namespace vulkan {
     }  // anonymous namespace
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
-        : CommandBufferBase(builder),
-          mCommands(builder->AcquireCommands()),
-          mPassResourceUsages(builder->AcquirePassResourceUsage()) {
+        : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {
@@ -135,6 +133,7 @@ namespace dawn_native { namespace vulkan {
             }
         };
 
+        const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
         size_t nextPassNumber = 0;
 
         Command type;
@@ -207,7 +206,7 @@ namespace dawn_native { namespace vulkan {
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
-                    TransitionForPass(commands, mPassResourceUsages[nextPassNumber]);
+                    TransitionForPass(commands, passResourceUsages[nextPassNumber]);
                     RecordRenderPass(commands, ToBackend(cmd->info.Get()));
 
                     nextPassNumber++;
@@ -216,7 +215,7 @@ namespace dawn_native { namespace vulkan {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
-                    TransitionForPass(commands, mPassResourceUsages[nextPassNumber]);
+                    TransitionForPass(commands, passResourceUsages[nextPassNumber]);
                     RecordComputePass(commands);
 
                     nextPassNumber++;

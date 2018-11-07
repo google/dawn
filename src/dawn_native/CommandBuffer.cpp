@@ -286,7 +286,11 @@ namespace dawn_native {
     // CommandBuffer
 
     CommandBufferBase::CommandBufferBase(CommandBufferBuilder* builder)
-        : ObjectBase(builder->GetDevice()) {
+        : ObjectBase(builder->GetDevice()), mResourceUsages(builder->AcquireResourceUsages()) {
+    }
+
+    const CommandBufferResourceUsage& CommandBufferBase::GetResourceUsages() const {
+        return mResourceUsages;
     }
 
     // CommandBufferBuilder
@@ -308,10 +312,10 @@ namespace dawn_native {
         return std::move(mIterator);
     }
 
-    std::vector<PassResourceUsage> CommandBufferBuilder::AcquirePassResourceUsage() {
-        ASSERT(!mWerePassUsagesAcquired);
-        mWerePassUsagesAcquired = true;
-        return std::move(mPassResourceUsages);
+    CommandBufferResourceUsage CommandBufferBuilder::AcquireResourceUsages() {
+        ASSERT(!mWereResourceUsagesAcquired);
+        mWereResourceUsagesAcquired = true;
+        return std::move(mResourceUsages);
     }
 
     CommandBufferBase* CommandBufferBuilder::GetResultImpl() {
@@ -372,6 +376,9 @@ namespace dawn_native {
                                               dawn::BufferUsageBit::TransferSrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
                                               dawn::BufferUsageBit::TransferDst));
+
+                    mResourceUsages.topLevelBuffers.insert(copy->source.buffer.Get());
+                    mResourceUsages.topLevelBuffers.insert(copy->destination.buffer.Get());
                 } break;
 
                 case Command::CopyBufferToTexture: {
@@ -391,6 +398,9 @@ namespace dawn_native {
                                               dawn::BufferUsageBit::TransferSrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
                                               dawn::TextureUsageBit::TransferDst));
+
+                    mResourceUsages.topLevelBuffers.insert(copy->source.buffer.Get());
+                    mResourceUsages.topLevelTextures.insert(copy->destination.texture.Get());
                 } break;
 
                 case Command::CopyTextureToBuffer: {
@@ -410,6 +420,9 @@ namespace dawn_native {
                                               dawn::TextureUsageBit::TransferSrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
                                               dawn::BufferUsageBit::TransferDst));
+
+                    mResourceUsages.topLevelTextures.insert(copy->source.texture.Get());
+                    mResourceUsages.topLevelBuffers.insert(copy->destination.buffer.Get());
                 } break;
 
                 default:
@@ -431,7 +444,7 @@ namespace dawn_native {
                     mIterator.NextCommand<EndComputePassCmd>();
 
                     DAWN_TRY(usageTracker.ValidateUsages(PassType::Compute));
-                    mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
+                    mResourceUsages.perPass.push_back(usageTracker.AcquireResourceUsage());
                     return {};
                 } break;
 
@@ -495,7 +508,7 @@ namespace dawn_native {
                     mIterator.NextCommand<EndRenderPassCmd>();
 
                     DAWN_TRY(usageTracker.ValidateUsages(PassType::Render));
-                    mPassResourceUsages.push_back(usageTracker.AcquireResourceUsage());
+                    mResourceUsages.perPass.push_back(usageTracker.AcquireResourceUsage());
                     return {};
                 } break;
 
