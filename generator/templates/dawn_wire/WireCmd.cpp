@@ -211,6 +211,14 @@
             //* guarantees they are filled even if there is an ID for an error object for the
             //* Maybe monad mechanism.
             DESERIALIZE_TRY(resolver.GetFromId(record->selfId, &record->self));
+
+            //* The object resolver returns a success even if the object is null because the
+            //* frontend is reponsible to validate that (null objects sometimes have special
+            //* meanings). However it is never valid to call a method on a null object so we
+            //* can error out in that case.
+            if (record->self == nullptr) {
+                return DeserializeResult::FatalError;
+            }
         {% endif %}
 
         {% if is_struct and as_struct.extensible %}
