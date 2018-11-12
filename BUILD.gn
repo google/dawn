@@ -17,6 +17,9 @@ import("scripts/dawn_features.gni")
 import("//build_overrides/build.gni")
 
 import("//testing/test.gni")
+if (build_with_chromium) {
+  import("//testing/libfuzzer/fuzzer_test.gni")
+}
 
 ###############################################################################
 # Template to wrap the Dawn code generator
@@ -938,6 +941,102 @@ if (dawn_standalone) {
       ":CppHelloTriangle",
       ":CubeReflection",
       ":glTFViewer",
+    ]
+  }
+}
+
+###############################################################################
+# Fuzzers
+###############################################################################
+if (build_with_chromium) {
+  group("dawn_fuzzers") {
+    testonly = true
+    deps = [
+      ":dawn_spirv_cross_glsl_fast_fuzzer",
+      ":dawn_spirv_cross_glsl_full_fuzzer",
+      ":dawn_spirv_cross_hlsl_fast_fuzzer",
+      ":dawn_spirv_cross_hlsl_full_fuzzer",
+      ":dawn_spirv_cross_msl_fast_fuzzer",
+      ":dawn_spirv_cross_msl_full_fuzzer",
+    ]
+  }
+
+  config("dawn_spirv_cross_fuzzers_config") {
+    defines = [ "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS" ]
+    include_dirs = [
+      "src/fuzzers",
+      "third_party/",
+    ]
+  }
+
+  static_library("dawn_spirv_cross_fuzzer_common") {
+    public_configs = [ ":dawn_spirv_cross_fuzzers_config" ]
+    sources = [
+      "src/fuzzers/DawnSPIRVCrossFuzzer.cpp",
+      "src/fuzzers/DawnSPIRVCrossFuzzer.h",
+    ]
+    deps = [
+      "third_party:spirv_cross",
+    ]
+  }
+
+  # Uses Dawn specific options and varies input data
+  fuzzer_test("dawn_spirv_cross_glsl_fast_fuzzer") {
+    sources = [
+      "src/fuzzers/DawnSPIRVCrossGLSLFastFuzzer.cpp",
+    ]
+    deps = [
+      ":dawn_spirv_cross_fuzzer_common",
+    ]
+  }
+
+  # Varies bother the options and input data
+  fuzzer_test("dawn_spirv_cross_glsl_full_fuzzer") {
+    sources = [
+      "src/fuzzers/DawnSPIRVCrossGLSLFullFuzzer.cpp",
+    ]
+    deps = [
+      ":dawn_spirv_cross_fuzzer_common",
+    ]
+  }
+
+  # Uses Dawn specific options and varies input data
+  fuzzer_test("dawn_spirv_cross_hlsl_fast_fuzzer") {
+    sources = [
+      "src/fuzzers/DawnSPIRVCrossGLSLFastFuzzer.cpp",
+    ]
+    deps = [
+      ":dawn_spirv_cross_fuzzer_common",
+    ]
+  }
+
+  # Varies bother the options and input data
+  fuzzer_test("dawn_spirv_cross_hlsl_full_fuzzer") {
+    sources = [
+      "src/fuzzers/DawnSPIRVCrossGLSLFullFuzzer.cpp",
+    ]
+    deps = [
+      ":dawn_spirv_cross_fuzzer_common",
+    ]
+  }
+
+  # Uses Dawn specific options and varies input data
+  fuzzer_test("dawn_spirv_cross_msl_fast_fuzzer") {
+    sources = [
+      "src/fuzzers/DawnSPIRVCrossGLSLFastFuzzer.cpp",
+    ]
+    deps = [
+      ":dawn_spirv_cross_fuzzer_common",
+    ]
+  }
+
+  # Varies bother the options and input data
+  fuzzer_test("dawn_spirv_cross_msl_full_fuzzer") {
+    sources = [
+      "src/fuzzers/DawnSPIRVCrossGLSLFullFuzzer.cpp",
+    ]
+    deps = [
+      ":dawn_spirv_cross_fuzzer_common",
     ]
   }
 }

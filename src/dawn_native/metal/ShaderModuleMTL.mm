@@ -52,6 +52,8 @@ namespace dawn_native { namespace metal {
                                                               const PipelineLayout* layout) const {
         spirv_cross::CompilerMSL compiler(mSpirv);
 
+        // If these options are changed, the values in DawnSPIRVCrossMSLFastFuzzer.cpp need to be
+        // updated.
         spirv_cross::CompilerGLSL::Options options_glsl;
         options_glsl.vertex.flip_vert_y = true;
         compiler.spirv_cross::CompilerGLSL::set_common_options(options_glsl);

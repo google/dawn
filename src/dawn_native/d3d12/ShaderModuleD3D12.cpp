@@ -33,6 +33,8 @@ namespace dawn_native { namespace d3d12 {
     const std::string ShaderModule::GetHLSLSource(PipelineLayout* layout) const {
         spirv_cross::CompilerHLSL compiler(mSpirv);
 
+        // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to be
+        // updated.
         spirv_cross::CompilerGLSL::Options options_glsl;
         options_glsl.vertex.fixup_clipspace = true;
         options_glsl.vertex.flip_vert_y = true;

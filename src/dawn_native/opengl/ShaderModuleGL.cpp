@@ -50,6 +50,8 @@ namespace dawn_native { namespace opengl {
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
         : ShaderModuleBase(device, descriptor) {
         spirv_cross::CompilerGLSL compiler(descriptor->code, descriptor->codeSize);
+        // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to be
+        // updated.
         spirv_cross::CompilerGLSL::Options options;
 
         // TODO(cwallez@chromium.org): discover the backing context version and use that.
