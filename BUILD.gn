@@ -961,21 +961,12 @@ if (build_with_chromium) {
     ]
   }
 
-  config("dawn_spirv_cross_fuzzers_config") {
-    defines = [ "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS" ]
-    include_dirs = [
-      "src/fuzzers",
-      "third_party/",
-    ]
-  }
-
   static_library("dawn_spirv_cross_fuzzer_common") {
-    public_configs = [ ":dawn_spirv_cross_fuzzers_config" ]
     sources = [
       "src/fuzzers/DawnSPIRVCrossFuzzer.cpp",
       "src/fuzzers/DawnSPIRVCrossFuzzer.h",
     ]
-    deps = [
+    public_deps = [
       "third_party:spirv_cross",
     ]
   }
