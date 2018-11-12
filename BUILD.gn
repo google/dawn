@@ -1030,4 +1030,18 @@ if (build_with_chromium) {
       ":dawn_spirv_cross_fuzzer_common",
     ]
   }
+
+  fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
+    sources = [
+      "src/fuzzers/DawnWireServerAndFrontendFuzzer.cpp",
+    ]
+
+    deps = [
+      ":libdawn",
+      ":libdawn_native",
+      ":libdawn_wire",
+    ]
+
+    additional_configs = [ ":dawn_shared_library_public" ]
+  }
 }
