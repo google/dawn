@@ -34,9 +34,16 @@ Dawn provides several WebGPU building blocks:
 ## Building Dawn
 
 Dawn uses the Chromium build system and dependency management so you need to [install depot_tools] and add it to the PATH.
-Then get the source as follows:
 
-[install depots_tools]: http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
+[install depot_tools]: http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
+
+On Linux you need to have the `pkg-config` command:
+```sh
+# Install pkg-config on Ubuntu
+sudo apt-get install pkg-config
+```
+
+Then get the source as follows:
 
 ```sh
 # Clone the repo as "dawn"
