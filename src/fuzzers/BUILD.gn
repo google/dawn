@@ -164,9 +164,9 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
   ]
 
   deps = [
-    "${dawn_top_level}:libdawn",
-    "${dawn_top_level}:libdawn_native",
-    "${dawn_top_level}:libdawn_wire",
+    "${dawn_top_level}:libdawn_sources",
+    "${dawn_top_level}:libdawn_native_sources",
+    "${dawn_top_level}:libdawn_wire_sources",
   ]
 
   additional_configs = [ "${dawn_top_level}:dawn_shared_library_public" ]

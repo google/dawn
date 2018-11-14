@@ -244,16 +244,32 @@ dawn_generator("libdawn_gen") {
   ]
 }
 
+config("libdawn_export") {
+  defines = [ "DAWN_IMPLEMENTATION" ]
+}
+
+source_set("libdawn_sources") {
+  public_deps = [
+    ":dawn_headers",
+  ]
+
+  deps = [
+    ":libdawn_gen",
+  ]
+  sources = get_target_outputs(":libdawn_gen")
+
+  # Put the export config public so that dependents use the same declspec.
+  public_configs = [ ":libdawn_export" ]
+}
+
 shared_library("libdawn") {
   public_deps = [
     ":dawn_headers",
   ]
 
-  defines = [ "DAWN_IMPLEMENTATION" ]
   deps = [
-    ":libdawn_gen",
+    ":libdawn_sources",
   ]
-  sources = get_target_outputs(":libdawn_gen")
 
   # Tell dependents where to find this shared library
   if (is_mac) {
@@ -270,12 +286,15 @@ shared_library("libdawn") {
 
 config("libdawn_native_internal") {
   configs = [ ":dawn_internal" ]
-  defines = [ "DAWN_NATIVE_IMPLEMENTATION" ]
 
   # Suppress warnings that Metal isn't in the deployment target of Chrome
   if (is_mac) {
     cflags_objcc = [ "-Wno-unguarded-availability" ]
   }
+}
+
+config("libdawn_native_export") {
+  defines = [ "DAWN_NATIVE_IMPLEMENTATION" ]
 }
 
 dawn_generator("libdawn_native_utils_gen") {
@@ -319,14 +338,10 @@ source_set("libdawn_native_sources") {
     "third_party:spirv_cross",
   ]
 
-  # Put the internal config public so that unittests can see internal headers
-  public_configs = [ ":libdawn_native_internal" ]
+  # Put the export config public so that dependents use the same declspec.
+  public_configs = [ ":libdawn_native_export" ]
 
-  # Set the headers as a public dependency so they are visible to unittests
-  public_deps = [
-    ":libdawn_native_headers",
-  ]
-
+  configs += [ ":libdawn_native_internal" ]
   libs = []
 
   sources = get_target_outputs(":libdawn_native_utils_gen")
@@ -633,6 +648,10 @@ source_set("libdawn_wire_headers") {
   ]
 }
 
+config("libdawn_wire_export") {
+  defines = [ "DAWN_WIRE_IMPLEMENTATION" ]
+}
+
 dawn_generator("libdawn_wire_gen") {
   target = "dawn_wire"
   outputs = [
@@ -643,7 +662,7 @@ dawn_generator("libdawn_wire_gen") {
   ]
 }
 
-shared_library("libdawn_wire") {
+source_set("libdawn_wire_sources") {
   deps = [
     ":dawn_common",
     ":libdawn_wire_gen",
@@ -651,11 +670,23 @@ shared_library("libdawn_wire") {
   ]
 
   configs += [ ":dawn_internal" ]
-  defines = [ "DAWN_WIRE_IMPLEMENTATION" ]
   sources = get_target_outputs(":libdawn_wire_gen")
   sources += [ "src/dawn_wire/WireCmd.h" ]
 
-  #Make headers publically visible
+  # Make headers publically visible
+  public_deps = [
+    ":libdawn_wire_headers",
+  ]
+  public_configs = [ ":libdawn_public" ]
+
+  # Put the export config public so that dependents use the same declspec.
+  public_configs += [ ":libdawn_wire_export" ]
+}
+
+shared_library("libdawn_wire") {
+  deps = [ ":libdawn_wire_sources" ]
+
+  # Make headers publically visible
   public_deps = [
     ":libdawn_wire_headers",
   ]
@@ -753,6 +784,10 @@ test("dawn_unittests") {
     ":mock_dawn_gen",
     "third_party:gmock_and_gtest",
   ]
+
+  # Add internal Dawn Native headers and config for internal unittests.
+  deps += [ ":libdawn_native_headers" ]
+  configs += [ ":libdawn_native_internal" ]
 
   sources = get_target_outputs(":mock_dawn_gen")
   sources += [
