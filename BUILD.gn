@@ -337,6 +337,9 @@ source_set("libdawn_native_sources") {
     "${dawn_spirv_tools_dir}:spvtools_val",
     "third_party:spirv_cross",
   ]
+  public_deps = [
+    ":libdawn_native_headers",
+  ]
 
   # Put the export config public so that dependents use the same declspec.
   public_configs = [ ":libdawn_native_export" ]
@@ -684,7 +687,9 @@ source_set("libdawn_wire_sources") {
 }
 
 shared_library("libdawn_wire") {
-  deps = [ ":libdawn_wire_sources" ]
+  deps = [
+    ":libdawn_wire_sources",
+  ]
 
   # Make headers publically visible
   public_deps = [
