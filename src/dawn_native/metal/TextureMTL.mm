@@ -76,6 +76,10 @@ namespace dawn_native { namespace metal {
                     return MTLTextureType2D;
                 case dawn::TextureViewDimension::e2DArray:
                     return MTLTextureType2DArray;
+                case dawn::TextureViewDimension::Cube:
+                    return MTLTextureTypeCube;
+                case dawn::TextureViewDimension::CubeArray:
+                    return MTLTextureTypeCubeArray;
                 default:
                     UNREACHABLE();
                     return MTLTextureType2D;

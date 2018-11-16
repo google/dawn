@@ -210,7 +210,17 @@ namespace dawn_native { namespace d3d12 {
                 mSrvDesc.Texture2DArray.PlaneSlice = 0;
                 mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
                 break;
-
+            case dawn::TextureViewDimension::Cube:
+            case dawn::TextureViewDimension::CubeArray:
+                ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
+                ASSERT(descriptor->layerCount % 6 == 0);
+                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
+                mSrvDesc.TextureCubeArray.First2DArrayFace = descriptor->baseArrayLayer;
+                mSrvDesc.TextureCubeArray.NumCubes = descriptor->layerCount / 6;
+                mSrvDesc.TextureCubeArray.MostDetailedMip = descriptor->baseMipLevel;
+                mSrvDesc.TextureCubeArray.MipLevels = descriptor->levelCount;
+                mSrvDesc.TextureCubeArray.ResourceMinLODClamp = 0;
+                break;
             default:
                 UNREACHABLE();
         }

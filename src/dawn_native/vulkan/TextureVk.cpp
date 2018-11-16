@@ -40,6 +40,10 @@ namespace dawn_native { namespace vulkan {
                     return VK_IMAGE_VIEW_TYPE_2D;
                 case dawn::TextureViewDimension::e2DArray:
                     return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+                case dawn::TextureViewDimension::Cube:
+                    return VK_IMAGE_VIEW_TYPE_CUBE;
+                case dawn::TextureViewDimension::CubeArray:
+                    return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
                 default:
                     UNREACHABLE();
             }

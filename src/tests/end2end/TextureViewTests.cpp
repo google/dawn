@@ -18,6 +18,8 @@
 #include "common/Constants.h"
 #include "utils/DawnHelpers.h"
 
+#include <array>
+
 constexpr static unsigned int kRTSize = 64;
 
 class TextureViewTest : public DawnTest {
@@ -55,6 +57,7 @@ protected:
 
         mVSModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
             #version 450
+            layout (location = 0) out vec2 o_texCoord;
             void main() {
                 const vec2 pos[6] = vec2[6](vec2(-2.f, -2.f),
                                             vec2(-2.f,  2.f),
@@ -62,7 +65,14 @@ protected:
                                             vec2(-2.f,  2.f),
                                             vec2( 2.f, -2.f),
                                             vec2( 2.f,  2.f));
+                const vec2 texCoord[6] = vec2[6](vec2(0.f, 0.f),
+                                                 vec2(0.f, 1.f),
+                                                 vec2(1.f, 0.f),
+                                                 vec2(0.f, 1.f),
+                                                 vec2(1.f, 0.f),
+                                                 vec2(1.f, 1.f));
                 gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
+                o_texCoord = texCoord[gl_VertexIndex];
             }
         )");
     }
@@ -180,11 +190,12 @@ protected:
             #version 450
             layout(set = 0, binding = 0) uniform sampler sampler0;
             layout(set = 0, binding = 1) uniform texture2D texture0;
+            layout(location = 0) in vec2 texCoord;
             layout(location = 0) out vec4 fragColor;
 
             void main() {
                 fragColor =
-                    texture(sampler2D(texture0, sampler0), vec2(gl_FragCoord.xy / 2.0));
+                    texture(sampler2D(texture0, sampler0), texCoord);
             }
         )";
 
@@ -218,13 +229,14 @@ protected:
             #version 450
             layout(set = 0, binding = 0) uniform sampler sampler0;
             layout(set = 0, binding = 1) uniform texture2DArray texture0;
+            layout(location = 0) in vec2 texCoord;
             layout(location = 0) out vec4 fragColor;
 
             void main() {
                 fragColor =
-                    texture(sampler2DArray(texture0, sampler0), vec3(gl_FragCoord.xy / 2.0, 0)) +
-                    texture(sampler2DArray(texture0, sampler0), vec3(gl_FragCoord.xy / 2.0, 1)) +
-                    texture(sampler2DArray(texture0, sampler0), vec3(gl_FragCoord.xy / 2.0, 2));
+                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 0)) +
+                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 1)) +
+                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 2));
             }
         )";
 
@@ -233,6 +245,74 @@ protected:
             expected += GenerateTestPixelValue(textureViewBaseLayer + i, textureViewBaseMipLevel);
         }
         Verify(textureView, fragmentShader, expected);
+    }
+
+    std::string CreateFragmentShaderForCubeMapFace(uint32_t layer, bool isCubeMapArray) {
+        // Reference: https://en.wikipedia.org/wiki/Cube_mapping
+        const std::array<std::string, 6> kCoordsToCubeMapFace = {{
+             " 1.f,   tc,  -sc",  // Positive X
+             "-1.f,   tc,   sc",  // Negative X
+             "  sc,  1.f,  -tc",  // Positive Y
+             "  sc, -1.f,   tc",  // Negative Y
+             "  sc,   tc,  1.f",  // Positive Z
+             " -sc,   tc, -1.f",  // Negative Z
+            }};
+
+        const std::string textureType = isCubeMapArray ? "textureCubeArray" : "textureCube";
+        const std::string samplerType = isCubeMapArray ? "samplerCubeArray" : "samplerCube";
+        const uint32_t cubeMapArrayIndex = layer / 6;
+        const std::string coordToCubeMapFace = kCoordsToCubeMapFace[layer % 6];
+
+        std::ostringstream stream;
+        stream << R"(
+            #version 450
+            layout(set = 0, binding = 0) uniform sampler sampler0;
+            layout(set = 0, binding = 1) uniform )" << textureType << R"( texture0;
+            layout(location = 0) in vec2 texCoord;
+            layout(location = 0) out vec4 fragColor;
+            void main() {
+                float sc = 2.f * texCoord.x - 1.f;
+                float tc = 2.f * texCoord.y - 1.f;
+                fragColor = texture()" << samplerType << "(texture0, sampler0), ";
+
+        if (isCubeMapArray) {
+            stream << "vec4(" << coordToCubeMapFace << ", " << cubeMapArrayIndex;
+        } else {
+            stream << "vec3(" << coordToCubeMapFace;
+        }
+
+        stream << R"());
+            })";
+
+        return stream.str();
+    }
+
+    void TextureCubeMapTest(uint32_t textureArrayLayers,
+                            uint32_t textureViewBaseLayer,
+                            uint32_t textureViewLayerCount,
+                            bool isCubeMapArray) {
+        constexpr uint32_t kMipLevels = 1u;
+        initTexture(textureArrayLayers, kMipLevels);
+
+        ASSERT_TRUE((textureViewLayerCount == 6) ||
+                    (isCubeMapArray && textureViewLayerCount % 6 == 0));
+
+        dawn::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
+        descriptor.dimension = (isCubeMapArray) ?
+            dawn::TextureViewDimension::CubeArray : dawn::TextureViewDimension::Cube;
+        descriptor.baseArrayLayer = textureViewBaseLayer;
+        descriptor.layerCount = textureViewLayerCount;
+
+        dawn::TextureView cubeMapTextureView = mTexture.CreateTextureView(&descriptor);
+
+        // Check the data in the every face of the cube map (array) texture view.
+        for (uint32_t layer = 0; layer < textureViewLayerCount; ++layer) {
+            const std::string &fragmentShader =
+                CreateFragmentShaderForCubeMapFace(layer, isCubeMapArray);
+
+            int expected = GenerateTestPixelValue(textureViewBaseLayer + layer, 0);
+            Verify(cubeMapTextureView, fragmentShader.c_str(), expected);
+        }
     }
 
     dawn::BindGroupLayout mBindGroupLayout;
@@ -259,13 +339,14 @@ TEST_P(TextureViewTest, Default2DArrayTexture) {
             #version 450
             layout(set = 0, binding = 0) uniform sampler sampler0;
             layout(set = 0, binding = 1) uniform texture2DArray texture0;
+            layout(location = 0) in vec2 texCoord;
             layout(location = 0) out vec4 fragColor;
 
             void main() {
                 fragColor =
-                    texture(sampler2DArray(texture0, sampler0), vec3(gl_FragCoord.xy / 2.0, 0)) +
-                    texture(sampler2DArray(texture0, sampler0), vec3(gl_FragCoord.xy / 2.0, 1)) +
-                    texture(sampler2DArray(texture0, sampler0), vec3(gl_FragCoord.xy / 2.0, 2));
+                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 0)) +
+                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 1)) +
+                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 2));
             }
         )";
 
@@ -297,6 +378,47 @@ TEST_P(TextureViewTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
 // Test sampling from a 2D array texture view created on a mipmap level of a 2D array texture.
 TEST_P(TextureViewTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
     Texture2DArrayViewTest(6, 6, 2, 4);
+}
+
+// Test sampling from a cube map texture view that covers a whole 2D array texture.
+TEST_P(TextureViewTest, TextureCubeMapOnWholeTexture) {
+    constexpr uint32_t kTotalLayers = 6;
+    TextureCubeMapTest(kTotalLayers, 0, kTotalLayers, false);
+}
+
+// Test sampling from a cube map texture view that covers a sub part of a 2D array texture.
+TEST_P(TextureViewTest, TextureCubeMapViewOnPartOfTexture) {
+    TextureCubeMapTest(10, 2, 6, false);
+}
+
+// Test sampling from a cube map texture view that covers the last layer of a 2D array texture.
+TEST_P(TextureViewTest, TextureCubeMapViewCoveringLastLayer) {
+    constexpr uint32_t kTotalLayers = 10;
+    constexpr uint32_t kBaseLayer = 4;
+    TextureCubeMapTest(kTotalLayers, kBaseLayer, kTotalLayers - kBaseLayer, false);
+}
+
+// Test sampling from a cube map texture array view that covers a whole 2D array texture.
+TEST_P(TextureViewTest, TextureCubeMapArrayaOnWholeTexture) {
+    constexpr uint32_t kTotalLayers = 12;
+    TextureCubeMapTest(kTotalLayers, 0, kTotalLayers, true);
+}
+
+// Test sampling from a cube map texture array view that covers a sub part of a 2D array texture.
+TEST_P(TextureViewTest, TextureCubeMapArrayViewOnPartOfTexture) {
+    TextureCubeMapTest(20, 3, 12, true);
+}
+
+// Test sampling from a cube map texture array view that covers the last layer of a 2D array texture.
+TEST_P(TextureViewTest, TextureCubeMapArrayViewCoveringLastLayer) {
+    constexpr uint32_t kTotalLayers = 20;
+    constexpr uint32_t kBaseLayer = 8;
+    TextureCubeMapTest(kTotalLayers, kBaseLayer, kTotalLayers - kBaseLayer, true);
+}
+
+// Test sampling from a cube map array texture view that only has a single cube map.
+TEST_P(TextureViewTest, TextureCubeMapArrayViewSingleCubeMap) {
+    TextureCubeMapTest(20, 7, 6, true);
 }
 
 DAWN_INSTANTIATE_TEST(TextureViewTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

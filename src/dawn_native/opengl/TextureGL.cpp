@@ -41,6 +41,10 @@ namespace dawn_native { namespace opengl {
                     return GL_TEXTURE_2D;
                 case dawn::TextureViewDimension::e2DArray:
                     return GL_TEXTURE_2D_ARRAY;
+                case dawn::TextureViewDimension::Cube:
+                    return GL_TEXTURE_CUBE_MAP;
+                case dawn::TextureViewDimension::CubeArray:
+                    return GL_TEXTURE_CUBE_MAP_ARRAY;
                 default:
                     UNREACHABLE();
                     return GL_TEXTURE_2D;
