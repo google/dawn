@@ -21,13 +21,20 @@
 #include "spirv-cross/spirv_hlsl.hpp"
 
 namespace {
-    int FuzzTask(std::vector<uint32_t> input, DawnSPIRVCrossFuzzer::CombinedOptions options) {
-        spirv_cross::CompilerHLSL compiler(input);
+    int FuzzTask(const std::vector<uint32_t>& input,
+                 DawnSPIRVCrossFuzzer::CombinedOptions options) {
+        std::unique_ptr<spirv_cross::CompilerHLSL> compiler;
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, input]() {
+            compiler = std::make_unique<spirv_cross::CompilerHLSL>(input);
+        });
+        if (compiler == nullptr) {
+            return 0;
+        }
 
-        compiler.set_common_options(options.glsl);
-        compiler.set_hlsl_options(options.hlsl);
+        compiler->set_common_options(options.glsl);
+        compiler->set_hlsl_options(options.hlsl);
 
-        std::string result = compiler.compile();
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler]() { compiler->compile(); });
         return 0;
     }
 

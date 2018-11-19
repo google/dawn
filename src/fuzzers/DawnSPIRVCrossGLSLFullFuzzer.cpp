@@ -20,11 +20,19 @@
 
 namespace {
 
-    int GLSLFullFuzzTask(std::vector<uint32_t> input, spirv_cross::CompilerGLSL::Options options) {
-        spirv_cross::CompilerGLSL compiler(input);
-        compiler.set_common_options(options);
+    int GLSLFullFuzzTask(const std::vector<uint32_t>& input,
+                         spirv_cross::CompilerGLSL::Options options) {
+        std::unique_ptr<spirv_cross::CompilerGLSL> compiler;
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, input]() {
+            compiler = std::make_unique<spirv_cross::CompilerGLSL>(input);
+        });
+        if (compiler == nullptr) {
+            return 0;
+        }
 
-        std::string result = compiler.compile();
+        compiler->set_common_options(options);
+
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler]() { compiler->compile(); });
 
         return 0;
     }

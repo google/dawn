@@ -22,12 +22,18 @@
 
 namespace {
 
-    int FuzzTask(std::vector<uint32_t> input, spirv_cross::CompilerGLSL::Options options) {
-        spirv_cross::CompilerMSL compiler(input);
+    int FuzzTask(const std::vector<uint32_t>& input, spirv_cross::CompilerGLSL::Options options) {
+        std::unique_ptr<spirv_cross::CompilerMSL> compiler;
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap(
+            [&compiler, input]() { compiler = std::make_unique<spirv_cross::CompilerMSL>(input); });
+        if (compiler == nullptr) {
+            return 0;
+        }
 
-        compiler.spirv_cross::CompilerGLSL::set_common_options(options);
+        compiler->spirv_cross::CompilerGLSL::set_common_options(options);
 
-        std::string result = compiler.compile();
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler]() { compiler->compile(); });
+
         return 0;
     }
 

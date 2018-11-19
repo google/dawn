@@ -26,9 +26,13 @@ namespace DawnSPIRVCrossFuzzer {
         spirv_cross::CompilerHLSL::Options hlsl;
     };
 
-    using Task = std::function<int(std::vector<uint32_t>)>;
+    using Task = std::function<int(const std::vector<uint32_t>&)>;
     template <class Options>
-    using TaskWithOptions = std::function<int(std::vector<uint32_t>, Options)>;
+    using TaskWithOptions = std::function<int(const std::vector<uint32_t>&, Options)>;
+
+    // Used to wrap code that may fire a SIGABRT. Do not allocate anything local within |exec|, as
+    // it is not guaranteed to return.
+    void ExecuteWithSignalTrap(std::function<void()> exec);
 
     // Used to fuzz by mutating the input data, but with fixed options to the compiler
     int Run(const uint8_t* data, size_t size, Task task);

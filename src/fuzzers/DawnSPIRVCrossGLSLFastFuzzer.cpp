@@ -20,15 +20,22 @@
 
 namespace {
 
-    int GLSLFastFuzzTask(std::vector<uint32_t> input) {
-        spirv_cross::CompilerGLSL compiler(input);
+    int GLSLFastFuzzTask(const std::vector<uint32_t>& input) {
+        std::unique_ptr<spirv_cross::CompilerGLSL> compiler;
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, input]() {
+            compiler = std::make_unique<spirv_cross::CompilerGLSL>(input);
+        });
+        if (compiler == nullptr) {
+            return 0;
+        }
 
         // Using the options that are used by Dawn, they appear in ShaderModuleGL.cpp
         spirv_cross::CompilerGLSL::Options options;
         options.version = 440;
-        compiler.set_common_options(options);
+        compiler->set_common_options(options);
 
-        std::string result = compiler.compile();
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler]() { compiler->compile(); });
+
         return 0;
     }
 

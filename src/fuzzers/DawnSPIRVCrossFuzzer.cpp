@@ -52,29 +52,32 @@ namespace {
 
 namespace DawnSPIRVCrossFuzzer {
 
-    int Run(const uint8_t* data, size_t size, std::function<int(std::vector<uint32_t>)> task) {
-        if (!data || size < 1)
-            return 0;
-
-        std::vector<uint32_t> input(data, data + (4 * (size / 4)));
-
+    void ExecuteWithSignalTrap(std::function<void()> exec) {
         BeginSIGABRTTrap();
 
         // On the first pass through setjmp will return 0, if returning here
         // from the longjmp in the signal handler it will return 1.
         if (setjmp(jump_buffer) == 0) {
-            task(input);
+            exec();
         }
 
         EndSIGABRTTrap();
+    }
 
+    int Run(const uint8_t* data, size_t size, Task task) {
+        if (!data || size < 1)
+            return 0;
+
+        size_t sizeInU32 = size / sizeof(uint32_t);
+        const uint32_t* u32Data = reinterpret_cast<const uint32_t*>(data);
+        std::vector<uint32_t> input(u32Data, u32Data + sizeInU32);
+
+        task(input);
         return 0;
     }
 
     template <class Options>
-    int RunWithOptions(const uint8_t* data,
-                       size_t size,
-                       std::function<int(std::vector<uint32_t>, Options)> task) {
+    int RunWithOptions(const uint8_t* data, size_t size, TaskWithOptions<Options> task) {
         if (!data || size < sizeof(Options) + 1)
             return 0;
 
@@ -84,15 +87,7 @@ namespace DawnSPIRVCrossFuzzer {
 
         std::vector<uint32_t> input(data, data + (4 * (size / 4)));
 
-        BeginSIGABRTTrap();
-
-        // On the first pass through setjmp will return 0, if returning here
-        // from the longjmp in the signal handler it will return 1.
-        if (setjmp(jump_buffer) == 0) {
-            task(input, options);
-        }
-
-        EndSIGABRTTrap();
+        task(input, options);
 
         return 0;
     }
