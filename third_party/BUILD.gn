@@ -218,10 +218,14 @@ static_library("glfw") {
     "${glfw_dir}/include/GLFW/glfw3.h",
     "${glfw_dir}/include/GLFW/glfw3native.h",
     "${glfw_dir}/src/context.c",
+    "${glfw_dir}/src/egl_context.c",
+    "${glfw_dir}/src/egl_context.h",
     "${glfw_dir}/src/init.c",
     "${glfw_dir}/src/input.c",
     "${glfw_dir}/src/internal.h",
     "${glfw_dir}/src/monitor.c",
+    "${glfw_dir}/src/osmesa_context.c",
+    "${glfw_dir}/src/osmesa_context.h",
     "${glfw_dir}/src/vulkan.c",
     "${glfw_dir}/src/window.c",
   ]
@@ -229,8 +233,6 @@ static_library("glfw") {
 
   if (is_win) {
     sources += [
-      "${glfw_dir}/src/egl_context.c",
-      "${glfw_dir}/src/egl_context.h",
       "${glfw_dir}/src/wgl_context.c",
       "${glfw_dir}/src/wgl_context.h",
       "${glfw_dir}/src/win32_init.c",
@@ -239,22 +241,20 @@ static_library("glfw") {
       "${glfw_dir}/src/win32_monitor.c",
       "${glfw_dir}/src/win32_platform.h",
       "${glfw_dir}/src/win32_time.c",
-      "${glfw_dir}/src/win32_tls.c",
+      "${glfw_dir}/src/win32_thread.c",
       "${glfw_dir}/src/win32_window.c",
     ]
   }
 
   if (is_linux || is_mac) {
     sources += [
-      "${glfw_dir}/src/posix_tls.c",
-      "${glfw_dir}/src/posix_tls.h",
+      "${glfw_dir}/src/posix_thread.c",
+      "${glfw_dir}/src/posix_thread.h",
     ]
   }
 
   if (is_linux) {
     sources += [
-      "${glfw_dir}/src/egl_context.c",
-      "${glfw_dir}/src/egl_context.h",
       "${glfw_dir}/src/glx_context.c",
       "${glfw_dir}/src/glx_context.h",
       "${glfw_dir}/src/linux_joystick.c",
