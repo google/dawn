@@ -12,19 +12,19 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@ddcfe1a1c6428569cb8c900735be3567358bc6ee',
+    'url': '{chromium_git}/chromium/src/build@2fb6537bf59c9c9a736997b8bd888ca0ecf54322',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/buildtools@9a90d9aaadeb5e04327ed05775f45132e4b3523f',
+    'url': '{chromium_git}/chromium/buildtools@24ebce4578745db15274e180da1938ebc1358243',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@d299f069f8d1dca337354ced634df7a78e4512f7',
+    'url': '{chromium_git}/chromium/src/tools/clang@1d879cee563167a2b18baffb096cf9e29f2f9376',
     'condition': 'dawn_standalone',
   },
   'third_party/binutils': {
-    'url': '{chromium_git}/chromium/src/third_party/binutils@4110e09197116a9c5dedd4c827bbe95c224f87ac',
+    'url': '{chromium_git}/chromium/src/third_party/binutils@2be73f7fbf783d7a0b288e174a5773b67c7656bc',
     'condition': 'dawn_standalone',
   },
 
@@ -222,6 +222,13 @@ hooks = [
         'python',
         'third_party/binutils/download.py',
     ],
+  },
+  # Update build/util/LASTCHANGE.
+  {
+    'name': 'lastchange',
+    'pattern': '.',
+    'action': ['python', 'build/util/lastchange.py',
+               '-o', 'build/util/LASTCHANGE'],
   },
 ]
 
