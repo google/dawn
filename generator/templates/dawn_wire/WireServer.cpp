@@ -542,6 +542,11 @@ namespace dawn_wire {
                     uint32_t requestStart = cmd->start;
                     bool isWrite = cmd->isWrite;
 
+                    //* The null object isn't valid as `self`
+                    if (bufferId == 0) {
+                        return false;
+                    }
+
                     auto* buffer = mKnownBuffer.Get(bufferId);
                     if (buffer == nullptr) {
                         return false;
@@ -584,6 +589,11 @@ namespace dawn_wire {
 
                     ObjectId bufferId = cmd->bufferId;
                     size_t dataLength = cmd->dataLength;
+
+                    //* The null object isn't valid as `self`
+                    if (bufferId == 0) {
+                        return false;
+                    }
 
                     auto* buffer = mKnownBuffer.Get(bufferId);
                     if (buffer == nullptr || !buffer->valid || buffer->mappedData == nullptr ||
