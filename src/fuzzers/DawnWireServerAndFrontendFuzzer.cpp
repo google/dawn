@@ -35,8 +35,14 @@ class DevNull : public dawn_wire::CommandSerializer {
     std::vector<char> buf;
 };
 
+void SkipSwapChainBuilderSetImplementation(dawnSwapChainBuilder builder, uint64_t) {
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     dawnProcTable procs = dawn_native::GetProcs();
+    // SwapChainSetImplementation receives a pointer, skip calls to it as they would be intercepted
+    // in embedders or dawn_wire too.
+    procs.swapChainBuilderSetImplementation = SkipSwapChainBuilderSetImplementation;
     dawnSetProcs(&procs);
 
     dawn::Device nullDevice = dawn::Device::Acquire(dawn_native::null::CreateDevice());
