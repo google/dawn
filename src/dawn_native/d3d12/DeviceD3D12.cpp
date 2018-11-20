@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 #include "common/SwapChainUtils.h"
-#include "dawn_native/D3D12backend.h"
+#include "dawn_native/D3D12Backend.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/BlendStateD3D12.h"
