@@ -39,7 +39,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     dawnProcTable procs = dawn_native::GetProcs();
     dawnSetProcs(&procs);
 
-    dawn::Device nullDevice = dawn_native::null::CreateDevice();
+    dawn::Device nullDevice = dawn::Device::Acquire(dawn_native::null::CreateDevice());
 
     DevNull devNull;
     std::unique_ptr<dawn_wire::CommandHandler> wireServer(
