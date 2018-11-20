@@ -238,12 +238,13 @@ namespace dawn_wire {
         //* Implementation of the client API functions.
         {% for type in by_category["object"] %}
             {% set Type = type.name.CamelCase() %}
+            {% set cType = as_cType(type.name) %}
 
             {% for method in type.methods %}
                 {% set Suffix = as_MethodSuffix(type.name, method.name) %}
 
-                {{as_wireType(method.return_type)}} Client{{Suffix}}(
-                    {{-as_cType(type.name)}} cSelf
+                {{as_cType(method.return_type.name)}} Client{{Suffix}}(
+                    {{-cType}} cSelf
                     {%- for arg in method.arguments -%}
                         , {{as_annotated_cType(arg)}}
                     {%- endfor -%}
@@ -282,16 +283,17 @@ namespace dawn_wire {
                     cmd.Serialize(allocatedBuffer, *device);
 
                     {% if method.return_type.category == "object" %}
-                        return allocation->object.get();
+                        return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
                     {% endif %}
                 }
             {% endfor %}
 
             {% if type.is_builder %}
-                void Client{{as_MethodSuffix(type.name, Name("set error callback"))}}({{Type}}* self,
+                void Client{{as_MethodSuffix(type.name, Name("set error callback"))}}({{cType}} cSelf,
                                                                                       dawnBuilderErrorCallback callback,
                                                                                       dawnCallbackUserdata userdata1,
                                                                                       dawnCallbackUserdata userdata2) {
+                    {{Type}}* self = reinterpret_cast<{{Type}}*>(cSelf);
                     self->builderCallback.callback = callback;
                     self->builderCallback.userdata1 = userdata1;
                     self->builderCallback.userdata2 = userdata2;
@@ -300,7 +302,8 @@ namespace dawn_wire {
 
             {% if not type.name.canonical_case() == "device" %}
                 //* When an object's refcount reaches 0, notify the server side of it and delete it.
-                void Client{{as_MethodSuffix(type.name, Name("release"))}}({{Type}}* obj) {
+                void Client{{as_MethodSuffix(type.name, Name("release"))}}({{cType}} cObj) {
+                    {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
                     obj->refcount --;
 
                     if (obj->refcount > 0) {
@@ -318,13 +321,16 @@ namespace dawn_wire {
                     obj->device->{{type.name.camelCase()}}.Free(obj);
                 }
 
-                void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{Type}}* obj) {
+                void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{cType}} cObj) {
+                    {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
                     obj->refcount ++;
                 }
             {% endif %}
         {% endfor %}
 
-        void ClientBufferMapReadAsync(Buffer* buffer, uint32_t start, uint32_t size, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata) {
+        void ClientBufferMapReadAsync(dawnBuffer cBuffer, uint32_t start, uint32_t size, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata) {
+            Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+
             uint32_t serial = buffer->requestSerial++;
             ASSERT(buffer->requests.find(serial) == buffer->requests.end());
 
@@ -346,7 +352,9 @@ namespace dawn_wire {
             *allocCmd = cmd;
         }
 
-        void ClientBufferMapWriteAsync(Buffer* buffer, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata) {
+        void ClientBufferMapWriteAsync(dawnBuffer cBuffer, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata) {
+            Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+
             uint32_t serial = buffer->requestSerial++;
             ASSERT(buffer->requests.find(serial) == buffer->requests.end());
 
@@ -401,13 +409,14 @@ namespace dawn_wire {
             ClientBufferUnmap(cBuffer);
         }
 
-        void ClientDeviceReference(Device*) {
+        void ClientDeviceReference(dawnDevice) {
         }
 
-        void ClientDeviceRelease(Device*) {
+        void ClientDeviceRelease(dawnDevice) {
         }
 
-        void ClientDeviceSetErrorCallback(Device* self, dawnDeviceErrorCallback callback, dawnCallbackUserdata userdata) {
+        void ClientDeviceSetErrorCallback(dawnDevice cSelf, dawnDeviceErrorCallback callback, dawnCallbackUserdata userdata) {
+            Device* self = reinterpret_cast<Device*>(cSelf);
             self->errorCallback = callback;
             self->errorUserdata = userdata;
         }
@@ -425,9 +434,9 @@ namespace dawn_wire {
                 {% for method in native_methods(type) %}
                     {% set suffix = as_MethodSuffix(type.name, method.name) %}
                     {% if suffix in proxied_commands %}
-                        table.{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(ProxyClient{{suffix}});
+                        table.{{as_varName(type.name, method.name)}} = ProxyClient{{suffix}};
                     {% else %}
-                        table.{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(Client{{suffix}});
+                        table.{{as_varName(type.name, method.name)}} = Client{{suffix}};
                     {% endif %}
                 {% endfor %}
             {% endfor %}
