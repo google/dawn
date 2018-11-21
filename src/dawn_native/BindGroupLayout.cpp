@@ -35,7 +35,7 @@ namespace dawn_native {
             DAWN_TRY(ValidateShaderStageBit(binding.visibility));
             DAWN_TRY(ValidateBindingType(binding.type));
 
-            if (binding.binding > kMaxBindingsPerGroup) {
+            if (binding.binding >= kMaxBindingsPerGroup) {
                 return DAWN_VALIDATION_ERROR("some binding index exceeds the maximum value");
             }
             if (bindingsSet[binding.binding]) {

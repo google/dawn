@@ -13,11 +13,14 @@
 // limitations under the License.
 
 #include "tests/unittests/validation/ValidationTest.h"
+
+#include "common/Constants.h"
 #include "utils/DawnHelpers.h"
 
 class BindGroupValidationTest : public ValidationTest {
 };
 
+// Tests constraints on the buffer view offset for bind groups.
 TEST_F(BindGroupValidationTest, BufferViewOffset) {
     auto layout = utils::MakeBindGroupLayout(
         device, {
@@ -128,4 +131,17 @@ TEST_F(BindGroupValidationTest, BindGroupBinding) {
                     {1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                     {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                 });
+}
+
+// Tests setting OOB checks for kMaxBindingsPerGroup in bind group layouts.
+TEST_F(BindGroupValidationTest, BindGroupLayoutBindingOOB) {
+    // Checks that kMaxBindingsPerGroup - 1 is valid.
+    utils::MakeBindGroupLayout(device, {
+        {kMaxBindingsPerGroup - 1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer}
+    });
+
+    // Checks that kMaxBindingsPerGroup is OOB
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {
+        {kMaxBindingsPerGroup, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer}
+    }));
 }
