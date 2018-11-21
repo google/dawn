@@ -497,8 +497,10 @@ namespace dawn_native { namespace vulkan {
             usedKnobs->swapchain = true;
         }
 
-        // Always require independentBlend because it is a core Dawn feature,
+        // Always require independentBlend because it is a core Dawn feature
         usedKnobs->features.independentBlend = VK_TRUE;
+        // Always require imageCubeArray because it is a core Dawn feature
+        usedKnobs->features.imageCubeArray = VK_TRUE;
 
         // Find a universal queue family
         {

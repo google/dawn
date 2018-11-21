@@ -267,6 +267,10 @@ namespace dawn_native { namespace vulkan {
         createInfo.pQueueFamilyIndices = nullptr;
         createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
+        if (GetArrayLayers() >= 6 && GetSize().width == GetSize().height) {
+            createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+        }
+
         if (device->fn.CreateImage(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
             VK_SUCCESS) {
             ASSERT(false);
