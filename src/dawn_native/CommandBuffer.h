@@ -115,6 +115,8 @@ namespace dawn_native {
         MaybeError ValidateComputePass();
         MaybeError ValidateRenderPass(RenderPassDescriptorBase* renderPass);
 
+        MaybeError ValidateCanRecordTopLevelCommands() const;
+
         void ConsumeError(ErrorData* error);
 
         CommandAllocator mAllocator;

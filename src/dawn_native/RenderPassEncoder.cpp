@@ -31,6 +31,10 @@ namespace dawn_native {
                                            uint32_t instanceCount,
                                            uint32_t firstVertex,
                                            uint32_t firstInstance) {
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
         DrawArraysCmd* draw = mAllocator->Allocate<DrawArraysCmd>(Command::DrawArrays);
         new (draw) DrawArraysCmd;
         draw->vertexCount = vertexCount;
@@ -43,6 +47,10 @@ namespace dawn_native {
                                              uint32_t instanceCount,
                                              uint32_t firstIndex,
                                              uint32_t firstInstance) {
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
         DrawElementsCmd* draw = mAllocator->Allocate<DrawElementsCmd>(Command::DrawElements);
         new (draw) DrawElementsCmd;
         draw->indexCount = indexCount;
@@ -63,6 +71,10 @@ namespace dawn_native {
     }
 
     void RenderPassEncoderBase::SetStencilReference(uint32_t reference) {
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
         SetStencilReferenceCmd* cmd =
             mAllocator->Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
         new (cmd) SetStencilReferenceCmd;
@@ -70,6 +82,10 @@ namespace dawn_native {
     }
 
     void RenderPassEncoderBase::SetBlendColor(float r, float g, float b, float a) {
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
         SetBlendColorCmd* cmd = mAllocator->Allocate<SetBlendColorCmd>(Command::SetBlendColor);
         new (cmd) SetBlendColorCmd;
         cmd->r = r;
@@ -82,6 +98,10 @@ namespace dawn_native {
                                                uint32_t y,
                                                uint32_t width,
                                                uint32_t height) {
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
         SetScissorRectCmd* cmd = mAllocator->Allocate<SetScissorRectCmd>(Command::SetScissorRect);
         new (cmd) SetScissorRectCmd;
         cmd->x = x;
@@ -91,7 +111,9 @@ namespace dawn_native {
     }
 
     void RenderPassEncoderBase::SetIndexBuffer(BufferBase* buffer, uint32_t offset) {
-        // TODO(kainino@chromium.org): validation
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
 
         SetIndexBufferCmd* cmd = mAllocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
         new (cmd) SetIndexBufferCmd;
@@ -103,7 +125,9 @@ namespace dawn_native {
                                                  uint32_t count,
                                                  BufferBase* const* buffers,
                                                  uint32_t const* offsets) {
-        // TODO(kainino@chromium.org): validation
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
 
         SetVertexBuffersCmd* cmd =
             mAllocator->Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);

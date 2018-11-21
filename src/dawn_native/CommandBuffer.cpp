@@ -593,9 +593,20 @@ namespace dawn_native {
         return DAWN_VALIDATION_ERROR("Unfinished render pass");
     }
 
+    MaybeError CommandBufferBuilder::ValidateCanRecordTopLevelCommands() const {
+        if (mEncodingState != EncodingState::TopLevel) {
+            return DAWN_VALIDATION_ERROR("Command cannot be recorded inside a pass");
+        }
+        return {};
+    }
+
     // Implementation of the API's command recording methods
 
     ComputePassEncoderBase* CommandBufferBuilder::BeginComputePass() {
+        if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
+            return nullptr;
+        }
+
         mAllocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
 
         mEncodingState = EncodingState::ComputePass;
@@ -603,6 +614,10 @@ namespace dawn_native {
     }
 
     RenderPassEncoderBase* CommandBufferBuilder::BeginRenderPass(RenderPassDescriptorBase* info) {
+        if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
+            return nullptr;
+        }
+
         BeginRenderPassCmd* cmd = mAllocator.Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
         new (cmd) BeginRenderPassCmd;
         cmd->info = info;
@@ -616,6 +631,10 @@ namespace dawn_native {
                                                   BufferBase* destination,
                                                   uint32_t destinationOffset,
                                                   uint32_t size) {
+        if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
+            return;
+        }
+
         CopyBufferToBufferCmd* copy =
             mAllocator.Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
         new (copy) CopyBufferToBufferCmd;
@@ -638,6 +657,10 @@ namespace dawn_native {
                                                    uint32_t depth,
                                                    uint32_t level,
                                                    uint32_t slice) {
+        if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
+            return;
+        }
+
         if (rowPitch == 0) {
             rowPitch = ComputeDefaultRowPitch(texture, width);
         }
@@ -670,6 +693,10 @@ namespace dawn_native {
                                                    BufferBase* buffer,
                                                    uint32_t bufferOffset,
                                                    uint32_t rowPitch) {
+        if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
+            return;
+        }
+
         if (rowPitch == 0) {
             rowPitch = ComputeDefaultRowPitch(texture, width);
         }
