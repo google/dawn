@@ -362,6 +362,7 @@ TEST_P(TextureViewTest, Texture2DViewOn2DArrayTexture) {
 
 // Test sampling from a 2D array texture view created on a 2D array texture.
 TEST_P(TextureViewTest, Texture2DArrayViewOn2DArrayTexture) {
+    DAWN_SKIP_TEST_IF(IsMetal());
     Texture2DArrayViewTest(6, 1, 2, 0);
 }
 
@@ -377,6 +378,7 @@ TEST_P(TextureViewTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
 
 // Test sampling from a 2D array texture view created on a mipmap level of a 2D array texture.
 TEST_P(TextureViewTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
+    DAWN_SKIP_TEST_IF(IsMetal());
     Texture2DArrayViewTest(6, 6, 2, 4);
 }
 
@@ -399,7 +401,7 @@ TEST_P(TextureViewTest, TextureCubeMapViewCoveringLastLayer) {
 }
 
 // Test sampling from a cube map texture array view that covers a whole 2D array texture.
-TEST_P(TextureViewTest, TextureCubeMapArrayaOnWholeTexture) {
+TEST_P(TextureViewTest, TextureCubeMapArrayOnWholeTexture) {
     constexpr uint32_t kTotalLayers = 12;
     TextureCubeMapTest(kTotalLayers, 0, kTotalLayers, true);
 }
