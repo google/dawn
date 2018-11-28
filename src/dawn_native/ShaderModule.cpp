@@ -30,7 +30,7 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        spvtools::SpirvTools spirvTools(SPV_ENV_WEBGPU_0);
+        spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
 
         std::ostringstream errorStream;
         errorStream << "SPIRV Validation failure:" << std::endl;

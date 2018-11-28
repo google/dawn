@@ -52,7 +52,9 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
 }
 
 // Test case with a shader with OpUndef to test WebGPU-specific validation
-TEST_F(ShaderModuleValidationTest, OpUndef) {
+// TODO(cwallez@chromium.org): Disabled because of
+// https://bugs.chromium.org/p/dawn/issues/detail?id=57
+TEST_F(ShaderModuleValidationTest, DISABLED_OpUndef) {
     const char* shader = R"(
                    OpCapability Shader
               %1 = OpExtInstImport "GLSL.std.450"
