@@ -38,11 +38,11 @@ class Result;
 
 // The interface of Result<T, E> shoud look like the following.
 //  public:
-//    Result(T success);
-//    Result(E error);
+//    Result(T&& success);
+//    Result(E&& error);
 //
 //    Result(Result<T, E>&& other);
-//    Result<T, E>&& operator=(Result<T, E>&& other);
+//    Result<T, E>& operator=(Result<T, E>&& other);
 //
 //    ~Result();
 //
@@ -113,8 +113,8 @@ class DAWN_NO_DISCARD Result<T*, E*> {
         Empty = 2,
     };
 
-    // Utility functions to manipulate the tagged pointer some of them don't need to be templated
-    // but we really want them inlined so we keep them in templates
+    // Utility functions to manipulate the tagged pointer. Some of them don't need to be templated
+    // but we really want them inlined so we keep them in the headers
     static intptr_t MakePayload(void* pointer, PayloadType type);
     static PayloadType GetPayloadType(intptr_t payload);
     static T* GetSuccessFromPayload(intptr_t payload);
