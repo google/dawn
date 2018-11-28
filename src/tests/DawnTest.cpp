@@ -301,10 +301,14 @@ std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
+    dawn::TextureCopyView textureCopyView =
+        utils::CreateTextureCopyView(texture, level, 0, {x, y, 0}, dawn::TextureAspect::Color);
+    dawn::BufferCopyView bufferCopyView =
+        utils::CreateBufferCopyView(readback.buffer, readback.offset, rowPitch, 0);
+    dawn::Extent3D copySize = {width, height, 1};
     dawn::CommandBuffer commands =
         device.CreateCommandBufferBuilder()
-            .CopyTextureToBuffer(texture, x, y, 0, width, height, 1, level, 0, readback.buffer,
-                                 readback.offset, rowPitch)
+            .CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize)
             .GetResult();
 
     queue.Submit(1, &commands);

@@ -258,7 +258,12 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         .GetResult();
 
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
-    builder.CopyBufferToTexture(stagingBuffer, 0, widthInBytes, texture, 0, 0, 0, width, height, 1, 0, 0);
+    dawn::BufferCopyView bufferCopyView =
+        utils::CreateBufferCopyView(stagingBuffer, 0, widthInBytes, 0);
+    dawn::TextureCopyView textureCopyView =
+        utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color);
+    dawn::Extent3D copySize = {width, height, 1};
+    builder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
     dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
     pass.SetRenderPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);

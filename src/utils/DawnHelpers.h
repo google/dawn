@@ -18,6 +18,8 @@
 
 namespace utils {
 
+    enum Expectation { Success, Failure };
+
     dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
                                           dawn::ShaderStage stage,
                                           const char* source);
@@ -34,6 +36,16 @@ namespace utils {
                                       std::initializer_list<T> data) {
         return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage);
     }
+
+    dawn::BufferCopyView CreateBufferCopyView(dawn::Buffer buffer,
+                                              uint32_t offset,
+                                              uint32_t rowPitch,
+                                              uint32_t imageHeight);
+    dawn::TextureCopyView CreateTextureCopyView(dawn::Texture texture,
+                                                uint32_t level,
+                                                uint32_t slice,
+                                                dawn::Origin3D origin,
+                                                dawn::TextureAspect aspect);
 
     struct BasicRenderPass {
         uint32_t width;

@@ -67,30 +67,12 @@ namespace dawn_native {
                                 BufferBase* destination,
                                 uint32_t destinationOffset,
                                 uint32_t size);
-        void CopyBufferToTexture(BufferBase* buffer,
-                                 uint32_t bufferOffset,
-                                 uint32_t rowPitch,
-                                 TextureBase* texture,
-                                 uint32_t x,
-                                 uint32_t y,
-                                 uint32_t z,
-                                 uint32_t width,
-                                 uint32_t height,
-                                 uint32_t depth,
-                                 uint32_t level,
-                                 uint32_t slice);
-        void CopyTextureToBuffer(TextureBase* texture,
-                                 uint32_t x,
-                                 uint32_t y,
-                                 uint32_t z,
-                                 uint32_t width,
-                                 uint32_t height,
-                                 uint32_t depth,
-                                 uint32_t level,
-                                 uint32_t slice,
-                                 BufferBase* buffer,
-                                 uint32_t bufferOffset,
-                                 uint32_t rowPitch);
+        void CopyBufferToTexture(const BufferCopyView* source,
+                                 const TextureCopyView* destination,
+                                 const Extent3D* copySize);
+        void CopyTextureToBuffer(const TextureCopyView* source,
+                                 const BufferCopyView* destination,
+                                 const Extent3D* copySize);
 
         // Functions to interact with the encoders
         bool ConsumedError(MaybeError maybeError) {

@@ -645,76 +645,58 @@ namespace dawn_native {
         copy->size = size;
     }
 
-    void CommandBufferBuilder::CopyBufferToTexture(BufferBase* buffer,
-                                                   uint32_t bufferOffset,
-                                                   uint32_t rowPitch,
-                                                   TextureBase* texture,
-                                                   uint32_t x,
-                                                   uint32_t y,
-                                                   uint32_t z,
-                                                   uint32_t width,
-                                                   uint32_t height,
-                                                   uint32_t depth,
-                                                   uint32_t level,
-                                                   uint32_t slice) {
+    void CommandBufferBuilder::CopyBufferToTexture(const BufferCopyView* source,
+                                                   const TextureCopyView* destination,
+                                                   const Extent3D* copySize) {
         if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
             return;
-        }
-
-        if (rowPitch == 0) {
-            rowPitch = ComputeDefaultRowPitch(texture, width);
         }
         CopyBufferToTextureCmd* copy =
             mAllocator.Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
         new (copy) CopyBufferToTextureCmd;
-        copy->source.buffer = buffer;
-        copy->source.offset = bufferOffset;
-        copy->destination.texture = texture;
-        copy->destination.x = x;
-        copy->destination.y = y;
-        copy->destination.z = z;
-        copy->destination.width = width;
-        copy->destination.height = height;
-        copy->destination.depth = depth;
-        copy->destination.level = level;
-        copy->destination.slice = slice;
-        copy->rowPitch = rowPitch;
+        copy->source.buffer = source->buffer;
+        copy->source.offset = source->offset;
+        copy->destination.texture = destination->texture;
+        copy->destination.x = destination->origin.x;
+        copy->destination.y = destination->origin.y;
+        copy->destination.z = destination->origin.z;
+        copy->destination.width = copySize->width;
+        copy->destination.height = copySize->height;
+        copy->destination.depth = copySize->depth;
+        copy->destination.level = destination->level;
+        copy->destination.slice = destination->slice;
+        if (source->rowPitch == 0) {
+            copy->rowPitch = ComputeDefaultRowPitch(destination->texture, copySize->width);
+        } else {
+            copy->rowPitch = source->rowPitch;
+        }
     }
 
-    void CommandBufferBuilder::CopyTextureToBuffer(TextureBase* texture,
-                                                   uint32_t x,
-                                                   uint32_t y,
-                                                   uint32_t z,
-                                                   uint32_t width,
-                                                   uint32_t height,
-                                                   uint32_t depth,
-                                                   uint32_t level,
-                                                   uint32_t slice,
-                                                   BufferBase* buffer,
-                                                   uint32_t bufferOffset,
-                                                   uint32_t rowPitch) {
+    void CommandBufferBuilder::CopyTextureToBuffer(const TextureCopyView* source,
+                                                   const BufferCopyView* destination,
+                                                   const Extent3D* copySize) {
         if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
             return;
-        }
-
-        if (rowPitch == 0) {
-            rowPitch = ComputeDefaultRowPitch(texture, width);
         }
         CopyTextureToBufferCmd* copy =
             mAllocator.Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
         new (copy) CopyTextureToBufferCmd;
-        copy->source.texture = texture;
-        copy->source.x = x;
-        copy->source.y = y;
-        copy->source.z = z;
-        copy->source.width = width;
-        copy->source.height = height;
-        copy->source.depth = depth;
-        copy->source.level = level;
-        copy->source.slice = slice;
-        copy->destination.buffer = buffer;
-        copy->destination.offset = bufferOffset;
-        copy->rowPitch = rowPitch;
+        copy->source.texture = source->texture;
+        copy->source.x = source->origin.x;
+        copy->source.y = source->origin.y;
+        copy->source.z = source->origin.z;
+        copy->source.width = copySize->width;
+        copy->source.height = copySize->height;
+        copy->source.depth = copySize->depth;
+        copy->source.level = source->level;
+        copy->source.slice = source->slice;
+        copy->destination.buffer = destination->buffer;
+        copy->destination.offset = destination->offset;
+        if (destination->rowPitch == 0) {
+            copy->rowPitch = ComputeDefaultRowPitch(source->texture, copySize->width);
+        } else {
+            copy->rowPitch = destination->rowPitch;
+        }
     }
 
 }  // namespace dawn_native

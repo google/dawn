@@ -240,6 +240,16 @@
             }
         ]
     },
+    "buffer copy view": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "buffer", "type": "buffer"},
+            {"name": "offset", "type": "uint32_t"},
+            {"name": "row pitch", "type": "uint32_t"},
+            {"name": "image height", "type": "uint32_t"}
+        ]
+    },
     "buffer descriptor": {
         "category": "structure",
         "extensible": true,
@@ -350,47 +360,17 @@
             {
                 "name": "copy buffer to texture",
                 "args": [
-                    {"name": "buffer", "type": "buffer"},
-                    {"name": "buffer offset", "type": "uint32_t"},
-                    {"name": "row pitch", "type": "uint32_t"},
-                    {"name": "texture", "type": "texture"},
-                    {"name": "x", "type": "uint32_t"},
-                    {"name": "y", "type": "uint32_t"},
-                    {"name": "z", "type": "uint32_t"},
-                    {"name": "width", "type": "uint32_t"},
-                    {"name": "height", "type": "uint32_t"},
-                    {"name": "depth", "type": "uint32_t"},
-                    {"name": "level", "type": "uint32_t"},
-                    {"name": "slice", "type": "uint32_t"}
-                ],
-                "TODO": [
-                    "Make pretty with Offset and Extents structures",
-                    "Allow choosing the aspect (depth vs. stencil)?",
-                    "Add these arguments too",
-                    {"name": "image height", "type": "uint32_t"}
+                    {"name": "source", "type": "buffer copy view", "annotation": "const*"},
+                    {"name": "destination", "type": "texture copy view", "annotation": "const*"},
+                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
             {
                 "name": "copy texture to buffer",
                 "args": [
-                    {"name": "texture", "type": "texture"},
-                    {"name": "x", "type": "uint32_t"},
-                    {"name": "y", "type": "uint32_t"},
-                    {"name": "z", "type": "uint32_t"},
-                    {"name": "width", "type": "uint32_t"},
-                    {"name": "height", "type": "uint32_t"},
-                    {"name": "depth", "type": "uint32_t"},
-                    {"name": "level", "type": "uint32_t"},
-                    {"name": "slice", "type": "uint32_t"},
-                    {"name": "buffer", "type": "buffer"},
-                    {"name": "buffer offset", "type": "uint32_t"},
-                    {"name": "row pitch", "type": "uint32_t"}
-                ],
-                "TODO": [
-                    "Make pretty with Offset and Extents structures",
-                    "Allow choosing the aspect (depth vs. stencil)?",
-                    "Add these arguments too",
-                    {"name": "image height", "type": "uint32_t"}
+                    {"name": "source", "type": "texture copy view", "annotation": "const*"},
+                    {"name": "destination", "type": "buffer copy view", "annotation": "const*"},
+                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
             }
         ]
@@ -687,6 +667,14 @@
         "values": [
             {"value": 0, "name": "clear"},
             {"value": 1, "name": "load"}
+        ]
+    },
+    "origin 3D": {
+        "category": "structure",
+        "members": [
+            {"name": "x", "type": "uint32_t"},
+            {"name": "y", "type": "uint32_t"},
+            {"name": "z", "type": "uint32_t"}
         ]
     },
     "pipeline layout": {
@@ -1044,6 +1032,25 @@
                     {"name": "descriptor", "type": "texture view descriptor", "annotation": "const*"}
                 ]
             }
+        ]
+    },
+    "texture aspect": {
+        "category": "bitmask",
+        "values": [
+            {"value": 1, "name": "color"},
+            {"value": 2, "name": "depth"},
+            {"value": 4, "name": "stencil"}
+        ]
+    },
+    "texture copy view": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "texture", "type": "texture"},
+            {"name": "level", "type": "uint32_t"},
+            {"name": "slice", "type": "uint32_t"},
+            {"name": "origin", "type": "origin 3D"},
+            {"name": "aspect", "type": "texture aspect"}
         ]
     },
     "texture descriptor": {

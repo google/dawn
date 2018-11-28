@@ -433,9 +433,14 @@ namespace {
             }
 
             dawn::Buffer staging = utils::CreateBufferFromData(device, data, rowPitch * iImage.height, dawn::BufferUsageBit::TransferSrc);
+            dawn::BufferCopyView bufferCopyView =
+                utils::CreateBufferCopyView(staging, 0, rowPitch, 0);
+            dawn::TextureCopyView textureCopyView =
+                utils::CreateTextureCopyView(oTexture, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color);
+            dawn::Extent3D copySize = {iImage.width, iImage.height, 1};
             auto cmdbuf = device.CreateCommandBufferBuilder()
-                .CopyBufferToTexture(staging, 0, rowPitch, oTexture, 0, 0, 0, iImage.width, iImage.height, 1, 0, 0)
-                .GetResult();
+                              .CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize)
+                              .GetResult();
             queue.Submit(1, &cmdbuf);
 
             textures[iTextureID] = oTexture.CreateDefaultTextureView();

@@ -124,9 +124,12 @@ protected:
                 dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
                     device, data.data(), data.size() * sizeof(RGBA8),
                     dawn::BufferUsageBit::TransferSrc);
-                builder.CopyBufferToTexture(
-                    stagingBuffer, 0, kTextureRowPitchAlignment, mTexture, 0, 0, 0, texWidth,
-                    texHeight, 1, level, layer);
+                dawn::BufferCopyView bufferCopyView =
+                    utils::CreateBufferCopyView(stagingBuffer, 0, kTextureRowPitchAlignment, 0);
+                dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+                    mTexture, level, layer, {0, 0, 0}, dawn::TextureAspect::Color);
+                dawn::Extent3D copySize = {texWidth, texHeight, 1};
+                builder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }
         }
         dawn::CommandBuffer copy = builder.GetResult();
