@@ -79,11 +79,12 @@ class NativelyDefined(Type):
         Type.__init__(self, name, record)
 
 class MethodArgument:
-    def __init__(self, name, typ, annotation):
+    def __init__(self, name, typ, annotation, optional):
         self.name = name
         self.type = typ
         self.annotation = annotation
         self.length = None
+        self.optional = optional
 
 Method = namedtuple('Method', ['name', 'return_type', 'arguments'])
 class ObjectType(Type):
@@ -94,11 +95,12 @@ class ObjectType(Type):
         self.built_type = None
 
 class StructureMember:
-    def __init__(self, name, typ, annotation):
+    def __init__(self, name, typ, annotation, optional):
         self.name = name
         self.type = typ
         self.annotation = annotation
         self.length = None
+        self.optional = optional
 
 class StructureType(Type):
     def __init__(self, name, record):
@@ -120,7 +122,8 @@ def link_object(obj, types):
         arguments = []
         arguments_by_name = {}
         for a in record.get('args', []):
-            arg = MethodArgument(Name(a['name']), types[a['type']], a.get('annotation', 'value'))
+            arg = MethodArgument(Name(a['name']), types[a['type']],
+                                 a.get('annotation', 'value'), a.get('optional', False))
             arguments.append(arg)
             arguments_by_name[arg.name.canonical_case()] = arg
 
@@ -153,7 +156,8 @@ def link_object(obj, types):
 
 def link_structure(struct, types):
     def make_member(m):
-        return StructureMember(Name(m['name']), types[m['type']], m.get('annotation', 'value'))
+        return StructureMember(Name(m['name']), types[m['type']],
+                               m.get('annotation', 'value'), m.get('optional', False))
 
     members = []
     members_by_name = {}
@@ -410,9 +414,9 @@ def cpp_native_methods(types, typ):
 
     if typ.is_builder:
         methods.append(Method(Name('set error callback'), types['void'], [
-            MethodArgument(Name('callback'), types['builder error callback'], 'value'),
-            MethodArgument(Name('userdata1'), types['callback userdata'], 'value'),
-            MethodArgument(Name('userdata2'), types['callback userdata'], 'value'),
+            MethodArgument(Name('callback'), types['builder error callback'], 'value', False),
+            MethodArgument(Name('userdata1'), types['callback userdata'], 'value', False),
+            MethodArgument(Name('userdata2'), types['callback userdata'], 'value', False),
         ]))
 
     return methods

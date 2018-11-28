@@ -357,12 +357,7 @@ namespace dawn_wire {
 
                 // Implementation of the ObjectIdResolver interface
                 {% for type in by_category["object"] %}
-                    DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const override {
-                        if (id == 0) {
-                            *out = nullptr;
-                            return DeserializeResult::Success;
-                        }
-
+                    DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {
                         auto data = mKnown{{type.name.CamelCase()}}.Get(id);
                         if (data == nullptr) {
                             return DeserializeResult::FatalError;
@@ -374,6 +369,15 @@ namespace dawn_wire {
                         } else {
                             return DeserializeResult::ErrorObject;
                         }
+                    }
+
+                    DeserializeResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {
+                        if (id == 0) {
+                            *out = nullptr;
+                            return DeserializeResult::Success;
+                        }
+
+                        return GetFromId(id, out);
                     }
                 {% endfor %}
 

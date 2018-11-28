@@ -214,11 +214,14 @@ namespace dawn_wire {
 
                 // Implementation of the ObjectIdProvider interface
                 {% for type in by_category["object"] %}
-                    ObjectId GetId({{as_cType(type.name)}} object) const override {
+                    ObjectId GetId({{as_cType(type.name)}} object) const final {
+                        return reinterpret_cast<{{as_wireType(type)}}>(object)->id;
+                    }
+                    ObjectId GetOptionalId({{as_cType(type.name)}} object) const final {
                         if (object == nullptr) {
                             return 0;
                         }
-                        return reinterpret_cast<{{as_wireType(type)}}>(object)->id;
+                        return GetId(object);
                     }
                 {% endfor %}
 

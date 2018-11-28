@@ -40,6 +40,7 @@ namespace dawn_wire {
         public:
             {% for type in by_category["object"] %}
                 virtual DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
+                virtual DeserializeResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
             {% endfor %}
     };
 
@@ -48,6 +49,7 @@ namespace dawn_wire {
         public:
             {% for type in by_category["object"] %}
                 virtual ObjectId GetId({{as_cType(type.name)}} object) const = 0;
+                virtual ObjectId GetOptionalId({{as_cType(type.name)}} object) const = 0;
             {% endfor %}
     };
 
