@@ -230,6 +230,26 @@ namespace dawn_native {
         }
     }
 
+    bool IsColorRenderableTextureFormat(dawn::TextureFormat format) {
+        switch (format) {
+            case dawn::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::R8Uint:
+            case dawn::TextureFormat::R8Unorm:
+                return true;
+
+            case dawn::TextureFormat::D32FloatS8Uint:
+                return false;
+
+            default:
+                UNREACHABLE();
+                return false;
+        }
+    }
+
     // TextureBase
 
     TextureBase::TextureBase(DeviceBase* device, const TextureDescriptor* descriptor)
@@ -277,7 +297,11 @@ namespace dawn_native {
     // TextureViewBase
 
     TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor)
-        : ObjectBase(texture->GetDevice()), mTexture(texture) {
+        : ObjectBase(texture->GetDevice()),
+          mTexture(texture),
+          mFormat(descriptor->format),
+          mLevelCount(descriptor->levelCount),
+          mLayerCount(descriptor->layerCount) {
     }
 
     const TextureBase* TextureViewBase::GetTexture() const {
@@ -288,4 +312,15 @@ namespace dawn_native {
         return mTexture.Get();
     }
 
+    dawn::TextureFormat TextureViewBase::GetFormat() const {
+        return mFormat;
+    }
+
+    uint32_t TextureViewBase::GetLevelCount() const {
+        return mLevelCount;
+    }
+
+    uint32_t TextureViewBase::GetLayerCount() const {
+        return mLayerCount;
+    }
 }  // namespace dawn_native

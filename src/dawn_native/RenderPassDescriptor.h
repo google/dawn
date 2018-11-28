@@ -94,6 +94,8 @@ namespace dawn_native {
       private:
         friend class RenderPassDescriptorBase;
 
+        bool CheckArrayLayersAndLevelCountForAttachment(const TextureViewBase* textureView);
+
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
         std::array<RenderPassColorAttachmentInfo, kMaxColorAttachments> mColorAttachments;
 

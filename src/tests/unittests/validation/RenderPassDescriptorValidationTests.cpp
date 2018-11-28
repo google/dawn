@@ -21,19 +21,33 @@ namespace {
 class RenderPassDescriptorValidationTest : public ValidationTest {
 };
 
-dawn::TextureView Create2DAttachment(dawn::Device& device, uint32_t width, uint32_t height, dawn::TextureFormat format) {
+dawn::Texture CreateTexture(dawn::Device& device,
+                            dawn::TextureDimension dimension,
+                            dawn::TextureFormat format,
+                            uint32_t width,
+                            uint32_t height,
+                            uint32_t arrayLayer,
+                            uint32_t levelCount) {
     dawn::TextureDescriptor descriptor;
-    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.dimension = dimension;
     descriptor.size.width = width;
     descriptor.size.height = height;
     descriptor.size.depth = 1;
-    descriptor.arrayLayer = 1;
+    descriptor.arrayLayer = arrayLayer;
     descriptor.format = format;
-    descriptor.levelCount = 1;
+    descriptor.levelCount = levelCount;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
-    dawn::Texture attachment = device.CreateTexture(&descriptor);
 
-    return attachment.CreateDefaultTextureView();
+    return device.CreateTexture(&descriptor);
+}
+
+dawn::TextureView Create2DAttachment(dawn::Device& device,
+                                     uint32_t width,
+                                     uint32_t height,
+                                     dawn::TextureFormat format) {
+    dawn::Texture texture = CreateTexture(
+        device, dawn::TextureDimension::e2D, format, width, height, 1, 1);
+    return texture.CreateDefaultTextureView();
 }
 
 // A render pass with no attachments isn't valid
@@ -173,6 +187,213 @@ TEST_F(RenderPassDescriptorValidationTest, FormatMismatch) {
     {
         AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
             .SetDepthStencilAttachment(color, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+}
+
+// Currently only texture views with layerCount == 1 are allowed to be color and depth stencil
+// attachments
+TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepthStencil) {
+    constexpr uint32_t kLevelCount = 1;
+    constexpr uint32_t kSize = 32;
+    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+
+    constexpr uint32_t kArrayLayers = 10;
+
+    dawn::Texture colorTexture = CreateTexture(
+        device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers, kLevelCount);
+    dawn::Texture depthStencilTexture = CreateTexture(
+        device, dawn::TextureDimension::e2D, kDepthStencilFormat, kSize, kSize, kArrayLayers,
+        kLevelCount);
+
+    dawn::TextureViewDescriptor baseDescriptor;
+    baseDescriptor.dimension = dawn::TextureViewDimension::e2DArray;
+    baseDescriptor.baseArrayLayer = 0;
+    baseDescriptor.layerCount = kArrayLayers;
+    baseDescriptor.baseMipLevel = 0;
+    baseDescriptor.levelCount = kLevelCount;
+
+    // Using 2D array texture view with layerCount > 1 is not allowed for color
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kColorFormat;
+        descriptor.layerCount = 5;
+
+        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
+            .SetColorAttachment(0, colorTextureView, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D array texture view with layerCount > 1 is not allowed for depth stencil
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kDepthStencilFormat;
+        descriptor.layerCount = 5;
+
+        dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
+            .SetDepthStencilAttachment(depthStencilView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D array texture view that covers the first layer of the texture is OK for color
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kColorFormat;
+        descriptor.baseArrayLayer = 0;
+        descriptor.layerCount = 1;
+
+        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
+            .SetColorAttachment(0, colorTextureView, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D array texture view that covers the first layer is OK for depth stencil
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kDepthStencilFormat;
+        descriptor.baseArrayLayer = 0;
+        descriptor.layerCount = 1;
+
+        dawn::TextureView depthStencilTextureView =
+            depthStencilTexture.CreateTextureView(&descriptor);
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
+            .SetDepthStencilAttachment(
+                depthStencilTextureView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D array texture view that covers the last layer is OK for color
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kColorFormat;
+        descriptor.baseArrayLayer = kArrayLayers - 1;
+        descriptor.layerCount = 1;
+
+        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
+            .SetColorAttachment(0, colorTextureView, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D array texture view that covers the last layer is OK for depth stencil
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kDepthStencilFormat;
+        descriptor.baseArrayLayer = kArrayLayers - 1;
+        descriptor.layerCount = 1;
+
+        dawn::TextureView depthStencilTextureView =
+            depthStencilTexture.CreateTextureView(&descriptor);
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
+            .SetDepthStencilAttachment(
+                depthStencilTextureView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+}
+
+// Only 2D texture views with levelCount == 1 are allowed to be color attachments
+TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepthStencil) {
+    constexpr uint32_t kArrayLayers = 1;
+    constexpr uint32_t kSize = 32;
+    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+
+    constexpr uint32_t kLevelCount = 4;
+
+    dawn::Texture colorTexture = CreateTexture(
+        device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers, kLevelCount);
+    dawn::Texture depthStencilTexture = CreateTexture(
+        device, dawn::TextureDimension::e2D, kDepthStencilFormat, kSize, kSize, kArrayLayers,
+        kLevelCount);
+
+    dawn::TextureViewDescriptor baseDescriptor;
+    baseDescriptor.dimension = dawn::TextureViewDimension::e2D;
+    baseDescriptor.baseArrayLayer = 0;
+    baseDescriptor.layerCount = kArrayLayers;
+    baseDescriptor.baseMipLevel = 0;
+    baseDescriptor.levelCount = kLevelCount;
+
+    // Using 2D texture view with levelCount > 1 is not allowed for color
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kColorFormat;
+        descriptor.levelCount = 2;
+
+        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
+            .SetColorAttachment(0, colorTextureView, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D texture view with levelCount > 1 is not allowed for depth stencil
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kDepthStencilFormat;
+        descriptor.levelCount = 2;
+
+        dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
+        AssertWillBeError(device.CreateRenderPassDescriptorBuilder())
+            .SetDepthStencilAttachment(depthStencilView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D texture view that covers the first level of the texture is OK for color
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kColorFormat;
+        descriptor.baseMipLevel = 0;
+        descriptor.levelCount = 1;
+
+        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
+            .SetColorAttachment(0, colorTextureView, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D texture view that covers the first level is OK for depth stencil
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kDepthStencilFormat;
+        descriptor.baseMipLevel = 0;
+        descriptor.levelCount = 1;
+
+        dawn::TextureView depthStencilTextureView =
+            depthStencilTexture.CreateTextureView(&descriptor);
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
+            .SetDepthStencilAttachment(
+                depthStencilTextureView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D texture view that covers the last level is OK for color
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kColorFormat;
+        descriptor.baseMipLevel = kLevelCount - 1;
+        descriptor.levelCount = 1;
+
+        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
+            .SetColorAttachment(0, colorTextureView, dawn::LoadOp::Clear)
+            .GetResult();
+    }
+
+    // Using 2D texture view that covers the last level is OK for depth stencil
+    {
+        dawn::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.format = kDepthStencilFormat;
+        descriptor.baseMipLevel = kLevelCount - 1;
+        descriptor.levelCount = 1;
+
+        dawn::TextureView depthStencilTextureView =
+            depthStencilTexture.CreateTextureView(&descriptor);
+        AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
+            .SetDepthStencilAttachment(
+                depthStencilTextureView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
             .GetResult();
     }
 }
