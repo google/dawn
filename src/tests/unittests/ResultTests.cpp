@@ -39,6 +39,8 @@ void TestSuccess(Result<T, E>* result, T expectedSuccess) {
 static int dummyError = 0xbeef;
 static float dummySuccess = 42.0f;
 
+// Result<void, E*>
+
 // Test constructing an error Result<void, E*>
 TEST(ResultOnlyPointerError, ConstructingError) {
     Result<void, int*> result(&dummyError);
@@ -88,6 +90,8 @@ TEST(ResultOnlyPointerError, ReturningSuccess) {
     ASSERT_FALSE(result.IsError());
 }
 
+// Result<T*, E*>
+
 // Test constructing an error Result<T*, E*>
 TEST(ResultBothPointer, ConstructingError) {
     Result<float*, int*> result(&dummyError);
@@ -132,6 +136,54 @@ TEST(ResultBothPointer, ReturningSuccess) {
 
     Result<float*, int*> result = CreateSuccess();
     TestSuccess(&result, &dummySuccess);
+}
+
+// Result<T, E>
+
+// Test constructing an error Result<T, E>
+TEST(ResultGeneric, ConstructingError) {
+    Result<std::vector<float>, int*> result(&dummyError);
+    TestError(&result, &dummyError);
+}
+
+// Test moving an error Result<T, E>
+TEST(ResultGeneric, MovingError) {
+    Result<std::vector<float>, int*> result(&dummyError);
+    Result<std::vector<float>, int*> movedResult(std::move(result));
+    TestError(&movedResult, &dummyError);
+}
+
+// Test returning an error Result<T, E>
+TEST(ResultGeneric, ReturningError) {
+    auto CreateError = []() -> Result<std::vector<float>, int*> {
+        return {&dummyError};
+    };
+
+    Result<std::vector<float>, int*> result = CreateError();
+    TestError(&result, &dummyError);
+}
+
+// Test constructing a success Result<T, E>
+TEST(ResultGeneric, ConstructingSuccess) {
+    Result<std::vector<float>, int*> result({1.0f});
+    TestSuccess(&result, {1.0f});
+}
+
+// Test moving a success Result<T, E>
+TEST(ResultGeneric, MovingSuccess) {
+    Result<std::vector<float>, int*> result({1.0f});
+    Result<std::vector<float>, int*> movedResult(std::move(result));
+    TestSuccess(&movedResult, {1.0f});
+}
+
+// Test returning a success Result<T, E>
+TEST(ResultGeneric, ReturningSuccess) {
+    auto CreateSuccess = []() -> Result<std::vector<float>, int*> {
+        return {{1.0f}};
+    };
+
+    Result<std::vector<float>, int*> result = CreateSuccess();
+    TestSuccess(&result, {1.0f});
 }
 
 }  // anonymous namespace

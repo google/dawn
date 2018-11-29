@@ -20,6 +20,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 
 // Result<T, E> is the following sum type (Haskell notation):
 //
@@ -122,6 +123,38 @@ class DAWN_NO_DISCARD Result<T*, E*> {
 
     constexpr static intptr_t kEmptyPayload = Empty;
     intptr_t mPayload = kEmptyPayload;
+};
+
+// Catchall definition of Result<T, E> implemented as a tagged struct. It could be improved to use
+// a tagged union instead if it turns out to be a hotspot. T and E must be movable and default
+// constructible.
+template <typename T, typename E>
+class DAWN_NO_DISCARD Result {
+  public:
+    Result(T&& success);
+    Result(E&& error);
+
+    Result(Result<T, E>&& other);
+    Result<T, E>& operator=(Result<T, E>&& other);
+
+    ~Result();
+
+    bool IsError() const;
+    bool IsSuccess() const;
+
+    T&& AcquireSuccess();
+    E&& AcquireError();
+
+  private:
+    enum PayloadType {
+        Success = 0,
+        Error = 1,
+        Acquired = 2,
+    };
+    PayloadType mType;
+
+    E mError;
+    T mSuccess;
 };
 
 // Implementation of Result<void, E*>
@@ -245,6 +278,58 @@ template <typename T, typename E>
 E* Result<T*, E*>::GetErrorFromPayload(intptr_t payload) {
     ASSERT(GetPayloadType(payload) == Error);
     return reinterpret_cast<E*>(payload ^ 1);
+}
+
+// Implementation of Result<T, E>
+template <typename T, typename E>
+Result<T, E>::Result(T&& success) : mType(Success), mSuccess(success) {
+}
+
+template <typename T, typename E>
+Result<T, E>::Result(E&& error) : mType(Error), mError(error) {
+}
+
+template <typename T, typename E>
+Result<T, E>::~Result() {
+    ASSERT(mType == Acquired);
+}
+
+template <typename T, typename E>
+Result<T, E>::Result(Result<T, E>&& other)
+    : mType(other.mType), mError(std::move(other.mError)), mSuccess(other.mSuccess) {
+    other.mType = Acquired;
+}
+template <typename T, typename E>
+Result<T, E>& Result<T, E>::operator=(Result<T, E>&& other) {
+    mType = other.mType;
+    mError = std::move(other.mError);
+    mSuccess = std::move(other.mSuccess);
+    other.mType = Acquired;
+    return *this;
+}
+
+template <typename T, typename E>
+bool Result<T, E>::IsError() const {
+    return mType == Error;
+}
+
+template <typename T, typename E>
+bool Result<T, E>::IsSuccess() const {
+    return mType == Success;
+}
+
+template <typename T, typename E>
+T&& Result<T, E>::AcquireSuccess() {
+    ASSERT(mType == Success);
+    mType = Acquired;
+    return std::move(mSuccess);
+}
+
+template <typename T, typename E>
+E&& Result<T, E>::AcquireError() {
+    ASSERT(mType == Error);
+    mType = Acquired;
+    return std::move(mError);
 }
 
 #endif  // COMMON_RESULT_H_
