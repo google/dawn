@@ -478,6 +478,7 @@ source_set("libdawn_native_sources") {
     libs += [
       "Metal.framework",
       "Cocoa.framework",
+      "IOKit.framework",
     ]
     sources += [
       "src/dawn_native/metal/BlendStateMTL.h",

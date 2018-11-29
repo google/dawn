@@ -33,9 +33,95 @@
 #include "dawn_native/metal/SwapChainMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
 
+#include <IOKit/graphics/IOGraphicsLib.h>
 #include <unistd.h>
 
 namespace dawn_native { namespace metal {
+
+    namespace {
+        // Since CGDisplayIOServicePort was deprecated in macOS 10.9, we need create
+        // an alternative function for getting I/O service port from current display.
+        io_service_t GetDisplayIOServicePort() {
+            // The matching service port (or 0 if none can be found)
+            io_service_t servicePort = 0;
+
+            // Create matching dictionary for display service
+            CFMutableDictionaryRef matchingDict = IOServiceMatching("IODisplayConnect");
+            if (matchingDict == nullptr) {
+                return 0;
+            }
+
+            io_iterator_t iter;
+            // IOServiceGetMatchingServices look up the default master ports that match a
+            // matching dictionary, and will consume the reference on the matching dictionary,
+            // so we don't need to release the dictionary, but the iterator handle should
+            // be released when its iteration is finished.
+            if (IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDict, &iter) !=
+                kIOReturnSuccess) {
+                return 0;
+            }
+
+            // Vendor number and product number of current main display
+            const uint32_t displayVendorNumber = CGDisplayVendorNumber(kCGDirectMainDisplay);
+            const uint32_t displayProductNumber = CGDisplayModelNumber(kCGDirectMainDisplay);
+
+            io_service_t serv;
+            while ((serv = IOIteratorNext(iter)) != IO_OBJECT_NULL) {
+                CFDictionaryRef displayInfo =
+                    IODisplayCreateInfoDictionary(serv, kIODisplayOnlyPreferredName);
+
+                CFNumberRef vendorIDRef, productIDRef;
+                Boolean success;
+                // The ownership of CF object follows the 'Get Rule', we don't need to
+                // release these values
+                success = CFDictionaryGetValueIfPresent(displayInfo, CFSTR(kDisplayVendorID),
+                                                        (const void**)&vendorIDRef);
+                success &= CFDictionaryGetValueIfPresent(displayInfo, CFSTR(kDisplayProductID),
+                                                         (const void**)&productIDRef);
+                if (success) {
+                    CFIndex vendorID = 0, productID = 0;
+                    CFNumberGetValue(vendorIDRef, kCFNumberSInt32Type, &vendorID);
+                    CFNumberGetValue(productIDRef, kCFNumberSInt32Type, &productID);
+
+                    if (vendorID == displayVendorNumber && productID == displayProductNumber) {
+                        // Check if vendor id and product id match with current display's
+                        // If it does, we find the desired service port
+                        servicePort = serv;
+                        CFRelease(displayInfo);
+                        break;
+                    }
+                }
+
+                CFRelease(displayInfo);
+                IOObjectRelease(serv);
+            }
+            IOObjectRelease(iter);
+            return servicePort;
+        }
+
+        // Get integer property from registry entry.
+        uint32_t GetEntryProperty(io_registry_entry_t entry, CFStringRef name) {
+            uint32_t value = 0;
+
+            // Recursively search registry entry and its parents for property name
+            // The data should release with CFRelease
+            CFDataRef data = static_cast<CFDataRef>(IORegistryEntrySearchCFProperty(
+                entry, kIOServicePlane, name, kCFAllocatorDefault,
+                kIORegistryIterateRecursively | kIORegistryIterateParents));
+
+            if (data != nullptr) {
+                const uint32_t* valuePtr =
+                    reinterpret_cast<const uint32_t*>(CFDataGetBytePtr(data));
+                if (valuePtr) {
+                    value = *valuePtr;
+                }
+
+                CFRelease(data);
+            }
+
+            return value;
+        }
+    }  // anonymous namespace
 
     dawnDevice CreateDevice(id<MTLDevice> metalDevice) {
         return reinterpret_cast<dawnDevice>(new Device(metalDevice));
@@ -200,8 +286,15 @@ namespace dawn_native { namespace metal {
         return mResourceUploader.get();
     }
 
-    // TODO(jiawei.shao@intel.com): collect device information on Metal
     void Device::CollectPCIInfo() {
+        io_registry_entry_t entry = GetDisplayIOServicePort();
+        if (entry != IO_OBJECT_NULL) {
+            mPCIInfo.vendorId = GetEntryProperty(entry, CFSTR("vendor-id"));
+            mPCIInfo.deviceId = GetEntryProperty(entry, CFSTR("device-id"));
+            IOObjectRelease(entry);
+        }
+
+        mPCIInfo.name = std::string([mMtlDevice.name UTF8String]);
     }
 
 }}  // namespace dawn_native::metal
