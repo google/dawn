@@ -329,10 +329,9 @@ namespace dawn_native { namespace d3d12 {
                     texture->TransitionUsageNow(commandList, dawn::TextureUsageBit::TransferDst);
 
                     auto copySplit = ComputeTextureCopySplit(
-                        copy->destination.x, copy->destination.y, copy->destination.z,
-                        copy->destination.width, copy->destination.height, copy->destination.depth,
+                        copy->destination.origin, copy->copySize,
                         static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())),
-                        copy->source.offset, copy->rowPitch);
+                        copy->source.offset, copy->source.rowPitch);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation;
                     textureLocation.pResource = texture->GetD3D12Resource();
@@ -352,7 +351,7 @@ namespace dawn_native { namespace d3d12 {
                         bufferLocation.PlacedFootprint.Footprint.Width = info.bufferSize.width;
                         bufferLocation.PlacedFootprint.Footprint.Height = info.bufferSize.height;
                         bufferLocation.PlacedFootprint.Footprint.Depth = info.bufferSize.depth;
-                        bufferLocation.PlacedFootprint.Footprint.RowPitch = copy->rowPitch;
+                        bufferLocation.PlacedFootprint.Footprint.RowPitch = copy->source.rowPitch;
 
                         D3D12_BOX sourceRegion;
                         sourceRegion.left = info.bufferOffset.x;
@@ -377,10 +376,9 @@ namespace dawn_native { namespace d3d12 {
                     buffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferDst);
 
                     auto copySplit = ComputeTextureCopySplit(
-                        copy->source.x, copy->source.y, copy->source.z, copy->source.width,
-                        copy->source.height, copy->source.depth,
+                        copy->source.origin, copy->copySize,
                         static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())),
-                        copy->destination.offset, copy->rowPitch);
+                        copy->destination.offset, copy->destination.rowPitch);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation;
                     textureLocation.pResource = texture->GetD3D12Resource();
@@ -399,7 +397,8 @@ namespace dawn_native { namespace d3d12 {
                         bufferLocation.PlacedFootprint.Footprint.Width = info.bufferSize.width;
                         bufferLocation.PlacedFootprint.Footprint.Height = info.bufferSize.height;
                         bufferLocation.PlacedFootprint.Footprint.Depth = info.bufferSize.depth;
-                        bufferLocation.PlacedFootprint.Footprint.RowPitch = copy->rowPitch;
+                        bufferLocation.PlacedFootprint.Footprint.RowPitch =
+                            copy->destination.rowPitch;
 
                         D3D12_BOX sourceRegion;
                         sourceRegion.left = info.textureOffset.x;

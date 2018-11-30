@@ -24,32 +24,26 @@ namespace dawn_native { namespace d3d12 {
                                  uint32_t rowPitch,
                                  uint32_t slicePitch,
                                  uint32_t texelSize,
-                                 uint32_t* texelOffsetX,
-                                 uint32_t* texelOffsetY,
-                                 uint32_t* texelOffsetZ) {
+                                 Origin3D* texelOffset) {
             uint32_t byteOffsetX = offset % rowPitch;
             offset -= byteOffsetX;
             uint32_t byteOffsetY = offset % slicePitch;
             uint32_t byteOffsetZ = offset - byteOffsetY;
 
-            *texelOffsetX = byteOffsetX / texelSize;
-            *texelOffsetY = byteOffsetY / rowPitch;
-            *texelOffsetZ = byteOffsetZ / slicePitch;
+            texelOffset->x = byteOffsetX / texelSize;
+            texelOffset->y = byteOffsetY / rowPitch;
+            texelOffset->z = byteOffsetZ / slicePitch;
         }
     }  // namespace
 
-    TextureCopySplit ComputeTextureCopySplit(uint32_t x,
-                                             uint32_t y,
-                                             uint32_t z,
-                                             uint32_t width,
-                                             uint32_t height,
-                                             uint32_t depth,
+    TextureCopySplit ComputeTextureCopySplit(Origin3D origin,
+                                             Extent3D copySize,
                                              uint32_t texelSize,
                                              uint32_t offset,
                                              uint32_t rowPitch) {
         TextureCopySplit copy;
 
-        if (z != 0 || depth > 1) {
+        if (origin.z != 0 || copySize.depth > 1) {
             // TODO(enga@google.com): Handle 3D
             ASSERT(false);
             return copy;
@@ -63,20 +57,14 @@ namespace dawn_native { namespace d3d12 {
         if (offset == alignedOffset) {
             copy.count = 1;
 
-            copy.copies[0].textureOffset.x = x;
-            copy.copies[0].textureOffset.y = y;
-            copy.copies[0].textureOffset.z = z;
+            copy.copies[0].textureOffset = origin;
 
-            copy.copies[0].copySize.width = width;
-            copy.copies[0].copySize.height = height;
-            copy.copies[0].copySize.depth = depth;
+            copy.copies[0].copySize = copySize;
 
             copy.copies[0].bufferOffset.x = 0;
             copy.copies[0].bufferOffset.y = 0;
             copy.copies[0].bufferOffset.z = 0;
-            copy.copies[0].bufferSize.width = width;
-            copy.copies[0].bufferSize.height = height;
-            copy.copies[0].bufferSize.depth = depth;
+            copy.copies[0].bufferSize = copySize;
 
             // Return early. There is only one copy needed because the offset is already 512-byte
             // aligned
@@ -85,13 +73,13 @@ namespace dawn_native { namespace d3d12 {
 
         ASSERT(alignedOffset < offset);
 
-        uint32_t texelOffsetX, texelOffsetY, texelOffsetZ;
-        ComputeTexelOffsets(offset - alignedOffset, rowPitch, rowPitch * height, texelSize,
-                            &texelOffsetX, &texelOffsetY, &texelOffsetZ);
+        Origin3D texelOffset;
+        ComputeTexelOffsets(offset - alignedOffset, rowPitch, rowPitch * copySize.height, texelSize,
+                            &texelOffset);
 
         uint32_t rowPitchInTexels = rowPitch / texelSize;
 
-        if (width + texelOffsetX <= rowPitchInTexels) {
+        if (copySize.width + texelOffset.x <= rowPitchInTexels) {
             // The region's rows fit inside the row pitch. In this case, extend the width of the
             // PlacedFootprint and copy the buffer with an offset location
             //  |<--------------- row pitch --------------->|
@@ -117,20 +105,14 @@ namespace dawn_native { namespace d3d12 {
 
             copy.count = 1;
 
-            copy.copies[0].textureOffset.x = x;
-            copy.copies[0].textureOffset.y = y;
-            copy.copies[0].textureOffset.z = z;
+            copy.copies[0].textureOffset = origin;
 
-            copy.copies[0].copySize.width = width;
-            copy.copies[0].copySize.height = height;
-            copy.copies[0].copySize.depth = depth;
+            copy.copies[0].copySize = copySize;
 
-            copy.copies[0].bufferOffset.x = texelOffsetX;
-            copy.copies[0].bufferOffset.y = texelOffsetY;
-            copy.copies[0].bufferOffset.z = texelOffsetZ;
-            copy.copies[0].bufferSize.width = width + texelOffsetX;
-            copy.copies[0].bufferSize.height = height + texelOffsetY;
-            copy.copies[0].bufferSize.depth = depth + texelOffsetZ;
+            copy.copies[0].bufferOffset = texelOffset;
+            copy.copies[0].bufferSize.width = copySize.width + texelOffset.x;
+            copy.copies[0].bufferSize.height = copySize.height + texelOffset.y;
+            copy.copies[0].bufferSize.depth = copySize.depth + texelOffset.z;
 
             return copy;
         }
@@ -171,37 +153,33 @@ namespace dawn_native { namespace d3d12 {
 
         copy.count = 2;
 
-        copy.copies[0].textureOffset.x = x;
-        copy.copies[0].textureOffset.y = y;
-        copy.copies[0].textureOffset.z = z;
+        copy.copies[0].textureOffset = origin;
 
-        ASSERT(rowPitchInTexels > texelOffsetX);
-        copy.copies[0].copySize.width = rowPitchInTexels - texelOffsetX;
-        copy.copies[0].copySize.height = height;
-        copy.copies[0].copySize.depth = depth;
+        ASSERT(rowPitchInTexels > texelOffset.x);
+        copy.copies[0].copySize.width = rowPitchInTexels - texelOffset.x;
+        copy.copies[0].copySize.height = copySize.height;
+        copy.copies[0].copySize.depth = copySize.depth;
 
-        copy.copies[0].bufferOffset.x = texelOffsetX;
-        copy.copies[0].bufferOffset.y = texelOffsetY;
-        copy.copies[0].bufferOffset.z = texelOffsetZ;
+        copy.copies[0].bufferOffset = texelOffset;
         copy.copies[0].bufferSize.width = rowPitchInTexels;
-        copy.copies[0].bufferSize.height = height + texelOffsetY;
-        copy.copies[0].bufferSize.depth = depth + texelOffsetZ;
+        copy.copies[0].bufferSize.height = copySize.height + texelOffset.y;
+        copy.copies[0].bufferSize.depth = copySize.depth + texelOffset.z;
 
-        copy.copies[1].textureOffset.x = x + copy.copies[0].copySize.width;
-        copy.copies[1].textureOffset.y = y;
-        copy.copies[1].textureOffset.z = z;
+        copy.copies[1].textureOffset.x = origin.x + copy.copies[0].copySize.width;
+        copy.copies[1].textureOffset.y = origin.y;
+        copy.copies[1].textureOffset.z = origin.z;
 
-        ASSERT(width > copy.copies[0].copySize.width);
-        copy.copies[1].copySize.width = width - copy.copies[0].copySize.width;
-        copy.copies[1].copySize.height = height;
-        copy.copies[1].copySize.depth = depth;
+        ASSERT(copySize.width > copy.copies[0].copySize.width);
+        copy.copies[1].copySize.width = copySize.width - copy.copies[0].copySize.width;
+        copy.copies[1].copySize.height = copySize.height;
+        copy.copies[1].copySize.depth = copySize.depth;
 
         copy.copies[1].bufferOffset.x = 0;
-        copy.copies[1].bufferOffset.y = texelOffsetY + 1;
-        copy.copies[1].bufferOffset.z = texelOffsetZ;
+        copy.copies[1].bufferOffset.y = texelOffset.y + 1;
+        copy.copies[1].bufferOffset.z = texelOffset.z;
         copy.copies[1].bufferSize.width = copy.copies[1].copySize.width;
-        copy.copies[1].bufferSize.height = height + texelOffsetY + 1;
-        copy.copies[1].bufferSize.depth = depth + texelOffsetZ;
+        copy.copies[1].bufferSize.height = copySize.height + texelOffset.y + 1;
+        copy.copies[1].bufferSize.depth = copySize.depth + texelOffset.z;
 
         return copy;
     }

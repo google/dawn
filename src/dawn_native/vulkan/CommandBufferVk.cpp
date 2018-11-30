@@ -39,30 +39,31 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
-        VkBufferImageCopy ComputeBufferImageCopyRegion(uint32_t rowPitch,
-                                                       const BufferCopyLocation& bufferLocation,
-                                                       const TextureCopyLocation& textureLocation) {
-            const Texture* texture = ToBackend(textureLocation.texture).Get();
+        VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
+                                                       const TextureCopy& textureCopy,
+                                                       const Extent3D& copySize) {
+            const Texture* texture = ToBackend(textureCopy.texture.Get());
 
             VkBufferImageCopy region;
 
-            region.bufferOffset = bufferLocation.offset;
+            region.bufferOffset = bufferCopy.offset;
             // In Vulkan the row length is in texels while it is in bytes for Dawn
-            region.bufferRowLength = rowPitch / TextureFormatPixelSize(texture->GetFormat());
-            region.bufferImageHeight = rowPitch * textureLocation.height;
+            region.bufferRowLength =
+                bufferCopy.rowPitch / TextureFormatPixelSize(texture->GetFormat());
+            region.bufferImageHeight = bufferCopy.rowPitch * copySize.height;
 
             region.imageSubresource.aspectMask = texture->GetVkAspectMask();
-            region.imageSubresource.mipLevel = textureLocation.level;
-            region.imageSubresource.baseArrayLayer = textureLocation.slice;
+            region.imageSubresource.mipLevel = textureCopy.level;
+            region.imageSubresource.baseArrayLayer = textureCopy.slice;
             region.imageSubresource.layerCount = 1;
 
-            region.imageOffset.x = textureLocation.x;
-            region.imageOffset.y = textureLocation.y;
-            region.imageOffset.z = textureLocation.z;
+            region.imageOffset.x = textureCopy.origin.x;
+            region.imageOffset.y = textureCopy.origin.y;
+            region.imageOffset.z = textureCopy.origin.z;
 
-            region.imageExtent.width = textureLocation.width;
-            region.imageExtent.height = textureLocation.height;
-            region.imageExtent.depth = textureLocation.depth;
+            region.imageExtent.width = copySize.width;
+            region.imageExtent.height = copySize.height;
+            region.imageExtent.depth = copySize.depth;
 
             return region;
         }
@@ -173,7 +174,7 @@ namespace dawn_native { namespace vulkan {
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 
                     VkBufferImageCopy region =
-                        ComputeBufferImageCopyRegion(copy->rowPitch, src, dst);
+                        ComputeBufferImageCopyRegion(src, dst, copy->copySize);
 
                     // The image is written to so the Dawn guarantees make sure it is in the
                     // TRANSFER_DST_OPTIMAL layout
@@ -196,7 +197,7 @@ namespace dawn_native { namespace vulkan {
                     VkBuffer dstBuffer = ToBackend(dst.buffer)->GetHandle();
 
                     VkBufferImageCopy region =
-                        ComputeBufferImageCopyRegion(copy->rowPitch, dst, src);
+                        ComputeBufferImageCopyRegion(dst, src, copy->copySize);
 
                     // The Dawn TransferSrc usage is always mapped to GENERAL
                     device->fn.CmdCopyImageToBuffer(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,

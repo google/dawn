@@ -220,7 +220,10 @@ namespace {
 class CopySplitTest : public testing::Test {
     protected:
         TextureCopySplit DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
-            TextureCopySplit copySplit = ComputeTextureCopySplit(textureSpec.x, textureSpec.y, textureSpec.z, textureSpec.width, textureSpec.height, textureSpec.depth, textureSpec.texelSize, bufferSpec.offset, bufferSpec.rowPitch);
+            TextureCopySplit copySplit = ComputeTextureCopySplit(
+                {textureSpec.x, textureSpec.y, textureSpec.z},
+                {textureSpec.width, textureSpec.height, textureSpec.depth}, textureSpec.texelSize,
+                bufferSpec.offset, bufferSpec.rowPitch);
             ValidateCopySplit(textureSpec, bufferSpec, copySplit);
             return copySplit;
         }

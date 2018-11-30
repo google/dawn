@@ -35,29 +35,30 @@ namespace dawn_native {
 
     namespace {
 
-        MaybeError ValidateCopyLocationFitsInTexture(const TextureCopyLocation& location) {
-            const TextureBase* texture = location.texture.Get();
-            if (location.level >= texture->GetNumMipLevels()) {
+        MaybeError ValidateCopySizeFitsInTexture(const TextureCopy& textureCopy,
+                                                 const Extent3D& copySize) {
+            const TextureBase* texture = textureCopy.texture.Get();
+            if (textureCopy.level >= texture->GetNumMipLevels()) {
                 return DAWN_VALIDATION_ERROR("Copy mip-level out of range");
             }
 
-            if (location.slice >= texture->GetArrayLayers()) {
+            if (textureCopy.slice >= texture->GetArrayLayers()) {
                 return DAWN_VALIDATION_ERROR("Copy array-layer out of range");
             }
 
             // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
             // overflows.
-            uint64_t level = location.level;
-            if (uint64_t(location.x) + uint64_t(location.width) >
+            uint64_t level = textureCopy.level;
+            if (uint64_t(textureCopy.origin.x) + uint64_t(copySize.width) >
                     (static_cast<uint64_t>(texture->GetSize().width) >> level) ||
-                uint64_t(location.y) + uint64_t(location.height) >
+                uint64_t(textureCopy.origin.y) + uint64_t(copySize.height) >
                     (static_cast<uint64_t>(texture->GetSize().height) >> level)) {
                 return DAWN_VALIDATION_ERROR("Copy would touch outside of the texture");
             }
 
             // TODO(cwallez@chromium.org): Check the depth bound differently for 2D arrays and 3D
             // textures
-            if (location.z != 0 || location.depth != 1) {
+            if (textureCopy.origin.z != 0 || copySize.depth != 1) {
                 return DAWN_VALIDATION_ERROR("No support for z != 0 and depth != 1 for now");
             }
 
@@ -69,31 +70,29 @@ namespace dawn_native {
             return offset <= bufferSize && (size <= (bufferSize - offset));
         }
 
-        MaybeError ValidateCopySizeFitsInBuffer(const BufferCopyLocation& location,
-                                                uint32_t dataSize) {
-            if (!FitsInBuffer(location.buffer.Get(), location.offset, dataSize)) {
+        MaybeError ValidateCopySizeFitsInBuffer(const BufferCopy& bufferCopy, uint32_t dataSize) {
+            if (!FitsInBuffer(bufferCopy.buffer.Get(), bufferCopy.offset, dataSize)) {
                 return DAWN_VALIDATION_ERROR("Copy would overflow the buffer");
             }
 
             return {};
         }
 
-        MaybeError ValidateTexelBufferOffset(TextureBase* texture,
-                                             const BufferCopyLocation& location) {
+        MaybeError ValidateTexelBufferOffset(TextureBase* texture, const BufferCopy& bufferCopy) {
             uint32_t texelSize =
                 static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat()));
-            if (location.offset % texelSize != 0) {
+            if (bufferCopy.offset % texelSize != 0) {
                 return DAWN_VALIDATION_ERROR("Buffer offset must be a multiple of the texel size");
             }
 
             return {};
         }
 
-        MaybeError ComputeTextureCopyBufferSize(const TextureCopyLocation& location,
+        MaybeError ComputeTextureCopyBufferSize(const Extent3D& copySize,
                                                 uint32_t rowPitch,
                                                 uint32_t* bufferSize) {
             // TODO(cwallez@chromium.org): check for overflows
-            *bufferSize = (rowPitch * (location.height - 1) + location.width) * location.depth;
+            *bufferSize = (rowPitch * (copySize.height - 1) + copySize.width) * copySize.depth;
 
             return {};
         }
@@ -103,13 +102,15 @@ namespace dawn_native {
             return texelSize * width;
         }
 
-        MaybeError ValidateRowPitch(const TextureCopyLocation& location, uint32_t rowPitch) {
+        MaybeError ValidateRowPitch(dawn::TextureFormat format,
+                                    const Extent3D& copySize,
+                                    uint32_t rowPitch) {
             if (rowPitch % kTextureRowPitchAlignment != 0) {
                 return DAWN_VALIDATION_ERROR("Row pitch must be a multiple of 256");
             }
 
-            uint32_t texelSize = TextureFormatPixelSize(location.texture.Get()->GetFormat());
-            if (rowPitch < location.width * texelSize) {
+            uint32_t texelSize = TextureFormatPixelSize(format);
+            if (rowPitch < copySize.width * texelSize) {
                 return DAWN_VALIDATION_ERROR(
                     "Row pitch must not be less than the number of bytes per row");
             }
@@ -385,11 +386,12 @@ namespace dawn_native {
                     CopyBufferToTextureCmd* copy = mIterator.NextCommand<CopyBufferToTextureCmd>();
 
                     uint32_t bufferCopySize = 0;
-                    DAWN_TRY(ValidateRowPitch(copy->destination, copy->rowPitch));
-                    DAWN_TRY(ComputeTextureCopyBufferSize(copy->destination, copy->rowPitch,
+                    DAWN_TRY(ValidateRowPitch(copy->destination.texture->GetFormat(),
+                                              copy->copySize, copy->source.rowPitch));
+                    DAWN_TRY(ComputeTextureCopyBufferSize(copy->copySize, copy->source.rowPitch,
                                                           &bufferCopySize));
 
-                    DAWN_TRY(ValidateCopyLocationFitsInTexture(copy->destination));
+                    DAWN_TRY(ValidateCopySizeFitsInTexture(copy->destination, copy->copySize));
                     DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->source, bufferCopySize));
                     DAWN_TRY(
                         ValidateTexelBufferOffset(copy->destination.texture.Get(), copy->source));
@@ -407,11 +409,12 @@ namespace dawn_native {
                     CopyTextureToBufferCmd* copy = mIterator.NextCommand<CopyTextureToBufferCmd>();
 
                     uint32_t bufferCopySize = 0;
-                    DAWN_TRY(ValidateRowPitch(copy->source, copy->rowPitch));
-                    DAWN_TRY(ComputeTextureCopyBufferSize(copy->source, copy->rowPitch,
-                                                          &bufferCopySize));
+                    DAWN_TRY(ValidateRowPitch(copy->source.texture->GetFormat(), copy->copySize,
+                                              copy->destination.rowPitch));
+                    DAWN_TRY(ComputeTextureCopyBufferSize(
+                        copy->copySize, copy->destination.rowPitch, &bufferCopySize));
 
-                    DAWN_TRY(ValidateCopyLocationFitsInTexture(copy->source));
+                    DAWN_TRY(ValidateCopySizeFitsInTexture(copy->source, copy->copySize));
                     DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->destination, bufferCopySize));
                     DAWN_TRY(
                         ValidateTexelBufferOffset(copy->source.texture.Get(), copy->destination));
@@ -657,18 +660,14 @@ namespace dawn_native {
         copy->source.buffer = source->buffer;
         copy->source.offset = source->offset;
         copy->destination.texture = destination->texture;
-        copy->destination.x = destination->origin.x;
-        copy->destination.y = destination->origin.y;
-        copy->destination.z = destination->origin.z;
-        copy->destination.width = copySize->width;
-        copy->destination.height = copySize->height;
-        copy->destination.depth = copySize->depth;
+        copy->destination.origin = destination->origin;
+        copy->copySize = *copySize;
         copy->destination.level = destination->level;
         copy->destination.slice = destination->slice;
         if (source->rowPitch == 0) {
-            copy->rowPitch = ComputeDefaultRowPitch(destination->texture, copySize->width);
+            copy->source.rowPitch = ComputeDefaultRowPitch(destination->texture, copySize->width);
         } else {
-            copy->rowPitch = source->rowPitch;
+            copy->source.rowPitch = source->rowPitch;
         }
     }
 
@@ -682,20 +681,16 @@ namespace dawn_native {
             mAllocator.Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
         new (copy) CopyTextureToBufferCmd;
         copy->source.texture = source->texture;
-        copy->source.x = source->origin.x;
-        copy->source.y = source->origin.y;
-        copy->source.z = source->origin.z;
-        copy->source.width = copySize->width;
-        copy->source.height = copySize->height;
-        copy->source.depth = copySize->depth;
+        copy->source.origin = source->origin;
+        copy->copySize = *copySize;
         copy->source.level = source->level;
         copy->source.slice = source->slice;
         copy->destination.buffer = destination->buffer;
         copy->destination.offset = destination->offset;
         if (destination->rowPitch == 0) {
-            copy->rowPitch = ComputeDefaultRowPitch(source->texture, copySize->width);
+            copy->destination.rowPitch = ComputeDefaultRowPitch(source->texture, copySize->width);
         } else {
-            copy->rowPitch = destination->rowPitch;
+            copy->destination.rowPitch = destination->rowPitch;
         }
     }
 
