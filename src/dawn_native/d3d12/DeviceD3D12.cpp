@@ -144,8 +144,8 @@ namespace dawn_native { namespace d3d12 {
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
         ASSERT_SUCCESS(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)));
 
-        ASSERT_SUCCESS(
-            mD3d12Device->CreateFence(mSerial, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
+        ASSERT_SUCCESS(mD3d12Device->CreateFence(mLastSubmittedSerial, D3D12_FENCE_FLAG_NONE,
+                                                 IID_PPV_ARGS(&mFence)));
         mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         ASSERT(mFenceEvent != nullptr);
 
@@ -160,9 +160,8 @@ namespace dawn_native { namespace d3d12 {
     }
 
     Device::~Device() {
-        const uint64_t currentSerial = GetSerial();
         NextSerial();
-        WaitForSerial(currentSerial);  // Wait for all in-flight commands to finish executing
+        WaitForSerial(mLastSubmittedSerial);  // Wait for all in-flight commands to finish executing
         TickImpl();                    // Call tick one last time so resources are cleaned up
 
         ASSERT(mUsedComObjectRefs.Empty());
@@ -224,14 +223,26 @@ namespace dawn_native { namespace d3d12 {
         return mPendingCommands.commandList;
     }
 
+    Serial Device::GetCompletedCommandSerial() const {
+        return mCompletedSerial;
+    }
+
+    Serial Device::GetLastSubmittedCommandSerial() const {
+        return mLastSubmittedSerial;
+    }
+
+    Serial Device::GetPendingCommandSerial() const {
+        return mLastSubmittedSerial + 1;
+    }
+
     void Device::TickImpl() {
         // Perform cleanup operations to free unused objects
-        const uint64_t lastCompletedSerial = mFence->GetCompletedValue();
-        mResourceAllocator->Tick(lastCompletedSerial);
-        mCommandAllocatorManager->Tick(lastCompletedSerial);
-        mDescriptorHeapAllocator->Tick(lastCompletedSerial);
-        mMapRequestTracker->Tick(lastCompletedSerial);
-        mUsedComObjectRefs.ClearUpTo(lastCompletedSerial);
+        mCompletedSerial = mFence->GetCompletedValue();
+        mResourceAllocator->Tick(mCompletedSerial);
+        mCommandAllocatorManager->Tick(mCompletedSerial);
+        mDescriptorHeapAllocator->Tick(mCompletedSerial);
+        mMapRequestTracker->Tick(mCompletedSerial);
+        mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
         ExecuteCommandLists({});
         NextSerial();
     }
@@ -240,24 +251,21 @@ namespace dawn_native { namespace d3d12 {
         return mPCIInfo;
     }
 
-    uint64_t Device::GetSerial() const {
-        return mSerial;
-    }
-
     void Device::NextSerial() {
-        ASSERT_SUCCESS(mCommandQueue->Signal(mFence.Get(), mSerial++));
+        mLastSubmittedSerial++;
+        ASSERT_SUCCESS(mCommandQueue->Signal(mFence.Get(), mLastSubmittedSerial));
     }
 
     void Device::WaitForSerial(uint64_t serial) {
-        const uint64_t lastCompletedSerial = mFence->GetCompletedValue();
-        if (lastCompletedSerial < serial) {
+        mCompletedSerial = mFence->GetCompletedValue();
+        if (mCompletedSerial < serial) {
             ASSERT_SUCCESS(mFence->SetEventOnCompletion(serial, mFenceEvent));
             WaitForSingleObject(mFenceEvent, INFINITE);
         }
     }
 
     void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
-        mUsedComObjectRefs.Enqueue(object, mSerial);
+        mUsedComObjectRefs.Enqueue(object, GetPendingCommandSerial());
     }
 
     void Device::ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists) {

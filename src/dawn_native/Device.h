@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_DEVICEBASE_H_
 #define DAWNNATIVE_DEVICEBASE_H_
 
+#include "common/Serial.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
@@ -58,6 +59,8 @@ namespace dawn_native {
         virtual RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) = 0;
         virtual SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) = 0;
 
+        virtual Serial GetCompletedCommandSerial() const = 0;
+        virtual Serial GetLastSubmittedCommandSerial() const = 0;
         virtual void TickImpl() = 0;
 
         // Many Dawn objects are completely immutable once created which means that if two
@@ -99,6 +102,7 @@ namespace dawn_native {
                                            const TextureViewDescriptor* descriptor);
 
         void Tick();
+
         void SetErrorCallback(dawn::DeviceErrorCallback callback, dawn::CallbackUserdata userdata);
         void Reference();
         void Release();

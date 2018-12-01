@@ -109,14 +109,29 @@ namespace dawn_native { namespace null {
         return mPCIInfo;
     }
 
+    Serial Device::GetCompletedCommandSerial() const {
+        return mCompletedSerial;
+    }
+
+    Serial Device::GetLastSubmittedCommandSerial() const {
+        return mLastSubmittedSerial;
+    }
+
     void Device::TickImpl() {
+        SubmitPendingOperations();
     }
 
     void Device::AddPendingOperation(std::unique_ptr<PendingOperation> operation) {
         mPendingOperations.emplace_back(std::move(operation));
     }
-    std::vector<std::unique_ptr<PendingOperation>> Device::AcquirePendingOperations() {
-        return std::move(mPendingOperations);
+    void Device::SubmitPendingOperations() {
+        for (auto& operation : mPendingOperations) {
+            operation->Execute();
+        }
+        mPendingOperations.clear();
+
+        mCompletedSerial = mLastSubmittedSerial;
+        mLastSubmittedSerial++;
     }
 
     // Buffer
@@ -200,13 +215,7 @@ namespace dawn_native { namespace null {
     }
 
     void Queue::SubmitImpl(uint32_t, CommandBufferBase* const*) {
-        auto operations = ToBackend(GetDevice())->AcquirePendingOperations();
-
-        for (auto& operation : operations) {
-            operation->Execute();
-        }
-
-        operations.clear();
+        ToBackend(GetDevice())->SubmitPendingOperations();
     }
 
     // SwapChain

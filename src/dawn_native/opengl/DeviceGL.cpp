@@ -50,6 +50,17 @@ namespace dawn_native { namespace opengl {
         CollectPCIInfo();
     }
 
+    Device::~Device() {
+        CheckPassedFences();
+        ASSERT(mFencesInFlight.empty());
+
+        // Some operations might have been started since the last submit and waiting
+        // on a serial that doesn't have a corresponding fence enqueued. Force all
+        // operations to look as if they were completed (because they were).
+        mCompletedSerial = mLastSubmittedSerial + 1;
+        Tick();
+    }
+
     BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
         return new BindGroup(builder);
     }
@@ -112,7 +123,47 @@ namespace dawn_native { namespace opengl {
         return new TextureView(texture, descriptor);
     }
 
+    void Device::SubmitFenceSync() {
+        GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        mLastSubmittedSerial++;
+        mFencesInFlight.emplace(sync, mLastSubmittedSerial);
+    }
+
+    Serial Device::GetCompletedCommandSerial() const {
+        return mCompletedSerial;
+    }
+
+    Serial Device::GetLastSubmittedCommandSerial() const {
+        return mLastSubmittedSerial;
+    }
+
     void Device::TickImpl() {
+        CheckPassedFences();
+    }
+
+    void Device::CheckPassedFences() {
+        while (!mFencesInFlight.empty()) {
+            GLsync sync = mFencesInFlight.front().first;
+            Serial fenceSerial = mFencesInFlight.front().second;
+
+            GLint status = 0;
+            GLsizei length;
+            glGetSynciv(sync, GL_SYNC_CONDITION, sizeof(GLint), &length, &status);
+            ASSERT(length == 1);
+
+            // Fence are added in order, so we can stop searching as soon
+            // as we see one that's not ready.
+            if (!status) {
+                return;
+            }
+
+            glDeleteSync(sync);
+
+            mFencesInFlight.pop();
+
+            ASSERT(fenceSerial > mCompletedSerial);
+            mCompletedSerial = fenceSerial;
+        }
     }
 
     const dawn_native::PCIInfo& Device::GetPCIInfo() const {

@@ -71,7 +71,7 @@ namespace dawn_native { namespace d3d12 {
 
                 // Descriptors don't need to be recorded if they have already been recorded in
                 // the heap. Indices are only updated when descriptors are recorded
-                const uint64_t serial = device->GetSerial();
+                const uint64_t serial = device->GetPendingCommandSerial();
                 if (group->GetHeapSerial() != serial ||
                     group->GetIndexInSubmit() != indexInSubmit) {
                     group->RecordDescriptors(cbvSrvUavCPUDescriptorHeap, &cbvSrvUavDescriptorIndex,

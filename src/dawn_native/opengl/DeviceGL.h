@@ -23,6 +23,8 @@
 
 #include "glad/glad.h"
 
+#include <queue>
+
 // Remove windows.h macros after glad's include of windows.h
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    include "common/windows_with_undefs.h"
@@ -33,6 +35,11 @@ namespace dawn_native { namespace opengl {
     class Device : public DeviceBase {
       public:
         Device();
+        ~Device();
+
+        void SubmitFenceSync();
+
+        // Dawn API
         BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
@@ -44,6 +51,8 @@ namespace dawn_native { namespace opengl {
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
 
+        Serial GetCompletedCommandSerial() const final override;
+        Serial GetLastSubmittedCommandSerial() const final override;
         void TickImpl() override;
 
         const dawn_native::PCIInfo& GetPCIInfo() const override;
@@ -65,6 +74,12 @@ namespace dawn_native { namespace opengl {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
         void CollectPCIInfo();
+
+        void CheckPassedFences();
+
+        Serial mCompletedSerial = 0;
+        Serial mLastSubmittedSerial = 0;
+        std::queue<std::pair<GLsync, Serial>> mFencesInFlight;
 
         dawn_native::PCIInfo mPCIInfo;
     };

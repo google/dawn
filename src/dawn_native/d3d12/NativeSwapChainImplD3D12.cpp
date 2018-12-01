@@ -107,7 +107,7 @@ namespace dawn_native { namespace d3d12 {
         // TODO(cwallez@chromium.org): Make the serial ticking implicit.
         mDevice->NextSerial();
 
-        mBufferSerials[mCurrentBuffer] = mDevice->GetSerial();
+        mBufferSerials[mCurrentBuffer] = mDevice->GetPendingCommandSerial();
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 

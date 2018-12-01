@@ -127,6 +127,6 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void DescriptorHeapAllocator::Release(DescriptorHeapHandle handle) {
-        mReleasedHandles.Enqueue(handle, mDevice->GetSerial());
+        mReleasedHandles.Enqueue(handle, mDevice->GetPendingCommandSerial());
     }
 }}  // namespace dawn_native::d3d12

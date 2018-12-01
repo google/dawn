@@ -23,9 +23,13 @@ namespace dawn_native { namespace opengl {
     }
 
     void Queue::SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) {
+        Device* device = ToBackend(GetDevice());
+
         for (uint32_t i = 0; i < numCommands; ++i) {
             ToBackend(commands[i])->Execute();
         }
+
+        device->SubmitFenceSync();
     }
 
 }}  // namespace dawn_native::opengl

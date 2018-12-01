@@ -170,7 +170,7 @@ namespace dawn_native { namespace vulkan {
         // Some operations might have been started since the last submit and waiting
         // on a serial that doesn't have a corresponding fence enqueued. Force all
         // operations to look as if they were completed (because they were).
-        mCompletedSerial = mNextSerial;
+        mCompletedSerial = mLastSubmittedSerial + 1;
         Tick();
 
         ASSERT(mCommandsInFlight.Empty());
@@ -277,6 +277,18 @@ namespace dawn_native { namespace vulkan {
         return new TextureView(texture, descriptor);
     }
 
+    Serial Device::GetCompletedCommandSerial() const {
+        return mCompletedSerial;
+    }
+
+    Serial Device::GetLastSubmittedCommandSerial() const {
+        return mLastSubmittedSerial;
+    }
+
+    Serial Device::GetPendingCommandSerial() const {
+        return mLastSubmittedSerial + 1;
+    }
+
     void Device::TickImpl() {
         CheckPassedFences();
         RecycleCompletedCommands();
@@ -289,11 +301,11 @@ namespace dawn_native { namespace vulkan {
 
         if (mPendingCommands.pool != VK_NULL_HANDLE) {
             SubmitPendingCommands();
-        } else if (mCompletedSerial == mNextSerial - 1) {
+        } else if (mCompletedSerial == mLastSubmittedSerial) {
             // If there's no GPU work in flight we still need to artificially increment the serial
             // so that CPU operations waiting on GPU completion can know they don't have to wait.
             mCompletedSerial++;
-            mNextSerial++;
+            mLastSubmittedSerial++;
         }
     }
 
@@ -345,10 +357,6 @@ namespace dawn_native { namespace vulkan {
         return mRenderPassCache.get();
     }
 
-    Serial Device::GetSerial() const {
-        return mNextSerial;
-    }
-
     VkCommandBuffer Device::GetPendingCommandBuffer() {
         if (mPendingCommands.pool == VK_NULL_HANDLE) {
             mPendingCommands = GetUnusedCommands();
@@ -395,16 +403,15 @@ namespace dawn_native { namespace vulkan {
             ASSERT(false);
         }
 
-        mCommandsInFlight.Enqueue(mPendingCommands, mNextSerial);
+        mLastSubmittedSerial++;
+        mCommandsInFlight.Enqueue(mPendingCommands, mLastSubmittedSerial);
         mPendingCommands = CommandPoolAndBuffer();
-        mFencesInFlight.emplace(fence, mNextSerial);
+        mFencesInFlight.emplace(fence, mLastSubmittedSerial);
 
         for (VkSemaphore semaphore : mWaitSemaphores) {
             mDeleter->DeleteWhenUnused(semaphore);
         }
         mWaitSemaphores.clear();
-
-        mNextSerial++;
     }
 
     void Device::AddWaitSemaphore(VkSemaphore semaphore) {

@@ -106,12 +106,14 @@ namespace dawn_native { namespace null {
         RenderPipelineBase* CreateRenderPipeline(RenderPipelineBuilder* builder) override;
         SwapChainBase* CreateSwapChain(SwapChainBuilder* builder) override;
 
+        Serial GetCompletedCommandSerial() const final override;
+        Serial GetLastSubmittedCommandSerial() const final override;
         void TickImpl() override;
 
         const dawn_native::PCIInfo& GetPCIInfo() const override;
 
         void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
-        std::vector<std::unique_ptr<PendingOperation>> AcquirePendingOperations();
+        void SubmitPendingOperations();
 
       private:
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
@@ -131,6 +133,8 @@ namespace dawn_native { namespace null {
             const TextureViewDescriptor* descriptor) override;
         void InitFakePCIInfo();
 
+        Serial mCompletedSerial = 0;
+        Serial mLastSubmittedSerial = 0;
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
         dawn_native::PCIInfo mPCIInfo;
     };

@@ -52,7 +52,7 @@ namespace dawn_native { namespace d3d12 {
         // Enqueue the command allocator. It will be scheduled for reset after the next
         // ExecuteCommandLists
         mInFlightCommandAllocators.Enqueue({mCommandAllocators[firstFreeIndex], firstFreeIndex},
-                                           device->GetSerial());
+                                           device->GetPendingCommandSerial());
 
         return mCommandAllocators[firstFreeIndex];
     }

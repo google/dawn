@@ -67,7 +67,7 @@ namespace dawn_native { namespace d3d12 {
     void ResourceAllocator::Release(ComPtr<ID3D12Resource> resource) {
         // Resources may still be in use on the GPU. Enqueue them so that we hold onto them until
         // GPU execution has completed
-        mReleasedResources.Enqueue(resource, mDevice->GetSerial());
+        mReleasedResources.Enqueue(resource, mDevice->GetPendingCommandSerial());
     }
 
     void ResourceAllocator::Tick(uint64_t lastCompletedSerial) {
