@@ -70,7 +70,7 @@
     "bind group layout": {
         "category": "object"
     },
-    "bind group binding": {
+    "bind group layout binding": {
         "category": "structure",
         "extensible": false,
         "members": [
@@ -84,7 +84,7 @@
         "extensible": true,
         "members": [
             {"name": "num bindings", "type": "uint32_t"},
-            {"name": "bindings", "type": "bind group binding", "annotation": "const*", "length": "num bindings"}
+            {"name": "bindings", "type": "bind group layout binding", "annotation": "const*", "length": "num bindings"}
         ]
     },
     "binding type": {

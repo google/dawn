@@ -447,7 +447,7 @@ TEST_F(WireTests, StructureOfObjectArrayArgument) {
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireTests, StructureOfStructureArrayArgument) {
     static constexpr int NUM_BINDINGS = 3;
-    dawnBindGroupBinding bindings[NUM_BINDINGS]{
+    dawnBindGroupLayoutBinding bindings[NUM_BINDINGS]{
         {0, DAWN_SHADER_STAGE_BIT_VERTEX, DAWN_BINDING_TYPE_SAMPLER},
         {1, DAWN_SHADER_STAGE_BIT_VERTEX, DAWN_BINDING_TYPE_SAMPLED_TEXTURE},
         {2,

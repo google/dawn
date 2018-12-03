@@ -63,6 +63,6 @@ namespace utils {
                                                  const dawn::BindGroupLayout* bindGroupLayout);
     dawn::BindGroupLayout MakeBindGroupLayout(
         const dawn::Device& device,
-        std::initializer_list<dawn::BindGroupBinding> bindingsInitializer);
+        std::initializer_list<dawn::BindGroupLayoutBinding> bindingsInitializer);
 
 }  // namespace utils

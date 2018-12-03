@@ -209,10 +209,11 @@ namespace utils {
 
     dawn::BindGroupLayout MakeBindGroupLayout(
         const dawn::Device& device,
-        std::initializer_list<dawn::BindGroupBinding> bindingsInitializer) {
-        std::vector<dawn::BindGroupBinding> bindings;
-        dawn::ShaderStageBit kNoStages{};
-        for (const dawn::BindGroupBinding& binding : bindingsInitializer) {
+        std::initializer_list<dawn::BindGroupLayoutBinding> bindingsInitializer) {
+        constexpr dawn::ShaderStageBit kNoStages{};
+
+        std::vector<dawn::BindGroupLayoutBinding> bindings;
+        for (const dawn::BindGroupLayoutBinding& binding : bindingsInitializer) {
             if (binding.visibility != kNoStages) {
                 bindings.push_back(binding);
             }
