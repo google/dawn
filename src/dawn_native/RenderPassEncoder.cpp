@@ -19,6 +19,8 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/RenderPipeline.h"
 
+#include <string.h>
+
 namespace dawn_native {
 
     RenderPassEncoderBase::RenderPassEncoderBase(DeviceBase* device,

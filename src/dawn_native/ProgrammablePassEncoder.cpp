@@ -18,6 +18,8 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Commands.h"
 
+#include <string.h>
+
 namespace dawn_native {
 
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
