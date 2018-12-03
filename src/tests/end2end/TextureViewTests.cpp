@@ -411,11 +411,19 @@ TEST_P(TextureViewTest, TextureCubeMapArrayOnWholeTexture) {
 
 // Test sampling from a cube map texture array view that covers a sub part of a 2D array texture.
 TEST_P(TextureViewTest, TextureCubeMapArrayViewOnPartOfTexture) {
+    // Test failing on the GPU FYI Mac Pro (AMD), see
+    // https://bugs.chromium.org/p/dawn/issues/detail?id=58
+    DAWN_SKIP_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
+
     TextureCubeMapTest(20, 3, 12, true);
 }
 
 // Test sampling from a cube map texture array view that covers the last layer of a 2D array texture.
 TEST_P(TextureViewTest, TextureCubeMapArrayViewCoveringLastLayer) {
+    // Test failing on the GPU FYI Mac Pro (AMD), see
+    // https://bugs.chromium.org/p/dawn/issues/detail?id=58
+    DAWN_SKIP_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
+
     constexpr uint32_t kTotalLayers = 20;
     constexpr uint32_t kBaseLayer = 8;
     TextureCubeMapTest(kTotalLayers, kBaseLayer, kTotalLayers - kBaseLayer, true);
@@ -423,6 +431,10 @@ TEST_P(TextureViewTest, TextureCubeMapArrayViewCoveringLastLayer) {
 
 // Test sampling from a cube map array texture view that only has a single cube map.
 TEST_P(TextureViewTest, TextureCubeMapArrayViewSingleCubeMap) {
+    // Test failing on the GPU FYI Mac Pro (AMD), see
+    // https://bugs.chromium.org/p/dawn/issues/detail?id=58
+    DAWN_SKIP_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
+
     TextureCubeMapTest(20, 7, 6, true);
 }
 
