@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <vector>
 
 namespace dawn_wire {
@@ -34,6 +35,13 @@ namespace dawn_wire {
             uint32_t requestSerial;
             uint32_t size;
             bool isWrite;
+        };
+
+        struct FenceCompletionUserdata {
+            Server* server;
+            uint32_t fenceId;
+            uint32_t fenceSerial;
+            uint64_t value;
         };
 
         //* Stores what the backend knows about the type.
@@ -141,6 +149,36 @@ namespace dawn_wire {
                 std::vector<Data> mKnown;
         };
 
+        // ObjectIds are lost in deserialization. Store the ids of deserialized
+        // objects here so they can be used in command handlers. This is useful
+        // for creating ReturnWireCmds which contain client ids
+        template <typename T>
+        class ObjectIdLookupTable {
+          public:
+            void Store(T key, ObjectId id) {
+                mTable[key] = id;
+            }
+
+            // Return the cached ObjectId, or 0 (null handle)
+            ObjectId Get(T key) const {
+                const auto it = mTable.find(key);
+                if (it != mTable.end()) {
+                    return it->second;
+                }
+                return 0;
+            }
+
+            void Remove(T key) {
+                auto it = mTable.find(key);
+                if (it != mTable.end()) {
+                    mTable.erase(it);
+                }
+            }
+
+          private:
+            std::map<T, ObjectId> mTable;
+        };
+
         void ForwardDeviceErrorToServer(const char* message, dawnCallbackUserdata userdata);
 
         {% for type in by_category["object"] if type.is_builder%}
@@ -149,6 +187,8 @@ namespace dawn_wire {
 
         void ForwardBufferMapReadAsync(dawnBufferMapAsyncStatus status, const void* ptr, dawnCallbackUserdata userdata);
         void ForwardBufferMapWriteAsync(dawnBufferMapAsyncStatus status, void* ptr, dawnCallbackUserdata userdata);
+        void ForwardFenceCompletedValue(dawnFenceCompletionStatus status,
+                                        dawnCallbackUserdata userdata);
 
         // A really really simple implementation of the DeserializeAllocator. It's main feature
         // is that it has some inline storage so as to avoid allocations for the majority of
@@ -301,6 +341,19 @@ namespace dawn_wire {
                     delete data;
                 }
 
+                void OnFenceCompletedValueUpdated(FenceCompletionUserdata* data) {
+                    ReturnFenceUpdateCompletedValueCmd cmd;
+                    cmd.fenceId = data->fenceId;
+                    cmd.fenceSerial = data->fenceSerial;
+                    cmd.value = data->value;
+
+                    auto allocCmd = static_cast<ReturnFenceUpdateCompletedValueCmd*>(GetCmdSpace(sizeof(cmd)));
+                    *allocCmd = cmd;
+
+                    delete data;
+                }
+
+                {% set client_side_commands = ["FenceGetCompletedValue"] %}
                 const char* HandleCommands(const char* commands, size_t size) override {
                     mProcs.deviceTick(mKnownDevice.Get(1)->handle);
 
@@ -312,9 +365,11 @@ namespace dawn_wire {
                             {% for type in by_category["object"] %}
                                 {% for method in type.methods %}
                                     {% set Suffix = as_MethodSuffix(type.name, method.name) %}
-                                    case WireCmd::{{Suffix}}:
-                                        success = Handle{{Suffix}}(&commands, &size);
-                                        break;
+                                    {% if Suffix not in client_side_commands %}
+                                        case WireCmd::{{Suffix}}:
+                                            success = Handle{{Suffix}}(&commands, &size);
+                                            break;
+                                    {% endif %}
                                 {% endfor %}
                                 {% set Suffix = as_MethodSuffix(type.name, Name("destroy")) %}
                                 case WireCmd::{{Suffix}}:
@@ -386,6 +441,11 @@ namespace dawn_wire {
                     KnownObjects<{{as_cType(type.name)}}> mKnown{{type.name.CamelCase()}};
                 {% endfor %}
 
+                {% set reverse_lookup_object_types = ["Fence"] %}
+                {% for type in by_category["object"] if type.name.CamelCase() in reverse_lookup_object_types %}
+                    ObjectIdLookupTable<{{as_cType(type.name)}}> m{{type.name.CamelCase()}}IdTable;
+                {% endfor %}
+
                 //* Helper function for the getting of the command data in command handlers.
                 //* Checks there is enough data left, updates the buffer / size and returns
                 //* the command (or nullptr for an error).
@@ -420,86 +480,119 @@ namespace dawn_wire {
                     return true;
                 }
 
+                {% set custom_post_handler_commands = ["QueueSignal"] %}
+
+                bool PostHandleQueueSignal(const QueueSignalCmd& cmd) {
+                    ObjectId fenceId = mFenceIdTable.Get(cmd.fence);
+                    ASSERT(fenceId != 0);
+                    auto* fence = mKnownFence.Get(fenceId);
+                    ASSERT(fence != nullptr);
+
+                    auto* data = new FenceCompletionUserdata;
+                    data->server = this;
+                    data->fenceId = fenceId;
+                    data->fenceSerial = fence->serial;
+                    data->value = cmd.signalValue;
+
+                    auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
+                    mProcs.fenceOnCompletion(cmd.fence, cmd.signalValue, ForwardFenceCompletedValue, userdata);
+                    return true;
+                }
+
                 //* Implementation of the command handlers
                 {% for type in by_category["object"] %}
                     {% for method in type.methods %}
                         {% set Suffix = as_MethodSuffix(type.name, method.name) %}
+                        {% if Suffix not in client_side_commands %}
+                            //* The generic command handlers
 
-                        //* The generic command handlers
+                            bool Handle{{Suffix}}(const char** commands, size_t* size) {
+                                {{Suffix}}Cmd cmd;
+                                DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator, *this);
 
-                        bool Handle{{Suffix}}(const char** commands, size_t* size) {
-                            {{Suffix}}Cmd cmd;
-                            DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator, *this);
-
-                            if (deserializeResult == DeserializeResult::FatalError) {
-                                return false;
-                            }
-
-                            {% if Suffix in custom_pre_handler_commands %}
-                                if (!PreHandle{{Suffix}}(cmd)) {
+                                if (deserializeResult == DeserializeResult::FatalError) {
                                     return false;
                                 }
-                            {% endif %}
 
-                            //* Unpack 'self'
-                            auto* selfData = mKnown{{type.name.CamelCase()}}.Get(cmd.selfId);
-                            ASSERT(selfData != nullptr);
-
-                            //* In all cases allocate the object data as it will be refered-to by the client.
-                            {% set return_type = method.return_type %}
-                            {% set returns = return_type.name.canonical_case() != "void" %}
-                            {% if returns %}
-                                {% set Type = method.return_type.name.CamelCase() %}
-                                auto* resultData = mKnown{{Type}}.Allocate(cmd.resultId);
-                                if (resultData == nullptr) {
-                                    return false;
-                                }
-                                resultData->serial = cmd.resultSerial;
-
-                                {% if type.is_builder %}
-                                    selfData->builtObjectId = cmd.resultId;
-                                    selfData->builtObjectSerial = cmd.resultSerial;
-                                {% endif %}
-                            {% endif %}
-
-                            //* After the data is allocated, apply the argument error propagation mechanism
-                            if (deserializeResult == DeserializeResult::ErrorObject) {
-                                {% if type.is_builder %}
-                                    selfData->valid = false;
-                                    //* If we are in GetResult, fake an error callback
-                                    {% if returns %}
-                                        On{{type.name.CamelCase()}}Error(DAWN_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd.selfId, selfData->serial);
-                                    {% endif %}
-                                {% endif %}
-                                return true;
-                            }
-
-                            {% if returns %}
-                                auto result ={{" "}}
-                            {%- endif %}
-                            mProcs.{{as_varName(type.name, method.name)}}(cmd.self
-                                {%- for arg in method.arguments -%}
-                                    , cmd.{{as_varName(arg.name)}}
-                                {%- endfor -%}
-                            );
-
-                            {% if returns %}
-                                resultData->handle = result;
-                                resultData->valid = result != nullptr;
-
-                                //* builders remember the ID of the object they built so that they can send it
-                                //* in the callback to the client.
-                                {% if return_type.is_builder %}
-                                    if (result != nullptr) {
-                                        uint64_t userdata1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
-                                        uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd.resultId;
-                                        mProcs.{{as_varName(return_type.name, Name("set error callback"))}}(result, Forward{{return_type.name.CamelCase()}}ToClient, userdata1, userdata2);
+                                {% if Suffix in custom_pre_handler_commands %}
+                                    if (!PreHandle{{Suffix}}(cmd)) {
+                                        return false;
                                     }
                                 {% endif %}
-                            {% endif %}
 
-                            return true;
-                        }
+                                //* Unpack 'self'
+                                auto* selfData = mKnown{{type.name.CamelCase()}}.Get(cmd.selfId);
+                                ASSERT(selfData != nullptr);
+
+                                //* In all cases allocate the object data as it will be refered-to by the client.
+                                {% set return_type = method.return_type %}
+                                {% set returns = return_type.name.canonical_case() != "void" %}
+                                {% if returns %}
+                                    {% set Type = method.return_type.name.CamelCase() %}
+                                    auto* resultData = mKnown{{Type}}.Allocate(cmd.resultId);
+                                    if (resultData == nullptr) {
+                                        return false;
+                                    }
+                                    resultData->serial = cmd.resultSerial;
+
+                                    {% if type.is_builder %}
+                                        selfData->builtObjectId = cmd.resultId;
+                                        selfData->builtObjectSerial = cmd.resultSerial;
+                                    {% endif %}
+                                {% endif %}
+
+                                //* After the data is allocated, apply the argument error propagation mechanism
+                                if (deserializeResult == DeserializeResult::ErrorObject) {
+                                    {% if type.is_builder %}
+                                        selfData->valid = false;
+                                        //* If we are in GetResult, fake an error callback
+                                        {% if returns %}
+                                            On{{type.name.CamelCase()}}Error(DAWN_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd.selfId, selfData->serial);
+                                        {% endif %}
+                                    {% endif %}
+                                    return true;
+                                }
+
+                                {% if returns %}
+                                    auto result ={{" "}}
+                                {%- endif %}
+                                mProcs.{{as_varName(type.name, method.name)}}(cmd.self
+                                    {%- for arg in method.arguments -%}
+                                        , cmd.{{as_varName(arg.name)}}
+                                    {%- endfor -%}
+                                );
+
+                                {% if Suffix in custom_post_handler_commands %}
+                                    if (!PostHandle{{Suffix}}(cmd)) {
+                                        return false;
+                                    }
+                                {% endif %}
+
+                                {% if returns %}
+                                    resultData->handle = result;
+                                    resultData->valid = result != nullptr;
+
+                                    {% if return_type.name.CamelCase() in reverse_lookup_object_types %}
+                                        //* For created objects, store a mapping from them back to their client IDs
+                                        if (result) {
+                                            m{{return_type.name.CamelCase()}}IdTable.Store(result, cmd.resultId);
+                                        }
+                                    {% endif %}
+
+                                    //* builders remember the ID of the object they built so that they can send it
+                                    //* in the callback to the client.
+                                    {% if return_type.is_builder %}
+                                        if (result != nullptr) {
+                                            uint64_t userdata1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
+                                            uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd.resultId;
+                                            mProcs.{{as_varName(return_type.name, Name("set error callback"))}}(result, Forward{{return_type.name.CamelCase()}}ToClient, userdata1, userdata2);
+                                        }
+                                    {% endif %}
+                                {% endif %}
+
+                                return true;
+                            }
+                        {% endif %}
                     {% endfor %}
 
                     //* Handlers for the destruction of objects: clients do the tracking of the
@@ -522,6 +615,10 @@ namespace dawn_wire {
                         if (data == nullptr) {
                             return false;
                         }
+
+                        {% if type.name.CamelCase() in reverse_lookup_object_types %}
+                            m{{type.name.CamelCase()}}IdTable.Remove(data->handle);
+                        {% endif %}
 
                         if (data->valid) {
                             mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
@@ -638,6 +735,13 @@ namespace dawn_wire {
         void ForwardBufferMapWriteAsync(dawnBufferMapAsyncStatus status, void* ptr, dawnCallbackUserdata userdata) {
             auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
             data->server->OnMapWriteAsyncCallback(status, ptr, data);
+        }
+
+        void ForwardFenceCompletedValue(dawnFenceCompletionStatus status, dawnCallbackUserdata userdata) {
+            auto data = reinterpret_cast<FenceCompletionUserdata*>(static_cast<uintptr_t>(userdata));
+            if (status == DAWN_FENCE_COMPLETION_STATUS_SUCCESS) {
+                data->server->OnFenceCompletedValueUpdated(data);
+            }
         }
     }
 

@@ -482,6 +482,13 @@
                 "returns": "depth stencil state builder"
             },
             {
+                "name": "create fence",
+                "returns": "fence",
+                "args": [
+                    {"name": "descriptor", "type": "fence descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "create render pass descriptor builder",
                 "returns": "render pass descriptor builder"
             },
@@ -609,6 +616,42 @@
             {"value": 3, "name": "both"}
         ]
     },
+    "fence": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "get completed value",
+                "returns": "uint64_t"
+            },
+            {
+                "name": "on completion",
+                "args": [
+                    {"name": "value", "type": "uint64_t"},
+                    {"name": "callback", "type": "fence on completion callback"},
+                    {"name": "userdata", "type": "callback userdata"}
+                ]
+            }
+        ]
+    },
+    "fence on completion callback": {
+        "category": "natively defined"
+    },
+    "fence completion status": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "error"},
+            {"value": 2, "name": "unknown"},
+            {"value": 3, "name": "context lost"}
+        ]
+    },
+    "fence descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "initial value", "type": "uint64_t"}
+        ]
+    },
     "filter mode": {
         "category": "enum",
         "values": [
@@ -706,6 +749,13 @@
                 "args": [
                     {"name": "num commands", "type": "uint32_t"},
                     {"name": "commands", "type": "command buffer", "annotation": "const*", "length": "num commands"}
+                ]
+            },
+            {
+                "name": "signal",
+                "args": [
+                    {"name": "fence", "type": "fence"},
+                    {"name": "signal value", "type": "uint64_t"}
                 ]
             }
         ]

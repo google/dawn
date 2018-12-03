@@ -16,6 +16,7 @@
 #include "dawn_wire/WireCmd.h"
 
 #include "common/Assert.h"
+#include "common/SerialMap.h"
 
 #include <cstring>
 #include <cstdlib>
@@ -68,6 +69,7 @@ namespace dawn_wire {
         {% set special_objects = [
             "device",
             "buffer",
+            "fence",
         ] %}
         {% for type in by_category["object"] if not type.name.canonical_case() in special_objects %}
             struct {{type.name.CamelCase()}} : ObjectBase {
@@ -116,6 +118,35 @@ namespace dawn_wire {
             void* mappedData = nullptr;
             size_t mappedDataSize = 0;
             bool isWriteMapped = false;
+        };
+
+        struct Fence : ObjectBase {
+            using ObjectBase::ObjectBase;
+
+            ~Fence() {
+                //* Callbacks need to be fired in all cases, as they can handle freeing resources
+                //* so we call them with "Unknown" status.
+                for (auto& request : requests.IterateAll()) {
+                    request.completionCallback(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, request.userdata);
+                }
+                requests.Clear();
+            }
+
+            void CheckPassedFences() {
+                for (auto& request : requests.IterateUpTo(completedValue)) {
+                    request.completionCallback(DAWN_FENCE_COMPLETION_STATUS_SUCCESS,
+                                               request.userdata);
+                }
+                requests.ClearUpTo(completedValue);
+            }
+
+            struct OnCompletionData {
+                dawnFenceOnCompletionCallback completionCallback = nullptr;
+                dawnCallbackUserdata userdata = 0;
+            };
+            uint64_t signaledValue = 0;
+            uint64_t completedValue = 0;
+            SerialMap<OnCompletionData> requests;
         };
 
         //* TODO(cwallez@chromium.org): Do something with objects before they are destroyed ?
@@ -238,6 +269,8 @@ namespace dawn_wire {
                CommandSerializer* mSerializer = nullptr;
         };
 
+        {% set client_side_commands = ["FenceGetCompletedValue"] %}
+
         //* Implementation of the client API functions.
         {% for type in by_category["object"] %}
             {% set Type = type.name.CamelCase() %}
@@ -245,50 +278,51 @@ namespace dawn_wire {
 
             {% for method in type.methods %}
                 {% set Suffix = as_MethodSuffix(type.name, method.name) %}
+                {% if Suffix not in client_side_commands %}
+                    {{as_cType(method.return_type.name)}} Client{{Suffix}}(
+                        {{-cType}} cSelf
+                        {%- for arg in method.arguments -%}
+                            , {{as_annotated_cType(arg)}}
+                        {%- endfor -%}
+                    ) {
+                        auto self = reinterpret_cast<{{as_wireType(type)}}>(cSelf);
+                        Device* device = self->device;
+                        {{Suffix}}Cmd cmd;
 
-                {{as_cType(method.return_type.name)}} Client{{Suffix}}(
-                    {{-cType}} cSelf
-                    {%- for arg in method.arguments -%}
-                        , {{as_annotated_cType(arg)}}
-                    {%- endfor -%}
-                ) {
-                    auto self = reinterpret_cast<{{as_wireType(type)}}>(cSelf);
-                    Device* device = self->device;
-                    {{Suffix}}Cmd cmd;
+                        //* Create the structure going on the wire on the stack and fill it with the value
+                        //* arguments so it can compute its size.
+                        cmd.self = cSelf;
 
-                    //* Create the structure going on the wire on the stack and fill it with the value
-                    //* arguments so it can compute its size.
-                    cmd.self = cSelf;
+                        //* For object creation, store the object ID the client will use for the result.
+                        {% if method.return_type.category == "object" %}
+                            auto* allocation = self->device->{{method.return_type.name.camelCase()}}.New();
 
-                    //* For object creation, store the object ID the client will use for the result.
-                    {% if method.return_type.category == "object" %}
-                        auto* allocation = self->device->{{method.return_type.name.camelCase()}}.New();
+                            {% if type.is_builder %}
+                                //* We are in GetResult, so the callback that should be called is the
+                                //* currently set one. Copy it over to the created object and prevent the
+                                //* builder from calling the callback on destruction.
+                                allocation->object->builderCallback = self->builderCallback;
+                                self->builderCallback.canCall = false;
+                            {% endif %}
 
-                        {% if type.is_builder %}
-                            //* We are in GetResult, so the callback that should be called is the
-                            //* currently set one. Copy it over to the created object and prevent the
-                            //* builder from calling the callback on destruction.
-                            allocation->object->builderCallback = self->builderCallback;
-                            self->builderCallback.canCall = false;
+                            cmd.resultId = allocation->object->id;
+                            cmd.resultSerial = allocation->serial;
                         {% endif %}
 
-                        cmd.resultId = allocation->object->id;
-                        cmd.resultSerial = allocation->serial;
-                    {% endif %}
+                        {% for arg in method.arguments %}
+                            cmd.{{as_varName(arg.name)}} = {{as_varName(arg.name)}};
+                        {% endfor %}
 
-                    {% for arg in method.arguments %}
-                        cmd.{{as_varName(arg.name)}} = {{as_varName(arg.name)}};
-                    {% endfor %}
+                        //* Allocate space to send the command and copy the value args over.
+                        size_t requiredSize = cmd.GetRequiredSize();
+                        char* allocatedBuffer = static_cast<char*>(device->GetCmdSpace(requiredSize));
+                        cmd.Serialize(allocatedBuffer, *device);
 
-                    //* Allocate space to send the command and copy the value args over.
-                    size_t requiredSize = cmd.GetRequiredSize();
-                    char* allocatedBuffer = static_cast<char*>(device->GetCmdSpace(requiredSize));
-                    cmd.Serialize(allocatedBuffer, *device);
-
-                    {% if method.return_type.category == "object" %}
-                        return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
-                    {% endif %}
-                }
+                        {% if method.return_type.category == "object" %}
+                            return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
+                        {% endif %}
+                    }
+                {% endif %}
             {% endfor %}
 
             {% if type.is_builder %}
@@ -379,6 +413,33 @@ namespace dawn_wire {
             *allocCmd = cmd;
         }
 
+        uint64_t ClientFenceGetCompletedValue(dawnFence cSelf) {
+            auto fence = reinterpret_cast<Fence*>(cSelf);
+            return fence->completedValue;
+        }
+
+        void ClientFenceOnCompletion(dawnFence cFence,
+                                     uint64_t value,
+                                     dawnFenceOnCompletionCallback callback,
+                                     dawnCallbackUserdata userdata) {
+            Fence* fence = reinterpret_cast<Fence*>(cFence);
+            if (value > fence->signaledValue) {
+                fence->device->HandleError("Value greater than fence signaled value");
+                callback(DAWN_FENCE_COMPLETION_STATUS_ERROR, userdata);
+                return;
+            }
+
+            if (value <= fence->completedValue) {
+                callback(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata);
+                return;
+            }
+
+            Fence::OnCompletionData request;
+            request.completionCallback = callback;
+            request.userdata = userdata;
+            fence->requests.Enqueue(std::move(request), value);
+        }
+
         void ProxyClientBufferUnmap(dawnBuffer cBuffer) {
             Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 
@@ -412,6 +473,25 @@ namespace dawn_wire {
             ClientBufferUnmap(cBuffer);
         }
 
+        dawnFence ProxyClientDeviceCreateFence(dawnDevice cSelf,
+                                               dawnFenceDescriptor const* descriptor) {
+            dawnFence cFence = ClientDeviceCreateFence(cSelf, descriptor);
+            Fence* fence = reinterpret_cast<Fence*>(cFence);
+            fence->signaledValue = descriptor->initialValue;
+            fence->completedValue = descriptor->initialValue;
+            return cFence;
+        }
+
+        void ProxyClientQueueSignal(dawnQueue cQueue, dawnFence cFence, uint64_t signalValue) {
+            Fence* fence = reinterpret_cast<Fence*>(cFence);
+            if (signalValue <= fence->signaledValue) {
+                fence->device->HandleError("Fence value less than or equal to signaled value");
+                return;
+            }
+            fence->signaledValue = signalValue;
+            ClientQueueSignal(cQueue, cFence, signalValue);
+        }
+
         void ClientDeviceReference(dawnDevice) {
         }
 
@@ -429,7 +509,7 @@ namespace dawn_wire {
         //  - An autogenerated Client{{suffix}} method that sends the command on the wire
         //  - A manual ProxyClient{{suffix}} method that will be inserted in the proctable instead of
         //    the autogenerated one, and that will have to call Client{{suffix}}
-        {% set proxied_commands = ["BufferUnmap"] %}
+        {% set proxied_commands = ["BufferUnmap", "DeviceCreateFence", "QueueSignal"] %}
 
         dawnProcTable GetProcs() {
             dawnProcTable table;
@@ -470,6 +550,9 @@ namespace dawn_wire {
                                 break;
                             case ReturnWireCmd::BufferMapWriteAsyncCallback:
                                 success = HandleBufferMapWriteAsyncCallback(&commands, &size);
+                                break;
+                            case ReturnWireCmd::FenceUpdateCompletedValue:
+                                success = HandleFenceUpdateCompletedValue(&commands, &size);
                                 break;
                             default:
                                 success = false;
@@ -673,6 +756,25 @@ namespace dawn_wire {
                         request.writeCallback(static_cast<dawnBufferMapAsyncStatus>(cmd->status), nullptr, request.userdata);
                     }
 
+                    return true;
+                }
+
+                bool HandleFenceUpdateCompletedValue(const char** commands, size_t* size) {
+                    const auto* cmd = GetCommand<ReturnFenceUpdateCompletedValueCmd>(commands, size);
+                    if (cmd == nullptr) {
+                        return false;
+                    }
+
+                    auto* fence = mDevice->fence.GetObject(cmd->fenceId);
+                    uint32_t fenceSerial = mDevice->fence.GetSerial(cmd->fenceId);
+
+                    //* The fence might have been deleted or recreated so this isn't an error.
+                    if (fence == nullptr || fenceSerial != cmd->fenceSerial) {
+                        return true;
+                    }
+
+                    fence->completedValue = cmd->value;
+                    fence->CheckPassedFences();
                     return true;
                 }
         };

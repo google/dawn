@@ -56,6 +56,14 @@ namespace dawn_wire {
         uint32_t status;
     };
 
+    struct ReturnFenceUpdateCompletedValueCmd {
+        ReturnWireCmd commandId = ReturnWireCmd::FenceUpdateCompletedValue;
+
+        ObjectId fenceId;
+        ObjectSerial fenceSerial;
+        uint64_t value;
+    };
+
     struct BufferUpdateMappedDataCmd {
         WireCmd commandId = WireCmd::BufferUpdateMappedDataCmd;
 

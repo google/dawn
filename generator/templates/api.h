@@ -53,6 +53,8 @@ typedef void (*dawnDeviceErrorCallback)(const char* message, dawnCallbackUserdat
 typedef void (*dawnBuilderErrorCallback)(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2);
 typedef void (*dawnBufferMapReadCallback)(dawnBufferMapAsyncStatus status, const void* data, dawnCallbackUserdata userdata);
 typedef void (*dawnBufferMapWriteCallback)(dawnBufferMapAsyncStatus status, void* data, dawnCallbackUserdata userdata);
+typedef void (*dawnFenceOnCompletionCallback)(dawnFenceCompletionStatus status,
+                                              dawnCallbackUserdata userdata);
 
 #ifdef __cplusplus
 extern "C" {

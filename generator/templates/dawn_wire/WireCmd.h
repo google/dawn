@@ -128,6 +128,7 @@ namespace dawn_wire {
         {% endfor %}
         BufferMapReadAsyncCallback,
         BufferMapWriteAsyncCallback,
+        FenceUpdateCompletedValue,
     };
 
     //* Command for the server calling a builder status callback.

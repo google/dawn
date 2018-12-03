@@ -22,6 +22,8 @@
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/DepthStencilState.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/Fence.h"
+#include "dawn_native/FenceSignalTracker.h"
 #include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
@@ -51,6 +53,7 @@ namespace dawn_native {
 
     DeviceBase::DeviceBase() {
         mCaches = std::make_unique<DeviceBase::Caches>();
+        mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
     }
 
     DeviceBase::~DeviceBase() {
@@ -70,6 +73,10 @@ namespace dawn_native {
 
     DeviceBase* DeviceBase::GetDevice() {
         return this;
+    }
+
+    FenceSignalTracker* DeviceBase::GetFenceSignalTracker() const {
+        return mFenceSignalTracker.get();
     }
 
     ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateBindGroupLayout(
@@ -134,6 +141,15 @@ namespace dawn_native {
     }
     DepthStencilStateBuilder* DeviceBase::CreateDepthStencilStateBuilder() {
         return new DepthStencilStateBuilder(this);
+    }
+    FenceBase* DeviceBase::CreateFence(const FenceDescriptor* descriptor) {
+        FenceBase* result = nullptr;
+
+        if (ConsumedError(CreateFenceInternal(&result, descriptor))) {
+            return nullptr;
+        }
+
+        return result;
     }
     InputStateBuilder* DeviceBase::CreateInputStateBuilder() {
         return new InputStateBuilder(this);
@@ -206,6 +222,7 @@ namespace dawn_native {
 
     void DeviceBase::Tick() {
         TickImpl();
+        mFenceSignalTracker->Tick(GetCompletedCommandSerial());
     }
 
     void DeviceBase::Reference() {
@@ -243,6 +260,13 @@ namespace dawn_native {
         const ComputePipelineDescriptor* descriptor) {
         DAWN_TRY(ValidateComputePipelineDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, CreateComputePipelineImpl(descriptor));
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateFenceInternal(FenceBase** result,
+                                               const FenceDescriptor* descriptor) {
+        DAWN_TRY(ValidateFenceDescriptor(this, descriptor));
+        *result = new FenceBase(this, descriptor);
         return {};
     }
 

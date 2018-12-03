@@ -36,6 +36,7 @@ namespace dawn_native {
     class ComputePassEncoderBase;
     class DepthStencilStateBase;
     class DepthStencilStateBuilder;
+    class FenceBase;
     class InputStateBase;
     class InputStateBuilder;
     class PipelineLayoutBase;

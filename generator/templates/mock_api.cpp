@@ -72,6 +72,17 @@ void ProcTableAsClass::BufferMapWriteAsync(dawnBuffer self, uint32_t start, uint
     OnBufferMapWriteAsyncCallback(self, start, size, callback, userdata);
 }
 
+void ProcTableAsClass::FenceOnCompletion(dawnFence self,
+                                         uint64_t value,
+                                         dawnFenceOnCompletionCallback callback,
+                                         dawnCallbackUserdata userdata) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+    object->fenceOnCompletionCallback = callback;
+    object->userdata1 = userdata;
+
+    OnFenceOnCompletionCallback(self, value, callback, userdata);
+}
+
 void ProcTableAsClass::CallDeviceErrorCallback(dawnDevice device, const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->deviceErrorCallback(message, object->userdata1);
@@ -88,6 +99,12 @@ void ProcTableAsClass::CallMapReadCallback(dawnBuffer buffer, dawnBufferMapAsync
 void ProcTableAsClass::CallMapWriteCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, void* data) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapWriteCallback(status, data, object->userdata1);
+}
+
+void ProcTableAsClass::CallFenceOnCompletionCallback(dawnFence fence,
+                                                     dawnFenceCompletionStatus status) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(fence);
+    object->fenceOnCompletionCallback(status, object->userdata1);
 }
 
 {% for type in by_category["object"] if type.is_builder %}
