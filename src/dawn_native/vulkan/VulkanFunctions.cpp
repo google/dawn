@@ -22,29 +22,29 @@ namespace dawn_native { namespace vulkan {
 #define GET_GLOBAL_PROC(name)                                                          \
     name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(nullptr, "vk" #name)); \
     if (name == nullptr) {                                                             \
-        return false;                                                                  \
+        return DAWN_CONTEXT_LOST_ERROR(std::string("Couldn't get proc vk") + #name);   \
     }
 
-    bool VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
+    MaybeError VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
         if (!vulkanLib.GetProc(&GetInstanceProcAddr, "vkGetInstanceProcAddr")) {
-            return false;
+            return DAWN_CONTEXT_LOST_ERROR("Couldn't get vkGetInstanceProcAddr");
         }
 
         GET_GLOBAL_PROC(CreateInstance);
         GET_GLOBAL_PROC(EnumerateInstanceExtensionProperties);
         GET_GLOBAL_PROC(EnumerateInstanceLayerProperties);
 
-        return true;
+        return {};
     }
 
 #define GET_INSTANCE_PROC(name)                                                         \
     name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(instance, "vk" #name)); \
     if (name == nullptr) {                                                              \
-        return false;                                                                   \
+        return DAWN_CONTEXT_LOST_ERROR(std::string("Couldn't get proc vk") + #name);    \
     }
 
-    bool VulkanFunctions::LoadInstanceProcs(VkInstance instance,
-                                            const VulkanGlobalKnobs& usedKnobs) {
+    MaybeError VulkanFunctions::LoadInstanceProcs(VkInstance instance,
+                                                  const VulkanGlobalKnobs& usedKnobs) {
         // Load this proc first so that we can destroy the instance even if some other
         // GET_INSTANCE_PROC fails
         GET_INSTANCE_PROC(DestroyInstance);
@@ -77,16 +77,17 @@ namespace dawn_native { namespace vulkan {
             GET_INSTANCE_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
         }
 
-        return true;
+        return {};
     }
 
-#define GET_DEVICE_PROC(name)                                                       \
-    name = reinterpret_cast<decltype(name)>(GetDeviceProcAddr(device, "vk" #name)); \
-    if (name == nullptr) {                                                          \
-        return false;                                                               \
+#define GET_DEVICE_PROC(name)                                                        \
+    name = reinterpret_cast<decltype(name)>(GetDeviceProcAddr(device, "vk" #name));  \
+    if (name == nullptr) {                                                           \
+        return DAWN_CONTEXT_LOST_ERROR(std::string("Couldn't get proc vk") + #name); \
     }
 
-    bool VulkanFunctions::LoadDeviceProcs(VkDevice device, const VulkanDeviceKnobs& usedKnobs) {
+    MaybeError VulkanFunctions::LoadDeviceProcs(VkDevice device,
+                                                const VulkanDeviceKnobs& usedKnobs) {
         GET_DEVICE_PROC(AllocateCommandBuffers);
         GET_DEVICE_PROC(AllocateDescriptorSets);
         GET_DEVICE_PROC(AllocateMemory);
@@ -215,7 +216,7 @@ namespace dawn_native { namespace vulkan {
             GET_DEVICE_PROC(QueuePresentKHR);
         }
 
-        return true;
+        return {};
     }
 
 }}  // namespace dawn_native::vulkan

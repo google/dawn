@@ -83,66 +83,47 @@ namespace dawn_native { namespace vulkan {
     // Device
 
     Device::Device(const std::vector<const char*>& requiredInstanceExtensions) {
-        if (!mVulkanLib.Open(kVulkanLibName)) {
+        if (ConsumedError(Initialize(requiredInstanceExtensions))) {
             ASSERT(false);
             return;
+        }
+    }
+
+    MaybeError Device::Initialize(const std::vector<const char*>& requiredInstanceExtensions) {
+        if (!mVulkanLib.Open(kVulkanLibName)) {
+            return DAWN_CONTEXT_LOST_ERROR(std::string("Couldn't open ") + kVulkanLibName);
         }
 
         VulkanFunctions* functions = GetMutableFunctions();
+        DAWN_TRY(functions->LoadGlobalProcs(mVulkanLib));
 
-        if (!functions->LoadGlobalProcs(mVulkanLib)) {
-            ASSERT(false);
-            return;
-        }
-
-        if (!GatherGlobalInfo(*this, &mGlobalInfo)) {
-            ASSERT(false);
-            return;
-        }
+        DAWN_TRY_ASSIGN(mGlobalInfo, GatherGlobalInfo(*this));
 
         VulkanGlobalKnobs usedGlobalKnobs = {};
-        if (!CreateInstance(&usedGlobalKnobs, requiredInstanceExtensions)) {
-            ASSERT(false);
-            return;
-        }
+        DAWN_TRY_ASSIGN(usedGlobalKnobs, CreateInstance(requiredInstanceExtensions));
         *static_cast<VulkanGlobalKnobs*>(&mGlobalInfo) = usedGlobalKnobs;
 
-        if (!functions->LoadInstanceProcs(mInstance, usedGlobalKnobs)) {
-            ASSERT(false);
-            return;
-        }
+        DAWN_TRY(functions->LoadInstanceProcs(mInstance, mGlobalInfo));
 
         if (usedGlobalKnobs.debugReport) {
-            if (!RegisterDebugReport()) {
-                ASSERT(false);
-                return;
-            }
+            DAWN_TRY(RegisterDebugReport());
         }
 
         std::vector<VkPhysicalDevice> physicalDevices;
-        if (!GetPhysicalDevices(*this, &physicalDevices) || physicalDevices.empty()) {
-            ASSERT(false);
-            return;
+        DAWN_TRY_ASSIGN(physicalDevices, GetPhysicalDevices(*this));
+        if (physicalDevices.empty()) {
+            return DAWN_CONTEXT_LOST_ERROR("No physical devices");
         }
         // TODO(cwallez@chromium.org): Choose the physical device based on ???
         mPhysicalDevice = physicalDevices[0];
 
-        if (!GatherDeviceInfo(*this, mPhysicalDevice, &mDeviceInfo)) {
-            ASSERT(false);
-            return;
-        }
+        DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this, mPhysicalDevice));
 
         VulkanDeviceKnobs usedDeviceKnobs = {};
-        if (!CreateDevice(&usedDeviceKnobs)) {
-            ASSERT(false);
-            return;
-        }
+        DAWN_TRY_ASSIGN(usedDeviceKnobs, CreateDevice());
         *static_cast<VulkanDeviceKnobs*>(&mDeviceInfo) = usedDeviceKnobs;
 
-        if (!functions->LoadDeviceProcs(mVkDevice, usedDeviceKnobs)) {
-            ASSERT(false);
-            return;
-        }
+        DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
 
         GatherQueueFromDevice();
 
@@ -155,6 +136,8 @@ namespace dawn_native { namespace vulkan {
         mPCIInfo.deviceId = mDeviceInfo.properties.deviceID;
         mPCIInfo.vendorId = mDeviceInfo.properties.vendorID;
         mPCIInfo.name = mDeviceInfo.properties.deviceName;
+
+        return {};
     }
 
     Device::~Device() {
@@ -418,8 +401,10 @@ namespace dawn_native { namespace vulkan {
         mWaitSemaphores.push_back(semaphore);
     }
 
-    bool Device::CreateInstance(VulkanGlobalKnobs* usedKnobs,
-                                const std::vector<const char*>& requiredExtensions) {
+    ResultOrError<VulkanGlobalKnobs> Device::CreateInstance(
+        const std::vector<const char*>& requiredExtensions) {
+        VulkanGlobalKnobs usedKnobs = {};
+
         std::vector<const char*> layersToRequest;
         std::vector<const char*> extensionsToRequest = requiredExtensions;
 
@@ -441,7 +426,7 @@ namespace dawn_native { namespace vulkan {
 #if defined(DAWN_USE_VKTRACE)
         if (mGlobalInfo.vktrace) {
             layersToRequest.push_back(kLayerNameLunargVKTrace);
-            usedKnobs->vktrace = true;
+            usedKnobs.vktrace = true;
         }
 #endif
         // RenderDoc installs a layer at the system level for its capture but we don't want to use
@@ -449,22 +434,22 @@ namespace dawn_native { namespace vulkan {
 #if defined(DAWN_USE_RENDERDOC)
         if (mGlobalInfo.renderDocCapture) {
             layersToRequest.push_back(kLayerNameRenderDocCapture);
-            usedKnobs->renderDocCapture = true;
+            usedKnobs.renderDocCapture = true;
         }
 #endif
 #if defined(DAWN_ENABLE_ASSERTS)
         if (mGlobalInfo.standardValidation) {
             layersToRequest.push_back(kLayerNameLunargStandardValidation);
-            usedKnobs->standardValidation = true;
+            usedKnobs.standardValidation = true;
         }
         if (mGlobalInfo.debugReport) {
             AddExtensionIfNotPresent(&extensionsToRequest, kExtensionNameExtDebugReport);
-            usedKnobs->debugReport = true;
+            usedKnobs.debugReport = true;
         }
 #endif
         if (mGlobalInfo.surface) {
             AddExtensionIfNotPresent(&extensionsToRequest, kExtensionNameKhrSurface);
-            usedKnobs->surface = true;
+            usedKnobs.surface = true;
         }
 
         VkApplicationInfo appInfo;
@@ -487,13 +472,15 @@ namespace dawn_native { namespace vulkan {
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
 
         if (fn.CreateInstance(&createInfo, nullptr, &mInstance) != VK_SUCCESS) {
-            return false;
+            return DAWN_CONTEXT_LOST_ERROR("vkCreateInstance failed");
         }
 
-        return true;
+        return usedKnobs;
     }
 
-    bool Device::CreateDevice(VulkanDeviceKnobs* usedKnobs) {
+    ResultOrError<VulkanDeviceKnobs> Device::CreateDevice() {
+        VulkanDeviceKnobs usedKnobs = {};
+
         float zero = 0.0f;
         std::vector<const char*> layersToRequest;
         std::vector<const char*> extensionsToRequest;
@@ -501,13 +488,13 @@ namespace dawn_native { namespace vulkan {
 
         if (mDeviceInfo.swapchain) {
             extensionsToRequest.push_back(kExtensionNameKhrSwapchain);
-            usedKnobs->swapchain = true;
+            usedKnobs.swapchain = true;
         }
 
         // Always require independentBlend because it is a core Dawn feature
-        usedKnobs->features.independentBlend = VK_TRUE;
+        usedKnobs.features.independentBlend = VK_TRUE;
         // Always require imageCubeArray because it is a core Dawn feature
-        usedKnobs->features.imageCubeArray = VK_TRUE;
+        usedKnobs.features.imageCubeArray = VK_TRUE;
 
         // Find a universal queue family
         {
@@ -523,7 +510,7 @@ namespace dawn_native { namespace vulkan {
             }
 
             if (universalQueueFamily == -1) {
-                return false;
+                return DAWN_CONTEXT_LOST_ERROR("No universal queue family");
             }
             mQueueFamily = static_cast<uint32_t>(universalQueueFamily);
         }
@@ -551,20 +538,20 @@ namespace dawn_native { namespace vulkan {
         createInfo.ppEnabledLayerNames = layersToRequest.data();
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
-        createInfo.pEnabledFeatures = &usedKnobs->features;
+        createInfo.pEnabledFeatures = &usedKnobs.features;
 
         if (fn.CreateDevice(mPhysicalDevice, &createInfo, nullptr, &mVkDevice) != VK_SUCCESS) {
-            return false;
+            return DAWN_CONTEXT_LOST_ERROR("vkCreateDevice failed");
         }
 
-        return true;
+        return usedKnobs;
     }
 
     void Device::GatherQueueFromDevice() {
         fn.GetDeviceQueue(mVkDevice, mQueueFamily, 0, &mQueue);
     }
 
-    bool Device::RegisterDebugReport() {
+    MaybeError Device::RegisterDebugReport() {
         VkDebugReportCallbackCreateInfoEXT createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
         createInfo.pNext = nullptr;
@@ -574,10 +561,10 @@ namespace dawn_native { namespace vulkan {
 
         if (fn.CreateDebugReportCallbackEXT(mInstance, &createInfo, nullptr,
                                             &mDebugReportCallback) != VK_SUCCESS) {
-            return false;
+            return DAWN_CONTEXT_LOST_ERROR("vkCreateDebugReportCallbackEXT failed");
         }
 
-        return true;
+        return {};
     }
 
     VKAPI_ATTR VkBool32 VKAPI_CALL

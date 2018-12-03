@@ -97,12 +97,13 @@ namespace dawn_native { namespace vulkan {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
 
-        bool CreateInstance(VulkanGlobalKnobs* usedKnobs,
-                            const std::vector<const char*>& requiredExtensions);
-        bool CreateDevice(VulkanDeviceKnobs* usedKnobs);
+        MaybeError Initialize(const std::vector<const char*>& requiredInstanceExtensions);
+        ResultOrError<VulkanGlobalKnobs> CreateInstance(
+            const std::vector<const char*>& requiredExtensions);
+        ResultOrError<VulkanDeviceKnobs> CreateDevice();
         void GatherQueueFromDevice();
 
-        bool RegisterDebugReport();
+        MaybeError RegisterDebugReport();
         static VKAPI_ATTR VkBool32 VKAPI_CALL
         OnDebugReportCallback(VkDebugReportFlagsEXT flags,
                               VkDebugReportObjectTypeEXT objectType,
@@ -117,8 +118,8 @@ namespace dawn_native { namespace vulkan {
         // the Device is allowed to mutate them through these private methods.
         VulkanFunctions* GetMutableFunctions();
 
-        VulkanGlobalInfo mGlobalInfo;
-        VulkanDeviceInfo mDeviceInfo;
+        VulkanGlobalInfo mGlobalInfo = {};
+        VulkanDeviceInfo mDeviceInfo = {};
 
         DynamicLib mVulkanLib;
 

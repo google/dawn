@@ -17,6 +17,8 @@
 
 #include "common/vulkan_platform.h"
 
+#include "dawn_native/Error.h"
+
 class DynamicLib;
 
 namespace dawn_native { namespace vulkan {
@@ -27,9 +29,9 @@ namespace dawn_native { namespace vulkan {
     // Stores the Vulkan entry points. Also loads them from the dynamic library
     // and the vkGet*ProcAddress entry points.
     struct VulkanFunctions {
-        bool LoadGlobalProcs(const DynamicLib& vulkanLib);
-        bool LoadInstanceProcs(VkInstance instance, const VulkanGlobalKnobs& usedGlobals);
-        bool LoadDeviceProcs(VkDevice device, const VulkanDeviceKnobs& usedKnobs);
+        MaybeError LoadGlobalProcs(const DynamicLib& vulkanLib);
+        MaybeError LoadInstanceProcs(VkInstance instance, const VulkanGlobalKnobs& usedGlobals);
+        MaybeError LoadDeviceProcs(VkDevice device, const VulkanDeviceKnobs& usedKnobs);
 
         // ---------- Global procs
 
