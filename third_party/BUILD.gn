@@ -240,8 +240,8 @@ static_library("glfw") {
       "${glfw_dir}/src/win32_joystick.h",
       "${glfw_dir}/src/win32_monitor.c",
       "${glfw_dir}/src/win32_platform.h",
-      "${glfw_dir}/src/win32_time.c",
       "${glfw_dir}/src/win32_thread.c",
+      "${glfw_dir}/src/win32_time.c",
       "${glfw_dir}/src/win32_window.c",
     ]
   }
