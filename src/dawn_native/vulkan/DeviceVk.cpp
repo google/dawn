@@ -148,7 +148,22 @@ namespace dawn_native { namespace vulkan {
             ASSERT(false);
         }
         CheckPassedFences();
-        ASSERT(mFencesInFlight.empty());
+
+        // Make sure all fences are complete by explicitly waiting on them all
+        while (!mFencesInFlight.empty()) {
+            VkFence fence = mFencesInFlight.front().first;
+            Serial fenceSerial = mFencesInFlight.front().second;
+            ASSERT(fenceSerial > mCompletedSerial);
+
+            VkResult result = VK_TIMEOUT;
+            do {
+                result = fn.WaitForFences(mVkDevice, 1, &fence, true, UINT64_MAX);
+            } while (result == VK_TIMEOUT);
+            fn.DestroyFence(mVkDevice, fence, nullptr);
+
+            mFencesInFlight.pop();
+            mCompletedSerial = fenceSerial;
+        }
 
         // Some operations might have been started since the last submit and waiting
         // on a serial that doesn't have a corresponding fence enqueued. Force all
