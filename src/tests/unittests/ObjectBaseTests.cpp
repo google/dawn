@@ -177,3 +177,21 @@ TEST(ObjectBase, MoveAssignmentSelf) {
     ASSERT_EQ(obj.Get(), &refcount);
     ASSERT_EQ(refcount, 2);
 }
+
+// Test the constructor using nullptr
+TEST(ObjectBase, NullptrConstructor) {
+    Object obj(nullptr);
+    ASSERT_EQ(obj.Get(), nullptr);
+}
+
+// Test assigning nullptr to the object
+TEST(ObjectBase, AssignNullptr) {
+    int refcount = 1;
+
+    Object obj(&refcount);
+    ASSERT_EQ(refcount, 2);
+
+    obj = nullptr;
+    ASSERT_EQ(refcount, 1);
+}
+

@@ -97,6 +97,15 @@ namespace dawn {
                 return static_cast<Derived&>(*this);
             }
 
+            ObjectBase(nullptr_t) {}
+            Derived& operator=(nullptr_t) {
+                if (mHandle != nullptr) {
+                    Derived::DawnRelease(mHandle);
+                    mHandle = nullptr;
+                }
+                return static_cast<Derived&>(*this);
+            }
+
             explicit operator bool() const {
                 return mHandle != nullptr;
             }
