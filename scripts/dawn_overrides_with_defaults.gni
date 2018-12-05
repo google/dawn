@@ -24,6 +24,10 @@ if (!defined(dawn_standalone)) {
   dawn_standalone = false
 }
 
+if (!defined(dawn_root)) {
+  dawn_root = get_path_info("..", "abspath")
+}
+
 if (!defined(dawn_jinja2_dir)) {
   dawn_jinja2_dir = "//third_party/jinja2"
 }
