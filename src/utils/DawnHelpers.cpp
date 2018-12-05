@@ -225,4 +225,47 @@ namespace utils {
         return device.CreateBindGroupLayout(&descriptor);
     }
 
+    BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
+                                                             const dawn::Sampler& sampler)
+        : binding(binding), sampler(sampler) {
+    }
+
+    BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
+                                                             const dawn::TextureView& textureView)
+        : binding(binding), textureView(textureView) {
+    }
+
+    BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
+                                                             const dawn::BufferView& bufferView)
+        : binding(binding), bufferView(bufferView) {
+    }
+
+    dawn::BindGroupBinding BindingInitializationHelper::GetAsBinding() const {
+        dawn::BindGroupBinding result;
+
+        result.binding = binding;
+        result.sampler = sampler;
+        result.textureView = textureView;
+        result.bufferView = bufferView;
+
+        return result;
+    }
+
+    dawn::BindGroup MakeBindGroup(
+        const dawn::Device& device,
+        const dawn::BindGroupLayout& layout,
+        std::initializer_list<BindingInitializationHelper> bindingsInitializer) {
+        std::vector<dawn::BindGroupBinding> bindings;
+        for (const BindingInitializationHelper& helper : bindingsInitializer) {
+            bindings.push_back(helper.GetAsBinding());
+        }
+
+        dawn::BindGroupDescriptor descriptor;
+        descriptor.layout = layout;
+        descriptor.numBindings = bindings.size();
+        descriptor.bindings = bindings.data();
+
+        return device.CreateBindGroup(&descriptor);
+    }
+
 }  // namespace utils

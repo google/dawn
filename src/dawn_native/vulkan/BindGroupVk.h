@@ -25,7 +25,7 @@ namespace dawn_native { namespace vulkan {
 
     class BindGroup : public BindGroupBase {
       public:
-        BindGroup(BindGroupBuilder* builder);
+        BindGroup(Device* device, const BindGroupDescriptor* descriptor);
         ~BindGroup();
 
         VkDescriptorSet GetHandle() const;

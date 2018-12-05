@@ -101,8 +101,14 @@ namespace dawn_native {
 
     // Object creation API methods
 
-    BindGroupBuilder* DeviceBase::CreateBindGroupBuilder() {
-        return new BindGroupBuilder(this);
+    BindGroupBase* DeviceBase::CreateBindGroup(const BindGroupDescriptor* descriptor) {
+        BindGroupBase* result = nullptr;
+
+        if (ConsumedError(CreateBindGroupInternal(&result, descriptor))) {
+            return nullptr;
+        }
+
+        return result;
     }
     BindGroupLayoutBase* DeviceBase::CreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor) {
@@ -239,6 +245,13 @@ namespace dawn_native {
     }
 
     // Implementation details of object creation
+
+    MaybeError DeviceBase::CreateBindGroupInternal(BindGroupBase** result,
+                                                   const BindGroupDescriptor* descriptor) {
+        DAWN_TRY(ValidateBindGroupDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(*result, CreateBindGroupImpl(descriptor));
+        return {};
+    }
 
     MaybeError DeviceBase::CreateBindGroupLayoutInternal(
         BindGroupLayoutBase** result,

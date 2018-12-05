@@ -155,11 +155,10 @@ protected:
     }
 
     void Verify(const dawn::TextureView &textureView, const char* fragmentShader, int expected) {
-        dawn::BindGroup bindGroup = device.CreateBindGroupBuilder()
-            .SetLayout(mBindGroupLayout)
-            .SetSamplers(0, 1, &mSampler)
-            .SetTextureViews(1, 1, &textureView)
-            .GetResult();
+        dawn::BindGroup bindGroup = utils::MakeBindGroup(device, mBindGroupLayout, {
+            {0, mSampler},
+            {1, textureView}
+        });
 
         dawn::ShaderModule fsModule =
             utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fragmentShader);

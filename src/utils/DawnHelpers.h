@@ -65,4 +65,32 @@ namespace utils {
         const dawn::Device& device,
         std::initializer_list<dawn::BindGroupLayoutBinding> bindingsInitializer);
 
+    // Helpers to make creating bind groups look nicer:
+    //
+    //   utils::MakeBindGroup(device, layout, {
+    //       {0, mySampler},
+    //       {1, myBufferView},
+    //       {3, myTexture}
+    //   });
+
+    // Structure with one constructor per-type of bindings, so that the initializer_list accepts
+    // bindings with the right type and no extra information.
+    struct BindingInitializationHelper {
+        BindingInitializationHelper(uint32_t binding, const dawn::Sampler& sampler);
+        BindingInitializationHelper(uint32_t binding, const dawn::TextureView& textureView);
+        BindingInitializationHelper(uint32_t binding, const dawn::BufferView& bufferView);
+
+        dawn::BindGroupBinding GetAsBinding() const;
+
+        uint32_t binding;
+        dawn::Sampler sampler;
+        dawn::TextureView textureView;
+        dawn::BufferView bufferView;
+    };
+
+    dawn::BindGroup MakeBindGroup(
+        const dawn::Device& device,
+        const dawn::BindGroupLayout& layout,
+        std::initializer_list<BindingInitializationHelper> bindingsInitializer);
+
 }  // namespace utils

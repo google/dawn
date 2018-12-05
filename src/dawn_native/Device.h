@@ -51,7 +51,6 @@ namespace dawn_native {
 
         FenceSignalTracker* GetFenceSignalTracker() const;
 
-        virtual BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) = 0;
         virtual BlendStateBase* CreateBlendState(BlendStateBuilder* builder) = 0;
         virtual BufferViewBase* CreateBufferView(BufferViewBuilder* builder) = 0;
         virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
@@ -86,7 +85,7 @@ namespace dawn_native {
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
         // Dawn API
-        BindGroupBuilder* CreateBindGroupBuilder();
+        BindGroupBase* CreateBindGroup(const BindGroupDescriptor* descriptor);
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
         BlendStateBuilder* CreateBlendStateBuilder();
         BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
@@ -119,6 +118,8 @@ namespace dawn_native {
         virtual const PCIInfo& GetPCIInfo() const = 0;
 
       private:
+        virtual ResultOrError<BindGroupBase*> CreateBindGroupImpl(
+            const BindGroupDescriptor* descriptor) = 0;
         virtual ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
             const BindGroupLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<BufferBase*> CreateBufferImpl(const BufferDescriptor* descriptor) = 0;
@@ -137,6 +138,8 @@ namespace dawn_native {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) = 0;
 
+        MaybeError CreateBindGroupInternal(BindGroupBase** result,
+                                           const BindGroupDescriptor* descriptor);
         MaybeError CreateBindGroupLayoutInternal(BindGroupLayoutBase** result,
                                                  const BindGroupLayoutDescriptor* descriptor);
         MaybeError CreateBufferInternal(BufferBase** result, const BufferDescriptor* descriptor);

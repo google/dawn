@@ -126,11 +126,10 @@ protected:
             sampler = device.CreateSampler(&descriptor);
         }
 
-        auto bindGroup = device.CreateBindGroupBuilder()
-            .SetLayout(mBindGroupLayout)
-            .SetSamplers(0, 1, &sampler)
-            .SetTextureViews(1, 1, &mTextureView)
-            .GetResult();
+        dawn::BindGroup bindGroup = utils::MakeBindGroup(device, mBindGroupLayout, {
+            {0, sampler},
+            {1, mTextureView}
+        });
 
         dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
         {

@@ -75,10 +75,7 @@ TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteUsage) {
         0, dawn::ShaderStageBit::Vertex, dawn::BindingType::StorageBuffer
     }});
     dawn::BufferView view = buffer.CreateBufferViewBuilder().SetExtent(0, 4).GetResult();
-    dawn::BindGroup bg = device.CreateBindGroupBuilder()
-        .SetLayout(bgl)
-        .SetBufferViews(0, 1, &view)
-        .GetResult();
+    dawn::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
 
     // Use the buffer as both index and storage in the same pass
     dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
@@ -107,10 +104,7 @@ TEST_F(CommandBufferValidationTest, TextureWithReadAndWriteUsage) {
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(device, {{
         0, dawn::ShaderStageBit::Vertex, dawn::BindingType::SampledTexture
     }});
-    dawn::BindGroup bg = device.CreateBindGroupBuilder()
-        .SetLayout(bgl)
-        .SetTextureViews(0, 1, &view)
-        .GetResult();
+    dawn::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
 
     // Create the render pass that will use the texture as an output attachment
     dawn::RenderPassDescriptor renderPass = device.CreateRenderPassDescriptorBuilder()

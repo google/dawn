@@ -56,10 +56,17 @@ class PushConstantTest: public DawnTest {
                 buf2.CreateBufferViewBuilder().SetExtent(0, 4).GetResult(),
             };
 
-            dawn::BindGroup bg = device.CreateBindGroupBuilder()
-                .SetLayout(bgl)
-                .SetBufferViews(0, extraBuffer ? 2 : 1, views)
-                .GetResult();
+            dawn::BindGroup bg;
+            if (extraBuffer) {
+                bg = utils::MakeBindGroup(device, bgl, {
+                    {0, views[0]},
+                    {1, views[1]},
+                });
+            } else {
+                bg = utils::MakeBindGroup(device, bgl, {
+                    {0, views[0]},
+                });
+            }
 
             return {std::move(pl), std::move(bg), std::move(buf1)};
         }

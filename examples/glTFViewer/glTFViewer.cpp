@@ -298,19 +298,22 @@ namespace {
             .SetDepthStencilState(depthStencilState)
             .GetResult();
 
-        auto bindGroupBuilder = device.CreateBindGroupBuilder();
-        bindGroupBuilder.SetLayout(bindGroupLayout);
+        dawn::BindGroup bindGroup;
 
         if (hasTexture) {
             const auto& textureView = textures[iTextureID];
             const auto& iSamplerID = scene.textures[iTextureID].sampler;
-            bindGroupBuilder.SetSamplers(0, 1, &samplers[iSamplerID]);
-            bindGroupBuilder.SetTextureViews(1, 1, &textureView);
+            bindGroup = utils::MakeBindGroup(device, bindGroupLayout, {
+                {0, samplers[iSamplerID]},
+                {1, textureView}
+            });
+        } else {
+            bindGroup = utils::MakeBindGroup(device, bindGroupLayout, {});
         }
 
         MaterialInfo material = {
-            pipeline.Get(),
-            bindGroupBuilder.GetResult(),
+            pipeline,
+            bindGroup,
             std::map<uint32_t, std::string>(),
         };
         materials[key] = std::move(material);

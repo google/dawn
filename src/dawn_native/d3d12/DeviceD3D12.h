@@ -41,7 +41,6 @@ namespace dawn_native { namespace d3d12 {
         Device();
         ~Device();
 
-        BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
@@ -80,6 +79,8 @@ namespace dawn_native { namespace d3d12 {
         void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
 
       private:
+        ResultOrError<BindGroupBase*> CreateBindGroupImpl(
+            const BindGroupDescriptor* descriptor) override;
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
             const BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<BufferBase*> CreateBufferImpl(const BufferDescriptor* descriptor) override;

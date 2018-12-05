@@ -68,10 +68,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
     dawn::Buffer buffer = device.CreateBuffer(&bufferDesc);
     dawn::BufferView bufferView =
         buffer.CreateBufferViewBuilder().SetExtent(0, sizeof(float)).GetResult();
-    dawn::BindGroup bindGroup = device.CreateBindGroupBuilder()
-        .SetLayout(bgl)
-        .SetBufferViews(0, 1, &bufferView)
-        .GetResult();
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, bufferView}});
 
     dawn::CommandBuffer cb[2];
     cb[0] = CreateSimpleComputeCommandBuffer(cp, bindGroup);
@@ -143,11 +140,10 @@ TEST_P(BindGroupTests, ReusedUBO) {
         buffer.CreateBufferViewBuilder().SetExtent(0, sizeof(Data::transform)).GetResult();
     dawn::BufferView fragUBOBufferView =
         buffer.CreateBufferViewBuilder().SetExtent(256, sizeof(Data::color)).GetResult();
-    dawn::BindGroup bindGroup = device.CreateBindGroupBuilder()
-        .SetLayout(bgl)
-        .SetBufferViews(0, 1, &vertUBOBufferView)
-        .SetBufferViews(1, 1, &fragUBOBufferView)
-        .GetResult();
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {
+        {0, vertUBOBufferView},
+        {1, fragUBOBufferView}
+    });
 
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
@@ -250,12 +246,11 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         data[i] = RGBA8(0, 255, 0, 255);
     }
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), sizeInBytes, dawn::BufferUsageBit::TransferSrc);
-    dawn::BindGroup bindGroup = device.CreateBindGroupBuilder()
-        .SetLayout(bgl)
-        .SetBufferViews(0, 1, &vertUBOBufferView)
-        .SetSamplers(1, 1, &sampler)
-        .SetTextureViews(2, 1, &textureView)
-        .GetResult();
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {
+        {0, vertUBOBufferView},
+        {1, sampler},
+        {2, textureView}
+    });
 
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     dawn::BufferCopyView bufferCopyView =

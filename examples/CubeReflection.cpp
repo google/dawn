@@ -193,17 +193,15 @@ void init() {
             .GetResult(),
     };
 
-    bindGroup[0] = device.CreateBindGroupBuilder()
-        .SetLayout(bgl)
-        .SetBufferViews(0, 1, &cameraBufferView)
-        .SetBufferViews(1, 1, &transformBufferView[0])
-        .GetResult();
+    bindGroup[0] = utils::MakeBindGroup(device, bgl, {
+        {0, cameraBufferView},
+        {1, transformBufferView[0]}
+    });
 
-    bindGroup[1] = device.CreateBindGroupBuilder()
-        .SetLayout(bgl)
-        .SetBufferViews(0, 1, &cameraBufferView)
-        .SetBufferViews(1, 1, &transformBufferView[1])
-        .GetResult();
+    bindGroup[1] = utils::MakeBindGroup(device, bgl, {
+        {0, cameraBufferView},
+        {1, transformBufferView[1]}
+    });
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 

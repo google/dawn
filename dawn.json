@@ -25,46 +25,23 @@
     "bind group": {
         "category": "object"
     },
-    "bind group builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "bind group"
-            },
-            {
-                "name": "set layout",
-                "args": [
-                    {"name": "layout", "type": "bind group layout"}
-                ]
-            },
-            {
-                "name": "set buffer views",
-                "args": [
-                    {"name": "start", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "buffer views", "type": "buffer view", "annotation": "const*", "length": "count"}
-                ]
-            },
-            {
-                "name": "set samplers",
-                "args": [
-                    {"name": "start", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "samplers", "type": "sampler", "annotation": "const*", "length": "count"}
-                ]
-            },
-            {
-                "name": "set texture views",
-                "args": [
-                    {"name": "start", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "texture views", "type": "texture view", "annotation": "const*", "length": "count"}
-                ]
-            }
-        ],
-        "TODO": [
-            "When resource are added, add methods for setting the content of the bind group"
+    "bind group binding": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "binding", "type": "uint32_t"},
+            {"name": "buffer view", "type": "buffer view", "optional": true},
+            {"name": "sampler", "type": "sampler", "optional": true},
+            {"name": "texture view", "type": "texture view", "optional": true}
+        ]
+    },
+    "bind group descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "layout", "type": "bind group layout"},
+            {"name": "num bindings", "type": "uint32_t"},
+            {"name": "bindings", "type": "bind group binding", "annotation": "const*", "length": "num bindings"}
         ]
     },
     "bind group layout": {
@@ -448,8 +425,11 @@
         "category": "object",
         "methods": [
             {
-                "name": "create bind group builder",
-                "returns": "bind group builder"
+                "name": "create bind group",
+                "returns": "bind group",
+                "args": [
+                    {"name": "descriptor", "type": "bind group descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create bind group layout",

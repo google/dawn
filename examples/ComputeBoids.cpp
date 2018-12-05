@@ -249,12 +249,11 @@ void initSim() {
     }
 
     for (uint32_t i = 0; i < 2; ++i) {
-        updateBGs[i] = device.CreateBindGroupBuilder()
-            .SetLayout(bgl)
-            .SetBufferViews(0, 1, &updateParamsView)
-            .SetBufferViews(1, 1, &views[i])
-            .SetBufferViews(2, 1, &views[(i + 1) % 2])
-            .GetResult();
+        updateBGs[i] = utils::MakeBindGroup(device, bgl, {
+            {0, updateParamsView},
+            {1, views[i]},
+            {2, views[(i + 1) % 2]}
+        });
     }
 }
 

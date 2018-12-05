@@ -494,21 +494,39 @@ TEST_F(WireTests, StructureOfStructureArrayArgument) {
 }
 
 // Test passing nullptr instead of objects - object as value version
-TEST_F(WireTests, DISABLED_NullptrAsValue) {
-    dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
-    dawnComputePassEncoder pass = dawnCommandBufferBuilderBeginComputePass(builder);
-    dawnComputePassEncoderSetComputePipeline(pass, nullptr);
+TEST_F(WireTests, OptionalObjectValue) {
+    dawnBindGroupLayoutDescriptor bglDesc;
+    bglDesc.nextInChain = nullptr;
+    bglDesc.numBindings = 0;
+    dawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDesc);
 
-    dawnCommandBufferBuilder apiBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
-        .WillOnce(Return(apiBuilder));
+    dawnBindGroupLayout apiBindGroupLayout = api.GetNewBindGroupLayout();
+    EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _))
+        .WillOnce(Return(apiBindGroupLayout));
 
-    dawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
-    EXPECT_CALL(api, CommandBufferBuilderBeginComputePass(apiBuilder))
-        .WillOnce(Return(apiPass));
+    // The `sampler`, `textureView` and `bufferView` members of a binding are optional.
+    dawnBindGroupBinding binding;
+    binding.binding = 0;
+    binding.sampler = nullptr;
+    binding.textureView = nullptr;
+    binding.bufferView = nullptr;
 
-    EXPECT_CALL(api, ComputePassEncoderSetComputePipeline(apiPass, nullptr))
-        .Times(1);
+    dawnBindGroupDescriptor bgDesc;
+    bgDesc.nextInChain = nullptr;
+    bgDesc.layout = bgl;
+    bgDesc.numBindings = 1;
+    bgDesc.bindings = &binding;
+
+    dawnDeviceCreateBindGroup(device, &bgDesc);
+    EXPECT_CALL(api, DeviceCreateBindGroup(apiDevice, MatchesLambda([](const dawnBindGroupDescriptor* desc) -> bool {
+        return desc->nextInChain == nullptr &&
+            desc->numBindings == 1 &&
+            desc->bindings[0].binding == 0 &&
+            desc->bindings[0].sampler == nullptr &&
+            desc->bindings[0].bufferView == nullptr &&
+            desc->bindings[0].textureView == nullptr;
+    })))
+        .WillOnce(Return(nullptr));
 
     FlushClient();
 }

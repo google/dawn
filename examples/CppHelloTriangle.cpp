@@ -137,11 +137,10 @@ void init() {
 
     dawn::TextureView view = texture.CreateDefaultTextureView();
 
-    bindGroup = device.CreateBindGroupBuilder()
-        .SetLayout(bgl)
-        .SetSamplers(0, 1, &sampler)
-        .SetTextureViews(1, 1, &view)
-        .GetResult();
+    bindGroup = utils::MakeBindGroup(device, bgl, {
+        {0, sampler},
+        {1, view}
+    });
 }
 
 struct {uint32_t a; float b;} s;

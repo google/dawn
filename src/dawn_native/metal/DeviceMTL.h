@@ -37,7 +37,6 @@ namespace dawn_native { namespace metal {
         Device(id<MTLDevice> mtlDevice);
         ~Device();
 
-        BindGroupBase* CreateBindGroup(BindGroupBuilder* builder) override;
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
@@ -64,6 +63,8 @@ namespace dawn_native { namespace metal {
         ResourceUploader* GetResourceUploader() const;
 
       private:
+        ResultOrError<BindGroupBase*> CreateBindGroupImpl(
+            const BindGroupDescriptor* descriptor) override;
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
             const BindGroupLayoutDescriptor* descriptor) override;
         ResultOrError<BufferBase*> CreateBufferImpl(const BufferDescriptor* descriptor) override;

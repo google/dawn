@@ -23,7 +23,8 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    BindGroup::BindGroup(BindGroupBuilder* builder) : BindGroupBase(builder) {
+    BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
+        : BindGroupBase(device, descriptor) {
     }
 
     void BindGroup::RecordDescriptors(const DescriptorHeapHandle& cbvUavSrvHeapStart,

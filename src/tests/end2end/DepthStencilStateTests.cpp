@@ -214,10 +214,7 @@ class DepthStencilStateTest : public DawnTest {
                     .GetResult();
 
                 // Create a bind group for the data
-                dawn::BindGroup bindGroup = device.CreateBindGroupBuilder()
-                    .SetLayout(bindGroupLayout)
-                    .SetBufferViews(0, 1, &view)
-                    .GetResult();
+                dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bindGroupLayout, {{0, view}});
 
                 // Create a pipeline for the triangles with the test spec's depth stencil state
                 dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()

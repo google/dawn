@@ -61,8 +61,9 @@ namespace dawn_native { namespace opengl {
         Tick();
     }
 
-    BindGroupBase* Device::CreateBindGroup(BindGroupBuilder* builder) {
-        return new BindGroup(builder);
+    ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(
+        const BindGroupDescriptor* descriptor) {
+        return new BindGroup(this, descriptor);
     }
     ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
         const BindGroupLayoutDescriptor* descriptor) {

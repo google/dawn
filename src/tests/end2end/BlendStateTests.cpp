@@ -101,10 +101,7 @@ class BlendStateTest : public DawnTest {
                 .SetExtent(0, bufferSize)
                 .GetResult();
 
-            return device.CreateBindGroupBuilder()
-                .SetLayout(bindGroupLayout)
-                .SetBufferViews(0, 1, &view)
-                .GetResult();
+            return utils::MakeBindGroup(device, bindGroupLayout, {{0, view}});
         }
 
         // Test that after drawing a triangle with the base color, and then the given triangle spec, the color is as expected
