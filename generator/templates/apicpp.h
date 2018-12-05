@@ -97,8 +97,8 @@ namespace dawn {
                 return static_cast<Derived&>(*this);
             }
 
-            ObjectBase(nullptr_t) {}
-            Derived& operator=(nullptr_t) {
+            ObjectBase(std::nullptr_t) {}
+            Derived& operator=(std::nullptr_t) {
                 if (mHandle != nullptr) {
                     Derived::DawnRelease(mHandle);
                     mHandle = nullptr;
