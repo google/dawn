@@ -144,7 +144,7 @@
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.
     void {{name}}Serialize(const {{name}}& record, {{name}}Transfer* transfer,
-                           char* buffer, const ObjectIdProvider& provider) {
+                           char** buffer, const ObjectIdProvider& provider) {
         DAWN_UNUSED(provider);
         DAWN_UNUSED(buffer);
 
@@ -170,8 +170,8 @@
             {% set memberName = as_varName(member.name) %}
             transfer->{{memberName}}Strlen = std::strlen(record.{{memberName}});
 
-            memcpy(buffer, record.{{memberName}}, transfer->{{memberName}}Strlen);
-            buffer += transfer->{{memberName}}Strlen;
+            memcpy(*buffer, record.{{memberName}}, transfer->{{memberName}}Strlen);
+            *buffer += transfer->{{memberName}}Strlen;
         {% endfor %}
 
         //* Allocate space and write the non-value arguments in it.
@@ -179,9 +179,9 @@
             {% set memberName = as_varName(member.name) %}
             {
                 size_t memberLength = {{member_length(member, "record.")}};
-                auto memberBuffer = reinterpret_cast<{{member_transfer_type(member)}}*>(buffer);
+                auto memberBuffer = reinterpret_cast<{{member_transfer_type(member)}}*>(*buffer);
 
-                buffer += memberLength * {{member_transfer_sizeof(member)}};
+                *buffer += memberLength * {{member_transfer_sizeof(member)}};
                 for (size_t i = 0; i < memberLength; ++i) {
                     {{serialize_member(member, "record." + memberName + "[i]", "memberBuffer[i]" )}}
                 }
@@ -345,7 +345,7 @@ namespace dawn_wire {
                 auto transfer = reinterpret_cast<{{name}}Transfer*>(buffer);
                 buffer += sizeof({{name}}Transfer);
 
-                {{name}}Serialize(*this, transfer, buffer, objectIdProvider);
+                {{name}}Serialize(*this, transfer, &buffer, objectIdProvider);
             }
 
             DeserializeResult {{Cmd}}::Deserialize(const char** buffer, size_t* size, DeserializeAllocator* allocator, const ObjectIdResolver& resolver) {
