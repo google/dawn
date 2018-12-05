@@ -133,10 +133,10 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     auto commandsClearGreen = commandsClearGreenBuilder.GetResult();
 
     queue.Submit(1, &commandsClearZero);
-    EXPECT_TEXTURE_RGBA8_EQ(expectZero.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expectZero.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0, 0);
 
     queue.Submit(1, &commandsClearGreen);
-    EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0, 0);
 
     // Part 2: draw a blue quad into the right half of the render target, and check result
 
@@ -155,9 +155,9 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
 
     queue.Submit(1, &commandsLoad);
     // Left half should still be green
-    EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize / 2, kRTSize, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize / 2, kRTSize, 0, 0);
     // Right half should now be blue
-    EXPECT_TEXTURE_RGBA8_EQ(expectBlue.data(), renderTarget, kRTSize / 2, 0, kRTSize / 2, kRTSize, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expectBlue.data(), renderTarget, kRTSize / 2, 0, kRTSize / 2, kRTSize, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

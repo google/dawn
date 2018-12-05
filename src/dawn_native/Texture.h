@@ -76,14 +76,18 @@ namespace dawn_native {
         TextureBase* GetTexture();
 
         dawn::TextureFormat GetFormat() const;
+        uint32_t GetBaseMipLevel() const;
         uint32_t GetLevelCount() const;
+        uint32_t GetBaseArrayLayer() const;
         uint32_t GetLayerCount() const;
 
       private:
         Ref<TextureBase> mTexture;
 
         dawn::TextureFormat mFormat;
+        uint32_t mBaseMipLevel;
         uint32_t mLevelCount;
+        uint32_t mBaseArrayLayer;
         uint32_t mLayerCount;
     };
 

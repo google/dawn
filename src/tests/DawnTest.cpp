@@ -292,6 +292,7 @@ std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
                                                     uint32_t width,
                                                     uint32_t height,
                                                     uint32_t level,
+                                                    uint32_t slice,
                                                     uint32_t pixelSize,
                                                     detail::Expectation* expectation) {
     uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
@@ -302,7 +303,7 @@ std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
     dawn::TextureCopyView textureCopyView =
-        utils::CreateTextureCopyView(texture, level, 0, {x, y, 0}, dawn::TextureAspect::Color);
+        utils::CreateTextureCopyView(texture, level, slice, {x, y, 0}, dawn::TextureAspect::Color);
     dawn::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(readback.buffer, readback.offset, rowPitch, 0);
     dawn::Extent3D copySize = {width, height, 1};

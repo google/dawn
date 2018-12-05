@@ -49,9 +49,11 @@ namespace dawn_native { namespace d3d12 {
       public:
         TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
 
+        DXGI_FORMAT GetD3D12Format() const;
+
         const D3D12_SHADER_RESOURCE_VIEW_DESC& GetSRVDescriptor() const;
-        D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor();
-        D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor();
+        D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor() const;
+        D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor() const;
 
       private:
         D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;

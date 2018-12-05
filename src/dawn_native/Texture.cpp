@@ -300,7 +300,9 @@ namespace dawn_native {
         : ObjectBase(texture->GetDevice()),
           mTexture(texture),
           mFormat(descriptor->format),
+          mBaseMipLevel(descriptor->baseMipLevel),
           mLevelCount(descriptor->levelCount),
+          mBaseArrayLayer(descriptor->baseArrayLayer),
           mLayerCount(descriptor->layerCount) {
     }
 
@@ -316,8 +318,16 @@ namespace dawn_native {
         return mFormat;
     }
 
+    uint32_t TextureViewBase::GetBaseMipLevel() const {
+        return mBaseMipLevel;
+    }
+
     uint32_t TextureViewBase::GetLevelCount() const {
         return mLevelCount;
+    }
+
+    uint32_t TextureViewBase::GetBaseArrayLayer() const {
+        return mBaseArrayLayer;
     }
 
     uint32_t TextureViewBase::GetLayerCount() const {

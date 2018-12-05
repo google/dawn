@@ -63,9 +63,8 @@ namespace dawn_native { namespace metal {
                     descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
                 }
 
-                // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
                 descriptor.colorAttachments[i].texture =
-                    ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
+                    ToBackend(attachmentInfo.view)->GetMTLTexture();
                 descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
             }
 

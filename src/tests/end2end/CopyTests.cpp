@@ -235,7 +235,7 @@ protected:
         std::vector<RGBA8> expected(rowPitch / kBytesPerTexel * (textureSpec.copyHeight - 1) + textureSpec.copyWidth);
         PackTextureData(&bufferData[bufferSpec.offset / kBytesPerTexel], textureSpec.copyWidth, textureSpec.copyHeight, bufferSpec.rowPitch / kBytesPerTexel, expected.data(), textureSpec.copyWidth);
 
-        EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, textureSpec.x, textureSpec.y, textureSpec.copyWidth, textureSpec.copyHeight, textureSpec.level) <<
+        EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, textureSpec.x, textureSpec.y, textureSpec.copyWidth, textureSpec.copyHeight, textureSpec.level, 0) <<
             "Buffer to Texture copy failed copying "
             << bufferSpec.size << "-byte buffer with offset " << bufferSpec.offset << " and row pitch " << bufferSpec.rowPitch << " to [("
             << textureSpec.x << ", " << textureSpec.y << "), (" << textureSpec.x + textureSpec.copyWidth << ", " << textureSpec.y + textureSpec.copyHeight <<

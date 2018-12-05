@@ -103,19 +103,20 @@ namespace dawn_native {
 
     RenderPassDescriptorBase* RenderPassDescriptorBuilder::GetResultImpl() {
         auto CheckOrSetSize = [this](const TextureViewBase* attachment) -> bool {
+            uint32_t mipLevel = attachment->GetBaseMipLevel();
             if (this->mWidth == 0) {
                 ASSERT(this->mHeight == 0);
 
-                this->mWidth = attachment->GetTexture()->GetSize().width;
-                this->mHeight = attachment->GetTexture()->GetSize().height;
+                this->mWidth = attachment->GetTexture()->GetSize().width >> mipLevel;
+                this->mHeight = attachment->GetTexture()->GetSize().height >> mipLevel;
                 ASSERT(this->mWidth != 0 && this->mHeight != 0);
 
                 return true;
             }
 
             ASSERT(this->mWidth != 0 && this->mHeight != 0);
-            return this->mWidth == attachment->GetTexture()->GetSize().width &&
-                   this->mHeight == attachment->GetTexture()->GetSize().height;
+            return this->mWidth == attachment->GetTexture()->GetSize().width >> mipLevel &&
+                   this->mHeight == attachment->GetTexture()->GetSize().height >> mipLevel;
         };
 
         uint32_t attachmentCount = 0;
