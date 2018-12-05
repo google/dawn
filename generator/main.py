@@ -48,37 +48,39 @@ class Name:
         return '_'.join(self.chunks)
 
 class Type:
-    def __init__(self, name, record, native=False):
-        self.record = record
+    def __init__(self, name, json_data, native=False):
+        self.json_data = json_data
         self.dict_name = name
         self.name = Name(name, native=native)
-        self.category = record['category']
+        self.category = json_data['category']
         self.is_builder = self.name.canonical_case().endswith(" builder")
 
 EnumValue = namedtuple('EnumValue', ['name', 'value'])
 class EnumType(Type):
-    def __init__(self, name, record):
-        Type.__init__(self, name, record)
-        self.values = [EnumValue(Name(m['name']), m['value']) for m in self.record['values']]
+    def __init__(self, name, json_data):
+        Type.__init__(self, name, json_data)
+        self.values = [EnumValue(Name(m['name']), m['value']) for m in self.json_data['values']]
 
 BitmaskValue = namedtuple('BitmaskValue', ['name', 'value'])
 class BitmaskType(Type):
-    def __init__(self, name, record):
-        Type.__init__(self, name, record)
-        self.values = [BitmaskValue(Name(m['name']), m['value']) for m in self.record['values']]
+    def __init__(self, name, json_data):
+        Type.__init__(self, name, json_data)
+        self.values = [BitmaskValue(Name(m['name']), m['value']) for m in self.json_data['values']]
         self.full_mask = 0
         for value in self.values:
             self.full_mask = self.full_mask | value.value
 
 class NativeType(Type):
-    def __init__(self, name, record):
-        Type.__init__(self, name, record, native=True)
+    def __init__(self, name, json_data):
+        Type.__init__(self, name, json_data, native=True)
 
 class NativelyDefined(Type):
-    def __init__(self, name, record):
-        Type.__init__(self, name, record)
+    def __init__(self, name, json_data):
+        Type.__init__(self, name, json_data)
 
-class MethodArgument:
+# Methods and structures are both "records", so record members correspond to
+# method arguments or structure members.
+class RecordMember:
     def __init__(self, name, typ, annotation, optional):
         self.name = name
         self.type = typ
@@ -88,24 +90,16 @@ class MethodArgument:
 
 Method = namedtuple('Method', ['name', 'return_type', 'arguments'])
 class ObjectType(Type):
-    def __init__(self, name, record):
-        Type.__init__(self, name, record)
+    def __init__(self, name, json_data):
+        Type.__init__(self, name, json_data)
         self.methods = []
         self.native_methods = []
         self.built_type = None
 
-class StructureMember:
-    def __init__(self, name, typ, annotation, optional):
-        self.name = name
-        self.type = typ
-        self.annotation = annotation
-        self.length = None
-        self.optional = optional
-
 class StructureType(Type):
-    def __init__(self, name, record):
-        Type.__init__(self, name, record)
-        self.extensible = record.get("extensible", False)
+    def __init__(self, name, json_data):
+        Type.__init__(self, name, json_data)
+        self.extensible = json_data.get("extensible", False)
         self.members = []
 
 ############################################################
@@ -117,32 +111,37 @@ def is_native_method(method):
     return method.return_type.category == "natively defined" or \
         any([arg.type.category == "natively defined" for arg in method.arguments])
 
-def link_object(obj, types):
-    def make_method(record):
-        arguments = []
-        arguments_by_name = {}
-        for a in record.get('args', []):
-            arg = MethodArgument(Name(a['name']), types[a['type']],
-                                 a.get('annotation', 'value'), a.get('optional', False))
-            arguments.append(arg)
-            arguments_by_name[arg.name.canonical_case()] = arg
+def linked_record_members(json_data, types):
+    members = []
+    members_by_name = {}
+    for m in json_data:
+        member = RecordMember(Name(m['name']), types[m['type']],
+                              m.get('annotation', 'value'), m.get('optional', False))
+        members.append(member)
+        members_by_name[member.name.canonical_case()] = member
 
-        for (arg, a) in zip(arguments, record.get('args', [])):
-            if arg.annotation != 'value':
-                if not 'length' in a:
-                    if arg.type.category == 'structure':
-                        arg.length = "constant"
-                        arg.constant_length = 1
-                    else:
-                        assert(False)
-                elif a['length'] == 'strlen':
-                    arg.length = 'strlen'
+    for (member, m) in zip(members, json_data):
+        if member.annotation != 'value':
+            if not 'length' in m:
+                if member.type.category == 'structure':
+                    member.length = "constant"
+                    member.constant_length = 1
                 else:
-                    arg.length = arguments_by_name[a['length']]
+                    assert(False)
+            elif m['length'] == 'strlen':
+                member.length = 'strlen'
+            else:
+                member.length = members_by_name[m['length']]
 
-        return Method(Name(record['name']), types[record.get('returns', 'void')], arguments)
+    return members
 
-    methods = [make_method(m) for m in obj.record.get('methods', [])]
+
+def link_object(obj, types):
+    def make_method(json_data):
+        arguments = linked_record_members(json_data.get('args', []), types)
+        return Method(Name(json_data['name']), types[json_data.get('returns', 'void')], arguments)
+
+    methods = [make_method(m) for m in obj.json_data.get('methods', [])]
     obj.methods = [method for method in methods if not is_native_method(method)]
     obj.native_methods = [method for method in methods if is_native_method(method)]
 
@@ -155,25 +154,7 @@ def link_object(obj, types):
         assert(obj.built_type != None)
 
 def link_structure(struct, types):
-    def make_member(m):
-        return StructureMember(Name(m['name']), types[m['type']],
-                               m.get('annotation', 'value'), m.get('optional', False))
-
-    members = []
-    members_by_name = {}
-    for m in struct.record['members']:
-        member = make_member(m)
-        members.append(member)
-        members_by_name[member.name.canonical_case()] = member
-    struct.members = members
-
-    for (member, m) in zip(members, struct.record['members']):
-        # TODO(kainino@chromium.org): More robust pointer/length handling?
-        if 'length' in m:
-            if m['length'] == 'strlen':
-                member.length = 'strlen'
-            else:
-                member.length = members_by_name[m['length']]
+    struct.members = linked_record_members(struct.json_data['members'], types)
 
 # Sort structures so that if struct A has struct B as a member, then B is listed before A
 # This is a form of topological sort where we try to keep the order reasonably similar to the
@@ -193,7 +174,7 @@ def topo_sort_structure(structs):
 
         max_dependent_depth = 0
         for member in struct.members:
-            if member.type.category == 'structure' and member.annotation == 'value':
+            if member.type.category == 'structure':
                 max_dependent_depth = max(max_dependent_depth, compute_depth(member.type) + 1)
 
         struct.subdag_depth = max_dependent_depth
@@ -227,11 +208,11 @@ def parse_json(json):
     for name in category_to_parser.keys():
         by_category[name] = []
 
-    for (name, record) in json.items():
+    for (name, json_data) in json.items():
         if name[0] == '_':
             continue
-        category = record['category']
-        parsed = category_to_parser[category](name, record)
+        category = json_data['category']
+        parsed = category_to_parser[category](name, json_data)
         by_category[category].append(parsed)
         types[name] = parsed
 
@@ -363,8 +344,6 @@ def as_cppType(name):
 def decorate(name, typ, arg):
     if arg.annotation == 'value':
         return typ + ' ' + name
-    elif arg.annotation == '*':
-        return typ + '* ' + name
     elif arg.annotation == 'const*':
         return typ + ' const * ' + name
     else:
@@ -414,9 +393,9 @@ def cpp_native_methods(types, typ):
 
     if typ.is_builder:
         methods.append(Method(Name('set error callback'), types['void'], [
-            MethodArgument(Name('callback'), types['builder error callback'], 'value', False),
-            MethodArgument(Name('userdata1'), types['callback userdata'], 'value', False),
-            MethodArgument(Name('userdata2'), types['callback userdata'], 'value', False),
+            RecordMember(Name('callback'), types['builder error callback'], 'value', False),
+            RecordMember(Name('userdata1'), types['callback userdata'], 'value', False),
+            RecordMember(Name('userdata2'), types['callback userdata'], 'value', False),
         ]))
 
     return methods
