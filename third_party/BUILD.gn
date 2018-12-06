@@ -58,6 +58,9 @@ static_library("spirv_cross") {
       "-Wno-return-type",
       "-Wno-sign-compare",
     ]
+  } else {
+    # Disable "not all control paths return a value" warning.
+    cflags_cc = [ "/wd4715" ]
   }
 
   sources = [
@@ -211,7 +214,10 @@ static_library("glfw") {
     # nonstandard extension, function/data pointer conversion in expression
     cflags_c = [ "/wd4152" ]
   } else {
-    cflags_c = [ "-Wno-sign-compare" ]
+    cflags_c = [
+      "-Wno-sign-compare",
+      "-Wno-missing-field-initializers",
+    ]
   }
 
   sources = [

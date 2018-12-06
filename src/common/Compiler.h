@@ -24,6 +24,9 @@
 //      (resp. false) to help it generate code that leads to better branch prediction.
 //  - DAWN_UNUSED(EXPR): Prevents unused variable/expression warnings on EXPR.
 //  - DAWN_UNUSED_FUNC(FUNC): Prevents unused function warnings on FUNC.
+//  - DAWN_DECLARE_UNUSED:    Prevents unused function warnings a subsequent declaration.
+//  Both DAWN_UNUSED_FUNC and DAWN_DECLARE_UNUSED may be necessary, e.g. to suppress clang's
+//  unneeded-internal-declaration warning.
 
 // Clang and GCC, check for __clang__ too to catch clang-cl masquarading as MSVC
 #if defined(__GNUC__) || defined(__clang__)
@@ -57,6 +60,8 @@
 #        define DAWN_NO_DISCARD [[nodiscard]]
 #    endif
 
+#    define DAWN_DECLARE_UNUSED __attribute__((unused))
+
 // MSVC
 #elif defined(_MSC_VER)
 #    define DAWN_COMPILER_MSVC
@@ -70,6 +75,8 @@ extern void __cdecl __debugbreak(void);
 #    if _MSC_VER >= 1911 && DAWN_CPP_VERSION >= 17
 #        define DAWN_NO_DISCARD [[nodiscard]]
 #    endif
+
+#    define DAWN_DECLARE_UNUSED
 
 #else
 #    error "Unsupported compiler"

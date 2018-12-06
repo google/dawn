@@ -110,7 +110,7 @@
     };
 
     //* Returns the required transfer size for `record` in addition to the transfer structure.
-    size_t {{name}}GetExtraRequiredSize(const {{name}}& record) {
+    DAWN_DECLARE_UNUSED size_t {{name}}GetExtraRequiredSize(const {{name}}& record) {
         DAWN_UNUSED(record);
 
         size_t result = 0;
