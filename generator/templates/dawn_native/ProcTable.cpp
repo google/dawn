@@ -159,7 +159,11 @@ namespace dawn_native {
                         {%- endfor -%}
                     );
                     {% if method.return_type.name.canonical_case() != "void" %}
-                        return reinterpret_cast<{{as_cType(method.return_type.name)}}>(result);
+                        {% if method.return_type.category == "object" %}
+                            return reinterpret_cast<{{as_cType(method.return_type.name)}}>(result);
+                        {% else %}
+                            return result;
+                        {% endif %}
                     {% endif %}
                 }
             {% endfor %}
