@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "mock/mock_dawn.h"
+#include "mock/mock_dawn_.h"
 
 #include "common/Assert.h"
 #include "dawn_wire/Wire.h"
