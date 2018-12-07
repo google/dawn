@@ -145,6 +145,20 @@ namespace dawn_wire {
                     mKnown[id].allocated = false;
                 }
 
+                std::vector<T> AcquireAllHandles() {
+                    std::vector<T> objects;
+                    for (Data& data : mKnown) {
+                        if (data.allocated && data.handle != nullptr) {
+                            objects.push_back(data.handle);
+                            data.valid = false;
+                            data.allocated = false;
+                            data.handle = nullptr;
+                        }
+                    }
+
+                    return objects;
+                }
+
             private:
                 std::vector<Data> mKnown;
         };
@@ -254,6 +268,18 @@ namespace dawn_wire {
 
                     auto userdata = static_cast<dawnCallbackUserdata>(reinterpret_cast<intptr_t>(this));
                     procs.deviceSetErrorCallback(device, ForwardDeviceErrorToServer, userdata);
+                }
+
+                ~Server() override {
+                    //* Free all objects when the server is destroyed
+                    {% for type in by_category["object"] if type.name.canonical_case() != "device" %}
+                        {
+                            std::vector<{{as_cType(type.name)}}> handles = mKnown{{type.name.CamelCase()}}.AcquireAllHandles();
+                            for ({{as_cType(type.name)}} handle : handles) {
+                                mProcs.{{as_varName(type.name, Name("release"))}}(handle);
+                            }
+                        }
+                    {% endfor %}
                 }
 
                 void OnDeviceError(const char* message) {
