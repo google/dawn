@@ -625,6 +625,12 @@ namespace dawn_wire {
                     //* reference / release and only send destroy on refcount = 0.
                     {% set Suffix = as_MethodSuffix(type.name, Name("destroy")) %}
                     bool Handle{{Suffix}}(const char** commands, size_t* size) {
+
+                        //* Freeing the device has to be done out of band.
+                        {% if type.name.canonical_case() == "device" %}
+                            return false;
+                        {% endif %}
+
                         const auto* cmd = GetCommand<{{Suffix}}Cmd>(commands, size);
                         if (cmd == nullptr) {
                             return false;
