@@ -46,37 +46,54 @@ namespace dawn_native { namespace d3d12 {
         const auto& bindingOffsets = bgl->GetBindingOffsets();
 
         auto d3d12Device = ToBackend(GetDevice())->GetD3D12Device();
-        for (uint32_t binding : IterateBitSet(layout.mask)) {
-            switch (layout.types[binding]) {
+        for (uint32_t bindingIndex : IterateBitSet(layout.mask)) {
+            switch (layout.types[bindingIndex]) {
                 case dawn::BindingType::UniformBuffer: {
-                    auto* view = ToBackend(GetBindingAsBufferView(binding));
-                    auto& cbv = view->GetCBVDescriptor();
+                    BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
+
+                    D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
+                    // TODO(enga@google.com): investigate if this needs to be a constraint at the
+                    // API level
+                    desc.SizeInBytes = Align(binding.size, 256);
+                    desc.BufferLocation = ToBackend(binding.buffer)->GetVA() + binding.offset;
+
                     d3d12Device->CreateConstantBufferView(
-                        &cbv, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
-                                                              bindingOffsets[binding]));
+                        &desc, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
+                                                               bindingOffsets[bindingIndex]));
                 } break;
                 case dawn::BindingType::StorageBuffer: {
-                    auto* view = ToBackend(GetBindingAsBufferView(binding));
-                    auto& uav = view->GetUAVDescriptor();
+                    BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
+
+                    D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+                    // TODO(enga@google.com): investigate if this needs to be a constraint at the
+                    // API level
+                    desc.Buffer.NumElements = Align(binding.size, 256);
+                    desc.Format = DXGI_FORMAT_UNKNOWN;
+                    desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+                    desc.Buffer.FirstElement = binding.offset;
+                    desc.Buffer.StructureByteStride = 1;
+                    desc.Buffer.CounterOffsetInBytes = 0;
+                    desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+
                     d3d12Device->CreateUnorderedAccessView(
-                        ToBackend(view->GetBuffer())->GetD3D12Resource().Get(), nullptr, &uav,
+                        ToBackend(binding.buffer)->GetD3D12Resource().Get(), nullptr, &desc,
                         cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
-                                                        bindingOffsets[binding]));
+                                                        bindingOffsets[bindingIndex]));
                 } break;
                 case dawn::BindingType::SampledTexture: {
-                    auto* view = ToBackend(GetBindingAsTextureView(binding));
+                    auto* view = ToBackend(GetBindingAsTextureView(bindingIndex));
                     auto& srv = view->GetSRVDescriptor();
                     d3d12Device->CreateShaderResourceView(
                         ToBackend(view->GetTexture())->GetD3D12Resource(), &srv,
                         cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
-                                                        bindingOffsets[binding]));
+                                                        bindingOffsets[bindingIndex]));
                 } break;
                 case dawn::BindingType::Sampler: {
-                    auto* sampler = ToBackend(GetBindingAsSampler(binding));
+                    auto* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     auto& samplerDesc = sampler->GetSamplerDescriptor();
                     d3d12Device->CreateSampler(
                         &samplerDesc, samplerHeapStart.GetCPUHandle(*samplerHeapOffset +
-                                                                    bindingOffsets[binding]));
+                                                                    bindingOffsets[bindingIndex]));
                 } break;
             }
         }

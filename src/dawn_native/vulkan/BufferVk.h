@@ -52,8 +52,6 @@ namespace dawn_native { namespace vulkan {
         dawn::BufferUsageBit mLastUsage = dawn::BufferUsageBit::None;
     };
 
-    using BufferView = BufferViewBase;
-
     class MapRequestTracker {
       public:
         MapRequestTracker(Device* device);

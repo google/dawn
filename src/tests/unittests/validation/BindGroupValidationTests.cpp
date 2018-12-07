@@ -135,7 +135,9 @@ TEST_F(BindGroupValidationTest, SamplerBindingType) {
     binding.binding = 0;
     binding.sampler = nullptr;
     binding.textureView = nullptr;
-    binding.bufferView = nullptr;
+    binding.buffer = nullptr;
+    binding.offset = 0;
+    binding.size = 0;
 
     dawn::BindGroupDescriptor descriptor;
     descriptor.nextInChain = nullptr;
@@ -155,10 +157,10 @@ TEST_F(BindGroupValidationTest, SamplerBindingType) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
     binding.textureView = nullptr;
 
-    // Setting the buffer view as well is an error
-    binding.bufferView = mUBO.CreateBufferViewBuilder().SetExtent(0, 256).GetResult();
+    // Setting the buffer as well is an error
+    binding.buffer = mUBO;
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
-    binding.bufferView = nullptr;
+    binding.buffer = nullptr;
 }
 
 // Check that a texture binding must contain exactly a texture view
@@ -171,7 +173,9 @@ TEST_F(BindGroupValidationTest, TextureBindingType) {
     binding.binding = 0;
     binding.sampler = nullptr;
     binding.textureView = nullptr;
-    binding.bufferView = nullptr;
+    binding.buffer = nullptr;
+    binding.offset = 0;
+    binding.size = 0;
 
     dawn::BindGroupDescriptor descriptor;
     descriptor.nextInChain = nullptr;
@@ -191,13 +195,13 @@ TEST_F(BindGroupValidationTest, TextureBindingType) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
     binding.textureView = nullptr;
 
-    // Setting the buffer view as well is an error
-    binding.bufferView = mUBO.CreateBufferViewBuilder().SetExtent(0, 256).GetResult();
+    // Setting the buffer as well is an error
+    binding.buffer = mUBO;
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
-    binding.bufferView = nullptr;
+    binding.buffer = nullptr;
 }
 
-// Check that a buffer binding must contain exactly a buffer view
+// Check that a buffer binding must contain exactly a buffer
 TEST_F(BindGroupValidationTest, BufferBindingType) {
     dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
         {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}
@@ -207,7 +211,9 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
     binding.binding = 0;
     binding.sampler = nullptr;
     binding.textureView = nullptr;
-    binding.bufferView = nullptr;
+    binding.buffer = nullptr;
+    binding.offset = 0;
+    binding.size = 0;
 
     dawn::BindGroupDescriptor descriptor;
     descriptor.nextInChain = nullptr;
@@ -218,8 +224,8 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
     // Not setting anything fails
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
 
-    // Control case: setting just the buffer view works
-    binding.bufferView = mUBO.CreateBufferViewBuilder().SetExtent(0, 256).GetResult();
+    // Control case: setting just the buffer works
+    binding.buffer = mUBO;
     device.CreateBindGroup(&descriptor);
 
     // Setting the texture view as well is an error
@@ -261,14 +267,11 @@ TEST_F(BindGroupValidationTest, BufferUsageUBO) {
         {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}
     });
 
-    dawn::BufferView uboView = mUBO.CreateBufferViewBuilder().SetExtent(0, 256).GetResult();
-    dawn::BufferView ssboView = mSSBO.CreateBufferViewBuilder().SetExtent(0, 256).GetResult();
-
     // Control case: using a buffer with the uniform usage works
-    utils::MakeBindGroup(device, layout, {{0, uboView}});
+    utils::MakeBindGroup(device, layout, {{0, mUBO, 0, 256}});
 
     // Using a buffer without the uniform usage fails
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, ssboView}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mSSBO, 0, 256}}));
 }
 
 // Check that a SSBO must have the correct usage
@@ -277,57 +280,63 @@ TEST_F(BindGroupValidationTest, BufferUsageSSBO) {
         {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::StorageBuffer}
     });
 
-    dawn::BufferView uboView = mUBO.CreateBufferViewBuilder().SetExtent(0, 256).GetResult();
-    dawn::BufferView ssboView = mSSBO.CreateBufferViewBuilder().SetExtent(0, 256).GetResult();
-
     // Control case: using a buffer with the storage usage works
-    utils::MakeBindGroup(device, layout, {{0, ssboView}});
+    utils::MakeBindGroup(device, layout, {{0, mSSBO, 0, 256}});
 
     // Using a buffer without the storage usage fails
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, uboView}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mUBO, 0, 256}}));
 }
 
-// Tests constraints on the buffer view offset for bind groups.
-TEST_F(BindGroupValidationTest, BufferViewOffset) {
+// Tests constraints on the buffer offset for bind groups.
+TEST_F(BindGroupValidationTest, BufferOffsetAlignment) {
     dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
         {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
     });
 
     // Check that offset 0 is valid
-    {
-        dawn::BufferView bufferView = mUBO.CreateBufferViewBuilder()
-            .SetExtent(0, 512)
-            .GetResult();
-        utils::MakeBindGroup(device, layout, {{0, bufferView}});
-    }
+    utils::MakeBindGroup(device, layout, {{0, mUBO, 0, 512}});
 
     // Check that offset 256 (aligned) is valid
-    {
-        dawn::BufferView bufferView = mUBO.CreateBufferViewBuilder()
-            .SetExtent(256, 256)
-            .GetResult();
-        utils::MakeBindGroup(device, layout, {{0, bufferView}});
-    }
+    utils::MakeBindGroup(device, layout, {{0, mUBO, 256, 256}});
 
-    // Check cases where unaligned buffer view offset is invalid
-    {
-        dawn::BufferView bufferView = mUBO.CreateBufferViewBuilder()
-            .SetExtent(1, 256)
-            .GetResult();
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, bufferView}}));
-    }
-    {
-        dawn::BufferView bufferView = mUBO.CreateBufferViewBuilder()
-            .SetExtent(128, 256)
-            .GetResult();
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, bufferView}}));
-    }
-    {
-        dawn::BufferView bufferView = mUBO.CreateBufferViewBuilder()
-            .SetExtent(255, 256)
-            .GetResult();
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, bufferView}}));
-    }
+    // Check cases where unaligned buffer offset is invalid
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mUBO, 1, 256}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mUBO, 128, 256}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mUBO, 255, 256}}));
+}
+
+// Tests constraints to be sure the buffer binding fits in the buffer
+TEST_F(BindGroupValidationTest, BufferBindingOOB) {
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
+        {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
+    });
+
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 1024;
+    descriptor.usage = dawn::BufferUsageBit::Uniform;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    // Success case, touching the start of the buffer works
+    utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256}});
+
+    // Success case, touching the end of the buffer works
+    utils::MakeBindGroup(device, layout, {{0, buffer, 3*256, 256}});
+    utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 0}});
+
+    // Success case, touching the full buffer works
+    utils::MakeBindGroup(device, layout, {{0, buffer, 0, 1024}});
+
+    // Error case, offset is OOB
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256*5, 0}}));
+
+    // Error case, size is OOB
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256*5}}));
+
+    // Error case, offset+size is OOB
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 1}}));
+
+    // Error case, offset+size overflows to be 0
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256, uint32_t(0) - uint32_t(256)}}));
 }
 
 class BindGroupLayoutValidationTest : public ValidationTest {

@@ -235,21 +235,21 @@ namespace dawn_native { namespace opengl {
             const auto& indices = pipelineLayout->GetBindingIndexInfo()[index];
             const auto& layout = group->GetLayout()->GetBindingInfo();
 
-            for (uint32_t binding : IterateBitSet(layout.mask)) {
-                switch (layout.types[binding]) {
+            for (uint32_t bindingIndex : IterateBitSet(layout.mask)) {
+                switch (layout.types[bindingIndex]) {
                     case dawn::BindingType::UniformBuffer: {
-                        BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
-                        GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
-                        GLuint uboIndex = indices[binding];
+                        BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
+                        GLuint buffer = ToBackend(binding.buffer)->GetHandle();
+                        GLuint uboIndex = indices[bindingIndex];
 
-                        glBindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer, view->GetOffset(),
-                                          view->GetSize());
+                        glBindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer, binding.offset,
+                                          binding.size);
                     } break;
 
                     case dawn::BindingType::Sampler: {
                         GLuint sampler =
-                            ToBackend(group->GetBindingAsSampler(binding))->GetHandle();
-                        GLuint samplerIndex = indices[binding];
+                            ToBackend(group->GetBindingAsSampler(bindingIndex))->GetHandle();
+                        GLuint samplerIndex = indices[bindingIndex];
 
                         for (auto unit : pipeline->GetTextureUnitsForSampler(samplerIndex)) {
                             glBindSampler(unit, sampler);
@@ -257,10 +257,10 @@ namespace dawn_native { namespace opengl {
                     } break;
 
                     case dawn::BindingType::SampledTexture: {
-                        TextureView* view = ToBackend(group->GetBindingAsTextureView(binding));
+                        TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                         GLuint handle = view->GetHandle();
                         GLenum target = view->GetGLTarget();
-                        GLuint viewIndex = indices[binding];
+                        GLuint viewIndex = indices[bindingIndex];
 
                         for (auto unit : pipeline->GetTextureUnitsForTextureView(viewIndex)) {
                             glActiveTexture(GL_TEXTURE0 + unit);
@@ -269,12 +269,12 @@ namespace dawn_native { namespace opengl {
                     } break;
 
                     case dawn::BindingType::StorageBuffer: {
-                        BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
-                        GLuint buffer = ToBackend(view->GetBuffer())->GetHandle();
-                        GLuint ssboIndex = indices[binding];
+                        BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
+                        GLuint buffer = ToBackend(binding.buffer)->GetHandle();
+                        GLuint ssboIndex = indices[bindingIndex];
 
                         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer,
-                                          view->GetOffset(), view->GetSize());
+                                          binding.offset, binding.size);
                     } break;
                 }
             }

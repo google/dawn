@@ -42,7 +42,6 @@ namespace dawn_native { namespace null {
     using BindGroupLayout = BindGroupLayoutBase;
     using BlendState = BlendStateBase;
     class Buffer;
-    using BufferView = BufferViewBase;
     class CommandBuffer;
     using ComputePipeline = ComputePipelineBase;
     using DepthStencilState = DepthStencilStateBase;
@@ -63,7 +62,6 @@ namespace dawn_native { namespace null {
         using BindGroupLayoutType = BindGroupLayout;
         using BlendStateType = BlendState;
         using BufferType = Buffer;
-        using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;
@@ -96,7 +94,6 @@ namespace dawn_native { namespace null {
         ~Device();
 
         BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
-        BufferViewBase* CreateBufferView(BufferViewBuilder* builder) override;
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;

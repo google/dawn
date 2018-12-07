@@ -57,9 +57,4 @@ namespace dawn_native { namespace opengl {
         glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 
-    // BufferView
-
-    BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
-    }
-
 }}  // namespace dawn_native::opengl

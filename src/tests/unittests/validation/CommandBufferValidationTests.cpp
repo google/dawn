@@ -74,8 +74,7 @@ TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteUsage) {
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(device, {{
         0, dawn::ShaderStageBit::Vertex, dawn::BindingType::StorageBuffer
     }});
-    dawn::BufferView view = buffer.CreateBufferViewBuilder().SetExtent(0, 4).GetResult();
-    dawn::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
+    dawn::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
 
     // Use the buffer as both index and storage in the same pass
     dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());

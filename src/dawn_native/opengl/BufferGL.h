@@ -38,11 +38,6 @@ namespace dawn_native { namespace opengl {
         GLuint mBuffer = 0;
     };
 
-    class BufferView : public BufferViewBase {
-      public:
-        BufferView(BufferViewBuilder* builder);
-    };
-
 }}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_BUFFERGL_H_

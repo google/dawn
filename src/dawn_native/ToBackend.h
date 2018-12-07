@@ -44,11 +44,6 @@ namespace dawn_native {
     };
 
     template <typename BackendTraits>
-    struct ToBackendTraits<BufferViewBase, BackendTraits> {
-        using BackendType = typename BackendTraits::BufferViewType;
-    };
-
-    template <typename BackendTraits>
     struct ToBackendTraits<CommandBufferBase, BackendTraits> {
         using BackendType = typename BackendTraits::CommandBufferType;
     };

@@ -197,32 +197,6 @@ namespace dawn_native { namespace d3d12 {
         mWrittenMappedRange = {};
     }
 
-    BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
-        mCbvDesc.BufferLocation = ToBackend(GetBuffer())->GetVA() + GetOffset();
-        mCbvDesc.SizeInBytes = GetD3D12Size();
-
-        mUavDesc.Format = DXGI_FORMAT_UNKNOWN;
-        mUavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-        mUavDesc.Buffer.FirstElement = GetOffset();
-        mUavDesc.Buffer.NumElements = GetD3D12Size();
-        mUavDesc.Buffer.StructureByteStride = 1;
-        mUavDesc.Buffer.CounterOffsetInBytes = 0;
-        mUavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-    }
-
-    uint32_t BufferView::GetD3D12Size() const {
-        // TODO(enga@google.com): TODO investigate if this needs to be a constraint at the API level
-        return Align(GetSize(), 256);
-    }
-
-    const D3D12_CONSTANT_BUFFER_VIEW_DESC& BufferView::GetCBVDescriptor() const {
-        return mCbvDesc;
-    }
-
-    const D3D12_UNORDERED_ACCESS_VIEW_DESC& BufferView::GetUAVDescriptor() const {
-        return mUavDesc;
-    }
-
     MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {
     }
 

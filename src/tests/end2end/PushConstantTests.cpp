@@ -51,20 +51,15 @@ class PushConstantTest: public DawnTest {
 
             dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
-            dawn::BufferView views[2] = {
-                buf1.CreateBufferViewBuilder().SetExtent(0, 4).GetResult(),
-                buf2.CreateBufferViewBuilder().SetExtent(0, 4).GetResult(),
-            };
-
             dawn::BindGroup bg;
             if (extraBuffer) {
                 bg = utils::MakeBindGroup(device, bgl, {
-                    {0, views[0]},
-                    {1, views[1]},
+                    {0, buf1, 0, 4},
+                    {1, buf2, 0, 4},
                 });
             } else {
                 bg = utils::MakeBindGroup(device, bgl, {
-                    {0, views[0]},
+                    {0, buf1, 0, 4},
                 });
             }
 

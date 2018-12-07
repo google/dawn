@@ -209,12 +209,8 @@ class DepthStencilStateTest : public DawnTest {
                 // Upload a buffer for each triangle's depth and color data
                 dawn::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(TriangleData), dawn::BufferUsageBit::Uniform);
 
-                dawn::BufferView view = buffer.CreateBufferViewBuilder()
-                    .SetExtent(0, sizeof(TriangleData))
-                    .GetResult();
-
                 // Create a bind group for the data
-                dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bindGroupLayout, {{0, view}});
+                dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bindGroupLayout, {{0, buffer, 0, sizeof(TriangleData)}});
 
                 // Create a pipeline for the triangles with the test spec's depth stencil state
                 dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()

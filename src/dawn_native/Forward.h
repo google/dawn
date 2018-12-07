@@ -27,8 +27,6 @@ namespace dawn_native {
     class BlendStateBuilder;
     class BufferBase;
     class BufferBuilder;
-    class BufferViewBase;
-    class BufferViewBuilder;
     class ComputePipelineBase;
     class ComputePipelineBuilder;
     class CommandBufferBase;

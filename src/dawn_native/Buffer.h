@@ -45,7 +45,6 @@ namespace dawn_native {
         MaybeError ValidateCanUseInSubmitNow() const;
 
         // Dawn API
-        BufferViewBuilder* CreateBufferViewBuilder();
         void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);
         void MapReadAsync(uint32_t start,
                           uint32_t size,
@@ -86,40 +85,8 @@ namespace dawn_native {
         bool mIsMapped = false;
     };
 
-    class BufferViewBase : public ObjectBase {
-      public:
-        BufferViewBase(BufferViewBuilder* builder);
-
-        BufferBase* GetBuffer();
-        uint32_t GetSize() const;
-        uint32_t GetOffset() const;
-
-      private:
-        Ref<BufferBase> mBuffer;
-        uint32_t mSize;
-        uint32_t mOffset;
-    };
-
-    class BufferViewBuilder : public Builder<BufferViewBase> {
-      public:
-        BufferViewBuilder(DeviceBase* device, BufferBase* buffer);
-
-        // Dawn API
-        void SetExtent(uint32_t offset, uint32_t size);
-
-      private:
-        friend class BufferViewBase;
-
-        BufferViewBase* GetResultImpl() override;
-
-        Ref<BufferBase> mBuffer;
-        uint32_t mOffset = 0;
-        uint32_t mSize = 0;
-        int mPropertiesSet = 0;
-    };
-
     // This builder class is kept around purely for testing but should not be used.
-    class BufferBuilder : public Builder<BufferViewBase> {
+    class BufferBuilder : public Builder<BufferBase> {
       public:
         BufferBuilder(DeviceBase* device) : Builder(device) {
             UNREACHABLE();

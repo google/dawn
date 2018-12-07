@@ -82,12 +82,11 @@ namespace dawn_native { namespace vulkan {
             switch (layoutInfo.types[bindingIndex]) {
                 case dawn::BindingType::UniformBuffer:
                 case dawn::BindingType::StorageBuffer: {
-                    BufferViewBase* view = GetBindingAsBufferView(bindingIndex);
-                    Buffer* buffer = ToBackend(view->GetBuffer());
+                    BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
-                    writeBufferInfo[numWrites].buffer = buffer->GetHandle();
-                    writeBufferInfo[numWrites].offset = view->GetOffset();
-                    writeBufferInfo[numWrites].range = view->GetSize();
+                    writeBufferInfo[numWrites].buffer = ToBackend(binding.buffer)->GetHandle();
+                    writeBufferInfo[numWrites].offset = binding.offset;
+                    writeBufferInfo[numWrites].range = binding.size;
 
                     write.pBufferInfo = &writeBufferInfo[numWrites];
                 } break;

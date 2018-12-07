@@ -17,17 +17,12 @@
 
 #include "dawn_native/ToBackend.h"
 
-namespace dawn_native {
-    class BufferViewBase;
-}
-
 namespace dawn_native { namespace vulkan {
 
     class BindGroup;
     class BindGroupLayout;
     class BlendState;
     class Buffer;
-    using BufferView = BufferViewBase;
     class CommandBuffer;
     class ComputePipeline;
     class DepthStencilState;
@@ -48,7 +43,6 @@ namespace dawn_native { namespace vulkan {
         using BindGroupLayoutType = BindGroupLayout;
         using BlendStateType = BlendState;
         using BufferType = Buffer;
-        using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;

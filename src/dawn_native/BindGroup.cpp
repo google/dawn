@@ -30,17 +30,28 @@ namespace dawn_native {
 
         MaybeError ValidateBufferBinding(const BindGroupBinding& binding,
                                          dawn::BufferUsageBit requiredUsage) {
-            if (binding.bufferView == nullptr || binding.sampler != nullptr ||
+            if (binding.buffer == nullptr || binding.sampler != nullptr ||
                 binding.textureView != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected buffer binding");
             }
 
-            if (!IsAligned(binding.bufferView->GetOffset(), 256)) {
-                return DAWN_VALIDATION_ERROR(
-                    "Buffer view offset for bind group needs to be 256-byte aligned");
+            uint32_t bufferSize = binding.buffer->GetSize();
+            if (binding.size > bufferSize) {
+                return DAWN_VALIDATION_ERROR("Buffer binding size larger than the buffer");
             }
 
-            if (!(binding.bufferView->GetBuffer()->GetUsage() & requiredUsage)) {
+            // Note that no overflow can happen because we already checked that
+            // bufferSize >= binding.size
+            if (binding.offset > bufferSize - binding.size) {
+                return DAWN_VALIDATION_ERROR("Buffer binding doesn't fit in the buffer");
+            }
+
+            if (!IsAligned(binding.offset, 256)) {
+                return DAWN_VALIDATION_ERROR(
+                    "Buffer offset for bind group needs to be 256-byte aligned");
+            }
+
+            if (!(binding.buffer->GetUsage() & requiredUsage)) {
                 return DAWN_VALIDATION_ERROR("buffer binding usage mismatch");
             }
 
@@ -50,7 +61,7 @@ namespace dawn_native {
         MaybeError ValidateTextureBinding(const BindGroupBinding& binding,
                                           dawn::TextureUsageBit requiredUsage) {
             if (binding.textureView == nullptr || binding.sampler != nullptr ||
-                binding.bufferView != nullptr) {
+                binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected texture binding");
             }
 
@@ -63,7 +74,7 @@ namespace dawn_native {
 
         MaybeError ValidateSamplerBinding(const BindGroupBinding& binding) {
             if (binding.sampler == nullptr || binding.textureView != nullptr ||
-                binding.bufferView != nullptr) {
+                binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected sampler binding");
             }
             return {};
@@ -142,9 +153,11 @@ namespace dawn_native {
             // Only a single binding type should be set, so once we found it we can skip to the
             // next loop iteration.
 
-            if (binding.bufferView != nullptr) {
+            if (binding.buffer != nullptr) {
                 ASSERT(mBindings[bindingIndex].Get() == nullptr);
-                mBindings[bindingIndex] = binding.bufferView;
+                mBindings[bindingIndex] = binding.buffer;
+                mOffsets[bindingIndex] = binding.offset;
+                mSizes[bindingIndex] = binding.size;
                 continue;
             }
 
@@ -166,12 +179,13 @@ namespace dawn_native {
         return mLayout.Get();
     }
 
-    BufferViewBase* BindGroupBase::GetBindingAsBufferView(size_t binding) {
+    BufferBinding BindGroupBase::GetBindingAsBufferBinding(size_t binding) {
         ASSERT(binding < kMaxBindingsPerGroup);
         ASSERT(mLayout->GetBindingInfo().mask[binding]);
         ASSERT(mLayout->GetBindingInfo().types[binding] == dawn::BindingType::UniformBuffer ||
                mLayout->GetBindingInfo().types[binding] == dawn::BindingType::StorageBuffer);
-        return reinterpret_cast<BufferViewBase*>(mBindings[binding].Get());
+        BufferBase* buffer = reinterpret_cast<BufferBase*>(mBindings[binding].Get());
+        return {buffer, mOffsets[binding], mSizes[binding]};
     }
 
     SamplerBase* BindGroupBase::GetBindingAsSampler(size_t binding) {

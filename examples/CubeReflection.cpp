@@ -180,27 +180,14 @@ void init() {
     transform = glm::translate(transform, glm::vec3(0.f, -2.f, 0.f));
     transformBuffer[1] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), dawn::BufferUsageBit::Uniform);
 
-    dawn::BufferView cameraBufferView = cameraBuffer.CreateBufferViewBuilder()
-        .SetExtent(0, sizeof(CameraData))
-        .GetResult();
-
-    dawn::BufferView transformBufferView[2] = {
-        transformBuffer[0].CreateBufferViewBuilder()
-            .SetExtent(0, sizeof(glm::mat4))
-            .GetResult(),
-        transformBuffer[1].CreateBufferViewBuilder()
-            .SetExtent(0, sizeof(glm::mat4))
-            .GetResult(),
-    };
-
     bindGroup[0] = utils::MakeBindGroup(device, bgl, {
-        {0, cameraBufferView},
-        {1, transformBufferView[0]}
+        {0, cameraBuffer, 0, sizeof(CameraData)},
+        {1, transformBuffer[0], 0, sizeof(glm::mat4)}
     });
 
     bindGroup[1] = utils::MakeBindGroup(device, bgl, {
-        {0, cameraBufferView},
-        {1, transformBufferView[1]}
+        {0, cameraBuffer, 0, sizeof(CameraData)},
+        {1, transformBuffer[1], 0, sizeof(glm::mat4)}
     });
 
     depthStencilView = CreateDefaultDepthStencilView(device);

@@ -32,18 +32,26 @@ namespace dawn_native {
     MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
                                            const BindGroupDescriptor* descriptor);
 
+    struct BufferBinding {
+        BufferBase* buffer;
+        uint32_t offset;
+        uint32_t size;
+    };
+
     class BindGroupBase : public ObjectBase {
       public:
         BindGroupBase(DeviceBase* device, const BindGroupDescriptor* descriptor);
 
         const BindGroupLayoutBase* GetLayout() const;
-        BufferViewBase* GetBindingAsBufferView(size_t binding);
+        BufferBinding GetBindingAsBufferBinding(size_t binding);
         SamplerBase* GetBindingAsSampler(size_t binding);
         TextureViewBase* GetBindingAsTextureView(size_t binding);
 
       private:
         Ref<BindGroupLayoutBase> mLayout;
         std::array<Ref<ObjectBase>, kMaxBindingsPerGroup> mBindings;
+        std::array<uint32_t, kMaxBindingsPerGroup> mOffsets;
+        std::array<uint32_t, kMaxBindingsPerGroup> mSizes;
     };
 
 }  // namespace dawn_native

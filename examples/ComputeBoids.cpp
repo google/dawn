@@ -237,22 +237,11 @@ void initSim() {
     csDesc.layout = pl;
     updatePipeline = device.CreateComputePipeline(&csDesc);
 
-    dawn::BufferView updateParamsView = updateParams.CreateBufferViewBuilder()
-        .SetExtent(0, sizeof(SimParams))
-        .GetResult();
-
-    std::array<dawn::BufferView, 2> views;
-    for (uint32_t i = 0; i < 2; ++i) {
-        views[i] = particleBuffers[i].CreateBufferViewBuilder()
-            .SetExtent(0, kNumParticles * sizeof(Particle))
-            .GetResult();
-    }
-
     for (uint32_t i = 0; i < 2; ++i) {
         updateBGs[i] = utils::MakeBindGroup(device, bgl, {
-            {0, updateParamsView},
-            {1, views[i]},
-            {2, views[(i + 1) % 2]}
+            {0, updateParams, 0, sizeof(SimParams)},
+            {1, particleBuffers[i], 0, kNumParticles * sizeof(Particle)},
+            {2, particleBuffers[(i + 1) % 2], 0, kNumParticles * sizeof(Particle)},
         });
     }
 }

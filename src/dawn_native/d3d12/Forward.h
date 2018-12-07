@@ -23,7 +23,6 @@ namespace dawn_native { namespace d3d12 {
     class BindGroupLayout;
     class BlendState;
     class Buffer;
-    class BufferView;
     class CommandBuffer;
     class ComputePipeline;
     class DepthStencilState;
@@ -44,7 +43,6 @@ namespace dawn_native { namespace d3d12 {
         using BindGroupLayoutType = BindGroupLayout;
         using BlendStateType = BlendState;
         using BufferType = Buffer;
-        using BufferViewType = BufferView;
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;
         using DepthStencilStateType = DepthStencilState;

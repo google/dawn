@@ -57,8 +57,6 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     }
     src.SetSubData(0, sizeof(expected), reinterpret_cast<const uint8_t*>(expected.data()));
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), src, 0, kNumUints);
-    auto srcView =
-        src.CreateBufferViewBuilder().SetExtent(0, kNumUints * sizeof(uint32_t)).GetResult();
 
     // Set up dst storage buffer
     dawn::BufferDescriptor dstDesc;
@@ -69,13 +67,11 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
 
     std::array<uint32_t, kNumUints> zero{};
     dst.SetSubData(0, sizeof(zero), reinterpret_cast<const uint8_t*>(zero.data()));
-    auto dstView =
-        dst.CreateBufferViewBuilder().SetExtent(0, kNumUints * sizeof(uint32_t)).GetResult();
 
     // Set up bind group and issue dispatch
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {
-        {0, srcView},
-        {1, dstView},
+        {0, src, 0, kNumUints * sizeof(uint32_t)},
+        {1, dst, 0, kNumUints * sizeof(uint32_t)},
     });
 
     dawn::CommandBuffer commands;

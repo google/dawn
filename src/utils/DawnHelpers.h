@@ -69,7 +69,7 @@ namespace utils {
     //
     //   utils::MakeBindGroup(device, layout, {
     //       {0, mySampler},
-    //       {1, myBufferView},
+    //       {1, myBuffer, offset, size},
     //       {3, myTexture}
     //   });
 
@@ -78,14 +78,19 @@ namespace utils {
     struct BindingInitializationHelper {
         BindingInitializationHelper(uint32_t binding, const dawn::Sampler& sampler);
         BindingInitializationHelper(uint32_t binding, const dawn::TextureView& textureView);
-        BindingInitializationHelper(uint32_t binding, const dawn::BufferView& bufferView);
+        BindingInitializationHelper(uint32_t binding,
+                                    const dawn::Buffer& buffer,
+                                    uint32_t offset,
+                                    uint32_t size);
 
         dawn::BindGroupBinding GetAsBinding() const;
 
         uint32_t binding;
         dawn::Sampler sampler;
         dawn::TextureView textureView;
-        dawn::BufferView bufferView;
+        dawn::Buffer buffer;
+        uint32_t offset = 0;
+        uint32_t size = 0;
     };
 
     dawn::BindGroup MakeBindGroup(

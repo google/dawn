@@ -96,12 +96,7 @@ class BlendStateTest : public DawnTest {
             uint32_t bufferSize = static_cast<uint32_t>(4 * N * sizeof(float));
 
             dawn::Buffer buffer = utils::CreateBufferFromData(device, &data, bufferSize, dawn::BufferUsageBit::Uniform);
-
-            dawn::BufferView view = buffer.CreateBufferViewBuilder()
-                .SetExtent(0, bufferSize)
-                .GetResult();
-
-            return utils::MakeBindGroup(device, bindGroupLayout, {{0, view}});
+            return utils::MakeBindGroup(device, bindGroupLayout, {{0, buffer, 0, bufferSize}});
         }
 
         // Test that after drawing a triangle with the base color, and then the given triangle spec, the color is as expected

@@ -236,8 +236,10 @@ namespace utils {
     }
 
     BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
-                                                             const dawn::BufferView& bufferView)
-        : binding(binding), bufferView(bufferView) {
+                                                             const dawn::Buffer& buffer,
+                                                             uint32_t offset,
+                                                             uint32_t size)
+        : binding(binding), buffer(buffer), offset(offset), size(size) {
     }
 
     dawn::BindGroupBinding BindingInitializationHelper::GetAsBinding() const {
@@ -246,7 +248,9 @@ namespace utils {
         result.binding = binding;
         result.sampler = sampler;
         result.textureView = textureView;
-        result.bufferView = bufferView;
+        result.buffer = buffer;
+        result.offset = offset;
+        result.size = size;
 
         return result;
     }

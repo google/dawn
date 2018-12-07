@@ -504,12 +504,12 @@ TEST_F(WireTests, OptionalObjectValue) {
     EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _))
         .WillOnce(Return(apiBindGroupLayout));
 
-    // The `sampler`, `textureView` and `bufferView` members of a binding are optional.
+    // The `sampler`, `textureView` and `buffer` members of a binding are optional.
     dawnBindGroupBinding binding;
     binding.binding = 0;
     binding.sampler = nullptr;
     binding.textureView = nullptr;
-    binding.bufferView = nullptr;
+    binding.buffer = nullptr;
 
     dawnBindGroupDescriptor bgDesc;
     bgDesc.nextInChain = nullptr;
@@ -523,7 +523,7 @@ TEST_F(WireTests, OptionalObjectValue) {
             desc->numBindings == 1 &&
             desc->bindings[0].binding == 0 &&
             desc->bindings[0].sampler == nullptr &&
-            desc->bindings[0].bufferView == nullptr &&
+            desc->bindings[0].buffer == nullptr &&
             desc->bindings[0].textureView == nullptr;
     })))
         .WillOnce(Return(nullptr));

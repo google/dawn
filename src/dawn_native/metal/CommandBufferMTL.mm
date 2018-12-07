@@ -118,12 +118,8 @@ namespace dawn_native { namespace metal {
             // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup
             // so that we only have to do one setVertexBuffers and one setFragmentBuffers
             // call here.
-            for (size_t binding = 0; binding < layout.mask.size(); ++binding) {
-                if (!layout.mask[binding]) {
-                    continue;
-                }
-
-                auto stage = layout.visibilities[binding];
+            for (uint32_t bindingIndex : IterateBitSet(layout.mask)) {
+                auto stage = layout.visibilities[bindingIndex];
                 bool hasVertStage = stage & dawn::ShaderStageBit::Vertex && render != nil;
                 bool hasFragStage = stage & dawn::ShaderStageBit::Fragment && render != nil;
                 bool hasComputeStage = stage & dawn::ShaderStageBit::Compute && compute != nil;
@@ -134,24 +130,23 @@ namespace dawn_native { namespace metal {
 
                 if (hasVertStage) {
                     vertIndex = pipelineLayout->GetBindingIndexInfo(
-                        dawn::ShaderStage::Vertex)[index][binding];
+                        dawn::ShaderStage::Vertex)[index][bindingIndex];
                 }
                 if (hasFragStage) {
                     fragIndex = pipelineLayout->GetBindingIndexInfo(
-                        dawn::ShaderStage::Fragment)[index][binding];
+                        dawn::ShaderStage::Fragment)[index][bindingIndex];
                 }
                 if (hasComputeStage) {
                     computeIndex = pipelineLayout->GetBindingIndexInfo(
-                        dawn::ShaderStage::Compute)[index][binding];
+                        dawn::ShaderStage::Compute)[index][bindingIndex];
                 }
 
-                switch (layout.types[binding]) {
+                switch (layout.types[bindingIndex]) {
                     case dawn::BindingType::UniformBuffer:
                     case dawn::BindingType::StorageBuffer: {
-                        BufferView* view = ToBackend(group->GetBindingAsBufferView(binding));
-                        auto b = ToBackend(view->GetBuffer());
-                        const id<MTLBuffer> buffer = b->GetMTLBuffer();
-                        const NSUInteger offset = view->GetOffset();
+                        BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
+                        const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
+                        const NSUInteger offset = binding.offset;
 
                         if (hasVertStage) {
                             [render setVertexBuffers:&buffer
@@ -172,7 +167,7 @@ namespace dawn_native { namespace metal {
                     } break;
 
                     case dawn::BindingType::Sampler: {
-                        auto sampler = ToBackend(group->GetBindingAsSampler(binding));
+                        auto sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                         if (hasVertStage) {
                             [render setVertexSamplerState:sampler->GetMTLSamplerState()
                                                   atIndex:vertIndex];
@@ -188,7 +183,7 @@ namespace dawn_native { namespace metal {
                     } break;
 
                     case dawn::BindingType::SampledTexture: {
-                        auto textureView = ToBackend(group->GetBindingAsTextureView(binding));
+                        auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                         if (hasVertStage) {
                             [render setVertexTexture:textureView->GetMTLTexture()
                                              atIndex:vertIndex];

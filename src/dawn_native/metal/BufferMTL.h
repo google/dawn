@@ -42,11 +42,6 @@ namespace dawn_native { namespace metal {
         id<MTLBuffer> mMtlBuffer = nil;
     };
 
-    class BufferView : public BufferViewBase {
-      public:
-        BufferView(BufferViewBuilder* builder);
-    };
-
     class MapRequestTracker {
       public:
         MapRequestTracker(Device* device);

@@ -68,9 +68,6 @@ namespace dawn_native { namespace metal {
         // Nothing to do, Metal StorageModeShared buffers are always mapped.
     }
 
-    BufferView::BufferView(BufferViewBuilder* builder) : BufferViewBase(builder) {
-    }
-
     MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {
     }
 

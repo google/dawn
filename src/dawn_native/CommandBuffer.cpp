@@ -255,12 +255,12 @@ namespace dawn_native {
 
                 switch (type) {
                     case dawn::BindingType::UniformBuffer: {
-                        BufferBase* buffer = group->GetBindingAsBufferView(i)->GetBuffer();
+                        BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
                         tracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Uniform);
                     } break;
 
                     case dawn::BindingType::StorageBuffer: {
-                        BufferBase* buffer = group->GetBindingAsBufferView(i)->GetBuffer();
+                        BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
                         tracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Storage);
                     } break;
 

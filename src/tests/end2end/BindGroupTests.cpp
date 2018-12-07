@@ -66,9 +66,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
     bufferDesc.usage = dawn::BufferUsageBit::TransferDst |
                        dawn::BufferUsageBit::Uniform;
     dawn::Buffer buffer = device.CreateBuffer(&bufferDesc);
-    dawn::BufferView bufferView =
-        buffer.CreateBufferViewBuilder().SetExtent(0, sizeof(float)).GetResult();
-    dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, bufferView}});
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(float)}});
 
     dawn::CommandBuffer cb[2];
     cb[0] = CreateSimpleComputeCommandBuffer(cp, bindGroup);
@@ -136,13 +134,9 @@ TEST_P(BindGroupTests, ReusedUBO) {
         { 0.f, 1.f, 0.f, 1.f },
     };
     dawn::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(data), dawn::BufferUsageBit::Uniform);
-    dawn::BufferView vertUBOBufferView =
-        buffer.CreateBufferViewBuilder().SetExtent(0, sizeof(Data::transform)).GetResult();
-    dawn::BufferView fragUBOBufferView =
-        buffer.CreateBufferViewBuilder().SetExtent(256, sizeof(Data::color)).GetResult();
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {
-        {0, vertUBOBufferView},
-        {1, fragUBOBufferView}
+        {0, buffer, 0, sizeof(Data::transform)},
+        {1, buffer, 256, sizeof(Data::color)}
     });
 
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
@@ -214,8 +208,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     constexpr float dummy = 0.0f;
     constexpr float transform[] = { 1.f, 0.f, dummy, dummy, 0.f, 1.f, dummy, dummy };
     dawn::Buffer buffer = utils::CreateBufferFromData(device, &transform, sizeof(transform), dawn::BufferUsageBit::Uniform);
-    dawn::BufferView vertUBOBufferView =
-        buffer.CreateBufferViewBuilder().SetExtent(0, sizeof(transform)).GetResult();
+
     dawn::SamplerDescriptor samplerDescriptor;
     samplerDescriptor.minFilter = dawn::FilterMode::Nearest;
     samplerDescriptor.magFilter = dawn::FilterMode::Nearest;
@@ -236,6 +229,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
     dawn::Texture texture = device.CreateTexture(&descriptor);
     dawn::TextureView textureView = texture.CreateDefaultTextureView();
+
     int width = kRTSize, height = kRTSize;
     int widthInBytes = width * sizeof(RGBA8);
     widthInBytes = (widthInBytes + 255) & ~255;
@@ -246,8 +240,9 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         data[i] = RGBA8(0, 255, 0, 255);
     }
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), sizeInBytes, dawn::BufferUsageBit::TransferSrc);
+
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {
-        {0, vertUBOBufferView},
+        {0, buffer, 0, sizeof(transform)},
         {1, sampler},
         {2, textureView}
     });

@@ -30,7 +30,9 @@
         "extensible": false,
         "members": [
             {"name": "binding", "type": "uint32_t"},
-            {"name": "buffer view", "type": "buffer view", "optional": true},
+            {"name": "buffer", "type": "buffer", "optional": true},
+            {"name": "offset", "type": "uint32_t"},
+            {"name": "size", "type": "uint32_t"},
             {"name": "sampler", "type": "sampler", "optional": true},
             {"name": "texture view", "type": "texture view", "optional": true}
         ]
@@ -165,10 +167,6 @@
         "category": "object",
         "methods": [
             {
-                "name": "create buffer view builder",
-                "returns": "buffer view builder"
-            },
-            {
                 "name": "set sub data",
                 "args": [
                     {"name": "start", "type": "uint32_t"},
@@ -262,25 +260,6 @@
             {"value": 32, "name": "vertex"},
             {"value": 64, "name": "uniform"},
             {"value": 128, "name": "storage"}
-        ]
-    },
-    "buffer view": {
-        "category": "object"
-    },
-    "buffer view builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "buffer view"
-            },
-            {
-                "name": "set extent",
-                "args": [
-                    {"name": "offset", "type": "uint32_t"},
-                    {"name": "size", "type": "uint32_t"}
-                ]
-            }
         ]
     },
     "callback userdata": {

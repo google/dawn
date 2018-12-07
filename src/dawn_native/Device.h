@@ -52,7 +52,6 @@ namespace dawn_native {
         FenceSignalTracker* GetFenceSignalTracker() const;
 
         virtual BlendStateBase* CreateBlendState(BlendStateBuilder* builder) = 0;
-        virtual BufferViewBase* CreateBufferView(BufferViewBuilder* builder) = 0;
         virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
         virtual DepthStencilStateBase* CreateDepthStencilState(
             DepthStencilStateBuilder* builder) = 0;

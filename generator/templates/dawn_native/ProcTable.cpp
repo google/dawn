@@ -20,7 +20,7 @@
 #include "dawn_native/ValidationUtils_autogen.h"
 
 {% for type in by_category["object"] %}
-    {% if not type.is_builder and type.name.canonical_case() not in ["buffer view", "texture view"] %}
+    {% if not type.is_builder and type.name.canonical_case() not in ["texture view"] %}
         #include "dawn_native/{{type.name.CamelCase()}}.h"
     {% endif %}
 {% endfor %}

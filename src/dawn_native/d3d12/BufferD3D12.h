@@ -50,19 +50,6 @@ namespace dawn_native { namespace d3d12 {
         D3D12_RANGE mWrittenMappedRange;
     };
 
-    class BufferView : public BufferViewBase {
-      public:
-        BufferView(BufferViewBuilder* builder);
-
-        uint32_t GetD3D12Size() const;
-        const D3D12_CONSTANT_BUFFER_VIEW_DESC& GetCBVDescriptor() const;
-        const D3D12_UNORDERED_ACCESS_VIEW_DESC& GetUAVDescriptor() const;
-
-      private:
-        D3D12_CONSTANT_BUFFER_VIEW_DESC mCbvDesc;
-        D3D12_UNORDERED_ACCESS_VIEW_DESC mUavDesc;
-    };
-
     class MapRequestTracker {
       public:
         MapRequestTracker(Device* device);
