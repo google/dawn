@@ -450,8 +450,8 @@ def get_renders_for_targets(api_params, targets):
         renders.append(FileRender('apicpp.cpp', 'dawn/dawncpp.cpp', [base_params, api_params, cpp_params]))
 
     if 'mock_dawn' in targets:
-        renders.append(FileRender('mock_api.h', 'mock/mock_dawn_.h', [base_params, api_params, c_params]))
-        renders.append(FileRender('mock_api.cpp', 'mock/mock_dawn_.cpp', [base_params, api_params, c_params]))
+        renders.append(FileRender('mock_api.h', 'mock/mock_dawn.h', [base_params, api_params, c_params]))
+        renders.append(FileRender('mock_api.cpp', 'mock/mock_dawn.cpp', [base_params, api_params, c_params]))
 
     if 'dawn_native_utils' in targets:
         frontend_params = [

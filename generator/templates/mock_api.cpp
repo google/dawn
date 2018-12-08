@@ -12,7 +12,7 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "mock_dawn_.h"
+#include "mock_dawn.h"
 
 namespace {
     {% for type in by_category["object"] %}
