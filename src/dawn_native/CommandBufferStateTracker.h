@@ -29,8 +29,8 @@ namespace dawn_native {
       public:
         // Non-state-modifying validation functions
         MaybeError ValidateCanDispatch();
-        MaybeError ValidateCanDrawArrays();
-        MaybeError ValidateCanDrawElements();
+        MaybeError ValidateCanDraw();
+        MaybeError ValidateCanDrawIndexed();
 
         // State-modifying methods
         void SetComputePipeline(ComputePipelineBase* pipeline);

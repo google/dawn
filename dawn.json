@@ -797,7 +797,7 @@
                 ]
             },
             {
-                "name": "draw arrays",
+                "name": "draw",
                 "args": [
                     {"name": "vertex count", "type": "uint32_t"},
                     {"name": "instance count", "type": "uint32_t"},
@@ -806,7 +806,7 @@
                 ]
             },
             {
-                "name": "draw elements",
+                "name": "draw indexed",
                 "args": [
                     {"name": "index count", "type": "uint32_t"},
                     {"name": "instance count", "type": "uint32_t"},

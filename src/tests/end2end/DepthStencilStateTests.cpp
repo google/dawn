@@ -225,7 +225,7 @@ class DepthStencilStateTest : public DawnTest {
                 pass.SetRenderPipeline(pipeline);
                 pass.SetStencilReference(test.stencil);  // Set the stencil reference
                 pass.SetBindGroup(0, bindGroup);         // Set the bind group which contains color and depth data
-                pass.DrawArrays(6, 1, 0, 0);
+                pass.Draw(6, 1, 0, 0);
             }
             pass.EndPass();
 

@@ -33,8 +33,8 @@ namespace dawn_native {
         CopyBufferToTexture,
         CopyTextureToBuffer,
         Dispatch,
-        DrawArrays,
-        DrawElements,
+        Draw,
+        DrawIndexed,
         EndComputePass,
         EndRenderPass,
         SetComputePipeline,
@@ -93,14 +93,14 @@ namespace dawn_native {
         uint32_t z;
     };
 
-    struct DrawArraysCmd {
+    struct DrawCmd {
         uint32_t vertexCount;
         uint32_t instanceCount;
         uint32_t firstVertex;
         uint32_t firstInstance;
     };
 
-    struct DrawElementsCmd {
+    struct DrawIndexedCmd {
         uint32_t indexCount;
         uint32_t instanceCount;
         uint32_t firstIndex;

@@ -29,32 +29,32 @@ namespace dawn_native {
         : ProgrammablePassEncoder(device, topLevelBuilder, allocator) {
     }
 
-    void RenderPassEncoderBase::DrawArrays(uint32_t vertexCount,
-                                           uint32_t instanceCount,
-                                           uint32_t firstVertex,
-                                           uint32_t firstInstance) {
+    void RenderPassEncoderBase::Draw(uint32_t vertexCount,
+                                     uint32_t instanceCount,
+                                     uint32_t firstVertex,
+                                     uint32_t firstInstance) {
         if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
             return;
         }
 
-        DrawArraysCmd* draw = mAllocator->Allocate<DrawArraysCmd>(Command::DrawArrays);
-        new (draw) DrawArraysCmd;
+        DrawCmd* draw = mAllocator->Allocate<DrawCmd>(Command::Draw);
+        new (draw) DrawCmd;
         draw->vertexCount = vertexCount;
         draw->instanceCount = instanceCount;
         draw->firstVertex = firstVertex;
         draw->firstInstance = firstInstance;
     }
 
-    void RenderPassEncoderBase::DrawElements(uint32_t indexCount,
-                                             uint32_t instanceCount,
-                                             uint32_t firstIndex,
-                                             uint32_t firstInstance) {
+    void RenderPassEncoderBase::DrawIndexed(uint32_t indexCount,
+                                            uint32_t instanceCount,
+                                            uint32_t firstIndex,
+                                            uint32_t firstInstance) {
         if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
             return;
         }
 
-        DrawElementsCmd* draw = mAllocator->Allocate<DrawElementsCmd>(Command::DrawElements);
-        new (draw) DrawElementsCmd;
+        DrawIndexedCmd* draw = mAllocator->Allocate<DrawIndexedCmd>(Command::DrawIndexed);
+        new (draw) DrawIndexedCmd;
         draw->indexCount = indexCount;
         draw->instanceCount = instanceCount;
         draw->firstIndex = firstIndex;

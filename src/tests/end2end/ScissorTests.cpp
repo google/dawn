@@ -55,7 +55,7 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetRenderPipeline(pipeline);
-        pass.DrawArrays(6, 1, 0, 0);
+        pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 
@@ -78,7 +78,7 @@ TEST_P(ScissorTest, LargerThanAttachment) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetRenderPipeline(pipeline);
         pass.SetScissorRect(0, 0, 200, 200);
-        pass.DrawArrays(6, 1, 0, 0);
+        pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 
@@ -104,7 +104,7 @@ TEST_P(ScissorTest, EmptyRect) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetRenderPipeline(pipeline);
         pass.SetScissorRect(0, 0, 0, 0);
-        pass.DrawArrays(6, 1, 0, 0);
+        pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 
@@ -132,7 +132,7 @@ TEST_P(ScissorTest, PartialRect) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetRenderPipeline(pipeline);
         pass.SetScissorRect(kX, kY, kW, kH);
-        pass.DrawArrays(6, 1, 0, 0);
+        pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 
@@ -163,7 +163,7 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetRenderPipeline(pipeline);
-        pass.DrawArrays(6, 1, 0, 0);
+        pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 

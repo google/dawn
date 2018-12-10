@@ -40,7 +40,7 @@ class DrawQuad {
                 .GetResult();
 
             pass->SetRenderPipeline(renderPipeline);
-            pass->DrawArrays(6, 1, 0, 0);
+            pass->Draw(6, 1, 0, 0);
         }
 
     private:

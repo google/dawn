@@ -108,7 +108,7 @@ TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
         pass.SetRenderPipeline(pipeline1);
-        pass.DrawArrays(3, 1, 0, 0);
+        pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     builder.GetResult();
@@ -119,9 +119,9 @@ TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
         pass.SetRenderPipeline(pipeline2);
         pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
-        pass.DrawArrays(3, 1, 0, 0);
+        pass.Draw(3, 1, 0, 0);
         pass.SetRenderPipeline(pipeline1);
-        pass.DrawArrays(3, 1, 0, 0);
+        pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     builder.GetResult();
@@ -146,14 +146,14 @@ TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
         pass.SetRenderPipeline(pipeline2);
         pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
-        pass.DrawArrays(3, 1, 0, 0);
+        pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
         pass.SetRenderPipeline(pipeline1);
         pass.SetVertexBuffers(0, 1, vertexBuffers.data(), offsets);
-        pass.DrawArrays(3, 1, 0, 0);
+        pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     builder.GetResult();
@@ -164,13 +164,13 @@ TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
         pass.SetRenderPipeline(pipeline2);
         pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
-        pass.DrawArrays(3, 1, 0, 0);
+        pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
         pass.SetRenderPipeline(pipeline1);
-        pass.DrawArrays(3, 1, 0, 0);
+        pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     builder.GetResult();

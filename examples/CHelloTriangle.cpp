@@ -87,7 +87,7 @@ void frame() {
 
         dawnRenderPassEncoder pass = dawnCommandBufferBuilderBeginRenderPass(builder, renderpassInfo);
         dawnRenderPassEncoderSetRenderPipeline(pass, pipeline);
-        dawnRenderPassEncoderDrawArrays(pass, 3, 1, 0, 0);
+        dawnRenderPassEncoderDraw(pass, 3, 1, 0, 0);
         dawnRenderPassEncoderEndPass(pass);
         dawnRenderPassEncoderRelease(pass);
 

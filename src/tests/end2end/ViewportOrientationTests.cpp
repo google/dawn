@@ -46,7 +46,7 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetRenderPipeline(pipeline);
-        pass.DrawArrays(1, 1, 0, 0);
+        pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
 

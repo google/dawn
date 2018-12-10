@@ -403,8 +403,8 @@ namespace dawn_native { namespace metal {
                     return;
                 } break;
 
-                case Command::DrawArrays: {
-                    DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
+                case Command::Draw: {
+                    DrawCmd* draw = mCommands.NextCommand<DrawCmd>();
 
                     [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
                                 vertexStart:draw->firstVertex
@@ -413,8 +413,8 @@ namespace dawn_native { namespace metal {
                                baseInstance:draw->firstInstance];
                 } break;
 
-                case Command::DrawElements: {
-                    DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
+                case Command::DrawIndexed: {
+                    DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
                     size_t formatSize = IndexFormatSize(lastPipeline->GetIndexFormat());
 
                     [encoder

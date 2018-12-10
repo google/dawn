@@ -258,7 +258,7 @@ TEST_P(PushConstantTest, RenderPassDefaultsToZero) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         // Test render push constants are set to zero by default.
         pass.SetRenderPipeline(pipeline);
-        pass.DrawArrays(1, 1, 0, 0);
+        pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
 
@@ -386,7 +386,7 @@ TEST_P(PushConstantTest, SeparateVertexAndFragmentConstants) {
         pass.SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 1, &one);
         pass.SetPushConstants(dawn::ShaderStageBit::Fragment, 0, 1, &two);
         pass.SetRenderPipeline(pipeline);
-        pass.DrawArrays(1, 1, 0, 0);
+        pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
 
@@ -411,7 +411,7 @@ TEST_P(PushConstantTest, SimultaneousVertexAndFragmentConstants) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetPushConstants(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment, 0, 1, &two);
         pass.SetRenderPipeline(pipeline);
-        pass.DrawArrays(1, 1, 0, 0);
+        pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
 

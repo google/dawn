@@ -583,8 +583,8 @@ namespace dawn_native { namespace opengl {
                     return;
                 } break;
 
-                case Command::DrawArrays: {
-                    DrawArraysCmd* draw = mCommands.NextCommand<DrawArraysCmd>();
+                case Command::Draw: {
+                    DrawCmd* draw = mCommands.NextCommand<DrawCmd>();
                     pushConstants.Apply(lastPipeline, lastPipeline);
                     inputBuffers.Apply();
 
@@ -600,8 +600,8 @@ namespace dawn_native { namespace opengl {
                     }
                 } break;
 
-                case Command::DrawElements: {
-                    DrawElementsCmd* draw = mCommands.NextCommand<DrawElementsCmd>();
+                case Command::DrawIndexed: {
+                    DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
                     pushConstants.Apply(lastPipeline, lastPipeline);
                     inputBuffers.Apply();
 

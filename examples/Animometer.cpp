@@ -145,7 +145,7 @@ void frame() {
         for (int k = 0; k < 10000; k++) {
             shaderData[i].time = f / 60.0f;
             pass.SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 6, reinterpret_cast<uint32_t*>(&shaderData[i]));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             i++;
         }
 

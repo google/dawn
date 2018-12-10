@@ -143,7 +143,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
     dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
     pass.SetRenderPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.DrawArrays(3, 1, 0, 0);
+    pass.Draw(3, 1, 0, 0);
     pass.EndPass();
 
     dawn::CommandBuffer commands = builder.GetResult();
@@ -257,7 +257,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
     pass.SetRenderPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.DrawArrays(3, 1, 0, 0);
+    pass.Draw(3, 1, 0, 0);
     pass.EndPass();
 
     dawn::CommandBuffer commands = builder.GetResult();

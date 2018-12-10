@@ -80,7 +80,7 @@ class DrawElementsTest : public DawnTest {
                 pass.SetRenderPipeline(pipeline);
                 pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
                 pass.SetIndexBuffer(indexBuffer, 0);
-                pass.DrawElements(indexCount, instanceCount, firstIndex, firstInstance);
+                pass.DrawIndexed(indexCount, instanceCount, firstIndex, firstInstance);
                 pass.EndPass();
             }
 

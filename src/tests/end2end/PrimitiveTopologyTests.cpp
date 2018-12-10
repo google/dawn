@@ -199,7 +199,7 @@ class PrimitiveTopologyTest : public DawnTest {
                 dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
                 pass.SetRenderPipeline(pipeline);
                 pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
-                pass.DrawArrays(6, 1, 0, 0);
+                pass.Draw(6, 1, 0, 0);
                 pass.EndPass();
             }
 

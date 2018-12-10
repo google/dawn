@@ -515,14 +515,14 @@ namespace dawn_native {
                     return {};
                 } break;
 
-                case Command::DrawArrays: {
-                    mIterator.NextCommand<DrawArraysCmd>();
-                    DAWN_TRY(persistentState.ValidateCanDrawArrays());
+                case Command::Draw: {
+                    mIterator.NextCommand<DrawCmd>();
+                    DAWN_TRY(persistentState.ValidateCanDraw());
                 } break;
 
-                case Command::DrawElements: {
-                    mIterator.NextCommand<DrawElementsCmd>();
-                    DAWN_TRY(persistentState.ValidateCanDrawElements());
+                case Command::DrawIndexed: {
+                    mIterator.NextCommand<DrawIndexedCmd>();
+                    DAWN_TRY(persistentState.ValidateCanDrawIndexed());
                 } break;
 
                 case Command::SetRenderPipeline: {

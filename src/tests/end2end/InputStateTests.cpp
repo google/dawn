@@ -176,7 +176,7 @@ class InputStateTest : public DawnTest {
                 pass.SetVertexBuffers(buffer.location, 1, buffer.buffer, &zeroOffset);
             }
 
-            pass.DrawArrays(triangles * 3, instances, 0, 0);
+            pass.Draw(triangles * 3, instances, 0, 0);
             pass.EndPass();
 
             dawn::CommandBuffer commands = builder.GetResult();

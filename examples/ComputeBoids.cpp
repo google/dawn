@@ -264,7 +264,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& render
         pass.SetRenderPipeline(renderPipeline);
         pass.SetVertexBuffers(0, 1, &bufferDst, zeroOffsets);
         pass.SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets);
-        pass.DrawArrays(3, kNumParticles, 0, 0);
+        pass.Draw(3, kNumParticles, 0, 0);
         pass.EndPass();
     }
 

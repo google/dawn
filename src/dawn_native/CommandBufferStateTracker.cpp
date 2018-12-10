@@ -38,11 +38,11 @@ namespace dawn_native {
     static constexpr CommandBufferStateTracker::ValidationAspects kDispatchAspects =
         1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS;
 
-    static constexpr CommandBufferStateTracker::ValidationAspects kDrawArraysAspects =
+    static constexpr CommandBufferStateTracker::ValidationAspects kDrawAspects =
         1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
         1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
 
-    static constexpr CommandBufferStateTracker::ValidationAspects kDrawElementsAspects =
+    static constexpr CommandBufferStateTracker::ValidationAspects kDrawIndexedAspects =
         1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
         1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
 
@@ -53,12 +53,12 @@ namespace dawn_native {
         return ValidateOperation(kDispatchAspects);
     }
 
-    MaybeError CommandBufferStateTracker::ValidateCanDrawArrays() {
-        return ValidateOperation(kDrawArraysAspects);
+    MaybeError CommandBufferStateTracker::ValidateCanDraw() {
+        return ValidateOperation(kDrawAspects);
     }
 
-    MaybeError CommandBufferStateTracker::ValidateCanDrawElements() {
-        return ValidateOperation(kDrawElementsAspects);
+    MaybeError CommandBufferStateTracker::ValidateCanDrawIndexed() {
+        return ValidateOperation(kDrawIndexedAspects);
     }
 
     MaybeError CommandBufferStateTracker::ValidateOperation(ValidationAspects requiredAspects) {

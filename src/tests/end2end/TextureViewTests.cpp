@@ -175,7 +175,7 @@ protected:
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(mRenderPass.renderPassInfo);
             pass.SetRenderPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.DrawArrays(6, 1, 0, 0);
+            pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 
@@ -512,7 +512,7 @@ class TextureViewRenderingTest : public DawnTest {
             dawn::RenderPassEncoder pass =
                 commandBufferBuilder.BeginRenderPass(renderPassInfo);
             pass.SetRenderPipeline(oneColorPipeline);
-            pass.DrawArrays(6, 1, 0, 0);
+            pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 

@@ -136,7 +136,7 @@ protected:
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(mRenderPass.renderPassInfo);
             pass.SetRenderPipeline(mPipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.DrawArrays(6, 1, 0, 0);
+            pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 

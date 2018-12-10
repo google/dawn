@@ -53,13 +53,13 @@ namespace dawn_native {
                     DispatchCmd* dispatch = commands->NextCommand<DispatchCmd>();
                     dispatch->~DispatchCmd();
                 } break;
-                case Command::DrawArrays: {
-                    DrawArraysCmd* draw = commands->NextCommand<DrawArraysCmd>();
-                    draw->~DrawArraysCmd();
+                case Command::Draw: {
+                    DrawCmd* draw = commands->NextCommand<DrawCmd>();
+                    draw->~DrawCmd();
                 } break;
-                case Command::DrawElements: {
-                    DrawElementsCmd* draw = commands->NextCommand<DrawElementsCmd>();
-                    draw->~DrawElementsCmd();
+                case Command::DrawIndexed: {
+                    DrawIndexedCmd* draw = commands->NextCommand<DrawIndexedCmd>();
+                    draw->~DrawIndexedCmd();
                 } break;
                 case Command::EndComputePass: {
                     EndComputePassCmd* cmd = commands->NextCommand<EndComputePassCmd>();
@@ -142,12 +142,12 @@ namespace dawn_native {
                 commands->NextCommand<DispatchCmd>();
                 break;
 
-            case Command::DrawArrays:
-                commands->NextCommand<DrawArraysCmd>();
+            case Command::Draw:
+                commands->NextCommand<DrawCmd>();
                 break;
 
-            case Command::DrawElements:
-                commands->NextCommand<DrawElementsCmd>();
+            case Command::DrawIndexed:
+                commands->NextCommand<DrawIndexedCmd>();
                 break;
 
             case Command::EndComputePass:

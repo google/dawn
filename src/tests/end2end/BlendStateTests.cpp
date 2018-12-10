@@ -107,13 +107,13 @@ class BlendStateTest : public DawnTest {
                 // First use the base pipeline to draw a triangle with no blending
                 pass.SetRenderPipeline(basePipeline);
                 pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { base } })));
-                pass.DrawArrays(3, 1, 0, 0);
+                pass.Draw(3, 1, 0, 0);
 
                 // Then use the test pipeline to draw the test triangle with blending
                 pass.SetRenderPipeline(testPipeline);
                 pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { triangle.color } })));
                 pass.SetBlendColor(triangle.blendFactor[0], triangle.blendFactor[1], triangle.blendFactor[2], triangle.blendFactor[3]);
-                pass.DrawArrays(3, 1, 0, 0);
+                pass.Draw(3, 1, 0, 0);
                 pass.EndPass();
             }
 
@@ -690,7 +690,7 @@ TEST_P(BlendStateTest, ColorWriteMaskBlendingDisabled) {
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
             pass.SetRenderPipeline(testPipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { base } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }
 
@@ -826,11 +826,11 @@ TEST_P(BlendStateTest, IndependentBlendState) {
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
             pass.SetRenderPipeline(basePipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 4>({ { base, base, base, base } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
 
             pass.SetRenderPipeline(testPipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 4>({ { color0, color1, color2, color3 } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }
 
@@ -892,10 +892,10 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
             pass.SetRenderPipeline(basePipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.SetRenderPipeline(testPipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }
 
@@ -912,11 +912,11 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
             pass.SetRenderPipeline(basePipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.SetRenderPipeline(testPipeline);
             pass.SetBlendColor(1, 1, 1, 1);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }
 
@@ -933,21 +933,21 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
             pass.SetRenderPipeline(basePipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.SetRenderPipeline(testPipeline);
             pass.SetBlendColor(1, 1, 1, 1);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }
         {
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
             pass.SetRenderPipeline(basePipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.SetRenderPipeline(testPipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
-            pass.DrawArrays(3, 1, 0, 0);
+            pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }
 
