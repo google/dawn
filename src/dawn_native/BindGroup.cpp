@@ -87,6 +87,10 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
+        if (descriptor->layout == nullptr) {
+            return DAWN_VALIDATION_ERROR("layout cannot be null");
+        }
+
         const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo =
             descriptor->layout->GetBindingInfo();
 

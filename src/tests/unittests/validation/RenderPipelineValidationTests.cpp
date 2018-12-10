@@ -24,7 +24,7 @@ class RenderPipelineValidationTest : public ValidationTest {
 
             renderpass = CreateSimpleRenderPass();
 
-            dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
+            pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
 
             inputState = device.CreateInputStateBuilder().GetResult();
 

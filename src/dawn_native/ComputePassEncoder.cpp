@@ -43,6 +43,11 @@ namespace dawn_native {
             return;
         }
 
+        if (pipeline == nullptr) {
+            mTopLevelBuilder->HandleError("Pipeline cannot be null");
+            return;
+        }
+
         SetComputePipelineCmd* cmd =
             mAllocator->Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);
         new (cmd) SetComputePipelineCmd;

@@ -189,6 +189,10 @@ namespace dawn_native {
             HandleError("Attachment index out of bounds");
             return;
         }
+        if (blendState == nullptr) {
+            HandleError("Blend state must not be null");
+            return;
+        }
         if (mBlendStatesSet[attachmentSlot]) {
             HandleError("Attachment blend state already set");
             return;
@@ -199,6 +203,11 @@ namespace dawn_native {
     }
 
     void RenderPipelineBuilder::SetDepthStencilState(DepthStencilStateBase* depthStencilState) {
+        if (depthStencilState == nullptr) {
+            HandleError("Depth stencil state must not be null");
+            return;
+        }
+
         mDepthStencilState = depthStencilState;
     }
 
@@ -212,6 +221,11 @@ namespace dawn_native {
     }
 
     void RenderPipelineBuilder::SetInputState(InputStateBase* inputState) {
+        if (inputState == nullptr) {
+            HandleError("Input state must not be null");
+            return;
+        }
+
         mInputState = inputState;
     }
 

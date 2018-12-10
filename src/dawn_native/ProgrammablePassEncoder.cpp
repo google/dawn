@@ -38,6 +38,11 @@ namespace dawn_native {
             return;
         }
 
+        if (group == nullptr) {
+            mTopLevelBuilder->HandleError("BindGroup cannot be null");
+            return;
+        }
+
         if (groupIndex >= kMaxBindGroups) {
             mTopLevelBuilder->HandleError("Setting bind group over the max");
             return;

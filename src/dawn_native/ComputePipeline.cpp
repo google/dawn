@@ -24,6 +24,14 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
+        if (descriptor->module == nullptr) {
+            return DAWN_VALIDATION_ERROR("module cannot be null");
+        }
+
+        if (descriptor->layout == nullptr) {
+            return DAWN_VALIDATION_ERROR("layout cannot be null");
+        }
+
         if (descriptor->entryPoint != std::string("main")) {
             return DAWN_VALIDATION_ERROR("Currently the entry point has to be main()");
         }

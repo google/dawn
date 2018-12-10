@@ -152,6 +152,11 @@ namespace dawn_native {
             return;
         }
 
+        if (textureView == nullptr) {
+            HandleError("Texture view cannot be nullptr");
+            return;
+        }
+
         if (!IsColorRenderableTextureFormat(textureView->GetFormat())) {
             HandleError(
                 "The format of the texture view used as color attachment is not color renderable");
@@ -186,6 +191,11 @@ namespace dawn_native {
     void RenderPassDescriptorBuilder::SetDepthStencilAttachment(TextureViewBase* textureView,
                                                                 dawn::LoadOp depthLoadOp,
                                                                 dawn::LoadOp stencilLoadOp) {
+        if (textureView == nullptr) {
+            HandleError("Texture view cannot be nullptr");
+            return;
+        }
+
         if (!TextureFormatHasDepthOrStencil(textureView->GetFormat())) {
             HandleError(
                 "The format of the texture view used as depth stencil attachment is not a depth "

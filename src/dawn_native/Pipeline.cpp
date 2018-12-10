@@ -106,12 +106,22 @@ namespace dawn_native {
     }
 
     void PipelineBuilder::SetLayout(PipelineLayoutBase* layout) {
+        if (layout == nullptr) {
+            mParentBuilder->HandleError("Layout must not be null");
+            return;
+        }
+
         mLayout = layout;
     }
 
     void PipelineBuilder::SetStage(dawn::ShaderStage stage,
                                    ShaderModuleBase* module,
                                    const char* entryPoint) {
+        if (module == nullptr) {
+            mParentBuilder->HandleError("Module must not be null");
+            return;
+        }
+
         if (entryPoint != std::string("main")) {
             mParentBuilder->HandleError("Currently the entry point has to be main()");
             return;

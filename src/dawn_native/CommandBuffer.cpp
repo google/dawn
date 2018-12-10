@@ -621,6 +621,11 @@ namespace dawn_native {
             return nullptr;
         }
 
+        if (info == nullptr) {
+            HandleError("RenderPassDescriptor cannot be null");
+            return nullptr;
+        }
+
         BeginRenderPassCmd* cmd = mAllocator.Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
         new (cmd) BeginRenderPassCmd;
         cmd->info = info;
@@ -635,6 +640,16 @@ namespace dawn_native {
                                                   uint32_t destinationOffset,
                                                   uint32_t size) {
         if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
+            return;
+        }
+
+        if (source == nullptr) {
+            HandleError("Source cannot be null");
+            return;
+        }
+
+        if (destination == nullptr) {
+            HandleError("Destination cannot be null");
             return;
         }
 
@@ -654,6 +669,17 @@ namespace dawn_native {
         if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
             return;
         }
+
+        if (source->buffer == nullptr) {
+            HandleError("Buffer cannot be null");
+            return;
+        }
+
+        if (destination->texture == nullptr) {
+            HandleError("Texture cannot be null");
+            return;
+        }
+
         CopyBufferToTextureCmd* copy =
             mAllocator.Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
         new (copy) CopyBufferToTextureCmd;
@@ -677,6 +703,17 @@ namespace dawn_native {
         if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
             return;
         }
+
+        if (source->texture == nullptr) {
+            HandleError("Texture cannot be null");
+            return;
+        }
+
+        if (destination->buffer == nullptr) {
+            HandleError("Buffer cannot be null");
+            return;
+        }
+
         CopyTextureToBufferCmd* copy =
             mAllocator.Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
         new (copy) CopyTextureToBufferCmd;
