@@ -903,6 +903,17 @@ test("dawn_end2end_tests") {
   }
 }
 
+# Temporary groups to make a 5-way patch to fix crbug.com/913171
+group("dawn_unittests_temp_group") {
+  testonly = true
+  deps = [ ":dawn_unittests" ]
+}
+
+group("dawn_end2end_tests_temp_group") {
+  testonly = true
+  deps = [ ":dawn_end2end_tests" ]
+}
+
 ###############################################################################
 # Dawn samples, only in standalone builds
 ###############################################################################
