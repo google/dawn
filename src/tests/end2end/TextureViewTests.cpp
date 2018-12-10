@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 #include <array>
@@ -163,12 +164,14 @@ protected:
         dawn::ShaderModule fsModule =
             utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fragmentShader);
 
-        dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-            .SetColorAttachmentFormat(0, mRenderPass.colorFormat)
-            .SetLayout(mPipelineLayout)
-            .SetStage(dawn::ShaderStage::Vertex, mVSModule, "main")
-            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-            .GetResult();
+        utils::ComboRenderPipelineDescriptor textureDescriptor(device);
+        textureDescriptor.cVertexStage.module = mVSModule;
+        textureDescriptor.cFragmentStage.module = fsModule;
+        textureDescriptor.layout = mPipelineLayout;
+        textureDescriptor.cColorAttachments[0].format =
+            mRenderPass.colorFormat;
+
+        dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
 
         dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
         {
@@ -502,11 +505,13 @@ class TextureViewRenderingTest : public DawnTest {
         dawn::ShaderModule oneColorFsModule =
             utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, oneColorFragmentShader);
 
-        dawn::RenderPipeline oneColorPipeline = device.CreateRenderPipelineBuilder()
-            .SetColorAttachmentFormat(0, kDefaultFormat)
-            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(dawn::ShaderStage::Fragment, oneColorFsModule, "main")
-            .GetResult();
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        pipelineDescriptor.cVertexStage.module = vsModule;
+        pipelineDescriptor.cFragmentStage.module = oneColorFsModule;
+        pipelineDescriptor.cColorAttachments[0].format = kDefaultFormat;
+
+        dawn::RenderPipeline oneColorPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
         dawn::CommandBufferBuilder commandBufferBuilder = device.CreateCommandBufferBuilder();
         {
             dawn::RenderPassEncoder pass =

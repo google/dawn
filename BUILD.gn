@@ -731,6 +731,8 @@ static_library("dawn_utils") {
   sources = [
     "src/utils/BackendBinding.cpp",
     "src/utils/BackendBinding.h",
+    "src/utils/ComboRenderPipelineDescriptor.cpp",
+    "src/utils/ComboRenderPipelineDescriptor.h",
     "src/utils/DawnHelpers.cpp",
     "src/utils/DawnHelpers.h",
     "src/utils/SystemUtils.cpp",

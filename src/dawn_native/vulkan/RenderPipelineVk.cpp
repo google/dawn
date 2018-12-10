@@ -47,32 +47,29 @@ namespace dawn_native { namespace vulkan {
 
     }  // anonymous namespace
 
-    RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder), mDevice(ToBackend(builder->GetDevice())) {
+    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
+        : RenderPipelineBase(device, descriptor) {
         // Eventually a bunch of the structures that need to be chained in the create info will be
         // held by objects such as the BlendState. They aren't implemented yet so we initialize
         // everything here.
 
         VkPipelineShaderStageCreateInfo shaderStages[2];
         {
-            const auto& vertexStageInfo = builder->GetStageInfo(dawn::ShaderStage::Vertex);
-            const auto& fragmentStageInfo = builder->GetStageInfo(dawn::ShaderStage::Fragment);
-
             shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStages[0].pNext = nullptr;
             shaderStages[0].flags = 0;
             shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-            shaderStages[0].module = ToBackend(vertexStageInfo.module)->GetHandle();
-            shaderStages[0].pName = vertexStageInfo.entryPoint.c_str();
             shaderStages[0].pSpecializationInfo = nullptr;
+            shaderStages[0].module = ToBackend(descriptor->vertexStage->module)->GetHandle();
+            shaderStages[0].pName = descriptor->vertexStage->entryPoint;
 
             shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStages[1].pNext = nullptr;
             shaderStages[1].flags = 0;
             shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-            shaderStages[1].module = ToBackend(fragmentStageInfo.module)->GetHandle();
-            shaderStages[1].pName = fragmentStageInfo.entryPoint.c_str();
             shaderStages[1].pSpecializationInfo = nullptr;
+            shaderStages[1].module = ToBackend(descriptor->fragmentStage->module)->GetHandle();
+            shaderStages[1].pName = descriptor->fragmentStage->entryPoint;
         }
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly;
@@ -183,7 +180,7 @@ namespace dawn_native { namespace vulkan {
                                       dawn::LoadOp::Load);
             }
 
-            renderPass = mDevice->GetRenderPassCache()->GetRenderPass(query);
+            renderPass = device->GetRenderPassCache()->GetRenderPass(query);
         }
 
         // The create info chains in a bunch of things created on the stack here or inside state
@@ -209,15 +206,15 @@ namespace dawn_native { namespace vulkan {
         createInfo.basePipelineHandle = VK_NULL_HANDLE;
         createInfo.basePipelineIndex = -1;
 
-        if (mDevice->fn.CreateGraphicsPipelines(mDevice->GetVkDevice(), VK_NULL_HANDLE, 1,
-                                                &createInfo, nullptr, &mHandle) != VK_SUCCESS) {
+        if (device->fn.CreateGraphicsPipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1,
+                                               &createInfo, nullptr, &mHandle) != VK_SUCCESS) {
             ASSERT(false);
         }
     }
 
     RenderPipeline::~RenderPipeline() {
         if (mHandle != VK_NULL_HANDLE) {
-            mDevice->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;
         }
     }

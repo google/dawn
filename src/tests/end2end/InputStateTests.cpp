@@ -15,6 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "common/Assert.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 using dawn::InputStepMode;
@@ -120,12 +121,14 @@ class InputStateTest : public DawnTest {
                 })"
             );
 
-            return device.CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, renderPass.colorFormat)
-                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-                .SetInputState(inputState)
-                .GetResult();
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.cVertexStage.module = vsModule;
+            descriptor.cFragmentStage.module = fsModule;
+            descriptor.inputState = inputState;
+            descriptor.cColorAttachments[0].format =
+                renderPass.colorFormat;
+
+            return device.CreateRenderPipeline(&descriptor);
         }
 
         struct InputSpec {

@@ -25,7 +25,7 @@ namespace dawn_native { namespace d3d12 {
 
     class RenderPipeline : public RenderPipelineBase {
       public:
-        RenderPipeline(RenderPipelineBuilder* builder);
+        RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
         ~RenderPipeline();
 
         D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
@@ -34,8 +34,6 @@ namespace dawn_native { namespace d3d12 {
       private:
         D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
         ComPtr<ID3D12PipelineState> mPipelineState;
-
-        Device* mDevice = nullptr;
     };
 
 }}  // namespace dawn_native::d3d12

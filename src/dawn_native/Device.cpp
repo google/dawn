@@ -182,13 +182,20 @@ namespace dawn_native {
     RenderPassDescriptorBuilder* DeviceBase::CreateRenderPassDescriptorBuilder() {
         return new RenderPassDescriptorBuilder(this);
     }
-    RenderPipelineBuilder* DeviceBase::CreateRenderPipelineBuilder() {
-        return new RenderPipelineBuilder(this);
-    }
     SamplerBase* DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
         SamplerBase* result = nullptr;
 
         if (ConsumedError(CreateSamplerInternal(&result, descriptor))) {
+            return nullptr;
+        }
+
+        return result;
+    }
+    RenderPipelineBase* DeviceBase::CreateRenderPipeline(
+        const RenderPipelineDescriptor* descriptor) {
+        RenderPipelineBase* result = nullptr;
+
+        if (ConsumedError(CreateRenderPipelineInternal(&result, descriptor))) {
             return nullptr;
         }
 
@@ -293,6 +300,14 @@ namespace dawn_native {
 
     MaybeError DeviceBase::CreateQueueInternal(QueueBase** result) {
         DAWN_TRY_ASSIGN(*result, CreateQueueImpl());
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateRenderPipelineInternal(
+        RenderPipelineBase** result,
+        const RenderPipelineDescriptor* descriptor) {
+        DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(*result, CreateRenderPipelineImpl(descriptor));
         return {};
     }
 

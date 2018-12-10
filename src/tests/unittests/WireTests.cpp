@@ -318,24 +318,99 @@ TEST_F(WireTests, ValueArrayArgument) {
 // Test that the wire is able to send C strings
 TEST_F(WireTests, CStringArgument) {
     // Create shader module
-    dawnShaderModuleDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.codeSize = 0;
-    dawnShaderModule shaderModule = dawnDeviceCreateShaderModule(device, &descriptor);
-
-    dawnShaderModule apiShaderModule = api.GetNewShaderModule();
+    dawnShaderModuleDescriptor vertexDescriptor;
+    vertexDescriptor.nextInChain = nullptr;
+    vertexDescriptor.codeSize = 0;
+    dawnShaderModule vsModule = dawnDeviceCreateShaderModule(device, &vertexDescriptor);
+    dawnShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
-        .WillOnce(Return(apiShaderModule));
+        .WillOnce(Return(apiVsModule));
+
+    // Create the blend state
+    dawnBlendStateBuilder blendStateBuilder = dawnDeviceCreateBlendStateBuilder(device);
+    dawnBlendStateBuilder apiBlendStateBuilder = api.GetNewBlendStateBuilder();
+    EXPECT_CALL(api, DeviceCreateBlendStateBuilder(apiDevice))
+        .WillOnce(Return(apiBlendStateBuilder));
+
+    dawnBlendState blendState = dawnBlendStateBuilderGetResult(blendStateBuilder);
+    dawnBlendState apiBlendState = api.GetNewBlendState();
+    EXPECT_CALL(api, BlendStateBuilderGetResult(apiBlendStateBuilder))
+        .WillOnce(Return(apiBlendState));
+
+    // Create the input state
+    dawnInputStateBuilder inputStateBuilder = dawnDeviceCreateInputStateBuilder(device);
+    dawnInputStateBuilder apiInputStateBuilder = api.GetNewInputStateBuilder();
+    EXPECT_CALL(api, DeviceCreateInputStateBuilder(apiDevice))
+        .WillOnce(Return(apiInputStateBuilder));
+
+    dawnInputState inputState = dawnInputStateBuilderGetResult(inputStateBuilder);
+    dawnInputState apiInputState = api.GetNewInputState();
+    EXPECT_CALL(api, InputStateBuilderGetResult(apiInputStateBuilder))
+        .WillOnce(Return(apiInputState));
+
+    // Create the depth-stencil state
+    dawnDepthStencilStateBuilder depthStencilStateBuilder = dawnDeviceCreateDepthStencilStateBuilder(device);
+    dawnDepthStencilStateBuilder apiDepthStencilStateBuilder = api.GetNewDepthStencilStateBuilder();
+    EXPECT_CALL(api, DeviceCreateDepthStencilStateBuilder(apiDevice))
+        .WillOnce(Return(apiDepthStencilStateBuilder));
+
+    dawnDepthStencilState depthStencilState = dawnDepthStencilStateBuilderGetResult(depthStencilStateBuilder);
+    dawnDepthStencilState apiDepthStencilState = api.GetNewDepthStencilState();
+    EXPECT_CALL(api, DepthStencilStateBuilderGetResult(apiDepthStencilStateBuilder))
+        .WillOnce(Return(apiDepthStencilState));
+
+    // Create the pipeline layout
+    dawnPipelineLayoutDescriptor layoutDescriptor;
+    layoutDescriptor.nextInChain = nullptr;
+    layoutDescriptor.numBindGroupLayouts = 0;
+    layoutDescriptor.bindGroupLayouts = nullptr;
+    dawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
+    dawnPipelineLayout apiLayout = api.GetNewPipelineLayout();
+    EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, _))
+        .WillOnce(Return(apiLayout));
 
     // Create pipeline
-    dawnRenderPipelineBuilder pipelineBuilder = dawnDeviceCreateRenderPipelineBuilder(device);
-    dawnRenderPipelineBuilderSetStage(pipelineBuilder, DAWN_SHADER_STAGE_FRAGMENT, shaderModule, "my entry point");
+    dawnRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.nextInChain = nullptr;
 
-    dawnRenderPipelineBuilder apiPipelineBuilder = api.GetNewRenderPipelineBuilder();
-    EXPECT_CALL(api, DeviceCreateRenderPipelineBuilder(apiDevice))
-        .WillOnce(Return(apiPipelineBuilder));
+    dawnPipelineStageDescriptor vertexStage;
+    vertexStage.nextInChain = nullptr;
+    vertexStage.module = vsModule;
+    vertexStage.entryPoint = "main";
+    pipelineDescriptor.vertexStage = &vertexStage;
 
-    EXPECT_CALL(api, RenderPipelineBuilderSetStage(apiPipelineBuilder, DAWN_SHADER_STAGE_FRAGMENT, apiShaderModule, StrEq("my entry point")));
+    dawnPipelineStageDescriptor fragmentStage;
+    fragmentStage.nextInChain = nullptr;
+    fragmentStage.module = vsModule;
+    fragmentStage.entryPoint = "main";
+    pipelineDescriptor.fragmentStage = &fragmentStage;
+
+    dawnAttachmentsStateDescriptor attachmentsState;
+    attachmentsState.nextInChain = nullptr;
+    attachmentsState.numColorAttachments = 1;
+    dawnAttachmentDescriptor colorAttachment = {nullptr, DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM};
+    attachmentsState.colorAttachments = &colorAttachment;
+    attachmentsState.hasDepthStencilAttachment = false;
+    // Even with hasDepthStencilAttachment = false, depthStencilAttachment must point to valid
+    // data because we don't have optional substructures yet.
+    attachmentsState.depthStencilAttachment = &colorAttachment;
+    pipelineDescriptor.attachmentsState = &attachmentsState;
+
+    pipelineDescriptor.numBlendStates = 1;
+    pipelineDescriptor.blendStates =  &blendState;
+
+    pipelineDescriptor.sampleCount = 1;
+    pipelineDescriptor.layout = layout;
+    pipelineDescriptor.inputState = inputState;
+    pipelineDescriptor.indexFormat = DAWN_INDEX_FORMAT_UINT32;
+    pipelineDescriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    pipelineDescriptor.depthStencilState = depthStencilState;
+
+    dawnDeviceCreateRenderPipeline(device, &pipelineDescriptor);
+	EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, MatchesLambda([](const dawnRenderPipelineDescriptor* desc) -> bool {
+        return desc->vertexStage->entryPoint == std::string("main");
+    })))
+        .WillOnce(Return(nullptr));
 
     FlushClient();
 }

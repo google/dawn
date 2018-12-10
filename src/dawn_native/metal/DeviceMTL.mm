@@ -197,11 +197,12 @@ namespace dawn_native { namespace metal {
         RenderPassDescriptorBuilder* builder) {
         return new RenderPassDescriptor(builder);
     }
-    RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
-        return new RenderPipeline(builder);
-    }
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
         return new Queue(this);
+    }
+    ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
+        const RenderPipelineDescriptor* descriptor) {
+        return new RenderPipeline(this, descriptor);
     }
     ResultOrError<SamplerBase*> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);

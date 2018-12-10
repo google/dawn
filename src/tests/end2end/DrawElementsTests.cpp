@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 constexpr uint32_t kRTSize = 4;
@@ -46,14 +47,16 @@ class DrawElementsTest : public DawnTest {
                 })"
             );
 
-            pipeline = device.CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, renderPass.colorFormat)
-                .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleStrip)
-                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-                .SetIndexFormat(dawn::IndexFormat::Uint32)
-                .SetInputState(inputState)
-                .GetResult();
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.cVertexStage.module = vsModule;
+            descriptor.cFragmentStage.module = fsModule;
+            descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
+            descriptor.indexFormat = dawn::IndexFormat::Uint32;
+            descriptor.inputState = inputState;
+            descriptor.cColorAttachments[0].format =
+                renderPass.colorFormat;
+
+            pipeline = device.CreateRenderPipeline(&descriptor);
 
             vertexBuffer = utils::CreateBufferFromData<float>(device, dawn::BufferUsageBit::Vertex, {
                 -1.0f, -1.0f, 0.0f, 1.0f,

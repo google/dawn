@@ -250,6 +250,26 @@ namespace dawn_native {
         }
     }
 
+    bool IsDepthStencilRenderableTextureFormat(dawn::TextureFormat format) {
+        switch (format) {
+            case dawn::TextureFormat::D32FloatS8Uint:
+                return true;
+
+            case dawn::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::R8Uint:
+            case dawn::TextureFormat::R8Unorm:
+                return false;
+
+            default:
+                UNREACHABLE();
+                return false;
+        }
+    }
+
     // TextureBase
 
     TextureBase::TextureBase(DeviceBase* device, const TextureDescriptor* descriptor)

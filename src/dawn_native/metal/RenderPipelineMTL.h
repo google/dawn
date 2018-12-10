@@ -21,9 +21,11 @@
 
 namespace dawn_native { namespace metal {
 
+    class Device;
+
     class RenderPipeline : public RenderPipelineBase {
       public:
-        RenderPipeline(RenderPipelineBuilder* builder);
+        RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
         ~RenderPipeline();
 
         MTLIndexType GetMTLIndexType() const;

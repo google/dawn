@@ -15,6 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "common/Assert.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 // Primitive topology tests work by drawing the following vertices with all the different primitive topology states:
@@ -185,13 +186,16 @@ class PrimitiveTopologyTest : public DawnTest {
 
         // Draw the vertices with the given primitive topology and check the pixel values of the test locations
         void DoTest(dawn::PrimitiveTopology primitiveTopology, const std::vector<LocationSpec> &locationSpecs) {
-            dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, renderPass.colorFormat)
-                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-                .SetInputState(inputState)
-                .SetPrimitiveTopology(primitiveTopology)
-                .GetResult();
+
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.cVertexStage.module = vsModule;
+            descriptor.cFragmentStage.module = fsModule;
+            descriptor.primitiveTopology = primitiveTopology;
+            descriptor.inputState = inputState;
+            descriptor.cColorAttachments[0].format =
+                renderPass.colorFormat;
+
+            dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
             static const uint32_t zeroOffset = 0;
             dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();

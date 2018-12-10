@@ -64,65 +64,57 @@ namespace dawn_native { namespace metal {
         }
     }
 
-    RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder),
+    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
+        : RenderPipelineBase(device, descriptor),
           mMtlIndexType(MTLIndexFormat(GetIndexFormat())),
           mMtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())) {
-        auto mtlDevice = ToBackend(builder->GetDevice())->GetMTLDevice();
+        auto mtlDevice = device->GetMTLDevice();
 
-        MTLRenderPipelineDescriptor* descriptor = [MTLRenderPipelineDescriptor new];
+        MTLRenderPipelineDescriptor* descriptorMTL = [MTLRenderPipelineDescriptor new];
 
-        for (auto stage : IterateStages(GetStageMask())) {
-            const auto& module = ToBackend(builder->GetStageInfo(stage).module);
+        const ShaderModule* vertexModule = ToBackend(descriptor->vertexStage->module);
+        const char* vertexEntryPoint = descriptor->vertexStage->entryPoint;
+        ShaderModule::MetalFunctionData vertexData = vertexModule->GetFunction(
+            vertexEntryPoint, dawn::ShaderStage::Vertex, ToBackend(GetLayout()));
+        descriptorMTL.vertexFunction = vertexData.function;
 
-            const auto& entryPoint = builder->GetStageInfo(stage).entryPoint;
-            ShaderModule::MetalFunctionData data =
-                module->GetFunction(entryPoint.c_str(), stage, ToBackend(GetLayout()));
-            id<MTLFunction> function = data.function;
-
-            switch (stage) {
-                case dawn::ShaderStage::Vertex:
-                    descriptor.vertexFunction = function;
-                    break;
-                case dawn::ShaderStage::Fragment:
-                    descriptor.fragmentFunction = function;
-                    break;
-                case dawn::ShaderStage::Compute:
-                    UNREACHABLE();
-            }
-        }
+        const ShaderModule* fragmentModule = ToBackend(descriptor->fragmentStage->module);
+        const char* fragmentEntryPoint = descriptor->fragmentStage->entryPoint;
+        ShaderModule::MetalFunctionData fragmentData = fragmentModule->GetFunction(
+            fragmentEntryPoint, dawn::ShaderStage::Fragment, ToBackend(GetLayout()));
+        descriptorMTL.fragmentFunction = fragmentData.function;
 
         if (HasDepthStencilAttachment()) {
             // TODO(kainino@chromium.org): Handle depth-only and stencil-only formats.
             dawn::TextureFormat depthStencilFormat = GetDepthStencilFormat();
-            descriptor.depthAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
-            descriptor.stencilAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
+            descriptorMTL.depthAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
+            descriptorMTL.stencilAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
         }
 
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
-            descriptor.colorAttachments[i].pixelFormat =
+            descriptorMTL.colorAttachments[i].pixelFormat =
                 MetalPixelFormat(GetColorAttachmentFormat(i));
-            ToBackend(GetBlendState(i))->ApplyBlendState(descriptor.colorAttachments[i]);
+            ToBackend(GetBlendState(i))->ApplyBlendState(descriptorMTL.colorAttachments[i]);
         }
 
-        descriptor.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());
+        descriptorMTL.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());
 
         InputState* inputState = ToBackend(GetInputState());
-        descriptor.vertexDescriptor = inputState->GetMTLVertexDescriptor();
+        descriptorMTL.vertexDescriptor = inputState->GetMTLVertexDescriptor();
 
         // TODO(kainino@chromium.org): push constants, textures, samplers
 
         NSError* error = nil;
-        mMtlRenderPipelineState = [mtlDevice newRenderPipelineStateWithDescriptor:descriptor
+        mMtlRenderPipelineState = [mtlDevice newRenderPipelineStateWithDescriptor:descriptorMTL
                                                                             error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
-            builder->HandleError("Error creating pipeline state");
-            [descriptor release];
+            device->HandleError("Error creating rendering pipeline state");
+            [descriptorMTL release];
             return;
         }
 
-        [descriptor release];
+        [descriptorMTL release];
     }
 
     RenderPipeline::~RenderPipeline() {

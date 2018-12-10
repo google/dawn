@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 #include <array>
@@ -23,28 +24,29 @@ constexpr static unsigned int kRTSize = 16;
 class DrawQuad {
     public:
         DrawQuad() {}
-        DrawQuad(dawn::Device* device, const char* vsSource, const char* fsSource)
+        DrawQuad(dawn::Device device, const char* vsSource, const char* fsSource)
             : device(device) {
-                vsModule = utils::CreateShaderModule(*device, dawn::ShaderStage::Vertex, vsSource);
-                fsModule = utils::CreateShaderModule(*device, dawn::ShaderStage::Fragment, fsSource);
+                vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vsSource);
+                fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fsSource);
 
-                pipelineLayout = utils::MakeBasicPipelineLayout(*device, nullptr);
+                pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
             }
 
         void Draw(dawn::RenderPassEncoder* pass) {
-            auto renderPipeline = device->CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
-                .SetLayout(pipelineLayout)
-                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-                .GetResult();
+
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.layout = pipelineLayout;
+            descriptor.cVertexStage.module = vsModule;
+            descriptor.cFragmentStage.module = fsModule;
+
+            auto renderPipeline = device.CreateRenderPipeline(&descriptor);
 
             pass->SetRenderPipeline(renderPipeline);
             pass->Draw(6, 1, 0, 0);
         }
 
     private:
-        dawn::Device* device = nullptr;
+        dawn::Device device;
         dawn::ShaderModule vsModule = {};
         dawn::ShaderModule fsModule = {};
         dawn::PipelineLayout pipelineLayout = {};
@@ -94,7 +96,7 @@ class RenderPassLoadOpTests : public DawnTest {
                     color = vec4(0.f, 0.f, 1.f, 1.f);
                 }
                 )";
-            blueQuad = DrawQuad(&device, vsSource, fsSource);
+            blueQuad = DrawQuad(device, vsSource, fsSource);
         }
 
         dawn::Texture renderTarget;

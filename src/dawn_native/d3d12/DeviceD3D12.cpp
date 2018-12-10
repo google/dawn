@@ -324,8 +324,9 @@ namespace dawn_native { namespace d3d12 {
         RenderPassDescriptorBuilder* builder) {
         return new RenderPassDescriptor(builder);
     }
-    RenderPipelineBase* Device::CreateRenderPipeline(RenderPipelineBuilder* builder) {
-        return new RenderPipeline(builder);
+    ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
+        const RenderPipelineDescriptor* descriptor) {
+        return new RenderPipeline(this, descriptor);
     }
     ResultOrError<SamplerBase*> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);

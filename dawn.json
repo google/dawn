@@ -22,6 +22,13 @@
             {"value": 2, "name":"clamp to edge"}
         ]
     },
+    "attachment descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "format", "type": "texture format"}
+        ]
+    },
     "bind group": {
         "category": "object"
     },
@@ -463,8 +470,11 @@
                 ]
             },
             {
-                "name": "create render pipeline builder",
-                "returns": "render pipeline builder"
+                "name": "create render pipeline",
+                "returns": "render pipeline",
+                "args": [
+                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create pipeline layout",
@@ -679,6 +689,16 @@
             {"name": "z", "type": "uint32_t"}
         ]
     },
+    "attachments state descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "num color attachments", "type": "uint32_t"},
+            {"name": "color attachments", "type": "attachment descriptor", "annotation": "const*", "length": "num color attachments"},
+            {"name": "has depth stencil attachment", "type": "bool"},
+            {"name": "depth stencil attachment", "type": "attachment descriptor", "annotation":"const*"}
+        ]
+    },
     "pipeline layout": {
         "category": "object"
     },
@@ -688,6 +708,14 @@
         "members": [
             {"name": "num bind group layouts", "type": "uint32_t"},
             {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "num bind group layouts"}
+        ]
+    },
+    "pipeline stage descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "module", "type": "shader module"},
+            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
     },
     "primitive topology": {
@@ -863,73 +891,21 @@
     "render pipeline": {
         "category": "object"
     },
-    "render pipeline builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "render pipeline"
-            },
-            {
-                "name": "set color attachment format",
-                "TODO": "Also need sample count",
-                "args": [
-                    {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "format", "type": "texture format"}
-                ]
-            },
-            {
-                "name": "set depth stencil attachment format",
-                "TODO": "Also need sample count",
-                "args": [
-                    {"name": "format", "type": "texture format"}
-                ]
-            },
-            {
-                "name": "set color attachment blend state",
-                "args": [
-                    {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "blend state", "type": "blend state"}
-                ]
-            },
-            {
-                "name": "set depth stencil state",
-                "args": [
-                    {"name": "depth stencil state", "type": "depth stencil state"}
-                ]
-            },
-            {
-                "name": "set index format",
-                "args": [
-                    {"name": "format", "type": "index format"}
-                ]
-            },
-            {
-                "name": "set input state",
-                "args": [
-                    {"name": "input", "type": "input state"}
-                ]
-            },
-            {
-                "name": "set layout",
-                "args": [
-                    {"name": "layout", "type": "pipeline layout"}
-                ]
-            },
-            {
-                "name": "set primitive topology",
-                "args": [
-                    {"name": "primitive topology", "type": "primitive topology"}
-                ]
-            },
-            {
-                "name": "set stage",
-                "args": [
-                    {"name": "stage", "type": "shader stage"},
-                    {"name": "module", "type": "shader module"},
-                    {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"}
-                ]
-            }
+    "render pipeline descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "layout", "type": "pipeline layout"},
+            {"name": "vertex stage", "type": "pipeline stage descriptor", "annotation": "const*"},
+            {"name": "fragment stage", "type": "pipeline stage descriptor", "annotation": "const*"},
+            {"name": "input state", "type": "input state"},
+            {"name": "index format", "type": "index format"},
+            {"name": "primitive topology", "type": "primitive topology"},
+            {"name": "attachments state", "type": "attachments state descriptor", "annotation": "const*"},
+            {"name": "sample count", "type": "uint32_t"},
+            {"name": "depth stencil state", "type": "depth stencil state"},
+            {"name": "num blend states", "type": "uint32_t"},
+            {"name": "blend states", "type": "blend state", "annotation": "const*", "length": "num blend states"}
         ]
     },
     "sampler": {

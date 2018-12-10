@@ -16,6 +16,7 @@
 
 #include "dawn_native/opengl/BlendStateGL.h"
 #include "dawn_native/opengl/DepthStencilStateGL.h"
+#include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/Forward.h"
 #include "dawn_native/opengl/InputStateGL.h"
 #include "dawn_native/opengl/PersistentPipelineStateGL.h"
@@ -41,13 +42,12 @@ namespace dawn_native { namespace opengl {
         }
     }  // namespace
 
-    RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder),
+    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
+        : RenderPipelineBase(device, descriptor),
           mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {
         PerStage<const ShaderModule*> modules(nullptr);
-        for (dawn::ShaderStage stage : IterateStages(GetStageMask())) {
-            modules[stage] = ToBackend(builder->GetStageInfo(stage).module.Get());
-        }
+        modules[dawn::ShaderStage::Vertex] = ToBackend(descriptor->vertexStage->module);
+        modules[dawn::ShaderStage::Fragment] = ToBackend(descriptor->fragmentStage->module);
 
         PipelineGL::Initialize(ToBackend(GetLayout()), modules);
     }

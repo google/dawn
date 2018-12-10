@@ -16,6 +16,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 class VertexBufferValidationTest : public ValidationTest {
@@ -78,12 +79,13 @@ class VertexBufferValidationTest : public ValidationTest {
         }
 
         dawn::RenderPipeline MakeRenderPipeline(const dawn::ShaderModule& vsModule, const dawn::InputState& inputState) {
-            return device.CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
-                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-                .SetInputState(inputState)
-                .GetResult();
+
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.cVertexStage.module = vsModule;
+            descriptor.cFragmentStage.module = fsModule;
+            descriptor.inputState = inputState;
+
+            return device.CreateRenderPipeline(&descriptor);
         }
 
         dawn::RenderPassDescriptor renderpass;

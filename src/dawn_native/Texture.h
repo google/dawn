@@ -33,6 +33,7 @@ namespace dawn_native {
     bool TextureFormatHasStencil(dawn::TextureFormat format);
     bool TextureFormatHasDepthOrStencil(dawn::TextureFormat format);
     bool IsColorRenderableTextureFormat(dawn::TextureFormat format);
+    bool IsDepthStencilRenderableTextureFormat(dawn::TextureFormat format);
 
     static constexpr dawn::TextureUsageBit kReadOnlyTextureUsages =
         dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::Sampled |

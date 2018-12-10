@@ -14,6 +14,7 @@
 
 #include "SampleUtils.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
 
@@ -197,16 +198,18 @@ void init() {
         .SetDepthWriteEnabled(true)
         .GetResult();
 
-    pipeline = device.CreateRenderPipelineBuilder()
-        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
-        .SetLayout(pl)
-        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-        .SetIndexFormat(dawn::IndexFormat::Uint32)
-        .SetInputState(inputState)
-        .SetDepthStencilState(depthStencilState)
-        .GetResult();
+    utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.layout = pl;
+    descriptor.cVertexStage.module = vsModule;
+    descriptor.cFragmentStage.module = fsModule;
+    descriptor.inputState = inputState;
+    descriptor.cAttachmentsState.hasDepthStencilAttachment = true;
+    descriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
+    descriptor.cColorAttachments[0].format =
+        GetPreferredSwapChainTextureFormat();
+    descriptor.depthStencilState = depthStencilState;
+
+    pipeline = device.CreateRenderPipeline(&descriptor);
 
     auto planeStencilState = device.CreateDepthStencilStateBuilder()
         .SetDepthCompareFunction(dawn::CompareFunction::Less)
@@ -214,15 +217,18 @@ void init() {
         .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .GetResult();
 
-    planePipeline = device.CreateRenderPipelineBuilder()
-        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
-        .SetLayout(pl)
-        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-        .SetInputState(inputState)
-        .SetDepthStencilState(planeStencilState)
-        .GetResult();
+    utils::ComboRenderPipelineDescriptor pDescriptor(device);
+    pDescriptor.layout = pl;
+    pDescriptor.cVertexStage.module = vsModule;
+    pDescriptor.cFragmentStage.module = fsModule;
+    pDescriptor.inputState = inputState;
+    pDescriptor.cAttachmentsState.hasDepthStencilAttachment = true;
+    pDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
+    pDescriptor.cColorAttachments[0].format =
+        GetPreferredSwapChainTextureFormat();
+    pDescriptor.depthStencilState = planeStencilState;
+
+    planePipeline = device.CreateRenderPipeline(&pDescriptor);
 
     auto reflectionStencilState = device.CreateDepthStencilStateBuilder()
         .SetDepthCompareFunction(dawn::CompareFunction::Less)
@@ -230,15 +236,18 @@ void init() {
         .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
         .GetResult();
 
-    reflectionPipeline = device.CreateRenderPipelineBuilder()
-        .SetColorAttachmentFormat(0, GetPreferredSwapChainTextureFormat())
-        .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
-        .SetLayout(pl)
-        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(dawn::ShaderStage::Fragment, fsReflectionModule, "main")
-        .SetInputState(inputState)
-        .SetDepthStencilState(reflectionStencilState)
-        .GetResult();
+    utils::ComboRenderPipelineDescriptor rfDescriptor(device);
+    rfDescriptor.layout = pl;
+    rfDescriptor.cVertexStage.module = vsModule;
+    rfDescriptor.cFragmentStage.module = fsReflectionModule;
+    rfDescriptor.inputState = inputState;
+    rfDescriptor.cAttachmentsState.hasDepthStencilAttachment = true;
+    rfDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
+    rfDescriptor.cColorAttachments[0].format =
+        GetPreferredSwapChainTextureFormat();
+    rfDescriptor.depthStencilState = reflectionStencilState;
+
+    reflectionPipeline = device.CreateRenderPipeline(&rfDescriptor);
 
     cameraData.proj = glm::perspective(glm::radians(45.0f), 1.f, 1.0f, 100.0f);
 }

@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 class ScissorTest: public DawnTest {
@@ -36,13 +37,13 @@ class ScissorTest: public DawnTest {
                 fragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
             })");
 
-        dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-            .SetColorAttachmentFormat(0, format)
-            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-            .GetResult();
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.cColorAttachments[0].format =
+            format;
 
-        return pipeline;
+        return device.CreateRenderPipeline(&descriptor);
     }
 };
 

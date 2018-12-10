@@ -63,10 +63,9 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // namespace
 
-    RenderPipeline::RenderPipeline(RenderPipelineBuilder* builder)
-        : RenderPipelineBase(builder),
-          mD3d12PrimitiveTopology(D3D12PrimitiveTopology(GetPrimitiveTopology())),
-          mDevice(ToBackend(builder->GetDevice())) {
+    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
+        : RenderPipelineBase(device, descriptor),
+          mD3d12PrimitiveTopology(D3D12PrimitiveTopology(GetPrimitiveTopology())) {
         uint32_t compileFlags = 0;
 #if defined(_DEBUG)
         // Enable better shader debugging with the graphics debugging tools.
@@ -75,36 +74,41 @@ namespace dawn_native { namespace d3d12 {
         // SPRIV-cross does matrix multiplication expecting row major matrices
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-        D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptor = {};
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptorD3D12 = {};
 
         PerStage<ComPtr<ID3DBlob>> compiledShader;
         ComPtr<ID3DBlob> errors;
 
-        for (auto stage : IterateStages(GetStageMask())) {
-            const auto& module = ToBackend(builder->GetStageInfo(stage).module);
-            const auto& entryPoint = builder->GetStageInfo(stage).entryPoint;
-            const auto& hlslSource = module->GetHLSLSource(ToBackend(GetLayout()));
-
+        dawn::ShaderStageBit renderStages =
+            dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment;
+        for (auto stage : IterateStages(renderStages)) {
+            const ShaderModule* module = nullptr;
+            const char* entryPoint = nullptr;
             const char* compileTarget = nullptr;
-
             D3D12_SHADER_BYTECODE* shader = nullptr;
             switch (stage) {
                 case dawn::ShaderStage::Vertex:
-                    shader = &descriptor.VS;
+                    module = ToBackend(descriptor->vertexStage->module);
+                    entryPoint = descriptor->vertexStage->entryPoint;
+                    shader = &descriptorD3D12.VS;
                     compileTarget = "vs_5_1";
                     break;
                 case dawn::ShaderStage::Fragment:
-                    shader = &descriptor.PS;
+                    module = ToBackend(descriptor->fragmentStage->module);
+                    entryPoint = descriptor->fragmentStage->entryPoint;
+                    shader = &descriptorD3D12.PS;
                     compileTarget = "ps_5_1";
                     break;
-                case dawn::ShaderStage::Compute:
+                default:
                     UNREACHABLE();
                     break;
             }
 
-            const PlatformFunctions* functions = ToBackend(builder->GetDevice())->GetFunctions();
+            const std::string hlslSource = module->GetHLSLSource(ToBackend(GetLayout()));
+
+            const PlatformFunctions* functions = device->GetFunctions();
             if (FAILED(functions->d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr,
-                                             nullptr, nullptr, entryPoint.c_str(), compileTarget,
+                                             nullptr, nullptr, entryPoint, compileTarget,
                                              compileFlags, 0, &compiledShader[stage], &errors))) {
                 printf("%s\n", reinterpret_cast<char*>(errors->GetBufferPointer()));
                 ASSERT(false);
@@ -118,54 +122,55 @@ namespace dawn_native { namespace d3d12 {
 
         PipelineLayout* layout = ToBackend(GetLayout());
 
-        descriptor.pRootSignature = layout->GetRootSignature().Get();
+        descriptorD3D12.pRootSignature = layout->GetRootSignature().Get();
 
         // D3D12 logs warnings if any empty input state is used
         InputState* inputState = ToBackend(GetInputState());
         if (inputState->GetAttributesSetMask().any()) {
-            descriptor.InputLayout = inputState->GetD3D12InputLayoutDescriptor();
+            descriptorD3D12.InputLayout = inputState->GetD3D12InputLayoutDescriptor();
         }
 
-        descriptor.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
-        descriptor.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
-        descriptor.RasterizerState.FrontCounterClockwise = FALSE;
-        descriptor.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
-        descriptor.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-        descriptor.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-        descriptor.RasterizerState.DepthClipEnable = TRUE;
-        descriptor.RasterizerState.MultisampleEnable = FALSE;
-        descriptor.RasterizerState.AntialiasedLineEnable = FALSE;
-        descriptor.RasterizerState.ForcedSampleCount = 0;
-        descriptor.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+        descriptorD3D12.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+        descriptorD3D12.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+        descriptorD3D12.RasterizerState.FrontCounterClockwise = FALSE;
+        descriptorD3D12.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+        descriptorD3D12.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+        descriptorD3D12.RasterizerState.SlopeScaledDepthBias =
+            D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+        descriptorD3D12.RasterizerState.DepthClipEnable = TRUE;
+        descriptorD3D12.RasterizerState.MultisampleEnable = FALSE;
+        descriptorD3D12.RasterizerState.AntialiasedLineEnable = FALSE;
+        descriptorD3D12.RasterizerState.ForcedSampleCount = 0;
+        descriptorD3D12.RasterizerState.ConservativeRaster =
+            D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
         if (HasDepthStencilAttachment()) {
-            descriptor.DSVFormat = D3D12TextureFormat(GetDepthStencilFormat());
+            descriptorD3D12.DSVFormat = D3D12TextureFormat(GetDepthStencilFormat());
         }
 
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
-            descriptor.RTVFormats[i] = D3D12TextureFormat(GetColorAttachmentFormat(i));
-            descriptor.BlendState.RenderTarget[i] =
+            descriptorD3D12.RTVFormats[i] = D3D12TextureFormat(GetColorAttachmentFormat(i));
+            descriptorD3D12.BlendState.RenderTarget[i] =
                 ToBackend(GetBlendState(i))->GetD3D12BlendDesc();
         }
-        descriptor.NumRenderTargets = static_cast<uint32_t>(GetColorAttachmentsMask().count());
+        descriptorD3D12.NumRenderTargets = static_cast<uint32_t>(GetColorAttachmentsMask().count());
 
-        descriptor.BlendState.AlphaToCoverageEnable = FALSE;
-        descriptor.BlendState.IndependentBlendEnable = TRUE;
+        descriptorD3D12.BlendState.AlphaToCoverageEnable = FALSE;
+        descriptorD3D12.BlendState.IndependentBlendEnable = TRUE;
 
         DepthStencilState* depthStencilState = ToBackend(GetDepthStencilState());
-        descriptor.DepthStencilState = depthStencilState->GetD3D12DepthStencilDescriptor();
+        descriptorD3D12.DepthStencilState = depthStencilState->GetD3D12DepthStencilDescriptor();
 
-        descriptor.SampleMask = UINT_MAX;
-        descriptor.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());
-        descriptor.SampleDesc.Count = 1;
+        descriptorD3D12.SampleMask = UINT_MAX;
+        descriptorD3D12.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());
+        descriptorD3D12.SampleDesc.Count = 1;
 
-        Device* device = ToBackend(builder->GetDevice());
         ASSERT_SUCCESS(device->GetD3D12Device()->CreateGraphicsPipelineState(
-            &descriptor, IID_PPV_ARGS(&mPipelineState)));
+            &descriptorD3D12, IID_PPV_ARGS(&mPipelineState)));
     }
 
     RenderPipeline::~RenderPipeline() {
-        mDevice->ReferenceUntilUnused(mPipelineState);
+        ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
     }
 
     D3D12_PRIMITIVE_TOPOLOGY RenderPipeline::GetD3D12PrimitiveTopology() const {

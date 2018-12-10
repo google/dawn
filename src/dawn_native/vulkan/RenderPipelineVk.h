@@ -25,14 +25,13 @@ namespace dawn_native { namespace vulkan {
 
     class RenderPipeline : public RenderPipelineBase {
       public:
-        RenderPipeline(RenderPipelineBuilder* builder);
+        RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
         ~RenderPipeline();
 
         VkPipeline GetHandle() const;
 
       private:
         VkPipeline mHandle = VK_NULL_HANDLE;
-        Device* mDevice = nullptr;
     };
 
 }}  // namespace dawn_native::vulkan

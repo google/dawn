@@ -15,6 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "common/Assert.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 constexpr static unsigned int kRTSize = 64;
@@ -213,14 +214,16 @@ class DepthStencilStateTest : public DawnTest {
                 dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bindGroupLayout, {{0, buffer, 0, sizeof(TriangleData)}});
 
                 // Create a pipeline for the triangles with the test spec's depth stencil state
-                dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-                    .SetColorAttachmentFormat(0, dawn::TextureFormat::R8G8B8A8Unorm)
-                    .SetDepthStencilAttachmentFormat(dawn::TextureFormat::D32FloatS8Uint)
-                    .SetLayout(pipelineLayout)
-                    .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-                    .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-                    .SetDepthStencilState(test.depthStencilState)
-                    .GetResult();
+
+                utils::ComboRenderPipelineDescriptor descriptor(device);
+                descriptor.layout = pipelineLayout;
+                descriptor.cVertexStage.module = vsModule;
+                descriptor.cFragmentStage.module = fsModule;
+                descriptor.cAttachmentsState.hasDepthStencilAttachment = true;
+                descriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
+                descriptor.depthStencilState = test.depthStencilState;
+
+                dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
                 pass.SetRenderPipeline(pipeline);
                 pass.SetStencilReference(test.stencil);  // Set the stencil reference

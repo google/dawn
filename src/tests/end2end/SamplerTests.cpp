@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <array>
 #include <cmath>
 
 #include "tests/DawnTest.h"
 
 #include "common/Assert.h"
 #include "common/Constants.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 constexpr static unsigned int kRTSize = 64;
@@ -73,12 +73,14 @@ protected:
             }
         )");
 
-        mPipeline = device.CreateRenderPipelineBuilder()
-            .SetColorAttachmentFormat(0, mRenderPass.colorFormat)
-            .SetLayout(pipelineLayout)
-            .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-            .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-            .GetResult();
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        pipelineDescriptor.layout = pipelineLayout;
+        pipelineDescriptor.cVertexStage.module = vsModule;
+        pipelineDescriptor.cFragmentStage.module = fsModule;
+        pipelineDescriptor.cColorAttachments[0].format =
+            mRenderPass.colorFormat;
+
+        mPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;

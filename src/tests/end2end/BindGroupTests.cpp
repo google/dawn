@@ -15,6 +15,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "tests/DawnTest.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 constexpr static unsigned int kRTSize = 8;
@@ -114,13 +115,15 @@ TEST_P(BindGroupTests, ReusedUBO) {
     );
     dawn::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-        .SetColorAttachmentFormat(0, renderPass.colorFormat)
-        .SetLayout(pipelineLayout)
-        .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
-        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-        .GetResult();
+    utils::ComboRenderPipelineDescriptor textureDescriptor(device);
+    textureDescriptor.layout = pipelineLayout;
+    textureDescriptor.cVertexStage.module = vsModule;
+    textureDescriptor.cFragmentStage.module = fsModule;
+    textureDescriptor.cColorAttachments[0].format =
+        renderPass.colorFormat;
+
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
+
     struct Data {
         float transform[8];
         char padding[256 - 8 * sizeof(float)];
@@ -198,13 +201,15 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     );
     dawn::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-        .SetColorAttachmentFormat(0, renderPass.colorFormat)
-        .SetLayout(pipelineLayout)
-        .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleList)
-        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-        .GetResult();
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+    pipelineDescriptor.layout = pipelineLayout;
+    pipelineDescriptor.cVertexStage.module = vsModule;
+    pipelineDescriptor.cFragmentStage.module = fsModule;
+    pipelineDescriptor.cColorAttachments[0].format =
+        renderPass.colorFormat;
+
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
     constexpr float dummy = 0.0f;
     constexpr float transform[] = { 1.f, 0.f, dummy, dummy, 0.f, 1.f, dummy, dummy };
     dawn::Buffer buffer = utils::CreateBufferFromData(device, &transform, sizeof(transform), dawn::BufferUsageBit::Uniform);

@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 class ViewportOrientationTests : public DawnTest {};
@@ -35,12 +36,14 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
             fragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
         })");
 
-    dawn::RenderPipeline pipeline = device.CreateRenderPipelineBuilder()
-        .SetColorAttachmentFormat(0, renderPass.colorFormat)
-        .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-        .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-        .SetPrimitiveTopology(dawn::PrimitiveTopology::PointList)
-        .GetResult();
+    utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.cVertexStage.module = vsModule;
+    descriptor.cFragmentStage.module = fsModule;
+    descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
+    descriptor.cColorAttachments[0].format =
+        renderPass.colorFormat;
+
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     {

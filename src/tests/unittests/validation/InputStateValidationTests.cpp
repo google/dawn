@@ -14,15 +14,12 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
-
-// Maximums for Dawn, tests will start failing when this changes
-static constexpr uint32_t kMaxVertexAttributes = 16u;
-static constexpr uint32_t kMaxVertexInputs = 16u;
 
 class InputStateTest : public ValidationTest {
     protected:
-        dawn::RenderPipeline CreatePipeline(bool success, const dawn::InputState& inputState, std::string vertexSource) {
+        void CreatePipeline(bool success, const dawn::InputState& inputState, std::string vertexSource) {
             DummyRenderPass renderpassData = CreateDummyRenderPass();
 
             dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
@@ -34,18 +31,18 @@ class InputStateTest : public ValidationTest {
                 }
             )");
 
-            dawn::RenderPipelineBuilder builder;
-            if (success) {
-                builder = AssertWillBeSuccess(device.CreateRenderPipelineBuilder());
-            } else {
-                builder = AssertWillBeError(device.CreateRenderPipelineBuilder());
-            }
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.cVertexStage.module = vsModule;
+            descriptor.cFragmentStage.module = fsModule;
+            descriptor.inputState = inputState;
+            descriptor.cColorAttachments[0].format =
+                renderpassData.attachmentFormat;
 
-            return builder.SetColorAttachmentFormat(0, renderpassData.attachmentFormat)
-                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-                .SetInputState(inputState)
-                .GetResult();
+            if (!success) {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            } else {
+                device.CreateRenderPipeline(&descriptor);
+            }
         }
 };
 

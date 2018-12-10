@@ -15,6 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "common/Assert.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 constexpr uint32_t kRTSize = 400;
@@ -51,14 +52,16 @@ class IndexFormatTest : public DawnTest {
                 })"
             );
 
-            return device.CreateRenderPipelineBuilder()
-                .SetColorAttachmentFormat(0, renderPass.colorFormat)
-                .SetPrimitiveTopology(dawn::PrimitiveTopology::TriangleStrip)
-                .SetStage(dawn::ShaderStage::Vertex, vsModule, "main")
-                .SetStage(dawn::ShaderStage::Fragment, fsModule, "main")
-                .SetIndexFormat(format)
-                .SetInputState(inputState)
-                .GetResult();
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.cVertexStage.module = vsModule;
+            descriptor.cFragmentStage.module = fsModule;
+            descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
+            descriptor.indexFormat = format;
+            descriptor.inputState = inputState;
+            descriptor.cColorAttachments[0].format =
+                renderPass.colorFormat;
+
+            return device.CreateRenderPipeline(&descriptor);
         }
 };
 
