@@ -88,11 +88,24 @@ namespace dawn_native {
             return {};
         }
 
+        MaybeError ValidateImageHeight(uint32_t imageHeight, uint32_t copyHeight) {
+            if (imageHeight < copyHeight) {
+                return DAWN_VALIDATION_ERROR("Image height must not be less than the copy height.");
+            }
+
+            return {};
+        }
+
         MaybeError ComputeTextureCopyBufferSize(const Extent3D& copySize,
                                                 uint32_t rowPitch,
+                                                uint32_t imageHeight,
                                                 uint32_t* bufferSize) {
+            DAWN_TRY(ValidateImageHeight(imageHeight, copySize.height));
+
             // TODO(cwallez@chromium.org): check for overflows
-            *bufferSize = (rowPitch * (copySize.height - 1) + copySize.width) * copySize.depth;
+            uint32_t slicePitch = rowPitch * imageHeight;
+            uint32_t sliceSize = rowPitch * (copySize.height - 1) + copySize.width;
+            *bufferSize = (slicePitch * (copySize.depth - 1)) + sliceSize;
 
             return {};
         }
@@ -388,7 +401,9 @@ namespace dawn_native {
                     uint32_t bufferCopySize = 0;
                     DAWN_TRY(ValidateRowPitch(copy->destination.texture->GetFormat(),
                                               copy->copySize, copy->source.rowPitch));
+
                     DAWN_TRY(ComputeTextureCopyBufferSize(copy->copySize, copy->source.rowPitch,
+                                                          copy->source.imageHeight,
                                                           &bufferCopySize));
 
                     DAWN_TRY(ValidateCopySizeFitsInTexture(copy->destination, copy->copySize));
@@ -412,7 +427,8 @@ namespace dawn_native {
                     DAWN_TRY(ValidateRowPitch(copy->source.texture->GetFormat(), copy->copySize,
                                               copy->destination.rowPitch));
                     DAWN_TRY(ComputeTextureCopyBufferSize(
-                        copy->copySize, copy->destination.rowPitch, &bufferCopySize));
+                        copy->copySize, copy->destination.rowPitch, copy->destination.imageHeight,
+                        &bufferCopySize));
 
                     DAWN_TRY(ValidateCopySizeFitsInTexture(copy->source, copy->copySize));
                     DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->destination, bufferCopySize));
@@ -695,6 +711,11 @@ namespace dawn_native {
         } else {
             copy->source.rowPitch = source->rowPitch;
         }
+        if (source->imageHeight == 0) {
+            copy->source.imageHeight = copySize->height;
+        } else {
+            copy->source.imageHeight = source->imageHeight;
+        }
     }
 
     void CommandBufferBuilder::CopyTextureToBuffer(const TextureCopyView* source,
@@ -728,6 +749,11 @@ namespace dawn_native {
             copy->destination.rowPitch = ComputeDefaultRowPitch(source->texture, copySize->width);
         } else {
             copy->destination.rowPitch = destination->rowPitch;
+        }
+        if (destination->imageHeight == 0) {
+            copy->destination.imageHeight = copySize->height;
+        } else {
+            copy->destination.imageHeight = destination->imageHeight;
         }
     }
 

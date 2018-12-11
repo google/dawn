@@ -333,6 +333,7 @@ namespace dawn_native { namespace opengl {
 
                     glPixelStorei(GL_UNPACK_ROW_LENGTH,
                                   src.rowPitch / TextureFormatPixelSize(texture->GetFormat()));
+                    glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.imageHeight);
                     switch (texture->GetDimension()) {
                         case dawn::TextureDimension::e2D:
                             if (texture->GetArrayLayers() > 1) {
@@ -352,6 +353,7 @@ namespace dawn_native { namespace opengl {
                             UNREACHABLE();
                     }
                     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+                    glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 
                     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
                 } break;
@@ -393,11 +395,13 @@ namespace dawn_native { namespace opengl {
                     glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
                     glPixelStorei(GL_PACK_ROW_LENGTH,
                                   dst.rowPitch / TextureFormatPixelSize(texture->GetFormat()));
+                    glPixelStorei(GL_PACK_IMAGE_HEIGHT, dst.imageHeight);
                     ASSERT(copySize.depth == 1 && src.origin.z == 0);
                     void* offset = reinterpret_cast<void*>(static_cast<uintptr_t>(dst.offset));
                     glReadPixels(src.origin.x, src.origin.y, copySize.width, copySize.height,
                                  format.format, format.type, offset);
                     glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+                    glPixelStorei(GL_PACK_IMAGE_HEIGHT, 0);
 
                     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
                     glDeleteFramebuffers(1, &readFBO);

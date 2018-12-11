@@ -37,6 +37,7 @@ namespace {
     struct BufferSpec {
         uint32_t offset;
         uint32_t rowPitch;
+        uint32_t imageHeight;
     };
 
     // Check that each copy region fits inside the buffer footprint
@@ -119,7 +120,7 @@ namespace {
             const auto& copy = copySplit.copies[i];
 
             uint32_t rowPitchInTexels = bufferSpec.rowPitch / textureSpec.texelSize;
-            uint32_t slicePitchInTexels = rowPitchInTexels * copy.copySize.height;
+            uint32_t slicePitchInTexels = rowPitchInTexels * bufferSpec.imageHeight;
             uint32_t absoluteTexelOffset = copySplit.offset / textureSpec.texelSize + copy.bufferOffset.x + copy.bufferOffset.y * rowPitchInTexels + copy.bufferOffset.z * slicePitchInTexels;
 
             ASSERT(absoluteTexelOffset >= bufferSpec.offset / textureSpec.texelSize);
@@ -153,7 +154,8 @@ namespace {
     }
 
     std::ostream& operator<<(std::ostream& os, const BufferSpec& bufferSpec) {
-        os << "BufferSpec(" << bufferSpec.offset << ", " << bufferSpec.rowPitch << ")";
+        os << "BufferSpec(" << bufferSpec.offset << ", " << bufferSpec.rowPitch << ", "
+           << bufferSpec.imageHeight << ")";
         return os;
     }
 
@@ -169,22 +171,25 @@ namespace {
 
     // Define base texture sizes and offsets to test with: some aligned, some unaligned
     constexpr TextureSpec kBaseTextureSpecs[] = {
-        { 0, 0, 0, 1, 1, 1, 4 },
-        { 31, 16, 0, 1, 1, 1, 4 },
-        { 64, 16, 0, 1, 1, 1, 4 },
+        {0, 0, 0, 1, 1, 1, 4},
+        {31, 16, 0, 1, 1, 1, 4},
+        {64, 16, 0, 1, 1, 1, 4},
+        {64, 16, 8, 1, 1, 1, 4},
 
-        { 0, 0, 0, 1024, 1024, 1, 4 },
-        { 256, 512, 0, 1024, 1024, 1, 4 },
-        { 64, 48, 0, 1024, 1024, 1, 4 },
+        {0, 0, 0, 1024, 1024, 1, 4},
+        {256, 512, 0, 1024, 1024, 1, 4},
+        {64, 48, 0, 1024, 1024, 1, 4},
+        {64, 48, 16, 1024, 1024, 1024, 4},
 
-        { 0, 0, 0, 257, 31, 1, 4 },
-        { 0, 0, 0, 17, 93, 1, 4 },
-        { 59, 13, 0, 257, 31, 1, 4 },
-        { 17, 73, 0, 17, 93, 1, 4 },
+        {0, 0, 0, 257, 31, 1, 4},
+        {0, 0, 0, 17, 93, 1, 4},
+        {59, 13, 0, 257, 31, 1, 4},
+        {17, 73, 0, 17, 93, 1, 4},
+        {17, 73, 59, 17, 93, 99, 4},
     };
 
     // Define base buffer sizes to work with: some offsets aligned, some unaligned. rowPitch is the minimum required
-    std::array<BufferSpec, 10> BaseBufferSpecs(const TextureSpec& textureSpec) {
+    std::array<BufferSpec, 13> BaseBufferSpecs(const TextureSpec& textureSpec) {
         uint32_t rowPitch = Align(textureSpec.texelSize * textureSpec.width, kTextureRowPitchAlignment);
 
         auto alignNonPow2 = [](uint32_t value, uint32_t size) -> uint32_t {
@@ -192,18 +197,21 @@ namespace {
         };
 
         return {
-             BufferSpec{alignNonPow2(0, textureSpec.texelSize), rowPitch},
-             BufferSpec{alignNonPow2(512, textureSpec.texelSize), rowPitch},
-             BufferSpec{alignNonPow2(1024, textureSpec.texelSize), rowPitch},
+            BufferSpec{alignNonPow2(0, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(512, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(1024, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(1024, textureSpec.texelSize), rowPitch, textureSpec.height * 2},
 
-             BufferSpec{alignNonPow2(32, textureSpec.texelSize), rowPitch},
-             BufferSpec{alignNonPow2(64, textureSpec.texelSize), rowPitch},
+            BufferSpec{alignNonPow2(32, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(64, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(64, textureSpec.texelSize), rowPitch, textureSpec.height * 2},
 
-             BufferSpec{alignNonPow2(31, textureSpec.texelSize), rowPitch},
-             BufferSpec{alignNonPow2(257, textureSpec.texelSize), rowPitch},
-             BufferSpec{alignNonPow2(511, textureSpec.texelSize), rowPitch},
-             BufferSpec{alignNonPow2(513, textureSpec.texelSize), rowPitch},
-             BufferSpec{alignNonPow2(1023, textureSpec.texelSize), rowPitch},
+            BufferSpec{alignNonPow2(31, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(257, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(511, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(513, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(1023, textureSpec.texelSize), rowPitch, textureSpec.height},
+            BufferSpec{alignNonPow2(1023, textureSpec.texelSize), rowPitch, textureSpec.height * 2},
         };
     }
 
@@ -223,7 +231,7 @@ class CopySplitTest : public testing::Test {
             TextureCopySplit copySplit = ComputeTextureCopySplit(
                 {textureSpec.x, textureSpec.y, textureSpec.z},
                 {textureSpec.width, textureSpec.height, textureSpec.depth}, textureSpec.texelSize,
-                bufferSpec.offset, bufferSpec.rowPitch);
+                bufferSpec.offset, bufferSpec.rowPitch, bufferSpec.imageHeight);
             ValidateCopySplit(textureSpec, bufferSpec, copySplit);
             return copySplit;
         }
@@ -364,6 +372,26 @@ TEST_F(CopySplitTest, RowPitch) {
                     std::ostringstream message;
                     message << "Failed generating splits: " << textureSpec << ", " << bufferSpec << std::endl
                         << copySplit << std::endl;
+                    FAIL() << message.str();
+                }
+            }
+        }
+    }
+}
+
+TEST_F(CopySplitTest, ImageHeight) {
+    for (TextureSpec textureSpec : kBaseTextureSpecs) {
+        for (BufferSpec bufferSpec : BaseBufferSpecs(textureSpec)) {
+            uint32_t baseImageHeight = bufferSpec.imageHeight;
+            for (uint32_t i = 0; i < 5; ++i) {
+                bufferSpec.imageHeight = baseImageHeight + i * 256;
+
+                TextureCopySplit copySplit = DoTest(textureSpec, bufferSpec);
+                if (HasFatalFailure()) {
+                    std::ostringstream message;
+                    message << "Failed generating splits: " << textureSpec << ", " << bufferSpec
+                            << std::endl
+                            << copySplit << std::endl;
                     FAIL() << message.str();
                 }
             }

@@ -340,6 +340,29 @@ TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
                 dawn::TextureAspect::Color, {65, 1, 1});
 }
 
+TEST_F(CopyCommandTest_B2T, ImageHeightConstraint) {
+    uint32_t bufferSize = BufferSizeForTextureCopy(5, 5, 1);
+    dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferDst);
+
+    // Image height is zero (Valid)
+    TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
+                dawn::TextureAspect::Color, {4, 4, 1});
+
+    // Image height is equal to copy height (Valid)
+    TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
+                dawn::TextureAspect::Color, {4, 4, 1});
+
+    // Image height is larger than copy height (Valid)
+    TestB2TCopy(utils::Expectation::Success, source, 0, 256, 4, destination, 0, 0, {0, 0, 0},
+                dawn::TextureAspect::Color, {4, 4, 1});
+
+    // Image height is less than copy height (Invalid)
+    TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 3, destination, 0, 0, {0, 0, 0},
+                dawn::TextureAspect::Color, {4, 4, 1});
+}
+
 // Test B2T copies with incorrect buffer offset usage
 TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
     uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
@@ -521,6 +544,29 @@ TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
     // Row pitch is less than width * bytesPerPixel
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
                 destination, 0, 256, 0, {65, 1, 1});
+}
+
+TEST_F(CopyCommandTest_T2B, ImageHeightConstraint) {
+    uint32_t bufferSize = BufferSizeForTextureCopy(5, 5, 1);
+    dawn::Texture source = Create2DTexture(16, 16, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm,
+                                           dawn::TextureUsageBit::TransferSrc);
+    dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
+
+    // Image height is zero (Valid)
+    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
+                destination, 0, 256, 0, {4, 4, 1});
+
+    // Image height is equal to copy height (Valid)
+    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
+                destination, 0, 256, 4, {4, 4, 1});
+
+    // Image height exceeds copy height (Valid)
+    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
+                destination, 0, 256, 5, {4, 4, 1});
+
+    // Image height is less than copy height (Invalid)
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
+                destination, 0, 256, 3, {4, 4, 1});
 }
 
 // Test T2B copies with incorrect buffer offset usage
