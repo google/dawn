@@ -68,6 +68,7 @@ Dawn doesn't have a formal coding style yet, except what's defined by our clang 
 Overall try to use the same style and convention as code around your change.
 
 If you find issues with Dawn, please feel free to report them on the [bug tracker](https://bugs.chromium.org/p/dawn/issues/entry).
+For other discussions, please post to [Dawn's mailing list](https://groups.google.com/forum/#!members/dawn-graphics).
 
 ## License
 
