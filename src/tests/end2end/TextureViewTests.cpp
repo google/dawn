@@ -146,8 +146,8 @@ protected:
                     dawn::BufferUsageBit::TransferSrc);
                 dawn::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(stagingBuffer, 0, kTextureRowPitchAlignment, 0);
-                dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                    mTexture, level, layer, {0, 0, 0}, dawn::TextureAspect::Color);
+                dawn::TextureCopyView textureCopyView =
+                    utils::CreateTextureCopyView(mTexture, level, layer, {0, 0, 0});
                 dawn::Extent3D copySize = {texWidth, texHeight, 1};
                 builder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }

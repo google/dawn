@@ -105,7 +105,7 @@ protected:
         dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data, sizeof(data), dawn::BufferUsageBit::TransferSrc);
         dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 256, 0);
         dawn::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color);
+            utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
         dawn::Extent3D copySize = {2, 2, 1};
         dawn::CommandBuffer copy =
             device.CreateCommandBufferBuilder()

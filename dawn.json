@@ -1034,8 +1034,7 @@
             {"name": "texture", "type": "texture"},
             {"name": "level", "type": "uint32_t"},
             {"name": "slice", "type": "uint32_t"},
-            {"name": "origin", "type": "origin 3D"},
-            {"name": "aspect", "type": "texture aspect"}
+            {"name": "origin", "type": "origin 3D"}
         ]
     },
     "texture descriptor": {

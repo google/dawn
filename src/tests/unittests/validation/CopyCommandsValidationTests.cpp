@@ -58,12 +58,11 @@ class CopyCommandTest : public ValidationTest {
                          uint32_t destLevel,
                          uint32_t destSlice,
                          dawn::Origin3D destOrigin,
-                         dawn::TextureAspect destAspect,
                          dawn::Extent3D extent3D) {
             dawn::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(srcBuffer, srcOffset, srcRowPitch, srcImageHeight);
-            dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                destTexture, destLevel, destSlice, destOrigin, destAspect);
+            dawn::TextureCopyView textureCopyView =
+                utils::CreateTextureCopyView(destTexture, destLevel, destSlice, destOrigin);
 
             if (expectation == utils::Expectation::Success) {
                 dawn::CommandBuffer commands =
@@ -83,7 +82,6 @@ class CopyCommandTest : public ValidationTest {
                          uint32_t srcLevel,
                          uint32_t srcSlice,
                          dawn::Origin3D srcOrigin,
-                         dawn::TextureAspect srcAspect,
                          dawn::Buffer destBuffer,
                          uint32_t destOffset,
                          uint32_t destRowPitch,
@@ -91,8 +89,8 @@ class CopyCommandTest : public ValidationTest {
                          dawn::Extent3D extent3D) {
             dawn::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(destBuffer, destOffset, destRowPitch, destImageHeight);
-            dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                srcTexture, srcLevel, srcSlice, srcOrigin, srcAspect);
+            dawn::TextureCopyView textureCopyView =
+                utils::CreateTextureCopyView(srcTexture, srcLevel, srcSlice, srcOrigin);
 
             if (expectation == utils::Expectation::Success) {
                 dawn::CommandBuffer commands =
@@ -192,42 +190,42 @@ TEST_F(CopyCommandTest_B2T, Success) {
     {
         // Copy 4x4 block in corner of first mip.
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
-                    dawn::TextureAspect::Color, {4, 4, 1});
+                    {4, 4, 1});
         // Copy 4x4 block in opposite corner of first mip.
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {12, 12, 0},
-                    dawn::TextureAspect::Color, {4, 4, 1});
+                    {4, 4, 1});
         // Copy 4x4 block in the 4x4 mip.
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 2, 0, {0, 0, 0},
-                    dawn::TextureAspect::Color, {4, 4, 1});
+                    {4, 4, 1});
         // Copy with a buffer offset
         TestB2TCopy(utils::Expectation::Success, source, bufferSize - 4, 256, 0, destination, 0, 0,
-                    {0, 0, 0}, dawn::TextureAspect::Color, {1, 1, 1});
+                    {0, 0, 0}, {1, 1, 1});
     }
 
     // Copies with a 256-byte aligned row pitch but unaligned texture region
     {
         // Unaligned region
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
-                    dawn::TextureAspect::Color, {3, 4, 1});
+                    {3, 4, 1});
         // Unaligned region with texture offset
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {5, 7, 0},
-                    dawn::TextureAspect::Color, {2, 3, 1});
+                    {2, 3, 1});
         // Unaligned region, with buffer offset
-        TestB2TCopy(utils::Expectation::Success, source, 31 * 4, 256, 0, destination, 0, 0, {0, 0, 0},
-                    dawn::TextureAspect::Color, {3, 3, 1});
+        TestB2TCopy(utils::Expectation::Success, source, 31 * 4, 256, 0, destination, 0, 0,
+                    {0, 0, 0}, {3, 3, 1});
     }
 
     // Empty copies are valid
     {
         // An empty copy
         TestB2TCopy(utils::Expectation::Success, source, 0, 0, 0, destination, 0, 0, {0, 0, 0},
-                    dawn::TextureAspect::Color, {0, 0, 1});
+                    {0, 0, 1});
         // An empty copy touching the end of the buffer
-        TestB2TCopy(utils::Expectation::Success, source, bufferSize, 0, 0, destination, 0, 0, {0, 0,
-                    0}, dawn::TextureAspect::Color, {0, 0, 1});
+        TestB2TCopy(utils::Expectation::Success, source, bufferSize, 0, 0, destination, 0, 0,
+                    {0, 0, 0}, {0, 0, 1});
         // An empty copy touching the side of the texture
         TestB2TCopy(utils::Expectation::Success, source, 0, 0, 0, destination, 0, 0, {16, 16, 0},
-                    dawn::TextureAspect::Color, {0, 0, 1});
+                    {0, 0, 1});
     }
 }
 
@@ -240,15 +238,15 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
 
     // OOB on the buffer because we copy too many pixels
     TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 5, 1});
+                {4, 5, 1});
 
     // OOB on the buffer because of the offset
     TestB2TCopy(utils::Expectation::Failure, source, 4, 256, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // OOB on the buffer because (row pitch * (height - 1) + width) * depth overflows
     TestB2TCopy(utils::Expectation::Failure, source, 0, 512, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 3, 1});
+                {4, 3, 1});
 
     // Not OOB on the buffer although row pitch * height overflows
     // but (row pitch * (height - 1) + width) * depth does not overlow
@@ -258,7 +256,7 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
         dawn::Buffer sourceBuffer = CreateBuffer(sourceBufferSize, dawn::BufferUsageBit::TransferSrc);
 
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
-                    dawn::TextureAspect::Color, {7, 3, 1});
+                    {7, 3, 1});
     }
 }
 
@@ -271,23 +269,23 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
 
     // OOB on the texture because x + width overflows
     TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, 0, {13, 12, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // OOB on the texture because y + width overflows
     TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, 0, {12, 13, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // OOB on the texture because we overflow a non-zero mip
     TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 2, 0, {1, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // OOB on the texture even on an empty copy when we copy to a non-existent mip.
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 5, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {0, 0, 1});
+                {0, 0, 1});
 
     // OOB on the texture because slice overflows
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 0, 2, {0, 0, 0},
-                dawn::TextureAspect::Color, {0, 0, 1});
+                {0, 0, 1});
 }
 
 // Test that we force Z=0 and Depth=1 on copies to 2D textures
@@ -298,11 +296,11 @@ TEST_F(CopyCommandTest_B2T, ZDepthConstraintFor2DTextures) {
 
     // Z=1 on an empty copy still errors
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 0, 0, {0, 0, 1},
-                dawn::TextureAspect::Color, {0, 0, 1});
+                {0, 0, 1});
 
     // Depth=0 on an empty copy still errors
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {0, 0, 0});
+                {0, 0, 0});
 }
 
 // Test B2T copies with incorrect buffer usage
@@ -316,11 +314,11 @@ TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
 
     // Incorrect source usage
     TestB2TCopy(utils::Expectation::Failure, vertex, 0, 256, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // Incorrect destination usage
     TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, sampled, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 }
 
 TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
@@ -331,15 +329,15 @@ TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
 
     // Default row pitch is not 256-byte aligned
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {3, 4, 1});
+                {3, 4, 1});
 
     // Row pitch is not 256-byte aligned
     TestB2TCopy(utils::Expectation::Failure, source, 0, 128, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // Row pitch is less than width * bytesPerPixel
     TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {65, 1, 1});
+                {65, 1, 1});
 }
 
 TEST_F(CopyCommandTest_B2T, ImageHeightConstraint) {
@@ -350,19 +348,19 @@ TEST_F(CopyCommandTest_B2T, ImageHeightConstraint) {
 
     // Image height is zero (Valid)
     TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // Image height is equal to copy height (Valid)
     TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // Image height is larger than copy height (Valid)
     TestB2TCopy(utils::Expectation::Success, source, 0, 256, 4, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 
     // Image height is less than copy height (Invalid)
     TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 3, destination, 0, 0, {0, 0, 0},
-                dawn::TextureAspect::Color, {4, 4, 1});
+                {4, 4, 1});
 }
 
 // Test B2T copies with incorrect buffer offset usage
@@ -373,17 +371,17 @@ TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
                                                      dawn::TextureUsageBit::TransferDst);
 
     // Correct usage
-    TestB2TCopy(utils::Expectation::Success, source, bufferSize - 4, 256, 0, destination, 0, 0, {0,
-                0, 0}, dawn::TextureAspect::Color, {1, 1, 1});
+    TestB2TCopy(utils::Expectation::Success, source, bufferSize - 4, 256, 0, destination, 0, 0,
+                {0, 0, 0}, {1, 1, 1});
 
     // Incorrect usages
     {
         TestB2TCopy(utils::Expectation::Failure, source, bufferSize - 5, 256, 0, destination, 0, 0,
-                    {0, 0, 0}, dawn::TextureAspect::Color, {1, 1, 1});
+                    {0, 0, 0}, {1, 1, 1});
         TestB2TCopy(utils::Expectation::Failure, source, bufferSize - 6, 256, 0, destination, 0, 0,
-                    {0, 0, 0}, dawn::TextureAspect::Color, {1, 1, 1});
+                    {0, 0, 0}, {1, 1, 1});
         TestB2TCopy(utils::Expectation::Failure, source, bufferSize - 7, 256, 0, destination, 0, 0,
-                    {0, 0, 0}, dawn::TextureAspect::Color, {1, 1, 1});
+                    {0, 0, 0}, {1, 1, 1});
     }
 }
 
@@ -400,43 +398,43 @@ TEST_F(CopyCommandTest_T2B, Success) {
     // Different copies, including some that touch the OOB condition
     {
         // Copy from 4x4 block in corner of first mip.
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                    destination, 0, 256, 0, {4, 4, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
+                    {4, 4, 1});
         // Copy from 4x4 block in opposite corner of first mip.
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {12, 12, 0},
-                    dawn::TextureAspect::Color, destination, 0, 256, 0, {4, 4, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {12, 12, 0}, destination, 0, 256, 0,
+                    {4, 4, 1});
         // Copy from 4x4 block in the 4x4 mip.
-        TestT2BCopy(utils::Expectation::Success, source, 2, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                    destination, 0, 256, 0, {4, 4, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 2, 0, {0, 0, 0}, destination, 0, 256, 0,
+                    {4, 4, 1});
         // Copy with a buffer offset
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                    destination, bufferSize - 4, 256, 0, {1, 1, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination,
+                    bufferSize - 4, 256, 0, {1, 1, 1});
     }
 
     // Copies with a 256-byte aligned row pitch but unaligned texture region
     {
         // Unaligned region
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                    destination, 0, 256, 0, {3, 4, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
+                    {3, 4, 1});
         // Unaligned region with texture offset
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {5, 7, 0}, dawn::TextureAspect::Color,
-                    destination, 0, 256, 0, {2, 3, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {5, 7, 0}, destination, 0, 256, 0,
+                    {2, 3, 1});
         // Unaligned region, with buffer offset
-        TestT2BCopy(utils::Expectation::Success, source, 2, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                    destination, 31 * 4, 256, 0, {3, 3, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 2, 0, {0, 0, 0}, destination, 31 * 4, 256,
+                    0, {3, 3, 1});
     }
 
     // Empty copies are valid
     {
         // An empty copy
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                    destination, 0, 0, 0, {0, 0, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0, 0,
+                    {0, 0, 1});
         // An empty copy touching the end of the buffer
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                    destination, bufferSize, 0, 0, {0, 0, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, bufferSize,
+                    0, 0, {0, 0, 1});
         // An empty copy touching the side of the texture
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {16, 16, 0},
-                    dawn::TextureAspect::Color, destination, 0, 0, 0, {0, 0, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {16, 16, 0}, destination, 0, 0, 0,
+                    {0, 0, 1});
     }
 }
 
@@ -448,20 +446,20 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // OOB on the texture because x + width overflows
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {13, 12, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 0, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {13, 12, 0}, destination, 0, 256, 0,
+                {4, 4, 1});
 
     // OOB on the texture because y + width overflows
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {12, 13, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 0, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {12, 13, 0}, destination, 0, 256, 0,
+                {4, 4, 1});
 
     // OOB on the texture because we overflow a non-zero mip
-    TestT2BCopy(utils::Expectation::Failure, source, 2, 0, {1, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 0, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 2, 0, {1, 0, 0}, destination, 0, 256, 0,
+                {4, 4, 1});
 
     // OOB on the texture even on an empty copy when we copy from a non-existent mip.
-    TestT2BCopy(utils::Expectation::Failure, source, 5, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 0, 0, {0, 0, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 5, 0, {0, 0, 0}, destination, 0, 0, 0,
+                {0, 0, 1});
 }
 
 // Test OOB conditions on the buffer
@@ -472,16 +470,16 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // OOB on the buffer because we copy too many pixels
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 0, {4, 5, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
+                {4, 5, 1});
 
     // OOB on the buffer because of the offset
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 4, 256, 0, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 4, 256, 0,
+                {4, 4, 1});
 
     // OOB on the buffer because (row pitch * (height - 1) + width) * depth overflows
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 512, 0, {4, 3, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 512, 0,
+                {4, 3, 1});
 
     // Not OOB on the buffer although row pitch * height overflows
     // but (row pitch * (height - 1) + width) * depth does not overlow
@@ -489,8 +487,8 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
         uint32_t destinationBufferSize = BufferSizeForTextureCopy(7, 3, 1);
         ASSERT_TRUE(256 * 3 > destinationBufferSize) << "row pitch * height should overflow buffer";
         dawn::Buffer destinationBuffer = CreateBuffer(destinationBufferSize, dawn::BufferUsageBit::TransferDst);
-        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                    destinationBuffer, 0, 256, 0, {7, 3, 1});
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destinationBuffer, 0, 256,
+                    0, {7, 3, 1});
     }
 }
 
@@ -502,12 +500,12 @@ TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // Z=1 on an empty copy still errors
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 1}, dawn::TextureAspect::Color,
-                destination, 0, 0, 0, {0, 0, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 1}, destination, 0, 0, 0,
+                {0, 0, 1});
 
     // Depth=0 on an empty copy still errors
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 0, 0, {0, 0, 0});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, 0,
+                {0, 0, 0});
 }
 
 // Test T2B copies with incorrect buffer usage
@@ -521,12 +519,11 @@ TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
     dawn::Buffer vertex = CreateBuffer(bufferSize, dawn::BufferUsageBit::Vertex);
 
     // Incorrect source usage
-    TestT2BCopy(utils::Expectation::Failure, sampled, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 0, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, sampled, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
+                {4, 4, 1});
 
     // Incorrect destination usage
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                vertex, 0, 256, 0, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, vertex, 0, 256, 0, {4, 4, 1});
 }
 
 TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
@@ -536,16 +533,16 @@ TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
 
     // Default row pitch is not 256-byte aligned
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 0, {3, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
+                {3, 4, 1});
 
     // Row pitch is not 256-byte aligned
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 257, 0, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 257, 0,
+                {4, 4, 1});
 
     // Row pitch is less than width * bytesPerPixel
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 0, {65, 1, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
+                {65, 1, 1});
 }
 
 TEST_F(CopyCommandTest_T2B, ImageHeightConstraint) {
@@ -555,20 +552,20 @@ TEST_F(CopyCommandTest_T2B, ImageHeightConstraint) {
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // Image height is zero (Valid)
-    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 0, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
+                {4, 4, 1});
 
     // Image height is equal to copy height (Valid)
-    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 4, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 256, 4,
+                {4, 4, 1});
 
     // Image height exceeds copy height (Valid)
-    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 5, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 256, 5,
+                {4, 4, 1});
 
     // Image height is less than copy height (Invalid)
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, 0, 256, 3, {4, 4, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 3,
+                {4, 4, 1});
 }
 
 // Test T2B copies with incorrect buffer offset usage
@@ -579,15 +576,15 @@ TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     // Correct usage
-    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, bufferSize - 4, 256, 0, {1, 1, 1});
+    TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, bufferSize - 4,
+                256, 0, {1, 1, 1});
 
     // Incorrect usages
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, bufferSize - 5, 256, 0, {1, 1, 1});
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, bufferSize - 6, 256, 0, {1, 1, 1});
-    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color,
-                destination, bufferSize - 7, 256, 0, {1, 1, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, bufferSize - 5,
+                256, 0, {1, 1, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, bufferSize - 6,
+                256, 0, {1, 1, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, bufferSize - 7,
+                256, 0, {1, 1, 1});
 }
 

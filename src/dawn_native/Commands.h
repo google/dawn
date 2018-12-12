@@ -66,7 +66,6 @@ namespace dawn_native {
         uint32_t level;
         uint32_t slice;
         Origin3D origin;  // Texels
-        dawn::TextureAspect aspect;
     };
 
     struct CopyBufferToBufferCmd {

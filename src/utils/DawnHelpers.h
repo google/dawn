@@ -44,8 +44,7 @@ namespace utils {
     dawn::TextureCopyView CreateTextureCopyView(dawn::Texture texture,
                                                 uint32_t level,
                                                 uint32_t slice,
-                                                dawn::Origin3D origin,
-                                                dawn::TextureAspect aspect);
+                                                dawn::Origin3D origin);
 
     struct BasicRenderPass {
         uint32_t width;

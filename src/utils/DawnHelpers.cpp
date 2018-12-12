@@ -170,14 +170,12 @@ namespace utils {
     dawn::TextureCopyView CreateTextureCopyView(dawn::Texture texture,
                                                 uint32_t level,
                                                 uint32_t slice,
-                                                dawn::Origin3D origin,
-                                                dawn::TextureAspect aspect) {
+                                                dawn::Origin3D origin) {
         dawn::TextureCopyView textureCopyView;
         textureCopyView.texture = texture;
         textureCopyView.level = level;
         textureCopyView.slice = slice;
         textureCopyView.origin = origin;
-        textureCopyView.aspect = aspect;
 
         return textureCopyView;
     }

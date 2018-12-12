@@ -445,7 +445,7 @@ namespace {
             dawn::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(staging, 0, rowPitch, 0);
             dawn::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(oTexture, 0, 0, {0, 0, 0}, dawn::TextureAspect::Color);
+                utils::CreateTextureCopyView(oTexture, 0, 0, {0, 0, 0});
             dawn::Extent3D copySize = {iImage.width, iImage.height, 1};
             auto cmdbuf = device.CreateCommandBufferBuilder()
                               .CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize)

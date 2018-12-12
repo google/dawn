@@ -103,8 +103,8 @@ class CopyTests_T2B : public CopyTests {
                     static_cast<uint32_t>(sizeof(RGBA8) * textureArrayData[slice].size()), dawn::BufferUsageBit::TransferSrc);
                 dawn::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
-                dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                    texture, textureSpec.level, slice, {0, 0, 0}, dawn::TextureAspect::Color);
+                dawn::TextureCopyView textureCopyView =
+                    utils::CreateTextureCopyView(texture, textureSpec.level, slice, {0, 0, 0});
                 dawn::Extent3D copySize = {width, height, 1};
                 cmdBuilder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }
@@ -123,8 +123,7 @@ class CopyTests_T2B : public CopyTests {
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
                 // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level` mip into the buffer at `offset + bufferSpec.size * slice` and `rowPitch`
                 dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                    texture, textureSpec.level, slice, {textureSpec.x, textureSpec.y, 0},
-                    dawn::TextureAspect::Color);
+                    texture, textureSpec.level, slice, {textureSpec.x, textureSpec.y, 0});
                 dawn::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(buffer, bufferOffset, bufferSpec.rowPitch, 0);
                 dawn::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
@@ -212,8 +211,8 @@ protected:
             dawn::Buffer uploadBuffer = utils::CreateBufferFromData(device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()), dawn::BufferUsageBit::TransferSrc);
             dawn::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
-            dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                texture, textureSpec.level, 0, {0, 0, 0}, dawn::TextureAspect::Color);
+            dawn::TextureCopyView textureCopyView =
+                utils::CreateTextureCopyView(texture, textureSpec.level, 0, {0, 0, 0});
             dawn::Extent3D copySize = {width, height, 1};
             cmdBuilder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
         }
@@ -223,8 +222,7 @@ protected:
             dawn::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(buffer, bufferSpec.offset, bufferSpec.rowPitch, 0);
             dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                texture, textureSpec.level, 0, {textureSpec.x, textureSpec.y, 0},
-                dawn::TextureAspect::Color);
+                texture, textureSpec.level, 0, {textureSpec.x, textureSpec.y, 0});
             dawn::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
             cmdBuilder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
         }
