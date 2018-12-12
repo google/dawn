@@ -30,7 +30,8 @@ class DepthStencilStateTest : public DawnTest {
             renderTargetDescriptor.size.width = kRTSize;
             renderTargetDescriptor.size.height = kRTSize;
             renderTargetDescriptor.size.depth = 1;
-            renderTargetDescriptor.arrayLayer = 1;
+            renderTargetDescriptor.arraySize = 1;
+            renderTargetDescriptor.sampleCount = 1;
             renderTargetDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
             renderTargetDescriptor.levelCount = 1;
             renderTargetDescriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
@@ -43,7 +44,8 @@ class DepthStencilStateTest : public DawnTest {
             depthDescriptor.size.width = kRTSize;
             depthDescriptor.size.height = kRTSize;
             depthDescriptor.size.depth = 1;
-            depthDescriptor.arrayLayer = 1;
+            depthDescriptor.arraySize = 1;
+            depthDescriptor.sampleCount = 1;
             depthDescriptor.format = dawn::TextureFormat::D32FloatS8Uint;
             depthDescriptor.levelCount = 1;
             depthDescriptor.usage = dawn::TextureUsageBit::OutputAttachment;

@@ -41,7 +41,8 @@ class BindGroupValidationTest : public ValidationTest {
             dawn::TextureDescriptor descriptor;
             descriptor.dimension = dawn::TextureDimension::e2D;
             descriptor.size = {16, 16, 1};
-            descriptor.arrayLayer = 1;
+            descriptor.arraySize = 1;
+            descriptor.sampleCount = 1;
             descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
             descriptor.levelCount = 1;
             descriptor.usage = dawn::TextureUsageBit::Sampled;
@@ -252,7 +253,8 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
     descriptor.size = {16, 16, 1};
-    descriptor.arrayLayer = 1;
+    descriptor.arraySize = 1;
+    descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
     descriptor.levelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;

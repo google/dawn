@@ -26,14 +26,15 @@ dawn::Texture CreateTexture(dawn::Device& device,
                             dawn::TextureFormat format,
                             uint32_t width,
                             uint32_t height,
-                            uint32_t arrayLayer,
+                            uint32_t arraySize,
                             uint32_t levelCount) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dimension;
     descriptor.size.width = width;
     descriptor.size.height = height;
     descriptor.size.depth = 1;
-    descriptor.arrayLayer = arrayLayer;
+    descriptor.arraySize = arraySize;
+    descriptor.sampleCount = 1;
     descriptor.format = format;
     descriptor.levelCount = levelCount;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;

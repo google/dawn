@@ -82,6 +82,15 @@ namespace dawn_native {
             }
         }
 
+        // TODO(jiawei.shao@intel.com): support multisampled textures
+        MaybeError ValidateSampleCount(uint32_t sampleCount) {
+            if (sampleCount != 1) {
+                return DAWN_VALIDATION_ERROR("The sample count of the texture is not supported.");
+            }
+
+            return {};
+        }
+
         MaybeError ValidateTextureViewDimensionCompatibility(
             const TextureBase* texture,
             const TextureViewDescriptor* descriptor) {
@@ -142,10 +151,11 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
         DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
+        DAWN_TRY(ValidateSampleCount(descriptor->sampleCount));
 
         // TODO(jiawei.shao@intel.com): check stuff based on the dimension
         if (descriptor->size.width == 0 || descriptor->size.height == 0 ||
-            descriptor->size.depth == 0 || descriptor->arrayLayer == 0 ||
+            descriptor->size.depth == 0 || descriptor->arraySize == 0 ||
             descriptor->levelCount == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
@@ -277,7 +287,7 @@ namespace dawn_native {
           mDimension(descriptor->dimension),
           mFormat(descriptor->format),
           mSize(descriptor->size),
-          mArrayLayers(descriptor->arrayLayer),
+          mArrayLayers(descriptor->arraySize),
           mNumMipLevels(descriptor->levelCount),
           mUsage(descriptor->usage) {
     }

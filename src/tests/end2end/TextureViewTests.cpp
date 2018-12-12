@@ -38,7 +38,8 @@ namespace {
         descriptor.size.width = width;
         descriptor.size.height = height;
         descriptor.size.depth = 1;
-        descriptor.arrayLayer = layerCount;
+        descriptor.arraySize = layerCount;
+        descriptor.sampleCount = 1;
         descriptor.format = kDefaultFormat;
         descriptor.levelCount = levelCount;
         descriptor.usage = usage;

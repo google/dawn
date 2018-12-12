@@ -395,7 +395,8 @@ namespace {
             descriptor.size.width = iImage.width;
             descriptor.size.height = iImage.height;
             descriptor.size.depth = 1;
-            descriptor.arrayLayer = 1;
+            descriptor.arraySize = 1;
+            descriptor.sampleCount = 1;
             descriptor.format = format;
             descriptor.levelCount = 1;
             descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;

@@ -87,7 +87,8 @@ protected:
         descriptor.size.width = 2;
         descriptor.size.height = 2;
         descriptor.size.depth = 1;
-        descriptor.arrayLayer = 1;
+        descriptor.arraySize = 1;
+        descriptor.sampleCount = 1;
         descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
         descriptor.levelCount = 1;
         descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;

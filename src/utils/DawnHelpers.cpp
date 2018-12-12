@@ -138,7 +138,8 @@ namespace utils {
         descriptor.size.width = width;
         descriptor.size.height = height;
         descriptor.size.depth = 1;
-        descriptor.arrayLayer = 1;
+        descriptor.arraySize = 1;
+        descriptor.sampleCount = 1;
         descriptor.format = result.colorFormat;
         descriptor.levelCount = 1;
         descriptor.usage =

@@ -31,7 +31,7 @@ class CopyTests : public DawnTest {
             uint32_t copyWidth;
             uint32_t copyHeight;
             uint32_t level;
-            uint32_t arrayLayer = 1u;
+            uint32_t arraySize = 1u;
         };
 
         struct BufferSpec {
@@ -78,7 +78,8 @@ class CopyTests_T2B : public CopyTests {
             descriptor.size.width = textureSpec.width;
             descriptor.size.height = textureSpec.height;
             descriptor.size.depth = 1;
-            descriptor.arrayLayer = textureSpec.arrayLayer;
+            descriptor.arraySize = textureSpec.arraySize;
+            descriptor.sampleCount = 1;
             descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
             descriptor.levelCount = textureSpec.level + 1;
             descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;
@@ -92,8 +93,8 @@ class CopyTests_T2B : public CopyTests {
 
             dawn::CommandBufferBuilder cmdBuilder = device.CreateCommandBufferBuilder();
 
-            std::vector<std::vector<RGBA8>> textureArrayData(textureSpec.arrayLayer);
-            for (uint32_t slice = 0; slice < textureSpec.arrayLayer; ++slice) {
+            std::vector<std::vector<RGBA8>> textureArrayData(textureSpec.arraySize);
+            for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
                 textureArrayData[slice].resize(texelCountPerLayer);
                 FillTextureData(width, height, rowPitch / kBytesPerTexel, textureArrayData[slice].data(), slice);
 
@@ -112,14 +113,14 @@ class CopyTests_T2B : public CopyTests {
             // Note: Prepopulating the buffer with empty data ensures that there is not random data in the expectation
             // and helps ensure that the padding due to the row pitch is not modified by the copy
             dawn::BufferDescriptor bufDescriptor;
-            bufDescriptor.size = bufferSpec.size * textureSpec.arrayLayer;
+            bufDescriptor.size = bufferSpec.size * textureSpec.arraySize;
             bufDescriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
             dawn::Buffer buffer = device.CreateBuffer(&bufDescriptor);
-            std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel * textureSpec.arrayLayer);
+            std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel * textureSpec.arraySize);
             buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(emptyData.data()));
 
             uint32_t bufferOffset = bufferSpec.offset;
-            for (uint32_t slice = 0; slice < textureSpec.arrayLayer; ++slice) {
+            for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
                 // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level` mip into the buffer at `offset + bufferSpec.size * slice` and `rowPitch`
                 dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
                     texture, textureSpec.level, slice, {textureSpec.x, textureSpec.y, 0},
@@ -136,7 +137,7 @@ class CopyTests_T2B : public CopyTests {
 
             bufferOffset = bufferSpec.offset;
             std::vector<RGBA8> expected(bufferSpec.rowPitch / kBytesPerTexel * (textureSpec.copyHeight - 1) + textureSpec.copyWidth);
-            for (uint32_t slice = 0; slice < textureSpec.arrayLayer; ++slice) {
+            for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
                 // Pack the data used to create the upload buffer in the specified copy region to have the same format as the expected buffer data.
                 std::fill(expected.begin(), expected.end(), RGBA8());
                 PackTextureData(
@@ -188,7 +189,8 @@ protected:
         descriptor.size.width = textureSpec.width;
         descriptor.size.height = textureSpec.height;
         descriptor.size.depth = 1;
-        descriptor.arrayLayer = 1;
+        descriptor.arraySize = 1;
+        descriptor.sampleCount = 1;
         descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
         descriptor.levelCount = textureSpec.level + 1;
         descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;

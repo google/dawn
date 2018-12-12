@@ -26,7 +26,7 @@ constexpr uint32_t kDefaultMipLevels = 6u;
 constexpr dawn::TextureFormat kDefaultTextureFormat = dawn::TextureFormat::R8G8B8A8Unorm;
 
 dawn::Texture Create2DArrayTexture(dawn::Device& device,
-                                   uint32_t arrayLayers,
+                                   uint32_t arraySize,
                                    uint32_t width = kWidth,
                                    uint32_t height = kHeight) {
     dawn::TextureDescriptor descriptor;
@@ -34,7 +34,8 @@ dawn::Texture Create2DArrayTexture(dawn::Device& device,
     descriptor.size.width = width;
     descriptor.size.height = height;
     descriptor.size.depth = 1;
-    descriptor.arrayLayer = arrayLayers;
+    descriptor.arraySize = arraySize;
+    descriptor.sampleCount = 1;
     descriptor.format = kDefaultTextureFormat;
     descriptor.levelCount = kDefaultMipLevels;
     descriptor.usage = dawn::TextureUsageBit::Sampled;
