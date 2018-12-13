@@ -550,7 +550,8 @@ namespace dawn_native { namespace d3d12 {
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
                     commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
-                                                      draw->firstIndex, 0, draw->firstInstance);
+                                                      draw->firstIndex, draw->baseVertex,
+                                                      draw->firstInstance);
                 } break;
 
                 case Command::SetRenderPipeline: {

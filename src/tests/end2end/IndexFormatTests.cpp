@@ -87,7 +87,7 @@ TEST_P(IndexFormatTest, Uint32) {
         pass.SetRenderPipeline(pipeline);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
         pass.SetIndexBuffer(indexBuffer, 0);
-        pass.DrawIndexed(3, 1, 0, 0);
+        pass.DrawIndexed(3, 1, 0, 0, 0);
         pass.EndPass();
     }
 
@@ -118,7 +118,7 @@ TEST_P(IndexFormatTest, Uint16) {
         pass.SetRenderPipeline(pipeline);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
         pass.SetIndexBuffer(indexBuffer, 0);
-        pass.DrawIndexed(3, 1, 0, 0);
+        pass.DrawIndexed(3, 1, 0, 0, 0);
         pass.EndPass();
     }
 
@@ -162,7 +162,7 @@ TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
         pass.SetRenderPipeline(pipeline);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
         pass.SetIndexBuffer(indexBuffer, 0);
-        pass.DrawIndexed(7, 1, 0, 0);
+        pass.DrawIndexed(7, 1, 0, 0, 0);
         pass.EndPass();
     }
 
@@ -196,7 +196,7 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
         pass.SetRenderPipeline(pipeline);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
         pass.SetIndexBuffer(indexBuffer, 0);
-        pass.DrawIndexed(7, 1, 0, 0);
+        pass.DrawIndexed(7, 1, 0, 0, 0);
         pass.EndPass();
     }
 
@@ -236,7 +236,7 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
         pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
         pass.SetIndexBuffer(indexBuffer, 0);
         pass.SetRenderPipeline(pipeline32);
-        pass.DrawIndexed(3, 1, 0, 0);
+        pass.DrawIndexed(3, 1, 0, 0, 0);
         pass.EndPass();
     }
 
@@ -270,7 +270,7 @@ TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
         pass.SetIndexBuffer(indexBuffer, 0);
         pass.SetRenderPipeline(pipeline);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
-        pass.DrawIndexed(3, 1, 0, 0);
+        pass.DrawIndexed(3, 1, 0, 0, 0);
         pass.EndPass();
     }
 

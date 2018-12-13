@@ -37,6 +37,7 @@ namespace dawn_native {
         void DrawIndexed(uint32_t vertexCount,
                          uint32_t instanceCount,
                          uint32_t firstIndex,
+                         uint32_t baseVertex,
                          uint32_t firstInstance);
 
         void SetRenderPipeline(RenderPipelineBase* pipeline);

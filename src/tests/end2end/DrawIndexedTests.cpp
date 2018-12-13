@@ -19,7 +19,7 @@
 
 constexpr uint32_t kRTSize = 4;
 
-class DrawElementsTest : public DawnTest {
+class DrawIndexedTest : public DawnTest {
     protected:
         void SetUp() override {
             DawnTest::SetUp();
@@ -59,10 +59,17 @@ class DrawElementsTest : public DawnTest {
             pipeline = device.CreateRenderPipeline(&descriptor);
 
             vertexBuffer = utils::CreateBufferFromData<float>(device, dawn::BufferUsageBit::Vertex, {
+                // First quad: the first 3 vertices represent the bottom left triangle
                 -1.0f, -1.0f, 0.0f, 1.0f,
                  1.0f,  1.0f, 0.0f, 1.0f,
                 -1.0f,  1.0f, 0.0f, 1.0f,
-                 1.0f, -1.0f, 0.0f, 1.0f
+                 1.0f, -1.0f, 0.0f, 1.0f,
+
+                 // Second quad: the first 3 vertices represent the top right triangle
+                -1.0f, -1.0f, 0.0f, 1.0f,
+                 1.0f,  1.0f, 0.0f, 1.0f,
+                 1.0f, -1.0f, 0.0f, 1.0f,
+                -1.0f,  1.0f, 0.0f, 1.0f
             });
             indexBuffer = utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsageBit::Index, {
                 0, 1, 2, 0, 3, 1
@@ -75,7 +82,8 @@ class DrawElementsTest : public DawnTest {
         dawn::Buffer indexBuffer;
 
         void Test(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex,
-                  uint32_t firstInstance, RGBA8 bottomLeftExpected, RGBA8 topRightExpected) {
+                  uint32_t baseVertex, uint32_t firstInstance, RGBA8 bottomLeftExpected,
+                  RGBA8 topRightExpected) {
             uint32_t zeroOffset = 0;
             dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
             {
@@ -83,7 +91,7 @@ class DrawElementsTest : public DawnTest {
                 pass.SetRenderPipeline(pipeline);
                 pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
                 pass.SetIndexBuffer(indexBuffer, 0);
-                pass.DrawIndexed(indexCount, instanceCount, firstIndex, firstInstance);
+                pass.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
                 pass.EndPass();
             }
 
@@ -95,20 +103,34 @@ class DrawElementsTest : public DawnTest {
         }
 };
 
-// The most basic DrawElements triangle draw.
-TEST_P(DrawElementsTest, Uint32) {
+// The most basic DrawIndexed triangle draw.
+TEST_P(DrawIndexedTest, Uint32) {
 
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 
     // Test a draw with no indices.
-    Test(0, 0, 0, 0, notFilled, notFilled);
-    // Test a draw with only the first 3 indices (bottom left triangle)
-    Test(3, 1, 0, 0, filled, notFilled);
-    // Test a draw with only the last 3 indices (top right triangle)
-    Test(3, 1, 3, 0, notFilled, filled);
+    Test(0, 0, 0, 0, 0, notFilled, notFilled);
+    // Test a draw with only the first 3 indices of the first quad (bottom left triangle)
+    Test(3, 1, 0, 0, 0, filled, notFilled);
+    // Test a draw with only the last 3 indices of the first quad (top right triangle)
+    Test(3, 1, 3, 0, 0, notFilled, filled);
     // Test a draw with all 6 indices (both triangles).
-    Test(6, 1, 0, 0, filled, filled);
+    Test(6, 1, 0, 0, 0, filled, filled);
 }
 
-DAWN_INSTANTIATE_TEST(DrawElementsTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+// Test the parameter 'baseVertex' of DrawIndexed() works.
+TEST_P(DrawIndexedTest, BaseVertex) {
+    // TODO(jiawei.shao@intel.com): enable 'baseVertex' on OpenGL back-ends
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    RGBA8 filled(0, 255, 0, 255);
+    RGBA8 notFilled(0, 0, 0, 0);
+
+    // Test a draw with only the first 3 indices of the second quad (top right triangle)
+    Test(3, 1, 0, 4, 0, notFilled, filled);
+    // Test a draw with only the last 3 indices of the second quad (bottom left triangle)
+    Test(3, 1, 3, 4, 0, filled, notFilled);
+}
+
+DAWN_INSTANTIATE_TEST(DrawIndexedTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)

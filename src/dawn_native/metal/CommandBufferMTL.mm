@@ -424,7 +424,7 @@ namespace dawn_native { namespace metal {
                                   indexBuffer:indexBuffer
                             indexBufferOffset:indexBufferBaseOffset + draw->firstIndex * formatSize
                                 instanceCount:draw->instanceCount
-                                   baseVertex:0
+                                   baseVertex:draw->baseVertex
                                  baseInstance:draw->firstInstance];
                 } break;
 

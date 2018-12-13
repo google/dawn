@@ -332,9 +332,9 @@ namespace dawn_native { namespace vulkan {
                     DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
 
                     descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                    uint32_t vertexOffset = 0;
                     device->fn.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
-                                              draw->firstIndex, vertexOffset, draw->firstInstance);
+                                              draw->firstIndex, draw->baseVertex,
+                                              draw->firstInstance);
                 } break;
 
                 case Command::SetBindGroup: {

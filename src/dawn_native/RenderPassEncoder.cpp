@@ -48,6 +48,7 @@ namespace dawn_native {
     void RenderPassEncoderBase::DrawIndexed(uint32_t indexCount,
                                             uint32_t instanceCount,
                                             uint32_t firstIndex,
+                                            uint32_t baseVertex,
                                             uint32_t firstInstance) {
         if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
             return;
@@ -58,6 +59,7 @@ namespace dawn_native {
         draw->indexCount = indexCount;
         draw->instanceCount = instanceCount;
         draw->firstIndex = firstIndex;
+        draw->baseVertex = baseVertex;
         draw->firstInstance = firstInstance;
     }
 

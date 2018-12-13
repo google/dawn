@@ -537,7 +537,7 @@ namespace {
                 }
                 const auto& oIndicesBuffer = buffers.at(iIndices.bufferView);
                 pass.SetIndexBuffer(oIndicesBuffer, static_cast<uint32_t>(iIndices.byteOffset));
-                pass.DrawIndexed(static_cast<uint32_t>(iIndices.count), 1, 0, 0);
+                pass.DrawIndexed(static_cast<uint32_t>(iIndices.count), 1, 0, 0, 0);
             } else {
                 // DrawArrays
                 pass.Draw(vertexCount, 1, 0, 0);
