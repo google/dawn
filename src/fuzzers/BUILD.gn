@@ -76,7 +76,7 @@ static_library("dawn_spirv_cross_fuzzer_common") {
     "DawnSPIRVCrossFuzzer.h",
   ]
   public_deps = [
-    "${dawn_top_level}/third_party:spirv_cross",
+    "${dawn_top_level}/third_party:spirv_cross_full_for_fuzzers",
   ]
 }
 
