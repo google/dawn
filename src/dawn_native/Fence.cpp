@@ -18,7 +18,6 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
-#include <cstdio>
 #include <utility>
 
 namespace dawn_native {

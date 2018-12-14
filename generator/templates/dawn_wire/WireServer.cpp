@@ -509,6 +509,9 @@ namespace dawn_wire {
                 {% set custom_post_handler_commands = ["QueueSignal"] %}
 
                 bool PostHandleQueueSignal(const QueueSignalCmd& cmd) {
+                    if (cmd.fence == nullptr) {
+                        return false;
+                    }
                     ObjectId fenceId = mFenceIdTable.Get(cmd.fence);
                     ASSERT(fenceId != 0);
                     auto* fence = mKnownFence.Get(fenceId);
