@@ -27,14 +27,14 @@ namespace dawn_native {
     }
 
     bool DepthStencilStateBase::StencilTestEnabled() const {
-        return mStencilInfo.back.compareFunction != dawn::CompareFunction::Always ||
-               mStencilInfo.back.stencilFail != dawn::StencilOperation::Keep ||
-               mStencilInfo.back.depthFail != dawn::StencilOperation::Keep ||
-               mStencilInfo.back.depthStencilPass != dawn::StencilOperation::Keep ||
-               mStencilInfo.front.compareFunction != dawn::CompareFunction::Always ||
-               mStencilInfo.front.stencilFail != dawn::StencilOperation::Keep ||
-               mStencilInfo.front.depthFail != dawn::StencilOperation::Keep ||
-               mStencilInfo.front.depthStencilPass != dawn::StencilOperation::Keep;
+        return mStencilInfo.back.compare != dawn::CompareFunction::Always ||
+               mStencilInfo.back.stencilFailOp != dawn::StencilOperation::Keep ||
+               mStencilInfo.back.depthFailOp != dawn::StencilOperation::Keep ||
+               mStencilInfo.back.passOp != dawn::StencilOperation::Keep ||
+               mStencilInfo.front.compare != dawn::CompareFunction::Always ||
+               mStencilInfo.front.stencilFailOp != dawn::StencilOperation::Keep ||
+               mStencilInfo.front.depthFailOp != dawn::StencilOperation::Keep ||
+               mStencilInfo.front.passOp != dawn::StencilOperation::Keep;
     }
 
     const DepthStencilStateBase::DepthInfo& DepthStencilStateBase::GetDepth() const {
@@ -85,11 +85,9 @@ namespace dawn_native {
         mDepthInfo.depthWriteEnabled = enabled;
     }
 
-    void DepthStencilStateBuilder::SetStencilFunction(dawn::Face face,
-                                                      dawn::CompareFunction stencilCompareFunction,
-                                                      dawn::StencilOperation stencilFail,
-                                                      dawn::StencilOperation depthFail,
-                                                      dawn::StencilOperation depthStencilPass) {
+    void DepthStencilStateBuilder::SetStencilFunction(
+        dawn::Face face,
+        const StencilStateFaceDescriptor* descriptor) {
         if (face == dawn::Face::None) {
             HandleError("Can't set stencil function of None face");
             return;
@@ -103,10 +101,10 @@ namespace dawn_native {
 
             mPropertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_STENCIL_BACK_FUNCTION;
 
-            mStencilInfo.back.compareFunction = stencilCompareFunction;
-            mStencilInfo.back.stencilFail = stencilFail;
-            mStencilInfo.back.depthFail = depthFail;
-            mStencilInfo.back.depthStencilPass = depthStencilPass;
+            mStencilInfo.back.compare = descriptor->compare;
+            mStencilInfo.back.stencilFailOp = descriptor->stencilFailOp;
+            mStencilInfo.back.depthFailOp = descriptor->depthFailOp;
+            mStencilInfo.back.passOp = descriptor->passOp;
         }
         if (face & dawn::Face::Front) {
             if ((mPropertiesSet & DEPTH_STENCIL_STATE_PROPERTY_STENCIL_FRONT_FUNCTION) != 0) {
@@ -116,10 +114,10 @@ namespace dawn_native {
 
             mPropertiesSet |= DEPTH_STENCIL_STATE_PROPERTY_STENCIL_FRONT_FUNCTION;
 
-            mStencilInfo.front.compareFunction = stencilCompareFunction;
-            mStencilInfo.front.stencilFail = stencilFail;
-            mStencilInfo.front.depthFail = depthFail;
-            mStencilInfo.front.depthStencilPass = depthStencilPass;
+            mStencilInfo.front.compare = descriptor->compare;
+            mStencilInfo.front.stencilFailOp = descriptor->stencilFailOp;
+            mStencilInfo.front.depthFailOp = descriptor->depthFailOp;
+            mStencilInfo.front.passOp = descriptor->passOp;
         }
     }
 

@@ -77,22 +77,22 @@ namespace dawn_native { namespace metal {
             MTLStencilDescriptor* frontFaceStencil = [MTLStencilDescriptor new];
 
             backFaceStencil.stencilCompareFunction =
-                MetalDepthStencilCompareFunction(stencil.back.compareFunction);
+                MetalDepthStencilCompareFunction(stencil.back.compare);
             backFaceStencil.stencilFailureOperation =
-                MetalStencilOperation(stencil.back.stencilFail);
-            backFaceStencil.depthFailureOperation = MetalStencilOperation(stencil.back.depthFail);
-            backFaceStencil.depthStencilPassOperation =
-                MetalStencilOperation(stencil.back.depthStencilPass);
+                MetalStencilOperation(stencil.back.stencilFailOp);
+            backFaceStencil.depthFailureOperation = MetalStencilOperation(stencil.back.depthFailOp);
+            backFaceStencil.depthStencilPassOperation = MetalStencilOperation(stencil.back.passOp);
             backFaceStencil.readMask = stencil.readMask;
             backFaceStencil.writeMask = stencil.writeMask;
 
             frontFaceStencil.stencilCompareFunction =
-                MetalDepthStencilCompareFunction(stencil.front.compareFunction);
+                MetalDepthStencilCompareFunction(stencil.front.compare);
             frontFaceStencil.stencilFailureOperation =
-                MetalStencilOperation(stencil.front.stencilFail);
-            frontFaceStencil.depthFailureOperation = MetalStencilOperation(stencil.front.depthFail);
+                MetalStencilOperation(stencil.front.stencilFailOp);
+            frontFaceStencil.depthFailureOperation =
+                MetalStencilOperation(stencil.front.depthFailOp);
             frontFaceStencil.depthStencilPassOperation =
-                MetalStencilOperation(stencil.front.depthStencilPass);
+                MetalStencilOperation(stencil.front.passOp);
             frontFaceStencil.readMask = stencil.readMask;
             frontFaceStencil.writeMask = stencil.writeMask;
 

@@ -135,13 +135,25 @@ class DepthStencilStateTest : public DawnTest {
         // Check whether a stencil comparison function works as expected
         // The less, equal, greater booleans denote wether the respective triangle should be visible based on the comparison function
         void CheckStencilCompareFunction(dawn::CompareFunction compareFunction, bool less, bool equal, bool greater) {
-            dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-                .GetResult();
+            dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+            baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
+            baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+            baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
+            dawn::DepthStencilState baseState =
+                device.CreateDepthStencilStateBuilder()
+                    .SetStencilFunction(dawn::Face::Both, &baseStencilFaceDescriptor)
+                    .GetResult();
 
-            dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(dawn::Face::Both, compareFunction, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
-                .GetResult();
+            dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
+            stencilFaceDescriptor.compare = compareFunction;
+            stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
+            dawn::DepthStencilState state =
+                device.CreateDepthStencilStateBuilder()
+                    .SetStencilFunction(dawn::Face::Both, &stencilFaceDescriptor)
+                    .GetResult();
 
             RGBA8 baseColor = RGBA8(255, 255, 255, 255);
             RGBA8 lessColor = RGBA8(255, 0, 0, 255);
@@ -163,13 +175,25 @@ class DepthStencilStateTest : public DawnTest {
 
         // Given the provided `initialStencil` and `reference`, check that applying the `stencilOperation` produces the `expectedStencil`
         void CheckStencilOperation(dawn::StencilOperation stencilOperation, uint32_t initialStencil, uint32_t reference, uint32_t expectedStencil) {
-            dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-                .GetResult();
+            dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+            baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
+            baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+            baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
+            dawn::DepthStencilState baseState =
+                device.CreateDepthStencilStateBuilder()
+                    .SetStencilFunction(dawn::Face::Both, &baseStencilFaceDescriptor)
+                    .GetResult();
 
-            dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, stencilOperation)
-                .GetResult();
+            dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
+            stencilFaceDescriptor.compare = dawn::CompareFunction::Always;
+            stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.passOp = stencilOperation;
+            dawn::DepthStencilState state =
+                device.CreateDepthStencilStateBuilder()
+                    .SetStencilFunction(dawn::Face::Both, &stencilFaceDescriptor)
+                    .GetResult();
 
             CheckStencil({
                 // Wipe the stencil buffer with the initialStencil value
@@ -182,9 +206,15 @@ class DepthStencilStateTest : public DawnTest {
 
         // Draw a list of test specs, and check if the stencil value is equal to the expected value
         void CheckStencil(std::vector<TestSpec> testParams, uint32_t expectedStencil) {
-            dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-                .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
-                .GetResult();
+            dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
+            stencilFaceDescriptor.compare = dawn::CompareFunction::Equal;
+            stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
+            dawn::DepthStencilState state =
+                device.CreateDepthStencilStateBuilder()
+                    .SetStencilFunction(dawn::Face::Both, &stencilFaceDescriptor)
+                    .GetResult();
 
             testParams.push_back({ state, RGBA8(0, 255, 0, 255), 0, expectedStencil });
             DoTest(testParams, RGBA8(0, 255, 0, 255));
@@ -415,14 +445,26 @@ TEST_P(DepthStencilStateTest, StencilDecrementWrap) {
 
 // Check that the setting a stencil read mask works
 TEST_P(DepthStencilStateTest, StencilReadMask) {
-    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
+    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
+    dawn::DepthStencilState baseState =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &baseStencilFaceDescriptor)
+            .GetResult();
 
-    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
-        .SetStencilMask(0x2, 0xff)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
+    stencilFaceDescriptor.compare = dawn::CompareFunction::Equal;
+    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
+    dawn::DepthStencilState state =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &stencilFaceDescriptor)
+            .SetStencilMask(0x2, 0xff)
+            .GetResult();
 
     RGBA8 baseColor = RGBA8(255, 255, 255, 255);
     RGBA8 red = RGBA8(255, 0, 0, 255);
@@ -435,14 +477,26 @@ TEST_P(DepthStencilStateTest, StencilReadMask) {
 
 // Check that setting a stencil write mask works
 TEST_P(DepthStencilStateTest, StencilWriteMask) {
-    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-        .SetStencilMask(0xff, 0x1)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
+    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
+    dawn::DepthStencilState baseState =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &baseStencilFaceDescriptor)
+            .SetStencilMask(0xff, 0x1)
+            .GetResult();
 
-    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
+    stencilFaceDescriptor.compare = dawn::CompareFunction::Equal;
+    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
+    dawn::DepthStencilState state =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &stencilFaceDescriptor)
+            .GetResult();
 
     RGBA8 baseColor = RGBA8(255, 255, 255, 255);
     RGBA8 green = RGBA8(0, 255, 0, 255);
@@ -454,13 +508,25 @@ TEST_P(DepthStencilStateTest, StencilWriteMask) {
 
 // Test that the stencil operation is executed on stencil fail
 TEST_P(DepthStencilStateTest, StencilFail) {
-    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
+    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
+    dawn::DepthStencilState baseState =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &baseStencilFaceDescriptor)
+            .GetResult();
 
-    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Less, dawn::StencilOperation::Replace, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
+    stencilFaceDescriptor.compare = dawn::CompareFunction::Less;
+    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Replace;
+    stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
+    dawn::DepthStencilState state =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &stencilFaceDescriptor)
+            .GetResult();
 
     CheckStencil({
         { baseState, RGBA8(255, 255, 255, 255), 1.f, 1 },   // Triangle to set stencil value to 1
@@ -470,16 +536,28 @@ TEST_P(DepthStencilStateTest, StencilFail) {
 
 // Test that the stencil operation is executed on stencil pass, depth fail
 TEST_P(DepthStencilStateTest, StencilDepthFail) {
-    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-        .SetDepthWriteEnabled(true)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
+    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
+    dawn::DepthStencilState baseState =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &baseStencilFaceDescriptor)
+            .SetDepthWriteEnabled(true)
+            .GetResult();
 
-    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Greater, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace, dawn::StencilOperation::Keep)
-        .SetDepthWriteEnabled(true)
-        .SetDepthCompareFunction(dawn::CompareFunction::Less)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
+    stencilFaceDescriptor.compare = dawn::CompareFunction::Greater;
+    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Replace;
+    stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
+    dawn::DepthStencilState state =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &stencilFaceDescriptor)
+            .SetDepthWriteEnabled(true)
+            .SetDepthCompareFunction(dawn::CompareFunction::Less)
+            .GetResult();
 
     CheckStencil({
         { baseState, RGBA8(255, 255, 255, 255), 0.f, 1 },   // Triangle to set stencil value to 1. Depth is 0
@@ -489,16 +567,28 @@ TEST_P(DepthStencilStateTest, StencilDepthFail) {
 
 // Test that the stencil operation is executed on stencil pass, depth pass
 TEST_P(DepthStencilStateTest, StencilDepthPass) {
-    dawn::DepthStencilState baseState = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-        .SetDepthWriteEnabled(true)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
+    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
+    dawn::DepthStencilState baseState =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &baseStencilFaceDescriptor)
+            .SetDepthWriteEnabled(true)
+            .GetResult();
 
-    dawn::DepthStencilState state = device.CreateDepthStencilStateBuilder()
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Greater, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-        .SetDepthWriteEnabled(true)
-        .SetDepthCompareFunction(dawn::CompareFunction::Less)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
+    stencilFaceDescriptor.compare = dawn::CompareFunction::Greater;
+    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
+    dawn::DepthStencilState state =
+        device.CreateDepthStencilStateBuilder()
+            .SetStencilFunction(dawn::Face::Both, &stencilFaceDescriptor)
+            .SetDepthWriteEnabled(true)
+            .SetDepthCompareFunction(dawn::CompareFunction::Less)
+            .GetResult();
 
     CheckStencil({
         { baseState, RGBA8(255, 255, 255, 255), 1.f, 1 },   // Triangle to set stencil value to 1. Depth is 0

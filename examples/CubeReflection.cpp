@@ -211,11 +211,16 @@ void init() {
 
     pipeline = device.CreateRenderPipeline(&descriptor);
 
+    dawn::StencilStateFaceDescriptor planeStencilDescriptor;
+    planeStencilDescriptor.compare = dawn::CompareFunction::Always;
+    planeStencilDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    planeStencilDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    planeStencilDescriptor.passOp = dawn::StencilOperation::Replace;
     auto planeStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(dawn::CompareFunction::Less)
-        .SetDepthWriteEnabled(false)
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Always, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-        .GetResult();
+                                 .SetDepthCompareFunction(dawn::CompareFunction::Less)
+                                 .SetDepthWriteEnabled(false)
+                                 .SetStencilFunction(dawn::Face::Both, &planeStencilDescriptor)
+                                 .GetResult();
 
     utils::ComboRenderPipelineDescriptor pDescriptor(device);
     pDescriptor.layout = pl;
@@ -230,11 +235,17 @@ void init() {
 
     planePipeline = device.CreateRenderPipeline(&pDescriptor);
 
-    auto reflectionStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(dawn::CompareFunction::Less)
-        .SetDepthWriteEnabled(true)
-        .SetStencilFunction(dawn::Face::Both, dawn::CompareFunction::Equal, dawn::StencilOperation::Keep, dawn::StencilOperation::Keep, dawn::StencilOperation::Replace)
-        .GetResult();
+    dawn::StencilStateFaceDescriptor reflectionStencilDescriptor;
+    reflectionStencilDescriptor.compare = dawn::CompareFunction::Equal;
+    reflectionStencilDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    reflectionStencilDescriptor.depthFailOp = dawn::StencilOperation::Keep;
+    reflectionStencilDescriptor.passOp = dawn::StencilOperation::Replace;
+    auto reflectionStencilState =
+        device.CreateDepthStencilStateBuilder()
+            .SetDepthCompareFunction(dawn::CompareFunction::Less)
+            .SetDepthWriteEnabled(true)
+            .SetStencilFunction(dawn::Face::Both, &reflectionStencilDescriptor)
+            .GetResult();
 
     utils::ComboRenderPipelineDescriptor rfDescriptor(device);
     rfDescriptor.layout = pl;

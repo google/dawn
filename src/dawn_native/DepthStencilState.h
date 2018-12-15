@@ -32,16 +32,13 @@ namespace dawn_native {
             bool depthWriteEnabled = false;
         };
 
-        struct StencilFaceInfo {
-            dawn::CompareFunction compareFunction = dawn::CompareFunction::Always;
-            dawn::StencilOperation stencilFail = dawn::StencilOperation::Keep;
-            dawn::StencilOperation depthFail = dawn::StencilOperation::Keep;
-            dawn::StencilOperation depthStencilPass = dawn::StencilOperation::Keep;
-        };
-
         struct StencilInfo {
-            StencilFaceInfo back;
-            StencilFaceInfo front;
+            StencilStateFaceDescriptor back = {
+                dawn::CompareFunction::Always, dawn::StencilOperation::Keep,
+                dawn::StencilOperation::Keep, dawn::StencilOperation::Keep};
+            StencilStateFaceDescriptor front = {
+                dawn::CompareFunction::Always, dawn::StencilOperation::Keep,
+                dawn::StencilOperation::Keep, dawn::StencilOperation::Keep};
             uint32_t readMask = 0xff;
             uint32_t writeMask = 0xff;
         };
@@ -62,11 +59,7 @@ namespace dawn_native {
         // Dawn API
         void SetDepthCompareFunction(dawn::CompareFunction depthCompareFunction);
         void SetDepthWriteEnabled(bool enabled);
-        void SetStencilFunction(dawn::Face face,
-                                dawn::CompareFunction stencilCompareFunction,
-                                dawn::StencilOperation stencilFail,
-                                dawn::StencilOperation depthFail,
-                                dawn::StencilOperation depthStencilPass);
+        void SetStencilFunction(dawn::Face face, const StencilStateFaceDescriptor* descriptor);
         void SetStencilMask(uint32_t readMask, uint32_t writeMask);
 
       private:

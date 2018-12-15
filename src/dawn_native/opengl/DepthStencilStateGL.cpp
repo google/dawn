@@ -98,17 +98,17 @@ namespace dawn_native { namespace opengl {
 
         auto& stencilInfo = GetStencil();
 
-        GLenum backCompareFunction = OpenGLCompareFunction(stencilInfo.back.compareFunction);
-        GLenum frontCompareFunction = OpenGLCompareFunction(stencilInfo.front.compareFunction);
+        GLenum backCompareFunction = OpenGLCompareFunction(stencilInfo.back.compare);
+        GLenum frontCompareFunction = OpenGLCompareFunction(stencilInfo.front.compare);
         persistentPipelineState.SetStencilFuncsAndMask(backCompareFunction, frontCompareFunction,
                                                        stencilInfo.readMask);
 
-        glStencilOpSeparate(GL_BACK, OpenGLStencilOperation(stencilInfo.back.stencilFail),
-                            OpenGLStencilOperation(stencilInfo.back.depthFail),
-                            OpenGLStencilOperation(stencilInfo.back.depthStencilPass));
-        glStencilOpSeparate(GL_FRONT, OpenGLStencilOperation(stencilInfo.front.stencilFail),
-                            OpenGLStencilOperation(stencilInfo.front.depthFail),
-                            OpenGLStencilOperation(stencilInfo.front.depthStencilPass));
+        glStencilOpSeparate(GL_BACK, OpenGLStencilOperation(stencilInfo.back.stencilFailOp),
+                            OpenGLStencilOperation(stencilInfo.back.depthFailOp),
+                            OpenGLStencilOperation(stencilInfo.back.passOp));
+        glStencilOpSeparate(GL_FRONT, OpenGLStencilOperation(stencilInfo.front.stencilFailOp),
+                            OpenGLStencilOperation(stencilInfo.front.depthFailOp),
+                            OpenGLStencilOperation(stencilInfo.front.passOp));
 
         glStencilMask(stencilInfo.writeMask);
     }

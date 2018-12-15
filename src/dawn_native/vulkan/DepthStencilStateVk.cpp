@@ -84,15 +84,15 @@ namespace dawn_native { namespace vulkan {
         const auto& stencil = GetStencil();
         mCreateInfo.stencilTestEnable = StencilTestEnabled() ? VK_TRUE : VK_FALSE;
 
-        mCreateInfo.front.failOp = VulkanStencilOp(stencil.front.stencilFail);
-        mCreateInfo.front.passOp = VulkanStencilOp(stencil.front.depthStencilPass);
-        mCreateInfo.front.depthFailOp = VulkanStencilOp(stencil.front.depthFail);
-        mCreateInfo.front.compareOp = VulkanCompareOp(stencil.front.compareFunction);
+        mCreateInfo.front.failOp = VulkanStencilOp(stencil.front.stencilFailOp);
+        mCreateInfo.front.passOp = VulkanStencilOp(stencil.front.passOp);
+        mCreateInfo.front.depthFailOp = VulkanStencilOp(stencil.front.depthFailOp);
+        mCreateInfo.front.compareOp = VulkanCompareOp(stencil.front.compare);
 
-        mCreateInfo.back.failOp = VulkanStencilOp(stencil.back.stencilFail);
-        mCreateInfo.back.passOp = VulkanStencilOp(stencil.back.depthStencilPass);
-        mCreateInfo.back.depthFailOp = VulkanStencilOp(stencil.back.depthFail);
-        mCreateInfo.back.compareOp = VulkanCompareOp(stencil.back.compareFunction);
+        mCreateInfo.back.failOp = VulkanStencilOp(stencil.back.stencilFailOp);
+        mCreateInfo.back.passOp = VulkanStencilOp(stencil.back.passOp);
+        mCreateInfo.back.depthFailOp = VulkanStencilOp(stencil.back.depthFailOp);
+        mCreateInfo.back.compareOp = VulkanCompareOp(stencil.back.compare);
 
         // Dawn doesn't have separate front and back stencil masks.
         mCreateInfo.front.compareMask = stencil.readMask;
