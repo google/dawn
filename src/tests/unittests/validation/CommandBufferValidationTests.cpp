@@ -25,10 +25,11 @@ TEST_F(CommandBufferValidationTest, Empty) {
         .GetResult();
 }
 
-// Tests for basic render pass usage
-TEST_F(CommandBufferValidationTest, RenderPass) {
-    auto renderpass = CreateSimpleRenderPass();
+// Test that a command buffer cannot be ended mid render pass
+TEST_F(CommandBufferValidationTest, EndedMidRenderPass) {
+    dawn::RenderPassDescriptor renderpass = CreateSimpleRenderPass();
 
+    // Control case, command buffer ended after the pass is ended.
     {
         dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
@@ -36,10 +37,51 @@ TEST_F(CommandBufferValidationTest, RenderPass) {
         builder.GetResult();
     }
 
+    // Error case, command buffer ended mid-pass.
     {
         dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
         builder.GetResult();
+    }
+
+    // Error case, command buffer ended mid-pass. Trying to use encoders after GetResult
+    // should fail too.
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        builder.GetResult();
+        // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
+        // produces a builder error.
+        pass.EndPass();
+    }
+}
+
+// Test that a command buffer cannot be ended mid compute pass
+TEST_F(CommandBufferValidationTest, EndedMidComputePass) {
+    // Control case, command buffer ended after the pass is ended.
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+        dawn::ComputePassEncoder pass = builder.BeginComputePass();
+        pass.EndPass();
+        builder.GetResult();
+    }
+
+    // Error case, command buffer ended mid-pass.
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
+        dawn::ComputePassEncoder pass = builder.BeginComputePass();
+        builder.GetResult();
+    }
+
+    // Error case, command buffer ended mid-pass. Trying to use encoders after GetResult
+    // should fail too.
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
+        dawn::ComputePassEncoder pass = builder.BeginComputePass();
+        builder.GetResult();
+        // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
+        // produces a builder error.
+        pass.EndPass();
     }
 }
 
