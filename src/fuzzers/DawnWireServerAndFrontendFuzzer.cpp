@@ -53,5 +53,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
     wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);
 
+    // Fake waiting for all previous commands before destroying the server.
+    nullDevice.Tick();
+
+    // Destroy the server before the device because it needs to free all objects.
+    wireServer = nullptr;
+    nullDevice = nullptr;
+
     return 0;
 }
