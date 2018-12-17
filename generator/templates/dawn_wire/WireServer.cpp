@@ -655,7 +655,7 @@ namespace dawn_wire {
                             m{{type.name.CamelCase()}}IdTable.Remove(data->handle);
                         {% endif %}
 
-                        if (data->valid) {
+                        if (data->handle != nullptr) {
                             mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
                         }
 
