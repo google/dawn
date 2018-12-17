@@ -187,6 +187,36 @@ TEST_F(BufferValidationTest, MapWriteOutOfRange) {
     ASSERT_DEVICE_ERROR(buf.MapWriteAsync(0, 5, ToMockBufferMapWriteCallback, userdata));
 }
 
+// Test map reading out of range causes an error, with an overflow
+TEST_F(BufferValidationTest, MapReadOutOfRangeOverflow) {
+    dawn::Buffer buf = CreateMapReadBuffer(4);
+
+    dawn::CallbackUserdata userdata = 40599;
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
+        .Times(1);
+
+    // An offset that when added to "2" would overflow to be zero and pass validation without
+    // overflow checks.
+    uint32_t offset = uint32_t(int32_t(0) - int32_t(2));
+
+    ASSERT_DEVICE_ERROR(buf.MapReadAsync(offset, 2, ToMockBufferMapReadCallback, userdata));
+}
+
+// Test map writing out of range causes an error, with an overflow
+TEST_F(BufferValidationTest, MapWriteOutOfRangeOverflow) {
+    dawn::Buffer buf = CreateMapWriteBuffer(4);
+
+    dawn::CallbackUserdata userdata = 40599;
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata))
+        .Times(1);
+
+    // An offset that when added to "2" would overflow to be zero and pass validation without
+    // overflow checks.
+    uint32_t offset = uint32_t(int32_t(0) - int32_t(2));
+
+    ASSERT_DEVICE_ERROR(buf.MapWriteAsync(offset, 5, ToMockBufferMapWriteCallback, userdata));
+}
+
 // Test map reading a buffer with wrong current usage
 TEST_F(BufferValidationTest, MapReadWrongUsage) {
     dawn::BufferDescriptor descriptor;
@@ -437,8 +467,21 @@ TEST_F(BufferValidationTest, SetSubDataSuccess) {
 TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
     dawn::Buffer buf = CreateSetSubDataBuffer(1);
 
-    uint8_t foo = 0;
-    ASSERT_DEVICE_ERROR(buf.SetSubData(0, 2, &foo));
+    uint8_t foo[2] = {0, 0};
+    ASSERT_DEVICE_ERROR(buf.SetSubData(0, 2, foo));
+}
+
+// Test error case for SetSubData out of bounds with an overflow
+TEST_F(BufferValidationTest, SetSubDataOutOfBoundsOverflow) {
+    dawn::Buffer buf = CreateSetSubDataBuffer(1000);
+
+    uint8_t foo[2] = {0, 0};
+
+    // An offset that when added to "2" would overflow to be zero and pass validation without
+    // overflow checks.
+    uint32_t offset = uint32_t(int32_t(0) - int32_t(2));
+
+    ASSERT_DEVICE_ERROR(buf.SetSubData(offset, 2, foo));
 }
 
 // Test error case for SetSubData with the wrong usage

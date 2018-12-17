@@ -166,8 +166,12 @@ namespace dawn_native {
     }
 
     MaybeError BufferBase::ValidateSetSubData(uint32_t start, uint32_t count) const {
-        // TODO(cwallez@chromium.org): check for overflows.
-        if (start + count > GetSize()) {
+        if (count > GetSize()) {
+            return DAWN_VALIDATION_ERROR("Buffer subdata with too much data");
+        }
+
+        // Note that no overflow can happen because we already checked for GetSize() >= count
+        if (start > GetSize() - count) {
             return DAWN_VALIDATION_ERROR("Buffer subdata out of range");
         }
 
@@ -181,9 +185,13 @@ namespace dawn_native {
     MaybeError BufferBase::ValidateMap(uint32_t start,
                                        uint32_t size,
                                        dawn::BufferUsageBit requiredUsage) const {
-        // TODO(cwallez@chromium.org): check for overflows.
-        if (start + size > GetSize()) {
-            return DAWN_VALIDATION_ERROR("Buffer map read out of range");
+        if (size > GetSize()) {
+            return DAWN_VALIDATION_ERROR("Buffer mapping with too big a region");
+        }
+
+        // Note that no overflow can happen because we already checked for GetSize() >= size
+        if (start > GetSize() - size) {
+            return DAWN_VALIDATION_ERROR("Buffer mapping out of range");
         }
 
         if (mIsMapped) {
