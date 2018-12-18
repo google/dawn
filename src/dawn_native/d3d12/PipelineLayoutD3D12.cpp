@@ -65,7 +65,7 @@ namespace dawn_native { namespace d3d12 {
 
                 for (uint32_t i = 0; i < rangeCount; ++i) {
                     ranges[rangeIndex] = descriptorRanges[i];
-                    ranges[rangeIndex].BaseShaderRegister += group * kMaxBindingsPerGroup;
+                    ranges[rangeIndex].RegisterSpace = group;
                     rangeIndex++;
                 }
 

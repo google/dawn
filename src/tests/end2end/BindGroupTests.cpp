@@ -32,6 +32,17 @@ protected:
         pass.EndPass();
         return builder.GetResult();
     }
+
+    dawn::PipelineLayout MakeBasicPipelineLayout(
+        dawn::Device device,
+        std::vector<dawn::BindGroupLayout> bindingInitializer) const {
+        dawn::PipelineLayoutDescriptor descriptor;
+
+        descriptor.numBindGroupLayouts = bindingInitializer.size();
+        descriptor.bindGroupLayouts = bindingInitializer.data();
+
+        return device.CreatePipelineLayout(&descriptor);
+    }
 };
 
 // Test a bindgroup reused in two command buffers in the same call to queue.Submit().
@@ -274,6 +285,102 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, max);
+    EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
+}
+
+TEST_P(BindGroupTests, MultipleBindLayouts) {
+    // Test fails on Metal.
+    // https://bugs.chromium.org/p/dawn/issues/detail?id=33
+    DAWN_SKIP_TEST_IF(IsMetal());
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+        #version 450
+        layout (set = 0, binding = 0) uniform vertexUniformBuffer1 {
+            mat2 transform1;
+        };
+        layout (set = 1, binding = 0) uniform vertexUniformBuffer2 {
+            mat2 transform2;
+        };
+        void main() {
+            const vec2 pos[3] = vec2[3](vec2(-1.f, -1.f), vec2(1.f, -1.f), vec2(-1.f, 1.f));
+            gl_Position = vec4((transform1 + transform2) * pos[gl_VertexIndex], 0.f, 1.f);
+        })");
+
+    dawn::ShaderModule fsModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        #version 450
+        layout (set = 0, binding = 1) uniform fragmentUniformBuffer1 {
+            vec4 color1;
+        };
+        layout (set = 1, binding = 1) uniform fragmentUniformBuffer2 {
+            vec4 color2;
+        };
+        layout(location = 0) out vec4 fragColor;
+        void main() {
+            fragColor = color1 + color2;
+        })");
+
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer},
+                });
+
+    dawn::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(device, {layout, layout});
+
+    utils::ComboRenderPipelineDescriptor textureDescriptor(device);
+    textureDescriptor.layout = pipelineLayout;
+    textureDescriptor.cVertexStage.module = vsModule;
+    textureDescriptor.cFragmentStage.module = fsModule;
+    textureDescriptor.cColorAttachments[0].format = renderPass.colorFormat;
+
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
+
+    struct Data {
+        float transform[8];
+        char padding[256 - 8 * sizeof(float)];
+        float color[4];
+    };
+    ASSERT(offsetof(Data, color) == 256);
+
+    std::vector<Data> data;
+    std::vector<dawn::Buffer> buffers;
+    std::vector<dawn::BindGroup> bindGroups;
+
+    data.push_back(
+        {{1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, {0}, {0.0f, 1.0f, 0.0f, 1.0f}});
+
+    data.push_back(
+        {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f}, {0}, {1.0f, 0.0f, 0.0f, 1.0f}});
+
+    for (int i = 0; i < 2; i++) {
+        dawn::Buffer buffer = utils::CreateBufferFromData(device, &data[i], sizeof(Data),
+                                                          dawn::BufferUsageBit::Uniform);
+        buffers.push_back(buffer);
+        bindGroups.push_back(utils::MakeBindGroup(device, layout,
+                                                  {{0, buffers[i], 0, sizeof(Data::transform)},
+                                                   {1, buffers[i], 256, sizeof(Data::color)}}));
+    }
+
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+    pass.SetRenderPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroups[0]);
+    pass.SetBindGroup(1, bindGroups[1]);
+    pass.Draw(3, 1, 0, 0);
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = builder.GetResult();
+    queue.Submit(1, &commands);
+
+    RGBA8 filled(255, 255, 0, 255);
+    RGBA8 notFilled(0, 0, 0, 0);
+    int min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 

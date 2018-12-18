@@ -52,10 +52,8 @@ namespace dawn_native { namespace d3d12 {
             for (uint32_t binding = 0; binding < groupBindingInfo.size(); ++binding) {
                 const BindingInfo& bindingInfo = groupBindingInfo[binding];
                 if (bindingInfo.used) {
-                    uint32_t bindGroupOffset = group * kMaxBindingsPerGroup;
                     uint32_t bindingOffset = bindingOffsets[binding];
-                    compiler.set_decoration(bindingInfo.id, spv::DecorationBinding,
-                                            bindGroupOffset + bindingOffset);
+                    compiler.set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);
                 }
             }
         }
