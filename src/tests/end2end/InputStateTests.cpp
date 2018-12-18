@@ -243,6 +243,8 @@ TEST_P(InputStateTest, ZeroStride) {
 
 // Test attributes defaults to (0, 0, 0, 1) if the input state doesn't have all components
 TEST_P(InputStateTest, AttributeExpanding) {
+    DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL() && IsAMD());
+
     // R32F case
     {
         dawn::InputState inputState = MakeInputState({
