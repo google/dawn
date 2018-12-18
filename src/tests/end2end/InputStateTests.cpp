@@ -243,7 +243,8 @@ TEST_P(InputStateTest, ZeroStride) {
 
 // Test attributes defaults to (0, 0, 0, 1) if the input state doesn't have all components
 TEST_P(InputStateTest, AttributeExpanding) {
-    DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL() && IsAMD());
+    // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
+    DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
 
     // R32F case
     {
