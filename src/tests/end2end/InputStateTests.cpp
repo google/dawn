@@ -225,6 +225,9 @@ TEST_P(InputStateTest, Basic) {
 
 // Test a stride of 0 works
 TEST_P(InputStateTest, ZeroStride) {
+    // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
+    DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
+
     dawn::InputState inputState = MakeInputState({
             {0, 0, InputStepMode::Vertex}
         }, {
@@ -301,6 +304,9 @@ TEST_P(InputStateTest, AttributeExpanding) {
 
 // Test a stride larger than the attributes
 TEST_P(InputStateTest, StrideLargerThanAttributes) {
+    // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
+    DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
+
     dawn::InputState inputState = MakeInputState({
             {0, 8 * sizeof(float), InputStepMode::Vertex}
         }, {
