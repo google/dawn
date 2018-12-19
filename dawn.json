@@ -275,6 +275,15 @@
     "char": {
         "category": "native"
     },
+    "color": {
+        "category": "structure",
+        "members": [
+            {"name": "r", "type": "float"},
+            {"name": "g", "type": "float"},
+            {"name": "b", "type": "float"},
+            {"name": "a", "type": "float"}
+        ]
+    },
     "color write mask": {
         "category": "bitmask",
         "values": [
@@ -678,6 +687,12 @@
             {"value": 1, "name": "load"}
         ]
     },
+    "store op": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "store"}
+        ]
+    },
     "origin 3D": {
         "category": "structure",
         "members": [
@@ -744,6 +759,31 @@
             }
         ]
     },
+
+    "render pass color attachment descriptor": {
+        "category": "structure",
+        "members": [
+            {"name": "attachment", "type": "texture view"},
+            {"name": "resolve target", "type": "texture view", "optional": true},
+            {"name": "load op", "type": "load op"},
+            {"name": "store op", "type": "store op"},
+            {"name": "clear color", "type": "color"}
+        ]
+    },
+
+    "render pass depth stencil attachment descriptor": {
+        "category": "structure",
+        "members": [
+            {"name": "attachment", "type": "texture view"},
+            {"name": "depth load op", "type": "load op"},
+            {"name": "depth store op", "type": "store op"},
+            {"name": "clear depth", "type": "float"},
+            {"name": "stencil load op", "type": "load op"},
+            {"name": "stencil store op", "type": "store op"},
+            {"name": "clear stencil", "type": "uint32_t"}
+        ]
+    },
+
     "render pass descriptor builder": {
         "category": "object",
         "methods": [
@@ -752,41 +792,20 @@
                 "returns": "render pass descriptor"
             },
             {
-                "name": "set color attachment",
+                "name": "set color attachments",
                 "args": [
-                    {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "texture view", "type": "texture view"},
-                    {"name": "load op", "type": "load op"}
-                ]
-            },
-            {
-                "name": "set color attachment clear color",
-                "TODO": "determine where to put these methods (probably BeginRenderPass?)",
-                "args": [
-                    {"name": "attachment slot", "type": "uint32_t"},
-                    {"name": "clear r", "type": "float"},
-                    {"name": "clear g", "type": "float"},
-                    {"name": "clear b", "type": "float"},
-                    {"name": "clear a", "type": "float"}
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "color attachments", "type": "render pass color attachment descriptor", "annotation": "const*", "length": "count"}
                 ]
             },
             {
                 "name": "set depth stencil attachment",
                 "args": [
-                    {"name": "texture view", "type": "texture view"},
-                    {"name": "depth load op", "type": "load op"},
-                    {"name": "stencil load op", "type": "load op"}
-                ]
-            },
-            {
-                "name": "set depth stencil attachment clear value",
-                "TODO": "determine where to put these methods (probably BeginRenderPass?)",
-                "args": [
-                    {"name": "clear depth", "type": "float"},
-                    {"name": "clear stencil", "type": "uint32_t"}
+                    {"name": "depth stencil attachment", "type": "render pass depth stencil attachment descriptor", "annotation": "const*"}
                 ]
             }
-        ]
+        ],
+        "TODO": "Remove this builder and use render pass descriptor directly"
     },
     "render pass descriptor": {
         "category": "object"

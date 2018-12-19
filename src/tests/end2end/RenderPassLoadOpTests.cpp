@@ -112,12 +112,16 @@ class RenderPassLoadOpTests : public DawnTest {
 
 // Tests clearing, loading, and drawing into color attachments
 TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
+    dawn::RenderPassColorAttachmentDescriptor colorAttachment;
+    colorAttachment.attachment = renderTargetView;
+    colorAttachment.resolveTarget = nullptr;
+    colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+    colorAttachment.loadOp = dawn::LoadOp::Clear;
+    colorAttachment.storeOp = dawn::StoreOp::Store;
 
     // Part 1: clear once, check to make sure it's cleared
-
     auto renderPassClearZero = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Clear)
-        .SetColorAttachmentClearColor(0, 0.0f, 0.0f, 0.0f, 0.0f)
+        .SetColorAttachments(1, &colorAttachment)
         .GetResult();
 
     auto commandsClearZeroBuilder = device.CreateCommandBufferBuilder();
@@ -125,9 +129,10 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     clearZeroPass.EndPass();
     auto commandsClearZero = commandsClearZeroBuilder.GetResult();
 
+    dawn::RenderPassColorAttachmentDescriptor colorAttachmentGreen = colorAttachment;
+    colorAttachmentGreen.clearColor = { 0.0f, 1.0f, 0.0f, 1.0f };
     auto renderPassClearGreen = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Clear)
-        .SetColorAttachmentClearColor(0, 0.0f, 1.0f, 0.0f, 1.0f)
+        .SetColorAttachments(1, &colorAttachmentGreen)
         .GetResult();
 
     auto commandsClearGreenBuilder = device.CreateCommandBufferBuilder();
@@ -142,9 +147,10 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0, 0);
 
     // Part 2: draw a blue quad into the right half of the render target, and check result
-
+    dawn::RenderPassColorAttachmentDescriptor colorAttachmentLoad = colorAttachment;
+    colorAttachmentLoad.loadOp = dawn::LoadOp::Load;
     auto renderPassLoad = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Load)
+        .SetColorAttachments(1, &colorAttachmentLoad)
         .GetResult();
 
     dawn::CommandBuffer commandsLoad;

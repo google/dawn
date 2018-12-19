@@ -147,8 +147,14 @@ namespace utils {
         result.color = device.CreateTexture(&descriptor);
 
         dawn::TextureView colorView = result.color.CreateDefaultTextureView();
+        dawn::RenderPassColorAttachmentDescriptor colorAttachment;
+        colorAttachment.attachment = colorView;
+        colorAttachment.resolveTarget = nullptr;
+        colorAttachment.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+        colorAttachment.loadOp = dawn::LoadOp::Clear;
+        colorAttachment.storeOp = dawn::StoreOp::Store;
         result.renderPassInfo = device.CreateRenderPassDescriptorBuilder()
-                                    .SetColorAttachment(0, colorView, dawn::LoadOp::Clear)
+                                    .SetColorAttachments(1, &colorAttachment)
                                     .GetResult();
 
         return result;

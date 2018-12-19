@@ -53,9 +53,24 @@ class DepthStencilStateTest : public DawnTest {
 
             depthTextureView = depthTexture.CreateDefaultTextureView();
 
+            dawn::RenderPassColorAttachmentDescriptor colorAttachment;
+            colorAttachment.attachment = renderTargetView;
+            colorAttachment.resolveTarget = nullptr;
+            colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+            colorAttachment.loadOp = dawn::LoadOp::Clear;
+            colorAttachment.storeOp = dawn::StoreOp::Store;
+
+            dawn::RenderPassDepthStencilAttachmentDescriptor depthStencilAttachment;
+            depthStencilAttachment.attachment = depthTextureView;
+            depthStencilAttachment.depthLoadOp = dawn::LoadOp::Clear;
+            depthStencilAttachment.stencilLoadOp = dawn::LoadOp::Clear;
+            depthStencilAttachment.clearDepth = 1.0f;
+            depthStencilAttachment.clearStencil = 0;
+            depthStencilAttachment.depthStoreOp = dawn::StoreOp::Store;
+            depthStencilAttachment.stencilStoreOp = dawn::StoreOp::Store;
             renderpass = device.CreateRenderPassDescriptorBuilder()
-                .SetColorAttachment(0, renderTargetView, dawn::LoadOp::Clear)
-                .SetDepthStencilAttachment(depthTextureView, dawn::LoadOp::Clear, dawn::LoadOp::Clear)
+                .SetColorAttachments(1, &colorAttachment)
+                .SetDepthStencilAttachment(&depthStencilAttachment)
                 .GetResult();
 
             vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(

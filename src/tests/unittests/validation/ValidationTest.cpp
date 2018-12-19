@@ -87,9 +87,14 @@ dawn::RenderPassDescriptor ValidationTest::CreateSimpleRenderPass() {
 
         auto colorBuffer = device.CreateTexture(&descriptor);
         auto colorView = colorBuffer.CreateDefaultTextureView();
-
+        dawn::RenderPassColorAttachmentDescriptor colorAttachment;
+        colorAttachment.attachment = colorView;
+        colorAttachment.resolveTarget = nullptr;
+        colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+        colorAttachment.loadOp = dawn::LoadOp::Clear;
+        colorAttachment.storeOp = dawn::StoreOp::Store;
         return device.CreateRenderPassDescriptorBuilder()
-            .SetColorAttachment(0, colorView, dawn::LoadOp::Clear)
+            .SetColorAttachments(1, &colorAttachment)
             .GetResult();
 }
 
@@ -141,9 +146,14 @@ ValidationTest::DummyRenderPass ValidationTest::CreateDummyRenderPass() {
     dummy.attachment = device.CreateTexture(&descriptor);
 
     dawn::TextureView view = dummy.attachment.CreateDefaultTextureView();
-
+    dawn::RenderPassColorAttachmentDescriptor colorAttachment;
+    colorAttachment.attachment = view;
+    colorAttachment.resolveTarget = nullptr;
+    colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+    colorAttachment.loadOp = dawn::LoadOp::Clear;
+    colorAttachment.storeOp = dawn::StoreOp::Store;
     dummy.renderPass = AssertWillBeSuccess(device.CreateRenderPassDescriptorBuilder())
-        .SetColorAttachment(0, view, dawn::LoadOp::Clear)
+        .SetColorAttachments(1, &colorAttachment)
         .GetResult();
 
     return dummy;

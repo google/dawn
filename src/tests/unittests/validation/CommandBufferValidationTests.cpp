@@ -149,8 +149,14 @@ TEST_F(CommandBufferValidationTest, TextureWithReadAndWriteUsage) {
     dawn::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
 
     // Create the render pass that will use the texture as an output attachment
+    dawn::RenderPassColorAttachmentDescriptor colorAttachment;
+    colorAttachment.attachment = view;
+    colorAttachment.resolveTarget = nullptr;
+    colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+    colorAttachment.loadOp = dawn::LoadOp::Load;
+    colorAttachment.storeOp = dawn::StoreOp::Store;
     dawn::RenderPassDescriptor renderPass = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, view, dawn::LoadOp::Load)
+        .SetColorAttachments(1, &colorAttachment)
         .GetResult();
 
     // Use the texture as both sampeld and output attachment in the same pass

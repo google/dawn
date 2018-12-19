@@ -490,9 +490,14 @@ class TextureViewRenderingTest : public DawnTest {
         dawn::ShaderModule vsModule = CreateDefaultVertexShaderModule(device);
 
         // Clear textureView with Red(255, 0, 0, 255) and render Green(0, 255, 0, 255) into it
+        dawn::RenderPassColorAttachmentDescriptor colorAttachment;
+        colorAttachment.attachment = textureView;
+        colorAttachment.resolveTarget = nullptr;
+        colorAttachment.clearColor = { 1.0, 0.0, 0.0, 1.0 };
+        colorAttachment.loadOp = dawn::LoadOp::Clear;
+        colorAttachment.storeOp = dawn::StoreOp::Store;
         dawn::RenderPassDescriptor renderPassInfo = device.CreateRenderPassDescriptorBuilder()
-            .SetColorAttachment(0, textureView, dawn::LoadOp::Clear)
-            .SetColorAttachmentClearColor(0, 1.0, 0.0, 0.0, 1.0)
+            .SetColorAttachments(1, &colorAttachment)
             .GetResult();
 
         const char* oneColorFragmentShader = R"(

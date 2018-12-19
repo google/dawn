@@ -144,53 +144,52 @@ namespace dawn_native {
         return GetDevice()->CreateRenderPassDescriptor(this);
     }
 
-    void RenderPassDescriptorBuilder::SetColorAttachment(uint32_t attachment,
-                                                         TextureViewBase* textureView,
-                                                         dawn::LoadOp loadOp) {
-        if (attachment >= kMaxColorAttachments) {
-            HandleError("Setting color attachment out of bounds");
+    void RenderPassDescriptorBuilder::SetColorAttachments(
+        uint32_t count,
+        const RenderPassColorAttachmentDescriptor* attachments) {
+        if (count > kMaxColorAttachments) {
+            HandleError("Setting color attachments out of bounds");
             return;
         }
 
-        if (textureView == nullptr) {
-            HandleError("Texture view cannot be nullptr");
-            return;
-        }
+        for (uint32_t i = 0; i < count; ++i) {
+            // TODO(jiawei.shao@intel.com): support resolve target for multisample color attachment.
+            if (attachments[i].resolveTarget != nullptr) {
+                HandleError("Resolve target is not supported now");
+                return;
+            }
 
-        if (!IsColorRenderableTextureFormat(textureView->GetFormat())) {
-            HandleError(
-                "The format of the texture view used as color attachment is not color renderable");
-            return;
-        }
+            TextureViewBase* textureView = attachments[i].attachment;
+            if (textureView == nullptr) {
+                continue;
+            }
 
-        if (!CheckArrayLayersAndLevelCountForAttachment(textureView)) {
-            return;
-        }
+            if (!IsColorRenderableTextureFormat(textureView->GetFormat())) {
+                HandleError(
+                    "The format of the texture view used as color attachment is not color "
+                    "renderable");
+                return;
+            }
 
-        mColorAttachmentsSet.set(attachment);
-        mColorAttachments[attachment].loadOp = loadOp;
-        mColorAttachments[attachment].view = textureView;
+            if (!CheckArrayLayersAndLevelCountForAttachment(textureView)) {
+                return;
+            }
+
+            // TODO(jiawei.shao@intel.com): set and make use of storeOp
+            mColorAttachmentsSet.set(i);
+            mColorAttachments[i].loadOp = attachments[i].loadOp;
+            mColorAttachments[i].view = textureView;
+
+            mColorAttachments[i].clearColor[0] = attachments[i].clearColor.r;
+            mColorAttachments[i].clearColor[1] = attachments[i].clearColor.g;
+            mColorAttachments[i].clearColor[2] = attachments[i].clearColor.b;
+            mColorAttachments[i].clearColor[3] = attachments[i].clearColor.a;
+        }
     }
 
-    void RenderPassDescriptorBuilder::SetColorAttachmentClearColor(uint32_t attachment,
-                                                                   float clearR,
-                                                                   float clearG,
-                                                                   float clearB,
-                                                                   float clearA) {
-        if (attachment >= kMaxColorAttachments) {
-            HandleError("Setting color attachment out of bounds");
-            return;
-        }
-
-        mColorAttachments[attachment].clearColor[0] = clearR;
-        mColorAttachments[attachment].clearColor[1] = clearG;
-        mColorAttachments[attachment].clearColor[2] = clearB;
-        mColorAttachments[attachment].clearColor[3] = clearA;
-    }
-
-    void RenderPassDescriptorBuilder::SetDepthStencilAttachment(TextureViewBase* textureView,
-                                                                dawn::LoadOp depthLoadOp,
-                                                                dawn::LoadOp stencilLoadOp) {
+    void RenderPassDescriptorBuilder::SetDepthStencilAttachment(
+        const RenderPassDepthStencilAttachmentDescriptor* attachment) {
+        TextureViewBase* textureView = attachment->attachment;
         if (textureView == nullptr) {
             HandleError("Texture view cannot be nullptr");
             return;
@@ -207,16 +206,13 @@ namespace dawn_native {
             return;
         }
 
+        // TODO(jiawei.shao@intel.com): set and make use of depthStoreOp and stencilStoreOp
         mDepthStencilAttachmentSet = true;
-        mDepthStencilAttachment.depthLoadOp = depthLoadOp;
-        mDepthStencilAttachment.stencilLoadOp = stencilLoadOp;
+        mDepthStencilAttachment.depthLoadOp = attachment->depthLoadOp;
+        mDepthStencilAttachment.stencilLoadOp = attachment->stencilLoadOp;
         mDepthStencilAttachment.view = textureView;
-    }
-
-    void RenderPassDescriptorBuilder::SetDepthStencilAttachmentClearValue(float clearDepth,
-                                                                          uint32_t clearStencil) {
-        mDepthStencilAttachment.clearDepth = clearDepth;
-        mDepthStencilAttachment.clearStencil = clearStencil;
+        mDepthStencilAttachment.clearDepth = attachment->clearDepth;
+        mDepthStencilAttachment.clearStencil = attachment->clearStencil;
     }
 
 }  // namespace dawn_native

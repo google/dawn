@@ -127,7 +127,13 @@ void frame() {
     dawnRenderPassDescriptor renderpassInfo;
     {
         dawnRenderPassDescriptorBuilder builder = dawnDeviceCreateRenderPassDescriptorBuilder(device);
-        dawnRenderPassDescriptorBuilderSetColorAttachment(builder, 0, backbufferView, DAWN_LOAD_OP_CLEAR);
+        dawnRenderPassColorAttachmentDescriptor colorAttachment;
+        colorAttachment.attachment = backbufferView;
+        colorAttachment.resolveTarget = nullptr;
+        colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+        colorAttachment.loadOp = DAWN_LOAD_OP_CLEAR;
+        colorAttachment.storeOp = DAWN_STORE_OP_STORE;
+        dawnRenderPassDescriptorBuilderSetColorAttachments(builder, 1, &colorAttachment);
         renderpassInfo = dawnRenderPassDescriptorBuilderGetResult(builder);
         dawnRenderPassDescriptorBuilderRelease(builder);
     }

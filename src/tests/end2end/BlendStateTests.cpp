@@ -728,11 +728,17 @@ TEST_P(BlendStateTest, IndependentBlendState) {
         renderTargetViews[i] = renderTargets[i].CreateDefaultTextureView();
     }
 
+    dawn::RenderPassColorAttachmentDescriptor colorAttachments[4];
+    for (uint32_t i = 0; i < 4; ++i) {
+        colorAttachments[i].attachment = renderTargetViews[i];
+        colorAttachments[i].resolveTarget = nullptr;
+        colorAttachments[i].clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+        colorAttachments[i].loadOp = dawn::LoadOp::Clear;
+        colorAttachments[i].storeOp = dawn::StoreOp::Store;
+    }
+
     dawn::RenderPassDescriptor renderpass = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachment(0, renderTargetViews[0], dawn::LoadOp::Clear)
-        .SetColorAttachment(1, renderTargetViews[1], dawn::LoadOp::Clear)
-        .SetColorAttachment(2, renderTargetViews[2], dawn::LoadOp::Clear)
-        .SetColorAttachment(3, renderTargetViews[3], dawn::LoadOp::Clear)
+        .SetColorAttachments(4, colorAttachments)
         .GetResult();
 
     dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
