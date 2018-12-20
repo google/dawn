@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef UTILS_SYSTEMUTILS_H_
+#define UTILS_SYSTEMUTILS_H_
+
 namespace utils {
 
     void USleep(unsigned int usecs);
 }
+
+#endif  // UTILS_SYSTEMUTILS_H_
