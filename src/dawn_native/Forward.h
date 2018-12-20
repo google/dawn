@@ -28,7 +28,6 @@ namespace dawn_native {
     class BufferBase;
     class BufferBuilder;
     class ComputePipelineBase;
-    class ComputePipelineBuilder;
     class CommandBufferBase;
     class CommandBufferBuilder;
     class ComputePassEncoderBase;
@@ -44,7 +43,6 @@ namespace dawn_native {
     class RenderPassDescriptorBuilder;
     class RenderPassEncoderBase;
     class RenderPipelineBase;
-    class RenderPipelineBuilder;
     class SamplerBase;
     class ShaderModuleBase;
     class ShaderModuleBuilder;
