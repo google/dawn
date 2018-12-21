@@ -41,7 +41,7 @@ class DrawQuad {
 
             auto renderPipeline = device.CreateRenderPipeline(&descriptor);
 
-            pass->SetRenderPipeline(renderPipeline);
+            pass->SetPipeline(renderPipeline);
             pass->Draw(6, 1, 0, 0);
         }
 

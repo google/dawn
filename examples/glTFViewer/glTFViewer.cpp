@@ -498,7 +498,7 @@ namespace {
                 }
             }
             const MaterialInfo& material = getMaterial(iPrim.material, strides[0], strides[1], strides[2]);
-            pass.SetRenderPipeline(material.pipeline);
+            pass.SetPipeline(material.pipeline);
             pass.SetBindGroup(0, material.bindGroup0);
             pass.SetPushConstants(dawn::ShaderStageBit::Vertex,
                     0, sizeof(u_transform_block) / sizeof(uint32_t),

@@ -63,7 +63,7 @@ namespace dawn_native {
         draw->firstInstance = firstInstance;
     }
 
-    void RenderPassEncoderBase::SetRenderPipeline(RenderPipelineBase* pipeline) {
+    void RenderPassEncoderBase::SetPipeline(RenderPipelineBase* pipeline) {
         if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
             return;
         }

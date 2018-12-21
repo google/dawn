@@ -257,7 +257,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& render
 
     {
         dawn::ComputePassEncoder pass = builder.BeginComputePass();
-        pass.SetComputePipeline(updatePipeline);
+        pass.SetPipeline(updatePipeline);
         pass.SetBindGroup(0, updateBGs[i]);
         pass.Dispatch(kNumParticles, 1, 1);
         pass.EndPass();
@@ -265,7 +265,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& render
 
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
-        pass.SetRenderPipeline(renderPipeline);
+        pass.SetPipeline(renderPipeline);
         pass.SetVertexBuffers(0, 1, &bufferDst, zeroOffsets);
         pass.SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets);
         pass.Draw(3, kNumParticles, 0, 0);

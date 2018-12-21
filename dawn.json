@@ -364,8 +364,7 @@
         "category": "object",
         "methods": [
             {
-                "name": "set compute pipeline",
-                "TODO": "This is called setPipeline in the WebGPU IDL",
+                "name": "set pipeline",
                 "args": [
                     {"name": "pipeline", "type": "compute pipeline"}
                 ]
@@ -814,8 +813,7 @@
         "category": "object",
         "methods": [
             {
-                "name": "set render pipeline",
-                "TODO": "This is called setPipeline in the WebGPU IDL",
+                "name": "set pipeline",
                 "args": [
                     {"name": "pipeline", "type": "render pipeline"}
                 ]

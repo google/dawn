@@ -201,7 +201,7 @@ class PrimitiveTopologyTest : public DawnTest {
             dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
             {
                 dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-                pass.SetRenderPipeline(pipeline);
+                pass.SetPipeline(pipeline);
                 pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
                 pass.Draw(6, 1, 0, 0);
                 pass.EndPass();

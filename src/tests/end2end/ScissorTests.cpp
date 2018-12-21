@@ -55,7 +55,7 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
@@ -77,7 +77,7 @@ TEST_P(ScissorTest, LargerThanAttachment) {
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetScissorRect(0, 0, 200, 200);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
@@ -103,7 +103,7 @@ TEST_P(ScissorTest, EmptyRect) {
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetScissorRect(0, 0, 0, 0);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
@@ -131,7 +131,7 @@ TEST_P(ScissorTest, PartialRect) {
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetScissorRect(kX, kY, kW, kH);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
@@ -163,7 +163,7 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     // RenderPass 2 draw a full quad, it shouldn't be scissored
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }

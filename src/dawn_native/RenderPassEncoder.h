@@ -40,7 +40,7 @@ namespace dawn_native {
                          uint32_t baseVertex,
                          uint32_t firstInstance);
 
-        void SetRenderPipeline(RenderPipelineBase* pipeline);
+        void SetPipeline(RenderPipelineBase* pipeline);
 
         void SetStencilReference(uint32_t reference);
         void SetBlendColor(float r, float g, float b, float a);

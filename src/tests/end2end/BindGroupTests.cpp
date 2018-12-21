@@ -26,7 +26,7 @@ protected:
             const dawn::ComputePipeline& pipeline, const dawn::BindGroup& bindGroup) {
         dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
         dawn::ComputePassEncoder pass = builder.BeginComputePass();
-        pass.SetComputePipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1, 1, 1);
         pass.EndPass();
@@ -155,7 +155,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-    pass.SetRenderPipeline(pipeline);
+    pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Draw(3, 1, 0, 0);
     pass.EndPass();
@@ -271,7 +271,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     dawn::Extent3D copySize = {width, height, 1};
     builder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
     dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-    pass.SetRenderPipeline(pipeline);
+    pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Draw(3, 1, 0, 0);
     pass.EndPass();
@@ -366,7 +366,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-    pass.SetRenderPipeline(pipeline);
+    pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroups[0]);
     pass.SetBindGroup(1, bindGroups[1]);
     pass.Draw(3, 1, 0, 0);

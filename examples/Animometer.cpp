@@ -144,7 +144,7 @@ void frame() {
     dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
 
         for (int k = 0; k < 10000; k++) {
             shaderData[i].time = f / 60.0f;

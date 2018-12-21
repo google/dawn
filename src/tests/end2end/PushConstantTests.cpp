@@ -218,7 +218,7 @@ TEST_P(PushConstantTest, ComputePassDefaultsToZero) {
         dawn::ComputePassEncoder pass = builder.BeginComputePass();
 
         // Test compute push constants are set to zero by default.
-        pass.SetComputePipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, binding.bindGroup);
         pass.Dispatch(1, 1, 1);
         // Set push constants to non-zero value to check they will be reset to zero
@@ -230,7 +230,7 @@ TEST_P(PushConstantTest, ComputePassDefaultsToZero) {
     {
         dawn::ComputePassEncoder pass = builder.BeginComputePass();
 
-        pass.SetComputePipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, binding.bindGroup);
         pass.Dispatch(1, 1, 1);
 
@@ -256,7 +256,7 @@ TEST_P(PushConstantTest, RenderPassDefaultsToZero) {
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         // Test render push constants are set to zero by default.
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
@@ -287,7 +287,7 @@ TEST_P(PushConstantTest, VariousConstantTypes) {
         dawn::ComputePassEncoder pass = builder.BeginComputePass();
 
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, 3, reinterpret_cast<uint32_t*>(&values));
-        pass.SetComputePipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, binding.bindGroup);
         pass.Dispatch(1, 1, 1);
 
@@ -318,12 +318,12 @@ TEST_P(PushConstantTest, InheritThroughPipelineLayoutChange) {
 
         // Set Push constant before there is a pipeline set
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, &one);
-        pass.SetComputePipeline(pipeline1);
+        pass.SetPipeline(pipeline1);
         pass.SetBindGroup(0, binding1.bindGroup);
         pass.Dispatch(1, 1, 1);
         // Change the push constant before changing pipeline layout
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, &two);
-        pass.SetComputePipeline(pipeline2);
+        pass.SetPipeline(pipeline2);
         pass.SetBindGroup(0, binding2.bindGroup);
         pass.Dispatch(1, 1, 1);
 
@@ -354,7 +354,7 @@ TEST_P(PushConstantTest, SetAllConstantsToNonZero) {
         dawn::ComputePassEncoder pass = builder.BeginComputePass();
 
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, kMaxPushConstants, &values[0]);
-        pass.SetComputePipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, binding.bindGroup);
         pass.Dispatch(1, 1, 1);
 
@@ -384,7 +384,7 @@ TEST_P(PushConstantTest, SeparateVertexAndFragmentConstants) {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 1, &one);
         pass.SetPushConstants(dawn::ShaderStageBit::Fragment, 0, 1, &two);
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
@@ -409,7 +409,7 @@ TEST_P(PushConstantTest, SimultaneousVertexAndFragmentConstants) {
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
         pass.SetPushConstants(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment, 0, 1, &two);
-        pass.SetRenderPipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }

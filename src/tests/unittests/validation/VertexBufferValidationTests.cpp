@@ -109,7 +109,7 @@ TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
     dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
-        pass.SetRenderPipeline(pipeline1);
+        pass.SetPipeline(pipeline1);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
@@ -119,10 +119,10 @@ TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
     builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
-        pass.SetRenderPipeline(pipeline2);
+        pass.SetPipeline(pipeline2);
         pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
         pass.Draw(3, 1, 0, 0);
-        pass.SetRenderPipeline(pipeline1);
+        pass.SetPipeline(pipeline1);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
@@ -146,14 +146,14 @@ TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
     dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
-        pass.SetRenderPipeline(pipeline2);
+        pass.SetPipeline(pipeline2);
         pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
-        pass.SetRenderPipeline(pipeline1);
+        pass.SetPipeline(pipeline1);
         pass.SetVertexBuffers(0, 1, vertexBuffers.data(), offsets);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
@@ -164,14 +164,14 @@ TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
     builder = AssertWillBeError(device.CreateCommandBufferBuilder());
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
-        pass.SetRenderPipeline(pipeline2);
+        pass.SetPipeline(pipeline2);
         pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
-        pass.SetRenderPipeline(pipeline1);
+        pass.SetPipeline(pipeline1);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }

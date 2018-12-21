@@ -177,7 +177,7 @@ protected:
         dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
         {
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(mRenderPass.renderPassInfo);
-            pass.SetRenderPipeline(pipeline);
+            pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
@@ -522,7 +522,7 @@ class TextureViewRenderingTest : public DawnTest {
         {
             dawn::RenderPassEncoder pass =
                 commandBufferBuilder.BeginRenderPass(renderPassInfo);
-            pass.SetRenderPipeline(oneColorPipeline);
+            pass.SetPipeline(oneColorPipeline);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }

@@ -272,7 +272,7 @@ class DepthStencilStateTest : public DawnTest {
 
                 dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-                pass.SetRenderPipeline(pipeline);
+                pass.SetPipeline(pipeline);
                 pass.SetStencilReference(test.stencil);  // Set the stencil reference
                 pass.SetBindGroup(0, bindGroup);         // Set the bind group which contains color and depth data
                 pass.Draw(6, 1, 0, 0);

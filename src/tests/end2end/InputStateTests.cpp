@@ -172,7 +172,7 @@ class InputStateTest : public DawnTest {
             dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
 
             dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
-            pass.SetRenderPipeline(pipeline);
+            pass.SetPipeline(pipeline);
 
             uint32_t zeroOffset = 0;
             for (const auto& buffer : vertexBuffers) {

@@ -142,7 +142,7 @@ void frame() {
         dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
 
         dawnRenderPassEncoder pass = dawnCommandBufferBuilderBeginRenderPass(builder, renderpassInfo);
-        dawnRenderPassEncoderSetRenderPipeline(pass, pipeline);
+        dawnRenderPassEncoderSetPipeline(pass, pipeline);
         dawnRenderPassEncoderDraw(pass, 3, 1, 0, 0);
         dawnRenderPassEncoderEndPass(pass);
         dawnRenderPassEncoderRelease(pass);

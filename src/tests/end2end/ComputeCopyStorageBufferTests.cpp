@@ -78,7 +78,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     {
         dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
         dawn::ComputePassEncoder pass = builder.BeginComputePass();
-        pass.SetComputePipeline(pipeline);
+        pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(kInstances, 1, 1);
         pass.EndPass();
