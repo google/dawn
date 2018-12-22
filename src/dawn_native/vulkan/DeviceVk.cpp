@@ -17,6 +17,7 @@
 #include "common/Platform.h"
 #include "common/SwapChainUtils.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/ErrorData.h"
 #include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
@@ -83,7 +84,14 @@ namespace dawn_native { namespace vulkan {
     // Device
 
     Device::Device(const std::vector<const char*>& requiredInstanceExtensions) {
-        if (ConsumedError(Initialize(requiredInstanceExtensions))) {
+        MaybeError maybeError = Initialize(requiredInstanceExtensions);
+
+        // In device initialization, the error callback can't have been set yet.
+        // So it's too early to use ConsumedError - consume the error manually.
+        if (DAWN_UNLIKELY(maybeError.IsError())) {
+            ErrorData* error = maybeError.AcquireError();
+            printf("Device initialization error: %s\n", error->GetMessage().c_str());
+            delete error;
             ASSERT(false);
             return;
         }
