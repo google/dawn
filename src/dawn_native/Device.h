@@ -51,7 +51,6 @@ namespace dawn_native {
 
         FenceSignalTracker* GetFenceSignalTracker() const;
 
-        virtual BlendStateBase* CreateBlendState(BlendStateBuilder* builder) = 0;
         virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
         virtual DepthStencilStateBase* CreateDepthStencilState(
             DepthStencilStateBuilder* builder) = 0;
@@ -85,7 +84,6 @@ namespace dawn_native {
         // Dawn API
         BindGroupBase* CreateBindGroup(const BindGroupDescriptor* descriptor);
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
-        BlendStateBuilder* CreateBlendStateBuilder();
         BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
         CommandBufferBuilder* CreateCommandBufferBuilder();
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);

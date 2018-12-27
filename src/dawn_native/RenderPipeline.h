@@ -15,7 +15,6 @@
 #ifndef DAWNNATIVE_RENDERPIPELINE_H_
 #define DAWNNATIVE_RENDERPIPELINE_H_
 
-#include "dawn_native/BlendState.h"
 #include "dawn_native/DepthStencilState.h"
 #include "dawn_native/InputState.h"
 #include "dawn_native/Pipeline.h"
@@ -36,7 +35,7 @@ namespace dawn_native {
       public:
         RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
 
-        BlendStateBase* GetBlendState(uint32_t attachmentSlot);
+        const BlendStateDescriptor* GetBlendStateDescriptor(uint32_t attachmentSlot);
         DepthStencilStateBase* GetDepthStencilState();
         dawn::IndexFormat GetIndexFormat() const;
         InputStateBase* GetInputState();
@@ -56,7 +55,7 @@ namespace dawn_native {
         dawn::IndexFormat mIndexFormat;
         Ref<InputStateBase> mInputState;
         dawn::PrimitiveTopology mPrimitiveTopology;
-        std::array<Ref<BlendStateBase>, kMaxColorAttachments> mBlendStates;
+        std::array<BlendStateDescriptor, kMaxColorAttachments> mBlendStates;
 
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
         std::array<dawn::TextureFormat, kMaxColorAttachments> mColorAttachmentFormats;

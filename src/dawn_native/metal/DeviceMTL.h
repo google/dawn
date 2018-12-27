@@ -37,7 +37,6 @@ namespace dawn_native { namespace metal {
         Device(id<MTLDevice> mtlDevice);
         ~Device();
 
-        BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;

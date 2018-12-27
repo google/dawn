@@ -18,7 +18,6 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/OpenGLBackend.h"
 #include "dawn_native/RenderPassDescriptor.h"
-#include "dawn_native/opengl/BlendStateGL.h"
 #include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/CommandBufferGL.h"
 #include "dawn_native/opengl/ComputePipelineGL.h"
@@ -68,9 +67,6 @@ namespace dawn_native { namespace opengl {
     ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
         const BindGroupLayoutDescriptor* descriptor) {
         return new BindGroupLayout(this, descriptor);
-    }
-    BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
-        return new BlendState(builder);
     }
     ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
         return new Buffer(this, descriptor);

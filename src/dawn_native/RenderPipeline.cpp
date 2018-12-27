@@ -15,7 +15,6 @@
 #include "dawn_native/RenderPipeline.h"
 
 #include "common/BitSetIterator.h"
-#include "dawn_native/BlendState.h"
 #include "dawn_native/DepthStencilState.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/InputState.h"
@@ -73,6 +72,20 @@ namespace dawn_native {
             return {};
         }
 
+        MaybeError ValidateBlendStateDescriptor(const BlendStateDescriptor* descriptor) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+            DAWN_TRY(ValidateBlendOperation(descriptor->alphaBlend.operation));
+            DAWN_TRY(ValidateBlendFactor(descriptor->alphaBlend.srcFactor));
+            DAWN_TRY(ValidateBlendFactor(descriptor->alphaBlend.dstFactor));
+            DAWN_TRY(ValidateBlendOperation(descriptor->colorBlend.operation));
+            DAWN_TRY(ValidateBlendFactor(descriptor->colorBlend.srcFactor));
+            DAWN_TRY(ValidateBlendFactor(descriptor->colorBlend.dstFactor));
+            DAWN_TRY(ValidateColorWriteMask(descriptor->colorWriteMask));
+            return {};
+        }
+
     }  // namespace
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
@@ -94,9 +107,7 @@ namespace dawn_native {
         }
 
         for (uint32_t i = 0; i < descriptor->numBlendStates; ++i) {
-            if (descriptor->blendStates[i] == nullptr) {
-                return DAWN_VALIDATION_ERROR("Blend state must not be null");
-            }
+            DAWN_TRY(ValidateBlendStateDescriptor(&descriptor->blendStates[i]));
         }
 
         DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
@@ -158,9 +169,10 @@ namespace dawn_native {
         // attachment are set?
     }
 
-    BlendStateBase* RenderPipelineBase::GetBlendState(uint32_t attachmentSlot) {
+    const BlendStateDescriptor* RenderPipelineBase::GetBlendStateDescriptor(
+        uint32_t attachmentSlot) {
         ASSERT(attachmentSlot < mBlendStates.size());
-        return mBlendStates[attachmentSlot].Get();
+        return &mBlendStates[attachmentSlot];
     }
 
     DepthStencilStateBase* RenderPipelineBase::GetDepthStencilState() {

@@ -16,7 +16,6 @@
 
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
-#include "dawn_native/BlendState.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/ComputePipeline.h"
@@ -119,9 +118,6 @@ namespace dawn_native {
         }
 
         return result;
-    }
-    BlendStateBuilder* DeviceBase::CreateBlendStateBuilder() {
-        return new BlendStateBuilder(this);
     }
     BufferBase* DeviceBase::CreateBuffer(const BufferDescriptor* descriptor) {
         BufferBase* result = nullptr;

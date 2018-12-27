@@ -41,7 +41,7 @@ namespace utils {
         {
             descriptor->attachmentsState = &cAttachmentsState;
             cAttachmentsState.numColorAttachments = 1;
-            cAttachmentsState.colorAttachments = cColorAttachments;
+            cAttachmentsState.colorAttachments = &cColorAttachments[0];
             cAttachmentsState.depthStencilAttachment = &cDepthStencilAttachment;
             cAttachmentsState.hasDepthStencilAttachment = false;
 
@@ -55,10 +55,20 @@ namespace utils {
         descriptor->layout = utils::MakeBasicPipelineLayout(device, nullptr);
 
         descriptor->numBlendStates = 1;
-        descriptor->blendStates = cBlendStates;
+        descriptor->blendStates = &cBlendStates[0];
 
+        dawn::BlendDescriptor blend;
+        blend.operation = dawn::BlendOperation::Add;
+        blend.srcFactor = dawn::BlendFactor::One;
+        blend.dstFactor = dawn::BlendFactor::Zero;
+        dawn::BlendStateDescriptor blendStateDescriptor;
+        blendStateDescriptor.nextInChain = nullptr;
+        blendStateDescriptor.blendEnabled = false;
+        blendStateDescriptor.alphaBlend = blend;
+        blendStateDescriptor.colorBlend = blend;
+        blendStateDescriptor.colorWriteMask = dawn::ColorWriteMask::All;
         for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-            cBlendStates[i] = device.CreateBlendStateBuilder().GetResult();
+            cBlendStates[i] = blendStateDescriptor;
         }
     }
 

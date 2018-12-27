@@ -21,7 +21,6 @@ namespace dawn_native { namespace vulkan {
 
     class BindGroup;
     class BindGroupLayout;
-    class BlendState;
     class Buffer;
     class CommandBuffer;
     class ComputePipeline;
@@ -41,7 +40,6 @@ namespace dawn_native { namespace vulkan {
     struct VulkanBackendTraits {
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
-        using BlendStateType = BlendState;
         using BufferType = Buffer;
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;

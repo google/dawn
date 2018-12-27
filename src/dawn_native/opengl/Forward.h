@@ -27,7 +27,6 @@ namespace dawn_native { namespace opengl {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
-    class BlendState;
     class Buffer;
     class CommandBuffer;
     class ComputePipeline;
@@ -48,7 +47,6 @@ namespace dawn_native { namespace opengl {
     struct OpenGLBackendTraits {
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
-        using BlendStateType = BlendState;
         using BufferType = Buffer;
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;

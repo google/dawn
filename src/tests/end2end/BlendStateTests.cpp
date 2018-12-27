@@ -53,7 +53,7 @@ class BlendStateTest : public DawnTest {
         };
 
         // Set up basePipeline and testPipeline. testPipeline has the given blend state on the first attachment. basePipeline has no blending
-        void SetupSingleSourcePipelines(const dawn::BlendState &blendState) {
+        void SetupSingleSourcePipelines(const dawn::BlendStateDescriptor& blendStateDescriptor) {
             dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
@@ -82,7 +82,7 @@ class BlendStateTest : public DawnTest {
             testDescriptor.cFragmentStage.module = fsModule;
             testDescriptor.cColorAttachments[0].format =
                 renderPass.colorFormat;
-            testDescriptor.cBlendStates[0] = blendState;
+            testDescriptor.cBlendStates[0] = blendStateDescriptor;
 
             testPipeline = device.CreateRenderPipeline(&testDescriptor);
         }
@@ -135,13 +135,14 @@ class BlendStateTest : public DawnTest {
             blend.srcFactor = dawn::BlendFactor::One;
             blend.dstFactor = dawn::BlendFactor::One;
 
-            dawn::BlendState blendState = device.CreateBlendStateBuilder()
-                .SetBlendEnabled(true)
-                .SetColorBlend(&blend)
-                .SetAlphaBlend(&blend)
-                .GetResult();
+            dawn::BlendStateDescriptor descriptor;
+            descriptor.blendEnabled = true;
+            descriptor.alphaBlend = blend;
+            descriptor.colorBlend = blend;
+            descriptor.nextInChain = nullptr;
+            descriptor.colorWriteMask = dawn::ColorWriteMask::All;
 
-            SetupSingleSourcePipelines(blendState);
+            SetupSingleSourcePipelines(descriptor);
 
             for (const auto& test : tests) {
                 DoSingleSourceTest(base, { test.first }, test.second);
@@ -160,13 +161,14 @@ class BlendStateTest : public DawnTest {
             alphaBlend.srcFactor = alphaSrcFactor;
             alphaBlend.dstFactor = alphaDstFactor;
 
-            dawn::BlendState blendState = device.CreateBlendStateBuilder()
-                .SetBlendEnabled(true)
-                .SetColorBlend(&colorBlend)
-                .SetAlphaBlend(&alphaBlend)
-                .GetResult();
+            dawn::BlendStateDescriptor descriptor;
+            descriptor.blendEnabled = true;
+            descriptor.colorBlend = colorBlend;
+            descriptor.alphaBlend = alphaBlend;
+            descriptor.nextInChain = nullptr;
+            descriptor.colorWriteMask = dawn::ColorWriteMask::All;
 
-            SetupSingleSourcePipelines(blendState);
+            SetupSingleSourcePipelines(descriptor);
 
             for (const auto& test : tests) {
                 DoSingleSourceTest(base, test.first, test.second);
@@ -276,8 +278,18 @@ namespace {
 
 // Test compilation and usage of the fixture
 TEST_P(BlendStateTest, Basic) {
-    dawn::BlendState blendState = device.CreateBlendStateBuilder().GetResult();
-    SetupSingleSourcePipelines(blendState);
+    dawn::BlendDescriptor blend;
+    blend.operation = dawn::BlendOperation::Add;
+    blend.srcFactor = dawn::BlendFactor::One;
+    blend.dstFactor = dawn::BlendFactor::Zero;
+    dawn::BlendStateDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.blendEnabled = false;
+    descriptor.alphaBlend = blend;
+    descriptor.colorBlend = blend;
+    descriptor.colorWriteMask = dawn::ColorWriteMask::All;
+
+    SetupSingleSourcePipelines(descriptor);
 
     DoSingleSourceTest(RGBA8(0, 0, 0, 0), { RGBA8(255, 0, 0, 0) }, RGBA8(255, 0, 0, 0));
 }
@@ -627,15 +639,15 @@ TEST_P(BlendStateTest, ColorWriteMask) {
     blend.srcFactor = dawn::BlendFactor::One;
     blend.dstFactor = dawn::BlendFactor::One;
 
+    dawn::BlendStateDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.blendEnabled = true;
+    descriptor.colorBlend = blend;
+    descriptor.alphaBlend = blend;
     {
         // Test single channel color write
-        dawn::BlendState blendState = device.CreateBlendStateBuilder()
-            .SetBlendEnabled(true)
-            .SetColorBlend(&blend)
-            .SetAlphaBlend(&blend)
-            .SetColorWriteMask(dawn::ColorWriteMask::Red)
-            .GetResult();
-        SetupSingleSourcePipelines(blendState);
+        descriptor.colorWriteMask = dawn::ColorWriteMask::Red;
+        SetupSingleSourcePipelines(descriptor);
 
         RGBA8 base(32, 64, 128, 192);
         for (auto& color : kColors) {
@@ -646,13 +658,8 @@ TEST_P(BlendStateTest, ColorWriteMask) {
 
     {
         // Test multi channel color write
-        dawn::BlendState blendState = device.CreateBlendStateBuilder()
-            .SetBlendEnabled(true)
-            .SetColorBlend(&blend)
-            .SetAlphaBlend(&blend)
-            .SetColorWriteMask(dawn::ColorWriteMask::Green | dawn::ColorWriteMask::Alpha)
-            .GetResult();
-        SetupSingleSourcePipelines(blendState);
+        descriptor.colorWriteMask = dawn::ColorWriteMask::Green | dawn::ColorWriteMask::Alpha;
+        SetupSingleSourcePipelines(descriptor);
 
         RGBA8 base(32, 64, 128, 192);
         for (auto& color : kColors) {
@@ -663,13 +670,8 @@ TEST_P(BlendStateTest, ColorWriteMask) {
 
     {
         // Test no channel color write
-        dawn::BlendState blendState = device.CreateBlendStateBuilder()
-            .SetBlendEnabled(true)
-            .SetColorBlend(&blend)
-            .SetAlphaBlend(&blend)
-            .SetColorWriteMask(dawn::ColorWriteMask::None)
-            .GetResult();
-        SetupSingleSourcePipelines(blendState);
+        descriptor.colorWriteMask = dawn::ColorWriteMask::None;
+        SetupSingleSourcePipelines(descriptor);
 
         RGBA8 base(32, 64, 128, 192);
         for (auto& color : kColors) {
@@ -681,11 +683,18 @@ TEST_P(BlendStateTest, ColorWriteMask) {
 // Check that the color write mask works when blending is disabled
 TEST_P(BlendStateTest, ColorWriteMaskBlendingDisabled) {
     {
-        dawn::BlendState blendState = device.CreateBlendStateBuilder()
-            .SetBlendEnabled(false)
-            .SetColorWriteMask(dawn::ColorWriteMask::Red)
-            .GetResult();
-        SetupSingleSourcePipelines(blendState);
+        dawn::BlendDescriptor blend;
+        blend.operation = dawn::BlendOperation::Add;
+        blend.srcFactor = dawn::BlendFactor::One;
+        blend.dstFactor = dawn::BlendFactor::Zero;
+        dawn::BlendStateDescriptor descriptor;
+        descriptor.nextInChain = nullptr;
+        descriptor.alphaBlend = blend;
+        descriptor.colorBlend = blend;
+
+        descriptor.blendEnabled = false;
+        descriptor.colorWriteMask = dawn::ColorWriteMask::Red;
+        SetupSingleSourcePipelines(descriptor);
 
         RGBA8 base(32, 64, 128, 192);
         RGBA8 expected(32, 0, 0, 0);
@@ -763,40 +772,6 @@ TEST_P(BlendStateTest, IndependentBlendState) {
         }
     )");
 
-    dawn::BlendDescriptor blend1;
-    blend1.operation = dawn::BlendOperation::Add;
-    blend1.srcFactor = dawn::BlendFactor::One;
-    blend1.dstFactor = dawn::BlendFactor::One;
-
-    dawn::BlendDescriptor blend2;
-    blend2.operation = dawn::BlendOperation::Subtract;
-    blend2.srcFactor = dawn::BlendFactor::One;
-    blend2.dstFactor = dawn::BlendFactor::One;
-
-    dawn::BlendDescriptor blend3;
-    blend3.operation = dawn::BlendOperation::Min;
-    blend3.srcFactor = dawn::BlendFactor::One;
-    blend3.dstFactor = dawn::BlendFactor::One;
-
-    std::array<dawn::BlendState, 4> blendStates = { {
-        device.CreateBlendStateBuilder()
-            .SetBlendEnabled(true)
-            .SetColorBlend(&blend1)
-            .SetAlphaBlend(&blend1)
-            .GetResult(),
-        device.CreateBlendStateBuilder()
-            .SetBlendEnabled(true)
-            .SetColorBlend(&blend2)
-            .SetAlphaBlend(&blend2)
-            .GetResult(),
-        device.CreateBlendStateBuilder().GetResult(),
-        device.CreateBlendStateBuilder()
-            .SetBlendEnabled(true)
-            .SetColorBlend(&blend3)
-            .SetAlphaBlend(&blend3)
-            .GetResult(),
-    } };
-
     utils::ComboRenderPipelineDescriptor baseDescriptor(device);
     baseDescriptor.layout = pipelineLayout;
     baseDescriptor.cVertexStage.module = vsModule;
@@ -812,7 +787,34 @@ TEST_P(BlendStateTest, IndependentBlendState) {
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.cAttachmentsState.numColorAttachments = 4;
     testDescriptor.numBlendStates = 4;
-    testDescriptor.blendStates = blendStates.data();
+
+    // set blend states
+    dawn::BlendDescriptor blend1;
+    blend1.operation = dawn::BlendOperation::Add;
+    blend1.srcFactor = dawn::BlendFactor::One;
+    blend1.dstFactor = dawn::BlendFactor::One;
+
+    dawn::BlendDescriptor blend2;
+    blend2.operation = dawn::BlendOperation::Subtract;
+    blend2.srcFactor = dawn::BlendFactor::One;
+    blend2.dstFactor = dawn::BlendFactor::One;
+
+    dawn::BlendDescriptor blend3;
+    blend3.operation = dawn::BlendOperation::Min;
+    blend3.srcFactor = dawn::BlendFactor::One;
+    blend3.dstFactor = dawn::BlendFactor::One;
+
+    testDescriptor.cBlendStates[0].blendEnabled = true;
+    testDescriptor.cBlendStates[0].colorBlend = blend1;
+    testDescriptor.cBlendStates[0].alphaBlend = blend1;
+
+    testDescriptor.cBlendStates[1].blendEnabled = true;
+    testDescriptor.cBlendStates[1].colorBlend = blend2;
+    testDescriptor.cBlendStates[1].alphaBlend = blend2;
+
+    testDescriptor.cBlendStates[3].blendEnabled = true;
+    testDescriptor.cBlendStates[3].colorBlend = blend3;
+    testDescriptor.cBlendStates[3].alphaBlend = blend3;
 
     testPipeline = device.CreateRenderPipeline(&testDescriptor);
 
@@ -853,17 +855,6 @@ TEST_P(BlendStateTest, IndependentBlendState) {
 
 // Test that the default blend color is correctly set at the beginning of every subpass
 TEST_P(BlendStateTest, DefaultBlendColor) {
-    dawn::BlendDescriptor blend;
-    blend.operation = dawn::BlendOperation::Add;
-    blend.srcFactor = dawn::BlendFactor::BlendColor;
-    blend.dstFactor = dawn::BlendFactor::One;
-
-    dawn::BlendState blendState = device.CreateBlendStateBuilder()
-        .SetBlendEnabled(true)
-        .SetColorBlend(&blend)
-        .SetAlphaBlend(&blend)
-        .GetResult();
-
     dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
         #version 450
         layout(set = 0, binding = 0) uniform myBlock {
@@ -892,7 +883,14 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.cColorAttachments[0].format =
         renderPass.colorFormat;
-    testDescriptor.cBlendStates[0] = blendState;
+
+    dawn::BlendDescriptor blend;
+    blend.operation = dawn::BlendOperation::Add;
+    blend.srcFactor = dawn::BlendFactor::BlendColor;
+    blend.dstFactor = dawn::BlendFactor::One;
+    testDescriptor.cBlendStates[0].blendEnabled = true;
+    testDescriptor.cBlendStates[0].colorBlend = blend;
+    testDescriptor.cBlendStates[0].alphaBlend = blend;
 
     testPipeline = device.CreateRenderPipeline(&testDescriptor);
 

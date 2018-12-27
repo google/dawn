@@ -15,7 +15,6 @@
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
 
 #include "common/Assert.h"
-#include "dawn_native/d3d12/BlendStateD3D12.h"
 #include "dawn_native/d3d12/DepthStencilStateD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/InputStateD3D12.h"
@@ -60,6 +59,88 @@ namespace dawn_native { namespace d3d12 {
                 default:
                     UNREACHABLE();
             }
+        }
+
+        D3D12_BLEND D3D12Blend(dawn::BlendFactor factor) {
+            switch (factor) {
+                case dawn::BlendFactor::Zero:
+                    return D3D12_BLEND_ZERO;
+                case dawn::BlendFactor::One:
+                    return D3D12_BLEND_ONE;
+                case dawn::BlendFactor::SrcColor:
+                    return D3D12_BLEND_SRC_COLOR;
+                case dawn::BlendFactor::OneMinusSrcColor:
+                    return D3D12_BLEND_INV_SRC_COLOR;
+                case dawn::BlendFactor::SrcAlpha:
+                    return D3D12_BLEND_SRC_ALPHA;
+                case dawn::BlendFactor::OneMinusSrcAlpha:
+                    return D3D12_BLEND_INV_SRC_ALPHA;
+                case dawn::BlendFactor::DstColor:
+                    return D3D12_BLEND_DEST_COLOR;
+                case dawn::BlendFactor::OneMinusDstColor:
+                    return D3D12_BLEND_INV_DEST_COLOR;
+                case dawn::BlendFactor::DstAlpha:
+                    return D3D12_BLEND_DEST_ALPHA;
+                case dawn::BlendFactor::OneMinusDstAlpha:
+                    return D3D12_BLEND_INV_DEST_ALPHA;
+                case dawn::BlendFactor::SrcAlphaSaturated:
+                    return D3D12_BLEND_SRC_ALPHA_SAT;
+                case dawn::BlendFactor::BlendColor:
+                    return D3D12_BLEND_BLEND_FACTOR;
+                case dawn::BlendFactor::OneMinusBlendColor:
+                    return D3D12_BLEND_INV_BLEND_FACTOR;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        D3D12_BLEND_OP D3D12BlendOperation(dawn::BlendOperation operation) {
+            switch (operation) {
+                case dawn::BlendOperation::Add:
+                    return D3D12_BLEND_OP_ADD;
+                case dawn::BlendOperation::Subtract:
+                    return D3D12_BLEND_OP_SUBTRACT;
+                case dawn::BlendOperation::ReverseSubtract:
+                    return D3D12_BLEND_OP_REV_SUBTRACT;
+                case dawn::BlendOperation::Min:
+                    return D3D12_BLEND_OP_MIN;
+                case dawn::BlendOperation::Max:
+                    return D3D12_BLEND_OP_MAX;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        uint8_t D3D12RenderTargetWriteMask(dawn::ColorWriteMask colorWriteMask) {
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Red) ==
+                              D3D12_COLOR_WRITE_ENABLE_RED,
+                          "ColorWriteMask values must match");
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Green) ==
+                              D3D12_COLOR_WRITE_ENABLE_GREEN,
+                          "ColorWriteMask values must match");
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Blue) ==
+                              D3D12_COLOR_WRITE_ENABLE_BLUE,
+                          "ColorWriteMask values must match");
+            static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Alpha) ==
+                              D3D12_COLOR_WRITE_ENABLE_ALPHA,
+                          "ColorWriteMask values must match");
+            return static_cast<uint8_t>(colorWriteMask);
+        }
+
+        D3D12_RENDER_TARGET_BLEND_DESC ComputeBlendDesc(const BlendStateDescriptor* descriptor) {
+            D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
+            blendDesc.BlendEnable = descriptor->blendEnabled;
+            blendDesc.SrcBlend = D3D12Blend(descriptor->colorBlend.srcFactor);
+            blendDesc.DestBlend = D3D12Blend(descriptor->colorBlend.dstFactor);
+            blendDesc.BlendOp = D3D12BlendOperation(descriptor->colorBlend.operation);
+            blendDesc.SrcBlendAlpha = D3D12Blend(descriptor->alphaBlend.srcFactor);
+            blendDesc.DestBlendAlpha = D3D12Blend(descriptor->alphaBlend.dstFactor);
+            blendDesc.BlendOpAlpha = D3D12BlendOperation(descriptor->alphaBlend.operation);
+            blendDesc.RenderTargetWriteMask =
+                D3D12RenderTargetWriteMask(descriptor->colorWriteMask);
+            blendDesc.LogicOpEnable = false;
+            blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+            return blendDesc;
         }
     }  // namespace
 
@@ -151,7 +232,7 @@ namespace dawn_native { namespace d3d12 {
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorD3D12.RTVFormats[i] = D3D12TextureFormat(GetColorAttachmentFormat(i));
             descriptorD3D12.BlendState.RenderTarget[i] =
-                ToBackend(GetBlendState(i))->GetD3D12BlendDesc();
+                ComputeBlendDesc(GetBlendStateDescriptor(i));
         }
         descriptorD3D12.NumRenderTargets = static_cast<uint32_t>(GetColorAttachmentsMask().count());
 

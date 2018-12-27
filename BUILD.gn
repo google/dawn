@@ -363,8 +363,6 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/BindGroup.h",
     "src/dawn_native/BindGroupLayout.cpp",
     "src/dawn_native/BindGroupLayout.h",
-    "src/dawn_native/BlendState.cpp",
-    "src/dawn_native/BlendState.h",
     "src/dawn_native/Buffer.cpp",
     "src/dawn_native/Buffer.h",
     "src/dawn_native/Builder.cpp",
@@ -437,8 +435,6 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/BindGroupD3D12.h",
       "src/dawn_native/d3d12/BindGroupLayoutD3D12.cpp",
       "src/dawn_native/d3d12/BindGroupLayoutD3D12.h",
-      "src/dawn_native/d3d12/BlendStateD3D12.cpp",
-      "src/dawn_native/d3d12/BlendStateD3D12.h",
       "src/dawn_native/d3d12/BufferD3D12.cpp",
       "src/dawn_native/d3d12/BufferD3D12.h",
       "src/dawn_native/d3d12/CommandAllocatorManager.cpp",
@@ -493,8 +489,6 @@ source_set("libdawn_native_sources") {
       "IOKit.framework",
     ]
     sources += [
-      "src/dawn_native/metal/BlendStateMTL.h",
-      "src/dawn_native/metal/BlendStateMTL.mm",
       "src/dawn_native/metal/BufferMTL.h",
       "src/dawn_native/metal/BufferMTL.mm",
       "src/dawn_native/metal/CommandBufferMTL.h",
@@ -537,8 +531,6 @@ source_set("libdawn_native_sources") {
   if (dawn_enable_opengl) {
     deps += [ "third_party:glad" ]
     sources += [
-      "src/dawn_native/opengl/BlendStateGL.cpp",
-      "src/dawn_native/opengl/BlendStateGL.h",
       "src/dawn_native/opengl/BufferGL.cpp",
       "src/dawn_native/opengl/BufferGL.h",
       "src/dawn_native/opengl/CommandBufferGL.cpp",
@@ -580,8 +572,6 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/vulkan/BindGroupLayoutVk.h",
       "src/dawn_native/vulkan/BindGroupVk.cpp",
       "src/dawn_native/vulkan/BindGroupVk.h",
-      "src/dawn_native/vulkan/BlendStateVk.cpp",
-      "src/dawn_native/vulkan/BlendStateVk.h",
       "src/dawn_native/vulkan/BufferUploader.cpp",
       "src/dawn_native/vulkan/BufferUploader.h",
       "src/dawn_native/vulkan/BufferVk.cpp",
@@ -827,7 +817,6 @@ test("dawn_unittests") {
     "src/tests/unittests/ToBackendTests.cpp",
     "src/tests/unittests/WireTests.cpp",
     "src/tests/unittests/validation/BindGroupValidationTests.cpp",
-    "src/tests/unittests/validation/BlendStateValidationTests.cpp",
     "src/tests/unittests/validation/BufferValidationTests.cpp",
     "src/tests/unittests/validation/CommandBufferValidationTests.cpp",
     "src/tests/unittests/validation/ComputeValidationTests.cpp",

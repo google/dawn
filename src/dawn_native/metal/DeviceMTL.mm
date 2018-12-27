@@ -18,7 +18,6 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/MetalBackend.h"
 #include "dawn_native/RenderPassDescriptor.h"
-#include "dawn_native/metal/BlendStateMTL.h"
 #include "dawn_native/metal/BufferMTL.h"
 #include "dawn_native/metal/CommandBufferMTL.h"
 #include "dawn_native/metal/ComputePipelineMTL.h"
@@ -169,9 +168,6 @@ namespace dawn_native { namespace metal {
     ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(
         const BindGroupLayoutDescriptor* descriptor) {
         return new BindGroupLayout(this, descriptor);
-    }
-    BlendStateBase* Device::CreateBlendState(BlendStateBuilder* builder) {
-        return new BlendState(builder);
     }
     ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
         return new Buffer(this, descriptor);

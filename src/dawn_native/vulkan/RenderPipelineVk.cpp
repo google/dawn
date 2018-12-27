@@ -14,7 +14,6 @@
 
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 
-#include "dawn_native/vulkan/BlendStateVk.h"
 #include "dawn_native/vulkan/DepthStencilStateVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
@@ -43,6 +42,88 @@ namespace dawn_native { namespace vulkan {
                 default:
                     UNREACHABLE();
             }
+        }
+
+        VkBlendFactor VulkanBlendFactor(dawn::BlendFactor factor) {
+            switch (factor) {
+                case dawn::BlendFactor::Zero:
+                    return VK_BLEND_FACTOR_ZERO;
+                case dawn::BlendFactor::One:
+                    return VK_BLEND_FACTOR_ONE;
+                case dawn::BlendFactor::SrcColor:
+                    return VK_BLEND_FACTOR_SRC_COLOR;
+                case dawn::BlendFactor::OneMinusSrcColor:
+                    return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+                case dawn::BlendFactor::SrcAlpha:
+                    return VK_BLEND_FACTOR_SRC_ALPHA;
+                case dawn::BlendFactor::OneMinusSrcAlpha:
+                    return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+                case dawn::BlendFactor::DstColor:
+                    return VK_BLEND_FACTOR_DST_COLOR;
+                case dawn::BlendFactor::OneMinusDstColor:
+                    return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+                case dawn::BlendFactor::DstAlpha:
+                    return VK_BLEND_FACTOR_DST_ALPHA;
+                case dawn::BlendFactor::OneMinusDstAlpha:
+                    return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+                case dawn::BlendFactor::SrcAlphaSaturated:
+                    return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+                case dawn::BlendFactor::BlendColor:
+                    return VK_BLEND_FACTOR_CONSTANT_COLOR;
+                case dawn::BlendFactor::OneMinusBlendColor:
+                    return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        VkBlendOp VulkanBlendOperation(dawn::BlendOperation operation) {
+            switch (operation) {
+                case dawn::BlendOperation::Add:
+                    return VK_BLEND_OP_ADD;
+                case dawn::BlendOperation::Subtract:
+                    return VK_BLEND_OP_SUBTRACT;
+                case dawn::BlendOperation::ReverseSubtract:
+                    return VK_BLEND_OP_REVERSE_SUBTRACT;
+                case dawn::BlendOperation::Min:
+                    return VK_BLEND_OP_MIN;
+                case dawn::BlendOperation::Max:
+                    return VK_BLEND_OP_MAX;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        VkColorComponentFlagBits VulkanColorWriteMask(dawn::ColorWriteMask mask) {
+            // Vulkan and Dawn color write masks match, static assert it and return the mask
+            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Red) ==
+                              VK_COLOR_COMPONENT_R_BIT,
+                          "");
+            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Green) ==
+                              VK_COLOR_COMPONENT_G_BIT,
+                          "");
+            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Blue) ==
+                              VK_COLOR_COMPONENT_B_BIT,
+                          "");
+            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Alpha) ==
+                              VK_COLOR_COMPONENT_A_BIT,
+                          "");
+
+            return static_cast<VkColorComponentFlagBits>(mask);
+        }
+
+        VkPipelineColorBlendAttachmentState ComputeBlendDesc(
+            const BlendStateDescriptor* descriptor) {
+            VkPipelineColorBlendAttachmentState attachment;
+            attachment.blendEnable = descriptor->blendEnabled ? VK_TRUE : VK_FALSE;
+            attachment.srcColorBlendFactor = VulkanBlendFactor(descriptor->colorBlend.srcFactor);
+            attachment.dstColorBlendFactor = VulkanBlendFactor(descriptor->colorBlend.dstFactor);
+            attachment.colorBlendOp = VulkanBlendOperation(descriptor->colorBlend.operation);
+            attachment.srcAlphaBlendFactor = VulkanBlendFactor(descriptor->alphaBlend.srcFactor);
+            attachment.dstAlphaBlendFactor = VulkanBlendFactor(descriptor->alphaBlend.dstFactor);
+            attachment.alphaBlendOp = VulkanBlendOperation(descriptor->alphaBlend.operation);
+            attachment.colorWriteMask = VulkanColorWriteMask(descriptor->colorWriteMask);
+            return attachment;
         }
 
     }  // anonymous namespace
@@ -133,7 +214,8 @@ namespace dawn_native { namespace vulkan {
         // pre-computed in the BlendState
         std::array<VkPipelineColorBlendAttachmentState, kMaxColorAttachments> colorBlendAttachments;
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
-            colorBlendAttachments[i] = ToBackend(GetBlendState(i))->GetState();
+            const BlendStateDescriptor* descriptor = GetBlendStateDescriptor(i);
+            colorBlendAttachments[i] = ComputeBlendDesc(descriptor);
         }
         VkPipelineColorBlendStateCreateInfo colorBlend;
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;

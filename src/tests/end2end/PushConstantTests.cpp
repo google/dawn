@@ -185,21 +185,19 @@ class PushConstantTest: public DawnTest {
                 })").c_str()
             );
 
-            dawn::BlendDescriptor blend;
-            blend.operation = dawn::BlendOperation::Add;
-            blend.srcFactor = dawn::BlendFactor::One;
-            blend.dstFactor = dawn::BlendFactor::One;
-
             utils::ComboRenderPipelineDescriptor descriptor(device);
             descriptor.layout = layout;
             descriptor.cVertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
             descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
-            descriptor.cBlendStates[0] = device.CreateBlendStateBuilder()
-                                         .SetBlendEnabled(true)
-                                         .SetColorBlend(&blend)
-                                         .SetAlphaBlend(&blend)
-                                         .GetResult();
+
+            dawn::BlendDescriptor blend;
+            blend.operation = dawn::BlendOperation::Add;
+            blend.srcFactor = dawn::BlendFactor::One;
+            blend.dstFactor = dawn::BlendFactor::One;
+            descriptor.cBlendStates[0].blendEnabled = true;
+            descriptor.cBlendStates[0].alphaBlend = blend;
+            descriptor.cBlendStates[0].colorBlend = blend;
 
             return device.CreateRenderPipeline(&descriptor);
         }

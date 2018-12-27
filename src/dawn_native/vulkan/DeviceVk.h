@@ -63,7 +63,6 @@ namespace dawn_native { namespace vulkan {
         void AddWaitSemaphore(VkSemaphore semaphore);
 
         // Dawn API
-        BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;

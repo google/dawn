@@ -19,7 +19,6 @@
 
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
-#include "dawn_native/BlendState.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/ComputePipeline.h"
@@ -40,7 +39,6 @@ namespace dawn_native { namespace null {
 
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
-    using BlendState = BlendStateBase;
     class Buffer;
     class CommandBuffer;
     using ComputePipeline = ComputePipelineBase;
@@ -60,7 +58,6 @@ namespace dawn_native { namespace null {
     struct NullBackendTraits {
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
-        using BlendStateType = BlendState;
         using BufferType = Buffer;
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;
@@ -93,7 +90,6 @@ namespace dawn_native { namespace null {
         Device();
         ~Device();
 
-        BlendStateBase* CreateBlendState(BlendStateBuilder* builder) override;
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
         DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;

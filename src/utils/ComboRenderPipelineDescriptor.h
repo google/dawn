@@ -19,6 +19,8 @@
 
 #include "common/Constants.h"
 
+#include <array>
+
 namespace utils {
 
     class ComboRenderPipelineDescriptor : public dawn::RenderPipelineDescriptor {
@@ -29,9 +31,9 @@ namespace utils {
         dawn::PipelineStageDescriptor cFragmentStage;
 
         dawn::AttachmentsStateDescriptor cAttachmentsState;
-        dawn::AttachmentDescriptor cColorAttachments[kMaxColorAttachments];
+        std::array<dawn::AttachmentDescriptor, kMaxColorAttachments> cColorAttachments;
         dawn::AttachmentDescriptor cDepthStencilAttachment;
-        dawn::BlendState cBlendStates[kMaxColorAttachments];
+        std::array<dawn::BlendStateDescriptor, kMaxColorAttachments> cBlendStates;
     };
 
 }  // namespace utils

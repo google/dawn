@@ -85,10 +85,18 @@ void init() {
         descriptor.sampleCount = 1;
 
         descriptor.numBlendStates = 1;
-        dawnBlendStateBuilder blendStateBuilder = dawnDeviceCreateBlendStateBuilder(device);
-        dawnBlendState blendState = dawnBlendStateBuilderGetResult(blendStateBuilder);
-        descriptor.blendStates =  &blendState;
-        dawnBlendStateBuilderRelease(blendStateBuilder);
+
+        dawnBlendDescriptor blendDescriptor;
+        blendDescriptor.operation = DAWN_BLEND_OPERATION_ADD;
+        blendDescriptor.srcFactor = DAWN_BLEND_FACTOR_ONE;
+        blendDescriptor.dstFactor = DAWN_BLEND_FACTOR_ONE;
+        dawnBlendStateDescriptor blendStateDescriptor;
+        blendStateDescriptor.nextInChain = nullptr;
+        blendStateDescriptor.blendEnabled = false;
+        blendStateDescriptor.alphaBlend = blendDescriptor;
+        blendStateDescriptor.colorBlend = blendDescriptor;
+        blendStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
+        descriptor.blendStates = &blendStateDescriptor;
 
         dawnPipelineLayoutDescriptor pl;
         pl.nextInChain = nullptr;
@@ -109,7 +117,6 @@ void init() {
 
         pipeline = dawnDeviceCreateRenderPipeline(device, &descriptor);
 
-        dawnBlendStateRelease(descriptor.blendStates[0]);
         dawnDepthStencilStateRelease(descriptor.depthStencilState);
         dawnInputStateRelease(descriptor.inputState);
     }

@@ -14,7 +14,6 @@
 
 #include "dawn_native/metal/RenderPipelineMTL.h"
 
-#include "dawn_native/metal/BlendStateMTL.h"
 #include "dawn_native/metal/DepthStencilStateMTL.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/InputStateMTL.h"
@@ -62,7 +61,89 @@ namespace dawn_native { namespace metal {
                     return MTLIndexTypeUInt32;
             }
         }
-    }
+
+        MTLBlendFactor MetalBlendFactor(dawn::BlendFactor factor, bool alpha) {
+            switch (factor) {
+                case dawn::BlendFactor::Zero:
+                    return MTLBlendFactorZero;
+                case dawn::BlendFactor::One:
+                    return MTLBlendFactorOne;
+                case dawn::BlendFactor::SrcColor:
+                    return MTLBlendFactorSourceColor;
+                case dawn::BlendFactor::OneMinusSrcColor:
+                    return MTLBlendFactorOneMinusSourceColor;
+                case dawn::BlendFactor::SrcAlpha:
+                    return MTLBlendFactorSourceAlpha;
+                case dawn::BlendFactor::OneMinusSrcAlpha:
+                    return MTLBlendFactorOneMinusSourceAlpha;
+                case dawn::BlendFactor::DstColor:
+                    return MTLBlendFactorDestinationColor;
+                case dawn::BlendFactor::OneMinusDstColor:
+                    return MTLBlendFactorOneMinusDestinationColor;
+                case dawn::BlendFactor::DstAlpha:
+                    return MTLBlendFactorDestinationAlpha;
+                case dawn::BlendFactor::OneMinusDstAlpha:
+                    return MTLBlendFactorOneMinusDestinationAlpha;
+                case dawn::BlendFactor::SrcAlphaSaturated:
+                    return MTLBlendFactorSourceAlphaSaturated;
+                case dawn::BlendFactor::BlendColor:
+                    return alpha ? MTLBlendFactorBlendAlpha : MTLBlendFactorBlendColor;
+                case dawn::BlendFactor::OneMinusBlendColor:
+                    return alpha ? MTLBlendFactorOneMinusBlendAlpha
+                                 : MTLBlendFactorOneMinusBlendColor;
+            }
+        }
+
+        MTLBlendOperation MetalBlendOperation(dawn::BlendOperation operation) {
+            switch (operation) {
+                case dawn::BlendOperation::Add:
+                    return MTLBlendOperationAdd;
+                case dawn::BlendOperation::Subtract:
+                    return MTLBlendOperationSubtract;
+                case dawn::BlendOperation::ReverseSubtract:
+                    return MTLBlendOperationReverseSubtract;
+                case dawn::BlendOperation::Min:
+                    return MTLBlendOperationMin;
+                case dawn::BlendOperation::Max:
+                    return MTLBlendOperationMax;
+            }
+        }
+
+        MTLColorWriteMask MetalColorWriteMask(dawn::ColorWriteMask colorWriteMask) {
+            MTLColorWriteMask mask = MTLColorWriteMaskNone;
+
+            if (colorWriteMask & dawn::ColorWriteMask::Red) {
+                mask |= MTLColorWriteMaskRed;
+            }
+            if (colorWriteMask & dawn::ColorWriteMask::Green) {
+                mask |= MTLColorWriteMaskGreen;
+            }
+            if (colorWriteMask & dawn::ColorWriteMask::Blue) {
+                mask |= MTLColorWriteMaskBlue;
+            }
+            if (colorWriteMask & dawn::ColorWriteMask::Alpha) {
+                mask |= MTLColorWriteMaskAlpha;
+            }
+
+            return mask;
+        }
+
+        void ComputeBlendDesc(MTLRenderPipelineColorAttachmentDescriptor* attachment,
+                              const BlendStateDescriptor* descriptor) {
+            attachment.blendingEnabled = descriptor->blendEnabled;
+            attachment.sourceRGBBlendFactor =
+                MetalBlendFactor(descriptor->colorBlend.srcFactor, false);
+            attachment.destinationRGBBlendFactor =
+                MetalBlendFactor(descriptor->colorBlend.dstFactor, false);
+            attachment.rgbBlendOperation = MetalBlendOperation(descriptor->colorBlend.operation);
+            attachment.sourceAlphaBlendFactor =
+                MetalBlendFactor(descriptor->alphaBlend.srcFactor, true);
+            attachment.destinationAlphaBlendFactor =
+                MetalBlendFactor(descriptor->alphaBlend.dstFactor, true);
+            attachment.alphaBlendOperation = MetalBlendOperation(descriptor->alphaBlend.operation);
+            attachment.writeMask = MetalColorWriteMask(descriptor->colorWriteMask);
+        }
+    }  // anonymous namespace
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
         : RenderPipelineBase(device, descriptor),
@@ -94,7 +175,8 @@ namespace dawn_native { namespace metal {
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorMTL.colorAttachments[i].pixelFormat =
                 MetalPixelFormat(GetColorAttachmentFormat(i));
-            ToBackend(GetBlendState(i))->ApplyBlendState(descriptorMTL.colorAttachments[i]);
+            const BlendStateDescriptor* descriptor = GetBlendStateDescriptor(i);
+            ComputeBlendDesc(descriptorMTL.colorAttachments[i], descriptor);
         }
 
         descriptorMTL.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());
