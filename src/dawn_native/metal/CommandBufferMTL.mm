@@ -64,7 +64,10 @@ namespace dawn_native { namespace metal {
                 }
 
                 descriptor.colorAttachments[i].texture =
-                    ToBackend(attachmentInfo.view)->GetMTLTexture();
+                    ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
+                descriptor.colorAttachments[i].level = attachmentInfo.view->GetBaseMipLevel();
+                descriptor.colorAttachments[i].slice = attachmentInfo.view->GetBaseArrayLayer();
+
                 descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
             }
 

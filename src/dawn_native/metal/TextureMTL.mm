@@ -17,7 +17,6 @@
 #include "dawn_native/metal/DeviceMTL.h"
 
 namespace dawn_native { namespace metal {
-
     MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format) {
         switch (format) {
             case dawn::TextureFormat::R8G8B8A8Unorm:
@@ -40,6 +39,12 @@ namespace dawn_native { namespace metal {
     }
 
     namespace {
+        bool UsageNeedsTextureView(dawn::TextureUsageBit usage) {
+            constexpr dawn::TextureUsageBit kUsageNeedsTextureView =
+                dawn::TextureUsageBit::Storage | dawn::TextureUsageBit::Sampled;
+            return usage & kUsageNeedsTextureView;
+        }
+
         MTLTextureUsage MetalTextureUsage(dawn::TextureUsageBit usage) {
             MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
@@ -55,9 +60,9 @@ namespace dawn_native { namespace metal {
                 result |= MTLTextureUsageRenderTarget;
             }
 
-            // TODO(jiawei.shao@intel.com): investigate if we should skip setting this flag when the
-            // texture is only used as a render target.
-            result |= MTLTextureUsagePixelFormatView;
+            if (UsageNeedsTextureView(usage)) {
+                result |= MTLTextureUsagePixelFormatView;
+            }
 
             return result;
         }
@@ -84,6 +89,31 @@ namespace dawn_native { namespace metal {
                     UNREACHABLE();
                     return MTLTextureType2D;
             }
+        }
+
+        bool RequiresCreatingNewTextureView(const TextureBase* texture,
+                                            const TextureViewDescriptor* textureViewDescriptor) {
+            if (texture->GetFormat() != textureViewDescriptor->format) {
+                return true;
+            }
+
+            if (texture->GetArrayLayers() != textureViewDescriptor->layerCount) {
+                return true;
+            }
+
+            if (texture->GetNumMipLevels() != textureViewDescriptor->levelCount) {
+                return true;
+            }
+
+            switch (textureViewDescriptor->dimension) {
+                case dawn::TextureViewDimension::Cube:
+                case dawn::TextureViewDimension::CubeArray:
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
         }
     }
 
@@ -121,20 +151,25 @@ namespace dawn_native { namespace metal {
         return mMtlTexture;
     }
 
-    // TODO(jiawei.shao@intel.com): use the original texture directly when the descriptor covers the
-    // whole texture in the same format (for example, when CreateDefaultTextureView() is called).
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor) {
-        MTLPixelFormat format = MetalPixelFormat(descriptor->format);
-        MTLTextureType textureViewType = MetalTextureViewType(descriptor->dimension);
-        auto mipLevelRange = NSMakeRange(descriptor->baseMipLevel, descriptor->levelCount);
-        auto arrayLayerRange = NSMakeRange(descriptor->baseArrayLayer, descriptor->layerCount);
-
         id<MTLTexture> mtlTexture = ToBackend(texture)->GetMTLTexture();
-        mMtlTextureView = [mtlTexture newTextureViewWithPixelFormat:format
-                                                        textureType:textureViewType
-                                                             levels:mipLevelRange
-                                                             slices:arrayLayerRange];
+
+        if (!UsageNeedsTextureView(texture->GetUsage())) {
+            mMtlTextureView = nil;
+        } else if (!RequiresCreatingNewTextureView(texture, descriptor)) {
+            mMtlTextureView = [mtlTexture retain];
+        } else {
+            MTLPixelFormat format = MetalPixelFormat(descriptor->format);
+            MTLTextureType textureViewType = MetalTextureViewType(descriptor->dimension);
+            auto mipLevelRange = NSMakeRange(descriptor->baseMipLevel, descriptor->levelCount);
+            auto arrayLayerRange = NSMakeRange(descriptor->baseArrayLayer, descriptor->layerCount);
+
+            mMtlTextureView = [mtlTexture newTextureViewWithPixelFormat:format
+                                                            textureType:textureViewType
+                                                                 levels:mipLevelRange
+                                                                 slices:arrayLayerRange];
+        }
     }
 
     TextureView::~TextureView() {
@@ -142,6 +177,7 @@ namespace dawn_native { namespace metal {
     }
 
     id<MTLTexture> TextureView::GetMTLTexture() {
+        ASSERT(mMtlTextureView != nil);
         return mMtlTextureView;
     }
 }}  // namespace dawn_native::metal
