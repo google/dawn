@@ -139,7 +139,6 @@ class BlendStateTest : public DawnTest {
             descriptor.blendEnabled = true;
             descriptor.alphaBlend = blend;
             descriptor.colorBlend = blend;
-            descriptor.nextInChain = nullptr;
             descriptor.colorWriteMask = dawn::ColorWriteMask::All;
 
             SetupSingleSourcePipelines(descriptor);
@@ -165,7 +164,6 @@ class BlendStateTest : public DawnTest {
             descriptor.blendEnabled = true;
             descriptor.colorBlend = colorBlend;
             descriptor.alphaBlend = alphaBlend;
-            descriptor.nextInChain = nullptr;
             descriptor.colorWriteMask = dawn::ColorWriteMask::All;
 
             SetupSingleSourcePipelines(descriptor);
@@ -283,7 +281,6 @@ TEST_P(BlendStateTest, Basic) {
     blend.srcFactor = dawn::BlendFactor::One;
     blend.dstFactor = dawn::BlendFactor::Zero;
     dawn::BlendStateDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
     descriptor.blendEnabled = false;
     descriptor.alphaBlend = blend;
     descriptor.colorBlend = blend;
@@ -640,7 +637,6 @@ TEST_P(BlendStateTest, ColorWriteMask) {
     blend.dstFactor = dawn::BlendFactor::One;
 
     dawn::BlendStateDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
     descriptor.blendEnabled = true;
     descriptor.colorBlend = blend;
     descriptor.alphaBlend = blend;
@@ -688,7 +684,6 @@ TEST_P(BlendStateTest, ColorWriteMaskBlendingDisabled) {
         blend.srcFactor = dawn::BlendFactor::One;
         blend.dstFactor = dawn::BlendFactor::Zero;
         dawn::BlendStateDescriptor descriptor;
-        descriptor.nextInChain = nullptr;
         descriptor.alphaBlend = blend;
         descriptor.colorBlend = blend;
 

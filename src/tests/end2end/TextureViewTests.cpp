@@ -116,7 +116,6 @@ protected:
         mTexture = Create2DTexture(
             device, textureWidthLevel0, textureHeightLevel0, layerCount, levelCount, kUsage);
 
-        mDefaultTextureViewDescriptor.nextInChain = nullptr;
         mDefaultTextureViewDescriptor.dimension = dawn::TextureViewDimension::e2DArray;
         mDefaultTextureViewDescriptor.format = kDefaultFormat;
         mDefaultTextureViewDescriptor.baseMipLevel = 0;

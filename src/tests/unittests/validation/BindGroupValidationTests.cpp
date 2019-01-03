@@ -141,7 +141,6 @@ TEST_F(BindGroupValidationTest, SamplerBindingType) {
     binding.size = 0;
 
     dawn::BindGroupDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
     descriptor.layout = layout;
     descriptor.numBindings = 1;
     descriptor.bindings = &binding;
@@ -179,7 +178,6 @@ TEST_F(BindGroupValidationTest, TextureBindingType) {
     binding.size = 0;
 
     dawn::BindGroupDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
     descriptor.layout = layout;
     descriptor.numBindings = 1;
     descriptor.bindings = &binding;
@@ -217,7 +215,6 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
     binding.size = 0;
 
     dawn::BindGroupDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
     descriptor.layout = layout;
     descriptor.numBindings = 1;
     descriptor.bindings = &binding;
