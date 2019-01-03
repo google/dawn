@@ -74,12 +74,16 @@ namespace dawn_native { namespace vulkan {
         mCreateInfo.flags = 0;
 
         const auto& depth = GetDepth();
-        mCreateInfo.depthTestEnable = VK_TRUE;
+        // Depth writes only occur if depth is enabled
+        mCreateInfo.depthTestEnable =
+            (depth.compareFunction == dawn::CompareFunction::Always && !depth.depthWriteEnabled)
+                ? VK_FALSE
+                : VK_TRUE;
         mCreateInfo.depthWriteEnable = depth.depthWriteEnabled ? VK_TRUE : VK_FALSE;
         mCreateInfo.depthCompareOp = VulkanCompareOp(depth.compareFunction);
         mCreateInfo.depthBoundsTestEnable = false;
         mCreateInfo.minDepthBounds = 0.0f;
-        mCreateInfo.maxDepthBounds = 0.0f;
+        mCreateInfo.maxDepthBounds = 1.0f;
 
         const auto& stencil = GetStencil();
         mCreateInfo.stencilTestEnable = StencilTestEnabled() ? VK_TRUE : VK_FALSE;
