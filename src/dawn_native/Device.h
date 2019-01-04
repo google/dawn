@@ -52,8 +52,6 @@ namespace dawn_native {
         FenceSignalTracker* GetFenceSignalTracker() const;
 
         virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
-        virtual DepthStencilStateBase* CreateDepthStencilState(
-            DepthStencilStateBuilder* builder) = 0;
         virtual InputStateBase* CreateInputState(InputStateBuilder* builder) = 0;
         virtual RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) = 0;
@@ -87,7 +85,6 @@ namespace dawn_native {
         BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
         CommandBufferBuilder* CreateCommandBufferBuilder();
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
-        DepthStencilStateBuilder* CreateDepthStencilStateBuilder();
         FenceBase* CreateFence(const FenceDescriptor* descriptor);
         InputStateBuilder* CreateInputStateBuilder();
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);

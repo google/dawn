@@ -15,7 +15,6 @@
 #ifndef DAWNNATIVE_RENDERPIPELINE_H_
 #define DAWNNATIVE_RENDERPIPELINE_H_
 
-#include "dawn_native/DepthStencilState.h"
 #include "dawn_native/InputState.h"
 #include "dawn_native/Pipeline.h"
 
@@ -30,13 +29,14 @@ namespace dawn_native {
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
+    bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState);
 
     class RenderPipelineBase : public PipelineBase {
       public:
         RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
 
         const BlendStateDescriptor* GetBlendStateDescriptor(uint32_t attachmentSlot);
-        DepthStencilStateBase* GetDepthStencilState();
+        const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor();
         dawn::IndexFormat GetIndexFormat() const;
         InputStateBase* GetInputState();
         dawn::PrimitiveTopology GetPrimitiveTopology() const;
@@ -51,7 +51,7 @@ namespace dawn_native {
         bool IsCompatibleWith(const RenderPassDescriptorBase* renderPass) const;
 
       private:
-        Ref<DepthStencilStateBase> mDepthStencilState;
+        DepthStencilStateDescriptor mDepthStencilState;
         dawn::IndexFormat mIndexFormat;
         Ref<InputStateBase> mInputState;
         dawn::PrimitiveTopology mPrimitiveTopology;

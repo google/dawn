@@ -19,7 +19,6 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/ComputePipeline.h"
-#include "dawn_native/DepthStencilState.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
@@ -140,9 +139,6 @@ namespace dawn_native {
         }
 
         return result;
-    }
-    DepthStencilStateBuilder* DeviceBase::CreateDepthStencilStateBuilder() {
-        return new DepthStencilStateBuilder(this);
     }
     FenceBase* DeviceBase::CreateFence(const FenceDescriptor* descriptor) {
         FenceBase* result = nullptr;

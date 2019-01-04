@@ -15,7 +15,6 @@
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
 
 #include "common/Assert.h"
-#include "dawn_native/d3d12/DepthStencilStateD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/InputStateD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
@@ -142,7 +141,85 @@ namespace dawn_native { namespace d3d12 {
             blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
             return blendDesc;
         }
-    }  // namespace
+
+        D3D12_STENCIL_OP StencilOp(dawn::StencilOperation op) {
+            switch (op) {
+                case dawn::StencilOperation::Keep:
+                    return D3D12_STENCIL_OP_KEEP;
+                case dawn::StencilOperation::Zero:
+                    return D3D12_STENCIL_OP_ZERO;
+                case dawn::StencilOperation::Replace:
+                    return D3D12_STENCIL_OP_REPLACE;
+                case dawn::StencilOperation::IncrementClamp:
+                    return D3D12_STENCIL_OP_INCR_SAT;
+                case dawn::StencilOperation::DecrementClamp:
+                    return D3D12_STENCIL_OP_DECR_SAT;
+                case dawn::StencilOperation::Invert:
+                    return D3D12_STENCIL_OP_INVERT;
+                case dawn::StencilOperation::IncrementWrap:
+                    return D3D12_STENCIL_OP_INCR;
+                case dawn::StencilOperation::DecrementWrap:
+                    return D3D12_STENCIL_OP_DECR;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        D3D12_COMPARISON_FUNC ComparisonFunc(dawn::CompareFunction func) {
+            switch (func) {
+                case dawn::CompareFunction::Always:
+                    return D3D12_COMPARISON_FUNC_ALWAYS;
+                case dawn::CompareFunction::Equal:
+                    return D3D12_COMPARISON_FUNC_EQUAL;
+                case dawn::CompareFunction::Greater:
+                    return D3D12_COMPARISON_FUNC_GREATER;
+                case dawn::CompareFunction::GreaterEqual:
+                    return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+                case dawn::CompareFunction::Less:
+                    return D3D12_COMPARISON_FUNC_LESS;
+                case dawn::CompareFunction::LessEqual:
+                    return D3D12_COMPARISON_FUNC_LESS_EQUAL;
+                case dawn::CompareFunction::Never:
+                    return D3D12_COMPARISON_FUNC_NEVER;
+                case dawn::CompareFunction::NotEqual:
+                    return D3D12_COMPARISON_FUNC_NOT_EQUAL;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(const StencilStateFaceDescriptor descriptor) {
+            D3D12_DEPTH_STENCILOP_DESC desc;
+
+            desc.StencilFailOp = StencilOp(descriptor.stencilFailOp);
+            desc.StencilDepthFailOp = StencilOp(descriptor.depthFailOp);
+            desc.StencilPassOp = StencilOp(descriptor.passOp);
+            desc.StencilFunc = ComparisonFunc(descriptor.compare);
+
+            return desc;
+        }
+
+        D3D12_DEPTH_STENCIL_DESC ComputeDepthStencilDesc(
+            const DepthStencilStateDescriptor* descriptor) {
+            D3D12_DEPTH_STENCIL_DESC mDepthStencilDescriptor;
+            mDepthStencilDescriptor.DepthEnable = TRUE;
+            mDepthStencilDescriptor.DepthWriteMask = descriptor->depthWriteEnabled
+                                                         ? D3D12_DEPTH_WRITE_MASK_ALL
+                                                         : D3D12_DEPTH_WRITE_MASK_ZERO;
+            mDepthStencilDescriptor.DepthFunc = ComparisonFunc(descriptor->depthCompare);
+
+            mDepthStencilDescriptor.StencilEnable = StencilTestEnabled(descriptor) ? TRUE : FALSE;
+            mDepthStencilDescriptor.StencilReadMask =
+                static_cast<UINT8>(descriptor->stencilReadMask);
+            mDepthStencilDescriptor.StencilWriteMask =
+                static_cast<UINT8>(descriptor->stencilWriteMask);
+
+            mDepthStencilDescriptor.FrontFace = StencilOpDesc(descriptor->front);
+            mDepthStencilDescriptor.BackFace = StencilOpDesc(descriptor->back);
+            return mDepthStencilDescriptor;
+        }
+
+    }  // anonymous namespace
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
         : RenderPipelineBase(device, descriptor),
@@ -239,8 +316,8 @@ namespace dawn_native { namespace d3d12 {
         descriptorD3D12.BlendState.AlphaToCoverageEnable = FALSE;
         descriptorD3D12.BlendState.IndependentBlendEnable = TRUE;
 
-        DepthStencilState* depthStencilState = ToBackend(GetDepthStencilState());
-        descriptorD3D12.DepthStencilState = depthStencilState->GetD3D12DepthStencilDescriptor();
+        descriptorD3D12.DepthStencilState =
+            ComputeDepthStencilDesc(GetDepthStencilStateDescriptor());
 
         descriptorD3D12.SampleMask = UINT_MAX;
         descriptorD3D12.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());

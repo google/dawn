@@ -52,9 +52,6 @@ namespace dawn_native { namespace null {
         const ComputePipelineDescriptor* descriptor) {
         return new ComputePipeline(this, descriptor);
     }
-    DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
-        return new DepthStencilState(builder);
-    }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);
     }

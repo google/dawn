@@ -193,11 +193,6 @@ void init() {
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 
-    auto depthStencilState = device.CreateDepthStencilStateBuilder()
-        .SetDepthCompareFunction(dawn::CompareFunction::Less)
-        .SetDepthWriteEnabled(true)
-        .GetResult();
-
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.layout = pl;
     descriptor.cVertexStage.module = vsModule;
@@ -207,20 +202,10 @@ void init() {
     descriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
     descriptor.cColorAttachments[0].format =
         GetPreferredSwapChainTextureFormat();
-    descriptor.depthStencilState = depthStencilState;
+    descriptor.cDepthStencilState.depthWriteEnabled = true;
+    descriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 
     pipeline = device.CreateRenderPipeline(&descriptor);
-
-    dawn::StencilStateFaceDescriptor planeStencilDescriptor;
-    planeStencilDescriptor.compare = dawn::CompareFunction::Always;
-    planeStencilDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
-    planeStencilDescriptor.depthFailOp = dawn::StencilOperation::Keep;
-    planeStencilDescriptor.passOp = dawn::StencilOperation::Replace;
-    auto planeStencilState = device.CreateDepthStencilStateBuilder()
-                                 .SetDepthCompareFunction(dawn::CompareFunction::Less)
-                                 .SetDepthWriteEnabled(false)
-                                 .SetStencilFunction(dawn::Face::Both, &planeStencilDescriptor)
-                                 .GetResult();
 
     utils::ComboRenderPipelineDescriptor pDescriptor(device);
     pDescriptor.layout = pl;
@@ -231,21 +216,11 @@ void init() {
     pDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
     pDescriptor.cColorAttachments[0].format =
         GetPreferredSwapChainTextureFormat();
-    pDescriptor.depthStencilState = planeStencilState;
+    pDescriptor.cDepthStencilState.front.passOp = dawn::StencilOperation::Replace;
+    pDescriptor.cDepthStencilState.back.passOp = dawn::StencilOperation::Replace;
+    pDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 
     planePipeline = device.CreateRenderPipeline(&pDescriptor);
-
-    dawn::StencilStateFaceDescriptor reflectionStencilDescriptor;
-    reflectionStencilDescriptor.compare = dawn::CompareFunction::Equal;
-    reflectionStencilDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
-    reflectionStencilDescriptor.depthFailOp = dawn::StencilOperation::Keep;
-    reflectionStencilDescriptor.passOp = dawn::StencilOperation::Replace;
-    auto reflectionStencilState =
-        device.CreateDepthStencilStateBuilder()
-            .SetDepthCompareFunction(dawn::CompareFunction::Less)
-            .SetDepthWriteEnabled(true)
-            .SetStencilFunction(dawn::Face::Both, &reflectionStencilDescriptor)
-            .GetResult();
 
     utils::ComboRenderPipelineDescriptor rfDescriptor(device);
     rfDescriptor.layout = pl;
@@ -256,7 +231,12 @@ void init() {
     rfDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
     rfDescriptor.cColorAttachments[0].format =
         GetPreferredSwapChainTextureFormat();
-    rfDescriptor.depthStencilState = reflectionStencilState;
+    pDescriptor.cDepthStencilState.front.compare = dawn::CompareFunction::Equal;
+    pDescriptor.cDepthStencilState.back.compare = dawn::CompareFunction::Equal;
+    pDescriptor.cDepthStencilState.front.passOp = dawn::StencilOperation::Replace;
+    pDescriptor.cDepthStencilState.back.passOp = dawn::StencilOperation::Replace;
+    rfDescriptor.cDepthStencilState.depthWriteEnabled = true;
+    rfDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 
     reflectionPipeline = device.CreateRenderPipeline(&rfDescriptor);
 

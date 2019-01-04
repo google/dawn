@@ -14,7 +14,6 @@
 
 #include "dawn_native/metal/RenderPipelineMTL.h"
 
-#include "dawn_native/metal/DepthStencilStateMTL.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/InputStateMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
@@ -143,6 +142,89 @@ namespace dawn_native { namespace metal {
             attachment.alphaBlendOperation = MetalBlendOperation(descriptor->alphaBlend.operation);
             attachment.writeMask = MetalColorWriteMask(descriptor->colorWriteMask);
         }
+
+        MTLCompareFunction MetalDepthStencilCompareFunction(dawn::CompareFunction compareFunction) {
+            switch (compareFunction) {
+                case dawn::CompareFunction::Never:
+                    return MTLCompareFunctionNever;
+                case dawn::CompareFunction::Less:
+                    return MTLCompareFunctionLess;
+                case dawn::CompareFunction::LessEqual:
+                    return MTLCompareFunctionLessEqual;
+                case dawn::CompareFunction::Greater:
+                    return MTLCompareFunctionGreater;
+                case dawn::CompareFunction::GreaterEqual:
+                    return MTLCompareFunctionGreaterEqual;
+                case dawn::CompareFunction::NotEqual:
+                    return MTLCompareFunctionNotEqual;
+                case dawn::CompareFunction::Equal:
+                    return MTLCompareFunctionEqual;
+                case dawn::CompareFunction::Always:
+                    return MTLCompareFunctionAlways;
+            }
+        }
+
+        MTLStencilOperation MetalStencilOperation(dawn::StencilOperation stencilOperation) {
+            switch (stencilOperation) {
+                case dawn::StencilOperation::Keep:
+                    return MTLStencilOperationKeep;
+                case dawn::StencilOperation::Zero:
+                    return MTLStencilOperationZero;
+                case dawn::StencilOperation::Replace:
+                    return MTLStencilOperationReplace;
+                case dawn::StencilOperation::Invert:
+                    return MTLStencilOperationInvert;
+                case dawn::StencilOperation::IncrementClamp:
+                    return MTLStencilOperationIncrementClamp;
+                case dawn::StencilOperation::DecrementClamp:
+                    return MTLStencilOperationDecrementClamp;
+                case dawn::StencilOperation::IncrementWrap:
+                    return MTLStencilOperationIncrementWrap;
+                case dawn::StencilOperation::DecrementWrap:
+                    return MTLStencilOperationDecrementWrap;
+            }
+        }
+
+        MTLDepthStencilDescriptor* ComputeDepthStencilDesc(
+            const DepthStencilStateDescriptor* descriptor) {
+            MTLDepthStencilDescriptor* mtlDepthStencilDescriptor =
+                [[MTLDepthStencilDescriptor new] autorelease];
+            mtlDepthStencilDescriptor.depthCompareFunction =
+                MetalDepthStencilCompareFunction(descriptor->depthCompare);
+            mtlDepthStencilDescriptor.depthWriteEnabled = descriptor->depthWriteEnabled;
+
+            if (StencilTestEnabled(descriptor)) {
+                MTLStencilDescriptor* backFaceStencil = [[MTLStencilDescriptor new] autorelease];
+                MTLStencilDescriptor* frontFaceStencil = [[MTLStencilDescriptor new] autorelease];
+
+                backFaceStencil.stencilCompareFunction =
+                    MetalDepthStencilCompareFunction(descriptor->back.compare);
+                backFaceStencil.stencilFailureOperation =
+                    MetalStencilOperation(descriptor->back.stencilFailOp);
+                backFaceStencil.depthFailureOperation =
+                    MetalStencilOperation(descriptor->back.depthFailOp);
+                backFaceStencil.depthStencilPassOperation =
+                    MetalStencilOperation(descriptor->back.passOp);
+                backFaceStencil.readMask = descriptor->stencilReadMask;
+                backFaceStencil.writeMask = descriptor->stencilWriteMask;
+
+                frontFaceStencil.stencilCompareFunction =
+                    MetalDepthStencilCompareFunction(descriptor->front.compare);
+                frontFaceStencil.stencilFailureOperation =
+                    MetalStencilOperation(descriptor->front.stencilFailOp);
+                frontFaceStencil.depthFailureOperation =
+                    MetalStencilOperation(descriptor->front.depthFailOp);
+                frontFaceStencil.depthStencilPassOperation =
+                    MetalStencilOperation(descriptor->front.passOp);
+                frontFaceStencil.readMask = descriptor->stencilReadMask;
+                frontFaceStencil.writeMask = descriptor->stencilWriteMask;
+
+                mtlDepthStencilDescriptor.backFaceStencil = backFaceStencil;
+                mtlDepthStencilDescriptor.frontFaceStencil = frontFaceStencil;
+            }
+            return mtlDepthStencilDescriptor;
+        }
+
     }  // anonymous namespace
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
@@ -186,21 +268,29 @@ namespace dawn_native { namespace metal {
 
         // TODO(kainino@chromium.org): push constants, textures, samplers
 
-        NSError* error = nil;
-        mMtlRenderPipelineState = [mtlDevice newRenderPipelineStateWithDescriptor:descriptorMTL
-                                                                            error:&error];
-        if (error != nil) {
-            NSLog(@" error => %@", error);
-            device->HandleError("Error creating rendering pipeline state");
+        {
+            NSError* error = nil;
+            mMtlRenderPipelineState = [mtlDevice newRenderPipelineStateWithDescriptor:descriptorMTL
+                                                                                error:&error];
             [descriptorMTL release];
-            return;
+            if (error != nil) {
+                NSLog(@" error => %@", error);
+                device->HandleError("Error creating rendering pipeline state");
+                return;
+            }
         }
 
-        [descriptorMTL release];
+        // create depth stencil state and cache it, fetch the cached depth stencil state when we
+        // call setDepthStencilState() for a given render pipeline in CommandBuffer, in order to
+        // improve performance.
+        mMtlDepthStencilState =
+            [mtlDevice newDepthStencilStateWithDescriptor:ComputeDepthStencilDesc(
+                                                              GetDepthStencilStateDescriptor())];
     }
 
     RenderPipeline::~RenderPipeline() {
         [mMtlRenderPipelineState release];
+        [mMtlDepthStencilState release];
     }
 
     MTLIndexType RenderPipeline::GetMTLIndexType() const {
@@ -213,6 +303,10 @@ namespace dawn_native { namespace metal {
 
     void RenderPipeline::Encode(id<MTLRenderCommandEncoder> encoder) {
         [encoder setRenderPipelineState:mMtlRenderPipelineState];
+    }
+
+    id<MTLDepthStencilState> RenderPipeline::GetMTLDepthStencilState() {
+        return mMtlDepthStencilState;
     }
 
 }}  // namespace dawn_native::metal

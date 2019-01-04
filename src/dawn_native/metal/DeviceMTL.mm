@@ -21,7 +21,6 @@
 #include "dawn_native/metal/BufferMTL.h"
 #include "dawn_native/metal/CommandBufferMTL.h"
 #include "dawn_native/metal/ComputePipelineMTL.h"
-#include "dawn_native/metal/DepthStencilStateMTL.h"
 #include "dawn_native/metal/InputStateMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 #include "dawn_native/metal/QueueMTL.h"
@@ -178,9 +177,6 @@ namespace dawn_native { namespace metal {
     ResultOrError<ComputePipelineBase*> Device::CreateComputePipelineImpl(
         const ComputePipelineDescriptor* descriptor) {
         return new ComputePipeline(this, descriptor);
-    }
-    DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
-        return new DepthStencilState(builder);
     }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);

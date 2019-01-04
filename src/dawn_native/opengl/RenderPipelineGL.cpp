@@ -14,7 +14,6 @@
 
 #include "dawn_native/opengl/RenderPipelineGL.h"
 
-#include "dawn_native/opengl/DepthStencilStateGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/Forward.h"
 #include "dawn_native/opengl/InputStateGL.h"
@@ -109,7 +108,92 @@ namespace dawn_native { namespace opengl {
                          descriptor->colorWriteMask & dawn::ColorWriteMask::Alpha);
         }
 
-    }  // namespace
+        GLuint OpenGLCompareFunction(dawn::CompareFunction compareFunction) {
+            switch (compareFunction) {
+                case dawn::CompareFunction::Never:
+                    return GL_NEVER;
+                case dawn::CompareFunction::Less:
+                    return GL_LESS;
+                case dawn::CompareFunction::LessEqual:
+                    return GL_LEQUAL;
+                case dawn::CompareFunction::Greater:
+                    return GL_GREATER;
+                case dawn::CompareFunction::GreaterEqual:
+                    return GL_GEQUAL;
+                case dawn::CompareFunction::NotEqual:
+                    return GL_NOTEQUAL;
+                case dawn::CompareFunction::Equal:
+                    return GL_EQUAL;
+                case dawn::CompareFunction::Always:
+                    return GL_ALWAYS;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        GLuint OpenGLStencilOperation(dawn::StencilOperation stencilOperation) {
+            switch (stencilOperation) {
+                case dawn::StencilOperation::Keep:
+                    return GL_KEEP;
+                case dawn::StencilOperation::Zero:
+                    return GL_ZERO;
+                case dawn::StencilOperation::Replace:
+                    return GL_REPLACE;
+                case dawn::StencilOperation::Invert:
+                    return GL_INVERT;
+                case dawn::StencilOperation::IncrementClamp:
+                    return GL_INCR;
+                case dawn::StencilOperation::DecrementClamp:
+                    return GL_DECR;
+                case dawn::StencilOperation::IncrementWrap:
+                    return GL_INCR_WRAP;
+                case dawn::StencilOperation::DecrementWrap:
+                    return GL_DECR_WRAP;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        void ApplyDepthStencilState(const DepthStencilStateDescriptor* descriptor,
+                                    PersistentPipelineState* persistentPipelineState) {
+            // Depth writes only occur if depth is enabled
+            if (descriptor->depthCompare == dawn::CompareFunction::Always &&
+                !descriptor->depthWriteEnabled) {
+                glDisable(GL_DEPTH_TEST);
+            } else {
+                glEnable(GL_DEPTH_TEST);
+            }
+
+            if (descriptor->depthWriteEnabled) {
+                glDepthMask(GL_TRUE);
+            } else {
+                glDepthMask(GL_FALSE);
+            }
+
+            glDepthFunc(OpenGLCompareFunction(descriptor->depthCompare));
+
+            if (StencilTestEnabled(descriptor)) {
+                glEnable(GL_STENCIL_TEST);
+            } else {
+                glDisable(GL_STENCIL_TEST);
+            }
+
+            GLenum backCompareFunction = OpenGLCompareFunction(descriptor->back.compare);
+            GLenum frontCompareFunction = OpenGLCompareFunction(descriptor->front.compare);
+            persistentPipelineState->SetStencilFuncsAndMask(
+                backCompareFunction, frontCompareFunction, descriptor->stencilReadMask);
+
+            glStencilOpSeparate(GL_BACK, OpenGLStencilOperation(descriptor->back.stencilFailOp),
+                                OpenGLStencilOperation(descriptor->back.depthFailOp),
+                                OpenGLStencilOperation(descriptor->back.passOp));
+            glStencilOpSeparate(GL_FRONT, OpenGLStencilOperation(descriptor->front.stencilFailOp),
+                                OpenGLStencilOperation(descriptor->front.depthFailOp),
+                                OpenGLStencilOperation(descriptor->front.passOp));
+
+            glStencilMask(descriptor->stencilWriteMask);
+        }
+
+    }  // anonymous namespace
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
         : RenderPipelineBase(device, descriptor),
@@ -131,8 +215,7 @@ namespace dawn_native { namespace opengl {
         auto inputState = ToBackend(GetInputState());
         glBindVertexArray(inputState->GetVAO());
 
-        auto depthStencilState = ToBackend(GetDepthStencilState());
-        depthStencilState->ApplyNow(persistentPipelineState);
+        ApplyDepthStencilState(GetDepthStencilStateDescriptor(), &persistentPipelineState);
 
         for (uint32_t attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
             ApplyBlendState(attachmentSlot, GetBlendStateDescriptor(attachmentSlot));

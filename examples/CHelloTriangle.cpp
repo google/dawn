@@ -111,13 +111,24 @@ void init() {
         descriptor.indexFormat = DAWN_INDEX_FORMAT_UINT32;
         descriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-        dawnDepthStencilStateBuilder depthStencilBuilder = dawnDeviceCreateDepthStencilStateBuilder(device);
-        descriptor.depthStencilState = dawnDepthStencilStateBuilderGetResult(depthStencilBuilder);
-        dawnDepthStencilStateBuilderRelease(depthStencilBuilder);
+        dawnStencilStateFaceDescriptor stencilFace;
+        stencilFace.compare = DAWN_COMPARE_FUNCTION_ALWAYS;
+        stencilFace.stencilFailOp = DAWN_STENCIL_OPERATION_KEEP;
+        stencilFace.depthFailOp = DAWN_STENCIL_OPERATION_KEEP;
+        stencilFace.passOp = DAWN_STENCIL_OPERATION_KEEP;
+
+        dawnDepthStencilStateDescriptor depthStencilState;
+        depthStencilState.nextInChain = nullptr;
+        depthStencilState.depthWriteEnabled = false;
+        depthStencilState.depthCompare = DAWN_COMPARE_FUNCTION_ALWAYS;
+        depthStencilState.back = stencilFace;
+        depthStencilState.front = stencilFace;
+        depthStencilState.stencilReadMask = 0xff;
+        depthStencilState.stencilWriteMask = 0xff;
+        descriptor.depthStencilState = &depthStencilState;
 
         pipeline = dawnDeviceCreateRenderPipeline(device, &descriptor);
 
-        dawnDepthStencilStateRelease(descriptor.depthStencilState);
         dawnInputStateRelease(descriptor.inputState);
     }
 

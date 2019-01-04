@@ -15,7 +15,6 @@
 #include "dawn_native/RenderPipeline.h"
 
 #include "common/BitSetIterator.h"
-#include "dawn_native/DepthStencilState.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/InputState.h"
 #include "dawn_native/RenderPassDescriptor.h"
@@ -86,7 +85,24 @@ namespace dawn_native {
             return {};
         }
 
-    }  // namespace
+        MaybeError ValidateDepthStencilStateDescriptor(
+            const DepthStencilStateDescriptor* descriptor) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+            DAWN_TRY(ValidateCompareFunction(descriptor->depthCompare));
+            DAWN_TRY(ValidateCompareFunction(descriptor->front.compare));
+            DAWN_TRY(ValidateStencilOperation(descriptor->front.stencilFailOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->front.depthFailOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->front.passOp));
+            DAWN_TRY(ValidateCompareFunction(descriptor->back.compare));
+            DAWN_TRY(ValidateStencilOperation(descriptor->back.stencilFailOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->back.depthFailOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->back.passOp));
+            return {};
+        }
+
+    }  // anonymous namespace
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor) {
@@ -137,8 +153,20 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Each color attachment should have blend state");
         }
 
-        // TODO: validate depth stencil state
+        DAWN_TRY(ValidateDepthStencilStateDescriptor(descriptor->depthStencilState));
+
         return {};
+    }
+
+    bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState) {
+        return mDepthStencilState->back.compare != dawn::CompareFunction::Always ||
+               mDepthStencilState->back.stencilFailOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->back.depthFailOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->back.passOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->front.compare != dawn::CompareFunction::Always ||
+               mDepthStencilState->front.stencilFailOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->front.depthFailOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->front.passOp != dawn::StencilOperation::Keep;
     }
 
     // RenderPipelineBase
@@ -148,7 +176,7 @@ namespace dawn_native {
         : PipelineBase(device,
                        descriptor->layout,
                        dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment),
-          mDepthStencilState(descriptor->depthStencilState),
+          mDepthStencilState(*descriptor->depthStencilState),
           mIndexFormat(descriptor->indexFormat),
           mInputState(descriptor->inputState),
           mPrimitiveTopology(descriptor->primitiveTopology),
@@ -175,8 +203,8 @@ namespace dawn_native {
         return &mBlendStates[attachmentSlot];
     }
 
-    DepthStencilStateBase* RenderPipelineBase::GetDepthStencilState() {
-        return mDepthStencilState.Get();
+    const DepthStencilStateDescriptor* RenderPipelineBase::GetDepthStencilStateDescriptor() {
+        return &mDepthStencilState;
     }
 
     dawn::IndexFormat RenderPipelineBase::GetIndexFormat() const {

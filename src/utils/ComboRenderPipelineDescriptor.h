@@ -34,6 +34,7 @@ namespace utils {
         std::array<dawn::AttachmentDescriptor, kMaxColorAttachments> cColorAttachments;
         dawn::AttachmentDescriptor cDepthStencilAttachment;
         std::array<dawn::BlendStateDescriptor, kMaxColorAttachments> cBlendStates;
+        dawn::DepthStencilStateDescriptor cDepthStencilState;
     };
 
 }  // namespace utils

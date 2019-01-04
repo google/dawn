@@ -14,7 +14,6 @@
 
 #include "dawn_native/Pipeline.h"
 
-#include "dawn_native/DepthStencilState.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"

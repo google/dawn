@@ -64,7 +64,6 @@ namespace dawn_native { namespace vulkan {
 
         // Dawn API
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-        DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;

@@ -25,7 +25,6 @@
 #include "dawn_native/vulkan/BufferVk.h"
 #include "dawn_native/vulkan/CommandBufferVk.h"
 #include "dawn_native/vulkan/ComputePipelineVk.h"
-#include "dawn_native/vulkan/DepthStencilStateVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/InputStateVk.h"
 #include "dawn_native/vulkan/NativeSwapChainImplVk.h"
@@ -236,9 +235,6 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<ComputePipelineBase*> Device::CreateComputePipelineImpl(
         const ComputePipelineDescriptor* descriptor) {
         return new ComputePipeline(this, descriptor);
-    }
-    DepthStencilStateBase* Device::CreateDepthStencilState(DepthStencilStateBuilder* builder) {
-        return new DepthStencilState(builder);
     }
     InputStateBase* Device::CreateInputState(InputStateBuilder* builder) {
         return new InputState(builder);

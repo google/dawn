@@ -14,7 +14,6 @@
 
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 
-#include "dawn_native/vulkan/DepthStencilStateVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/InputStateVk.h"
@@ -126,6 +125,97 @@ namespace dawn_native { namespace vulkan {
             return attachment;
         }
 
+        VkCompareOp VulkanCompareOp(dawn::CompareFunction op) {
+            switch (op) {
+                case dawn::CompareFunction::Always:
+                    return VK_COMPARE_OP_ALWAYS;
+                case dawn::CompareFunction::Equal:
+                    return VK_COMPARE_OP_EQUAL;
+                case dawn::CompareFunction::Greater:
+                    return VK_COMPARE_OP_GREATER;
+                case dawn::CompareFunction::GreaterEqual:
+                    return VK_COMPARE_OP_GREATER_OR_EQUAL;
+                case dawn::CompareFunction::Less:
+                    return VK_COMPARE_OP_LESS;
+                case dawn::CompareFunction::LessEqual:
+                    return VK_COMPARE_OP_LESS_OR_EQUAL;
+                case dawn::CompareFunction::Never:
+                    return VK_COMPARE_OP_NEVER;
+                case dawn::CompareFunction::NotEqual:
+                    return VK_COMPARE_OP_NOT_EQUAL;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        VkStencilOp VulkanStencilOp(dawn::StencilOperation op) {
+            switch (op) {
+                case dawn::StencilOperation::Keep:
+                    return VK_STENCIL_OP_KEEP;
+                case dawn::StencilOperation::Zero:
+                    return VK_STENCIL_OP_ZERO;
+                case dawn::StencilOperation::Replace:
+                    return VK_STENCIL_OP_REPLACE;
+                case dawn::StencilOperation::IncrementClamp:
+                    return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+                case dawn::StencilOperation::DecrementClamp:
+                    return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+                case dawn::StencilOperation::Invert:
+                    return VK_STENCIL_OP_INVERT;
+                case dawn::StencilOperation::IncrementWrap:
+                    return VK_STENCIL_OP_INCREMENT_AND_WRAP;
+                case dawn::StencilOperation::DecrementWrap:
+                    return VK_STENCIL_OP_DECREMENT_AND_WRAP;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        VkPipelineDepthStencilStateCreateInfo ComputeDepthStencilDesc(
+            const DepthStencilStateDescriptor* descriptor) {
+            VkPipelineDepthStencilStateCreateInfo depthStencilState;
+            depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+            depthStencilState.pNext = nullptr;
+            depthStencilState.flags = 0;
+
+            // Depth writes only occur if depth is enabled
+            depthStencilState.depthTestEnable =
+                (descriptor->depthCompare == dawn::CompareFunction::Always &&
+                 !descriptor->depthWriteEnabled)
+                    ? VK_FALSE
+                    : VK_TRUE;
+            depthStencilState.depthWriteEnable = descriptor->depthWriteEnabled ? VK_TRUE : VK_FALSE;
+            depthStencilState.depthCompareOp = VulkanCompareOp(descriptor->depthCompare);
+            depthStencilState.depthBoundsTestEnable = false;
+            depthStencilState.minDepthBounds = 0.0f;
+            depthStencilState.maxDepthBounds = 1.0f;
+
+            depthStencilState.stencilTestEnable =
+                StencilTestEnabled(descriptor) ? VK_TRUE : VK_FALSE;
+
+            depthStencilState.front.failOp = VulkanStencilOp(descriptor->front.stencilFailOp);
+            depthStencilState.front.passOp = VulkanStencilOp(descriptor->front.passOp);
+            depthStencilState.front.depthFailOp = VulkanStencilOp(descriptor->front.depthFailOp);
+            depthStencilState.front.compareOp = VulkanCompareOp(descriptor->front.compare);
+
+            depthStencilState.back.failOp = VulkanStencilOp(descriptor->back.stencilFailOp);
+            depthStencilState.back.passOp = VulkanStencilOp(descriptor->back.passOp);
+            depthStencilState.back.depthFailOp = VulkanStencilOp(descriptor->back.depthFailOp);
+            depthStencilState.back.compareOp = VulkanCompareOp(descriptor->back.compare);
+
+            // Dawn doesn't have separate front and back stencil masks.
+            depthStencilState.front.compareMask = descriptor->stencilReadMask;
+            depthStencilState.back.compareMask = descriptor->stencilReadMask;
+            depthStencilState.front.writeMask = descriptor->stencilWriteMask;
+            depthStencilState.back.writeMask = descriptor->stencilWriteMask;
+
+            // The stencil reference is always dynamic
+            depthStencilState.front.reference = 0;
+            depthStencilState.back.reference = 0;
+
+            return depthStencilState;
+        }
+
     }  // anonymous namespace
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
@@ -210,6 +300,9 @@ namespace dawn_native { namespace vulkan {
         multisample.alphaToCoverageEnable = VK_FALSE;
         multisample.alphaToOneEnable = VK_FALSE;
 
+        VkPipelineDepthStencilStateCreateInfo depthStencilState =
+            ComputeDepthStencilDesc(GetDepthStencilStateDescriptor());
+
         // Initialize the "blend state info" that will be chained in the "create info" from the data
         // pre-computed in the BlendState
         std::array<VkPipelineColorBlendAttachmentState, kMaxColorAttachments> colorBlendAttachments;
@@ -279,7 +372,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pViewportState = &viewport;
         createInfo.pRasterizationState = &rasterization;
         createInfo.pMultisampleState = &multisample;
-        createInfo.pDepthStencilState = ToBackend(GetDepthStencilState())->GetCreateInfo();
+        createInfo.pDepthStencilState = &depthStencilState;
         createInfo.pColorBlendState = &colorBlend;
         createInfo.pDynamicState = &dynamic;
         createInfo.layout = ToBackend(GetLayout())->GetHandle();

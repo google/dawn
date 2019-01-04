@@ -33,10 +33,13 @@ namespace dawn_native { namespace metal {
 
         void Encode(id<MTLRenderCommandEncoder> encoder);
 
+        id<MTLDepthStencilState> GetMTLDepthStencilState();
+
       private:
         MTLIndexType mMtlIndexType;
         MTLPrimitiveType mMtlPrimitiveTopology;
         id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;
+        id<MTLDepthStencilState> mMtlDepthStencilState = nil;
     };
 
 }}  // namespace dawn_native::metal

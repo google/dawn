@@ -350,15 +350,20 @@ TEST_F(WireTests, CStringArgument) {
         .WillOnce(Return(apiInputState));
 
     // Create the depth-stencil state
-    dawnDepthStencilStateBuilder depthStencilStateBuilder = dawnDeviceCreateDepthStencilStateBuilder(device);
-    dawnDepthStencilStateBuilder apiDepthStencilStateBuilder = api.GetNewDepthStencilStateBuilder();
-    EXPECT_CALL(api, DeviceCreateDepthStencilStateBuilder(apiDevice))
-        .WillOnce(Return(apiDepthStencilStateBuilder));
+    dawnStencilStateFaceDescriptor stencilFace;
+    stencilFace.compare = DAWN_COMPARE_FUNCTION_ALWAYS;
+    stencilFace.stencilFailOp = DAWN_STENCIL_OPERATION_KEEP;
+    stencilFace.depthFailOp = DAWN_STENCIL_OPERATION_KEEP;
+    stencilFace.passOp = DAWN_STENCIL_OPERATION_KEEP;
 
-    dawnDepthStencilState depthStencilState = dawnDepthStencilStateBuilderGetResult(depthStencilStateBuilder);
-    dawnDepthStencilState apiDepthStencilState = api.GetNewDepthStencilState();
-    EXPECT_CALL(api, DepthStencilStateBuilderGetResult(apiDepthStencilStateBuilder))
-        .WillOnce(Return(apiDepthStencilState));
+    dawnDepthStencilStateDescriptor depthStencilState;
+    depthStencilState.nextInChain = nullptr;
+    depthStencilState.depthWriteEnabled = false;
+    depthStencilState.depthCompare = DAWN_COMPARE_FUNCTION_ALWAYS;
+    depthStencilState.back = stencilFace;
+    depthStencilState.front = stencilFace;
+    depthStencilState.stencilReadMask = 0xff;
+    depthStencilState.stencilWriteMask = 0xff;
 
     // Create the pipeline layout
     dawnPipelineLayoutDescriptor layoutDescriptor;
@@ -405,7 +410,7 @@ TEST_F(WireTests, CStringArgument) {
     pipelineDescriptor.inputState = inputState;
     pipelineDescriptor.indexFormat = DAWN_INDEX_FORMAT_UINT32;
     pipelineDescriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    pipelineDescriptor.depthStencilState = depthStencilState;
+    pipelineDescriptor.depthStencilState = &depthStencilState;
 
     dawnDeviceCreateRenderPipeline(device, &pipelineDescriptor);
 	EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, MatchesLambda([](const dawnRenderPipelineDescriptor* desc) -> bool {

@@ -49,11 +49,6 @@ namespace dawn_native {
     };
 
     template <typename BackendTraits>
-    struct ToBackendTraits<DepthStencilStateBase, BackendTraits> {
-        using BackendType = typename BackendTraits::DepthStencilStateType;
-    };
-
-    template <typename BackendTraits>
     struct ToBackendTraits<DeviceBase, BackendTraits> {
         using BackendType = typename BackendTraits::DeviceType;
     };

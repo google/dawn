@@ -422,10 +422,6 @@
                 "returns": "command buffer builder"
             },
             {
-                "name": "create depth stencil state builder",
-                "returns": "depth stencil state builder"
-            },
-            {
                 "name": "create fence",
                 "returns": "fence",
                 "args": [
@@ -502,42 +498,16 @@
             }
         ]
     },
-    "depth stencil state": {
-        "category": "object"
-    },
-    "depth stencil state builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "depth stencil state"
-            },
-            {
-                "name": "set depth compare function",
-                "args": [
-                    {"name": "depth compare function", "type": "compare function"}
-                ]
-            },
-            {
-                "name": "set depth write enabled",
-                "args" : [
-                    {"name": "enabled", "type": "bool"}
-                ]
-            },
-            {
-                "name": "set stencil function",
-                "args": [
-                    {"name": "face", "type": "face"},
-                    {"name": "descriptor", "type": "stencil state face descriptor", "annotation": "const*"}
-                ]
-            },
-            {
-                "name": "set stencil mask",
-                "args": [
-                    {"name": "read mask", "type": "uint32_t"},
-                    {"name": "write mask", "type": "uint32_t"}
-                ]
-            }
+    "depth stencil state descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "depth write enabled", "type": "bool"},
+            {"name": "depth compare", "type": "compare function"},
+            {"name": "front", "type": "stencil state face descriptor"},
+            {"name": "back", "type": "stencil state face descriptor"},
+            {"name": "stencil read mask", "type": "uint32_t"},
+            {"name": "stencil write mask", "type": "uint32_t"}
         ]
     },
     "device error callback": {
@@ -888,7 +858,7 @@
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "attachments state", "type": "attachments state descriptor", "annotation": "const*"},
             {"name": "sample count", "type": "uint32_t"},
-            {"name": "depth stencil state", "type": "depth stencil state"},
+            {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*"},
             {"name": "num blend states", "type": "uint32_t"},
             {"name": "blend states", "type": "blend state descriptor", "annotation": "const*", "length": "num blend states"}
         ]

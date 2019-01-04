@@ -22,7 +22,6 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/ComputePipeline.h"
-#include "dawn_native/DepthStencilState.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"
@@ -42,7 +41,6 @@ namespace dawn_native { namespace null {
     class Buffer;
     class CommandBuffer;
     using ComputePipeline = ComputePipelineBase;
-    using DepthStencilState = DepthStencilStateBase;
     class Device;
     using InputState = InputStateBase;
     using PipelineLayout = PipelineLayoutBase;
@@ -61,7 +59,6 @@ namespace dawn_native { namespace null {
         using BufferType = Buffer;
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;
-        using DepthStencilStateType = DepthStencilState;
         using DeviceType = Device;
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
@@ -91,7 +88,6 @@ namespace dawn_native { namespace null {
         ~Device();
 
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
-        DepthStencilStateBase* CreateDepthStencilState(DepthStencilStateBuilder* builder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;

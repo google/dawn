@@ -282,11 +282,6 @@ namespace {
                          dawn::BindingType::SampledTexture},
                     });
 
-        auto depthStencilState = device.CreateDepthStencilStateBuilder()
-            .SetDepthCompareFunction(dawn::CompareFunction::Less)
-            .SetDepthWriteEnabled(true)
-            .GetResult();
-
         auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -299,7 +294,8 @@ namespace {
         descriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
         descriptor.cColorAttachments[0].format =
             GetPreferredSwapChainTextureFormat();
-        descriptor.depthStencilState = depthStencilState;
+        descriptor.cDepthStencilState.depthWriteEnabled = true;
+        descriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 
         dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 

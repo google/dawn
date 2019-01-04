@@ -50,25 +50,45 @@ namespace utils {
             }
         }
 
-        descriptor->inputState = device.CreateInputStateBuilder().GetResult();
-        descriptor->depthStencilState = device.CreateDepthStencilStateBuilder().GetResult();
-        descriptor->layout = utils::MakeBasicPipelineLayout(device, nullptr);
+        // Set defaults for the blend state descriptors.
+        {
+            descriptor->numBlendStates = 1;
+            descriptor->blendStates = &cBlendStates[0];
 
-        descriptor->numBlendStates = 1;
-        descriptor->blendStates = &cBlendStates[0];
-
-        dawn::BlendDescriptor blend;
-        blend.operation = dawn::BlendOperation::Add;
-        blend.srcFactor = dawn::BlendFactor::One;
-        blend.dstFactor = dawn::BlendFactor::Zero;
-        dawn::BlendStateDescriptor blendStateDescriptor;
-        blendStateDescriptor.blendEnabled = false;
-        blendStateDescriptor.alphaBlend = blend;
-        blendStateDescriptor.colorBlend = blend;
-        blendStateDescriptor.colorWriteMask = dawn::ColorWriteMask::All;
-        for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-            cBlendStates[i] = blendStateDescriptor;
+            dawn::BlendDescriptor blend;
+            blend.operation = dawn::BlendOperation::Add;
+            blend.srcFactor = dawn::BlendFactor::One;
+            blend.dstFactor = dawn::BlendFactor::Zero;
+            dawn::BlendStateDescriptor blendStateDescriptor;
+            blendStateDescriptor.blendEnabled = false;
+            blendStateDescriptor.alphaBlend = blend;
+            blendStateDescriptor.colorBlend = blend;
+            blendStateDescriptor.colorWriteMask = dawn::ColorWriteMask::All;
+            for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
+                cBlendStates[i] = blendStateDescriptor;
+            }
         }
+
+        // Set defaults for the depth stencil state descriptors.
+        {
+            dawn::StencilStateFaceDescriptor stencilFace;
+            stencilFace.compare = dawn::CompareFunction::Always;
+            stencilFace.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFace.depthFailOp = dawn::StencilOperation::Keep;
+            stencilFace.passOp = dawn::StencilOperation::Keep;
+
+            // dawn::DepthStencilStateDescriptor depthStencilState;
+            cDepthStencilState.depthWriteEnabled = false;
+            cDepthStencilState.depthCompare = dawn::CompareFunction::Always;
+            cDepthStencilState.back = stencilFace;
+            cDepthStencilState.front = stencilFace;
+            cDepthStencilState.stencilReadMask = 0xff;
+            cDepthStencilState.stencilWriteMask = 0xff;
+            descriptor->depthStencilState = &cDepthStencilState;
+        }
+
+        descriptor->inputState = device.CreateInputStateBuilder().GetResult();
+        descriptor->layout = utils::MakeBasicPipelineLayout(device, nullptr);
     }
 
 }  // namespace utils
