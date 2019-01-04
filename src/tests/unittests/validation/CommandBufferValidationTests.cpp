@@ -85,6 +85,52 @@ TEST_F(CommandBufferValidationTest, EndedMidComputePass) {
     }
 }
 
+// Test that a render pass cannot be ended twice
+TEST_F(CommandBufferValidationTest, RenderPassEndedTwice) {
+    dawn::RenderPassDescriptor renderpass = CreateSimpleRenderPass();
+
+    // Control case, pass is ended once
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.EndPass();
+        builder.GetResult();
+    }
+
+    // Error case, pass ended twice
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
+        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+        pass.EndPass();
+        // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
+        // produces a builder error.
+        pass.EndPass();
+        builder.GetResult();
+    }
+}
+
+// Test that a compute pass cannot be ended twice
+TEST_F(CommandBufferValidationTest, ComputePassEndedTwice) {
+    // Control case, pass is ended once.
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
+        dawn::ComputePassEncoder pass = builder.BeginComputePass();
+        pass.EndPass();
+        builder.GetResult();
+    }
+
+    // Error case, pass ended twice
+    {
+        dawn::CommandBufferBuilder builder = AssertWillBeError(device.CreateCommandBufferBuilder());
+        dawn::ComputePassEncoder pass = builder.BeginComputePass();
+        pass.EndPass();
+        // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
+        // produces a builder error.
+        pass.EndPass();
+        builder.GetResult();
+    }
+}
+
 // Test that using a single buffer in multiple read usages in the same pass is allowed.
 TEST_F(CommandBufferValidationTest, BufferWithMultipleReadUsage) {
     // Create a buffer used as both vertex and index buffer.

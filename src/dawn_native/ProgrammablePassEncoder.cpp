@@ -29,6 +29,10 @@ namespace dawn_native {
     }
 
     void ProgrammablePassEncoder::EndPass() {
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
         mTopLevelBuilder->PassEnded();
         mAllocator = nullptr;
     }
