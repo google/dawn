@@ -326,6 +326,12 @@ namespace dawn_wire {
                 {% endfor %}
 
                 void OnMapReadAsyncCallback(dawnBufferMapAsyncStatus status, const void* ptr, MapUserdata* data) {
+                    // Skip sending the callback if the buffer has already been destroyed.
+                    auto* bufferData = mKnownBuffer.Get(data->bufferId);
+                    if (bufferData == nullptr || bufferData->serial != data->bufferSerial) {
+                        return;
+                    }
+
                     ReturnBufferMapReadAsyncCallbackCmd cmd;
                     cmd.bufferId = data->bufferId;
                     cmd.bufferSerial = data->bufferSerial;
@@ -347,6 +353,12 @@ namespace dawn_wire {
                 }
 
                 void OnMapWriteAsyncCallback(dawnBufferMapAsyncStatus status, void* ptr, MapUserdata* data) {
+                    // Skip sending the callback if the buffer has already been destroyed.
+                    auto* bufferData = mKnownBuffer.Get(data->bufferId);
+                    if (bufferData == nullptr || bufferData->serial != data->bufferSerial) {
+                        return;
+                    }
+
                     ReturnBufferMapWriteAsyncCallbackCmd cmd;
                     cmd.bufferId = data->bufferId;
                     cmd.bufferSerial = data->bufferSerial;
@@ -357,11 +369,8 @@ namespace dawn_wire {
                     *allocCmd = cmd;
 
                     if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
-                        auto* selfData = mKnownBuffer.Get(data->bufferId);
-                        ASSERT(selfData != nullptr);
-
-                        selfData->mappedData = ptr;
-                        selfData->mappedDataSize = data->size;
+                        bufferData->mappedData = ptr;
+                        bufferData->mappedDataSize = data->size;
                     }
 
                     delete data;
