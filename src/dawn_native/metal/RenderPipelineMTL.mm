@@ -19,6 +19,7 @@
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 #include "dawn_native/metal/ShaderModuleMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
+#include "dawn_native/metal/UtilsMetal.h"
 
 namespace dawn_native { namespace metal {
 
@@ -143,27 +144,6 @@ namespace dawn_native { namespace metal {
             attachment.writeMask = MetalColorWriteMask(descriptor->colorWriteMask);
         }
 
-        MTLCompareFunction MetalDepthStencilCompareFunction(dawn::CompareFunction compareFunction) {
-            switch (compareFunction) {
-                case dawn::CompareFunction::Never:
-                    return MTLCompareFunctionNever;
-                case dawn::CompareFunction::Less:
-                    return MTLCompareFunctionLess;
-                case dawn::CompareFunction::LessEqual:
-                    return MTLCompareFunctionLessEqual;
-                case dawn::CompareFunction::Greater:
-                    return MTLCompareFunctionGreater;
-                case dawn::CompareFunction::GreaterEqual:
-                    return MTLCompareFunctionGreaterEqual;
-                case dawn::CompareFunction::NotEqual:
-                    return MTLCompareFunctionNotEqual;
-                case dawn::CompareFunction::Equal:
-                    return MTLCompareFunctionEqual;
-                case dawn::CompareFunction::Always:
-                    return MTLCompareFunctionAlways;
-            }
-        }
-
         MTLStencilOperation MetalStencilOperation(dawn::StencilOperation stencilOperation) {
             switch (stencilOperation) {
                 case dawn::StencilOperation::Keep:
@@ -190,7 +170,7 @@ namespace dawn_native { namespace metal {
             MTLDepthStencilDescriptor* mtlDepthStencilDescriptor =
                 [[MTLDepthStencilDescriptor new] autorelease];
             mtlDepthStencilDescriptor.depthCompareFunction =
-                MetalDepthStencilCompareFunction(descriptor->depthCompare);
+                ToMetalCompareFunction(descriptor->depthCompare);
             mtlDepthStencilDescriptor.depthWriteEnabled = descriptor->depthWriteEnabled;
 
             if (StencilTestEnabled(descriptor)) {
@@ -198,7 +178,7 @@ namespace dawn_native { namespace metal {
                 MTLStencilDescriptor* frontFaceStencil = [[MTLStencilDescriptor new] autorelease];
 
                 backFaceStencil.stencilCompareFunction =
-                    MetalDepthStencilCompareFunction(descriptor->back.compare);
+                    ToMetalCompareFunction(descriptor->back.compare);
                 backFaceStencil.stencilFailureOperation =
                     MetalStencilOperation(descriptor->back.stencilFailOp);
                 backFaceStencil.depthFailureOperation =
@@ -209,7 +189,7 @@ namespace dawn_native { namespace metal {
                 backFaceStencil.writeMask = descriptor->stencilWriteMask;
 
                 frontFaceStencil.stencilCompareFunction =
-                    MetalDepthStencilCompareFunction(descriptor->front.compare);
+                    ToMetalCompareFunction(descriptor->front.compare);
                 frontFaceStencil.stencilFailureOperation =
                     MetalStencilOperation(descriptor->front.stencilFailOp);
                 frontFaceStencil.depthFailureOperation =

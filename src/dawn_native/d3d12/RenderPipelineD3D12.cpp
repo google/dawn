@@ -21,6 +21,7 @@
 #include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
+#include "dawn_native/d3d12/UtilsD3D12.h"
 
 #include <d3dcompiler.h>
 
@@ -165,36 +166,13 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        D3D12_COMPARISON_FUNC ComparisonFunc(dawn::CompareFunction func) {
-            switch (func) {
-                case dawn::CompareFunction::Always:
-                    return D3D12_COMPARISON_FUNC_ALWAYS;
-                case dawn::CompareFunction::Equal:
-                    return D3D12_COMPARISON_FUNC_EQUAL;
-                case dawn::CompareFunction::Greater:
-                    return D3D12_COMPARISON_FUNC_GREATER;
-                case dawn::CompareFunction::GreaterEqual:
-                    return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
-                case dawn::CompareFunction::Less:
-                    return D3D12_COMPARISON_FUNC_LESS;
-                case dawn::CompareFunction::LessEqual:
-                    return D3D12_COMPARISON_FUNC_LESS_EQUAL;
-                case dawn::CompareFunction::Never:
-                    return D3D12_COMPARISON_FUNC_NEVER;
-                case dawn::CompareFunction::NotEqual:
-                    return D3D12_COMPARISON_FUNC_NOT_EQUAL;
-                default:
-                    UNREACHABLE();
-            }
-        }
-
         D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(const StencilStateFaceDescriptor descriptor) {
             D3D12_DEPTH_STENCILOP_DESC desc;
 
             desc.StencilFailOp = StencilOp(descriptor.stencilFailOp);
             desc.StencilDepthFailOp = StencilOp(descriptor.depthFailOp);
             desc.StencilPassOp = StencilOp(descriptor.passOp);
-            desc.StencilFunc = ComparisonFunc(descriptor.compare);
+            desc.StencilFunc = ToD3D12ComparisonFunc(descriptor.compare);
 
             return desc;
         }
@@ -206,7 +184,7 @@ namespace dawn_native { namespace d3d12 {
             mDepthStencilDescriptor.DepthWriteMask = descriptor->depthWriteEnabled
                                                          ? D3D12_DEPTH_WRITE_MASK_ALL
                                                          : D3D12_DEPTH_WRITE_MASK_ZERO;
-            mDepthStencilDescriptor.DepthFunc = ComparisonFunc(descriptor->depthCompare);
+            mDepthStencilDescriptor.DepthFunc = ToD3D12ComparisonFunc(descriptor->depthCompare);
 
             mDepthStencilDescriptor.StencilEnable = StencilTestEnabled(descriptor) ? TRUE : FALSE;
             mDepthStencilDescriptor.StencilReadMask =

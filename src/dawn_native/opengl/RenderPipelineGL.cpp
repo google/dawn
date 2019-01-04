@@ -18,6 +18,7 @@
 #include "dawn_native/opengl/Forward.h"
 #include "dawn_native/opengl/InputStateGL.h"
 #include "dawn_native/opengl/PersistentPipelineStateGL.h"
+#include "dawn_native/opengl/UtilsGL.h"
 
 namespace dawn_native { namespace opengl {
 
@@ -108,29 +109,6 @@ namespace dawn_native { namespace opengl {
                          descriptor->colorWriteMask & dawn::ColorWriteMask::Alpha);
         }
 
-        GLuint OpenGLCompareFunction(dawn::CompareFunction compareFunction) {
-            switch (compareFunction) {
-                case dawn::CompareFunction::Never:
-                    return GL_NEVER;
-                case dawn::CompareFunction::Less:
-                    return GL_LESS;
-                case dawn::CompareFunction::LessEqual:
-                    return GL_LEQUAL;
-                case dawn::CompareFunction::Greater:
-                    return GL_GREATER;
-                case dawn::CompareFunction::GreaterEqual:
-                    return GL_GEQUAL;
-                case dawn::CompareFunction::NotEqual:
-                    return GL_NOTEQUAL;
-                case dawn::CompareFunction::Equal:
-                    return GL_EQUAL;
-                case dawn::CompareFunction::Always:
-                    return GL_ALWAYS;
-                default:
-                    UNREACHABLE();
-            }
-        }
-
         GLuint OpenGLStencilOperation(dawn::StencilOperation stencilOperation) {
             switch (stencilOperation) {
                 case dawn::StencilOperation::Keep:
@@ -170,7 +148,7 @@ namespace dawn_native { namespace opengl {
                 glDepthMask(GL_FALSE);
             }
 
-            glDepthFunc(OpenGLCompareFunction(descriptor->depthCompare));
+            glDepthFunc(ToOpenGLCompareFunction(descriptor->depthCompare));
 
             if (StencilTestEnabled(descriptor)) {
                 glEnable(GL_STENCIL_TEST);
@@ -178,8 +156,8 @@ namespace dawn_native { namespace opengl {
                 glDisable(GL_STENCIL_TEST);
             }
 
-            GLenum backCompareFunction = OpenGLCompareFunction(descriptor->back.compare);
-            GLenum frontCompareFunction = OpenGLCompareFunction(descriptor->front.compare);
+            GLenum backCompareFunction = ToOpenGLCompareFunction(descriptor->back.compare);
+            GLenum frontCompareFunction = ToOpenGLCompareFunction(descriptor->front.compare);
             persistentPipelineState->SetStencilFuncsAndMask(
                 backCompareFunction, frontCompareFunction, descriptor->stencilReadMask);
 
