@@ -246,6 +246,29 @@ TEST(ErrorTests, TRY_RESULT_ConversionToError) {
     delete errorData;
 }
 
+// Check a ResultOrError can be DAWN_TRY_ASSIGNED in a function that returns an Error
+// Version without Result<E*, T*>
+TEST(ErrorTests, TRY_RESULT_ConversionToErrorNonPointer) {
+    auto ReturnError = []() -> ResultOrError<int> {
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
+    };
+
+    auto Try = [ReturnError]() -> MaybeError {
+        int result = 0;
+        DAWN_TRY_ASSIGN(result, ReturnError());
+        DAWN_UNUSED(result);
+
+        return {};
+    };
+
+    MaybeError result = Try();
+    ASSERT_TRUE(result.IsError());
+
+    ErrorData* errorData = result.AcquireError();
+    ASSERT_EQ(errorData->GetMessage(), dummyErrorMessage);
+    delete errorData;
+}
+
 // Check a MaybeError can be DAWN_TRIED in a function that returns an ResultOrError
 // Check DAWN_TRY handles errors correctly.
 TEST(ErrorTests, TRY_ConversionToErrorOrResult) {
@@ -259,6 +282,26 @@ TEST(ErrorTests, TRY_ConversionToErrorOrResult) {
     };
 
     ResultOrError<int*> result = Try();
+    ASSERT_TRUE(result.IsError());
+
+    ErrorData* errorData = result.AcquireError();
+    ASSERT_EQ(errorData->GetMessage(), dummyErrorMessage);
+    delete errorData;
+}
+
+// Check a MaybeError can be DAWN_TRIED in a function that returns an ResultOrError
+// Check DAWN_TRY handles errors correctly. Version without Result<E*, T*>
+TEST(ErrorTests, TRY_ConversionToErrorOrResultNonPointer) {
+    auto ReturnError = []() -> MaybeError {
+        return DAWN_VALIDATION_ERROR(dummyErrorMessage);
+    };
+
+    auto Try = [ReturnError]() -> ResultOrError<int>{
+        DAWN_TRY(ReturnError());
+        return 42;
+    };
+
+    ResultOrError<int> result = Try();
     ASSERT_TRUE(result.IsError());
 
     ErrorData* errorData = result.AcquireError();

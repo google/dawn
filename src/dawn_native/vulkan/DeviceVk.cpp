@@ -37,6 +37,7 @@
 #include "dawn_native/vulkan/ShaderModuleVk.h"
 #include "dawn_native/vulkan/SwapChainVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 #include <spirv-cross/spirv_cross.hpp>
 
@@ -485,9 +486,8 @@ namespace dawn_native { namespace vulkan {
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
 
-        if (fn.CreateInstance(&createInfo, nullptr, &mInstance) != VK_SUCCESS) {
-            return DAWN_CONTEXT_LOST_ERROR("vkCreateInstance failed");
-        }
+        DAWN_TRY(CheckVkSuccess(fn.CreateInstance(&createInfo, nullptr, &mInstance),
+                                "vkCreateInstance"));
 
         return usedKnobs;
     }
@@ -554,9 +554,8 @@ namespace dawn_native { namespace vulkan {
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
         createInfo.pEnabledFeatures = &usedKnobs.features;
 
-        if (fn.CreateDevice(mPhysicalDevice, &createInfo, nullptr, &mVkDevice) != VK_SUCCESS) {
-            return DAWN_CONTEXT_LOST_ERROR("vkCreateDevice failed");
-        }
+        DAWN_TRY(CheckVkSuccess(fn.CreateDevice(mPhysicalDevice, &createInfo, nullptr, &mVkDevice),
+                                "vkCreateDevice"));
 
         return usedKnobs;
     }
@@ -573,12 +572,9 @@ namespace dawn_native { namespace vulkan {
         createInfo.pfnCallback = Device::OnDebugReportCallback;
         createInfo.pUserData = this;
 
-        if (fn.CreateDebugReportCallbackEXT(mInstance, &createInfo, nullptr,
-                                            &mDebugReportCallback) != VK_SUCCESS) {
-            return DAWN_CONTEXT_LOST_ERROR("vkCreateDebugReportCallbackEXT failed");
-        }
-
-        return {};
+        return CheckVkSuccess(
+            fn.CreateDebugReportCallbackEXT(mInstance, &createInfo, nullptr, &mDebugReportCallback),
+            "vkCreateDebugReportcallback");
     }
 
     VKAPI_ATTR VkBool32 VKAPI_CALL
