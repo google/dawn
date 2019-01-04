@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 
 #include <cstring>
+#include <limits>
 
 //* Helper macros so that the main [de]serialization functions can be written in a generic manner.
 
@@ -288,7 +289,11 @@ namespace dawn_wire {
         // Returns FatalError if not enough memory was available
         template <typename T>
         DeserializeResult GetPtrFromBuffer(const char** buffer, size_t* size, size_t count, const T** data) {
-            // TODO(cwallez@chromium.org): For robustness we would need to handle overflows here.
+            constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
+            if (count > kMaxCountWithoutOverflows) {
+                return DeserializeResult::FatalError;
+            }
+
             size_t totalSize = sizeof(T) * count;
             if (totalSize > *size) {
                 return DeserializeResult::FatalError;
@@ -305,7 +310,11 @@ namespace dawn_wire {
         // Return FatalError if the allocator couldn't allocate the memory.
         template <typename T>
         DeserializeResult GetSpace(DeserializeAllocator* allocator, size_t count, T** out) {
-            // TODO(cwallez@chromium.org): For robustness we would need to handle overflows here.
+            constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
+            if (count > kMaxCountWithoutOverflows) {
+                return DeserializeResult::FatalError;
+            }
+
             size_t totalSize = sizeof(T) * count;
             *out = static_cast<T*>(allocator->GetSpace(totalSize));
             if (*out == nullptr) {
