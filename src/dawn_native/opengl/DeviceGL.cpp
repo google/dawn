@@ -14,6 +14,7 @@
 
 #include "dawn_native/opengl/DeviceGL.h"
 
+#include "dawn_native/BackendConnection.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/OpenGLBackend.h"
@@ -40,6 +41,10 @@ namespace dawn_native { namespace opengl {
         glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
 
         return reinterpret_cast<dawnDevice>(new Device);
+    }
+
+    BackendConnection* Connect(InstanceBase* instance) {
+        return nullptr;
     }
 
     // Device

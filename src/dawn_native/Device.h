@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_DEVICEBASE_H_
-#define DAWNNATIVE_DEVICEBASE_H_
+#ifndef DAWNNATIVE_DEVICE_H_
+#define DAWNNATIVE_DEVICE_H_
 
 #include "common/Serial.h"
 #include "dawn_native/Error.h"
@@ -170,4 +170,4 @@ namespace dawn_native {
 
 }  // namespace dawn_native
 
-#endif  // DAWNNATIVE_DEVICEBASE_H_
+#endif  // DAWNNATIVE_DEVICE_H_

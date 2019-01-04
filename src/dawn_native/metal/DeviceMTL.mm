@@ -14,6 +14,7 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
+#include "dawn_native/BackendConnection.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/MetalBackend.h"
@@ -123,6 +124,10 @@ namespace dawn_native { namespace metal {
 
     dawnDevice CreateDevice(id<MTLDevice> metalDevice) {
         return reinterpret_cast<dawnDevice>(new Device(metalDevice));
+    }
+
+    BackendConnection* Connect(InstanceBase* instance) {
+        return nullptr;
     }
 
     // Device

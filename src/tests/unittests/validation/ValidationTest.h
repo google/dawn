@@ -19,6 +19,10 @@
 #include "dawn/dawncpp.h"
 #include "dawn/dawncpp_traits.h"
 
+namespace dawn_native {
+    class Instance;
+};
+
 #define ASSERT_DEVICE_ERROR(statement) \
     StartExpectDeviceError(); \
     statement; \
@@ -66,6 +70,8 @@ class ValidationTest : public testing::Test {
         dawn::Device device;
 
     private:
+        std::unique_ptr<dawn_native::Instance> mInstance;
+
         static void OnDeviceError(const char* message, dawnCallbackUserdata userdata);
         std::string mDeviceErrorMessage;
         bool mExpectError = false;

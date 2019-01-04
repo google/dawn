@@ -14,22 +14,33 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "common/Assert.h"
 #include "dawn/dawn.h"
 #include "dawn_native/DawnNative.h"
 #include "dawn_native/NullBackend.h"
 
-namespace dawn_native {
-    namespace null {
-        void Init(dawnProcTable* procs, dawnDevice* device);
-    }
-}
-
 ValidationTest::ValidationTest() {
-    dawnProcTable procs = dawn_native::GetProcs();
-    dawnDevice cDevice = dawn_native::null::CreateDevice();
+    mInstance = std::make_unique<dawn_native::Instance>();
+    mInstance->DiscoverDefaultAdapters();
 
+    std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
+
+    // Validation tests run against the null backend, find the corresponding adapter
+    bool foundNullAdapter = false;
+    dawn_native::Adapter nullAdapter;
+    for (auto adapter : adapters) {
+        if (adapter.GetBackendType() == dawn_native::BackendType::Null) {
+            nullAdapter = adapter;
+            foundNullAdapter = true;
+            break;
+        }
+    }
+
+    ASSERT(foundNullAdapter);
+    device = dawn::Device::Acquire(nullAdapter.CreateDevice());
+
+    dawnProcTable procs = dawn_native::GetProcs();
     dawnSetProcs(&procs);
-    device = dawn::Device::Acquire(cDevice);
 
     device.SetErrorCallback(ValidationTest::OnDeviceError, static_cast<dawnCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
 }

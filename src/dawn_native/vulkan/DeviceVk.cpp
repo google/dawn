@@ -16,6 +16,7 @@
 
 #include "common/Platform.h"
 #include "common/SwapChainUtils.h"
+#include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/VulkanBackend.h"
@@ -78,6 +79,10 @@ namespace dawn_native { namespace vulkan {
         const dawnSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
         return static_cast<dawnTextureFormat>(impl->GetPreferredFormat());
+    }
+
+    BackendConnection* Connect(InstanceBase* instance) {
+        return nullptr;
     }
 
     // Device

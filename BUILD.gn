@@ -359,6 +359,10 @@ source_set("libdawn_native_sources") {
 
   sources = get_target_outputs(":libdawn_native_utils_gen")
   sources += [
+    "src/dawn_native/Adapter.cpp",
+    "src/dawn_native/Adapter.h",
+    "src/dawn_native/BackendConnection.cpp",
+    "src/dawn_native/BackendConnection.h",
     "src/dawn_native/BindGroup.cpp",
     "src/dawn_native/BindGroup.h",
     "src/dawn_native/BindGroupLayout.cpp",
@@ -393,6 +397,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Forward.h",
     "src/dawn_native/InputState.cpp",
     "src/dawn_native/InputState.h",
+    "src/dawn_native/Instance.cpp",
+    "src/dawn_native/Instance.h",
     "src/dawn_native/ObjectBase.cpp",
     "src/dawn_native/ObjectBase.h",
     "src/dawn_native/PassResourceUsage.h",

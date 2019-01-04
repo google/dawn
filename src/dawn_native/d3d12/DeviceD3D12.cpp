@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 #include "common/SwapChainUtils.h"
+#include "dawn_native/BackendConnection.h"
 #include "dawn_native/D3D12Backend.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
@@ -64,6 +65,10 @@ namespace dawn_native { namespace d3d12 {
 
     void ASSERT_SUCCESS(HRESULT hr) {
         ASSERT(SUCCEEDED(hr));
+    }
+
+    BackendConnection* Connect(InstanceBase* instance) {
+        return nullptr;
     }
 
     namespace {

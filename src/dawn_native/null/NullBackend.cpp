@@ -14,6 +14,7 @@
 
 #include "dawn_native/null/NullBackend.h"
 
+#include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/NullBackend.h"
 
@@ -21,8 +22,40 @@
 
 namespace dawn_native { namespace null {
 
+    // Implementation of pre-Device objects: the null adapter, null backend connection and Connect()
+
+    class Adapter : public AdapterBase {
+      public:
+        Adapter(InstanceBase* instance) : AdapterBase(instance, BackendType::Null) {
+        }
+        virtual ~Adapter() = default;
+
+      private:
+        ResultOrError<DeviceBase*> CreateDeviceImpl() override {
+            return {new Device};
+        }
+    };
+
+    class NullBackend : public BackendConnection {
+      public:
+        NullBackend(InstanceBase* instance) : BackendConnection(instance, BackendType::Null) {
+        }
+
+        std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override {
+            // There is always a single Null adapter because it is purely CPU based and doesn't
+            // depend on the system.
+            std::vector<std::unique_ptr<AdapterBase>> adapters;
+            adapters.push_back(std::make_unique<Adapter>(GetInstance()));
+            return adapters;
+        }
+    };
+
     dawnDevice CreateDevice() {
         return reinterpret_cast<dawnDevice>(new Device);
+    }
+
+    BackendConnection* Connect(InstanceBase* instance) {
+        return new NullBackend(instance);
     }
 
     // Device
