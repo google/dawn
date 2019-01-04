@@ -474,6 +474,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/TextureCopySplitter.h",
       "src/dawn_native/d3d12/TextureD3D12.cpp",
       "src/dawn_native/d3d12/TextureD3D12.h",
+      "src/dawn_native/d3d12/UtilsD3D12.cpp",
+      "src/dawn_native/d3d12/UtilsD3D12.h",
       "src/dawn_native/d3d12/d3d12_platform.h",
     ]
   }
@@ -512,6 +514,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/metal/SwapChainMTL.mm",
       "src/dawn_native/metal/TextureMTL.h",
       "src/dawn_native/metal/TextureMTL.mm",
+      "src/dawn_native/metal/UtilsMetal.h",
+      "src/dawn_native/metal/UtilsMetal.mm",
     ]
   }
 
@@ -554,6 +558,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/opengl/SwapChainGL.h",
       "src/dawn_native/opengl/TextureGL.cpp",
       "src/dawn_native/opengl/TextureGL.h",
+      "src/dawn_native/opengl/UtilsGL.cpp",
+      "src/dawn_native/opengl/UtilsGL.h",
     ]
   }
 
@@ -601,6 +607,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/vulkan/SwapChainVk.h",
       "src/dawn_native/vulkan/TextureVk.cpp",
       "src/dawn_native/vulkan/TextureVk.h",
+      "src/dawn_native/vulkan/UtilsVulkan.cpp",
+      "src/dawn_native/vulkan/UtilsVulkan.h",
       "src/dawn_native/vulkan/VulkanFunctions.cpp",
       "src/dawn_native/vulkan/VulkanFunctions.h",
       "src/dawn_native/vulkan/VulkanInfo.cpp",

@@ -126,6 +126,10 @@ protected:
             descriptor.addressModeU = u.mMode;
             descriptor.addressModeV = v.mMode;
             descriptor.addressModeW = w.mMode;
+            descriptor.lodMinClamp = kLodMin;
+            descriptor.lodMaxClamp = kLodMax;
+            descriptor.compareFunction = dawn::CompareFunction::Never;
+            descriptor.borderColor = dawn::BorderColor::TransparentBlack;
             sampler = device.CreateSampler(&descriptor);
         }
 

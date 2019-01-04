@@ -16,6 +16,7 @@
 #include "mock/mock_dawn.h"
 
 #include "common/Assert.h"
+#include "common/Constants.h"
 #include "dawn_wire/Wire.h"
 #include "utils/TerribleCommandBuffer.h"
 
@@ -496,6 +497,10 @@ TEST_F(WireTests, StructureOfValuesArgument) {
     descriptor.addressModeU = DAWN_ADDRESS_MODE_CLAMP_TO_EDGE;
     descriptor.addressModeV = DAWN_ADDRESS_MODE_REPEAT;
     descriptor.addressModeW = DAWN_ADDRESS_MODE_MIRRORED_REPEAT;
+    descriptor.lodMinClamp = kLodMin;
+    descriptor.lodMaxClamp = kLodMax;
+    descriptor.compareFunction = DAWN_COMPARE_FUNCTION_NEVER;
+    descriptor.borderColor = DAWN_BORDER_COLOR_TRANSPARENT_BLACK;
 
     dawnDeviceCreateSampler(device, &descriptor);
     EXPECT_CALL(api, DeviceCreateSampler(apiDevice, MatchesLambda([](const dawnSamplerDescriptor* desc) -> bool {
@@ -505,7 +510,11 @@ TEST_F(WireTests, StructureOfValuesArgument) {
             desc->mipmapFilter == DAWN_FILTER_MODE_LINEAR &&
             desc->addressModeU == DAWN_ADDRESS_MODE_CLAMP_TO_EDGE &&
             desc->addressModeV == DAWN_ADDRESS_MODE_REPEAT &&
-            desc->addressModeW == DAWN_ADDRESS_MODE_MIRRORED_REPEAT;
+            desc->addressModeW == DAWN_ADDRESS_MODE_MIRRORED_REPEAT &&
+            desc->compareFunction == DAWN_COMPARE_FUNCTION_NEVER &&
+            desc->borderColor == DAWN_BORDER_COLOR_TRANSPARENT_BLACK &&
+            desc->lodMinClamp == kLodMin &&
+            desc->lodMaxClamp == kLodMax;
     })))
         .WillOnce(Return(nullptr));
 

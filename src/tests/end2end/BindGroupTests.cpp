@@ -232,6 +232,11 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     samplerDescriptor.addressModeU = dawn::AddressMode::ClampToEdge;
     samplerDescriptor.addressModeV = dawn::AddressMode::ClampToEdge;
     samplerDescriptor.addressModeW = dawn::AddressMode::ClampToEdge;
+    samplerDescriptor.lodMinClamp = kLodMin;
+    samplerDescriptor.lodMaxClamp = kLodMax;
+    samplerDescriptor.compareFunction = dawn::CompareFunction::Never;
+    samplerDescriptor.borderColor = dawn::BorderColor::TransparentBlack;
+
     dawn::Sampler sampler = device.CreateSampler(&samplerDescriptor);
 
     dawn::TextureDescriptor descriptor;

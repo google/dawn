@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 #include "dawn_native/opengl/DeviceGL.h"
+#include "dawn_native/opengl/UtilsGL.h"
 
 namespace dawn_native { namespace opengl {
 
@@ -64,10 +65,16 @@ namespace dawn_native { namespace opengl {
                     return GL_MIRRORED_REPEAT;
                 case dawn::AddressMode::ClampToEdge:
                     return GL_CLAMP_TO_EDGE;
+                case dawn::AddressMode::ClampToBorderColor:
+                    return GL_CLAMP_TO_BORDER;
                 default:
                     UNREACHABLE();
             }
         }
+
+        static const float kTransparentBlack[4] = {0.0, 0.0, 0.0, 0.0};
+        static const float kOpaqueBlack[4] = {0.0, 0.0, 0.0, 1.0};
+        static const float kOpaqueWhite[4] = {1.0, 1.0, 1.0, 1.0};
 
     }  // namespace
 
@@ -80,6 +87,29 @@ namespace dawn_native { namespace opengl {
         glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_R, WrapMode(descriptor->addressModeW));
         glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_S, WrapMode(descriptor->addressModeU));
         glSamplerParameteri(mHandle, GL_TEXTURE_WRAP_T, WrapMode(descriptor->addressModeV));
+
+        glSamplerParameterf(mHandle, GL_TEXTURE_MIN_LOD, descriptor->lodMinClamp);
+        glSamplerParameterf(mHandle, GL_TEXTURE_MAX_LOD, descriptor->lodMaxClamp);
+
+        if (ToOpenGLCompareFunction(descriptor->compareFunction) != GL_NEVER) {
+            glSamplerParameteri(mHandle, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+            glSamplerParameteri(mHandle, GL_TEXTURE_COMPARE_FUNC,
+                                ToOpenGLCompareFunction(descriptor->compareFunction));
+        }
+
+        switch (descriptor->borderColor) {
+            case dawn::BorderColor::TransparentBlack:
+                glSamplerParameterfv(mHandle, GL_TEXTURE_BORDER_COLOR, kTransparentBlack);
+                break;
+            case dawn::BorderColor::OpaqueBlack:
+                glSamplerParameterfv(mHandle, GL_TEXTURE_BORDER_COLOR, kOpaqueBlack);
+                break;
+            case dawn::BorderColor::OpaqueWhite:
+                glSamplerParameterfv(mHandle, GL_TEXTURE_BORDER_COLOR, kOpaqueWhite);
+                break;
+            default:
+                UNREACHABLE();
+        }
     }
 
     GLuint Sampler::GetHandle() const {

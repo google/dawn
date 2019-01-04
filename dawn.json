@@ -17,9 +17,10 @@
     "address mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name":"repeat"},
-            {"value": 1, "name":"mirrored repeat"},
-            {"value": 2, "name":"clamp to edge"}
+            {"value": 0, "name": "repeat"},
+            {"value": 1, "name": "mirrored repeat"},
+            {"value": 2, "name": "clamp to edge"},
+            {"value": 3, "name": "clamp to border color"}
         ]
     },
     "attachment descriptor": {
@@ -131,6 +132,14 @@
     },
     "bool": {
         "category": "native"
+    },
+    "border color": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "transparent black"},
+            {"value": 1, "name": "opaque black"},
+            {"value": 2, "name": "opaque white"}
+        ]
     },
     "builder error status": {
         "category": "enum",
@@ -870,12 +879,16 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "address mode u", "type": "address mode"},
+            {"name": "address mode v", "type": "address mode"},
+            {"name": "address mode w", "type": "address mode"},
             {"name": "mag filter", "type": "filter mode"},
             {"name": "min filter", "type": "filter mode"},
             {"name": "mipmap filter", "type": "filter mode"},
-            {"name": "address mode u", "type": "address mode"},
-            {"name": "address mode v", "type": "address mode"},
-            {"name": "address mode w", "type": "address mode"}
+            {"name": "lod min clamp", "type": "float"},
+            {"name": "lod max clamp", "type": "float"},
+            {"name": "compare function", "type": "compare function"},
+            {"name": "border color", "type": "border color"}
         ]
     },
     "shader module": {

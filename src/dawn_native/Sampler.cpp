@@ -23,12 +23,24 @@ namespace dawn_native {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
+
+        if (descriptor->lodMinClamp < 0 || descriptor->lodMaxClamp < 0) {
+            return DAWN_VALIDATION_ERROR("LOD must be positive");
+        }
+
+        if (descriptor->lodMinClamp > descriptor->lodMaxClamp) {
+            return DAWN_VALIDATION_ERROR(
+                "Min lod clamp value cannot greater than max lod clamp value");
+        }
+
         DAWN_TRY(ValidateFilterMode(descriptor->minFilter));
         DAWN_TRY(ValidateFilterMode(descriptor->magFilter));
         DAWN_TRY(ValidateFilterMode(descriptor->mipmapFilter));
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeU));
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeV));
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeW));
+        DAWN_TRY(ValidateCompareFunction(descriptor->compareFunction));
+        DAWN_TRY(ValidateBorderColor(descriptor->borderColor));
         return {};
     }
 

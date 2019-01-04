@@ -27,4 +27,8 @@ static constexpr uint32_t kNumStages = 3;
 static constexpr uint32_t kMaxColorAttachments = 4u;
 static constexpr uint32_t kTextureRowPitchAlignment = 256u;
 
+// Non spec defined constants.
+static constexpr float kLodMin = 0.0;
+static constexpr float kLodMax = 1000.0;
+
 #endif  // COMMON_CONSTANTS_H_

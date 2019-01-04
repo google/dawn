@@ -15,6 +15,7 @@
 #include "utils/DawnHelpers.h"
 
 #include "common/Assert.h"
+#include "common/Constants.h"
 
 #include <shaderc/shaderc.hpp>
 
@@ -195,6 +196,10 @@ namespace utils {
         desc.addressModeU = dawn::AddressMode::Repeat;
         desc.addressModeV = dawn::AddressMode::Repeat;
         desc.addressModeW = dawn::AddressMode::Repeat;
+        desc.lodMinClamp = kLodMin;
+        desc.lodMaxClamp = kLodMax;
+        desc.compareFunction = dawn::CompareFunction::Never;
+        desc.borderColor = dawn::BorderColor::TransparentBlack;
 
         return desc;
     }

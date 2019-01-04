@@ -15,6 +15,7 @@
 #include "dawn_native/metal/SamplerMTL.h"
 
 #include "dawn_native/metal/DeviceMTL.h"
+#include "dawn_native/metal/UtilsMetal.h"
 
 namespace dawn_native { namespace metal {
 
@@ -45,6 +46,19 @@ namespace dawn_native { namespace metal {
                     return MTLSamplerAddressModeMirrorRepeat;
                 case dawn::AddressMode::ClampToEdge:
                     return MTLSamplerAddressModeClampToEdge;
+                case dawn::AddressMode::ClampToBorderColor:
+                    return MTLSamplerAddressModeClampToBorderColor;
+            }
+        }
+
+        MTLSamplerBorderColor BorderColor(dawn::BorderColor color) {
+            switch (color) {
+                case dawn::BorderColor::TransparentBlack:
+                    return MTLSamplerBorderColorTransparentBlack;
+                case dawn::BorderColor::OpaqueBlack:
+                    return MTLSamplerBorderColorOpaqueBlack;
+                case dawn::BorderColor::OpaqueWhite:
+                    return MTLSamplerBorderColorOpaqueWhite;
             }
         }
     }
@@ -60,6 +74,11 @@ namespace dawn_native { namespace metal {
         mtlDesc.sAddressMode = AddressMode(descriptor->addressModeU);
         mtlDesc.tAddressMode = AddressMode(descriptor->addressModeV);
         mtlDesc.rAddressMode = AddressMode(descriptor->addressModeW);
+
+        mtlDesc.lodMinClamp = descriptor->lodMinClamp;
+        mtlDesc.lodMaxClamp = descriptor->lodMaxClamp;
+        mtlDesc.compareFunction = ToMetalCompareFunction(descriptor->compareFunction);
+        mtlDesc.borderColor = BorderColor(descriptor->borderColor);
 
         mMtlSamplerState = [device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc];
     }
