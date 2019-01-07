@@ -34,7 +34,7 @@ namespace dawn_native { namespace metal {
 
     class Device : public DeviceBase {
       public:
-        Device(id<MTLDevice> mtlDevice);
+        Device();
         ~Device();
 
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;

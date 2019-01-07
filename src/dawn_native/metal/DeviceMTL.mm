@@ -122,8 +122,13 @@ namespace dawn_native { namespace metal {
         }
     }  // anonymous namespace
 
-    dawnDevice CreateDevice(id<MTLDevice> metalDevice) {
-        return reinterpret_cast<dawnDevice>(new Device(metalDevice));
+    dawnDevice CreateDevice() {
+        return reinterpret_cast<dawnDevice>(new Device());
+    }
+
+    id<MTLDevice> GetMetalDevice(dawnDevice cDevice) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+        return device->GetMTLDevice();
     }
 
     BackendConnection* Connect(InstanceBase* instance) {
@@ -132,8 +137,8 @@ namespace dawn_native { namespace metal {
 
     // Device
 
-    Device::Device(id<MTLDevice> mtlDevice)
-        : mMtlDevice(mtlDevice),
+    Device::Device()
+        : mMtlDevice(MTLCreateSystemDefaultDevice()),
           mMapTracker(new MapRequestTracker(this)),
           mResourceUploader(new ResourceUploader(this)) {
         [mMtlDevice retain];

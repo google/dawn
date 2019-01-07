@@ -111,9 +111,11 @@ namespace utils {
         void SetupGLFWWindowHints() override {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
+
         dawnDevice CreateDevice() override {
-            mMetalDevice = MTLCreateSystemDefaultDevice();
-            return dawn_native::metal::CreateDevice(mMetalDevice);
+            dawnDevice device = dawn_native::metal::CreateDevice();
+            mMetalDevice = dawn_native::metal::GetMetalDevice(device);
+            return device;
         }
 
         uint64_t GetSwapChainImplementation() override {
