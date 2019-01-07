@@ -35,8 +35,13 @@ namespace dawn_native { namespace vulkan {
     const char kLayerNameRenderDocCapture[] = "VK_LAYER_RENDERDOC_Capture";
 
     const char kExtensionNameExtDebugReport[] = "VK_EXT_debug_report";
+    const char kExtensionNameMvkMacosSurface[] = "VK_MVK_macos_surface";
     const char kExtensionNameKhrSurface[] = "VK_KHR_surface";
     const char kExtensionNameKhrSwapchain[] = "VK_KHR_swapchain";
+    const char kExtensionNameKhrWaylandSurface[] = "VK_KHR_wayland_surface";
+    const char kExtensionNameKhrWin32Surface[] = "VK_KHR_win32_surface";
+    const char kExtensionNameKhrXcbSurface[] = "VK_KHR_xcb_surface";
+    const char kExtensionNameKhrXlibSurface[] = "VK_KHR_xlib_surface";
 
     ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const Device& device) {
         VulkanGlobalInfo info = {};
@@ -91,8 +96,23 @@ namespace dawn_native { namespace vulkan {
                 if (IsExtensionName(extension, kExtensionNameExtDebugReport)) {
                     info.debugReport = true;
                 }
+                if (IsExtensionName(extension, kExtensionNameMvkMacosSurface)) {
+                    info.macosSurface = true;
+                }
                 if (IsExtensionName(extension, kExtensionNameKhrSurface)) {
                     info.surface = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrWaylandSurface)) {
+                    info.waylandSurface = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrWin32Surface)) {
+                    info.win32Surface = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrXcbSurface)) {
+                    info.xcbSurface = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrXlibSurface)) {
+                    info.xlibSurface = true;
                 }
             }
         }

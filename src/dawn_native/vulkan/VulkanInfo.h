@@ -29,8 +29,13 @@ namespace dawn_native { namespace vulkan {
     extern const char kLayerNameRenderDocCapture[];
 
     extern const char kExtensionNameExtDebugReport[];
+    extern const char kExtensionNameMvkMacosSurface[];
     extern const char kExtensionNameKhrSurface[];
     extern const char kExtensionNameKhrSwapchain[];
+    extern const char kExtensionNameKhrWaylandSurface[];
+    extern const char kExtensionNameKhrWin32Surface[];
+    extern const char kExtensionNameKhrXcbSurface[];
+    extern const char kExtensionNameKhrXlibSurface[];
 
     // Global information - gathered before the instance is created
     struct VulkanGlobalKnobs {
@@ -41,7 +46,12 @@ namespace dawn_native { namespace vulkan {
 
         // Extensions
         bool debugReport = false;
+        bool macosSurface = false;
         bool surface = false;
+        bool waylandSurface = false;
+        bool win32Surface = false;
+        bool xcbSurface = false;
+        bool xlibSurface = false;
     };
 
     struct VulkanGlobalInfo : VulkanGlobalKnobs {

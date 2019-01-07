@@ -28,13 +28,7 @@ namespace utils {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
         dawnDevice CreateDevice() override {
-            uint32_t extensionCount = 0;
-            const char** glfwInstanceExtensions =
-                glfwGetRequiredInstanceExtensions(&extensionCount);
-            std::vector<const char*> requiredExtensions(glfwInstanceExtensions,
-                                                        glfwInstanceExtensions + extensionCount);
-
-            mDevice = dawn_native::vulkan::CreateDevice(requiredExtensions);
+            mDevice = dawn_native::vulkan::CreateDevice();
             return mDevice;
         }
         uint64_t GetSwapChainImplementation() override {

@@ -24,8 +24,7 @@
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
-    DAWN_NATIVE_EXPORT dawnDevice
-    CreateDevice(const std::vector<const char*>& requiredInstanceExtensions);
+    DAWN_NATIVE_EXPORT dawnDevice CreateDevice();
 
     DAWN_NATIVE_EXPORT VkInstance GetInstance(dawnDevice device);
 

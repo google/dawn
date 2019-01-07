@@ -54,8 +54,8 @@ const char kVulkanLibName[] = "vulkan-1.dll";
 
 namespace dawn_native { namespace vulkan {
 
-    dawnDevice CreateDevice(const std::vector<const char*>& requiredInstanceExtensions) {
-        return reinterpret_cast<dawnDevice>(new Device(requiredInstanceExtensions));
+    dawnDevice CreateDevice() {
+        return reinterpret_cast<dawnDevice>(new Device());
     }
 
     VkInstance GetInstance(dawnDevice device) {
@@ -87,8 +87,8 @@ namespace dawn_native { namespace vulkan {
 
     // Device
 
-    Device::Device(const std::vector<const char*>& requiredInstanceExtensions) {
-        MaybeError maybeError = Initialize(requiredInstanceExtensions);
+    Device::Device() {
+        MaybeError maybeError = Initialize();
 
         // In device initialization, the error callback can't have been set yet.
         // So it's too early to use ConsumedError - consume the error manually.
@@ -101,7 +101,7 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    MaybeError Device::Initialize(const std::vector<const char*>& requiredInstanceExtensions) {
+    MaybeError Device::Initialize() {
         if (!mVulkanLib.Open(kVulkanLibName)) {
             return DAWN_CONTEXT_LOST_ERROR(std::string("Couldn't open ") + kVulkanLibName);
         }
@@ -112,7 +112,7 @@ namespace dawn_native { namespace vulkan {
         DAWN_TRY_ASSIGN(mGlobalInfo, GatherGlobalInfo(*this));
 
         VulkanGlobalKnobs usedGlobalKnobs = {};
-        DAWN_TRY_ASSIGN(usedGlobalKnobs, CreateInstance(requiredInstanceExtensions));
+        DAWN_TRY_ASSIGN(usedGlobalKnobs, CreateInstance());
         *static_cast<VulkanGlobalKnobs*>(&mGlobalInfo) = usedGlobalKnobs;
 
         DAWN_TRY(functions->LoadInstanceProcs(mInstance, mGlobalInfo));
@@ -421,22 +421,11 @@ namespace dawn_native { namespace vulkan {
         mWaitSemaphores.push_back(semaphore);
     }
 
-    ResultOrError<VulkanGlobalKnobs> Device::CreateInstance(
-        const std::vector<const char*>& requiredExtensions) {
+    ResultOrError<VulkanGlobalKnobs> Device::CreateInstance() {
         VulkanGlobalKnobs usedKnobs = {};
 
         std::vector<const char*> layersToRequest;
-        std::vector<const char*> extensionsToRequest = requiredExtensions;
-
-        auto AddExtensionIfNotPresent = [](std::vector<const char*>* extensions,
-                                           const char* extension) {
-            for (const char* present : *extensions) {
-                if (strcmp(present, extension) == 0) {
-                    return;
-                }
-            }
-            extensions->push_back(extension);
-        };
+        std::vector<const char*> extensionsToRequest;
 
         // vktrace works by instering a layer, but we hide it behind a macro due to the vktrace
         // layer crashes when used without vktrace server started, see this vktrace issue:
@@ -463,13 +452,35 @@ namespace dawn_native { namespace vulkan {
             usedKnobs.standardValidation = true;
         }
         if (mGlobalInfo.debugReport) {
-            AddExtensionIfNotPresent(&extensionsToRequest, kExtensionNameExtDebugReport);
+            extensionsToRequest.push_back(kExtensionNameExtDebugReport);
             usedKnobs.debugReport = true;
         }
 #endif
+        // Always request all extensions used to create VkSurfaceKHR objects so that they are
+        // always available for embedders looking to create VkSurfaceKHR on our VkInstance.
+        if (mGlobalInfo.macosSurface) {
+            extensionsToRequest.push_back(kExtensionNameMvkMacosSurface);
+            usedKnobs.macosSurface = true;
+        }
         if (mGlobalInfo.surface) {
-            AddExtensionIfNotPresent(&extensionsToRequest, kExtensionNameKhrSurface);
+            extensionsToRequest.push_back(kExtensionNameKhrSurface);
             usedKnobs.surface = true;
+        }
+        if (mGlobalInfo.waylandSurface) {
+            extensionsToRequest.push_back(kExtensionNameKhrWaylandSurface);
+            usedKnobs.waylandSurface = true;
+        }
+        if (mGlobalInfo.win32Surface) {
+            extensionsToRequest.push_back(kExtensionNameKhrWin32Surface);
+            usedKnobs.win32Surface = true;
+        }
+        if (mGlobalInfo.xcbSurface) {
+            extensionsToRequest.push_back(kExtensionNameKhrXcbSurface);
+            usedKnobs.xcbSurface = true;
+        }
+        if (mGlobalInfo.xlibSurface) {
+            extensionsToRequest.push_back(kExtensionNameKhrXlibSurface);
+            usedKnobs.xlibSurface = true;
         }
 
         VkApplicationInfo appInfo;

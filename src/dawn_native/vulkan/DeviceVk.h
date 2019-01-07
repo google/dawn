@@ -38,7 +38,7 @@ namespace dawn_native { namespace vulkan {
 
     class Device : public DeviceBase {
       public:
-        Device(const std::vector<const char*>& requiredInstanceExtensions);
+        Device();
         ~Device();
 
         // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
@@ -96,9 +96,8 @@ namespace dawn_native { namespace vulkan {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
 
-        MaybeError Initialize(const std::vector<const char*>& requiredInstanceExtensions);
-        ResultOrError<VulkanGlobalKnobs> CreateInstance(
-            const std::vector<const char*>& requiredExtensions);
+        MaybeError Initialize();
+        ResultOrError<VulkanGlobalKnobs> CreateInstance();
         ResultOrError<VulkanDeviceKnobs> CreateDevice();
         void GatherQueueFromDevice();
 
