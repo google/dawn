@@ -22,32 +22,6 @@
 
 namespace utils {
 
-    class SwapChainImplVulkan {
-      public:
-        using WSIContext = dawnWSIContextVulkan;
-
-        SwapChainImplVulkan(GLFWwindow* /*window*/) {
-        }
-
-        ~SwapChainImplVulkan() {
-        }
-
-        void Init(dawnWSIContextVulkan*) {
-        }
-
-        dawnSwapChainError Configure(dawnTextureFormat, dawnTextureUsageBit, uint32_t, uint32_t) {
-            return DAWN_SWAP_CHAIN_NO_ERROR;
-        }
-
-        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture*) {
-            return DAWN_SWAP_CHAIN_NO_ERROR;
-        }
-
-        dawnSwapChainError Present() {
-            return DAWN_SWAP_CHAIN_NO_ERROR;
-        }
-    };
-
     class VulkanBinding : public BackendBinding {
       public:
         void SetupGLFWWindowHints() override {
