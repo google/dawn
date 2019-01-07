@@ -18,6 +18,8 @@
 #include "dawn_native/Adapter.h"
 #include "dawn_native/DawnNative.h"
 
+#include <memory>
+
 namespace dawn_native {
 
     // An common interface for all backends. Mostly used to create adapters for a particular
