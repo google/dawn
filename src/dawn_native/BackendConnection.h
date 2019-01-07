@@ -36,6 +36,10 @@ namespace dawn_native {
         // options (such as debug adapters, custom driver libraries, etc.)
         virtual std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() = 0;
 
+        // Returns new adapters created with the backend-specific options.
+        virtual ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> DiscoverAdapters(
+            const AdapterDiscoveryOptionsBase* options);
+
       private:
         InstanceBase* mInstance = nullptr;
         BackendType mType;

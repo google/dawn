@@ -33,22 +33,6 @@
 
 namespace dawn_native { namespace opengl {
 
-    dawnDevice CreateDevice(void* (*getProc)(const char*)) {
-        gladLoadGLLoader(reinterpret_cast<GLADloadproc>(getProc));
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_SCISSOR_TEST);
-        glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
-
-        return reinterpret_cast<dawnDevice>(new Device);
-    }
-
-    BackendConnection* Connect(InstanceBase* instance) {
-        return nullptr;
-    }
-
-    // Device
-
     Device::Device() {
         CollectPCIInfo();
     }

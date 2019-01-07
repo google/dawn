@@ -64,6 +64,15 @@ namespace dawn_native {
         AdapterBase* mImpl = nullptr;
     };
 
+    // Base class for options passed to Instance::DiscoverAdapters.
+    struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptionsBase {
+      public:
+        const BackendType backendType;
+
+      protected:
+        AdapterDiscoveryOptionsBase(BackendType type);
+    };
+
     // Represents a connection to dawn_native and is used for dependency injection, discovering
     // system adapters and injecting custom adapters (like a Swiftshader Vulkan adapter).
     //
@@ -80,6 +89,10 @@ namespace dawn_native {
         // Gather all adapters in the system that can be accessed with no special options. These
         // adapters will later be returned by GetAdapters.
         void DiscoverDefaultAdapters();
+
+        // Adds adapters that can be discovered with the options provided (like a getProcAddress).
+        // The backend is chosen based on the type of the options used. Returns true on success.
+        bool DiscoverAdapters(const AdapterDiscoveryOptionsBase* options);
 
         // Returns all the adapters that the instance knows about.
         std::vector<Adapter> GetAdapters() const;

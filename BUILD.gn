@@ -535,6 +535,8 @@ source_set("libdawn_native_sources") {
   if (dawn_enable_opengl) {
     deps += [ "third_party:glad" ]
     sources += [
+      "src/dawn_native/opengl/BackendGL.cpp",
+      "src/dawn_native/opengl/BackendGL.h",
       "src/dawn_native/opengl/BufferGL.cpp",
       "src/dawn_native/opengl/BufferGL.h",
       "src/dawn_native/opengl/CommandBufferGL.cpp",

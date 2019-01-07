@@ -67,6 +67,11 @@ namespace dawn_native {
         }
     }
 
+    // This is just a wrapper around the real logic that uses Error.h error handling.
+    bool InstanceBase::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
+        return !ConsumedError(DiscoverAdaptersInternal(options));
+    }
+
     const std::vector<std::unique_ptr<AdapterBase>>& InstanceBase::GetAdapters() const {
         return mAdapters;
     }
@@ -101,6 +106,34 @@ namespace dawn_native {
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
         mBackendsConnected = true;
+    }
+
+    ResultOrError<BackendConnection*> InstanceBase::FindBackend(BackendType type) {
+        for (std::unique_ptr<BackendConnection>& backend : mBackends) {
+            if (backend->GetType() == type) {
+                return backend.get();
+            }
+        }
+
+        return DAWN_VALIDATION_ERROR("Backend isn't present.");
+    }
+
+    MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options) {
+        EnsureBackendConnections();
+
+        BackendConnection* backend;
+        DAWN_TRY_ASSIGN(backend, FindBackend(options->backendType));
+
+        std::vector<std::unique_ptr<AdapterBase>> newAdapters;
+        DAWN_TRY_ASSIGN(newAdapters, backend->DiscoverAdapters(options));
+
+        for (std::unique_ptr<AdapterBase>& adapter : newAdapters) {
+            ASSERT(adapter->GetBackendType() == backend->GetType());
+            ASSERT(adapter->GetInstance() == this);
+            mAdapters.push_back(std::move(adapter));
+        }
+
+        return {};
     }
 
     bool InstanceBase::ConsumedError(MaybeError maybeError) {

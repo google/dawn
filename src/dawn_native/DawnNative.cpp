@@ -54,6 +54,11 @@ namespace dawn_native {
         return reinterpret_cast<dawnDevice>(mImpl->CreateDevice());
     }
 
+    // AdapterDiscoverOptionsBase
+
+    AdapterDiscoveryOptionsBase::AdapterDiscoveryOptionsBase(BackendType type) : backendType(type) {
+    }
+
     // Instance
 
     Instance::Instance() : mImpl(new InstanceBase()) {
@@ -66,6 +71,10 @@ namespace dawn_native {
 
     void Instance::DiscoverDefaultAdapters() {
         mImpl->DiscoverDefaultAdapters();
+    }
+
+    bool Instance::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
+        return mImpl->DiscoverAdapters(options);
     }
 
     std::vector<Adapter> Instance::GetAdapters() const {

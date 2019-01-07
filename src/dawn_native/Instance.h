@@ -34,6 +34,7 @@ namespace dawn_native {
         InstanceBase& operator=(const InstanceBase& other) = delete;
 
         void DiscoverDefaultAdapters();
+        bool DiscoverAdapters(const AdapterDiscoveryOptionsBase* options);
 
         const std::vector<std::unique_ptr<AdapterBase>>& GetAdapters() const;
 
@@ -41,7 +42,13 @@ namespace dawn_native {
         bool ConsumedError(MaybeError maybeError);
 
       private:
+        // Lazily creates connections to all backends that have been compiled.
         void EnsureBackendConnections();
+        // Finds the BackendConnection for `type` or returns an error.
+        ResultOrError<BackendConnection*> FindBackend(BackendType type);
+
+        MaybeError DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options);
+
         bool mBackendsConnected = false;
 
         std::vector<std::unique_ptr<BackendConnection>> mBackends;

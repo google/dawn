@@ -36,9 +36,9 @@ namespace dawn_native { namespace null {
         }
     };
 
-    class NullBackend : public BackendConnection {
+    class Backend : public BackendConnection {
       public:
-        NullBackend(InstanceBase* instance) : BackendConnection(instance, BackendType::Null) {
+        Backend(InstanceBase* instance) : BackendConnection(instance, BackendType::Null) {
         }
 
         std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override {
@@ -55,7 +55,7 @@ namespace dawn_native { namespace null {
     }
 
     BackendConnection* Connect(InstanceBase* instance) {
-        return new NullBackend(instance);
+        return new Backend(instance);
     }
 
     // Device
