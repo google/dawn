@@ -14,6 +14,7 @@
 
 #include "dawn_native/null/NullBackend.h"
 
+#include "common/SwapChainUtils.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/NullBackend.h"
@@ -259,6 +260,37 @@ namespace dawn_native { namespace null {
     }
 
     void SwapChain::OnBeforePresent(TextureBase*) {
+    }
+
+    // CreateNativeSwapChainImpl
+
+    class NativeSwapChainImpl {
+      public:
+        using WSIContext = struct {};
+        void Init(WSIContext* context) {
+        }
+        dawnSwapChainError Configure(dawnTextureFormat format,
+                                     dawnTextureUsageBit,
+                                     uint32_t width,
+                                     uint32_t height) {
+            return DAWN_SWAP_CHAIN_NO_ERROR;
+        }
+        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
+            return DAWN_SWAP_CHAIN_NO_ERROR;
+        }
+        dawnSwapChainError Present() {
+            return DAWN_SWAP_CHAIN_NO_ERROR;
+        }
+        dawn::TextureFormat GetPreferredFormat() const {
+            return dawn::TextureFormat::R8G8B8A8Unorm;
+        }
+    };
+
+    DAWN_NATIVE_EXPORT dawnSwapChainImplementation CreateNativeSwapChainImpl() {
+        dawnSwapChainImplementation impl;
+        impl = CreateSwapChainImplementation(new NativeSwapChainImpl());
+        impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
+        return impl;
     }
 
 }}  // namespace dawn_native::null

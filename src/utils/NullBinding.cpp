@@ -26,11 +26,17 @@ namespace utils {
             return dawn_native::null::CreateDevice();
         }
         uint64_t GetSwapChainImplementation() override {
-            return 0;
+            if (mSwapchainImpl.userData == nullptr) {
+                mSwapchainImpl = dawn_native::null::CreateNativeSwapChainImpl();
+            }
+            return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
         dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
             return DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
         }
+
+      private:
+        dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
     BackendBinding* CreateNullBinding() {
