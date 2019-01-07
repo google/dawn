@@ -71,6 +71,13 @@ namespace dawn_wire {
         uint32_t dataLength;
     };
 
+    struct DestroyObjectCmd {
+        WireCmd commandId = WireCmd::DestroyObject;
+
+        ObjectType objectType;
+        ObjectId objectId;
+    };
+
 }  // namespace dawn_wire
 
 #endif  // DAWNWIRE_WIRECMD_H_

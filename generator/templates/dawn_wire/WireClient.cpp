@@ -349,7 +349,8 @@ namespace dawn_wire {
 
                     obj->builderCallback.Call(DAWN_BUILDER_ERROR_STATUS_UNKNOWN, "Unknown");
 
-                    {{as_MethodSuffix(type.name, Name("destroy"))}}Cmd cmd;
+                    DestroyObjectCmd cmd;
+                    cmd.objectType = ObjectType::{{type.name.CamelCase()}};
                     cmd.objectId = obj->id;
 
                     auto allocCmd = static_cast<decltype(cmd)*>(obj->device->GetCmdSpace(sizeof(cmd)));

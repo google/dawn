@@ -406,10 +406,6 @@ namespace dawn_wire {
                                             break;
                                     {% endif %}
                                 {% endfor %}
-                                {% set Suffix = as_MethodSuffix(type.name, Name("destroy")) %}
-                                case WireCmd::{{Suffix}}:
-                                    success = Handle{{Suffix}}(&commands, &size);
-                                    break;
                             {% endfor %}
                             case WireCmd::BufferMapAsync:
                                 success = HandleBufferMapAsync(&commands, &size);
@@ -417,7 +413,9 @@ namespace dawn_wire {
                             case WireCmd::BufferUpdateMappedDataCmd:
                                 success = HandleBufferUpdateMappedData(&commands, &size);
                                 break;
-
+                            case WireCmd::DestroyObject:
+                                success = HandleDestroyObject(&commands, &size);
+                                break;
                             default:
                                 success = false;
                         }
@@ -632,45 +630,6 @@ namespace dawn_wire {
                             }
                         {% endif %}
                     {% endfor %}
-
-                    //* Handlers for the destruction of objects: clients do the tracking of the
-                    //* reference / release and only send destroy on refcount = 0.
-                    {% set Suffix = as_MethodSuffix(type.name, Name("destroy")) %}
-                    bool Handle{{Suffix}}(const char** commands, size_t* size) {
-
-                        //* Freeing the device has to be done out of band.
-                        {% if type.name.canonical_case() == "device" %}
-                            return false;
-                        {% endif %}
-
-                        const auto* cmd = GetCommand<{{Suffix}}Cmd>(commands, size);
-                        if (cmd == nullptr) {
-                            return false;
-                        }
-
-                        ObjectId objectId = cmd->objectId;
-
-                        //* ID 0 are reserved for nullptr and cannot be destroyed.
-                        if (objectId == 0) {
-                            return false;
-                        }
-
-                        auto* data = mKnown{{type.name.CamelCase()}}.Get(objectId);
-                        if (data == nullptr) {
-                            return false;
-                        }
-
-                        {% if type.name.CamelCase() in reverse_lookup_object_types %}
-                            m{{type.name.CamelCase()}}IdTable.Remove(data->handle);
-                        {% endif %}
-
-                        if (data->handle != nullptr) {
-                            mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
-                        }
-
-                        mKnown{{type.name.CamelCase()}}.Free(objectId);
-                        return true;
-                    }
                 {% endfor %}
 
                 bool HandleBufferMapAsync(const char** commands, size_t* size) {
@@ -754,6 +713,48 @@ namespace dawn_wire {
                     memcpy(buffer->mappedData, data, dataLength);
 
                     return true;
+                }
+
+                bool HandleDestroyObject(const char** commands, size_t* size) {
+                    const auto* cmd = GetCommand<DestroyObjectCmd>(commands, size);
+                    if (cmd == nullptr) {
+                        return false;
+                    }
+
+                    ObjectId objectId = cmd->objectId;
+                    //* ID 0 are reserved for nullptr and cannot be destroyed.
+                    if (objectId == 0) {
+                        return false;
+                    }
+
+                    switch (cmd->objectType) {
+                        {% for type in by_category["object"] %}
+                            {% set ObjectType = type.name.CamelCase() %}
+                            case ObjectType::{{ObjectType}}: {
+                                {% if ObjectType == "Device" %}
+                                    //* Freeing the device has to be done out of band.
+                                    return false;
+                                {% else %}
+                                    auto* data = mKnown{{type.name.CamelCase()}}.Get(objectId);
+                                    if (data == nullptr) {
+                                        return false;
+                                    }
+                                    {% if type.name.CamelCase() in reverse_lookup_object_types %}
+                                        m{{type.name.CamelCase()}}IdTable.Remove(data->handle);
+                                    {% endif %}
+
+                                    if (data->handle != nullptr) {
+                                        mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
+                                    }
+
+                                    mKnown{{type.name.CamelCase()}}.Free(objectId);
+                                    return true;
+                                {% endif %}
+                            }
+                        {% endfor %}
+                        default:
+                            UNREACHABLE();
+                    }
                 }
         };
 

@@ -53,16 +53,22 @@ namespace dawn_wire {
             {% endfor %}
     };
 
+    enum class ObjectType : uint32_t {
+        {% for type in by_category["object"] %}
+            {{type.name.CamelCase()}},
+        {% endfor %}
+    };
+
     //* Enum used as a prefix to each command on the wire format.
     enum class WireCmd : uint32_t {
         {% for type in by_category["object"] %}
             {% for method in type.methods %}
                 {{as_MethodSuffix(type.name, method.name)}},
             {% endfor %}
-            {{as_MethodSuffix(type.name, Name("destroy"))}},
         {% endfor %}
         BufferMapAsync,
         BufferUpdateMappedDataCmd,
+        DestroyObject,
     };
 
     {% for type in by_category["object"] %}
@@ -110,14 +116,6 @@ namespace dawn_wire {
                 {% endfor %}
             };
         {% endfor %}
-
-        //* The command structure used when sending that an ID is destroyed.
-        {% set Suffix = as_MethodSuffix(type.name, Name("destroy")) %}
-        struct {{Suffix}}Cmd {
-            WireCmd commandId = WireCmd::{{Suffix}};
-            ObjectId objectId;
-        };
-
     {% endfor %}
 
     //* Enum used as a prefix to each command on the return wire format.
