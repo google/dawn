@@ -479,6 +479,7 @@ def get_renders_for_targets(api_params, targets):
                 'as_wireType': lambda typ: typ.name.CamelCase() + '*' if typ.category == 'object' else as_cppType(typ.name)
             }
         ]
+        renders.append(FileRender('dawn_wire/TypeTraits.h', 'dawn_wire/TypeTraits_autogen.h', wire_params))
         renders.append(FileRender('dawn_wire/WireCmd.h', 'dawn_wire/WireCmd_autogen.h', wire_params))
         renders.append(FileRender('dawn_wire/WireCmd.cpp', 'dawn_wire/WireCmd_autogen.cpp', wire_params))
         renders.append(FileRender('dawn_wire/WireClient.cpp', 'dawn_wire/WireClient.cpp', wire_params))

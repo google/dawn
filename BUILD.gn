@@ -671,6 +671,7 @@ config("libdawn_wire_export") {
 dawn_generator("libdawn_wire_gen") {
   target = "dawn_wire"
   outputs = [
+    "dawn_wire/TypeTraits_autogen.h",
     "dawn_wire/WireServer.cpp",
     "dawn_wire/WireCmd_autogen.h",
     "dawn_wire/WireClient.cpp",

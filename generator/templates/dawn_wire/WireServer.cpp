@@ -12,6 +12,7 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
+#include "dawn_wire/TypeTraits_autogen.h"
 #include "dawn_wire/Wire.h"
 #include "dawn_wire/WireCmd.h"
 
@@ -44,17 +45,11 @@ namespace dawn_wire {
             uint64_t value;
         };
 
-        //* Stores what the backend knows about the type.
-        template<typename T>
+        template <typename T>
         struct ObjectDataBase {
             //* The backend-provided handle and serial to this object.
             T handle;
             uint32_t serial = 0;
-
-            //* Built object ID and serial, needed to send to the client along with builder error callbacks
-            //* TODO(cwallez@chromium.org) only have this for builder T
-            uint32_t builtObjectId = 0;
-            uint32_t builtObjectSerial = 0;
 
             //* Used by the error-propagation mechanism to know if this object is an error.
             //* TODO(cwallez@chromium.org): this is doubling the memory usage of
@@ -63,8 +58,22 @@ namespace dawn_wire {
             //* Whether this object has been allocated, used by the KnownObjects queries
             //* TODO(cwallez@chromium.org): make this an internal bit vector in KnownObjects.
             bool allocated;
+        };
 
-            //* TODO(cwallez@chromium.org): this is only useful for buffers
+        //* Stores what the backend knows about the type.
+        template<typename T, bool IsBuilder = IsBuilderType<T>::value>
+        struct ObjectData : public ObjectDataBase<T> {
+        };
+
+
+        template <typename T>
+        struct ObjectData<T, true> : public ObjectDataBase<T> {
+            uint32_t builtObjectId = 0;
+            uint32_t builtObjectSerial = 0;
+        };
+
+        template <>
+        struct ObjectData<dawnBuffer, false> : public ObjectDataBase<dawnBuffer> {
             void* mappedData = nullptr;
             size_t mappedDataSize = 0;
         };
@@ -73,7 +82,7 @@ namespace dawn_wire {
         template<typename T>
         class KnownObjects {
             public:
-                using Data = ObjectDataBase<T>;
+                using Data = ObjectData<T>;
 
                 KnownObjects() {
                     //* Pre-allocate ID 0 to refer to the null handle.
