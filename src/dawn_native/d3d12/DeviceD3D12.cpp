@@ -15,9 +15,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
 #include "common/Assert.h"
-#include "common/SwapChainUtils.h"
 #include "dawn_native/BackendConnection.h"
-#include "dawn_native/D3D12Backend.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/BufferD3D12.h"
@@ -26,7 +24,6 @@
 #include "dawn_native/d3d12/ComputePipelineD3D12.h"
 #include "dawn_native/d3d12/DescriptorHeapAllocator.h"
 #include "dawn_native/d3d12/InputStateD3D12.h"
-#include "dawn_native/d3d12/NativeSwapChainImplD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/QueueD3D12.h"
@@ -42,26 +39,6 @@
 #include <locale>
 
 namespace dawn_native { namespace d3d12 {
-
-    dawnDevice CreateDevice() {
-        return reinterpret_cast<dawnDevice>(new Device());
-    }
-
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, HWND window) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-
-        dawnSwapChainImplementation impl;
-        impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, window));
-        impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
-
-        return impl;
-    }
-
-    dawnTextureFormat GetNativeSwapChainPreferredFormat(
-        const dawnSwapChainImplementation* swapChain) {
-        NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-        return static_cast<dawnTextureFormat>(impl->GetPreferredFormat());
-    }
 
     void ASSERT_SUCCESS(HRESULT hr) {
         ASSERT(SUCCEEDED(hr));

@@ -447,6 +447,7 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/CommandBufferD3D12.h",
       "src/dawn_native/d3d12/ComputePipelineD3D12.cpp",
       "src/dawn_native/d3d12/ComputePipelineD3D12.h",
+      "src/dawn_native/d3d12/D3D12Backend.cpp",
       "src/dawn_native/d3d12/DescriptorHeapAllocator.cpp",
       "src/dawn_native/d3d12/DescriptorHeapAllocator.h",
       "src/dawn_native/d3d12/DeviceD3D12.cpp",
@@ -504,6 +505,7 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/metal/Forward.h",
       "src/dawn_native/metal/InputStateMTL.h",
       "src/dawn_native/metal/InputStateMTL.mm",
+      "src/dawn_native/metal/MetalBackend.mm",
       "src/dawn_native/metal/PipelineLayoutMTL.h",
       "src/dawn_native/metal/PipelineLayoutMTL.mm",
       "src/dawn_native/metal/QueueMTL.h",
@@ -527,8 +529,9 @@ source_set("libdawn_native_sources") {
 
   if (dawn_enable_null) {
     sources += [
+      "src/dawn_native/null/DeviceNull.cpp",
+      "src/dawn_native/null/DeviceNull.h",
       "src/dawn_native/null/NullBackend.cpp",
-      "src/dawn_native/null/NullBackend.h",
     ]
   }
 
@@ -548,6 +551,7 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/opengl/Forward.h",
       "src/dawn_native/opengl/InputStateGL.cpp",
       "src/dawn_native/opengl/InputStateGL.h",
+      "src/dawn_native/opengl/OpenGLBackend.cpp",
       "src/dawn_native/opengl/PersistentPipelineStateGL.cpp",
       "src/dawn_native/opengl/PersistentPipelineStateGL.h",
       "src/dawn_native/opengl/PipelineGL.cpp",
@@ -617,6 +621,7 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/vulkan/TextureVk.h",
       "src/dawn_native/vulkan/UtilsVulkan.cpp",
       "src/dawn_native/vulkan/UtilsVulkan.h",
+      "src/dawn_native/vulkan/VulkanBackend.cpp",
       "src/dawn_native/vulkan/VulkanError.cpp",
       "src/dawn_native/vulkan/VulkanError.h",
       "src/dawn_native/vulkan/VulkanFunctions.cpp",

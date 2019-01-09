@@ -17,7 +17,6 @@
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
-#include "dawn_native/MetalBackend.h"
 #include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/metal/BufferMTL.h"
 #include "dawn_native/metal/CommandBufferMTL.h"
@@ -121,15 +120,6 @@ namespace dawn_native { namespace metal {
             return value;
         }
     }  // anonymous namespace
-
-    dawnDevice CreateDevice() {
-        return reinterpret_cast<dawnDevice>(new Device());
-    }
-
-    id<MTLDevice> GetMetalDevice(dawnDevice cDevice) {
-        Device* device = reinterpret_cast<Device*>(cDevice);
-        return device->GetMTLDevice();
-    }
 
     BackendConnection* Connect(InstanceBase* instance) {
         return nullptr;

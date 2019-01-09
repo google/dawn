@@ -12,25 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// NullBackend.cpp: contains the definition of symbols exported by NullBackend.h so that they
+// OpenGLBackend.cpp: contains the definition of symbols exported by OpenGLBackend.h so that they
 // can be compiled twice: once export (shared library), once not exported (static library)
 
-#include "dawn_native/NullBackend.h"
+#include "dawn_native/OpenGLBackend.h"
 
-#include "common/SwapChainUtils.h"
-#include "dawn_native/null/DeviceNull.h"
+#include "dawn_native/opengl/DeviceGL.h"
 
-namespace dawn_native { namespace null {
+namespace dawn_native { namespace opengl {
 
-    dawnDevice CreateDevice() {
-        return reinterpret_cast<dawnDevice>(new Device);
+    AdapterDiscoveryOptions::AdapterDiscoveryOptions()
+        : AdapterDiscoveryOptionsBase(BackendType::OpenGL) {
     }
 
-    dawnSwapChainImplementation CreateNativeSwapChainImpl() {
-        dawnSwapChainImplementation impl;
-        impl = CreateSwapChainImplementation(new NativeSwapChainImpl());
-        impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
-        return impl;
-    }
-
-}}  // namespace dawn_native::null
+}}  // namespace dawn_native::opengl

@@ -19,12 +19,6 @@
 
 namespace dawn_native { namespace opengl {
 
-    // Implementation of OpenGLBackend.h
-
-    AdapterDiscoveryOptions::AdapterDiscoveryOptions()
-        : AdapterDiscoveryOptionsBase(BackendType::OpenGL) {
-    }
-
     // The OpenGL backend's Adapter.
 
     class Adapter : public AdapterBase {
