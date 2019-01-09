@@ -15,18 +15,22 @@
 #ifndef DAWN_EXPORT_H_
 #define DAWN_EXPORT_H_
 
-#if defined(_WIN32)
-#    if defined(DAWN_IMPLEMENTATION)
-#        define DAWN_EXPORT __declspec(dllexport)
-#    else
-#        define DAWN_EXPORT __declspec(dllimport)
-#    endif
-#else
-#    if defined(DAWN_IMPLEMENTATION)
-#        define DAWN_EXPORT __attribute__((visibility("default")))
-#    else
-#        define DAWN_EXPORT
-#    endif
-#endif
+#if defined(DAWN_SHARED_LIBRARY)
+#    if defined(_WIN32)
+#        if defined(DAWN_IMPLEMENTATION)
+#            define DAWN_EXPORT __declspec(dllexport)
+#        else
+#            define DAWN_EXPORT __declspec(dllimport)
+#        endif
+#    else  // defined(_WIN32)
+#        if defined(DAWN_IMPLEMENTATION)
+#            define DAWN_EXPORT __attribute__((visibility("default")))
+#        else
+#            define DAWN_EXPORT
+#        endif
+#    endif  // defined(_WIN32)
+#else       // defined(DAWN_SHARED_LIBRARY)
+#    define DAWN_EXPORT
+#endif  // defined(DAWN_SHARED_LIBRARY)
 
 #endif  // DAWN_EXPORT_H_
