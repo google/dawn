@@ -32,6 +32,8 @@ namespace dawn_native { namespace opengl {
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_SCISSOR_TEST);
             glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+
+            mPCIInfo.name = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
         }
         virtual ~Adapter() = default;
 
@@ -39,7 +41,7 @@ namespace dawn_native { namespace opengl {
         ResultOrError<DeviceBase*> CreateDeviceImpl() override {
             // There is no limit on the number of devices created from this adapter because they can
             // all share the same backing OpenGL context.
-            return {new Device};
+            return {new Device(this)};
         }
     };
 

@@ -97,7 +97,7 @@ namespace dawn_native { namespace d3d12 {
 
     }  // anonymous namespace
 
-    Device::Device() {
+    Device::Device() : DeviceBase(nullptr) {
         mFunctions = std::make_unique<PlatformFunctions>();
 
         {

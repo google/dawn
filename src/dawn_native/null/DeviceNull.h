@@ -85,7 +85,7 @@ namespace dawn_native { namespace null {
 
     class Device : public DeviceBase {
       public:
-        Device();
+        Device(Adapter* adapter);
         ~Device();
 
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
@@ -97,8 +97,6 @@ namespace dawn_native { namespace null {
         Serial GetCompletedCommandSerial() const final override;
         Serial GetLastSubmittedCommandSerial() const final override;
         void TickImpl() override;
-
-        const dawn_native::PCIInfo& GetPCIInfo() const override;
 
         void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
         void SubmitPendingOperations();
@@ -123,12 +121,10 @@ namespace dawn_native { namespace null {
         ResultOrError<TextureViewBase*> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
-        void InitFakePCIInfo();
 
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
-        dawn_native::PCIInfo mPCIInfo;
     };
 
     class Buffer : public BufferBase {

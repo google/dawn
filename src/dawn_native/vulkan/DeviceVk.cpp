@@ -57,7 +57,7 @@ namespace dawn_native { namespace vulkan {
 
     // Device
 
-    Device::Device() {
+    Device::Device() : DeviceBase(nullptr) {
         MaybeError maybeError = Initialize();
 
         // In device initialization, the error callback can't have been set yet.

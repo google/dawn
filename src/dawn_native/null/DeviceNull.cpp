@@ -26,12 +26,13 @@ namespace dawn_native { namespace null {
     class Adapter : public AdapterBase {
       public:
         Adapter(InstanceBase* instance) : AdapterBase(instance, BackendType::Null) {
+            mPCIInfo.name = "Null backend";
         }
         virtual ~Adapter() = default;
 
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl() override {
-            return {new Device};
+            return {new Device(this)};
         }
     };
 
@@ -55,8 +56,7 @@ namespace dawn_native { namespace null {
 
     // Device
 
-    Device::Device() {
-        InitFakePCIInfo();
+    Device::Device(Adapter* adapter) : DeviceBase(adapter) {
     }
 
     Device::~Device() {
@@ -120,14 +120,6 @@ namespace dawn_native { namespace null {
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) {
         return new TextureView(texture, descriptor);
-    }
-
-    void Device::InitFakePCIInfo() {
-        mPCIInfo.name = "Null backend";
-    }
-
-    const dawn_native::PCIInfo& Device::GetPCIInfo() const {
-        return mPCIInfo;
     }
 
     Serial Device::GetCompletedCommandSerial() const {

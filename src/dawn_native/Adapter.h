@@ -34,6 +34,9 @@ namespace dawn_native {
 
         DeviceBase* CreateDevice();
 
+      protected:
+        PCIInfo mPCIInfo = {};
+
       private:
         virtual ResultOrError<DeviceBase*> CreateDeviceImpl() = 0;
 
@@ -41,7 +44,6 @@ namespace dawn_native {
 
         InstanceBase* mInstance = nullptr;
         BackendType mBackend;
-        PCIInfo mPCIInfo;
     };
 
 }  // namespace dawn_native

@@ -128,7 +128,8 @@ namespace dawn_native { namespace metal {
     // Device
 
     Device::Device()
-        : mMtlDevice(MTLCreateSystemDefaultDevice()),
+        : DeviceBase(nullptr),
+          mMtlDevice(MTLCreateSystemDefaultDevice()),
           mMapTracker(new MapRequestTracker(this)),
           mResourceUploader(new ResourceUploader(this)) {
         [mMtlDevice retain];

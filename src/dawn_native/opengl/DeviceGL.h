@@ -34,7 +34,7 @@ namespace dawn_native { namespace opengl {
 
     class Device : public DeviceBase {
       public:
-        Device();
+        Device(AdapterBase* adapter);
         ~Device();
 
         void SubmitFenceSync();
@@ -49,8 +49,6 @@ namespace dawn_native { namespace opengl {
         Serial GetCompletedCommandSerial() const final override;
         Serial GetLastSubmittedCommandSerial() const final override;
         void TickImpl() override;
-
-        const dawn_native::PCIInfo& GetPCIInfo() const override;
 
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
@@ -72,15 +70,12 @@ namespace dawn_native { namespace opengl {
         ResultOrError<TextureViewBase*> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
-        void CollectPCIInfo();
 
         void CheckPassedFences();
 
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
         std::queue<std::pair<GLsync, Serial>> mFencesInFlight;
-
-        dawn_native::PCIInfo mPCIInfo;
     };
 
 }}  // namespace dawn_native::opengl

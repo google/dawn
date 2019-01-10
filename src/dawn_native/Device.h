@@ -29,11 +29,12 @@ namespace dawn_native {
 
     using ErrorCallback = void (*)(const char* errorMessage, void* userData);
 
+    class AdapterBase;
     class FenceSignalTracker;
 
     class DeviceBase {
       public:
-        DeviceBase();
+        DeviceBase(AdapterBase* adapter);
         virtual ~DeviceBase();
 
         void HandleError(const char* message);
@@ -108,7 +109,7 @@ namespace dawn_native {
             return nullptr;
         }
 
-        virtual const PCIInfo& GetPCIInfo() const = 0;
+        virtual const PCIInfo& GetPCIInfo() const;
 
       private:
         virtual ResultOrError<BindGroupBase*> CreateBindGroupImpl(
@@ -155,6 +156,8 @@ namespace dawn_native {
                                              const TextureViewDescriptor* descriptor);
 
         void ConsumeError(ErrorData* error);
+
+        AdapterBase* mAdapter = nullptr;
 
         // The object caches aren't exposed in the header as they would require a lot of
         // additional includes.

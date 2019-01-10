@@ -14,6 +14,7 @@
 
 #include "dawn_native/Device.h"
 
+#include "dawn_native/Adapter.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
@@ -49,7 +50,7 @@ namespace dawn_native {
 
     // DeviceBase
 
-    DeviceBase::DeviceBase() {
+    DeviceBase::DeviceBase(AdapterBase* adapter) : mAdapter(adapter) {
         mCaches = std::make_unique<DeviceBase::Caches>();
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
     }
@@ -95,6 +96,11 @@ namespace dawn_native {
 
     void DeviceBase::UncacheBindGroupLayout(BindGroupLayoutBase* obj) {
         mCaches->bindGroupLayouts.erase(obj);
+    }
+
+    const PCIInfo& DeviceBase::GetPCIInfo() const {
+        ASSERT(mAdapter != nullptr);
+        return mAdapter->GetPCIInfo();
     }
 
     // Object creation API methods

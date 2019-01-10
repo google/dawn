@@ -32,8 +32,7 @@
 
 namespace dawn_native { namespace opengl {
 
-    Device::Device() {
-        CollectPCIInfo();
+    Device::Device(AdapterBase* adapter) : DeviceBase(adapter) {
     }
 
     Device::~Device() {
@@ -143,14 +142,6 @@ namespace dawn_native { namespace opengl {
             ASSERT(fenceSerial > mCompletedSerial);
             mCompletedSerial = fenceSerial;
         }
-    }
-
-    const dawn_native::PCIInfo& Device::GetPCIInfo() const {
-        return mPCIInfo;
-    }
-
-    void Device::CollectPCIInfo() {
-        mPCIInfo.name = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
     }
 
 }}  // namespace dawn_native::opengl
