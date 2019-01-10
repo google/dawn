@@ -25,6 +25,7 @@ namespace {
 
 namespace dawn_native { namespace opengl {
 
+    class Adapter;
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
     class Buffer;
@@ -44,6 +45,7 @@ namespace dawn_native { namespace opengl {
     class TextureView;
 
     struct OpenGLBackendTraits {
+        using AdapterType = Adapter;
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
         using BufferType = Buffer;

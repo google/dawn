@@ -19,6 +19,7 @@
 
 namespace dawn_native {
 
+    class AdapterBase;
     class BindGroupBase;
     class BindGroupBuilder;
     class BindGroupLayoutBase;
@@ -32,6 +33,7 @@ namespace dawn_native {
     class FenceBase;
     class InputStateBase;
     class InputStateBuilder;
+    class InstanceBase;
     class PipelineLayoutBase;
     class PipelineLayoutBuilder;
     class QueueBase;

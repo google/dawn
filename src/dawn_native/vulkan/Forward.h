@@ -19,6 +19,7 @@
 
 namespace dawn_native { namespace vulkan {
 
+    class Adapter;
     class BindGroup;
     class BindGroupLayout;
     class Buffer;
@@ -37,6 +38,7 @@ namespace dawn_native { namespace vulkan {
     class TextureView;
 
     struct VulkanBackendTraits {
+        using AdapterType = Adapter;
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
         using BufferType = Buffer;

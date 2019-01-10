@@ -19,6 +19,7 @@
 
 namespace dawn_native { namespace d3d12 {
 
+    class Adapter;
     class BindGroup;
     class BindGroupLayout;
     class Buffer;
@@ -37,6 +38,7 @@ namespace dawn_native { namespace d3d12 {
     class TextureView;
 
     struct D3D12BackendTraits {
+        using AdapterType = Adapter;
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
         using BufferType = Buffer;

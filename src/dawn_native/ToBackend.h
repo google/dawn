@@ -24,6 +24,11 @@ namespace dawn_native {
     struct ToBackendTraits;
 
     template <typename BackendTraits>
+    struct ToBackendTraits<AdapterBase, BackendTraits> {
+        using BackendType = typename BackendTraits::AdapterType;
+    };
+
+    template <typename BackendTraits>
     struct ToBackendTraits<BindGroupBase, BackendTraits> {
         using BackendType = typename BackendTraits::BindGroupType;
     };

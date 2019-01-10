@@ -35,6 +35,7 @@
 
 namespace dawn_native { namespace null {
 
+    class Adapter;
     using BindGroup = BindGroupBase;
     using BindGroupLayout = BindGroupLayoutBase;
     class Buffer;
@@ -53,6 +54,7 @@ namespace dawn_native { namespace null {
     using TextureView = TextureViewBase;
 
     struct NullBackendTraits {
+        using AdapterType = Adapter;
         using BindGroupType = BindGroup;
         using BindGroupLayoutType = BindGroupLayout;
         using BufferType = Buffer;
