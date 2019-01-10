@@ -22,10 +22,6 @@
 
 namespace dawn_native { namespace null {
 
-    dawnDevice CreateDevice() {
-        return reinterpret_cast<dawnDevice>(new Device);
-    }
-
     dawnSwapChainImplementation CreateNativeSwapChainImpl() {
         dawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl());

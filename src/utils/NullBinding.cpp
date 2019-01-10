@@ -14,6 +14,7 @@
 
 #include "utils/BackendBinding.h"
 
+#include "common/Assert.h"
 #include "dawn_native/NullBackend.h"
 
 namespace utils {
@@ -23,7 +24,19 @@ namespace utils {
         void SetupGLFWWindowHints() override {
         }
         dawnDevice CreateDevice() override {
-            return dawn_native::null::CreateDevice();
+            // Make an instance and find the null adapter
+            mInstance = std::make_unique<dawn_native::Instance>();
+            mInstance->DiscoverDefaultAdapters();
+
+            std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
+            for (dawn_native::Adapter adapter : adapters) {
+                if (adapter.GetBackendType() == dawn_native::BackendType::Null) {
+                    return adapter.CreateDevice();
+                }
+            }
+
+            UNREACHABLE();
+            return {};
         }
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
@@ -36,6 +49,7 @@ namespace utils {
         }
 
       private:
+        std::unique_ptr<dawn_native::Instance> mInstance;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 

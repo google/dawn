@@ -164,8 +164,13 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
   ]
 
   deps = [
+    "${dawn_top_level}:dawn_common",
     "${dawn_top_level}:libdawn_static",
     "${dawn_top_level}:libdawn_native_static",
     "${dawn_top_level}:libdawn_wire_static",
+  ]
+
+  additional_configs = [
+    "${dawn_top_level}:dawn_internal",
   ]
 }

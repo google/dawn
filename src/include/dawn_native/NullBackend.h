@@ -15,12 +15,10 @@
 #ifndef DAWNNATIVE_NULLBACKEND_H_
 #define DAWNNATIVE_NULLBACKEND_H_
 
-#include <dawn/dawn.h>
 #include <dawn/dawn_wsi.h>
-#include <dawn_native/dawn_native_export.h>
+#include <dawn_native/DawnNative.h>
 
 namespace dawn_native { namespace null {
-    DAWN_NATIVE_EXPORT dawnDevice CreateDevice();
     DAWN_NATIVE_EXPORT dawnSwapChainImplementation CreateNativeSwapChainImpl();
 }}  // namespace dawn_native::null
 

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "common/Assert.h"
 #include "dawn/dawncpp.h"
 #include "dawn_native/DawnNative.h"
-#include "dawn_native/NullBackend.h"
 #include "dawn_wire/Wire.h"
 
 #include <vector>
@@ -45,7 +45,20 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     procs.swapChainBuilderSetImplementation = SkipSwapChainBuilderSetImplementation;
     dawnSetProcs(&procs);
 
-    dawn::Device nullDevice = dawn::Device::Acquire(dawn_native::null::CreateDevice());
+    // Create an instance and find the null adapter to create a device with.
+    std::unique_ptr<dawn_native::Instance> instance = std::make_unique<dawn_native::Instance>();
+    instance->DiscoverDefaultAdapters();
+
+    std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
+
+    dawn::Device nullDevice;
+    for (dawn_native::Adapter adapter : adapters) {
+        if (adapter.GetBackendType() == dawn_native::BackendType::Null) {
+            nullDevice = dawn::Device::Acquire(adapter.CreateDevice());
+            break;
+        }
+    }
+    ASSERT(nullDevice.Get() != nullptr);
 
     DevNull devNull;
     std::unique_ptr<dawn_wire::CommandHandler> wireServer(
@@ -59,6 +72,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     // Destroy the server before the device because it needs to free all objects.
     wireServer = nullptr;
     nullDevice = nullptr;
+    instance = nullptr;
 
     return 0;
 }
