@@ -17,6 +17,8 @@
 #include "common/Assert.h"
 #include "dawn_native/NullBackend.h"
 
+#include <memory>
+
 namespace utils {
 
     class NullBinding : public BackendBinding {
