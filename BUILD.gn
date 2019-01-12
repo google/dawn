@@ -216,6 +216,8 @@ template("dawn_static_and_shared_library") {
   static_library("${libname}_static") {
     output_name = libname
 
+    complete_static_lib = dawn_complete_static_libs
+
     # Copy all variables except "configs", which has a default value
     forward_variables_from(invoker, "*", [ "configs" ])
     if (defined(invoker.configs)) {

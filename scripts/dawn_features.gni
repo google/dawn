@@ -16,6 +16,11 @@ declare_args() {
   # Enable Dawn's ASSERTs even in release builds
   dawn_always_assert = false
 
+  # Should the Dawn static libraries be fully linked vs. GN's default of
+  # treating them as source sets. This is useful for people using Dawn
+  # standalone to produce static libraries to use in their projects.
+  dawn_complete_static_libs = false
+
   # Enables the compilation of Dawn's D3D12 backend
   dawn_enable_d3d12 = is_win
 
