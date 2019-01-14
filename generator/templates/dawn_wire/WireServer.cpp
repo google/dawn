@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace dawn_wire {
@@ -334,7 +335,9 @@ namespace dawn_wire {
                     }
                 {% endfor %}
 
-                void OnMapReadAsyncCallback(dawnBufferMapAsyncStatus status, const void* ptr, MapUserdata* data) {
+                void OnMapReadAsyncCallback(dawnBufferMapAsyncStatus status, const void* ptr, MapUserdata* userdata) {
+                    std::unique_ptr<MapUserdata> data(userdata);
+
                     // Skip sending the callback if the buffer has already been destroyed.
                     auto* bufferData = mKnownBuffer.Get(data->bufferId);
                     if (bufferData == nullptr || bufferData->serial != data->bufferSerial) {
@@ -357,11 +360,11 @@ namespace dawn_wire {
                         void* dataAlloc = GetCmdSpace(data->size);
                         memcpy(dataAlloc, ptr, data->size);
                     }
-
-                    delete data;
                 }
 
-                void OnMapWriteAsyncCallback(dawnBufferMapAsyncStatus status, void* ptr, MapUserdata* data) {
+                void OnMapWriteAsyncCallback(dawnBufferMapAsyncStatus status, void* ptr, MapUserdata* userdata) {
+                    std::unique_ptr<MapUserdata> data(userdata);
+
                     // Skip sending the callback if the buffer has already been destroyed.
                     auto* bufferData = mKnownBuffer.Get(data->bufferId);
                     if (bufferData == nullptr || bufferData->serial != data->bufferSerial) {
@@ -381,11 +384,11 @@ namespace dawn_wire {
                         bufferData->mappedData = ptr;
                         bufferData->mappedDataSize = data->size;
                     }
-
-                    delete data;
                 }
 
-                void OnFenceCompletedValueUpdated(FenceCompletionUserdata* data) {
+                void OnFenceCompletedValueUpdated(FenceCompletionUserdata* userdata) {
+                    std::unique_ptr<FenceCompletionUserdata> data(userdata);
+
                     ReturnFenceUpdateCompletedValueCmd cmd;
                     cmd.fenceId = data->fenceId;
                     cmd.fenceSerial = data->fenceSerial;
@@ -393,8 +396,6 @@ namespace dawn_wire {
 
                     auto allocCmd = static_cast<ReturnFenceUpdateCompletedValueCmd*>(GetCmdSpace(sizeof(cmd)));
                     *allocCmd = cmd;
-
-                    delete data;
                 }
 
                 {% set client_side_commands = ["FenceGetCompletedValue"] %}
