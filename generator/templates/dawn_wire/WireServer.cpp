@@ -14,7 +14,8 @@
 
 #include "dawn_wire/TypeTraits_autogen.h"
 #include "dawn_wire/Wire.h"
-#include "dawn_wire/WireCmd.h"
+#include "dawn_wire/WireCmd_autogen.h"
+#include "dawn_wire/WireDeserializeAllocator.h"
 
 #include "common/Assert.h"
 
@@ -32,8 +33,7 @@ namespace dawn_wire {
 
         struct MapUserdata {
             Server* server;
-            uint32_t bufferId;
-            uint32_t bufferSerial;
+            ObjectHandle buffer;
             uint32_t requestSerial;
             uint32_t size;
             bool isWrite;
@@ -41,8 +41,7 @@ namespace dawn_wire {
 
         struct FenceCompletionUserdata {
             Server* server;
-            uint32_t fenceId;
-            uint32_t fenceSerial;
+            ObjectHandle fence;
             uint64_t value;
         };
 
@@ -69,8 +68,7 @@ namespace dawn_wire {
 
         template <typename T>
         struct ObjectData<T, true> : public ObjectDataBase<T> {
-            uint32_t builtObjectId = 0;
-            uint32_t builtObjectSerial = 0;
+            ObjectHandle builtObject = ObjectHandle{0, 0};
         };
 
         template <>
@@ -214,59 +212,6 @@ namespace dawn_wire {
         void ForwardFenceCompletedValue(dawnFenceCompletionStatus status,
                                         dawnCallbackUserdata userdata);
 
-        // A really really simple implementation of the DeserializeAllocator. It's main feature
-        // is that it has some inline storage so as to avoid allocations for the majority of
-        // commands.
-        class ServerAllocator : public DeserializeAllocator {
-            public:
-                ServerAllocator() {
-                    Reset();
-                }
-
-                ~ServerAllocator() {
-                    Reset();
-                }
-
-                void* GetSpace(size_t size) override {
-                    // Return space in the current buffer if possible first.
-                    if (mRemainingSize >= size) {
-                        char* buffer = mCurrentBuffer;
-                        mCurrentBuffer += size;
-                        mRemainingSize -= size;
-                        return buffer;
-                    }
-
-                    // Otherwise allocate a new buffer and try again.
-                    size_t allocationSize = std::max(size, size_t(2048));
-                    char* allocation = static_cast<char*>(malloc(allocationSize));
-                    if (allocation == nullptr) {
-                        return nullptr;
-                    }
-
-                    mAllocations.push_back(allocation);
-                    mCurrentBuffer = allocation;
-                    mRemainingSize = allocationSize;
-                    return GetSpace(size);
-                }
-
-                void Reset() {
-                    for (auto allocation : mAllocations) {
-                        free(allocation);
-                    }
-                    mAllocations.clear();
-
-                    // The initial buffer is the inline buffer so that some allocations can be skipped
-                    mCurrentBuffer = mStaticBuffer;
-                    mRemainingSize = sizeof(mStaticBuffer);
-                }
-
-            private:
-                size_t mRemainingSize = 0;
-                char* mCurrentBuffer = nullptr;
-                char mStaticBuffer[2048];
-                std::vector<char*> mAllocations;
-        };
-
         class Server : public CommandHandler, public ObjectIdResolver {
             public:
                 Server(dawnDevice device, const dawnProcTable& procs, CommandSerializer* serializer)
@@ -294,13 +239,11 @@ namespace dawn_wire {
 
                 void OnDeviceError(const char* message) {
                     ReturnDeviceErrorCallbackCmd cmd;
-                    cmd.messageStrlen = std::strlen(message);
+                    cmd.message = message;
 
-                    auto allocCmd = static_cast<ReturnDeviceErrorCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
-                    *allocCmd = cmd;
-
-                    char* messageAlloc = static_cast<char*>(GetCmdSpace(cmd.messageStrlen + 1));
-                    strcpy(messageAlloc, message);
+                    size_t requiredSize = cmd.GetRequiredSize();
+                    char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
+                    cmd.Serialize(allocatedBuffer);
                 }
 
                 {% for type in by_category["object"] if type.is_builder%}
@@ -319,18 +262,16 @@ namespace dawn_wire {
                         if (status != DAWN_BUILDER_ERROR_STATUS_UNKNOWN) {
                             //* Unknown is the only status that can be returned without a call to GetResult
                             //* so we are guaranteed to have created an object.
-                            ASSERT(builder->builtObjectId != 0);
+                            ASSERT(builder->builtObject.id != 0);
 
                             Return{{Type}}ErrorCallbackCmd cmd;
-                            cmd.builtObjectId = builder->builtObjectId;
-                            cmd.builtObjectSerial = builder->builtObjectSerial;
+                            cmd.builtObject = builder->builtObject;
                             cmd.status = status;
-                            cmd.messageStrlen = std::strlen(message);
+                            cmd.message = message;
 
-                            auto allocCmd = static_cast<Return{{Type}}ErrorCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
-                            *allocCmd = cmd;
-                            char* messageAlloc = static_cast<char*>(GetCmdSpace(strlen(message) + 1));
-                            strcpy(messageAlloc, message);
+                            size_t requiredSize = cmd.GetRequiredSize();
+                            char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
+                            cmd.Serialize(allocatedBuffer);
                         }
                     }
                 {% endfor %}
@@ -339,46 +280,44 @@ namespace dawn_wire {
                     std::unique_ptr<MapUserdata> data(userdata);
 
                     // Skip sending the callback if the buffer has already been destroyed.
-                    auto* bufferData = mKnownBuffer.Get(data->bufferId);
-                    if (bufferData == nullptr || bufferData->serial != data->bufferSerial) {
+                    auto* bufferData = mKnownBuffer.Get(data->buffer.id);
+                    if (bufferData == nullptr || bufferData->serial != data->buffer.serial) {
                         return;
                     }
 
                     ReturnBufferMapReadAsyncCallbackCmd cmd;
-                    cmd.bufferId = data->bufferId;
-                    cmd.bufferSerial = data->bufferSerial;
+                    cmd.buffer = data->buffer;
                     cmd.requestSerial = data->requestSerial;
                     cmd.status = status;
                     cmd.dataLength = 0;
-
-                    auto allocCmd = static_cast<ReturnBufferMapReadAsyncCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
-                    *allocCmd = cmd;
+                    cmd.data = reinterpret_cast<const uint8_t*>(ptr);
 
                     if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
-                        allocCmd->dataLength = data->size;
-
-                        void* dataAlloc = GetCmdSpace(data->size);
-                        memcpy(dataAlloc, ptr, data->size);
+                        cmd.dataLength = data->size;
                     }
+
+                    size_t requiredSize = cmd.GetRequiredSize();
+                    char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
+                    cmd.Serialize(allocatedBuffer);
                 }
 
                 void OnMapWriteAsyncCallback(dawnBufferMapAsyncStatus status, void* ptr, MapUserdata* userdata) {
                     std::unique_ptr<MapUserdata> data(userdata);
 
                     // Skip sending the callback if the buffer has already been destroyed.
-                    auto* bufferData = mKnownBuffer.Get(data->bufferId);
-                    if (bufferData == nullptr || bufferData->serial != data->bufferSerial) {
+                    auto* bufferData = mKnownBuffer.Get(data->buffer.id);
+                    if (bufferData == nullptr || bufferData->serial != data->buffer.serial) {
                         return;
                     }
 
                     ReturnBufferMapWriteAsyncCallbackCmd cmd;
-                    cmd.bufferId = data->bufferId;
-                    cmd.bufferSerial = data->bufferSerial;
+                    cmd.buffer = data->buffer;
                     cmd.requestSerial = data->requestSerial;
                     cmd.status = status;
 
-                    auto allocCmd = static_cast<ReturnBufferMapWriteAsyncCallbackCmd*>(GetCmdSpace(sizeof(cmd)));
-                    *allocCmd = cmd;
+                    size_t requiredSize = cmd.GetRequiredSize();
+                    char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
+                    cmd.Serialize(allocatedBuffer);
 
                     if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
                         bufferData->mappedData = ptr;
@@ -390,15 +329,14 @@ namespace dawn_wire {
                     std::unique_ptr<FenceCompletionUserdata> data(userdata);
 
                     ReturnFenceUpdateCompletedValueCmd cmd;
-                    cmd.fenceId = data->fenceId;
-                    cmd.fenceSerial = data->fenceSerial;
+                    cmd.fence = data->fence;
                     cmd.value = data->value;
 
-                    auto allocCmd = static_cast<ReturnFenceUpdateCompletedValueCmd*>(GetCmdSpace(sizeof(cmd)));
-                    *allocCmd = cmd;
+                    size_t requiredSize = cmd.GetRequiredSize();
+                    char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
+                    cmd.Serialize(allocatedBuffer);
                 }
 
-                {% set client_side_commands = ["FenceGetCompletedValue"] %}
                 const char* HandleCommands(const char* commands, size_t size) override {
                     mProcs.deviceTick(mKnownDevice.Get(1)->handle);
 
@@ -407,25 +345,11 @@ namespace dawn_wire {
 
                         bool success = false;
                         switch (cmdId) {
-                            {% for type in by_category["object"] %}
-                                {% for method in type.methods %}
-                                    {% set Suffix = as_MethodSuffix(type.name, method.name) %}
-                                    {% if Suffix not in client_side_commands %}
-                                        case WireCmd::{{Suffix}}:
-                                            success = Handle{{Suffix}}(&commands, &size);
-                                            break;
-                                    {% endif %}
-                                {% endfor %}
+                            {% for command in cmd_records["command"] %}
+                                case WireCmd::{{command.name.CamelCase()}}:
+                                    success = Handle{{command.name.CamelCase()}}(&commands, &size);
+                                    break;
                             {% endfor %}
-                            case WireCmd::BufferMapAsync:
-                                success = HandleBufferMapAsync(&commands, &size);
-                                break;
-                            case WireCmd::BufferUpdateMappedDataCmd:
-                                success = HandleBufferUpdateMappedData(&commands, &size);
-                                break;
-                            case WireCmd::DestroyObject:
-                                success = HandleDestroyObject(&commands, &size);
-                                break;
                             default:
                                 success = false;
                         }
@@ -447,7 +371,7 @@ namespace dawn_wire {
                 dawnProcTable mProcs;
                 CommandSerializer* mSerializer = nullptr;
 
-                ServerAllocator mAllocator;
+                WireDeserializeAllocator mAllocator;
 
                 void* GetCmdSpace(size_t size) {
                     return mSerializer->GetCmdSpace(size);
@@ -484,35 +408,9 @@ namespace dawn_wire {
                     KnownObjects<{{as_cType(type.name)}}> mKnown{{type.name.CamelCase()}};
                 {% endfor %}
 
-                {% set reverse_lookup_object_types = ["Fence"] %}
-                {% for type in by_category["object"] if type.name.CamelCase() in reverse_lookup_object_types %}
+                {% for type in by_category["object"] if type.name.CamelCase() in server_reverse_lookup_objects %}
                     ObjectIdLookupTable<{{as_cType(type.name)}}> m{{type.name.CamelCase()}}IdTable;
                 {% endfor %}
-
-                //* Helper function for the getting of the command data in command handlers.
-                //* Checks there is enough data left, updates the buffer / size and returns
-                //* the command (or nullptr for an error).
-                template <typename T>
-                static const T* GetData(const char** buffer, size_t* size, size_t count) {
-                    // TODO(cwallez@chromium.org): Check for overflow
-                    size_t totalSize = count * sizeof(T);
-                    if (*size < totalSize) {
-                        return nullptr;
-                    }
-
-                    const T* data = reinterpret_cast<const T*>(*buffer);
-
-                    *buffer += totalSize;
-                    *size -= totalSize;
-
-                    return data;
-                }
-                template <typename T>
-                static const T* GetCommand(const char** commands, size_t* size) {
-                    return GetData<T>(commands, size, 1);
-                }
-
-                {% set custom_pre_handler_commands = ["BufferUnmap"] %}
 
                 bool PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
                     auto* selfData = mKnownBuffer.Get(cmd.selfId);
@@ -522,8 +420,6 @@ namespace dawn_wire {
 
                     return true;
                 }
-
-                {% set custom_post_handler_commands = ["QueueSignal"] %}
 
                 bool PostHandleQueueSignal(const QueueSignalCmd& cmd) {
                     if (cmd.fence == nullptr) {
@@ -536,8 +432,7 @@ namespace dawn_wire {
 
                     auto* data = new FenceCompletionUserdata;
                     data->server = this;
-                    data->fenceId = fenceId;
-                    data->fenceSerial = fence->serial;
+                    data->fence = ObjectHandle{fenceId, fence->serial};
                     data->value = cmd.signalValue;
 
                     auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
@@ -560,7 +455,7 @@ namespace dawn_wire {
                                     return false;
                                 }
 
-                                {% if Suffix in custom_pre_handler_commands %}
+                                {% if Suffix in server_custom_pre_handler_commands %}
                                     if (!PreHandle{{Suffix}}(cmd)) {
                                         return false;
                                     }
@@ -575,15 +470,14 @@ namespace dawn_wire {
                                 {% set returns = return_type.name.canonical_case() != "void" %}
                                 {% if returns %}
                                     {% set Type = method.return_type.name.CamelCase() %}
-                                    auto* resultData = mKnown{{Type}}.Allocate(cmd.resultId);
+                                    auto* resultData = mKnown{{Type}}.Allocate(cmd.result.id);
                                     if (resultData == nullptr) {
                                         return false;
                                     }
-                                    resultData->serial = cmd.resultSerial;
+                                    resultData->serial = cmd.result.serial;
 
                                     {% if type.is_builder %}
-                                        selfData->builtObjectId = cmd.resultId;
-                                        selfData->builtObjectSerial = cmd.resultSerial;
+                                        selfData->builtObject = cmd.result;
                                     {% endif %}
                                 {% endif %}
 
@@ -608,7 +502,7 @@ namespace dawn_wire {
                                     {%- endfor -%}
                                 );
 
-                                {% if Suffix in custom_post_handler_commands %}
+                                {% if Suffix in server_custom_post_handler_commands %}
                                     if (!PostHandle{{Suffix}}(cmd)) {
                                         return false;
                                     }
@@ -618,10 +512,10 @@ namespace dawn_wire {
                                     resultData->handle = result;
                                     resultData->valid = result != nullptr;
 
-                                    {% if return_type.name.CamelCase() in reverse_lookup_object_types %}
+                                    {% if return_type.name.CamelCase() in server_reverse_lookup_objects %}
                                         //* For created objects, store a mapping from them back to their client IDs
                                         if (result) {
-                                            m{{return_type.name.CamelCase()}}IdTable.Store(result, cmd.resultId);
+                                            m{{return_type.name.CamelCase()}}IdTable.Store(result, cmd.result.id);
                                         }
                                     {% endif %}
 
@@ -630,7 +524,7 @@ namespace dawn_wire {
                                     {% if return_type.is_builder %}
                                         if (result != nullptr) {
                                             uint64_t userdata1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
-                                            uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd.resultId;
+                                            uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd.result.id;
                                             mProcs.{{as_varName(return_type.name, Name("set error callback"))}}(result, Forward{{return_type.name.CamelCase()}}ToClient, userdata1, userdata2);
                                         }
                                     {% endif %}
@@ -645,16 +539,18 @@ namespace dawn_wire {
                 bool HandleBufferMapAsync(const char** commands, size_t* size) {
                     //* These requests are just forwarded to the buffer, with userdata containing what the client
                     //* will require in the return command.
-                    const auto* cmd = GetCommand<BufferMapAsyncCmd>(commands, size);
-                    if (cmd == nullptr) {
+                    BufferMapAsyncCmd cmd;
+                    DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator);
+
+                    if (deserializeResult == DeserializeResult::FatalError) {
                         return false;
                     }
 
-                    ObjectId bufferId = cmd->bufferId;
-                    uint32_t requestSerial = cmd->requestSerial;
-                    uint32_t requestSize = cmd->size;
-                    uint32_t requestStart = cmd->start;
-                    bool isWrite = cmd->isWrite;
+                    ObjectId bufferId = cmd.bufferId;
+                    uint32_t requestSerial = cmd.requestSerial;
+                    uint32_t requestSize = cmd.size;
+                    uint32_t requestStart = cmd.start;
+                    bool isWrite = cmd.isWrite;
 
                     //* The null object isn't valid as `self`
                     if (bufferId == 0) {
@@ -668,8 +564,7 @@ namespace dawn_wire {
 
                     auto* data = new MapUserdata;
                     data->server = this;
-                    data->bufferId = bufferId;
-                    data->bufferSerial = buffer->serial;
+                    data->buffer = ObjectHandle{bufferId, buffer->serial};
                     data->requestSerial = requestSerial;
                     data->size = requestSize;
                     data->isWrite = isWrite;
@@ -696,13 +591,15 @@ namespace dawn_wire {
                 }
 
                 bool HandleBufferUpdateMappedData(const char** commands, size_t* size) {
-                    const auto* cmd = GetCommand<BufferUpdateMappedDataCmd>(commands, size);
-                    if (cmd == nullptr) {
+                    BufferUpdateMappedDataCmd cmd;
+                    DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator);
+
+                    if (deserializeResult == DeserializeResult::FatalError) {
                         return false;
                     }
 
-                    ObjectId bufferId = cmd->bufferId;
-                    size_t dataLength = cmd->dataLength;
+                    ObjectId bufferId = cmd.bufferId;
+                    size_t dataLength = cmd.dataLength;
 
                     //* The null object isn't valid as `self`
                     if (bufferId == 0) {
@@ -715,29 +612,28 @@ namespace dawn_wire {
                         return false;
                     }
 
-                    const char* data = GetData<char>(commands, size, dataLength);
-                    if (data == nullptr) {
-                        return false;
-                    }
+                    DAWN_ASSERT(cmd.data != nullptr);
 
-                    memcpy(buffer->mappedData, data, dataLength);
+                    memcpy(buffer->mappedData, cmd.data, dataLength);
 
                     return true;
                 }
 
                 bool HandleDestroyObject(const char** commands, size_t* size) {
-                    const auto* cmd = GetCommand<DestroyObjectCmd>(commands, size);
-                    if (cmd == nullptr) {
+                    DestroyObjectCmd cmd;
+                    DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator);
+
+                    if (deserializeResult == DeserializeResult::FatalError) {
                         return false;
                     }
 
-                    ObjectId objectId = cmd->objectId;
+                    ObjectId objectId = cmd.objectId;
                     //* ID 0 are reserved for nullptr and cannot be destroyed.
                     if (objectId == 0) {
                         return false;
                     }
 
-                    switch (cmd->objectType) {
+                    switch (cmd.objectType) {
                         {% for type in by_category["object"] %}
                             {% set ObjectType = type.name.CamelCase() %}
                             case ObjectType::{{ObjectType}}: {
@@ -749,7 +645,7 @@ namespace dawn_wire {
                                     if (data == nullptr) {
                                         return false;
                                     }
-                                    {% if type.name.CamelCase() in reverse_lookup_object_types %}
+                                    {% if type.name.CamelCase() in server_reverse_lookup_objects %}
                                         m{{type.name.CamelCase()}}IdTable.Remove(data->handle);
                                     {% endif %}
 

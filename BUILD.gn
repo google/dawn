@@ -54,6 +54,8 @@ template("dawn_generator") {
   # target using templates in this directory.
   generator_args = [
     rebase_path("dawn.json", root_build_dir),
+    "--wire-json",
+    rebase_path("dawn_wire.json", root_build_dir),
     "--template-dir",
     rebase_path("generator/templates", root_build_dir),
     "--targets",
@@ -695,8 +697,8 @@ dawn_static_and_shared_library("libdawn_native") {
   ]
 
   deps = [
-    ":libdawn_native_sources",
     ":dawn_common",
+    ":libdawn_native_sources",
   ]
   sources = [
     "src/dawn_native/DawnNative.cpp",
@@ -761,7 +763,10 @@ dawn_static_and_shared_library("libdawn_wire") {
 
   configs = [ ":dawn_internal" ]
   sources = get_target_outputs(":libdawn_wire_gen")
-  sources += [ "src/dawn_wire/WireCmd.h" ]
+  sources += [
+    "src/dawn_wire/WireDeserializeAllocator.cpp",
+    "src/dawn_wire/WireDeserializeAllocator.h",
+  ]
 
   # Make headers publically visible
   public_deps = [
@@ -849,8 +854,8 @@ test("dawn_unittests") {
     ":dawn_headers",
     ":dawn_utils",
     ":libdawn",
-    ":libdawn_native_sources",
     ":libdawn_native",
+    ":libdawn_native_sources",
     ":libdawn_wire",
     ":mock_dawn_gen",
     "third_party:gmock_and_gtest",

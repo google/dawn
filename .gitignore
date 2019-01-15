@@ -1,3 +1,5 @@
+*.pyc
+
 # Directories added by gclient sync and the GN build
 .gclient
 .gclient_entries

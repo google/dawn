@@ -1106,6 +1106,18 @@
             {"value": 11, "name": "unorm r8 g8"}
         ]
     },
+    "ObjectType": {
+      "_comment": "Only used for the wire",
+      "category": "native"
+    },
+    "ObjectId": {
+      "_comment": "Only used for the wire",
+      "category": "native"
+    },
+    "ObjectHandle": {
+      "_comment": "Only used for the wire",
+      "category": "native"
+    },
     "void": {
         "category": "native"
     },

@@ -17,90 +17,9 @@
 # COMMON
 ############################################################
 from collections import namedtuple
-
-class Name:
-    def __init__(self, name, native=False):
-        self.native = native
-        if native:
-            self.chunks = [name]
-        else:
-            self.chunks = name.split(' ')
-
-    def CamelChunk(self, chunk):
-        return chunk[0].upper() + chunk[1:]
-
-    def canonical_case(self):
-        return (' '.join(self.chunks)).lower()
-
-    def concatcase(self):
-        return ''.join(self.chunks)
-
-    def camelCase(self):
-        return self.chunks[0] + ''.join([self.CamelChunk(chunk) for chunk in self.chunks[1:]])
-
-    def CamelCase(self):
-        return ''.join([self.CamelChunk(chunk) for chunk in self.chunks])
-
-    def SNAKE_CASE(self):
-        return '_'.join([chunk.upper() for chunk in self.chunks])
-
-    def snake_case(self):
-        return '_'.join(self.chunks)
-
-class Type:
-    def __init__(self, name, json_data, native=False):
-        self.json_data = json_data
-        self.dict_name = name
-        self.name = Name(name, native=native)
-        self.category = json_data['category']
-        self.is_builder = self.name.canonical_case().endswith(" builder")
-
-EnumValue = namedtuple('EnumValue', ['name', 'value'])
-class EnumType(Type):
-    def __init__(self, name, json_data):
-        Type.__init__(self, name, json_data)
-        self.values = [EnumValue(Name(m['name']), m['value']) for m in self.json_data['values']]
-
-BitmaskValue = namedtuple('BitmaskValue', ['name', 'value'])
-class BitmaskType(Type):
-    def __init__(self, name, json_data):
-        Type.__init__(self, name, json_data)
-        self.values = [BitmaskValue(Name(m['name']), m['value']) for m in self.json_data['values']]
-        self.full_mask = 0
-        for value in self.values:
-            self.full_mask = self.full_mask | value.value
-
-class NativeType(Type):
-    def __init__(self, name, json_data):
-        Type.__init__(self, name, json_data, native=True)
-
-class NativelyDefined(Type):
-    def __init__(self, name, json_data):
-        Type.__init__(self, name, json_data)
-
-# Methods and structures are both "records", so record members correspond to
-# method arguments or structure members.
-class RecordMember:
-    def __init__(self, name, typ, annotation, optional):
-        self.name = name
-        self.type = typ
-        self.annotation = annotation
-        self.length = None
-        self.optional = optional
-
-Method = namedtuple('Method', ['name', 'return_type', 'arguments'])
-class ObjectType(Type):
-    def __init__(self, name, json_data):
-        Type.__init__(self, name, json_data)
-        self.methods = []
-        self.native_methods = []
-        self.built_type = None
-
-class StructureType(Type):
-    def __init__(self, name, json_data):
-        Type.__init__(self, name, json_data)
-        self.extensible = json_data.get("extensible", False)
-        self.members = []
+from common import Name
+import common
+import wire_cmd
 
 ############################################################
 # PARSE
@@ -111,35 +30,10 @@ def is_native_method(method):
     return method.return_type.category == "natively defined" or \
         any([arg.type.category == "natively defined" for arg in method.arguments])
 
-def linked_record_members(json_data, types):
-    members = []
-    members_by_name = {}
-    for m in json_data:
-        member = RecordMember(Name(m['name']), types[m['type']],
-                              m.get('annotation', 'value'), m.get('optional', False))
-        members.append(member)
-        members_by_name[member.name.canonical_case()] = member
-
-    for (member, m) in zip(members, json_data):
-        if member.annotation != 'value':
-            if not 'length' in m:
-                if member.type.category == 'structure':
-                    member.length = "constant"
-                    member.constant_length = 1
-                else:
-                    assert(False)
-            elif m['length'] == 'strlen':
-                member.length = 'strlen'
-            else:
-                member.length = members_by_name[m['length']]
-
-    return members
-
-
 def link_object(obj, types):
     def make_method(json_data):
-        arguments = linked_record_members(json_data.get('args', []), types)
-        return Method(Name(json_data['name']), types[json_data.get('returns', 'void')], arguments)
+        arguments = common.linked_record_members(json_data.get('args', []), types)
+        return common.Method(Name(json_data['name']), types[json_data.get('returns', 'void')], arguments)
 
     methods = [make_method(m) for m in obj.json_data.get('methods', [])]
     obj.methods = [method for method in methods if not is_native_method(method)]
@@ -154,7 +48,7 @@ def link_object(obj, types):
         assert(obj.built_type != None)
 
 def link_structure(struct, types):
-    struct.members = linked_record_members(struct.json_data['members'], types)
+    struct.members = common.linked_record_members(struct.json_data['members'], types)
 
 # Sort structures so that if struct A has struct B as a member, then B is listed before A
 # This is a form of topological sort where we try to keep the order reasonably similar to the
@@ -194,12 +88,12 @@ def topo_sort_structure(structs):
 
 def parse_json(json):
     category_to_parser = {
-        'bitmask': BitmaskType,
-        'enum': EnumType,
-        'native': NativeType,
-        'natively defined': NativelyDefined,
-        'object': ObjectType,
-        'structure': StructureType,
+        'bitmask': common.BitmaskType,
+        'enum': common.EnumType,
+        'native': common.NativeType,
+        'natively defined': common.NativelyDefined,
+        'object': common.ObjectType,
+        'structure': common.StructureType,
     }
 
     types = {}
@@ -226,6 +120,9 @@ def parse_json(json):
         by_category[category] = sorted(by_category[category], key=lambda typ: typ.name.canonical_case())
 
     by_category['structure'] = topo_sort_structure(by_category['structure'])
+
+    for struct in by_category['structure']:
+        struct.update_metadata()
 
     return {
         'types': types,
@@ -392,18 +289,18 @@ def cpp_native_methods(types, typ):
     methods = typ.methods + typ.native_methods
 
     if typ.is_builder:
-        methods.append(Method(Name('set error callback'), types['void'], [
-            RecordMember(Name('callback'), types['builder error callback'], 'value', False),
-            RecordMember(Name('userdata1'), types['callback userdata'], 'value', False),
-            RecordMember(Name('userdata2'), types['callback userdata'], 'value', False),
+        methods.append(common.Method(Name('set error callback'), types['void'], [
+            common.RecordMember(Name('callback'), types['builder error callback'], 'value', False, False),
+            common.RecordMember(Name('userdata1'), types['callback userdata'], 'value', False, False),
+            common.RecordMember(Name('userdata2'), types['callback userdata'], 'value', False, False),
         ]))
 
     return methods
 
 def c_native_methods(types, typ):
     return cpp_native_methods(types, typ) + [
-        Method(Name('reference'), types['void'], []),
-        Method(Name('release'), types['void'], []),
+        common.Method(Name('reference'), types['void'], []),
+        common.Method(Name('release'), types['void'], []),
     ]
 
 def js_native_methods(types, typ):
@@ -412,7 +309,7 @@ def js_native_methods(types, typ):
 def debug(text):
     print(text)
 
-def get_renders_for_targets(api_params, targets):
+def get_renders_for_targets(api_params, wire_json, targets):
     base_params = {
         'enumerate': enumerate,
         'format': format,
@@ -471,17 +368,20 @@ def get_renders_for_targets(api_params, targets):
         renders.append(FileRender('dawn_native/ProcTable.cpp', 'dawn_native/ProcTable.cpp', frontend_params))
 
     if 'dawn_wire' in targets:
+        additional_params = wire_cmd.compute_wire_params(api_params, wire_json)
+
         wire_params = [
             base_params,
             api_params,
             c_params,
             {
                 'as_wireType': lambda typ: typ.name.CamelCase() + '*' if typ.category == 'object' else as_cppType(typ.name)
-            }
+            },
+            additional_params
         ]
-        renders.append(FileRender('dawn_wire/TypeTraits.h', 'dawn_wire/TypeTraits_autogen.h', wire_params))
         renders.append(FileRender('dawn_wire/WireCmd.h', 'dawn_wire/WireCmd_autogen.h', wire_params))
         renders.append(FileRender('dawn_wire/WireCmd.cpp', 'dawn_wire/WireCmd_autogen.cpp', wire_params))
+        renders.append(FileRender('dawn_wire/TypeTraits.h', 'dawn_wire/TypeTraits_autogen.h', wire_params))
         renders.append(FileRender('dawn_wire/WireClient.cpp', 'dawn_wire/WireClient.cpp', wire_params))
         renders.append(FileRender('dawn_wire/WireServer.cpp', 'dawn_wire/WireServer.cpp', wire_params))
 
@@ -507,6 +407,7 @@ def main():
         formatter_class = argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument('json', metavar='DAWN_JSON', nargs=1, type=str, help ='The DAWN JSON definition to use.')
+    parser.add_argument('--wire-json', default=None, type=str, help='The DAWN WIRE JSON definition to use.')
     parser.add_argument('-t', '--template-dir', default='templates', type=str, help='Directory with template files.')
     parser.add_argument('-T', '--targets', required=True, type=str, help='Comma-separated subset of targets to output. Available targets: ' + ', '.join(allowed_targets))
     parser.add_argument(kExtraPythonPath, default=None, type=str, help='Additional python path to set before loading Jinja2')
@@ -522,7 +423,17 @@ def main():
     api_params = parse_json(loaded_json)
 
     targets = args.targets.split(',')
-    renders = get_renders_for_targets(api_params, targets)
+    dependencies = [
+        os.path.join(os.path.abspath(os.path.dirname(__file__)), "common.py")
+    ]
+
+    loaded_wire_json = None
+    if args.wire_json:
+      with open(args.wire_json) as f:
+          loaded_wire_json = json.loads(f.read())
+      dependencies.append(args.wire_json)
+
+    renders = get_renders_for_targets(api_params, loaded_wire_json, targets)
 
     # The caller wants to assert that the outputs are what it expects.
     # Load the file and compare with our renders.
@@ -544,8 +455,9 @@ def main():
     if args.output_json_tarball != None:
         output_to_json(outputs, args.output_json_tarball)
 
-        dependencies = [args.template_dir + os.path.sep + render.template for render in renders]
+        dependencies += [args.template_dir + os.path.sep + render.template for render in renders]
         dependencies.append(args.json[0])
+        dependencies.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), "wire_cmd.py"))
         output_depfile(args.depfile, args.output_json_tarball, dependencies)
 
 if __name__ == '__main__':

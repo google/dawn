@@ -15,10 +15,16 @@
 #ifndef DAWNWIRE_WIRECMD_AUTOGEN_H_
 #define DAWNWIRE_WIRECMD_AUTOGEN_H_
 
+#include <dawn/dawn.h>
+
 namespace dawn_wire {
 
     using ObjectId = uint32_t;
     using ObjectSerial = uint32_t;
+    struct ObjectHandle {
+      ObjectId id;
+      ObjectSerial serial;
+    };
 
     enum class DeserializeResult {
         Success,
@@ -61,84 +67,68 @@ namespace dawn_wire {
 
     //* Enum used as a prefix to each command on the wire format.
     enum class WireCmd : uint32_t {
-        {% for type in by_category["object"] %}
-            {% for method in type.methods %}
-                {{as_MethodSuffix(type.name, method.name)}},
-            {% endfor %}
+        {% for command in cmd_records["command"] %}
+            {{command.name.CamelCase()}},
         {% endfor %}
-        BufferMapAsync,
-        BufferUpdateMappedDataCmd,
-        DestroyObject,
     };
-
-    {% for type in by_category["object"] %}
-        {% for method in type.methods %}
-            {% set Suffix = as_MethodSuffix(type.name, method.name) %}
-            {% set Cmd = Suffix + "Cmd" %}
-
-            //* These are "structure" version of the list of arguments to the different Dawn methods.
-            //* They provide helpers to serialize/deserialize to/from a buffer.
-            struct {{Cmd}} {
-                //* From a filled structure, compute how much size will be used in the serialization buffer.
-                size_t GetRequiredSize() const;
-
-                //* Serialize the structure and everything it points to into serializeBuffer which must be
-                //* big enough to contain all the data (as queried from GetRequiredSize).
-                void Serialize(char* serializeBuffer, const ObjectIdProvider& objectIdProvider) const;
-
-                //* Deserializes the structure from a buffer, consuming a maximum of *size bytes. When this
-                //* function returns, buffer and size will be updated by the number of bytes consumed to
-                //* deserialize the structure. Structures containing pointers will use allocator to get
-                //* scratch space to deserialize the pointed-to data.
-                //* Deserialize returns:
-                //*  - Success if everything went well (yay!)
-                //*  - FatalError is something bad happened (buffer too small for example)
-                //*  - ErrorObject if one if the deserialized object is an error value, for the implementation
-                //*    of the Maybe monad.
-                //* If the return value is not FatalError, selfId, resultId and resultSerial (if present) are
-                //* filled.
-                DeserializeResult Deserialize(const char** buffer, size_t* size, DeserializeAllocator* allocator, const ObjectIdResolver& resolver);
-
-                {{as_cType(type.name)}} self;
-
-                //* Command handlers want to know the object ID in addition to the backing object.
-                //* Doesn't need to be filled before Serialize, or GetRequiredSize.
-                ObjectId selfId;
-
-                //* Commands creating objects say which ID the created object will be referred as.
-                {% if method.return_type.category == "object" %}
-                    ObjectId resultId;
-                    ObjectSerial resultSerial;
-                {% endif %}
-
-                {% for arg in method.arguments %}
-                    {{as_annotated_cType(arg)}};
-                {% endfor %}
-            };
-        {% endfor %}
-    {% endfor %}
 
     //* Enum used as a prefix to each command on the return wire format.
     enum class ReturnWireCmd : uint32_t {
-        DeviceErrorCallback,
-        {% for type in by_category["object"] if type.is_builder %}
-                {{type.name.CamelCase()}}ErrorCallback,
+        {% for command in cmd_records["return command"] %}
+            {{command.name.CamelCase()}},
         {% endfor %}
-        BufferMapReadAsyncCallback,
-        BufferMapWriteAsyncCallback,
-        FenceUpdateCompletedValue,
     };
 
-    //* Command for the server calling a builder status callback.
-    {% for type in by_category["object"] if type.is_builder %}
-        struct Return{{type.name.CamelCase()}}ErrorCallbackCmd {
-            ReturnWireCmd commandId = ReturnWireCmd::{{type.name.CamelCase()}}ErrorCallback;
+{% macro write_command_struct(command, is_return_command) %}
+    {% set Return = "Return" if is_return_command else "" %}
+    {% set Cmd = command.name.CamelCase() + "Cmd" %}
+    struct {{Return}}{{Cmd}} {
+        //* From a filled structure, compute how much size will be used in the serialization buffer.
+        size_t GetRequiredSize() const;
 
-            ObjectId builtObjectId;
-            ObjectSerial builtObjectSerial;
-            uint32_t status;
-            size_t messageStrlen;
-        };
+        //* Serialize the structure and everything it points to into serializeBuffer which must be
+        //* big enough to contain all the data (as queried from GetRequiredSize).
+        void Serialize(char* serializeBuffer
+            {%- if command.has_dawn_object -%}
+                , const ObjectIdProvider& objectIdProvider
+            {%- endif -%}
+        ) const;
+
+        //* Deserializes the structure from a buffer, consuming a maximum of *size bytes. When this
+        //* function returns, buffer and size will be updated by the number of bytes consumed to
+        //* deserialize the structure. Structures containing pointers will use allocator to get
+        //* scratch space to deserialize the pointed-to data.
+        //* Deserialize returns:
+        //*  - Success if everything went well (yay!)
+        //*  - FatalError is something bad happened (buffer too small for example)
+        //*  - ErrorObject if one if the deserialized object is an error value, for the implementation
+        //*    of the Maybe monad.
+        //* If the return value is not FatalError, selfId, resultId and resultSerial (if present) are
+        //* filled.
+        DeserializeResult Deserialize(const char** buffer, size_t* size, DeserializeAllocator* allocator
+            {%- if command.has_dawn_object -%}
+                , const ObjectIdResolver& resolver
+            {%- endif -%}
+        );
+
+        {% if command.derived_method %}
+            //* Command handlers want to know the object ID in addition to the backing object.
+            //* Doesn't need to be filled before Serialize, or GetRequiredSize.
+            ObjectId selfId;
+        {% endif %}
+
+        {% for member in command.members %}
+            {{as_annotated_cType(member)}};
+        {% endfor %}
+    };
+{% endmacro %}
+
+    {% for command in cmd_records["command"] %}
+        {{write_command_struct(command, False)}}
+    {% endfor %}
+
+    {% for command in cmd_records["return command"] %}
+        {{write_command_struct(command, True)}}
     {% endfor %}
 
 }  // namespace dawn_wire
