@@ -18,6 +18,7 @@
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/CommandBuffer.h"
 
+#include "dawn_native/d3d12/InputStateD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -27,6 +28,17 @@ namespace dawn_native { namespace d3d12 {
 
     struct BindGroupStateTracker;
 
+    struct VertexBuffersInfo {
+        // startSlot and endSlot indicate the range of dirty vertex buffers.
+        // If there are multiple calls to SetVertexBuffers, the start and end
+        // represent the union of the dirty ranges (the union may have non-dirty
+        // data in the middle of the range).
+        const InputState* lastInputState = nullptr;
+        uint32_t startSlot = kMaxVertexInputs;
+        uint32_t endSlot = 0;
+        std::array<D3D12_VERTEX_BUFFER_VIEW, kMaxVertexInputs> d3d12BufferViews = {};
+    };
+
     class CommandBuffer : public CommandBufferBase {
       public:
         CommandBuffer(CommandBufferBuilder* builder);
@@ -35,6 +47,9 @@ namespace dawn_native { namespace d3d12 {
         void RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList, uint32_t indexInSubmit);
 
       private:
+        void FlushSetVertexBuffers(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                   VertexBuffersInfo* vertexBuffersInfo,
+                                   const InputState* inputState);
         void RecordComputePass(ComPtr<ID3D12GraphicsCommandList> commandList,
                                BindGroupStateTracker* bindingTracker);
         void RecordRenderPass(ComPtr<ID3D12GraphicsCommandList> commandList,

@@ -185,6 +185,10 @@ class InputStateTest : public DawnTest {
             dawn::CommandBuffer commands = builder.GetResult();
             queue.Submit(1, &commands);
 
+            CheckResult(triangles, instances);
+        }
+
+        void CheckResult(unsigned int triangles, unsigned int instances) {
             // Check that the center of each triangle is pure green, so that if a single vertex shader
             // instance fails, linear interpolation makes the pixel check fail.
             for (unsigned int triangle = 0; triangle < 4; triangle++) {
@@ -421,6 +425,89 @@ TEST_P(InputStateTest, MixedEverything) {
         3, 4, 5, 6, 0, 3, 4, 5, 6, 0,
     });
     DoTestDraw(pipeline, 1, 1, {{0, &buffer0}, {1, &buffer1}});
+}
+
+// Test input state is unaffected by unused vertex slot
+TEST_P(InputStateTest, UnusedVertexSlot) {
+    // Instance input state, using slot 1
+    dawn::InputState instanceInputState =
+        MakeInputState({{1, 4 * sizeof(float), InputStepMode::Instance}},
+                       {{0, 1, 0, VertexFormat::FloatR32G32B32A32}});
+    dawn::RenderPipeline instancePipeline = MakeTestPipeline(
+        instanceInputState, 1, {{0, VertexFormat::FloatR32G32B32A32, InputStepMode::Instance}});
+
+    dawn::Buffer buffer = MakeVertexBuffer<float>({
+        0, 1, 2, 3,
+        1, 2, 3, 4,
+        2, 3, 4, 5,
+        3, 4, 5, 6,
+    });
+
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+
+    dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+
+    uint32_t zeroOffset = 0;
+    pass.SetVertexBuffers(0, 1, &buffer, &zeroOffset);
+    pass.SetVertexBuffers(1, 1, &buffer, &zeroOffset);
+
+    pass.SetPipeline(instancePipeline);
+    pass.Draw(1 * 3, 4, 0, 0);
+
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = builder.GetResult();
+    queue.Submit(1, &commands);
+
+    CheckResult(1, 4);
+}
+
+// Test setting a different pipeline with a different input state.
+// This was a problem with the D3D12 backend where SetVertexBuffers
+// was getting the input from the last set pipeline, not the current.
+// SetVertexBuffers should be reapplied when the input state changes.
+TEST_P(InputStateTest, MultiplePipelinesMixedInputState) {
+    // Basic input state, using slot 0
+    dawn::InputState vertexInputState =
+        MakeInputState({{0, 4 * sizeof(float), InputStepMode::Vertex}},
+                       {{0, 0, 0, VertexFormat::FloatR32G32B32A32}});
+    dawn::RenderPipeline vertexPipeline = MakeTestPipeline(
+        vertexInputState, 1, {{0, VertexFormat::FloatR32G32B32A32, InputStepMode::Vertex}});
+
+    // Instance input state, using slot 1
+    dawn::InputState instanceInputState =
+        MakeInputState({{1, 4 * sizeof(float), InputStepMode::Instance}},
+                       {{0, 1, 0, VertexFormat::FloatR32G32B32A32}});
+    dawn::RenderPipeline instancePipeline = MakeTestPipeline(
+        instanceInputState, 1, {{0, VertexFormat::FloatR32G32B32A32, InputStepMode::Instance}});
+
+    dawn::Buffer buffer = MakeVertexBuffer<float>({
+        0, 1, 2, 3,
+        1, 2, 3, 4,
+        2, 3, 4, 5,
+        3, 4, 5, 6,
+    });
+
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+
+    dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+
+    uint32_t zeroOffset = 0;
+    pass.SetVertexBuffers(0, 1, &buffer, &zeroOffset);
+    pass.SetVertexBuffers(1, 1, &buffer, &zeroOffset);
+
+    pass.SetPipeline(vertexPipeline);
+    pass.Draw(1 * 3, 1, 0, 0);
+
+    pass.SetPipeline(instancePipeline);
+    pass.Draw(1 * 3, 4, 0, 0);
+
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = builder.GetResult();
+    queue.Submit(1, &commands);
+
+    CheckResult(1, 4);
 }
 
 DAWN_INSTANTIATE_TEST(InputStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
