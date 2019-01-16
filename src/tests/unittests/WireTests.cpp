@@ -213,6 +213,7 @@ TEST_F(WireTests, CallForwarded) {
     EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
         .WillOnce(Return(apiCmdBufBuilder));
 
+    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
     FlushClient();
 }
 
@@ -229,6 +230,8 @@ TEST_F(WireTests, CreateThenCall) {
     EXPECT_CALL(api, CommandBufferBuilderGetResult(apiCmdBufBuilder))
         .WillOnce(Return(apiCmdBuf));
 
+    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+    EXPECT_CALL(api, CommandBufferRelease(apiCmdBuf));
     FlushClient();
 }
 
@@ -242,6 +245,7 @@ TEST_F(WireTests, RefCountKeptInClient) {
     dawnCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
     EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
         .WillOnce(Return(apiCmdBufBuilder));
+    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
 
     FlushClient();
 }
@@ -278,6 +282,8 @@ TEST_F(WireTests, ValueArgument) {
     EXPECT_CALL(api, ComputePassEncoderDispatch(apiPass, 1, 2, 3))
         .Times(1);
 
+    EXPECT_CALL(api, CommandBufferBuilderRelease(apiBuilder));
+    EXPECT_CALL(api, ComputePassEncoderRelease(apiPass));
     FlushClient();
 }
 
@@ -312,6 +318,8 @@ TEST_F(WireTests, ValueArrayArgument) {
         .WillOnce(Return(apiPass));
 
     EXPECT_CALL(api, ComputePassEncoderSetPushConstants(apiPass, DAWN_SHADER_STAGE_BIT_VERTEX, 0, 4, ResultOf(CheckPushConstantValues, Eq(true))));
+    EXPECT_CALL(api, CommandBufferBuilderRelease(apiBuilder));
+    EXPECT_CALL(api, ComputePassEncoderRelease(apiPass));
 
     FlushClient();
 }
@@ -418,8 +426,12 @@ TEST_F(WireTests, CStringArgument) {
         return desc->vertexStage->entryPoint == std::string("main");
     })))
         .WillOnce(Return(nullptr));
+        EXPECT_CALL(api, ShaderModuleRelease(apiVsModule));
+        EXPECT_CALL(api, InputStateBuilderRelease(apiInputStateBuilder));
+        EXPECT_CALL(api, InputStateRelease(apiInputState));
+        EXPECT_CALL(api, PipelineLayoutRelease(apiLayout));
 
-    FlushClient();
+        FlushClient();
 }
 
 // Test that the wire is able to send objects as value arguments
@@ -446,6 +458,9 @@ TEST_F(WireTests, ObjectAsValueArgument) {
     EXPECT_CALL(api, CommandBufferBuilderBeginRenderPass(apiCmdBufBuilder, apiRenderPass))
         .Times(1);
 
+    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+    EXPECT_CALL(api, RenderPassDescriptorBuilderRelease(apiRenderPassBuilder));
+    EXPECT_CALL(api, RenderPassDescriptorRelease(apiRenderPass));
     FlushClient();
 }
 
@@ -469,6 +484,8 @@ TEST_F(WireTests, ObjectsAsPointerArgument) {
         apiCmdBufs[i] = api.GetNewCommandBuffer();
         EXPECT_CALL(api, CommandBufferBuilderGetResult(apiCmdBufBuilder))
             .WillOnce(Return(apiCmdBufs[i]));
+        EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+        EXPECT_CALL(api, CommandBufferRelease(apiCmdBufs[i]));
     }
 
     // Create queue
@@ -484,6 +501,7 @@ TEST_F(WireTests, ObjectsAsPointerArgument) {
         return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
     })));
 
+    EXPECT_CALL(api, QueueRelease(apiQueue));
     FlushClient();
 }
 
@@ -544,6 +562,7 @@ TEST_F(WireTests, StructureOfObjectArrayArgument) {
     })))
         .WillOnce(Return(nullptr));
 
+    EXPECT_CALL(api, BindGroupLayoutRelease(apiBgl));
     FlushClient();
 }
 
@@ -580,6 +599,7 @@ TEST_F(WireTests, StructureOfStructureArrayArgument) {
             })))
         .WillOnce(Return(apiBgl));
 
+    EXPECT_CALL(api, BindGroupLayoutRelease(apiBgl));
     FlushClient();
 }
 
@@ -618,6 +638,7 @@ TEST_F(WireTests, OptionalObjectValue) {
     })))
         .WillOnce(Return(nullptr));
 
+    EXPECT_CALL(api, BindGroupLayoutRelease(apiBindGroupLayout));
     FlushClient();
 }
 
@@ -710,6 +731,8 @@ TEST_F(WireTests, SuccessCallbackOnBuilderSuccess) {
             return apiBuffer;
         }));
 
+    EXPECT_CALL(api, BufferBuilderRelease(apiBufferBuilder));
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
     FlushClient();
 
     EXPECT_CALL(*mockBuilderErrorCallback, Call(DAWN_BUILDER_ERROR_STATUS_SUCCESS, _ , 1 ,2));
@@ -772,6 +795,8 @@ TEST_F(WireTests, SuccessCallbackNotForwardedToDevice) {
             return apiBuffer;
         }));
 
+    EXPECT_CALL(api, BufferBuilderRelease(apiBufferBuilder));
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
     FlushClient();
     FlushServer();
 }
@@ -794,6 +819,7 @@ TEST_F(WireTests, ErrorCallbackForwardedToDevice) {
             return nullptr;
         }));
 
+    EXPECT_CALL(api, BufferBuilderRelease(apiBufferBuilder));
     FlushClient();
 
     EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(1);
@@ -855,6 +881,8 @@ TEST_F(WireSetCallbackTests, BuilderErrorCallback) {
             return apiBuffer;
         }));
 
+    EXPECT_CALL(api, BufferBuilderRelease(apiBufferBuilder));
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
     FlushClient();
 
     // The error callback gets called on the client side
@@ -882,6 +910,7 @@ class WireBufferMappingTests : public WireTestsBase {
                 EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
                     .WillOnce(Return(apiBuffer))
                     .RetiresOnSaturation();
+                EXPECT_CALL(api, BufferRelease(apiBuffer));
                 FlushClient();
             }
             {
@@ -1083,9 +1112,6 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
 
     FlushServer();
 
-    EXPECT_CALL(api, BufferRelease(apiBuffer))
-        .Times(1);
-
     FlushClient();
 }
 
@@ -1279,9 +1305,6 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
 
     FlushServer();
 
-    EXPECT_CALL(api, BufferRelease(apiBuffer))
-        .Times(1);
-
     FlushClient();
 }
 
@@ -1302,12 +1325,14 @@ class WireFenceTests : public WireTestsBase {
             fence = dawnDeviceCreateFence(device, &descriptor);
 
             EXPECT_CALL(api, DeviceCreateFence(apiDevice, _)).WillOnce(Return(apiFence));
+            EXPECT_CALL(api, FenceRelease(apiFence));
             FlushClient();
         }
         {
             queue = dawnDeviceCreateQueue(device);
             apiQueue = api.GetNewQueue();
             EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue));
+            EXPECT_CALL(api, QueueRelease(apiQueue));
             FlushClient();
         }
     }
