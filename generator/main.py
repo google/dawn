@@ -379,11 +379,16 @@ def get_renders_for_targets(api_params, wire_json, targets):
             },
             additional_params
         ]
+        renders.append(FileRender('dawn_wire/TypeTraits.h', 'dawn_wire/TypeTraits_autogen.h', wire_params))
         renders.append(FileRender('dawn_wire/WireCmd.h', 'dawn_wire/WireCmd_autogen.h', wire_params))
         renders.append(FileRender('dawn_wire/WireCmd.cpp', 'dawn_wire/WireCmd_autogen.cpp', wire_params))
-        renders.append(FileRender('dawn_wire/TypeTraits.h', 'dawn_wire/TypeTraits_autogen.h', wire_params))
-        renders.append(FileRender('dawn_wire/WireClient.cpp', 'dawn_wire/WireClient.cpp', wire_params))
         renders.append(FileRender('dawn_wire/WireServer.cpp', 'dawn_wire/WireServer.cpp', wire_params))
+        renders.append(FileRender('dawn_wire/client/ApiObjects.h', 'dawn_wire/client/ApiObjects_autogen.h', wire_params))
+        renders.append(FileRender('dawn_wire/client/ApiProcs.cpp', 'dawn_wire/client/ApiProcs_autogen.cpp', wire_params))
+        renders.append(FileRender('dawn_wire/client/ApiProcs.h', 'dawn_wire/client/ApiProcs_autogen.h', wire_params))
+        renders.append(FileRender('dawn_wire/client/ClientHandlers.cpp', 'dawn_wire/client/ClientHandlers_autogen.cpp', wire_params))
+        renders.append(FileRender('dawn_wire/client/ClientPrototypes.inl', 'dawn_wire/client/ClientPrototypes_autogen.inl', wire_params))
+        renders.append(FileRender('dawn_wire/client/Device.h', 'dawn_wire/client/Device_autogen.h', wire_params))
 
     return renders
 

@@ -745,10 +745,15 @@ dawn_generator("libdawn_wire_gen") {
   target = "dawn_wire"
   outputs = [
     "dawn_wire/TypeTraits_autogen.h",
-    "dawn_wire/WireServer.cpp",
     "dawn_wire/WireCmd_autogen.h",
-    "dawn_wire/WireClient.cpp",
     "dawn_wire/WireCmd_autogen.cpp",
+    "dawn_wire/WireServer.cpp",
+    "dawn_wire/client/ApiObjects_autogen.h",
+    "dawn_wire/client/ApiProcs_autogen.cpp",
+    "dawn_wire/client/ApiProcs_autogen.h",
+    "dawn_wire/client/ClientHandlers_autogen.cpp",
+    "dawn_wire/client/ClientPrototypes_autogen.inl",
+    "dawn_wire/client/Device_autogen.h",
   ]
 }
 
@@ -764,8 +769,19 @@ dawn_static_and_shared_library("libdawn_wire") {
   configs = [ ":dawn_internal" ]
   sources = get_target_outputs(":libdawn_wire_gen")
   sources += [
+    "src/dawn_wire/DawnWire.cpp",
     "src/dawn_wire/WireDeserializeAllocator.cpp",
     "src/dawn_wire/WireDeserializeAllocator.h",
+    "src/dawn_wire/client/ApiObjects.h",
+    "src/dawn_wire/client/ApiProcs.cpp",
+    "src/dawn_wire/client/Buffer.cpp",
+    "src/dawn_wire/client/Buffer.h",
+    "src/dawn_wire/client/Client.cpp",
+    "src/dawn_wire/client/Client.h",
+    "src/dawn_wire/client/ClientHandlers.cpp",
+    "src/dawn_wire/client/Fence.cpp",
+    "src/dawn_wire/client/Fence.h",
+    "src/dawn_wire/client/ObjectAllocator.h",
   ]
 
   # Make headers publically visible
