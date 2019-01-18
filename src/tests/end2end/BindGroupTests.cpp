@@ -389,4 +389,84 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 
+// This test reproduces an out-of-bound bug on D3D12 backends when calling draw command twice with
+// one pipeline that has 4 bind group sets in one render pass.
+TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets)
+{
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+        #version 450
+        void main() {
+            const vec2 pos[3] = vec2[3](vec2(-1.f, -1.f), vec2(1.f, -1.f), vec2(-1.f, 1.f));
+            gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
+        })");
+
+    dawn::ShaderModule fsModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        #version 450
+        layout (std140, set = 0, binding = 0) uniform fragmentUniformBuffer1 {
+            vec4 color1;
+        };
+        layout (std140, set = 1, binding = 0) uniform fragmentUniformBuffer2 {
+            vec4 color2;
+        };
+        layout (std140, set = 2, binding = 0) uniform fragmentUniformBuffer3 {
+            vec4 color3;
+        };
+        layout (std140, set = 3, binding = 0) uniform fragmentUniformBuffer4 {
+            vec4 color4;
+        };
+        layout(location = 0) out vec4 fragColor;
+        void main() {
+            fragColor = color1 + color2 + color3 + color4;
+        })");
+
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {
+            { 0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer }
+        });
+    dawn::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(
+        device, { layout, layout, layout, layout });
+
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+    pipelineDescriptor.layout = pipelineLayout;
+    pipelineDescriptor.cVertexStage.module = vsModule;
+    pipelineDescriptor.cFragmentStage.module = fsModule;
+    pipelineDescriptor.cColorAttachments[0].format = renderPass.colorFormat;
+
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+
+    pass.SetPipeline(pipeline);
+
+    std::array<float, 4> color = { 0.25, 0, 0, 0.25 };
+    dawn::Buffer uniformBuffer = utils::CreateBufferFromData(
+        device, &color, sizeof(color), dawn::BufferUsageBit::Uniform);
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, layout, { { 0, uniformBuffer, 0, sizeof(color) } });
+
+    pass.SetBindGroup(0, bindGroup);
+    pass.SetBindGroup(1, bindGroup);
+    pass.SetBindGroup(2, bindGroup);
+    pass.SetBindGroup(3, bindGroup);
+    pass.Draw(3, 1, 0, 0);
+
+    pass.SetPipeline(pipeline);
+    pass.Draw(3, 1, 0, 0);
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = builder.GetResult();
+    queue.Submit(1, &commands);
+
+    RGBA8 filled(255, 0, 0, 255);
+    RGBA8 notFilled(0, 0, 0, 0);
+    int min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

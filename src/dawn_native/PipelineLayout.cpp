@@ -70,7 +70,7 @@ namespace dawn_native {
                 return i;
             }
         }
-        return kMaxBindGroups + 1;
+        return kMaxBindGroups;
     }
 
 }  // namespace dawn_native
