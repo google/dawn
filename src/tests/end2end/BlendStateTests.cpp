@@ -71,8 +71,7 @@ class BlendStateTest : public DawnTest {
             baseDescriptor.layout = pipelineLayout;
             baseDescriptor.cVertexStage.module = vsModule;
             baseDescriptor.cFragmentStage.module = fsModule;
-            baseDescriptor.cColorAttachments[0].format =
-                renderPass.colorFormat;
+            baseDescriptor.cColorAttachments[0]->format = renderPass.colorFormat;
 
             basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
@@ -80,8 +79,7 @@ class BlendStateTest : public DawnTest {
             testDescriptor.layout = pipelineLayout;
             testDescriptor.cVertexStage.module = vsModule;
             testDescriptor.cFragmentStage.module = fsModule;
-            testDescriptor.cColorAttachments[0].format =
-                renderPass.colorFormat;
+            testDescriptor.cColorAttachments[0]->format = renderPass.colorFormat;
             testDescriptor.cBlendStates[0] = blendStateDescriptor;
 
             testPipeline = device.CreateRenderPipeline(&testDescriptor);
@@ -867,8 +865,7 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
     baseDescriptor.layout = pipelineLayout;
     baseDescriptor.cVertexStage.module = vsModule;
     baseDescriptor.cFragmentStage.module = fsModule;
-    baseDescriptor.cColorAttachments[0].format =
-        renderPass.colorFormat;
+    baseDescriptor.cColorAttachments[0]->format = renderPass.colorFormat;
 
     basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
@@ -876,8 +873,7 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
     testDescriptor.layout = pipelineLayout;
     testDescriptor.cVertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
-    testDescriptor.cColorAttachments[0].format =
-        renderPass.colorFormat;
+    testDescriptor.cColorAttachments[0]->format = renderPass.colorFormat;
 
     dawn::BlendDescriptor blend;
     blend.operation = dawn::BlendOperation::Add;

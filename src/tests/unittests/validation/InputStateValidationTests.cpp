@@ -35,8 +35,7 @@ class InputStateTest : public ValidationTest {
             descriptor.cVertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
             descriptor.inputState = inputState;
-            descriptor.cColorAttachments[0].format =
-                renderpassData.attachmentFormat;
+            descriptor.cColorAttachments[0]->format = renderpassData.attachmentFormat;
 
             if (!success) {
                 ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));

@@ -61,7 +61,7 @@ namespace dawn_native {
             }
 
             for (uint32_t i = 0; i < descriptor->numColorAttachments; ++i) {
-                dawn::TextureFormat format = descriptor->colorAttachments[i].format;
+                dawn::TextureFormat format = descriptor->colorAttachments[i]->format;
                 DAWN_TRY(ValidateTextureFormat(format));
 
                 if (!IsColorRenderableTextureFormat(format)) {
@@ -190,7 +190,7 @@ namespace dawn_native {
         for (uint32_t i = 0; i < descriptor->attachmentsState->numColorAttachments; ++i) {
             mColorAttachmentsSet.set(i);
             mBlendStates[i] = descriptor->blendStates[i];
-            mColorAttachmentFormats[i] = descriptor->attachmentsState->colorAttachments[i].format;
+            mColorAttachmentFormats[i] = descriptor->attachmentsState->colorAttachments[i]->format;
         }
 
         // TODO(cwallez@chromium.org): Check against the shader module that the correct color

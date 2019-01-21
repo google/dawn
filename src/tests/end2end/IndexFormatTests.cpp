@@ -58,8 +58,7 @@ class IndexFormatTest : public DawnTest {
             descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
             descriptor.indexFormat = format;
             descriptor.inputState = inputState;
-            descriptor.cColorAttachments[0].format =
-                renderPass.colorFormat;
+            descriptor.cColorAttachments[0]->format = renderPass.colorFormat;
 
             return device.CreateRenderPipeline(&descriptor);
         }

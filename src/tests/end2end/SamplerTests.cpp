@@ -77,8 +77,7 @@ protected:
         pipelineDescriptor.layout = pipelineLayout;
         pipelineDescriptor.cVertexStage.module = vsModule;
         pipelineDescriptor.cFragmentStage.module = fsModule;
-        pipelineDescriptor.cColorAttachments[0].format =
-            mRenderPass.colorFormat;
+        pipelineDescriptor.cColorAttachments[0]->format = mRenderPass.colorFormat;
 
         mPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 

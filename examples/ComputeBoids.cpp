@@ -130,8 +130,7 @@ void initRender() {
     descriptor.inputState = inputState;
     descriptor.cAttachmentsState.hasDepthStencilAttachment = true;
     descriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
-    descriptor.cColorAttachments[0].format =
-        GetPreferredSwapChainTextureFormat();
+    descriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
 
     renderPipeline = device.CreateRenderPipeline(&descriptor);
 }

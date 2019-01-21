@@ -75,7 +75,8 @@ void init() {
         attachmentsState.nextInChain = nullptr;
         attachmentsState.numColorAttachments = 1;
         dawnAttachmentDescriptor colorAttachment = {nullptr, swapChainFormat};
-        attachmentsState.colorAttachments = &colorAttachment;
+        dawnAttachmentDescriptor* colorAttachmentPtr[] = {&colorAttachment};
+        attachmentsState.colorAttachments = colorAttachmentPtr;
         attachmentsState.hasDepthStencilAttachment = false;
         // Even with hasDepthStencilAttachment = false, depthStencilAttachment must point to valid
         // data because we don't have optional substructures yet.

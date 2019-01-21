@@ -404,7 +404,8 @@ TEST_F(WireTests, CStringArgument) {
     attachmentsState.nextInChain = nullptr;
     attachmentsState.numColorAttachments = 1;
     dawnAttachmentDescriptor colorAttachment = {nullptr, DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM};
-    attachmentsState.colorAttachments = &colorAttachment;
+    dawnAttachmentDescriptor* colorAttachmentPtr[] = {&colorAttachment};
+    attachmentsState.colorAttachments = colorAttachmentPtr;
     attachmentsState.hasDepthStencilAttachment = false;
     // Even with hasDepthStencilAttachment = false, depthStencilAttachment must point to valid
     // data because we don't have optional substructures yet.

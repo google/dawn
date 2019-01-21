@@ -192,8 +192,7 @@ class PrimitiveTopologyTest : public DawnTest {
             descriptor.cFragmentStage.module = fsModule;
             descriptor.primitiveTopology = primitiveTopology;
             descriptor.inputState = inputState;
-            descriptor.cColorAttachments[0].format =
-                renderPass.colorFormat;
+            descriptor.cColorAttachments[0]->format = renderPass.colorFormat;
 
             dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 

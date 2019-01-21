@@ -46,7 +46,8 @@ namespace utils {
             cAttachmentsState.hasDepthStencilAttachment = false;
 
             for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-                cColorAttachments[i].format = dawn::TextureFormat::R8G8B8A8Unorm;
+                colorAttachments[i].format = dawn::TextureFormat::R8G8B8A8Unorm;
+                cColorAttachments[i] = &colorAttachments[i];
             }
         }
 

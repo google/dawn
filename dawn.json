@@ -654,7 +654,7 @@
         "extensible": true,
         "members": [
             {"name": "num color attachments", "type": "uint32_t"},
-            {"name": "color attachments", "type": "attachment descriptor", "annotation": "const*", "length": "num color attachments"},
+            {"name": "color attachments", "type": "attachment descriptor", "annotation": "const*const*", "length": "num color attachments"},
             {"name": "has depth stencil attachment", "type": "bool"},
             {"name": "depth stencil attachment", "type": "attachment descriptor", "annotation":"const*"}
         ]

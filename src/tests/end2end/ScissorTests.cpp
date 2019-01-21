@@ -40,8 +40,7 @@ class ScissorTest: public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.cColorAttachments[0].format =
-            format;
+        descriptor.cColorAttachments[0]->format = format;
 
         return device.CreateRenderPipeline(&descriptor);
     }

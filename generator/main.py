@@ -243,6 +243,8 @@ def decorate(name, typ, arg):
         return typ + ' ' + name
     elif arg.annotation == 'const*':
         return typ + ' const * ' + name
+    elif arg.annotation == 'const*const*':
+        return 'const ' + typ + '* const * ' + name
     else:
         assert(False)
 

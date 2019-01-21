@@ -115,8 +115,7 @@ void init() {
     descriptor.cFragmentStage.module = fsModule;
     descriptor.cAttachmentsState.hasDepthStencilAttachment = true;
     descriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
-    descriptor.cColorAttachments[0].format =
-        GetPreferredSwapChainTextureFormat();
+    descriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
 
     pipeline = device.CreateRenderPipeline(&descriptor);
 
