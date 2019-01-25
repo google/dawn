@@ -135,22 +135,23 @@ template("dawn_generator") {
 }
 
 ###############################################################################
-# Template to produce static and shared versions of Dawn's libraries
+# Template to produce a component for one of Dawn's libraries.
 ###############################################################################
 
-# Template that produces static and shared versions of the same library.
+# Template that produces static and shared versions of the same library as well
+# as a target similar to Chromium's component targets.
 #  - The shared version exports symbols and has dependent import the symbols
 #    as libname.so with target name libname_shared
 #  - The static library doesn't export symbols nor make dependents import them
-#  - The libname target is an alias for libname_shared. This is mostly to keep
-#    the GN convention that target_type(name) defines a "name" target.
+#  - The libname target is similar to a Chromium component and is an alias for
+#    either the static or the shared library.
 #
 # The DEFINE_PREFIX must be provided and must match the respective "_export.h"
 # file.
 #
 # Example usage:
 #
-#   dawn_static_and_shared_library("my_library") {
+#   dawn_component("my_library") {
 #     // my_library_export.h must use the MY_LIBRARY_IMPLEMENTATION and
 #     // MY_LIBRARY_SHARED_LIBRARY macros.
 #     DEFINE_PREFIX = "MY_LIBRARY"
@@ -163,7 +164,7 @@ template("dawn_generator") {
 #   executable("foo") {
 #     deps = [ ":my_library_shared" ] // or :my_library for the same effect
 #   }
-template("dawn_static_and_shared_library") {
+template("dawn_component") {
   # Copy the target_name in the local scope so it doesn't get shadowed in the
   # definition of targets.
   libname = target_name
@@ -228,9 +229,15 @@ template("dawn_static_and_shared_library") {
   }
 
   group(libname) {
-    public_deps = [
-      ":${libname}_shared",
-    ]
+    if (is_component_build) {
+      public_deps = [
+        ":${libname}_shared",
+      ]
+    } else {
+      public_deps = [
+        ":${libname}_static",
+      ]
+    }
   }
 }
 
@@ -343,7 +350,7 @@ dawn_generator("libdawn_gen") {
   ]
 }
 
-dawn_static_and_shared_library("libdawn") {
+dawn_component("libdawn") {
   DEFINE_PREFIX = "DAWN"
 
   public_deps = [
@@ -688,7 +695,7 @@ source_set("libdawn_native_sources") {
 # The static and shared libraries for libdawn_native. Most of the files are
 # already compiled in libdawn_native_sources, but we still need to compile
 # files defining exported symbols.
-dawn_static_and_shared_library("libdawn_native") {
+dawn_component("libdawn_native") {
   DEFINE_PREFIX = "DAWN_NATIVE"
 
   #Make headers publically visible
@@ -757,7 +764,7 @@ dawn_generator("libdawn_wire_gen") {
   ]
 }
 
-dawn_static_and_shared_library("libdawn_wire") {
+dawn_component("libdawn_wire") {
   DEFINE_PREFIX = "DAWN_WIRE"
 
   deps = [
