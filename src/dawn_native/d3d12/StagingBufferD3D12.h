@@ -1,4 +1,4 @@
-// Copyright 2017 The Dawn Authors
+// Copyright 2018 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,37 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_D3D12_RESOURCEUPLOADER_H_
-#define DAWNNATIVE_D3D12_RESOURCEUPLOADER_H_
+#ifndef DAWNNATIVE_STAGINGBUFFERD3D12_H_
+#define DAWNNATIVE_STAGINGBUFFERD3D12_H_
 
+#include "dawn_native/StagingBuffer.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
-
-#include "dawn_native/Forward.h"
 
 namespace dawn_native { namespace d3d12 {
 
     class Device;
 
-    class ResourceUploader {
+    class StagingBuffer : public StagingBufferBase {
       public:
-        ResourceUploader(Device* device);
+        StagingBuffer(size_t size, Device* device);
+        ~StagingBuffer();
 
-        void BufferSubData(ComPtr<ID3D12Resource> resource,
-                           uint32_t start,
-                           uint32_t count,
-                           const void* data);
+        ID3D12Resource* GetResource() const;
+
+        MaybeError Initialize() override;
 
       private:
-        struct UploadHandle {
-            ComPtr<ID3D12Resource> resource;
-            uint8_t* mappedBuffer;
-        };
-
-        UploadHandle GetUploadBuffer(uint32_t requiredSize);
-        void Release(UploadHandle uploadHandle);
-
         Device* mDevice;
+        ComPtr<ID3D12Resource> mUploadHeap;
     };
 }}  // namespace dawn_native::d3d12
 
-#endif  // DAWNNATIVE_D3D12_RESOURCEUPLOADER_H_
+#endif  // DAWNNATIVE_STAGINGBUFFERD3D12_H_

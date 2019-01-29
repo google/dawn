@@ -17,6 +17,7 @@
 #include "common/Platform.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
@@ -680,6 +681,18 @@ namespace dawn_native { namespace vulkan {
 
         // Command buffers are implicitly destroyed when the command pool is.
         commands->commandBuffer = VK_NULL_HANDLE;
+    }
+
+    ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
+        return DAWN_UNIMPLEMENTED_ERROR("Device unable to create staging buffer.");
+    }
+
+    MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
+                                               uint32_t sourceOffset,
+                                               BufferBase* destination,
+                                               uint32_t destinationOffset,
+                                               uint32_t size) {
+        return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer.");
     }
 
 }}  // namespace dawn_native::vulkan

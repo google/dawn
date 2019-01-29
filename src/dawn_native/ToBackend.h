@@ -94,6 +94,11 @@ namespace dawn_native {
     };
 
     template <typename BackendTraits>
+    struct ToBackendTraits<StagingBufferBase, BackendTraits> {
+        using BackendType = typename BackendTraits::StagingBufferType;
+    };
+
+    template <typename BackendTraits>
     struct ToBackendTraits<TextureBase, BackendTraits> {
         using BackendType = typename BackendTraits::TextureType;
     };

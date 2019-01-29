@@ -31,9 +31,10 @@ namespace dawn_native { namespace opengl {
         return mBuffer;
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
+    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glBufferSubData(GL_ARRAY_BUFFER, start, count, data);
+        return {};
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {

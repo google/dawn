@@ -52,11 +52,18 @@ namespace dawn_native { namespace metal {
         id<MTLDevice> GetMTLDevice();
 
         id<MTLCommandBuffer> GetPendingCommandBuffer();
-        Serial GetPendingCommandSerial() const;
+        Serial GetPendingCommandSerial() const override;
         void SubmitPendingCommandBuffer();
 
         MapRequestTracker* GetMapTracker() const;
         ResourceUploader* GetResourceUploader() const;
+
+        ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
+        MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
+                                           uint32_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint32_t destinationOffset,
+                                           uint32_t size) override;
 
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(

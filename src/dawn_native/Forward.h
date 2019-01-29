@@ -44,6 +44,7 @@ namespace dawn_native {
     class SamplerBase;
     class ShaderModuleBase;
     class ShaderModuleBuilder;
+    class StagingBufferBase;
     class SwapChainBase;
     class SwapChainBuilder;
     class TextureBase;

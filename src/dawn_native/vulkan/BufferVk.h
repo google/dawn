@@ -41,7 +41,7 @@ namespace dawn_native { namespace vulkan {
         void TransitionUsageNow(VkCommandBuffer commands, dawn::BufferUsageBit usage);
 
       private:
-        void SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
+        MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;

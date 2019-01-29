@@ -222,10 +222,15 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
 TEST_P(BufferSetSubDataTests, ManySetSubData) {
     // TODO(cwallez@chromium.org): Use ringbuffers for SetSubData on explicit APIs.
     // otherwise this creates too many resources and can take freeze the driver(?)
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsMetal() || IsVulkan());
+    DAWN_SKIP_TEST_IF(IsMetal() || IsVulkan());
 
+    // Note: Increasing the size of the buffer will likely cause timeout issues.
+    // In D3D12, timeout detection occurs when the GPU scheduler tries but cannot preempt the task
+    // executing these commands in-flight. If this takes longer than ~2s, a device reset occurs and
+    // fails the test. Since GPUs may or may not complete by then, this test must be disabled OR
+    // modified to be well-below the timeout limit.
     constexpr uint32_t kSize = 4000 * 1000;
-    constexpr uint32_t kElements = 1000 * 1000;
+    constexpr uint32_t kElements = 500 * 500;
     dawn::BufferDescriptor descriptor;
     descriptor.size = kSize;
     descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;

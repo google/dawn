@@ -17,9 +17,9 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocator.h"
-#include "dawn_native/d3d12/ResourceUploader.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -161,11 +161,22 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
+    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         Device* device = ToBackend(GetDevice());
 
-        TransitionUsageNow(device->GetPendingCommandList(), dawn::BufferUsageBit::TransferDst);
-        device->GetResourceUploader()->BufferSubData(mResource, start, count, data);
+        DynamicUploader* uploader = nullptr;
+        DAWN_TRY_ASSIGN(uploader, device->GetDynamicUploader());
+
+        UploadHandle uploadHandle;
+        DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(count, kDefaultAlignment));
+        ASSERT(uploadHandle.mappedBuffer != nullptr);
+
+        memcpy(uploadHandle.mappedBuffer, data, count);
+
+        DAWN_TRY(device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer,
+                                                 uploadHandle.startOffset, this, start, count));
+
+        return {};
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {

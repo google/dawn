@@ -31,7 +31,6 @@ namespace dawn_native { namespace d3d12 {
     class MapRequestTracker;
     class PlatformFunctions;
     class ResourceAllocator;
-    class ResourceUploader;
 
     void ASSERT_SUCCESS(HRESULT hr);
 
@@ -61,11 +60,10 @@ namespace dawn_native { namespace d3d12 {
         MapRequestTracker* GetMapRequestTracker() const;
         const PlatformFunctions* GetFunctions();
         ResourceAllocator* GetResourceAllocator();
-        ResourceUploader* GetResourceUploader();
 
         void OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList);
         ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
-        Serial GetPendingCommandSerial() const;
+        Serial GetPendingCommandSerial() const override;
 
         void NextSerial();
         void WaitForSerial(Serial serial);
@@ -73,6 +71,15 @@ namespace dawn_native { namespace d3d12 {
         void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
         void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
+
+        ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
+        MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
+                                           uint32_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint32_t destinationOffset,
+                                           uint32_t size) override;
+
+        ResultOrError<DynamicUploader*> GetDynamicUploader() const;
 
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
@@ -121,9 +128,11 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<DescriptorHeapAllocator> mDescriptorHeapAllocator;
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceAllocator> mResourceAllocator;
-        std::unique_ptr<ResourceUploader> mResourceUploader;
+        std::unique_ptr<DynamicUploader> mDynamicUploader;
 
         dawn_native::PCIInfo mPCIInfo;
+
+        static constexpr size_t kDefaultUploadBufferSize = 64000;  // DXGI min heap size is 64kB.
     };
 
 }}  // namespace dawn_native::d3d12

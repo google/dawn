@@ -34,7 +34,7 @@ namespace dawn_native { namespace metal {
         void OnMapCommandSerialFinished(uint32_t mapSerial, uint32_t offset, bool isWrite);
 
       private:
-        void SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
+        MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
         void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
         void UnmapImpl() override;

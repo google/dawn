@@ -16,6 +16,7 @@
 
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/DynamicUploader.h"
 
 #include <spirv-cross/spirv_cross.hpp>
 
@@ -57,6 +58,7 @@ namespace dawn_native { namespace null {
     // Device
 
     Device::Device(Adapter* adapter) : DeviceBase(adapter) {
+        mDynamicUploader = std::make_unique<DynamicUploader>(this);
     }
 
     Device::~Device() {
@@ -122,12 +124,30 @@ namespace dawn_native { namespace null {
         return new TextureView(texture, descriptor);
     }
 
+    ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
+        std::unique_ptr<StagingBufferBase> stagingBuffer =
+            std::make_unique<StagingBuffer>(size, this);
+        return std::move(stagingBuffer);
+    }
+
+    MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
+                                               uint32_t sourceOffset,
+                                               BufferBase* destination,
+                                               uint32_t destinationOffset,
+                                               uint32_t size) {
+        return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer.");
+    }
+
     Serial Device::GetCompletedCommandSerial() const {
         return mCompletedSerial;
     }
 
     Serial Device::GetLastSubmittedCommandSerial() const {
         return mLastSubmittedSerial;
+    }
+
+    Serial Device::GetPendingCommandSerial() const {
+        return mLastSubmittedSerial + 1;
     }
 
     void Device::TickImpl() {
@@ -179,10 +199,11 @@ namespace dawn_native { namespace null {
         }
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
+    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         ASSERT(start + count <= GetSize());
         ASSERT(mBackingData);
         memcpy(mBackingData.get() + start, data, count);
+        return {};
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
@@ -270,6 +291,17 @@ namespace dawn_native { namespace null {
 
     dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
         return dawn::TextureFormat::R8G8B8A8Unorm;
+    }
+
+    // StagingBuffer
+
+    StagingBuffer::StagingBuffer(size_t size, Device* device) : StagingBufferBase(size) {
+    }
+
+    MaybeError StagingBuffer::Initialize() {
+        mBuffer = std::make_unique<uint8_t[]>(GetSize());
+        mMappedPointer = mBuffer.get();
+        return {};
     }
 
 }}  // namespace dawn_native::null

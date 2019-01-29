@@ -95,6 +95,7 @@ TEST(SerialQueue, IterateUpTo) {
         expectedValues.erase(expectedValues.begin());
     }
     ASSERT_TRUE(expectedValues.empty());
+    EXPECT_EQ(queue.LastSerial(), 2u);
 }
 
 // Test ClearUpTo
@@ -110,6 +111,7 @@ TEST(SerialQueue, ClearUpTo) {
     queue.Enqueue(vector3, 1);
 
     queue.ClearUpTo(0);
+    EXPECT_EQ(queue.LastSerial(), 1u);
 
     std::vector<int> expectedValues = {9, 0};
     for (int value : queue.IterateAll()) {
@@ -140,4 +142,15 @@ TEST(SerialQueue, FirstSerial) {
     queue.Clear();
     queue.Enqueue(vector1, 6);
     EXPECT_EQ(queue.FirstSerial(), 6u);
+}
+
+// Test LastSerial
+TEST(SerialQueue, LastSerial) {
+    TestSerialQueue queue;
+
+    queue.Enqueue({1}, 0);
+    EXPECT_EQ(queue.LastSerial(), 0u);
+
+    queue.Enqueue({2}, 1);
+    EXPECT_EQ(queue.LastSerial(), 1u);
 }

@@ -31,6 +31,8 @@ namespace dawn_native {
 
     class AdapterBase;
     class FenceSignalTracker;
+    class DynamicUploader;
+    class StagingBufferBase;
 
     class DeviceBase {
       public:
@@ -60,6 +62,7 @@ namespace dawn_native {
 
         virtual Serial GetCompletedCommandSerial() const = 0;
         virtual Serial GetLastSubmittedCommandSerial() const = 0;
+        virtual Serial GetPendingCommandSerial() const = 0;
         virtual void TickImpl() = 0;
 
         // Many Dawn objects are completely immutable once created which means that if two
@@ -110,6 +113,14 @@ namespace dawn_native {
         }
 
         virtual const PCIInfo& GetPCIInfo() const;
+
+        virtual ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(
+            size_t size) = 0;
+        virtual MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
+                                                   uint32_t sourceOffset,
+                                                   BufferBase* destination,
+                                                   uint32_t destinationOffset,
+                                                   uint32_t size) = 0;
 
       private:
         virtual ResultOrError<BindGroupBase*> CreateBindGroupImpl(

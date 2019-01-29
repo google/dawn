@@ -63,7 +63,7 @@ namespace dawn_native {
         void CallMapWriteCallback(uint32_t serial, dawnBufferMapAsyncStatus status, void* pointer);
 
       private:
-        virtual void SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) = 0;
+        virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) = 0;
         virtual void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
         virtual void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
         virtual void UnmapImpl() = 0;

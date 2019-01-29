@@ -196,7 +196,7 @@ namespace dawn_native { namespace vulkan {
         mLastUsage = usage;
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
+    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         Device* device = ToBackend(GetDevice());
 
         VkCommandBuffer commands = device->GetPendingCommandBuffer();
@@ -204,6 +204,7 @@ namespace dawn_native { namespace vulkan {
 
         BufferUploader* uploader = device->GetBufferUploader();
         uploader->BufferSubData(mHandle, start, count, data);
+        return {};
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {

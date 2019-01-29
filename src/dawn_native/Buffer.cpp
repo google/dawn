@@ -106,7 +106,9 @@ namespace dawn_native {
             return;
         }
 
-        SetSubDataImpl(start, count, data);
+        if (GetDevice()->ConsumedError(SetSubDataImpl(start, count, data))) {
+            return;
+        }
     }
 
     void BufferBase::MapReadAsync(uint32_t start,

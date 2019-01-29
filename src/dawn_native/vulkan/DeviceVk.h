@@ -58,7 +58,7 @@ namespace dawn_native { namespace vulkan {
         RenderPassCache* GetRenderPassCache() const;
 
         VkCommandBuffer GetPendingCommandBuffer();
-        Serial GetPendingCommandSerial() const;
+        Serial GetPendingCommandSerial() const override;
         void SubmitPendingCommands();
         void AddWaitSemaphore(VkSemaphore semaphore);
 
@@ -74,6 +74,13 @@ namespace dawn_native { namespace vulkan {
         void TickImpl() override;
 
         const dawn_native::PCIInfo& GetPCIInfo() const override;
+
+        ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
+        MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
+                                           uint32_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint32_t destinationOffset,
+                                           uint32_t size) override;
 
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(

@@ -49,9 +49,10 @@ namespace dawn_native { namespace metal {
         }
     }
 
-    void Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
+    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         auto* uploader = ToBackend(GetDevice())->GetResourceUploader();
         uploader->BufferSubData(mMtlBuffer, start, count, data);
+        return {};
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t) {
