@@ -91,14 +91,14 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
             DAWN_TRY(ValidateCompareFunction(descriptor->depthCompare));
-            DAWN_TRY(ValidateCompareFunction(descriptor->front.compare));
-            DAWN_TRY(ValidateStencilOperation(descriptor->front.stencilFailOp));
-            DAWN_TRY(ValidateStencilOperation(descriptor->front.depthFailOp));
-            DAWN_TRY(ValidateStencilOperation(descriptor->front.passOp));
-            DAWN_TRY(ValidateCompareFunction(descriptor->back.compare));
-            DAWN_TRY(ValidateStencilOperation(descriptor->back.stencilFailOp));
-            DAWN_TRY(ValidateStencilOperation(descriptor->back.depthFailOp));
-            DAWN_TRY(ValidateStencilOperation(descriptor->back.passOp));
+            DAWN_TRY(ValidateCompareFunction(descriptor->stencilFront.compare));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.failOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.depthFailOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.passOp));
+            DAWN_TRY(ValidateCompareFunction(descriptor->stencilBack.compare));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.failOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.depthFailOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.passOp));
             return {};
         }
 
@@ -159,14 +159,14 @@ namespace dawn_native {
     }
 
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState) {
-        return mDepthStencilState->back.compare != dawn::CompareFunction::Always ||
-               mDepthStencilState->back.stencilFailOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->back.depthFailOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->back.passOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->front.compare != dawn::CompareFunction::Always ||
-               mDepthStencilState->front.stencilFailOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->front.depthFailOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->front.passOp != dawn::StencilOperation::Keep;
+        return mDepthStencilState->stencilBack.compare != dawn::CompareFunction::Always ||
+               mDepthStencilState->stencilBack.failOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->stencilBack.depthFailOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->stencilBack.passOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->stencilFront.compare != dawn::CompareFunction::Always ||
+               mDepthStencilState->stencilFront.failOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->stencilFront.depthFailOp != dawn::StencilOperation::Keep ||
+               mDepthStencilState->stencilFront.passOp != dawn::StencilOperation::Keep;
     }
 
     // RenderPipelineBase

@@ -121,23 +121,23 @@ class DepthStencilStateTest : public DawnTest {
         void CheckDepthCompareFunction(dawn::CompareFunction compareFunction, bool less, bool equal, bool greater) {
             dawn::StencilStateFaceDescriptor stencilFace;
             stencilFace.compare = dawn::CompareFunction::Always;
-            stencilFace.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFace.failOp = dawn::StencilOperation::Keep;
             stencilFace.depthFailOp = dawn::StencilOperation::Keep;
             stencilFace.passOp = dawn::StencilOperation::Keep;
 
             dawn::DepthStencilStateDescriptor baseState;
             baseState.depthWriteEnabled = true;
             baseState.depthCompare = dawn::CompareFunction::Always;
-            baseState.back = stencilFace;
-            baseState.front = stencilFace;
+            baseState.stencilBack = stencilFace;
+            baseState.stencilFront = stencilFace;
             baseState.stencilReadMask = 0xff;
             baseState.stencilWriteMask = 0xff;
 
             dawn::DepthStencilStateDescriptor state;
             state.depthWriteEnabled = true;
             state.depthCompare = compareFunction;
-            state.back = stencilFace;
-            state.front = stencilFace;
+            state.stencilBack = stencilFace;
+            state.stencilFront = stencilFace;
             state.stencilReadMask = 0xff;
             state.stencilWriteMask = 0xff;
 
@@ -149,7 +149,8 @@ class DepthStencilStateTest : public DawnTest {
             // Base triangle at depth 0.5, depth always, depth write enabled
             TestSpec base = { baseState, baseColor, 0.5f, 0u };
 
-            // Draw the base triangle, then a triangle in front of the base triangle with the given depth comparison function
+            // Draw the base triangle, then a triangle in stencilFront of the base triangle with the
+            // given depth comparison function
             DoTest({ base, { state, lessColor, 0.f, 0u } }, less ? lessColor : baseColor);
 
             // Draw the base triangle, then a triangle in at the same depth as the base triangle with the given depth comparison function
@@ -164,27 +165,27 @@ class DepthStencilStateTest : public DawnTest {
         void CheckStencilCompareFunction(dawn::CompareFunction compareFunction, bool less, bool equal, bool greater) {
             dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
             baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
-            baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            baseStencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
             baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
             baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
             dawn::DepthStencilStateDescriptor baseState;
             baseState.depthWriteEnabled = false;
             baseState.depthCompare = dawn::CompareFunction::Always;
-            baseState.back = baseStencilFaceDescriptor;
-            baseState.front = baseStencilFaceDescriptor;
+            baseState.stencilBack = baseStencilFaceDescriptor;
+            baseState.stencilFront = baseStencilFaceDescriptor;
             baseState.stencilReadMask = 0xff;
             baseState.stencilWriteMask = 0xff;
 
             dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
             stencilFaceDescriptor.compare = compareFunction;
-            stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
             stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
             stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
             dawn::DepthStencilStateDescriptor state;
             state.depthWriteEnabled = false;
             state.depthCompare = dawn::CompareFunction::Always;
-            state.back = stencilFaceDescriptor;
-            state.front = stencilFaceDescriptor;
+            state.stencilBack = stencilFaceDescriptor;
+            state.stencilFront = stencilFaceDescriptor;
             state.stencilReadMask = 0xff;
             state.stencilWriteMask = 0xff;
 
@@ -210,27 +211,27 @@ class DepthStencilStateTest : public DawnTest {
         void CheckStencilOperation(dawn::StencilOperation stencilOperation, uint32_t initialStencil, uint32_t reference, uint32_t expectedStencil) {
             dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
             baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
-            baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            baseStencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
             baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
             baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
             dawn::DepthStencilStateDescriptor baseState;
             baseState.depthWriteEnabled = false;
             baseState.depthCompare = dawn::CompareFunction::Always;
-            baseState.back = baseStencilFaceDescriptor;
-            baseState.front = baseStencilFaceDescriptor;
+            baseState.stencilBack = baseStencilFaceDescriptor;
+            baseState.stencilFront = baseStencilFaceDescriptor;
             baseState.stencilReadMask = 0xff;
             baseState.stencilWriteMask = 0xff;
 
             dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
             stencilFaceDescriptor.compare = dawn::CompareFunction::Always;
-            stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
             stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
             stencilFaceDescriptor.passOp = stencilOperation;
             dawn::DepthStencilStateDescriptor state;
             state.depthWriteEnabled = false;
             state.depthCompare = dawn::CompareFunction::Always;
-            state.back = stencilFaceDescriptor;
-            state.front = stencilFaceDescriptor;
+            state.stencilBack = stencilFaceDescriptor;
+            state.stencilFront = stencilFaceDescriptor;
             state.stencilReadMask = 0xff;
             state.stencilWriteMask = 0xff;
 
@@ -247,14 +248,14 @@ class DepthStencilStateTest : public DawnTest {
         void CheckStencil(std::vector<TestSpec> testParams, uint32_t expectedStencil) {
             dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
             stencilFaceDescriptor.compare = dawn::CompareFunction::Equal;
-            stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
             stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
             stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
             dawn::DepthStencilStateDescriptor state;
             state.depthWriteEnabled = false;
             state.depthCompare = dawn::CompareFunction::Always;
-            state.back = stencilFaceDescriptor;
-            state.front = stencilFaceDescriptor;
+            state.stencilBack = stencilFaceDescriptor;
+            state.stencilFront = stencilFaceDescriptor;
             state.stencilReadMask = 0xff;
             state.stencilWriteMask = 0xff;
 
@@ -332,15 +333,15 @@ class DepthStencilStateTest : public DawnTest {
 TEST_P(DepthStencilStateTest, Basic) {
     dawn::StencilStateFaceDescriptor stencilFace;
     stencilFace.compare = dawn::CompareFunction::Always;
-    stencilFace.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFace.failOp = dawn::StencilOperation::Keep;
     stencilFace.depthFailOp = dawn::StencilOperation::Keep;
     stencilFace.passOp = dawn::StencilOperation::Keep;
 
     dawn::DepthStencilStateDescriptor state;
     state.depthWriteEnabled = false;
     state.depthCompare = dawn::CompareFunction::Always;
-    state.back = stencilFace;
-    state.front = stencilFace;
+    state.stencilBack = stencilFace;
+    state.stencilFront = stencilFace;
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
@@ -353,15 +354,15 @@ TEST_P(DepthStencilStateTest, Basic) {
 TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
     dawn::StencilStateFaceDescriptor stencilFace;
     stencilFace.compare = dawn::CompareFunction::Always;
-    stencilFace.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFace.failOp = dawn::StencilOperation::Keep;
     stencilFace.depthFailOp = dawn::StencilOperation::Keep;
     stencilFace.passOp = dawn::StencilOperation::Keep;
 
     dawn::DepthStencilStateDescriptor state;
     state.depthWriteEnabled = false;
     state.depthCompare = dawn::CompareFunction::Always;
-    state.back = stencilFace;
-    state.front = stencilFace;
+    state.stencilBack = stencilFace;
+    state.stencilFront = stencilFace;
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
@@ -418,31 +419,31 @@ TEST_P(DepthStencilStateTest, DepthNotEqual) {
 TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
     dawn::StencilStateFaceDescriptor stencilFace;
     stencilFace.compare = dawn::CompareFunction::Always;
-    stencilFace.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFace.failOp = dawn::StencilOperation::Keep;
     stencilFace.depthFailOp = dawn::StencilOperation::Keep;
     stencilFace.passOp = dawn::StencilOperation::Keep;
 
     dawn::DepthStencilStateDescriptor baseState;
     baseState.depthWriteEnabled = true;
     baseState.depthCompare = dawn::CompareFunction::Always;
-    baseState.back = stencilFace;
-    baseState.front = stencilFace;
+    baseState.stencilBack = stencilFace;
+    baseState.stencilFront = stencilFace;
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
     dawn::DepthStencilStateDescriptor noDepthWrite;
     noDepthWrite.depthWriteEnabled = false;
     noDepthWrite.depthCompare = dawn::CompareFunction::Always;
-    noDepthWrite.back = stencilFace;
-    noDepthWrite.front = stencilFace;
+    noDepthWrite.stencilBack = stencilFace;
+    noDepthWrite.stencilFront = stencilFace;
     noDepthWrite.stencilReadMask = 0xff;
     noDepthWrite.stencilWriteMask = 0xff;
 
     dawn::DepthStencilStateDescriptor checkState;
     checkState.depthWriteEnabled = false;
     checkState.depthCompare = dawn::CompareFunction::Equal;
-    checkState.back = stencilFace;
-    checkState.front = stencilFace;
+    checkState.stencilBack = stencilFace;
+    checkState.stencilFront = stencilFace;
     checkState.stencilReadMask = 0xff;
     checkState.stencilWriteMask = 0xff;
 
@@ -527,27 +528,27 @@ TEST_P(DepthStencilStateTest, StencilDecrementWrap) {
 TEST_P(DepthStencilStateTest, StencilReadMask) {
     dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
-    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
     dawn::DepthStencilStateDescriptor baseState;
     baseState.depthWriteEnabled = false;
     baseState.depthCompare = dawn::CompareFunction::Always;
-    baseState.back = baseStencilFaceDescriptor;
-    baseState.front = baseStencilFaceDescriptor;
+    baseState.stencilBack = baseStencilFaceDescriptor;
+    baseState.stencilFront = baseStencilFaceDescriptor;
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
     dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
     stencilFaceDescriptor.compare = dawn::CompareFunction::Equal;
-    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
     dawn::DepthStencilStateDescriptor state;
     state.depthWriteEnabled = false;
     state.depthCompare = dawn::CompareFunction::Always;
-    state.back = stencilFaceDescriptor;
-    state.front = stencilFaceDescriptor;
+    state.stencilBack = stencilFaceDescriptor;
+    state.stencilFront = stencilFaceDescriptor;
     state.stencilReadMask = 0x2;
     state.stencilWriteMask = 0xff;
 
@@ -564,27 +565,27 @@ TEST_P(DepthStencilStateTest, StencilReadMask) {
 TEST_P(DepthStencilStateTest, StencilWriteMask) {
     dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
-    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
     dawn::DepthStencilStateDescriptor baseState;
     baseState.depthWriteEnabled = false;
     baseState.depthCompare = dawn::CompareFunction::Always;
-    baseState.back = baseStencilFaceDescriptor;
-    baseState.front = baseStencilFaceDescriptor;
+    baseState.stencilBack = baseStencilFaceDescriptor;
+    baseState.stencilFront = baseStencilFaceDescriptor;
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0x1;
 
     dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
     stencilFaceDescriptor.compare = dawn::CompareFunction::Equal;
-    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
     dawn::DepthStencilStateDescriptor state;
     state.depthWriteEnabled = false;
     state.depthCompare = dawn::CompareFunction::Always;
-    state.back = stencilFaceDescriptor;
-    state.front = stencilFaceDescriptor;
+    state.stencilBack = stencilFaceDescriptor;
+    state.stencilFront = stencilFaceDescriptor;
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
@@ -600,27 +601,27 @@ TEST_P(DepthStencilStateTest, StencilWriteMask) {
 TEST_P(DepthStencilStateTest, StencilFail) {
     dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
-    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
     dawn::DepthStencilStateDescriptor baseState;
     baseState.depthWriteEnabled = false;
     baseState.depthCompare = dawn::CompareFunction::Always;
-    baseState.back = baseStencilFaceDescriptor;
-    baseState.front = baseStencilFaceDescriptor;
+    baseState.stencilBack = baseStencilFaceDescriptor;
+    baseState.stencilFront = baseStencilFaceDescriptor;
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
     dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
     stencilFaceDescriptor.compare = dawn::CompareFunction::Less;
-    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Replace;
+    stencilFaceDescriptor.failOp = dawn::StencilOperation::Replace;
     stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
     dawn::DepthStencilStateDescriptor state;
     state.depthWriteEnabled = false;
     state.depthCompare = dawn::CompareFunction::Always;
-    state.back = stencilFaceDescriptor;
-    state.front = stencilFaceDescriptor;
+    state.stencilBack = stencilFaceDescriptor;
+    state.stencilFront = stencilFaceDescriptor;
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
@@ -634,27 +635,27 @@ TEST_P(DepthStencilStateTest, StencilFail) {
 TEST_P(DepthStencilStateTest, StencilDepthFail) {
     dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
-    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
     dawn::DepthStencilStateDescriptor baseState;
     baseState.depthWriteEnabled = true;
     baseState.depthCompare = dawn::CompareFunction::Always;
-    baseState.back = baseStencilFaceDescriptor;
-    baseState.front = baseStencilFaceDescriptor;
+    baseState.stencilBack = baseStencilFaceDescriptor;
+    baseState.stencilFront = baseStencilFaceDescriptor;
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
     dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
     stencilFaceDescriptor.compare = dawn::CompareFunction::Greater;
-    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Replace;
     stencilFaceDescriptor.passOp = dawn::StencilOperation::Keep;
     dawn::DepthStencilStateDescriptor state;
     state.depthWriteEnabled = true;
     state.depthCompare = dawn::CompareFunction::Less;
-    state.back = stencilFaceDescriptor;
-    state.front = stencilFaceDescriptor;
+    state.stencilBack = stencilFaceDescriptor;
+    state.stencilFront = stencilFaceDescriptor;
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
@@ -668,27 +669,27 @@ TEST_P(DepthStencilStateTest, StencilDepthFail) {
 TEST_P(DepthStencilStateTest, StencilDepthPass) {
     dawn::StencilStateFaceDescriptor baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = dawn::CompareFunction::Always;
-    baseStencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    baseStencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
     dawn::DepthStencilStateDescriptor baseState;
     baseState.depthWriteEnabled = true;
     baseState.depthCompare = dawn::CompareFunction::Always;
-    baseState.back = baseStencilFaceDescriptor;
-    baseState.front = baseStencilFaceDescriptor;
+    baseState.stencilBack = baseStencilFaceDescriptor;
+    baseState.stencilFront = baseStencilFaceDescriptor;
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
     dawn::StencilStateFaceDescriptor stencilFaceDescriptor;
     stencilFaceDescriptor.compare = dawn::CompareFunction::Greater;
-    stencilFaceDescriptor.stencilFailOp = dawn::StencilOperation::Keep;
+    stencilFaceDescriptor.failOp = dawn::StencilOperation::Keep;
     stencilFaceDescriptor.depthFailOp = dawn::StencilOperation::Keep;
     stencilFaceDescriptor.passOp = dawn::StencilOperation::Replace;
     dawn::DepthStencilStateDescriptor state;
     state.depthWriteEnabled = true;
     state.depthCompare = dawn::CompareFunction::Less;
-    state.back = stencilFaceDescriptor;
-    state.front = stencilFaceDescriptor;
+    state.stencilBack = stencilFaceDescriptor;
+    state.stencilFront = stencilFaceDescriptor;
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 

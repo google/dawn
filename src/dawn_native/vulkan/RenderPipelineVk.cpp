@@ -171,15 +171,17 @@ namespace dawn_native { namespace vulkan {
             depthStencilState.stencilTestEnable =
                 StencilTestEnabled(descriptor) ? VK_TRUE : VK_FALSE;
 
-            depthStencilState.front.failOp = VulkanStencilOp(descriptor->front.stencilFailOp);
-            depthStencilState.front.passOp = VulkanStencilOp(descriptor->front.passOp);
-            depthStencilState.front.depthFailOp = VulkanStencilOp(descriptor->front.depthFailOp);
-            depthStencilState.front.compareOp = ToVulkanCompareOp(descriptor->front.compare);
+            depthStencilState.front.failOp = VulkanStencilOp(descriptor->stencilFront.failOp);
+            depthStencilState.front.passOp = VulkanStencilOp(descriptor->stencilFront.passOp);
+            depthStencilState.front.depthFailOp =
+                VulkanStencilOp(descriptor->stencilFront.depthFailOp);
+            depthStencilState.front.compareOp = ToVulkanCompareOp(descriptor->stencilFront.compare);
 
-            depthStencilState.back.failOp = VulkanStencilOp(descriptor->back.stencilFailOp);
-            depthStencilState.back.passOp = VulkanStencilOp(descriptor->back.passOp);
-            depthStencilState.back.depthFailOp = VulkanStencilOp(descriptor->back.depthFailOp);
-            depthStencilState.back.compareOp = ToVulkanCompareOp(descriptor->back.compare);
+            depthStencilState.back.failOp = VulkanStencilOp(descriptor->stencilBack.failOp);
+            depthStencilState.back.passOp = VulkanStencilOp(descriptor->stencilBack.passOp);
+            depthStencilState.back.depthFailOp =
+                VulkanStencilOp(descriptor->stencilBack.depthFailOp);
+            depthStencilState.back.compareOp = ToVulkanCompareOp(descriptor->stencilBack.compare);
 
             // Dawn doesn't have separate front and back stencil masks.
             depthStencilState.front.compareMask = descriptor->stencilReadMask;

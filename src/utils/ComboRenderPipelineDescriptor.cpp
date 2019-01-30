@@ -74,15 +74,15 @@ namespace utils {
         {
             dawn::StencilStateFaceDescriptor stencilFace;
             stencilFace.compare = dawn::CompareFunction::Always;
-            stencilFace.stencilFailOp = dawn::StencilOperation::Keep;
+            stencilFace.failOp = dawn::StencilOperation::Keep;
             stencilFace.depthFailOp = dawn::StencilOperation::Keep;
             stencilFace.passOp = dawn::StencilOperation::Keep;
 
             // dawn::DepthStencilStateDescriptor depthStencilState;
             cDepthStencilState.depthWriteEnabled = false;
             cDepthStencilState.depthCompare = dawn::CompareFunction::Always;
-            cDepthStencilState.back = stencilFace;
-            cDepthStencilState.front = stencilFace;
+            cDepthStencilState.stencilBack = stencilFace;
+            cDepthStencilState.stencilFront = stencilFace;
             cDepthStencilState.stencilReadMask = 0xff;
             cDepthStencilState.stencilWriteMask = 0xff;
             descriptor->depthStencilState = &cDepthStencilState;

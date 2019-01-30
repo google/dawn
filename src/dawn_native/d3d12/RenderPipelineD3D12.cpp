@@ -169,7 +169,7 @@ namespace dawn_native { namespace d3d12 {
         D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(const StencilStateFaceDescriptor descriptor) {
             D3D12_DEPTH_STENCILOP_DESC desc;
 
-            desc.StencilFailOp = StencilOp(descriptor.stencilFailOp);
+            desc.StencilFailOp = StencilOp(descriptor.failOp);
             desc.StencilDepthFailOp = StencilOp(descriptor.depthFailOp);
             desc.StencilPassOp = StencilOp(descriptor.passOp);
             desc.StencilFunc = ToD3D12ComparisonFunc(descriptor.compare);
@@ -192,8 +192,8 @@ namespace dawn_native { namespace d3d12 {
             mDepthStencilDescriptor.StencilWriteMask =
                 static_cast<UINT8>(descriptor->stencilWriteMask);
 
-            mDepthStencilDescriptor.FrontFace = StencilOpDesc(descriptor->front);
-            mDepthStencilDescriptor.BackFace = StencilOpDesc(descriptor->back);
+            mDepthStencilDescriptor.FrontFace = StencilOpDesc(descriptor->stencilFront);
+            mDepthStencilDescriptor.BackFace = StencilOpDesc(descriptor->stencilBack);
             return mDepthStencilDescriptor;
         }
 

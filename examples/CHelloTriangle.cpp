@@ -114,7 +114,7 @@ void init() {
 
         dawnStencilStateFaceDescriptor stencilFace;
         stencilFace.compare = DAWN_COMPARE_FUNCTION_ALWAYS;
-        stencilFace.stencilFailOp = DAWN_STENCIL_OPERATION_KEEP;
+        stencilFace.failOp = DAWN_STENCIL_OPERATION_KEEP;
         stencilFace.depthFailOp = DAWN_STENCIL_OPERATION_KEEP;
         stencilFace.passOp = DAWN_STENCIL_OPERATION_KEEP;
 
@@ -122,8 +122,8 @@ void init() {
         depthStencilState.nextInChain = nullptr;
         depthStencilState.depthWriteEnabled = false;
         depthStencilState.depthCompare = DAWN_COMPARE_FUNCTION_ALWAYS;
-        depthStencilState.back = stencilFace;
-        depthStencilState.front = stencilFace;
+        depthStencilState.stencilBack = stencilFace;
+        depthStencilState.stencilFront = stencilFace;
         depthStencilState.stencilReadMask = 0xff;
         depthStencilState.stencilWriteMask = 0xff;
         descriptor.depthStencilState = &depthStencilState;

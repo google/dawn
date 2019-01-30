@@ -178,24 +178,24 @@ namespace dawn_native { namespace metal {
                 MTLStencilDescriptor* frontFaceStencil = [[MTLStencilDescriptor new] autorelease];
 
                 backFaceStencil.stencilCompareFunction =
-                    ToMetalCompareFunction(descriptor->back.compare);
+                    ToMetalCompareFunction(descriptor->stencilBack.compare);
                 backFaceStencil.stencilFailureOperation =
-                    MetalStencilOperation(descriptor->back.stencilFailOp);
+                    MetalStencilOperation(descriptor->stencilBack.failOp);
                 backFaceStencil.depthFailureOperation =
-                    MetalStencilOperation(descriptor->back.depthFailOp);
+                    MetalStencilOperation(descriptor->stencilBack.depthFailOp);
                 backFaceStencil.depthStencilPassOperation =
-                    MetalStencilOperation(descriptor->back.passOp);
+                    MetalStencilOperation(descriptor->stencilBack.passOp);
                 backFaceStencil.readMask = descriptor->stencilReadMask;
                 backFaceStencil.writeMask = descriptor->stencilWriteMask;
 
                 frontFaceStencil.stencilCompareFunction =
-                    ToMetalCompareFunction(descriptor->front.compare);
+                    ToMetalCompareFunction(descriptor->stencilFront.compare);
                 frontFaceStencil.stencilFailureOperation =
-                    MetalStencilOperation(descriptor->front.stencilFailOp);
+                    MetalStencilOperation(descriptor->stencilFront.failOp);
                 frontFaceStencil.depthFailureOperation =
-                    MetalStencilOperation(descriptor->front.depthFailOp);
+                    MetalStencilOperation(descriptor->stencilFront.depthFailOp);
                 frontFaceStencil.depthStencilPassOperation =
-                    MetalStencilOperation(descriptor->front.passOp);
+                    MetalStencilOperation(descriptor->stencilFront.passOp);
                 frontFaceStencil.readMask = descriptor->stencilReadMask;
                 frontFaceStencil.writeMask = descriptor->stencilWriteMask;
 

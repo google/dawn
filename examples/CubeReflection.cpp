@@ -214,8 +214,8 @@ void init() {
     pDescriptor.cAttachmentsState.hasDepthStencilAttachment = true;
     pDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
     pDescriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
-    pDescriptor.cDepthStencilState.front.passOp = dawn::StencilOperation::Replace;
-    pDescriptor.cDepthStencilState.back.passOp = dawn::StencilOperation::Replace;
+    pDescriptor.cDepthStencilState.stencilFront.passOp = dawn::StencilOperation::Replace;
+    pDescriptor.cDepthStencilState.stencilBack.passOp = dawn::StencilOperation::Replace;
     pDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 
     planePipeline = device.CreateRenderPipeline(&pDescriptor);
@@ -228,10 +228,10 @@ void init() {
     rfDescriptor.cAttachmentsState.hasDepthStencilAttachment = true;
     rfDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
     rfDescriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
-    pDescriptor.cDepthStencilState.front.compare = dawn::CompareFunction::Equal;
-    pDescriptor.cDepthStencilState.back.compare = dawn::CompareFunction::Equal;
-    pDescriptor.cDepthStencilState.front.passOp = dawn::StencilOperation::Replace;
-    pDescriptor.cDepthStencilState.back.passOp = dawn::StencilOperation::Replace;
+    pDescriptor.cDepthStencilState.stencilFront.compare = dawn::CompareFunction::Equal;
+    pDescriptor.cDepthStencilState.stencilBack.compare = dawn::CompareFunction::Equal;
+    pDescriptor.cDepthStencilState.stencilFront.passOp = dawn::StencilOperation::Replace;
+    pDescriptor.cDepthStencilState.stencilBack.passOp = dawn::StencilOperation::Replace;
     rfDescriptor.cDepthStencilState.depthWriteEnabled = true;
     rfDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 

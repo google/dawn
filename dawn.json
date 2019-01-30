@@ -513,8 +513,8 @@
         "members": [
             {"name": "depth write enabled", "type": "bool"},
             {"name": "depth compare", "type": "compare function"},
-            {"name": "front", "type": "stencil state face descriptor"},
-            {"name": "back", "type": "stencil state face descriptor"},
+            {"name": "stencil front", "type": "stencil state face descriptor"},
+            {"name": "stencil back", "type": "stencil state face descriptor"},
             {"name": "stencil read mask", "type": "uint32_t"},
             {"name": "stencil write mask", "type": "uint32_t"}
         ]
@@ -937,7 +937,7 @@
         "extensible": false,
         "members": [
             {"name": "compare", "type": "compare function"},
-            {"name": "stencil fail op", "type": "stencil operation"},
+            {"name": "fail op", "type": "stencil operation"},
             {"name": "depth fail op", "type": "stencil operation"},
             {"name": "pass op", "type": "stencil operation"}
         ]
