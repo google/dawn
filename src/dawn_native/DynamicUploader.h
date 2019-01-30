@@ -18,8 +18,6 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/RingBuffer.h"
 
-#include <memory>
-
 // DynamicUploader is the front-end implementation used to manage multiple ring buffers for upload
 // usage.
 namespace dawn_native {

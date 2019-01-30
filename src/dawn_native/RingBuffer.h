@@ -18,6 +18,8 @@
 #include "common/SerialQueue.h"
 #include "dawn_native/StagingBuffer.h"
 
+#include <memory>
+
 // RingBuffer is the front-end implementation used to manage a ring buffer in GPU memory.
 namespace dawn_native {
 
