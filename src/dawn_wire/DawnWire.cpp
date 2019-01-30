@@ -14,6 +14,7 @@
 
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/Device_autogen.h"
+#include "dawn_wire/server/Server.h"
 
 namespace dawn_wire {
     CommandHandler* NewClientDevice(dawnProcTable* procs,
@@ -25,5 +26,11 @@ namespace dawn_wire {
         *procs = client::GetProcs();
 
         return new client::Client(clientDevice);
+    }
+
+    CommandHandler* NewServerCommandHandler(dawnDevice device,
+                                            const dawnProcTable& procs,
+                                            CommandSerializer* serializer) {
+        return new server::Server(device, procs, serializer);
     }
 }  // namespace dawn_wire
