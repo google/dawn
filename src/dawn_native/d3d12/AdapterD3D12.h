@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn Authors
+// Copyright 2019 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_D3D12BACKEND_H_
-#define DAWNNATIVE_D3D12BACKEND_H_
+#ifndef DAWNNATIVE_D3D12_ADAPTERD3D12_H_
+#define DAWNNATIVE_D3D12_ADAPTERD3D12_H_
 
-#include <dawn/dawn_wsi.h>
-#include <dawn_native/DawnNative.h>
+#include "dawn_native/Adapter.h"
 
-#include <windows.h>
+#include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
-    DAWN_NATIVE_EXPORT dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device,
-                                                                             HWND window);
-    DAWN_NATIVE_EXPORT dawnTextureFormat
-    GetNativeSwapChainPreferredFormat(const dawnSwapChainImplementation* swapChain);
+
+    class Backend;
+
+    class Adapter : public AdapterBase {
+      public:
+        Adapter(Backend* backend, ComPtr<IDXGIAdapter1> hardwareAdapter);
+        virtual ~Adapter() = default;
+
+        Backend* GetBackend() const;
+
+      private:
+        ResultOrError<DeviceBase*> CreateDeviceImpl() override;
+
+        ComPtr<IDXGIAdapter1> mHardwareAdapter;
+        Backend* mBackend;
+    };
+
 }}  // namespace dawn_native::d3d12
 
-#endif  // DAWNNATIVE_D3D12BACKEND_H_
+#endif  // DAWNNATIVE_D3D12_ADAPTERD3D12_H_

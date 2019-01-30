@@ -37,7 +37,7 @@ namespace dawn_native { namespace d3d12 {
     // Definition of backend types
     class Device : public DeviceBase {
       public:
-        Device();
+        Device(Adapter* adapter, ComPtr<ID3D12Device> d3d12Device);
         ~Device();
 
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
@@ -50,16 +50,15 @@ namespace dawn_native { namespace d3d12 {
         Serial GetLastSubmittedCommandSerial() const final override;
         void TickImpl() override;
 
-        const dawn_native::PCIInfo& GetPCIInfo() const override;
+        ComPtr<ID3D12Device> GetD3D12Device() const;
+        ComPtr<ID3D12CommandQueue> GetCommandQueue() const;
 
-        ComPtr<IDXGIFactory4> GetFactory();
-        ComPtr<ID3D12Device> GetD3D12Device();
-        ComPtr<ID3D12CommandQueue> GetCommandQueue();
-
-        DescriptorHeapAllocator* GetDescriptorHeapAllocator();
+        DescriptorHeapAllocator* GetDescriptorHeapAllocator() const;
         MapRequestTracker* GetMapRequestTracker() const;
-        const PlatformFunctions* GetFunctions();
-        ResourceAllocator* GetResourceAllocator();
+        ResourceAllocator* GetResourceAllocator() const;
+
+        const PlatformFunctions* GetFunctions() const;
+        ComPtr<IDXGIFactory4> GetFactory() const;
 
         void OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList);
         ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
@@ -101,19 +100,12 @@ namespace dawn_native { namespace d3d12 {
         ResultOrError<TextureViewBase*> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
-        void CollectPCIInfo();
-
-        // Keep mFunctions as the first member so that in the destructor it is freed. Otherwise the
-        // D3D12 DLLs are unloaded before we are done using it.
-        std::unique_ptr<PlatformFunctions> mFunctions;
 
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent;
 
-        ComPtr<IDXGIFactory4> mFactory;
-        ComPtr<IDXGIAdapter1> mHardwareAdapter;
         ComPtr<ID3D12Device> mD3d12Device;
         ComPtr<ID3D12CommandQueue> mCommandQueue;
 

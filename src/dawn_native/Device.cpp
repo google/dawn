@@ -70,6 +70,10 @@ namespace dawn_native {
         mErrorUserdata = userdata;
     }
 
+    AdapterBase* DeviceBase::GetAdapter() const {
+        return mAdapter;
+    }
+
     DeviceBase* DeviceBase::GetDevice() {
         return this;
     }

@@ -506,6 +506,10 @@ source_set("libdawn_native_sources") {
   if (dawn_enable_d3d12) {
     libs += [ "dxguid.lib" ]
     sources += [
+      "src/dawn_native/d3d12/AdapterD3D12.cpp",
+      "src/dawn_native/d3d12/AdapterD3D12.h",
+      "src/dawn_native/d3d12/BackendD3D12.cpp",
+      "src/dawn_native/d3d12/BackendD3D12.h",
       "src/dawn_native/d3d12/BindGroupD3D12.cpp",
       "src/dawn_native/d3d12/BindGroupD3D12.h",
       "src/dawn_native/d3d12/BindGroupLayoutD3D12.cpp",

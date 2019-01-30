@@ -23,10 +23,6 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    dawnDevice CreateDevice() {
-        return reinterpret_cast<dawnDevice>(new Device());
-    }
-
     dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, HWND window) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
 

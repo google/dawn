@@ -30,8 +30,18 @@ namespace utils {
         }
 
         dawnDevice CreateDevice() override {
-            mBackendDevice = dawn_native::d3d12::CreateDevice();
-            return mBackendDevice;
+            // Make an instance and find a D3D12 adapter
+            mInstance = std::make_unique<dawn_native::Instance>();
+            mInstance->DiscoverDefaultAdapters();
+
+            std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
+            for (dawn_native::Adapter adapter : adapters) {
+                if (adapter.GetBackendType() == dawn_native::BackendType::D3D12) {
+                    mBackendDevice = adapter.CreateDevice();
+                    return mBackendDevice;
+                }
+            }
+            UNREACHABLE();
         }
 
         uint64_t GetSwapChainImplementation() override {
@@ -49,6 +59,7 @@ namespace utils {
         }
 
       private:
+        std::unique_ptr<dawn_native::Instance> mInstance;
         dawnDevice mBackendDevice = nullptr;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };

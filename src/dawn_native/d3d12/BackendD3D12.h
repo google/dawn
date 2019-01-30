@@ -12,25 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_OPENGL_BACKENDGL_H_
-#define DAWNNATIVE_OPENGL_BACKENDGL_H_
+#ifndef DAWNNATIVE_D3D12_BACKENDD3D12_H_
+#define DAWNNATIVE_D3D12_BACKENDD3D12_H_
 
 #include "dawn_native/BackendConnection.h"
 
-namespace dawn_native { namespace opengl {
+#include "dawn_native/d3d12/d3d12_platform.h"
+
+namespace dawn_native { namespace d3d12 {
+
+    class PlatformFunctions;
 
     class Backend : public BackendConnection {
       public:
         Backend(InstanceBase* instance);
 
+        MaybeError Initialize();
+
+        ComPtr<IDXGIFactory4> GetFactory() const;
+        const PlatformFunctions* GetFunctions() const;
+
         std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
-        ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> DiscoverAdapters(
-            const AdapterDiscoveryOptionsBase* options) override;
 
       private:
-        bool mCreatedAdapter = false;
+        // Keep mFunctions as the first member so that in the destructor it is freed last. Otherwise
+        // the D3D12 DLLs are unloaded before we are done using them.
+        std::unique_ptr<PlatformFunctions> mFunctions;
+        ComPtr<IDXGIFactory4> mFactory;
     };
 
-}}  // namespace dawn_native::opengl
+}}  // namespace dawn_native::d3d12
 
-#endif  // DAWNNATIVE_OPENGL_BACKENDGL_H_
+#endif  // DAWNNATIVE_D3D12_BACKENDD3D12_H_

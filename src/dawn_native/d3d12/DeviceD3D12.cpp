@@ -17,6 +17,8 @@
 #include "common/Assert.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/DynamicUploader.h"
+#include "dawn_native/d3d12/AdapterD3D12.h"
+#include "dawn_native/d3d12/BackendD3D12.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/BufferD3D12.h"
@@ -37,88 +39,14 @@
 #include "dawn_native/d3d12/SwapChainD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-#include <locale>
-
 namespace dawn_native { namespace d3d12 {
 
     void ASSERT_SUCCESS(HRESULT hr) {
         ASSERT(SUCCEEDED(hr));
     }
 
-    BackendConnection* Connect(InstanceBase* instance) {
-        return nullptr;
-    }
-
-    namespace {
-        ComPtr<IDXGIFactory4> CreateFactory(const PlatformFunctions* functions) {
-            ComPtr<IDXGIFactory4> factory;
-
-            uint32_t dxgiFactoryFlags = 0;
-#if defined(DAWN_ENABLE_ASSERTS)
-            // Enable the debug layer (requires the Graphics Tools "optional feature").
-            {
-                ComPtr<ID3D12Debug> debugController;
-                if (SUCCEEDED(functions->d3d12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-                    debugController->EnableDebugLayer();
-
-                    // Enable additional debug layers.
-                    dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
-                }
-
-                ComPtr<IDXGIDebug1> dxgiDebug;
-                if (SUCCEEDED(functions->dxgiGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug)))) {
-                    dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
-                                                 DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
-                }
-            }
-#endif  // defined(DAWN_ENABLE_ASSERTS)
-
-            ASSERT_SUCCESS(functions->createDxgiFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
-            return factory;
-        }
-
-        ComPtr<IDXGIAdapter1> GetHardwareAdapter(ComPtr<IDXGIFactory4> factory,
-                                                 const PlatformFunctions* functions) {
-            for (uint32_t adapterIndex = 0;; ++adapterIndex) {
-                IDXGIAdapter1* adapter = nullptr;
-                if (factory->EnumAdapters1(adapterIndex, &adapter) == DXGI_ERROR_NOT_FOUND) {
-                    break;  // No more adapters to enumerate.
-                }
-
-                // Check to see if the adapter supports Direct3D 12, but don't create the actual
-                // device yet.
-                if (SUCCEEDED(functions->d3d12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0,
-                                                           _uuidof(ID3D12Device), nullptr))) {
-                    return adapter;
-                }
-                adapter->Release();
-            }
-            return nullptr;
-        }
-
-    }  // anonymous namespace
-
-    Device::Device() : DeviceBase(nullptr) {
-        mFunctions = std::make_unique<PlatformFunctions>();
-
-        {
-            MaybeError status = mFunctions->LoadFunctions();
-            ASSERT(status.IsSuccess());
-        }
-
-        // Create the connection to DXGI and the D3D12 device
-        mFactory = CreateFactory(mFunctions.get());
-        ASSERT(mFactory.Get() != nullptr);
-
-        mHardwareAdapter = GetHardwareAdapter(mFactory, mFunctions.get());
-        ASSERT(mHardwareAdapter.Get() != nullptr);
-
-        ASSERT_SUCCESS(mFunctions->d3d12CreateDevice(mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0,
-                                                     IID_PPV_ARGS(&mD3d12Device)));
-
-        // Collect GPU information
-        CollectPCIInfo();
-
+    Device::Device(Adapter* adapter, ComPtr<ID3D12Device> d3d12Device)
+        : DeviceBase(adapter), mD3d12Device(d3d12Device) {
         // Create device-global objects
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -149,31 +77,31 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(mPendingCommands.commandList == nullptr);
     }
 
-    ComPtr<IDXGIFactory4> Device::GetFactory() {
-        return mFactory;
-    }
-
-    ComPtr<ID3D12Device> Device::GetD3D12Device() {
+    ComPtr<ID3D12Device> Device::GetD3D12Device() const {
         return mD3d12Device;
     }
 
-    ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() {
+    ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() const {
         return mCommandQueue;
     }
 
-    DescriptorHeapAllocator* Device::GetDescriptorHeapAllocator() {
+    DescriptorHeapAllocator* Device::GetDescriptorHeapAllocator() const {
         return mDescriptorHeapAllocator.get();
     }
 
-    const PlatformFunctions* Device::GetFunctions() {
-        return mFunctions.get();
+    ComPtr<IDXGIFactory4> Device::GetFactory() const {
+        return ToBackend(GetAdapter())->GetBackend()->GetFactory();
+    }
+
+    const PlatformFunctions* Device::GetFunctions() const {
+        return ToBackend(GetAdapter())->GetBackend()->GetFunctions();
     }
 
     MapRequestTracker* Device::GetMapRequestTracker() const {
         return mMapRequestTracker.get();
     }
 
-    ResourceAllocator* Device::GetResourceAllocator() {
+    ResourceAllocator* Device::GetResourceAllocator() const {
         return mResourceAllocator.get();
     }
 
@@ -223,10 +151,6 @@ namespace dawn_native { namespace d3d12 {
         mDynamicUploader->Tick(mCompletedSerial);
         ExecuteCommandLists({});
         NextSerial();
-    }
-
-    const dawn_native::PCIInfo& Device::GetPCIInfo() const {
-        return mPCIInfo;
     }
 
     void Device::NextSerial() {
@@ -317,20 +241,6 @@ namespace dawn_native { namespace d3d12 {
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) {
         return new TextureView(texture, descriptor);
-    }
-
-    void Device::CollectPCIInfo() {
-        memset(&mPCIInfo, 0, sizeof(mPCIInfo));
-
-        DXGI_ADAPTER_DESC1 adapterDesc;
-        mHardwareAdapter->GetDesc1(&adapterDesc);
-
-        mPCIInfo.deviceId = adapterDesc.DeviceId;
-        mPCIInfo.vendorId = adapterDesc.VendorId;
-
-        std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>> converter(
-            "Error converting");
-        mPCIInfo.name = converter.to_bytes(adapterDesc.Description);
     }
 
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
