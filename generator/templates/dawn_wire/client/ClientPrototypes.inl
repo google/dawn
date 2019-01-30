@@ -16,3 +16,17 @@
 {% for command in cmd_records["return command"] %}
     bool Handle{{command.name.CamelCase()}}(const char** commands, size_t* size);
 {% endfor %}
+
+//* Return command doers
+{% for command in cmd_records["return command"] %}
+    bool Do{{command.name.CamelCase()}}(
+        {%- for member in command.members -%}
+            {%- if member.handle_type -%}
+                {{as_cppType(member.handle_type.name)}}* {{as_varName(member.name)}}
+            {%- else -%}
+                {{as_annotated_cppType(member)}}
+            {%- endif -%}
+            {%- if not loop.last -%}, {% endif %}
+        {%- endfor -%}
+    );
+{% endfor %}

@@ -27,12 +27,8 @@ def compute_wire_params(api_params, wire_json):
     commands = []
     return_commands = []
 
-    object_result_member = common.RecordMember(Name('result'), types['ObjectHandle'], 'value', False, True)
-
     string_message_member = common.RecordMember(Name('message'), types['char'], 'const*', False, False)
     string_message_member.length = 'strlen'
-
-    built_object_member = common.RecordMember(Name('built object'), types['ObjectHandle'], 'value', False, False)
 
     callback_status_member = common.RecordMember(Name('status'), types['uint32_t'], 'value', False, False)
 
@@ -50,7 +46,9 @@ def compute_wire_params(api_params, wire_json):
 
             # Client->Server commands that return an object return the result object handle
             if method.return_type.category == 'object':
-                members.append(object_result_member)
+                result = common.RecordMember(Name('result'), types['ObjectHandle'], 'value', False, True)
+                result.set_handle_type(method.return_type)
+                members.append(result)
 
             command_name = concat_names(api_object.name, method.name)
             command = common.Command(command_name, members)
@@ -63,9 +61,10 @@ def compute_wire_params(api_params, wire_json):
         # This can be removed when WebGPU error handling is implemented
         if api_object.is_builder:
             command_name = concat_names(api_object.name, Name('error callback'))
-
+            built_object = common.RecordMember(Name('built object'), types['ObjectHandle'], 'value', False, False)
+            built_object.set_handle_type(api_object.built_type)
             command = common.Command(command_name, [
-                built_object_member,
+                built_object,
                 callback_status_member,
                 string_message_member,
             ])

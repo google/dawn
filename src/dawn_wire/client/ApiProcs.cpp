@@ -105,25 +105,24 @@ namespace dawn_wire { namespace client {
         fence->requests.Enqueue(std::move(request), value);
     }
 
-    void ProxyClientBufferUnmap(dawnBuffer cBuffer) {
+    void ClientBufferUnmap(dawnBuffer cBuffer) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 
         // Invalidate the local pointer, and cancel all other in-flight requests that would
-        // turn into
-        // errors anyway (you can't double map). This prevents race when the following happens,
-        // where
-        // the application code would have unmapped a buffer but still receive a callback:
-        //  - Client -> Server: MapRequest1, Unmap, MapRequest2
-        //  - Server -> Client: Result of MapRequest1
-        //  - Unmap locally on the client
-        //  - Server -> Client: Result of MapRequest2
+        // turn into errors anyway (you can't double map). This prevents race when the following
+        // happens, where the application code would have unmapped a buffer but still receive a
+        // callback:
+        //   - Client -> Server: MapRequest1, Unmap, MapRequest2
+        //   - Server -> Client: Result of MapRequest1
+        //   - Unmap locally on the client
+        //   - Server -> Client: Result of MapRequest2
         if (buffer->mappedData) {
             // If the buffer was mapped for writing, send the update to the data to the server
             if (buffer->isWriteMapped) {
                 BufferUpdateMappedDataCmd cmd;
                 cmd.bufferId = buffer->id;
                 cmd.dataLength = static_cast<uint32_t>(buffer->mappedDataSize);
-                cmd.data = reinterpret_cast<const uint8_t*>(buffer->mappedData);
+                cmd.data = static_cast<const uint8_t*>(buffer->mappedData);
 
                 size_t requiredSize = cmd.GetRequiredSize();
                 char* allocatedBuffer =
@@ -136,26 +135,52 @@ namespace dawn_wire { namespace client {
         }
         buffer->ClearMapRequests(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN);
 
-        ClientBufferUnmap(cBuffer);
+        BufferUnmapCmd cmd;
+        cmd.self = cBuffer;
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer =
+            static_cast<char*>(buffer->device->GetClient()->GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer, *buffer->device->GetClient());
     }
 
-    dawnFence ProxyClientDeviceCreateFence(dawnDevice cSelf,
-                                           dawnFenceDescriptor const* descriptor) {
-        dawnFence cFence = ClientDeviceCreateFence(cSelf, descriptor);
+    dawnFence ClientDeviceCreateFence(dawnDevice cSelf, dawnFenceDescriptor const* descriptor) {
+        Device* device = reinterpret_cast<Device*>(cSelf);
+
+        DeviceCreateFenceCmd cmd;
+        cmd.self = cSelf;
+        auto* allocation = device->GetClient()->FenceAllocator().New(device);
+        cmd.result = ObjectHandle{allocation->object->id, allocation->serial};
+        cmd.descriptor = descriptor;
+
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer = static_cast<char*>(device->GetClient()->GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer, *device->GetClient());
+
+        dawnFence cFence = reinterpret_cast<dawnFence>(allocation->object.get());
+
         Fence* fence = reinterpret_cast<Fence*>(cFence);
         fence->signaledValue = descriptor->initialValue;
         fence->completedValue = descriptor->initialValue;
         return cFence;
     }
 
-    void ProxyClientQueueSignal(dawnQueue cQueue, dawnFence cFence, uint64_t signalValue) {
+    void ClientQueueSignal(dawnQueue cQueue, dawnFence cFence, uint64_t signalValue) {
         Fence* fence = reinterpret_cast<Fence*>(cFence);
         if (signalValue <= fence->signaledValue) {
             fence->device->HandleError("Fence value less than or equal to signaled value");
             return;
         }
         fence->signaledValue = signalValue;
-        ClientQueueSignal(cQueue, cFence, signalValue);
+
+        QueueSignalCmd cmd;
+        cmd.self = cQueue;
+        cmd.fence = cFence;
+        cmd.signalValue = signalValue;
+
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer =
+            static_cast<char*>(fence->device->GetClient()->GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer, *fence->device->GetClient());
     }
 
     void ClientDeviceReference(dawnDevice) {

@@ -18,34 +18,38 @@
 #include <string>
 
 namespace dawn_wire { namespace client {
-    {% for type in by_category["object"] if type.is_builder %}
-        {% set Type = type.name.CamelCase() %}
-        bool Client::Handle{{Type}}ErrorCallback(const char** commands, size_t* size) {
-            Return{{Type}}ErrorCallbackCmd cmd;
+    {% for command in cmd_records["return command"] %}
+        bool Client::Handle{{command.name.CamelCase()}}(const char** commands, size_t* size) {
+            Return{{command.name.CamelCase()}}Cmd cmd;
             DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator);
 
             if (deserializeResult == DeserializeResult::FatalError) {
                 return false;
             }
 
-            DAWN_ASSERT(cmd.message != nullptr);
+            {% for member in command.members if member.handle_type %}
+                {% set Type = member.handle_type.name.CamelCase() %}
+                {% set name = as_varName(member.name) %}
 
-            auto* builtObject = mDevice->GetClient()->{{type.built_type.name.CamelCase()}}Allocator().GetObject(cmd.builtObject.id);
-            uint32_t objectSerial = mDevice->GetClient()->{{type.built_type.name.CamelCase()}}Allocator().GetSerial(cmd.builtObject.id);
+                {% if member.type.dict_name == "ObjectHandle" %}
+                    {{Type}}* {{name}} = {{Type}}Allocator().GetObject(cmd.{{name}}.id);
+                    uint32_t {{name}}Serial = {{Type}}Allocator().GetSerial(cmd.{{name}}.id);
+                    if ({{name}}Serial != cmd.{{name}}.serial) {
+                        {{name}} = nullptr;
+                    }
+                {% endif %}
+            {% endfor %}
 
-            //* The object might have been deleted or a new object created with the same ID.
-            if (builtObject == nullptr || objectSerial != cmd.builtObject.serial) {
-                return true;
-            }
-
-            bool called = builtObject->builderCallback.Call(static_cast<dawnBuilderErrorStatus>(cmd.status), cmd.message);
-
-            // Unhandled builder errors are forwarded to the device
-            if (!called && cmd.status != DAWN_BUILDER_ERROR_STATUS_SUCCESS && cmd.status != DAWN_BUILDER_ERROR_STATUS_UNKNOWN) {
-                mDevice->HandleError(("Unhandled builder error: " + std::string(cmd.message)).c_str());
-            }
-
-            return true;
+            return Do{{command.name.CamelCase()}}(
+                {%- for member in command.members -%}
+                    {%- if member.handle_type -%}
+                        {{as_varName(member.name)}}
+                    {%- else -%}
+                        cmd.{{as_varName(member.name)}}
+                    {%- endif -%}
+                    {%- if not loop.last -%}, {% endif %}
+                {%- endfor -%}
+            );
         }
     {% endfor %}
 

@@ -24,7 +24,7 @@ namespace dawn_wire { namespace client {
 
         {% for method in type.methods %}
             {% set Suffix = as_MethodSuffix(type.name, method.name) %}
-            {% if Suffix not in client_side_commands %}
+            {% if Suffix not in client_handwritten_commands %}
                 {{as_cType(method.return_type.name)}} Client{{Suffix}}(
                     {{-cType}} cSelf
                     {%- for arg in method.arguments -%}
@@ -122,11 +122,7 @@ namespace dawn_wire { namespace client {
         {% for type in by_category["object"] %}
             {% for method in native_methods(type) %}
                 {% set suffix = as_MethodSuffix(type.name, method.name) %}
-                {% if suffix in client_proxied_commands %}
-                    table.{{as_varName(type.name, method.name)}} = ProxyClient{{suffix}};
-                {% else %}
-                    table.{{as_varName(type.name, method.name)}} = Client{{suffix}};
-                {% endif %}
+                table.{{as_varName(type.name, method.name)}} = Client{{suffix}};
             {% endfor %}
         {% endfor %}
         return table;
