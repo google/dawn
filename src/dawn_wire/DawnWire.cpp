@@ -13,19 +13,13 @@
 // limitations under the License.
 
 #include "dawn_wire/client/Client.h"
-#include "dawn_wire/client/Device_autogen.h"
 #include "dawn_wire/server/Server.h"
 
 namespace dawn_wire {
     CommandHandler* NewClientDevice(dawnProcTable* procs,
                                     dawnDevice* device,
                                     CommandSerializer* serializer) {
-        auto clientDevice = new client::Device(serializer);
-
-        *device = reinterpret_cast<dawnDeviceImpl*>(clientDevice);
-        *procs = client::GetProcs();
-
-        return new client::Client(clientDevice);
+        return new client::Client(procs, device, serializer);
     }
 
     CommandHandler* NewServerCommandHandler(dawnDevice device,

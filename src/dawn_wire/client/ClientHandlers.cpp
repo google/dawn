@@ -14,7 +14,7 @@
 
 #include "common/Assert.h"
 #include "dawn_wire/client/Client.h"
-#include "dawn_wire/client/Device_autogen.h"
+#include "dawn_wire/client/Device.h"
 
 namespace dawn_wire { namespace client {
 
@@ -40,8 +40,8 @@ namespace dawn_wire { namespace client {
             return false;
         }
 
-        auto* buffer = mDevice->buffer.GetObject(cmd.buffer.id);
-        uint32_t bufferSerial = mDevice->buffer.GetSerial(cmd.buffer.id);
+        auto* buffer = mDevice->GetClient()->BufferAllocator().GetObject(cmd.buffer.id);
+        uint32_t bufferSerial = mDevice->GetClient()->BufferAllocator().GetSerial(cmd.buffer.id);
 
         // The buffer might have been deleted or recreated so this isn't an error.
         if (buffer == nullptr || bufferSerial != cmd.buffer.serial) {
@@ -102,8 +102,8 @@ namespace dawn_wire { namespace client {
             return false;
         }
 
-        auto* buffer = mDevice->buffer.GetObject(cmd.buffer.id);
-        uint32_t bufferSerial = mDevice->buffer.GetSerial(cmd.buffer.id);
+        auto* buffer = mDevice->GetClient()->BufferAllocator().GetObject(cmd.buffer.id);
+        uint32_t bufferSerial = mDevice->GetClient()->BufferAllocator().GetSerial(cmd.buffer.id);
 
         // The buffer might have been deleted or recreated so this isn't an error.
         if (buffer == nullptr || bufferSerial != cmd.buffer.serial) {
@@ -156,8 +156,8 @@ namespace dawn_wire { namespace client {
             return false;
         }
 
-        auto* fence = mDevice->fence.GetObject(cmd.fence.id);
-        uint32_t fenceSerial = mDevice->fence.GetSerial(cmd.fence.id);
+        auto* fence = mDevice->GetClient()->FenceAllocator().GetObject(cmd.fence.id);
+        uint32_t fenceSerial = mDevice->GetClient()->FenceAllocator().GetSerial(cmd.fence.id);
 
         // The fence might have been deleted or recreated so this isn't an error.
         if (fence == nullptr || fenceSerial != cmd.fence.serial) {

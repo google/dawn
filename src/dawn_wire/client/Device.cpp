@@ -12,21 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/Device.h"
 
 namespace dawn_wire { namespace client {
 
-    Client::Client(dawnProcTable* procs, dawnDevice* device, CommandSerializer* serializer)
-        : ClientBase(),
-          mDevice(DeviceAllocator().New(this)->object.get()),
-          mSerializer(serializer) {
-        *device = reinterpret_cast<dawnDeviceImpl*>(mDevice);
-        *procs = client::GetProcs();
+    Device::Device(Client* client, uint32_t refcount, uint32_t id)
+        : ObjectBase(this, refcount, id), mClient(client) {
+        this->device = this;
     }
 
-    Client::~Client() {
-        DeviceAllocator().Free(mDevice);
+    Client* Device::GetClient() {
+        return mClient;
+    }
+
+    void Device::HandleError(const char* message) {
+        if (mErrorCallback) {
+            mErrorCallback(message, mErrorUserdata);
+        }
+    }
+
+    void Device::SetErrorCallback(dawnDeviceErrorCallback errorCallback,
+                                  dawnCallbackUserdata errorUserdata) {
+        mErrorCallback = errorCallback;
+        mErrorUserdata = errorUserdata;
     }
 
 }}  // namespace dawn_wire::client

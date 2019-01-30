@@ -170,6 +170,10 @@ class WireTestsBase : public Test {
         void TearDown() override {
             dawnSetProcs(nullptr);
 
+            // Reset client before mocks are deleted.
+            // Incomplete callbacks will be called on deletion, so the mocks cannot be null.
+            mWireClient = nullptr;
+
             // Delete mocks so that expectations are checked
             mockDeviceErrorCallback = nullptr;
             mockBuilderErrorCallback = nullptr;

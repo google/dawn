@@ -15,7 +15,6 @@
 #include "dawn_wire/client/ApiObjects.h"
 #include "dawn_wire/client/ApiProcs_autogen.h"
 #include "dawn_wire/client/Client.h"
-#include "dawn_wire/client/Device_autogen.h"
 
 namespace dawn_wire { namespace client {
     //* Implementation of the client API functions.
@@ -42,7 +41,7 @@ namespace dawn_wire { namespace client {
 
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
-                        auto* allocation = self->device->{{method.return_type.name.camelCase()}}.New();
+                        auto* allocation = self->device->GetClient()->{{method.return_type.name.CamelCase()}}Allocator().New(self->device);
 
                         {% if type.is_builder %}
                             //* We are in GetResult, so the callback that should be called is the
@@ -61,8 +60,8 @@ namespace dawn_wire { namespace client {
 
                     //* Allocate space to send the command and copy the value args over.
                     size_t requiredSize = cmd.GetRequiredSize();
-                    char* allocatedBuffer = static_cast<char*>(device->GetCmdSpace(requiredSize));
-                    cmd.Serialize(allocatedBuffer, *device);
+                    char* allocatedBuffer = static_cast<char*>(device->GetClient()->GetCmdSpace(requiredSize));
+                    cmd.Serialize(allocatedBuffer, *device->GetClient());
 
                     {% if method.return_type.category == "object" %}
                         return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
@@ -100,10 +99,10 @@ namespace dawn_wire { namespace client {
                 cmd.objectId = obj->id;
 
                 size_t requiredSize = cmd.GetRequiredSize();
-                char* allocatedBuffer = static_cast<char*>(obj->device->GetCmdSpace(requiredSize));
+                char* allocatedBuffer = static_cast<char*>(obj->device->GetClient()->GetCmdSpace(requiredSize));
                 cmd.Serialize(allocatedBuffer);
 
-                obj->device->{{type.name.camelCase()}}.Free(obj);
+                obj->device->GetClient()->{{type.name.CamelCase()}}Allocator().Free(obj);
             }
 
             void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{cType}} cObj) {

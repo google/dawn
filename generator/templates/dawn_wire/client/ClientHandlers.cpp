@@ -14,7 +14,6 @@
 
 #include "common/Assert.h"
 #include "dawn_wire/client/Client.h"
-#include "dawn_wire/client/Device_autogen.h"
 
 #include <string>
 
@@ -31,8 +30,8 @@ namespace dawn_wire { namespace client {
 
             DAWN_ASSERT(cmd.message != nullptr);
 
-            auto* builtObject = mDevice->{{type.built_type.name.camelCase()}}.GetObject(cmd.builtObject.id);
-            uint32_t objectSerial = mDevice->{{type.built_type.name.camelCase()}}.GetSerial(cmd.builtObject.id);
+            auto* builtObject = mDevice->GetClient()->{{type.built_type.name.CamelCase()}}Allocator().GetObject(cmd.builtObject.id);
+            uint32_t objectSerial = mDevice->GetClient()->{{type.built_type.name.CamelCase()}}Allocator().GetSerial(cmd.builtObject.id);
 
             //* The object might have been deleted or a new object created with the same ID.
             if (builtObject == nullptr || objectSerial != cmd.builtObject.serial) {

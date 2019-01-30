@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "dawn_wire/client/ApiObjects.h"
 #include "dawn_wire/client/ApiProcs_autogen.h"
-#include "dawn_wire/client/Device_autogen.h"
+#include "dawn_wire/client/Client.h"
 
 namespace dawn_wire { namespace client {
 
@@ -42,7 +43,8 @@ namespace dawn_wire { namespace client {
         cmd.isWrite = false;
 
         size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(buffer->device->GetCmdSpace(requiredSize));
+        char* allocatedBuffer =
+            static_cast<char*>(buffer->device->GetClient()->GetCmdSpace(requiredSize));
         cmd.Serialize(allocatedBuffer);
     }
 
@@ -71,7 +73,8 @@ namespace dawn_wire { namespace client {
         cmd.isWrite = true;
 
         size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(buffer->device->GetCmdSpace(requiredSize));
+        char* allocatedBuffer =
+            static_cast<char*>(buffer->device->GetClient()->GetCmdSpace(requiredSize));
         cmd.Serialize(allocatedBuffer);
     }
 
@@ -124,7 +127,7 @@ namespace dawn_wire { namespace client {
 
                 size_t requiredSize = cmd.GetRequiredSize();
                 char* allocatedBuffer =
-                    static_cast<char*>(buffer->device->GetCmdSpace(requiredSize));
+                    static_cast<char*>(buffer->device->GetClient()->GetCmdSpace(requiredSize));
                 cmd.Serialize(allocatedBuffer);
             }
 
@@ -164,9 +167,8 @@ namespace dawn_wire { namespace client {
     void ClientDeviceSetErrorCallback(dawnDevice cSelf,
                                       dawnDeviceErrorCallback callback,
                                       dawnCallbackUserdata userdata) {
-        Device* self = reinterpret_cast<Device*>(cSelf);
-        self->errorCallback = callback;
-        self->errorUserdata = userdata;
+        Device* device = reinterpret_cast<Device*>(cSelf);
+        device->SetErrorCallback(callback, userdata);
     }
 
 }}  // namespace dawn_wire::client

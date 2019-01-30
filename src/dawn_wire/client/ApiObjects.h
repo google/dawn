@@ -18,6 +18,7 @@
 #include "dawn_wire/client/ObjectBase.h"
 
 #include "dawn_wire/client/Buffer.h"
+#include "dawn_wire/client/Device.h"
 #include "dawn_wire/client/Fence.h"
 
 #include "dawn_wire/client/ApiObjects_autogen.h"
