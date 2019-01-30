@@ -16,19 +16,13 @@
 #include <functional>
 #include <vector>
 
-#include "spirv-cross/spirv_glsl.hpp"
-#include "spirv-cross/spirv_hlsl.hpp"
+#include "shaderc/spvc.hpp"
 
 namespace DawnSPIRVCrossFuzzer {
 
-    struct CombinedOptions {
-        spirv_cross::CompilerGLSL::Options glsl;
-        spirv_cross::CompilerHLSL::Options hlsl;
-    };
-
     using Task = std::function<int(const std::vector<uint32_t>&)>;
-    template <class Options>
-    using TaskWithOptions = std::function<int(const std::vector<uint32_t>&, Options)>;
+    using TaskWithOptions =
+        std::function<int(const std::vector<uint32_t>&, shaderc_spvc::CompileOptions)>;
 
     // Used to wrap code that may fire a SIGABRT. Do not allocate anything local within |exec|, as
     // it is not guaranteed to return.
@@ -38,7 +32,6 @@ namespace DawnSPIRVCrossFuzzer {
     int Run(const uint8_t* data, size_t size, Task task);
 
     // Used to fuzz by mutating both the input data and options to the compiler
-    template <class Options>
-    int RunWithOptions(const uint8_t* data, size_t size, TaskWithOptions<Options> task);
+    int RunWithOptions(const uint8_t* data, size_t size, TaskWithOptions task);
 
 }  // namespace DawnSPIRVCrossFuzzer

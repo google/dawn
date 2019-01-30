@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../../scripts/dawn_overrides_with_defaults.gni")
 import("//build_overrides/build.gni")
 
 dawn_top_level = "../.."
@@ -76,7 +77,7 @@ static_library("dawn_spirv_cross_fuzzer_common") {
     "DawnSPIRVCrossFuzzer.h",
   ]
   public_deps = [
-    "${dawn_top_level}/third_party:spirv_cross_full_for_fuzzers",
+    "${dawn_shaderc_dir}:libshaderc_spvc",
   ]
 }
 
@@ -111,7 +112,7 @@ dawn_fuzzer_test("dawn_spirv_cross_glsl_full_fuzzer") {
 # Uses Dawn specific options and varies input data
 dawn_fuzzer_test("dawn_spirv_cross_hlsl_fast_fuzzer") {
   sources = [
-    "DawnSPIRVCrossGLSLFastFuzzer.cpp",
+    "DawnSPIRVCrossHLSLFastFuzzer.cpp",
   ]
   deps = [
     ":dawn_spirv_cross_fuzzer_common",
@@ -124,7 +125,7 @@ dawn_fuzzer_test("dawn_spirv_cross_hlsl_fast_fuzzer") {
 # Varies both the options and input data
 dawn_fuzzer_test("dawn_spirv_cross_hlsl_full_fuzzer") {
   sources = [
-    "DawnSPIRVCrossGLSLFullFuzzer.cpp",
+    "DawnSPIRVCrossHLSLFullFuzzer.cpp",
   ]
   deps = [
     ":dawn_spirv_cross_fuzzer_common",
@@ -137,7 +138,7 @@ dawn_fuzzer_test("dawn_spirv_cross_hlsl_full_fuzzer") {
 # Uses Dawn specific options and varies input data
 dawn_fuzzer_test("dawn_spirv_cross_msl_fast_fuzzer") {
   sources = [
-    "DawnSPIRVCrossGLSLFastFuzzer.cpp",
+    "DawnSPIRVCrossMSLFastFuzzer.cpp",
   ]
   deps = [
     ":dawn_spirv_cross_fuzzer_common",
@@ -150,7 +151,7 @@ dawn_fuzzer_test("dawn_spirv_cross_msl_fast_fuzzer") {
 # Varies both the options and input data
 dawn_fuzzer_test("dawn_spirv_cross_msl_full_fuzzer") {
   sources = [
-    "DawnSPIRVCrossGLSLFullFuzzer.cpp",
+    "DawnSPIRVCrossMSLFullFuzzer.cpp",
   ]
   deps = [
     ":dawn_spirv_cross_fuzzer_common",
@@ -165,12 +166,10 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
 
   deps = [
     "${dawn_top_level}:dawn_common",
-    "${dawn_top_level}:libdawn_static",
     "${dawn_top_level}:libdawn_native_static",
+    "${dawn_top_level}:libdawn_static",
     "${dawn_top_level}:libdawn_wire_static",
   ]
 
-  additional_configs = [
-    "${dawn_top_level}:dawn_internal",
-  ]
+  additional_configs = [ "${dawn_top_level}:dawn_internal" ]
 }

@@ -18,29 +18,22 @@
 
 #include "DawnSPIRVCrossFuzzer.h"
 
-#include "spirv-cross/spirv_hlsl.hpp"
-
 namespace {
-    int FuzzTask(const std::vector<uint32_t>& input,
-                 DawnSPIRVCrossFuzzer::CombinedOptions options) {
-        std::unique_ptr<spirv_cross::CompilerHLSL> compiler;
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, input]() {
-            compiler = std::make_unique<spirv_cross::CompilerHLSL>(input);
-        });
-        if (compiler == nullptr) {
+    int FuzzTask(const std::vector<uint32_t>& input, shaderc_spvc::CompileOptions options) {
+        shaderc_spvc::Compiler compiler;
+        if (!compiler.IsValid()) {
             return 0;
         }
 
-        compiler->set_common_options(options.glsl);
-        compiler->set_hlsl_options(options.hlsl);
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, &input, &options]() {
+            compiler.CompileSpvToHlsl(input.data(), input.size(), options);
+        });
 
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler]() { compiler->compile(); });
         return 0;
     }
 
 }  // namespace
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-    return DawnSPIRVCrossFuzzer::RunWithOptions<DawnSPIRVCrossFuzzer::CombinedOptions>(data, size,
-                                                                                       FuzzTask);
+    return DawnSPIRVCrossFuzzer::RunWithOptions(data, size, FuzzTask);
 }

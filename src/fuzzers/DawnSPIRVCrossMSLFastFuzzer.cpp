@@ -18,24 +18,21 @@
 
 #include "DawnSPIRVCrossFuzzer.h"
 
-#include "spirv-cross/spirv_msl.hpp"
-
 namespace {
 
     int FuzzTask(const std::vector<uint32_t>& input) {
-        std::unique_ptr<spirv_cross::CompilerMSL> compiler;
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap(
-            [&compiler, input]() { compiler = std::make_unique<spirv_cross::CompilerMSL>(input); });
-        if (compiler == nullptr) {
+        shaderc_spvc::Compiler compiler;
+        if (!compiler.IsValid()) {
             return 0;
         }
 
-        // Using the options that are used by Dawn, they appear in ShaderModuleMTL.mm
-        spirv_cross::CompilerGLSL::Options options;
-        options.vertex.flip_vert_y = true;
-        compiler->spirv_cross::CompilerGLSL::set_common_options(options);
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, &input]() {
+            shaderc_spvc::CompileOptions options;
 
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler]() { compiler->compile(); });
+            // Using the options that are used by Dawn, they appear in ShaderModuleMTL.mm
+            options.SetFlipVertY(true);
+            compiler.CompileSpvToMsl(input.data(), input.size(), options);
+        });
 
         return 0;
     }

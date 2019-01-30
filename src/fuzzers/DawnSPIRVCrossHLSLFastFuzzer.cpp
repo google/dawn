@@ -18,30 +18,23 @@
 
 #include "DawnSPIRVCrossFuzzer.h"
 
-#include "spirv-cross/spirv_hlsl.hpp"
-
 namespace {
 
     int FuzzTask(const std::vector<uint32_t>& input) {
-        std::unique_ptr<spirv_cross::CompilerHLSL> compiler;
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, input]() {
-            compiler = std::make_unique<spirv_cross::CompilerHLSL>(input);
-        });
-        if (compiler == nullptr) {
+        shaderc_spvc::Compiler compiler;
+        if (!compiler.IsValid()) {
             return 0;
         }
 
-        // Using the options that are used by Dawn, they appear in ShaderModuleD3D12.cpp
-        spirv_cross::CompilerGLSL::Options options_glsl;
-        options_glsl.vertex.fixup_clipspace = true;
-        options_glsl.vertex.flip_vert_y = true;
-        compiler->set_common_options(options_glsl);
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, &input]() {
+            shaderc_spvc::CompileOptions options;
 
-        spirv_cross::CompilerHLSL::Options options_hlsl;
-        options_hlsl.shader_model = 51;
-        compiler->set_hlsl_options(options_hlsl);
-
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler]() { compiler->compile(); });
+            // Using the options that are used by Dawn, they appear in ShaderModuleD3D12.cpp
+            options.SetFixupClipspace(true);
+            options.SetFlipVertY(true);
+            options.SetShaderModel(51);
+            compiler.CompileSpvToHlsl(input.data(), input.size(), options);
+        });
 
         return 0;
     }

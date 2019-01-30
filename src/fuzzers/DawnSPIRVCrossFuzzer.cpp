@@ -65,43 +65,26 @@ namespace DawnSPIRVCrossFuzzer {
     }
 
     int Run(const uint8_t* data, size_t size, Task task) {
-        if (!data || size < 1)
-            return 0;
-
         size_t sizeInU32 = size / sizeof(uint32_t);
         const uint32_t* u32Data = reinterpret_cast<const uint32_t*>(data);
         std::vector<uint32_t> input(u32Data, u32Data + sizeInU32);
 
-        task(input);
+        if (input.size() != 0) {
+            task(input);
+        }
+
         return 0;
     }
 
-    template <class Options>
-    int RunWithOptions(const uint8_t* data, size_t size, TaskWithOptions<Options> task) {
-        if (!data || size < sizeof(Options) + 1)
+    int RunWithOptions(const uint8_t* data, size_t size, TaskWithOptions task) {
+        shaderc_spvc::CompileOptions options;
+        size_t used = options.SetForFuzzing(data, size);
+        if (used == 0) {
+            // not enough data to set options
             return 0;
+        }
 
-        Options options = *reinterpret_cast<const Options*>(data);
-        data += sizeof(options);
-        size -= sizeof(options);
-
-        std::vector<uint32_t> input(data, data + (4 * (size / 4)));
-
-        task(input, options);
-
-        return 0;
+        return Run(data + used, size - used, std::bind(task, std::placeholders::_1, options));
     }
-
-    template int RunWithOptions<spirv_cross::CompilerGLSL::Options>(
-        const uint8_t*,
-        size_t,
-        TaskWithOptions<spirv_cross::CompilerGLSL::Options>);
-    template int RunWithOptions<spirv_cross::CompilerHLSL::Options>(
-        const uint8_t*,
-        size_t,
-        TaskWithOptions<spirv_cross::CompilerHLSL::Options>);
-    template int RunWithOptions<CombinedOptions>(const uint8_t*,
-                                                 size_t,
-                                                 TaskWithOptions<CombinedOptions>);
 
 }  // namespace DawnSPIRVCrossFuzzer
