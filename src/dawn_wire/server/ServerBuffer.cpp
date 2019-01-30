@@ -20,7 +20,7 @@
 namespace dawn_wire { namespace server {
 
     bool Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
-        auto* selfData = mKnownBuffer.Get(cmd.selfId);
+        auto* selfData = BufferObjects().Get(cmd.selfId);
         ASSERT(selfData != nullptr);
 
         selfData->mappedData = nullptr;
@@ -49,7 +49,7 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        auto* buffer = mKnownBuffer.Get(bufferId);
+        auto* buffer = BufferObjects().Get(bufferId);
         if (buffer == nullptr) {
             return false;
         }
@@ -100,7 +100,7 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        auto* buffer = mKnownBuffer.Get(bufferId);
+        auto* buffer = BufferObjects().Get(bufferId);
         if (buffer == nullptr || !buffer->valid || buffer->mappedData == nullptr ||
             buffer->mappedDataSize != dataLength) {
             return false;
@@ -133,7 +133,7 @@ namespace dawn_wire { namespace server {
         std::unique_ptr<MapUserdata> data(userdata);
 
         // Skip sending the callback if the buffer has already been destroyed.
-        auto* bufferData = mKnownBuffer.Get(data->buffer.id);
+        auto* bufferData = BufferObjects().Get(data->buffer.id);
         if (bufferData == nullptr || bufferData->serial != data->buffer.serial) {
             return;
         }
@@ -160,7 +160,7 @@ namespace dawn_wire { namespace server {
         std::unique_ptr<MapUserdata> data(userdata);
 
         // Skip sending the callback if the buffer has already been destroyed.
-        auto* bufferData = mKnownBuffer.Get(data->buffer.id);
+        auto* bufferData = BufferObjects().Get(data->buffer.id);
         if (bufferData == nullptr || bufferData->serial != data->buffer.serial) {
             return;
         }

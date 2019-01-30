@@ -17,9 +17,9 @@
 namespace dawn_wire { namespace server {
 
     Server::Server(dawnDevice device, const dawnProcTable& procs, CommandSerializer* serializer)
-        : ServerBase(device, procs, serializer) {
+        : mSerializer(serializer), mProcs(procs) {
         // The client-server knowledge is bootstrapped with device 1.
-        auto* deviceData = mKnownDevice.Allocate(1);
+        auto* deviceData = DeviceObjects().Allocate(1);
         deviceData->handle = device;
         deviceData->valid = true;
 
@@ -28,6 +28,11 @@ namespace dawn_wire { namespace server {
     }
 
     Server::~Server() {
+        DestroyAllObjects(mProcs);
+    }
+
+    void* Server::GetCmdSpace(size_t size) {
+        return mSerializer->GetCmdSpace(size);
     }
 
 }}  // namespace dawn_wire::server

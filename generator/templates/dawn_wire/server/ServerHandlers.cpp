@@ -37,7 +37,7 @@ namespace dawn_wire { namespace server {
                     {% endif %}
 
                     //* Unpack 'self'
-                    auto* selfData = mKnown{{type.name.CamelCase()}}.Get(cmd.selfId);
+                    auto* selfData = {{type.name.CamelCase()}}Objects().Get(cmd.selfId);
                     ASSERT(selfData != nullptr);
 
                     //* In all cases allocate the object data as it will be refered-to by the client.
@@ -45,7 +45,7 @@ namespace dawn_wire { namespace server {
                     {% set returns = return_type.name.canonical_case() != "void" %}
                     {% if returns %}
                         {% set Type = method.return_type.name.CamelCase() %}
-                        auto* resultData = mKnown{{Type}}.Allocate(cmd.result.id);
+                        auto* resultData = {{Type}}Objects().Allocate(cmd.result.id);
                         if (resultData == nullptr) {
                             return false;
                         }
@@ -90,7 +90,7 @@ namespace dawn_wire { namespace server {
                         {% if return_type.name.CamelCase() in server_reverse_lookup_objects %}
                             //* For created objects, store a mapping from them back to their client IDs
                             if (result) {
-                                m{{return_type.name.CamelCase()}}IdTable.Store(result, cmd.result.id);
+                                {{return_type.name.CamelCase()}}ObjectIdTable().Store(result, cmd.result.id);
                             }
                         {% endif %}
 
@@ -133,19 +133,19 @@ namespace dawn_wire { namespace server {
                         //* Freeing the device has to be done out of band.
                         return false;
                     {% else %}
-                        auto* data = mKnown{{type.name.CamelCase()}}.Get(objectId);
+                        auto* data = {{type.name.CamelCase()}}Objects().Get(objectId);
                         if (data == nullptr) {
                             return false;
                         }
                         {% if type.name.CamelCase() in server_reverse_lookup_objects %}
-                            m{{type.name.CamelCase()}}IdTable.Remove(data->handle);
+                            {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
                         {% endif %}
 
                         if (data->handle != nullptr) {
                             mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
                         }
 
-                        mKnown{{type.name.CamelCase()}}.Free(objectId);
+                        {{type.name.CamelCase()}}Objects().Free(objectId);
                         return true;
                     {% endif %}
                 }
@@ -156,7 +156,7 @@ namespace dawn_wire { namespace server {
     }
 
     const char* Server::HandleCommands(const char* commands, size_t size) {
-        mProcs.deviceTick(mKnownDevice.Get(1)->handle);
+        mProcs.deviceTick(DeviceObjects().Get(1)->handle);
 
         while (size >= sizeof(WireCmd)) {
             WireCmd cmdId = *reinterpret_cast<const WireCmd*>(commands);

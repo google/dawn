@@ -19,6 +19,22 @@
 
 namespace dawn_wire { namespace server {
 
+    class Server;
+
+    struct MapUserdata {
+        Server* server;
+        ObjectHandle buffer;
+        uint32_t requestSerial;
+        uint32_t size;
+        bool isWrite;
+    };
+
+    struct FenceCompletionUserdata {
+        Server* server;
+        ObjectHandle fence;
+        uint64_t value;
+    };
+
     class Server : public ServerBase, public CommandHandler {
       public:
         Server(dawnDevice device, const dawnProcTable& procs, CommandSerializer* serializer);
@@ -27,6 +43,8 @@ namespace dawn_wire { namespace server {
         const char* HandleCommands(const char* commands, size_t size);
 
       private:
+        void* GetCmdSpace(size_t size);
+
         // Forwarding callbacks
         static void ForwardDeviceErrorToServer(const char* message, dawnCallbackUserdata userdata);
         static void ForwardBufferMapReadAsync(dawnBufferMapAsyncStatus status,
@@ -56,6 +74,10 @@ namespace dawn_wire { namespace server {
         bool HandleDestroyObject(const char** commands, size_t* size);
 
 #include "dawn_wire/server/ServerPrototypes_autogen.inl"
+
+        CommandSerializer* mSerializer = nullptr;
+        WireDeserializeAllocator mAllocator;
+        dawnProcTable mProcs;
     };
 
 }}  // namespace dawn_wire::server

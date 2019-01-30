@@ -22,50 +22,43 @@
 
 namespace dawn_wire { namespace server {
 
-    class Server;
-
-    struct MapUserdata {
-        Server* server;
-        ObjectHandle buffer;
-        uint32_t requestSerial;
-        uint32_t size;
-        bool isWrite;
-    };
-
-    struct FenceCompletionUserdata {
-        Server* server;
-        ObjectHandle fence;
-        uint64_t value;
-    };
-
     class ServerBase : public ObjectIdResolver {
       public:
-        ServerBase(dawnDevice device, const dawnProcTable& procs, CommandSerializer* serializer)
-            : mProcs(procs), mSerializer(serializer) {
-        }
+        ServerBase() = default;
+        virtual ~ServerBase() = default;
 
-        virtual ~ServerBase() {
-            //* Free all objects when the server is destroyed
+      protected:
+        void DestroyAllObjects(const dawnProcTable& procs) {
+          //* Free all objects when the server is destroyed
             {% for type in by_category["object"] if type.name.canonical_case() != "device" %}
                 {
                     std::vector<{{as_cType(type.name)}}> handles = mKnown{{type.name.CamelCase()}}.AcquireAllHandles();
                     for ({{as_cType(type.name)}} handle : handles) {
-                        mProcs.{{as_varName(type.name, Name("release"))}}(handle);
+                        procs.{{as_varName(type.name, Name("release"))}}(handle);
                     }
                 }
             {% endfor %}
         }
 
-      protected:
-        dawnProcTable mProcs;
-        CommandSerializer* mSerializer = nullptr;
+        {% for type in by_category["object"] %}
+            const KnownObjects<{{as_cType(type.name)}}>& {{type.name.CamelCase()}}Objects() const {
+                return mKnown{{type.name.CamelCase()}};
+            }
+            KnownObjects<{{as_cType(type.name)}}>& {{type.name.CamelCase()}}Objects() {
+                return mKnown{{type.name.CamelCase()}};
+            }
+        {% endfor %}
 
-        WireDeserializeAllocator mAllocator;
+        {% for type in by_category["object"] if type.name.CamelCase() in server_reverse_lookup_objects %}
+            const ObjectIdLookupTable<{{as_cType(type.name)}}>& {{type.name.CamelCase()}}ObjectIdTable() const {
+                return m{{type.name.CamelCase()}}IdTable;
+            }
+            ObjectIdLookupTable<{{as_cType(type.name)}}>& {{type.name.CamelCase()}}ObjectIdTable() {
+                return m{{type.name.CamelCase()}}IdTable;
+            }
+        {% endfor %}
 
-        void* GetCmdSpace(size_t size) {
-            return mSerializer->GetCmdSpace(size);
-        }
-
+      private:
         // Implementation of the ObjectIdResolver interface
         {% for type in by_category["object"] %}
             DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {

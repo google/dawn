@@ -28,7 +28,7 @@ namespace dawn_wire { namespace server {
     {% for type in by_category["object"] if type.is_builder%}
         {% set Type = type.name.CamelCase() %}
         void Server::On{{Type}}Error(dawnBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial) {
-            auto* builder = mKnown{{Type}}.Get(id);
+            auto* builder = {{Type}}Objects().Get(id);
 
             if (builder == nullptr || builder->serial != serial) {
                 return;

@@ -21,9 +21,9 @@ namespace dawn_wire { namespace server {
         if (cmd.fence == nullptr) {
             return false;
         }
-        ObjectId fenceId = mFenceIdTable.Get(cmd.fence);
+        ObjectId fenceId = FenceObjectIdTable().Get(cmd.fence);
         ASSERT(fenceId != 0);
-        auto* fence = mKnownFence.Get(fenceId);
+        auto* fence = FenceObjects().Get(fenceId);
         ASSERT(fence != nullptr);
 
         auto* data = new FenceCompletionUserdata;
