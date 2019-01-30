@@ -408,26 +408,32 @@ namespace dawn_native { namespace metal {
                 case Command::Draw: {
                     DrawCmd* draw = mCommands.NextCommand<DrawCmd>();
 
-                    [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
-                                vertexStart:draw->firstVertex
-                                vertexCount:draw->vertexCount
-                              instanceCount:draw->instanceCount
-                               baseInstance:draw->firstInstance];
+                    // The instance count must be non-zero, otherwise no-op
+                    if (draw->instanceCount != 0) {
+                        [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
+                                    vertexStart:draw->firstVertex
+                                    vertexCount:draw->vertexCount
+                                  instanceCount:draw->instanceCount
+                                   baseInstance:draw->firstInstance];
+                    }
                 } break;
 
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
                     size_t formatSize = IndexFormatSize(lastPipeline->GetIndexFormat());
 
-                    [encoder
-                        drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
-                                   indexCount:draw->indexCount
-                                    indexType:lastPipeline->GetMTLIndexType()
-                                  indexBuffer:indexBuffer
-                            indexBufferOffset:indexBufferBaseOffset + draw->firstIndex * formatSize
-                                instanceCount:draw->instanceCount
-                                   baseVertex:draw->baseVertex
-                                 baseInstance:draw->firstInstance];
+                    // The index and instance count must be non-zero, otherwise no-op
+                    if (draw->indexCount != 0 && draw->instanceCount != 0) {
+                        [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
+                                            indexCount:draw->indexCount
+                                             indexType:lastPipeline->GetMTLIndexType()
+                                           indexBuffer:indexBuffer
+                                     indexBufferOffset:indexBufferBaseOffset +
+                                                       draw->firstIndex * formatSize
+                                         instanceCount:draw->instanceCount
+                                            baseVertex:draw->baseVertex
+                                          baseInstance:draw->firstInstance];
+                    }
                 } break;
 
                 case Command::SetRenderPipeline: {

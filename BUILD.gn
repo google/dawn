@@ -980,6 +980,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/CopyTests.cpp",
     "src/tests/end2end/DepthStencilStateTests.cpp",
     "src/tests/end2end/DrawIndexedTests.cpp",
+    "src/tests/end2end/DrawTests.cpp",
     "src/tests/end2end/FenceTests.cpp",
     "src/tests/end2end/IndexFormatTests.cpp",
     "src/tests/end2end/InputStateTests.cpp",
