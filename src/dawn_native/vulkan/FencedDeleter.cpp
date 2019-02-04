@@ -96,7 +96,7 @@ namespace dawn_native { namespace vulkan {
 
     void FencedDeleter::Tick(Serial completedSerial) {
         VkDevice vkDevice = mDevice->GetVkDevice();
-        VkInstance instance = mDevice->GetInstance();
+        VkInstance instance = mDevice->GetVkInstance();
 
         // Buffers and images must be deleted before memories because it is invalid to free memory
         // that still have resources bound to it.

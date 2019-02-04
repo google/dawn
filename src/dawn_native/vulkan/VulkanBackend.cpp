@@ -27,15 +27,13 @@
 
 namespace dawn_native { namespace vulkan {
 
-    dawnDevice CreateDevice() {
-        return reinterpret_cast<dawnDevice>(new Device());
-    }
-
     VkInstance GetInstance(dawnDevice device) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
-        return backendDevice->GetInstance();
+        return backendDevice->GetVkInstance();
     }
 
+    // Explicitly export this function because it uses the "native" type for surfaces while the
+    // header as seen in this file uses the wrapped type.
     DAWN_NATIVE_EXPORT dawnSwapChainImplementation
     CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHRNative surfaceNative) {
         Device* backendDevice = reinterpret_cast<Device*>(device);

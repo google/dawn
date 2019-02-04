@@ -19,6 +19,8 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/vulkan/AdapterVk.h"
+#include "dawn_native/vulkan/BackendVk.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
 #include "dawn_native/vulkan/BufferUploader.h"
@@ -38,72 +40,22 @@
 #include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-#include <spirv-cross/spirv_cross.hpp>
-
-#include <iostream>
-
-#if DAWN_PLATFORM_LINUX
-const char kVulkanLibName[] = "libvulkan.so.1";
-#elif DAWN_PLATFORM_WINDOWS
-const char kVulkanLibName[] = "vulkan-1.dll";
-#else
-#    error "Unimplemented Vulkan backend platform"
-#endif
-
 namespace dawn_native { namespace vulkan {
 
-    BackendConnection* Connect(InstanceBase* instance) {
-        return nullptr;
-    }
-
-    // Device
-
-    Device::Device() : DeviceBase(nullptr) {
-        MaybeError maybeError = Initialize();
-
-        // In device initialization, the error callback can't have been set yet.
-        // So it's too early to use ConsumedError - consume the error manually.
-        if (DAWN_UNLIKELY(maybeError.IsError())) {
-            ErrorData* error = maybeError.AcquireError();
-            printf("Device initialization error: %s\n", error->GetMessage().c_str());
-            delete error;
-            ASSERT(false);
-            return;
-        }
+    Device::Device(Adapter* adapter) : DeviceBase(adapter) {
     }
 
     MaybeError Device::Initialize() {
-        if (!mVulkanLib.Open(kVulkanLibName)) {
-            return DAWN_CONTEXT_LOST_ERROR(std::string("Couldn't open ") + kVulkanLibName);
-        }
+        // Copy the adapter's device info to the device so that we can change the "knobs"
+        mDeviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
 
         VulkanFunctions* functions = GetMutableFunctions();
-        DAWN_TRY(functions->LoadGlobalProcs(mVulkanLib));
+        *functions = ToBackend(GetAdapter())->GetBackend()->GetFunctions();
 
-        DAWN_TRY_ASSIGN(mGlobalInfo, GatherGlobalInfo(*this));
-
-        VulkanGlobalKnobs usedGlobalKnobs = {};
-        DAWN_TRY_ASSIGN(usedGlobalKnobs, CreateInstance());
-        *static_cast<VulkanGlobalKnobs*>(&mGlobalInfo) = usedGlobalKnobs;
-
-        DAWN_TRY(functions->LoadInstanceProcs(mInstance, mGlobalInfo));
-
-        if (usedGlobalKnobs.debugReport) {
-            DAWN_TRY(RegisterDebugReport());
-        }
-
-        std::vector<VkPhysicalDevice> physicalDevices;
-        DAWN_TRY_ASSIGN(physicalDevices, GetPhysicalDevices(*this));
-        if (physicalDevices.empty()) {
-            return DAWN_CONTEXT_LOST_ERROR("No physical devices");
-        }
-        // TODO(cwallez@chromium.org): Choose the physical device based on ???
-        mPhysicalDevice = physicalDevices[0];
-
-        DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this, mPhysicalDevice));
+        VkPhysicalDevice physicalDevice = ToBackend(GetAdapter())->GetPhysicalDevice();
 
         VulkanDeviceKnobs usedDeviceKnobs = {};
-        DAWN_TRY_ASSIGN(usedDeviceKnobs, CreateDevice());
+        DAWN_TRY_ASSIGN(usedDeviceKnobs, CreateDevice(physicalDevice));
         *static_cast<VulkanDeviceKnobs*>(&mDeviceInfo) = usedDeviceKnobs;
 
         DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
@@ -115,10 +67,6 @@ namespace dawn_native { namespace vulkan {
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mMemoryAllocator = std::make_unique<MemoryAllocator>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
-
-        mPCIInfo.deviceId = mDeviceInfo.properties.deviceID;
-        mPCIInfo.vendorId = mDeviceInfo.properties.vendorID;
-        mPCIInfo.name = mDeviceInfo.properties.deviceName;
 
         return {};
     }
@@ -181,17 +129,6 @@ namespace dawn_native { namespace vulkan {
         if (mVkDevice != VK_NULL_HANDLE) {
             fn.DestroyDevice(mVkDevice, nullptr);
             mVkDevice = VK_NULL_HANDLE;
-        }
-
-        if (mDebugReportCallback != VK_NULL_HANDLE) {
-            fn.DestroyDebugReportCallbackEXT(mInstance, mDebugReportCallback, nullptr);
-            mDebugReportCallback = VK_NULL_HANDLE;
-        }
-
-        // VkPhysicalDevices are destroyed when the VkInstance is destroyed
-        if (mInstance != VK_NULL_HANDLE) {
-            fn.DestroyInstance(mInstance, nullptr);
-            mInstance = VK_NULL_HANDLE;
         }
     }
 
@@ -283,20 +220,11 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    const dawn_native::PCIInfo& Device::GetPCIInfo() const {
-        return mPCIInfo;
+    VkInstance Device::GetVkInstance() const {
+        return ToBackend(GetAdapter())->GetBackend()->GetVkInstance();
     }
-
     const VulkanDeviceInfo& Device::GetDeviceInfo() const {
         return mDeviceInfo;
-    }
-
-    VkInstance Device::GetInstance() const {
-        return mInstance;
-    }
-
-    VkPhysicalDevice Device::GetPhysicalDevice() const {
-        return mPhysicalDevice;
     }
 
     VkDevice Device::GetVkDevice() const {
@@ -392,94 +320,7 @@ namespace dawn_native { namespace vulkan {
         mWaitSemaphores.push_back(semaphore);
     }
 
-    ResultOrError<VulkanGlobalKnobs> Device::CreateInstance() {
-        VulkanGlobalKnobs usedKnobs = {};
-
-        std::vector<const char*> layersToRequest;
-        std::vector<const char*> extensionsToRequest;
-
-        // vktrace works by instering a layer, but we hide it behind a macro due to the vktrace
-        // layer crashes when used without vktrace server started, see this vktrace issue:
-        // https://github.com/LunarG/VulkanTools/issues/254
-        // Also it is good to put it in first position so that it doesn't see Vulkan calls inserted
-        // by other layers.
-#if defined(DAWN_USE_VKTRACE)
-        if (mGlobalInfo.vktrace) {
-            layersToRequest.push_back(kLayerNameLunargVKTrace);
-            usedKnobs.vktrace = true;
-        }
-#endif
-        // RenderDoc installs a layer at the system level for its capture but we don't want to use
-        // it unless we are debugging in RenderDoc so we hide it behind a macro.
-#if defined(DAWN_USE_RENDERDOC)
-        if (mGlobalInfo.renderDocCapture) {
-            layersToRequest.push_back(kLayerNameRenderDocCapture);
-            usedKnobs.renderDocCapture = true;
-        }
-#endif
-#if defined(DAWN_ENABLE_ASSERTS)
-        if (mGlobalInfo.standardValidation) {
-            layersToRequest.push_back(kLayerNameLunargStandardValidation);
-            usedKnobs.standardValidation = true;
-        }
-        if (mGlobalInfo.debugReport) {
-            extensionsToRequest.push_back(kExtensionNameExtDebugReport);
-            usedKnobs.debugReport = true;
-        }
-#endif
-        // Always request all extensions used to create VkSurfaceKHR objects so that they are
-        // always available for embedders looking to create VkSurfaceKHR on our VkInstance.
-        if (mGlobalInfo.macosSurface) {
-            extensionsToRequest.push_back(kExtensionNameMvkMacosSurface);
-            usedKnobs.macosSurface = true;
-        }
-        if (mGlobalInfo.surface) {
-            extensionsToRequest.push_back(kExtensionNameKhrSurface);
-            usedKnobs.surface = true;
-        }
-        if (mGlobalInfo.waylandSurface) {
-            extensionsToRequest.push_back(kExtensionNameKhrWaylandSurface);
-            usedKnobs.waylandSurface = true;
-        }
-        if (mGlobalInfo.win32Surface) {
-            extensionsToRequest.push_back(kExtensionNameKhrWin32Surface);
-            usedKnobs.win32Surface = true;
-        }
-        if (mGlobalInfo.xcbSurface) {
-            extensionsToRequest.push_back(kExtensionNameKhrXcbSurface);
-            usedKnobs.xcbSurface = true;
-        }
-        if (mGlobalInfo.xlibSurface) {
-            extensionsToRequest.push_back(kExtensionNameKhrXlibSurface);
-            usedKnobs.xlibSurface = true;
-        }
-
-        VkApplicationInfo appInfo;
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pNext = nullptr;
-        appInfo.pApplicationName = nullptr;
-        appInfo.applicationVersion = 0;
-        appInfo.pEngineName = nullptr;
-        appInfo.engineVersion = 0;
-        appInfo.apiVersion = VK_API_VERSION_1_0;
-
-        VkInstanceCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = 0;
-        createInfo.pApplicationInfo = &appInfo;
-        createInfo.enabledLayerCount = static_cast<uint32_t>(layersToRequest.size());
-        createInfo.ppEnabledLayerNames = layersToRequest.data();
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
-        createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
-
-        DAWN_TRY(CheckVkSuccess(fn.CreateInstance(&createInfo, nullptr, &mInstance),
-                                "vkCreateInstance"));
-
-        return usedKnobs;
-    }
-
-    ResultOrError<VulkanDeviceKnobs> Device::CreateDevice() {
+    ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalDevice) {
         VulkanDeviceKnobs usedKnobs = {};
 
         float zero = 0.0f;
@@ -541,7 +382,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
         createInfo.pEnabledFeatures = &usedKnobs.features;
 
-        DAWN_TRY(CheckVkSuccess(fn.CreateDevice(mPhysicalDevice, &createInfo, nullptr, &mVkDevice),
+        DAWN_TRY(CheckVkSuccess(fn.CreateDevice(physicalDevice, &createInfo, nullptr, &mVkDevice),
                                 "vkCreateDevice"));
 
         return usedKnobs;
@@ -549,34 +390,6 @@ namespace dawn_native { namespace vulkan {
 
     void Device::GatherQueueFromDevice() {
         fn.GetDeviceQueue(mVkDevice, mQueueFamily, 0, &mQueue);
-    }
-
-    MaybeError Device::RegisterDebugReport() {
-        VkDebugReportCallbackCreateInfoEXT createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-        createInfo.pNext = nullptr;
-        createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
-        createInfo.pfnCallback = Device::OnDebugReportCallback;
-        createInfo.pUserData = this;
-
-        return CheckVkSuccess(
-            fn.CreateDebugReportCallbackEXT(mInstance, &createInfo, nullptr, &mDebugReportCallback),
-            "vkCreateDebugReportcallback");
-    }
-
-    VKAPI_ATTR VkBool32 VKAPI_CALL
-    Device::OnDebugReportCallback(VkDebugReportFlagsEXT flags,
-                                  VkDebugReportObjectTypeEXT /*objectType*/,
-                                  uint64_t /*object*/,
-                                  size_t /*location*/,
-                                  int32_t /*messageCode*/,
-                                  const char* /*pLayerPrefix*/,
-                                  const char* pMessage,
-                                  void* /*pUserdata*/) {
-        std::cout << pMessage << std::endl;
-        ASSERT((flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) == 0);
-
-        return VK_FALSE;
     }
 
     VulkanFunctions* Device::GetMutableFunctions() {

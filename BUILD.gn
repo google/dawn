@@ -649,6 +649,10 @@ source_set("libdawn_native_sources") {
   if (dawn_enable_vulkan) {
     deps += [ "third_party:vulkan_headers" ]
     sources += [
+      "src/dawn_native/vulkan/AdapterVk.cpp",
+      "src/dawn_native/vulkan/AdapterVk.h",
+      "src/dawn_native/vulkan/BackendVk.cpp",
+      "src/dawn_native/vulkan/BackendVk.h",
       "src/dawn_native/vulkan/BindGroupLayoutVk.cpp",
       "src/dawn_native/vulkan/BindGroupLayoutVk.h",
       "src/dawn_native/vulkan/BindGroupVk.cpp",

@@ -15,17 +15,14 @@
 #ifndef DAWNNATIVE_VULKANBACKEND_H_
 #define DAWNNATIVE_VULKANBACKEND_H_
 
-#include <dawn/dawn.h>
 #include <dawn/dawn_wsi.h>
-#include <dawn_native/dawn_native_export.h>
+#include <dawn_native/DawnNative.h>
 
 #include <vulkan/vulkan.h>
 
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
-    DAWN_NATIVE_EXPORT dawnDevice CreateDevice();
-
     DAWN_NATIVE_EXPORT VkInstance GetInstance(dawnDevice device);
 
     DAWN_NATIVE_EXPORT dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device,

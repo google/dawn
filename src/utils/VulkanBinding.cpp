@@ -28,8 +28,20 @@ namespace utils {
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
         dawnDevice CreateDevice() override {
-            mDevice = dawn_native::vulkan::CreateDevice();
-            return mDevice;
+            // Make an instance and find a Vulkan adapter
+            mInstance = std::make_unique<dawn_native::Instance>();
+            mInstance->DiscoverDefaultAdapters();
+
+            std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
+            for (dawn_native::Adapter adapter : adapters) {
+                if (adapter.GetBackendType() == dawn_native::BackendType::Vulkan) {
+                    mDevice = adapter.CreateDevice();
+                    return mDevice;
+                }
+            }
+
+            UNREACHABLE();
+            return {};
         }
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
@@ -49,7 +61,8 @@ namespace utils {
         }
 
       private:
-        dawnDevice mDevice;
+        std::unique_ptr<dawn_native::Instance> mInstance;
+        dawnDevice mDevice = nullptr;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
