@@ -21,6 +21,8 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3native.h"
 
+#include <memory>
+
 namespace utils {
 
     class D3D12Binding : public BackendBinding {
