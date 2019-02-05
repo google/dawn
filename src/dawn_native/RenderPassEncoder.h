@@ -43,7 +43,7 @@ namespace dawn_native {
         void SetPipeline(RenderPipelineBase* pipeline);
 
         void SetStencilReference(uint32_t reference);
-        void SetBlendColor(float r, float g, float b, float a);
+        void SetBlendColor(const Color* color);
         void SetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
         template <typename T>

@@ -637,7 +637,7 @@ namespace dawn_native { namespace d3d12 {
 
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
-                    commandList->OMSetBlendFactor(static_cast<const FLOAT*>(&cmd->r));
+                    commandList->OMSetBlendFactor(static_cast<const FLOAT*>(&cmd->color.r));
                 } break;
 
                 case Command::SetBindGroup: {

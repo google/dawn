@@ -483,7 +483,10 @@ namespace dawn_native { namespace metal {
 
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
-                    [encoder setBlendColorRed:cmd->r green:cmd->g blue:cmd->b alpha:cmd->a];
+                    [encoder setBlendColorRed:cmd->color.r
+                                        green:cmd->color.g
+                                         blue:cmd->color.b
+                                        alpha:cmd->color.a];
                 } break;
 
                 case Command::SetBindGroup: {

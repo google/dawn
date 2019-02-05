@@ -134,7 +134,7 @@ namespace dawn_native {
     };
 
     struct SetBlendColorCmd {
-        float r, g, b, a;
+        Color color;
     };
 
     struct SetBindGroupCmd {

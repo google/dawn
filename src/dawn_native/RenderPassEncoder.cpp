@@ -90,17 +90,14 @@ namespace dawn_native {
         cmd->reference = reference;
     }
 
-    void RenderPassEncoderBase::SetBlendColor(float r, float g, float b, float a) {
+    void RenderPassEncoderBase::SetBlendColor(const Color* color) {
         if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
             return;
         }
 
         SetBlendColorCmd* cmd = mAllocator->Allocate<SetBlendColorCmd>(Command::SetBlendColor);
         new (cmd) SetBlendColorCmd;
-        cmd->r = r;
-        cmd->g = g;
-        cmd->b = b;
-        cmd->a = a;
+        cmd->color = *color;
     }
 
     void RenderPassEncoderBase::SetScissorRect(uint32_t x,

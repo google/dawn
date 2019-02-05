@@ -104,6 +104,8 @@ class BlendStateTest : public DawnTest {
 
         // Test that after drawing a triangle with the base color, and then the given triangle spec, the color is as expected
         void DoSingleSourceTest(RGBA8 base, const TriangleSpec& triangle, const RGBA8& expected) {
+            dawn::Color blendColor{triangle.blendFactor[0], triangle.blendFactor[1], triangle.blendFactor[2], triangle.blendFactor[3]};
+
             dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
             {
                 dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
@@ -115,7 +117,7 @@ class BlendStateTest : public DawnTest {
                 // Then use the test pipeline to draw the test triangle with blending
                 pass.SetPipeline(testPipeline);
                 pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { triangle.color } })));
-                pass.SetBlendColor(triangle.blendFactor[0], triangle.blendFactor[1], triangle.blendFactor[2], triangle.blendFactor[3]);
+                pass.SetBlendColor(&blendColor);
                 pass.Draw(3, 1, 0, 0);
                 pass.EndPass();
             }
@@ -884,6 +886,7 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
     testDescriptor.cBlendStates[0].alphaBlend = blend;
 
     testPipeline = device.CreateRenderPipeline(&testDescriptor);
+    constexpr dawn::Color kWhite{1.0f, 1.0f, 1.0f, 1.0f};
 
     // Check that the initial blend color is (0,0,0,0)
     {
@@ -914,7 +917,7 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
             pass.Draw(3, 1, 0, 0);
             pass.SetPipeline(testPipeline);
-            pass.SetBlendColor(1, 1, 1, 1);
+            pass.SetBlendColor(&kWhite);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
             pass.Draw(3, 1, 0, 0);
             pass.EndPass();
@@ -935,7 +938,7 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(0, 0, 0, 0) } })));
             pass.Draw(3, 1, 0, 0);
             pass.SetPipeline(testPipeline);
-            pass.SetBlendColor(1, 1, 1, 1);
+            pass.SetBlendColor(&kWhite);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({ { RGBA8(255, 255, 255, 255) } })));
             pass.Draw(3, 1, 0, 0);
             pass.EndPass();

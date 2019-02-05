@@ -662,7 +662,7 @@ namespace dawn_native { namespace opengl {
 
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
-                    glBlendColor(cmd->r, cmd->g, cmd->b, cmd->a);
+                    glBlendColor(cmd->color.r, cmd->color.g, cmd->color.b, cmd->color.a);
                 } break;
 
                 case Command::SetBindGroup: {

@@ -68,7 +68,8 @@ TEST_F(SetBlendColorTest, Success) {
     dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
-        pass.SetBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+        constexpr dawn::Color kTransparentBlack{0.0f, 0.0f, 0.0f, 0.0f};
+        pass.SetBlendColor(&kTransparentBlack);
         pass.EndPass();
     }
     builder.GetResult();
@@ -81,7 +82,8 @@ TEST_F(SetBlendColorTest, AnyValueAllowed) {
     dawn::CommandBufferBuilder builder = AssertWillBeSuccess(device.CreateCommandBufferBuilder());
     {
         dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPass);
-        pass.SetBlendColor(-1.0f, 42.0f, -0.0f, 0.0f);
+        constexpr dawn::Color kAnyColorValue{-1.0f, 42.0f, -0.0f, 0.0f};
+        pass.SetBlendColor(&kAnyColorValue);
         pass.EndPass();
     }
     builder.GetResult();
@@ -90,7 +92,7 @@ TEST_F(SetBlendColorTest, AnyValueAllowed) {
 class SetStencilReferenceTest : public ValidationTest {
 };
 
-// Test to check basic use of SetBlendColor
+// Test to check basic use of SetStencilReferenceTest
 TEST_F(SetStencilReferenceTest, Success) {
     DummyRenderPass renderPass = CreateDummyRenderPass();
 

@@ -815,10 +815,7 @@
             {
                 "name": "set blend color",
                 "args": [
-                    {"name": "r", "type": "float"},
-                    {"name": "g", "type": "float"},
-                    {"name": "b", "type": "float"},
-                    {"name": "a", "type": "float"}
+                    {"name": "color", "type": "color", "annotation": "const*"}
                 ]
             },
             {
