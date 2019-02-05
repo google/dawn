@@ -568,6 +568,8 @@ source_set("libdawn_native_sources") {
       "IOKit.framework",
     ]
     sources += [
+      "src/dawn_native/metal/BackendMTL.h",
+      "src/dawn_native/metal/BackendMTL.mm",
       "src/dawn_native/metal/BufferMTL.h",
       "src/dawn_native/metal/BufferMTL.mm",
       "src/dawn_native/metal/CommandBufferMTL.h",

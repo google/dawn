@@ -22,6 +22,8 @@
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
+#import <QuartzCore/CAMetalLayer.h>
+
 namespace utils {
     class SwapChainImplMTL {
       public:
@@ -113,9 +115,21 @@ namespace utils {
         }
 
         dawnDevice CreateDevice() override {
-            dawnDevice device = dawn_native::metal::CreateDevice();
-            mMetalDevice = dawn_native::metal::GetMetalDevice(device);
-            return device;
+            // Make an instance and find a Metal adapter
+            mInstance = std::make_unique<dawn_native::Instance>();
+            mInstance->DiscoverDefaultAdapters();
+
+            std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
+            for (dawn_native::Adapter adapter : adapters) {
+                if (adapter.GetBackendType() == dawn_native::BackendType::Metal) {
+                    dawnDevice device = adapter.CreateDevice();
+                    mMetalDevice = dawn_native::metal::GetMetalDevice(device);
+                    return device;
+                }
+            }
+
+            UNREACHABLE();
+            return {};
         }
 
         uint64_t GetSwapChainImplementation() override {
@@ -131,6 +145,7 @@ namespace utils {
         }
 
       private:
+        std::unique_ptr<dawn_native::Instance> mInstance;
         id<MTLDevice> mMetalDevice = nil;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };

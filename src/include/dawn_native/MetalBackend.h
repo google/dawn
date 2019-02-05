@@ -15,15 +15,12 @@
 #ifndef DAWNNATIVE_METALBACKEND_H_
 #define DAWNNATIVE_METALBACKEND_H_
 
-#include <dawn/dawn.h>
 #include <dawn/dawn_wsi.h>
-#include <dawn_native/dawn_native_export.h>
+#include <dawn_native/DawnNative.h>
 
 #import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
 
 namespace dawn_native { namespace metal {
-    DAWN_NATIVE_EXPORT dawnDevice CreateDevice();
     DAWN_NATIVE_EXPORT id<MTLDevice> GetMetalDevice(dawnDevice device);
 }}  // namespace dawn_native::metal
 

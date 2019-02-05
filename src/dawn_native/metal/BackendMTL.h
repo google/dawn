@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// MetalBackend.cpp: contains the definition of symbols exported by MetalBackend.h so that they
-// can be compiled twice: once export (shared library), once not exported (static library)
+#ifndef DAWNNATIVE_METAL_BACKENDMTL_H_
+#define DAWNNATIVE_METAL_BACKENDMTL_H_
 
-#include "dawn_native/MetalBackend.h"
-
-#include "dawn_native/metal/DeviceMTL.h"
+#include "dawn_native/BackendConnection.h"
 
 namespace dawn_native { namespace metal {
 
-    id<MTLDevice> GetMetalDevice(dawnDevice cDevice) {
-        Device* device = reinterpret_cast<Device*>(cDevice);
-        return device->GetMTLDevice();
-    }
+    class Backend : public BackendConnection {
+      public:
+        Backend(InstanceBase* instance);
+
+        std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
+    };
 
 }}  // namespace dawn_native::metal
+
+#endif  // DAWNNATIVE_METAL_BACKENDMTL_H_

@@ -34,7 +34,7 @@ namespace dawn_native { namespace metal {
 
     class Device : public DeviceBase {
       public:
-        Device();
+        Device(AdapterBase* adapter, id<MTLDevice> mtlDevice);
         ~Device();
 
         CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
@@ -46,8 +46,6 @@ namespace dawn_native { namespace metal {
         Serial GetCompletedCommandSerial() const final override;
         Serial GetLastSubmittedCommandSerial() const final override;
         void TickImpl() override;
-
-        const dawn_native::PCIInfo& GetPCIInfo() const override;
 
         id<MTLDevice> GetMTLDevice();
 
@@ -85,7 +83,6 @@ namespace dawn_native { namespace metal {
         ResultOrError<TextureViewBase*> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
-        void CollectPCIInfo();
 
         void OnCompletedHandler();
 
@@ -97,8 +94,6 @@ namespace dawn_native { namespace metal {
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
         id<MTLCommandBuffer> mPendingCommands = nil;
-
-        dawn_native::PCIInfo mPCIInfo;
     };
 
 }}  // namespace dawn_native::metal
