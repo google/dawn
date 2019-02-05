@@ -45,13 +45,13 @@ enum class CmdBufType {
 // Default to D3D12, Metal, Vulkan, OpenGL in that order as D3D12 and Metal are the preferred on
 // their respective platforms, and Vulkan is preferred to OpenGL
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
-    static utils::BackendType backendType = utils::BackendType::D3D12;
+    static dawn_native::BackendType backendType = dawn_native::BackendType::D3D12;
 #elif defined(DAWN_ENABLE_BACKEND_METAL)
-    static utils::BackendType backendType = utils::BackendType::Metal;
+    static dawn_native::BackendType backendType = dawn_native::BackendType::Metal;
 #elif defined(DAWN_ENABLE_BACKEND_OPENGL)
-    static utils::BackendType backendType = utils::BackendType::OpenGL;
+    static dawn_native::BackendType backendType = dawn_native::BackendType::OpenGL;
 #elif defined(DAWN_ENABLE_BACKEND_VULKAN)
-    static utils::BackendType backendType = utils::BackendType::Vulkan;
+    static dawn_native::BackendType backendType = dawn_native::BackendType::Vulkan;
 #else
     #error
 #endif
@@ -184,23 +184,23 @@ bool InitSample(int argc, const char** argv) {
         if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {
             i++;
             if (i < argc && std::string("d3d12") == argv[i]) {
-                backendType = utils::BackendType::D3D12;
+                backendType = dawn_native::BackendType::D3D12;
                 continue;
             }
             if (i < argc && std::string("metal") == argv[i]) {
-                backendType = utils::BackendType::Metal;
+                backendType = dawn_native::BackendType::Metal;
                 continue;
             }
             if (i < argc && std::string("null") == argv[i]) {
-                backendType = utils::BackendType::Null;
+                backendType = dawn_native::BackendType::Null;
                 continue;
             }
             if (i < argc && std::string("opengl") == argv[i]) {
-                backendType = utils::BackendType::OpenGL;
+                backendType = dawn_native::BackendType::OpenGL;
                 continue;
             }
             if (i < argc && std::string("vulkan") == argv[i]) {
-                backendType = utils::BackendType::Vulkan;
+                backendType = dawn_native::BackendType::Vulkan;
                 continue;
             }
             fprintf(stderr, "--backend expects a backend name (opengl, metal, d3d12, null, vulkan)\n");

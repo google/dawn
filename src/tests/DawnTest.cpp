@@ -26,34 +26,22 @@
 #include "utils/TerribleCommandBuffer.h"
 
 #include <iostream>
+#include <unordered_map>
 #include "GLFW/glfw3.h"
 
 namespace {
 
-    utils::BackendType ParamToBackendType(BackendType type) {
+    std::string ParamName(dawn_native::BackendType type) {
         switch (type) {
-            case D3D12Backend:
-                return utils::BackendType::D3D12;
-            case MetalBackend:
-                return utils::BackendType::Metal;
-            case OpenGLBackend:
-                return utils::BackendType::OpenGL;
-            case VulkanBackend:
-                return utils::BackendType::Vulkan;
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    std::string ParamName(BackendType type) {
-        switch (type) {
-            case D3D12Backend:
+            case dawn_native::BackendType::D3D12:
                 return "D3D12";
-            case MetalBackend:
+            case dawn_native::BackendType::Metal:
                 return "Metal";
-            case OpenGLBackend:
+            case dawn_native::BackendType::Null:
+                return "Null";
+            case dawn_native::BackendType::OpenGL:
                 return "OpenGL";
-            case VulkanBackend:
+            case dawn_native::BackendType::Vulkan:
                 return "Vulkan";
             default:
                 UNREACHABLE();
@@ -63,10 +51,10 @@ namespace {
     // Windows don't usually like to be bound to one API than the other, for example switching
     // from Vulkan to OpenGL causes crashes on some drivers. Because of this, we lazily created
     // a window for each backing API.
-    GLFWwindow* windows[NumBackendTypes];
+    std::unordered_map<dawn_native::BackendType, GLFWwindow*> windows;
 
     // Creates a GLFW window set up for use with a given backend.
-    GLFWwindow* GetWindowForBackend(utils::BackendBinding* binding, BackendType type) {
+    GLFWwindow* GetWindowForBackend(utils::BackendBinding* binding, dawn_native::BackendType type) {
         GLFWwindow** window = &windows[type];
 
         if (*window != nullptr) {
@@ -185,7 +173,7 @@ bool DawnTest::IsMacOS() const {
 bool gTestUsesWire = false;
 
 void DawnTest::SetUp() {
-    mBinding.reset(utils::CreateBinding(ParamToBackendType(GetParam())));
+    mBinding.reset(utils::CreateBinding(GetParam()));
     DAWN_ASSERT(mBinding != nullptr);
 
     GLFWwindow* testWindow = GetWindowForBackend(mBinding.get(), GetParam());
@@ -456,24 +444,20 @@ std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
                   << ", " << static_cast<int>(color.b) << ", " << static_cast<int>(color.a) << ")";
 }
 
-std::ostream& operator<<(std::ostream& stream, BackendType backend) {
-    return stream << ParamName(backend);
-}
-
 namespace detail {
-    bool IsBackendAvailable(BackendType type) {
+    bool IsBackendAvailable(dawn_native::BackendType type) {
         switch (type) {
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
-            case D3D12Backend:
+            case dawn_native::BackendType::D3D12:
 #endif
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-            case MetalBackend:
+            case dawn_native::BackendType::Metal:
 #endif
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-            case OpenGLBackend:
+            case dawn_native::BackendType::OpenGL:
 #endif
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
-            case VulkanBackend:
+            case dawn_native::BackendType::Vulkan:
 #endif
                 return true;
 
@@ -482,8 +466,9 @@ namespace detail {
         }
     }
 
-    std::vector<BackendType> FilterBackends(const BackendType* types, size_t numParams) {
-        std::vector<BackendType> backends;
+    std::vector<dawn_native::BackendType> FilterBackends(const dawn_native::BackendType* types,
+                                                         size_t numParams) {
+        std::vector<dawn_native::BackendType> backends;
 
         for (size_t i = 0; i < numParams; ++i) {
             if (IsBackendAvailable(types[i])) {
@@ -491,6 +476,10 @@ namespace detail {
             }
         }
         return backends;
+    }
+
+    std::string GetParamName(const testing::TestParamInfo<dawn_native::BackendType>& info) {
+        return ParamName(info.param);
     }
 
     // Helper classes to set expectations

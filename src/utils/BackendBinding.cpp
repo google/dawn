@@ -38,30 +38,30 @@ namespace utils {
         mWindow = window;
     }
 
-    BackendBinding* CreateBinding(BackendType type) {
+    BackendBinding* CreateBinding(dawn_native::BackendType type) {
         switch (type) {
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
-            case BackendType::D3D12:
+            case dawn_native::BackendType::D3D12:
                 return CreateD3D12Binding();
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-            case BackendType::Metal:
+            case dawn_native::BackendType::Metal:
                 return CreateMetalBinding();
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_NULL)
-            case BackendType::Null:
+            case dawn_native::BackendType::Null:
                 return CreateNullBinding();
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-            case BackendType::OpenGL:
+            case dawn_native::BackendType::OpenGL:
                 return CreateOpenGLBinding();
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
-            case BackendType::Vulkan:
+            case dawn_native::BackendType::Vulkan:
                 return CreateVulkanBinding();
 #endif
 

@@ -56,15 +56,11 @@ struct RGBA8 {
 };
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
 
-// Backend types used in the DAWN_INSTANTIATE_TEST
-enum BackendType {
-    D3D12Backend,
-    MetalBackend,
-    OpenGLBackend,
-    VulkanBackend,
-    NumBackendTypes,
-};
-std::ostream& operator<<(std::ostream& stream, BackendType backend);
+// Shorthands for backend types used in the DAWN_INSTANTIATE_TEST
+static constexpr dawn_native::BackendType D3D12Backend = dawn_native::BackendType::D3D12;
+static constexpr dawn_native::BackendType MetalBackend = dawn_native::BackendType::Metal;
+static constexpr dawn_native::BackendType OpenGLBackend = dawn_native::BackendType::OpenGL;
+static constexpr dawn_native::BackendType VulkanBackend = dawn_native::BackendType::Vulkan;
 
 namespace utils {
     class BackendBinding;
@@ -79,7 +75,7 @@ namespace dawn_wire {
     class CommandHandler;
 }  // namespace dawn_wire
 
-class DawnTest : public ::testing::TestWithParam<BackendType> {
+class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
   public:
     DawnTest();
     ~DawnTest();
@@ -192,7 +188,7 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
     INSTANTIATE_TEST_CASE_P(, testName,                                                            \
                             testing::ValuesIn(::detail::FilterBackends(                            \
                                 testName##params, sizeof(testName##params) / sizeof(firstParam))), \
-                            testing::PrintToStringParamName());
+                            ::detail::GetParamName);
 
 // Skip a test when the given condition is satisfied.
 #define DAWN_SKIP_TEST_IF(condition)                               \
@@ -203,8 +199,10 @@ class DawnTest : public ::testing::TestWithParam<BackendType> {
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST
-    bool IsBackendAvailable(BackendType type);
-    std::vector<BackendType> FilterBackends(const BackendType* types, size_t numParams);
+    bool IsBackendAvailable(dawn_native::BackendType type);
+    std::vector<dawn_native::BackendType> FilterBackends(const dawn_native::BackendType* types,
+                                                         size_t numParams);
+    std::string GetParamName(const testing::TestParamInfo<dawn_native::BackendType>& info);
 
     // All classes used to implement the deferred expectations should inherit from this.
     class Expectation {

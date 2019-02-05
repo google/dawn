@@ -15,21 +15,13 @@
 #ifndef UTILS_BACKENDBINDING_H_
 #define UTILS_BACKENDBINDING_H_
 
-#include <dawn/dawn_wsi.h>
+#include <dawn_native/DawnNative.h>
 
 struct GLFWwindow;
 typedef struct dawnProcTable_s dawnProcTable;
 typedef struct dawnDeviceImpl* dawnDevice;
 
 namespace utils {
-
-    enum class BackendType {
-        D3D12,
-        Metal,
-        OpenGL,
-        Null,
-        Vulkan,
-    };
 
     class BackendBinding {
       public:
@@ -46,7 +38,7 @@ namespace utils {
         GLFWwindow* mWindow = nullptr;
     };
 
-    BackendBinding* CreateBinding(BackendType type);
+    BackendBinding* CreateBinding(dawn_native::BackendType type);
 
 }  // namespace utils
 
