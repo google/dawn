@@ -80,8 +80,7 @@ namespace dawn_native { namespace vulkan {
             // All things equal favor the memory in the biggest heap
             VkDeviceSize bestTypeHeapSize =
                 info.memoryHeaps[info.memoryTypes[bestType].heapIndex].size;
-            VkDeviceSize candidateHeapSize =
-                info.memoryHeaps[info.memoryTypes[bestType].heapIndex].size;
+            VkDeviceSize candidateHeapSize = info.memoryHeaps[info.memoryTypes[i].heapIndex].size;
             if (candidateHeapSize > bestTypeHeapSize) {
                 bestType = static_cast<int>(i);
                 continue;
