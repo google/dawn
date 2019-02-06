@@ -81,6 +81,8 @@ namespace dawn_native { namespace vulkan {
                                            uint32_t destinationOffset,
                                            uint32_t size) override;
 
+        ResultOrError<DynamicUploader*> GetDynamicUploader() const;
+
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
@@ -114,7 +116,7 @@ namespace dawn_native { namespace vulkan {
         uint32_t mQueueFamily = 0;
         VkQueue mQueue = VK_NULL_HANDLE;
 
-        std::unique_ptr<BufferUploader> mBufferUploader;
+        std::unique_ptr<DynamicUploader> mDynamicUploader;
         std::unique_ptr<FencedDeleter> mDeleter;
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<MemoryAllocator> mMemoryAllocator;
@@ -145,6 +147,9 @@ namespace dawn_native { namespace vulkan {
         std::vector<CommandPoolAndBuffer> mUnusedCommands;
         CommandPoolAndBuffer mPendingCommands;
         std::vector<VkSemaphore> mWaitSemaphores;
+
+        static constexpr size_t kDefaultUploadBufferSize =
+            64000;  // TODO(b-brber): Figure out this value.
     };
 
 }}  // namespace dawn_native::vulkan

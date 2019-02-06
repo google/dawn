@@ -1,4 +1,4 @@
-// Copyright 2017 The Dawn Authors
+// Copyright 2018 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,32 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_VULKAN_BUFFERUPLOADER_H_
-#define DAWNNATIVE_VULKAN_BUFFERUPLOADER_H_
+#ifndef DAWNNATIVE_STAGINGBUFFERVK_H_
+#define DAWNNATIVE_STAGINGBUFFERVK_H_
 
-#include "common/SerialQueue.h"
-#include "common/vulkan_platform.h"
+#include "dawn_native/StagingBuffer.h"
+#include "dawn_native/vulkan/MemoryAllocator.h"
 
 namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class BufferUploader {
+    class StagingBuffer : public StagingBufferBase {
       public:
-        BufferUploader(Device* device);
-        ~BufferUploader();
+        StagingBuffer(size_t size, Device* device);
+        ~StagingBuffer();
 
-        void BufferSubData(VkBuffer buffer,
-                           VkDeviceSize offset,
-                           VkDeviceSize size,
-                           const void* data);
+        VkBuffer GetBufferHandle() const;
 
-        void Tick(Serial completedSerial);
+        MaybeError Initialize() override;
 
       private:
-        Device* mDevice = nullptr;
+        Device* mDevice;
+        VkBuffer mBuffer;
+        DeviceMemoryAllocation mAllocation;
     };
-
 }}  // namespace dawn_native::vulkan
 
-#endif  // DAWNNATIVE_VULKAN_BUFFERUPLOADER_H_
+#endif  // DAWNNATIVE_STAGINGBUFFERVK_H_

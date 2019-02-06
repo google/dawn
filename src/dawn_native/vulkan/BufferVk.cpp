@@ -14,7 +14,7 @@
 
 #include "dawn_native/vulkan/BufferVk.h"
 
-#include "dawn_native/vulkan/BufferUploader.h"
+#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 
@@ -199,11 +199,18 @@ namespace dawn_native { namespace vulkan {
     MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         Device* device = ToBackend(GetDevice());
 
-        VkCommandBuffer commands = device->GetPendingCommandBuffer();
-        TransitionUsageNow(commands, dawn::BufferUsageBit::TransferDst);
+        DynamicUploader* uploader = nullptr;
+        DAWN_TRY_ASSIGN(uploader, device->GetDynamicUploader());
 
-        BufferUploader* uploader = device->GetBufferUploader();
-        uploader->BufferSubData(mHandle, start, count, data);
+        UploadHandle uploadHandle;
+        DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(count, kDefaultAlignment));
+        ASSERT(uploadHandle.mappedBuffer != nullptr);
+
+        memcpy(uploadHandle.mappedBuffer, data, count);
+
+        DAWN_TRY(device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer,
+                                                 uploadHandle.startOffset, this, start, count));
+
         return {};
     }
 
