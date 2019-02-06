@@ -20,6 +20,8 @@
 // Include GLFW after VulkanBackend so that it declares the Vulkan-specific functions
 #include "GLFW/glfw3.h"
 
+#include <memory>
+
 namespace utils {
 
     class VulkanBinding : public BackendBinding {
