@@ -397,7 +397,8 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegion) {
 // Test that copying texture 2D array mips with 256-byte aligned sizes works
 TEST_P(CopyTests_T2B, Texture2DArrayMip) {
     // TODO(b-brber): Figure out why this test fails on Intel Linux.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsIntel());
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=101
+    DAWN_SKIP_TEST_IF(IsLinux() && IsVulkan() && IsIntel());
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
