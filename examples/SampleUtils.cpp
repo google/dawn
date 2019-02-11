@@ -20,9 +20,11 @@
 #include "utils/TerribleCommandBuffer.h"
 
 #include <dawn/dawn.h>
-#include <dawn/dawncpp.h>
 #include <dawn/dawn_wsi.h>
+#include <dawn/dawncpp.h>
 #include <dawn_native/DawnNative.h>
+#include <dawn_wire/WireClient.h>
+#include <dawn_wire/WireServer.h>
 #include "GLFW/glfw3.h"
 
 #include <cstring>
@@ -61,8 +63,8 @@ static utils::BackendBinding* binding = nullptr;
 
 static GLFWwindow* window = nullptr;
 
-static dawn_wire::CommandHandler* wireServer = nullptr;
-static dawn_wire::CommandHandler* wireClient = nullptr;
+static dawn_wire::WireServer* wireServer = nullptr;
+static dawn_wire::WireClient* wireClient = nullptr;
 static utils::TerribleCommandBuffer* c2sBuf = nullptr;
 static utils::TerribleCommandBuffer* s2cBuf = nullptr;
 
@@ -101,12 +103,12 @@ dawn::Device CreateCppDawnDevice() {
                 c2sBuf = new utils::TerribleCommandBuffer();
                 s2cBuf = new utils::TerribleCommandBuffer();
 
-                wireServer = dawn_wire::NewServerCommandHandler(backendDevice, backendProcs, s2cBuf);
+                wireServer = new dawn_wire::WireServer(backendDevice, backendProcs, s2cBuf);
                 c2sBuf->SetHandler(wireServer);
 
-                dawnDevice clientDevice;
-                dawnProcTable clientProcs;
-                wireClient = dawn_wire::NewClientDevice(&clientProcs, &clientDevice, c2sBuf);
+                wireClient = new dawn_wire::WireClient(c2sBuf);
+                dawnDevice clientDevice = wireClient->GetDevice();
+                dawnProcTable clientProcs = wireClient->GetProcs();
                 s2cBuf->SetHandler(wireClient);
 
                 procs = clientProcs;

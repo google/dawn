@@ -35,7 +35,7 @@ namespace dawn_wire { namespace server {
         uint64_t value;
     };
 
-    class Server : public ServerBase, public CommandHandler {
+    class Server : public ServerBase {
       public:
         Server(dawnDevice device, const dawnProcTable& procs, CommandSerializer* serializer);
         ~Server();

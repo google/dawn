@@ -12,19 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "dawn_wire/WireClient.h"
 #include "dawn_wire/client/Client.h"
-#include "dawn_wire/client/Device.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire {
 
-    Client::Client(CommandSerializer* serializer)
-        : ClientBase(),
-          mDevice(DeviceAllocator().New(this)->object.get()),
-          mSerializer(serializer) {
+    WireClient::WireClient(CommandSerializer* serializer) : mImpl(new client::Client(serializer)) {
     }
 
-    Client::~Client() {
-        DeviceAllocator().Free(mDevice);
+    WireClient::~WireClient() {
+        mImpl.reset();
     }
 
-}}  // namespace dawn_wire::client
+    dawnDevice WireClient::GetDevice() const {
+        return mImpl->GetDevice();
+    }
+
+    dawnProcTable WireClient::GetProcs() const {
+        return client::GetProcs();
+    }
+
+    const char* WireClient::HandleCommands(const char* commands, size_t size) {
+        return mImpl->HandleCommands(commands, size);
+    }
+
+}  // namespace dawn_wire

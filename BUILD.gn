@@ -760,6 +760,8 @@ source_set("libdawn_wire_headers") {
   public_configs = [ ":dawn_public" ]
   sources = [
     "src/include/dawn_wire/Wire.h",
+    "src/include/dawn_wire/WireClient.h",
+    "src/include/dawn_wire/WireServer.h",
     "src/include/dawn_wire/dawn_wire_export.h",
   ]
 }
@@ -797,9 +799,10 @@ dawn_component("libdawn_wire") {
   configs = [ ":dawn_internal" ]
   sources = get_target_outputs(":libdawn_wire_gen")
   sources += [
-    "src/dawn_wire/DawnWire.cpp",
+    "src/dawn_wire/WireClient.cpp",
     "src/dawn_wire/WireDeserializeAllocator.cpp",
     "src/dawn_wire/WireDeserializeAllocator.h",
+    "src/dawn_wire/WireServer.cpp",
     "src/dawn_wire/client/ApiObjects.h",
     "src/dawn_wire/client/ApiProcs.cpp",
     "src/dawn_wire/client/Buffer.cpp",

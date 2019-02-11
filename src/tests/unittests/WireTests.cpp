@@ -17,13 +17,13 @@
 
 #include "common/Assert.h"
 #include "common/Constants.h"
-#include "dawn_wire/Wire.h"
+#include "dawn_wire/WireClient.h"
+#include "dawn_wire/WireServer.h"
 #include "utils/TerribleCommandBuffer.h"
 
 #include <memory>
 
 using namespace testing;
-using namespace dawn_wire;
 
 // Definition of a "Lambda predicate matcher" for GMock to allow checking deep structures
 // are passed correctly by the wire.
@@ -156,11 +156,12 @@ class WireTestsBase : public Test {
             mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
             mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>(mWireServer.get());
 
-            mWireServer.reset(NewServerCommandHandler(mockDevice, mockProcs, mS2cBuf.get()));
+            mWireServer.reset(new dawn_wire::WireServer(mockDevice, mockProcs, mS2cBuf.get()));
             mC2sBuf->SetHandler(mWireServer.get());
 
-            dawnProcTable clientProcs;
-            mWireClient.reset(NewClientDevice(&clientProcs, &device, mC2sBuf.get()));
+            mWireClient.reset(new dawn_wire::WireClient(mC2sBuf.get()));
+            dawnProcTable clientProcs = mWireClient->GetProcs();
+            device = mWireClient->GetDevice();
             dawnSetProcs(&clientProcs);
             mS2cBuf->SetHandler(mWireClient.get());
 
@@ -197,8 +198,8 @@ class WireTestsBase : public Test {
     private:
         bool mIgnoreSetCallbackCalls = false;
 
-        std::unique_ptr<CommandHandler> mWireServer;
-        std::unique_ptr<CommandHandler> mWireClient;
+        std::unique_ptr<dawn_wire::WireServer> mWireServer;
+        std::unique_ptr<dawn_wire::WireClient> mWireClient;
         std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
         std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
 };
