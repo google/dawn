@@ -227,11 +227,20 @@ namespace dawn_native {
     }
 
     bool ShaderModuleBase::IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout) {
-        for (size_t group = 0; group < kMaxBindGroups; ++group) {
+        for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             if (!IsCompatibleWithBindGroupLayout(group, layout->GetBindGroupLayout(group))) {
                 return false;
             }
         }
+
+        for (uint32_t group : IterateBitSet(~layout->GetBindGroupLayoutsMask())) {
+            for (size_t i = 0; i < kMaxBindingsPerGroup; ++i) {
+                if (mBindingInfo[group][i].used) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 

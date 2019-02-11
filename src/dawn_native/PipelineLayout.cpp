@@ -52,6 +52,7 @@ namespace dawn_native {
 
     const BindGroupLayoutBase* PipelineLayoutBase::GetBindGroupLayout(size_t group) const {
         ASSERT(group < kMaxBindGroups);
+        ASSERT(mMask[group]);
         return mBindGroupLayouts[group].Get();
     }
 

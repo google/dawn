@@ -15,6 +15,7 @@
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 
 #include "common/Assert.h"
+#include "common/BitSetIterator.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
@@ -45,7 +46,7 @@ namespace dawn_native { namespace d3d12 {
         compiler.set_hlsl_options(options_hlsl);
 
         const ModuleBindingInfo& moduleBindingInfo = GetBindingInfo();
-        for (uint32_t group = 0; group < moduleBindingInfo.size(); ++group) {
+        for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const auto& bindingOffsets =
                 ToBackend(layout->GetBindGroupLayout(group))->GetBindingOffsets();
             const auto& groupBindingInfo = moduleBindingInfo[group];
