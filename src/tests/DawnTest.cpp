@@ -332,8 +332,10 @@ void DawnTest::SwapBuffersForCapture() {
 
 void DawnTest::FlushWire() {
     if (gTestUsesWire) {
-        ASSERT(mC2sBuf->Flush());
-        ASSERT(mS2cBuf->Flush());
+        bool C2SFlushed = mC2sBuf->Flush();
+        bool S2CFlushed = mS2cBuf->Flush();
+        ASSERT(C2SFlushed);
+        ASSERT(S2CFlushed);
     }
 }
 
