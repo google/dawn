@@ -14,7 +14,7 @@
 
 // Forwarding callbacks
 {% for type in by_category["object"] if type.is_builder%}
-    static void Forward{{type.name.CamelCase()}}ToClient(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2);
+    static void Forward{{type.name.CamelCase()}}(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2);
 {% endfor %}
 
 // Error callbacks
@@ -23,12 +23,27 @@
     void On{{Type}}Error(dawnBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial);
 {% endfor %}
 
-// Command handlers
-{% for type in by_category["object"] %}
-    {% for method in type.methods %}
-        {% set Suffix = as_MethodSuffix(type.name, method.name) %}
-        {% if Suffix not in client_side_commands %}
-            bool Handle{{Suffix}}(const char** commands, size_t* size);
-        {% endif %}
-    {% endfor %}
+// Command handlers & doers
+{% for command in cmd_records["command"] if command.name.CamelCase() not in client_side_commands %}
+    {% set Suffix = command.name.CamelCase() %}
+    bool Handle{{Suffix}}(const char** commands, size_t* size);
+
+    bool Do{{Suffix}}(
+        {%- for member in command.members -%}
+            {%- if member.is_return_value -%}
+                {%- if member.handle_type -%}
+                    {{as_cType(member.handle_type.name)}}* {{as_varName(member.name)}}
+                {%- else -%}
+                    {{as_cType(member.type.name)}}* {{as_varName(member.name)}}
+                {%- endif -%}
+            {%- else -%}
+                {{as_annotated_cType(member)}}
+            {%- endif -%}
+            {%- if not loop.last -%}, {% endif %}
+        {%- endfor -%}
+    );
+{% endfor %}
+
+{% for CommandName in server_custom_pre_handler_commands %}
+    bool PreHandle{{CommandName}}(const {{CommandName}}Cmd& cmd);
 {% endfor %}

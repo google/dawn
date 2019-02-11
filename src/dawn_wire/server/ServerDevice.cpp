@@ -16,7 +16,7 @@
 
 namespace dawn_wire { namespace server {
 
-    void Server::ForwardDeviceErrorToServer(const char* message, dawnCallbackUserdata userdata) {
+    void Server::ForwardDeviceError(const char* message, dawnCallbackUserdata userdata) {
         auto server = reinterpret_cast<Server*>(static_cast<intptr_t>(userdata));
         server->OnDeviceError(message);
     }

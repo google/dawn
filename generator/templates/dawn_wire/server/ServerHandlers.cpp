@@ -16,144 +16,120 @@
 #include "dawn_wire/server/Server.h"
 
 namespace dawn_wire { namespace server {
-    {% for type in by_category["object"] %}
-        {% for method in type.methods %}
-            {% set Suffix = as_MethodSuffix(type.name, method.name) %}
-            {% if Suffix not in client_side_commands %}
-                //* The generic command handlers
+    {% for command in cmd_records["command"] %}
+        {% set type = command.derived_object %}
+        {% set method = command.derived_method %}
+        {% set is_method = method != None %}
+        {% set returns = is_method and method.return_type.name.canonical_case() != "void" %}
 
-                bool Server::Handle{{Suffix}}(const char** commands, size_t* size) {
-                    {{Suffix}}Cmd cmd;
-                    DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator, *this);
+        {% set Suffix = command.name.CamelCase() %}
+        {% if Suffix not in client_side_commands %}
+            //* The generic command handlers
+            bool Server::Handle{{Suffix}}(const char** commands, size_t* size) {
+                {{Suffix}}Cmd cmd;
+                DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator
+                    {%- if command.has_dawn_object -%}
+                        , *this
+                    {%- endif -%}
+                );
 
-                    if (deserializeResult == DeserializeResult::FatalError) {
+                if (deserializeResult == DeserializeResult::FatalError) {
+                    return false;
+                }
+
+                {% if Suffix in server_custom_pre_handler_commands %}
+                    if (!PreHandle{{Suffix}}(cmd)) {
                         return false;
                     }
+                {% endif %}
 
-                    {% if Suffix in server_custom_pre_handler_commands %}
-                        if (!PreHandle{{Suffix}}(cmd)) {
-                            return false;
-                        }
-                    {% endif %}
-
+                {% if is_method %}
                     //* Unpack 'self'
                     auto* selfData = {{type.name.CamelCase()}}Objects().Get(cmd.selfId);
                     ASSERT(selfData != nullptr);
+                {% endif %}
 
-                    //* In all cases allocate the object data as it will be refered-to by the client.
-                    {% set return_type = method.return_type %}
-                    {% set returns = return_type.name.canonical_case() != "void" %}
-                    {% if returns %}
-                        {% set Type = method.return_type.name.CamelCase() %}
-                        auto* resultData = {{Type}}Objects().Allocate(cmd.result.id);
-                        if (resultData == nullptr) {
-                            return false;
-                        }
-                        resultData->serial = cmd.result.serial;
+                //* Allocate any result objects
+                {%- for member in command.members if member.is_return_value -%}
+                    {{ assert(member.handle_type) }}
+                    {% set Type = member.handle_type.name.CamelCase() %}
+                    {% set name = as_varName(member.name) %}
 
-                        {% if type.is_builder %}
-                            selfData->builtObject = cmd.result;
-                        {% endif %}
-                    {% endif %}
-
-                    //* After the data is allocated, apply the argument error propagation mechanism
-                    if (deserializeResult == DeserializeResult::ErrorObject) {
-                        {% if type.is_builder %}
-                            selfData->valid = false;
-                            //* If we are in GetResult, fake an error callback
-                            {% if returns %}
-                                On{{type.name.CamelCase()}}Error(DAWN_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd.selfId, selfData->serial);
-                            {% endif %}
-                        {% endif %}
-                        return true;
+                    auto* {{name}}Data = {{Type}}Objects().Allocate(cmd.{{name}}.id);
+                    if ({{name}}Data == nullptr) {
+                        return false;
                     }
+                    {{name}}Data->serial = cmd.{{name}}.serial;
 
-                    {% if returns %}
-                        auto result ={{" "}}
-                    {%- endif %}
-                    mProcs.{{as_varName(type.name, method.name)}}(cmd.self
-                        {%- for arg in method.arguments -%}
-                            , cmd.{{as_varName(arg.name)}}
-                        {%- endfor -%}
-                    );
-
-                    {% if Suffix in server_custom_post_handler_commands %}
-                        if (!PostHandle{{Suffix}}(cmd)) {
-                            return false;
-                        }
+                    {% if type.is_builder %}
+                        selfData->builtObject = cmd.{{name}};
                     {% endif %}
+                {% endfor %}
 
-                    {% if returns %}
-                        resultData->handle = result;
-                        resultData->valid = result != nullptr;
-
-                        {% if return_type.name.CamelCase() in server_reverse_lookup_objects %}
-                            //* For created objects, store a mapping from them back to their client IDs
-                            if (result) {
-                                {{return_type.name.CamelCase()}}ObjectIdTable().Store(result, cmd.result.id);
-                            }
-                        {% endif %}
-
-                        //* builders remember the ID of the object they built so that they can send it
-                        //* in the callback to the client.
-                        {% if return_type.is_builder %}
-                            if (result != nullptr) {
-                                uint64_t userdata1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
-                                uint64_t userdata2 = (uint64_t(resultData->serial) << uint64_t(32)) + cmd.result.id;
-                                mProcs.{{as_varName(return_type.name, Name("set error callback"))}}(result, Forward{{return_type.name.CamelCase()}}ToClient, userdata1, userdata2);
-                            }
+                //* After the data is allocated, apply the argument error propagation mechanism
+                if (deserializeResult == DeserializeResult::ErrorObject) {
+                    {% if type.is_builder %}
+                        selfData->valid = false;
+                        //* If we are in GetResult, fake an error callback
+                        {% if returns %}
+                            On{{type.name.CamelCase()}}Error(DAWN_BUILDER_ERROR_STATUS_ERROR, "Maybe monad", cmd.selfId, selfData->serial);
                         {% endif %}
                     {% endif %}
-
                     return true;
                 }
-            {% endif %}
-        {% endfor %}
-    {% endfor %}
 
-    bool Server::HandleDestroyObject(const char** commands, size_t* size) {
-        DestroyObjectCmd cmd;
-        DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator);
+                //* Do command
+                bool success = Do{{Suffix}}(
+                    {%- for member in command.members -%}
+                        {%- if member.is_return_value -%}
+                            {%- if member.handle_type -%}
+                                &{{as_varName(member.name)}}Data->handle //* Pass the handle of the output object to be written by the doer
+                            {%- else -%}
+                                &cmd.{{as_varName(member.name)}}
+                            {%- endif -%}
+                        {%- else -%}
+                            cmd.{{as_varName(member.name)}}
+                        {%- endif -%}
+                        {%- if not loop.last -%}, {% endif %}
+                    {%- endfor -%}
+                );
 
-        if (deserializeResult == DeserializeResult::FatalError) {
-            return false;
-        }
+                //* Mark output object handles as valid/invalid
+                {%- for member in command.members if member.is_return_value and member.handle_type -%}
+                    {% set name = as_varName(member.name) %}
+                    {{name}}Data->valid = {{name}}Data->handle != nullptr;
+                {% endfor %}
 
-        ObjectId objectId = cmd.objectId;
-        //* ID 0 are reserved for nullptr and cannot be destroyed.
-        if (objectId == 0) {
-            return false;
-        }
-
-        switch (cmd.objectType) {
-            {% for type in by_category["object"] %}
-                {% set ObjectType = type.name.CamelCase() %}
-                case ObjectType::{{ObjectType}}: {
-                    {% if ObjectType == "Device" %}
-                        //* Freeing the device has to be done out of band.
-                        return false;
-                    {% else %}
-                        auto* data = {{type.name.CamelCase()}}Objects().Get(objectId);
-                        if (data == nullptr) {
-                            return false;
-                        }
-                        {% if type.name.CamelCase() in server_reverse_lookup_objects %}
-                            {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
-                        {% endif %}
-
-                        if (data->handle != nullptr) {
-                            mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
-                        }
-
-                        {{type.name.CamelCase()}}Objects().Free(objectId);
-                        return true;
-                    {% endif %}
+                if (!success) {
+                    return false;
                 }
-            {% endfor %}
-            default:
-                UNREACHABLE();
-        }
-    }
+
+                {%- for member in command.members if member.is_return_value and member.handle_type -%}
+                    {% set Type = member.handle_type.name.CamelCase() %}
+                    {% set name = as_varName(member.name) %}
+
+                    {% if Type in server_reverse_lookup_objects %}
+                        //* For created objects, store a mapping from them back to their client IDs
+                        if ({{name}}Data->valid) {
+                            {{Type}}ObjectIdTable().Store({{name}}Data->handle, cmd.{{name}}.id);
+                        }
+                    {% endif %}
+
+                    //* builders remember the ID of the object they built so that they can send it
+                    //* in the callback to the client.
+                    {% if member.handle_type.is_builder %}
+                        if ({{name}}Data->valid) {
+                            uint64_t userdata1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
+                            uint64_t userdata2 = (uint64_t({{name}}Data->serial) << uint64_t(32)) + cmd.{{name}}.id;
+                            mProcs.{{as_varName(member.handle_type.name, Name("set error callback"))}}({{name}}Data->handle, Forward{{Type}}, userdata1, userdata2);
+                        }
+                    {% endif %}
+                {% endfor %}
+
+                return true;
+            }
+        {% endif %}
+    {% endfor %}
 
     const char* Server::HandleCommands(const char* commands, size_t size) {
         mProcs.deviceTick(DeviceObjects().Get(1)->handle);

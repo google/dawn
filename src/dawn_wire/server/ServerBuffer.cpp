@@ -21,28 +21,20 @@ namespace dawn_wire { namespace server {
 
     bool Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
         auto* selfData = BufferObjects().Get(cmd.selfId);
-        ASSERT(selfData != nullptr);
+        DAWN_ASSERT(selfData != nullptr);
 
         selfData->mappedData = nullptr;
 
         return true;
     }
 
-    bool Server::HandleBufferMapAsync(const char** commands, size_t* size) {
+    bool Server::DoBufferMapAsync(ObjectId bufferId,
+                                  uint32_t requestSerial,
+                                  uint32_t start,
+                                  uint32_t size,
+                                  bool isWrite) {
         // These requests are just forwarded to the buffer, with userdata containing what the
         // client will require in the return command.
-        BufferMapAsyncCmd cmd;
-        DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator);
-
-        if (deserializeResult == DeserializeResult::FatalError) {
-            return false;
-        }
-
-        ObjectId bufferId = cmd.bufferId;
-        uint32_t requestSerial = cmd.requestSerial;
-        uint32_t requestSize = cmd.size;
-        uint32_t requestStart = cmd.start;
-        bool isWrite = cmd.isWrite;
 
         // The null object isn't valid as `self`
         if (bufferId == 0) {
@@ -58,7 +50,7 @@ namespace dawn_wire { namespace server {
         data->server = this;
         data->buffer = ObjectHandle{bufferId, buffer->serial};
         data->requestSerial = requestSerial;
-        data->size = requestSize;
+        data->size = size;
         data->isWrite = isWrite;
 
         auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
@@ -74,27 +66,17 @@ namespace dawn_wire { namespace server {
         }
 
         if (isWrite) {
-            mProcs.bufferMapWriteAsync(buffer->handle, requestStart, requestSize,
-                                       ForwardBufferMapWriteAsync, userdata);
+            mProcs.bufferMapWriteAsync(buffer->handle, start, size, ForwardBufferMapWriteAsync,
+                                       userdata);
         } else {
-            mProcs.bufferMapReadAsync(buffer->handle, requestStart, requestSize,
-                                      ForwardBufferMapReadAsync, userdata);
+            mProcs.bufferMapReadAsync(buffer->handle, start, size, ForwardBufferMapReadAsync,
+                                      userdata);
         }
 
         return true;
     }
 
-    bool Server::HandleBufferUpdateMappedData(const char** commands, size_t* size) {
-        BufferUpdateMappedDataCmd cmd;
-        DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator);
-
-        if (deserializeResult == DeserializeResult::FatalError) {
-            return false;
-        }
-
-        ObjectId bufferId = cmd.bufferId;
-        size_t dataLength = cmd.dataLength;
-
+    bool Server::DoBufferUpdateMappedData(ObjectId bufferId, uint32_t count, const uint8_t* data) {
         // The null object isn't valid as `self`
         if (bufferId == 0) {
             return false;
@@ -102,13 +84,15 @@ namespace dawn_wire { namespace server {
 
         auto* buffer = BufferObjects().Get(bufferId);
         if (buffer == nullptr || !buffer->valid || buffer->mappedData == nullptr ||
-            buffer->mappedDataSize != dataLength) {
+            buffer->mappedDataSize != count) {
             return false;
         }
 
-        DAWN_ASSERT(cmd.data != nullptr);
+        if (data == nullptr) {
+            return false;
+        }
 
-        memcpy(buffer->mappedData, cmd.data, dataLength);
+        memcpy(buffer->mappedData, data, count);
 
         return true;
     }

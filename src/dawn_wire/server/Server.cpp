@@ -24,7 +24,7 @@ namespace dawn_wire { namespace server {
         deviceData->valid = true;
 
         auto userdata = static_cast<dawnCallbackUserdata>(reinterpret_cast<intptr_t>(this));
-        procs.deviceSetErrorCallback(device, ForwardDeviceErrorToServer, userdata);
+        procs.deviceSetErrorCallback(device, ForwardDeviceError, userdata);
     }
 
     Server::~Server() {

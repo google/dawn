@@ -71,7 +71,7 @@
         "server_custom_pre_handler_commands": [
             "BufferUnmap"
         ],
-        "server_custom_post_handler_commands": [
+        "server_handwritten_commands": [
             "QueueSignal"
         ],
         "server_reverse_lookup_objects": [

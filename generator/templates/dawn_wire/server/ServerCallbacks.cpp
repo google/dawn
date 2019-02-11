@@ -17,7 +17,7 @@
 
 namespace dawn_wire { namespace server {
     {% for type in by_category["object"] if type.is_builder%}
-        void Server::Forward{{type.name.CamelCase()}}ToClient(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2) {
+        void Server::Forward{{type.name.CamelCase()}}(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2) {
             auto server = reinterpret_cast<Server*>(static_cast<uintptr_t>(userdata1));
             uint32_t id = userdata2 & 0xFFFFFFFFu;
             uint32_t serial = userdata2 >> uint64_t(32);

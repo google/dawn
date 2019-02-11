@@ -17,11 +17,14 @@
 
 namespace dawn_wire { namespace server {
 
-    bool Server::PostHandleQueueSignal(const QueueSignalCmd& cmd) {
-        if (cmd.fence == nullptr) {
+    bool Server::DoQueueSignal(dawnQueue cSelf, dawnFence cFence, uint64_t signalValue) {
+        if (cFence == nullptr) {
             return false;
         }
-        ObjectId fenceId = FenceObjectIdTable().Get(cmd.fence);
+
+        mProcs.queueSignal(cSelf, cFence, signalValue);
+
+        ObjectId fenceId = FenceObjectIdTable().Get(cFence);
         ASSERT(fenceId != 0);
         auto* fence = FenceObjects().Get(fenceId);
         ASSERT(fence != nullptr);
@@ -29,10 +32,10 @@ namespace dawn_wire { namespace server {
         auto* data = new FenceCompletionUserdata;
         data->server = this;
         data->fence = ObjectHandle{fenceId, fence->serial};
-        data->value = cmd.signalValue;
+        data->value = signalValue;
 
         auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
-        mProcs.fenceOnCompletion(cmd.fence, cmd.signalValue, ForwardFenceCompletedValue, userdata);
+        mProcs.fenceOnCompletion(cFence, signalValue, ForwardFenceCompletedValue, userdata);
         return true;
     }
 
