@@ -61,7 +61,6 @@ namespace utils {
             blend.srcFactor = dawn::BlendFactor::One;
             blend.dstFactor = dawn::BlendFactor::Zero;
             dawn::BlendStateDescriptor blendStateDescriptor;
-            blendStateDescriptor.blendEnabled = false;
             blendStateDescriptor.alphaBlend = blend;
             blendStateDescriptor.colorBlend = blend;
             blendStateDescriptor.colorWriteMask = dawn::ColorWriteMask::All;

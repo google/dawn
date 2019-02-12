@@ -169,6 +169,15 @@ namespace dawn_native {
                mDepthStencilState->stencilFront.passOp != dawn::StencilOperation::Keep;
     }
 
+    bool BlendEnabled(const BlendStateDescriptor* mBlendState) {
+        return mBlendState->alphaBlend.operation != dawn::BlendOperation::Add ||
+               mBlendState->alphaBlend.srcFactor != dawn::BlendFactor::One ||
+               mBlendState->alphaBlend.dstFactor != dawn::BlendFactor::Zero ||
+               mBlendState->colorBlend.operation != dawn::BlendOperation::Add ||
+               mBlendState->colorBlend.srcFactor != dawn::BlendFactor::One ||
+               mBlendState->colorBlend.dstFactor != dawn::BlendFactor::Zero;
+    }
+
     // RenderPipelineBase
 
     RenderPipelineBase::RenderPipelineBase(DeviceBase* device,

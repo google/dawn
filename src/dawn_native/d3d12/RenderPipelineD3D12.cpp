@@ -129,7 +129,7 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_RENDER_TARGET_BLEND_DESC ComputeBlendDesc(const BlendStateDescriptor* descriptor) {
             D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
-            blendDesc.BlendEnable = descriptor->blendEnabled;
+            blendDesc.BlendEnable = BlendEnabled(descriptor);
             blendDesc.SrcBlend = D3D12Blend(descriptor->colorBlend.srcFactor);
             blendDesc.DestBlend = D3D12Blend(descriptor->colorBlend.dstFactor);
             blendDesc.BlendOp = D3D12BlendOperation(descriptor->colorBlend.operation);

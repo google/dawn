@@ -115,7 +115,7 @@ namespace dawn_native { namespace vulkan {
         VkPipelineColorBlendAttachmentState ComputeBlendDesc(
             const BlendStateDescriptor* descriptor) {
             VkPipelineColorBlendAttachmentState attachment;
-            attachment.blendEnable = descriptor->blendEnabled ? VK_TRUE : VK_FALSE;
+            attachment.blendEnable = BlendEnabled(descriptor) ? VK_TRUE : VK_FALSE;
             attachment.srcColorBlendFactor = VulkanBlendFactor(descriptor->colorBlend.srcFactor);
             attachment.dstColorBlendFactor = VulkanBlendFactor(descriptor->colorBlend.dstFactor);
             attachment.colorBlendOp = VulkanBlendOperation(descriptor->colorBlend.operation);

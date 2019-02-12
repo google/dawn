@@ -91,7 +91,7 @@ namespace dawn_native { namespace opengl {
         }
 
         void ApplyBlendState(uint32_t attachment, const BlendStateDescriptor* descriptor) {
-            if (descriptor->blendEnabled) {
+            if (BlendEnabled(descriptor)) {
                 glEnablei(GL_BLEND, attachment);
                 glBlendEquationSeparatei(attachment, GLBlendMode(descriptor->colorBlend.operation),
                                          GLBlendMode(descriptor->alphaBlend.operation));

@@ -130,7 +130,7 @@ namespace dawn_native { namespace metal {
 
         void ComputeBlendDesc(MTLRenderPipelineColorAttachmentDescriptor* attachment,
                               const BlendStateDescriptor* descriptor) {
-            attachment.blendingEnabled = descriptor->blendEnabled;
+            attachment.blendingEnabled = BlendEnabled(descriptor);
             attachment.sourceRGBBlendFactor =
                 MetalBlendFactor(descriptor->colorBlend.srcFactor, false);
             attachment.destinationRGBBlendFactor =

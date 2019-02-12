@@ -136,7 +136,6 @@ class BlendStateTest : public DawnTest {
             blend.dstFactor = dawn::BlendFactor::One;
 
             dawn::BlendStateDescriptor descriptor;
-            descriptor.blendEnabled = true;
             descriptor.alphaBlend = blend;
             descriptor.colorBlend = blend;
             descriptor.colorWriteMask = dawn::ColorWriteMask::All;
@@ -161,7 +160,6 @@ class BlendStateTest : public DawnTest {
             alphaBlend.dstFactor = alphaDstFactor;
 
             dawn::BlendStateDescriptor descriptor;
-            descriptor.blendEnabled = true;
             descriptor.colorBlend = colorBlend;
             descriptor.alphaBlend = alphaBlend;
             descriptor.colorWriteMask = dawn::ColorWriteMask::All;
@@ -281,7 +279,6 @@ TEST_P(BlendStateTest, Basic) {
     blend.srcFactor = dawn::BlendFactor::One;
     blend.dstFactor = dawn::BlendFactor::Zero;
     dawn::BlendStateDescriptor descriptor;
-    descriptor.blendEnabled = false;
     descriptor.alphaBlend = blend;
     descriptor.colorBlend = blend;
     descriptor.colorWriteMask = dawn::ColorWriteMask::All;
@@ -637,7 +634,6 @@ TEST_P(BlendStateTest, ColorWriteMask) {
     blend.dstFactor = dawn::BlendFactor::One;
 
     dawn::BlendStateDescriptor descriptor;
-    descriptor.blendEnabled = true;
     descriptor.colorBlend = blend;
     descriptor.alphaBlend = blend;
     {
@@ -687,7 +683,6 @@ TEST_P(BlendStateTest, ColorWriteMaskBlendingDisabled) {
         descriptor.alphaBlend = blend;
         descriptor.colorBlend = blend;
 
-        descriptor.blendEnabled = false;
         descriptor.colorWriteMask = dawn::ColorWriteMask::Red;
         SetupSingleSourcePipelines(descriptor);
 
@@ -799,15 +794,12 @@ TEST_P(BlendStateTest, IndependentBlendState) {
     blend3.srcFactor = dawn::BlendFactor::One;
     blend3.dstFactor = dawn::BlendFactor::One;
 
-    testDescriptor.cBlendStates[0].blendEnabled = true;
     testDescriptor.cBlendStates[0].colorBlend = blend1;
     testDescriptor.cBlendStates[0].alphaBlend = blend1;
 
-    testDescriptor.cBlendStates[1].blendEnabled = true;
     testDescriptor.cBlendStates[1].colorBlend = blend2;
     testDescriptor.cBlendStates[1].alphaBlend = blend2;
 
-    testDescriptor.cBlendStates[3].blendEnabled = true;
     testDescriptor.cBlendStates[3].colorBlend = blend3;
     testDescriptor.cBlendStates[3].alphaBlend = blend3;
 
@@ -881,7 +873,6 @@ TEST_P(BlendStateTest, DefaultBlendColor) {
     blend.operation = dawn::BlendOperation::Add;
     blend.srcFactor = dawn::BlendFactor::BlendColor;
     blend.dstFactor = dawn::BlendFactor::One;
-    testDescriptor.cBlendStates[0].blendEnabled = true;
     testDescriptor.cBlendStates[0].colorBlend = blend;
     testDescriptor.cBlendStates[0].alphaBlend = blend;
 

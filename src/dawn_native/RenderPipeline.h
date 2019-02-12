@@ -30,6 +30,7 @@ namespace dawn_native {
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState);
+    bool BlendEnabled(const BlendStateDescriptor* mBlendState);
 
     class RenderPipelineBase : public PipelineBase {
       public:
