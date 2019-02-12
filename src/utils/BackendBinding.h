@@ -15,11 +15,10 @@
 #ifndef UTILS_BACKENDBINDING_H_
 #define UTILS_BACKENDBINDING_H_
 
-#include <dawn_native/DawnNative.h>
+#include "dawn/dawncpp.h"
+#include "dawn_native/DawnNative.h"
 
 struct GLFWwindow;
-typedef struct dawnProcTable_s dawnProcTable;
-typedef struct dawnDeviceImpl* dawnDevice;
 
 namespace utils {
 
@@ -27,18 +26,23 @@ namespace utils {
       public:
         virtual ~BackendBinding() = default;
 
-        virtual void SetupGLFWWindowHints() = 0;
-        virtual dawnDevice CreateDevice() = 0;
         virtual uint64_t GetSwapChainImplementation() = 0;
         virtual dawnTextureFormat GetPreferredSwapChainTextureFormat() = 0;
 
-        void SetWindow(GLFWwindow* window);
-
       protected:
+        BackendBinding(GLFWwindow* window, dawnDevice device);
+
         GLFWwindow* mWindow = nullptr;
+        dawnDevice mDevice = nullptr;
     };
 
-    BackendBinding* CreateBinding(dawn_native::BackendType type);
+    void SetupGLFWWindowHintsForBackend(dawn_native::BackendType type);
+    void DiscoverAdapter(dawn_native::Instance* instance,
+                         GLFWwindow* window,
+                         dawn_native::BackendType type);
+    BackendBinding* CreateBinding(dawn_native::BackendType type,
+                                  GLFWwindow* window,
+                                  dawnDevice device);
 
 }  // namespace utils
 

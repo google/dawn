@@ -23,23 +23,9 @@ namespace utils {
 
     class NullBinding : public BackendBinding {
       public:
-        void SetupGLFWWindowHints() override {
+        NullBinding(GLFWwindow* window, dawnDevice device) : BackendBinding(window, device) {
         }
-        dawnDevice CreateDevice() override {
-            // Make an instance and find the null adapter
-            mInstance = std::make_unique<dawn_native::Instance>();
-            mInstance->DiscoverDefaultAdapters();
 
-            std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
-            for (dawn_native::Adapter adapter : adapters) {
-                if (adapter.GetBackendType() == dawn_native::BackendType::Null) {
-                    return adapter.CreateDevice();
-                }
-            }
-
-            UNREACHABLE();
-            return {};
-        }
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
                 mSwapchainImpl = dawn_native::null::CreateNativeSwapChainImpl();
@@ -51,12 +37,11 @@ namespace utils {
         }
 
       private:
-        std::unique_ptr<dawn_native::Instance> mInstance;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateNullBinding() {
-        return new NullBinding;
+    BackendBinding* CreateNullBinding(GLFWwindow* window, dawnDevice device) {
+        return new NullBinding(window, device);
     }
 
 }  // namespace utils

@@ -95,36 +95,9 @@ namespace utils {
 
     class OpenGLBinding : public BackendBinding {
       public:
-        void SetupGLFWWindowHints() override {
-#if defined(DAWN_PLATFORM_APPLE)
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#else
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#endif
-        }
-
-        dawnDevice CreateDevice() override {
-            glfwMakeContextCurrent(mWindow);
+        OpenGLBinding(GLFWwindow* window, dawnDevice device) : BackendBinding(window, device) {
             // Load the GL entry points in our copy of the glad static library
             gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
-
-            // Make an instance and "discover" an OpenGL adapter with glfw's getProc
-            mInstance = std::make_unique<dawn_native::Instance>();
-
-            dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
-            adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
-            mInstance->DiscoverAdapters(&adapterOptions);
-
-            std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
-            ASSERT(adapters.size() == 1);
-
-            return adapters[0].CreateDevice();
         }
 
         uint64_t GetSwapChainImplementation() override {
@@ -139,12 +112,11 @@ namespace utils {
         }
 
       private:
-        std::unique_ptr<dawn_native::Instance> mInstance;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateOpenGLBinding() {
-        return new OpenGLBinding;
+    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, dawnDevice device) {
+        return new OpenGLBinding(window, device);
     }
 
 }  // namespace utils

@@ -110,26 +110,7 @@ namespace utils {
 
     class MetalBinding : public BackendBinding {
       public:
-        void SetupGLFWWindowHints() override {
-            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        }
-
-        dawnDevice CreateDevice() override {
-            // Make an instance and find a Metal adapter
-            mInstance = std::make_unique<dawn_native::Instance>();
-            mInstance->DiscoverDefaultAdapters();
-
-            std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
-            for (dawn_native::Adapter adapter : adapters) {
-                if (adapter.GetBackendType() == dawn_native::BackendType::Metal) {
-                    dawnDevice device = adapter.CreateDevice();
-                    mMetalDevice = dawn_native::metal::GetMetalDevice(device);
-                    return device;
-                }
-            }
-
-            UNREACHABLE();
-            return {};
+        MetalBinding(GLFWwindow* window, dawnDevice device) : BackendBinding(window, device) {
         }
 
         uint64_t GetSwapChainImplementation() override {
@@ -145,12 +126,10 @@ namespace utils {
         }
 
       private:
-        std::unique_ptr<dawn_native::Instance> mInstance;
-        id<MTLDevice> mMetalDevice = nil;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateMetalBinding() {
-        return new MetalBinding;
+    BackendBinding* CreateMetalBinding(GLFWwindow* window, dawnDevice device) {
+        return new MetalBinding(window, device);
     }
 }

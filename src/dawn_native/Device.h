@@ -114,8 +114,6 @@ namespace dawn_native {
             return nullptr;
         }
 
-        virtual const PCIInfo& GetPCIInfo() const;
-
         virtual ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(
             size_t size) = 0;
         virtual MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,

@@ -14,55 +14,92 @@
 
 #include "utils/BackendBinding.h"
 
-#include "common/Assert.h"
+#include "common/Compiler.h"
+
+#include "GLFW/glfw3.h"
+
+#if defined(DAWN_ENABLE_BACKEND_OPENGL)
+#    include "dawn_native/OpenGLBackend.h"
+#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 
 namespace utils {
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
-    BackendBinding* CreateD3D12Binding();
+    BackendBinding* CreateD3D12Binding(GLFWwindow* window, dawnDevice device);
 #endif
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-    BackendBinding* CreateMetalBinding();
+    BackendBinding* CreateMetalBinding(GLFWwindow* window, dawnDevice device);
 #endif
 #if defined(DAWN_ENABLE_BACKEND_NULL)
-    BackendBinding* CreateNullBinding();
+    BackendBinding* CreateNullBinding(GLFWwindow* window, dawnDevice device);
 #endif
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-    BackendBinding* CreateOpenGLBinding();
+    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, dawnDevice device);
 #endif
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
-    BackendBinding* CreateVulkanBinding();
+    BackendBinding* CreateVulkanBinding(GLFWwindow* window, dawnDevice device);
 #endif
 
-    void BackendBinding::SetWindow(GLFWwindow* window) {
-        mWindow = window;
+    BackendBinding::BackendBinding(GLFWwindow* window, dawnDevice device)
+        : mWindow(window), mDevice(device) {
     }
 
-    BackendBinding* CreateBinding(dawn_native::BackendType type) {
+    void SetupGLFWWindowHintsForBackend(dawn_native::BackendType type) {
+        if (type == dawn_native::BackendType::OpenGL) {
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        } else {
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        }
+    }
+
+    void DiscoverAdapter(dawn_native::Instance* instance,
+                         GLFWwindow* window,
+                         dawn_native::BackendType type) {
+        DAWN_UNUSED(type);
+        DAWN_UNUSED(window);
+
+        if (type == dawn_native::BackendType::OpenGL) {
+#if defined(DAWN_ENABLE_BACKEND_OPENGL)
+            glfwMakeContextCurrent(window);
+            dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
+            adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
+            instance->DiscoverAdapters(&adapterOptions);
+#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
+        } else {
+            instance->DiscoverDefaultAdapters();
+        }
+    }
+
+    BackendBinding* CreateBinding(dawn_native::BackendType type,
+                                  GLFWwindow* window,
+                                  dawnDevice device) {
         switch (type) {
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
             case dawn_native::BackendType::D3D12:
-                return CreateD3D12Binding();
+                return CreateD3D12Binding(window, device);
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
             case dawn_native::BackendType::Metal:
-                return CreateMetalBinding();
+                return CreateMetalBinding(window, device);
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_NULL)
             case dawn_native::BackendType::Null:
-                return CreateNullBinding();
+                return CreateNullBinding(window, device);
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
             case dawn_native::BackendType::OpenGL:
-                return CreateOpenGLBinding();
+                return CreateOpenGLBinding(window, device);
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
             case dawn_native::BackendType::Vulkan:
-                return CreateVulkanBinding();
+                return CreateVulkanBinding(window, device);
 #endif
 
             default:

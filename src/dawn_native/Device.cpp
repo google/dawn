@@ -102,11 +102,6 @@ namespace dawn_native {
         mCaches->bindGroupLayouts.erase(obj);
     }
 
-    const PCIInfo& DeviceBase::GetPCIInfo() const {
-        ASSERT(mAdapter != nullptr);
-        return mAdapter->GetPCIInfo();
-    }
-
     // Object creation API methods
 
     BindGroupBase* DeviceBase::CreateBindGroup(const BindGroupDescriptor* descriptor) {

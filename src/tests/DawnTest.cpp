@@ -26,6 +26,7 @@
 #include "utils/SystemUtils.h"
 #include "utils/TerribleCommandBuffer.h"
 
+#include <algorithm>
 #include <iostream>
 #include <unordered_map>
 #include "GLFW/glfw3.h"
@@ -55,7 +56,7 @@ namespace {
     std::unordered_map<dawn_native::BackendType, GLFWwindow*> windows;
 
     // Creates a GLFW window set up for use with a given backend.
-    GLFWwindow* GetWindowForBackend(utils::BackendBinding* binding, dawn_native::BackendType type) {
+    GLFWwindow* GetWindowForBackend(dawn_native::BackendType type) {
         GLFWwindow** window = &windows[type];
 
         if (*window != nullptr) {
@@ -67,7 +68,7 @@ namespace {
         }
 
         glfwDefaultWindowHints();
-        binding->SetupGLFWWindowHints();
+        utils::SetupGLFWWindowHintsForBackend(type);
 
         std::string windowName = "Dawn " + ParamName(type) + " test window";
         *window = glfwCreateWindow(400, 400, windowName.c_str(), nullptr, nullptr);
@@ -174,16 +175,34 @@ bool DawnTest::IsMacOS() const {
 bool gTestUsesWire = false;
 
 void DawnTest::SetUp() {
-    mBinding.reset(utils::CreateBinding(GetParam()));
-    DAWN_ASSERT(mBinding != nullptr);
-
-    GLFWwindow* testWindow = GetWindowForBackend(mBinding.get(), GetParam());
+    // Create the test window and discover adapters using it (esp. for OpenGL)
+    GLFWwindow* testWindow = GetWindowForBackend(GetParam());
     DAWN_ASSERT(testWindow != nullptr);
 
-    mBinding->SetWindow(testWindow);
+    mInstance = std::make_unique<dawn_native::Instance>();
+    utils::DiscoverAdapter(mInstance.get(), testWindow, GetParam());
 
-    dawnDevice backendDevice = mBinding->CreateDevice();
+    // Get an adapter for the backend to use, and create the device.
+    dawn_native::Adapter backendAdapter;
+    {
+        std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
+        auto adapterIt = std::find_if(adapters.begin(), adapters.end(),
+                                      [this](const dawn_native::Adapter adapter) -> bool {
+                                          // Chromium's GTest harness has GetParam() as a regular
+                                          // function and not a member function of this.
+                                          DAWN_UNUSED(this);
+                                          return adapter.GetBackendType() == GetParam();
+                                      });
+        ASSERT(adapterIt != adapters.end());
+        backendAdapter = *adapterIt;
+    }
+
+    mPCIInfo = backendAdapter.GetPCIInfo();
+    dawnDevice backendDevice = backendAdapter.CreateDevice();
     dawnProcTable backendProcs = dawn_native::GetProcs();
+
+    mBinding.reset(utils::CreateBinding(GetParam(), testWindow, backendDevice));
+    DAWN_ASSERT(mBinding != nullptr);
 
     // Choose whether to use the backend procs and devices directly, or set up the wire.
     dawnDevice cDevice = nullptr;
@@ -225,8 +244,6 @@ void DawnTest::SetUp() {
 
     // The end2end tests should never cause validation errors. These should be tested in unittests.
     device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
-
-    mPCIInfo = dawn_native::GetPCIInfo(backendDevice);
 }
 
 void DawnTest::TearDown() {

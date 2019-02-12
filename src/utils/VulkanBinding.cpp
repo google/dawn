@@ -26,25 +26,9 @@ namespace utils {
 
     class VulkanBinding : public BackendBinding {
       public:
-        void SetupGLFWWindowHints() override {
-            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        VulkanBinding(GLFWwindow* window, dawnDevice device) : BackendBinding(window, device) {
         }
-        dawnDevice CreateDevice() override {
-            // Make an instance and find a Vulkan adapter
-            mInstance = std::make_unique<dawn_native::Instance>();
-            mInstance->DiscoverDefaultAdapters();
 
-            std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
-            for (dawn_native::Adapter adapter : adapters) {
-                if (adapter.GetBackendType() == dawn_native::BackendType::Vulkan) {
-                    mDevice = adapter.CreateDevice();
-                    return mDevice;
-                }
-            }
-
-            UNREACHABLE();
-            return {};
-        }
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
                 VkSurfaceKHR surface = VK_NULL_HANDLE;
@@ -63,13 +47,11 @@ namespace utils {
         }
 
       private:
-        std::unique_ptr<dawn_native::Instance> mInstance;
-        dawnDevice mDevice = nullptr;
         dawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateVulkanBinding() {
-        return new VulkanBinding;
+    BackendBinding* CreateVulkanBinding(GLFWwindow* window, dawnDevice device) {
+        return new VulkanBinding(window, device);
     }
 
 }  // namespace utils

@@ -55,6 +55,8 @@ namespace dawn_native {
         BackendType GetBackendType() const;
         const PCIInfo& GetPCIInfo() const;
 
+        explicit operator bool() const;
+
         // Create a device on this adapter, note that the interface will change to include at least
         // a device descriptor and a pointer to backend specific options.
         // On an error, nullptr is returned.
@@ -103,8 +105,6 @@ namespace dawn_native {
 
     // Backend-agnostic API for dawn_native
     DAWN_NATIVE_EXPORT dawnProcTable GetProcs();
-
-    DAWN_NATIVE_EXPORT const PCIInfo& GetPCIInfo(dawnDevice device);
 
 }  // namespace dawn_native
 
