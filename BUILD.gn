@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("scripts/dawn_overrides_with_defaults.gni")
-import("scripts/dawn_features.gni")
 import("//build_overrides/build.gni")
+import("scripts/dawn_features.gni")
+import("scripts/dawn_overrides_with_defaults.gni")
 
 import("//testing/test.gni")
 
@@ -849,6 +849,11 @@ static_library("dawn_utils") {
     "src/utils/TerribleCommandBuffer.cpp",
     "src/utils/TerribleCommandBuffer.h",
   ]
+
+  public_deps = [
+    ":dawn_headers_gen",
+  ]
+
   deps = [
     ":dawn_common",
     ":libdawn_native",
