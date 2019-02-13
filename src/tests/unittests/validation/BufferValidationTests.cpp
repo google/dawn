@@ -495,3 +495,234 @@ TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
     uint8_t foo = 0;
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
 }
+
+// Test that it is valid to destroy an unmapped buffer
+TEST_F(BufferValidationTest, DestroyUnmappedBuffer) {
+    {
+        dawn::Buffer buf = CreateMapReadBuffer(4);
+        buf.Destroy();
+    }
+    {
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        buf.Destroy();
+    }
+}
+
+// Test that it is valid to destroy a mapped buffer
+TEST_F(BufferValidationTest, DestroyMappedBuffer) {
+    {
+        dawn::Buffer buf = CreateMapReadBuffer(4);
+        buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, 30303);
+        buf.Destroy();
+    }
+    {
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, 30233);
+        buf.Destroy();
+    }
+}
+
+// Test that destroying a buffer implicitly unmaps it
+TEST_F(BufferValidationTest, DestroyMappedBufferCausesImplicitUnmap) {
+    {
+        dawn::Buffer buf = CreateMapReadBuffer(4);
+        dawn::CallbackUserdata userdata = 40598;
+        buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, userdata);
+        // Buffer is destroyed. Callback should be called with UNKNOWN status
+        EXPECT_CALL(*mockBufferMapReadCallback,
+                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
+            .Times(1);
+        buf.Destroy();
+        queue.Submit(0, nullptr);
+    }
+    {
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        dawn::CallbackUserdata userdata = 23980;
+        buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, userdata);
+        // Buffer is destroyed. Callback should be called with UNKNOWN status
+        EXPECT_CALL(*mockBufferMapWriteCallback,
+                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, userdata))
+            .Times(1);
+        buf.Destroy();
+        queue.Submit(0, nullptr);
+    }
+}
+
+// Test that it is valid to Destroy a destroyed buffer
+TEST_F(BufferValidationTest, DestroyDestroyedBuffer) {
+    dawn::Buffer buf = CreateSetSubDataBuffer(4);
+    buf.Destroy();
+    buf.Destroy();
+}
+
+// Test that it is invalid to Unmap a destroyed buffer
+TEST_F(BufferValidationTest, UnmapDestroyedBuffer) {
+    {
+        dawn::Buffer buf = CreateMapReadBuffer(4);
+        buf.Destroy();
+        ASSERT_DEVICE_ERROR(buf.Unmap());
+    }
+    {
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        buf.Destroy();
+        ASSERT_DEVICE_ERROR(buf.Unmap());
+    }
+}
+
+// Test that it is invalid to map a destroyed buffer
+TEST_F(BufferValidationTest, MapDestroyedBuffer) {
+    {
+        dawn::Buffer buf = CreateMapReadBuffer(4);
+        buf.Destroy();
+        ASSERT_DEVICE_ERROR(buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, 11303));
+    }
+    {
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        buf.Destroy();
+        ASSERT_DEVICE_ERROR(buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, 56303));
+    }
+}
+
+// Test that it is invalid to call SetSubData on a destroyed buffer
+TEST_F(BufferValidationTest, SetSubDataDestroyedBuffer) {
+    dawn::Buffer buf = CreateSetSubDataBuffer(4);
+    buf.Destroy();
+    uint8_t foo = 0;
+    ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
+}
+
+// Test that is is invalid to Map a mapped buffer
+TEST_F(BufferValidationTest, MapMappedbuffer) {
+    {
+        dawn::Buffer buf = CreateMapReadBuffer(4);
+        buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, 43309);
+        ASSERT_DEVICE_ERROR(buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, 34309));
+        queue.Submit(0, nullptr);
+    }
+    {
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, 20301);
+        ASSERT_DEVICE_ERROR(buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, 40303));
+        queue.Submit(0, nullptr);
+    }
+}
+
+// Test that it is invalid to call SetSubData on a mapped buffer
+TEST_F(BufferValidationTest, SetSubDataMappedBuffer) {
+    {
+        dawn::Buffer buf = CreateMapReadBuffer(4);
+        buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, 42899);
+        uint8_t foo = 0;
+        ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
+        queue.Submit(0, nullptr);
+    }
+    {
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, 40329);
+        uint8_t foo = 0;
+        ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
+        queue.Submit(0, nullptr);
+    }
+}
+
+// Test that it is valid to submit a buffer in a queue with a map usage if it is unmapped
+TEST_F(BufferValidationTest, SubmitBufferWithMapUsage) {
+    dawn::BufferDescriptor descriptorA;
+    descriptorA.size = 4;
+    descriptorA.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::MapWrite;
+
+    dawn::BufferDescriptor descriptorB;
+    descriptorB.size = 4;
+    descriptorB.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead;
+
+    dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
+    dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    builder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
+    dawn::CommandBuffer commands = builder.GetResult();
+    queue.Submit(1, &commands);
+}
+
+// Test that it is invalid to submit a mapped buffer in a queue
+TEST_F(BufferValidationTest, SubmitMappedBuffer) {
+    dawn::BufferDescriptor descriptorA;
+    descriptorA.size = 4;
+    descriptorA.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::MapWrite;
+
+    dawn::BufferDescriptor descriptorB;
+    descriptorB.size = 4;
+    descriptorB.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead;
+    {
+        dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
+        dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+
+        bufA.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, 40329);
+
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        builder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
+        dawn::CommandBuffer commands = builder.GetResult();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        queue.Submit(0, nullptr);
+    }
+    {
+        dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
+        dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+
+        bufB.MapReadAsync(0, 4, ToMockBufferMapReadCallback, 11329);
+
+        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        builder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
+        dawn::CommandBuffer commands = builder.GetResult();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        queue.Submit(0, nullptr);
+    }
+}
+
+// Test that it is invalid to submit a destroyed buffer in a queue
+TEST_F(BufferValidationTest, SubmitDestroyedBuffer) {
+    dawn::BufferDescriptor descriptorA;
+    descriptorA.size = 4;
+    descriptorA.usage = dawn::BufferUsageBit::TransferSrc;
+
+    dawn::BufferDescriptor descriptorB;
+    descriptorB.size = 4;
+    descriptorB.usage = dawn::BufferUsageBit::TransferDst;
+
+    dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
+    dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+
+    bufA.Destroy();
+    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    builder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
+    dawn::CommandBuffer commands = builder.GetResult();
+    ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+}
+
+// Test that a map usage is required to call Unmap
+TEST_F(BufferValidationTest, UnmapWithoutMapUsage) {
+    dawn::Buffer buf = CreateSetSubDataBuffer(4);
+    ASSERT_DEVICE_ERROR(buf.Unmap());
+}
+
+// Test that it is valid to call Unmap on a buffer that is not mapped
+TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
+    {
+        dawn::Buffer buf = CreateMapReadBuffer(4);
+        // Buffer starts unmapped. Unmap should succeed.
+        buf.Unmap();
+        buf.MapReadAsync(0, 4, ToMockBufferMapReadCallback, 30603);
+        buf.Unmap();
+        // Unmapping twice should succeed
+        buf.Unmap();
+    }
+    {
+        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        // Buffer starts unmapped. Unmap should succeed.
+        buf.Unmap();
+        buf.MapWriteAsync(0, 4, ToMockBufferMapWriteCallback, 23890);
+        // Unmapping twice should succeed
+        buf.Unmap();
+        buf.Unmap();
+    }
+}

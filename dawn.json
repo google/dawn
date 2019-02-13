@@ -185,6 +185,9 @@
             },
             {
                 "name": "unmap"
+            },
+            {
+                "name": "destroy"
             }
         ]
     },

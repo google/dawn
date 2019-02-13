@@ -77,14 +77,18 @@ namespace dawn_native {
     // Buffer
 
     BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
-        : ObjectBase(device), mSize(descriptor->size), mUsage(descriptor->usage) {
+        : ObjectBase(device),
+          mSize(descriptor->size),
+          mUsage(descriptor->usage),
+          mState(BufferState::Unmapped) {
     }
 
-    BufferBase::BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag) : ObjectBase(device, tag) {
+    BufferBase::BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag), mState(BufferState::Unmapped) {
     }
 
     BufferBase::~BufferBase() {
-        if (mIsMapped) {
+        if (mState == BufferState::Mapped) {
             ASSERT(!IsError());
             CallMapReadCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
             CallMapWriteCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
@@ -109,10 +113,14 @@ namespace dawn_native {
     MaybeError BufferBase::ValidateCanUseInSubmitNow() const {
         ASSERT(!IsError());
 
-        if (mIsMapped) {
-            return DAWN_VALIDATION_ERROR("Buffer used in a submit while mapped");
+        switch (mState) {
+            case BufferState::Destroyed:
+                return DAWN_VALIDATION_ERROR("Destroyed buffer used in a submit");
+            case BufferState::Mapped:
+                return DAWN_VALIDATION_ERROR("Buffer used in a submit while mapped");
+            case BufferState::Unmapped:
+                return {};
         }
-        return {};
     }
 
     void BufferBase::CallMapReadCallback(uint32_t serial,
@@ -172,7 +180,7 @@ namespace dawn_native {
         mMapSerial++;
         mMapReadCallback = callback;
         mMapUserdata = userdata;
-        mIsMapped = true;
+        mState = BufferState::Mapped;
 
         MapReadAsyncImpl(mMapSerial, start, size);
     }
@@ -193,9 +201,21 @@ namespace dawn_native {
         mMapSerial++;
         mMapWriteCallback = callback;
         mMapUserdata = userdata;
-        mIsMapped = true;
+        mState = BufferState::Mapped;
 
         MapWriteAsyncImpl(mMapSerial, start, size);
+    }
+
+    void BufferBase::Destroy() {
+        if (GetDevice()->ConsumedError(ValidateDestroy())) {
+            return;
+        }
+        ASSERT(!IsError());
+
+        if (mState == BufferState::Mapped) {
+            Unmap();
+        }
+        mState = BufferState::Destroyed;
     }
 
     void BufferBase::Unmap() {
@@ -209,7 +229,7 @@ namespace dawn_native {
         CallMapReadCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         CallMapWriteCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         UnmapImpl();
-        mIsMapped = false;
+        mState = BufferState::Unmapped;
         mMapReadCallback = nullptr;
         mMapWriteCallback = nullptr;
         mMapUserdata = 0;
@@ -217,6 +237,14 @@ namespace dawn_native {
 
     MaybeError BufferBase::ValidateSetSubData(uint32_t start, uint32_t count) const {
         DAWN_TRY(GetDevice()->ValidateObject(this));
+
+        if (mState == BufferState::Destroyed) {
+            return DAWN_VALIDATION_ERROR("Buffer is destroyed");
+        }
+
+        if (mState == BufferState::Mapped) {
+            return DAWN_VALIDATION_ERROR("Buffer is mapped");
+        }
 
         if (count > GetSize()) {
             return DAWN_VALIDATION_ERROR("Buffer subdata with too much data");
@@ -248,7 +276,11 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Buffer mapping out of range");
         }
 
-        if (mIsMapped) {
+        if (mState == BufferState::Destroyed) {
+            return DAWN_VALIDATION_ERROR("Buffer is destroyed");
+        }
+
+        if (mState == BufferState::Mapped) {
             return DAWN_VALIDATION_ERROR("Buffer already mapped");
         }
 
@@ -262,10 +294,20 @@ namespace dawn_native {
     MaybeError BufferBase::ValidateUnmap() const {
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        if (!mIsMapped) {
-            return DAWN_VALIDATION_ERROR("Buffer wasn't mapped");
+        if ((mUsage & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) == 0) {
+            return DAWN_VALIDATION_ERROR("Buffer does not have map usage");
         }
+        switch (mState) {
+            case BufferState::Unmapped:
+            case BufferState::Mapped:
+                return {};
+            case BufferState::Destroyed:
+                return DAWN_VALIDATION_ERROR("Buffer is destroyed");
+        }
+    }
 
+    MaybeError BufferBase::ValidateDestroy() const {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
         return {};
     }
 

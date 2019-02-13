@@ -35,6 +35,12 @@ namespace dawn_native {
         dawn::BufferUsageBit::Storage;
 
     class BufferBase : public ObjectBase {
+        enum class BufferState {
+            Unmapped,
+            Mapped,
+            Destroyed,
+        };
+
       public:
         BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
         ~BufferBase();
@@ -57,6 +63,7 @@ namespace dawn_native {
                            dawnBufferMapWriteCallback callback,
                            dawnCallbackUserdata userdata);
         void Unmap();
+        void Destroy();
 
       protected:
         BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
@@ -77,6 +84,7 @@ namespace dawn_native {
                                uint32_t size,
                                dawn::BufferUsageBit requiredUsage) const;
         MaybeError ValidateUnmap() const;
+        MaybeError ValidateDestroy() const;
 
         uint32_t mSize = 0;
         dawn::BufferUsageBit mUsage = dawn::BufferUsageBit::None;
@@ -86,7 +94,7 @@ namespace dawn_native {
         dawnCallbackUserdata mMapUserdata = 0;
         uint32_t mMapSerial = 0;
 
-        bool mIsMapped = false;
+        BufferState mState;
     };
 
     // This builder class is kept around purely for testing but should not be used.
