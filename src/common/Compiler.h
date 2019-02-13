@@ -85,7 +85,7 @@ extern void __cdecl __debugbreak(void);
 // It seems that (void) EXPR works on all compilers to silence the unused variable warning.
 #define DAWN_UNUSED(EXPR) (void)EXPR
 // Likewise using static asserting on sizeof(&FUNC) seems to make it tagged as used
-#define DAWN_UNUSED_FUNC(FUNC) static_assert(sizeof(&FUNC) == sizeof(void (*)()), "");
+#define DAWN_UNUSED_FUNC(FUNC) static_assert(sizeof(&FUNC) == sizeof(void (*)()), "")
 
 // Add noop replacements for macros for features that aren't supported by the compiler.
 #if !defined(DAWN_LIKELY)
