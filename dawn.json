@@ -863,7 +863,7 @@
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "attachments state", "type": "attachments state descriptor", "annotation": "const*"},
             {"name": "sample count", "type": "uint32_t"},
-            {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*"},
+            {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
             {"name": "num blend states", "type": "uint32_t"},
             {"name": "blend states", "type": "blend state descriptor", "annotation": "const*", "length": "num blend states"}
         ]

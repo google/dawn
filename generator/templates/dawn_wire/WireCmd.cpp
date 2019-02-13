@@ -105,6 +105,10 @@
         {% for member in members if member.length == "strlen" %}
             size_t {{as_varName(member.name)}}Strlen;
         {% endfor %}
+
+        {% for member in members if member.annotation != "value" and member.type.category != "object" %}
+            bool has_{{as_varName(member.name)}};
+        {% endfor %}
     };
 
     //* Returns the required transfer size for `record` in addition to the transfer structure.
@@ -120,6 +124,9 @@
 
         //* Gather how much space will be needed for pointer members.
         {% for member in members if member.annotation != "value" and member.length != "strlen" %}
+            {% if member.type.category != "object" and member.optional %}
+                if (record.{{as_varName(member.name)}} != nullptr)
+            {% endif %}
             {
                 size_t memberLength = {{member_length(member, "record.")}};
                 result += memberLength * {{member_transfer_sizeof(member)}};
@@ -176,6 +183,12 @@
         //* Allocate space and write the non-value arguments in it.
         {% for member in members if member.annotation != "value" and member.length != "strlen" %}
             {% set memberName = as_varName(member.name) %}
+
+            {% if member.type.category != "object" and member.optional %}
+                bool has_{{memberName}} = record.{{memberName}} != nullptr;
+                transfer->has_{{memberName}} = has_{{memberName}};
+                if (has_{{memberName}})
+            {% endif %}
             {
                 size_t memberLength = {{member_length(member, "record.")}};
                 auto memberBuffer = reinterpret_cast<{{member_transfer_type(member)}}*>(*buffer);
@@ -277,6 +290,12 @@
         //* Get extra buffer data, and copy pointed to values in extra allocated space.
         {% for member in members if member.annotation != "value" and member.length != "strlen" %}
             {% set memberName = as_varName(member.name) %}
+
+            {% if member.type.category != "object" and member.optional %}
+                bool has_{{memberName}} = transfer->has_{{memberName}};
+                record->{{memberName}} = nullptr;
+                if (has_{{memberName}})
+            {% endif %}
             {
                 size_t memberLength = {{member_length(member, "record->")}};
                 auto memberBuffer = reinterpret_cast<const {{member_transfer_type(member)}}*>(buffer);
