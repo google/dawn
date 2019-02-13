@@ -387,6 +387,8 @@ namespace dawn_native {
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mIterator.NextCommand<CopyBufferToBufferCmd>();
 
+                    DAWN_TRY(GetDevice()->ValidateObject(copy->source.buffer.Get()));
+                    DAWN_TRY(GetDevice()->ValidateObject(copy->destination.buffer.Get()));
                     DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->source, copy->size));
                     DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->destination, copy->size));
 
@@ -401,6 +403,9 @@ namespace dawn_native {
 
                 case Command::CopyBufferToTexture: {
                     CopyBufferToTextureCmd* copy = mIterator.NextCommand<CopyBufferToTextureCmd>();
+
+                    DAWN_TRY(GetDevice()->ValidateObject(copy->source.buffer.Get()));
+                    DAWN_TRY(GetDevice()->ValidateObject(copy->destination.texture.Get()));
 
                     uint32_t bufferCopySize = 0;
                     DAWN_TRY(ValidateRowPitch(copy->destination.texture->GetFormat(),
@@ -426,6 +431,9 @@ namespace dawn_native {
 
                 case Command::CopyTextureToBuffer: {
                     CopyTextureToBufferCmd* copy = mIterator.NextCommand<CopyTextureToBufferCmd>();
+
+                    DAWN_TRY(GetDevice()->ValidateObject(copy->source.texture.Get()));
+                    DAWN_TRY(GetDevice()->ValidateObject(copy->destination.buffer.Get()));
 
                     uint32_t bufferCopySize = 0;
                     DAWN_TRY(ValidateRowPitch(copy->source.texture->GetFormat(), copy->copySize,

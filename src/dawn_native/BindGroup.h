@@ -42,12 +42,16 @@ namespace dawn_native {
       public:
         BindGroupBase(DeviceBase* device, const BindGroupDescriptor* descriptor);
 
+        static BindGroupBase* MakeError(DeviceBase* device);
+
         const BindGroupLayoutBase* GetLayout() const;
         BufferBinding GetBindingAsBufferBinding(size_t binding);
         SamplerBase* GetBindingAsSampler(size_t binding);
         TextureViewBase* GetBindingAsTextureView(size_t binding);
 
       private:
+        BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         Ref<BindGroupLayoutBase> mLayout;
         std::array<Ref<ObjectBase>, kMaxBindingsPerGroup> mBindings;
         std::array<uint32_t, kMaxBindingsPerGroup> mOffsets;

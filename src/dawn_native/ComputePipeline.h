@@ -27,6 +27,11 @@ namespace dawn_native {
     class ComputePipelineBase : public PipelineBase {
       public:
         ComputePipelineBase(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
+
+        static ComputePipelineBase* MakeError(DeviceBase* device);
+
+      private:
+        ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
     };
 
 }  // namespace dawn_native

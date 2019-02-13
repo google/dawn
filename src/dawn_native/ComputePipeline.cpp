@@ -18,19 +18,14 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateComputePipelineDescriptor(DeviceBase*,
+    MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                                  const ComputePipelineDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        if (descriptor->module == nullptr) {
-            return DAWN_VALIDATION_ERROR("module cannot be null");
-        }
-
-        if (descriptor->layout == nullptr) {
-            return DAWN_VALIDATION_ERROR("layout cannot be null");
-        }
+        DAWN_TRY(device->ValidateObject(descriptor->module));
+        DAWN_TRY(device->ValidateObject(descriptor->layout));
 
         if (descriptor->entryPoint != std::string("main")) {
             return DAWN_VALIDATION_ERROR("Currently the entry point has to be main()");
@@ -53,6 +48,15 @@ namespace dawn_native {
                                              const ComputePipelineDescriptor* descriptor)
         : PipelineBase(device, descriptor->layout, dawn::ShaderStageBit::Compute) {
         ExtractModuleData(dawn::ShaderStage::Compute, descriptor->module);
+    }
+
+    ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : PipelineBase(device, tag) {
+    }
+
+    // static
+    ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
+        return new ComputePipelineBase(device, ObjectBase::kError);
     }
 
 }  // namespace dawn_native

@@ -23,13 +23,22 @@ namespace dawn_native {
 
     class ObjectBase : public RefCounted {
       public:
+        struct ErrorTag {};
+        static constexpr ErrorTag kError = {};
+
         ObjectBase(DeviceBase* device);
+        ObjectBase(DeviceBase* device, ErrorTag tag);
         virtual ~ObjectBase();
 
         DeviceBase* GetDevice() const;
+        bool IsError() const;
 
       private:
         DeviceBase* mDevice;
+        // TODO(cwallez@chromium.org): This most likely adds 4 bytes to most Dawn objects, see if
+        // that bit can be hidden in the refcount once it is a single 64bit refcount.
+        // See https://bugs.chromium.org/p/dawn/issues/detail?id=105
+        bool mIsError;
     };
 
 }  // namespace dawn_native

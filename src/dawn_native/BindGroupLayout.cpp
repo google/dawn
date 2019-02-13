@@ -92,14 +92,25 @@ namespace dawn_native {
         }
     }
 
+    BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag), mIsBlueprint(true) {
+    }
+
     BindGroupLayoutBase::~BindGroupLayoutBase() {
         // Do not uncache the actual cached object if we are a blueprint
         if (!mIsBlueprint) {
+            ASSERT(!IsError());
             GetDevice()->UncacheBindGroupLayout(this);
         }
     }
 
+    // static
+    BindGroupLayoutBase* BindGroupLayoutBase::MakeError(DeviceBase* device) {
+        return new BindGroupLayoutBase(device, ObjectBase::kError);
+    }
+
     const BindGroupLayoutBase::LayoutBindingInfo& BindGroupLayoutBase::GetBindingInfo() const {
+        ASSERT(!IsError());
         return mBindingInfo;
     }
 

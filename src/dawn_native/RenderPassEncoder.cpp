@@ -17,6 +17,7 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/Device.h"
 #include "dawn_native/RenderPipeline.h"
 
 #include <string.h>
@@ -64,12 +65,8 @@ namespace dawn_native {
     }
 
     void RenderPassEncoderBase::SetPipeline(RenderPipelineBase* pipeline) {
-        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
-
-        if (pipeline == nullptr) {
-            mTopLevelBuilder->HandleError("Pipeline cannot be null");
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands()) ||
+            mTopLevelBuilder->ConsumedError(GetDevice()->ValidateObject(pipeline))) {
             return;
         }
 
@@ -117,12 +114,8 @@ namespace dawn_native {
     }
 
     void RenderPassEncoderBase::SetIndexBuffer(BufferBase* buffer, uint32_t offset) {
-        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
-
-        if (buffer == nullptr) {
-            mTopLevelBuilder->HandleError("Buffer cannot be null");
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands()) ||
+            mTopLevelBuilder->ConsumedError(GetDevice()->ValidateObject(buffer))) {
             return;
         }
 
@@ -141,8 +134,7 @@ namespace dawn_native {
         }
 
         for (size_t i = 0; i < count; ++i) {
-            if (buffers[i] == nullptr) {
-                mTopLevelBuilder->HandleError("Buffers cannot be null");
+            if (mTopLevelBuilder->ConsumedError(GetDevice()->ValidateObject(buffers[i]))) {
                 return;
             }
         }

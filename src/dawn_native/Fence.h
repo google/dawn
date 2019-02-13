@@ -33,12 +33,15 @@ namespace dawn_native {
         FenceBase(DeviceBase* device, const FenceDescriptor* descriptor);
         ~FenceBase();
 
+        static FenceBase* MakeError(DeviceBase* device);
+
+        uint64_t GetSignaledValue() const;
+
         // Dawn API
         uint64_t GetCompletedValue() const;
         void OnCompletion(uint64_t value,
                           dawn::FenceOnCompletionCallback callback,
                           dawn::CallbackUserdata userdata);
-        uint64_t GetSignaledValue() const;
 
       protected:
         friend class QueueBase;
@@ -47,6 +50,8 @@ namespace dawn_native {
         void SetCompletedValue(uint64_t completedValue);
 
       private:
+        FenceBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         MaybeError ValidateOnCompletion(uint64_t value) const;
 
         struct OnCompletionData {

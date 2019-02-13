@@ -69,7 +69,18 @@ namespace dawn_native {
         : ObjectBase(device) {
     }
 
+    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag) {
+    }
+
+    // static
+    ShaderModuleBase* ShaderModuleBase::MakeError(DeviceBase* device) {
+        return new ShaderModuleBase(device, ObjectBase::kError);
+    }
+
     void ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
+        ASSERT(!IsError());
+
         DeviceBase* device = GetDevice();
         // TODO(cwallez@chromium.org): make errors here builder-level
         // currently errors here do not prevent the shadermodule from being used
@@ -211,22 +222,28 @@ namespace dawn_native {
     }
 
     const ShaderModuleBase::PushConstantInfo& ShaderModuleBase::GetPushConstants() const {
+        ASSERT(!IsError());
         return mPushConstants;
     }
 
     const ShaderModuleBase::ModuleBindingInfo& ShaderModuleBase::GetBindingInfo() const {
+        ASSERT(!IsError());
         return mBindingInfo;
     }
 
     const std::bitset<kMaxVertexAttributes>& ShaderModuleBase::GetUsedVertexAttributes() const {
+        ASSERT(!IsError());
         return mUsedVertexAttributes;
     }
 
     dawn::ShaderStage ShaderModuleBase::GetExecutionModel() const {
+        ASSERT(!IsError());
         return mExecutionModel;
     }
 
     bool ShaderModuleBase::IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout) {
+        ASSERT(!IsError());
+
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             if (!IsCompatibleWithBindGroupLayout(group, layout->GetBindGroupLayout(group))) {
                 return false;
@@ -246,6 +263,8 @@ namespace dawn_native {
 
     bool ShaderModuleBase::IsCompatibleWithBindGroupLayout(size_t group,
                                                            const BindGroupLayoutBase* layout) {
+        ASSERT(!IsError());
+
         const auto& layoutInfo = layout->GetBindingInfo();
         for (size_t i = 0; i < kMaxBindingsPerGroup; ++i) {
             const auto& moduleInfo = mBindingInfo[group][i];

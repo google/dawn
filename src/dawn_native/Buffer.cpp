@@ -23,6 +23,33 @@
 
 namespace dawn_native {
 
+    namespace {
+
+        class ErrorBuffer : public BufferBase {
+          public:
+            ErrorBuffer(DeviceBase* device) : BufferBase(device, ObjectBase::kError) {
+            }
+
+          private:
+            MaybeError SetSubDataImpl(uint32_t start,
+                                      uint32_t count,
+                                      const uint8_t* data) override {
+                UNREACHABLE();
+                return {};
+            }
+            void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) override {
+                UNREACHABLE();
+            }
+            void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) override {
+                UNREACHABLE();
+            }
+            void UnmapImpl() override {
+                UNREACHABLE();
+            }
+        };
+
+    }  // anonymous namespace
+
     MaybeError ValidateBufferDescriptor(DeviceBase*, const BufferDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -53,22 +80,35 @@ namespace dawn_native {
         : ObjectBase(device), mSize(descriptor->size), mUsage(descriptor->usage) {
     }
 
+    BufferBase::BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag) : ObjectBase(device, tag) {
+    }
+
     BufferBase::~BufferBase() {
         if (mIsMapped) {
+            ASSERT(!IsError());
             CallMapReadCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
             CallMapWriteCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr);
         }
     }
 
+    // static
+    BufferBase* BufferBase::MakeError(DeviceBase* device) {
+        return new ErrorBuffer(device);
+    }
+
     uint32_t BufferBase::GetSize() const {
+        ASSERT(!IsError());
         return mSize;
     }
 
     dawn::BufferUsageBit BufferBase::GetUsage() const {
+        ASSERT(!IsError());
         return mUsage;
     }
 
     MaybeError BufferBase::ValidateCanUseInSubmitNow() const {
+        ASSERT(!IsError());
+
         if (mIsMapped) {
             return DAWN_VALIDATION_ERROR("Buffer used in a submit while mapped");
         }
@@ -78,6 +118,8 @@ namespace dawn_native {
     void BufferBase::CallMapReadCallback(uint32_t serial,
                                          dawnBufferMapAsyncStatus status,
                                          const void* pointer) {
+        ASSERT(!IsError());
+
         if (mMapReadCallback != nullptr && serial == mMapSerial) {
             ASSERT(mMapWriteCallback == nullptr);
             // Tag the callback as fired before firing it, otherwise it could fire a second time if
@@ -91,6 +133,8 @@ namespace dawn_native {
     void BufferBase::CallMapWriteCallback(uint32_t serial,
                                           dawnBufferMapAsyncStatus status,
                                           void* pointer) {
+        ASSERT(!IsError());
+
         if (mMapWriteCallback != nullptr && serial == mMapSerial) {
             ASSERT(mMapReadCallback == nullptr);
             // Tag the callback as fired before firing it, otherwise it could fire a second time if
@@ -105,6 +149,7 @@ namespace dawn_native {
         if (GetDevice()->ConsumedError(ValidateSetSubData(start, count))) {
             return;
         }
+        ASSERT(!IsError());
 
         if (GetDevice()->ConsumedError(SetSubDataImpl(start, count, data))) {
             return;
@@ -119,6 +164,7 @@ namespace dawn_native {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
+        ASSERT(!IsError());
 
         ASSERT(mMapWriteCallback == nullptr);
 
@@ -139,6 +185,7 @@ namespace dawn_native {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
             return;
         }
+        ASSERT(!IsError());
 
         ASSERT(mMapReadCallback == nullptr);
 
@@ -155,6 +202,7 @@ namespace dawn_native {
         if (GetDevice()->ConsumedError(ValidateUnmap())) {
             return;
         }
+        ASSERT(!IsError());
 
         // A map request can only be called once, so this will fire only if the request wasn't
         // completed before the Unmap
@@ -168,6 +216,8 @@ namespace dawn_native {
     }
 
     MaybeError BufferBase::ValidateSetSubData(uint32_t start, uint32_t count) const {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+
         if (count > GetSize()) {
             return DAWN_VALIDATION_ERROR("Buffer subdata with too much data");
         }
@@ -187,6 +237,8 @@ namespace dawn_native {
     MaybeError BufferBase::ValidateMap(uint32_t start,
                                        uint32_t size,
                                        dawn::BufferUsageBit requiredUsage) const {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+
         if (size > GetSize()) {
             return DAWN_VALIDATION_ERROR("Buffer mapping with too big a region");
         }
@@ -208,6 +260,8 @@ namespace dawn_native {
     }
 
     MaybeError BufferBase::ValidateUnmap() const {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+
         if (!mIsMapped) {
             return DAWN_VALIDATION_ERROR("Buffer wasn't mapped");
         }

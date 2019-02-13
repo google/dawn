@@ -25,9 +25,12 @@ namespace dawn_native {
     // Helper functions
     namespace {
 
-        MaybeError ValidatePipelineStageDescriptor(const PipelineStageDescriptor* descriptor,
+        MaybeError ValidatePipelineStageDescriptor(DeviceBase* device,
+                                                   const PipelineStageDescriptor* descriptor,
                                                    const PipelineLayoutBase* layout,
                                                    dawn::ShaderStage stage) {
+            DAWN_TRY(device->ValidateObject(descriptor->module));
+
             if (descriptor->entryPoint != std::string("main")) {
                 return DAWN_VALIDATION_ERROR("Entry point must be \"main\"");
             }
@@ -110,16 +113,10 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        if (descriptor->layout == nullptr) {
-            return DAWN_VALIDATION_ERROR("Layout must not be null");
-        }
+        DAWN_TRY(device->ValidateObject(descriptor->layout));
 
         if (descriptor->inputState == nullptr) {
             return DAWN_VALIDATION_ERROR("Input state must not be null");
-        }
-
-        if (descriptor->depthStencilState == nullptr) {
-            return DAWN_VALIDATION_ERROR("Depth stencil state must not be null");
         }
 
         for (uint32_t i = 0; i < descriptor->numBlendStates; ++i) {
@@ -128,10 +125,10 @@ namespace dawn_native {
 
         DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
         DAWN_TRY(ValidatePrimitiveTopology(descriptor->primitiveTopology));
-        DAWN_TRY(ValidatePipelineStageDescriptor(descriptor->vertexStage, descriptor->layout,
-                                                 dawn::ShaderStage::Vertex));
-        DAWN_TRY(ValidatePipelineStageDescriptor(descriptor->fragmentStage, descriptor->layout,
-                                                 dawn::ShaderStage::Fragment));
+        DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->vertexStage,
+                                                 descriptor->layout, dawn::ShaderStage::Vertex));
+        DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->fragmentStage,
+                                                 descriptor->layout, dawn::ShaderStage::Fragment));
         DAWN_TRY(ValidateAttachmentsStateDescriptor(descriptor->attachmentsState));
 
         if ((descriptor->vertexStage->module->GetUsedVertexAttributes() &
@@ -206,46 +203,65 @@ namespace dawn_native {
         // attachment are set?
     }
 
+    RenderPipelineBase::RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : PipelineBase(device, tag) {
+    }
+
+    // static
+    RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device) {
+        return new RenderPipelineBase(device, ObjectBase::kError);
+    }
+
     const BlendStateDescriptor* RenderPipelineBase::GetBlendStateDescriptor(
         uint32_t attachmentSlot) {
+        ASSERT(!IsError());
         ASSERT(attachmentSlot < mBlendStates.size());
         return &mBlendStates[attachmentSlot];
     }
 
     const DepthStencilStateDescriptor* RenderPipelineBase::GetDepthStencilStateDescriptor() {
+        ASSERT(!IsError());
         return &mDepthStencilState;
     }
 
     dawn::IndexFormat RenderPipelineBase::GetIndexFormat() const {
+        ASSERT(!IsError());
         return mIndexFormat;
     }
 
     InputStateBase* RenderPipelineBase::GetInputState() {
+        ASSERT(!IsError());
         return mInputState.Get();
     }
 
     dawn::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
+        ASSERT(!IsError());
         return mPrimitiveTopology;
     }
 
     std::bitset<kMaxColorAttachments> RenderPipelineBase::GetColorAttachmentsMask() const {
+        ASSERT(!IsError());
         return mColorAttachmentsSet;
     }
 
     bool RenderPipelineBase::HasDepthStencilAttachment() const {
+        ASSERT(!IsError());
         return mHasDepthStencilAttachment;
     }
 
     dawn::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(uint32_t attachment) const {
+        ASSERT(!IsError());
         return mColorAttachmentFormats[attachment];
     }
 
     dawn::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
+        ASSERT(!IsError());
         ASSERT(mHasDepthStencilAttachment);
         return mDepthStencilFormat;
     }
 
     bool RenderPipelineBase::IsCompatibleWith(const RenderPassDescriptorBase* renderPass) const {
+        ASSERT(!IsError());
         // TODO(cwallez@chromium.org): This is called on every SetPipeline command. Optimize it for
         // example by caching some "attachment compatibility" object that would make the
         // compatibility check a single pointer comparison.

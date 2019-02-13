@@ -36,6 +36,8 @@ namespace dawn_native {
       public:
         PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDescriptor* descriptor);
 
+        static PipelineLayoutBase* MakeError(DeviceBase* device);
+
         const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
         const std::bitset<kMaxBindGroups> GetBindGroupLayoutsMask() const;
 
@@ -48,6 +50,8 @@ namespace dawn_native {
         uint32_t GroupsInheritUpTo(const PipelineLayoutBase* other) const;
 
       protected:
+        PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         BindGroupLayoutArray mBindGroupLayouts;
         std::bitset<kMaxBindGroups> mMask;
     };

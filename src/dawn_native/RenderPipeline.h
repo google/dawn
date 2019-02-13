@@ -36,6 +36,8 @@ namespace dawn_native {
       public:
         RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
 
+        static RenderPipelineBase* MakeError(DeviceBase* device);
+
         const BlendStateDescriptor* GetBlendStateDescriptor(uint32_t attachmentSlot);
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor();
         dawn::IndexFormat GetIndexFormat() const;
@@ -52,6 +54,8 @@ namespace dawn_native {
         bool IsCompatibleWith(const RenderPassDescriptorBase* renderPass) const;
 
       private:
+        RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         DepthStencilStateDescriptor mDepthStencilState;
         dawn::IndexFormat mIndexFormat;
         Ref<InputStateBase> mInputState;

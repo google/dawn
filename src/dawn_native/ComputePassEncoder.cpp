@@ -17,6 +17,7 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/ComputePipeline.h"
+#include "dawn_native/Device.h"
 
 namespace dawn_native {
 
@@ -39,12 +40,8 @@ namespace dawn_native {
     }
 
     void ComputePassEncoderBase::SetPipeline(ComputePipelineBase* pipeline) {
-        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
-
-        if (pipeline == nullptr) {
-            mTopLevelBuilder->HandleError("Pipeline cannot be null");
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands()) ||
+            mTopLevelBuilder->ConsumedError(GetDevice()->ValidateObject(pipeline))) {
             return;
         }
 

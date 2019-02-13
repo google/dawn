@@ -47,6 +47,8 @@ namespace dawn_native {
       public:
         TextureBase(DeviceBase* device, const TextureDescriptor* descriptor);
 
+        static TextureBase* MakeError(DeviceBase* device);
+
         dawn::TextureDimension GetDimension() const;
         dawn::TextureFormat GetFormat() const;
         const Extent3D& GetSize() const;
@@ -61,6 +63,8 @@ namespace dawn_native {
         TextureViewBase* CreateTextureView(const TextureViewDescriptor* descriptor);
 
       private:
+        TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         dawn::TextureDimension mDimension;
         dawn::TextureFormat mFormat;
         Extent3D mSize;
@@ -73,6 +77,8 @@ namespace dawn_native {
       public:
         TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor);
 
+        static TextureViewBase* MakeError(DeviceBase* device);
+
         const TextureBase* GetTexture() const;
         TextureBase* GetTexture();
 
@@ -83,6 +89,8 @@ namespace dawn_native {
         uint32_t GetLayerCount() const;
 
       private:
+        TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         Ref<TextureBase> mTexture;
 
         dawn::TextureFormat mFormat;

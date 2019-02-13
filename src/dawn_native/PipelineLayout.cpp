@@ -20,7 +20,7 @@
 
 namespace dawn_native {
 
-    MaybeError ValidatePipelineLayoutDescriptor(DeviceBase*,
+    MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
                                                 const PipelineLayoutDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -31,9 +31,7 @@ namespace dawn_native {
         }
 
         for (uint32_t i = 0; i < descriptor->numBindGroupLayouts; ++i) {
-            if (descriptor->bindGroupLayouts[i] == nullptr) {
-                return DAWN_VALIDATION_ERROR("bind group layouts may not be null");
-            }
+            DAWN_TRY(device->ValidateObject(descriptor->bindGroupLayouts[i]));
         }
         return {};
     }
@@ -50,22 +48,36 @@ namespace dawn_native {
         }
     }
 
+    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag) {
+    }
+
+    // static
+    PipelineLayoutBase* PipelineLayoutBase::MakeError(DeviceBase* device) {
+        return new PipelineLayoutBase(device, ObjectBase::kError);
+    }
+
     const BindGroupLayoutBase* PipelineLayoutBase::GetBindGroupLayout(size_t group) const {
+        ASSERT(!IsError());
         ASSERT(group < kMaxBindGroups);
         ASSERT(mMask[group]);
         return mBindGroupLayouts[group].Get();
     }
 
     const std::bitset<kMaxBindGroups> PipelineLayoutBase::GetBindGroupLayoutsMask() const {
+        ASSERT(!IsError());
         return mMask;
     }
 
     std::bitset<kMaxBindGroups> PipelineLayoutBase::InheritedGroupsMask(
         const PipelineLayoutBase* other) const {
+        ASSERT(!IsError());
         return {(1 << GroupsInheritUpTo(other)) - 1u};
     }
 
     uint32_t PipelineLayoutBase::GroupsInheritUpTo(const PipelineLayoutBase* other) const {
+        ASSERT(!IsError());
+
         for (uint32_t i = 0; i < kMaxBindGroups; ++i) {
             if (!mMask[i] || mBindGroupLayouts[i].Get() != other->mBindGroupLayouts[i].Get()) {
                 return i;

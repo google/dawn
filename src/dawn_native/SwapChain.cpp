@@ -72,6 +72,7 @@ namespace dawn_native {
     }
 
     void SwapChainBase::Present(TextureBase* texture) {
+        // This also checks that the texture is valid since mLastNextTexture is always valid.
         if (texture != mLastNextTexture) {
             GetDevice()->HandleError("Tried to present something other than the last NextTexture");
             return;

@@ -163,13 +163,14 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateTextureViewDescriptor(const DeviceBase*,
+    MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                              const TextureBase* texture,
                                              const TextureViewDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
+        DAWN_TRY(device->ValidateObject(texture));
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
@@ -292,31 +293,52 @@ namespace dawn_native {
           mUsage(descriptor->usage) {
     }
 
+    TextureBase::TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag) {
+    }
+
+    // static
+    TextureBase* TextureBase::MakeError(DeviceBase* device) {
+        return new TextureBase(device, ObjectBase::kError);
+    }
+
     dawn::TextureDimension TextureBase::GetDimension() const {
+        ASSERT(!IsError());
         return mDimension;
     }
     dawn::TextureFormat TextureBase::GetFormat() const {
+        ASSERT(!IsError());
         return mFormat;
     }
     const Extent3D& TextureBase::GetSize() const {
+        ASSERT(!IsError());
         return mSize;
     }
     uint32_t TextureBase::GetArrayLayers() const {
+        ASSERT(!IsError());
         return mArrayLayers;
     }
     uint32_t TextureBase::GetNumMipLevels() const {
+        ASSERT(!IsError());
         return mNumMipLevels;
     }
     dawn::TextureUsageBit TextureBase::GetUsage() const {
+        ASSERT(!IsError());
         return mUsage;
     }
 
     MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
+        ASSERT(!IsError());
         return {};
     }
 
     TextureViewBase* TextureBase::CreateDefaultTextureView() {
-        TextureViewDescriptor descriptor = MakeDefaultTextureViewDescriptor(this);
+        TextureViewDescriptor descriptor = {};
+
+        if (!IsError()) {
+            descriptor = MakeDefaultTextureViewDescriptor(this);
+        }
+
         return GetDevice()->CreateTextureView(this, &descriptor);
     }
 
@@ -336,31 +358,47 @@ namespace dawn_native {
           mLayerCount(descriptor->layerCount) {
     }
 
+    TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag) {
+    }
+
+    // static
+    TextureViewBase* TextureViewBase::MakeError(DeviceBase* device) {
+        return new TextureViewBase(device, ObjectBase::kError);
+    }
+
     const TextureBase* TextureViewBase::GetTexture() const {
+        ASSERT(!IsError());
         return mTexture.Get();
     }
 
     TextureBase* TextureViewBase::GetTexture() {
+        ASSERT(!IsError());
         return mTexture.Get();
     }
 
     dawn::TextureFormat TextureViewBase::GetFormat() const {
+        ASSERT(!IsError());
         return mFormat;
     }
 
     uint32_t TextureViewBase::GetBaseMipLevel() const {
+        ASSERT(!IsError());
         return mBaseMipLevel;
     }
 
     uint32_t TextureViewBase::GetLevelCount() const {
+        ASSERT(!IsError());
         return mLevelCount;
     }
 
     uint32_t TextureViewBase::GetBaseArrayLayer() const {
+        ASSERT(!IsError());
         return mBaseArrayLayer;
     }
 
     uint32_t TextureViewBase::GetLayerCount() const {
+        ASSERT(!IsError());
         return mLayerCount;
     }
 }  // namespace dawn_native

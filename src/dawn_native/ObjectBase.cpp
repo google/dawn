@@ -16,7 +16,10 @@
 
 namespace dawn_native {
 
-    ObjectBase::ObjectBase(DeviceBase* device) : mDevice(device) {
+    ObjectBase::ObjectBase(DeviceBase* device) : mDevice(device), mIsError(false) {
+    }
+
+    ObjectBase::ObjectBase(DeviceBase* device, ErrorTag) : mDevice(device), mIsError(true) {
     }
 
     ObjectBase::~ObjectBase() {
@@ -24,6 +27,10 @@ namespace dawn_native {
 
     DeviceBase* ObjectBase::GetDevice() const {
         return mDevice;
+    }
+
+    bool ObjectBase::IsError() const {
+        return mIsError;
     }
 
 }  // namespace dawn_native

@@ -39,6 +39,8 @@ namespace dawn_native {
         BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
         ~BufferBase();
 
+        static BufferBase* MakeError(DeviceBase* device);
+
         uint32_t GetSize() const;
         dawn::BufferUsageBit GetUsage() const;
 
@@ -57,6 +59,8 @@ namespace dawn_native {
         void Unmap();
 
       protected:
+        BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         void CallMapReadCallback(uint32_t serial,
                                  dawnBufferMapAsyncStatus status,
                                  const void* pointer);
@@ -74,7 +78,7 @@ namespace dawn_native {
                                dawn::BufferUsageBit requiredUsage) const;
         MaybeError ValidateUnmap() const;
 
-        uint32_t mSize;
+        uint32_t mSize = 0;
         dawn::BufferUsageBit mUsage = dawn::BufferUsageBit::None;
 
         dawnBufferMapReadCallback mMapReadCallback = nullptr;

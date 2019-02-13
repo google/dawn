@@ -17,6 +17,7 @@
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/Device.h"
 
 #include <string.h>
 
@@ -38,12 +39,8 @@ namespace dawn_native {
     }
 
     void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {
-        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
-
-        if (group == nullptr) {
-            mTopLevelBuilder->HandleError("BindGroup cannot be null");
+        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands()) ||
+            mTopLevelBuilder->ConsumedError(GetDevice()->ValidateObject(group))) {
             return;
         }
 

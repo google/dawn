@@ -32,6 +32,7 @@ namespace dawn_native {
         if (GetDevice()->ConsumedError(ValidateSubmit(numCommands, commands))) {
             return;
         }
+        ASSERT(!IsError());
 
         SubmitImpl(numCommands, commands);
     }
@@ -40,13 +41,20 @@ namespace dawn_native {
         if (GetDevice()->ConsumedError(ValidateSignal(fence, signalValue))) {
             return;
         }
+        ASSERT(!IsError());
 
         fence->SetSignaledValue(signalValue);
         GetDevice()->GetFenceSignalTracker()->UpdateFenceOnComplete(fence, signalValue);
     }
 
     MaybeError QueueBase::ValidateSubmit(uint32_t numCommands, CommandBufferBase* const* commands) {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+
         for (uint32_t i = 0; i < numCommands; ++i) {
+            DAWN_TRY(GetDevice()->ValidateObject(commands[i]));
+
+            // TODO(cwallez@chromium.org): Remove this once CommandBufferBuilder doesn't use the
+            // builder mechanism anymore.
             if (commands[i] == nullptr) {
                 return DAWN_VALIDATION_ERROR("Command buffers cannot be null");
             }
@@ -74,9 +82,8 @@ namespace dawn_native {
     }
 
     MaybeError QueueBase::ValidateSignal(const FenceBase* fence, uint64_t signalValue) {
-        if (fence == nullptr) {
-            return DAWN_VALIDATION_ERROR("Fence cannot be null");
-        }
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+        DAWN_TRY(GetDevice()->ValidateObject(fence));
 
         if (signalValue <= fence->GetSignaledValue()) {
             return DAWN_VALIDATION_ERROR("Signal value less than or equal to fence signaled value");

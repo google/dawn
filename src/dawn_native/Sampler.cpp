@@ -49,4 +49,13 @@ namespace dawn_native {
     SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor*) : ObjectBase(device) {
     }
 
+    SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag) {
+    }
+
+    // static
+    SamplerBase* SamplerBase::MakeError(DeviceBase* device) {
+        return new SamplerBase(device, ObjectBase::kError);
+    }
+
 }  // namespace dawn_native

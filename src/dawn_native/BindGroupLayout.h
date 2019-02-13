@@ -37,6 +37,8 @@ namespace dawn_native {
                             bool blueprint = false);
         ~BindGroupLayoutBase() override;
 
+        static BindGroupLayoutBase* MakeError(DeviceBase* device);
+
         struct LayoutBindingInfo {
             std::array<dawn::ShaderStageBit, kMaxBindingsPerGroup> visibilities;
             std::array<dawn::BindingType, kMaxBindingsPerGroup> types;
@@ -45,6 +47,8 @@ namespace dawn_native {
         const LayoutBindingInfo& GetBindingInfo() const;
 
       private:
+        BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         LayoutBindingInfo mBindingInfo;
         bool mIsBlueprint = false;
     };

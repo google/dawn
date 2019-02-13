@@ -26,10 +26,16 @@ namespace dawn_native {
     PipelineBase::PipelineBase(DeviceBase* device,
                                PipelineLayoutBase* layout,
                                dawn::ShaderStageBit stages)
-        : ObjectBase(device), mStageMask(stages), mLayout(layout), mDevice(device) {
+        : ObjectBase(device), mStageMask(stages), mLayout(layout) {
+    }
+
+    PipelineBase::PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag) {
     }
 
     void PipelineBase::ExtractModuleData(dawn::ShaderStage stage, ShaderModuleBase* module) {
+        ASSERT(!IsError());
+
         PushConstantInfo* info = &mPushConstants[stage];
 
         const auto& moduleInfo = module->GetPushConstants();
@@ -50,19 +56,18 @@ namespace dawn_native {
 
     const PipelineBase::PushConstantInfo& PipelineBase::GetPushConstants(
         dawn::ShaderStage stage) const {
+        ASSERT(!IsError());
         return mPushConstants[stage];
     }
 
     dawn::ShaderStageBit PipelineBase::GetStageMask() const {
+        ASSERT(!IsError());
         return mStageMask;
     }
 
     PipelineLayoutBase* PipelineBase::GetLayout() {
+        ASSERT(!IsError());
         return mLayout.Get();
-    }
-
-    DeviceBase* PipelineBase::GetDevice() const {
-        return mDevice;
     }
 
 }  // namespace dawn_native
