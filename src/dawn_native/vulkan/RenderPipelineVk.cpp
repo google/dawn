@@ -19,7 +19,6 @@
 #include "dawn_native/vulkan/InputStateVk.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/RenderPassCache.h"
-#include "dawn_native/vulkan/RenderPassDescriptorVk.h"
 #include "dawn_native/vulkan/ShaderModuleVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
 

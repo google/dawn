@@ -31,7 +31,6 @@
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/QueueVk.h"
 #include "dawn_native/vulkan/RenderPassCache.h"
-#include "dawn_native/vulkan/RenderPassDescriptorVk.h"
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 #include "dawn_native/vulkan/SamplerVk.h"
 #include "dawn_native/vulkan/ShaderModuleVk.h"

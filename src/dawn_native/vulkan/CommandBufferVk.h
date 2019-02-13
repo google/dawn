@@ -16,12 +16,11 @@
 #define DAWNNATIVE_VULKAN_COMMANDBUFFERVK_H_
 
 #include "dawn_native/CommandBuffer.h"
+#include "dawn_native/RenderPassDescriptor.h"
 
 #include "common/vulkan_platform.h"
 
 namespace dawn_native { namespace vulkan {
-
-    class RenderPassDescriptor;
 
     class CommandBuffer : public CommandBufferBase {
       public:
@@ -32,7 +31,7 @@ namespace dawn_native { namespace vulkan {
 
       private:
         void RecordComputePass(VkCommandBuffer commands);
-        void RecordRenderPass(VkCommandBuffer commands, RenderPassDescriptor* renderPass);
+        void RecordRenderPass(VkCommandBuffer commands, RenderPassDescriptorBase* renderPass);
 
         CommandIterator mCommands;
     };

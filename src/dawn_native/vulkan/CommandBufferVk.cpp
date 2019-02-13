@@ -19,8 +19,9 @@
 #include "dawn_native/vulkan/BufferVk.h"
 #include "dawn_native/vulkan/ComputePipelineVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
+#include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
-#include "dawn_native/vulkan/RenderPassDescriptorVk.h"
+#include "dawn_native/vulkan/RenderPassCache.h"
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 
@@ -109,6 +110,100 @@ namespace dawn_native { namespace vulkan {
             std::bitset<kMaxBindGroups> mDirtySets;
         };
 
+        void RecordBeginRenderPass(VkCommandBuffer commands,
+                                   Device* device,
+                                   RenderPassDescriptorBase* renderPass) {
+            // Query a VkRenderPass from the cache
+            VkRenderPass renderPassVK = VK_NULL_HANDLE;
+            {
+                RenderPassCacheQuery query;
+
+                for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
+                    const auto& attachmentInfo = renderPass->GetColorAttachment(i);
+                    query.SetColor(i, attachmentInfo.view->GetTexture()->GetFormat(),
+                                   attachmentInfo.loadOp);
+                }
+
+                if (renderPass->HasDepthStencilAttachment()) {
+                    const auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
+                    query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat(),
+                                          attachmentInfo.depthLoadOp, attachmentInfo.stencilLoadOp);
+                }
+
+                renderPassVK = device->GetRenderPassCache()->GetRenderPass(query);
+            }
+
+            // Create a framebuffer that will be used once for the render pass and gather the clear
+            // values for the attachments at the same time.
+            std::array<VkClearValue, kMaxColorAttachments + 1> clearValues;
+            VkFramebuffer framebuffer = VK_NULL_HANDLE;
+            uint32_t attachmentCount = 0;
+            {
+                // Fill in the attachment info that will be chained in the framebuffer create info.
+                std::array<VkImageView, kMaxColorAttachments + 1> attachments;
+
+                for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
+                    auto& attachmentInfo = renderPass->GetColorAttachment(i);
+                    TextureView* view = ToBackend(attachmentInfo.view.Get());
+
+                    attachments[attachmentCount] = view->GetHandle();
+
+                    clearValues[attachmentCount].color.float32[0] = attachmentInfo.clearColor[0];
+                    clearValues[attachmentCount].color.float32[1] = attachmentInfo.clearColor[1];
+                    clearValues[attachmentCount].color.float32[2] = attachmentInfo.clearColor[2];
+                    clearValues[attachmentCount].color.float32[3] = attachmentInfo.clearColor[3];
+
+                    attachmentCount++;
+                }
+
+                if (renderPass->HasDepthStencilAttachment()) {
+                    auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
+                    TextureView* view = ToBackend(attachmentInfo.view.Get());
+
+                    attachments[attachmentCount] = view->GetHandle();
+
+                    clearValues[attachmentCount].depthStencil.depth = attachmentInfo.clearDepth;
+                    clearValues[attachmentCount].depthStencil.stencil = attachmentInfo.clearStencil;
+
+                    attachmentCount++;
+                }
+
+                // Chain attachments and create the framebuffer
+                VkFramebufferCreateInfo createInfo;
+                createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+                createInfo.pNext = nullptr;
+                createInfo.flags = 0;
+                createInfo.renderPass = renderPassVK;
+                createInfo.attachmentCount = attachmentCount;
+                createInfo.pAttachments = attachments.data();
+                createInfo.width = renderPass->GetWidth();
+                createInfo.height = renderPass->GetHeight();
+                createInfo.layers = 1;
+
+                if (device->fn.CreateFramebuffer(device->GetVkDevice(), &createInfo, nullptr,
+                                                 &framebuffer) != VK_SUCCESS) {
+                    ASSERT(false);
+                }
+
+                // We don't reuse VkFramebuffers so mark the framebuffer for deletion as soon as the
+                // commands currently being recorded are finished.
+                device->GetFencedDeleter()->DeleteWhenUnused(framebuffer);
+            }
+
+            VkRenderPassBeginInfo beginInfo;
+            beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            beginInfo.pNext = nullptr;
+            beginInfo.renderPass = renderPassVK;
+            beginInfo.framebuffer = framebuffer;
+            beginInfo.renderArea.offset.x = 0;
+            beginInfo.renderArea.offset.y = 0;
+            beginInfo.renderArea.extent.width = renderPass->GetWidth();
+            beginInfo.renderArea.extent.height = renderPass->GetHeight();
+            beginInfo.clearValueCount = attachmentCount;
+            beginInfo.pClearValues = clearValues.data();
+
+            device->fn.CmdBeginRenderPass(commands, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        }
     }  // anonymous namespace
 
     CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
@@ -270,10 +365,10 @@ namespace dawn_native { namespace vulkan {
         UNREACHABLE();
     }
     void CommandBuffer::RecordRenderPass(VkCommandBuffer commands,
-                                         RenderPassDescriptor* renderPass) {
+                                         RenderPassDescriptorBase* renderPass) {
         Device* device = ToBackend(GetDevice());
 
-        renderPass->RecordBeginRenderPass(commands);
+        RecordBeginRenderPass(commands, device, renderPass);
 
         // Set the default value for the dynamic state
         {

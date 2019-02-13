@@ -682,8 +682,6 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/vulkan/QueueVk.h",
       "src/dawn_native/vulkan/RenderPassCache.cpp",
       "src/dawn_native/vulkan/RenderPassCache.h",
-      "src/dawn_native/vulkan/RenderPassDescriptorVk.cpp",
-      "src/dawn_native/vulkan/RenderPassDescriptorVk.h",
       "src/dawn_native/vulkan/RenderPipelineVk.cpp",
       "src/dawn_native/vulkan/RenderPipelineVk.h",
       "src/dawn_native/vulkan/SamplerVk.cpp",
