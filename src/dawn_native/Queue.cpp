@@ -51,13 +51,13 @@ namespace dawn_native {
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         for (uint32_t i = 0; i < numCommands; ++i) {
-            DAWN_TRY(GetDevice()->ValidateObject(commands[i]));
-
             // TODO(cwallez@chromium.org): Remove this once CommandBufferBuilder doesn't use the
             // builder mechanism anymore.
             if (commands[i] == nullptr) {
                 return DAWN_VALIDATION_ERROR("Command buffers cannot be null");
             }
+
+            DAWN_TRY(GetDevice()->ValidateObject(commands[i]));
 
             const CommandBufferResourceUsage& usages = commands[i]->GetResourceUsages();
 
