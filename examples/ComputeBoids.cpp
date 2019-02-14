@@ -114,13 +114,31 @@ void initRender() {
         }
     )");
 
+    dawn::VertexAttributeDescriptor attribute1;
+    attribute1.shaderLocation = 0;
+    attribute1.inputSlot = 0;
+    attribute1.offset = offsetof(Particle, pos);
+    attribute1.format = dawn::VertexFormat::FloatR32G32;
+
+    dawn::VertexAttributeDescriptor attribute2;
+    attribute2.shaderLocation = 1;
+    attribute2.inputSlot = 0;
+    attribute2.offset = offsetof(Particle, vel);
+    attribute2.format = dawn::VertexFormat::FloatR32G32;
+
+    dawn::VertexAttributeDescriptor attribute3;
+    attribute3.shaderLocation = 2;
+    attribute3.inputSlot = 1;
+    attribute3.offset = 0;
+    attribute3.format = dawn::VertexFormat::FloatR32G32;
+
     dawn::InputState inputState = device.CreateInputStateBuilder()
-        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32G32, offsetof(Particle, pos))
-        .SetAttribute(1, 0, dawn::VertexFormat::FloatR32G32, offsetof(Particle, vel))
-        .SetInput(0, sizeof(Particle), dawn::InputStepMode::Instance)
-        .SetAttribute(2, 1, dawn::VertexFormat::FloatR32G32, 0)
-        .SetInput(1, sizeof(glm::vec2), dawn::InputStepMode::Vertex)
-        .GetResult();
+                                      .SetAttribute(&attribute1)
+                                      .SetAttribute(&attribute2)
+                                      .SetInput(0, sizeof(Particle), dawn::InputStepMode::Instance)
+                                      .SetAttribute(&attribute3)
+                                      .SetInput(1, sizeof(glm::vec2), dawn::InputStepMode::Vertex)
+                                      .GetResult();
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 

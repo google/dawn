@@ -117,7 +117,7 @@ namespace dawn_native {
     InputStateBase* InputStateBuilder::GetResultImpl() {
         for (uint32_t location = 0; location < kMaxVertexAttributes; ++location) {
             if (mAttributesSetMask[location] &&
-                !mInputsSetMask[mAttributeInfos[location].bindingSlot]) {
+                !mInputsSetMask[mAttributeInfos[location].inputSlot]) {
                 HandleError("Attribute uses unset input");
                 return nullptr;
             }
@@ -126,28 +126,25 @@ namespace dawn_native {
         return GetDevice()->CreateInputState(this);
     }
 
-    void InputStateBuilder::SetAttribute(uint32_t shaderLocation,
-                                         uint32_t bindingSlot,
-                                         dawn::VertexFormat format,
-                                         uint32_t offset) {
-        if (shaderLocation >= kMaxVertexAttributes) {
+    void InputStateBuilder::SetAttribute(const VertexAttributeDescriptor* attribute) {
+        if (attribute->shaderLocation >= kMaxVertexAttributes) {
             HandleError("Setting attribute out of bounds");
             return;
         }
-        if (bindingSlot >= kMaxVertexInputs) {
+        if (attribute->inputSlot >= kMaxVertexInputs) {
             HandleError("Binding slot out of bounds");
             return;
         }
-        if (mAttributesSetMask[shaderLocation]) {
+        if (mAttributesSetMask[attribute->shaderLocation]) {
             HandleError("Setting already set attribute");
             return;
         }
 
-        mAttributesSetMask.set(shaderLocation);
-        auto& info = mAttributeInfos[shaderLocation];
-        info.bindingSlot = bindingSlot;
-        info.format = format;
-        info.offset = offset;
+        mAttributesSetMask.set(attribute->shaderLocation);
+        auto& info = mAttributeInfos[attribute->shaderLocation];
+        info.inputSlot = attribute->inputSlot;
+        info.offset = attribute->offset;
+        info.format = attribute->format;
     }
 
     void InputStateBuilder::SetInput(uint32_t bindingSlot,

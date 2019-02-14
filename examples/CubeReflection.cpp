@@ -156,11 +156,23 @@ void init() {
             fragColor = vec4(mix(f_col, vec3(0.5, 0.5, 0.5), 0.5), 1.0);
         })");
 
+    dawn::VertexAttributeDescriptor attribute1;
+    attribute1.shaderLocation = 0;
+    attribute1.inputSlot = 0;
+    attribute1.offset = 0;
+    attribute1.format = dawn::VertexFormat::FloatR32G32B32;
+
+    dawn::VertexAttributeDescriptor attribute2;
+    attribute2.shaderLocation = 1;
+    attribute2.inputSlot = 0;
+    attribute2.offset = 3 * sizeof(float);
+    attribute2.format = dawn::VertexFormat::FloatR32G32B32;
+
     auto inputState = device.CreateInputStateBuilder()
-        .SetAttribute(0, 0, dawn::VertexFormat::FloatR32G32B32, 0)
-        .SetAttribute(1, 0, dawn::VertexFormat::FloatR32G32B32, 3 * sizeof(float))
-        .SetInput(0, 6 * sizeof(float), dawn::InputStepMode::Vertex)
-        .GetResult();
+                          .SetAttribute(&attribute1)
+                          .SetAttribute(&attribute2)
+                          .SetInput(0, 6 * sizeof(float), dawn::InputStepMode::Vertex)
+                          .GetResult();
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {

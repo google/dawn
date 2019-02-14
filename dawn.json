@@ -594,6 +594,16 @@
             {"value": 1, "name": "uint32"}
         ]
     },
+    "vertex attribute descriptor": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "shader location", "type": "uint32_t"},
+            {"name": "input slot", "type": "uint32_t"},
+            {"name": "offset", "type": "uint32_t"},
+            {"name": "format", "type": "vertex format"}
+        ]
+    },
     "input state": {
         "category": "object"
     },
@@ -607,10 +617,7 @@
             {
                 "name": "set attribute",
                 "args": [
-                    {"name": "shader location", "type": "uint32_t"},
-                    {"name": "binding slot", "type": "uint32_t"},
-                    {"name": "format", "type": "vertex format"},
-                    {"name": "offset", "type": "uint32_t"}
+                    {"name": "attribute", "type": "vertex attribute descriptor", "annotation": "const*"}
                 ]
             },
             {

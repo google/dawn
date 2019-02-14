@@ -78,9 +78,9 @@ namespace dawn_native { namespace d3d12 {
             inputElementDescriptor.SemanticName = "TEXCOORD";
             inputElementDescriptor.SemanticIndex = static_cast<uint32_t>(i);
             inputElementDescriptor.Format = VertexFormatType(attribute.format);
-            inputElementDescriptor.InputSlot = attribute.bindingSlot;
+            inputElementDescriptor.InputSlot = attribute.inputSlot;
 
-            const InputInfo& input = GetInput(attribute.bindingSlot);
+            const InputInfo& input = GetInput(attribute.inputSlot);
 
             inputElementDescriptor.AlignedByteOffset = attribute.offset;
             inputElementDescriptor.InputSlotClass = InputStepModeFunction(input.stepMode);

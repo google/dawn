@@ -149,7 +149,13 @@ class InputStateTest : public DawnTest {
             }
 
             for (const auto& attribute : attributes) {
-                builder.SetAttribute(attribute.location, attribute.slot, attribute.format, attribute.offset);
+                dawn::VertexAttributeDescriptor descriptor;
+                descriptor.shaderLocation = attribute.location;
+                descriptor.inputSlot = attribute.slot;
+                descriptor.offset = attribute.offset;
+                descriptor.format = attribute.format;
+
+                builder.SetAttribute(&descriptor);
             }
 
             return builder.GetResult();

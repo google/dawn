@@ -247,16 +247,25 @@ namespace {
                 fprintf(stderr, "unsupported technique parameter type %d\n", iParameter.type);
                 continue;
             }
+            dawn::VertexAttributeDescriptor attribute;
+            attribute.offset = 0;
+            attribute.format = format;
             if (iParameter.semantic == "POSITION") {
-                builder.SetAttribute(0, 0, format, 0);
+                attribute.shaderLocation = 0;
+                attribute.inputSlot = 0;
+                builder.SetAttribute(&attribute);
                 builder.SetInput(0, static_cast<uint32_t>(stridePos), dawn::InputStepMode::Vertex);
                 slotsSet.set(0);
             } else if (iParameter.semantic == "NORMAL") {
-                builder.SetAttribute(1, 1, format, 0);
+                attribute.shaderLocation = 1;
+                attribute.inputSlot = 1;
+                builder.SetAttribute(&attribute);
                 builder.SetInput(1, static_cast<uint32_t>(strideNor), dawn::InputStepMode::Vertex);
                 slotsSet.set(1);
             } else if (iParameter.semantic == "TEXCOORD_0") {
-                builder.SetAttribute(2, 2, format, 0);
+                attribute.shaderLocation = 2;
+                attribute.inputSlot = 2;
+                builder.SetAttribute(&attribute);
                 builder.SetInput(2, static_cast<uint32_t>(strideTxc), dawn::InputStepMode::Vertex);
                 slotsSet.set(2);
             } else {
@@ -268,7 +277,13 @@ namespace {
             if (slotsSet[i]) {
                 continue;
             }
-            builder.SetAttribute(i, i, dawn::VertexFormat::FloatR32G32B32A32, 0);
+            dawn::VertexAttributeDescriptor attribute;
+            attribute.offset = 0;
+            attribute.shaderLocation = i;
+            attribute.inputSlot = i;
+            attribute.format = dawn::VertexFormat::FloatR32G32B32A32;
+
+            builder.SetAttribute(&attribute);
             builder.SetInput(i, 0, dawn::InputStepMode::Vertex);
         }
         auto inputState = builder.GetResult();

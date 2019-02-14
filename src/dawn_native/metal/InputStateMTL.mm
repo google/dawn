@@ -71,7 +71,7 @@ namespace dawn_native { namespace metal {
             auto attribDesc = [MTLVertexAttributeDescriptor new];
             attribDesc.format = VertexFormatType(info.format);
             attribDesc.offset = info.offset;
-            attribDesc.bufferIndex = kMaxBindingsPerGroup + info.bindingSlot;
+            attribDesc.bufferIndex = kMaxBindingsPerGroup + info.inputSlot;
             mMtlVertexDescriptor.attributes[i] = attribDesc;
             [attribDesc release];
         }

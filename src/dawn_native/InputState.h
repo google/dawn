@@ -37,7 +37,7 @@ namespace dawn_native {
         InputStateBase(InputStateBuilder* builder);
 
         struct AttributeInfo {
-            uint32_t bindingSlot;
+            uint32_t inputSlot;
             dawn::VertexFormat format;
             uint32_t offset;
         };
@@ -64,10 +64,7 @@ namespace dawn_native {
         InputStateBuilder(DeviceBase* device);
 
         // Dawn API
-        void SetAttribute(uint32_t shaderLocation,
-                          uint32_t bindingSlot,
-                          dawn::VertexFormat format,
-                          uint32_t offset);
+        void SetAttribute(const VertexAttributeDescriptor* attribute);
         void SetInput(uint32_t bindingSlot, uint32_t stride, dawn::InputStepMode stepMode);
 
       private:

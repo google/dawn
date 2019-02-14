@@ -26,10 +26,17 @@ class DrawIndexedTest : public DawnTest {
 
             renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-            dawn::InputState inputState = device.CreateInputStateBuilder()
-                .SetInput(0, 4 * sizeof(float), dawn::InputStepMode::Vertex)
-                .SetAttribute(0, 0, dawn::VertexFormat::FloatR32G32B32A32, 0)
-                .GetResult();
+            dawn::VertexAttributeDescriptor attribute;
+            attribute.shaderLocation = 0;
+            attribute.inputSlot = 0;
+            attribute.offset = 0;
+            attribute.format = dawn::VertexFormat::FloatR32G32B32A32;
+
+            dawn::InputState inputState =
+                device.CreateInputStateBuilder()
+                    .SetInput(0, 4 * sizeof(float), dawn::InputStepMode::Vertex)
+                    .SetAttribute(&attribute)
+                    .GetResult();
 
             dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450
