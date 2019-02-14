@@ -939,7 +939,6 @@ test("dawn_unittests") {
     "src/tests/unittests/SerialMapTests.cpp",
     "src/tests/unittests/SerialQueueTests.cpp",
     "src/tests/unittests/ToBackendTests.cpp",
-    "src/tests/unittests/WireTests.cpp",
     "src/tests/unittests/validation/BindGroupValidationTests.cpp",
     "src/tests/unittests/validation/BufferValidationTests.cpp",
     "src/tests/unittests/validation/CommandBufferValidationTests.cpp",
@@ -958,6 +957,14 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/ValidationTest.cpp",
     "src/tests/unittests/validation/ValidationTest.h",
     "src/tests/unittests/validation/VertexBufferValidationTests.cpp",
+    "src/tests/unittests/wire/WireArgumentTests.cpp",
+    "src/tests/unittests/wire/WireBasicTests.cpp",
+    "src/tests/unittests/wire/WireBufferMappingTests.cpp",
+    "src/tests/unittests/wire/WireCallbackTests.cpp",
+    "src/tests/unittests/wire/WireFenceTests.cpp",
+    "src/tests/unittests/wire/WireOptionalTests.cpp",
+    "src/tests/unittests/wire/WireTest.cpp",
+    "src/tests/unittests/wire/WireTest.h",
   ]
 
   if (dawn_enable_d3d12) {
