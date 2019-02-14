@@ -240,10 +240,10 @@ void init() {
     rfDescriptor.cAttachmentsState.hasDepthStencilAttachment = true;
     rfDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
     rfDescriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
-    pDescriptor.cDepthStencilState.stencilFront.compare = dawn::CompareFunction::Equal;
-    pDescriptor.cDepthStencilState.stencilBack.compare = dawn::CompareFunction::Equal;
-    pDescriptor.cDepthStencilState.stencilFront.passOp = dawn::StencilOperation::Replace;
-    pDescriptor.cDepthStencilState.stencilBack.passOp = dawn::StencilOperation::Replace;
+    rfDescriptor.cDepthStencilState.stencilFront.compare = dawn::CompareFunction::Equal;
+    rfDescriptor.cDepthStencilState.stencilBack.compare = dawn::CompareFunction::Equal;
+    rfDescriptor.cDepthStencilState.stencilFront.passOp = dawn::StencilOperation::Replace;
+    rfDescriptor.cDepthStencilState.stencilBack.passOp = dawn::StencilOperation::Replace;
     rfDescriptor.cDepthStencilState.depthWriteEnabled = true;
     rfDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 
