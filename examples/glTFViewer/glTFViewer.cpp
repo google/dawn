@@ -250,23 +250,32 @@ namespace {
             dawn::VertexAttributeDescriptor attribute;
             attribute.offset = 0;
             attribute.format = format;
+            dawn::VertexInputDescriptor input;
+            input.stepMode = dawn::InputStepMode::Vertex;
+
             if (iParameter.semantic == "POSITION") {
                 attribute.shaderLocation = 0;
                 attribute.inputSlot = 0;
+                input.inputSlot = 0;
+                input.stride = static_cast<uint32_t>(stridePos);
                 builder.SetAttribute(&attribute);
-                builder.SetInput(0, static_cast<uint32_t>(stridePos), dawn::InputStepMode::Vertex);
+                builder.SetInput(&input);
                 slotsSet.set(0);
             } else if (iParameter.semantic == "NORMAL") {
                 attribute.shaderLocation = 1;
                 attribute.inputSlot = 1;
+                input.inputSlot = 1;
+                input.stride = static_cast<uint32_t>(strideNor);
                 builder.SetAttribute(&attribute);
-                builder.SetInput(1, static_cast<uint32_t>(strideNor), dawn::InputStepMode::Vertex);
+                builder.SetInput(&input);
                 slotsSet.set(1);
             } else if (iParameter.semantic == "TEXCOORD_0") {
                 attribute.shaderLocation = 2;
                 attribute.inputSlot = 2;
+                input.inputSlot = 2;
+                input.stride = static_cast<uint32_t>(strideTxc);
                 builder.SetAttribute(&attribute);
-                builder.SetInput(2, static_cast<uint32_t>(strideTxc), dawn::InputStepMode::Vertex);
+                builder.SetInput(&input);
                 slotsSet.set(2);
             } else {
                 fprintf(stderr, "unsupported technique attribute semantic %s\n", iParameter.semantic.c_str());
@@ -283,8 +292,13 @@ namespace {
             attribute.inputSlot = i;
             attribute.format = dawn::VertexFormat::FloatR32G32B32A32;
 
+            dawn::VertexInputDescriptor input;
+            input.inputSlot = i;
+            input.stride = 0;
+            input.stepMode = dawn::InputStepMode::Vertex;
+
             builder.SetAttribute(&attribute);
-            builder.SetInput(i, 0, dawn::InputStepMode::Vertex);
+            builder.SetInput(&input);
         }
         auto inputState = builder.GetResult();
 

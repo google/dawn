@@ -145,7 +145,11 @@ class InputStateTest : public DawnTest {
             dawn::InputStateBuilder builder = device.CreateInputStateBuilder();
 
             for (const auto& input : inputs) {
-                builder.SetInput(input.slot, input.stride, input.step);
+                dawn::VertexInputDescriptor descriptor;
+                descriptor.inputSlot = input.slot;
+                descriptor.stride = input.stride;
+                descriptor.stepMode = input.step;
+                builder.SetInput(&descriptor);
             }
 
             for (const auto& attribute : attributes) {

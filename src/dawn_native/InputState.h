@@ -65,7 +65,7 @@ namespace dawn_native {
 
         // Dawn API
         void SetAttribute(const VertexAttributeDescriptor* attribute);
-        void SetInput(uint32_t bindingSlot, uint32_t stride, dawn::InputStepMode stepMode);
+        void SetInput(const VertexInputDescriptor* input);
 
       private:
         friend class InputStateBase;

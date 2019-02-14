@@ -171,9 +171,14 @@ class PrimitiveTopologyTest : public DawnTest {
             attribute.offset = 0;
             attribute.format = dawn::VertexFormat::FloatR32G32B32A32;
 
+            dawn::VertexInputDescriptor input;
+            input.inputSlot = 0;
+            input.stride = 4 * sizeof(float);
+            input.stepMode = dawn::InputStepMode::Vertex;
+
             inputState = device.CreateInputStateBuilder()
                              .SetAttribute(&attribute)
-                             .SetInput(0, 4 * sizeof(float), dawn::InputStepMode::Vertex)
+                             .SetInput(&input)
                              .GetResult();
 
             vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices), dawn::BufferUsageBit::Vertex);

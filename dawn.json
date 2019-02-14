@@ -598,6 +598,15 @@
             {"name": "format", "type": "vertex format"}
         ]
     },
+    "vertex input descriptor": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "input slot", "type": "uint32_t"},
+            {"name": "stride", "type": "uint32_t"},
+            {"name": "step mode", "type": "input step mode"}
+        ]
+    },
     "input state": {
         "category": "object"
     },
@@ -617,9 +626,7 @@
             {
                 "name": "set input",
                 "args": [
-                    {"name": "binding slot", "type": "uint32_t"},
-                    {"name": "stride", "type": "uint32_t"},
-                    {"name": "step mode", "type": "input step mode"}
+                    {"name": "input", "type": "vertex input descriptor", "annotation": "const*"}
                 ]
             }
         ]

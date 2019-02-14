@@ -147,22 +147,20 @@ namespace dawn_native {
         info.format = attribute->format;
     }
 
-    void InputStateBuilder::SetInput(uint32_t bindingSlot,
-                                     uint32_t stride,
-                                     dawn::InputStepMode stepMode) {
-        if (bindingSlot >= kMaxVertexInputs) {
+    void InputStateBuilder::SetInput(const VertexInputDescriptor* input) {
+        if (input->inputSlot >= kMaxVertexInputs) {
             HandleError("Setting input out of bounds");
             return;
         }
-        if (mInputsSetMask[bindingSlot]) {
+        if (mInputsSetMask[input->inputSlot]) {
             HandleError("Setting already set input");
             return;
         }
 
-        mInputsSetMask.set(bindingSlot);
-        auto& info = mInputInfos[bindingSlot];
-        info.stride = stride;
-        info.stepMode = stepMode;
+        mInputsSetMask.set(input->inputSlot);
+        auto& info = mInputInfos[input->inputSlot];
+        info.stride = input->stride;
+        info.stepMode = input->stepMode;
     }
 
 }  // namespace dawn_native

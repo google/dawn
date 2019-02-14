@@ -75,11 +75,16 @@ class VertexBufferValidationTest : public ValidationTest {
             attribute.offset = 0;
             attribute.format = dawn::VertexFormat::FloatR32G32B32;
 
+            dawn::VertexInputDescriptor input;
+            input.stride = 0;
+            input.stepMode = dawn::InputStepMode::Vertex;
+
             for (unsigned int i = 0; i < numInputs; ++i) {
                 attribute.shaderLocation = i;
                 attribute.inputSlot = i;
+                input.inputSlot = i;
                 builder.SetAttribute(&attribute);
-                builder.SetInput(i, 0, dawn::InputStepMode::Vertex);
+                builder.SetInput(&input);
             }
             return builder.GetResult();
         }

@@ -168,10 +168,15 @@ void init() {
     attribute2.offset = 3 * sizeof(float);
     attribute2.format = dawn::VertexFormat::FloatR32G32B32;
 
+    dawn::VertexInputDescriptor input;
+    input.inputSlot = 0;
+    input.stride = 6 * sizeof(float);
+    input.stepMode = dawn::InputStepMode::Vertex;
+
     auto inputState = device.CreateInputStateBuilder()
                           .SetAttribute(&attribute1)
                           .SetAttribute(&attribute2)
-                          .SetInput(0, 6 * sizeof(float), dawn::InputStepMode::Vertex)
+                          .SetInput(&input)
                           .GetResult();
 
     auto bgl = utils::MakeBindGroupLayout(
