@@ -49,9 +49,11 @@ namespace dawn_wire { namespace server {
         static void ForwardDeviceError(const char* message, dawnCallbackUserdata userdata);
         static void ForwardBufferMapReadAsync(dawnBufferMapAsyncStatus status,
                                               const void* ptr,
+                                              uint32_t dataLength,
                                               dawnCallbackUserdata userdata);
         static void ForwardBufferMapWriteAsync(dawnBufferMapAsyncStatus status,
                                                void* ptr,
+                                               uint32_t dataLength,
                                                dawnCallbackUserdata userdata);
         static void ForwardFenceCompletedValue(dawnFenceCompletionStatus status,
                                                dawnCallbackUserdata userdata);
@@ -60,9 +62,11 @@ namespace dawn_wire { namespace server {
         void OnDeviceError(const char* message);
         void OnBufferMapReadAsyncCallback(dawnBufferMapAsyncStatus status,
                                           const void* ptr,
+                                          uint32_t dataLength,
                                           MapUserdata* userdata);
         void OnBufferMapWriteAsyncCallback(dawnBufferMapAsyncStatus status,
                                            void* ptr,
+                                           uint32_t dataLength,
                                            MapUserdata* userdata);
         void OnFenceCompletedValueUpdated(FenceCompletionUserdata* userdata);
 

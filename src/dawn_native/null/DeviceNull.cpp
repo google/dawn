@@ -193,9 +193,9 @@ namespace dawn_native { namespace null {
 
     void Buffer::MapReadOperationCompleted(uint32_t serial, void* ptr, bool isWrite) {
         if (isWrite) {
-            CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
+            CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr, GetSize());
         } else {
-            CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr);
+            CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr, GetSize());
         }
     }
 
@@ -206,21 +206,20 @@ namespace dawn_native { namespace null {
         return {};
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
-        MapAsyncImplCommon(serial, start, count, false);
+    void Buffer::MapReadAsyncImpl(uint32_t serial) {
+        MapAsyncImplCommon(serial, false);
     }
 
-    void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
-        MapAsyncImplCommon(serial, start, count, true);
+    void Buffer::MapWriteAsyncImpl(uint32_t serial) {
+        MapAsyncImplCommon(serial, true);
     }
 
-    void Buffer::MapAsyncImplCommon(uint32_t serial, uint32_t start, uint32_t count, bool isWrite) {
-        ASSERT(start + count <= GetSize());
+    void Buffer::MapAsyncImplCommon(uint32_t serial, bool isWrite) {
         ASSERT(mBackingData);
 
         auto operation = new BufferMapReadOperation;
         operation->buffer = this;
-        operation->ptr = mBackingData.get() + start;
+        operation->ptr = mBackingData.get();
         operation->serial = serial;
         operation->isWrite = isWrite;
 

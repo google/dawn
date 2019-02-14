@@ -164,21 +164,15 @@
                 ]
             },
             {
-                "_comment": "Contrary to set sub data, this is in char size",
                 "name": "map read async",
                 "args": [
-                    {"name": "start", "type": "uint32_t"},
-                    {"name": "size", "type": "uint32_t"},
                     {"name": "callback", "type": "buffer map read callback"},
                     {"name": "userdata", "type": "callback userdata"}
                 ]
             },
             {
-                "_comment": "Contrary to set sub data, this is in char size",
                 "name": "map write async",
                 "args": [
-                    {"name": "start", "type": "uint32_t"},
-                    {"name": "size", "type": "uint32_t"},
                     {"name": "callback", "type": "buffer map write callback"},
                     {"name": "userdata", "type": "callback userdata"}
                 ]

@@ -18,29 +18,33 @@
 
 class BufferMapReadTests : public DawnTest {
     protected:
-        static void MapReadCallback(dawnBufferMapAsyncStatus status, const void* data, dawnCallbackUserdata userdata) {
-            ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
-            ASSERT_NE(nullptr, data);
+      static void MapReadCallback(dawnBufferMapAsyncStatus status,
+                                  const void* data,
+                                  uint32_t,
+                                  dawnCallbackUserdata userdata) {
+          ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+          ASSERT_NE(nullptr, data);
 
-            auto test = reinterpret_cast<BufferMapReadTests*>(static_cast<uintptr_t>(userdata));
-            test->mappedData = data;
-        }
+          auto test = reinterpret_cast<BufferMapReadTests*>(static_cast<uintptr_t>(userdata));
+          test->mappedData = data;
+      }
 
-        const void* MapReadAsyncAndWait(const dawn::Buffer& buffer, uint32_t start, uint32_t offset) {
-            buffer.MapReadAsync(start, offset, MapReadCallback, static_cast<dawn::CallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+      const void* MapReadAsyncAndWait(const dawn::Buffer& buffer) {
+          buffer.MapReadAsync(MapReadCallback, static_cast<dawn::CallbackUserdata>(
+                                                   reinterpret_cast<uintptr_t>(this)));
 
-            while (mappedData == nullptr) {
-                WaitABit();
-            }
+          while (mappedData == nullptr) {
+              WaitABit();
+          }
 
-            return mappedData;
-        }
+          return mappedData;
+      }
 
     private:
         const void* mappedData = nullptr;
 };
 
-// Test that the simplest map read (one u8 at offset 0) works.
+// Test that the simplest map read works.
 TEST_P(BufferMapReadTests, SmallReadAtZero) {
     dawn::BufferDescriptor descriptor;
     descriptor.size = 1;
@@ -50,45 +54,13 @@ TEST_P(BufferMapReadTests, SmallReadAtZero) {
     uint8_t myData = 187;
     buffer.SetSubData(0, sizeof(myData), &myData);
 
-    const void* mappedData = MapReadAsyncAndWait(buffer, 0, 1);
+    const void* mappedData = MapReadAsyncAndWait(buffer);
     ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
 
     buffer.Unmap();
 }
 
-// Test mapping a buffer at an offset.
-TEST_P(BufferMapReadTests, SmallReadAtOffset) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.size = 4000;
-    descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    uint8_t myData = 234;
-    buffer.SetSubData(2048, sizeof(myData), &myData);
-
-    const void* mappedData = MapReadAsyncAndWait(buffer, 2048, 4);
-    ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
-
-    buffer.Unmap();
-}
-
-// Test mapping a buffer at an offset that's not uint32-aligned.
-TEST_P(BufferMapReadTests, SmallReadAtUnalignedOffset) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.size = 4000;
-    descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    uint8_t myData = 213;
-    buffer.SetSubData(3, 1, &myData);
-
-    const void* mappedData = MapReadAsyncAndWait(buffer, 3, 1);
-    ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
-
-    buffer.Unmap();
-}
-
-// Test mapping large ranges of a buffer.
+// Test mapping a large buffer.
 TEST_P(BufferMapReadTests, LargeRead) {
     constexpr uint32_t kDataSize = 1000 * 1000;
     std::vector<uint32_t> myData;
@@ -103,7 +75,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
 
     buffer.SetSubData(0, kDataSize * sizeof(uint32_t), reinterpret_cast<uint8_t*>(myData.data()));
 
-    const void* mappedData = MapReadAsyncAndWait(buffer, 0, static_cast<uint32_t>(kDataSize * sizeof(uint32_t)));
+    const void* mappedData = MapReadAsyncAndWait(buffer);
     ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
 
     buffer.Unmap();
@@ -113,30 +85,33 @@ DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBack
 
 class BufferMapWriteTests : public DawnTest {
     protected:
+      static void MapWriteCallback(dawnBufferMapAsyncStatus status,
+                                   void* data,
+                                   uint32_t,
+                                   dawnCallbackUserdata userdata) {
+          ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+          ASSERT_NE(nullptr, data);
 
-        static void MapWriteCallback(dawnBufferMapAsyncStatus status, void* data, dawnCallbackUserdata userdata) {
-            ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
-            ASSERT_NE(nullptr, data);
+          auto test = reinterpret_cast<BufferMapWriteTests*>(static_cast<uintptr_t>(userdata));
+          test->mappedData = data;
+      }
 
-            auto test = reinterpret_cast<BufferMapWriteTests*>(static_cast<uintptr_t>(userdata));
-            test->mappedData = data;
-        }
+      void* MapWriteAsyncAndWait(const dawn::Buffer& buffer) {
+          buffer.MapWriteAsync(MapWriteCallback, static_cast<dawn::CallbackUserdata>(
+                                                     reinterpret_cast<uintptr_t>(this)));
 
-        void* MapWriteAsyncAndWait(const dawn::Buffer& buffer, uint32_t start, uint32_t offset) {
-            buffer.MapWriteAsync(start, offset, MapWriteCallback, static_cast<dawn::CallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+          while (mappedData == nullptr) {
+              WaitABit();
+          }
 
-            while (mappedData == nullptr) {
-                WaitABit();
-            }
-
-            return mappedData;
-        }
+          return mappedData;
+      }
 
     private:
         void* mappedData = nullptr;
 };
 
-// Test that the simplest map write (one u32 at offset 0) works.
+// Test that the simplest map write works.
 TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
     dawn::BufferDescriptor descriptor;
     descriptor.size = 4;
@@ -144,29 +119,14 @@ TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t myData = 2934875;
-    void* mappedData = MapWriteAsyncAndWait(buffer, 0, 4);
+    void* mappedData = MapWriteAsyncAndWait(buffer);
     memcpy(mappedData, &myData, sizeof(myData));
     buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 }
 
-// Test mapping a buffer at an offset.
-TEST_P(BufferMapWriteTests, SmallWriteAtOffset) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.size = 4000;
-    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    uint32_t myData = 2934875;
-    void* mappedData = MapWriteAsyncAndWait(buffer, 2048, 4);
-    memcpy(mappedData, &myData, sizeof(myData));
-    buffer.Unmap();
-
-    EXPECT_BUFFER_U32_EQ(myData, buffer, 2048);
-}
-
-// Test mapping large ranges of a buffer.
+// Test mapping a large buffer.
 TEST_P(BufferMapWriteTests, LargeWrite) {
     constexpr uint32_t kDataSize = 1000 * 1000;
     std::vector<uint32_t> myData;
@@ -179,7 +139,7 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
     descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    void* mappedData = MapWriteAsyncAndWait(buffer, 0, kDataSize * sizeof(uint32_t));
+    void* mappedData = MapWriteAsyncAndWait(buffer);
     memcpy(mappedData, myData.data(), kDataSize * sizeof(uint32_t));
     buffer.Unmap();
 

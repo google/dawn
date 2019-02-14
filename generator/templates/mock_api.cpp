@@ -56,20 +56,20 @@ void ProcTableAsClass::DeviceSetErrorCallback(dawnDevice self, dawnDeviceErrorCa
     OnDeviceSetErrorCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapReadAsync(dawnBuffer self, uint32_t start, uint32_t size, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata) {
+void ProcTableAsClass::BufferMapReadAsync(dawnBuffer self, dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapReadCallback = callback;
     object->userdata1 = userdata;
 
-    OnBufferMapReadAsyncCallback(self, start, size, callback, userdata);
+    OnBufferMapReadAsyncCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapWriteAsync(dawnBuffer self, uint32_t start, uint32_t size, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata) {
+void ProcTableAsClass::BufferMapWriteAsync(dawnBuffer self, dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapWriteCallback = callback;
     object->userdata1 = userdata;
 
-    OnBufferMapWriteAsyncCallback(self, start, size, callback, userdata);
+    OnBufferMapWriteAsyncCallback(self, callback, userdata);
 }
 
 void ProcTableAsClass::FenceOnCompletion(dawnFence self,
@@ -91,14 +91,14 @@ void ProcTableAsClass::CallBuilderErrorCallback(void* builder , dawnBuilderError
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(builder);
     object->builderErrorCallback(status, message, object->userdata1, object->userdata2);
 }
-void ProcTableAsClass::CallMapReadCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, const void* data) {
+void ProcTableAsClass::CallMapReadCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, const void* data, uint32_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
-    object->mapReadCallback(status, data, object->userdata1);
+    object->mapReadCallback(status, data, dataLength, object->userdata1);
 }
 
-void ProcTableAsClass::CallMapWriteCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, void* data) {
+void ProcTableAsClass::CallMapWriteCallback(dawnBuffer buffer, dawnBufferMapAsyncStatus status, void* data, uint32_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
-    object->mapWriteCallback(status, data, object->userdata1);
+    object->mapWriteCallback(status, data, dataLength, object->userdata1);
 }
 
 void ProcTableAsClass::CallFenceOnCompletionCallback(dawnFence fence,

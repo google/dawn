@@ -149,11 +149,11 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Buffer::OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data) {
-        CallMapReadCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+        CallMapReadCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
     }
 
     void Buffer::OnMapWriteCommandSerialFinished(uint32_t mapSerial, void* data) {
-        CallMapWriteCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+        CallMapWriteCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
     }
 
     VkBuffer Buffer::GetHandle() const {
@@ -214,7 +214,7 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
+    void Buffer::MapReadAsyncImpl(uint32_t serial) {
         Device* device = ToBackend(GetDevice());
 
         VkCommandBuffer commands = device->GetPendingCommandBuffer();
@@ -224,10 +224,10 @@ namespace dawn_native { namespace vulkan {
         ASSERT(memory != nullptr);
 
         MapRequestTracker* tracker = device->GetMapRequestTracker();
-        tracker->Track(this, serial, memory + start, false);
+        tracker->Track(this, serial, memory, false);
     }
 
-    void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t /*count*/) {
+    void Buffer::MapWriteAsyncImpl(uint32_t serial) {
         Device* device = ToBackend(GetDevice());
 
         VkCommandBuffer commands = device->GetPendingCommandBuffer();
@@ -237,7 +237,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(memory != nullptr);
 
         MapRequestTracker* tracker = device->GetMapRequestTracker();
-        tracker->Track(this, serial, memory + start, true);
+        tracker->Track(this, serial, memory, true);
     }
 
     void Buffer::UnmapImpl() {

@@ -30,8 +30,6 @@ namespace dawn_wire { namespace server {
 
     bool Server::DoBufferMapAsync(ObjectId bufferId,
                                   uint32_t requestSerial,
-                                  uint32_t start,
-                                  uint32_t size,
                                   bool isWrite) {
         // These requests are just forwarded to the buffer, with userdata containing what the
         // client will require in the return command.
@@ -50,7 +48,6 @@ namespace dawn_wire { namespace server {
         data->server = this;
         data->buffer = ObjectHandle{bufferId, buffer->serial};
         data->requestSerial = requestSerial;
-        data->size = size;
         data->isWrite = isWrite;
 
         auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
@@ -58,19 +55,18 @@ namespace dawn_wire { namespace server {
         if (!buffer->valid) {
             // Fake the buffer returning a failure, data will be freed in this call.
             if (isWrite) {
-                ForwardBufferMapWriteAsync(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+                ForwardBufferMapWriteAsync(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0,
+                                           userdata);
             } else {
-                ForwardBufferMapReadAsync(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, userdata);
+                ForwardBufferMapReadAsync(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata);
             }
             return true;
         }
 
         if (isWrite) {
-            mProcs.bufferMapWriteAsync(buffer->handle, start, size, ForwardBufferMapWriteAsync,
-                                       userdata);
+            mProcs.bufferMapWriteAsync(buffer->handle, ForwardBufferMapWriteAsync, userdata);
         } else {
-            mProcs.bufferMapReadAsync(buffer->handle, start, size, ForwardBufferMapReadAsync,
-                                      userdata);
+            mProcs.bufferMapReadAsync(buffer->handle, ForwardBufferMapReadAsync, userdata);
         }
 
         return true;
@@ -99,20 +95,23 @@ namespace dawn_wire { namespace server {
 
     void Server::ForwardBufferMapReadAsync(dawnBufferMapAsyncStatus status,
                                            const void* ptr,
+                                           uint32_t dataLength,
                                            dawnCallbackUserdata userdata) {
         auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
-        data->server->OnBufferMapReadAsyncCallback(status, ptr, data);
+        data->server->OnBufferMapReadAsyncCallback(status, ptr, dataLength, data);
     }
 
     void Server::ForwardBufferMapWriteAsync(dawnBufferMapAsyncStatus status,
                                             void* ptr,
+                                            uint32_t dataLength,
                                             dawnCallbackUserdata userdata) {
         auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
-        data->server->OnBufferMapWriteAsyncCallback(status, ptr, data);
+        data->server->OnBufferMapWriteAsyncCallback(status, ptr, dataLength, data);
     }
 
     void Server::OnBufferMapReadAsyncCallback(dawnBufferMapAsyncStatus status,
                                               const void* ptr,
+                                              uint32_t dataLength,
                                               MapUserdata* userdata) {
         std::unique_ptr<MapUserdata> data(userdata);
 
@@ -130,7 +129,7 @@ namespace dawn_wire { namespace server {
         cmd.data = reinterpret_cast<const uint8_t*>(ptr);
 
         if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
-            cmd.dataLength = data->size;
+            cmd.dataLength = dataLength;
         }
 
         size_t requiredSize = cmd.GetRequiredSize();
@@ -140,6 +139,7 @@ namespace dawn_wire { namespace server {
 
     void Server::OnBufferMapWriteAsyncCallback(dawnBufferMapAsyncStatus status,
                                                void* ptr,
+                                               uint32_t dataLength,
                                                MapUserdata* userdata) {
         std::unique_ptr<MapUserdata> data(userdata);
 
@@ -153,6 +153,7 @@ namespace dawn_wire { namespace server {
         cmd.buffer = data->buffer;
         cmd.requestSerial = data->requestSerial;
         cmd.status = status;
+        cmd.dataLength = dataLength;
 
         size_t requiredSize = cmd.GetRequiredSize();
         char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
@@ -160,7 +161,7 @@ namespace dawn_wire { namespace server {
 
         if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
             bufferData->mappedData = ptr;
-            bufferData->mappedDataSize = data->size;
+            bufferData->mappedDataSize = dataLength;
         }
     }
 

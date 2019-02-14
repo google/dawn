@@ -19,8 +19,6 @@
 namespace dawn_wire { namespace client {
 
     void ClientBufferMapReadAsync(dawnBuffer cBuffer,
-                                  uint32_t start,
-                                  uint32_t size,
                                   dawnBufferMapReadCallback callback,
                                   dawnCallbackUserdata userdata) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
@@ -31,15 +29,12 @@ namespace dawn_wire { namespace client {
         Buffer::MapRequestData request;
         request.readCallback = callback;
         request.userdata = userdata;
-        request.size = size;
         request.isWrite = false;
         buffer->requests[serial] = request;
 
         BufferMapAsyncCmd cmd;
         cmd.bufferId = buffer->id;
         cmd.requestSerial = serial;
-        cmd.start = start;
-        cmd.size = size;
         cmd.isWrite = false;
 
         size_t requiredSize = cmd.GetRequiredSize();
@@ -49,8 +44,6 @@ namespace dawn_wire { namespace client {
     }
 
     void ClientBufferMapWriteAsync(dawnBuffer cBuffer,
-                                   uint32_t start,
-                                   uint32_t size,
                                    dawnBufferMapWriteCallback callback,
                                    dawnCallbackUserdata userdata) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
@@ -61,15 +54,12 @@ namespace dawn_wire { namespace client {
         Buffer::MapRequestData request;
         request.writeCallback = callback;
         request.userdata = userdata;
-        request.size = size;
         request.isWrite = true;
         buffer->requests[serial] = request;
 
         BufferMapAsyncCmd cmd;
         cmd.bufferId = buffer->id;
         cmd.requestSerial = serial;
-        cmd.start = start;
-        cmd.size = size;
         cmd.isWrite = true;
 
         size_t requiredSize = cmd.GetRequiredSize();

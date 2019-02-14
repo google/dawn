@@ -21,7 +21,10 @@ namespace {
 class QueueSubmitValidationTest : public ValidationTest {
 };
 
-static void StoreTrueMapWriteCallback(dawnBufferMapAsyncStatus status, void*, dawnCallbackUserdata userdata) {
+static void StoreTrueMapWriteCallback(dawnBufferMapAsyncStatus status,
+                                      void*,
+                                      uint32_t,
+                                      dawnCallbackUserdata userdata) {
     bool* userdataPtr = reinterpret_cast<bool*>(static_cast<intptr_t>(userdata));
     *userdataPtr = true;
 }
@@ -55,7 +58,7 @@ TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
     // Map the buffer, submitting when the buffer is mapped should fail
     bool mapWriteFinished = false;
     dawnCallbackUserdata userdata = static_cast<dawnCallbackUserdata>(reinterpret_cast<intptr_t>(&mapWriteFinished));
-    buffer.MapWriteAsync(0, 4, StoreTrueMapWriteCallback, userdata);
+    buffer.MapWriteAsync(StoreTrueMapWriteCallback, userdata);
     queue.Submit(0, nullptr);
     ASSERT_TRUE(mapWriteFinished);
 

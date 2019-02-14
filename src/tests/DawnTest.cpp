@@ -386,9 +386,8 @@ void DawnTest::MapSlotsSynchronously() {
         auto userdata = new MapReadUserdata{this, i};
 
         auto& slot = mReadbackSlots[i];
-        slot.buffer.MapReadAsync(
-            0, slot.bufferSize, SlotMapReadCallback,
-            static_cast<dawn::CallbackUserdata>(reinterpret_cast<uintptr_t>(userdata)));
+        slot.buffer.MapReadAsync(SlotMapReadCallback, static_cast<dawn::CallbackUserdata>(
+                                                          reinterpret_cast<uintptr_t>(userdata)));
     }
 
     // Busy wait until all map operations are done.
@@ -400,6 +399,7 @@ void DawnTest::MapSlotsSynchronously() {
 // static
 void DawnTest::SlotMapReadCallback(dawnBufferMapAsyncStatus status,
                                    const void* data,
+                                   uint32_t,
                                    dawnCallbackUserdata userdata_) {
     DAWN_ASSERT(status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
 

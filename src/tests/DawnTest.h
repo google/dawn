@@ -148,6 +148,7 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     void MapSlotsSynchronously();
     static void SlotMapReadCallback(dawnBufferMapAsyncStatus status,
                                     const void* data,
+                                    uint32_t dataLength,
                                     dawnCallbackUserdata userdata);
     size_t mNumPendingMapOperations = 0;
 

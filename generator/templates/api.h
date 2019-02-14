@@ -51,8 +51,8 @@
 typedef uint64_t dawnCallbackUserdata;
 typedef void (*dawnDeviceErrorCallback)(const char* message, dawnCallbackUserdata userdata);
 typedef void (*dawnBuilderErrorCallback)(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2);
-typedef void (*dawnBufferMapReadCallback)(dawnBufferMapAsyncStatus status, const void* data, dawnCallbackUserdata userdata);
-typedef void (*dawnBufferMapWriteCallback)(dawnBufferMapAsyncStatus status, void* data, dawnCallbackUserdata userdata);
+typedef void (*dawnBufferMapReadCallback)(dawnBufferMapAsyncStatus status, const void* data, uint32_t dataLength, dawnCallbackUserdata userdata);
+typedef void (*dawnBufferMapWriteCallback)(dawnBufferMapAsyncStatus status, void* data, uint32_t dataLength, dawnCallbackUserdata userdata);
 typedef void (*dawnFenceOnCompletionCallback)(dawnFenceCompletionStatus status,
                                               dawnCallbackUserdata userdata);
 

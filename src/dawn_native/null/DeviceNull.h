@@ -147,11 +147,11 @@ namespace dawn_native { namespace null {
 
       private:
         MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
-        void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
-        void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) override;
+        void MapReadAsyncImpl(uint32_t serial) override;
+        void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
 
-        void MapAsyncImplCommon(uint32_t serial, uint32_t start, uint32_t count, bool isWrite);
+        void MapAsyncImplCommon(uint32_t serial, bool isWrite);
 
         std::unique_ptr<char[]> mBackingData;
     };

@@ -37,20 +37,20 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+    void Buffer::MapReadAsyncImpl(uint32_t serial) {
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_READ_BIT);
-        CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+        void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+        CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
     }
 
-    void Buffer::MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t count) {
+    void Buffer::MapWriteAsyncImpl(uint32_t serial) {
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        void* data = glMapBufferRange(GL_ARRAY_BUFFER, start, count, GL_MAP_WRITE_BIT);
-        CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data);
+        void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+        CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
     }
 
     void Buffer::UnmapImpl() {

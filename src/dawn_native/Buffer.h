@@ -54,14 +54,8 @@ namespace dawn_native {
 
         // Dawn API
         void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);
-        void MapReadAsync(uint32_t start,
-                          uint32_t size,
-                          dawnBufferMapReadCallback callback,
-                          dawnCallbackUserdata userdata);
-        void MapWriteAsync(uint32_t start,
-                           uint32_t size,
-                           dawnBufferMapWriteCallback callback,
-                           dawnCallbackUserdata userdata);
+        void MapReadAsync(dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata);
+        void MapWriteAsync(dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata);
         void Unmap();
         void Destroy();
 
@@ -70,19 +64,21 @@ namespace dawn_native {
 
         void CallMapReadCallback(uint32_t serial,
                                  dawnBufferMapAsyncStatus status,
-                                 const void* pointer);
-        void CallMapWriteCallback(uint32_t serial, dawnBufferMapAsyncStatus status, void* pointer);
+                                 const void* pointer,
+                                 uint32_t dataLength);
+        void CallMapWriteCallback(uint32_t serial,
+                                  dawnBufferMapAsyncStatus status,
+                                  void* pointer,
+                                  uint32_t dataLength);
 
       private:
         virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) = 0;
-        virtual void MapReadAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
-        virtual void MapWriteAsyncImpl(uint32_t serial, uint32_t start, uint32_t size) = 0;
+        virtual void MapReadAsyncImpl(uint32_t serial) = 0;
+        virtual void MapWriteAsyncImpl(uint32_t serial) = 0;
         virtual void UnmapImpl() = 0;
 
         MaybeError ValidateSetSubData(uint32_t start, uint32_t count) const;
-        MaybeError ValidateMap(uint32_t start,
-                               uint32_t size,
-                               dawn::BufferUsageBit requiredUsage) const;
+        MaybeError ValidateMap(dawn::BufferUsageBit requiredUsage) const;
         MaybeError ValidateUnmap() const;
         MaybeError ValidateDestroy() const;
 

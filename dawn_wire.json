@@ -18,8 +18,6 @@
         "buffer map async": [
             { "name": "buffer id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint32_t" },
-            { "name": "start", "type": "uint32_t" },
-            { "name": "size", "type": "uint32_t" },
             { "name": "is write", "type": "bool" }
         ],
         "buffer update mapped data": [
@@ -43,7 +41,8 @@
         "buffer map write async callback": [
             { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer" },
             { "name": "request serial", "type": "uint32_t" },
-            { "name": "status", "type": "uint32_t" }
+            { "name": "status", "type": "uint32_t" },
+            { "name": "data length", "type": "uint32_t" }
         ],
         "device error callback": [
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }

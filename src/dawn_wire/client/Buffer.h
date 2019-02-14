@@ -36,7 +36,6 @@ namespace dawn_wire { namespace client {
             dawnBufferMapReadCallback readCallback = nullptr;
             dawnBufferMapWriteCallback writeCallback = nullptr;
             dawnCallbackUserdata userdata = 0;
-            uint32_t size = 0;
             bool isWrite = false;
         };
         std::map<uint32_t, MapRequestData> requests;

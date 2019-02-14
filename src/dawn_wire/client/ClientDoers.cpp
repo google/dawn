@@ -27,7 +27,7 @@ namespace dawn_wire { namespace client {
     bool Client::DoBufferMapReadAsyncCallback(Buffer* buffer,
                                               uint32_t requestSerial,
                                               uint32_t status,
-                                              uint32_t count,
+                                              uint32_t dataLength,
                                               const uint8_t* data) {
         // The buffer might have been deleted or recreated so this isn't an error.
         if (buffer == nullptr) {
@@ -53,12 +53,6 @@ namespace dawn_wire { namespace client {
         // On success, we copy the data locally because the IPC buffer isn't valid outside of this
         // function
         if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
-            // The server didn't send the right amount of data, this is an error and could cause
-            // the application to crash if we did call the callback.
-            if (request.size != count) {
-                return false;
-            }
-
             ASSERT(data != nullptr);
 
             if (buffer->mappedData != nullptr) {
@@ -66,14 +60,14 @@ namespace dawn_wire { namespace client {
             }
 
             buffer->isWriteMapped = false;
-            buffer->mappedDataSize = request.size;
-            buffer->mappedData = malloc(request.size);
-            memcpy(buffer->mappedData, data, request.size);
+            buffer->mappedDataSize = dataLength;
+            buffer->mappedData = malloc(dataLength);
+            memcpy(buffer->mappedData, data, dataLength);
 
             request.readCallback(static_cast<dawnBufferMapAsyncStatus>(status), buffer->mappedData,
-                                 request.userdata);
+                                 dataLength, request.userdata);
         } else {
-            request.readCallback(static_cast<dawnBufferMapAsyncStatus>(status), nullptr,
+            request.readCallback(static_cast<dawnBufferMapAsyncStatus>(status), nullptr, 0,
                                  request.userdata);
         }
 
@@ -82,7 +76,8 @@ namespace dawn_wire { namespace client {
 
     bool Client::DoBufferMapWriteAsyncCallback(Buffer* buffer,
                                                uint32_t requestSerial,
-                                               uint32_t status) {
+                                               uint32_t status,
+                                               uint32_t dataLength) {
         // The buffer might have been deleted or recreated so this isn't an error.
         if (buffer == nullptr) {
             return true;
@@ -112,14 +107,14 @@ namespace dawn_wire { namespace client {
             }
 
             buffer->isWriteMapped = true;
-            buffer->mappedDataSize = request.size;
-            buffer->mappedData = malloc(request.size);
-            memset(buffer->mappedData, 0, request.size);
+            buffer->mappedDataSize = dataLength;
+            buffer->mappedData = malloc(dataLength);
+            memset(buffer->mappedData, 0, dataLength);
 
             request.writeCallback(static_cast<dawnBufferMapAsyncStatus>(status), buffer->mappedData,
-                                  request.userdata);
+                                  dataLength, request.userdata);
         } else {
-            request.writeCallback(static_cast<dawnBufferMapAsyncStatus>(status), nullptr,
+            request.writeCallback(static_cast<dawnBufferMapAsyncStatus>(status), nullptr, 0,
                                   request.userdata);
         }
 
