@@ -44,7 +44,6 @@ TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
     // Create a command buffer that reads from the mappable buffer.
     dawn::CommandBuffer commands;
     {
-        dawn::RenderPassDescriptor renderpass = CreateSimpleRenderPass();
         dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
         builder.CopyBufferToBuffer(buffer, 0, targetBuffer, 0, 4);
         commands = builder.GetResult();

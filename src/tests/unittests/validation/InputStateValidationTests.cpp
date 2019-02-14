@@ -20,8 +20,6 @@
 class InputStateTest : public ValidationTest {
     protected:
         void CreatePipeline(bool success, const dawn::InputState& inputState, std::string vertexSource) {
-            DummyRenderPass renderpassData = CreateDummyRenderPass();
-
             dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
             dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
@@ -35,7 +33,7 @@ class InputStateTest : public ValidationTest {
             descriptor.cVertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
             descriptor.inputState = inputState;
-            descriptor.cColorAttachments[0]->format = renderpassData.attachmentFormat;
+            descriptor.cColorAttachments[0]->format = dawn::TextureFormat::R8G8B8A8Unorm;
 
             if (!success) {
                 ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));

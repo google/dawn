@@ -23,8 +23,6 @@ class RenderPipelineValidationTest : public ValidationTest {
         void SetUp() override {
             ValidationTest::SetUp();
 
-            renderpass = CreateSimpleRenderPass();
-
             vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450
                 void main() {
@@ -40,7 +38,6 @@ class RenderPipelineValidationTest : public ValidationTest {
                 })");
         }
 
-        dawn::RenderPassDescriptor renderpass;
         dawn::ShaderModule vsModule;
         dawn::ShaderModule fsModule;
 };
