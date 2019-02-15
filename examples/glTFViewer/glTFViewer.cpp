@@ -471,9 +471,11 @@ namespace {
             dawn::TextureCopyView textureCopyView =
                 utils::CreateTextureCopyView(oTexture, 0, 0, {0, 0, 0});
             dawn::Extent3D copySize = {iImage.width, iImage.height, 1};
-            auto cmdbuf = device.CreateCommandBufferBuilder()
-                              .CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize)
-                              .GetResult();
+
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+
+            dawn::CommandBuffer cmdbuf = encoder.Finish();
             queue.Submit(1, &cmdbuf);
 
             textures[iTextureID] = oTexture.CreateDefaultTextureView();
@@ -603,9 +605,9 @@ namespace {
         GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
         const auto& defaultSceneNodes = scene.scenes.at(scene.defaultScene);
-        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
             for (const auto& n : defaultSceneNodes) {
                 const auto& node = scene.nodes.at(n);
                 drawNode(pass, node);
@@ -613,7 +615,7 @@ namespace {
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = builder.GetResult();
+        dawn::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         swapchain.Present(backbuffer);

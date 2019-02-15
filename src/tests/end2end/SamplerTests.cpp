@@ -106,12 +106,13 @@ protected:
         dawn::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
         dawn::Extent3D copySize = {2, 2, 1};
-        dawn::CommandBuffer copy =
-            device.CreateCommandBufferBuilder()
-                .CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize)
-                .GetResult();
 
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+
+        dawn::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
+
         mTextureView = texture.CreateDefaultTextureView();
     }
 
@@ -137,16 +138,16 @@ protected:
             {1, mTextureView}
         });
 
-        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = builder.BeginRenderPass(mRenderPass.renderPassInfo);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(mRenderPass.renderPassInfo);
             pass.SetPipeline(mPipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = builder.GetResult();
+        dawn::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         RGBA8 expectedU2(u.mExpected2, u.mExpected2, u.mExpected2, 255);

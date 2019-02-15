@@ -80,7 +80,7 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
 
     dawn::Texture renderTarget1 = CreateDefault2DTexture();
     dawn::Texture renderTarget2 = CreateDefault2DTexture();
-    dawn::CommandBufferBuilder commandBufferBuilder = device.CreateCommandBufferBuilder();
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 
     dawn::RenderPassColorAttachmentDescriptor colorAttachment;
     colorAttachment.loadOp = dawn::LoadOp::Clear;
@@ -97,7 +97,7 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
             .SetColorAttachments(1, &colorAttachment)
             .GetResult();
 
-        dawn::RenderPassEncoder pass = commandBufferBuilder.BeginRenderPass(renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
@@ -112,13 +112,13 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
             .SetColorAttachments(1, &colorAttachment)
             .GetResult();
 
-        dawn::RenderPassEncoder pass = commandBufferBuilder.BeginRenderPass(renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = commandBufferBuilder.GetResult();
+    dawn::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(kBlue, renderTarget1, 1, kRTSize - 1);

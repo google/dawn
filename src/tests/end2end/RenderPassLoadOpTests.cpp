@@ -124,10 +124,10 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
         .SetColorAttachments(1, &colorAttachment)
         .GetResult();
 
-    auto commandsClearZeroBuilder = device.CreateCommandBufferBuilder();
-    auto clearZeroPass = commandsClearZeroBuilder.BeginRenderPass(renderPassClearZero);
+    auto commandsClearZeroEncoder = device.CreateCommandEncoder();
+    auto clearZeroPass = commandsClearZeroEncoder.BeginRenderPass(renderPassClearZero);
     clearZeroPass.EndPass();
-    auto commandsClearZero = commandsClearZeroBuilder.GetResult();
+    auto commandsClearZero = commandsClearZeroEncoder.Finish();
 
     dawn::RenderPassColorAttachmentDescriptor colorAttachmentGreen = colorAttachment;
     colorAttachmentGreen.clearColor = { 0.0f, 1.0f, 0.0f, 1.0f };
@@ -135,10 +135,10 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
         .SetColorAttachments(1, &colorAttachmentGreen)
         .GetResult();
 
-    auto commandsClearGreenBuilder = device.CreateCommandBufferBuilder();
-    auto clearGreenPass = commandsClearGreenBuilder.BeginRenderPass(renderPassClearGreen);
+    auto commandsClearGreenEncoder = device.CreateCommandEncoder();
+    auto clearGreenPass = commandsClearGreenEncoder.BeginRenderPass(renderPassClearGreen);
     clearGreenPass.EndPass();
-    auto commandsClearGreen = commandsClearGreenBuilder.GetResult();
+    auto commandsClearGreen = commandsClearGreenEncoder.Finish();
 
     queue.Submit(1, &commandsClearZero);
     EXPECT_TEXTURE_RGBA8_EQ(expectZero.data(), renderTarget, 0, 0, kRTSize, kRTSize, 0, 0);
@@ -155,11 +155,11 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
 
     dawn::CommandBuffer commandsLoad;
     {
-        auto builder = device.CreateCommandBufferBuilder();
-        auto pass = builder.BeginRenderPass(renderPassLoad);
+        auto encoder = device.CreateCommandEncoder();
+        auto pass = encoder.BeginRenderPass(renderPassLoad);
         blueQuad.Draw(&pass);
         pass.EndPass();
-        commandsLoad = builder.GetResult();
+        commandsLoad = encoder.Finish();
     }
 
     queue.Submit(1, &commandsLoad);

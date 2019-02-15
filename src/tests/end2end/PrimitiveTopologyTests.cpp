@@ -208,16 +208,16 @@ class PrimitiveTopologyTest : public DawnTest {
             dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
             static const uint32_t zeroOffset = 0;
-            dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             {
-                dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+                dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
                 pass.SetPipeline(pipeline);
                 pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
                 pass.Draw(6, 1, 0, 0);
                 pass.EndPass();
             }
 
-            dawn::CommandBuffer commands = builder.GetResult();
+            dawn::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
 
             for (auto& locationSpec : locationSpecs) {

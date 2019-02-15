@@ -267,11 +267,10 @@ std::ostringstream& DawnTest::AddBufferExpectation(const char* file,
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the buffer might have been modified.
-    dawn::CommandBuffer commands =
-        device.CreateCommandBufferBuilder()
-            .CopyBufferToBuffer(buffer, offset, readback.buffer, readback.offset, size)
-            .GetResult();
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(buffer, offset, readback.buffer, readback.offset, size);
 
+    dawn::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     DeferredExpectation deferred;
@@ -312,11 +311,11 @@ std::ostringstream& DawnTest::AddTextureExpectation(const char* file,
     dawn::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(readback.buffer, readback.offset, rowPitch, 0);
     dawn::Extent3D copySize = {width, height, 1};
-    dawn::CommandBuffer commands =
-        device.CreateCommandBufferBuilder()
-            .CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize)
-            .GetResult();
 
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+
+    dawn::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     DeferredExpectation deferred;

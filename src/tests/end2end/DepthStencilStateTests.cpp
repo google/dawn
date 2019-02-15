@@ -266,14 +266,14 @@ class DepthStencilStateTest : public DawnTest {
         // Each test param represents a pair of triangles with a color, depth, stencil value, and depthStencil state, one frontfacing, one backfacing
         // Draw the triangles in order and check the expected colors for the frontfaces and backfaces
         void DoTest(const std::vector<TestSpec> &testParams, const RGBA8& expectedFront, const RGBA8& expectedBack) {
-            dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 
             struct TriangleData {
                 float color[3];
                 float depth;
             };
 
-            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderpass);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
 
             for (size_t i = 0; i < testParams.size(); ++i) {
                 const TestSpec& test = testParams[i];
@@ -307,7 +307,7 @@ class DepthStencilStateTest : public DawnTest {
             }
             pass.EndPass();
 
-            dawn::CommandBuffer commands = builder.GetResult();
+            dawn::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
 
             EXPECT_PIXEL_RGBA8_EQ(expectedFront, renderTarget, kRTSize / 4, kRTSize / 2) << "Front face check failed";

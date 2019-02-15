@@ -19,6 +19,7 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
+#include "dawn_native/CommandEncoder.h"
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Fence.h"
@@ -144,6 +145,9 @@ namespace dawn_native {
     }
     CommandBufferBuilder* DeviceBase::CreateCommandBufferBuilder() {
         return new CommandBufferBuilder(this);
+    }
+    CommandEncoderBase* DeviceBase::CreateCommandEncoder() {
+        return new CommandEncoderBase(this);
     }
     ComputePipelineBase* DeviceBase::CreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {

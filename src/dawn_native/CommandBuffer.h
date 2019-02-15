@@ -43,9 +43,13 @@ namespace dawn_native {
       public:
         CommandBufferBase(CommandBufferBuilder* builder);
 
+        static CommandBufferBase* MakeError(DeviceBase* device);
+
         const CommandBufferResourceUsage& GetResourceUsages() const;
 
       private:
+        CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         CommandBufferResourceUsage mResourceUsages;
     };
 

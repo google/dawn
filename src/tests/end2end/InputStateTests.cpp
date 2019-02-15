@@ -178,9 +178,9 @@ class InputStateTest : public DawnTest {
             EXPECT_LE(triangles, 4u);
             EXPECT_LE(instances, 4u);
 
-            dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 
-            dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
 
             uint32_t zeroOffset = 0;
@@ -191,7 +191,7 @@ class InputStateTest : public DawnTest {
             pass.Draw(triangles * 3, instances, 0, 0);
             pass.EndPass();
 
-            dawn::CommandBuffer commands = builder.GetResult();
+            dawn::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
 
             CheckResult(triangles, instances);
@@ -452,9 +452,9 @@ TEST_P(InputStateTest, UnusedVertexSlot) {
         3, 4, 5, 6,
     });
 
-    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
 
     uint32_t zeroOffset = 0;
     pass.SetVertexBuffers(0, 1, &buffer, &zeroOffset);
@@ -465,7 +465,7 @@ TEST_P(InputStateTest, UnusedVertexSlot) {
 
     pass.EndPass();
 
-    dawn::CommandBuffer commands = builder.GetResult();
+    dawn::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     CheckResult(1, 4);
@@ -497,9 +497,9 @@ TEST_P(InputStateTest, MultiplePipelinesMixedInputState) {
         3, 4, 5, 6,
     });
 
-    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass.renderPassInfo);
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
 
     uint32_t zeroOffset = 0;
     pass.SetVertexBuffers(0, 1, &buffer, &zeroOffset);
@@ -513,7 +513,7 @@ TEST_P(InputStateTest, MultiplePipelinesMixedInputState) {
 
     pass.EndPass();
 
-    dawn::CommandBuffer commands = builder.GetResult();
+    dawn::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     CheckResult(1, 4);

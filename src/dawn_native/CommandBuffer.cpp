@@ -303,6 +303,15 @@ namespace dawn_native {
         : ObjectBase(builder->GetDevice()), mResourceUsages(builder->AcquireResourceUsages()) {
     }
 
+    CommandBufferBase::CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag) {
+    }
+
+    // static
+    CommandBufferBase* CommandBufferBase::MakeError(DeviceBase* device) {
+        return new CommandBufferBase(device, ObjectBase::kError);
+    }
+
     const CommandBufferResourceUsage& CommandBufferBase::GetResourceUsages() const {
         return mResourceUsages;
     }

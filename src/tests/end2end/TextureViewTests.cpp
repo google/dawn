@@ -134,7 +134,7 @@ protected:
         constexpr uint32_t kPixelsPerRowPitch = kTextureRowPitchAlignment / sizeof(RGBA8);
         ASSERT_LE(textureWidthLevel0, kPixelsPerRowPitch);
 
-        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         for (uint32_t layer = 0; layer < layerCount; ++layer) {
             for (uint32_t level = 0; level < levelCount; ++level) {
                 const uint32_t texWidth = textureWidthLevel0 >> level;
@@ -152,10 +152,10 @@ protected:
                 dawn::TextureCopyView textureCopyView =
                     utils::CreateTextureCopyView(mTexture, level, layer, {0, 0, 0});
                 dawn::Extent3D copySize = {texWidth, texHeight, 1};
-                builder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+                encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }
         }
-        dawn::CommandBuffer copy = builder.GetResult();
+        dawn::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
     }
 
@@ -176,16 +176,16 @@ protected:
 
         dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
 
-        dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = builder.BeginRenderPass(mRenderPass.renderPassInfo);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(mRenderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = builder.GetResult();
+        dawn::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         RGBA8 expectedPixel(0, 0, 0, expected);
@@ -520,16 +520,16 @@ class TextureViewRenderingTest : public DawnTest {
 
         dawn::RenderPipeline oneColorPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
-        dawn::CommandBufferBuilder commandBufferBuilder = device.CreateCommandBufferBuilder();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             dawn::RenderPassEncoder pass =
-                commandBufferBuilder.BeginRenderPass(renderPassInfo);
+                encoder.BeginRenderPass(renderPassInfo);
             pass.SetPipeline(oneColorPipeline);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = commandBufferBuilder.GetResult();
+        dawn::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         // Check if the right pixels (Green) have been written into the right part of the texture.

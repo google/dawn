@@ -280,10 +280,10 @@ void initSim() {
 dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& renderPass, size_t i) {
     static const uint32_t zeroOffsets[1] = {0};
     auto& bufferDst = particleBuffers[(i + 1) % 2];
-    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 
     {
-        dawn::ComputePassEncoder pass = builder.BeginComputePass();
+        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(updatePipeline);
         pass.SetBindGroup(0, updateBGs[i]);
         pass.Dispatch(kNumParticles, 1, 1);
@@ -291,7 +291,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& render
     }
 
     {
-        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
         pass.SetPipeline(renderPipeline);
         pass.SetVertexBuffers(0, 1, &bufferDst, zeroOffsets);
         pass.SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets);
@@ -299,7 +299,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& render
         pass.EndPass();
     }
 
-    return builder.GetResult();
+    return encoder.Finish();
 }
 
 void init() {

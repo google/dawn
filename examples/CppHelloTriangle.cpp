@@ -74,11 +74,11 @@ void initTextures() {
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
     dawn::Extent3D copySize = {1024, 1024, 1};
-    dawn::CommandBuffer copy =
-        device.CreateCommandBufferBuilder()
-            .CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize)
-            .GetResult();
 
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+
+    dawn::CommandBuffer copy = encoder.Finish();
     queue.Submit(1, &copy);
 }
 
@@ -165,9 +165,9 @@ void frame() {
     GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
 
     static const uint32_t vertexBufferOffsets[1] = {0};
-    dawn::CommandBufferBuilder builder = device.CreateCommandBufferBuilder();
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = builder.BeginRenderPass(renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
@@ -176,7 +176,7 @@ void frame() {
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = builder.GetResult();
+    dawn::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
     swapchain.Present(backbuffer);
     DoFlush();
