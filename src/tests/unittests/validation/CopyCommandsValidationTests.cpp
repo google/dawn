@@ -64,16 +64,13 @@ class CopyCommandTest : public ValidationTest {
             dawn::TextureCopyView textureCopyView =
                 utils::CreateTextureCopyView(destTexture, destLevel, destSlice, destOrigin);
 
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &extent3D);
+
             if (expectation == utils::Expectation::Success) {
-                dawn::CommandBuffer commands =
-                    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-                        .CopyBufferToTexture(&bufferCopyView, &textureCopyView, &extent3D)
-                        .GetResult();
+                encoder.Finish();
             } else {
-                dawn::CommandBuffer commands =
-                    AssertWillBeError(device.CreateCommandBufferBuilder())
-                        .CopyBufferToTexture(&bufferCopyView, &textureCopyView, &extent3D)
-                        .GetResult();
+                ASSERT_DEVICE_ERROR(encoder.Finish());
             }
         }
 
@@ -92,16 +89,13 @@ class CopyCommandTest : public ValidationTest {
             dawn::TextureCopyView textureCopyView =
                 utils::CreateTextureCopyView(srcTexture, srcLevel, srcSlice, srcOrigin);
 
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D);
+
             if (expectation == utils::Expectation::Success) {
-                dawn::CommandBuffer commands =
-                    AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-                        .CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D)
-                        .GetResult();
+                encoder.Finish();
             } else {
-                dawn::CommandBuffer commands =
-                    AssertWillBeError(device.CreateCommandBufferBuilder())
-                        .CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D)
-                        .GetResult();
+                ASSERT_DEVICE_ERROR(encoder.Finish());
             }
         }
 };
@@ -118,20 +112,20 @@ TEST_F(CopyCommandTest_B2B, Success) {
 
     // Copy different copies, including some that touch the OOB condition
     {
-        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-            .CopyBufferToBuffer(source, 0, destination, 0, 16)
-            .CopyBufferToBuffer(source, 8, destination, 0, 8)
-            .CopyBufferToBuffer(source, 0, destination, 8, 8)
-            .GetResult();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(source, 0, destination, 0, 16);
+        encoder.CopyBufferToBuffer(source, 8, destination, 0, 8);
+        encoder.CopyBufferToBuffer(source, 0, destination, 8, 8);
+        encoder.Finish();
     }
 
     // Empty copies are valid
     {
-        dawn::CommandBuffer commands = AssertWillBeSuccess(device.CreateCommandBufferBuilder())
-            .CopyBufferToBuffer(source, 0, destination, 0, 0)
-            .CopyBufferToBuffer(source, 0, destination, 16, 0)
-            .CopyBufferToBuffer(source, 16, destination, 0, 0)
-            .GetResult();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(source, 0, destination, 0, 0);
+        encoder.CopyBufferToBuffer(source, 0, destination, 16, 0);
+        encoder.CopyBufferToBuffer(source, 16, destination, 0, 0);
+        encoder.Finish();
     }
 }
 
@@ -142,16 +136,16 @@ TEST_F(CopyCommandTest_B2B, OutOfBounds) {
 
     // OOB on the source
     {
-        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToBuffer(source, 8, destination, 0, 12)
-            .GetResult();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(source, 8, destination, 0, 12);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // OOB on the destination
     {
-        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToBuffer(source, 0, destination, 8, 12)
-            .GetResult();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(source, 0, destination, 8, 12);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
 
@@ -163,16 +157,16 @@ TEST_F(CopyCommandTest_B2B, BadUsage) {
 
     // Source with incorrect usage
     {
-        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToBuffer(vertex, 0, destination, 0, 16)
-            .GetResult();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(vertex, 0, destination, 0, 16);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // Destination with incorrect usage
     {
-        dawn::CommandBuffer commands = AssertWillBeError(device.CreateCommandBufferBuilder())
-            .CopyBufferToBuffer(source, 0, vertex, 0, 16)
-            .GetResult();
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(source, 0, vertex, 0, 16);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
 
