@@ -156,9 +156,9 @@ void initRender() {
     descriptor.cVertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.inputState = inputState;
-    descriptor.cAttachmentsState.hasDepthStencilAttachment = true;
-    descriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
-    descriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
+    descriptor.depthStencilState = &descriptor.cDepthStencilState;
+    descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+    descriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
 
     renderPipeline = device.CreateRenderPipeline(&descriptor);
 }

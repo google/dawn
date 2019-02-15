@@ -125,7 +125,7 @@ class InputStateTest : public DawnTest {
             descriptor.cVertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
             descriptor.inputState = inputState;
-            descriptor.cColorAttachments[0]->format = renderPass.colorFormat;
+            descriptor.cColorStates[0].format = renderPass.colorFormat;
 
             return device.CreateRenderPipeline(&descriptor);
         }

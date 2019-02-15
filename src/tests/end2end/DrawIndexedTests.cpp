@@ -64,7 +64,7 @@ class DrawIndexedTest : public DawnTest {
             descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
             descriptor.indexFormat = dawn::IndexFormat::Uint32;
             descriptor.inputState = inputState;
-            descriptor.cColorAttachments[0]->format = renderPass.colorFormat;
+            descriptor.cColorStates[0].format = renderPass.colorFormat;
 
             pipeline = device.CreateRenderPipeline(&descriptor);
 

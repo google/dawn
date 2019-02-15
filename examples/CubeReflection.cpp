@@ -215,9 +215,9 @@ void init() {
     descriptor.cVertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.inputState = inputState;
-    descriptor.cAttachmentsState.hasDepthStencilAttachment = true;
-    descriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
-    descriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
+    descriptor.depthStencilState = &descriptor.cDepthStencilState;
+    descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+    descriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
     descriptor.cDepthStencilState.depthWriteEnabled = true;
     descriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 
@@ -228,9 +228,9 @@ void init() {
     pDescriptor.cVertexStage.module = vsModule;
     pDescriptor.cFragmentStage.module = fsModule;
     pDescriptor.inputState = inputState;
-    pDescriptor.cAttachmentsState.hasDepthStencilAttachment = true;
-    pDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
-    pDescriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
+    pDescriptor.depthStencilState = &pDescriptor.cDepthStencilState;
+    pDescriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+    pDescriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
     pDescriptor.cDepthStencilState.stencilFront.passOp = dawn::StencilOperation::Replace;
     pDescriptor.cDepthStencilState.stencilBack.passOp = dawn::StencilOperation::Replace;
     pDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
@@ -242,9 +242,9 @@ void init() {
     rfDescriptor.cVertexStage.module = vsModule;
     rfDescriptor.cFragmentStage.module = fsReflectionModule;
     rfDescriptor.inputState = inputState;
-    rfDescriptor.cAttachmentsState.hasDepthStencilAttachment = true;
-    rfDescriptor.cDepthStencilAttachment.format = dawn::TextureFormat::D32FloatS8Uint;
-    rfDescriptor.cColorAttachments[0]->format = GetPreferredSwapChainTextureFormat();
+    rfDescriptor.depthStencilState = &rfDescriptor.cDepthStencilState;
+    rfDescriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+    rfDescriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
     rfDescriptor.cDepthStencilState.stencilFront.compare = dawn::CompareFunction::Equal;
     rfDescriptor.cDepthStencilState.stencilBack.compare = dawn::CompareFunction::Equal;
     rfDescriptor.cDepthStencilState.stencilFront.passOp = dawn::StencilOperation::Replace;

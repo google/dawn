@@ -58,26 +58,16 @@ TEST_F(RenderPipelineValidationTest, BlendState) {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.numBlendStates = 1;
+        descriptor.numColorStates = 1;
 
         device.CreateRenderPipeline(&descriptor);
     }
 
-    {   // Fail because lack of blend states for color attachments
+    {  // Fail because lack of color states (and depth/stencil state)
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.numBlendStates = 0;
-
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
-    }
-
-    {
-        // Fail because set blend states for empty color attachments
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.numBlendStates = 2;
+        descriptor.numColorStates = 0;
 
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }

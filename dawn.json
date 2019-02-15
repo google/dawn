@@ -23,13 +23,6 @@
             {"value": 3, "name": "clamp to border color"}
         ]
     },
-    "attachment descriptor": {
-        "category": "structure",
-        "extensible": true,
-        "members": [
-            {"name": "format", "type": "texture format"}
-        ]
-    },
     "bind group": {
         "category": "object"
     },
@@ -120,10 +113,11 @@
             {"value": 4, "name": "max"}
         ]
     },
-    "blend state descriptor": {
+    "color state descriptor": {
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "format", "type": "texture format"},
             {"name": "alpha blend", "type": "blend descriptor"},
             {"name": "color blend", "type": "blend descriptor"},
             {"name": "color write mask", "type": "color write mask"}
@@ -507,6 +501,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "format", "type": "texture format"},
             {"name": "depth write enabled", "type": "bool"},
             {"name": "depth compare", "type": "compare function"},
             {"name": "stencil front", "type": "stencil state face descriptor"},
@@ -657,16 +652,6 @@
             {"name": "x", "type": "uint32_t"},
             {"name": "y", "type": "uint32_t"},
             {"name": "z", "type": "uint32_t"}
-        ]
-    },
-    "attachments state descriptor": {
-        "category": "structure",
-        "extensible": true,
-        "members": [
-            {"name": "num color attachments", "type": "uint32_t"},
-            {"name": "color attachments", "type": "attachment descriptor", "annotation": "const*const*", "length": "num color attachments"},
-            {"name": "has depth stencil attachment", "type": "bool"},
-            {"name": "depth stencil attachment", "type": "attachment descriptor", "annotation":"const*"}
         ]
     },
     "pipeline layout": {
@@ -872,11 +857,10 @@
             {"name": "input state", "type": "input state"},
             {"name": "index format", "type": "index format"},
             {"name": "primitive topology", "type": "primitive topology"},
-            {"name": "attachments state", "type": "attachments state descriptor", "annotation": "const*"},
             {"name": "sample count", "type": "uint32_t"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
-            {"name": "num blend states", "type": "uint32_t"},
-            {"name": "blend states", "type": "blend state descriptor", "annotation": "const*", "length": "num blend states"}
+            {"name": "num color states", "type": "uint32_t"},
+            {"name": "color states", "type": "color state descriptor", "annotation": "const*", "length": "num color states"}
         ]
     },
     "sampler": {

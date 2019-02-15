@@ -172,7 +172,7 @@ protected:
         textureDescriptor.cVertexStage.module = mVSModule;
         textureDescriptor.cFragmentStage.module = fsModule;
         textureDescriptor.layout = mPipelineLayout;
-        textureDescriptor.cColorAttachments[0]->format = mRenderPass.colorFormat;
+        textureDescriptor.cColorStates[0].format = mRenderPass.colorFormat;
 
         dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
 
@@ -516,7 +516,7 @@ class TextureViewRenderingTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.cVertexStage.module = vsModule;
         pipelineDescriptor.cFragmentStage.module = oneColorFsModule;
-        pipelineDescriptor.cColorAttachments[0]->format = kDefaultFormat;
+        pipelineDescriptor.cColorStates[0].format = kDefaultFormat;
 
         dawn::RenderPipeline oneColorPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 

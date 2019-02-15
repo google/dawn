@@ -71,32 +71,21 @@ void init() {
         fragmentStage.entryPoint = "main";
         descriptor.fragmentStage = &fragmentStage;
 
-        dawnAttachmentsStateDescriptor attachmentsState;
-        attachmentsState.nextInChain = nullptr;
-        attachmentsState.numColorAttachments = 1;
-        dawnAttachmentDescriptor colorAttachment = {nullptr, swapChainFormat};
-        dawnAttachmentDescriptor* colorAttachmentPtr[] = {&colorAttachment};
-        attachmentsState.colorAttachments = colorAttachmentPtr;
-        attachmentsState.hasDepthStencilAttachment = false;
-        // Even with hasDepthStencilAttachment = false, depthStencilAttachment must point to valid
-        // data because we don't have optional substructures yet.
-        attachmentsState.depthStencilAttachment = &colorAttachment;
-        descriptor.attachmentsState = &attachmentsState;
-
         descriptor.sampleCount = 1;
 
-        descriptor.numBlendStates = 1;
+        descriptor.numColorStates = 1;
 
         dawnBlendDescriptor blendDescriptor;
         blendDescriptor.operation = DAWN_BLEND_OPERATION_ADD;
         blendDescriptor.srcFactor = DAWN_BLEND_FACTOR_ONE;
         blendDescriptor.dstFactor = DAWN_BLEND_FACTOR_ONE;
-        dawnBlendStateDescriptor blendStateDescriptor;
-        blendStateDescriptor.nextInChain = nullptr;
-        blendStateDescriptor.alphaBlend = blendDescriptor;
-        blendStateDescriptor.colorBlend = blendDescriptor;
-        blendStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
-        descriptor.blendStates = &blendStateDescriptor;
+        dawnColorStateDescriptor colorStateDescriptor;
+        colorStateDescriptor.nextInChain = nullptr;
+        colorStateDescriptor.format = swapChainFormat;
+        colorStateDescriptor.alphaBlend = blendDescriptor;
+        colorStateDescriptor.colorBlend = blendDescriptor;
+        colorStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
+        descriptor.colorStates = &colorStateDescriptor;
 
         dawnPipelineLayoutDescriptor pl;
         pl.nextInChain = nullptr;
@@ -111,21 +100,7 @@ void init() {
         descriptor.indexFormat = DAWN_INDEX_FORMAT_UINT32;
         descriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-        dawnStencilStateFaceDescriptor stencilFace;
-        stencilFace.compare = DAWN_COMPARE_FUNCTION_ALWAYS;
-        stencilFace.failOp = DAWN_STENCIL_OPERATION_KEEP;
-        stencilFace.depthFailOp = DAWN_STENCIL_OPERATION_KEEP;
-        stencilFace.passOp = DAWN_STENCIL_OPERATION_KEEP;
-
-        dawnDepthStencilStateDescriptor depthStencilState;
-        depthStencilState.nextInChain = nullptr;
-        depthStencilState.depthWriteEnabled = false;
-        depthStencilState.depthCompare = DAWN_COMPARE_FUNCTION_ALWAYS;
-        depthStencilState.stencilBack = stencilFace;
-        depthStencilState.stencilFront = stencilFace;
-        depthStencilState.stencilReadMask = 0xff;
-        depthStencilState.stencilWriteMask = 0xff;
-        descriptor.depthStencilState = &depthStencilState;
+        descriptor.depthStencilState = nullptr;
 
         pipeline = dawnDeviceCreateRenderPipeline(device, &descriptor);
 

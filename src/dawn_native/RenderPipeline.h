@@ -30,7 +30,7 @@ namespace dawn_native {
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState);
-    bool BlendEnabled(const BlendStateDescriptor* mBlendState);
+    bool BlendEnabled(const ColorStateDescriptor* mBlendState);
 
     class RenderPipelineBase : public PipelineBase {
       public:
@@ -38,7 +38,7 @@ namespace dawn_native {
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
-        const BlendStateDescriptor* GetBlendStateDescriptor(uint32_t attachmentSlot);
+        const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot);
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor();
         dawn::IndexFormat GetIndexFormat() const;
         InputStateBase* GetInputState();
@@ -60,12 +60,10 @@ namespace dawn_native {
         dawn::IndexFormat mIndexFormat;
         Ref<InputStateBase> mInputState;
         dawn::PrimitiveTopology mPrimitiveTopology;
-        std::array<BlendStateDescriptor, kMaxColorAttachments> mBlendStates;
+        std::array<ColorStateDescriptor, kMaxColorAttachments> mColorStates;
 
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
-        std::array<dawn::TextureFormat, kMaxColorAttachments> mColorAttachmentFormats;
         bool mHasDepthStencilAttachment = false;
-        dawn::TextureFormat mDepthStencilFormat;
     };
 
 }  // namespace dawn_native
