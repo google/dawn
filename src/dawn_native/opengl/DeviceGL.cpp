@@ -44,6 +44,9 @@ namespace dawn_native { namespace opengl {
         // on a serial that doesn't have a corresponding fence enqueued. Force all
         // operations to look as if they were completed (because they were).
         mCompletedSerial = mLastSubmittedSerial + 1;
+
+        mDynamicUploader = nullptr;
+
         Tick();
     }
 

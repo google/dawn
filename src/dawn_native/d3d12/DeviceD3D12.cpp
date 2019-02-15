@@ -63,7 +63,6 @@ namespace dawn_native { namespace d3d12 {
         mDescriptorHeapAllocator = std::make_unique<DescriptorHeapAllocator>(this);
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mResourceAllocator = std::make_unique<ResourceAllocator>(this);
-        mDynamicUploader = std::make_unique<DynamicUploader>(this);
 
         NextSerial();
     }
@@ -72,6 +71,14 @@ namespace dawn_native { namespace d3d12 {
         NextSerial();
         WaitForSerial(mLastSubmittedSerial);  // Wait for all in-flight commands to finish executing
         TickImpl();                    // Call tick one last time so resources are cleaned up
+
+        // Free services explicitly so that they can free D3D12 resources before destruction of the
+        // device.
+        mDynamicUploader = nullptr;
+
+        // Releasing the uploader enqueues buffers to be released.
+        // Call Tick() again to clear them before releasing the allocator.
+        mResourceAllocator->Tick(mCompletedSerial);
 
         ASSERT(mUsedComObjectRefs.Empty());
         ASSERT(mPendingCommands.commandList == nullptr);
@@ -143,12 +150,16 @@ namespace dawn_native { namespace d3d12 {
     void Device::TickImpl() {
         // Perform cleanup operations to free unused objects
         mCompletedSerial = mFence->GetCompletedValue();
+
+        // Uploader should tick before the resource allocator
+        // as it enqueues resources to be released.
+        mDynamicUploader->Tick(mCompletedSerial);
+
         mResourceAllocator->Tick(mCompletedSerial);
         mCommandAllocatorManager->Tick(mCompletedSerial);
         mDescriptorHeapAllocator->Tick(mCompletedSerial);
         mMapRequestTracker->Tick(mCompletedSerial);
         mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
-        mDynamicUploader->Tick(mCompletedSerial);
         ExecuteCommandLists({});
         NextSerial();
     }
@@ -263,14 +274,6 @@ namespace dawn_native { namespace d3d12 {
             ToBackend(source)->GetResource(), sourceOffset, size);
 
         return {};
-    }
-
-    ResultOrError<DynamicUploader*> Device::GetDynamicUploader() const {
-        // TODO(b-brber): Refactor this into device init once moved into DeviceBase.
-        if (mDynamicUploader->IsEmpty()) {
-            DAWN_TRY(mDynamicUploader->CreateAndAppendBuffer(kDefaultUploadBufferSize));
-        }
-        return mDynamicUploader.get();
     }
 
 }}  // namespace dawn_native::d3d12

@@ -180,10 +180,6 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
 
 // Stress test for many calls to SetSubData
 TEST_P(BufferSetSubDataTests, ManySetSubData) {
-    // TODO(cwallez@chromium.org): Use ringbuffers for SetSubData on explicit APIs.
-    // otherwise this creates too many resources and can take freeze the driver(?)
-    DAWN_SKIP_TEST_IF(IsMetal());
-
     // Note: Increasing the size of the buffer will likely cause timeout issues.
     // In D3D12, timeout detection occurs when the GPU scheduler tries but cannot preempt the task
     // executing these commands in-flight. If this takes longer than ~2s, a device reset occurs and

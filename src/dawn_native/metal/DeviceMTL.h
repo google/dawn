@@ -30,7 +30,6 @@
 namespace dawn_native { namespace metal {
 
     class MapRequestTracker;
-    class ResourceUploader;
 
     class Device : public DeviceBase {
       public:
@@ -53,7 +52,6 @@ namespace dawn_native { namespace metal {
         void SubmitPendingCommandBuffer();
 
         MapRequestTracker* GetMapTracker() const;
-        ResourceUploader* GetResourceUploader() const;
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
         MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
@@ -90,7 +88,6 @@ namespace dawn_native { namespace metal {
         id<MTLDevice> mMtlDevice = nil;
         id<MTLCommandQueue> mCommandQueue = nil;
         std::unique_ptr<MapRequestTracker> mMapTracker;
-        std::unique_ptr<ResourceUploader> mResourceUploader;
 
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;

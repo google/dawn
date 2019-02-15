@@ -41,13 +41,9 @@ namespace dawn_native { namespace vulkan {
         void TransitionUsageNow(VkCommandBuffer commands, dawn::BufferUsageBit usage);
 
       private:
-        MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
-
-        // TODO(b-brber): Remove once alignment constraint is added to validation (dawn:73).
-        static constexpr size_t kDefaultAlignment = 4;  // TODO(b-brber): Figure out this value.
 
         VkBuffer mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;

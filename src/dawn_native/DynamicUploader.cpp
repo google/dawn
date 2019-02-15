@@ -46,7 +46,7 @@ namespace dawn_native {
                 newMaxSize *= 2;
             }
 
-            // TODO(b-brber): Fall-back to no sub-allocations should this fail.
+            // TODO(bryan.bernhart@intel.com): Fall-back to no sub-allocations should this fail.
             DAWN_TRY(CreateAndAppendBuffer(newMaxSize));
             largestRingBuffer = GetLargestBuffer();
             uploadHandle = largestRingBuffer->SubAllocate(alignedSize);

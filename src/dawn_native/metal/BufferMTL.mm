@@ -15,7 +15,6 @@
 #include "dawn_native/metal/BufferMTL.h"
 
 #include "dawn_native/metal/DeviceMTL.h"
-#include "dawn_native/metal/ResourceUploader.h"
 
 namespace dawn_native { namespace metal {
 
@@ -47,12 +46,6 @@ namespace dawn_native { namespace metal {
         } else {
             CallMapReadCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
         }
-    }
-
-    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
-        auto* uploader = ToBackend(GetDevice())->GetResourceUploader();
-        uploader->BufferSubData(mMtlBuffer, start, count, data);
-        return {};
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial) {

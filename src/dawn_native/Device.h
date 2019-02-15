@@ -124,6 +124,11 @@ namespace dawn_native {
                                                    uint32_t destinationOffset,
                                                    uint32_t size) = 0;
 
+        ResultOrError<DynamicUploader*> GetDynamicUploader() const;
+
+      protected:
+        std::unique_ptr<DynamicUploader> mDynamicUploader;
+
       private:
         virtual ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) = 0;

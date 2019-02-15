@@ -58,10 +58,10 @@ namespace dawn_native { namespace null {
     // Device
 
     Device::Device(Adapter* adapter) : DeviceBase(adapter) {
-        mDynamicUploader = std::make_unique<DynamicUploader>(this);
     }
 
     Device::~Device() {
+        mDynamicUploader = nullptr;
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(

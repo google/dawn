@@ -77,8 +77,6 @@ namespace dawn_native { namespace d3d12 {
                                            uint32_t destinationOffset,
                                            uint32_t size) override;
 
-        ResultOrError<DynamicUploader*> GetDynamicUploader() const;
-
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
@@ -121,11 +119,8 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<DescriptorHeapAllocator> mDescriptorHeapAllocator;
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceAllocator> mResourceAllocator;
-        std::unique_ptr<DynamicUploader> mDynamicUploader;
 
         dawn_native::PCIInfo mPCIInfo;
-
-        static constexpr size_t kDefaultUploadBufferSize = 64000;  // DXGI min heap size is 64kB.
     };
 
 }}  // namespace dawn_native::d3d12

@@ -72,7 +72,7 @@ namespace dawn_native {
                                   uint32_t dataLength);
 
       private:
-        virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) = 0;
+        virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data);
         virtual void MapReadAsyncImpl(uint32_t serial) = 0;
         virtual void MapWriteAsyncImpl(uint32_t serial) = 0;
         virtual void UnmapImpl() = 0;

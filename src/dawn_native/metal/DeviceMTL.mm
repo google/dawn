@@ -26,9 +26,9 @@
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 #include "dawn_native/metal/QueueMTL.h"
 #include "dawn_native/metal/RenderPipelineMTL.h"
-#include "dawn_native/metal/ResourceUploader.h"
 #include "dawn_native/metal/SamplerMTL.h"
 #include "dawn_native/metal/ShaderModuleMTL.h"
+#include "dawn_native/metal/StagingBufferMTL.h"
 #include "dawn_native/metal/SwapChainMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
 
@@ -37,8 +37,7 @@ namespace dawn_native { namespace metal {
     Device::Device(AdapterBase* adapter, id<MTLDevice> mtlDevice)
         : DeviceBase(adapter),
           mMtlDevice([mtlDevice retain]),
-          mMapTracker(new MapRequestTracker(this)),
-          mResourceUploader(new ResourceUploader(this)) {
+          mMapTracker(new MapRequestTracker(this)) {
         [mMtlDevice retain];
         mCommandQueue = [mMtlDevice newCommandQueue];
     }
@@ -58,7 +57,7 @@ namespace dawn_native { namespace metal {
         mPendingCommands = nil;
 
         mMapTracker = nullptr;
-        mResourceUploader = nullptr;
+        mDynamicUploader = nullptr;
 
         [mCommandQueue release];
         mCommandQueue = nil;
@@ -136,7 +135,7 @@ namespace dawn_native { namespace metal {
     }
 
     void Device::TickImpl() {
-        mResourceUploader->Tick(mCompletedSerial);
+        mDynamicUploader->Tick(mCompletedSerial);
         mMapTracker->Tick(mCompletedSerial);
 
         if (mPendingCommands != nil) {
@@ -185,12 +184,10 @@ namespace dawn_native { namespace metal {
         return mMapTracker.get();
     }
 
-    ResourceUploader* Device::GetResourceUploader() const {
-        return mResourceUploader.get();
-    }
-
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
-        return DAWN_UNIMPLEMENTED_ERROR("Device unable to create staging buffer.");
+        std::unique_ptr<StagingBufferBase> stagingBuffer =
+            std::make_unique<StagingBuffer>(size, this);
+        return std::move(stagingBuffer);
     }
 
     MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
@@ -198,7 +195,18 @@ namespace dawn_native { namespace metal {
                                                BufferBase* destination,
                                                uint32_t destinationOffset,
                                                uint32_t size) {
-        return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer.");
+        id<MTLBuffer> uploadBuffer = ToBackend(source)->GetBufferHandle();
+        id<MTLBuffer> buffer = ToBackend(destination)->GetMTLBuffer();
+        id<MTLCommandBuffer> commandBuffer = GetPendingCommandBuffer();
+        id<MTLBlitCommandEncoder> encoder = [commandBuffer blitCommandEncoder];
+        [encoder copyFromBuffer:uploadBuffer
+                   sourceOffset:sourceOffset
+                       toBuffer:buffer
+              destinationOffset:destinationOffset
+                           size:size];
+        [encoder endEncoding];
+
+        return {};
     }
 
 }}  // namespace dawn_native::metal

@@ -39,14 +39,9 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         // Dawn API
-        MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
-
-        // TODO(b-brber): Remove once alignment constraint is added to validation (dawn:73).
-        static constexpr size_t kDefaultAlignment =
-            4;  // D3D does not specify so we assume 4-byte alignment to be safe.
 
         ComPtr<ID3D12Resource> mResource;
         bool mFixedResourceState = false;

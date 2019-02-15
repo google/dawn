@@ -27,7 +27,7 @@
 // only two indices that keep increasing (unbounded) but can be still indexed using bit masks.
 // However, this 1) requires the size to always be a power-of-two and 2) remove tests that check
 // used bytes.
-// TODO(b-brber): Follow-up with ringbuffer optimization.
+// TODO(bryan.bernhart@intel.com): Follow-up with ringbuffer optimization.
 namespace dawn_native {
 
     static constexpr size_t INVALID_OFFSET = std::numeric_limits<size_t>::max();

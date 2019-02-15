@@ -39,7 +39,7 @@ namespace dawn_native { namespace d3d12 {
         mUploadHeap = mDevice->GetResourceAllocator()->Allocate(
             D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor, D3D12_RESOURCE_STATE_GENERIC_READ);
 
-        // TODO(b-brber): Record the GPU pointer for generic non-upload usage.
+        // TODO(bryan.bernhart@intel.com): Record the GPU pointer for generic non-upload usage.
 
         if (FAILED(mUploadHeap->Map(0, nullptr, &mMappedPointer))) {
             return DAWN_CONTEXT_LOST_ERROR("Unable to map staging buffer.");

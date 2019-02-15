@@ -21,6 +21,7 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/ComputePipeline.h"
+#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
@@ -54,9 +55,12 @@ namespace dawn_native {
     DeviceBase::DeviceBase(AdapterBase* adapter) : mAdapter(adapter) {
         mCaches = std::make_unique<DeviceBase::Caches>();
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
+        mDynamicUploader = std::make_unique<DynamicUploader>(this);
     }
 
     DeviceBase::~DeviceBase() {
+        // Devices must explicitly free the uploader
+        ASSERT(mDynamicUploader == nullptr);
     }
 
     void DeviceBase::HandleError(const char* message) {
@@ -375,6 +379,13 @@ namespace dawn_native {
         ASSERT(error != nullptr);
         HandleError(error->GetMessage().c_str());
         delete error;
+    }
+
+    ResultOrError<DynamicUploader*> DeviceBase::GetDynamicUploader() const {
+        if (mDynamicUploader->IsEmpty()) {
+            DAWN_TRY(mDynamicUploader->CreateAndAppendBuffer());
+        }
+        return mDynamicUploader.get();
     }
 
 }  // namespace dawn_native

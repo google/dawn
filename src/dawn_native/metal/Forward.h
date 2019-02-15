@@ -40,6 +40,7 @@ namespace dawn_native { namespace metal {
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
+    class StagingBuffer;
     class SwapChain;
     class Texture;
     class TextureView;
@@ -59,6 +60,7 @@ namespace dawn_native { namespace metal {
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
+        using StagingBufferType = StagingBuffer;
         using SwapChainType = SwapChain;
         using TextureType = Texture;
         using TextureViewType = TextureView;

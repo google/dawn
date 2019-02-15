@@ -32,11 +32,14 @@ namespace dawn_native {
 
         RingBuffer* GetLargestBuffer();
 
-        MaybeError CreateAndAppendBuffer(size_t size);
+        MaybeError CreateAndAppendBuffer(size_t size = kBaseUploadBufferSize);
 
         bool IsEmpty() const;
 
       private:
+        // TODO(bryan.bernhart@intel.com): Figure out this value.
+        static constexpr size_t kBaseUploadBufferSize = 64000;
+
         std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
         DeviceBase* mDevice;
     };

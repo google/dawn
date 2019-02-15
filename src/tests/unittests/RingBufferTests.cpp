@@ -33,7 +33,7 @@ namespace {
 class RingBufferTests : public testing::Test {
   protected:
     void SetUp() override {
-        // TODO(b-brber): Create this device through the adapter.
+        // TODO(bryan.bernhart@intel.com): Create this device through the adapter.
         mDevice = std::make_unique<null::Device>(/*adapter*/ nullptr);
     }
 
@@ -165,7 +165,7 @@ TEST_F(RingBufferTests, RingBufferSubAlloc) {
 
     // In this example, Tick(8) could not reclaim the wasted bytes. The wasted bytes
     // were add to F9's sub-allocation.
-    // TODO(b-brber): Decide if Tick(8) should free these wasted bytes.
+    // TODO(bryan.bernhart@intel.com): Decide if Tick(8) should free these wasted bytes.
 
     ASSERT_EQ(offset, 0u);
     ASSERT_EQ(buffer->GetUsedSize(), frameSizeInBytes * maxNumOfFrames);
