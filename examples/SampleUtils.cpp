@@ -150,9 +150,9 @@ dawn::TextureFormat GetPreferredSwapChainTextureFormat() {
 }
 
 dawn::SwapChain GetSwapChain(const dawn::Device &device) {
-    return device.CreateSwapChainBuilder()
-        .SetImplementation(GetSwapChainImplementation())
-        .GetResult();
+    dawn::SwapChainDescriptor swapChainDesc;
+    swapChainDesc.implementation = GetSwapChainImplementation();
+    return device.CreateSwapChain(&swapChainDesc);
 }
 
 dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device) {

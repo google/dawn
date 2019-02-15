@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/SwapChainGL.h"
 
-#include "dawn_native/Device.h"
+#include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/Forward.h"
 #include "dawn_native/opengl/TextureGL.h"
 
@@ -22,7 +22,8 @@
 
 namespace dawn_native { namespace opengl {
 
-    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
+    SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
+        : SwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();
         im.Init(im.userData, nullptr);
     }

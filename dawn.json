@@ -475,8 +475,11 @@
                 ]
             },
             {
-                "name": "create swap chain builder",
-                "returns": "swap chain builder"
+                "name": "create swap chain",
+                "returns": "swap chain",
+                "args": [
+                    {"name": "descriptor", "type": "swap chain descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "create texture",
@@ -957,19 +960,11 @@
             }
         ]
     },
-    "swap chain builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "swap chain"
-            },
-            {
-                "name": "set implementation",
-                "args": [
-                    {"name": "implementation", "type": "uint64_t"}
-                ]
-            }
+    "swap chain descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "implementation", "type": "uint64_t"}
         ]
     },
     "texture": {

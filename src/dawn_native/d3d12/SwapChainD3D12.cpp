@@ -21,7 +21,8 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
+    SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
+        : SwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();
         dawnWSIContextD3D12 wsiContext = {};
         wsiContext.device = reinterpret_cast<dawnDevice>(GetDevice());

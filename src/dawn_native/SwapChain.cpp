@@ -16,28 +16,79 @@
 
 #include "dawn_native/Device.h"
 #include "dawn_native/Texture.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 namespace dawn_native {
 
+    namespace {
+
+        class ErrorSwapChain : public SwapChainBase {
+          public:
+            ErrorSwapChain(DeviceBase* device) : SwapChainBase(device, ObjectBase::kError) {
+            }
+
+          private:
+            TextureBase* GetNextTextureImpl(const TextureDescriptor*) override {
+                UNREACHABLE();
+            }
+
+            void OnBeforePresent(TextureBase* texture) override {
+                UNREACHABLE();
+            }
+        };
+
+    }  // anonymous namespace
+
+    MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
+                                           const SwapChainDescriptor* descriptor) {
+        if (descriptor->implementation == 0) {
+            return DAWN_VALIDATION_ERROR("Null implementation for the swapchain");
+        }
+
+        dawnSwapChainImplementation* impl =
+            reinterpret_cast<dawnSwapChainImplementation*>(descriptor->implementation);
+
+        if (!impl->Init || !impl->Destroy || !impl->Configure || !impl->GetNextTexture ||
+            !impl->Present) {
+            return DAWN_VALIDATION_ERROR("Implementation is incomplete");
+        }
+
+        return {};
+    }
+
     // SwapChain
 
-    SwapChainBase::SwapChainBase(SwapChainBuilder* builder)
-        : ObjectBase(builder->GetDevice()), mImplementation(builder->mImplementation) {
+    SwapChainBase::SwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor)
+        : ObjectBase(device),
+          mImplementation(
+              *reinterpret_cast<dawnSwapChainImplementation*>(descriptor->implementation)) {
+    }
+
+    SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ObjectBase(device, tag) {
     }
 
     SwapChainBase::~SwapChainBase() {
-        const auto& im = GetImplementation();
-        im.Destroy(im.userData);
+        if (!IsError()) {
+            const auto& im = GetImplementation();
+            im.Destroy(im.userData);
+        }
+    }
+
+    // static
+    SwapChainBase* SwapChainBase::MakeError(DeviceBase* device) {
+        return new ErrorSwapChain(device);
     }
 
     void SwapChainBase::Configure(dawn::TextureFormat format,
                                   dawn::TextureUsageBit allowedUsage,
                                   uint32_t width,
                                   uint32_t height) {
-        if (width == 0 || height == 0) {
-            GetDevice()->HandleError("Swap chain cannot be configured to zero size");
+        if (GetDevice()->ConsumedError(ValidateConfigure(format, allowedUsage, width, height))) {
             return;
         }
+        ASSERT(!IsError());
+
         allowedUsage |= dawn::TextureUsageBit::Present;
 
         mFormat = format;
@@ -49,11 +100,10 @@ namespace dawn_native {
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {
-        if (mWidth == 0) {
-            // If width is 0, it implies swap chain has never been configured
-            GetDevice()->HandleError("Swap chain needs to be configured before GetNextTexture");
-            return nullptr;
+        if (GetDevice()->ConsumedError(ValidateGetNextTexture())) {
+            return TextureBase::MakeError(GetDevice());
         }
+        ASSERT(!IsError());
 
         TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
@@ -72,11 +122,10 @@ namespace dawn_native {
     }
 
     void SwapChainBase::Present(TextureBase* texture) {
-        // This also checks that the texture is valid since mLastNextTexture is always valid.
-        if (texture != mLastNextTexture) {
-            GetDevice()->HandleError("Tried to present something other than the last NextTexture");
+        if (GetDevice()->ConsumedError(ValidatePresent(texture))) {
             return;
         }
+        ASSERT(!IsError());
 
         OnBeforePresent(texture);
 
@@ -84,37 +133,48 @@ namespace dawn_native {
     }
 
     const dawnSwapChainImplementation& SwapChainBase::GetImplementation() {
+        ASSERT(!IsError());
         return mImplementation;
     }
 
-    // SwapChain Builder
+    MaybeError SwapChainBase::ValidateConfigure(dawn::TextureFormat format,
+                                                dawn::TextureUsageBit allowedUsage,
+                                                uint32_t width,
+                                                uint32_t height) const {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
 
-    SwapChainBuilder::SwapChainBuilder(DeviceBase* device) : Builder(device) {
-    }
+        DAWN_TRY(ValidateTextureUsageBit(allowedUsage));
+        DAWN_TRY(ValidateTextureFormat(format));
 
-    SwapChainBase* SwapChainBuilder::GetResultImpl() {
-        if (!mImplementation.Init) {
-            HandleError("Implementation not set");
-            return nullptr;
-        }
-        return GetDevice()->CreateSwapChain(this);
-    }
-
-    void SwapChainBuilder::SetImplementation(uint64_t implementation) {
-        if (!implementation) {
-            HandleError("Implementation pointer is invalid");
-            return;
+        if (width == 0 || height == 0) {
+            return DAWN_VALIDATION_ERROR("Swap chain cannot be configured to zero size");
         }
 
-        dawnSwapChainImplementation& impl =
-            *reinterpret_cast<dawnSwapChainImplementation*>(implementation);
+        return {};
+    }
 
-        if (!impl.Init || !impl.Destroy || !impl.Configure || !impl.GetNextTexture ||
-            !impl.Present) {
-            HandleError("Implementation is incomplete");
-            return;
+    MaybeError SwapChainBase::ValidateGetNextTexture() const {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+
+        if (mWidth == 0) {
+            // If width is 0, it implies swap chain has never been configured
+            return DAWN_VALIDATION_ERROR("Swap chain needs to be configured before GetNextTexture");
         }
 
-        mImplementation = impl;
+        return {};
     }
+
+    MaybeError SwapChainBase::ValidatePresent(TextureBase* texture) const {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+        DAWN_TRY(GetDevice()->ValidateObject(texture));
+
+        // This also checks that the texture is valid since mLastNextTexture is always valid.
+        if (texture != mLastNextTexture) {
+            return DAWN_VALIDATION_ERROR(
+                "Tried to present something other than the last NextTexture");
+        }
+
+        return {};
+    }
+
 }  // namespace dawn_native

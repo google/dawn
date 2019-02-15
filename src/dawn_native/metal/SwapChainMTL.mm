@@ -21,7 +21,8 @@
 
 namespace dawn_native { namespace metal {
 
-    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
+    SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
+        : SwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();
         dawnWSIContextMetal wsiContext = {};
         wsiContext.device = ToBackend(GetDevice())->GetMTLDevice();

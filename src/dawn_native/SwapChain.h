@@ -16,6 +16,7 @@
 #define DAWNNATIVE_SWAPCHAIN_H_
 
 #include "dawn_native/Builder.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
 
@@ -24,10 +25,15 @@
 
 namespace dawn_native {
 
+    MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
+                                           const SwapChainDescriptor* descriptor);
+
     class SwapChainBase : public ObjectBase {
       public:
-        SwapChainBase(SwapChainBuilder* builder);
+        SwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor);
         ~SwapChainBase();
+
+        static SwapChainBase* MakeError(DeviceBase* device);
 
         // Dawn API
         void Configure(dawn::TextureFormat format,
@@ -38,31 +44,26 @@ namespace dawn_native {
         void Present(TextureBase* texture);
 
       protected:
+        SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         const dawnSwapChainImplementation& GetImplementation();
         virtual TextureBase* GetNextTextureImpl(const TextureDescriptor*) = 0;
         virtual void OnBeforePresent(TextureBase* texture) = 0;
 
       private:
+        MaybeError ValidateConfigure(dawn::TextureFormat format,
+                                     dawn::TextureUsageBit allowedUsage,
+                                     uint32_t width,
+                                     uint32_t height) const;
+        MaybeError ValidateGetNextTexture() const;
+        MaybeError ValidatePresent(TextureBase* texture) const;
+
         dawnSwapChainImplementation mImplementation = {};
         dawn::TextureFormat mFormat = {};
         dawn::TextureUsageBit mAllowedUsage;
         uint32_t mWidth = 0;
         uint32_t mHeight = 0;
         TextureBase* mLastNextTexture = nullptr;
-    };
-
-    class SwapChainBuilder : public Builder<SwapChainBase> {
-      public:
-        SwapChainBuilder(DeviceBase* device);
-
-        // Dawn API
-        SwapChainBase* GetResultImpl() override;
-        void SetImplementation(uint64_t implementation);
-
-      private:
-        friend class SwapChainBase;
-
-        dawnSwapChainImplementation mImplementation = {};
     };
 
 }  // namespace dawn_native

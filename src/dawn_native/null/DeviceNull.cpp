@@ -112,8 +112,9 @@ namespace dawn_native { namespace null {
 
         return module;
     }
-    SwapChainBase* Device::CreateSwapChain(SwapChainBuilder* builder) {
-        return new SwapChain(builder);
+    ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
+        const SwapChainDescriptor* descriptor) {
+        return new SwapChain(this, descriptor);
     }
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return new Texture(this, descriptor);
@@ -253,7 +254,8 @@ namespace dawn_native { namespace null {
 
     // SwapChain
 
-    SwapChain::SwapChain(SwapChainBuilder* builder) : SwapChainBase(builder) {
+    SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
+        : SwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();
         im.Init(im.userData, nullptr);
     }

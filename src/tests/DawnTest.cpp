@@ -235,9 +235,9 @@ void DawnTest::SetUp() {
 
     // The swapchain isn't used by tests but is useful when debugging with graphics debuggers that
     // capture at frame boundaries.
-    swapchain = device.CreateSwapChainBuilder()
-                    .SetImplementation(mBinding->GetSwapChainImplementation())
-                    .GetResult();
+    dawn::SwapChainDescriptor swapChainDesc;
+    swapChainDesc.implementation = mBinding->GetSwapChainImplementation();
+    swapchain = device.CreateSwapChain(&swapChainDesc);
     swapchain.Configure(
         static_cast<dawn::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
         dawn::TextureUsageBit::OutputAttachment, 400, 400);

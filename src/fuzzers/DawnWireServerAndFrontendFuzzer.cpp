@@ -35,14 +35,26 @@ class DevNull : public dawn_wire::CommandSerializer {
     std::vector<char> buf;
 };
 
-void SkipSwapChainBuilderSetImplementation(dawnSwapChainBuilder builder, uint64_t) {
+static dawnProcDeviceCreateSwapChain originalDeviceCreateSwapChain = nullptr;
+
+dawnSwapChain ErrorDeviceCreateSwapChain(dawnDevice device, const dawnSwapChainDescriptor*) {
+    dawnSwapChainDescriptor desc;
+    desc.nextInChain = nullptr;
+    // A 0 implementation will trigger a swapchain creation error.
+    desc.implementation = 0;
+    return originalDeviceCreateSwapChain(device, &desc);
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     dawnProcTable procs = dawn_native::GetProcs();
-    // SwapChainSetImplementation receives a pointer, skip calls to it as they would be intercepted
-    // in embedders or dawn_wire too.
-    procs.swapChainBuilderSetImplementation = SkipSwapChainBuilderSetImplementation;
+
+    // Swapchains receive a pointer to an implementation. The fuzzer will pass garbage in so we
+    // intercept calls to create swapchains and make sure they always return error swapchains.
+    // This is ok for fuzzing because embedders of dawn_wire would always define their own
+    // swapchain handling.
+    originalDeviceCreateSwapChain = procs.deviceCreateSwapChain;
+    procs.deviceCreateSwapChain = ErrorDeviceCreateSwapChain;
+
     dawnSetProcs(&procs);
 
     // Create an instance and find the null adapter to create a device with.

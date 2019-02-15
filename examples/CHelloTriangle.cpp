@@ -29,11 +29,10 @@ void init() {
     queue = dawnDeviceCreateQueue(device);
 
     {
-        dawnSwapChainBuilder builder = dawnDeviceCreateSwapChainBuilder(device);
-        uint64_t swapchainImpl = GetSwapChainImplementation();
-        dawnSwapChainBuilderSetImplementation(builder, swapchainImpl);
-        swapchain = dawnSwapChainBuilderGetResult(builder);
-        dawnSwapChainBuilderRelease(builder);
+        dawnSwapChainDescriptor descriptor;
+        descriptor.nextInChain = nullptr;
+        descriptor.implementation = GetSwapChainImplementation();
+        swapchain = dawnDeviceCreateSwapChain(device, &descriptor);
     }
     swapChainFormat = static_cast<dawnTextureFormat>(GetPreferredSwapChainTextureFormat());
     dawnSwapChainConfigure(swapchain, swapChainFormat, DAWN_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT, 640,
