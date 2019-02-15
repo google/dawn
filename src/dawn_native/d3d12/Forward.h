@@ -29,7 +29,7 @@ namespace dawn_native { namespace d3d12 {
     class InputState;
     class PipelineLayout;
     class Queue;
-    class RenderPassDescriptor;
+    using RenderPassDescriptor = RenderPassDescriptorBase;
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
