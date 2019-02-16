@@ -51,8 +51,7 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
     device.CreateRenderPipeline(&descriptor);
 }
 
-TEST_F(RenderPipelineValidationTest, BlendState) {
-
+TEST_F(RenderPipelineValidationTest, ColorState) {
     {
         // This one succeeds because attachment 0 is the color attachment
         utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -72,4 +71,3 @@ TEST_F(RenderPipelineValidationTest, BlendState) {
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
 }
-

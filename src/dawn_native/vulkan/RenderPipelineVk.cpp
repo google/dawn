@@ -111,7 +111,7 @@ namespace dawn_native { namespace vulkan {
             return static_cast<VkColorComponentFlagBits>(mask);
         }
 
-        VkPipelineColorBlendAttachmentState ComputeBlendDesc(
+        VkPipelineColorBlendAttachmentState ComputeColorDesc(
             const ColorStateDescriptor* descriptor) {
             VkPipelineColorBlendAttachmentState attachment;
             attachment.blendEnable = BlendEnabled(descriptor) ? VK_TRUE : VK_FALSE;
@@ -199,10 +199,6 @@ namespace dawn_native { namespace vulkan {
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
         : RenderPipelineBase(device, descriptor) {
-        // Eventually a bunch of the structures that need to be chained in the create info will be
-        // held by objects such as the BlendState. They aren't implemented yet so we initialize
-        // everything here.
-
         VkPipelineShaderStageCreateInfo shaderStages[2];
         {
             shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -283,11 +279,11 @@ namespace dawn_native { namespace vulkan {
             ComputeDepthStencilDesc(GetDepthStencilStateDescriptor());
 
         // Initialize the "blend state info" that will be chained in the "create info" from the data
-        // pre-computed in the BlendState
+        // pre-computed in the ColorState
         std::array<VkPipelineColorBlendAttachmentState, kMaxColorAttachments> colorBlendAttachments;
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
             const ColorStateDescriptor* descriptor = GetColorStateDescriptor(i);
-            colorBlendAttachments[i] = ComputeBlendDesc(descriptor);
+            colorBlendAttachments[i] = ComputeColorDesc(descriptor);
         }
         VkPipelineColorBlendStateCreateInfo colorBlend;
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
