@@ -180,6 +180,10 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
 
 // Stress test for many calls to SetSubData
 TEST_P(BufferSetSubDataTests, ManySetSubData) {
+    // Test failing on Mac Metal Intel, maybe because Metal runs out of space to encode commands.
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=108
+    DAWN_SKIP_TEST_IF(IsMacOS() && IsMetal() && IsIntel());
+
     // Note: Increasing the size of the buffer will likely cause timeout issues.
     // In D3D12, timeout detection occurs when the GPU scheduler tries but cannot preempt the task
     // executing these commands in-flight. If this takes longer than ~2s, a device reset occurs and
