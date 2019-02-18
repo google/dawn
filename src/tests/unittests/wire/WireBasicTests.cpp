@@ -26,59 +26,59 @@ class WireBasicTests : public WireTest {
 
 // One call gets forwarded correctly.
 TEST_F(WireBasicTests, CallForwarded) {
-    dawnDeviceCreateCommandBufferBuilder(device);
+    dawnDeviceCreateCommandEncoder(device);
 
-    dawnCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
-        .WillOnce(Return(apiCmdBufBuilder));
+    dawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
+        .WillOnce(Return(apiCmdBufEncoder));
 
-    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
     FlushClient();
 }
 
 // Test that calling methods on a new object works as expected.
 TEST_F(WireBasicTests, CreateThenCall) {
-    dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
-    dawnCommandBufferBuilderGetResult(builder);
+    dawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
+    dawnCommandEncoderFinish(encoder);
 
-    dawnCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
-        .WillOnce(Return(apiCmdBufBuilder));
+    dawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
+        .WillOnce(Return(apiCmdBufEncoder));
 
     dawnCommandBuffer apiCmdBuf = api.GetNewCommandBuffer();
-    EXPECT_CALL(api, CommandBufferBuilderGetResult(apiCmdBufBuilder)).WillOnce(Return(apiCmdBuf));
+    EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder)).WillOnce(Return(apiCmdBuf));
 
-    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
     EXPECT_CALL(api, CommandBufferRelease(apiCmdBuf));
     FlushClient();
 }
 
 // Test that client reference/release do not call the backend API.
 TEST_F(WireBasicTests, RefCountKeptInClient) {
-    dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
+    dawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
 
-    dawnCommandBufferBuilderReference(builder);
-    dawnCommandBufferBuilderRelease(builder);
+    dawnCommandEncoderReference(encoder);
+    dawnCommandEncoderRelease(encoder);
 
-    dawnCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
-        .WillOnce(Return(apiCmdBufBuilder));
-    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+    dawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
+        .WillOnce(Return(apiCmdBufEncoder));
+    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
 
     FlushClient();
 }
 
 // Test that client reference/release do not call the backend API.
 TEST_F(WireBasicTests, ReleaseCalledOnRefCount0) {
-    dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
+    dawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
 
-    dawnCommandBufferBuilderRelease(builder);
+    dawnCommandEncoderRelease(encoder);
 
-    dawnCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
-        .WillOnce(Return(apiCmdBufBuilder));
+    dawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
+        .WillOnce(Return(apiCmdBufEncoder));
 
-    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
 
     FlushClient();
 }

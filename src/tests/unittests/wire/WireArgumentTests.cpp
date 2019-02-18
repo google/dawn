@@ -28,19 +28,19 @@ class WireArgumentTests : public WireTest {
 
 // Test that the wire is able to send numerical values
 TEST_F(WireArgumentTests, ValueArgument) {
-    dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
-    dawnComputePassEncoder pass = dawnCommandBufferBuilderBeginComputePass(builder);
+    dawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
+    dawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
     dawnComputePassEncoderDispatch(pass, 1, 2, 3);
 
-    dawnCommandBufferBuilder apiBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice)).WillOnce(Return(apiBuilder));
+    dawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
 
     dawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
-    EXPECT_CALL(api, CommandBufferBuilderBeginComputePass(apiBuilder)).WillOnce(Return(apiPass));
+    EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder)).WillOnce(Return(apiPass));
 
     EXPECT_CALL(api, ComputePassEncoderDispatch(apiPass, 1, 2, 3)).Times(1);
 
-    EXPECT_CALL(api, CommandBufferBuilderRelease(apiBuilder));
+    EXPECT_CALL(api, CommandEncoderRelease(apiEncoder));
     EXPECT_CALL(api, ComputePassEncoderRelease(apiPass));
     FlushClient();
 }
@@ -58,21 +58,21 @@ bool CheckPushConstantValues(const uint32_t* values) {
 }
 
 TEST_F(WireArgumentTests, ValueArrayArgument) {
-    dawnCommandBufferBuilder builder = dawnDeviceCreateCommandBufferBuilder(device);
-    dawnComputePassEncoder pass = dawnCommandBufferBuilderBeginComputePass(builder);
+    dawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
+    dawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
     dawnComputePassEncoderSetPushConstants(pass, DAWN_SHADER_STAGE_BIT_VERTEX, 0, 4,
                                            testPushConstantValues);
 
-    dawnCommandBufferBuilder apiBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice)).WillOnce(Return(apiBuilder));
+    dawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
 
     dawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
-    EXPECT_CALL(api, CommandBufferBuilderBeginComputePass(apiBuilder)).WillOnce(Return(apiPass));
+    EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder)).WillOnce(Return(apiPass));
 
     EXPECT_CALL(api,
                 ComputePassEncoderSetPushConstants(apiPass, DAWN_SHADER_STAGE_BIT_VERTEX, 0, 4,
                                                    ResultOf(CheckPushConstantValues, Eq(true))));
-    EXPECT_CALL(api, CommandBufferBuilderRelease(apiBuilder));
+    EXPECT_CALL(api, CommandEncoderRelease(apiEncoder));
     EXPECT_CALL(api, ComputePassEncoderRelease(apiPass));
 
     FlushClient();
@@ -193,17 +193,17 @@ TEST_F(WireArgumentTests, ObjectAsValueArgument) {
     EXPECT_CALL(api, RenderPassDescriptorBuilderGetResult(apiRenderPassBuilder))
         .WillOnce(Return(apiRenderPass));
 
-    // Create command buffer builder, setting render pass descriptor
-    dawnCommandBufferBuilder cmdBufBuilder = dawnDeviceCreateCommandBufferBuilder(device);
-    dawnCommandBufferBuilderBeginRenderPass(cmdBufBuilder, renderPass);
+    // Create command buffer encoder, setting render pass descriptor
+    dawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
+    dawnCommandEncoderBeginRenderPass(cmdBufEncoder, renderPass);
 
-    dawnCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
-    EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
-        .WillOnce(Return(apiCmdBufBuilder));
+    dawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
+        .WillOnce(Return(apiCmdBufEncoder));
 
-    EXPECT_CALL(api, CommandBufferBuilderBeginRenderPass(apiCmdBufBuilder, apiRenderPass)).Times(1);
+    EXPECT_CALL(api, CommandEncoderBeginRenderPass(apiCmdBufEncoder, apiRenderPass)).Times(1);
 
-    EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
     EXPECT_CALL(api, RenderPassDescriptorBuilderRelease(apiRenderPassBuilder));
     EXPECT_CALL(api, RenderPassDescriptorRelease(apiRenderPass));
     FlushClient();
@@ -215,21 +215,21 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
     dawnCommandBuffer apiCmdBufs[2];
 
     // Create two command buffers we need to use a GMock sequence otherwise the order of the
-    // CreateCommandBufferBuilder might be swapped since they are equivalent in term of matchers
+    // CreateCommandEncoder might be swapped since they are equivalent in term of matchers
     Sequence s;
     for (int i = 0; i < 2; ++i) {
-        dawnCommandBufferBuilder cmdBufBuilder = dawnDeviceCreateCommandBufferBuilder(device);
-        cmdBufs[i] = dawnCommandBufferBuilderGetResult(cmdBufBuilder);
+        dawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
+        cmdBufs[i] = dawnCommandEncoderFinish(cmdBufEncoder);
 
-        dawnCommandBufferBuilder apiCmdBufBuilder = api.GetNewCommandBufferBuilder();
-        EXPECT_CALL(api, DeviceCreateCommandBufferBuilder(apiDevice))
+        dawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
             .InSequence(s)
-            .WillOnce(Return(apiCmdBufBuilder));
+            .WillOnce(Return(apiCmdBufEncoder));
 
         apiCmdBufs[i] = api.GetNewCommandBuffer();
-        EXPECT_CALL(api, CommandBufferBuilderGetResult(apiCmdBufBuilder))
+        EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder))
             .WillOnce(Return(apiCmdBufs[i]));
-        EXPECT_CALL(api, CommandBufferBuilderRelease(apiCmdBufBuilder));
+        EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
         EXPECT_CALL(api, CommandBufferRelease(apiCmdBufs[i]));
     }
 

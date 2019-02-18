@@ -271,55 +271,6 @@
     "command buffer": {
         "category": "object"
     },
-    "command buffer builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "command buffer"
-            },
-            {
-                "name": "begin compute pass",
-                "returns": "compute pass encoder"
-            },
-            {
-                "name": "begin render pass",
-                "args": [
-                    {"name": "info", "type": "render pass descriptor"}
-                ],
-                "returns": "render pass encoder"
-            },
-            {
-                "name": "copy buffer to buffer",
-                "args": [
-                    {"name": "source", "type": "buffer"},
-                    {"name": "source offset", "type": "uint32_t"},
-                    {"name": "destination", "type": "buffer"},
-                    {"name": "destination offset", "type": "uint32_t"},
-                    {"name": "size", "type": "uint32_t"}
-                ],
-                "TODO": [
-                    "Restrictions on the alignment of the copy? Cf Metal on OSX"
-                ]
-            },
-            {
-                "name": "copy buffer to texture",
-                "args": [
-                    {"name": "source", "type": "buffer copy view", "annotation": "const*"},
-                    {"name": "destination", "type": "texture copy view", "annotation": "const*"},
-                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
-                ]
-            },
-            {
-                "name": "copy texture to buffer",
-                "args": [
-                    {"name": "source", "type": "texture copy view", "annotation": "const*"},
-                    {"name": "destination", "type": "buffer copy view", "annotation": "const*"},
-                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
-                ]
-            }
-        ]
-    },
     "command encoder": {
         "category": "object",
         "methods": [
@@ -464,10 +415,6 @@
             {
                 "name": "create buffer builder for testing",
                 "returns": "buffer builder"
-            },
-            {
-                "name": "create command buffer builder",
-                "returns": "command buffer builder"
             },
             {
                 "name": "create command encoder",
