@@ -47,11 +47,11 @@ namespace dawn_native { namespace metal {
         };
 
         // Creates an autoreleased MTLRenderPassDescriptor matching desc
-        MTLRenderPassDescriptor* CreateMTLRenderPassDescriptor(RenderPassDescriptorBase* desc) {
+        MTLRenderPassDescriptor* CreateMTLRenderPassDescriptor(BeginRenderPassCmd* renderPass) {
             MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
 
-            for (uint32_t i : IterateBitSet(desc->GetColorAttachmentMask())) {
-                auto& attachmentInfo = desc->GetColorAttachment(i);
+            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                auto& attachmentInfo = renderPass->colorAttachments[i];
 
                 if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
                     descriptor.colorAttachments[i].loadAction = MTLLoadActionClear;
@@ -70,8 +70,8 @@ namespace dawn_native { namespace metal {
                 descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
             }
 
-            if (desc->HasDepthStencilAttachment()) {
-                auto& attachmentInfo = desc->GetDepthStencilAttachment();
+            if (renderPass->hasDepthStencilAttachment) {
+                auto& attachmentInfo = renderPass->depthStencilAttachment;
 
                 // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
                 id<MTLTexture> texture =
@@ -229,7 +229,7 @@ namespace dawn_native { namespace metal {
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
                     encoders.Finish();
-                    EncodeRenderPass(commandBuffer, ToBackend(cmd->info.Get()));
+                    EncodeRenderPass(commandBuffer, cmd);
                 } break;
 
                 case Command::CopyBufferToBuffer: {
@@ -373,7 +373,7 @@ namespace dawn_native { namespace metal {
     }
 
     void CommandBuffer::EncodeRenderPass(id<MTLCommandBuffer> commandBuffer,
-                                         RenderPassDescriptorBase* renderPass) {
+                                         BeginRenderPassCmd* renderPassCmd) {
         RenderPipeline* lastPipeline = nullptr;
         id<MTLBuffer> indexBuffer = nil;
         uint32_t indexBufferBaseOffset = 0;
@@ -383,7 +383,7 @@ namespace dawn_native { namespace metal {
 
         // This will be autoreleased
         id<MTLRenderCommandEncoder> encoder = [commandBuffer
-            renderCommandEncoderWithDescriptor:CreateMTLRenderPassDescriptor(renderPass)];
+            renderCommandEncoderWithDescriptor:CreateMTLRenderPassDescriptor(renderPassCmd)];
 
         // Set default values for push constants
         vertexPushConstants.fill(0);

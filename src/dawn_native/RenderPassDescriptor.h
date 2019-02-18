@@ -17,6 +17,7 @@
 
 #include "common/Constants.h"
 #include "dawn_native/Builder.h"
+#include "dawn_native/Commands.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
 
@@ -27,20 +28,6 @@
 #include <vector>
 
 namespace dawn_native {
-
-    struct RenderPassColorAttachmentInfo {
-        dawn::LoadOp loadOp;
-        std::array<float, 4> clearColor = {{0.0f, 0.0f, 0.0f, 0.0f}};
-        Ref<TextureViewBase> view;
-    };
-
-    struct RenderPassDepthStencilAttachmentInfo {
-        dawn::LoadOp depthLoadOp;
-        dawn::LoadOp stencilLoadOp;
-        float clearDepth = 1.0f;
-        uint32_t clearStencil = 0;
-        Ref<TextureViewBase> view;
-    };
 
     // RenderPassDescriptor contains the list of attachments for a renderpass along with data such
     // as the load operation and the clear values for the attachments.

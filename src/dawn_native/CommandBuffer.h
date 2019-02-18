@@ -29,6 +29,8 @@
 
 namespace dawn_native {
 
+    struct BeginRenderPassCmd;
+
     class BindGroupBase;
     class BufferBase;
     class FramebufferBase;
@@ -99,7 +101,7 @@ namespace dawn_native {
         void MoveToIterator();
 
         MaybeError ValidateComputePass();
-        MaybeError ValidateRenderPass(RenderPassDescriptorBase* renderPass);
+        MaybeError ValidateRenderPass(BeginRenderPassCmd* renderPass);
 
         MaybeError ValidateCanRecordTopLevelCommands() const;
 

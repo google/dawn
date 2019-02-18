@@ -167,10 +167,10 @@ namespace dawn_native { namespace d3d12 {
         }
 
         // This function must only be called before calling AllocateRTVAndDSVHeaps().
-        void TrackRenderPass(const RenderPassDescriptor* renderPass) {
+        void TrackRenderPass(const BeginRenderPassCmd* renderPass) {
             DAWN_ASSERT(mRTVHeap.Get() == nullptr && mDSVHeap.Get() == nullptr);
-            mNumRTVs += static_cast<uint32_t>(renderPass->GetColorAttachmentMask().count());
-            if (renderPass->HasDepthStencilAttachment()) {
+            mNumRTVs += static_cast<uint32_t>(renderPass->colorAttachmentsSet.count());
+            if (renderPass->hasDepthStencilAttachment) {
                 ++mNumDSVs;
             }
         }
@@ -189,14 +189,14 @@ namespace dawn_native { namespace d3d12 {
 
         // TODO(jiawei.shao@intel.com): use hash map <RenderPass, OMSetRenderTargetArgs> as cache to
         // avoid redundant RTV and DSV memory allocations.
-        OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs(RenderPassDescriptor* renderPass) {
+        OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs(BeginRenderPassCmd* renderPass) {
             OMSetRenderTargetArgs args = {};
 
             unsigned int rtvIndex = 0;
-            uint32_t rtvCount = static_cast<uint32_t>(renderPass->GetColorAttachmentMask().count());
+            uint32_t rtvCount = static_cast<uint32_t>(renderPass->colorAttachmentsSet.count());
             DAWN_ASSERT(mAllocatedRTVs + rtvCount <= mNumRTVs);
-            for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
-                TextureView* view = ToBackend(renderPass->GetColorAttachment(i).view).Get();
+            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                TextureView* view = ToBackend(renderPass->colorAttachments[i].view).Get();
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = mRTVHeap.GetCPUHandle(mAllocatedRTVs);
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = view->GetRTVDescriptor();
                 mDevice->GetD3D12Device()->CreateRenderTargetView(
@@ -208,9 +208,9 @@ namespace dawn_native { namespace d3d12 {
             }
             args.numRTVs = rtvIndex;
 
-            if (renderPass->HasDepthStencilAttachment()) {
+            if (renderPass->hasDepthStencilAttachment) {
                 DAWN_ASSERT(mAllocatedDSVs < mNumDSVs);
-                TextureView* view = ToBackend(renderPass->GetDepthStencilAttachment().view).Get();
+                TextureView* view = ToBackend(renderPass->depthStencilAttachment.view).Get();
                 D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDSVHeap.GetCPUHandle(mAllocatedDSVs);
                 D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = view->GetDSVDescriptor();
                 mDevice->GetD3D12Device()->CreateDepthStencilView(
@@ -283,7 +283,7 @@ namespace dawn_native { namespace d3d12 {
                         } break;
                         case Command::BeginRenderPass: {
                             BeginRenderPassCmd* cmd = commands->NextCommand<BeginRenderPassCmd>();
-                            renderPassTracker->TrackRenderPass(cmd->info.Get());
+                            renderPassTracker->TrackRenderPass(cmd);
                         } break;
                         default:
                             SkipCommand(commands, type);
@@ -393,7 +393,7 @@ namespace dawn_native { namespace d3d12 {
                     TransitionForPass(commandList, passResourceUsages[nextPassNumber]);
                     bindingTracker.SetInComputePass(false);
                     RecordRenderPass(commandList, &bindingTracker, &renderPassTracker,
-                                     ToBackend(beginRenderPassCmd->info.Get()));
+                                     beginRenderPassCmd);
 
                     nextPassNumber++;
                 } break;
@@ -597,13 +597,13 @@ namespace dawn_native { namespace d3d12 {
     void CommandBuffer::RecordRenderPass(ComPtr<ID3D12GraphicsCommandList> commandList,
                                          BindGroupStateTracker* bindingTracker,
                                          RenderPassDescriptorHeapTracker* renderPassTracker,
-                                         RenderPassDescriptor* renderPass) {
+                                         BeginRenderPassCmd* renderPass) {
         OMSetRenderTargetArgs args = renderPassTracker->GetSubpassOMSetRenderTargetArgs(renderPass);
 
         // Clear framebuffer attachments as needed and transition to render target
         {
-            for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
-                auto& attachmentInfo = renderPass->GetColorAttachment(i);
+            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                auto& attachmentInfo = renderPass->colorAttachments[i];
 
                 // Load op - color
                 if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
@@ -613,9 +613,9 @@ namespace dawn_native { namespace d3d12 {
                 }
             }
 
-            if (renderPass->HasDepthStencilAttachment()) {
-                auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
-                Texture* texture = ToBackend(attachmentInfo.view->GetTexture());
+            if (renderPass->hasDepthStencilAttachment) {
+                auto& attachmentInfo = renderPass->depthStencilAttachment;
+                Texture* texture = ToBackend(renderPass->depthStencilAttachment.view->GetTexture());
 
                 // Load op - depth/stencil
                 bool doDepthClear = TextureFormatHasDepth(texture->GetFormat()) &&
@@ -653,8 +653,8 @@ namespace dawn_native { namespace d3d12 {
 
         // Set up default dynamic state
         {
-            uint32_t width = renderPass->GetWidth();
-            uint32_t height = renderPass->GetHeight();
+            uint32_t width = renderPass->width;
+            uint32_t height = renderPass->height;
             D3D12_VIEWPORT viewport = {
                 0.f, 0.f, static_cast<float>(width), static_cast<float>(height), 0.f, 1.f};
             D3D12_RECT scissorRect = {0, 0, static_cast<long>(width), static_cast<long>(height)};

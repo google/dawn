@@ -20,7 +20,7 @@
 #import <Metal/Metal.h>
 
 namespace dawn_native {
-    class RenderPassDescriptorBase;
+    struct BeginRenderPassCmd;
 }
 
 namespace dawn_native { namespace metal {
@@ -36,8 +36,7 @@ namespace dawn_native { namespace metal {
 
       private:
         void EncodeComputePass(id<MTLCommandBuffer> commandBuffer);
-        void EncodeRenderPass(id<MTLCommandBuffer> commandBuffer,
-                              RenderPassDescriptorBase* renderPass);
+        void EncodeRenderPass(id<MTLCommandBuffer> commandBuffer, BeginRenderPassCmd* renderPass);
 
         Device* mDevice;
         CommandIterator mCommands;

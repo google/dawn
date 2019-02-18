@@ -112,20 +112,19 @@ namespace dawn_native { namespace vulkan {
 
         void RecordBeginRenderPass(VkCommandBuffer commands,
                                    Device* device,
-                                   RenderPassDescriptorBase* renderPass) {
+                                   BeginRenderPassCmd* renderPass) {
             // Query a VkRenderPass from the cache
             VkRenderPass renderPassVK = VK_NULL_HANDLE;
             {
                 RenderPassCacheQuery query;
 
-                for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
-                    const auto& attachmentInfo = renderPass->GetColorAttachment(i);
-                    query.SetColor(i, attachmentInfo.view->GetTexture()->GetFormat(),
-                                   attachmentInfo.loadOp);
+                for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                    const auto& attachmentInfo = renderPass->colorAttachments[i];
+                    query.SetColor(i, attachmentInfo.view->GetFormat(), attachmentInfo.loadOp);
                 }
 
-                if (renderPass->HasDepthStencilAttachment()) {
-                    const auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
+                if (renderPass->hasDepthStencilAttachment) {
+                    const auto& attachmentInfo = renderPass->depthStencilAttachment;
                     query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat(),
                                           attachmentInfo.depthLoadOp, attachmentInfo.stencilLoadOp);
                 }
@@ -142,8 +141,8 @@ namespace dawn_native { namespace vulkan {
                 // Fill in the attachment info that will be chained in the framebuffer create info.
                 std::array<VkImageView, kMaxColorAttachments + 1> attachments;
 
-                for (uint32_t i : IterateBitSet(renderPass->GetColorAttachmentMask())) {
-                    auto& attachmentInfo = renderPass->GetColorAttachment(i);
+                for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                    auto& attachmentInfo = renderPass->colorAttachments[i];
                     TextureView* view = ToBackend(attachmentInfo.view.Get());
 
                     attachments[attachmentCount] = view->GetHandle();
@@ -156,8 +155,8 @@ namespace dawn_native { namespace vulkan {
                     attachmentCount++;
                 }
 
-                if (renderPass->HasDepthStencilAttachment()) {
-                    auto& attachmentInfo = renderPass->GetDepthStencilAttachment();
+                if (renderPass->hasDepthStencilAttachment) {
+                    auto& attachmentInfo = renderPass->depthStencilAttachment;
                     TextureView* view = ToBackend(attachmentInfo.view.Get());
 
                     attachments[attachmentCount] = view->GetHandle();
@@ -176,8 +175,8 @@ namespace dawn_native { namespace vulkan {
                 createInfo.renderPass = renderPassVK;
                 createInfo.attachmentCount = attachmentCount;
                 createInfo.pAttachments = attachments.data();
-                createInfo.width = renderPass->GetWidth();
-                createInfo.height = renderPass->GetHeight();
+                createInfo.width = renderPass->width;
+                createInfo.height = renderPass->height;
                 createInfo.layers = 1;
 
                 if (device->fn.CreateFramebuffer(device->GetVkDevice(), &createInfo, nullptr,
@@ -197,8 +196,8 @@ namespace dawn_native { namespace vulkan {
             beginInfo.framebuffer = framebuffer;
             beginInfo.renderArea.offset.x = 0;
             beginInfo.renderArea.offset.y = 0;
-            beginInfo.renderArea.extent.width = renderPass->GetWidth();
-            beginInfo.renderArea.extent.height = renderPass->GetHeight();
+            beginInfo.renderArea.extent.width = renderPass->width;
+            beginInfo.renderArea.extent.height = renderPass->height;
             beginInfo.clearValueCount = attachmentCount;
             beginInfo.pClearValues = clearValues.data();
 
@@ -303,7 +302,7 @@ namespace dawn_native { namespace vulkan {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
                     TransitionForPass(commands, passResourceUsages[nextPassNumber]);
-                    RecordRenderPass(commands, ToBackend(cmd->info.Get()));
+                    RecordRenderPass(commands, cmd);
 
                     nextPassNumber++;
                 } break;
@@ -365,10 +364,10 @@ namespace dawn_native { namespace vulkan {
         UNREACHABLE();
     }
     void CommandBuffer::RecordRenderPass(VkCommandBuffer commands,
-                                         RenderPassDescriptorBase* renderPass) {
+                                         BeginRenderPassCmd* renderPassCmd) {
         Device* device = ToBackend(GetDevice());
 
-        RecordBeginRenderPass(commands, device, renderPass);
+        RecordBeginRenderPass(commands, device, renderPassCmd);
 
         // Set the default value for the dynamic state
         {
@@ -389,8 +388,8 @@ namespace dawn_native { namespace vulkan {
             VkViewport viewport;
             viewport.x = 0.0f;
             viewport.y = 0.0f;
-            viewport.width = static_cast<float>(renderPass->GetWidth());
-            viewport.height = static_cast<float>(renderPass->GetHeight());
+            viewport.width = static_cast<float>(renderPassCmd->width);
+            viewport.height = static_cast<float>(renderPassCmd->height);
             viewport.minDepth = 0.0f;
             viewport.maxDepth = 1.0f;
             device->fn.CmdSetViewport(commands, 0, 1, &viewport);
@@ -398,8 +397,8 @@ namespace dawn_native { namespace vulkan {
             VkRect2D scissorRect;
             scissorRect.offset.x = 0;
             scissorRect.offset.y = 0;
-            scissorRect.extent.width = renderPass->GetWidth();
-            scissorRect.extent.height = renderPass->GetHeight();
+            scissorRect.extent.width = renderPassCmd->width;
+            scissorRect.extent.height = renderPassCmd->height;
             device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
         }
 

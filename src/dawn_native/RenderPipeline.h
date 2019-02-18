@@ -25,6 +25,8 @@
 
 namespace dawn_native {
 
+    struct BeginRenderPassCmd;
+
     class DeviceBase;
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
@@ -51,7 +53,7 @@ namespace dawn_native {
 
         // A pipeline can be used in a render pass if its attachment info matches the actual
         // attachments in the render pass. This returns whether it is the case.
-        bool IsCompatibleWith(const RenderPassDescriptorBase* renderPass) const;
+        bool IsCompatibleWith(const BeginRenderPassCmd* renderPassCmd) const;
 
       private:
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
