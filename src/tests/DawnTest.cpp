@@ -96,6 +96,9 @@ namespace {
 
 }  // namespace
 
+void InitDawnEnd2EndTestEnvironment(int, char**) {
+}
+
 DawnTest::DawnTest() = default;
 
 DawnTest::~DawnTest() {
