@@ -28,7 +28,7 @@ namespace dawn_native { namespace opengl {
 
     class CommandBuffer : public CommandBufferBase {
       public:
-        CommandBuffer(CommandBufferBuilder* builder);
+        CommandBuffer(Device* device, CommandEncoderBase* encoder);
         ~CommandBuffer();
 
         void Execute();

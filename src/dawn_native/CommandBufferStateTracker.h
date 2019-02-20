@@ -16,7 +16,8 @@
 #define DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H
 
 #include "common/Constants.h"
-#include "dawn_native/CommandBuffer.h"
+#include "dawn_native/Error.h"
+#include "dawn_native/Forward.h"
 
 #include <array>
 #include <bitset>

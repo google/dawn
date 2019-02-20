@@ -15,9 +15,11 @@
 #include "dawn_native/opengl/CommandBufferGL.h"
 
 #include "dawn_native/BindGroup.h"
+#include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/ComputePipelineGL.h"
+#include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/Forward.h"
 #include "dawn_native/opengl/InputStateGL.h"
 #include "dawn_native/opengl/PersistentPipelineStateGL.h"
@@ -281,8 +283,8 @@ namespace dawn_native { namespace opengl {
         }
     }  // namespace
 
-    CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
+    CommandBuffer::CommandBuffer(Device* device, CommandEncoderBase* encoder)
+        : CommandBufferBase(device, encoder), mCommands(encoder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {

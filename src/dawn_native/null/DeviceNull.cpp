@@ -75,8 +75,8 @@ namespace dawn_native { namespace null {
     ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
         return new Buffer(this, descriptor);
     }
-    CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
-        return new CommandBuffer(builder);
+    CommandBufferBase* Device::CreateCommandBuffer(CommandEncoderBase* encoder) {
+        return new CommandBuffer(this, encoder);
     }
     ResultOrError<ComputePipelineBase*> Device::CreateComputePipelineImpl(
         const ComputePipelineDescriptor* descriptor) {
@@ -232,8 +232,8 @@ namespace dawn_native { namespace null {
 
     // CommandBuffer
 
-    CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
+    CommandBuffer::CommandBuffer(Device* device, CommandEncoderBase* encoder)
+        : CommandBufferBase(device, encoder), mCommands(encoder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {

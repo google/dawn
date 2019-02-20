@@ -17,34 +17,15 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "dawn_native/Builder.h"
-#include "dawn_native/CommandAllocator.h"
-#include "dawn_native/Error.h"
+#include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PassResourceUsage.h"
 
-#include <memory>
-#include <set>
-#include <utility>
-
 namespace dawn_native {
-
-    struct BeginRenderPassCmd;
-
-    class BindGroupBase;
-    class BufferBase;
-    class FramebufferBase;
-    class DeviceBase;
-    class PipelineBase;
-    class RenderPassBase;
-    class TextureBase;
-
-    class CommandBufferBuilder;
 
     class CommandBufferBase : public ObjectBase {
       public:
-        CommandBufferBase(CommandBufferBuilder* builder);
-
+        CommandBufferBase(DeviceBase* device, CommandEncoderBase* encoder);
         static CommandBufferBase* MakeError(DeviceBase* device);
 
         const CommandBufferResourceUsage& GetResourceUsages() const;
@@ -52,67 +33,6 @@ namespace dawn_native {
       private:
         CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        CommandBufferResourceUsage mResourceUsages;
-    };
-
-    class CommandBufferBuilder : public Builder<CommandBufferBase> {
-      public:
-        CommandBufferBuilder(DeviceBase* device);
-        ~CommandBufferBuilder();
-
-        MaybeError ValidateGetResult();
-
-        CommandIterator AcquireCommands();
-        CommandBufferResourceUsage AcquireResourceUsages();
-
-        // Dawn API
-        ComputePassEncoderBase* BeginComputePass();
-        RenderPassEncoderBase* BeginRenderPass(RenderPassDescriptorBase* info);
-        void CopyBufferToBuffer(BufferBase* source,
-                                uint32_t sourceOffset,
-                                BufferBase* destination,
-                                uint32_t destinationOffset,
-                                uint32_t size);
-        void CopyBufferToTexture(const BufferCopyView* source,
-                                 const TextureCopyView* destination,
-                                 const Extent3D* copySize);
-        void CopyTextureToBuffer(const TextureCopyView* source,
-                                 const BufferCopyView* destination,
-                                 const Extent3D* copySize);
-
-        // Functions to interact with the encoders
-        bool ConsumedError(MaybeError maybeError) {
-            if (DAWN_UNLIKELY(maybeError.IsError())) {
-                ConsumeError(maybeError.AcquireError());
-                return true;
-            }
-            return false;
-        }
-
-        void PassEnded();
-
-      private:
-        friend class CommandBufferBase;
-
-        enum class EncodingState : uint8_t;
-        EncodingState mEncodingState;
-
-        CommandBufferBase* GetResultImpl() override;
-        void MoveToIterator();
-
-        MaybeError ValidateComputePass();
-        MaybeError ValidateRenderPass(BeginRenderPassCmd* renderPass);
-
-        MaybeError ValidateCanRecordTopLevelCommands() const;
-
-        void ConsumeError(ErrorData* error);
-
-        CommandAllocator mAllocator;
-        CommandIterator mIterator;
-        bool mWasMovedToIterator = false;
-        bool mWereCommandsAcquired = false;
-
-        bool mWereResourceUsagesAcquired = false;
         CommandBufferResourceUsage mResourceUsages;
     };
 

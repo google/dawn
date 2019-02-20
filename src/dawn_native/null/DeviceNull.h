@@ -19,6 +19,7 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
+#include "dawn_native/CommandEncoder.h"
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/InputState.h"
@@ -90,7 +91,7 @@ namespace dawn_native { namespace null {
         Device(Adapter* adapter);
         ~Device();
 
-        CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+        CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;
@@ -158,7 +159,7 @@ namespace dawn_native { namespace null {
 
     class CommandBuffer : public CommandBufferBase {
       public:
-        CommandBuffer(CommandBufferBuilder* builder);
+        CommandBuffer(Device* device, CommandEncoderBase* encoder);
         ~CommandBuffer();
 
       private:

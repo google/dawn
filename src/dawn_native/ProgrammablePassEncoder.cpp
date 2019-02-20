@@ -24,28 +24,28 @@
 namespace dawn_native {
 
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
-                                                     CommandBufferBuilder* topLevelBuilder,
+                                                     CommandEncoderBase* topLevelEncoder,
                                                      CommandAllocator* allocator)
-        : ObjectBase(device), mTopLevelBuilder(topLevelBuilder), mAllocator(allocator) {
+        : ObjectBase(device), mTopLevelEncoder(topLevelEncoder), mAllocator(allocator) {
     }
 
     void ProgrammablePassEncoder::EndPass() {
-        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
             return;
         }
 
-        mTopLevelBuilder->PassEnded();
+        mTopLevelEncoder->PassEnded();
         mAllocator = nullptr;
     }
 
     void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {
-        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands()) ||
-            mTopLevelBuilder->ConsumedError(GetDevice()->ValidateObject(group))) {
+        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
+            mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(group))) {
             return;
         }
 
         if (groupIndex >= kMaxBindGroups) {
-            mTopLevelBuilder->HandleError("Setting bind group over the max");
+            mTopLevelEncoder->HandleError("Setting bind group over the max");
             return;
         }
 
@@ -59,13 +59,13 @@ namespace dawn_native {
                                                    uint32_t offset,
                                                    uint32_t count,
                                                    const void* data) {
-        if (mTopLevelBuilder->ConsumedError(ValidateCanRecordCommands())) {
+        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
             return;
         }
 
         // TODO(cwallez@chromium.org): check for overflows
         if (offset + count > kMaxPushConstants) {
-            mTopLevelBuilder->HandleError("Setting too many push constants");
+            mTopLevelEncoder->HandleError("Setting too many push constants");
             return;
         }
 

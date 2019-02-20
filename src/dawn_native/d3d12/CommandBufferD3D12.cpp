@@ -15,6 +15,7 @@
 #include "dawn_native/d3d12/CommandBufferD3D12.h"
 
 #include "common/Assert.h"
+#include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
@@ -322,8 +323,8 @@ namespace dawn_native { namespace d3d12 {
 
     }  // anonymous namespace
 
-    CommandBuffer::CommandBuffer(CommandBufferBuilder* builder)
-        : CommandBufferBase(builder), mCommands(builder->AcquireCommands()) {
+    CommandBuffer::CommandBuffer(Device* device, CommandEncoderBase* encoder)
+        : CommandBufferBase(device, encoder), mCommands(encoder->AcquireCommands()) {
     }
 
     CommandBuffer::~CommandBuffer() {

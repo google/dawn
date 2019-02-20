@@ -77,8 +77,8 @@ namespace dawn_native { namespace metal {
     ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
         return new Buffer(this, descriptor);
     }
-    CommandBufferBase* Device::CreateCommandBuffer(CommandBufferBuilder* builder) {
-        return new CommandBuffer(builder);
+    CommandBufferBase* Device::CreateCommandBuffer(CommandEncoderBase* encoder) {
+        return new CommandBuffer(this, encoder);
     }
     ResultOrError<ComputePipelineBase*> Device::CreateComputePipelineImpl(
         const ComputePipelineDescriptor* descriptor) {

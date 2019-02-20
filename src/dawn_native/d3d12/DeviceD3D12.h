@@ -40,7 +40,7 @@ namespace dawn_native { namespace d3d12 {
         Device(Adapter* adapter, ComPtr<ID3D12Device> d3d12Device);
         ~Device();
 
-        CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+        CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;

@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_VULKAN_COMMANDBUFFERVK_H_
 #define DAWNNATIVE_VULKAN_COMMANDBUFFERVK_H_
 
+#include "dawn_native/CommandAllocator.h"
 #include "dawn_native/CommandBuffer.h"
 
 #include "common/vulkan_platform.h"
@@ -25,9 +26,11 @@ namespace dawn_native {
 
 namespace dawn_native { namespace vulkan {
 
+    class Device;
+
     class CommandBuffer : public CommandBufferBase {
       public:
-        CommandBuffer(CommandBufferBuilder* builder);
+        CommandBuffer(Device* device, CommandEncoderBase* encoder);
         ~CommandBuffer();
 
         void RecordCommands(VkCommandBuffer commands);

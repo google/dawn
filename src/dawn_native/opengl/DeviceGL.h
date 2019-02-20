@@ -40,7 +40,7 @@ namespace dawn_native { namespace opengl {
         void SubmitFenceSync();
 
         // Dawn API
-        CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) override;
+        CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
         RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) override;

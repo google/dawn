@@ -30,6 +30,7 @@ namespace dawn_native {
     using ErrorCallback = void (*)(const char* errorMessage, void* userData);
 
     class AdapterBase;
+    class BufferBuilder;
     class FenceSignalTracker;
     class DynamicUploader;
     class StagingBufferBase;
@@ -58,7 +59,7 @@ namespace dawn_native {
 
         FenceSignalTracker* GetFenceSignalTracker() const;
 
-        virtual CommandBufferBase* CreateCommandBuffer(CommandBufferBuilder* builder) = 0;
+        virtual CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) = 0;
         virtual InputStateBase* CreateInputState(InputStateBuilder* builder) = 0;
         virtual RenderPassDescriptorBase* CreateRenderPassDescriptor(
             RenderPassDescriptorBuilder* builder) = 0;
@@ -90,7 +91,6 @@ namespace dawn_native {
         BindGroupBase* CreateBindGroup(const BindGroupDescriptor* descriptor);
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
         BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
-        CommandBufferBuilder* CreateCommandBufferBuilder();
         CommandEncoderBase* CreateCommandEncoder();
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
         FenceBase* CreateFence(const FenceDescriptor* descriptor);
