@@ -637,6 +637,14 @@ namespace dawn_native { namespace opengl {
                     }
                 } break;
 
+                case Command::InsertDebugMarker:
+                case Command::PopDebugGroup:
+                case Command::PushDebugGroup: {
+                    // Due to lack of linux driver support for GL_EXT_debug_marker
+                    // extension these functions are skipped.
+                    SkipCommand(&mCommands, type);
+                } break;
+
                 case Command::SetRenderPipeline: {
                     SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
                     lastPipeline = ToBackend(cmd->pipeline).Get();

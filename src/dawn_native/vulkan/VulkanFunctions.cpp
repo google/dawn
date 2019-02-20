@@ -208,6 +208,12 @@ namespace dawn_native { namespace vulkan {
         GET_DEVICE_PROC(UpdateDescriptorSets);
         GET_DEVICE_PROC(WaitForFences);
 
+        if (usedKnobs.debugMarker) {
+            GET_DEVICE_PROC(CmdDebugMarkerBeginEXT);
+            GET_DEVICE_PROC(CmdDebugMarkerEndEXT);
+            GET_DEVICE_PROC(CmdDebugMarkerInsertEXT);
+        }
+
         if (usedKnobs.swapchain) {
             GET_DEVICE_PROC(CreateSwapchainKHR);
             GET_DEVICE_PROC(DestroySwapchainKHR);

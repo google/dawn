@@ -35,6 +35,10 @@ namespace dawn_native {
 
         void EndPass();
 
+        void InsertDebugMarker(const char* groupLabel);
+        void PopDebugGroup();
+        void PushDebugGroup(const char* groupLabel);
+
         void SetBindGroup(uint32_t groupIndex, BindGroupBase* group);
         void SetPushConstants(dawn::ShaderStageBit stages,
                               uint32_t offset,

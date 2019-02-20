@@ -69,6 +69,20 @@ namespace dawn_native {
                     EndRenderPassCmd* cmd = commands->NextCommand<EndRenderPassCmd>();
                     cmd->~EndRenderPassCmd();
                 } break;
+                case Command::InsertDebugMarker: {
+                    InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
+                    commands->NextData<char>(cmd->length + 1);
+                    cmd->~InsertDebugMarkerCmd();
+                } break;
+                case Command::PopDebugGroup: {
+                    PopDebugGroupCmd* cmd = commands->NextCommand<PopDebugGroupCmd>();
+                    cmd->~PopDebugGroupCmd();
+                } break;
+                case Command::PushDebugGroup: {
+                    PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
+                    commands->NextData<char>(cmd->length + 1);
+                    cmd->~PushDebugGroupCmd();
+                } break;
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = commands->NextCommand<SetComputePipelineCmd>();
                     cmd->~SetComputePipelineCmd();
@@ -157,6 +171,20 @@ namespace dawn_native {
             case Command::EndRenderPass:
                 commands->NextCommand<EndRenderPassCmd>();
                 break;
+
+            case Command::InsertDebugMarker: {
+                InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
+                commands->NextData<char>(cmd->length + 1);
+            } break;
+
+            case Command::PopDebugGroup:
+                commands->NextCommand<PopDebugGroupCmd>();
+                break;
+
+            case Command::PushDebugGroup: {
+                PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
+                commands->NextData<char>(cmd->length + 1);
+            } break;
 
             case Command::SetComputePipeline:
                 commands->NextCommand<SetComputePipelineCmd>();

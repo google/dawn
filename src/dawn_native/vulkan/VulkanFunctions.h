@@ -204,6 +204,11 @@ namespace dawn_native { namespace vulkan {
         PFN_vkUpdateDescriptorSets UpdateDescriptorSets = nullptr;
         PFN_vkWaitForFences WaitForFences = nullptr;
 
+        // VK_EXT_debug_marker
+        PFN_vkCmdDebugMarkerBeginEXT CmdDebugMarkerBeginEXT = nullptr;
+        PFN_vkCmdDebugMarkerEndEXT CmdDebugMarkerEndEXT = nullptr;
+        PFN_vkCmdDebugMarkerInsertEXT CmdDebugMarkerInsertEXT = nullptr;
+
         // VK_KHR_swapchain
         PFN_vkCreateSwapchainKHR CreateSwapchainKHR = nullptr;
         PFN_vkDestroySwapchainKHR DestroySwapchainKHR = nullptr;

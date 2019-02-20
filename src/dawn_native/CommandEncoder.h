@@ -87,6 +87,8 @@ namespace dawn_native {
         bool mWereResourceUsagesAcquired = false;
         CommandBufferResourceUsage mResourceUsages;
 
+        unsigned int mDebugGroupStackSize = 0;
+
         bool mGotError = false;
         std::string mErrorMessage;
     };

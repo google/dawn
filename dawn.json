@@ -337,6 +337,22 @@
         "category": "object",
         "methods": [
             {
+                "name": "insert debug marker",
+                "args": [
+                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "pop debug group",
+                "args": []
+            },
+            {
+                "name": "push debug group",
+                "args": [
+                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
                 "name": "set pipeline",
                 "args": [
                     {"name": "pipeline", "type": "compute pipeline"}
@@ -802,6 +818,22 @@
                     {"name": "first index", "type": "uint32_t"},
                     {"name": "base vertex", "type": "uint32_t"},
                     {"name": "first instance", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "insert debug marker",
+                "args": [
+                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "pop debug group",
+                "args": []
+            },
+            {
+                "name": "push debug group",
+                "args": [
+                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
             },
             {

@@ -331,6 +331,11 @@ namespace dawn_native { namespace vulkan {
         std::vector<const char*> extensionsToRequest;
         std::vector<VkDeviceQueueCreateInfo> queuesToRequest;
 
+        if (mDeviceInfo.debugMarker) {
+            extensionsToRequest.push_back(kExtensionNameExtDebugMarker);
+            usedKnobs.debugMarker = true;
+        }
+
         if (mDeviceInfo.swapchain) {
             extensionsToRequest.push_back(kExtensionNameKhrSwapchain);
             usedKnobs.swapchain = true;

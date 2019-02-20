@@ -94,6 +94,29 @@ namespace dawn_native {
             return {};
         }
 
+        inline MaybeError PushDebugMarkerStack(unsigned int* counter) {
+            *counter += 1;
+            return {};
+        }
+
+        inline MaybeError PopDebugMarkerStack(unsigned int* counter) {
+            if (*counter == 0) {
+                return DAWN_VALIDATION_ERROR("Pop must be balanced by a corresponding Push.");
+            } else {
+                *counter -= 1;
+            }
+
+            return {};
+        }
+
+        inline MaybeError ValidateDebugGroups(const unsigned int counter) {
+            if (counter != 0) {
+                return DAWN_VALIDATION_ERROR("Each Push must be balanced by a corresponding Pop.");
+            }
+
+            return {};
+        }
+
         MaybeError ComputeTextureCopyBufferSize(const Extent3D& copySize,
                                                 uint32_t rowPitch,
                                                 uint32_t imageHeight,
@@ -635,6 +658,8 @@ namespace dawn_native {
                 case Command::EndComputePass: {
                     mIterator.NextCommand<EndComputePassCmd>();
 
+                    DAWN_TRY(ValidateDebugGroups(mDebugGroupStackSize));
+
                     DAWN_TRY(usageTracker.ValidateUsages(PassType::Compute));
                     mResourceUsages.perPass.push_back(usageTracker.AcquireResourceUsage());
                     return {};
@@ -643,6 +668,22 @@ namespace dawn_native {
                 case Command::Dispatch: {
                     mIterator.NextCommand<DispatchCmd>();
                     DAWN_TRY(persistentState.ValidateCanDispatch());
+                } break;
+
+                case Command::InsertDebugMarker: {
+                    InsertDebugMarkerCmd* cmd = mIterator.NextCommand<InsertDebugMarkerCmd>();
+                    mIterator.NextData<char>(cmd->length + 1);
+                } break;
+
+                case Command::PopDebugGroup: {
+                    mIterator.NextCommand<PopDebugGroupCmd>();
+                    DAWN_TRY(PopDebugMarkerStack(&mDebugGroupStackSize));
+                } break;
+
+                case Command::PushDebugGroup: {
+                    PushDebugGroupCmd* cmd = mIterator.NextCommand<PushDebugGroupCmd>();
+                    mIterator.NextData<char>(cmd->length + 1);
+                    DAWN_TRY(PushDebugMarkerStack(&mDebugGroupStackSize));
                 } break;
 
                 case Command::SetComputePipeline: {
@@ -701,6 +742,8 @@ namespace dawn_native {
                 case Command::EndRenderPass: {
                     mIterator.NextCommand<EndRenderPassCmd>();
 
+                    DAWN_TRY(ValidateDebugGroups(mDebugGroupStackSize));
+
                     DAWN_TRY(usageTracker.ValidateUsages(PassType::Render));
                     mResourceUsages.perPass.push_back(usageTracker.AcquireResourceUsage());
                     return {};
@@ -714,6 +757,22 @@ namespace dawn_native {
                 case Command::DrawIndexed: {
                     mIterator.NextCommand<DrawIndexedCmd>();
                     DAWN_TRY(persistentState.ValidateCanDrawIndexed());
+                } break;
+
+                case Command::InsertDebugMarker: {
+                    InsertDebugMarkerCmd* cmd = mIterator.NextCommand<InsertDebugMarkerCmd>();
+                    mIterator.NextData<char>(cmd->length + 1);
+                } break;
+
+                case Command::PopDebugGroup: {
+                    mIterator.NextCommand<PopDebugGroupCmd>();
+                    DAWN_TRY(PopDebugMarkerStack(&mDebugGroupStackSize));
+                } break;
+
+                case Command::PushDebugGroup: {
+                    PushDebugGroupCmd* cmd = mIterator.NextCommand<PushDebugGroupCmd>();
+                    mIterator.NextData<char>(cmd->length + 1);
+                    DAWN_TRY(PushDebugMarkerStack(&mDebugGroupStackSize));
                 } break;
 
                 case Command::SetRenderPipeline: {

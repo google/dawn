@@ -38,6 +38,30 @@ namespace dawn_native {
         mAllocator = nullptr;
     }
 
+    void ProgrammablePassEncoder::InsertDebugMarker(const char* groupLabel) {
+        InsertDebugMarkerCmd* cmd =
+            mAllocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
+        new (cmd) InsertDebugMarkerCmd;
+        cmd->length = strlen(groupLabel);
+
+        char* label = mAllocator->AllocateData<char>(cmd->length + 1);
+        memcpy(label, groupLabel, cmd->length + 1);
+    }
+
+    void ProgrammablePassEncoder::PopDebugGroup() {
+        PopDebugGroupCmd* cmd = mAllocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
+        new (cmd) PopDebugGroupCmd;
+    }
+
+    void ProgrammablePassEncoder::PushDebugGroup(const char* groupLabel) {
+        PushDebugGroupCmd* cmd = mAllocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
+        new (cmd) PushDebugGroupCmd;
+        cmd->length = strlen(groupLabel);
+
+        char* label = mAllocator->AllocateData<char>(cmd->length + 1);
+        memcpy(label, groupLabel, cmd->length + 1);
+    }
+
     void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndex, BindGroupBase* group) {
         if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
             mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(group))) {

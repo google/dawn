@@ -696,6 +696,14 @@ namespace dawn_native { namespace d3d12 {
                                                       draw->firstInstance);
                 } break;
 
+                case Command::InsertDebugMarker:
+                case Command::PopDebugGroup:
+                case Command::PushDebugGroup: {
+                    // TODO(brandon1.jones@intel.com): Implement debug markers after PIX licensing
+                    // issue is resolved.
+                    SkipCommand(&mCommands, type);
+                } break;
+
                 case Command::SetRenderPipeline: {
                     SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
                     RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
