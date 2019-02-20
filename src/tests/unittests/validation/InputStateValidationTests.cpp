@@ -39,7 +39,7 @@ class InputStateTest : public ValidationTest {
             descriptor.cVertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
             descriptor.inputState = inputState;
-            descriptor.cColorStates[0].format = dawn::TextureFormat::R8G8B8A8Unorm;
+            descriptor.cColorStates[0]->format = dawn::TextureFormat::R8G8B8A8Unorm;
 
             if (!success) {
                 ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));

@@ -195,8 +195,8 @@ class PushConstantTest: public DawnTest {
             blend.operation = dawn::BlendOperation::Add;
             blend.srcFactor = dawn::BlendFactor::One;
             blend.dstFactor = dawn::BlendFactor::One;
-            descriptor.cColorStates[0].alphaBlend = blend;
-            descriptor.cColorStates[0].colorBlend = blend;
+            descriptor.cColorStates[0]->alphaBlend = blend;
+            descriptor.cColorStates[0]->colorBlend = blend;
 
             return device.CreateRenderPipeline(&descriptor);
         }

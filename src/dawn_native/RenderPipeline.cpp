@@ -131,7 +131,7 @@ namespace dawn_native {
         }
 
         for (uint32_t i = 0; i < descriptor->numColorStates; ++i) {
-            DAWN_TRY(ValidateColorStateDescriptor(&descriptor->colorStates[i]));
+            DAWN_TRY(ValidateColorStateDescriptor(descriptor->colorStates[i]));
         }
 
         if (descriptor->depthStencilState) {
@@ -197,7 +197,7 @@ namespace dawn_native {
 
         for (uint32_t i = 0; i < descriptor->numColorStates; ++i) {
             mColorAttachmentsSet.set(i);
-            mColorStates[i] = descriptor->colorStates[i];
+            mColorStates[i] = *descriptor->colorStates[i];
         }
 
         // TODO(cwallez@chromium.org): Check against the shader module that the correct color

@@ -863,7 +863,7 @@
             {"name": "sample count", "type": "uint32_t"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
             {"name": "num color states", "type": "uint32_t"},
-            {"name": "color states", "type": "color state descriptor", "annotation": "const*", "length": "num color states"}
+            {"name": "color states", "type": "color state descriptor", "annotation": "const*const*", "length": "num color states"}
         ]
     },
     "sampler": {

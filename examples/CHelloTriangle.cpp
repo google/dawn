@@ -72,8 +72,6 @@ void init() {
 
         descriptor.sampleCount = 1;
 
-        descriptor.numColorStates = 1;
-
         dawnBlendDescriptor blendDescriptor;
         blendDescriptor.operation = DAWN_BLEND_OPERATION_ADD;
         blendDescriptor.srcFactor = DAWN_BLEND_FACTOR_ONE;
@@ -84,7 +82,10 @@ void init() {
         colorStateDescriptor.alphaBlend = blendDescriptor;
         colorStateDescriptor.colorBlend = blendDescriptor;
         colorStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
-        descriptor.colorStates = &colorStateDescriptor;
+
+        descriptor.numColorStates = 1;
+        dawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
+        descriptor.colorStates = colorStatesPtr;
 
         dawnPipelineLayoutDescriptor pl;
         pl.nextInChain = nullptr;

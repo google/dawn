@@ -321,7 +321,7 @@ namespace {
         descriptor.indexFormat = dawn::IndexFormat::Uint16;
         descriptor.depthStencilState = &descriptor.cDepthStencilState;
         descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
-        descriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
+        descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
         descriptor.cDepthStencilState.depthWriteEnabled = true;
         descriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
 

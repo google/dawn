@@ -139,7 +139,8 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
     pipelineDescriptor.numColorStates = 1;
-    pipelineDescriptor.colorStates = &colorStateDescriptor;
+    dawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
+    pipelineDescriptor.colorStates = colorStatesPtr;
 
     pipelineDescriptor.sampleCount = 1;
     pipelineDescriptor.layout = layout;
