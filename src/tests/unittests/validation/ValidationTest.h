@@ -21,7 +21,7 @@
 
 namespace dawn_native {
     class Instance;
-};
+}
 
 #define ASSERT_DEVICE_ERROR(statement) \
     StartExpectDeviceError(); \

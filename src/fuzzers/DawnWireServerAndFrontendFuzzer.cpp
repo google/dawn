@@ -29,7 +29,7 @@ class DevNull : public dawn_wire::CommandSerializer {
     }
     bool Flush() override {
         return true;
-    };
+    }
 
   private:
     std::vector<char> buf;
