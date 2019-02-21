@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <unordered_map>
 
 // Getting data back from Dawn is done in an async manners so all expectations are "deferred"
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
@@ -62,6 +63,8 @@ static constexpr dawn_native::BackendType MetalBackend = dawn_native::BackendTyp
 static constexpr dawn_native::BackendType OpenGLBackend = dawn_native::BackendType::OpenGL;
 static constexpr dawn_native::BackendType VulkanBackend = dawn_native::BackendType::Vulkan;
 
+struct GLFWwindow;
+
 namespace utils {
     class BackendBinding;
     class TerribleCommandBuffer;
@@ -75,6 +78,31 @@ namespace dawn_wire {
     class WireClient;
     class WireServer;
 }  // namespace dawn_wire
+
+void InitDawnEnd2EndTestEnvironment(int argc, char** argv);
+
+class DawnTestEnvironment : public testing::Environment {
+  public:
+    DawnTestEnvironment(int argc, char** argv);
+    ~DawnTestEnvironment() = default;
+
+    void SetUp() override;
+
+    bool UseWire() const;
+    dawn_native::Instance* GetInstance() const;
+    GLFWwindow* GetWindowForBackend(dawn_native::BackendType type) const;
+
+  private:
+    void CreateBackendWindow(dawn_native::BackendType type);
+
+    bool mUseWire = false;
+    std::unique_ptr<dawn_native::Instance> mInstance;
+
+    // Windows don't usually like to be bound to one API than the other, for example switching
+    // from Vulkan to OpenGL causes crashes on some drivers. Because of this, we lazily created
+    // a window for each backing API.
+    std::unordered_map<dawn_native::BackendType, GLFWwindow*> mWindows;
+};
 
 class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
   public:
@@ -178,7 +206,6 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     // Assuming the data is mapped, checks all expectations
     void ResolveExpectations();
 
-    std::unique_ptr<dawn_native::Instance> mInstance;
     std::unique_ptr<utils::BackendBinding> mBinding;
 
     dawn_native::PCIInfo mPCIInfo;

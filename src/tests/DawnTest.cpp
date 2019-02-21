@@ -50,32 +50,6 @@ namespace {
         }
     }
 
-    // Windows don't usually like to be bound to one API than the other, for example switching
-    // from Vulkan to OpenGL causes crashes on some drivers. Because of this, we lazily created
-    // a window for each backing API.
-    std::unordered_map<dawn_native::BackendType, GLFWwindow*> windows;
-
-    // Creates a GLFW window set up for use with a given backend.
-    GLFWwindow* GetWindowForBackend(dawn_native::BackendType type) {
-        GLFWwindow** window = &windows[type];
-
-        if (*window != nullptr) {
-            return *window;
-        }
-
-        if (!glfwInit()) {
-            return nullptr;
-        }
-
-        glfwDefaultWindowHints();
-        utils::SetupGLFWWindowHintsForBackend(type);
-
-        std::string windowName = "Dawn " + ParamName(type) + " test window";
-        *window = glfwCreateWindow(400, 400, windowName.c_str(), nullptr, nullptr);
-
-        return *window;
-    }
-
     // End2end tests should test valid commands produce the expected result so no error
     // should happen. Failure cases should be tested in the validation tests.
     void DeviceErrorCauseTestFailure(const char* message, dawnCallbackUserdata) {
@@ -94,10 +68,77 @@ namespace {
     constexpr uint32_t kVendorID_Nvidia = 0x10DE;
     constexpr uint32_t kVendorID_Qualcomm = 0x5143;
 
+    DawnTestEnvironment* gTestEnv = nullptr;
+
 }  // namespace
 
-void InitDawnEnd2EndTestEnvironment(int, char**) {
+// Implementation of DawnTestEnvironment
+
+void InitDawnEnd2EndTestEnvironment(int argc, char** argv) {
+    gTestEnv = new DawnTestEnvironment(argc, argv);
+    testing::AddGlobalTestEnvironment(gTestEnv);
 }
+
+DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp("-w", argv[i]) == 0 || strcmp("--use-wire", argv[i]) == 0) {
+            mUseWire = true;
+            continue;
+        }
+
+        if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
+            std::cout << "\n\nUsage: " << argv[0] << " [GTEST_FLAGS...] [-w] \n";
+            std::cout << "  -w, --use-wire: Run the tests through the wire (defaults to no wire)";
+            std::cout << std::endl;
+            continue;
+        }
+    }
+}
+
+void DawnTestEnvironment::SetUp() {
+    ASSERT_TRUE(glfwInit());
+
+    mInstance = std::make_unique<dawn_native::Instance>();
+
+    static constexpr dawn_native::BackendType kAllBackends[] = {
+        D3D12Backend,
+        MetalBackend,
+        OpenGLBackend,
+        VulkanBackend,
+    };
+
+    // Create a test window for each backend and discover an adapter using it.
+    for (dawn_native::BackendType backend : kAllBackends) {
+        if (detail::IsBackendAvailable(backend)) {
+            CreateBackendWindow(backend);
+            utils::DiscoverAdapter(mInstance.get(), mWindows[backend], backend);
+        }
+    }
+}
+
+bool DawnTestEnvironment::UseWire() const {
+    return mUseWire;
+}
+
+dawn_native::Instance* DawnTestEnvironment::GetInstance() const {
+    return mInstance.get();
+}
+
+GLFWwindow* DawnTestEnvironment::GetWindowForBackend(dawn_native::BackendType type) const {
+    return mWindows.at(type);
+}
+
+void DawnTestEnvironment::CreateBackendWindow(dawn_native::BackendType type) {
+    glfwDefaultWindowHints();
+    utils::SetupGLFWWindowHintsForBackend(type);
+
+    std::string windowName = "Dawn " + ParamName(type) + " test window";
+    GLFWwindow* window = glfwCreateWindow(400, 400, windowName.c_str(), nullptr, nullptr);
+
+    mWindows[type] = window;
+}
+
+// Implementation of DawnTest
 
 DawnTest::DawnTest() = default;
 
@@ -175,20 +216,12 @@ bool DawnTest::IsMacOS() const {
 #endif
 }
 
-bool gTestUsesWire = false;
-
 void DawnTest::SetUp() {
-    // Create the test window and discover adapters using it (esp. for OpenGL)
-    GLFWwindow* testWindow = GetWindowForBackend(GetParam());
-    DAWN_ASSERT(testWindow != nullptr);
-
-    mInstance = std::make_unique<dawn_native::Instance>();
-    utils::DiscoverAdapter(mInstance.get(), testWindow, GetParam());
-
     // Get an adapter for the backend to use, and create the device.
     dawn_native::Adapter backendAdapter;
     {
-        std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
+        dawn_native::Instance* instance = gTestEnv->GetInstance();
+        std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
         auto adapterIt = std::find_if(adapters.begin(), adapters.end(),
                                       [this](const dawn_native::Adapter adapter) -> bool {
                                           // Chromium's GTest harness has GetParam() as a regular
@@ -204,6 +237,9 @@ void DawnTest::SetUp() {
     dawnDevice backendDevice = backendAdapter.CreateDevice();
     dawnProcTable backendProcs = dawn_native::GetProcs();
 
+    // Get the test window and create the device using it (esp. for OpenGL)
+    GLFWwindow* testWindow = gTestEnv->GetWindowForBackend(GetParam());
+    DAWN_ASSERT(testWindow != nullptr);
     mBinding.reset(utils::CreateBinding(GetParam(), testWindow, backendDevice));
     DAWN_ASSERT(mBinding != nullptr);
 
@@ -211,7 +247,7 @@ void DawnTest::SetUp() {
     dawnDevice cDevice = nullptr;
     dawnProcTable procs;
 
-    if (gTestUsesWire) {
+    if (gTestEnv->UseWire()) {
         mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
         mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
 
@@ -350,7 +386,7 @@ void DawnTest::SwapBuffersForCapture() {
 }
 
 void DawnTest::FlushWire() {
-    if (gTestUsesWire) {
+    if (gTestEnv->UseWire()) {
         bool C2SFlushed = mC2sBuf->Flush();
         bool S2CFlushed = mS2cBuf->Flush();
         ASSERT(C2SFlushed);
