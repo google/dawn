@@ -203,9 +203,9 @@ namespace dawn_native { namespace d3d12 {
             case dawn::TextureViewDimension::e2DArray:
                 ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-                mSrvDesc.Texture2DArray.ArraySize = descriptor->layerCount;
+                mSrvDesc.Texture2DArray.ArraySize = descriptor->arrayLayerCount;
                 mSrvDesc.Texture2DArray.FirstArraySlice = descriptor->baseArrayLayer;
-                mSrvDesc.Texture2DArray.MipLevels = descriptor->levelCount;
+                mSrvDesc.Texture2DArray.MipLevels = descriptor->mipLevelCount;
                 mSrvDesc.Texture2DArray.MostDetailedMip = descriptor->baseMipLevel;
                 mSrvDesc.Texture2DArray.PlaneSlice = 0;
                 mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
@@ -213,12 +213,12 @@ namespace dawn_native { namespace d3d12 {
             case dawn::TextureViewDimension::Cube:
             case dawn::TextureViewDimension::CubeArray:
                 ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
-                ASSERT(descriptor->layerCount % 6 == 0);
+                ASSERT(descriptor->arrayLayerCount % 6 == 0);
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
                 mSrvDesc.TextureCubeArray.First2DArrayFace = descriptor->baseArrayLayer;
-                mSrvDesc.TextureCubeArray.NumCubes = descriptor->layerCount / 6;
+                mSrvDesc.TextureCubeArray.NumCubes = descriptor->arrayLayerCount / 6;
                 mSrvDesc.TextureCubeArray.MostDetailedMip = descriptor->baseMipLevel;
-                mSrvDesc.TextureCubeArray.MipLevels = descriptor->levelCount;
+                mSrvDesc.TextureCubeArray.MipLevels = descriptor->mipLevelCount;
                 mSrvDesc.TextureCubeArray.ResourceMinLODClamp = 0;
                 break;
             default:

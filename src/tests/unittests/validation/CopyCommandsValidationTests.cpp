@@ -27,18 +27,18 @@ class CopyCommandTest : public ValidationTest {
             return device.CreateBuffer(&descriptor);
         }
 
-        dawn::Texture Create2DTexture(uint32_t width, uint32_t height, uint32_t levels,
-                                      uint32_t arraySize, dawn::TextureFormat format,
+        dawn::Texture Create2DTexture(uint32_t width, uint32_t height, uint32_t mipLevelCount,
+                                      uint32_t arrayLayerCount, dawn::TextureFormat format,
                                       dawn::TextureUsageBit usage) {
             dawn::TextureDescriptor descriptor;
             descriptor.dimension = dawn::TextureDimension::e2D;
             descriptor.size.width = width;
             descriptor.size.height = height;
             descriptor.size.depth = 1;
-            descriptor.arraySize = arraySize;
+            descriptor.arrayLayerCount = arrayLayerCount;
             descriptor.sampleCount = 1;
             descriptor.format = format;
-            descriptor.levelCount = levels;
+            descriptor.mipLevelCount = mipLevelCount;
             descriptor.usage = usage;
             dawn::Texture tex = device.CreateTexture(&descriptor);
             return tex;

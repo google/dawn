@@ -26,11 +26,11 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        if (descriptor->numBindGroupLayouts > kMaxBindGroups) {
+        if (descriptor->bindGroupLayoutCount > kMaxBindGroups) {
             return DAWN_VALIDATION_ERROR("too many bind group layouts");
         }
 
-        for (uint32_t i = 0; i < descriptor->numBindGroupLayouts; ++i) {
+        for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
             DAWN_TRY(device->ValidateObject(descriptor->bindGroupLayouts[i]));
         }
         return {};
@@ -41,8 +41,8 @@ namespace dawn_native {
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                            const PipelineLayoutDescriptor* descriptor)
         : ObjectBase(device) {
-        ASSERT(descriptor->numBindGroupLayouts <= kMaxBindGroups);
-        for (uint32_t group = 0; group < descriptor->numBindGroupLayouts; ++group) {
+        ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
+        for (uint32_t group = 0; group < descriptor->bindGroupLayoutCount; ++group) {
             mBindGroupLayouts[group] = descriptor->bindGroupLayouts[group];
             mMask.set(group);
         }

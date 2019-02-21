@@ -35,8 +35,8 @@ dawn::TextureDescriptor CreateDefaultTextureDescriptor() {
     descriptor.size.width = kWidth;
     descriptor.size.height = kHeight;
     descriptor.size.depth = 1;
-    descriptor.arraySize = kDefaultArraySize;
-    descriptor.levelCount = kDefaultMipLevels;
+    descriptor.arrayLayerCount = kDefaultArraySize;
+    descriptor.mipLevelCount = kDefaultMipLevels;
     descriptor.sampleCount = kDefaultSampleCount;
     descriptor.dimension = dawn::TextureDimension::e2D;
     descriptor.format = kDefaultTextureFormat;

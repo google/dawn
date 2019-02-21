@@ -758,10 +758,10 @@ TEST_P(ColorStateTest, IndependentColorState) {
     descriptor.size.width = kRTSize;
     descriptor.size.height = kRTSize;
     descriptor.size.depth = 1;
-    descriptor.arraySize = 1;
+    descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
-    descriptor.levelCount = 1;
+    descriptor.mipLevelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
 
     for (uint32_t i = 0; i < 4; ++i) {
@@ -808,7 +808,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
     baseDescriptor.layout = pipelineLayout;
     baseDescriptor.cVertexStage.module = vsModule;
     baseDescriptor.cFragmentStage.module = fsModule;
-    baseDescriptor.numColorStates = 4;
+    baseDescriptor.colorStateCount = 4;
 
     basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
@@ -816,7 +816,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
     testDescriptor.layout = pipelineLayout;
     testDescriptor.cVertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
-    testDescriptor.numColorStates = 4;
+    testDescriptor.colorStateCount = 4;
 
     // set color states
     dawn::BlendDescriptor blend1;

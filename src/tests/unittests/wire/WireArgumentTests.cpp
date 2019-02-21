@@ -131,7 +131,7 @@ TEST_F(WireArgumentTests, CStringArgument) {
     // Create the pipeline layout
     dawnPipelineLayoutDescriptor layoutDescriptor;
     layoutDescriptor.nextInChain = nullptr;
-    layoutDescriptor.numBindGroupLayouts = 0;
+    layoutDescriptor.bindGroupLayoutCount = 0;
     layoutDescriptor.bindGroupLayouts = nullptr;
     dawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
     dawnPipelineLayout apiLayout = api.GetNewPipelineLayout();
@@ -153,7 +153,7 @@ TEST_F(WireArgumentTests, CStringArgument) {
     fragmentStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
-    pipelineDescriptor.numColorStates = 1;
+    pipelineDescriptor.colorStateCount = 1;
     dawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
     pipelineDescriptor.colorStates = colorStatesPtr;
 
@@ -288,7 +288,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
     dawnBindGroupLayoutDescriptor bglDescriptor;
-    bglDescriptor.numBindings = 0;
+    bglDescriptor.bindingCount = 0;
     bglDescriptor.bindings = nullptr;
 
     dawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDescriptor);
@@ -297,7 +297,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
 
     dawnPipelineLayoutDescriptor descriptor;
     descriptor.nextInChain = nullptr;
-    descriptor.numBindGroupLayouts = 1;
+    descriptor.bindGroupLayoutCount = 1;
     descriptor.bindGroupLayouts = &bgl;
 
     dawnDeviceCreatePipelineLayout(device, &descriptor);
@@ -305,7 +305,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
                          apiDevice,
                          MatchesLambda([apiBgl](const dawnPipelineLayoutDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr &&
-                                    desc->numBindGroupLayouts == 1 &&
+                                    desc->bindGroupLayoutCount == 1 &&
                                     desc->bindGroupLayouts[0] == apiBgl;
                          })))
         .WillOnce(Return(nullptr));
@@ -326,7 +326,7 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
          DAWN_BINDING_TYPE_UNIFORM_BUFFER},
     };
     dawnBindGroupLayoutDescriptor bglDescriptor;
-    bglDescriptor.numBindings = NUM_BINDINGS;
+    bglDescriptor.bindingCount = NUM_BINDINGS;
     bglDescriptor.bindings = bindings;
 
     dawnDeviceCreateBindGroupLayout(device, &bglDescriptor);
@@ -343,7 +343,7 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
                         return false;
                     }
                 }
-                return desc->nextInChain == nullptr && desc->numBindings == 3;
+                return desc->nextInChain == nullptr && desc->bindingCount == 3;
             })))
         .WillOnce(Return(apiBgl));
 
@@ -357,14 +357,14 @@ TEST_F(WireArgumentTests, DISABLED_NullptrInArray) {
 
     dawnPipelineLayoutDescriptor descriptor;
     descriptor.nextInChain = nullptr;
-    descriptor.numBindGroupLayouts = 1;
+    descriptor.bindGroupLayoutCount = 1;
     descriptor.bindGroupLayouts = &nullBGL;
 
     dawnDeviceCreatePipelineLayout(device, &descriptor);
     EXPECT_CALL(api,
                 DeviceCreatePipelineLayout(
                     apiDevice, MatchesLambda([](const dawnPipelineLayoutDescriptor* desc) -> bool {
-                        return desc->nextInChain == nullptr && desc->numBindGroupLayouts == 1 &&
+                        return desc->nextInChain == nullptr && desc->bindGroupLayoutCount == 1 &&
                                desc->bindGroupLayouts[0] == nullptr;
                     })))
         .WillOnce(Return(nullptr));

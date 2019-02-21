@@ -30,7 +30,7 @@ namespace dawn_native {
         }
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
-        for (uint32_t i = 0; i < descriptor->numBindings; ++i) {
+        for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
             auto& binding = descriptor->bindings[i];
             DAWN_TRY(ValidateShaderStageBit(binding.visibility));
             DAWN_TRY(ValidateBindingType(binding.type));
@@ -80,7 +80,7 @@ namespace dawn_native {
                                              const BindGroupLayoutDescriptor* descriptor,
                                              bool blueprint)
         : ObjectBase(device), mIsBlueprint(blueprint) {
-        for (uint32_t i = 0; i < descriptor->numBindings; ++i) {
+        for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
             auto& binding = descriptor->bindings[i];
 
             uint32_t index = binding.binding;

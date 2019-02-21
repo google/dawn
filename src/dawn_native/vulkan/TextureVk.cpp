@@ -372,9 +372,9 @@ namespace dawn_native { namespace vulkan {
                                                    VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
         createInfo.subresourceRange.aspectMask = VulkanAspectMask(descriptor->format);
         createInfo.subresourceRange.baseMipLevel = descriptor->baseMipLevel;
-        createInfo.subresourceRange.levelCount = descriptor->levelCount;
+        createInfo.subresourceRange.levelCount = descriptor->mipLevelCount;
         createInfo.subresourceRange.baseArrayLayer = descriptor->baseArrayLayer;
-        createInfo.subresourceRange.layerCount = descriptor->layerCount;
+        createInfo.subresourceRange.layerCount = descriptor->arrayLayerCount;
 
         if (device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
             VK_SUCCESS) {

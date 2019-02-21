@@ -29,13 +29,13 @@ namespace dawn_native {
         QueueBase(DeviceBase* device);
 
         // Dawn API
-        void Submit(uint32_t numCommands, CommandBufferBase* const* commands);
+        void Submit(uint32_t commandCount, CommandBufferBase* const* commands);
         void Signal(FenceBase* fence, uint64_t signalValue);
 
       private:
-        virtual void SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) = 0;
+        virtual void SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) = 0;
 
-        MaybeError ValidateSubmit(uint32_t numCommands, CommandBufferBase* const* commands);
+        MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands);
         MaybeError ValidateSignal(const FenceBase* fence, uint64_t signalValue);
     };
 

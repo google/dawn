@@ -30,18 +30,18 @@ namespace {
     dawn::Texture Create2DTexture(dawn::Device device,
                                   uint32_t width,
                                   uint32_t height,
-                                  uint32_t layerCount,
-                                  uint32_t levelCount,
+                                  uint32_t arrayLayerCount,
+                                  uint32_t mipLevelCount,
                                   dawn::TextureUsageBit usage) {
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
         descriptor.size.width = width;
         descriptor.size.height = height;
         descriptor.size.depth = 1;
-        descriptor.arraySize = layerCount;
+        descriptor.arrayLayerCount = arrayLayerCount;
         descriptor.sampleCount = 1;
         descriptor.format = kDefaultFormat;
-        descriptor.levelCount = levelCount;
+        descriptor.mipLevelCount = mipLevelCount;
         descriptor.usage = usage;
         return device.CreateTexture(&descriptor);
     }
@@ -110,22 +110,22 @@ protected:
         mVSModule = CreateDefaultVertexShaderModule(device);
     }
 
-    void initTexture(uint32_t layerCount, uint32_t levelCount) {
-        ASSERT(layerCount > 0 && levelCount > 0);
+    void initTexture(uint32_t arrayLayerCount, uint32_t mipLevelCount) {
+        ASSERT(arrayLayerCount > 0 && mipLevelCount > 0);
 
-        const uint32_t textureWidthLevel0 = 1 << levelCount;
-        const uint32_t textureHeightLevel0 = 1 << levelCount;
+        const uint32_t textureWidthLevel0 = 1 << mipLevelCount;
+        const uint32_t textureHeightLevel0 = 1 << mipLevelCount;
         constexpr dawn::TextureUsageBit kUsage =
             dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
         mTexture = Create2DTexture(
-            device, textureWidthLevel0, textureHeightLevel0, layerCount, levelCount, kUsage);
+            device, textureWidthLevel0, textureHeightLevel0, arrayLayerCount, mipLevelCount, kUsage);
 
         mDefaultTextureViewDescriptor.dimension = dawn::TextureViewDimension::e2DArray;
         mDefaultTextureViewDescriptor.format = kDefaultFormat;
         mDefaultTextureViewDescriptor.baseMipLevel = 0;
-        mDefaultTextureViewDescriptor.levelCount = levelCount;
+        mDefaultTextureViewDescriptor.mipLevelCount = mipLevelCount;
         mDefaultTextureViewDescriptor.baseArrayLayer = 0;
-        mDefaultTextureViewDescriptor.layerCount = layerCount;
+        mDefaultTextureViewDescriptor.arrayLayerCount = arrayLayerCount;
 
         // Create a texture with pixel = (0, 0, 0, level * 10 + layer + 1) at level `level` and
         // layer `layer`.
@@ -135,8 +135,8 @@ protected:
         ASSERT_LE(textureWidthLevel0, kPixelsPerRowPitch);
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        for (uint32_t layer = 0; layer < layerCount; ++layer) {
-            for (uint32_t level = 0; level < levelCount; ++level) {
+        for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
+            for (uint32_t level = 0; level < mipLevelCount; ++level) {
                 const uint32_t texWidth = textureWidthLevel0 >> level;
                 const uint32_t texHeight = textureHeightLevel0 >> level;
 
@@ -207,9 +207,9 @@ protected:
         dawn::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
         descriptor.dimension = dawn::TextureViewDimension::e2D;
         descriptor.baseArrayLayer = textureViewBaseLayer;
-        descriptor.layerCount = 1;
+        descriptor.arrayLayerCount = 1;
         descriptor.baseMipLevel = textureViewBaseMipLevel;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
         dawn::TextureView textureView = mTexture.CreateTextureView(&descriptor);
 
         const char* fragmentShader = R"(
@@ -246,9 +246,9 @@ protected:
         dawn::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
         descriptor.dimension = dawn::TextureViewDimension::e2DArray;
         descriptor.baseArrayLayer = textureViewBaseLayer;
-        descriptor.layerCount = kTextureViewLayerCount;
+        descriptor.arrayLayerCount = kTextureViewLayerCount;
         descriptor.baseMipLevel = textureViewBaseMipLevel;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
         dawn::TextureView textureView = mTexture.CreateTextureView(&descriptor);
 
         const char* fragmentShader = R"(
@@ -327,7 +327,7 @@ protected:
         descriptor.dimension = (isCubeMapArray) ?
             dawn::TextureViewDimension::CubeArray : dawn::TextureViewDimension::Cube;
         descriptor.baseArrayLayer = textureViewBaseLayer;
-        descriptor.layerCount = textureViewLayerCount;
+        descriptor.arrayLayerCount = textureViewLayerCount;
 
         dawn::TextureView cubeMapTextureView = mTexture.CreateTextureView(&descriptor);
 
@@ -484,9 +484,9 @@ class TextureViewRenderingTest : public DawnTest {
         descriptor.format = kDefaultFormat;
         descriptor.dimension = dimension;
         descriptor.baseArrayLayer = textureViewBaseLayer;
-        descriptor.layerCount = 1;
+        descriptor.arrayLayerCount = 1;
         descriptor.baseMipLevel = textureViewBaseLevel;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
         dawn::TextureView textureView = texture.CreateTextureView(&descriptor);
 
         dawn::ShaderModule vsModule = CreateDefaultVertexShaderModule(device);

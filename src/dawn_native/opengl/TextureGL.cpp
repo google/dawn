@@ -25,10 +25,10 @@ namespace dawn_native { namespace opengl {
     namespace {
 
         GLenum TargetForDimensionAndArrayLayers(dawn::TextureDimension dimension,
-                                                uint32_t arrayLayer) {
+                                                uint32_t arrayLayerCount) {
             switch (dimension) {
                 case dawn::TextureDimension::e2D:
-                    return (arrayLayer > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
+                    return (arrayLayerCount > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
                 default:
                     UNREACHABLE();
                     return GL_TEXTURE_2D;
@@ -154,8 +154,8 @@ namespace dawn_native { namespace opengl {
         const Texture* textureGL = ToBackend(texture);
         TextureFormatInfo textureViewFormat = GetGLFormatInfo(descriptor->format);
         glTextureView(mHandle, mTarget, textureGL->GetHandle(), textureViewFormat.internalFormat,
-                      descriptor->baseMipLevel, descriptor->levelCount, descriptor->baseArrayLayer,
-                      descriptor->layerCount);
+                      descriptor->baseMipLevel, descriptor->mipLevelCount,
+                      descriptor->baseArrayLayer, descriptor->arrayLayerCount);
     }
 
     TextureView::~TextureView() {

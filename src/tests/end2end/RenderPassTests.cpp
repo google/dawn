@@ -59,10 +59,10 @@ protected:
         descriptor.size.width = kRTSize;
         descriptor.size.height = kRTSize;
         descriptor.size.depth = 1;
-        descriptor.arraySize = 1;
+        descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
         descriptor.format = kFormat;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
         descriptor.usage =
             dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
         return device.CreateTexture(&descriptor);

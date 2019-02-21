@@ -28,7 +28,7 @@ class WireOptionalTests : public WireTest {
 TEST_F(WireOptionalTests, OptionalObjectValue) {
     dawnBindGroupLayoutDescriptor bglDesc;
     bglDesc.nextInChain = nullptr;
-    bglDesc.numBindings = 0;
+    bglDesc.bindingCount = 0;
     dawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDesc);
 
     dawnBindGroupLayout apiBindGroupLayout = api.GetNewBindGroupLayout();
@@ -45,13 +45,13 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
     dawnBindGroupDescriptor bgDesc;
     bgDesc.nextInChain = nullptr;
     bgDesc.layout = bgl;
-    bgDesc.numBindings = 1;
+    bgDesc.bindingCount = 1;
     bgDesc.bindings = &binding;
 
     dawnDeviceCreateBindGroup(device, &bgDesc);
     EXPECT_CALL(api, DeviceCreateBindGroup(
                          apiDevice, MatchesLambda([](const dawnBindGroupDescriptor* desc) -> bool {
-                             return desc->nextInChain == nullptr && desc->numBindings == 1 &&
+                             return desc->nextInChain == nullptr && desc->bindingCount == 1 &&
                                     desc->bindings[0].binding == 0 &&
                                     desc->bindings[0].sampler == nullptr &&
                                     desc->bindings[0].buffer == nullptr &&
@@ -116,7 +116,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create the pipeline layout
     dawnPipelineLayoutDescriptor layoutDescriptor;
     layoutDescriptor.nextInChain = nullptr;
-    layoutDescriptor.numBindGroupLayouts = 0;
+    layoutDescriptor.bindGroupLayoutCount = 0;
     layoutDescriptor.bindGroupLayouts = nullptr;
     dawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
     dawnPipelineLayout apiLayout = api.GetNewPipelineLayout();
@@ -138,7 +138,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     fragmentStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
-    pipelineDescriptor.numColorStates = 1;
+    pipelineDescriptor.colorStateCount = 1;
     dawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
     pipelineDescriptor.colorStates = colorStatesPtr;
 

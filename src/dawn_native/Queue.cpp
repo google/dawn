@@ -28,13 +28,13 @@ namespace dawn_native {
     QueueBase::QueueBase(DeviceBase* device) : ObjectBase(device) {
     }
 
-    void QueueBase::Submit(uint32_t numCommands, CommandBufferBase* const* commands) {
-        if (GetDevice()->ConsumedError(ValidateSubmit(numCommands, commands))) {
+    void QueueBase::Submit(uint32_t commandCount, CommandBufferBase* const* commands) {
+        if (GetDevice()->ConsumedError(ValidateSubmit(commandCount, commands))) {
             return;
         }
         ASSERT(!IsError());
 
-        SubmitImpl(numCommands, commands);
+        SubmitImpl(commandCount, commands);
     }
 
     void QueueBase::Signal(FenceBase* fence, uint64_t signalValue) {
@@ -47,10 +47,11 @@ namespace dawn_native {
         GetDevice()->GetFenceSignalTracker()->UpdateFenceOnComplete(fence, signalValue);
     }
 
-    MaybeError QueueBase::ValidateSubmit(uint32_t numCommands, CommandBufferBase* const* commands) {
+    MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
+                                         CommandBufferBase* const* commands) {
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        for (uint32_t i = 0; i < numCommands; ++i) {
+        for (uint32_t i = 0; i < commandCount; ++i) {
             // TODO(cwallez@chromium.org): Remove this once CommandBufferBuilder doesn't use the
             // builder mechanism anymore.
             if (commands[i] == nullptr) {

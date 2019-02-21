@@ -97,11 +97,11 @@ namespace dawn_native { namespace metal {
                 return true;
             }
 
-            if (texture->GetArrayLayers() != textureViewDescriptor->layerCount) {
+            if (texture->GetArrayLayers() != textureViewDescriptor->arrayLayerCount) {
                 return true;
             }
 
-            if (texture->GetNumMipLevels() != textureViewDescriptor->levelCount) {
+            if (texture->GetNumMipLevels() != textureViewDescriptor->mipLevelCount) {
                 return true;
             }
 
@@ -162,8 +162,9 @@ namespace dawn_native { namespace metal {
         } else {
             MTLPixelFormat format = MetalPixelFormat(descriptor->format);
             MTLTextureType textureViewType = MetalTextureViewType(descriptor->dimension);
-            auto mipLevelRange = NSMakeRange(descriptor->baseMipLevel, descriptor->levelCount);
-            auto arrayLayerRange = NSMakeRange(descriptor->baseArrayLayer, descriptor->layerCount);
+            auto mipLevelRange = NSMakeRange(descriptor->baseMipLevel, descriptor->mipLevelCount);
+            auto arrayLayerRange =
+                NSMakeRange(descriptor->baseArrayLayer, descriptor->arrayLayerCount);
 
             mMtlTextureView = [mtlTexture newTextureViewWithPixelFormat:format
                                                             textureType:textureViewType

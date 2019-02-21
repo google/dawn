@@ -122,15 +122,15 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Sample count must be one");
         }
 
-        if (descriptor->numColorStates > kMaxColorAttachments) {
+        if (descriptor->colorStateCount > kMaxColorAttachments) {
             return DAWN_VALIDATION_ERROR("Color States number exceeds maximum");
         }
 
-        if (descriptor->numColorStates == 0 && !descriptor->depthStencilState) {
+        if (descriptor->colorStateCount == 0 && !descriptor->depthStencilState) {
             return DAWN_VALIDATION_ERROR("Should have at least one attachment");
         }
 
-        for (uint32_t i = 0; i < descriptor->numColorStates; ++i) {
+        for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
             DAWN_TRY(ValidateColorStateDescriptor(descriptor->colorStates[i]));
         }
 
@@ -195,7 +195,7 @@ namespace dawn_native {
         ExtractModuleData(dawn::ShaderStage::Vertex, descriptor->vertexStage->module);
         ExtractModuleData(dawn::ShaderStage::Fragment, descriptor->fragmentStage->module);
 
-        for (uint32_t i = 0; i < descriptor->numColorStates; ++i) {
+        for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
             mColorAttachmentsSet.set(i);
             mColorStates[i] = *descriptor->colorStates[i];
         }

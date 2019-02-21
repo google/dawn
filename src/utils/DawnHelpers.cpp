@@ -139,10 +139,10 @@ namespace utils {
         descriptor.size.width = width;
         descriptor.size.height = height;
         descriptor.size.depth = 1;
-        descriptor.arraySize = 1;
+        descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
         descriptor.format = result.colorFormat;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
         descriptor.usage =
             dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
         result.color = device.CreateTexture(&descriptor);
@@ -208,10 +208,10 @@ namespace utils {
                                                  const dawn::BindGroupLayout* bindGroupLayout) {
         dawn::PipelineLayoutDescriptor descriptor;
         if (bindGroupLayout) {
-            descriptor.numBindGroupLayouts = 1;
+            descriptor.bindGroupLayoutCount = 1;
             descriptor.bindGroupLayouts = bindGroupLayout;
         } else {
-            descriptor.numBindGroupLayouts = 0;
+            descriptor.bindGroupLayoutCount = 0;
             descriptor.bindGroupLayouts = nullptr;
         }
         return device.CreatePipelineLayout(&descriptor);
@@ -230,7 +230,7 @@ namespace utils {
         }
 
         dawn::BindGroupLayoutDescriptor descriptor;
-        descriptor.numBindings = static_cast<uint32_t>(bindings.size());
+        descriptor.bindingCount = static_cast<uint32_t>(bindings.size());
         descriptor.bindings = bindings.data();
         return device.CreateBindGroupLayout(&descriptor);
     }
@@ -276,7 +276,7 @@ namespace utils {
 
         dawn::BindGroupDescriptor descriptor;
         descriptor.layout = layout;
-        descriptor.numBindings = bindings.size();
+        descriptor.bindingCount = bindings.size();
         descriptor.bindings = bindings.data();
 
         return device.CreateBindGroup(&descriptor);

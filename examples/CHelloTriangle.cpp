@@ -83,13 +83,13 @@ void init() {
         colorStateDescriptor.colorBlend = blendDescriptor;
         colorStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
 
-        descriptor.numColorStates = 1;
+        descriptor.colorStateCount = 1;
         dawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
         descriptor.colorStates = colorStatesPtr;
 
         dawnPipelineLayoutDescriptor pl;
         pl.nextInChain = nullptr;
-        pl.numBindGroupLayouts = 0;
+        pl.bindGroupLayoutCount = 0;
         pl.bindGroupLayouts = nullptr;
         descriptor.layout = dawnDeviceCreatePipelineLayout(device, &pl);
 

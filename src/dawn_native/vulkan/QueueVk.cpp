@@ -25,13 +25,13 @@ namespace dawn_native { namespace vulkan {
     Queue::~Queue() {
     }
 
-    void Queue::SubmitImpl(uint32_t numCommands, CommandBufferBase* const* commands) {
+    void Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
         Device* device = ToBackend(GetDevice());
 
         device->Tick();
 
         VkCommandBuffer commandBuffer = device->GetPendingCommandBuffer();
-        for (uint32_t i = 0; i < numCommands; ++i) {
+        for (uint32_t i = 0; i < commandCount; ++i) {
             ToBackend(commands[i])->RecordCommands(commandBuffer);
         }
 

@@ -95,7 +95,7 @@ namespace dawn_native {
             const TextureBase* texture,
             const TextureViewDescriptor* descriptor) {
             if (!IsArrayLayerValidForTextureViewDimension(descriptor->dimension,
-                                                          descriptor->layerCount)) {
+                                                          descriptor->arrayLayerCount)) {
                 return DAWN_VALIDATION_ERROR(
                     "The dimension of the texture view is not compatible with the layer count");
             }
@@ -121,9 +121,9 @@ namespace dawn_native {
             TextureViewDescriptor descriptor;
             descriptor.format = texture->GetFormat();
             descriptor.baseArrayLayer = 0;
-            descriptor.layerCount = texture->GetArrayLayers();
+            descriptor.arrayLayerCount = texture->GetArrayLayers();
             descriptor.baseMipLevel = 0;
-            descriptor.levelCount = texture->GetNumMipLevels();
+            descriptor.mipLevelCount = texture->GetNumMipLevels();
 
             // TODO(jiawei.shao@intel.com): support all texture dimensions.
             switch (texture->GetDimension()) {
@@ -155,8 +155,8 @@ namespace dawn_native {
 
         // TODO(jiawei.shao@intel.com): check stuff based on the dimension
         if (descriptor->size.width == 0 || descriptor->size.height == 0 ||
-            descriptor->size.depth == 0 || descriptor->arraySize == 0 ||
-            descriptor->levelCount == 0) {
+            descriptor->size.depth == 0 || descriptor->arrayLayerCount == 0 ||
+            descriptor->mipLevelCount == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
 
@@ -175,16 +175,16 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
         // TODO(jiawei.shao@intel.com): check stuff based on resource limits
-        if (descriptor->layerCount == 0 || descriptor->levelCount == 0) {
+        if (descriptor->arrayLayerCount == 0 || descriptor->mipLevelCount == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture view");
         }
 
-        if (uint64_t(descriptor->baseArrayLayer) + uint64_t(descriptor->layerCount) >
+        if (uint64_t(descriptor->baseArrayLayer) + uint64_t(descriptor->arrayLayerCount) >
             uint64_t(texture->GetArrayLayers())) {
             return DAWN_VALIDATION_ERROR("Texture view array-layer out of range");
         }
 
-        if (uint64_t(descriptor->baseMipLevel) + uint64_t(descriptor->levelCount) >
+        if (uint64_t(descriptor->baseMipLevel) + uint64_t(descriptor->mipLevelCount) >
             uint64_t(texture->GetNumMipLevels())) {
             return DAWN_VALIDATION_ERROR("Texture view mip-level out of range");
         }
@@ -288,8 +288,8 @@ namespace dawn_native {
           mDimension(descriptor->dimension),
           mFormat(descriptor->format),
           mSize(descriptor->size),
-          mArrayLayers(descriptor->arraySize),
-          mNumMipLevels(descriptor->levelCount),
+          mArrayLayerCount(descriptor->arrayLayerCount),
+          mMipLevelCount(descriptor->mipLevelCount),
           mUsage(descriptor->usage) {
     }
 
@@ -316,11 +316,11 @@ namespace dawn_native {
     }
     uint32_t TextureBase::GetArrayLayers() const {
         ASSERT(!IsError());
-        return mArrayLayers;
+        return mArrayLayerCount;
     }
     uint32_t TextureBase::GetNumMipLevels() const {
         ASSERT(!IsError());
-        return mNumMipLevels;
+        return mMipLevelCount;
     }
     dawn::TextureUsageBit TextureBase::GetUsage() const {
         ASSERT(!IsError());
@@ -353,9 +353,9 @@ namespace dawn_native {
           mTexture(texture),
           mFormat(descriptor->format),
           mBaseMipLevel(descriptor->baseMipLevel),
-          mLevelCount(descriptor->levelCount),
+          mMipLevelCount(descriptor->mipLevelCount),
           mBaseArrayLayer(descriptor->baseArrayLayer),
-          mLayerCount(descriptor->layerCount) {
+          mArrayLayerCount(descriptor->arrayLayerCount) {
     }
 
     TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -389,7 +389,7 @@ namespace dawn_native {
 
     uint32_t TextureViewBase::GetLevelCount() const {
         ASSERT(!IsError());
-        return mLevelCount;
+        return mMipLevelCount;
     }
 
     uint32_t TextureViewBase::GetBaseArrayLayer() const {
@@ -399,6 +399,6 @@ namespace dawn_native {
 
     uint32_t TextureViewBase::GetLayerCount() const {
         ASSERT(!IsError());
-        return mLayerCount;
+        return mArrayLayerCount;
     }
 }  // namespace dawn_native

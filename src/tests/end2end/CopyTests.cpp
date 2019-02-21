@@ -78,10 +78,10 @@ class CopyTests_T2B : public CopyTests {
             descriptor.size.width = textureSpec.width;
             descriptor.size.height = textureSpec.height;
             descriptor.size.depth = 1;
-            descriptor.arraySize = textureSpec.arraySize;
+            descriptor.arrayLayerCount = textureSpec.arraySize;
             descriptor.sampleCount = 1;
             descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
-            descriptor.levelCount = textureSpec.level + 1;
+            descriptor.mipLevelCount = textureSpec.level + 1;
             descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;
             dawn::Texture texture = device.CreateTexture(&descriptor);
 
@@ -188,10 +188,10 @@ protected:
         descriptor.size.width = textureSpec.width;
         descriptor.size.height = textureSpec.height;
         descriptor.size.depth = 1;
-        descriptor.arraySize = 1;
+        descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
         descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
-        descriptor.levelCount = textureSpec.level + 1;
+        descriptor.mipLevelCount = textureSpec.level + 1;
         descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;
         dawn::Texture texture = device.CreateTexture(&descriptor);
 

@@ -43,8 +43,8 @@
         "extensible": true,
         "members": [
             {"name": "layout", "type": "bind group layout"},
-            {"name": "num bindings", "type": "uint32_t"},
-            {"name": "bindings", "type": "bind group binding", "annotation": "const*", "length": "num bindings"}
+            {"name": "binding count", "type": "uint32_t"},
+            {"name": "bindings", "type": "bind group binding", "annotation": "const*", "length": "binding count"}
         ]
     },
     "bind group layout": {
@@ -63,8 +63,8 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "num bindings", "type": "uint32_t"},
-            {"name": "bindings", "type": "bind group layout binding", "annotation": "const*", "length": "num bindings"}
+            {"name": "binding count", "type": "uint32_t"},
+            {"name": "bindings", "type": "bind group layout binding", "annotation": "const*", "length": "binding count"}
         ]
     },
     "binding type": {
@@ -680,8 +680,8 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "num bind group layouts", "type": "uint32_t"},
-            {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "num bind group layouts"}
+            {"name": "bind group layout count", "type": "uint32_t"},
+            {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count"}
         ]
     },
     "pipeline stage descriptor": {
@@ -708,8 +708,8 @@
             {
                 "name": "submit",
                 "args": [
-                    {"name": "num commands", "type": "uint32_t"},
-                    {"name": "commands", "type": "command buffer", "annotation": "const*", "length": "num commands"}
+                    {"name": "command count", "type": "uint32_t"},
+                    {"name": "commands", "type": "command buffer", "annotation": "const*", "length": "command count"}
                 ]
             },
             {
@@ -894,8 +894,8 @@
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "sample count", "type": "uint32_t"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
-            {"name": "num color states", "type": "uint32_t"},
-            {"name": "color states", "type": "color state descriptor", "annotation": "const*const*", "length": "num color states"}
+            {"name": "color state count", "type": "uint32_t"},
+            {"name": "color states", "type": "color state descriptor", "annotation": "const*const*", "length": "color state count"}
         ]
     },
     "sampler": {
@@ -1040,9 +1040,9 @@
             {"name": "usage", "type": "texture usage bit"},
             {"name": "dimension", "type": "texture dimension"},
             {"name": "size", "type": "extent 3D"},
-            {"name": "array size", "type": "uint32_t"},
+            {"name": "array layer count", "type": "uint32_t"},
             {"name": "format", "type": "texture format"},
-            {"name": "level count", "type": "uint32_t"},
+            {"name": "mip level count", "type": "uint32_t"},
             {"name": "sample count", "type": "uint32_t"}
         ]
     },
@@ -1084,9 +1084,9 @@
             {"name": "format", "type": "texture format"},
             {"name": "dimension", "type": "texture view dimension"},
             {"name": "base mip level", "type": "uint32_t"},
-            {"name": "level count", "type": "uint32_t"},
+            {"name": "mip level count", "type": "uint32_t"},
             {"name": "base array layer", "type": "uint32_t"},
-            {"name": "layer count", "type": "uint32_t"}
+            {"name": "array layer count", "type": "uint32_t"}
         ],
         "TODO": [
             "jiawei.shao@intel.com: Allow choosing the aspect (depth vs. stencil)"

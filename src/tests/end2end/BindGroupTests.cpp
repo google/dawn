@@ -38,7 +38,7 @@ protected:
         std::vector<dawn::BindGroupLayout> bindingInitializer) const {
         dawn::PipelineLayoutDescriptor descriptor;
 
-        descriptor.numBindGroupLayouts = bindingInitializer.size();
+        descriptor.bindGroupLayoutCount = bindingInitializer.size();
         descriptor.bindGroupLayouts = bindingInitializer.data();
 
         return device.CreatePipelineLayout(&descriptor);
@@ -242,10 +242,10 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     descriptor.size.width = kRTSize;
     descriptor.size.height = kRTSize;
     descriptor.size.depth = 1;
-    descriptor.arraySize = 1;
+    descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
-    descriptor.levelCount = 1;
+    descriptor.mipLevelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
     dawn::Texture texture = device.CreateTexture(&descriptor);
     dawn::TextureView textureView = texture.CreateDefaultTextureView();

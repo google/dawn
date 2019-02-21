@@ -57,7 +57,7 @@ TEST_F(RenderPipelineValidationTest, ColorState) {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.numColorStates = 1;
+        descriptor.colorStateCount = 1;
 
         device.CreateRenderPipeline(&descriptor);
     }
@@ -66,7 +66,7 @@ TEST_F(RenderPipelineValidationTest, ColorState) {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.numColorStates = 0;
+        descriptor.colorStateCount = 0;
 
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }

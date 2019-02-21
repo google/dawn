@@ -62,10 +62,10 @@ class RenderPassLoadOpTests : public DawnTest {
             descriptor.size.width = kRTSize;
             descriptor.size.height = kRTSize;
             descriptor.size.depth = 1;
-            descriptor.arraySize = 1;
+            descriptor.arrayLayerCount = 1;
             descriptor.sampleCount = 1;
             descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
-            descriptor.levelCount = 1;
+            descriptor.mipLevelCount = 1;
             descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
             renderTarget = device.CreateTexture(&descriptor);
 

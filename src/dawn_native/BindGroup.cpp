@@ -100,12 +100,12 @@ namespace dawn_native {
         const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo =
             descriptor->layout->GetBindingInfo();
 
-        if (descriptor->numBindings != layoutInfo.mask.count()) {
+        if (descriptor->bindingCount != layoutInfo.mask.count()) {
             return DAWN_VALIDATION_ERROR("numBindings mismatch");
         }
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
-        for (uint32_t i = 0; i < descriptor->numBindings; ++i) {
+        for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
             const BindGroupBinding& binding = descriptor->bindings[i];
             uint32_t bindingIndex = binding.binding;
 
@@ -155,7 +155,7 @@ namespace dawn_native {
 
     BindGroupBase::BindGroupBase(DeviceBase* device, const BindGroupDescriptor* descriptor)
         : ObjectBase(device), mLayout(descriptor->layout) {
-        for (uint32_t i = 0; i < descriptor->numBindings; ++i) {
+        for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
             const BindGroupBinding& binding = descriptor->bindings[i];
 
             uint32_t bindingIndex = binding.binding;

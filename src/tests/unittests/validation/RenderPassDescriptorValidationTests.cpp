@@ -26,17 +26,17 @@ dawn::Texture CreateTexture(dawn::Device& device,
                             dawn::TextureFormat format,
                             uint32_t width,
                             uint32_t height,
-                            uint32_t arraySize,
-                            uint32_t levelCount) {
+                            uint32_t arrayLayerCount,
+                            uint32_t mipLevelCount) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dimension;
     descriptor.size.width = width;
     descriptor.size.height = height;
     descriptor.size.depth = 1;
-    descriptor.arraySize = arraySize;
+    descriptor.arrayLayerCount = arrayLayerCount;
     descriptor.sampleCount = 1;
     descriptor.format = format;
-    descriptor.levelCount = levelCount;
+    descriptor.mipLevelCount = mipLevelCount;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
 
     return device.CreateTexture(&descriptor);
@@ -239,7 +239,7 @@ TEST_F(RenderPassDescriptorValidationTest, FormatMismatch) {
     }
 }
 
-// Currently only texture views with layerCount == 1 are allowed to be color and depth stencil
+// Currently only texture views with arrayLayerCount == 1 are allowed to be color and depth stencil
 // attachments
 TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepthStencil) {
     constexpr uint32_t kLevelCount = 1;
@@ -258,15 +258,15 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
     dawn::TextureViewDescriptor baseDescriptor;
     baseDescriptor.dimension = dawn::TextureViewDimension::e2DArray;
     baseDescriptor.baseArrayLayer = 0;
-    baseDescriptor.layerCount = kArrayLayers;
+    baseDescriptor.arrayLayerCount = kArrayLayers;
     baseDescriptor.baseMipLevel = 0;
-    baseDescriptor.levelCount = kLevelCount;
+    baseDescriptor.mipLevelCount = kLevelCount;
 
-    // Using 2D array texture view with layerCount > 1 is not allowed for color
+    // Using 2D array texture view with arrayLayerCount > 1 is not allowed for color
     {
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kColorFormat;
-        descriptor.layerCount = 5;
+        descriptor.arrayLayerCount = 5;
 
         dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
         dawn::RenderPassColorAttachmentDescriptor colorAttachment;
@@ -281,11 +281,11 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
             .GetResult();
     }
 
-    // Using 2D array texture view with layerCount > 1 is not allowed for depth stencil
+    // Using 2D array texture view with arrayLayerCount > 1 is not allowed for depth stencil
     {
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kDepthStencilFormat;
-        descriptor.layerCount = 5;
+        descriptor.arrayLayerCount = 5;
 
         dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
         dawn::RenderPassDepthStencilAttachmentDescriptor depthStencilAttachment;
@@ -306,7 +306,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kColorFormat;
         descriptor.baseArrayLayer = 0;
-        descriptor.layerCount = 1;
+        descriptor.arrayLayerCount = 1;
 
         dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
         dawn::RenderPassColorAttachmentDescriptor colorAttachment;
@@ -325,7 +325,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kDepthStencilFormat;
         descriptor.baseArrayLayer = 0;
-        descriptor.layerCount = 1;
+        descriptor.arrayLayerCount = 1;
 
         dawn::TextureView depthStencilTextureView =
             depthStencilTexture.CreateTextureView(&descriptor);
@@ -347,7 +347,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kColorFormat;
         descriptor.baseArrayLayer = kArrayLayers - 1;
-        descriptor.layerCount = 1;
+        descriptor.arrayLayerCount = 1;
 
         dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
         dawn::RenderPassColorAttachmentDescriptor colorAttachment;
@@ -366,7 +366,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kDepthStencilFormat;
         descriptor.baseArrayLayer = kArrayLayers - 1;
-        descriptor.layerCount = 1;
+        descriptor.arrayLayerCount = 1;
 
         dawn::TextureView depthStencilTextureView =
             depthStencilTexture.CreateTextureView(&descriptor);
@@ -384,7 +384,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
     }
 }
 
-// Only 2D texture views with levelCount == 1 are allowed to be color attachments
+// Only 2D texture views with mipLevelCount == 1 are allowed to be color attachments
 TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepthStencil) {
     constexpr uint32_t kArrayLayers = 1;
     constexpr uint32_t kSize = 32;
@@ -402,15 +402,15 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
     dawn::TextureViewDescriptor baseDescriptor;
     baseDescriptor.dimension = dawn::TextureViewDimension::e2D;
     baseDescriptor.baseArrayLayer = 0;
-    baseDescriptor.layerCount = kArrayLayers;
+    baseDescriptor.arrayLayerCount = kArrayLayers;
     baseDescriptor.baseMipLevel = 0;
-    baseDescriptor.levelCount = kLevelCount;
+    baseDescriptor.mipLevelCount = kLevelCount;
 
-    // Using 2D texture view with levelCount > 1 is not allowed for color
+    // Using 2D texture view with mipLevelCount > 1 is not allowed for color
     {
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kColorFormat;
-        descriptor.levelCount = 2;
+        descriptor.mipLevelCount = 2;
 
         dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
         dawn::RenderPassColorAttachmentDescriptor colorAttachment;
@@ -424,11 +424,11 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
             .GetResult();
     }
 
-    // Using 2D texture view with levelCount > 1 is not allowed for depth stencil
+    // Using 2D texture view with mipLevelCount > 1 is not allowed for depth stencil
     {
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kDepthStencilFormat;
-        descriptor.levelCount = 2;
+        descriptor.mipLevelCount = 2;
 
         dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
         dawn::RenderPassDepthStencilAttachmentDescriptor depthStencilAttachment;
@@ -449,7 +449,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kColorFormat;
         descriptor.baseMipLevel = 0;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
 
         dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
         dawn::RenderPassColorAttachmentDescriptor colorAttachment;
@@ -468,7 +468,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kDepthStencilFormat;
         descriptor.baseMipLevel = 0;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
 
         dawn::TextureView depthStencilTextureView =
             depthStencilTexture.CreateTextureView(&descriptor);
@@ -490,7 +490,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kColorFormat;
         descriptor.baseMipLevel = kLevelCount - 1;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
 
         dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
         dawn::RenderPassColorAttachmentDescriptor colorAttachment;
@@ -509,7 +509,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         dawn::TextureViewDescriptor descriptor = baseDescriptor;
         descriptor.format = kDepthStencilFormat;
         descriptor.baseMipLevel = kLevelCount - 1;
-        descriptor.levelCount = 1;
+        descriptor.mipLevelCount = 1;
 
         dawn::TextureView depthStencilTextureView =
             depthStencilTexture.CreateTextureView(&descriptor);

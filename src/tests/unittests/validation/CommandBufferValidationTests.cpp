@@ -181,9 +181,9 @@ TEST_F(CommandBufferValidationTest, TextureWithReadAndWriteUsage) {
     textureDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
     textureDescriptor.dimension = dawn::TextureDimension::e2D;
     textureDescriptor.size = {1, 1, 1};
-    textureDescriptor.arraySize = 1;
+    textureDescriptor.arrayLayerCount = 1;
     textureDescriptor.sampleCount = 1;
-    textureDescriptor.levelCount = 1;
+    textureDescriptor.mipLevelCount = 1;
     dawn::Texture texture = device.CreateTexture(&textureDescriptor);
     dawn::TextureView view = texture.CreateDefaultTextureView();
 

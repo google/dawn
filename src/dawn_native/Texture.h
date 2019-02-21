@@ -68,8 +68,8 @@ namespace dawn_native {
         dawn::TextureDimension mDimension;
         dawn::TextureFormat mFormat;
         Extent3D mSize;
-        uint32_t mArrayLayers;
-        uint32_t mNumMipLevels;
+        uint32_t mArrayLayerCount;
+        uint32_t mMipLevelCount;
         dawn::TextureUsageBit mUsage = dawn::TextureUsageBit::None;
     };
 
@@ -95,9 +95,9 @@ namespace dawn_native {
 
         dawn::TextureFormat mFormat;
         uint32_t mBaseMipLevel;
-        uint32_t mLevelCount;
+        uint32_t mMipLevelCount;
         uint32_t mBaseArrayLayer;
-        uint32_t mLayerCount;
+        uint32_t mArrayLayerCount;
     };
 
 }  // namespace dawn_native

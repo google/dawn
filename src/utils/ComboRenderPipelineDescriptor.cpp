@@ -39,7 +39,7 @@ namespace utils {
 
         // Set defaults for the color state descriptors.
         {
-            descriptor->numColorStates = 1;
+            descriptor->colorStateCount = 1;
             descriptor->colorStates = &cColorStates[0];
 
             dawn::BlendDescriptor blend;
