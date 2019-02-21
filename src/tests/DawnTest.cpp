@@ -27,7 +27,9 @@
 #include "utils/TerribleCommandBuffer.h"
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <unordered_map>
 #include "GLFW/glfw3.h"
 
@@ -114,6 +116,31 @@ void DawnTestEnvironment::SetUp() {
             utils::DiscoverAdapter(mInstance.get(), mWindows[backend], backend);
         }
     }
+
+    std::cout << "Testing configuration\n";
+    std::cout << "---------------------\n";
+    std::cout << "UseWire: " << (mUseWire ? "true" : "false") << "\n";
+    std::cout << "\n";
+
+    // Preparing for outputting hex numbers
+    std::cout << std::showbase << std::hex << std::setfill('0') << std::setw(4);
+
+    std::cout << "System adapters: \n";
+    for (const dawn_native::Adapter& adapter : mInstance->GetAdapters()) {
+        const dawn_native::PCIInfo& pci = adapter.GetPCIInfo();
+
+        std::ostringstream vendorId;
+        std::ostringstream deviceId;
+        vendorId << std::setfill('0') << std::uppercase << std::internal << std::hex << std::setw(4)
+                 << pci.vendorId;
+        deviceId << std::setfill('0') << std::uppercase << std::internal << std::hex << std::setw(4)
+                 << pci.deviceId;
+
+        std::cout << " - \"" << pci.name << "\" on " << ParamName(adapter.GetBackendType()) << "\n";
+        std::cout << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
+                  << "\n";
+    }
+    std::cout << std::endl;
 }
 
 bool DawnTestEnvironment::UseWire() const {
