@@ -186,12 +186,13 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
 //     DAWN_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
-#define DAWN_INSTANTIATE_TEST(testName, firstParam, ...)                                           \
-    const decltype(firstParam) testName##params[] = {firstParam, ##__VA_ARGS__};                   \
-    INSTANTIATE_TEST_CASE_P(, testName,                                                            \
-                            testing::ValuesIn(::detail::FilterBackends(                            \
-                                testName##params, sizeof(testName##params) / sizeof(firstParam))), \
-                            ::detail::GetParamName);
+#define DAWN_INSTANTIATE_TEST(testName, firstParam, ...)                         \
+    const decltype(firstParam) testName##params[] = {firstParam, ##__VA_ARGS__}; \
+    INSTANTIATE_TEST_SUITE_P(                                                    \
+        , testName,                                                              \
+        testing::ValuesIn(::detail::FilterBackends(                              \
+            testName##params, sizeof(testName##params) / sizeof(firstParam))),   \
+        ::detail::GetParamName);
 
 // Skip a test when the given condition is satisfied.
 #define DAWN_SKIP_TEST_IF(condition)                               \
