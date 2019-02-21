@@ -118,4 +118,4 @@ TEST_P(DrawTest, Uint32) {
     Test(6, 1, 0, 0, filled, filled);
 }
 
-DAWN_INSTANTIATE_TEST(DrawTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(DrawTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

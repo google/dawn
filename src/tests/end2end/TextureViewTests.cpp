@@ -631,6 +631,6 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALayerOf2DArrayTextureAsCol
     }
 }
 
-DAWN_INSTANTIATE_TEST(TextureViewSamplingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(TextureViewSamplingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
 
-DAWN_INSTANTIATE_TEST(TextureViewRenderingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(TextureViewRenderingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

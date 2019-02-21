@@ -224,4 +224,4 @@ TEST_P(FenceTests, DISABLED_DestroyBeforeOnCompletionEnd) {
     WaitForCompletedValue(fence, 1);
 }
 
-DAWN_INSTANTIATE_TEST(FenceTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(FenceTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

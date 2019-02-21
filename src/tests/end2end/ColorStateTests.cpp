@@ -1011,4 +1011,4 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(ColorStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(ColorStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

@@ -703,4 +703,4 @@ DAWN_INSTANTIATE_TEST(DepthStencilStateTest,
                      D3D12Backend,
                      MetalBackend,
                      OpenGLBackend,
-                     VulkanBackend)
+                     VulkanBackend);

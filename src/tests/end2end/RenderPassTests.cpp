@@ -128,4 +128,4 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
     EXPECT_PIXEL_RGBA8_EQ(kGreen, renderTarget2, kRTSize - 1, 1);
 }
 
-DAWN_INSTANTIATE_TEST(RenderPassTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(RenderPassTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

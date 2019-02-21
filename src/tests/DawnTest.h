@@ -192,7 +192,7 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
         , testName,                                                              \
         testing::ValuesIn(::detail::FilterBackends(                              \
             testName##params, sizeof(testName##params) / sizeof(firstParam))),   \
-        ::detail::GetParamName);
+        ::detail::GetParamName)
 
 // Skip a test when the given condition is satisfied.
 #define DAWN_SKIP_TEST_IF(condition)                               \

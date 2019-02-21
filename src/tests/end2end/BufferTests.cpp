@@ -81,7 +81,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
     buffer.Unmap();
 }
 
-DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
 
 class BufferMapWriteTests : public DawnTest {
     protected:
@@ -146,7 +146,7 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
 }
 
-DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
 
 class BufferSetSubDataTests : public DawnTest {
 };
@@ -228,4 +228,4 @@ DAWN_INSTANTIATE_TEST(BufferSetSubDataTests,
                      D3D12Backend,
                      MetalBackend,
                      OpenGLBackend,
-                     VulkanBackend)
+                     VulkanBackend);

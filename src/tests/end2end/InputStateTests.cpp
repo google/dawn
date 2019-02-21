@@ -519,7 +519,7 @@ TEST_P(InputStateTest, MultiplePipelinesMixedInputState) {
     CheckResult(1, 4);
 }
 
-DAWN_INSTANTIATE_TEST(InputStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(InputStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
 
 // TODO for the input state:
 //  - Add more vertex formats

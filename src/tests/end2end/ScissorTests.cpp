@@ -176,4 +176,4 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 99, 99);
 }
 
-DAWN_INSTANTIATE_TEST(ScissorTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(ScissorTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

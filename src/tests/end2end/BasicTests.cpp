@@ -33,4 +33,4 @@ TEST_P(BasicTests, BufferSetSubData) {
     EXPECT_BUFFER_U8_EQ(value, buffer, 0);
 }
 
-DAWN_INSTANTIATE_TEST(BasicTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend)
+DAWN_INSTANTIATE_TEST(BasicTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
