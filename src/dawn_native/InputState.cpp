@@ -95,7 +95,7 @@ namespace dawn_native {
         return mAttributesSetMask;
     }
 
-    const InputStateBase::AttributeInfo& InputStateBase::GetAttribute(uint32_t location) const {
+    const VertexAttributeDescriptor& InputStateBase::GetAttribute(uint32_t location) const {
         ASSERT(mAttributesSetMask[location]);
         return mAttributeInfos[location];
     }
@@ -104,7 +104,7 @@ namespace dawn_native {
         return mInputsSetMask;
     }
 
-    const InputStateBase::InputInfo& InputStateBase::GetInput(uint32_t slot) const {
+    const VertexInputDescriptor& InputStateBase::GetInput(uint32_t slot) const {
         ASSERT(mInputsSetMask[slot]);
         return mInputInfos[slot];
     }
@@ -135,21 +135,33 @@ namespace dawn_native {
             HandleError("Binding slot out of bounds");
             return;
         }
+        // If attribute->offset is close to 0xFFFFFFFF, the validation below to add
+        // attribute->offset and VertexFormatSize(attribute->format) might overflow on a
+        // 32bit machine, then it can pass the validation incorrectly. We need to catch it.
+        if (attribute->offset >= kMaxVertexAttributeEnd) {
+            HandleError("Setting attribute offset out of bounds");
+            return;
+        }
+        if (attribute->offset + VertexFormatSize(attribute->format) > kMaxVertexAttributeEnd) {
+            HandleError("Setting attribute offset out of bounds");
+            return;
+        }
         if (mAttributesSetMask[attribute->shaderLocation]) {
             HandleError("Setting already set attribute");
             return;
         }
 
         mAttributesSetMask.set(attribute->shaderLocation);
-        auto& info = mAttributeInfos[attribute->shaderLocation];
-        info.inputSlot = attribute->inputSlot;
-        info.offset = attribute->offset;
-        info.format = attribute->format;
+        mAttributeInfos[attribute->shaderLocation] = *attribute;
     }
 
     void InputStateBuilder::SetInput(const VertexInputDescriptor* input) {
         if (input->inputSlot >= kMaxVertexInputs) {
             HandleError("Setting input out of bounds");
+            return;
+        }
+        if (input->stride > kMaxVertexInputStride) {
+            HandleError("Setting input stride out of bounds");
             return;
         }
         if (mInputsSetMask[input->inputSlot]) {
@@ -158,9 +170,7 @@ namespace dawn_native {
         }
 
         mInputsSetMask.set(input->inputSlot);
-        auto& info = mInputInfos[input->inputSlot];
-        info.stride = input->stride;
-        info.stepMode = input->stepMode;
+        mInputInfos[input->inputSlot] = *input;
     }
 
 }  // namespace dawn_native

@@ -146,9 +146,9 @@ TEST_F(InputStateTest, AlreadySetInput) {
         .GetResult();
 }
 
-// Check out of bounds condition on SetInput
-TEST_F(InputStateTest, SetInputOutOfBounds) {
-    // Control case, setting last input
+// Check out of bounds condition on input slot
+TEST_F(InputStateTest, SetInputSlotOutOfBounds) {
+    // Control case, setting last input slot
     dawn::VertexInputDescriptor input;
     input.inputSlot = kMaxVertexInputs - 1;
     input.stride = 0;
@@ -156,8 +156,22 @@ TEST_F(InputStateTest, SetInputOutOfBounds) {
 
     AssertWillBeSuccess(device.CreateInputStateBuilder()).SetInput(&input).GetResult();
 
-    // Test OOB
+    // Test input slot OOB
     input.inputSlot = kMaxVertexInputs;
+    AssertWillBeError(device.CreateInputStateBuilder()).SetInput(&input).GetResult();
+}
+
+// Check out of bounds condition on input stride
+TEST_F(InputStateTest, SetInputStrideOutOfBounds) {
+    // Control case, setting max input stride
+    dawn::VertexInputDescriptor input;
+    input.inputSlot = 0;
+    input.stride = kMaxVertexInputStride;
+    input.stepMode = dawn::InputStepMode::Vertex;
+    AssertWillBeSuccess(device.CreateInputStateBuilder()).SetInput(&input).GetResult();
+
+    // Test input stride OOB
+    input.stride = kMaxVertexInputStride + 1;
     AssertWillBeError(device.CreateInputStateBuilder()).SetInput(&input).GetResult();
 }
 
@@ -183,9 +197,9 @@ TEST_F(InputStateTest, AlreadySetAttribute) {
         .GetResult();
 }
 
-// Check out of bounds condition on SetAttribute
-TEST_F(InputStateTest, SetAttributeOutOfBounds) {
-    // Control case, setting last attribute
+// Check out of bounds condition on attribute shader location
+TEST_F(InputStateTest, SetAttributeLocationOutOfBounds) {
+    // Control case, setting last attribute shader location
     dawn::VertexAttributeDescriptor attribute;
     attribute.shaderLocation = kMaxVertexAttributes - 1;
     attribute.inputSlot = 0;
@@ -197,8 +211,42 @@ TEST_F(InputStateTest, SetAttributeOutOfBounds) {
         .SetAttribute(&attribute)
         .GetResult();
 
-    // Test OOB
+    // Test attribute location OOB
     attribute.shaderLocation = kMaxVertexAttributes;
+    AssertWillBeError(device.CreateInputStateBuilder())
+        .SetInput(&kBaseInput)
+        .SetAttribute(&attribute)
+        .GetResult();
+}
+
+// Check attribute offset out of bounds
+TEST_F(InputStateTest, SetAttributeOffsetOutOfBounds) {
+    // Control case, setting max attribute offset for FloatR32 vertex format
+    dawn::VertexAttributeDescriptor attribute;
+    attribute.shaderLocation = 0;
+    attribute.inputSlot = 0;
+    attribute.offset = kMaxVertexAttributeEnd - sizeof(dawn::VertexFormat::FloatR32);
+    attribute.format = dawn::VertexFormat::FloatR32;
+    AssertWillBeSuccess(device.CreateInputStateBuilder())
+        .SetInput(&kBaseInput)
+        .SetAttribute(&attribute)
+        .GetResult();
+
+    // Test attribute offset out of bounds
+    attribute.offset = kMaxVertexAttributeEnd - 1;
+    AssertWillBeError(device.CreateInputStateBuilder())
+        .SetInput(&kBaseInput)
+        .SetAttribute(&attribute)
+        .GetResult();
+}
+
+// Check attribute offset overflow
+TEST_F(InputStateTest, SetAttributeOffsetOverflow) {
+    dawn::VertexAttributeDescriptor attribute;
+    attribute.shaderLocation = 0;
+    attribute.inputSlot = 0;
+    attribute.offset = std::numeric_limits<uint32_t>::max();
+    attribute.format = dawn::VertexFormat::FloatR32;
     AssertWillBeError(device.CreateInputStateBuilder())
         .SetInput(&kBaseInput)
         .SetAttribute(&attribute)

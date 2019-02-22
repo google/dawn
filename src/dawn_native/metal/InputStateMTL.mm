@@ -66,7 +66,7 @@ namespace dawn_native { namespace metal {
             if (!attributesSetMask[i]) {
                 continue;
             }
-            const AttributeInfo& info = GetAttribute(i);
+            const VertexAttributeDescriptor& info = GetAttribute(i);
 
             auto attribDesc = [MTLVertexAttributeDescriptor new];
             attribDesc.format = VertexFormatType(info.format);
@@ -77,7 +77,7 @@ namespace dawn_native { namespace metal {
         }
 
         for (uint32_t i : IterateBitSet(GetInputsSetMask())) {
-            const InputInfo& info = GetInput(i);
+            const VertexInputDescriptor& info = GetInput(i);
 
             auto layoutDesc = [MTLVertexBufferLayoutDescriptor new];
             if (info.stride == 0) {

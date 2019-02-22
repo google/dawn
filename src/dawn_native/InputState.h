@@ -36,27 +36,16 @@ namespace dawn_native {
       public:
         InputStateBase(InputStateBuilder* builder);
 
-        struct AttributeInfo {
-            uint32_t inputSlot;
-            dawn::VertexFormat format;
-            uint32_t offset;
-        };
-
-        struct InputInfo {
-            uint32_t stride;
-            dawn::InputStepMode stepMode;
-        };
-
         const std::bitset<kMaxVertexAttributes>& GetAttributesSetMask() const;
-        const AttributeInfo& GetAttribute(uint32_t location) const;
+        const VertexAttributeDescriptor& GetAttribute(uint32_t location) const;
         const std::bitset<kMaxVertexInputs>& GetInputsSetMask() const;
-        const InputInfo& GetInput(uint32_t slot) const;
+        const VertexInputDescriptor& GetInput(uint32_t slot) const;
 
       private:
         std::bitset<kMaxVertexAttributes> mAttributesSetMask;
-        std::array<AttributeInfo, kMaxVertexAttributes> mAttributeInfos;
+        std::array<VertexAttributeDescriptor, kMaxVertexAttributes> mAttributeInfos;
         std::bitset<kMaxVertexInputs> mInputsSetMask;
-        std::array<InputInfo, kMaxVertexInputs> mInputInfos;
+        std::array<VertexInputDescriptor, kMaxVertexInputs> mInputInfos;
     };
 
     class InputStateBuilder : public Builder<InputStateBase> {
@@ -73,9 +62,9 @@ namespace dawn_native {
         InputStateBase* GetResultImpl() override;
 
         std::bitset<kMaxVertexAttributes> mAttributesSetMask;
-        std::array<InputStateBase::AttributeInfo, kMaxVertexAttributes> mAttributeInfos;
+        std::array<VertexAttributeDescriptor, kMaxVertexAttributes> mAttributeInfos;
         std::bitset<kMaxVertexInputs> mInputsSetMask;
-        std::array<InputStateBase::InputInfo, kMaxVertexInputs> mInputInfos;
+        std::array<VertexInputDescriptor, kMaxVertexInputs> mInputInfos;
     };
 
 }  // namespace dawn_native
