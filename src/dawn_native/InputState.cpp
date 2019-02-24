@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 namespace dawn_native {
 
@@ -133,6 +134,9 @@ namespace dawn_native {
         }
         if (attribute->inputSlot >= kMaxVertexInputs) {
             HandleError("Binding slot out of bounds");
+            return;
+        }
+        if (GetDevice()->ConsumedError(ValidateVertexFormat(attribute->format))) {
             return;
         }
         // If attribute->offset is close to 0xFFFFFFFF, the validation below to add
