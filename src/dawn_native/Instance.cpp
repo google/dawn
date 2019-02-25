@@ -54,6 +54,10 @@ namespace dawn_native {
     void InstanceBase::DiscoverDefaultAdapters() {
         EnsureBackendConnections();
 
+        if (mDiscoveredDefaultAdapters) {
+            return;
+        }
+
         // Query and merge all default adapters for all backends
         for (std::unique_ptr<BackendConnection>& backend : mBackends) {
             std::vector<std::unique_ptr<AdapterBase>> backendAdapters =
@@ -65,6 +69,8 @@ namespace dawn_native {
                 mAdapters.push_back(std::move(adapter));
             }
         }
+
+        mDiscoveredDefaultAdapters = true;
     }
 
     // This is just a wrapper around the real logic that uses Error.h error handling.

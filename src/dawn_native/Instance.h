@@ -50,6 +50,7 @@ namespace dawn_native {
         MaybeError DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options);
 
         bool mBackendsConnected = false;
+        bool mDiscoveredDefaultAdapters = false;
 
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<std::unique_ptr<AdapterBase>> mAdapters;
