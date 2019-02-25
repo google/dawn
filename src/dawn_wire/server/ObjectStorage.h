@@ -60,12 +60,14 @@ namespace dawn_wire { namespace server {
         using Data = ObjectData<T>;
 
         KnownObjects() {
-            // Pre-allocate ID 0 to refer to the null handle.
-            Data nullObject;
-            nullObject.handle = nullptr;
-            nullObject.valid = true;
-            nullObject.allocated = true;
-            mKnown.push_back(nullObject);
+            // Reserve ID 0 so that it can be used to represent nullptr for optional object values
+            // in the wire format. However don't tag it as allocated so that it is an error to ask
+            // KnownObjects for ID 0.
+            Data reservation;
+            reservation.handle = nullptr;
+            reservation.valid = false;
+            reservation.allocated = false;
+            mKnown.push_back(reservation);
         }
 
         // Get a backend objects for a given client ID.
