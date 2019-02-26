@@ -225,6 +225,9 @@ config("glfw_public") {
 static_library("glfw") {
   public_configs = [ ":glfw_public" ]
 
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+
   if (is_msvc) {
     # nonstandard extension, function/data pointer conversion in expression
     cflags_c = [ "/wd4152" ]
@@ -335,6 +338,9 @@ if (dawn_standalone) {
     include_dirs = [ "glm" ]
   }
   source_set("glm") {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+
     public_configs = [ ":glm_public_config" ]
     # GLM is header only but has too many files to list them.
   }
