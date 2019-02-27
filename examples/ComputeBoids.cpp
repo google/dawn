@@ -277,7 +277,7 @@ void initSim() {
     }
 }
 
-dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& renderPass, size_t i) {
+dawn::CommandBuffer createCommandBuffer(const dawn::Texture backbuffer, size_t i) {
     static const uint32_t zeroOffsets[1] = {0};
     auto& bufferDst = particleBuffers[(i + 1) % 2];
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -291,7 +291,9 @@ dawn::CommandBuffer createCommandBuffer(const dawn::RenderPassDescriptor& render
     }
 
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
+        utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultTextureView()},
+                                                    depthStencilView);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(renderPipeline);
         pass.SetVertexBuffers(0, 1, &bufferDst, zeroOffsets);
         pass.SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets);
@@ -316,11 +318,9 @@ void init() {
 }
 
 void frame() {
-    dawn::Texture backbuffer;
-    dawn::RenderPassDescriptor renderPass;
-    GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
+    dawn::Texture backbuffer = swapchain.GetNextTexture();
 
-    dawn::CommandBuffer commandBuffer = createCommandBuffer(renderPass, pingpong);
+    dawn::CommandBuffer commandBuffer = createCommandBuffer(backbuffer, pingpong);
     queue.Submit(1, &commandBuffer);
     swapchain.Present(backbuffer);
     DoFlush();

@@ -546,7 +546,7 @@ namespace dawn_native { namespace opengl {
 
                 // Load op - color
                 if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
-                    glClearBufferfv(GL_COLOR, i, attachmentInfo.clearColor.data());
+                    glClearBufferfv(GL_COLOR, i, &attachmentInfo.clearColor.r);
                 }
             }
 

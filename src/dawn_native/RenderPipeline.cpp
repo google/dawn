@@ -18,7 +18,6 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/InputState.h"
-#include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/Texture.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 

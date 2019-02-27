@@ -82,22 +82,13 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
     dawn::Texture renderTarget2 = CreateDefault2DTexture();
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    dawn::RenderPassColorAttachmentDescriptor colorAttachment;
-    colorAttachment.loadOp = dawn::LoadOp::Clear;
-    colorAttachment.storeOp = dawn::StoreOp::Store;
-    colorAttachment.resolveTarget = nullptr;
-
     {
         // In the first render pass we clear renderTarget1 to red and draw a blue triangle in the
         // bottom left of renderTarget1.
-        colorAttachment.clearColor = { 1.0, 0.0, 0.0, 1.0 };
+        utils::ComboRenderPassDescriptor renderPass({renderTarget1.CreateDefaultTextureView()});
+        renderPass.cColorAttachmentsInfoPtr[0]->clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
 
-        colorAttachment.attachment = renderTarget1.CreateDefaultTextureView();
-        dawn::RenderPassDescriptor renderPass = device.CreateRenderPassDescriptorBuilder()
-            .SetColorAttachments(1, &colorAttachment)
-            .GetResult();
-
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
@@ -106,13 +97,10 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
     {
         // In the second render pass we clear renderTarget2 to green and draw a blue triangle in the
         // bottom left of renderTarget2.
-        colorAttachment.attachment = renderTarget2.CreateDefaultTextureView();
-        colorAttachment.clearColor = { 0.0, 1.0, 0.0, 1.0 };
-        dawn::RenderPassDescriptor renderPass = device.CreateRenderPassDescriptorBuilder()
-            .SetColorAttachments(1, &colorAttachment)
-            .GetResult();
+        utils::ComboRenderPassDescriptor renderPass({renderTarget2.CreateDefaultTextureView()});
+        renderPass.cColorAttachmentsInfoPtr[0]->clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
 
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();

@@ -25,7 +25,6 @@
 #include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
-#include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/RingBuffer.h"
 #include "dawn_native/Sampler.h"
@@ -48,7 +47,6 @@ namespace dawn_native { namespace null {
     using InputState = InputStateBase;
     using PipelineLayout = PipelineLayoutBase;
     class Queue;
-    using RenderPassDescriptor = RenderPassDescriptorBase;
     using RenderPipeline = RenderPipelineBase;
     using Sampler = SamplerBase;
     using ShaderModule = ShaderModuleBase;
@@ -67,7 +65,6 @@ namespace dawn_native { namespace null {
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassDescriptorType = RenderPassDescriptor;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
@@ -93,8 +90,6 @@ namespace dawn_native { namespace null {
 
         CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) override;
         InputStateBase* CreateInputState(InputStateBuilder* builder) override;
-        RenderPassDescriptorBase* CreateRenderPassDescriptor(
-            RenderPassDescriptorBuilder* builder) override;
 
         Serial GetCompletedCommandSerial() const final override;
         Serial GetLastSubmittedCommandSerial() const final override;

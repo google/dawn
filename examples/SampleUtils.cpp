@@ -170,35 +170,6 @@ dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device) {
     return depthStencilTexture.CreateDefaultTextureView();
 }
 
-void GetNextRenderPassDescriptor(const dawn::Device& device,
-    const dawn::SwapChain& swapchain,
-    const dawn::TextureView& depthStencilView,
-    dawn::Texture* backbuffer,
-    dawn::RenderPassDescriptor* info) {
-    *backbuffer = swapchain.GetNextTexture();
-    auto backbufferView = backbuffer->CreateDefaultTextureView();
-    dawn::RenderPassColorAttachmentDescriptor colorAttachment;
-    colorAttachment.attachment = backbufferView;
-    colorAttachment.resolveTarget = nullptr;
-    colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-    colorAttachment.loadOp = dawn::LoadOp::Clear;
-    colorAttachment.storeOp = dawn::StoreOp::Store;
-
-    dawn::RenderPassDepthStencilAttachmentDescriptor depthStencilAttachment;
-    depthStencilAttachment.attachment = depthStencilView;
-    depthStencilAttachment.depthLoadOp = dawn::LoadOp::Clear;
-    depthStencilAttachment.stencilLoadOp = dawn::LoadOp::Clear;
-    depthStencilAttachment.clearDepth = 1.0f;
-    depthStencilAttachment.clearStencil = 0;
-    depthStencilAttachment.depthStoreOp = dawn::StoreOp::Store;
-    depthStencilAttachment.stencilStoreOp = dawn::StoreOp::Store;
-
-    *info = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachments(1, &colorAttachment)
-        .SetDepthStencilAttachment(&depthStencilAttachment)
-        .GetResult();
-}
-
 bool InitSample(int argc, const char** argv) {
     for (int i = 1; i < argc; i++) {
         if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {

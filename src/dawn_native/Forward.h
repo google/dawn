@@ -34,8 +34,6 @@ namespace dawn_native {
     class PipelineBase;
     class PipelineLayoutBase;
     class QueueBase;
-    class RenderPassDescriptorBase;
-    class RenderPassDescriptorBuilder;
     class RenderPassEncoderBase;
     class RenderPipelineBase;
     class SamplerBase;

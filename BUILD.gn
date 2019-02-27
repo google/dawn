@@ -483,8 +483,6 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Queue.h",
     "src/dawn_native/RefCounted.cpp",
     "src/dawn_native/RefCounted.h",
-    "src/dawn_native/RenderPassDescriptor.cpp",
-    "src/dawn_native/RenderPassDescriptor.h",
     "src/dawn_native/RenderPassEncoder.cpp",
     "src/dawn_native/RenderPassEncoder.h",
     "src/dawn_native/RenderPipeline.cpp",

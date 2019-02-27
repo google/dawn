@@ -148,10 +148,10 @@ namespace dawn_native { namespace vulkan {
 
                     attachments[attachmentCount] = view->GetHandle();
 
-                    clearValues[attachmentCount].color.float32[0] = attachmentInfo.clearColor[0];
-                    clearValues[attachmentCount].color.float32[1] = attachmentInfo.clearColor[1];
-                    clearValues[attachmentCount].color.float32[2] = attachmentInfo.clearColor[2];
-                    clearValues[attachmentCount].color.float32[3] = attachmentInfo.clearColor[3];
+                    clearValues[attachmentCount].color.float32[0] = attachmentInfo.clearColor.r;
+                    clearValues[attachmentCount].color.float32[1] = attachmentInfo.clearColor.g;
+                    clearValues[attachmentCount].color.float32[2] = attachmentInfo.clearColor.b;
+                    clearValues[attachmentCount].color.float32[3] = attachmentInfo.clearColor.a;
 
                     attachmentCount++;
                 }

@@ -62,7 +62,7 @@ namespace dawn_native {
         Ref<TextureViewBase> resolveTarget;
         dawn::LoadOp loadOp;
         dawn::StoreOp storeOp;
-        std::array<float, 4> clearColor = {{0.0f, 0.0f, 0.0f, 0.0f}};
+        dawn_native::Color clearColor;
     };
 
     struct RenderPassDepthStencilAttachmentInfo {

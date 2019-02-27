@@ -285,7 +285,7 @@
             {
                 "name": "begin render pass",
                 "args": [
-                    {"name": "info", "type": "render pass descriptor"}
+                    {"name": "info", "type": "render pass descriptor", "annotation": "const*"}
                 ],
                 "returns": "render pass encoder"
             },
@@ -442,10 +442,6 @@
                 "args": [
                     {"name": "descriptor", "type": "fence descriptor", "annotation": "const*"}
                 ]
-            },
-            {
-                "name": "create render pass descriptor builder",
-                "returns": "render pass descriptor builder"
             },
             {
                 "name": "create input state builder",
@@ -746,31 +742,13 @@
         ]
     },
 
-    "render pass descriptor builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "render pass descriptor"
-            },
-            {
-                "name": "set color attachments",
-                "args": [
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "color attachments", "type": "render pass color attachment descriptor", "annotation": "const*", "length": "count"}
-                ]
-            },
-            {
-                "name": "set depth stencil attachment",
-                "args": [
-                    {"name": "depth stencil attachment", "type": "render pass depth stencil attachment descriptor", "annotation": "const*"}
-                ]
-            }
-        ],
-        "TODO": "Remove this builder and use render pass descriptor directly"
-    },
     "render pass descriptor": {
-        "category": "object"
+        "category": "structure",
+        "members": [
+            {"name": "color attachment count", "type": "uint32_t"},
+            {"name": "color attachments", "type": "render pass color attachment descriptor", "annotation": "const*const*", "length": "color attachment count"},
+            {"name": "depth stencil attachment", "type": "render pass depth stencil attachment descriptor", "annotation": "const*", "optional": true}
+        ]
     },
     "render pass encoder": {
         "category": "object",

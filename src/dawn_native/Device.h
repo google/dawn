@@ -61,8 +61,6 @@ namespace dawn_native {
 
         virtual CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) = 0;
         virtual InputStateBase* CreateInputState(InputStateBuilder* builder) = 0;
-        virtual RenderPassDescriptorBase* CreateRenderPassDescriptor(
-            RenderPassDescriptorBuilder* builder) = 0;
 
         virtual Serial GetCompletedCommandSerial() const = 0;
         virtual Serial GetLastSubmittedCommandSerial() const = 0;
@@ -97,7 +95,6 @@ namespace dawn_native {
         InputStateBuilder* CreateInputStateBuilder();
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
         QueueBase* CreateQueue();
-        RenderPassDescriptorBuilder* CreateRenderPassDescriptorBuilder();
         RenderPipelineBase* CreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
         SamplerBase* CreateSampler(const SamplerDescriptor* descriptor);
         ShaderModuleBase* CreateShaderModule(const ShaderModuleDescriptor* descriptor);

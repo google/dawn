@@ -24,7 +24,7 @@ TEST_P(DebugMarkerTests, NoFailureWithoutDebugToolAttached) {
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();

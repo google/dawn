@@ -106,7 +106,7 @@ namespace dawn_native {
 
     MaybeError ProgrammablePassEncoder::ValidateCanRecordCommands() const {
         if (mAllocator == nullptr) {
-            return DAWN_VALIDATION_ERROR("Recording in an already ended pass encoder");
+            return DAWN_VALIDATION_ERROR("Recording in an error or already ended pass encoder");
         }
 
         return nullptr;

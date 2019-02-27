@@ -53,18 +53,20 @@ class ValidationTest : public testing::Test {
         bool EndExpectDeviceError();
         std::string GetLastDeviceErrorMessage() const;
 
-        dawn::RenderPassDescriptor CreateSimpleRenderPass();
-
         // Helper functions to create objects to test validation.
 
-        struct DummyRenderPass {
-            dawn::RenderPassDescriptor renderPass;
+        struct DummyRenderPass : public dawn::RenderPassDescriptor{
+          public:
+            DummyRenderPass(const dawn::Device& device);
             dawn::Texture attachment;
             dawn::TextureFormat attachmentFormat;
             uint32_t width;
             uint32_t height;
+
+          private:
+            dawn::RenderPassColorAttachmentDescriptor mColorAttachment;
+            dawn::RenderPassColorAttachmentDescriptor* mColorAttachments[1];
         };
-        DummyRenderPass CreateDummyRenderPass();
 
     protected:
         dawn::Device device;

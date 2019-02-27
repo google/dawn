@@ -126,14 +126,97 @@ namespace utils {
         return buffer;
     }
 
+    ComboRenderPassDescriptor::ComboRenderPassDescriptor(
+        std::initializer_list<dawn::TextureView> colorAttachmentInfo,
+        dawn::TextureView depthStencil)
+        : cColorAttachmentsInfoPtr() {
+        for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
+            mColorAttachmentsInfo[i].loadOp = dawn::LoadOp::Clear;
+            mColorAttachmentsInfo[i].storeOp = dawn::StoreOp::Store;
+            mColorAttachmentsInfo[i].clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+            cColorAttachmentsInfoPtr[i] = nullptr;
+        }
+
+        cDepthStencilAttachmentInfo.clearDepth = 1.0f;
+        cDepthStencilAttachmentInfo.clearStencil = 0;
+        cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+        cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Store;
+        cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Clear;
+        cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Store;
+
+        colorAttachmentCount = static_cast<uint32_t>(colorAttachmentInfo.size());
+        uint32_t colorAttachmentIndex = 0;
+        for (const dawn::TextureView& colorAttachment : colorAttachmentInfo) {
+            if (colorAttachment.Get() != nullptr) {
+                mColorAttachmentsInfo[colorAttachmentIndex].attachment = colorAttachment;
+                cColorAttachmentsInfoPtr[colorAttachmentIndex] =
+                    &mColorAttachmentsInfo[colorAttachmentIndex];
+            }
+            ++colorAttachmentIndex;
+        }
+        colorAttachments = cColorAttachmentsInfoPtr;
+
+        if (depthStencil.Get() != nullptr) {
+            cDepthStencilAttachmentInfo.attachment = depthStencil;
+            depthStencilAttachment = &cDepthStencilAttachmentInfo;
+        } else {
+            depthStencilAttachment = nullptr;
+        }
+    }
+
+    const ComboRenderPassDescriptor& ComboRenderPassDescriptor::operator=(
+        const ComboRenderPassDescriptor& otherRenderPass) {
+        cDepthStencilAttachmentInfo = otherRenderPass.cDepthStencilAttachmentInfo;
+        mColorAttachmentsInfo = otherRenderPass.mColorAttachmentsInfo;
+
+        colorAttachmentCount = otherRenderPass.colorAttachmentCount;
+
+        // Assign the pointers in colorAttachmentsInfoPtr to items in this->mColorAttachmentsInfo
+        for (uint32_t i = 0; i < colorAttachmentCount; ++i) {
+            if (otherRenderPass.cColorAttachmentsInfoPtr[i] != nullptr) {
+                cColorAttachmentsInfoPtr[i] = &mColorAttachmentsInfo[i];
+            } else {
+                cColorAttachmentsInfoPtr[i] = nullptr;
+            }
+        }
+        colorAttachments = cColorAttachmentsInfoPtr;
+
+        if (otherRenderPass.depthStencilAttachment != nullptr) {
+            // Assign desc.depthStencilAttachment to this->depthStencilAttachmentInfo;
+            depthStencilAttachment = &cDepthStencilAttachmentInfo;
+        } else {
+            depthStencilAttachment = nullptr;
+        }
+
+        return *this;
+    }
+
+    BasicRenderPass::BasicRenderPass()
+        : width(0),
+          height(0),
+          color(nullptr),
+          colorFormat(dawn::TextureFormat::R8G8B8A8Unorm),
+          renderPassInfo({}) {
+    }
+
+    BasicRenderPass::BasicRenderPass(uint32_t texWidth,
+                                     uint32_t texHeight,
+                                     dawn::Texture colorAttachment,
+                                     dawn::TextureFormat textureFormat)
+        : width(texWidth),
+          height(texHeight),
+          color(colorAttachment),
+          colorFormat(textureFormat),
+          renderPassInfo({colorAttachment.CreateDefaultTextureView()}) {
+    }
+
     BasicRenderPass CreateBasicRenderPass(const dawn::Device& device,
                                           uint32_t width,
                                           uint32_t height) {
-        BasicRenderPass result;
-        result.width = width;
-        result.height = height;
+        DAWN_ASSERT(width > 0 && height > 0);
 
-        result.colorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+        dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
         descriptor.size.width = width;
@@ -141,24 +224,13 @@ namespace utils {
         descriptor.size.depth = 1;
         descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
-        descriptor.format = result.colorFormat;
+        descriptor.format = kColorFormat;
         descriptor.mipLevelCount = 1;
         descriptor.usage =
             dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
-        result.color = device.CreateTexture(&descriptor);
+        dawn::Texture color = device.CreateTexture(&descriptor);
 
-        dawn::TextureView colorView = result.color.CreateDefaultTextureView();
-        dawn::RenderPassColorAttachmentDescriptor colorAttachment;
-        colorAttachment.attachment = colorView;
-        colorAttachment.resolveTarget = nullptr;
-        colorAttachment.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
-        colorAttachment.loadOp = dawn::LoadOp::Clear;
-        colorAttachment.storeOp = dawn::StoreOp::Store;
-        result.renderPassInfo = device.CreateRenderPassDescriptorBuilder()
-                                    .SetColorAttachments(1, &colorAttachment)
-                                    .GetResult();
-
-        return result;
+        return BasicRenderPass(width, height, color, kColorFormat);
     }
 
     dawn::BufferCopyView CreateBufferCopyView(dawn::Buffer buffer,

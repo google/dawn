@@ -118,23 +118,23 @@ void frame() {
         backbufferView = dawnTextureCreateDefaultTextureView(backbuffer);
     }
     dawnRenderPassDescriptor renderpassInfo;
+    dawnRenderPassColorAttachmentDescriptor colorAttachment;
+    dawnRenderPassColorAttachmentDescriptor* colorAttachments = {&colorAttachment};
     {
-        dawnRenderPassDescriptorBuilder builder = dawnDeviceCreateRenderPassDescriptorBuilder(device);
-        dawnRenderPassColorAttachmentDescriptor colorAttachment;
         colorAttachment.attachment = backbufferView;
         colorAttachment.resolveTarget = nullptr;
         colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
         colorAttachment.loadOp = DAWN_LOAD_OP_CLEAR;
         colorAttachment.storeOp = DAWN_STORE_OP_STORE;
-        dawnRenderPassDescriptorBuilderSetColorAttachments(builder, 1, &colorAttachment);
-        renderpassInfo = dawnRenderPassDescriptorBuilderGetResult(builder);
-        dawnRenderPassDescriptorBuilderRelease(builder);
+        renderpassInfo.colorAttachmentCount = 1;
+        renderpassInfo.colorAttachments = &colorAttachments;
+        renderpassInfo.depthStencilAttachment = nullptr;
     }
     dawnCommandBuffer commands;
     {
         dawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
 
-        dawnRenderPassEncoder pass = dawnCommandEncoderBeginRenderPass(encoder, renderpassInfo);
+        dawnRenderPassEncoder pass = dawnCommandEncoderBeginRenderPass(encoder, &renderpassInfo);
         dawnRenderPassEncoderSetPipeline(pass, pipeline);
         dawnRenderPassEncoderDraw(pass, 3, 1, 0, 0);
         dawnRenderPassEncoderEndPass(pass);
@@ -147,7 +147,6 @@ void frame() {
     dawnQueueSubmit(queue, 1, &commands);
     dawnCommandBufferRelease(commands);
     dawnSwapChainPresent(swapchain, backbuffer);
-    dawnRenderPassDescriptorRelease(renderpassInfo);
     dawnTextureViewRelease(backbufferView);
 
     DoFlush();

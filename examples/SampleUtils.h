@@ -27,8 +27,3 @@ uint64_t GetSwapChainImplementation();
 dawn::TextureFormat GetPreferredSwapChainTextureFormat();
 dawn::SwapChain GetSwapChain(const dawn::Device& device);
 dawn::TextureView CreateDefaultDepthStencilView(const dawn::Device& device);
-void GetNextRenderPassDescriptor(const dawn::Device& device,
-    const dawn::SwapChain& swapchain,
-    const dawn::TextureView& depthStencilView,
-    dawn::Texture* backbuffer,
-    dawn::RenderPassDescriptor* info);

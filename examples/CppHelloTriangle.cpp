@@ -160,14 +160,14 @@ void frame() {
     s.b += 0.02f;
     if (s.b >= 1.0f) {s.b = 0.0f;}
 
-    dawn::Texture backbuffer;
-    dawn::RenderPassDescriptor renderPass;
-    GetNextRenderPassDescriptor(device, swapchain, depthStencilView, &backbuffer, &renderPass);
+    dawn::Texture backbuffer = swapchain.GetNextTexture();
+    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultTextureView()},
+                                                depthStencilView);
 
     static const uint32_t vertexBufferOffsets[1] = {0};
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);

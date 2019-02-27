@@ -609,7 +609,7 @@ namespace dawn_native { namespace d3d12 {
                 // Load op - color
                 if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
                     D3D12_CPU_DESCRIPTOR_HANDLE handle = args.RTVs[i];
-                    commandList->ClearRenderTargetView(handle, attachmentInfo.clearColor.data(), 0,
+                    commandList->ClearRenderTargetView(handle, &attachmentInfo.clearColor.r, 0,
                                                        nullptr);
                 }
             }

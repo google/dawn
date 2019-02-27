@@ -36,7 +36,6 @@ namespace dawn_native { namespace opengl {
     class PersistentPipelineState;
     class PipelineLayout;
     class Queue;
-    using RenderPassDescriptor = RenderPassDescriptorBase;
     class RenderPipeline;
     class Sampler;
     class ShaderModule;
@@ -55,7 +54,6 @@ namespace dawn_native { namespace opengl {
         using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
-        using RenderPassDescriptorType = RenderPassDescriptor;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;

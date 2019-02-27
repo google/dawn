@@ -178,7 +178,7 @@ protected:
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(mRenderPass.renderPassInfo);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);
@@ -492,15 +492,8 @@ class TextureViewRenderingTest : public DawnTest {
         dawn::ShaderModule vsModule = CreateDefaultVertexShaderModule(device);
 
         // Clear textureView with Red(255, 0, 0, 255) and render Green(0, 255, 0, 255) into it
-        dawn::RenderPassColorAttachmentDescriptor colorAttachment;
-        colorAttachment.attachment = textureView;
-        colorAttachment.resolveTarget = nullptr;
-        colorAttachment.clearColor = { 1.0, 0.0, 0.0, 1.0 };
-        colorAttachment.loadOp = dawn::LoadOp::Clear;
-        colorAttachment.storeOp = dawn::StoreOp::Store;
-        dawn::RenderPassDescriptor renderPassInfo = device.CreateRenderPassDescriptorBuilder()
-            .SetColorAttachments(1, &colorAttachment)
-            .GetResult();
+        utils::ComboRenderPassDescriptor renderPassInfo({textureView});
+        renderPassInfo.cColorAttachmentsInfoPtr[0]->clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
 
         const char* oneColorFragmentShader = R"(
             #version 450
@@ -522,8 +515,7 @@ class TextureViewRenderingTest : public DawnTest {
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass =
-                encoder.BeginRenderPass(renderPassInfo);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);
             pass.SetPipeline(oneColorPipeline);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();

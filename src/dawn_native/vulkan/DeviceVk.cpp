@@ -19,7 +19,6 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
-#include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/BackendVk.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
@@ -162,10 +161,6 @@ namespace dawn_native { namespace vulkan {
     }
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
         return new Queue(this);
-    }
-    RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
-        RenderPassDescriptorBuilder* builder) {
-        return new RenderPassDescriptor(builder);
     }
     ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {

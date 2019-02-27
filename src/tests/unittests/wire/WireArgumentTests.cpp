@@ -179,34 +179,31 @@ TEST_F(WireArgumentTests, CStringArgument) {
     FlushClient();
 }
 
+
 // Test that the wire is able to send objects as value arguments
 TEST_F(WireArgumentTests, ObjectAsValueArgument) {
-    // Create a RenderPassDescriptor
-    dawnRenderPassDescriptorBuilder renderPassBuilder =
-        dawnDeviceCreateRenderPassDescriptorBuilder(device);
-    dawnRenderPassDescriptor renderPass =
-        dawnRenderPassDescriptorBuilderGetResult(renderPassBuilder);
-
-    dawnRenderPassDescriptorBuilder apiRenderPassBuilder = api.GetNewRenderPassDescriptorBuilder();
-    EXPECT_CALL(api, DeviceCreateRenderPassDescriptorBuilder(apiDevice))
-        .WillOnce(Return(apiRenderPassBuilder));
-    dawnRenderPassDescriptor apiRenderPass = api.GetNewRenderPassDescriptor();
-    EXPECT_CALL(api, RenderPassDescriptorBuilderGetResult(apiRenderPassBuilder))
-        .WillOnce(Return(apiRenderPass));
-
-    // Create command buffer encoder, setting render pass descriptor
     dawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
-    dawnCommandEncoderBeginRenderPass(cmdBufEncoder, renderPass);
+    dawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
 
-    dawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
-        .WillOnce(Return(apiCmdBufEncoder));
+    dawnBufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = 8;
+    descriptor.usage = static_cast<dawnBufferUsageBit>(DAWN_BUFFER_USAGE_BIT_TRANSFER_SRC |
+                                                       DAWN_BUFFER_USAGE_BIT_TRANSFER_DST);
 
-    EXPECT_CALL(api, CommandEncoderBeginRenderPass(apiCmdBufEncoder, apiRenderPass)).Times(1);
+    dawnBuffer buffer = dawnDeviceCreateBuffer(device, &descriptor);
+    dawnBuffer apiBuffer = api.GetNewBuffer();
+    EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
+        .WillOnce(Return(apiBuffer))
+        .RetiresOnSaturation();
 
-    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
-    EXPECT_CALL(api, RenderPassDescriptorBuilderRelease(apiRenderPassBuilder));
-    EXPECT_CALL(api, RenderPassDescriptorRelease(apiRenderPass));
+    dawnCommandEncoderCopyBufferToBuffer(cmdBufEncoder, buffer, 0, buffer, 4, 4);
+    EXPECT_CALL(api, CommandEncoderCopyBufferToBuffer(apiEncoder, apiBuffer, 0, apiBuffer, 4, 4));
+
+    EXPECT_CALL(api, CommandEncoderRelease(apiEncoder));
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+
     FlushClient();
 }
 

@@ -140,7 +140,7 @@ protected:
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(mRenderPass.renderPassInfo);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
             pass.SetPipeline(mPipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);

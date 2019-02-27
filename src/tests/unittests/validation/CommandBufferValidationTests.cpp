@@ -26,12 +26,12 @@ TEST_F(CommandBufferValidationTest, Empty) {
 
 // Test that a command buffer cannot be ended mid render pass
 TEST_F(CommandBufferValidationTest, EndedMidRenderPass) {
-    dawn::RenderPassDescriptor renderpass = CreateSimpleRenderPass();
+    DummyRenderPass dummyRenderPass(device);
 
     // Control case, command buffer ended after the pass is ended.
     {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
         encoder.Finish();
     }
@@ -39,7 +39,7 @@ TEST_F(CommandBufferValidationTest, EndedMidRenderPass) {
     // Error case, command buffer ended mid-pass.
     {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -47,7 +47,7 @@ TEST_F(CommandBufferValidationTest, EndedMidRenderPass) {
     // should fail too.
     {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         ASSERT_DEVICE_ERROR(encoder.Finish());
         // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
         // produces a encoder error.
@@ -86,12 +86,12 @@ TEST_F(CommandBufferValidationTest, EndedMidComputePass) {
 
 // Test that a render pass cannot be ended twice
 TEST_F(CommandBufferValidationTest, RenderPassEndedTwice) {
-    dawn::RenderPassDescriptor renderpass = CreateSimpleRenderPass();
+    DummyRenderPass dummyRenderPass(device);
 
     // Control case, pass is ended once
     {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
         encoder.Finish();
     }
@@ -99,7 +99,7 @@ TEST_F(CommandBufferValidationTest, RenderPassEndedTwice) {
     // Error case, pass ended twice
     {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
         // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
         // produces a encoder error.
@@ -141,8 +141,8 @@ TEST_F(CommandBufferValidationTest, BufferWithMultipleReadUsage) {
     // Use the buffer as both index and vertex in the same pass
     uint32_t zero = 0;
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    auto renderpass = CreateSimpleRenderPass();
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
+    DummyRenderPass dummyRenderPass(device);
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
     pass.SetIndexBuffer(buffer, 0);
     pass.SetVertexBuffers(0, 1, &buffer, &zero);
     pass.EndPass();
@@ -165,8 +165,8 @@ TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteUsage) {
 
     // Use the buffer as both index and storage in the same pass
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    auto renderpass = CreateSimpleRenderPass();
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
+    DummyRenderPass dummyRenderPass(device);
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
     pass.SetIndexBuffer(buffer, 0);
     pass.SetBindGroup(0, bg);
     pass.EndPass();
@@ -194,19 +194,11 @@ TEST_F(CommandBufferValidationTest, TextureWithReadAndWriteUsage) {
     dawn::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
 
     // Create the render pass that will use the texture as an output attachment
-    dawn::RenderPassColorAttachmentDescriptor colorAttachment;
-    colorAttachment.attachment = view;
-    colorAttachment.resolveTarget = nullptr;
-    colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-    colorAttachment.loadOp = dawn::LoadOp::Load;
-    colorAttachment.storeOp = dawn::StoreOp::Store;
-    dawn::RenderPassDescriptor renderPass = device.CreateRenderPassDescriptorBuilder()
-        .SetColorAttachments(1, &colorAttachment)
-        .GetResult();
+    utils::ComboRenderPassDescriptor renderPass({view});
 
     // Use the texture as both sampeld and output attachment in the same pass
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass);
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
     pass.SetBindGroup(0, bg);
     pass.EndPass();
     ASSERT_DEVICE_ERROR(encoder.Finish());

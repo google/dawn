@@ -28,7 +28,6 @@
 #include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
-#include "dawn_native/RenderPassDescriptor.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Sampler.h"
 #include "dawn_native/ShaderModule.h"
@@ -193,9 +192,6 @@ namespace dawn_native {
         }
 
         return result;
-    }
-    RenderPassDescriptorBuilder* DeviceBase::CreateRenderPassDescriptorBuilder() {
-        return new RenderPassDescriptorBuilder(this);
     }
     SamplerBase* DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
         SamplerBase* result = nullptr;

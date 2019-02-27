@@ -44,7 +44,7 @@ class PushConstantTest : public ValidationTest {
 
 // Test valid usage of the parameters to SetPushConstants
 TEST_F(PushConstantTest, Success) {
-    DummyRenderPass renderpassData = CreateDummyRenderPass();
+    DummyRenderPass renderpassData(device);
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     // PushConstants in a compute pass
@@ -56,7 +56,7 @@ TEST_F(PushConstantTest, Success) {
 
     // PushConstants in a render pass
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpassData.renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpassData);
         pass.SetPushConstants(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment, 0, 1, constants);
         pass.EndPass();
     }
@@ -142,12 +142,12 @@ TEST_F(PushConstantTest, StageForComputePass) {
 
 // Test valid stages for render passes
 TEST_F(PushConstantTest, StageForRenderPass) {
-    DummyRenderPass renderpassData = CreateDummyRenderPass();
+    DummyRenderPass renderpassData(device);
 
     // Control case: setting to vertex and fragment in render pass
     {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpassData.renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpassData);
         pass.SetPushConstants(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment, 0, 1, constants);
         pass.EndPass();
         encoder.Finish();
@@ -156,7 +156,7 @@ TEST_F(PushConstantTest, StageForRenderPass) {
     // Compute stage is disallowed
     {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpassData.renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpassData);
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, constants);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -165,7 +165,7 @@ TEST_F(PushConstantTest, StageForRenderPass) {
     // A None shader stage mask is valid.
     {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpassData.renderPass);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpassData);
         pass.SetPushConstants(dawn::ShaderStageBit::None, 0, 1, constants);
         pass.EndPass();
         encoder.Finish();

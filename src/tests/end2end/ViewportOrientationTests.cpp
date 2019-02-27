@@ -46,7 +46,7 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();

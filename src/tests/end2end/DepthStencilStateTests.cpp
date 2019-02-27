@@ -53,26 +53,6 @@ class DepthStencilStateTest : public DawnTest {
 
             depthTextureView = depthTexture.CreateDefaultTextureView();
 
-            dawn::RenderPassColorAttachmentDescriptor colorAttachment;
-            colorAttachment.attachment = renderTargetView;
-            colorAttachment.resolveTarget = nullptr;
-            colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-            colorAttachment.loadOp = dawn::LoadOp::Clear;
-            colorAttachment.storeOp = dawn::StoreOp::Store;
-
-            dawn::RenderPassDepthStencilAttachmentDescriptor depthStencilAttachment;
-            depthStencilAttachment.attachment = depthTextureView;
-            depthStencilAttachment.depthLoadOp = dawn::LoadOp::Clear;
-            depthStencilAttachment.stencilLoadOp = dawn::LoadOp::Clear;
-            depthStencilAttachment.clearDepth = 1.0f;
-            depthStencilAttachment.clearStencil = 0;
-            depthStencilAttachment.depthStoreOp = dawn::StoreOp::Store;
-            depthStencilAttachment.stencilStoreOp = dawn::StoreOp::Store;
-            renderpass = device.CreateRenderPassDescriptorBuilder()
-                .SetColorAttachments(1, &colorAttachment)
-                .SetDepthStencilAttachment(&depthStencilAttachment)
-                .GetResult();
-
             vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
@@ -273,7 +253,8 @@ class DepthStencilStateTest : public DawnTest {
                 float depth;
             };
 
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderpass);
+            utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthTextureView);
+            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
 
             for (size_t i = 0; i < testParams.size(); ++i) {
                 const TestSpec& test = testParams[i];
@@ -318,7 +299,6 @@ class DepthStencilStateTest : public DawnTest {
             DoTest(testParams, expected, expected);
         }
 
-        dawn::RenderPassDescriptor renderpass;
         dawn::Texture renderTarget;
         dawn::Texture depthTexture;
         dawn::TextureView renderTargetView;

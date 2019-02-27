@@ -74,11 +74,6 @@ namespace dawn_native {
     };
 
     template <typename BackendTraits>
-    struct ToBackendTraits<RenderPassDescriptorBase, BackendTraits> {
-        using BackendType = typename BackendTraits::RenderPassDescriptorType;
-    };
-
-    template <typename BackendTraits>
     struct ToBackendTraits<RenderPipelineBase, BackendTraits> {
         using BackendType = typename BackendTraits::RenderPipelineType;
     };

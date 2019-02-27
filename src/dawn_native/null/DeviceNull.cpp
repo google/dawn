@@ -92,10 +92,6 @@ namespace dawn_native { namespace null {
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
         return new Queue(this);
     }
-    RenderPassDescriptorBase* Device::CreateRenderPassDescriptor(
-        RenderPassDescriptorBuilder* builder) {
-        return new RenderPassDescriptor(builder);
-    }
     ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {
         return new RenderPipeline(this, descriptor);

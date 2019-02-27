@@ -42,7 +42,7 @@ namespace dawn_native {
 
         // Dawn API
         ComputePassEncoderBase* BeginComputePass();
-        RenderPassEncoderBase* BeginRenderPass(RenderPassDescriptorBase* info);
+        RenderPassEncoderBase* BeginRenderPass(const RenderPassDescriptor* info);
         void CopyBufferToBuffer(BufferBase* source,
                                 uint32_t sourceOffset,
                                 BufferBase* destination,

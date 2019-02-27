@@ -20,11 +20,11 @@ class DebugMarkerValidationTest : public ValidationTest {};
 
 // Correct usage of debug markers should succeed in render pass.
 TEST_F(DebugMarkerValidationTest, RenderSuccess) {
-    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 4, 4);
+    DummyRenderPass renderPass(device);
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.PushDebugGroup("Event Start");
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
@@ -38,11 +38,11 @@ TEST_F(DebugMarkerValidationTest, RenderSuccess) {
 
 // A PushDebugGroup call without a following PopDebugGroup produces an error in render pass.
 TEST_F(DebugMarkerValidationTest, RenderUnbalancedPush) {
-    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 4, 4);
+    DummyRenderPass renderPass(device);
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.PushDebugGroup("Event Start");
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
@@ -55,11 +55,11 @@ TEST_F(DebugMarkerValidationTest, RenderUnbalancedPush) {
 
 // A PopDebugGroup call without a preceding PushDebugGroup produces an error in render pass.
 TEST_F(DebugMarkerValidationTest, RenderUnbalancedPop) {
-    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 4, 4);
+    DummyRenderPass renderPass(device);
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(renderPass.renderPassInfo);
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
