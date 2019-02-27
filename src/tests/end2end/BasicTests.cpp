@@ -27,10 +27,10 @@ TEST_P(BasicTests, BufferSetSubData) {
     descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    uint8_t value = 187;
-    buffer.SetSubData(0, sizeof(value), &value);
+    uint32_t value = 0x01020304;
+    buffer.SetSubData(0, sizeof(value), reinterpret_cast<uint8_t*>(&value));
 
-    EXPECT_BUFFER_U8_EQ(value, buffer, 0);
+    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
 }
 
 DAWN_INSTANTIATE_TEST(BasicTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

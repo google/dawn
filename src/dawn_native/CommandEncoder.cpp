@@ -76,6 +76,23 @@ namespace dawn_native {
             return {};
         }
 
+        MaybeError ValidateB2BCopySizeAlignment(uint32_t dataSize,
+                                                uint32_t srcOffset,
+                                                uint32_t dstOffset) {
+            // Copy size must be a multiple of 4 bytes on macOS.
+            if (dataSize % 4 != 0) {
+                return DAWN_VALIDATION_ERROR("Copy size must be a multiple of 4 bytes");
+            }
+
+            // SourceOffset and destinationOffset must be multiples of 4 bytes on macOS.
+            if (srcOffset % 4 != 0 || dstOffset % 4 != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "Source offset and destination offset must be multiples of 4 bytes");
+            }
+
+            return {};
+        }
+
         MaybeError ValidateTexelBufferOffset(TextureBase* texture, const BufferCopy& bufferCopy) {
             uint32_t texelSize =
                 static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat()));
@@ -575,6 +592,8 @@ namespace dawn_native {
                     DAWN_TRY(GetDevice()->ValidateObject(copy->destination.buffer.Get()));
                     DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->source, copy->size));
                     DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->destination, copy->size));
+                    DAWN_TRY(ValidateB2BCopySizeAlignment(copy->size, copy->source.offset,
+                                                          copy->destination.offset));
 
                     DAWN_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
                                               dawn::BufferUsageBit::TransferSrc));

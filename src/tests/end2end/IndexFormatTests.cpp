@@ -197,6 +197,8 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
     });
     dawn::Buffer indexBuffer = utils::CreateBufferFromData<uint16_t>(device, dawn::BufferUsageBit::Index, {
         0, 1, 2, 0xFFFFu, 3, 4, 2,
+        // This value is for padding.
+        0xFFFFu,
     });
 
     uint32_t zeroOffset = 0;

@@ -433,10 +433,10 @@ TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
 
 // Test the success case for Buffer::SetSubData
 TEST_F(BufferValidationTest, SetSubDataSuccess) {
-    dawn::Buffer buf = CreateSetSubDataBuffer(1);
+    dawn::Buffer buf = CreateSetSubDataBuffer(4);
 
-    uint8_t foo = 0;
-    buf.SetSubData(0, sizeof(foo), &foo);
+    uint32_t foo = 0x01020304;
+    buf.SetSubData(0, sizeof(foo), reinterpret_cast<uint8_t*>(&foo));
 }
 
 // Test error case for SetSubData out of bounds
@@ -470,6 +470,31 @@ TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
 
     uint8_t foo = 0;
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
+}
+
+// Test SetSubData with unaligned size
+TEST_F(BufferValidationTest, SetSubDataWithUnalignedSize) {
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+
+    dawn::Buffer buf = device.CreateBuffer(&descriptor);
+
+    uint8_t value = 123;
+    ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(value), &value));
+}
+
+// Test SetSubData with unaligned offset
+TEST_F(BufferValidationTest, SetSubDataWithUnalignedOffset) {
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4000;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+
+    dawn::Buffer buf = device.CreateBuffer(&descriptor);
+
+    uint32_t kOffset = 2999;
+    uint32_t value = 0x01020304;
+    ASSERT_DEVICE_ERROR(buf.SetSubData(kOffset, sizeof(value), reinterpret_cast<uint8_t*>(&value)));
 }
 
 // Test that it is valid to destroy an unmapped buffer

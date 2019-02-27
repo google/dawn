@@ -47,15 +47,15 @@ class BufferMapReadTests : public DawnTest {
 // Test that the simplest map read works.
 TEST_P(BufferMapReadTests, SmallReadAtZero) {
     dawn::BufferDescriptor descriptor;
-    descriptor.size = 1;
+    descriptor.size = 4;
     descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    uint8_t myData = 187;
-    buffer.SetSubData(0, sizeof(myData), &myData);
+    uint32_t myData = 0x01020304;
+    buffer.SetSubData(0, sizeof(myData), reinterpret_cast<uint8_t*>(&myData));
 
     const void* mappedData = MapReadAsyncAndWait(buffer);
-    ASSERT_EQ(myData, *reinterpret_cast<const uint8_t*>(mappedData));
+    ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
 
     buffer.Unmap();
 }
@@ -151,17 +151,17 @@ DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBac
 class BufferSetSubDataTests : public DawnTest {
 };
 
-// Test the simplest set sub data: setting one u8 at offset 0.
+// Test the simplest set sub data: setting one u32 at offset 0.
 TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
     dawn::BufferDescriptor descriptor;
-    descriptor.size = 1;
+    descriptor.size = 4;
     descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    uint8_t value = 171;
-    buffer.SetSubData(0, sizeof(value), &value);
+    uint32_t value = 0x01020304;
+    buffer.SetSubData(0, sizeof(value), reinterpret_cast<uint8_t*>(&value));
 
-    EXPECT_BUFFER_U8_EQ(value, buffer, 0);
+    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
 }
 
 // Test that SetSubData offset works.
@@ -172,10 +172,10 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     constexpr uint32_t kOffset = 2000;
-    uint8_t value = 231;
-    buffer.SetSubData(kOffset, sizeof(value), &value);
+    uint32_t value = 0x01020304;
+    buffer.SetSubData(kOffset, sizeof(value), reinterpret_cast<uint8_t*>(&value));
 
-    EXPECT_BUFFER_U8_EQ(value, buffer, kOffset);
+    EXPECT_BUFFER_U32_EQ(value, buffer, kOffset);
 }
 
 // Stress test for many calls to SetSubData
