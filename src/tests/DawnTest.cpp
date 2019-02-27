@@ -249,15 +249,22 @@ void DawnTest::SetUp() {
     {
         dawn_native::Instance* instance = gTestEnv->GetInstance();
         std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
-        auto adapterIt = std::find_if(adapters.begin(), adapters.end(),
-                                      [this](const dawn_native::Adapter adapter) -> bool {
-                                          // Chromium's GTest harness has GetParam() as a regular
-                                          // function and not a member function of this.
-                                          DAWN_UNUSED(this);
-                                          return adapter.GetBackendType() == GetParam();
-                                      });
-        ASSERT(adapterIt != adapters.end());
-        backendAdapter = *adapterIt;
+
+        for (const dawn_native::Adapter& adapter : adapters) {
+            if (adapter.GetBackendType() == GetParam()) {
+                backendAdapter = adapter;
+                // On Metal, select the last adapter so that the discrete GPU is tested on
+                // multi-GPU systems.
+                // TODO(cwallez@chromium.org): Replace this with command line arguments requesting
+                // a specific device / vendor ID once the macOS 10.13 SDK is rolled and correct
+                // PCI info collection is implemented on Metal.
+                if (GetParam() != MetalBackend) {
+                    break;
+                }
+            }
+        }
+
+        ASSERT(backendAdapter);
     }
 
     mPCIInfo = backendAdapter.GetPCIInfo();
