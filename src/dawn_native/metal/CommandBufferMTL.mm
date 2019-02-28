@@ -262,16 +262,98 @@ namespace dawn_native { namespace metal {
                     size.height = copySize.height;
                     size.depth = copySize.depth;
 
+                    // When uploading textures from an unpacked buffer, Metal validation layer
+                    // doesn't compute the correct range when checking if the buffer is big enough
+                    // to contain the data for the whole copy. Instead of looking at the position
+                    // of the last texel in the buffer, it computes the volume of the 3D box with
+                    // rowPitch * imageHeight * copySize.depth. For example considering the pixel
+                    // buffer below where in memory, each row data (D) of the texture is followed
+                    // by some padding data (P):
+                    //     |DDDDDDD|PP|
+                    //     |DDDDDDD|PP|
+                    //     |DDDDDDD|PP|
+                    //     |DDDDDDD|PP|
+                    //     |DDDDDDA|PP|
+                    // The last pixel read will be A, but the driver will think it is the whole
+                    // last padding row, causing it to generate an error when the pixel buffer is
+                    // just big enough.
+
+                    // We work around this limitation by detecting when Metal would complain and
+                    // copy the last image and row separately using tight sourceBytesPerRow or
+                    // sourceBytesPerImage.
+                    uint32_t bytesPerImage = src.rowPitch * src.imageHeight;
+
+                    // Check whether buffer size is big enough.
+                    bool needWorkaround =
+                        (buffer->GetSize() - src.offset < bytesPerImage * size.depth);
+
                     encoders.EnsureBlit(commandBuffer);
-                    [encoders.blit copyFromBuffer:buffer->GetMTLBuffer()
-                                     sourceOffset:src.offset
-                                sourceBytesPerRow:src.rowPitch
-                              sourceBytesPerImage:(src.rowPitch * src.imageHeight)
-                                       sourceSize:size
-                                        toTexture:texture->GetMTLTexture()
-                                 destinationSlice:dst.slice
-                                 destinationLevel:dst.level
-                                destinationOrigin:origin];
+
+                    if (!needWorkaround) {
+                        [encoders.blit copyFromBuffer:buffer->GetMTLBuffer()
+                                         sourceOffset:src.offset
+                                    sourceBytesPerRow:src.rowPitch
+                                  sourceBytesPerImage:(src.rowPitch * src.imageHeight)
+                                           sourceSize:size
+                                            toTexture:texture->GetMTLTexture()
+                                     destinationSlice:dst.slice
+                                     destinationLevel:dst.level
+                                    destinationOrigin:origin];
+                        break;
+                    }
+
+                    uint32_t offset = src.offset;
+
+                    // Doing all the copy except the last image.
+                    if (size.depth > 1) {
+                        [encoders.blit
+                                 copyFromBuffer:buffer->GetMTLBuffer()
+                                   sourceOffset:offset
+                              sourceBytesPerRow:src.rowPitch
+                            sourceBytesPerImage:(src.rowPitch * src.imageHeight)
+                                     sourceSize:MTLSizeMake(size.width, size.height, size.depth - 1)
+                                      toTexture:texture->GetMTLTexture()
+                               destinationSlice:dst.slice
+                               destinationLevel:dst.level
+                              destinationOrigin:origin];
+
+                        // Update offset to copy to the last image.
+                        offset += (copySize.depth - 1) * bytesPerImage;
+                    }
+
+                    // Doing all the copy in last image except the last row.
+                    if (size.height > 1) {
+                        [encoders.blit copyFromBuffer:buffer->GetMTLBuffer()
+                                         sourceOffset:offset
+                                    sourceBytesPerRow:src.rowPitch
+                                  sourceBytesPerImage:(src.rowPitch * (src.imageHeight - 1))
+                                           sourceSize:MTLSizeMake(size.width, size.height - 1, 1)
+                                            toTexture:texture->GetMTLTexture()
+                                     destinationSlice:dst.slice
+                                     destinationLevel:dst.level
+                                    destinationOrigin:MTLOriginMake(origin.x, origin.y,
+                                                                    origin.z + size.depth - 1)];
+
+                        // Update offset to copy to the last row.
+                        offset += (copySize.height - 1) * src.rowPitch;
+                    }
+
+                    // Doing the last row copy with the exact number of bytes in last row.
+                    // Like copy to a 1D texture to workaround the issue.
+                    uint32_t lastRowDataSize =
+                        copySize.width * TextureFormatPixelSize(texture->GetFormat());
+
+                    [encoders.blit
+                             copyFromBuffer:buffer->GetMTLBuffer()
+                               sourceOffset:offset
+                          sourceBytesPerRow:lastRowDataSize
+                        sourceBytesPerImage:lastRowDataSize
+                                 sourceSize:MTLSizeMake(size.width, 1, 1)
+                                  toTexture:texture->GetMTLTexture()
+                           destinationSlice:dst.slice
+                           destinationLevel:dst.level
+                          destinationOrigin:MTLOriginMake(origin.x, origin.y + size.height - 1,
+                                                          origin.z + size.depth - 1)];
                 } break;
 
                 case Command::CopyTextureToBuffer: {
@@ -292,16 +374,100 @@ namespace dawn_native { namespace metal {
                     size.height = copySize.height;
                     size.depth = copySize.depth;
 
+                    // When Copy textures to an unpacked buffer, Metal validation layer doesn't
+                    // compute the correct range when checking if the buffer is big enough to
+                    // contain the data for the whole copy. Instead of looking at the position
+                    // of the last texel in the buffer, it computes the volume of the 3D box with
+                    // rowPitch * imageHeight * copySize.depth.
+                    // For example considering the texture below where in memory, each row
+                    // data (D) of the texture is followed by some padding data (P):
+                    //     |DDDDDDD|PP|
+                    //     |DDDDDDD|PP|
+                    //     |DDDDDDD|PP|
+                    //     |DDDDDDD|PP|
+                    //     |DDDDDDA|PP|
+                    // The last valid pixel read will be A, but the driver will think it needs the
+                    // whole last padding row, causing it to generate an error when the buffer is
+                    // just big enough.
+
+                    // We work around this limitation by detecting when Metal would complain and
+                    // copy the last image and row separately using tight destinationBytesPerRow or
+                    // destinationBytesPerImage.
+                    uint32_t bytesPerImage = dst.rowPitch * dst.imageHeight;
+
+                    // Check whether buffer size is big enough.
+                    bool needWorkaround =
+                        (buffer->GetSize() - dst.offset < bytesPerImage * size.depth);
+
                     encoders.EnsureBlit(commandBuffer);
-                    [encoders.blit copyFromTexture:texture->GetMTLTexture()
-                                       sourceSlice:src.slice
-                                       sourceLevel:src.level
-                                      sourceOrigin:origin
-                                        sourceSize:size
-                                          toBuffer:buffer->GetMTLBuffer()
-                                 destinationOffset:dst.offset
-                            destinationBytesPerRow:dst.rowPitch
-                          destinationBytesPerImage:(dst.rowPitch * dst.imageHeight)];
+
+                    if (!needWorkaround) {
+                        [encoders.blit copyFromTexture:texture->GetMTLTexture()
+                                           sourceSlice:src.slice
+                                           sourceLevel:src.level
+                                          sourceOrigin:origin
+                                            sourceSize:size
+                                              toBuffer:buffer->GetMTLBuffer()
+                                     destinationOffset:dst.offset
+                                destinationBytesPerRow:dst.rowPitch
+                              destinationBytesPerImage:(dst.rowPitch * dst.imageHeight)];
+                        break;
+                    }
+
+                    uint32_t offset = dst.offset;
+
+                    // Doing all the copy except the last image.
+                    if (size.depth > 1) {
+                        size.depth = copySize.depth - 1;
+
+                        [encoders.blit copyFromTexture:texture->GetMTLTexture()
+                                           sourceSlice:src.slice
+                                           sourceLevel:src.level
+                                          sourceOrigin:origin
+                                            sourceSize:MTLSizeMake(size.width, size.height,
+                                                                   size.depth - 1)
+                                              toBuffer:buffer->GetMTLBuffer()
+                                     destinationOffset:offset
+                                destinationBytesPerRow:dst.rowPitch
+                              destinationBytesPerImage:dst.rowPitch * dst.imageHeight];
+
+                        // Update offset to copy from the last image.
+                        offset += (copySize.depth - 1) * bytesPerImage;
+                    }
+
+                    // Doing all the copy in last image except the last row.
+                    if (size.height > 1) {
+                        [encoders.blit copyFromTexture:texture->GetMTLTexture()
+                                           sourceSlice:src.slice
+                                           sourceLevel:src.level
+                                          sourceOrigin:MTLOriginMake(origin.x, origin.y,
+                                                                     origin.z + size.depth - 1)
+                                            sourceSize:MTLSizeMake(size.width, size.height - 1, 1)
+                                              toBuffer:buffer->GetMTLBuffer()
+                                     destinationOffset:offset
+                                destinationBytesPerRow:dst.rowPitch
+                              destinationBytesPerImage:dst.rowPitch * (dst.imageHeight - 1)];
+
+                        // Update offset to copy from the last row.
+                        offset += (copySize.height - 1) * dst.rowPitch;
+                    }
+
+                    // Doing the last row copy with the exact number of bytes in last row.
+                    // Like copy from a 1D texture to workaround the issue.
+                    uint32_t lastRowDataSize =
+                        copySize.width * TextureFormatPixelSize(texture->GetFormat());
+
+                    [encoders.blit
+                                 copyFromTexture:texture->GetMTLTexture()
+                                     sourceSlice:src.slice
+                                     sourceLevel:src.level
+                                    sourceOrigin:MTLOriginMake(origin.x, origin.y + size.height - 1,
+                                                               origin.z + size.depth - 1)
+                                      sourceSize:MTLSizeMake(size.width, 1, 1)
+                                        toBuffer:buffer->GetMTLBuffer()
+                               destinationOffset:offset
+                          destinationBytesPerRow:lastRowDataSize
+                        destinationBytesPerImage:lastRowDataSize];
                 } break;
 
                 default: { UNREACHABLE(); } break;
