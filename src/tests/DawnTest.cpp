@@ -52,12 +52,6 @@ namespace {
         }
     }
 
-    // End2end tests should test valid commands produce the expected result so no error
-    // should happen. Failure cases should be tested in the validation tests.
-    void DeviceErrorCauseTestFailure(const char* message, dawnCallbackUserdata) {
-        FAIL() << "Device level failure: " << message;
-    }
-
     struct MapReadUserdata {
         DawnTest* test;
         size_t slot;
@@ -315,8 +309,8 @@ void DawnTest::SetUp() {
         static_cast<dawn::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
         dawn::TextureUsageBit::OutputAttachment, 400, 400);
 
-    // The end2end tests should never cause validation errors. These should be tested in unittests.
-    device.SetErrorCallback(DeviceErrorCauseTestFailure, 0);
+    device.SetErrorCallback(OnDeviceError,
+                            static_cast<dawnCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
 }
 
 void DawnTest::TearDown() {
@@ -328,6 +322,24 @@ void DawnTest::TearDown() {
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         mReadbackSlots[i].buffer.Unmap();
     }
+}
+
+void DawnTest::StartExpectDeviceError() {
+    mExpectError = true;
+    mError = false;
+}
+bool DawnTest::EndExpectDeviceError() {
+    mExpectError = false;
+    return mError;
+}
+
+// static
+void DawnTest::OnDeviceError(const char* message, dawnCallbackUserdata userdata) {
+    DawnTest* self = reinterpret_cast<DawnTest*>(static_cast<uintptr_t>(userdata));
+
+    ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
+    ASSERT_FALSE(self->mError) << "Got two errors in expect block";
+    self->mError = true;
 }
 
 std::ostringstream& DawnTest::AddBufferExpectation(const char* file,

@@ -33,4 +33,16 @@ TEST_P(BasicTests, BufferSetSubData) {
     EXPECT_BUFFER_U32_EQ(value, buffer, 0);
 }
 
+// Test a validation error for buffer setSubData, but really this is the most basic test possible
+// for ASSERT_DEVICE_ERROR
+TEST_P(BasicTests, BufferSetSubDataError) {
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    uint8_t value = 187;
+    ASSERT_DEVICE_ERROR(buffer.SetSubData(1000, sizeof(value), &value));
+}
+
 DAWN_INSTANTIATE_TEST(BasicTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

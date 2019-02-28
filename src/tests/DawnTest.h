@@ -41,6 +41,13 @@
                           sizeof(RGBA8),                                                  \
                           new detail::ExpectEq<RGBA8>(expected, (width) * (height)))
 
+// Should only be used to test validation of function that can't be tested by regular validation
+// tests;
+#define ASSERT_DEVICE_ERROR(statement) \
+    StartExpectDeviceError();          \
+    statement;                         \
+    ASSERT_TRUE(EndExpectDeviceError());
+
 struct RGBA8 {
     constexpr RGBA8() : RGBA8(0, 0, 0, 0) {
     }
@@ -124,6 +131,9 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     bool IsLinux() const;
     bool IsMacOS() const;
 
+    void StartExpectDeviceError();
+    bool EndExpectDeviceError();
+
   protected:
     dawn::Device device;
     dawn::Queue queue;
@@ -159,6 +169,11 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
     void FlushWire();
+
+    // Tracking for validation errors
+    static void OnDeviceError(const char* message, dawnCallbackUserdata userdata);
+    bool mExpectError = false;
+    bool mError = false;
 
     // MapRead buffers used to get data for the expectations
     struct ReadbackSlot {
