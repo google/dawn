@@ -24,11 +24,19 @@ namespace dawn_native { namespace metal {
     class Device;
 
     MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format);
+    MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase* device,
+                                             const TextureDescriptor* descriptor,
+                                             IOSurfaceRef ioSurface,
+                                             uint32_t plane);
 
     class Texture : public TextureBase {
       public:
         Texture(Device* device, const TextureDescriptor* descriptor);
         Texture(Device* device, const TextureDescriptor* descriptor, id<MTLTexture> mtlTexture);
+        Texture(Device* device,
+                const TextureDescriptor* descriptor,
+                IOSurfaceRef ioSurface,
+                uint32_t plane);
         ~Texture();
 
         id<MTLTexture> GetMTLTexture();

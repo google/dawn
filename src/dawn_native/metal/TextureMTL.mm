@@ -16,27 +16,9 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
+#include <IOSurface/IOSurface.h>
+
 namespace dawn_native { namespace metal {
-    MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format) {
-        switch (format) {
-            case dawn::TextureFormat::R8G8B8A8Unorm:
-                return MTLPixelFormatRGBA8Unorm;
-            case dawn::TextureFormat::R8G8Unorm:
-                return MTLPixelFormatRG8Unorm;
-            case dawn::TextureFormat::R8Unorm:
-                return MTLPixelFormatR8Unorm;
-            case dawn::TextureFormat::R8G8B8A8Uint:
-                return MTLPixelFormatRGBA8Uint;
-            case dawn::TextureFormat::R8G8Uint:
-                return MTLPixelFormatRG8Uint;
-            case dawn::TextureFormat::R8Uint:
-                return MTLPixelFormatR8Uint;
-            case dawn::TextureFormat::B8G8R8A8Unorm:
-                return MTLPixelFormatBGRA8Unorm;
-            case dawn::TextureFormat::D32FloatS8Uint:
-                return MTLPixelFormatDepth32Float_Stencil8;
-        }
-    }
 
     namespace {
         bool UsageNeedsTextureView(dawn::TextureUsageBit usage) {
@@ -115,32 +97,124 @@ namespace dawn_native { namespace metal {
 
             return false;
         }
+
+        ResultOrError<dawn::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
+            switch (format) {
+                case 'BGRA':
+                    return dawn::TextureFormat::B8G8R8A8Unorm;
+                case '2C08':
+                    return dawn::TextureFormat::R8G8Unorm;
+                case 'L008':
+                    return dawn::TextureFormat::R8Unorm;
+                default:
+                    return DAWN_VALIDATION_ERROR("Unsupported IOSurface format");
+            }
+        }
+    }
+
+    MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format) {
+        switch (format) {
+            case dawn::TextureFormat::R8G8B8A8Unorm:
+                return MTLPixelFormatRGBA8Unorm;
+            case dawn::TextureFormat::R8G8Unorm:
+                return MTLPixelFormatRG8Unorm;
+            case dawn::TextureFormat::R8Unorm:
+                return MTLPixelFormatR8Unorm;
+            case dawn::TextureFormat::R8G8B8A8Uint:
+                return MTLPixelFormatRGBA8Uint;
+            case dawn::TextureFormat::R8G8Uint:
+                return MTLPixelFormatRG8Uint;
+            case dawn::TextureFormat::R8Uint:
+                return MTLPixelFormatR8Uint;
+            case dawn::TextureFormat::B8G8R8A8Unorm:
+                return MTLPixelFormatBGRA8Unorm;
+            case dawn::TextureFormat::D32FloatS8Uint:
+                return MTLPixelFormatDepth32Float_Stencil8;
+        }
+    }
+
+    MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase*,
+                                             const TextureDescriptor* descriptor,
+                                             IOSurfaceRef ioSurface,
+                                             uint32_t plane) {
+        // IOSurfaceGetPlaneCount can return 0 for non-planar IOSurfaces but we will treat
+        // non-planar like it is a single plane.
+        size_t surfacePlaneCount = std::max(size_t(1), IOSurfaceGetPlaneCount(ioSurface));
+        if (plane >= surfacePlaneCount) {
+            return DAWN_VALIDATION_ERROR("IOSurface plane doesn't exist");
+        }
+
+        if (descriptor->dimension != dawn::TextureDimension::e2D) {
+            return DAWN_VALIDATION_ERROR("IOSurface texture must be 2D");
+        }
+
+        if (descriptor->mipLevelCount != 1) {
+            return DAWN_VALIDATION_ERROR("IOSurface mip level count must be 1");
+        }
+
+        if (descriptor->arrayLayerCount != 1) {
+            return DAWN_VALIDATION_ERROR("IOSurface array layer count must be 1");
+        }
+
+        if (descriptor->sampleCount != 1) {
+            return DAWN_VALIDATION_ERROR("IOSurface sample count must be 1");
+        }
+
+        if (descriptor->size.width != IOSurfaceGetWidthOfPlane(ioSurface, plane) ||
+            descriptor->size.height != IOSurfaceGetHeightOfPlane(ioSurface, plane) ||
+            descriptor->size.depth != 1) {
+            return DAWN_VALIDATION_ERROR("IOSurface size doesn't match descriptor");
+        }
+
+        dawn::TextureFormat ioSurfaceFormat;
+        DAWN_TRY_ASSIGN(ioSurfaceFormat,
+                        GetFormatEquivalentToIOSurfaceFormat(IOSurfaceGetPixelFormat(ioSurface)));
+        if (descriptor->format != ioSurfaceFormat) {
+            return DAWN_VALIDATION_ERROR("IOSurface format doesn't match descriptor");
+        }
+
+        return {};
+    }
+
+    MTLTextureDescriptor* CreateMetalTextureDescriptor(const TextureDescriptor* descriptor) {
+        MTLTextureDescriptor* mtlDesc = [MTLTextureDescriptor new];
+        mtlDesc.textureType = MetalTextureType(descriptor->dimension, descriptor->arrayLayerCount);
+        mtlDesc.usage = MetalTextureUsage(descriptor->usage);
+        mtlDesc.pixelFormat = MetalPixelFormat(descriptor->format);
+
+        mtlDesc.width = descriptor->size.width;
+        mtlDesc.height = descriptor->size.height;
+        mtlDesc.depth = descriptor->size.depth;
+
+        mtlDesc.mipmapLevelCount = descriptor->mipLevelCount;
+        mtlDesc.arrayLength = descriptor->arrayLayerCount;
+        mtlDesc.storageMode = MTLStorageModePrivate;
+
+        return mtlDesc;
     }
 
     Texture::Texture(Device* device, const TextureDescriptor* descriptor)
         : TextureBase(device, descriptor) {
-        auto desc = [MTLTextureDescriptor new];
-        [desc autorelease];
-        desc.textureType = MetalTextureType(GetDimension(), GetArrayLayers());
-        desc.usage = MetalTextureUsage(GetUsage());
-        desc.pixelFormat = MetalPixelFormat(GetFormat());
-
-        const Extent3D& size = GetSize();
-        desc.width = size.width;
-        desc.height = size.height;
-        desc.depth = size.depth;
-
-        desc.mipmapLevelCount = GetNumMipLevels();
-        desc.arrayLength = GetArrayLayers();
-        desc.storageMode = MTLStorageModePrivate;
-
-        auto mtlDevice = device->GetMTLDevice();
-        mMtlTexture = [mtlDevice newTextureWithDescriptor:desc];
+        MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(descriptor);
+        mMtlTexture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc];
+        [mtlDesc release];
     }
 
     Texture::Texture(Device* device, const TextureDescriptor* descriptor, id<MTLTexture> mtlTexture)
         : TextureBase(device, descriptor), mMtlTexture(mtlTexture) {
         [mMtlTexture retain];
+    }
+
+    Texture::Texture(Device* device,
+                     const TextureDescriptor* descriptor,
+                     IOSurfaceRef ioSurface,
+                     uint32_t plane)
+        : TextureBase(device, descriptor) {
+        MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(descriptor);
+        mMtlTexture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
+                                                             iosurface:ioSurface
+                                                                 plane:plane];
+        [mtlDesc release];
     }
 
     Texture::~Texture() {

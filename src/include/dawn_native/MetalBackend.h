@@ -18,10 +18,24 @@
 #include <dawn/dawn_wsi.h>
 #include <dawn_native/DawnNative.h>
 
-#import <Metal/Metal.h>
+struct __IOSurface;
+typedef __IOSurface* IOSurfaceRef;
+
+#ifdef __OBJC__
+#    import <Metal/Metal.h>
+#endif  //__OBJC__
 
 namespace dawn_native { namespace metal {
-    DAWN_NATIVE_EXPORT id<MTLDevice> GetMetalDevice(dawnDevice device);
+    DAWN_NATIVE_EXPORT dawnTexture WrapIOSurface(dawnDevice device,
+                                                 const dawnTextureDescriptor* descriptor,
+                                                 IOSurfaceRef ioSurface,
+                                                 uint32_t plane);
 }}  // namespace dawn_native::metal
+
+#ifdef __OBJC__
+namespace dawn_native { namespace metal {
+    DAWN_NATIVE_EXPORT id<MTLDevice> GetMetalDevice(dawnDevice device);
+}}      // namespace dawn_native::metal
+#endif  // __OBJC__
 
 #endif  // DAWNNATIVE_METALBACKEND_H_

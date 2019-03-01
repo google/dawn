@@ -51,6 +51,10 @@ namespace dawn_native { namespace metal {
 
         MapRequestTracker* GetMapTracker() const;
 
+        TextureBase* CreateTextureWrappingIOSurface(const TextureDescriptor* descriptor,
+                                                    IOSurfaceRef ioSurface,
+                                                    uint32_t plane);
+
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
         MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
                                            uint32_t sourceOffset,
