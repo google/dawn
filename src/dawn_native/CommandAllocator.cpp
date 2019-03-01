@@ -177,32 +177,55 @@ namespace dawn_native {
 
         // It should always be possible to allocate one id, for EndOfBlock tagging,
         ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
-        ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr);
-        uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
+        ASSERT(mEndPtr >= mCurrentPtr);
+        ASSERT(static_cast<size_t>(mEndPtr - mCurrentPtr) >= sizeof(uint32_t));
 
-        uint8_t* commandAlloc = AlignPtr(mCurrentPtr + sizeof(uint32_t), commandAlignment);
-        uint8_t* nextPtr = AlignPtr(commandAlloc + commandSize, alignof(uint32_t));
+        // The memory after the ID will contain the following:
+        //   - the current ID
+        //   - padding to align the command, maximum kMaxSupportedAlignment
+        //   - the command of size commandSize
+        //   - padding to align the next ID, maximum alignof(uint32_t)
+        //   - the next ID of size sizeof(uint32_t)
+        //
+        // To avoid checking for overflows at every step of the computations we compute an upper
+        // bound of the space that will be needed in addition to the command data.
+        static constexpr size_t kWorstCaseAdditionalSize =
+            sizeof(uint32_t) + kMaxSupportedAlignment + alignof(uint32_t) + sizeof(uint32_t);
 
-        // When there is not enough space, we signal the EndOfBlock, so that the iterator nows to
-        // move to the next one. EndOfBlock on the last block means the end of the commands.
-        if (nextPtr + sizeof(uint32_t) > mEndPtr) {
-            // Even if we are not able to get another block, the list of commands will be
-            // well-formed and iterable as this block will be that last one.
-            *idAlloc = EndOfBlock;
+        // This can't overflow because by construction mCurrentPtr always has space for the next ID.
+        size_t remainingSize = static_cast<size_t>(mEndPtr - mCurrentPtr);
 
-            // Make sure we have space for current allocation, plus end of block and alignment
-            // padding for the first id.
-            ASSERT(nextPtr > mCurrentPtr);
-            if (!GetNewBlock(static_cast<size_t>(nextPtr - mCurrentPtr) + sizeof(uint32_t) +
-                             alignof(uint32_t))) {
-                return nullptr;
-            }
-            return Allocate(commandId, commandSize, commandAlignment);
+        // The good case were we have enough space for the command data and upper bound of the
+        // extra required space.
+        if ((remainingSize >= kWorstCaseAdditionalSize) &&
+            (remainingSize - kWorstCaseAdditionalSize >= commandSize)) {
+            uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
+            *idAlloc = commandId;
+
+            uint8_t* commandAlloc = AlignPtr(mCurrentPtr + sizeof(uint32_t), commandAlignment);
+            mCurrentPtr = AlignPtr(commandAlloc + commandSize, alignof(uint32_t));
+
+            return commandAlloc;
         }
 
-        *idAlloc = commandId;
-        mCurrentPtr = nextPtr;
-        return commandAlloc;
+        // When there is not enough space, we signal the EndOfBlock, so that the iterator knows to
+        // move to the next one. EndOfBlock on the last block means the end of the commands.
+        uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
+        *idAlloc = EndOfBlock;
+
+        // We'll request a block that can contain at least the command ID, the command and an
+        // additional ID to contain the EndOfBlock tag.
+        size_t requestedBlockSize = commandSize + kWorstCaseAdditionalSize;
+
+        // The computation of the request could overflow.
+        if (DAWN_UNLIKELY(requestedBlockSize <= commandSize)) {
+            return nullptr;
+        }
+
+        if (DAWN_UNLIKELY(!GetNewBlock(requestedBlockSize))) {
+            return nullptr;
+        }
+        return Allocate(commandId, commandSize, commandAlignment);
     }
 
     uint8_t* CommandAllocator::AllocateData(size_t commandSize, size_t commandAlignment) {
@@ -215,7 +238,7 @@ namespace dawn_native {
             std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
 
         uint8_t* block = reinterpret_cast<uint8_t*>(malloc(mLastAllocationSize));
-        if (block == nullptr) {
+        if (DAWN_UNLIKELY(block == nullptr)) {
             return false;
         }
 

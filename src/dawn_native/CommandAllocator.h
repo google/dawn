@@ -34,9 +34,8 @@ namespace dawn_native {
     //
     //     CommandIterator commands(allocator);
     //     CommandType type;
-    //     void* command;
-    //     while(commands.NextCommandId(&e)) {
-    //         switch(e) {
+    //     while(commands.NextCommandId(&type)) {
+    //         switch(type) {
     //              case CommandType::Draw:
     //                  DrawCommand* draw = commands.NextCommand<DrawCommand>();
     //                  // Do the draw
@@ -113,16 +112,22 @@ namespace dawn_native {
         T* Allocate(E commandId) {
             static_assert(sizeof(E) == sizeof(uint32_t), "");
             static_assert(alignof(E) == alignof(uint32_t), "");
+            static_assert(alignof(T) <= kMaxSupportedAlignment, "");
             return reinterpret_cast<T*>(
                 Allocate(static_cast<uint32_t>(commandId), sizeof(T), alignof(T)));
         }
 
         template <typename T>
         T* AllocateData(size_t count) {
+            static_assert(alignof(T) <= kMaxSupportedAlignment, "");
             return reinterpret_cast<T*>(AllocateData(sizeof(T) * count, alignof(T)));
         }
 
       private:
+        // This is used for some internal computations and can be any power of two as long as code
+        // using the CommandAllocator passes the static_asserts.
+        static constexpr size_t kMaxSupportedAlignment = 8;
+
         friend CommandIterator;
         CommandBlocks&& AcquireBlocks();
 
@@ -134,7 +139,7 @@ namespace dawn_native {
         size_t mLastAllocationSize = 2048;
 
         // Pointers to the current range of allocation in the block. Guaranteed to allow for at
-        // least one uint32_t is not nullptr, so that the special EndOfBlock command id can always
+        // least one uint32_t if not nullptr, so that the special EndOfBlock command id can always
         // be written. Nullptr iff the blocks were moved out.
         uint8_t* mCurrentPtr = nullptr;
         uint8_t* mEndPtr = nullptr;
