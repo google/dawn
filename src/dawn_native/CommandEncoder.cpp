@@ -133,6 +133,14 @@ namespace dawn_native {
             return {};
         }
 
+        MaybeError ValidateTextureSampleCountInCopyCommands(const TextureBase* texture) {
+            if (texture->GetSampleCount() > 1) {
+                return DAWN_VALIDATION_ERROR("The sample count of textures must be 1");
+            }
+
+            return {};
+        }
+
         MaybeError ComputeTextureCopyBufferSize(const Extent3D& copySize,
                                                 uint32_t rowPitch,
                                                 uint32_t imageHeight,
@@ -735,6 +743,9 @@ namespace dawn_native {
                     DAWN_TRY(GetDevice()->ValidateObject(copy->source.buffer.Get()));
                     DAWN_TRY(GetDevice()->ValidateObject(copy->destination.texture.Get()));
 
+                    DAWN_TRY(
+                        ValidateTextureSampleCountInCopyCommands(copy->destination.texture.Get()));
+
                     uint32_t bufferCopySize = 0;
                     DAWN_TRY(ValidateRowPitch(copy->destination.texture->GetFormat(),
                                               copy->copySize, copy->source.rowPitch));
@@ -762,6 +773,8 @@ namespace dawn_native {
 
                     DAWN_TRY(GetDevice()->ValidateObject(copy->source.texture.Get()));
                     DAWN_TRY(GetDevice()->ValidateObject(copy->destination.buffer.Get()));
+
+                    DAWN_TRY(ValidateTextureSampleCountInCopyCommands(copy->source.texture.Get()));
 
                     uint32_t bufferCopySize = 0;
                     DAWN_TRY(ValidateRowPitch(copy->source.texture->GetFormat(), copy->copySize,

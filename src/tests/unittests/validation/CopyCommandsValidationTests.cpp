@@ -29,14 +29,14 @@ class CopyCommandTest : public ValidationTest {
 
         dawn::Texture Create2DTexture(uint32_t width, uint32_t height, uint32_t mipLevelCount,
                                       uint32_t arrayLayerCount, dawn::TextureFormat format,
-                                      dawn::TextureUsageBit usage) {
+                                      dawn::TextureUsageBit usage, uint32_t sampleCount = 1) {
             dawn::TextureDescriptor descriptor;
             descriptor.dimension = dawn::TextureDimension::e2D;
             descriptor.size.width = width;
             descriptor.size.height = height;
             descriptor.size.depth = 1;
             descriptor.arrayLayerCount = arrayLayerCount;
-            descriptor.sampleCount = 1;
+            descriptor.sampleCount = sampleCount;
             descriptor.format = format;
             descriptor.mipLevelCount = mipLevelCount;
             descriptor.usage = usage;
@@ -409,6 +409,17 @@ TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
     }
 }
 
+// Test multisampled textures cannot be used in B2T copies.
+TEST_F(CopyCommandTest_B2T, CopyToMultisampledTexture) {
+    uint32_t bufferSize = BufferSizeForTextureCopy(16, 16, 1);
+    dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(2, 2, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferDst, 4);
+
+    TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
+                {2, 2, 1});
+}
+
 class CopyCommandTest_T2B : public CopyCommandTest {
 };
 
@@ -612,3 +623,13 @@ TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
                 256, 0, {1, 1, 1});
 }
 
+// Test multisampled textures cannot be used in T2B copies.
+TEST_F(CopyCommandTest_T2B, CopyFromMultisampledTexture) {
+    dawn::Texture source = Create2DTexture(2, 2, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm,
+                                           dawn::TextureUsageBit::TransferSrc, 4);
+    uint32_t bufferSize = BufferSizeForTextureCopy(16, 16, 1);
+    dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
+
+    TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
+                {2, 2, 1});
+}
