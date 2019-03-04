@@ -7,7 +7,7 @@
     APIs: gl=4.5
     Profile: core
     Extensions:
-        
+
     Loader: True
     Local files: False
     Omit khrplatform: False
@@ -81,7 +81,7 @@ typedef void* (* GLADloadproc)(const char *name);
 # endif
 #endif
 
-GLAPI struct gladGLversionStruct GLVersion;
+extern struct gladGLversionStruct GLVersion;
 
 GLAPI int gladLoadGL(void);
 
