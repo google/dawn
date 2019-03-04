@@ -54,9 +54,12 @@ namespace dawn_native {
         const Extent3D& GetSize() const;
         uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
+        uint32_t GetSampleCount() const;
         dawn::TextureUsageBit GetUsage() const;
 
         MaybeError ValidateCanUseInSubmitNow() const;
+
+        bool IsMultisampledTexture() const;
 
         // Dawn API
         TextureViewBase* CreateDefaultTextureView();
@@ -70,6 +73,7 @@ namespace dawn_native {
         Extent3D mSize;
         uint32_t mArrayLayerCount;
         uint32_t mMipLevelCount;
+        uint32_t mSampleCount;
         dawn::TextureUsageBit mUsage = dawn::TextureUsageBit::None;
     };
 

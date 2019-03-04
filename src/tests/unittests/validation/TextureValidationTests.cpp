@@ -56,10 +56,27 @@ TEST_F(TextureValidationTest, SampleCount) {
         device.CreateTexture(&descriptor);
     }
 
+    // sampleCount == 4 is allowed.
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.sampleCount = 4;
+
+        device.CreateTexture(&descriptor);
+    }
+
     // It is an error to create a texture with an invalid sampleCount.
     {
         dawn::TextureDescriptor descriptor = defaultDescriptor;
         descriptor.sampleCount = 3;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // It is an error to create a multisampled texture with mipLevelCount > 1.
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.sampleCount = 4;
+        descriptor.mipLevelCount = 2;
 
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }

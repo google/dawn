@@ -28,16 +28,18 @@ constexpr dawn::TextureFormat kDefaultTextureFormat = dawn::TextureFormat::R8G8B
 dawn::Texture Create2DArrayTexture(dawn::Device& device,
                                    uint32_t arrayLayerCount,
                                    uint32_t width = kWidth,
-                                   uint32_t height = kHeight) {
+                                   uint32_t height = kHeight,
+                                   uint32_t mipLevelCount = kDefaultMipLevels,
+                                   uint32_t sampleCount = 1) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
     descriptor.size.width = width;
     descriptor.size.height = height;
     descriptor.size.depth = 1;
     descriptor.arrayLayerCount = arrayLayerCount;
-    descriptor.sampleCount = 1;
+    descriptor.sampleCount = sampleCount;
     descriptor.format = kDefaultTextureFormat;
-    descriptor.mipLevelCount = kDefaultMipLevels;
+    descriptor.mipLevelCount = mipLevelCount;
     descriptor.usage = dawn::TextureUsageBit::Sampled;
     return device.CreateTexture(&descriptor);
 }
@@ -197,6 +199,30 @@ TEST_F(TextureViewValidationTest, CreateCubeMapTextureView) {
         descriptor.dimension = dawn::TextureViewDimension::CubeArray;
         descriptor.arrayLayerCount = 12;
         ASSERT_DEVICE_ERROR(nonSquareTexture.CreateTextureView(&descriptor));
+    }
+
+    // It is an error to create a cube map texture view on a multisampled texture.
+    {
+        constexpr uint32_t kSampleCount = 4;
+        dawn::Texture multisampledTexture = Create2DArrayTexture(device, kDefaultArrayLayers,
+                                                                 kWidth, kHeight, 1, kSampleCount);
+        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = dawn::TextureViewDimension::Cube;
+        descriptor.arrayLayerCount = 6;
+        descriptor.mipLevelCount = 1;
+        ASSERT_DEVICE_ERROR(multisampledTexture.CreateTextureView(&descriptor));
+    }
+
+    // It is an error to create a cube map array texture view on a multisampled texture.
+    {
+        constexpr uint32_t kSampleCount = 4;
+        dawn::Texture multisampledTexture = Create2DArrayTexture(device, kDefaultArrayLayers,
+                                                                 kWidth, kHeight, 1, kSampleCount);
+        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = dawn::TextureViewDimension::CubeArray;
+        descriptor.arrayLayerCount = 12;
+        descriptor.mipLevelCount = 1;
+        ASSERT_DEVICE_ERROR(multisampledTexture.CreateTextureView(&descriptor));
     }
 }
 
