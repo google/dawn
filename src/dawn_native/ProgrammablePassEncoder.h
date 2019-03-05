@@ -46,6 +46,11 @@ namespace dawn_native {
                               const void* data);
 
       protected:
+        // Construct an "error" programmable pass encoder.
+        ProgrammablePassEncoder(DeviceBase* device,
+                                CommandEncoderBase* topLevelEncoder,
+                                ErrorTag errorTag);
+
         MaybeError ValidateCanRecordCommands() const;
 
         // The allocator is borrowed from the top level encoder. Keep a reference to the encoder

@@ -30,8 +30,16 @@ namespace dawn_native {
                                CommandEncoderBase* topLevelEncoder,
                                CommandAllocator* allocator);
 
+        static ComputePassEncoderBase* MakeError(DeviceBase* device,
+                                                 CommandEncoderBase* topLevelEncoder);
+
         void Dispatch(uint32_t x, uint32_t y, uint32_t z);
         void SetPipeline(ComputePipelineBase* pipeline);
+
+      protected:
+        ComputePassEncoderBase(DeviceBase* device,
+                               CommandEncoderBase* topLevelEncoder,
+                               ErrorTag errorTag);
     };
 
 }  // namespace dawn_native

@@ -30,6 +30,9 @@ namespace dawn_native {
                               CommandEncoderBase* topLevelEncoder,
                               CommandAllocator* allocator);
 
+        static RenderPassEncoderBase* MakeError(DeviceBase* device,
+                                                CommandEncoderBase* topLevelEncoder);
+
         void Draw(uint32_t vertexCount,
                   uint32_t instanceCount,
                   uint32_t firstVertex,
@@ -60,6 +63,11 @@ namespace dawn_native {
                               BufferBase* const* buffers,
                               uint32_t const* offsets);
         void SetIndexBuffer(BufferBase* buffer, uint32_t offset);
+
+      protected:
+        RenderPassEncoderBase(DeviceBase* device,
+                              CommandEncoderBase* topLevelEncoder,
+                              ErrorTag errorTag);
     };
 
 }  // namespace dawn_native

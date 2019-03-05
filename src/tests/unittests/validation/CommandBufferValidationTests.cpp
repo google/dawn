@@ -130,6 +130,31 @@ TEST_F(CommandBufferValidationTest, ComputePassEndedTwice) {
     }
 }
 
+// Test that beginning a compute pass before ending the previous pass causes an error.
+TEST_F(CommandBufferValidationTest, BeginComputePassBeforeEndPreviousPass) {
+    DummyRenderPass dummyRenderPass(device);
+
+    // Beginning a compute pass before ending a render pass causes an error.
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&dummyRenderPass);
+        dawn::ComputePassEncoder computePass = encoder.BeginComputePass();
+        computePass.EndPass();
+        renderPass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Beginning a compute pass before ending a compute pass causes an error.
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::ComputePassEncoder computePass1 = encoder.BeginComputePass();
+        dawn::ComputePassEncoder computePass2 = encoder.BeginComputePass();
+        computePass2.EndPass();
+        computePass1.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
 // Test that using a single buffer in multiple read usages in the same pass is allowed.
 TEST_F(CommandBufferValidationTest, BufferWithMultipleReadUsage) {
     // Create a buffer used as both vertex and index buffer.

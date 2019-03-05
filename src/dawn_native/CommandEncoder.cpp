@@ -486,29 +486,28 @@ namespace dawn_native {
     // Implementation of the API's command recording methods
 
     ComputePassEncoderBase* CommandEncoderBase::BeginComputePass() {
+        DeviceBase* device = GetDevice();
         if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
-            return nullptr;
+            return ComputePassEncoderBase::MakeError(device, this);
         }
 
         mAllocator.Allocate<BeginComputePassCmd>(Command::BeginComputePass);
 
         mEncodingState = EncodingState::ComputePass;
-        return new ComputePassEncoderBase(GetDevice(), this, &mAllocator);
+        return new ComputePassEncoderBase(device, this, &mAllocator);
     }
 
     RenderPassEncoderBase* CommandEncoderBase::BeginRenderPass(const RenderPassDescriptor* info) {
         DeviceBase* device = GetDevice();
 
         if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
-            // Using nullptr as allocator will make ValidateCanRecordCommands() always return false,
-            // thus any API call on the return value will result in a Dawn validation error.
-            return new RenderPassEncoderBase(device, this, nullptr);
+            return RenderPassEncoderBase::MakeError(device, this);
         }
 
         uint32_t width = 0;
         uint32_t height = 0;
         if (ConsumedError(ValidateRenderPassDescriptorAndSetSize(device, info, &width, &height))) {
-            return new RenderPassEncoderBase(device, this, nullptr);
+            return RenderPassEncoderBase::MakeError(device, this);
         }
 
         mEncodingState = EncodingState::RenderPass;
@@ -543,7 +542,7 @@ namespace dawn_native {
         cmd->width = width;
         cmd->height = height;
 
-        return new RenderPassEncoderBase(GetDevice(), this, &mAllocator);
+        return new RenderPassEncoderBase(device, this, &mAllocator);
     }
 
     void CommandEncoderBase::CopyBufferToBuffer(BufferBase* source,

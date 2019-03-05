@@ -27,6 +27,17 @@ namespace dawn_native {
         : ProgrammablePassEncoder(device, topLevelEncoder, allocator) {
     }
 
+    ComputePassEncoderBase::ComputePassEncoderBase(DeviceBase* device,
+                                                   CommandEncoderBase* topLevelEncoder,
+                                                   ErrorTag errorTag)
+        : ProgrammablePassEncoder(device, topLevelEncoder, errorTag) {
+    }
+
+    ComputePassEncoderBase* ComputePassEncoderBase::MakeError(DeviceBase* device,
+                                                              CommandEncoderBase* topLevelEncoder) {
+        return new ComputePassEncoderBase(device, topLevelEncoder, ObjectBase::kError);
+    }
+
     void ComputePassEncoderBase::Dispatch(uint32_t x, uint32_t y, uint32_t z) {
         if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
             return;

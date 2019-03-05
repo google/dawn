@@ -30,6 +30,17 @@ namespace dawn_native {
         : ProgrammablePassEncoder(device, topLevelEncoder, allocator) {
     }
 
+    RenderPassEncoderBase::RenderPassEncoderBase(DeviceBase* device,
+                                                 CommandEncoderBase* topLevelEncoder,
+                                                 ErrorTag errorTag)
+        : ProgrammablePassEncoder(device, topLevelEncoder, errorTag) {
+    }
+
+    RenderPassEncoderBase* RenderPassEncoderBase::MakeError(DeviceBase* device,
+                                                            CommandEncoderBase* topLevelEncoder) {
+        return new RenderPassEncoderBase(device, topLevelEncoder, ObjectBase::kError);
+    }
+
     void RenderPassEncoderBase::Draw(uint32_t vertexCount,
                                      uint32_t instanceCount,
                                      uint32_t firstVertex,

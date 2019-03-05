@@ -27,6 +27,13 @@ namespace dawn_native {
                                                      CommandEncoderBase* topLevelEncoder,
                                                      CommandAllocator* allocator)
         : ObjectBase(device), mTopLevelEncoder(topLevelEncoder), mAllocator(allocator) {
+        DAWN_ASSERT(allocator != nullptr);
+    }
+
+    ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
+                                                     CommandEncoderBase* topLevelEncoder,
+                                                     ErrorTag errorTag)
+        : ObjectBase(device, errorTag), mTopLevelEncoder(topLevelEncoder), mAllocator(nullptr) {
     }
 
     void ProgrammablePassEncoder::EndPass() {
