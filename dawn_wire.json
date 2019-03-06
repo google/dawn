@@ -58,7 +58,7 @@
         ],
         "client_handwritten_commands": [
             "BufferUnmap",
-            "DeviceCreateFence",
+            "QueueCreateFence",
             "FenceGetCompletedValue",
             "QueueSignal"
         ],

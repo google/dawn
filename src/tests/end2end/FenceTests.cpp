@@ -69,7 +69,7 @@ class FenceTests : public DawnTest {
 TEST_P(FenceTests, SimpleSignal) {
     dawn::FenceDescriptor descriptor;
     descriptor.initialValue = 1u;
-    dawn::Fence fence = device.CreateFence(&descriptor);
+    dawn::Fence fence = queue.CreateFence(&descriptor);
 
     // Completed value starts at initial value
     EXPECT_EQ(fence.GetCompletedValue(), 1u);
@@ -85,7 +85,7 @@ TEST_P(FenceTests, SimpleSignal) {
 TEST_P(FenceTests, OnCompletionOrdering) {
     dawn::FenceDescriptor descriptor;
     descriptor.initialValue = 0u;
-    dawn::Fence fence = device.CreateFence(&descriptor);
+    dawn::Fence fence = queue.CreateFence(&descriptor);
 
     queue.Signal(fence, 4);
 
@@ -126,7 +126,7 @@ TEST_P(FenceTests, OnCompletionOrdering) {
 TEST_P(FenceTests, MultipleSignalOnCompletion) {
     dawn::FenceDescriptor descriptor;
     descriptor.initialValue = 0u;
-    dawn::Fence fence = device.CreateFence(&descriptor);
+    dawn::Fence fence = queue.CreateFence(&descriptor);
 
     queue.Signal(fence, 2);
     queue.Signal(fence, 4);
@@ -144,7 +144,7 @@ TEST_P(FenceTests, MultipleSignalOnCompletion) {
 TEST_P(FenceTests, OnCompletionMultipleCallbacks) {
     dawn::FenceDescriptor descriptor;
     descriptor.initialValue = 0u;
-    dawn::Fence fence = device.CreateFence(&descriptor);
+    dawn::Fence fence = queue.CreateFence(&descriptor);
 
     queue.Signal(fence, 4);
 
@@ -182,13 +182,13 @@ TEST_P(FenceTests, OnCompletionMultipleCallbacks) {
 TEST_P(FenceTests, DISABLED_DestroyBeforeOnCompletionEnd) {
     dawn::FenceDescriptor descriptor;
     descriptor.initialValue = 0u;
-    dawn::Fence fence = device.CreateFence(&descriptor);
+    dawn::Fence fence = queue.CreateFence(&descriptor);
 
     // The fence in this block will be deleted when it goes out of scope
     {
         dawn::FenceDescriptor descriptor;
         descriptor.initialValue = 0u;
-        dawn::Fence testFence = device.CreateFence(&descriptor);
+        dawn::Fence testFence = queue.CreateFence(&descriptor);
 
         queue.Signal(testFence, 4);
 

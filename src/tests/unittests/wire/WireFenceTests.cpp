@@ -56,22 +56,22 @@ class WireFenceTests : public WireTest {
         mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
 
         {
+            queue = dawnDeviceCreateQueue(device);
+            apiQueue = api.GetNewQueue();
+            EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue));
+            EXPECT_CALL(api, QueueRelease(apiQueue));
+            FlushClient();
+        }
+        {
             dawnFenceDescriptor descriptor;
             descriptor.initialValue = 1;
             descriptor.nextInChain = nullptr;
 
             apiFence = api.GetNewFence();
-            fence = dawnDeviceCreateFence(device, &descriptor);
+            fence = dawnQueueCreateFence(queue, &descriptor);
 
-            EXPECT_CALL(api, DeviceCreateFence(apiDevice, _)).WillOnce(Return(apiFence));
+            EXPECT_CALL(api, QueueCreateFence(apiQueue, _)).WillOnce(Return(apiFence));
             EXPECT_CALL(api, FenceRelease(apiFence));
-            FlushClient();
-        }
-        {
-            queue = dawnDeviceCreateQueue(device);
-            apiQueue = api.GetNewQueue();
-            EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue));
-            EXPECT_CALL(api, QueueRelease(apiQueue));
             FlushClient();
         }
     }
@@ -263,4 +263,45 @@ TEST_F(WireFenceTests, DestroyBeforeOnCompletionEnd) {
         .Times(1);
 
     dawnFenceRelease(fence);
+}
+
+// Test that signaling a fence on a wrong queue is invalid
+TEST_F(WireFenceTests, SignalWrongQueue) {
+    dawnQueue queue2 = dawnDeviceCreateQueue(device);
+    dawnQueue apiQueue2 = api.GetNewQueue();
+    EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue2));
+    EXPECT_CALL(api, QueueRelease(apiQueue2));
+    FlushClient();
+
+    dawnCallbackUserdata userdata = 1520;
+    dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata);
+
+    EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(1);
+    dawnQueueSignal(queue2, fence, 2u);  // error
+}
+
+// Test that signaling a fence on a wrong queue does not update fence signaled value
+TEST_F(WireFenceTests, SignalWrongQueueDoesNotUpdateValue) {
+    dawnQueue queue2 = dawnDeviceCreateQueue(device);
+    dawnQueue apiQueue2 = api.GetNewQueue();
+    EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue2));
+    EXPECT_CALL(api, QueueRelease(apiQueue2));
+    FlushClient();
+
+    dawnCallbackUserdata userdata = 1024;
+    dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata);
+
+    EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(1);
+    dawnQueueSignal(queue2, fence, 2u);  // error
+
+    // Fence value should be unchanged.
+    FlushClient();
+    FlushServer();
+    EXPECT_EQ(dawnFenceGetCompletedValue(fence), 1u);
+
+    // Signaling with 2 on the correct queue should succeed
+    DoQueueSignal(2u);  // success
+    FlushClient();
+    FlushServer();
+    EXPECT_EQ(dawnFenceGetCompletedValue(fence), 2u);
 }

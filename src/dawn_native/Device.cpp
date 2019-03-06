@@ -159,15 +159,6 @@ namespace dawn_native {
 
         return result;
     }
-    FenceBase* DeviceBase::CreateFence(const FenceDescriptor* descriptor) {
-        FenceBase* result = nullptr;
-
-        if (ConsumedError(CreateFenceInternal(&result, descriptor))) {
-            return FenceBase::MakeError(this);
-        }
-
-        return result;
-    }
     InputStateBuilder* DeviceBase::CreateInputStateBuilder() {
         return new InputStateBuilder(this);
     }
@@ -299,13 +290,6 @@ namespace dawn_native {
         const ComputePipelineDescriptor* descriptor) {
         DAWN_TRY(ValidateComputePipelineDescriptor(this, descriptor));
         DAWN_TRY_ASSIGN(*result, CreateComputePipelineImpl(descriptor));
-        return {};
-    }
-
-    MaybeError DeviceBase::CreateFenceInternal(FenceBase** result,
-                                               const FenceDescriptor* descriptor) {
-        DAWN_TRY(ValidateFenceDescriptor(this, descriptor));
-        *result = new FenceBase(this, descriptor);
         return {};
     }
 

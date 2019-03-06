@@ -133,10 +133,11 @@ namespace dawn_wire { namespace client {
         cmd.Serialize(allocatedBuffer, *buffer->device->GetClient());
     }
 
-    dawnFence ClientDeviceCreateFence(dawnDevice cSelf, dawnFenceDescriptor const* descriptor) {
-        Device* device = reinterpret_cast<Device*>(cSelf);
+    dawnFence ClientQueueCreateFence(dawnQueue cSelf, dawnFenceDescriptor const* descriptor) {
+        Queue* queue = reinterpret_cast<Queue*>(cSelf);
+        Device* device = queue->device;
 
-        DeviceCreateFenceCmd cmd;
+        QueueCreateFenceCmd cmd;
         cmd.self = cSelf;
         auto* allocation = device->GetClient()->FenceAllocator().New(device);
         cmd.result = ObjectHandle{allocation->object->id, allocation->serial};
@@ -149,6 +150,7 @@ namespace dawn_wire { namespace client {
         dawnFence cFence = reinterpret_cast<dawnFence>(allocation->object.get());
 
         Fence* fence = reinterpret_cast<Fence*>(cFence);
+        fence->queue = queue;
         fence->signaledValue = descriptor->initialValue;
         fence->completedValue = descriptor->initialValue;
         return cFence;
@@ -156,6 +158,12 @@ namespace dawn_wire { namespace client {
 
     void ClientQueueSignal(dawnQueue cQueue, dawnFence cFence, uint64_t signalValue) {
         Fence* fence = reinterpret_cast<Fence*>(cFence);
+        Queue* queue = reinterpret_cast<Queue*>(cQueue);
+        if (fence->queue != queue) {
+            fence->device->HandleError(
+                "Fence must be signaled on the queue on which it was created.");
+            return;
+        }
         if (signalValue <= fence->signaledValue) {
             fence->device->HandleError("Fence value less than or equal to signaled value");
             return;

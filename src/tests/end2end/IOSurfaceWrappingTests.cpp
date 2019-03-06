@@ -351,7 +351,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         // Maybe it is because the Metal command buffer has been submitted but not "scheduled" yet?
         dawn::FenceDescriptor fenceDescriptor;
         fenceDescriptor.initialValue = 0u;
-        dawn::Fence fence = device.CreateFence(&fenceDescriptor);
+        dawn::Fence fence = queue.CreateFence(&fenceDescriptor);
         queue.Signal(fence, 1);
 
         while (fence.GetCompletedValue() < 1) {

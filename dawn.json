@@ -437,13 +437,6 @@
                 "returns": "command encoder"
             },
             {
-                "name": "create fence",
-                "returns": "fence",
-                "args": [
-                    {"name": "descriptor", "type": "fence descriptor", "annotation": "const*"}
-                ]
-            },
-            {
                 "name": "create input state builder",
                 "returns": "input state builder"
             },
@@ -713,6 +706,13 @@
                 "args": [
                     {"name": "fence", "type": "fence"},
                     {"name": "signal value", "type": "uint64_t"}
+                ]
+            },
+            {
+                "name": "create fence",
+                "returns": "fence",
+                "args": [
+                    {"name": "descriptor", "type": "fence descriptor", "annotation": "const*"}
                 ]
             }
         ]
