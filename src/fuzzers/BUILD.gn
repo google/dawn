@@ -15,8 +15,6 @@
 import("../../scripts/dawn_overrides_with_defaults.gni")
 import("//build_overrides/build.gni")
 
-dawn_top_level = "../.."
-
 # We only have libfuzzer in Chromium builds but if we build fuzzer targets only
 # there, we would risk breaking fuzzer targets all the time when making changes
 # to Dawn. To avoid that, we make fuzzer targets compile in standalone builds
@@ -165,11 +163,11 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
   ]
 
   deps = [
-    "${dawn_top_level}:dawn_common",
-    "${dawn_top_level}:libdawn_native_static",
-    "${dawn_top_level}:libdawn_static",
-    "${dawn_top_level}:libdawn_wire_static",
+    "${dawn_root}/:libdawn_native_static",
+    "${dawn_root}/:libdawn_wire_static",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:libdawn_static",
   ]
 
-  additional_configs = [ "${dawn_top_level}:dawn_internal" ]
+  additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
 }

@@ -20,142 +20,12 @@ import("generator/dawn_generator.gni")
 
 import("//testing/test.gni")
 
-# Use Chromium's dcheck_always_on when available so that we respect it when
-# running tests on the GPU builders
-if (build_with_chromium) {
-  import("//build/config/dcheck_always_on.gni")
-} else {
-  dcheck_always_on = false
-}
-
-###############################################################################
-# Common dawn libraries and configs
-###############################################################################
-
-config("dawn_public") {
-  include_dirs = [
-    target_gen_dir,
-    "src/include",
-  ]
-}
-
-config("dawn_internal") {
-  include_dirs = [ "src" ]
-
-  defines = []
-  if (dawn_always_assert || dcheck_always_on || is_debug) {
-    defines += [ "DAWN_ENABLE_ASSERTS" ]
-  }
-
-  if (dawn_enable_d3d12) {
-    defines += [ "DAWN_ENABLE_BACKEND_D3D12" ]
-  }
-  if (dawn_enable_metal) {
-    defines += [ "DAWN_ENABLE_BACKEND_METAL" ]
-  }
-  if (dawn_enable_null) {
-    defines += [ "DAWN_ENABLE_BACKEND_NULL" ]
-  }
-  if (dawn_enable_opengl) {
-    defines += [ "DAWN_ENABLE_BACKEND_OPENGL" ]
-  }
-  if (dawn_enable_vulkan) {
-    defines += [ "DAWN_ENABLE_BACKEND_VULKAN" ]
-  }
-
-  configs = [ ":dawn_public" ]
-
-  # Only internal Dawn targets can use this config, this means only targets in
-  # this BUILD.gn file.
-  visibility = [ ":*" ]
-}
-
-static_library("dawn_common") {
-  sources = [
-    "src/common/Assert.cpp",
-    "src/common/Assert.h",
-    "src/common/BitSetIterator.h",
-    "src/common/Compiler.h",
-    "src/common/DynamicLib.cpp",
-    "src/common/DynamicLib.h",
-    "src/common/HashUtils.h",
-    "src/common/Math.cpp",
-    "src/common/Math.h",
-    "src/common/Platform.h",
-    "src/common/Result.h",
-    "src/common/Serial.h",
-    "src/common/SerialMap.h",
-    "src/common/SerialQueue.h",
-    "src/common/SerialStorage.h",
-    "src/common/SwapChainUtils.h",
-    "src/common/vulkan_platform.h",
-    "src/common/windows_with_undefs.h",
-  ]
-
-  configs += [ ":dawn_internal" ]
-  deps = [
-    ":dawn_headers",
-  ]
-}
-
-###############################################################################
-# Dawn headers
-###############################################################################
-
-dawn_generator("dawn_headers_gen") {
-  target = "dawn_headers"
-  outputs = [
-    "dawn/dawncpp.h",
-    "dawn/dawn.h",
-    "dawn/dawncpp_traits.h",
-  ]
-}
-
-source_set("dawn_headers") {
-  public_configs = [ ":dawn_public" ]
-  deps = [
-    ":dawn_headers_gen",
-  ]
-
-  sources = get_target_outputs(":dawn_headers_gen")
-  sources += [
-    "src/include/dawn/EnumClassBitmasks.h",
-    "src/include/dawn/dawn_export.h",
-    "src/include/dawn/dawn_wsi.h",
-  ]
-}
-
-###############################################################################
-# libdawn
-###############################################################################
-
-dawn_generator("libdawn_gen") {
-  target = "libdawn"
-  outputs = [
-    "dawn/dawncpp.cpp",
-    "dawn/dawn.c",
-  ]
-}
-
-dawn_component("libdawn") {
-  DEFINE_PREFIX = "DAWN"
-
-  public_deps = [
-    ":dawn_headers",
-  ]
-
-  deps = [
-    ":libdawn_gen",
-  ]
-  sources = get_target_outputs(":libdawn_gen")
-}
-
 ###############################################################################
 # libdawn_native
 ###############################################################################
 
 config("libdawn_native_internal") {
-  configs = [ ":dawn_internal" ]
+  configs = [ "${dawn_root}/src/common:dawn_internal" ]
 
   # Suppress warnings that Metal isn't in the deployment target of Chrome
   if (is_mac) {
@@ -178,9 +48,9 @@ dawn_generator("libdawn_native_utils_gen") {
 # dependencies of libdawn_native
 source_set("libdawn_native_headers") {
   public_deps = [
-    ":dawn_headers",
+    "${dawn_root}/src/dawn:dawn_headers",
   ]
-  public_configs = [ ":dawn_public" ]
+  public_configs = [ "${dawn_root}/src/common:dawn_public" ]
   sources = [
     "src/include/dawn_native/DawnNative.h",
     "src/include/dawn_native/dawn_native_export.h",
@@ -200,9 +70,9 @@ source_set("libdawn_native_headers") {
 # except those that define exported symbols.
 source_set("libdawn_native_sources") {
   deps = [
-    ":dawn_common",
     ":libdawn_native_headers",
     ":libdawn_native_utils_gen",
+    "${dawn_root}/src/common",
     "${dawn_spirv_tools_dir}:spvtools_val",
     "third_party:spirv_cross",
   ]
@@ -504,8 +374,8 @@ dawn_component("libdawn_native") {
   ]
 
   deps = [
-    ":dawn_common",
     ":libdawn_native_sources",
+    "${dawn_root}/src/common",
   ]
   sources = [
     "src/dawn_native/DawnNative.cpp",
@@ -539,9 +409,9 @@ dawn_component("libdawn_native") {
 # dependencies of libdawn_wire
 source_set("libdawn_wire_headers") {
   public_deps = [
-    ":dawn_headers",
+    "${dawn_root}/src/dawn:dawn_headers",
   ]
-  public_configs = [ ":dawn_public" ]
+  public_configs = [ "${dawn_root}/src/common:dawn_public" ]
   sources = [
     "src/include/dawn_wire/Wire.h",
     "src/include/dawn_wire/WireClient.h",
@@ -575,12 +445,12 @@ dawn_component("libdawn_wire") {
   DEFINE_PREFIX = "DAWN_WIRE"
 
   deps = [
-    ":dawn_common",
     ":libdawn_wire_gen",
     ":libdawn_wire_headers",
+    "${dawn_root}/src/common",
   ]
 
-  configs = [ ":dawn_internal" ]
+  configs = [ "${dawn_root}/src/common:dawn_internal" ]
   sources = get_target_outputs(":libdawn_wire_gen")
   sources += [
     "src/dawn_wire/WireClient.cpp",
@@ -619,7 +489,7 @@ dawn_component("libdawn_wire") {
 ###############################################################################
 
 static_library("dawn_utils") {
-  configs += [ ":dawn_internal" ]
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
 
   sources = [
     "src/utils/BackendBinding.cpp",
@@ -635,13 +505,13 @@ static_library("dawn_utils") {
   ]
 
   public_deps = [
-    ":dawn_headers_gen",
+    "${dawn_root}/src/dawn:dawn_headers",
   ]
 
   deps = [
-    ":dawn_common",
     ":libdawn_native",
     ":libdawn_wire",
+    "${dawn_root}/src/common",
     "${dawn_shaderc_dir}:libshaderc",
     "third_party:glfw",
   ]
@@ -692,17 +562,16 @@ dawn_generator("mock_dawn_gen") {
 }
 
 test("dawn_unittests") {
-  configs += [ ":dawn_internal" ]
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
 
   deps = [
-    ":dawn_common",
-    ":dawn_headers",
     ":dawn_utils",
-    ":libdawn",
     ":libdawn_native",
     ":libdawn_native_sources",
     ":libdawn_wire",
     ":mock_dawn_gen",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:libdawn",
     "third_party:gmock_and_gtest",
   ]
 
@@ -768,14 +637,14 @@ test("dawn_unittests") {
 }
 
 test("dawn_end2end_tests") {
-  configs += [ ":dawn_internal" ]
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
 
   deps = [
-    ":dawn_common",
     ":dawn_utils",
-    ":libdawn",
     ":libdawn_native",
     ":libdawn_wire",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:libdawn",
     "third_party:glfw",
     "third_party:gmock_and_gtest",
   ]
@@ -852,14 +721,14 @@ if (dawn_standalone) {
 
     # Export all of these as public deps so that `gn check` allows includes
     public_deps = [
-      ":dawn_common",
       ":dawn_utils",
-      ":libdawn",
       ":libdawn_native",
       ":libdawn_wire",
+      "${dawn_root}/src/common",
+      "${dawn_root}/src/dawn:libdawn",
       "third_party:glfw",
     ]
-    public_configs = [ ":dawn_internal" ]
+    public_configs = [ "${dawn_root}/src/common:dawn_internal" ]
   }
 
   # Template for samples to avoid listing dawn_sample_utils as a dep every time
