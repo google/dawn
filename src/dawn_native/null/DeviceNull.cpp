@@ -226,6 +226,9 @@ namespace dawn_native { namespace null {
     void Buffer::UnmapImpl() {
     }
 
+    void Buffer::DestroyImpl() {
+    }
+
     // CommandBuffer
 
     CommandBuffer::CommandBuffer(Device* device, CommandEncoderBase* encoder)
