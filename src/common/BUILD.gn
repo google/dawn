@@ -71,30 +71,35 @@ config("dawn_internal") {
 # Common dawn library
 ###############################################################################
 
-static_library("common") {
-  sources = [
-    "Assert.cpp",
-    "Assert.h",
-    "BitSetIterator.h",
-    "Compiler.h",
-    "DynamicLib.cpp",
-    "DynamicLib.h",
-    "HashUtils.h",
-    "Math.cpp",
-    "Math.h",
-    "Platform.h",
-    "Result.h",
-    "Serial.h",
-    "SerialMap.h",
-    "SerialQueue.h",
-    "SerialStorage.h",
-    "SwapChainUtils.h",
-    "vulkan_platform.h",
-    "windows_with_undefs.h",
-  ]
-
-  configs += [ ":dawn_internal" ]
-  deps = [
-    "${dawn_root}/src/dawn:dawn_headers",
-  ]
+# This GN file is discovered by all Chromium builds, but common doesn't support
+# all of Chromium's OSes so we explicitly make the target visible only on
+# systems we know Dawn is able to compile on.
+if (is_win || is_linux || is_mac) {
+  static_library("common") {
+    sources = [
+      "Assert.cpp",
+      "Assert.h",
+      "BitSetIterator.h",
+      "Compiler.h",
+      "DynamicLib.cpp",
+      "DynamicLib.h",
+      "HashUtils.h",
+      "Math.cpp",
+      "Math.h",
+      "Platform.h",
+      "Result.h",
+      "Serial.h",
+      "SerialMap.h",
+      "SerialQueue.h",
+      "SerialStorage.h",
+      "SwapChainUtils.h",
+      "vulkan_platform.h",
+      "windows_with_undefs.h",
+    ]
+  
+    configs += [ ":dawn_internal" ]
+    deps = [
+      "${dawn_root}/src/dawn:dawn_headers",
+    ]
+  }
 }
