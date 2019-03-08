@@ -405,21 +405,6 @@ dawn_component("libdawn_native") {
 # libdawn_wire
 ###############################################################################
 
-# Public libdawn_wire headers so they can be publically visible for
-# dependencies of libdawn_wire
-source_set("libdawn_wire_headers") {
-  public_deps = [
-    "${dawn_root}/src/dawn:dawn_headers",
-  ]
-  public_configs = [ "${dawn_root}/src/common:dawn_public" ]
-  sources = [
-    "src/include/dawn_wire/Wire.h",
-    "src/include/dawn_wire/WireClient.h",
-    "src/include/dawn_wire/WireServer.h",
-    "src/include/dawn_wire/dawn_wire_export.h",
-  ]
-}
-
 dawn_generator("libdawn_wire_gen") {
   target = "dawn_wire"
   outputs = [
@@ -446,8 +431,8 @@ dawn_component("libdawn_wire") {
 
   deps = [
     ":libdawn_wire_gen",
-    ":libdawn_wire_headers",
     "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn_wire:libdawn_wire_headers",
   ]
 
   configs = [ "${dawn_root}/src/common:dawn_internal" ]
@@ -480,7 +465,7 @@ dawn_component("libdawn_wire") {
 
   # Make headers publically visible
   public_deps = [
-    ":libdawn_wire_headers",
+    "${dawn_root}/src/dawn_wire:libdawn_wire_headers",
   ]
 }
 
