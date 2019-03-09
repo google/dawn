@@ -137,7 +137,14 @@ namespace dawn_native { namespace vulkan {
     }
 
     Buffer::~Buffer() {
-        DestroyImpl();
+        Device* device = ToBackend(GetDevice());
+
+        device->GetMemoryAllocator()->Free(&mMemoryAllocation);
+
+        if (mHandle != VK_NULL_HANDLE) {
+            device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+            mHandle = VK_NULL_HANDLE;
+        }
     }
 
     void Buffer::OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data) {
@@ -216,15 +223,6 @@ namespace dawn_native { namespace vulkan {
 
     void Buffer::UnmapImpl() {
         // No need to do anything, we keep CPU-visible memory mapped at all time.
-    }
-
-    void Buffer::DestroyImpl() {
-        ToBackend(GetDevice())->GetMemoryAllocator()->Free(&mMemoryAllocation);
-
-        if (mHandle != VK_NULL_HANDLE) {
-            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-            mHandle = VK_NULL_HANDLE;
-        }
     }
 
     // MapRequestTracker

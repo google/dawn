@@ -76,7 +76,6 @@ namespace dawn_native {
         virtual void MapReadAsyncImpl(uint32_t serial) = 0;
         virtual void MapWriteAsyncImpl(uint32_t serial) = 0;
         virtual void UnmapImpl() = 0;
-        virtual void DestroyImpl() = 0;
 
         MaybeError ValidateSetSubData(uint32_t start, uint32_t count) const;
         MaybeError ValidateMap(dawn::BufferUsageBit requiredUsage) const;

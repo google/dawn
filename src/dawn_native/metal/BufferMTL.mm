@@ -31,7 +31,8 @@ namespace dawn_native { namespace metal {
     }
 
     Buffer::~Buffer() {
-        DestroyImpl();
+        [mMtlBuffer release];
+        mMtlBuffer = nil;
     }
 
     id<MTLBuffer> Buffer::GetMTLBuffer() {
@@ -59,11 +60,6 @@ namespace dawn_native { namespace metal {
 
     void Buffer::UnmapImpl() {
         // Nothing to do, Metal StorageModeShared buffers are always mapped.
-    }
-
-    void Buffer::DestroyImpl() {
-        [mMtlBuffer release];
-        mMtlBuffer = nil;
     }
 
     MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {

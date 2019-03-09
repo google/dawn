@@ -105,7 +105,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     Buffer::~Buffer() {
-        DestroyImpl();
+        ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
     }
 
     uint32_t Buffer::GetD3D12Size() const {
@@ -187,11 +187,6 @@ namespace dawn_native { namespace d3d12 {
         mResource->Unmap(0, &mWrittenMappedRange);
         ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
         mWrittenMappedRange = {};
-    }
-
-    void Buffer::DestroyImpl() {
-        ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
-        mResource = nullptr;
     }
 
     MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {

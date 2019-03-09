@@ -146,7 +146,6 @@ namespace dawn_native { namespace null {
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
-        void DestroyImpl() override;
 
         void MapAsyncImplCommon(uint32_t serial, bool isWrite);
 
