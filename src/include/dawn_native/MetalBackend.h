@@ -18,6 +18,13 @@
 #include <dawn/dawn_wsi.h>
 #include <dawn_native/DawnNative.h>
 
+// The specifics of the Metal backend expose types in function signatures that might not be
+// available in dependent's minimum supported SDK version. Suppress all availability errors using
+// clang's pragmas. Dependents using the types without guarded availability will still get errors
+// when using the types.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+
 struct __IOSurface;
 typedef __IOSurface* IOSurfaceRef;
 
@@ -37,5 +44,7 @@ namespace dawn_native { namespace metal {
     DAWN_NATIVE_EXPORT id<MTLDevice> GetMetalDevice(dawnDevice device);
 }}      // namespace dawn_native::metal
 #endif  // __OBJC__
+
+#pragma clang diagnostic pop
 
 #endif  // DAWNNATIVE_METALBACKEND_H_
