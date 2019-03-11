@@ -132,9 +132,6 @@ TEST_P(DrawIndexedTest, Uint32) {
 
 // Test the parameter 'baseVertex' of DrawIndexed() works.
 TEST_P(DrawIndexedTest, BaseVertex) {
-    // TODO(jiawei.shao@intel.com): enable 'baseVertex' on OpenGL back-ends
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 

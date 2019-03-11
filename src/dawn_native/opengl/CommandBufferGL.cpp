@@ -622,18 +622,18 @@ namespace dawn_native { namespace opengl {
                     GLenum formatType = IndexFormatType(indexFormat);
 
                     if (draw->firstInstance > 0) {
-                        glDrawElementsInstancedBaseInstance(
+                        glDrawElementsInstancedBaseVertexBaseInstance(
                             lastPipeline->GetGLPrimitiveTopology(), draw->indexCount, formatType,
                             reinterpret_cast<void*>(draw->firstIndex * formatSize +
                                                     indexBufferBaseOffset),
-                            draw->instanceCount, draw->firstInstance);
+                            draw->instanceCount, draw->baseVertex, draw->firstInstance);
                     } else {
                         // This branch is only needed on OpenGL < 4.2
-                        glDrawElementsInstanced(
+                        glDrawElementsInstancedBaseVertex(
                             lastPipeline->GetGLPrimitiveTopology(), draw->indexCount, formatType,
                             reinterpret_cast<void*>(draw->firstIndex * formatSize +
                                                     indexBufferBaseOffset),
-                            draw->instanceCount);
+                            draw->instanceCount, draw->baseVertex);
                     }
                 } break;
 
