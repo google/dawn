@@ -37,6 +37,7 @@ namespace dawn_native { namespace metal {
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
+        void DestroyImpl() override;
 
         id<MTLBuffer> mMtlBuffer = nil;
     };

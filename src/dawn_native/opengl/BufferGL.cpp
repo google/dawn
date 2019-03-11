@@ -27,6 +27,10 @@ namespace dawn_native { namespace opengl {
         glBufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);
     }
 
+    Buffer::~Buffer() {
+        DestroyImpl();
+    }
+
     GLuint Buffer::GetHandle() const {
         return mBuffer;
     }
@@ -56,6 +60,11 @@ namespace dawn_native { namespace opengl {
     void Buffer::UnmapImpl() {
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glUnmapBuffer(GL_ARRAY_BUFFER);
+    }
+
+    void Buffer::DestroyImpl() {
+        glDeleteBuffers(1, &mBuffer);
+        mBuffer = 0;
     }
 
 }}  // namespace dawn_native::opengl

@@ -47,6 +47,9 @@ namespace dawn_native {
             void UnmapImpl() override {
                 UNREACHABLE();
             }
+            void DestroyImpl() override {
+                UNREACHABLE();
+            }
         };
 
     }  // anonymous namespace
@@ -232,6 +235,7 @@ namespace dawn_native {
         if (mState == BufferState::Mapped) {
             Unmap();
         }
+        DestroyImpl();
         mState = BufferState::Destroyed;
     }
 

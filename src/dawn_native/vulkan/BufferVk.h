@@ -44,6 +44,7 @@ namespace dawn_native { namespace vulkan {
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
+        void DestroyImpl() override;
 
         VkBuffer mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;

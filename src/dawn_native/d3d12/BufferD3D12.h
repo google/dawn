@@ -42,6 +42,7 @@ namespace dawn_native { namespace d3d12 {
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
+        void DestroyImpl() override;
 
         ComPtr<ID3D12Resource> mResource;
         bool mFixedResourceState = false;
