@@ -101,15 +101,15 @@ namespace dawn_native {
 #if defined(DAWN_ENABLE_BACKEND_METAL)
         Register(metal::Connect(this), BackendType::Metal);
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
-#if defined(DAWN_ENABLE_BACKEND_NULL)
-        Register(null::Connect(this), BackendType::Null);
-#endif  // defined(DAWN_ENABLE_BACKEND_NULL)
-#if defined(DAWN_ENABLE_BACKEND_OPENGL)
-        Register(opengl::Connect(this), BackendType::OpenGL);
-#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
         Register(vulkan::Connect(this), BackendType::Vulkan);
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
+#if defined(DAWN_ENABLE_BACKEND_OPENGL)
+        Register(opengl::Connect(this), BackendType::OpenGL);
+#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
+#if defined(DAWN_ENABLE_BACKEND_NULL)
+        Register(null::Connect(this), BackendType::Null);
+#endif  // defined(DAWN_ENABLE_BACKEND_NULL)
 
         mBackendsConnected = true;
     }
