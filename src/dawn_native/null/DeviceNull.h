@@ -184,12 +184,12 @@ namespace dawn_native { namespace null {
       public:
         using WSIContext = struct {};
         void Init(WSIContext* context);
-        dawnSwapChainError Configure(dawnTextureFormat format,
-                                     dawnTextureUsageBit,
+        DawnSwapChainError Configure(DawnTextureFormat format,
+                                     DawnTextureUsageBit,
                                      uint32_t width,
                                      uint32_t height);
-        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture* nextTexture);
-        dawnSwapChainError Present();
+        DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
+        DawnSwapChainError Present();
         dawn::TextureFormat GetPreferredFormat() const;
     };
 

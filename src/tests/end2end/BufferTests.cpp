@@ -18,10 +18,10 @@
 
 class BufferMapReadTests : public DawnTest {
     protected:
-      static void MapReadCallback(dawnBufferMapAsyncStatus status,
+      static void MapReadCallback(DawnBufferMapAsyncStatus status,
                                   const void* data,
                                   uint32_t,
-                                  dawnCallbackUserdata userdata) {
+                                  DawnCallbackUserdata userdata) {
           ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
           ASSERT_NE(nullptr, data);
 
@@ -85,10 +85,10 @@ DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBack
 
 class BufferMapWriteTests : public DawnTest {
     protected:
-      static void MapWriteCallback(dawnBufferMapAsyncStatus status,
+      static void MapWriteCallback(DawnBufferMapAsyncStatus status,
                                    void* data,
                                    uint32_t,
-                                   dawnCallbackUserdata userdata) {
+                                   DawnCallbackUserdata userdata) {
           ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
           ASSERT_NE(nullptr, data);
 

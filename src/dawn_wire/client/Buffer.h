@@ -27,15 +27,15 @@ namespace dawn_wire { namespace client {
         using ObjectBase::ObjectBase;
 
         ~Buffer();
-        void ClearMapRequests(dawnBufferMapAsyncStatus status);
+        void ClearMapRequests(DawnBufferMapAsyncStatus status);
 
         // We want to defer all the validation to the server, which means we could have multiple
         // map request in flight at a single time and need to track them separately.
         // On well-behaved applications, only one request should exist at a single time.
         struct MapRequestData {
-            dawnBufferMapReadCallback readCallback = nullptr;
-            dawnBufferMapWriteCallback writeCallback = nullptr;
-            dawnCallbackUserdata userdata = 0;
+            DawnBufferMapReadCallback readCallback = nullptr;
+            DawnBufferMapWriteCallback writeCallback = nullptr;
+            DawnCallbackUserdata userdata = 0;
             bool isWrite = false;
         };
         std::map<uint32_t, MapRequestData> requests;

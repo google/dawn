@@ -20,30 +20,30 @@ using namespace testing;
 
 class MockFenceOnCompletionCallback {
   public:
-    MOCK_METHOD2(Call, void(dawnFenceCompletionStatus status, dawnCallbackUserdata userdata));
+    MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, DawnCallbackUserdata userdata));
 };
 
 struct FenceOnCompletionExpectation {
     dawn::Fence fence;
     uint64_t value;
-    dawnFenceCompletionStatus status;
+    DawnFenceCompletionStatus status;
 };
 
 static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
-static void ToMockFenceOnCompletionCallback(dawnFenceCompletionStatus status,
-                                            dawnCallbackUserdata userdata) {
+static void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status,
+                                            DawnCallbackUserdata userdata) {
     mockFenceOnCompletionCallback->Call(status, userdata);
 }
 
 class FenceValidationTest : public ValidationTest {
   protected:
-    void TestOnCompletion(dawn::Fence fence, uint64_t value, dawnFenceCompletionStatus status) {
+    void TestOnCompletion(dawn::Fence fence, uint64_t value, DawnFenceCompletionStatus status) {
         FenceOnCompletionExpectation* expectation = new FenceOnCompletionExpectation;
         expectation->fence = fence;
         expectation->value = value;
         expectation->status = status;
-        dawnCallbackUserdata userdata =
-            static_cast<dawnCallbackUserdata>(reinterpret_cast<uintptr_t>(expectation));
+        DawnCallbackUserdata userdata =
+            static_cast<DawnCallbackUserdata>(reinterpret_cast<uintptr_t>(expectation));
 
         EXPECT_CALL(*mockFenceOnCompletionCallback, Call(status, userdata)).Times(1);
         fence.OnCompletion(value, ToMockFenceOnCompletionCallback, userdata);
@@ -135,7 +135,7 @@ TEST_F(FenceValidationTest, GetCompletedValueInsideCallback) {
     queue.Signal(fence, 3);
     fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, 0);
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, 0))
-        .WillOnce(Invoke([&](dawnFenceCompletionStatus status, dawnCallbackUserdata userdata) {
+        .WillOnce(Invoke([&](DawnFenceCompletionStatus status, DawnCallbackUserdata userdata) {
             EXPECT_EQ(fence.GetCompletedValue(), 3u);
         }));
 

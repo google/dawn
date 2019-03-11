@@ -28,7 +28,7 @@ namespace dawn_wire { namespace server {
         virtual ~ServerBase() = default;
 
       protected:
-        void DestroyAllObjects(const dawnProcTable& procs) {
+        void DestroyAllObjects(const DawnProcTable& procs) {
           //* Free all objects when the server is destroyed
             {% for type in by_category["object"] if type.name.canonical_case() != "device" %}
                 {

@@ -20,9 +20,9 @@
 
 namespace dawn_native {
 
-    dawnProcTable GetProcsAutogen();
+    DawnProcTable GetProcsAutogen();
 
-    dawnProcTable GetProcs() {
+    DawnProcTable GetProcs() {
         return GetProcsAutogen();
     }
 
@@ -49,8 +49,8 @@ namespace dawn_native {
         return mImpl != nullptr;
     }
 
-    dawnDevice Adapter::CreateDevice() {
-        return reinterpret_cast<dawnDevice>(mImpl->CreateDevice());
+    DawnDevice Adapter::CreateDevice() {
+        return reinterpret_cast<DawnDevice>(mImpl->CreateDevice());
     }
 
     // AdapterDiscoverOptionsBase

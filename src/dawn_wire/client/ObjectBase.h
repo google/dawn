@@ -22,7 +22,7 @@ namespace dawn_wire { namespace client {
     class Device;
 
     struct BuilderCallbackData {
-        bool Call(dawnBuilderErrorStatus status, const char* message) {
+        bool Call(DawnBuilderErrorStatus status, const char* message) {
             if (canCall && callback != nullptr) {
                 canCall = true;
                 callback(status, message, userdata1, userdata2);
@@ -33,9 +33,9 @@ namespace dawn_wire { namespace client {
         }
 
         // For help with development, prints all builder errors by default.
-        dawnBuilderErrorCallback callback = nullptr;
-        dawnCallbackUserdata userdata1 = 0;
-        dawnCallbackUserdata userdata2 = 0;
+        DawnBuilderErrorCallback callback = nullptr;
+        DawnCallbackUserdata userdata1 = 0;
+        DawnCallbackUserdata userdata2 = 0;
         bool canCall = true;
     };
 

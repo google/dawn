@@ -45,8 +45,8 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Null implementation for the swapchain");
         }
 
-        dawnSwapChainImplementation* impl =
-            reinterpret_cast<dawnSwapChainImplementation*>(descriptor->implementation);
+        DawnSwapChainImplementation* impl =
+            reinterpret_cast<DawnSwapChainImplementation*>(descriptor->implementation);
 
         if (!impl->Init || !impl->Destroy || !impl->Configure || !impl->GetNextTexture ||
             !impl->Present) {
@@ -61,7 +61,7 @@ namespace dawn_native {
     SwapChainBase::SwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor)
         : ObjectBase(device),
           mImplementation(
-              *reinterpret_cast<dawnSwapChainImplementation*>(descriptor->implementation)) {
+              *reinterpret_cast<DawnSwapChainImplementation*>(descriptor->implementation)) {
     }
 
     SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -95,8 +95,8 @@ namespace dawn_native {
         mAllowedUsage = allowedUsage;
         mWidth = width;
         mHeight = height;
-        mImplementation.Configure(mImplementation.userData, static_cast<dawnTextureFormat>(format),
-                                  static_cast<dawnTextureUsageBit>(allowedUsage), width, height);
+        mImplementation.Configure(mImplementation.userData, static_cast<DawnTextureFormat>(format),
+                                  static_cast<DawnTextureUsageBit>(allowedUsage), width, height);
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {
@@ -132,7 +132,7 @@ namespace dawn_native {
         mImplementation.Present(mImplementation.userData);
     }
 
-    const dawnSwapChainImplementation& SwapChainBase::GetImplementation() {
+    const DawnSwapChainImplementation& SwapChainBase::GetImplementation() {
         ASSERT(!IsError());
         return mImplementation;
     }

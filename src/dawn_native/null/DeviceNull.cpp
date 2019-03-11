@@ -271,18 +271,18 @@ namespace dawn_native { namespace null {
     void NativeSwapChainImpl::Init(WSIContext* context) {
     }
 
-    dawnSwapChainError NativeSwapChainImpl::Configure(dawnTextureFormat format,
-                                                      dawnTextureUsageBit,
+    DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
+                                                      DawnTextureUsageBit,
                                                       uint32_t width,
                                                       uint32_t height) {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    dawnSwapChainError NativeSwapChainImpl::GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
+    DawnSwapChainError NativeSwapChainImpl::GetNextTexture(DawnSwapChainNextTexture* nextTexture) {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    dawnSwapChainError NativeSwapChainImpl::Present() {
+    DawnSwapChainError NativeSwapChainImpl::Present() {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 

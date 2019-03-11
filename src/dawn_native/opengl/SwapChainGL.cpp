@@ -33,8 +33,8 @@ namespace dawn_native { namespace opengl {
 
     TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
         const auto& im = GetImplementation();
-        dawnSwapChainNextTexture next = {};
-        dawnSwapChainError error = im.GetNextTexture(im.userData, &next);
+        DawnSwapChainNextTexture next = {};
+        DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
         if (error) {
             GetDevice()->HandleError(error);
             return nullptr;

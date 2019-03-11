@@ -30,8 +30,8 @@ namespace dawn_wire {
         WireClient(CommandSerializer* serializer);
         ~WireClient();
 
-        dawnDevice GetDevice() const;
-        dawnProcTable GetProcs() const;
+        DawnDevice GetDevice() const;
+        DawnProcTable GetProcs() const;
         const char* HandleCommands(const char* commands, size_t size) override final;
 
       private:

@@ -22,22 +22,22 @@ namespace {
     // Mock classes to add expectations on the wire calling callbacks
     class MockDeviceErrorCallback {
       public:
-        MOCK_METHOD2(Call, void(const char* message, dawnCallbackUserdata userdata));
+        MOCK_METHOD2(Call, void(const char* message, DawnCallbackUserdata userdata));
     };
 
     std::unique_ptr<MockDeviceErrorCallback> mockDeviceErrorCallback;
-    void ToMockDeviceErrorCallback(const char* message, dawnCallbackUserdata userdata) {
+    void ToMockDeviceErrorCallback(const char* message, DawnCallbackUserdata userdata) {
         mockDeviceErrorCallback->Call(message, userdata);
     }
 
     class MockFenceOnCompletionCallback {
       public:
-        MOCK_METHOD2(Call, void(dawnFenceCompletionStatus status, dawnCallbackUserdata userdata));
+        MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, DawnCallbackUserdata userdata));
     };
 
     std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
-    void ToMockFenceOnCompletionCallback(dawnFenceCompletionStatus status,
-                                         dawnCallbackUserdata userdata) {
+    void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status,
+                                         DawnCallbackUserdata userdata) {
         mockFenceOnCompletionCallback->Call(status, userdata);
     }
 
@@ -63,7 +63,7 @@ class WireFenceTests : public WireTest {
             FlushClient();
         }
         {
-            dawnFenceDescriptor descriptor;
+            DawnFenceDescriptor descriptor;
             descriptor.initialValue = 1;
             descriptor.nextInChain = nullptr;
 
@@ -98,11 +98,11 @@ class WireFenceTests : public WireTest {
     }
 
     // A successfully created fence
-    dawnFence fence;
-    dawnFence apiFence;
+    DawnFence fence;
+    DawnFence apiFence;
 
-    dawnQueue queue;
-    dawnQueue apiQueue;
+    DawnQueue queue;
+    DawnQueue apiQueue;
 };
 
 // Check that signaling a fence succeeds
@@ -116,7 +116,7 @@ TEST_F(WireFenceTests, QueueSignalSuccess) {
 // Without any flushes, it is valid to signal a value greater than the current
 // signaled value
 TEST_F(WireFenceTests, QueueSignalSynchronousValidationSuccess) {
-    dawnCallbackUserdata userdata = 9157;
+    DawnCallbackUserdata userdata = 9157;
     dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata);
     EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(0);
 
@@ -128,7 +128,7 @@ TEST_F(WireFenceTests, QueueSignalSynchronousValidationSuccess) {
 // Without any flushes, errors should be generated when signaling a value less
 // than or equal to the current signaled value
 TEST_F(WireFenceTests, QueueSignalSynchronousValidationError) {
-    dawnCallbackUserdata userdata = 3157;
+    DawnCallbackUserdata userdata = 3157;
     dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata);
 
     EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(1);
@@ -152,7 +152,7 @@ TEST_F(WireFenceTests, QueueSignalSynchronousValidationError) {
 TEST_F(WireFenceTests, OnCompletionImmediate) {
     // Can call on value < (initial) signaled value happens immediately
     {
-        dawnCallbackUserdata userdata = 9847;
+        DawnCallbackUserdata userdata = 9847;
         EXPECT_CALL(*mockFenceOnCompletionCallback,
                     Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata))
             .Times(1);
@@ -161,7 +161,7 @@ TEST_F(WireFenceTests, OnCompletionImmediate) {
 
     // Can call on value == (initial) signaled value happens immediately
     {
-        dawnCallbackUserdata userdata = 4347;
+        DawnCallbackUserdata userdata = 4347;
         EXPECT_CALL(*mockFenceOnCompletionCallback,
                     Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata))
             .Times(1);
@@ -174,10 +174,10 @@ TEST_F(WireFenceTests, OnCompletionMultiple) {
     DoQueueSignal(3u);
     DoQueueSignal(6u);
 
-    dawnCallbackUserdata userdata0 = 2134;
-    dawnCallbackUserdata userdata1 = 7134;
-    dawnCallbackUserdata userdata2 = 3144;
-    dawnCallbackUserdata userdata3 = 1130;
+    DawnCallbackUserdata userdata0 = 2134;
+    DawnCallbackUserdata userdata1 = 7134;
+    DawnCallbackUserdata userdata2 = 3144;
+    DawnCallbackUserdata userdata3 = 1130;
 
     // Add callbacks in a non-monotonic order. They should still be called
     // in order of increasing fence value.
@@ -221,8 +221,8 @@ TEST_F(WireFenceTests, OnCompletionSynchronousValidationSuccess) {
 // Without any flushes, errors should be generated when waiting on a value greater
 // than the last signaled value
 TEST_F(WireFenceTests, OnCompletionSynchronousValidationError) {
-    dawnCallbackUserdata userdata1 = 3817;
-    dawnCallbackUserdata userdata2 = 3857;
+    DawnCallbackUserdata userdata1 = 3817;
+    DawnCallbackUserdata userdata2 = 3857;
     dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata2);
 
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_ERROR, userdata1))
@@ -255,7 +255,7 @@ TEST_F(WireFenceTests, GetCompletedValueNoUpdate) {
 // Check that the callback is called with UNKNOWN when the fence is destroyed
 // before the completed value is updated
 TEST_F(WireFenceTests, DestroyBeforeOnCompletionEnd) {
-    dawnCallbackUserdata userdata = 8616;
+    DawnCallbackUserdata userdata = 8616;
     dawnQueueSignal(queue, fence, 3u);
     dawnFenceOnCompletion(fence, 2u, ToMockFenceOnCompletionCallback, userdata);
     EXPECT_CALL(*mockFenceOnCompletionCallback,
@@ -267,13 +267,13 @@ TEST_F(WireFenceTests, DestroyBeforeOnCompletionEnd) {
 
 // Test that signaling a fence on a wrong queue is invalid
 TEST_F(WireFenceTests, SignalWrongQueue) {
-    dawnQueue queue2 = dawnDeviceCreateQueue(device);
-    dawnQueue apiQueue2 = api.GetNewQueue();
+    DawnQueue queue2 = dawnDeviceCreateQueue(device);
+    DawnQueue apiQueue2 = api.GetNewQueue();
     EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue2));
     EXPECT_CALL(api, QueueRelease(apiQueue2));
     FlushClient();
 
-    dawnCallbackUserdata userdata = 1520;
+    DawnCallbackUserdata userdata = 1520;
     dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata);
 
     EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(1);
@@ -282,13 +282,13 @@ TEST_F(WireFenceTests, SignalWrongQueue) {
 
 // Test that signaling a fence on a wrong queue does not update fence signaled value
 TEST_F(WireFenceTests, SignalWrongQueueDoesNotUpdateValue) {
-    dawnQueue queue2 = dawnDeviceCreateQueue(device);
-    dawnQueue apiQueue2 = api.GetNewQueue();
+    DawnQueue queue2 = dawnDeviceCreateQueue(device);
+    DawnQueue apiQueue2 = api.GetNewQueue();
     EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue2));
     EXPECT_CALL(api, QueueRelease(apiQueue2));
     FlushClient();
 
-    dawnCallbackUserdata userdata = 1024;
+    DawnCallbackUserdata userdata = 1024;
     dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, userdata);
 
     EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(1);

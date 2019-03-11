@@ -23,17 +23,17 @@ using namespace testing;
 class MockBufferMapReadCallback {
     public:
       MOCK_METHOD4(Call,
-                   void(dawnBufferMapAsyncStatus status,
+                   void(DawnBufferMapAsyncStatus status,
                         const uint32_t* ptr,
                         uint32_t dataLength,
-                        dawnCallbackUserdata userdata));
+                        DawnCallbackUserdata userdata));
 };
 
 static std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
-static void ToMockBufferMapReadCallback(dawnBufferMapAsyncStatus status,
+static void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
                                         const void* ptr,
                                         uint32_t dataLength,
-                                        dawnCallbackUserdata userdata) {
+                                        DawnCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapReadCallback->Call(status, reinterpret_cast<const uint32_t*>(ptr), dataLength,
                                     userdata);
@@ -42,17 +42,17 @@ static void ToMockBufferMapReadCallback(dawnBufferMapAsyncStatus status,
 class MockBufferMapWriteCallback {
     public:
       MOCK_METHOD4(Call,
-                   void(dawnBufferMapAsyncStatus status,
+                   void(DawnBufferMapAsyncStatus status,
                         uint32_t* ptr,
                         uint32_t dataLength,
-                        dawnCallbackUserdata userdata));
+                        DawnCallbackUserdata userdata));
 };
 
 static std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;
-static void ToMockBufferMapWriteCallback(dawnBufferMapAsyncStatus status,
+static void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
                                          void* ptr,
                                          uint32_t dataLength,
-                                         dawnCallbackUserdata userdata) {
+                                         DawnCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapWriteCallback->Call(status, reinterpret_cast<uint32_t*>(ptr), dataLength,
                                      userdata);

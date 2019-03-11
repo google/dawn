@@ -98,8 +98,8 @@ dawn::Device CreateCppDawnDevice() {
         backendAdapter = *adapterIt;
     }
 
-    dawnDevice backendDevice = backendAdapter.CreateDevice();
-    dawnProcTable backendProcs = dawn_native::GetProcs();
+    DawnDevice backendDevice = backendAdapter.CreateDevice();
+    DawnProcTable backendProcs = dawn_native::GetProcs();
 
     binding = utils::CreateBinding(backendType, window, backendDevice);
     if (binding == nullptr) {
@@ -107,8 +107,8 @@ dawn::Device CreateCppDawnDevice() {
     }
 
     // Choose whether to use the backend procs and devices directly, or set up the wire.
-    dawnDevice cDevice = nullptr;
-    dawnProcTable procs;
+    DawnDevice cDevice = nullptr;
+    DawnProcTable procs;
 
     switch (cmdBufType) {
         case CmdBufType::None:
@@ -125,8 +125,8 @@ dawn::Device CreateCppDawnDevice() {
                 c2sBuf->SetHandler(wireServer);
 
                 wireClient = new dawn_wire::WireClient(c2sBuf);
-                dawnDevice clientDevice = wireClient->GetDevice();
-                dawnProcTable clientProcs = wireClient->GetProcs();
+                DawnDevice clientDevice = wireClient->GetDevice();
+                DawnProcTable clientProcs = wireClient->GetProcs();
                 s2cBuf->SetHandler(wireClient);
 
                 procs = clientProcs;

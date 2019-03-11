@@ -23,12 +23,12 @@
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
-    DAWN_NATIVE_EXPORT VkInstance GetInstance(dawnDevice device);
+    DAWN_NATIVE_EXPORT VkInstance GetInstance(DawnDevice device);
 
-    DAWN_NATIVE_EXPORT dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device,
+    DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device,
                                                                              VkSurfaceKHR surface);
-    DAWN_NATIVE_EXPORT dawnTextureFormat
-    GetNativeSwapChainPreferredFormat(const dawnSwapChainImplementation* swapChain);
+    DAWN_NATIVE_EXPORT DawnTextureFormat
+    GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 }}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKANBACKEND_H_

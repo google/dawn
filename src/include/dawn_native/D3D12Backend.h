@@ -21,10 +21,10 @@
 #include <windows.h>
 
 namespace dawn_native { namespace d3d12 {
-    DAWN_NATIVE_EXPORT dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device,
+    DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device,
                                                                              HWND window);
-    DAWN_NATIVE_EXPORT dawnTextureFormat
-    GetNativeSwapChainPreferredFormat(const dawnSwapChainImplementation* swapChain);
+    DAWN_NATIVE_EXPORT DawnTextureFormat
+    GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12BACKEND_H_

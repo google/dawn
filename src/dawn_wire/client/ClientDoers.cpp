@@ -64,10 +64,10 @@ namespace dawn_wire { namespace client {
             buffer->mappedData = malloc(dataLength);
             memcpy(buffer->mappedData, data, dataLength);
 
-            request.readCallback(static_cast<dawnBufferMapAsyncStatus>(status), buffer->mappedData,
+            request.readCallback(static_cast<DawnBufferMapAsyncStatus>(status), buffer->mappedData,
                                  dataLength, request.userdata);
         } else {
-            request.readCallback(static_cast<dawnBufferMapAsyncStatus>(status), nullptr, 0,
+            request.readCallback(static_cast<DawnBufferMapAsyncStatus>(status), nullptr, 0,
                                  request.userdata);
         }
 
@@ -111,10 +111,10 @@ namespace dawn_wire { namespace client {
             buffer->mappedData = malloc(dataLength);
             memset(buffer->mappedData, 0, dataLength);
 
-            request.writeCallback(static_cast<dawnBufferMapAsyncStatus>(status), buffer->mappedData,
+            request.writeCallback(static_cast<DawnBufferMapAsyncStatus>(status), buffer->mappedData,
                                   dataLength, request.userdata);
         } else {
-            request.writeCallback(static_cast<dawnBufferMapAsyncStatus>(status), nullptr, 0,
+            request.writeCallback(static_cast<DawnBufferMapAsyncStatus>(status), nullptr, 0,
                                   request.userdata);
         }
 

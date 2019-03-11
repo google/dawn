@@ -83,7 +83,7 @@ namespace dawn_native {
         }
 
         if (mCallback != nullptr) {
-            mCallback(static_cast<dawnBuilderErrorStatus>(mStoredStatus), mStoredMessage.c_str(),
+            mCallback(static_cast<DawnBuilderErrorStatus>(mStoredStatus), mStoredMessage.c_str(),
                       mUserdata1, mUserdata2);
         }
 

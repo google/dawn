@@ -22,20 +22,20 @@
 
 namespace dawn_native { namespace metal {
 
-    id<MTLDevice> GetMetalDevice(dawnDevice cDevice) {
+    id<MTLDevice> GetMetalDevice(DawnDevice cDevice) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         return device->GetMTLDevice();
     }
 
-    dawnTexture WrapIOSurface(dawnDevice cDevice,
-                              const dawnTextureDescriptor* cDescriptor,
+    DawnTexture WrapIOSurface(DawnDevice cDevice,
+                              const DawnTextureDescriptor* cDescriptor,
                               IOSurfaceRef ioSurface,
                               uint32_t plane) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         const TextureDescriptor* descriptor =
             reinterpret_cast<const TextureDescriptor*>(cDescriptor);
         TextureBase* texture = device->CreateTextureWrappingIOSurface(descriptor, ioSurface, plane);
-        return reinterpret_cast<dawnTexture>(texture);
+        return reinterpret_cast<DawnTexture>(texture);
     }
 
 }}  // namespace dawn_native::metal

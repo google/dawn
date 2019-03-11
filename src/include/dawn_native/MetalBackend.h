@@ -33,15 +33,15 @@ typedef __IOSurface* IOSurfaceRef;
 #endif  //__OBJC__
 
 namespace dawn_native { namespace metal {
-    DAWN_NATIVE_EXPORT dawnTexture WrapIOSurface(dawnDevice device,
-                                                 const dawnTextureDescriptor* descriptor,
+    DAWN_NATIVE_EXPORT DawnTexture WrapIOSurface(DawnDevice device,
+                                                 const DawnTextureDescriptor* descriptor,
                                                  IOSurfaceRef ioSurface,
                                                  uint32_t plane);
 }}  // namespace dawn_native::metal
 
 #ifdef __OBJC__
 namespace dawn_native { namespace metal {
-    DAWN_NATIVE_EXPORT id<MTLDevice> GetMetalDevice(dawnDevice device);
+    DAWN_NATIVE_EXPORT id<MTLDevice> GetMetalDevice(DawnDevice device);
 }}      // namespace dawn_native::metal
 #endif  // __OBJC__
 

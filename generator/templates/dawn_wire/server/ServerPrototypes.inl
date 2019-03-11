@@ -14,13 +14,13 @@
 
 // Forwarding callbacks
 {% for type in by_category["object"] if type.is_builder%}
-    static void Forward{{type.name.CamelCase()}}(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2);
+    static void Forward{{type.name.CamelCase()}}(DawnBuilderErrorStatus status, const char* message, DawnCallbackUserdata userdata1, DawnCallbackUserdata userdata2);
 {% endfor %}
 
 // Error callbacks
 {% for type in by_category["object"] if type.is_builder%}
     {% set Type = type.name.CamelCase() %}
-    void On{{Type}}Error(dawnBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial);
+    void On{{Type}}Error(DawnBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial);
 {% endfor %}
 
 // Command handlers & doers

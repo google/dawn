@@ -171,7 +171,7 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     void FlushWire();
 
     // Tracking for validation errors
-    static void OnDeviceError(const char* message, dawnCallbackUserdata userdata);
+    static void OnDeviceError(const char* message, DawnCallbackUserdata userdata);
     bool mExpectError = false;
     bool mError = false;
 
@@ -185,10 +185,10 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
 
     // Maps all the buffers and fill ReadbackSlot::mappedData
     void MapSlotsSynchronously();
-    static void SlotMapReadCallback(dawnBufferMapAsyncStatus status,
+    static void SlotMapReadCallback(DawnBufferMapAsyncStatus status,
                                     const void* data,
                                     uint32_t dataLength,
-                                    dawnCallbackUserdata userdata);
+                                    DawnCallbackUserdata userdata);
     size_t mNumPendingMapOperations = 0;
 
     // Reserve space where the data for an expectation can be copied

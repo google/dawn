@@ -57,7 +57,7 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    void NativeSwapChainImpl::Init(dawnWSIContextVulkan* /*context*/) {
+    void NativeSwapChainImpl::Init(DawnWSIContextVulkan* /*context*/) {
         if (mDevice->ConsumedError(
                 GatherSurfaceInfo(*ToBackend(mDevice->GetAdapter()), mSurface, &mInfo))) {
             ASSERT(false);
@@ -68,8 +68,8 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    dawnSwapChainError NativeSwapChainImpl::Configure(dawnTextureFormat format,
-                                                      dawnTextureUsageBit usage,
+    DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
+                                                      DawnTextureUsageBit usage,
                                                       uint32_t width,
                                                       uint32_t height) {
         ASSERT(mInfo.capabilities.minImageExtent.width <= width);
@@ -77,7 +77,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(mInfo.capabilities.minImageExtent.height <= height);
         ASSERT(mInfo.capabilities.maxImageExtent.height >= height);
 
-        ASSERT(format == static_cast<dawnTextureFormat>(GetPreferredFormat()));
+        ASSERT(format == static_cast<DawnTextureFormat>(GetPreferredFormat()));
         // TODO(cwallez@chromium.org): need to check usage works too
 
         // Create the swapchain with the configuration we chose
@@ -151,7 +151,7 @@ namespace dawn_native { namespace vulkan {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    dawnSwapChainError NativeSwapChainImpl::GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
+    DawnSwapChainError NativeSwapChainImpl::GetNextTexture(DawnSwapChainNextTexture* nextTexture) {
         // Transiently create a semaphore that will be signaled when the presentation engine is done
         // with the swapchain image. Further operations on the image will wait for this semaphore.
         VkSemaphore semaphore = VK_NULL_HANDLE;
@@ -178,7 +178,7 @@ namespace dawn_native { namespace vulkan {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    dawnSwapChainError NativeSwapChainImpl::Present() {
+    DawnSwapChainError NativeSwapChainImpl::Present() {
         // This assumes that the image has already been transitioned to the PRESENT layout and
         // writes were made available to the stage.
 

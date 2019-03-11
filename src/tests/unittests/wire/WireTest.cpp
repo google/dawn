@@ -28,8 +28,8 @@ WireTest::~WireTest() {
 }
 
 void WireTest::SetUp() {
-    dawnProcTable mockProcs;
-    dawnDevice mockDevice;
+    DawnProcTable mockProcs;
+    DawnDevice mockDevice;
     api.GetProcTableAndDevice(&mockProcs, &mockDevice);
 
     // This SetCallback call cannot be ignored because it is done as soon as we start the server
@@ -49,7 +49,7 @@ void WireTest::SetUp() {
     mS2cBuf->SetHandler(mWireClient.get());
 
     device = mWireClient->GetDevice();
-    dawnProcTable clientProcs = mWireClient->GetProcs();
+    DawnProcTable clientProcs = mWireClient->GetProcs();
     dawnSetProcs(&clientProcs);
 
     apiDevice = mockDevice;

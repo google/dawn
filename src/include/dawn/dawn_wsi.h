@@ -18,8 +18,8 @@
 #include <dawn/dawn.h>
 
 // Error message (or nullptr if there was no error)
-typedef const char* dawnSwapChainError;
-constexpr dawnSwapChainError DAWN_SWAP_CHAIN_NO_ERROR = nullptr;
+typedef const char* DawnSwapChainError;
+constexpr DawnSwapChainError DAWN_SWAP_CHAIN_NO_ERROR = nullptr;
 
 typedef struct {
     /// Backend-specific texture id/name/pointer
@@ -28,40 +28,40 @@ typedef struct {
         uint64_t u64;
         uint32_t u32;
     } texture;
-} dawnSwapChainNextTexture;
+} DawnSwapChainNextTexture;
 
 typedef struct {
     /// Initialize the swap chain implementation.
-    ///   (*wsiContext) is one of dawnWSIContext{D3D12,Metal,GL}
+    ///   (*wsiContext) is one of DawnWSIContext{D3D12,Metal,GL}
     void (*Init)(void* userData, void* wsiContext);
 
     /// Destroy the swap chain implementation.
     void (*Destroy)(void* userData);
 
     /// Configure/reconfigure the swap chain.
-    dawnSwapChainError (*Configure)(void* userData,
-                                    dawnTextureFormat format,
-                                    dawnTextureUsageBit allowedUsage,
+    DawnSwapChainError (*Configure)(void* userData,
+                                    DawnTextureFormat format,
+                                    DawnTextureUsageBit allowedUsage,
                                     uint32_t width,
                                     uint32_t height);
 
     /// Acquire the next texture from the swap chain.
-    dawnSwapChainError (*GetNextTexture)(void* userData, dawnSwapChainNextTexture* nextTexture);
+    DawnSwapChainError (*GetNextTexture)(void* userData, DawnSwapChainNextTexture* nextTexture);
 
     /// Present the last acquired texture to the screen.
-    dawnSwapChainError (*Present)(void* userData);
+    DawnSwapChainError (*Present)(void* userData);
 
     /// Each function is called with userData as its first argument.
     void* userData;
 
     /// For use by the D3D12 and Vulkan backends: how the swapchain will use the texture.
-    dawnTextureUsageBit textureUsage;
-} dawnSwapChainImplementation;
+    DawnTextureUsageBit textureUsage;
+} DawnSwapChainImplementation;
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12) && defined(__cplusplus)
 typedef struct {
-    dawnDevice device = nullptr;
-} dawnWSIContextD3D12;
+    DawnDevice device = nullptr;
+} DawnWSIContextD3D12;
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_METAL) && defined(__OBJC__)
@@ -69,17 +69,17 @@ typedef struct {
 
 typedef struct {
     id<MTLDevice> device = nil;
-} dawnWSIContextMetal;
+} DawnWSIContextMetal;
 #endif
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGL
 typedef struct {
-} dawnWSIContextGL;
+} DawnWSIContextGL;
 #endif
 
 #ifdef DAWN_ENABLE_BACKEND_VULKAN
 typedef struct {
-} dawnWSIContextVulkan;
+} DawnWSIContextVulkan;
 #endif
 
 #endif  // DAWN_DAWN_WSI_H

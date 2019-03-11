@@ -29,7 +29,7 @@
 namespace utils {
     class SwapChainImplGL {
       public:
-        using WSIContext = dawnWSIContextGL;
+        using WSIContext = DawnWSIContextGL;
 
         SwapChainImplGL(GLFWwindow* window) : mWindow(window) {
         }
@@ -39,7 +39,7 @@ namespace utils {
             glDeleteFramebuffers(1, &mBackFBO);
         }
 
-        void Init(dawnWSIContextGL*) {
+        void Init(DawnWSIContextGL*) {
             glGenTextures(1, &mBackTexture);
             glBindTexture(GL_TEXTURE_2D, mBackTexture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -50,8 +50,8 @@ namespace utils {
                                    mBackTexture, 0);
         }
 
-        dawnSwapChainError Configure(dawnTextureFormat format,
-                                     dawnTextureUsageBit,
+        DawnSwapChainError Configure(DawnTextureFormat format,
+                                     DawnTextureUsageBit,
                                      uint32_t width,
                                      uint32_t height) {
             if (format != DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
@@ -70,12 +70,12 @@ namespace utils {
             return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
-        dawnSwapChainError GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
+        DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture) {
             nextTexture->texture.u32 = mBackTexture;
             return DAWN_SWAP_CHAIN_NO_ERROR;
         }
 
-        dawnSwapChainError Present() {
+        DawnSwapChainError Present() {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
             glBlitFramebuffer(0, 0, mWidth, mHeight, 0, mHeight, mWidth, 0, GL_COLOR_BUFFER_BIT,
@@ -95,7 +95,7 @@ namespace utils {
 
     class OpenGLBinding : public BackendBinding {
       public:
-        OpenGLBinding(GLFWwindow* window, dawnDevice device) : BackendBinding(window, device) {
+        OpenGLBinding(GLFWwindow* window, DawnDevice device) : BackendBinding(window, device) {
             // Load the GL entry points in our copy of the glad static library
             gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
         }
@@ -107,15 +107,15 @@ namespace utils {
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
-        dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
+        DawnTextureFormat GetPreferredSwapChainTextureFormat() override {
             return DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
         }
 
       private:
-        dawnSwapChainImplementation mSwapchainImpl = {};
+        DawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, dawnDevice device) {
+    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, DawnDevice device) {
         return new OpenGLBinding(window, device);
     }
 

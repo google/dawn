@@ -24,7 +24,7 @@ namespace dawn_native { namespace metal {
     SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
         : SwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();
-        dawnWSIContextMetal wsiContext = {};
+        DawnWSIContextMetal wsiContext = {};
         wsiContext.device = ToBackend(GetDevice())->GetMTLDevice();
         im.Init(im.userData, &wsiContext);
     }
@@ -34,8 +34,8 @@ namespace dawn_native { namespace metal {
 
     TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
         const auto& im = GetImplementation();
-        dawnSwapChainNextTexture next = {};
-        dawnSwapChainError error = im.GetNextTexture(im.userData, &next);
+        DawnSwapChainNextTexture next = {};
+        DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
         if (error) {
             GetDevice()->HandleError(error);
             return nullptr;

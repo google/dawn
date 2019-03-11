@@ -54,8 +54,8 @@ namespace dawn_native {
 
         // Dawn API
         void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);
-        void MapReadAsync(dawnBufferMapReadCallback callback, dawnCallbackUserdata userdata);
-        void MapWriteAsync(dawnBufferMapWriteCallback callback, dawnCallbackUserdata userdata);
+        void MapReadAsync(DawnBufferMapReadCallback callback, DawnCallbackUserdata userdata);
+        void MapWriteAsync(DawnBufferMapWriteCallback callback, DawnCallbackUserdata userdata);
         void Unmap();
         void Destroy();
 
@@ -63,11 +63,11 @@ namespace dawn_native {
         BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         void CallMapReadCallback(uint32_t serial,
-                                 dawnBufferMapAsyncStatus status,
+                                 DawnBufferMapAsyncStatus status,
                                  const void* pointer,
                                  uint32_t dataLength);
         void CallMapWriteCallback(uint32_t serial,
-                                  dawnBufferMapAsyncStatus status,
+                                  DawnBufferMapAsyncStatus status,
                                   void* pointer,
                                   uint32_t dataLength);
 
@@ -85,9 +85,9 @@ namespace dawn_native {
         uint32_t mSize = 0;
         dawn::BufferUsageBit mUsage = dawn::BufferUsageBit::None;
 
-        dawnBufferMapReadCallback mMapReadCallback = nullptr;
-        dawnBufferMapWriteCallback mMapWriteCallback = nullptr;
-        dawnCallbackUserdata mMapUserdata = 0;
+        DawnBufferMapReadCallback mMapReadCallback = nullptr;
+        DawnBufferMapWriteCallback mMapWriteCallback = nullptr;
+        DawnCallbackUserdata mMapUserdata = 0;
         uint32_t mMapSerial = 0;
 
         BufferState mState;

@@ -48,7 +48,7 @@ namespace dawn_wire { namespace server {
     };
 
     template <>
-    struct ObjectData<dawnBuffer, false> : public ObjectDataBase<dawnBuffer> {
+    struct ObjectData<DawnBuffer, false> : public ObjectDataBase<DawnBuffer> {
         void* mappedData = nullptr;
         size_t mappedDataSize = 0;
     };

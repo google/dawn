@@ -21,7 +21,7 @@
 namespace dawn_native { namespace d3d12 {
 
     namespace {
-        DXGI_USAGE D3D12SwapChainBufferUsage(dawnTextureUsageBit allowedUsages) {
+        DXGI_USAGE D3D12SwapChainBufferUsage(DawnTextureUsageBit allowedUsages) {
             DXGI_USAGE usage = DXGI_CPU_ACCESS_NONE;
             if (allowedUsages & DAWN_TEXTURE_USAGE_BIT_SAMPLED) {
                 usage |= DXGI_USAGE_SHADER_INPUT;
@@ -45,16 +45,16 @@ namespace dawn_native { namespace d3d12 {
     NativeSwapChainImpl::~NativeSwapChainImpl() {
     }
 
-    void NativeSwapChainImpl::Init(dawnWSIContextD3D12* /*context*/) {
+    void NativeSwapChainImpl::Init(DawnWSIContextD3D12* /*context*/) {
     }
 
-    dawnSwapChainError NativeSwapChainImpl::Configure(dawnTextureFormat format,
-                                                      dawnTextureUsageBit usage,
+    DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
+                                                      DawnTextureUsageBit usage,
                                                       uint32_t width,
                                                       uint32_t height) {
         ASSERT(width > 0);
         ASSERT(height > 0);
-        ASSERT(format == static_cast<dawnTextureFormat>(GetPreferredFormat()));
+        ASSERT(format == static_cast<DawnTextureFormat>(GetPreferredFormat()));
 
         ComPtr<IDXGIFactory4> factory = mDevice->GetFactory();
         ComPtr<ID3D12CommandQueue> queue = mDevice->GetCommandQueue();
@@ -89,7 +89,7 @@ namespace dawn_native { namespace d3d12 {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    dawnSwapChainError NativeSwapChainImpl::GetNextTexture(dawnSwapChainNextTexture* nextTexture) {
+    DawnSwapChainError NativeSwapChainImpl::GetNextTexture(DawnSwapChainNextTexture* nextTexture) {
         mCurrentBuffer = mSwapChain->GetCurrentBackBufferIndex();
         nextTexture->texture.ptr = mBuffers[mCurrentBuffer].Get();
 
@@ -100,7 +100,7 @@ namespace dawn_native { namespace d3d12 {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    dawnSwapChainError NativeSwapChainImpl::Present() {
+    DawnSwapChainError NativeSwapChainImpl::Present() {
         // This assumes the texture has already been transition to the PRESENT state.
 
         ASSERT_SUCCESS(mSwapChain->Present(1, 0));

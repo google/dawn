@@ -26,23 +26,23 @@ class WireOptionalTests : public WireTest {
 
 // Test passing nullptr instead of objects - object as value version
 TEST_F(WireOptionalTests, OptionalObjectValue) {
-    dawnBindGroupLayoutDescriptor bglDesc;
+    DawnBindGroupLayoutDescriptor bglDesc;
     bglDesc.nextInChain = nullptr;
     bglDesc.bindingCount = 0;
-    dawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDesc);
+    DawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDesc);
 
-    dawnBindGroupLayout apiBindGroupLayout = api.GetNewBindGroupLayout();
+    DawnBindGroupLayout apiBindGroupLayout = api.GetNewBindGroupLayout();
     EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _))
         .WillOnce(Return(apiBindGroupLayout));
 
     // The `sampler`, `textureView` and `buffer` members of a binding are optional.
-    dawnBindGroupBinding binding;
+    DawnBindGroupBinding binding;
     binding.binding = 0;
     binding.sampler = nullptr;
     binding.textureView = nullptr;
     binding.buffer = nullptr;
 
-    dawnBindGroupDescriptor bgDesc;
+    DawnBindGroupDescriptor bgDesc;
     bgDesc.nextInChain = nullptr;
     bgDesc.layout = bgl;
     bgDesc.bindingCount = 1;
@@ -50,7 +50,7 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
 
     dawnDeviceCreateBindGroup(device, &bgDesc);
     EXPECT_CALL(api, DeviceCreateBindGroup(
-                         apiDevice, MatchesLambda([](const dawnBindGroupDescriptor* desc) -> bool {
+                         apiDevice, MatchesLambda([](const DawnBindGroupDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr && desc->bindingCount == 1 &&
                                     desc->bindings[0].binding == 0 &&
                                     desc->bindings[0].sampler == nullptr &&
@@ -66,19 +66,19 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
 // Test that the wire is able to send optional pointers to structures
 TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create shader module
-    dawnShaderModuleDescriptor vertexDescriptor;
+    DawnShaderModuleDescriptor vertexDescriptor;
     vertexDescriptor.nextInChain = nullptr;
     vertexDescriptor.codeSize = 0;
-    dawnShaderModule vsModule = dawnDeviceCreateShaderModule(device, &vertexDescriptor);
-    dawnShaderModule apiVsModule = api.GetNewShaderModule();
+    DawnShaderModule vsModule = dawnDeviceCreateShaderModule(device, &vertexDescriptor);
+    DawnShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
     // Create the color state descriptor
-    dawnBlendDescriptor blendDescriptor;
+    DawnBlendDescriptor blendDescriptor;
     blendDescriptor.operation = DAWN_BLEND_OPERATION_ADD;
     blendDescriptor.srcFactor = DAWN_BLEND_FACTOR_ONE;
     blendDescriptor.dstFactor = DAWN_BLEND_FACTOR_ONE;
-    dawnColorStateDescriptor colorStateDescriptor;
+    DawnColorStateDescriptor colorStateDescriptor;
     colorStateDescriptor.nextInChain = nullptr;
     colorStateDescriptor.format = DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
     colorStateDescriptor.alphaBlend = blendDescriptor;
@@ -86,24 +86,24 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     colorStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
 
     // Create the input state
-    dawnInputStateBuilder inputStateBuilder = dawnDeviceCreateInputStateBuilder(device);
-    dawnInputStateBuilder apiInputStateBuilder = api.GetNewInputStateBuilder();
+    DawnInputStateBuilder inputStateBuilder = dawnDeviceCreateInputStateBuilder(device);
+    DawnInputStateBuilder apiInputStateBuilder = api.GetNewInputStateBuilder();
     EXPECT_CALL(api, DeviceCreateInputStateBuilder(apiDevice))
         .WillOnce(Return(apiInputStateBuilder));
 
-    dawnInputState inputState = dawnInputStateBuilderGetResult(inputStateBuilder);
-    dawnInputState apiInputState = api.GetNewInputState();
+    DawnInputState inputState = dawnInputStateBuilderGetResult(inputStateBuilder);
+    DawnInputState apiInputState = api.GetNewInputState();
     EXPECT_CALL(api, InputStateBuilderGetResult(apiInputStateBuilder))
         .WillOnce(Return(apiInputState));
 
     // Create the depth-stencil state
-    dawnStencilStateFaceDescriptor stencilFace;
+    DawnStencilStateFaceDescriptor stencilFace;
     stencilFace.compare = DAWN_COMPARE_FUNCTION_ALWAYS;
     stencilFace.failOp = DAWN_STENCIL_OPERATION_KEEP;
     stencilFace.depthFailOp = DAWN_STENCIL_OPERATION_KEEP;
     stencilFace.passOp = DAWN_STENCIL_OPERATION_KEEP;
 
-    dawnDepthStencilStateDescriptor depthStencilState;
+    DawnDepthStencilStateDescriptor depthStencilState;
     depthStencilState.nextInChain = nullptr;
     depthStencilState.format = DAWN_TEXTURE_FORMAT_D32_FLOAT_S8_UINT;
     depthStencilState.depthWriteEnabled = false;
@@ -114,32 +114,32 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     depthStencilState.stencilWriteMask = 0xff;
 
     // Create the pipeline layout
-    dawnPipelineLayoutDescriptor layoutDescriptor;
+    DawnPipelineLayoutDescriptor layoutDescriptor;
     layoutDescriptor.nextInChain = nullptr;
     layoutDescriptor.bindGroupLayoutCount = 0;
     layoutDescriptor.bindGroupLayouts = nullptr;
-    dawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
-    dawnPipelineLayout apiLayout = api.GetNewPipelineLayout();
+    DawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
+    DawnPipelineLayout apiLayout = api.GetNewPipelineLayout();
     EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, _)).WillOnce(Return(apiLayout));
 
     // Create pipeline
-    dawnRenderPipelineDescriptor pipelineDescriptor;
+    DawnRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.nextInChain = nullptr;
 
-    dawnPipelineStageDescriptor vertexStage;
+    DawnPipelineStageDescriptor vertexStage;
     vertexStage.nextInChain = nullptr;
     vertexStage.module = vsModule;
     vertexStage.entryPoint = "main";
     pipelineDescriptor.vertexStage = &vertexStage;
 
-    dawnPipelineStageDescriptor fragmentStage;
+    DawnPipelineStageDescriptor fragmentStage;
     fragmentStage.nextInChain = nullptr;
     fragmentStage.module = vsModule;
     fragmentStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
     pipelineDescriptor.colorStateCount = 1;
-    dawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
+    DawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
     pipelineDescriptor.colorStates = colorStatesPtr;
 
     pipelineDescriptor.sampleCount = 1;
@@ -154,7 +154,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     EXPECT_CALL(
         api,
         DeviceCreateRenderPipeline(
-            apiDevice, MatchesLambda([](const dawnRenderPipelineDescriptor* desc) -> bool {
+            apiDevice, MatchesLambda([](const DawnRenderPipelineDescriptor* desc) -> bool {
                 return desc->depthStencilState != nullptr &&
                        desc->depthStencilState->nextInChain == nullptr &&
                        desc->depthStencilState->depthWriteEnabled == false &&
@@ -185,7 +185,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     dawnDeviceCreateRenderPipeline(device, &pipelineDescriptor);
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
-                    apiDevice, MatchesLambda([](const dawnRenderPipelineDescriptor* desc) -> bool {
+                    apiDevice, MatchesLambda([](const DawnRenderPipelineDescriptor* desc) -> bool {
                         return desc->depthStencilState == nullptr;
                     })))
         .WillOnce(Return(nullptr));

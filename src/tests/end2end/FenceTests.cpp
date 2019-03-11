@@ -20,12 +20,12 @@
 
 class MockFenceOnCompletionCallback {
   public:
-    MOCK_METHOD2(Call, void(dawnFenceCompletionStatus status, dawnCallbackUserdata userdata));
+    MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, DawnCallbackUserdata userdata));
 };
 
 static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
-static void ToMockFenceOnCompletionCallback(dawnFenceCompletionStatus status,
-                                            dawnCallbackUserdata userdata) {
+static void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status,
+                                            DawnCallbackUserdata userdata) {
     mockFenceOnCompletionCallback->Call(status, userdata);
 }
 class FenceTests : public DawnTest {
@@ -33,10 +33,10 @@ class FenceTests : public DawnTest {
     struct CallbackInfo {
         FenceTests* test;
         uint64_t value;
-        dawnFenceCompletionStatus status;
+        DawnFenceCompletionStatus status;
         int32_t callIndex = -1;  // If this is -1, the callback was not called
 
-        void Update(dawnFenceCompletionStatus status) {
+        void Update(DawnFenceCompletionStatus status) {
             this->callIndex = test->mCallIndex++;
             this->status = status;
         }
@@ -89,10 +89,10 @@ TEST_P(FenceTests, OnCompletionOrdering) {
 
     queue.Signal(fence, 4);
 
-    dawnCallbackUserdata userdata0 = 1282;
-    dawnCallbackUserdata userdata1 = 4382;
-    dawnCallbackUserdata userdata2 = 1211;
-    dawnCallbackUserdata userdata3 = 1882;
+    DawnCallbackUserdata userdata0 = 1282;
+    DawnCallbackUserdata userdata1 = 4382;
+    DawnCallbackUserdata userdata2 = 1211;
+    DawnCallbackUserdata userdata3 = 1882;
 
     {
         testing::InSequence s;
@@ -131,7 +131,7 @@ TEST_P(FenceTests, MultipleSignalOnCompletion) {
     queue.Signal(fence, 2);
     queue.Signal(fence, 4);
 
-    dawnCallbackUserdata userdata = 1234;
+    DawnCallbackUserdata userdata = 1234;
     EXPECT_CALL(*mockFenceOnCompletionCallback,
                 Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata))
         .Times(1);
@@ -148,10 +148,10 @@ TEST_P(FenceTests, OnCompletionMultipleCallbacks) {
 
     queue.Signal(fence, 4);
 
-    dawnCallbackUserdata userdata0 = 2341;
-    dawnCallbackUserdata userdata1 = 4598;
-    dawnCallbackUserdata userdata2 = 5690;
-    dawnCallbackUserdata userdata3 = 2783;
+    DawnCallbackUserdata userdata0 = 2341;
+    DawnCallbackUserdata userdata1 = 4598;
+    DawnCallbackUserdata userdata2 = 5690;
+    DawnCallbackUserdata userdata3 = 2783;
 
     EXPECT_CALL(*mockFenceOnCompletionCallback,
                 Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata0))
@@ -192,10 +192,10 @@ TEST_P(FenceTests, DISABLED_DestroyBeforeOnCompletionEnd) {
 
         queue.Signal(testFence, 4);
 
-        dawnCallbackUserdata userdata0 = 1341;
-        dawnCallbackUserdata userdata1 = 1598;
-        dawnCallbackUserdata userdata2 = 1690;
-        dawnCallbackUserdata userdata3 = 1783;
+        DawnCallbackUserdata userdata0 = 1341;
+        DawnCallbackUserdata userdata1 = 1598;
+        DawnCallbackUserdata userdata2 = 1690;
+        DawnCallbackUserdata userdata3 = 1783;
 
         EXPECT_CALL(*mockFenceOnCompletionCallback,
                     Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, userdata0))

@@ -262,8 +262,8 @@ void DawnTest::SetUp() {
     }
 
     mPCIInfo = backendAdapter.GetPCIInfo();
-    dawnDevice backendDevice = backendAdapter.CreateDevice();
-    dawnProcTable backendProcs = dawn_native::GetProcs();
+    DawnDevice backendDevice = backendAdapter.CreateDevice();
+    DawnProcTable backendProcs = dawn_native::GetProcs();
 
     // Get the test window and create the device using it (esp. for OpenGL)
     GLFWwindow* testWindow = gTestEnv->GetWindowForBackend(GetParam());
@@ -272,8 +272,8 @@ void DawnTest::SetUp() {
     DAWN_ASSERT(mBinding != nullptr);
 
     // Choose whether to use the backend procs and devices directly, or set up the wire.
-    dawnDevice cDevice = nullptr;
-    dawnProcTable procs;
+    DawnDevice cDevice = nullptr;
+    DawnProcTable procs;
 
     if (gTestEnv->UseWire()) {
         mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
@@ -283,8 +283,8 @@ void DawnTest::SetUp() {
         mC2sBuf->SetHandler(mWireServer.get());
 
         mWireClient.reset(new dawn_wire::WireClient(mC2sBuf.get()));
-        dawnDevice clientDevice = mWireClient->GetDevice();
-        dawnProcTable clientProcs = mWireClient->GetProcs();
+        DawnDevice clientDevice = mWireClient->GetDevice();
+        DawnProcTable clientProcs = mWireClient->GetProcs();
         mS2cBuf->SetHandler(mWireClient.get());
 
         procs = clientProcs;
@@ -310,7 +310,7 @@ void DawnTest::SetUp() {
         dawn::TextureUsageBit::OutputAttachment, 400, 400);
 
     device.SetErrorCallback(OnDeviceError,
-                            static_cast<dawnCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+                            static_cast<DawnCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
 }
 
 void DawnTest::TearDown() {
@@ -334,7 +334,7 @@ bool DawnTest::EndExpectDeviceError() {
 }
 
 // static
-void DawnTest::OnDeviceError(const char* message, dawnCallbackUserdata userdata) {
+void DawnTest::OnDeviceError(const char* message, DawnCallbackUserdata userdata) {
     DawnTest* self = reinterpret_cast<DawnTest*>(static_cast<uintptr_t>(userdata));
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
@@ -481,10 +481,10 @@ void DawnTest::MapSlotsSynchronously() {
 }
 
 // static
-void DawnTest::SlotMapReadCallback(dawnBufferMapAsyncStatus status,
+void DawnTest::SlotMapReadCallback(DawnBufferMapAsyncStatus status,
                                    const void* data,
                                    uint32_t,
-                                   dawnCallbackUserdata userdata_) {
+                                   DawnCallbackUserdata userdata_) {
     DAWN_ASSERT(status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
 
     auto userdata = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata_));

@@ -93,23 +93,23 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    void Server::ForwardBufferMapReadAsync(dawnBufferMapAsyncStatus status,
+    void Server::ForwardBufferMapReadAsync(DawnBufferMapAsyncStatus status,
                                            const void* ptr,
                                            uint32_t dataLength,
-                                           dawnCallbackUserdata userdata) {
+                                           DawnCallbackUserdata userdata) {
         auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
         data->server->OnBufferMapReadAsyncCallback(status, ptr, dataLength, data);
     }
 
-    void Server::ForwardBufferMapWriteAsync(dawnBufferMapAsyncStatus status,
+    void Server::ForwardBufferMapWriteAsync(DawnBufferMapAsyncStatus status,
                                             void* ptr,
                                             uint32_t dataLength,
-                                            dawnCallbackUserdata userdata) {
+                                            DawnCallbackUserdata userdata) {
         auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
         data->server->OnBufferMapWriteAsyncCallback(status, ptr, dataLength, data);
     }
 
-    void Server::OnBufferMapReadAsyncCallback(dawnBufferMapAsyncStatus status,
+    void Server::OnBufferMapReadAsyncCallback(DawnBufferMapAsyncStatus status,
                                               const void* ptr,
                                               uint32_t dataLength,
                                               MapUserdata* userdata) {
@@ -137,7 +137,7 @@ namespace dawn_wire { namespace server {
         cmd.Serialize(allocatedBuffer);
     }
 
-    void Server::OnBufferMapWriteAsyncCallback(dawnBufferMapAsyncStatus status,
+    void Server::OnBufferMapWriteAsyncCallback(DawnBufferMapAsyncStatus status,
                                                void* ptr,
                                                uint32_t dataLength,
                                                MapUserdata* userdata) {

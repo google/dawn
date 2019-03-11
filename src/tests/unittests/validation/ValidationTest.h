@@ -74,7 +74,7 @@ class ValidationTest : public testing::Test {
     private:
         std::unique_ptr<dawn_native::Instance> mInstance;
 
-        static void OnDeviceError(const char* message, dawnCallbackUserdata userdata);
+        static void OnDeviceError(const char* message, DawnCallbackUserdata userdata);
         std::string mDeviceErrorMessage;
         bool mExpectError = false;
         bool mError = false;
@@ -85,14 +85,14 @@ class ValidationTest : public testing::Test {
 
             bool gotStatus = false;
             std::string statusMessage;
-            dawnBuilderErrorStatus status;
+            DawnBuilderErrorStatus status;
         };
         std::vector<BuilderStatusExpectations> mExpectations;
 
         template<typename Builder>
         Builder AddExpectation(Builder& builder, std::string debugName, bool expectSuccess);
 
-        static void OnBuilderErrorStatus(dawnBuilderErrorStatus status, const char* message, dawn::CallbackUserdata userdata1, dawn::CallbackUserdata userdata2);
+        static void OnBuilderErrorStatus(DawnBuilderErrorStatus status, const char* message, dawn::CallbackUserdata userdata1, dawn::CallbackUserdata userdata2);
 };
 
 // Template implementation details

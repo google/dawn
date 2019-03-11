@@ -35,10 +35,10 @@ class DevNull : public dawn_wire::CommandSerializer {
     std::vector<char> buf;
 };
 
-static dawnProcDeviceCreateSwapChain originalDeviceCreateSwapChain = nullptr;
+static DawnProcDeviceCreateSwapChain originalDeviceCreateSwapChain = nullptr;
 
-dawnSwapChain ErrorDeviceCreateSwapChain(dawnDevice device, const dawnSwapChainDescriptor*) {
-    dawnSwapChainDescriptor desc;
+DawnSwapChain ErrorDeviceCreateSwapChain(DawnDevice device, const DawnSwapChainDescriptor*) {
+    DawnSwapChainDescriptor desc;
     desc.nextInChain = nullptr;
     // A 0 implementation will trigger a swapchain creation error.
     desc.implementation = 0;
@@ -46,7 +46,7 @@ dawnSwapChain ErrorDeviceCreateSwapChain(dawnDevice device, const dawnSwapChainD
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-    dawnProcTable procs = dawn_native::GetProcs();
+    DawnProcTable procs = dawn_native::GetProcs();
 
     // Swapchains receive a pointer to an implementation. The fuzzer will pass garbage in so we
     // intercept calls to create swapchains and make sure they always return error swapchains.

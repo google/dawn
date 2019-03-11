@@ -29,13 +29,13 @@ namespace dawn_wire { namespace client {
 
         Client* GetClient();
         void HandleError(const char* message);
-        void SetErrorCallback(dawnDeviceErrorCallback errorCallback,
-                              dawnCallbackUserdata errorUserdata);
+        void SetErrorCallback(DawnDeviceErrorCallback errorCallback,
+                              DawnCallbackUserdata errorUserdata);
 
       private:
         Client* mClient = nullptr;
-        dawnDeviceErrorCallback mErrorCallback = nullptr;
-        dawnCallbackUserdata mErrorUserdata;
+        DawnDeviceErrorCallback mErrorCallback = nullptr;
+        DawnCallbackUserdata mErrorUserdata;
     };
 
 }}  // namespace dawn_wire::client

@@ -96,8 +96,8 @@ namespace {
         dawn::Texture WrapIOSurface(const dawn::TextureDescriptor* descriptor,
                                     IOSurfaceRef ioSurface,
                                     uint32_t plane) {
-            dawnTexture texture = dawn_native::metal::WrapIOSurface(
-                device.Get(), reinterpret_cast<const dawnTextureDescriptor*>(descriptor), ioSurface,
+            DawnTexture texture = dawn_native::metal::WrapIOSurface(
+                device.Get(), reinterpret_cast<const DawnTextureDescriptor*>(descriptor), ioSurface,
                 plane);
             return dawn::Texture::Acquire(texture);
         }

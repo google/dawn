@@ -23,20 +23,20 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    dawnSwapChainImplementation CreateNativeSwapChainImpl(dawnDevice device, HWND window) {
+    DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device, HWND window) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
 
-        dawnSwapChainImplementation impl;
+        DawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, window));
         impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
 
         return impl;
     }
 
-    dawnTextureFormat GetNativeSwapChainPreferredFormat(
-        const dawnSwapChainImplementation* swapChain) {
+    DawnTextureFormat GetNativeSwapChainPreferredFormat(
+        const DawnSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-        return static_cast<dawnTextureFormat>(impl->GetPreferredFormat());
+        return static_cast<DawnTextureFormat>(impl->GetPreferredFormat());
     }
 
 }}  // namespace dawn_native::d3d12

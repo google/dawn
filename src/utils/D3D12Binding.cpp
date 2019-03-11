@@ -27,7 +27,7 @@ namespace utils {
 
     class D3D12Binding : public BackendBinding {
       public:
-        D3D12Binding(GLFWwindow* window, dawnDevice device) : BackendBinding(window, device) {
+        D3D12Binding(GLFWwindow* window, DawnDevice device) : BackendBinding(window, device) {
         }
 
         uint64_t GetSwapChainImplementation() override {
@@ -39,16 +39,16 @@ namespace utils {
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
-        dawnTextureFormat GetPreferredSwapChainTextureFormat() override {
+        DawnTextureFormat GetPreferredSwapChainTextureFormat() override {
             ASSERT(mSwapchainImpl.userData != nullptr);
             return dawn_native::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:
-        dawnSwapChainImplementation mSwapchainImpl = {};
+        DawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateD3D12Binding(GLFWwindow* window, dawnDevice device) {
+    BackendBinding* CreateD3D12Binding(GLFWwindow* window, DawnDevice device) {
         return new D3D12Binding(window, device);
     }
 

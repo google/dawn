@@ -46,7 +46,7 @@ namespace dawn_native {
       protected:
         SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        const dawnSwapChainImplementation& GetImplementation();
+        const DawnSwapChainImplementation& GetImplementation();
         virtual TextureBase* GetNextTextureImpl(const TextureDescriptor*) = 0;
         virtual void OnBeforePresent(TextureBase* texture) = 0;
 
@@ -58,7 +58,7 @@ namespace dawn_native {
         MaybeError ValidateGetNextTexture() const;
         MaybeError ValidatePresent(TextureBase* texture) const;
 
-        dawnSwapChainImplementation mImplementation = {};
+        DawnSwapChainImplementation mImplementation = {};
         dawn::TextureFormat mFormat = {};
         dawn::TextureUsageBit mAllowedUsage;
         uint32_t mWidth = 0;

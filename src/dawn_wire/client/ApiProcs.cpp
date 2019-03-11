@@ -18,9 +18,9 @@
 
 namespace dawn_wire { namespace client {
 
-    void ClientBufferMapReadAsync(dawnBuffer cBuffer,
-                                  dawnBufferMapReadCallback callback,
-                                  dawnCallbackUserdata userdata) {
+    void ClientBufferMapReadAsync(DawnBuffer cBuffer,
+                                  DawnBufferMapReadCallback callback,
+                                  DawnCallbackUserdata userdata) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 
         uint32_t serial = buffer->requestSerial++;
@@ -43,9 +43,9 @@ namespace dawn_wire { namespace client {
         cmd.Serialize(allocatedBuffer);
     }
 
-    void ClientBufferMapWriteAsync(dawnBuffer cBuffer,
-                                   dawnBufferMapWriteCallback callback,
-                                   dawnCallbackUserdata userdata) {
+    void ClientBufferMapWriteAsync(DawnBuffer cBuffer,
+                                   DawnBufferMapWriteCallback callback,
+                                   DawnCallbackUserdata userdata) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 
         uint32_t serial = buffer->requestSerial++;
@@ -68,15 +68,15 @@ namespace dawn_wire { namespace client {
         cmd.Serialize(allocatedBuffer);
     }
 
-    uint64_t ClientFenceGetCompletedValue(dawnFence cSelf) {
+    uint64_t ClientFenceGetCompletedValue(DawnFence cSelf) {
         auto fence = reinterpret_cast<Fence*>(cSelf);
         return fence->completedValue;
     }
 
-    void ClientFenceOnCompletion(dawnFence cFence,
+    void ClientFenceOnCompletion(DawnFence cFence,
                                  uint64_t value,
-                                 dawnFenceOnCompletionCallback callback,
-                                 dawnCallbackUserdata userdata) {
+                                 DawnFenceOnCompletionCallback callback,
+                                 DawnCallbackUserdata userdata) {
         Fence* fence = reinterpret_cast<Fence*>(cFence);
         if (value > fence->signaledValue) {
             fence->device->HandleError("Value greater than fence signaled value");
@@ -95,7 +95,7 @@ namespace dawn_wire { namespace client {
         fence->requests.Enqueue(std::move(request), value);
     }
 
-    void ClientBufferUnmap(dawnBuffer cBuffer) {
+    void ClientBufferUnmap(DawnBuffer cBuffer) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 
         // Invalidate the local pointer, and cancel all other in-flight requests that would
@@ -133,7 +133,7 @@ namespace dawn_wire { namespace client {
         cmd.Serialize(allocatedBuffer, *buffer->device->GetClient());
     }
 
-    dawnFence ClientQueueCreateFence(dawnQueue cSelf, dawnFenceDescriptor const* descriptor) {
+    DawnFence ClientQueueCreateFence(DawnQueue cSelf, DawnFenceDescriptor const* descriptor) {
         Queue* queue = reinterpret_cast<Queue*>(cSelf);
         Device* device = queue->device;
 
@@ -147,7 +147,7 @@ namespace dawn_wire { namespace client {
         char* allocatedBuffer = static_cast<char*>(device->GetClient()->GetCmdSpace(requiredSize));
         cmd.Serialize(allocatedBuffer, *device->GetClient());
 
-        dawnFence cFence = reinterpret_cast<dawnFence>(allocation->object.get());
+        DawnFence cFence = reinterpret_cast<DawnFence>(allocation->object.get());
 
         Fence* fence = reinterpret_cast<Fence*>(cFence);
         fence->queue = queue;
@@ -156,7 +156,7 @@ namespace dawn_wire { namespace client {
         return cFence;
     }
 
-    void ClientQueueSignal(dawnQueue cQueue, dawnFence cFence, uint64_t signalValue) {
+    void ClientQueueSignal(DawnQueue cQueue, DawnFence cFence, uint64_t signalValue) {
         Fence* fence = reinterpret_cast<Fence*>(cFence);
         Queue* queue = reinterpret_cast<Queue*>(cQueue);
         if (fence->queue != queue) {
@@ -181,15 +181,15 @@ namespace dawn_wire { namespace client {
         cmd.Serialize(allocatedBuffer, *fence->device->GetClient());
     }
 
-    void ClientDeviceReference(dawnDevice) {
+    void ClientDeviceReference(DawnDevice) {
     }
 
-    void ClientDeviceRelease(dawnDevice) {
+    void ClientDeviceRelease(DawnDevice) {
     }
 
-    void ClientDeviceSetErrorCallback(dawnDevice cSelf,
-                                      dawnDeviceErrorCallback callback,
-                                      dawnCallbackUserdata userdata) {
+    void ClientDeviceSetErrorCallback(DawnDevice cSelf,
+                                      DawnDeviceErrorCallback callback,
+                                      DawnCallbackUserdata userdata) {
         Device* device = reinterpret_cast<Device*>(cSelf);
         device->SetErrorCallback(callback, userdata);
     }

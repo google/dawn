@@ -26,7 +26,7 @@ namespace dawn_wire { namespace client {
         }
     }
 
-    void Buffer::ClearMapRequests(dawnBufferMapAsyncStatus status) {
+    void Buffer::ClearMapRequests(DawnBufferMapAsyncStatus status) {
         for (auto& it : requests) {
             if (it.second.isWrite) {
                 it.second.writeCallback(status, nullptr, 0, it.second.userdata);

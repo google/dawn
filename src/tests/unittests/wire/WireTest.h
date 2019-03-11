@@ -86,8 +86,8 @@ class WireTest : public testing::Test {
     void FlushServer();
 
     MockProcTable api;
-    dawnDevice apiDevice;
-    dawnDevice device;
+    DawnDevice apiDevice;
+    DawnDevice device;
 
   private:
     bool mIgnoreSetCallbackCalls = false;

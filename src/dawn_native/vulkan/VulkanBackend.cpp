@@ -27,29 +27,29 @@
 
 namespace dawn_native { namespace vulkan {
 
-    VkInstance GetInstance(dawnDevice device) {
+    VkInstance GetInstance(DawnDevice device) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         return backendDevice->GetVkInstance();
     }
 
     // Explicitly export this function because it uses the "native" type for surfaces while the
     // header as seen in this file uses the wrapped type.
-    DAWN_NATIVE_EXPORT dawnSwapChainImplementation
-    CreateNativeSwapChainImpl(dawnDevice device, VkSurfaceKHRNative surfaceNative) {
+    DAWN_NATIVE_EXPORT DawnSwapChainImplementation
+    CreateNativeSwapChainImpl(DawnDevice device, VkSurfaceKHRNative surfaceNative) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         VkSurfaceKHR surface = VkSurfaceKHR::CreateFromHandle(surfaceNative);
 
-        dawnSwapChainImplementation impl;
+        DawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, surface));
         impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
 
         return impl;
     }
 
-    dawnTextureFormat GetNativeSwapChainPreferredFormat(
-        const dawnSwapChainImplementation* swapChain) {
+    DawnTextureFormat GetNativeSwapChainPreferredFormat(
+        const DawnSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-        return static_cast<dawnTextureFormat>(impl->GetPreferredFormat());
+        return static_cast<DawnTextureFormat>(impl->GetPreferredFormat());
     }
 
 }}  // namespace dawn_native::vulkan

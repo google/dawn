@@ -14,11 +14,11 @@
 
 #include "dawn/dawn.h"
 
-static dawnProcTable procs;
+static DawnProcTable procs;
 
-static dawnProcTable nullProcs;
+static DawnProcTable nullProcs;
 
-void dawnSetProcs(const dawnProcTable* procs_) {
+void dawnSetProcs(const DawnProcTable* procs_) {
     if (procs_) {
         procs = *procs_;
     } else {

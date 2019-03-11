@@ -170,8 +170,8 @@ namespace dawn_native {
         {% endfor %}
     }
 
-    dawnProcTable GetProcsAutogen() {
-        dawnProcTable table;
+    DawnProcTable GetProcsAutogen() {
+        DawnProcTable table;
         {% for type in by_category["object"] %}
             {% for method in native_methods(type) %}
                 table.{{as_varName(type.name, method.name)}} = Validating{{as_MethodSuffix(type.name, method.name)}};

@@ -230,7 +230,7 @@ def as_cType(name):
     if name.native:
         return name.concatcase()
     else:
-        return 'dawn' + name.CamelCase()
+        return 'Dawn' + name.CamelCase()
 
 def as_cppType(name):
     if name.native:
@@ -272,7 +272,7 @@ def as_MethodSuffix(type_name, method_name):
 
 def as_cProc(type_name, method_name):
     assert(not type_name.native and not method_name.native)
-    return 'dawn' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+    return 'Dawn' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
 def as_frontendType(typ):
     if typ.category == 'object':

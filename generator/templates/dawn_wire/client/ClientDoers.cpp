@@ -25,7 +25,7 @@ namespace dawn_wire {
                 if (object == nullptr) {
                     return true;
                 }
-                bool called = object->builderCallback.Call(static_cast<dawnBuilderErrorStatus>(status), message);
+                bool called = object->builderCallback.Call(static_cast<DawnBuilderErrorStatus>(status), message);
 
                 //* Unhandled builder errors are forwarded to the device
                 if (!called && status != DAWN_BUILDER_ERROR_STATUS_SUCCESS && status != DAWN_BUILDER_ERROR_STATUS_UNKNOWN) {

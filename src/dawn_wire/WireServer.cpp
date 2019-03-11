@@ -17,8 +17,8 @@
 
 namespace dawn_wire {
 
-    WireServer::WireServer(dawnDevice device,
-                           const dawnProcTable& procs,
+    WireServer::WireServer(DawnDevice device,
+                           const DawnProcTable& procs,
                            CommandSerializer* serializer)
         : mImpl(new server::Server(device, procs, serializer)) {
     }

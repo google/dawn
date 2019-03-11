@@ -24,11 +24,11 @@ namespace dawn_wire {
         mImpl.reset();
     }
 
-    dawnDevice WireClient::GetDevice() const {
+    DawnDevice WireClient::GetDevice() const {
         return mImpl->GetDevice();
     }
 
-    dawnProcTable WireClient::GetProcs() const {
+    DawnProcTable WireClient::GetProcs() const {
         return client::GetProcs();
     }
 

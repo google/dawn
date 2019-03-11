@@ -17,7 +17,7 @@
 
 namespace dawn_wire { namespace server {
     {% for type in by_category["object"] if type.is_builder%}
-        void Server::Forward{{type.name.CamelCase()}}(dawnBuilderErrorStatus status, const char* message, dawnCallbackUserdata userdata1, dawnCallbackUserdata userdata2) {
+        void Server::Forward{{type.name.CamelCase()}}(DawnBuilderErrorStatus status, const char* message, DawnCallbackUserdata userdata1, DawnCallbackUserdata userdata2) {
             auto server = reinterpret_cast<Server*>(static_cast<uintptr_t>(userdata1));
             uint32_t id = userdata2 & 0xFFFFFFFFu;
             uint32_t serial = userdata2 >> uint64_t(32);
@@ -27,7 +27,7 @@ namespace dawn_wire { namespace server {
 
     {% for type in by_category["object"] if type.is_builder%}
         {% set Type = type.name.CamelCase() %}
-        void Server::On{{Type}}Error(dawnBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial) {
+        void Server::On{{Type}}Error(DawnBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial) {
             auto* builder = {{Type}}Objects().Get(id);
 
             if (builder == nullptr || builder->serial != serial) {

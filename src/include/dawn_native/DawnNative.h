@@ -60,7 +60,7 @@ namespace dawn_native {
         // Create a device on this adapter, note that the interface will change to include at least
         // a device descriptor and a pointer to backend specific options.
         // On an error, nullptr is returned.
-        dawnDevice CreateDevice();
+        DawnDevice CreateDevice();
 
       private:
         AdapterBase* mImpl = nullptr;
@@ -104,7 +104,7 @@ namespace dawn_native {
     };
 
     // Backend-agnostic API for dawn_native
-    DAWN_NATIVE_EXPORT dawnProcTable GetProcs();
+    DAWN_NATIVE_EXPORT DawnProcTable GetProcs();
 
 }  // namespace dawn_native
 

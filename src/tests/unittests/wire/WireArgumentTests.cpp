@@ -28,14 +28,14 @@ class WireArgumentTests : public WireTest {
 
 // Test that the wire is able to send numerical values
 TEST_F(WireArgumentTests, ValueArgument) {
-    dawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
-    dawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
+    DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
+    DawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
     dawnComputePassEncoderDispatch(pass, 1, 2, 3);
 
-    dawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+    DawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
 
-    dawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
+    DawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
     EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder)).WillOnce(Return(apiPass));
 
     EXPECT_CALL(api, ComputePassEncoderDispatch(apiPass, 1, 2, 3)).Times(1);
@@ -58,15 +58,15 @@ bool CheckPushConstantValues(const uint32_t* values) {
 }
 
 TEST_F(WireArgumentTests, ValueArrayArgument) {
-    dawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
-    dawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
+    DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
+    DawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
     dawnComputePassEncoderSetPushConstants(pass, DAWN_SHADER_STAGE_BIT_VERTEX, 0, 4,
                                            testPushConstantValues);
 
-    dawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+    DawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
 
-    dawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
+    DawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
     EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder)).WillOnce(Return(apiPass));
 
     EXPECT_CALL(api,
@@ -81,19 +81,19 @@ TEST_F(WireArgumentTests, ValueArrayArgument) {
 // Test that the wire is able to send C strings
 TEST_F(WireArgumentTests, CStringArgument) {
     // Create shader module
-    dawnShaderModuleDescriptor vertexDescriptor;
+    DawnShaderModuleDescriptor vertexDescriptor;
     vertexDescriptor.nextInChain = nullptr;
     vertexDescriptor.codeSize = 0;
-    dawnShaderModule vsModule = dawnDeviceCreateShaderModule(device, &vertexDescriptor);
-    dawnShaderModule apiVsModule = api.GetNewShaderModule();
+    DawnShaderModule vsModule = dawnDeviceCreateShaderModule(device, &vertexDescriptor);
+    DawnShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
     // Create the color state descriptor
-    dawnBlendDescriptor blendDescriptor;
+    DawnBlendDescriptor blendDescriptor;
     blendDescriptor.operation = DAWN_BLEND_OPERATION_ADD;
     blendDescriptor.srcFactor = DAWN_BLEND_FACTOR_ONE;
     blendDescriptor.dstFactor = DAWN_BLEND_FACTOR_ONE;
-    dawnColorStateDescriptor colorStateDescriptor;
+    DawnColorStateDescriptor colorStateDescriptor;
     colorStateDescriptor.nextInChain = nullptr;
     colorStateDescriptor.format = DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
     colorStateDescriptor.alphaBlend = blendDescriptor;
@@ -101,24 +101,24 @@ TEST_F(WireArgumentTests, CStringArgument) {
     colorStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
 
     // Create the input state
-    dawnInputStateBuilder inputStateBuilder = dawnDeviceCreateInputStateBuilder(device);
-    dawnInputStateBuilder apiInputStateBuilder = api.GetNewInputStateBuilder();
+    DawnInputStateBuilder inputStateBuilder = dawnDeviceCreateInputStateBuilder(device);
+    DawnInputStateBuilder apiInputStateBuilder = api.GetNewInputStateBuilder();
     EXPECT_CALL(api, DeviceCreateInputStateBuilder(apiDevice))
         .WillOnce(Return(apiInputStateBuilder));
 
-    dawnInputState inputState = dawnInputStateBuilderGetResult(inputStateBuilder);
-    dawnInputState apiInputState = api.GetNewInputState();
+    DawnInputState inputState = dawnInputStateBuilderGetResult(inputStateBuilder);
+    DawnInputState apiInputState = api.GetNewInputState();
     EXPECT_CALL(api, InputStateBuilderGetResult(apiInputStateBuilder))
         .WillOnce(Return(apiInputState));
 
     // Create the depth-stencil state
-    dawnStencilStateFaceDescriptor stencilFace;
+    DawnStencilStateFaceDescriptor stencilFace;
     stencilFace.compare = DAWN_COMPARE_FUNCTION_ALWAYS;
     stencilFace.failOp = DAWN_STENCIL_OPERATION_KEEP;
     stencilFace.depthFailOp = DAWN_STENCIL_OPERATION_KEEP;
     stencilFace.passOp = DAWN_STENCIL_OPERATION_KEEP;
 
-    dawnDepthStencilStateDescriptor depthStencilState;
+    DawnDepthStencilStateDescriptor depthStencilState;
     depthStencilState.nextInChain = nullptr;
     depthStencilState.format = DAWN_TEXTURE_FORMAT_D32_FLOAT_S8_UINT;
     depthStencilState.depthWriteEnabled = false;
@@ -129,32 +129,32 @@ TEST_F(WireArgumentTests, CStringArgument) {
     depthStencilState.stencilWriteMask = 0xff;
 
     // Create the pipeline layout
-    dawnPipelineLayoutDescriptor layoutDescriptor;
+    DawnPipelineLayoutDescriptor layoutDescriptor;
     layoutDescriptor.nextInChain = nullptr;
     layoutDescriptor.bindGroupLayoutCount = 0;
     layoutDescriptor.bindGroupLayouts = nullptr;
-    dawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
-    dawnPipelineLayout apiLayout = api.GetNewPipelineLayout();
+    DawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
+    DawnPipelineLayout apiLayout = api.GetNewPipelineLayout();
     EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, _)).WillOnce(Return(apiLayout));
 
     // Create pipeline
-    dawnRenderPipelineDescriptor pipelineDescriptor;
+    DawnRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.nextInChain = nullptr;
 
-    dawnPipelineStageDescriptor vertexStage;
+    DawnPipelineStageDescriptor vertexStage;
     vertexStage.nextInChain = nullptr;
     vertexStage.module = vsModule;
     vertexStage.entryPoint = "main";
     pipelineDescriptor.vertexStage = &vertexStage;
 
-    dawnPipelineStageDescriptor fragmentStage;
+    DawnPipelineStageDescriptor fragmentStage;
     fragmentStage.nextInChain = nullptr;
     fragmentStage.module = vsModule;
     fragmentStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
     pipelineDescriptor.colorStateCount = 1;
-    dawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
+    DawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
     pipelineDescriptor.colorStates = colorStatesPtr;
 
     pipelineDescriptor.sampleCount = 1;
@@ -167,7 +167,7 @@ TEST_F(WireArgumentTests, CStringArgument) {
     dawnDeviceCreateRenderPipeline(device, &pipelineDescriptor);
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
-                    apiDevice, MatchesLambda([](const dawnRenderPipelineDescriptor* desc) -> bool {
+                    apiDevice, MatchesLambda([](const DawnRenderPipelineDescriptor* desc) -> bool {
                         return desc->vertexStage->entryPoint == std::string("main");
                     })))
         .WillOnce(Return(nullptr));
@@ -182,18 +182,18 @@ TEST_F(WireArgumentTests, CStringArgument) {
 
 // Test that the wire is able to send objects as value arguments
 TEST_F(WireArgumentTests, ObjectAsValueArgument) {
-    dawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
-    dawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+    DawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
+    DawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
 
-    dawnBufferDescriptor descriptor;
+    DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.size = 8;
-    descriptor.usage = static_cast<dawnBufferUsageBit>(DAWN_BUFFER_USAGE_BIT_TRANSFER_SRC |
+    descriptor.usage = static_cast<DawnBufferUsageBit>(DAWN_BUFFER_USAGE_BIT_TRANSFER_SRC |
                                                        DAWN_BUFFER_USAGE_BIT_TRANSFER_DST);
 
-    dawnBuffer buffer = dawnDeviceCreateBuffer(device, &descriptor);
-    dawnBuffer apiBuffer = api.GetNewBuffer();
+    DawnBuffer buffer = dawnDeviceCreateBuffer(device, &descriptor);
+    DawnBuffer apiBuffer = api.GetNewBuffer();
     EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
         .WillOnce(Return(apiBuffer))
         .RetiresOnSaturation();
@@ -209,17 +209,17 @@ TEST_F(WireArgumentTests, ObjectAsValueArgument) {
 
 // Test that the wire is able to send array of objects
 TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
-    dawnCommandBuffer cmdBufs[2];
-    dawnCommandBuffer apiCmdBufs[2];
+    DawnCommandBuffer cmdBufs[2];
+    DawnCommandBuffer apiCmdBufs[2];
 
     // Create two command buffers we need to use a GMock sequence otherwise the order of the
     // CreateCommandEncoder might be swapped since they are equivalent in term of matchers
     Sequence s;
     for (int i = 0; i < 2; ++i) {
-        dawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
+        DawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
         cmdBufs[i] = dawnCommandEncoderFinish(cmdBufEncoder);
 
-        dawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        DawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
         EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
             .InSequence(s)
             .WillOnce(Return(apiCmdBufEncoder));
@@ -232,15 +232,15 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
     }
 
     // Create queue
-    dawnQueue queue = dawnDeviceCreateQueue(device);
-    dawnQueue apiQueue = api.GetNewQueue();
+    DawnQueue queue = dawnDeviceCreateQueue(device);
+    DawnQueue apiQueue = api.GetNewQueue();
     EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue));
 
     // Submit command buffer and check we got a call with both API-side command buffers
     dawnQueueSubmit(queue, 2, cmdBufs);
 
     EXPECT_CALL(
-        api, QueueSubmit(apiQueue, 2, MatchesLambda([=](const dawnCommandBuffer* cmdBufs) -> bool {
+        api, QueueSubmit(apiQueue, 2, MatchesLambda([=](const DawnCommandBuffer* cmdBufs) -> bool {
                              return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
                          })));
 
@@ -250,7 +250,7 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
 
 // Test that the wire is able to send structures that contain pure values (non-objects)
 TEST_F(WireArgumentTests, StructureOfValuesArgument) {
-    dawnSamplerDescriptor descriptor;
+    DawnSamplerDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.magFilter = DAWN_FILTER_MODE_LINEAR;
     descriptor.minFilter = DAWN_FILTER_MODE_NEAREST;
@@ -265,7 +265,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
 
     dawnDeviceCreateSampler(device, &descriptor);
     EXPECT_CALL(api, DeviceCreateSampler(
-                         apiDevice, MatchesLambda([](const dawnSamplerDescriptor* desc) -> bool {
+                         apiDevice, MatchesLambda([](const DawnSamplerDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr &&
                                     desc->magFilter == DAWN_FILTER_MODE_LINEAR &&
                                     desc->minFilter == DAWN_FILTER_MODE_NEAREST &&
@@ -284,15 +284,15 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
 
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
-    dawnBindGroupLayoutDescriptor bglDescriptor;
+    DawnBindGroupLayoutDescriptor bglDescriptor;
     bglDescriptor.bindingCount = 0;
     bglDescriptor.bindings = nullptr;
 
-    dawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDescriptor);
-    dawnBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
+    DawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDescriptor);
+    DawnBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
     EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _)).WillOnce(Return(apiBgl));
 
-    dawnPipelineLayoutDescriptor descriptor;
+    DawnPipelineLayoutDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.bindGroupLayoutCount = 1;
     descriptor.bindGroupLayouts = &bgl;
@@ -300,7 +300,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
     dawnDeviceCreatePipelineLayout(device, &descriptor);
     EXPECT_CALL(api, DeviceCreatePipelineLayout(
                          apiDevice,
-                         MatchesLambda([apiBgl](const dawnPipelineLayoutDescriptor* desc) -> bool {
+                         MatchesLambda([apiBgl](const DawnPipelineLayoutDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr &&
                                     desc->bindGroupLayoutCount == 1 &&
                                     desc->bindGroupLayouts[0] == apiBgl;
@@ -314,24 +314,24 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
     static constexpr int NUM_BINDINGS = 3;
-    dawnBindGroupLayoutBinding bindings[NUM_BINDINGS]{
+    DawnBindGroupLayoutBinding bindings[NUM_BINDINGS]{
         {0, DAWN_SHADER_STAGE_BIT_VERTEX, DAWN_BINDING_TYPE_SAMPLER},
         {1, DAWN_SHADER_STAGE_BIT_VERTEX, DAWN_BINDING_TYPE_SAMPLED_TEXTURE},
         {2,
-         static_cast<dawnShaderStageBit>(DAWN_SHADER_STAGE_BIT_VERTEX |
+         static_cast<DawnShaderStageBit>(DAWN_SHADER_STAGE_BIT_VERTEX |
                                          DAWN_SHADER_STAGE_BIT_FRAGMENT),
          DAWN_BINDING_TYPE_UNIFORM_BUFFER},
     };
-    dawnBindGroupLayoutDescriptor bglDescriptor;
+    DawnBindGroupLayoutDescriptor bglDescriptor;
     bglDescriptor.bindingCount = NUM_BINDINGS;
     bglDescriptor.bindings = bindings;
 
     dawnDeviceCreateBindGroupLayout(device, &bglDescriptor);
-    dawnBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
+    DawnBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
     EXPECT_CALL(
         api,
         DeviceCreateBindGroupLayout(
-            apiDevice, MatchesLambda([bindings](const dawnBindGroupLayoutDescriptor* desc) -> bool {
+            apiDevice, MatchesLambda([bindings](const DawnBindGroupLayoutDescriptor* desc) -> bool {
                 for (int i = 0; i < NUM_BINDINGS; ++i) {
                     const auto& a = desc->bindings[i];
                     const auto& b = bindings[i];
@@ -350,9 +350,9 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
 
 // Test passing nullptr instead of objects - array of objects version
 TEST_F(WireArgumentTests, DISABLED_NullptrInArray) {
-    dawnBindGroupLayout nullBGL = nullptr;
+    DawnBindGroupLayout nullBGL = nullptr;
 
-    dawnPipelineLayoutDescriptor descriptor;
+    DawnPipelineLayoutDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.bindGroupLayoutCount = 1;
     descriptor.bindGroupLayouts = &nullBGL;
@@ -360,7 +360,7 @@ TEST_F(WireArgumentTests, DISABLED_NullptrInArray) {
     dawnDeviceCreatePipelineLayout(device, &descriptor);
     EXPECT_CALL(api,
                 DeviceCreatePipelineLayout(
-                    apiDevice, MatchesLambda([](const dawnPipelineLayoutDescriptor* desc) -> bool {
+                    apiDevice, MatchesLambda([](const DawnPipelineLayoutDescriptor* desc) -> bool {
                         return desc->nextInChain == nullptr && desc->bindGroupLayoutCount == 1 &&
                                desc->bindGroupLayouts[0] == nullptr;
                     })))

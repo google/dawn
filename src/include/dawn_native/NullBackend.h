@@ -19,7 +19,7 @@
 #include <dawn_native/DawnNative.h>
 
 namespace dawn_native { namespace null {
-    DAWN_NATIVE_EXPORT dawnSwapChainImplementation CreateNativeSwapChainImpl();
+    DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl();
 }}  // namespace dawn_native::null
 
 #endif  // DAWNNATIVE_NULLBACKEND_H_

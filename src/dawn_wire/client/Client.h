@@ -36,8 +36,8 @@ namespace dawn_wire { namespace client {
             return mSerializer->GetCmdSpace(size);
         }
 
-        dawnDevice GetDevice() const {
-            return reinterpret_cast<dawnDeviceImpl*>(mDevice);
+        DawnDevice GetDevice() const {
+            return reinterpret_cast<DawnDeviceImpl*>(mDevice);
         }
 
       private:
@@ -48,7 +48,7 @@ namespace dawn_wire { namespace client {
         WireDeserializeAllocator mAllocator;
     };
 
-    dawnProcTable GetProcs();
+    DawnProcTable GetProcs();
 
 }}  // namespace dawn_wire::client
 

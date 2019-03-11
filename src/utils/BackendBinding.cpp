@@ -25,22 +25,22 @@
 namespace utils {
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
-    BackendBinding* CreateD3D12Binding(GLFWwindow* window, dawnDevice device);
+    BackendBinding* CreateD3D12Binding(GLFWwindow* window, DawnDevice device);
 #endif
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-    BackendBinding* CreateMetalBinding(GLFWwindow* window, dawnDevice device);
+    BackendBinding* CreateMetalBinding(GLFWwindow* window, DawnDevice device);
 #endif
 #if defined(DAWN_ENABLE_BACKEND_NULL)
-    BackendBinding* CreateNullBinding(GLFWwindow* window, dawnDevice device);
+    BackendBinding* CreateNullBinding(GLFWwindow* window, DawnDevice device);
 #endif
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, dawnDevice device);
+    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, DawnDevice device);
 #endif
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
-    BackendBinding* CreateVulkanBinding(GLFWwindow* window, dawnDevice device);
+    BackendBinding* CreateVulkanBinding(GLFWwindow* window, DawnDevice device);
 #endif
 
-    BackendBinding::BackendBinding(GLFWwindow* window, dawnDevice device)
+    BackendBinding::BackendBinding(GLFWwindow* window, DawnDevice device)
         : mWindow(window), mDevice(device) {
     }
 
@@ -75,7 +75,7 @@ namespace utils {
 
     BackendBinding* CreateBinding(dawn_native::BackendType type,
                                   GLFWwindow* window,
-                                  dawnDevice device) {
+                                  DawnDevice device) {
         switch (type) {
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
             case dawn_native::BackendType::D3D12:
