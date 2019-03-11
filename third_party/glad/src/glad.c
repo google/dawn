@@ -7,7 +7,7 @@
     APIs: gl=4.5
     Profile: core
     Extensions:
-        
+
     Loader: True
     Local files: False
     Omit khrplatform: False
@@ -152,7 +152,7 @@ int gladLoadGL(void) {
     return status;
 }
 
-struct gladGLversionStruct GLVersion = { 0, 0 };
+static struct gladGLversionStruct GLVersion = { 0, 0 };
 
 #if defined(GL_ES_VERSION_3_0) || defined(GL_VERSION_3_0)
 #define _GLAD_IS_SOME_NEW_VERSION 1
