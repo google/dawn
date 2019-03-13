@@ -211,6 +211,7 @@ namespace dawn_native { namespace metal {
                      uint32_t plane)
         : TextureBase(device, descriptor) {
         MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(descriptor);
+        mtlDesc.storageMode = MTLStorageModeManaged;
         mMtlTexture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
                                                              iosurface:ioSurface
                                                                  plane:plane];
