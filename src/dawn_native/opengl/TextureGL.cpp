@@ -89,12 +89,6 @@ namespace dawn_native { namespace opengl {
 
     Texture::Texture(Device* device, const TextureDescriptor* descriptor)
         : Texture(device, descriptor, GenTexture()) {
-    }
-
-    Texture::Texture(Device* device, const TextureDescriptor* descriptor, GLuint handle)
-        : TextureBase(device, descriptor), mHandle(handle) {
-        mTarget = TargetForDimensionAndArrayLayers(GetDimension(), GetArrayLayers());
-
         uint32_t width = GetSize().width;
         uint32_t height = GetSize().height;
         uint32_t levels = GetNumMipLevels();
@@ -102,7 +96,7 @@ namespace dawn_native { namespace opengl {
 
         auto formatInfo = GetGLFormatInfo(GetFormat());
 
-        glBindTexture(mTarget, handle);
+        glBindTexture(mTarget, mHandle);
 
         // glTextureView() requires the value of GL_TEXTURE_IMMUTABLE_FORMAT for origtexture to be
         // GL_TRUE, so the storage of the texture must be allocated with glTexStorage*D.
@@ -123,6 +117,11 @@ namespace dawn_native { namespace opengl {
         // The texture is not complete if it uses mipmapping and not all levels up to
         // MAX_LEVEL have been defined.
         glTexParameteri(mTarget, GL_TEXTURE_MAX_LEVEL, levels - 1);
+    }
+
+    Texture::Texture(Device* device, const TextureDescriptor* descriptor, GLuint handle)
+        : TextureBase(device, descriptor), mHandle(handle) {
+        mTarget = TargetForDimensionAndArrayLayers(GetDimension(), GetArrayLayers());
     }
 
     Texture::~Texture() {
