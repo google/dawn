@@ -325,7 +325,8 @@ namespace dawn_native {
             const DeviceBase* device,
             const RenderPassDepthStencilAttachmentDescriptor* depthStencilAttachment,
             uint32_t* width,
-            uint32_t* height) {
+            uint32_t* height,
+            uint32_t* sampleCount) {
             DAWN_ASSERT(depthStencilAttachment != nullptr);
 
             DAWN_TRY(device->ValidateObject(depthStencilAttachment->attachment));
@@ -335,6 +336,12 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(
                     "The format of the texture view used as depth stencil attachment is not a "
                     "depth stencil format");
+            }
+
+            // *sampleCount == 0 must only happen when there is no color attachment. In that case we
+            // do not need to validate the sample count of the depth stencil attachment.
+            if (*sampleCount != 0 && (attachment->GetTexture()->GetSampleCount() != *sampleCount)) {
+                return DAWN_VALIDATION_ERROR("Depth stencil attachment sample counts mismatch");
             }
 
             DAWN_TRY(ValidateAttachmentArrayLayersAndLevelCount(attachment));
@@ -359,7 +366,7 @@ namespace dawn_native {
 
             if (renderPass->depthStencilAttachment != nullptr) {
                 DAWN_TRY(ValidateRenderPassDepthStencilAttachment(
-                    device, renderPass->depthStencilAttachment, width, height));
+                    device, renderPass->depthStencilAttachment, width, height, &sampleCount));
             }
 
             if (renderPass->colorAttachmentCount == 0 &&

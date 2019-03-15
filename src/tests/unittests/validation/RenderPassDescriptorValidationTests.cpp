@@ -583,6 +583,50 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ColorAttachmentResolveTar
     }
 }
 
+// Tests on the sample count of depth stencil attachment.
+TEST_F(MultisampledRenderPassDescriptorValidationTest, DepthStencilAttachmentSampleCount) {
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+    dawn::Texture multisampledDepthStencilTexture = CreateTexture(
+        device, dawn::TextureDimension::e2D, kDepthStencilFormat, kSize, kSize, kArrayLayers,
+        kLevelCount, kSampleCount);
+    dawn::TextureView multisampledDepthStencilTextureView =
+        multisampledDepthStencilTexture.CreateDefaultTextureView();
+
+    // It is not allowed to use a depth stencil attachment whose sample count is different from the
+    // one of the color attachment.
+    {
+        dawn::Texture depthStencilTexture = CreateTexture(
+            device, dawn::TextureDimension::e2D, kDepthStencilFormat, kSize, kSize, kArrayLayers,
+            kLevelCount);
+        dawn::TextureView depthStencilTextureView = depthStencilTexture.CreateDefaultTextureView();
+
+        utils::ComboRenderPassDescriptor renderPass(
+            {CreateMultisampledColorTextureView()}, depthStencilTextureView);
+        AssertBeginRenderPassError(&renderPass);
+    }
+
+    {
+        utils::ComboRenderPassDescriptor renderPass(
+            {CreateNonMultisampledColorTextureView()}, multisampledDepthStencilTextureView);
+        AssertBeginRenderPassError(&renderPass);
+    }
+
+    // It is allowed to use a multisampled depth stencil attachment whose sample count is equal to
+    // the one of the color attachment.
+    {
+        utils::ComboRenderPassDescriptor renderPass(
+            {CreateMultisampledColorTextureView()}, multisampledDepthStencilTextureView);
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // It is allowed to use a multisampled depth stencil attachment while there is no color
+    // attachment.
+    {
+        utils::ComboRenderPassDescriptor renderPass({}, multisampledDepthStencilTextureView);
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+}
+
 // TODO(cwallez@chromium.org): Constraints on attachment aliasing?
 
 } // anonymous namespace
