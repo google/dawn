@@ -667,6 +667,15 @@ namespace dawn_native { namespace metal {
                     rect.width = cmd->width;
                     rect.height = cmd->height;
 
+                    // The scissor rect x + width must be <= render pass width
+                    if ((rect.x + rect.width) > renderPassCmd->width) {
+                        rect.width = renderPassCmd->width - rect.x;
+                    }
+                    // The scissor rect y + height must be <= render pass height
+                    if ((rect.y + rect.height > renderPassCmd->height)) {
+                        rect.height = renderPassCmd->height - rect.y;
+                    }
+
                     [encoder setScissorRect:rect];
                 } break;
 
