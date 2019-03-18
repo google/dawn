@@ -159,6 +159,12 @@ namespace dawn_native { namespace opengl {
                         // These binding types are handled in the separate sampler and texture
                         // emulation
                         break;
+
+                    // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
+                    case dawn::BindingType::DynamicUniformBuffer:
+                    case dawn::BindingType::DynamicStorageBuffer:
+                        UNREACHABLE();
+                        break;
                 }
             }
         }

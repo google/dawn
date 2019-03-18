@@ -53,6 +53,12 @@ namespace dawn_native { namespace opengl {
                         mIndexInfo[group][binding] = ssboIndex;
                         ssboIndex++;
                         break;
+
+                    // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset
+                    case dawn::BindingType::DynamicUniformBuffer:
+                    case dawn::BindingType::DynamicStorageBuffer:
+                        UNREACHABLE();
+                        break;
                 }
             }
         }

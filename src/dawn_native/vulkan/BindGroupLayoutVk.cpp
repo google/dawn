@@ -49,6 +49,9 @@ namespace dawn_native { namespace vulkan {
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             case dawn::BindingType::StorageBuffer:
                 return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            case dawn::BindingType::DynamicUniformBuffer:
+            case dawn::BindingType::DynamicStorageBuffer:
+                UNREACHABLE();
             default:
                 UNREACHABLE();
         }
@@ -125,6 +128,9 @@ namespace dawn_native { namespace vulkan {
                     return SAMPLED_IMAGE;
                 case dawn::BindingType::StorageBuffer:
                     return STORAGE_BUFFER;
+                case dawn::BindingType::DynamicUniformBuffer:
+                case dawn::BindingType::DynamicStorageBuffer:
+                    UNREACHABLE();
                 default:
                     UNREACHABLE();
             }

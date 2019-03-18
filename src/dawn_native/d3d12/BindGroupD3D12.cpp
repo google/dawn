@@ -95,6 +95,12 @@ namespace dawn_native { namespace d3d12 {
                         &samplerDesc, samplerHeapStart.GetCPUHandle(*samplerHeapOffset +
                                                                     bindingOffsets[bindingIndex]));
                 } break;
+
+                // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
+                case dawn::BindingType::DynamicUniformBuffer:
+                case dawn::BindingType::DynamicStorageBuffer:
+                    UNREACHABLE();
+                    break;
             }
         }
 

@@ -169,7 +169,7 @@ void frame() {
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, bindGroup);
+        pass.SetBindGroup(0, bindGroup, 0, nullptr);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
         pass.SetIndexBuffer(indexBuffer, 0);
         pass.DrawIndexed(3, 1, 0, 0, 0);

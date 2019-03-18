@@ -142,7 +142,7 @@ protected:
         {
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
             pass.SetPipeline(mPipeline);
-            pass.SetBindGroup(0, bindGroup);
+            pass.SetBindGroup(0, bindGroup, 0, nullptr);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }

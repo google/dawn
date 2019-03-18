@@ -138,6 +138,10 @@ namespace dawn_native {
                 case dawn::BindingType::Sampler:
                     DAWN_TRY(ValidateSamplerBinding(device, binding));
                     break;
+                // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
+                case dawn::BindingType::DynamicUniformBuffer:
+                case dawn::BindingType::DynamicStorageBuffer:
+                    return DAWN_VALIDATION_ERROR("Dawn doesn't support dynamic buffer yet");
             }
         }
 

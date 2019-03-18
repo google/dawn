@@ -108,6 +108,11 @@ namespace dawn_native { namespace vulkan {
 
                     write.pImageInfo = &writeImageInfo[numWrites];
                 } break;
+
+                case dawn::BindingType::DynamicUniformBuffer:
+                case dawn::BindingType::DynamicStorageBuffer:
+                    UNREACHABLE();
+                    break;
                 default:
                     UNREACHABLE();
             }

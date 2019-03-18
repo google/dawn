@@ -39,7 +39,10 @@ namespace dawn_native {
         void PopDebugGroup();
         void PushDebugGroup(const char* groupLabel);
 
-        void SetBindGroup(uint32_t groupIndex, BindGroupBase* group);
+        void SetBindGroup(uint32_t groupIndex,
+                          BindGroupBase* group,
+                          uint32_t dynamicOffsetCount,
+                          const uint32_t* dynamicOffsets);
         void SetPushConstants(dawn::ShaderStageBit stages,
                               uint32_t offset,
                               uint32_t count,

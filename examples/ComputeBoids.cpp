@@ -285,7 +285,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::Texture backbuffer, size_t i
     {
         dawn::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(updatePipeline);
-        pass.SetBindGroup(0, updateBGs[i]);
+        pass.SetBindGroup(0, updateBGs[i], 0, nullptr);
         pass.Dispatch(kNumParticles, 1, 1);
         pass.EndPass();
     }

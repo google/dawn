@@ -216,7 +216,7 @@ TEST_P(PushConstantTest, ComputePassDefaultsToZero) {
 
         // Test compute push constants are set to zero by default.
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, binding.bindGroup);
+        pass.SetBindGroup(0, binding.bindGroup, 0, nullptr);
         pass.Dispatch(1, 1, 1);
         // Set push constants to non-zero value to check they will be reset to zero
         // on the next BeginComputePass
@@ -228,7 +228,7 @@ TEST_P(PushConstantTest, ComputePassDefaultsToZero) {
         dawn::ComputePassEncoder pass = encoder.BeginComputePass();
 
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, binding.bindGroup);
+        pass.SetBindGroup(0, binding.bindGroup, 0, nullptr);
         pass.Dispatch(1, 1, 1);
 
         pass.EndPass();
@@ -285,7 +285,7 @@ TEST_P(PushConstantTest, VariousConstantTypes) {
 
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, 3, reinterpret_cast<uint32_t*>(&values));
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, binding.bindGroup);
+        pass.SetBindGroup(0, binding.bindGroup, 0, nullptr);
         pass.Dispatch(1, 1, 1);
 
         pass.EndPass();
@@ -316,12 +316,12 @@ TEST_P(PushConstantTest, InheritThroughPipelineLayoutChange) {
         // Set Push constant before there is a pipeline set
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, &one);
         pass.SetPipeline(pipeline1);
-        pass.SetBindGroup(0, binding1.bindGroup);
+        pass.SetBindGroup(0, binding1.bindGroup, 0, nullptr);
         pass.Dispatch(1, 1, 1);
         // Change the push constant before changing pipeline layout
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, 1, &two);
         pass.SetPipeline(pipeline2);
-        pass.SetBindGroup(0, binding2.bindGroup);
+        pass.SetBindGroup(0, binding2.bindGroup, 0, nullptr);
         pass.Dispatch(1, 1, 1);
 
         pass.EndPass();
@@ -352,7 +352,7 @@ TEST_P(PushConstantTest, SetAllConstantsToNonZero) {
 
         pass.SetPushConstants(dawn::ShaderStageBit::Compute, 0, kMaxPushConstants, &values[0]);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, binding.bindGroup);
+        pass.SetBindGroup(0, binding.bindGroup, 0, nullptr);
         pass.Dispatch(1, 1, 1);
 
         pass.EndPass();

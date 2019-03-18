@@ -278,6 +278,12 @@ namespace dawn_native { namespace opengl {
                         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer,
                                           binding.offset, binding.size);
                     } break;
+
+                    // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
+                    case dawn::BindingType::DynamicUniformBuffer:
+                    case dawn::BindingType::DynamicStorageBuffer:
+                        UNREACHABLE();
+                        break;
                 }
             }
         }
