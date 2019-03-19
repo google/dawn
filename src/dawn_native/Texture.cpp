@@ -100,18 +100,13 @@ namespace dawn_native {
 
         // TODO(jiawei.shao@intel.com): support more sample count.
         MaybeError ValidateSampleCount(const TextureDescriptor* descriptor) {
-            switch (descriptor->sampleCount) {
-                case 1:
-                    break;
-                case 4:
-                    if (descriptor->mipLevelCount > 1) {
-                        return DAWN_VALIDATION_ERROR(
-                            "The mipmap level count of a multisampled texture must be 1.");
-                    }
-                    break;
-                default:
-                    return DAWN_VALIDATION_ERROR(
-                        "The sample count of the texture is not supported.");
+            if (!IsValidSampleCount(descriptor->sampleCount)) {
+                return DAWN_VALIDATION_ERROR("The sample count of the texture is not supported.");
+            }
+
+            if (descriptor->sampleCount > 1 && descriptor->mipLevelCount > 1) {
+                return DAWN_VALIDATION_ERROR(
+                    "The mipmap level count of a multisampled texture must be 1.");
             }
 
             return {};
@@ -310,6 +305,17 @@ namespace dawn_native {
 
             default:
                 UNREACHABLE();
+                return false;
+        }
+    }
+
+    bool IsValidSampleCount(uint32_t sampleCount) {
+        switch (sampleCount) {
+            case 1:
+            case 4:
+                return true;
+
+            default:
                 return false;
         }
     }

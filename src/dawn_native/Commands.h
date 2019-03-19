@@ -81,9 +81,10 @@ namespace dawn_native {
         bool hasDepthStencilAttachment;
         RenderPassDepthStencilAttachmentInfo depthStencilAttachment;
 
-        // Cache the width and height of all attachments for convenience
+        // Cache the width, height and sample count of all attachments for convenience
         uint32_t width;
         uint32_t height;
+        uint32_t sampleCount;
     };
 
     struct BufferCopy {

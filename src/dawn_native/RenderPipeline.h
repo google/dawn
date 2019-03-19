@@ -66,6 +66,8 @@ namespace dawn_native {
 
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
         bool mHasDepthStencilAttachment = false;
+
+        uint32_t mSampleCount;
     };
 
 }  // namespace dawn_native

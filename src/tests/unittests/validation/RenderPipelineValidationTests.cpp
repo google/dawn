@@ -71,3 +71,176 @@ TEST_F(RenderPipelineValidationTest, ColorState) {
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
 }
+
+/// Tests that the sample count of the render pipeline must be valid.
+TEST_F(RenderPipelineValidationTest, SampleCount) {
+    {
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.sampleCount = 4;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    {
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.sampleCount = 3;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
+
+// Tests that the sample count of the render pipeline must be equal to the one of every attachments
+// in the render pass.
+TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
+    constexpr uint32_t kMultisampledCount = 4;
+    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+
+    dawn::TextureDescriptor baseTextureDescriptor;
+    baseTextureDescriptor.size.width = 4;
+    baseTextureDescriptor.size.height = 4;
+    baseTextureDescriptor.size.depth = 1;
+    baseTextureDescriptor.arrayLayerCount = 1;
+    baseTextureDescriptor.mipLevelCount = 1;
+    baseTextureDescriptor.dimension = dawn::TextureDimension::e2D;
+    baseTextureDescriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+
+    utils::ComboRenderPipelineDescriptor nonMultisampledPipelineDescriptor(device);
+    nonMultisampledPipelineDescriptor.sampleCount = 1;
+    nonMultisampledPipelineDescriptor.cVertexStage.module = vsModule;
+    nonMultisampledPipelineDescriptor.cFragmentStage.module = fsModule;
+    dawn::RenderPipeline nonMultisampledPipeline =
+        device.CreateRenderPipeline(&nonMultisampledPipelineDescriptor);
+
+    nonMultisampledPipelineDescriptor.colorStateCount = 0;
+    nonMultisampledPipelineDescriptor.depthStencilState =
+        &nonMultisampledPipelineDescriptor.cDepthStencilState;
+    dawn::RenderPipeline nonMultisampledPipelineWithDepthStencilOnly =
+        device.CreateRenderPipeline(&nonMultisampledPipelineDescriptor);
+
+    utils::ComboRenderPipelineDescriptor multisampledPipelineDescriptor(device);
+    multisampledPipelineDescriptor.sampleCount = kMultisampledCount;
+    multisampledPipelineDescriptor.cVertexStage.module = vsModule;
+    multisampledPipelineDescriptor.cFragmentStage.module = fsModule;
+    dawn::RenderPipeline multisampledPipeline =
+        device.CreateRenderPipeline(&multisampledPipelineDescriptor);
+
+    multisampledPipelineDescriptor.colorStateCount = 0;
+    multisampledPipelineDescriptor.depthStencilState =
+        &multisampledPipelineDescriptor.cDepthStencilState;
+    dawn::RenderPipeline multisampledPipelineWithDepthStencilOnly =
+        device.CreateRenderPipeline(&multisampledPipelineDescriptor);
+
+    // It is not allowed to use multisampled render pass and non-multisampled render pipeline.
+    {
+        {
+            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            textureDescriptor.format = kColorFormat;
+            textureDescriptor.sampleCount = kMultisampledCount;
+            dawn::Texture multisampledColorTexture = device.CreateTexture(&textureDescriptor);
+            utils::ComboRenderPassDescriptor renderPassDescriptor(
+                {multisampledColorTexture.CreateDefaultTextureView()});
+
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            renderPass.SetPipeline(nonMultisampledPipeline);
+            renderPass.EndPass();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        {
+            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            textureDescriptor.sampleCount = kMultisampledCount;
+            textureDescriptor.format = kDepthStencilFormat;
+            dawn::Texture multisampledDepthStencilTexture =
+                device.CreateTexture(&textureDescriptor);
+            utils::ComboRenderPassDescriptor renderPassDescriptor(
+                {}, multisampledDepthStencilTexture.CreateDefaultTextureView());
+
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            renderPass.SetPipeline(nonMultisampledPipelineWithDepthStencilOnly);
+            renderPass.EndPass();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
+    // It is allowed to use multisampled render pass and multisampled render pipeline.
+    {
+        {
+            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            textureDescriptor.format = kColorFormat;
+            textureDescriptor.sampleCount = kMultisampledCount;
+            dawn::Texture multisampledColorTexture = device.CreateTexture(&textureDescriptor);
+            utils::ComboRenderPassDescriptor renderPassDescriptor(
+                {multisampledColorTexture.CreateDefaultTextureView()});
+
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            renderPass.SetPipeline(multisampledPipeline);
+            renderPass.EndPass();
+
+            encoder.Finish();
+        }
+
+        {
+            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            textureDescriptor.sampleCount = kMultisampledCount;
+            textureDescriptor.format = kDepthStencilFormat;
+            dawn::Texture multisampledDepthStencilTexture =
+                device.CreateTexture(&textureDescriptor);
+            utils::ComboRenderPassDescriptor renderPassDescriptor(
+                {}, multisampledDepthStencilTexture.CreateDefaultTextureView());
+
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            renderPass.SetPipeline(multisampledPipelineWithDepthStencilOnly);
+            renderPass.EndPass();
+
+            encoder.Finish();
+        }
+    }
+
+    // It is not allowed to use non-multisampled render pass and multisampled render pipeline.
+    {
+        {
+            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            textureDescriptor.format = kColorFormat;
+            textureDescriptor.sampleCount = 1;
+            dawn::Texture nonMultisampledColorTexture = device.CreateTexture(&textureDescriptor);
+            utils::ComboRenderPassDescriptor nonMultisampledRenderPassDescriptor(
+                { nonMultisampledColorTexture.CreateDefaultTextureView() });
+
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            dawn::RenderPassEncoder renderPass =
+                encoder.BeginRenderPass(&nonMultisampledRenderPassDescriptor);
+            renderPass.SetPipeline(multisampledPipeline);
+            renderPass.EndPass();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        {
+            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            textureDescriptor.sampleCount = 1;
+            textureDescriptor.format = kDepthStencilFormat;
+            dawn::Texture multisampledDepthStencilTexture =
+                device.CreateTexture(&textureDescriptor);
+            utils::ComboRenderPassDescriptor renderPassDescriptor(
+                {}, multisampledDepthStencilTexture.CreateDefaultTextureView());
+
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            renderPass.SetPipeline(multisampledPipelineWithDepthStencilOnly);
+            renderPass.EndPass();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+}

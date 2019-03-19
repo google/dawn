@@ -340,8 +340,13 @@ namespace dawn_native {
 
             // *sampleCount == 0 must only happen when there is no color attachment. In that case we
             // do not need to validate the sample count of the depth stencil attachment.
-            if (*sampleCount != 0 && (attachment->GetTexture()->GetSampleCount() != *sampleCount)) {
-                return DAWN_VALIDATION_ERROR("Depth stencil attachment sample counts mismatch");
+            const uint32_t depthStencilSampleCount = attachment->GetTexture()->GetSampleCount();
+            if (*sampleCount != 0) {
+                if (depthStencilSampleCount != *sampleCount) {
+                    return DAWN_VALIDATION_ERROR("Depth stencil attachment sample counts mismatch");
+                }
+            } else {
+                *sampleCount = depthStencilSampleCount;
             }
 
             DAWN_TRY(ValidateAttachmentArrayLayersAndLevelCount(attachment));
@@ -350,23 +355,23 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateRenderPassDescriptorAndSetSize(const DeviceBase* device,
-                                                          const RenderPassDescriptor* renderPass,
-                                                          uint32_t* width,
-                                                          uint32_t* height) {
+        MaybeError ValidateRenderPassDescriptor(const DeviceBase* device,
+                                                const RenderPassDescriptor* renderPass,
+                                                uint32_t* width,
+                                                uint32_t* height,
+                                                uint32_t* sampleCount) {
             if (renderPass->colorAttachmentCount > kMaxColorAttachments) {
                 return DAWN_VALIDATION_ERROR("Setting color attachments out of bounds");
             }
 
-            uint32_t sampleCount = 0;
             for (uint32_t i = 0; i < renderPass->colorAttachmentCount; ++i) {
                 DAWN_TRY(ValidateRenderPassColorAttachment(device, renderPass->colorAttachments[i],
-                                                           width, height, &sampleCount));
+                                                           width, height, sampleCount));
             }
 
             if (renderPass->depthStencilAttachment != nullptr) {
                 DAWN_TRY(ValidateRenderPassDepthStencilAttachment(
-                    device, renderPass->depthStencilAttachment, width, height, &sampleCount));
+                    device, renderPass->depthStencilAttachment, width, height, sampleCount));
             }
 
             if (renderPass->colorAttachmentCount == 0 &&
@@ -584,9 +589,13 @@ namespace dawn_native {
 
         uint32_t width = 0;
         uint32_t height = 0;
-        if (ConsumedError(ValidateRenderPassDescriptorAndSetSize(device, info, &width, &height))) {
+        uint32_t sampleCount = 0;
+        if (ConsumedError(
+                ValidateRenderPassDescriptor(device, info, &width, &height, &sampleCount))) {
             return RenderPassEncoderBase::MakeError(device, this);
         }
+
+        ASSERT(width > 0 && height > 0 && sampleCount > 0);
 
         mEncodingState = EncodingState::RenderPass;
 
@@ -619,6 +628,7 @@ namespace dawn_native {
 
         cmd->width = width;
         cmd->height = height;
+        cmd->sampleCount = sampleCount;
 
         return new RenderPassEncoderBase(device, this, &mAllocator);
     }
