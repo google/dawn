@@ -71,7 +71,7 @@ class VertexBufferValidationTest : public ValidationTest {
             auto builder = device.CreateInputStateBuilder();
             dawn::VertexAttributeDescriptor attribute;
             attribute.offset = 0;
-            attribute.format = dawn::VertexFormat::FloatR32G32B32;
+            attribute.format = dawn::VertexFormat::Float3;
 
             dawn::VertexInputDescriptor input;
             input.stride = 0;

@@ -68,13 +68,13 @@ TEST_F(InputStateTest, PipelineCompatibility) {
     attribute1.shaderLocation = 0;
     attribute1.inputSlot = 0;
     attribute1.offset = 0;
-    attribute1.format = dawn::VertexFormat::FloatR32;
+    attribute1.format = dawn::VertexFormat::Float;
 
     dawn::VertexAttributeDescriptor attribute2;
     attribute2.shaderLocation = 1;
     attribute2.inputSlot = 0;
     attribute2.offset = sizeof(float);
-    attribute2.format = dawn::VertexFormat::FloatR32;
+    attribute2.format = dawn::VertexFormat::Float;
 
     dawn::VertexInputDescriptor input;
     input.inputSlot = 0;
@@ -126,7 +126,7 @@ TEST_F(InputStateTest, StrideZero) {
     attribute.shaderLocation = 0;
     attribute.inputSlot = 0;
     attribute.offset = 128;
-    attribute.format = dawn::VertexFormat::FloatR32;
+    attribute.format = dawn::VertexFormat::Float;
 
     AssertWillBeSuccess(device.CreateInputStateBuilder())
         .SetInput(&kBaseInput)
@@ -182,7 +182,7 @@ TEST_F(InputStateTest, AlreadySetAttribute) {
     attribute.shaderLocation = 0;
     attribute.inputSlot = 0;
     attribute.offset = 0;
-    attribute.format = dawn::VertexFormat::FloatR32;
+    attribute.format = dawn::VertexFormat::Float;
 
     AssertWillBeSuccess(device.CreateInputStateBuilder())
         .SetInput(&kBaseInput)
@@ -204,7 +204,7 @@ TEST_F(InputStateTest, SetAttributeLocationOutOfBounds) {
     attribute.shaderLocation = kMaxVertexAttributes - 1;
     attribute.inputSlot = 0;
     attribute.offset = 0;
-    attribute.format = dawn::VertexFormat::FloatR32;
+    attribute.format = dawn::VertexFormat::Float;
 
     AssertWillBeSuccess(device.CreateInputStateBuilder())
         .SetInput(&kBaseInput)
@@ -225,8 +225,8 @@ TEST_F(InputStateTest, SetAttributeOffsetOutOfBounds) {
     dawn::VertexAttributeDescriptor attribute;
     attribute.shaderLocation = 0;
     attribute.inputSlot = 0;
-    attribute.offset = kMaxVertexAttributeEnd - sizeof(dawn::VertexFormat::FloatR32);
-    attribute.format = dawn::VertexFormat::FloatR32;
+    attribute.offset = kMaxVertexAttributeEnd - sizeof(dawn::VertexFormat::Float);
+    attribute.format = dawn::VertexFormat::Float;
     AssertWillBeSuccess(device.CreateInputStateBuilder())
         .SetInput(&kBaseInput)
         .SetAttribute(&attribute)
@@ -246,7 +246,7 @@ TEST_F(InputStateTest, SetAttributeOffsetOverflow) {
     attribute.shaderLocation = 0;
     attribute.inputSlot = 0;
     attribute.offset = std::numeric_limits<uint32_t>::max();
-    attribute.format = dawn::VertexFormat::FloatR32;
+    attribute.format = dawn::VertexFormat::Float;
     AssertWillBeError(device.CreateInputStateBuilder())
         .SetInput(&kBaseInput)
         .SetAttribute(&attribute)
@@ -260,7 +260,7 @@ TEST_F(InputStateTest, RequireInputForAttribute) {
     attribute.shaderLocation = 0;
     attribute.inputSlot = 0;
     attribute.offset = 0;
-    attribute.format = dawn::VertexFormat::FloatR32;
+    attribute.format = dawn::VertexFormat::Float;
 
     AssertWillBeSuccess(device.CreateInputStateBuilder())
         .SetInput(&kBaseInput)
@@ -282,7 +282,7 @@ TEST_F(InputStateTest, SetAttributeOOBCheckForInputs) {
     attribute.shaderLocation = 0;
     attribute.inputSlot = 0;
     attribute.offset = 0;
-    attribute.format = dawn::VertexFormat::FloatR32;
+    attribute.format = dawn::VertexFormat::Float;
 
     AssertWillBeSuccess(device.CreateInputStateBuilder())
         .SetInput(&kBaseInput)

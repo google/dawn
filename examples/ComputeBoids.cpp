@@ -118,13 +118,13 @@ void initRender() {
     attribute1.shaderLocation = 0;
     attribute1.inputSlot = 0;
     attribute1.offset = offsetof(Particle, pos);
-    attribute1.format = dawn::VertexFormat::FloatR32G32;
+    attribute1.format = dawn::VertexFormat::Float2;
 
     dawn::VertexAttributeDescriptor attribute2;
     attribute2.shaderLocation = 1;
     attribute2.inputSlot = 0;
     attribute2.offset = offsetof(Particle, vel);
-    attribute2.format = dawn::VertexFormat::FloatR32G32;
+    attribute2.format = dawn::VertexFormat::Float2;
 
     dawn::VertexInputDescriptor input1;
     input1.inputSlot = 0;
@@ -135,7 +135,7 @@ void initRender() {
     attribute3.shaderLocation = 2;
     attribute3.inputSlot = 1;
     attribute3.offset = 0;
-    attribute3.format = dawn::VertexFormat::FloatR32G32;
+    attribute3.format = dawn::VertexFormat::Float2;
 
     dawn::VertexInputDescriptor input2;
     input2.inputSlot = 1;

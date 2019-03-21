@@ -160,13 +160,13 @@ void init() {
     attribute1.shaderLocation = 0;
     attribute1.inputSlot = 0;
     attribute1.offset = 0;
-    attribute1.format = dawn::VertexFormat::FloatR32G32B32;
+    attribute1.format = dawn::VertexFormat::Float3;
 
     dawn::VertexAttributeDescriptor attribute2;
     attribute2.shaderLocation = 1;
     attribute2.inputSlot = 0;
     attribute2.offset = 3 * sizeof(float);
-    attribute2.format = dawn::VertexFormat::FloatR32G32B32;
+    attribute2.format = dawn::VertexFormat::Float3;
 
     dawn::VertexInputDescriptor input;
     input.inputSlot = 0;

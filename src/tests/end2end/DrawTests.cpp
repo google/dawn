@@ -35,7 +35,7 @@ class DrawTest : public DawnTest {
         attribute.shaderLocation = 0;
         attribute.inputSlot = 0;
         attribute.offset = 0;
-        attribute.format = dawn::VertexFormat::FloatR32G32B32A32;
+        attribute.format = dawn::VertexFormat::Float4;
 
         dawn::InputState inputState =
             device.CreateInputStateBuilder().SetInput(&input).SetAttribute(&attribute).GetResult();

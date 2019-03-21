@@ -107,13 +107,13 @@ namespace {
     bool techniqueParameterTypeToVertexFormat(int type, dawn::VertexFormat *format) {
         switch (type) {
             case gl::FloatVec2:
-                *format = dawn::VertexFormat::FloatR32G32;
+                *format = dawn::VertexFormat::Float2;
                 return true;
             case gl::FloatVec3:
-                *format = dawn::VertexFormat::FloatR32G32B32;
+                *format = dawn::VertexFormat::Float3;
                 return true;
             case gl::FloatVec4:
-                *format = dawn::VertexFormat::FloatR32G32B32A32;
+                *format = dawn::VertexFormat::Float4;
                 return true;
             default:
                 return false;
@@ -290,7 +290,7 @@ namespace {
             attribute.offset = 0;
             attribute.shaderLocation = i;
             attribute.inputSlot = i;
-            attribute.format = dawn::VertexFormat::FloatR32G32B32A32;
+            attribute.format = dawn::VertexFormat::Float4;
 
             dawn::VertexInputDescriptor input;
             input.inputSlot = i;

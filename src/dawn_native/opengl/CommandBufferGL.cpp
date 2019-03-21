@@ -47,22 +47,44 @@ namespace dawn_native { namespace opengl {
 
         GLenum VertexFormatType(dawn::VertexFormat format) {
             switch (format) {
-                case dawn::VertexFormat::FloatR32G32B32A32:
-                case dawn::VertexFormat::FloatR32G32B32:
-                case dawn::VertexFormat::FloatR32G32:
-                case dawn::VertexFormat::FloatR32:
-                    return GL_FLOAT;
-                case dawn::VertexFormat::IntR32G32B32A32:
-                case dawn::VertexFormat::IntR32G32B32:
-                case dawn::VertexFormat::IntR32G32:
-                case dawn::VertexFormat::IntR32:
-                    return GL_INT;
-                case dawn::VertexFormat::UshortR16G16B16A16:
-                case dawn::VertexFormat::UshortR16G16:
-                    return GL_UNSIGNED_SHORT;
-                case dawn::VertexFormat::UnormR8G8B8A8:
-                case dawn::VertexFormat::UnormR8G8:
+                case dawn::VertexFormat::UChar2:
+                case dawn::VertexFormat::UChar4:
+                case dawn::VertexFormat::UChar2Norm:
+                case dawn::VertexFormat::UChar4Norm:
                     return GL_UNSIGNED_BYTE;
+                case dawn::VertexFormat::Char2:
+                case dawn::VertexFormat::Char4:
+                case dawn::VertexFormat::Char2Norm:
+                case dawn::VertexFormat::Char4Norm:
+                    return GL_BYTE;
+                case dawn::VertexFormat::UShort2:
+                case dawn::VertexFormat::UShort4:
+                case dawn::VertexFormat::UShort2Norm:
+                case dawn::VertexFormat::UShort4Norm:
+                    return GL_UNSIGNED_SHORT;
+                case dawn::VertexFormat::Short2:
+                case dawn::VertexFormat::Short4:
+                case dawn::VertexFormat::Short2Norm:
+                case dawn::VertexFormat::Short4Norm:
+                    return GL_SHORT;
+                case dawn::VertexFormat::Half2:
+                case dawn::VertexFormat::Half4:
+                    return GL_HALF_FLOAT;
+                case dawn::VertexFormat::Float:
+                case dawn::VertexFormat::Float2:
+                case dawn::VertexFormat::Float3:
+                case dawn::VertexFormat::Float4:
+                    return GL_FLOAT;
+                case dawn::VertexFormat::UInt:
+                case dawn::VertexFormat::UInt2:
+                case dawn::VertexFormat::UInt3:
+                case dawn::VertexFormat::UInt4:
+                    return GL_UNSIGNED_INT;
+                case dawn::VertexFormat::Int:
+                case dawn::VertexFormat::Int2:
+                case dawn::VertexFormat::Int3:
+                case dawn::VertexFormat::Int4:
+                    return GL_INT;
                 default:
                     UNREACHABLE();
             }
@@ -70,8 +92,14 @@ namespace dawn_native { namespace opengl {
 
         GLboolean VertexFormatIsNormalized(dawn::VertexFormat format) {
             switch (format) {
-                case dawn::VertexFormat::UnormR8G8B8A8:
-                case dawn::VertexFormat::UnormR8G8:
+                case dawn::VertexFormat::UChar2Norm:
+                case dawn::VertexFormat::UChar4Norm:
+                case dawn::VertexFormat::Char2Norm:
+                case dawn::VertexFormat::Char4Norm:
+                case dawn::VertexFormat::UShort2Norm:
+                case dawn::VertexFormat::UShort4Norm:
+                case dawn::VertexFormat::Short2Norm:
+                case dawn::VertexFormat::Short4Norm:
                     return GL_TRUE;
                 default:
                     return GL_FALSE;
