@@ -24,8 +24,9 @@
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
 
+#include <atomic>
 #include <memory>
-#include <type_traits>
+#include <mutex>
 
 namespace dawn_native { namespace metal {
 
@@ -54,6 +55,7 @@ namespace dawn_native { namespace metal {
         TextureBase* CreateTextureWrappingIOSurface(const TextureDescriptor* descriptor,
                                                     IOSurfaceRef ioSurface,
                                                     uint32_t plane);
+        void WaitForCommandsToBeScheduled();
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
         MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
@@ -85,15 +87,21 @@ namespace dawn_native { namespace metal {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
 
-        void OnCompletedHandler();
-
         id<MTLDevice> mMtlDevice = nil;
         id<MTLCommandQueue> mCommandQueue = nil;
         std::unique_ptr<MapRequestTracker> mMapTracker;
 
-        Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
         id<MTLCommandBuffer> mPendingCommands = nil;
+
+        // The completed serial is updated in a Metal completion handler that can be fired on a
+        // different thread, so it needs to be atomic.
+        std::atomic<uint64_t> mCompletedSerial;
+
+        // mLastSubmittedCommands will be accessed in a Metal schedule handler that can be fired on
+        // a different thread so we guard access to it with a mutex.
+        std::mutex mLastSubmittedCommandsMutex;
+        id<MTLCommandBuffer> mLastSubmittedCommands = nil;
     };
 
 }}  // namespace dawn_native::metal

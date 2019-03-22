@@ -345,18 +345,8 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         dawn::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        // Use a fence to know that GPU rendering is finished.
-        // TODO(cwallez@chromium.org): IOSurfaceLock should wait for previous GPU use of the
-        // IOSurface to be completed but this appears to not be the case.
-        // Maybe it is because the Metal command buffer has been submitted but not "scheduled" yet?
-        dawn::FenceDescriptor fenceDescriptor;
-        fenceDescriptor.initialValue = 0u;
-        dawn::Fence fence = queue.CreateFence(&fenceDescriptor);
-        queue.Signal(fence, 1);
-
-        while (fence.GetCompletedValue() < 1) {
-            WaitABit();
-        }
+        // Wait for the commands touching the IOSurface to be scheduled
+        dawn_native::metal::WaitForCommandsToBeScheduled(device.Get());
 
         // Check the correct data was written
         IOSurfaceLock(ioSurface, kIOSurfaceLockReadOnly, nullptr);

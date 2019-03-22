@@ -38,4 +38,9 @@ namespace dawn_native { namespace metal {
         return reinterpret_cast<DawnTexture>(texture);
     }
 
+    void WaitForCommandsToBeScheduled(DawnDevice cDevice) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+        device->WaitForCommandsToBeScheduled();
+    }
+
 }}  // namespace dawn_native::metal

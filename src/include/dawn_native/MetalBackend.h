@@ -37,6 +37,13 @@ namespace dawn_native { namespace metal {
                                                  const DawnTextureDescriptor* descriptor,
                                                  IOSurfaceRef ioSurface,
                                                  uint32_t plane);
+
+    // When making Metal interop with other APIs, we need to be careful that QueueSubmit doesn't
+    // mean that the operations will be visible to other APIs/Metal devices right away. macOS
+    // does have a global queue of graphics operations, but the command buffers are inserted there
+    // when they are "scheduled". Submitting other operations before the command buffer is
+    // scheduled could lead to races in who gets scheduled first and incorrect rendering.
+    DAWN_NATIVE_EXPORT void WaitForCommandsToBeScheduled(DawnDevice device);
 }}  // namespace dawn_native::metal
 
 #ifdef __OBJC__
