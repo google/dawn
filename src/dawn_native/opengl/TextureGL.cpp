@@ -83,6 +83,37 @@ namespace dawn_native { namespace opengl {
             return handle;
         }
 
+        bool UsageNeedsTextureView(dawn::TextureUsageBit usage) {
+            constexpr dawn::TextureUsageBit kUsageNeedingTextureView =
+                dawn::TextureUsageBit::Storage | dawn::TextureUsageBit::Sampled;
+            return usage & kUsageNeedingTextureView;
+        }
+
+        bool RequiresCreatingNewTextureView(const TextureBase* texture,
+                                            const TextureViewDescriptor* textureViewDescriptor) {
+            if (texture->GetFormat() != textureViewDescriptor->format) {
+                return true;
+            }
+
+            if (texture->GetArrayLayers() != textureViewDescriptor->arrayLayerCount) {
+                return true;
+            }
+
+            if (texture->GetNumMipLevels() != textureViewDescriptor->mipLevelCount) {
+                return true;
+            }
+
+            switch (textureViewDescriptor->dimension) {
+                case dawn::TextureViewDimension::Cube:
+                case dawn::TextureViewDimension::CubeArray:
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
     }  // namespace
 
     // Texture
@@ -144,24 +175,35 @@ namespace dawn_native { namespace opengl {
     // TextureView
 
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
-        : TextureViewBase(texture, descriptor) {
+        : TextureViewBase(texture, descriptor), mOwnsHandle(false) {
         mTarget = TargetForTextureViewDimension(descriptor->dimension);
 
-        // glTextureView() is supported on OpenGL version >= 4.3
-        // TODO(jiawei.shao@intel.com): support texture view on OpenGL version <= 4.2
-        mHandle = GenTexture();
-        const Texture* textureGL = ToBackend(texture);
-        TextureFormatInfo textureViewFormat = GetGLFormatInfo(descriptor->format);
-        glTextureView(mHandle, mTarget, textureGL->GetHandle(), textureViewFormat.internalFormat,
-                      descriptor->baseMipLevel, descriptor->mipLevelCount,
-                      descriptor->baseArrayLayer, descriptor->arrayLayerCount);
+        if (!UsageNeedsTextureView(texture->GetUsage())) {
+            mHandle = 0;
+        } else if (!RequiresCreatingNewTextureView(texture, descriptor)) {
+            mHandle = ToBackend(texture)->GetHandle();
+        } else {
+            // glTextureView() is supported on OpenGL version >= 4.3
+            // TODO(jiawei.shao@intel.com): support texture view on OpenGL version <= 4.2
+            mHandle = GenTexture();
+            const Texture* textureGL = ToBackend(texture);
+            TextureFormatInfo textureViewFormat = GetGLFormatInfo(descriptor->format);
+            glTextureView(mHandle, mTarget, textureGL->GetHandle(),
+                          textureViewFormat.internalFormat, descriptor->baseMipLevel,
+                          descriptor->mipLevelCount, descriptor->baseArrayLayer,
+                          descriptor->arrayLayerCount);
+            mOwnsHandle = true;
+        }
     }
 
     TextureView::~TextureView() {
-        glDeleteTextures(1, &mHandle);
+        if (mOwnsHandle) {
+            glDeleteTextures(1, &mHandle);
+        }
     }
 
     GLuint TextureView::GetHandle() const {
+        ASSERT(mHandle != 0);
         return mHandle;
     }
 
