@@ -68,7 +68,8 @@ namespace dawn_wire { namespace server {
                                            void* ptr,
                                            uint32_t dataLength,
                                            MapUserdata* userdata);
-        void OnFenceCompletedValueUpdated(FenceCompletionUserdata* userdata);
+        void OnFenceCompletedValueUpdated(DawnFenceCompletionStatus status,
+                                          FenceCompletionUserdata* userdata);
 
 #include "dawn_wire/server/ServerPrototypes_autogen.inl"
 
