@@ -476,6 +476,40 @@ namespace dawn_native { namespace metal {
                         destinationBytesPerImage:lastRowDataSize];
                 } break;
 
+                case Command::CopyTextureToTexture: {
+                    CopyTextureToTextureCmd* copy =
+                        mCommands.NextCommand<CopyTextureToTextureCmd>();
+                    Texture* srcTexture = ToBackend(copy->source.texture.Get());
+                    Texture* dstTexture = ToBackend(copy->destination.texture.Get());
+
+                    MTLOrigin srcOrigin;
+                    srcOrigin.x = copy->source.origin.x;
+                    srcOrigin.y = copy->source.origin.y;
+                    srcOrigin.z = copy->source.origin.z;
+
+                    MTLOrigin dstOrigin;
+                    dstOrigin.x = copy->destination.origin.x;
+                    dstOrigin.y = copy->destination.origin.y;
+                    dstOrigin.z = copy->destination.origin.z;
+
+                    MTLSize size;
+                    size.width = copy->copySize.width;
+                    size.height = copy->copySize.height;
+                    size.depth = copy->copySize.depth;
+
+                    encoders.EnsureBlit(commandBuffer);
+
+                    [encoders.blit copyFromTexture:srcTexture->GetMTLTexture()
+                                       sourceSlice:copy->source.slice
+                                       sourceLevel:copy->source.level
+                                      sourceOrigin:srcOrigin
+                                        sourceSize:size
+                                         toTexture:dstTexture->GetMTLTexture()
+                                  destinationSlice:copy->destination.slice
+                                  destinationLevel:copy->destination.level
+                                 destinationOrigin:dstOrigin];
+                } break;
+
                 default: { UNREACHABLE(); } break;
             }
         }

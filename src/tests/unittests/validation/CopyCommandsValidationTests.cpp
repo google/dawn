@@ -49,6 +49,14 @@ class CopyCommandTest : public ValidationTest {
             return (rowPitch * (height - 1) + width) * depth;
         }
 
+        void ValidateExpectation(dawn::CommandEncoder encoder, utils::Expectation expectation) {
+            if (expectation == utils::Expectation::Success) {
+                encoder.Finish();
+            } else {
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+        }
+
         void TestB2TCopy(utils::Expectation expectation,
                          dawn::Buffer srcBuffer,
                          uint32_t srcOffset,
@@ -67,11 +75,7 @@ class CopyCommandTest : public ValidationTest {
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &extent3D);
 
-            if (expectation == utils::Expectation::Success) {
-                encoder.Finish();
-            } else {
-                ASSERT_DEVICE_ERROR(encoder.Finish());
-            }
+            ValidateExpectation(encoder, expectation);
         }
 
         void TestT2BCopy(utils::Expectation expectation,
@@ -92,11 +96,28 @@ class CopyCommandTest : public ValidationTest {
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D);
 
-            if (expectation == utils::Expectation::Success) {
-                encoder.Finish();
-            } else {
-                ASSERT_DEVICE_ERROR(encoder.Finish());
-            }
+            ValidateExpectation(encoder, expectation);
+        }
+
+        void TestT2TCopy(utils::Expectation expectation,
+                         dawn::Texture srcTexture,
+                         uint32_t srcLevel,
+                         uint32_t srcSlice,
+                         dawn::Origin3D srcOrigin,
+                         dawn::Texture dstTexture,
+                         uint32_t dstLevel,
+                         uint32_t dstSlice,
+                         dawn::Origin3D dstOrigin,
+                         dawn::Extent3D extent3D) {
+            dawn::TextureCopyView srcTextureCopyView =
+                utils::CreateTextureCopyView(srcTexture, srcLevel, srcSlice, srcOrigin);
+            dawn::TextureCopyView dstTextureCopyView =
+                utils::CreateTextureCopyView(dstTexture, dstLevel, dstSlice, dstOrigin);
+
+            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &extent3D);
+
+            ValidateExpectation(encoder, expectation);
         }
 };
 
@@ -736,5 +757,195 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyTextureToBuffer(&textureCopyView, &errorBufferCopyView, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+class CopyCommandTest_T2T : public CopyCommandTest {};
+
+TEST_F(CopyCommandTest_T2T, Success) {
+    dawn::Texture source = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                           dawn::TextureUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferDst);
+
+    // Different copies, including some that touch the OOB condition
+    {
+        // Copy a region along top left boundary
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {4, 4, 1});
+
+        // Copy entire texture
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {16, 16, 1});
+
+        // Copy a region along bottom right boundary
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {8, 8, 0}, destination, 0, 0,
+                    {8, 8, 0}, {8, 8, 1});
+
+        // Copy region into mip
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 2, 0,
+                    {0, 0, 0}, {4, 4, 1});
+
+        // Copy mip into region
+        TestT2TCopy(utils::Expectation::Success, source, 2, 0, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {4, 4, 1});
+
+        // Copy between slices
+        TestT2TCopy(utils::Expectation::Success, source, 0, 1, {0, 0, 0}, destination, 0, 1,
+                    {0, 0, 0}, {16, 16, 1});
+    }
+
+    // Empty copies are valid
+    {
+        // An empty copy
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {0, 0, 1});
+
+        // An empty copy touching the side of the source texture
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0,
+                    {16, 16, 0}, {0, 0, 1});
+
+        // An empty copy touching the side of the destination texture
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0,
+                    {16, 16, 0}, {0, 0, 1});
+    }
+}
+
+TEST_F(CopyCommandTest_T2T, IncorrectUsage) {
+    dawn::Texture source = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                           dawn::TextureUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferDst);
+
+    // Incorrect source usage causes failure
+    TestT2TCopy(utils::Expectation::Failure, destination, 0, 0, {0, 0, 0}, destination, 0, 0,
+                {0, 0, 0}, {16, 16, 1});
+
+    // Incorrect destination usage causes failure
+    TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, source, 0, 0, {0, 0, 0},
+                {16, 16, 1});
+}
+
+TEST_F(CopyCommandTest_T2T, OutOfBounds) {
+    dawn::Texture source = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                           dawn::TextureUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferDst);
+
+    // OOB on source
+    {
+        // x + width overflows
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {1, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {16, 16, 1});
+
+        // y + height overflows
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 1, 0}, destination, 0, 0,
+                    {0, 0, 0}, {16, 16, 1});
+
+        // non-zero mip overflows
+        TestT2TCopy(utils::Expectation::Failure, source, 1, 0, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {9, 9, 1});
+
+        // empty copy on non-existent mip fails
+        TestT2TCopy(utils::Expectation::Failure, source, 6, 0, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {0, 0, 1});
+
+        // empty copy from non-existent slice fails
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 2, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {0, 0, 1});
+    }
+
+    // OOB on destination
+    {
+        // x + width overflows
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0,
+                    {1, 0, 0}, {16, 16, 1});
+
+        // y + height overflows
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0,
+                    {0, 1, 0}, {16, 16, 1});
+
+        // non-zero mip overflows
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 1, 0,
+                    {0, 0, 0}, {9, 9, 1});
+
+        // empty copy on non-existent mip fails
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 6, 0,
+                    {0, 0, 0}, {0, 0, 1});
+
+        // empty copy on non-existent slice fails
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 2,
+                    {0, 0, 0}, {0, 0, 1});
+    }
+}
+
+TEST_F(CopyCommandTest_T2T, 2DTextureDepthConstraints) {
+    dawn::Texture source = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                           dawn::TextureUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferDst);
+
+    // Empty copy on source with z > 0 fails
+    TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 1}, destination, 0, 0, {0, 0, 0},
+                {0, 0, 1});
+
+    // Empty copy on destination with z > 0 fails
+    TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 1},
+                {0, 0, 1});
+
+    // Empty copy with depth = 0 fails
+    TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 0},
+                {0, 0, 0});
+}
+
+TEST_F(CopyCommandTest_T2T, 2DTextureDepthStencil) {
+    dawn::Texture source = Create2DTexture(16, 16, 1, 1, dawn::TextureFormat::D32FloatS8Uint,
+                                           dawn::TextureUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 1, 1, dawn::TextureFormat::D32FloatS8Uint,
+                                                dawn::TextureUsageBit::TransferDst);
+
+    // Success when entire depth stencil subresource is copied
+    TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 0},
+                {16, 16, 1});
+
+    // Failure when depth stencil subresource is partially copied
+    TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 0},
+                {15, 15, 1});
+}
+
+TEST_F(CopyCommandTest_T2T, FormatsMismatch) {
+    dawn::Texture source = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Uint,
+                                           dawn::TextureUsageBit::TransferSrc);
+    dawn::Texture destination = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
+                                                dawn::TextureUsageBit::TransferDst);
+
+    // Failure when formats don't match
+    TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 0},
+                {0, 0, 1});
+}
+
+TEST_F(CopyCommandTest_T2T, MultisampledCopies) {
+    dawn::Texture sourceMultiSampled1x = Create2DTexture(
+        16, 16, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm, dawn::TextureUsageBit::TransferSrc, 1);
+    dawn::Texture sourceMultiSampled4x = Create2DTexture(
+        16, 16, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm, dawn::TextureUsageBit::TransferSrc, 4);
+    dawn::Texture destinationMultiSampled4x = Create2DTexture(
+        16, 16, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm, dawn::TextureUsageBit::TransferDst, 4);
+
+    // Success when entire multisampled subresource is copied
+    {
+        TestT2TCopy(utils::Expectation::Success, sourceMultiSampled4x, 0, 0, {0, 0, 0},
+                    destinationMultiSampled4x, 0, 0, {0, 0, 0}, {16, 16, 1});
+    }
+
+    // Failures
+    {
+        // An empty copy with mismatched samples fails
+        TestT2TCopy(utils::Expectation::Failure, sourceMultiSampled1x, 0, 0, {0, 0, 0},
+                    destinationMultiSampled4x, 0, 0, {0, 0, 0}, {0, 0, 1});
+
+        // A copy fails when samples are greater than 1, and entire subresource isn't copied
+        TestT2TCopy(utils::Expectation::Failure, sourceMultiSampled4x, 0, 0, {0, 0, 0},
+                    destinationMultiSampled4x, 0, 0, {0, 0, 0}, {15, 15, 1});
     }
 }

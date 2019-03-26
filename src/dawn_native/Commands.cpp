@@ -49,6 +49,11 @@ namespace dawn_native {
                     CopyTextureToBufferCmd* copy = commands->NextCommand<CopyTextureToBufferCmd>();
                     copy->~CopyTextureToBufferCmd();
                 } break;
+                case Command::CopyTextureToTexture: {
+                    CopyTextureToTextureCmd* copy =
+                        commands->NextCommand<CopyTextureToTextureCmd>();
+                    copy->~CopyTextureToTextureCmd();
+                } break;
                 case Command::Dispatch: {
                     DispatchCmd* dispatch = commands->NextCommand<DispatchCmd>();
                     dispatch->~DispatchCmd();
@@ -150,6 +155,10 @@ namespace dawn_native {
 
             case Command::CopyTextureToBuffer:
                 commands->NextCommand<CopyTextureToBufferCmd>();
+                break;
+
+            case Command::CopyTextureToTexture:
+                commands->NextCommand<CopyTextureToTextureCmd>();
                 break;
 
             case Command::Dispatch:

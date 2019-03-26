@@ -44,6 +44,32 @@ namespace dawn_native { namespace d3d12 {
                     UNREACHABLE();
             }
         }
+
+        D3D12_TEXTURE_COPY_LOCATION CreateTextureCopyLocationForTexture(const Texture& texture,
+                                                                        uint32_t level,
+                                                                        uint32_t slice) {
+            D3D12_TEXTURE_COPY_LOCATION copyLocation;
+            copyLocation.pResource = texture.GetD3D12Resource();
+            copyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+            copyLocation.SubresourceIndex = texture.GetNumMipLevels() * slice + level;
+
+            return copyLocation;
+        }
+
+        bool CanUseCopyResource(const uint32_t sourceNumMipLevels,
+                                const Extent3D& srcSize,
+                                const Extent3D& dstSize,
+                                const Extent3D& copySize) {
+            if (sourceNumMipLevels == 1 && srcSize.width == dstSize.width &&
+                srcSize.height == dstSize.height && srcSize.depth == dstSize.depth &&
+                srcSize.width == copySize.width && srcSize.height == copySize.height &&
+                srcSize.depth == copySize.depth) {
+                return true;
+            }
+
+            return false;
+        }
+
     }  // anonymous namespace
 
     struct BindGroupStateTracker {
@@ -425,12 +451,9 @@ namespace dawn_native { namespace d3d12 {
                         static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())),
                         copy->source.offset, copy->source.rowPitch, copy->source.imageHeight);
 
-                    D3D12_TEXTURE_COPY_LOCATION textureLocation;
-                    textureLocation.pResource = texture->GetD3D12Resource();
-                    textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-                    textureLocation.SubresourceIndex =
-                        texture->GetNumMipLevels() * copy->destination.slice +
-                        copy->destination.level;
+                    D3D12_TEXTURE_COPY_LOCATION textureLocation =
+                        CreateTextureCopyLocationForTexture(*texture, copy->destination.level,
+                                                            copy->destination.slice);
 
                     for (uint32_t i = 0; i < copySplit.count; ++i) {
                         auto& info = copySplit.copies[i];
@@ -473,11 +496,9 @@ namespace dawn_native { namespace d3d12 {
                         copy->destination.offset, copy->destination.rowPitch,
                         copy->destination.imageHeight);
 
-                    D3D12_TEXTURE_COPY_LOCATION textureLocation;
-                    textureLocation.pResource = texture->GetD3D12Resource();
-                    textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-                    textureLocation.SubresourceIndex =
-                        texture->GetNumMipLevels() * copy->source.slice + copy->source.level;
+                    D3D12_TEXTURE_COPY_LOCATION textureLocation =
+                        CreateTextureCopyLocationForTexture(*texture, copy->source.level,
+                                                            copy->source.slice);
 
                     for (uint32_t i = 0; i < copySplit.count; ++i) {
                         auto& info = copySplit.copies[i];
@@ -504,6 +525,45 @@ namespace dawn_native { namespace d3d12 {
                         commandList->CopyTextureRegion(&bufferLocation, info.bufferOffset.x,
                                                        info.bufferOffset.y, info.bufferOffset.z,
                                                        &textureLocation, &sourceRegion);
+                    }
+                } break;
+
+                case Command::CopyTextureToTexture: {
+                    CopyTextureToTextureCmd* copy =
+                        mCommands.NextCommand<CopyTextureToTextureCmd>();
+
+                    Texture* source = ToBackend(copy->source.texture.Get());
+                    Texture* destination = ToBackend(copy->destination.texture.Get());
+
+                    source->TransitionUsageNow(commandList, dawn::TextureUsageBit::TransferSrc);
+                    destination->TransitionUsageNow(commandList,
+                                                    dawn::TextureUsageBit::TransferDst);
+
+                    if (CanUseCopyResource(source->GetNumMipLevels(), source->GetSize(),
+                                           destination->GetSize(), copy->copySize)) {
+                        commandList->CopyResource(destination->GetD3D12Resource(),
+                                                  source->GetD3D12Resource());
+
+                    } else {
+                        D3D12_TEXTURE_COPY_LOCATION srcLocation =
+                            CreateTextureCopyLocationForTexture(*source, copy->source.level,
+                                                                copy->source.slice);
+
+                        D3D12_TEXTURE_COPY_LOCATION dstLocation =
+                            CreateTextureCopyLocationForTexture(
+                                *destination, copy->destination.level, copy->destination.slice);
+
+                        D3D12_BOX sourceRegion;
+                        sourceRegion.left = copy->source.origin.x;
+                        sourceRegion.top = copy->source.origin.y;
+                        sourceRegion.front = copy->source.origin.z;
+                        sourceRegion.right = copy->source.origin.x + copy->copySize.width;
+                        sourceRegion.bottom = copy->source.origin.y + copy->copySize.height;
+                        sourceRegion.back = copy->source.origin.z + copy->copySize.depth;
+
+                        commandList->CopyTextureRegion(
+                            &dstLocation, copy->destination.origin.x, copy->destination.origin.y,
+                            copy->destination.origin.z, &srcLocation, &sourceRegion);
                     }
                 } break;
 

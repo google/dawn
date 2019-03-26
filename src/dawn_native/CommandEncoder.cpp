@@ -141,6 +141,49 @@ namespace dawn_native {
             return {};
         }
 
+        MaybeError ValidateEntireSubresourceCopied(const TextureCopy& src,
+                                                   const TextureCopy& dst,
+                                                   const Extent3D& copySize) {
+            Extent3D srcSize = src.texture.Get()->GetSize();
+
+            if (dst.origin.x != 0 || dst.origin.y != 0 || dst.origin.z != 0 ||
+                srcSize.width != copySize.width || srcSize.height != copySize.height ||
+                srcSize.depth != copySize.depth) {
+                return DAWN_VALIDATION_ERROR(
+                    "The entire subresource must be copied when using a depth/stencil texture or "
+                    "when samples are greater than 1.");
+            }
+
+            return {};
+        }
+
+        MaybeError ValidateTextureToTextureCopyRestrictions(const TextureCopy& src,
+                                                            const TextureCopy& dst,
+                                                            const Extent3D& copySize) {
+            const uint32_t srcSamples = src.texture.Get()->GetSampleCount();
+            const uint32_t dstSamples = dst.texture.Get()->GetSampleCount();
+
+            if (srcSamples != dstSamples) {
+                return DAWN_VALIDATION_ERROR(
+                    "Source and destination textures must have matching sample counts.");
+            } else if (srcSamples > 1) {
+                // D3D12 requires entire subresource to be copied when using CopyTextureRegion when
+                // samples > 1.
+                DAWN_TRY(ValidateEntireSubresourceCopied(src, dst, copySize));
+            }
+
+            if (src.texture.Get()->GetFormat() != dst.texture.Get()->GetFormat()) {
+                // Metal requires texture-to-texture copies be the same format
+                return DAWN_VALIDATION_ERROR("Source and destination texture formats must match.");
+            } else if (TextureFormatHasDepthOrStencil(src.texture.Get()->GetFormat())) {
+                // D3D12 requires entire subresource to be copied when using CopyTextureRegion is
+                // used with depth/stencil.
+                DAWN_TRY(ValidateEntireSubresourceCopied(src, dst, copySize));
+            }
+
+            return {};
+        }
+
         MaybeError ComputeTextureCopyBufferSize(const Extent3D& copySize,
                                                 uint32_t rowPitch,
                                                 uint32_t imageHeight,
@@ -734,6 +777,35 @@ namespace dawn_native {
         }
     }
 
+    void CommandEncoderBase::CopyTextureToTexture(const TextureCopyView* source,
+                                                  const TextureCopyView* destination,
+                                                  const Extent3D* copySize) {
+        if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
+            return;
+        }
+
+        if (ConsumedError(GetDevice()->ValidateObject(source->texture))) {
+            return;
+        }
+
+        if (ConsumedError(GetDevice()->ValidateObject(destination->texture))) {
+            return;
+        }
+
+        CopyTextureToTextureCmd* copy =
+            mAllocator.Allocate<CopyTextureToTextureCmd>(Command::CopyTextureToTexture);
+        new (copy) CopyTextureToTextureCmd;
+        copy->source.texture = source->texture;
+        copy->source.origin = source->origin;
+        copy->source.level = source->level;
+        copy->source.slice = source->slice;
+        copy->destination.texture = destination->texture;
+        copy->destination.origin = destination->origin;
+        copy->destination.level = destination->level;
+        copy->destination.slice = destination->slice;
+        copy->copySize = *copySize;
+    }
+
     CommandBufferBase* CommandEncoderBase::Finish() {
         if (GetDevice()->ConsumedError(ValidateFinish())) {
             return CommandBufferBase::MakeError(GetDevice());
@@ -868,6 +940,25 @@ namespace dawn_native {
 
                     mResourceUsages.topLevelTextures.insert(copy->source.texture.Get());
                     mResourceUsages.topLevelBuffers.insert(copy->destination.buffer.Get());
+                } break;
+
+                case Command::CopyTextureToTexture: {
+                    CopyTextureToTextureCmd* copy =
+                        mIterator.NextCommand<CopyTextureToTextureCmd>();
+
+                    DAWN_TRY(ValidateTextureToTextureCopyRestrictions(
+                        copy->source, copy->destination, copy->copySize));
+
+                    DAWN_TRY(ValidateCopySizeFitsInTexture(copy->source, copy->copySize));
+                    DAWN_TRY(ValidateCopySizeFitsInTexture(copy->destination, copy->copySize));
+
+                    DAWN_TRY(ValidateCanUseAs(copy->source.texture.Get(),
+                                              dawn::TextureUsageBit::TransferSrc));
+                    DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
+                                              dawn::TextureUsageBit::TransferDst));
+
+                    mResourceUsages.topLevelTextures.insert(copy->source.texture.Get());
+                    mResourceUsages.topLevelTextures.insert(copy->destination.texture.Get());
                 } break;
 
                 default:

@@ -70,6 +70,39 @@ namespace dawn_native { namespace vulkan {
             return region;
         }
 
+        VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
+                                           const TextureCopy& dstCopy,
+                                           const Extent3D& copySize) {
+            const Texture* srcTexture = ToBackend(srcCopy.texture.Get());
+            const Texture* dstTexture = ToBackend(dstCopy.texture.Get());
+
+            VkImageCopy region;
+
+            region.srcSubresource.aspectMask = srcTexture->GetVkAspectMask();
+            region.srcSubresource.mipLevel = srcCopy.level;
+            region.srcSubresource.baseArrayLayer = srcCopy.slice;
+            region.srcSubresource.layerCount = 1;
+
+            region.srcOffset.x = srcCopy.origin.x;
+            region.srcOffset.y = srcCopy.origin.y;
+            region.srcOffset.z = srcCopy.origin.z;
+
+            region.dstSubresource.aspectMask = dstTexture->GetVkAspectMask();
+            region.dstSubresource.mipLevel = dstCopy.level;
+            region.dstSubresource.baseArrayLayer = dstCopy.slice;
+            region.dstSubresource.layerCount = 1;
+
+            region.dstOffset.x = dstCopy.origin.x;
+            region.dstOffset.y = dstCopy.origin.y;
+            region.dstOffset.z = dstCopy.origin.z;
+
+            region.extent.width = copySize.width;
+            region.extent.height = copySize.height;
+            region.extent.depth = copySize.depth;
+
+            return region;
+        }
+
         class DescriptorSetTracker {
           public:
             void OnSetBindGroup(uint32_t index, VkDescriptorSet set) {
@@ -297,6 +330,26 @@ namespace dawn_native { namespace vulkan {
                     // The Dawn TransferSrc usage is always mapped to GENERAL
                     device->fn.CmdCopyImageToBuffer(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
                                                     dstBuffer, 1, &region);
+                } break;
+
+                case Command::CopyTextureToTexture: {
+                    CopyTextureToTextureCmd* copy =
+                        mCommands.NextCommand<CopyTextureToTextureCmd>();
+                    TextureCopy& src = copy->source;
+                    TextureCopy& dst = copy->destination;
+
+                    ToBackend(src.texture)
+                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferSrc);
+                    ToBackend(dst.texture)
+                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
+
+                    VkImage srcImage = ToBackend(src.texture)->GetHandle();
+                    VkImage dstImage = ToBackend(dst.texture)->GetHandle();
+
+                    VkImageCopy region = ComputeImageCopyRegion(src, dst, copy->copySize);
+
+                    device->fn.CmdCopyImage(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL, dstImage,
+                                            VK_IMAGE_LAYOUT_GENERAL, 1, &region);
                 } break;
 
                 case Command::BeginRenderPass: {

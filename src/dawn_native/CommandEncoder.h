@@ -54,6 +54,9 @@ namespace dawn_native {
         void CopyTextureToBuffer(const TextureCopyView* source,
                                  const BufferCopyView* destination,
                                  const Extent3D* copySize);
+        void CopyTextureToTexture(const TextureCopyView* source,
+                                  const TextureCopyView* destination,
+                                  const Extent3D* copySize);
         CommandBufferBase* Finish();
 
         // Functions to interact with the encoders

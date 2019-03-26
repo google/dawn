@@ -36,6 +36,7 @@ namespace dawn_native {
         CopyBufferToBuffer,
         CopyBufferToTexture,
         CopyTextureToBuffer,
+        CopyTextureToTexture,
         Dispatch,
         Draw,
         DrawIndexed,
@@ -116,6 +117,12 @@ namespace dawn_native {
     struct CopyTextureToBufferCmd {
         TextureCopy source;
         BufferCopy destination;
+        Extent3D copySize;  // Texels
+    };
+
+    struct CopyTextureToTextureCmd {
+        TextureCopy source;
+        TextureCopy destination;
         Extent3D copySize;  // Texels
     };
 

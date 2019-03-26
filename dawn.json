@@ -319,6 +319,14 @@
                     {"name": "destination", "type": "buffer copy view", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
+            },
+            {
+                "name": "copy texture to texture",
+                "args": [
+                    {"name": "source", "type": "texture copy view", "annotation": "const*"},
+                    {"name": "destination", "type": "texture copy view", "annotation": "const*"},
+                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
+                ]
             }
         ]
     },

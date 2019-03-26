@@ -443,6 +443,22 @@ namespace dawn_native { namespace opengl {
                     glDeleteFramebuffers(1, &readFBO);
                 } break;
 
+                case Command::CopyTextureToTexture: {
+                    CopyTextureToTextureCmd* copy =
+                        mCommands.NextCommand<CopyTextureToTextureCmd>();
+                    auto& src = copy->source;
+                    auto& dst = copy->destination;
+                    auto& copySize = copy->copySize;
+                    Texture* srcTexture = ToBackend(src.texture.Get());
+                    Texture* dstTexture = ToBackend(dst.texture.Get());
+
+                    glCopyImageSubData(srcTexture->GetHandle(), srcTexture->GetGLTarget(),
+                                       src.level, src.origin.x, src.origin.y, src.slice,
+                                       dstTexture->GetHandle(), dstTexture->GetGLTarget(),
+                                       dst.level, dst.origin.x, dst.origin.y, dst.slice,
+                                       copySize.width, copySize.height, 1);
+                } break;
+
                 default: { UNREACHABLE(); } break;
             }
         }

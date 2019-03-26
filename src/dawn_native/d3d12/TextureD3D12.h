@@ -32,7 +32,7 @@ namespace dawn_native { namespace d3d12 {
         ~Texture();
 
         DXGI_FORMAT GetD3D12Format() const;
-        ID3D12Resource* GetD3D12Resource();
+        ID3D12Resource* GetD3D12Resource() const;
 
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                 dawn::TextureUsageBit usage);

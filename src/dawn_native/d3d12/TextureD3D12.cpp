@@ -150,7 +150,7 @@ namespace dawn_native { namespace d3d12 {
         return D3D12TextureFormat(GetFormat());
     }
 
-    ID3D12Resource* Texture::GetD3D12Resource() {
+    ID3D12Resource* Texture::GetD3D12Resource() const {
         return mResourcePtr;
     }
 
