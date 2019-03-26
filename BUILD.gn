@@ -50,7 +50,7 @@ source_set("libdawn_native_headers") {
   public_deps = [
     "${dawn_root}/src/dawn:dawn_headers",
   ]
-  public_configs = [ "${dawn_root}/src/common:dawn_public" ]
+  all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
   sources = [
     "src/include/dawn_native/DawnNative.h",
     "src/include/dawn_native/dawn_native_export.h",

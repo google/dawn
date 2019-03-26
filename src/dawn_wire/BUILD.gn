@@ -27,7 +27,7 @@ source_set("libdawn_wire_headers") {
   public_deps = [
     "${dawn_root}/src/dawn:dawn_headers",
   ]
-  public_configs = [ "${dawn_root}/src/common:dawn_public" ]
+  all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
   sources = [
     "${dawn_root}/src/include/dawn_wire/Wire.h",
     "${dawn_root}/src/include/dawn_wire/WireClient.h",
