@@ -55,8 +55,8 @@ namespace dawn_native {
 
             // TODO(cwallez@chromium.org): Check the depth bound differently for 2D arrays and 3D
             // textures
-            if (textureCopy.origin.z != 0 || copySize.depth != 1) {
-                return DAWN_VALIDATION_ERROR("No support for z != 0 and depth != 1 for now");
+            if (textureCopy.origin.z != 0 || copySize.depth > 1) {
+                return DAWN_VALIDATION_ERROR("No support for z != 0 and depth > 1 for now");
             }
 
             return {};

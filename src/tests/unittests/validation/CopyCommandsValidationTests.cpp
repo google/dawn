@@ -288,6 +288,9 @@ TEST_F(CopyCommandTest_B2T, Success) {
         // An empty copy
         TestB2TCopy(utils::Expectation::Success, source, 0, 0, 0, destination, 0, 0, {0, 0, 0},
                     {0, 0, 1});
+        // An empty copy with depth = 0
+        TestB2TCopy(utils::Expectation::Success, source, 0, 0, 0, destination, 0, 0, {0, 0, 0},
+                    {0, 0, 0});
         // An empty copy touching the end of the buffer
         TestB2TCopy(utils::Expectation::Success, source, bufferSize, 0, 0, destination, 0, 0,
                     {0, 0, 0}, {0, 0, 1});
@@ -366,9 +369,9 @@ TEST_F(CopyCommandTest_B2T, ZDepthConstraintFor2DTextures) {
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 0, 0, {0, 0, 1},
                 {0, 0, 1});
 
-    // Depth=0 on an empty copy still errors
+    // Depth > 1 on an empty copy still errors
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 0, 0, {0, 0, 0},
-                {0, 0, 0});
+                {0, 0, 2});
 }
 
 // Test B2T copies with incorrect buffer usage
@@ -549,6 +552,9 @@ TEST_F(CopyCommandTest_T2B, Success) {
         // An empty copy
         TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0, 0,
                     {0, 0, 1});
+        // An empty copy with depth = 0
+        TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0, 0,
+                    {0, 0, 0});
         // An empty copy touching the end of the buffer
         TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, bufferSize,
                     0, 0, {0, 0, 1});
@@ -623,9 +629,9 @@ TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 1}, destination, 0, 0, 0,
                 {0, 0, 1});
 
-    // Depth=0 on an empty copy still errors
+    // Depth > 1 on an empty copy still errors
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, 0,
-                {0, 0, 0});
+                {0, 0, 2});
 }
 
 // Test T2B copies with incorrect buffer usage
@@ -801,6 +807,10 @@ TEST_F(CopyCommandTest_T2T, Success) {
         TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0,
                     {0, 0, 0}, {0, 0, 1});
 
+        // An empty copy with depth = 0
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {0, 0, 0});
+
         // An empty copy touching the side of the source texture
         TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 0,
                     {16, 16, 0}, {0, 0, 1});
@@ -893,9 +903,9 @@ TEST_F(CopyCommandTest_T2T, 2DTextureDepthConstraints) {
     TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 1},
                 {0, 0, 1});
 
-    // Empty copy with depth = 0 fails
+    // Empty copy with depth > 1 fails
     TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 0},
-                {0, 0, 0});
+                {0, 0, 2});
 }
 
 TEST_F(CopyCommandTest_T2T, 2DTextureDepthStencil) {
