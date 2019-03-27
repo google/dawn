@@ -54,6 +54,12 @@ namespace dawn_native { namespace opengl {
         // updated.
         spirv_cross::CompilerGLSL::Options options;
 
+        // The range of Z-coordinate in the clipping volume of OpenGL is [-w, w], while it is [0, w]
+        // in D3D12, Metal and Vulkan, so we should normalize it in shaders in all backends.
+        // See the documentation of spirv_cross::CompilerGLSL::Options::vertex::fixup_clipspace for
+        // more details.
+        options.vertex.fixup_clipspace = true;
+
         // TODO(cwallez@chromium.org): discover the backing context version and use that.
 #if defined(DAWN_PLATFORM_APPLE)
         options.version = 410;

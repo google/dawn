@@ -640,6 +640,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/BasicTests.cpp",
     "src/tests/end2end/BindGroupTests.cpp",
     "src/tests/end2end/BufferTests.cpp",
+    "src/tests/end2end/ClipSpaceTests.cpp",
     "src/tests/end2end/ColorStateTests.cpp",
     "src/tests/end2end/ComputeCopyStorageBufferTests.cpp",
     "src/tests/end2end/CopyTests.cpp",

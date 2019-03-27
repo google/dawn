@@ -106,6 +106,15 @@ namespace dawn_native { namespace opengl {
             }
         }
 
+        GLint GetStencilMaskFromStencilFormat(dawn::TextureFormat depthStencilFormat) {
+            switch (depthStencilFormat) {
+                case dawn::TextureFormat::D32FloatS8Uint:
+                    return 0xFF;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
         // Push constants are implemented using OpenGL uniforms, however they aren't part of the
         // global OpenGL state but are part of the program state instead. This means that we have to
         // reapply push constants on pipeline change.
@@ -610,6 +619,14 @@ namespace dawn_native { namespace opengl {
                                     (attachmentInfo.depthLoadOp == dawn::LoadOp::Clear);
                 bool doStencilClear = TextureFormatHasStencil(attachmentFormat) &&
                                       (attachmentInfo.stencilLoadOp == dawn::LoadOp::Clear);
+
+                if (doDepthClear) {
+                    glDepthMask(GL_TRUE);
+                }
+                if (doStencilClear) {
+                    glStencilMask(GetStencilMaskFromStencilFormat(attachmentFormat));
+                }
+
                 if (doDepthClear && doStencilClear) {
                     glClearBufferfi(GL_DEPTH_STENCIL, 0, attachmentInfo.clearDepth,
                                     attachmentInfo.clearStencil);

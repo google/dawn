@@ -37,7 +37,6 @@ namespace dawn_native { namespace d3d12 {
         // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to be
         // updated.
         spirv_cross::CompilerGLSL::Options options_glsl;
-        options_glsl.vertex.fixup_clipspace = true;
         options_glsl.vertex.flip_vert_y = true;
         compiler.set_common_options(options_glsl);
 
