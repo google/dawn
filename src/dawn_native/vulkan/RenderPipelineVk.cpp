@@ -16,7 +16,6 @@
 
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
-#include "dawn_native/vulkan/InputStateVk.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/RenderPassCache.h"
 #include "dawn_native/vulkan/ShaderModuleVk.h"
@@ -25,6 +24,84 @@
 namespace dawn_native { namespace vulkan {
 
     namespace {
+
+        VkVertexInputRate VulkanInputRate(dawn::InputStepMode stepMode) {
+            switch (stepMode) {
+                case dawn::InputStepMode::Vertex:
+                    return VK_VERTEX_INPUT_RATE_VERTEX;
+                case dawn::InputStepMode::Instance:
+                    return VK_VERTEX_INPUT_RATE_INSTANCE;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        VkFormat VulkanVertexFormat(dawn::VertexFormat format) {
+            switch (format) {
+                case dawn::VertexFormat::UChar2:
+                    return VK_FORMAT_R8G8_UINT;
+                case dawn::VertexFormat::UChar4:
+                    return VK_FORMAT_R8G8B8A8_UINT;
+                case dawn::VertexFormat::Char2:
+                    return VK_FORMAT_R8G8_SINT;
+                case dawn::VertexFormat::Char4:
+                    return VK_FORMAT_R8G8B8A8_SINT;
+                case dawn::VertexFormat::UChar2Norm:
+                    return VK_FORMAT_R8G8_UNORM;
+                case dawn::VertexFormat::UChar4Norm:
+                    return VK_FORMAT_R8G8B8A8_UNORM;
+                case dawn::VertexFormat::Char2Norm:
+                    return VK_FORMAT_R8G8_SNORM;
+                case dawn::VertexFormat::Char4Norm:
+                    return VK_FORMAT_R8G8B8A8_SNORM;
+                case dawn::VertexFormat::UShort2:
+                    return VK_FORMAT_R16G16_UINT;
+                case dawn::VertexFormat::UShort4:
+                    return VK_FORMAT_R16G16B16A16_UINT;
+                case dawn::VertexFormat::Short2:
+                    return VK_FORMAT_R16G16_SINT;
+                case dawn::VertexFormat::Short4:
+                    return VK_FORMAT_R16G16B16A16_SINT;
+                case dawn::VertexFormat::UShort2Norm:
+                    return VK_FORMAT_R16G16_UNORM;
+                case dawn::VertexFormat::UShort4Norm:
+                    return VK_FORMAT_R16G16B16A16_UNORM;
+                case dawn::VertexFormat::Short2Norm:
+                    return VK_FORMAT_R16G16_SNORM;
+                case dawn::VertexFormat::Short4Norm:
+                    return VK_FORMAT_R16G16B16A16_SNORM;
+                case dawn::VertexFormat::Half2:
+                    return VK_FORMAT_R16G16_SFLOAT;
+                case dawn::VertexFormat::Half4:
+                    return VK_FORMAT_R16G16B16A16_SFLOAT;
+                case dawn::VertexFormat::Float:
+                    return VK_FORMAT_R32_SFLOAT;
+                case dawn::VertexFormat::Float2:
+                    return VK_FORMAT_R32G32_SFLOAT;
+                case dawn::VertexFormat::Float3:
+                    return VK_FORMAT_R32G32B32_SFLOAT;
+                case dawn::VertexFormat::Float4:
+                    return VK_FORMAT_R32G32B32A32_SFLOAT;
+                case dawn::VertexFormat::UInt:
+                    return VK_FORMAT_R32_UINT;
+                case dawn::VertexFormat::UInt2:
+                    return VK_FORMAT_R32G32_UINT;
+                case dawn::VertexFormat::UInt3:
+                    return VK_FORMAT_R32G32B32_UINT;
+                case dawn::VertexFormat::UInt4:
+                    return VK_FORMAT_R32G32B32A32_UINT;
+                case dawn::VertexFormat::Int:
+                    return VK_FORMAT_R32_SINT;
+                case dawn::VertexFormat::Int2:
+                    return VK_FORMAT_R32G32_SINT;
+                case dawn::VertexFormat::Int3:
+                    return VK_FORMAT_R32G32B32_SINT;
+                case dawn::VertexFormat::Int4:
+                    return VK_FORMAT_R32G32B32A32_SINT;
+                default:
+                    UNREACHABLE();
+            }
+        }
 
         VkPrimitiveTopology VulkanPrimitiveTopology(dawn::PrimitiveTopology topology) {
             switch (topology) {
@@ -218,6 +295,12 @@ namespace dawn_native { namespace vulkan {
             shaderStages[1].pName = descriptor->fragmentStage->entryPoint;
         }
 
+        std::array<VkVertexInputBindingDescription, kMaxVertexInputs> mBindings;
+        std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes> mAttributes;
+        const InputStateDescriptor* inputState = GetInputStateDescriptor();
+        VkPipelineVertexInputStateCreateInfo inputStateCreateInfo =
+            ComputeInputStateDesc(inputState, &mBindings, &mAttributes);
+
         VkPipelineInputAssemblyStateCreateInfo inputAssembly;
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         inputAssembly.pNext = nullptr;
@@ -341,7 +424,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
         createInfo.stageCount = 2;
         createInfo.pStages = shaderStages;
-        createInfo.pVertexInputState = ToBackend(GetInputState())->GetCreateInfo();
+        createInfo.pVertexInputState = &inputStateCreateInfo;
         createInfo.pInputAssemblyState = &inputAssembly;
         createInfo.pTessellationState = nullptr;
         createInfo.pViewportState = &viewport;
@@ -360,6 +443,49 @@ namespace dawn_native { namespace vulkan {
                                                &createInfo, nullptr, &mHandle) != VK_SUCCESS) {
             ASSERT(false);
         }
+    }
+
+    VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeInputStateDesc(
+        const InputStateDescriptor* inputState,
+        std::array<VkVertexInputBindingDescription, kMaxVertexInputs>* mBindings,
+        std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes>* mAttributes) {
+        // Fill in the "binding info" that will be chained in the create info
+        uint32_t bindingCount = 0;
+        for (uint32_t i : IterateBitSet(GetInputsSetMask())) {
+            const auto& bindingInfo = GetInput(i);
+
+            auto& bindingDesc = (*mBindings)[bindingCount];
+            bindingDesc.binding = i;
+            bindingDesc.stride = bindingInfo.stride;
+            bindingDesc.inputRate = VulkanInputRate(bindingInfo.stepMode);
+
+            bindingCount++;
+        }
+
+        // Fill in the "attribute info" that will be chained in the create info
+        uint32_t attributeCount = 0;
+        for (uint32_t i : IterateBitSet(GetAttributesSetMask())) {
+            const auto& attributeInfo = GetAttribute(i);
+
+            auto& attributeDesc = (*mAttributes)[attributeCount];
+            attributeDesc.location = i;
+            attributeDesc.binding = attributeInfo.inputSlot;
+            attributeDesc.format = VulkanVertexFormat(attributeInfo.format);
+            attributeDesc.offset = attributeInfo.offset;
+
+            attributeCount++;
+        }
+
+        // Build the create info
+        VkPipelineVertexInputStateCreateInfo mCreateInfo;
+        mCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        mCreateInfo.pNext = nullptr;
+        mCreateInfo.flags = 0;
+        mCreateInfo.vertexBindingDescriptionCount = bindingCount;
+        mCreateInfo.pVertexBindingDescriptions = &(*mBindings)[0];
+        mCreateInfo.vertexAttributeDescriptionCount = attributeCount;
+        mCreateInfo.pVertexAttributeDescriptions = &(*mAttributes)[0];
+        return mCreateInfo;
     }
 
     RenderPipeline::~RenderPipeline() {

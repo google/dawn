@@ -19,7 +19,6 @@
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/RenderPipeline.h"
 
@@ -106,7 +105,7 @@ namespace dawn_native {
         if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
             ASSERT(mLastRenderPipeline != nullptr);
 
-            auto requiredInputs = mLastRenderPipeline->GetInputState()->GetInputsSetMask();
+            auto requiredInputs = mLastRenderPipeline->GetInputsSetMask();
             if ((mInputsSet & requiredInputs) == requiredInputs) {
                 mAspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
             }

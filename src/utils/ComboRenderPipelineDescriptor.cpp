@@ -37,6 +37,15 @@ namespace utils {
             cFragmentStage.entryPoint = "main";
         }
 
+        // Set defaults for the input state descriptors.
+        {
+            descriptor->inputState = &cInputState;
+            cInputState.numInputs = 0;
+            cInputState.inputs = nullptr;
+            cInputState.numAttributes = 0;
+            cInputState.attributes = nullptr;
+        }
+
         // Set defaults for the color state descriptors.
         {
             descriptor->colorStateCount = 1;
@@ -75,7 +84,6 @@ namespace utils {
             descriptor->depthStencilState = nullptr;
         }
 
-        descriptor->inputState = device.CreateInputStateBuilder().GetResult();
         descriptor->layout = utils::MakeBasicPipelineLayout(device, nullptr);
     }
 

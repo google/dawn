@@ -25,7 +25,6 @@
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
-#include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/RenderPipeline.h"
@@ -158,9 +157,6 @@ namespace dawn_native {
         }
 
         return result;
-    }
-    InputStateBuilder* DeviceBase::CreateInputStateBuilder() {
-        return new InputStateBuilder(this);
     }
     PipelineLayoutBase* DeviceBase::CreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor) {

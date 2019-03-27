@@ -15,7 +15,6 @@
 #ifndef DAWNNATIVE_RENDERPIPELINE_H_
 #define DAWNNATIVE_RENDERPIPELINE_H_
 
-#include "dawn_native/InputState.h"
 #include "dawn_native/Pipeline.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -31,6 +30,11 @@ namespace dawn_native {
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
+    size_t IndexFormatSize(dawn::IndexFormat format);
+    uint32_t VertexFormatNumComponents(dawn::VertexFormat format);
+    size_t VertexFormatComponentSize(dawn::VertexFormat format);
+    size_t VertexFormatSize(dawn::VertexFormat format);
+
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState);
     bool BlendEnabled(const ColorStateDescriptor* mColorState);
 
@@ -40,10 +44,15 @@ namespace dawn_native {
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
+        const InputStateDescriptor* GetInputStateDescriptor() const;
+        const std::bitset<kMaxVertexAttributes>& GetAttributesSetMask() const;
+        const VertexAttributeDescriptor& GetAttribute(uint32_t location) const;
+        const std::bitset<kMaxVertexInputs>& GetInputsSetMask() const;
+        const VertexInputDescriptor& GetInput(uint32_t slot) const;
+
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot);
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor();
         dawn::IndexFormat GetIndexFormat() const;
-        InputStateBase* GetInputState();
         dawn::PrimitiveTopology GetPrimitiveTopology() const;
 
         std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
@@ -54,14 +63,20 @@ namespace dawn_native {
         // A pipeline can be used in a render pass if its attachment info matches the actual
         // attachments in the render pass. This returns whether it is the case.
         bool IsCompatibleWith(const BeginRenderPassCmd* renderPassCmd) const;
+        std::bitset<kMaxVertexAttributes> GetAttributesUsingInput(uint32_t slot) const;
+        std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexInputs> attributesUsingInput;
 
       private:
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        DepthStencilStateDescriptor mDepthStencilState;
         dawn::IndexFormat mIndexFormat;
-        Ref<InputStateBase> mInputState;
+        InputStateDescriptor mInputState;
+        std::bitset<kMaxVertexAttributes> mAttributesSetMask;
+        std::array<VertexAttributeDescriptor, kMaxVertexAttributes> mAttributeInfos;
+        std::bitset<kMaxVertexInputs> mInputsSetMask;
+        std::array<VertexInputDescriptor, kMaxVertexInputs> mInputInfos;
         dawn::PrimitiveTopology mPrimitiveTopology;
+        DepthStencilStateDescriptor mDepthStencilState;
         std::array<ColorStateDescriptor, kMaxColorAttachments> mColorStates;
 
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;

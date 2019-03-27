@@ -449,10 +449,6 @@
                 "returns": "command encoder"
             },
             {
-                "name": "create input state builder",
-                "returns": "input state builder"
-            },
-            {
                 "name": "create compute pipeline",
                 "returns": "compute pipeline",
                 "args": [
@@ -622,28 +618,14 @@
             {"name": "step mode", "type": "input step mode"}
         ]
     },
-    "input state": {
-        "category": "object"
-    },
-    "input state builder": {
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "input state"
-            },
-            {
-                "name": "set attribute",
-                "args": [
-                    {"name": "attribute", "type": "vertex attribute descriptor", "annotation": "const*"}
-                ]
-            },
-            {
-                "name": "set input",
-                "args": [
-                    {"name": "input", "type": "vertex input descriptor", "annotation": "const*"}
-                ]
-            }
+    "input state descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "num attributes", "type": "uint32_t"},
+            {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "num attributes"},
+            {"name": "num inputs", "type": "uint32_t"},
+            {"name": "inputs", "type": "vertex input descriptor", "annotation": "const*", "length": "num inputs"}
         ]
     },
     "input step mode": {
@@ -881,7 +863,7 @@
             {"name": "layout", "type": "pipeline layout"},
             {"name": "vertex stage", "type": "pipeline stage descriptor", "annotation": "const*"},
             {"name": "fragment stage", "type": "pipeline stage descriptor", "annotation": "const*"},
-            {"name": "input state", "type": "input state"},
+            {"name": "input state", "type": "input state descriptor", "annotation": "const*"},
             {"name": "index format", "type": "index format"},
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "sample count", "type": "uint32_t"},

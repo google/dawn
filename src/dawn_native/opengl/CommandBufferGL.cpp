@@ -21,7 +21,6 @@
 #include "dawn_native/opengl/ComputePipelineGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/Forward.h"
-#include "dawn_native/opengl/InputStateGL.h"
 #include "dawn_native/opengl/PersistentPipelineStateGL.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
 #include "dawn_native/opengl/RenderPipelineGL.h"
@@ -212,15 +211,14 @@ namespace dawn_native { namespace opengl {
             }
 
             void OnSetPipeline(RenderPipelineBase* pipeline) {
-                InputStateBase* inputState = pipeline->GetInputState();
-                if (mLastInputState == inputState) {
+                if (mLastPipeline == pipeline) {
                     return;
                 }
 
                 mIndexBufferDirty = true;
-                mDirtyVertexBuffers |= inputState->GetInputsSetMask();
+                mDirtyVertexBuffers |= pipeline->GetInputsSetMask();
 
-                mLastInputState = ToBackend(inputState);
+                mLastPipeline = pipeline;
             }
 
             void Apply() {
@@ -230,15 +228,15 @@ namespace dawn_native { namespace opengl {
                 }
 
                 for (uint32_t slot :
-                     IterateBitSet(mDirtyVertexBuffers & mLastInputState->GetInputsSetMask())) {
+                     IterateBitSet(mDirtyVertexBuffers & mLastPipeline->GetInputsSetMask())) {
                     for (uint32_t location :
-                         IterateBitSet(mLastInputState->GetAttributesUsingInput(slot))) {
-                        auto attribute = mLastInputState->GetAttribute(location);
+                         IterateBitSet(mLastPipeline->GetAttributesUsingInput(slot))) {
+                        auto attribute = mLastPipeline->GetAttribute(location);
 
                         GLuint buffer = mVertexBuffers[slot]->GetHandle();
                         uint32_t offset = mVertexBufferOffsets[slot];
 
-                        auto input = mLastInputState->GetInput(slot);
+                        auto input = mLastPipeline->GetInput(slot);
                         auto components = VertexFormatNumComponents(attribute.format);
                         auto formatType = VertexFormatType(attribute.format);
 
@@ -262,7 +260,7 @@ namespace dawn_native { namespace opengl {
             std::array<Buffer*, kMaxVertexInputs> mVertexBuffers;
             std::array<uint32_t, kMaxVertexInputs> mVertexBufferOffsets;
 
-            InputState* mLastInputState = nullptr;
+            RenderPipelineBase* mLastPipeline = nullptr;
         };
 
         // Handles SetBindGroup commands with the specifics of translating to OpenGL texture and

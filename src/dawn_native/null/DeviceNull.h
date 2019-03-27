@@ -22,7 +22,6 @@
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Device.h"
-#include "dawn_native/InputState.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/RenderPipeline.h"
@@ -44,7 +43,6 @@ namespace dawn_native { namespace null {
     class CommandBuffer;
     using ComputePipeline = ComputePipelineBase;
     class Device;
-    using InputState = InputStateBase;
     using PipelineLayout = PipelineLayoutBase;
     class Queue;
     using RenderPipeline = RenderPipelineBase;
@@ -62,7 +60,6 @@ namespace dawn_native { namespace null {
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;
         using DeviceType = Device;
-        using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
         using RenderPipelineType = RenderPipeline;
@@ -89,7 +86,6 @@ namespace dawn_native { namespace null {
         ~Device();
 
         CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) override;
-        InputStateBase* CreateInputState(InputStateBuilder* builder) override;
 
         Serial GetCompletedCommandSerial() const final override;
         Serial GetLastSubmittedCommandSerial() const final override;

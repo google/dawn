@@ -26,7 +26,6 @@ namespace dawn_native { namespace d3d12 {
     class CommandBuffer;
     class ComputePipeline;
     class Device;
-    class InputState;
     class PipelineLayout;
     class Queue;
     class RenderPipeline;
@@ -45,7 +44,6 @@ namespace dawn_native { namespace d3d12 {
         using CommandBufferType = CommandBuffer;
         using ComputePipelineType = ComputePipeline;
         using DeviceType = Device;
-        using InputStateType = InputState;
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
         using RenderPipelineType = RenderPipeline;

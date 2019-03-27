@@ -36,6 +36,8 @@ namespace dawn_native { namespace metal {
         id<MTLDepthStencilState> GetMTLDepthStencilState();
 
       private:
+        MTLVertexDescriptor* MakeVertexDesc();
+
         MTLIndexType mMtlIndexType;
         MTLPrimitiveType mMtlPrimitiveTopology;
         id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;

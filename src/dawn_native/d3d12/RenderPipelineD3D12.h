@@ -32,6 +32,9 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12PipelineState> GetPipelineState();
 
       private:
+        D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(
+            std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors);
+
         D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
         ComPtr<ID3D12PipelineState> mPipelineState;
     };

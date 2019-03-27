@@ -122,9 +122,6 @@ void init() {
     input.stride = 4 * sizeof(float);
     input.stepMode = dawn::InputStepMode::Vertex;
 
-    auto inputState =
-        device.CreateInputStateBuilder().SetAttribute(&attribute).SetInput(&input).GetResult();
-
     auto bgl = utils::MakeBindGroupLayout(
         device, {
                     {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
@@ -139,7 +136,10 @@ void init() {
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
     descriptor.cVertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.inputState = inputState;
+    descriptor.cInputState.numAttributes = 1;
+    descriptor.cInputState.attributes = &attribute;
+    descriptor.cInputState.numInputs = 1;
+    descriptor.cInputState.inputs = &input;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
     descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
     descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();

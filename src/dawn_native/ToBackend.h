@@ -59,11 +59,6 @@ namespace dawn_native {
     };
 
     template <typename BackendTraits>
-    struct ToBackendTraits<InputStateBase, BackendTraits> {
-        using BackendType = typename BackendTraits::InputStateType;
-    };
-
-    template <typename BackendTraits>
     struct ToBackendTraits<PipelineLayoutBase, BackendTraits> {
         using BackendType = typename BackendTraits::PipelineLayoutType;
     };

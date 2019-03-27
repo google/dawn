@@ -28,8 +28,6 @@ namespace dawn_native {
     class CommandEncoderBase;
     class ComputePassEncoderBase;
     class FenceBase;
-    class InputStateBase;
-    class InputStateBuilder;
     class InstanceBase;
     class PipelineBase;
     class PipelineLayoutBase;

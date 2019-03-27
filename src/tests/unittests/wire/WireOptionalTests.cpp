@@ -86,15 +86,12 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     colorStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
 
     // Create the input state
-    DawnInputStateBuilder inputStateBuilder = dawnDeviceCreateInputStateBuilder(device);
-    DawnInputStateBuilder apiInputStateBuilder = api.GetNewInputStateBuilder();
-    EXPECT_CALL(api, DeviceCreateInputStateBuilder(apiDevice))
-        .WillOnce(Return(apiInputStateBuilder));
-
-    DawnInputState inputState = dawnInputStateBuilderGetResult(inputStateBuilder);
-    DawnInputState apiInputState = api.GetNewInputState();
-    EXPECT_CALL(api, InputStateBuilderGetResult(apiInputStateBuilder))
-        .WillOnce(Return(apiInputState));
+    DawnInputStateDescriptor inputState;
+    inputState.nextInChain = nullptr;
+    inputState.numInputs = 0;
+    inputState.inputs = nullptr;
+    inputState.numAttributes = 0;
+    inputState.attributes = nullptr;
 
     // Create the depth-stencil state
     DawnStencilStateFaceDescriptor stencilFace;
@@ -144,7 +141,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
 
     pipelineDescriptor.sampleCount = 1;
     pipelineDescriptor.layout = layout;
-    pipelineDescriptor.inputState = inputState;
+    pipelineDescriptor.inputState = &inputState;
     pipelineDescriptor.indexFormat = DAWN_INDEX_FORMAT_UINT32;
     pipelineDescriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
@@ -191,8 +188,6 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
         .WillOnce(Return(nullptr));
 
     EXPECT_CALL(api, ShaderModuleRelease(apiVsModule));
-    EXPECT_CALL(api, InputStateBuilderRelease(apiInputStateBuilder));
-    EXPECT_CALL(api, InputStateRelease(apiInputState));
     EXPECT_CALL(api, PipelineLayoutRelease(apiLayout));
 
     FlushClient();

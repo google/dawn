@@ -114,48 +114,41 @@ void initRender() {
         }
     )");
 
-    dawn::VertexAttributeDescriptor attribute1;
-    attribute1.shaderLocation = 0;
-    attribute1.inputSlot = 0;
-    attribute1.offset = offsetof(Particle, pos);
-    attribute1.format = dawn::VertexFormat::Float2;
+    dawn::VertexAttributeDescriptor attribute[3];
+    attribute[0].shaderLocation = 0;
+    attribute[0].inputSlot = 0;
+    attribute[0].offset = offsetof(Particle, pos);
+    attribute[0].format = dawn::VertexFormat::Float2;
 
-    dawn::VertexAttributeDescriptor attribute2;
-    attribute2.shaderLocation = 1;
-    attribute2.inputSlot = 0;
-    attribute2.offset = offsetof(Particle, vel);
-    attribute2.format = dawn::VertexFormat::Float2;
+    attribute[1].shaderLocation = 1;
+    attribute[1].inputSlot = 0;
+    attribute[1].offset = offsetof(Particle, vel);
+    attribute[1].format = dawn::VertexFormat::Float2;
 
-    dawn::VertexInputDescriptor input1;
-    input1.inputSlot = 0;
-    input1.stride = sizeof(Particle);
-    input1.stepMode = dawn::InputStepMode::Instance;
+    attribute[2].shaderLocation = 2;
+    attribute[2].inputSlot = 1;
+    attribute[2].offset = 0;
+    attribute[2].format = dawn::VertexFormat::Float2;
 
-    dawn::VertexAttributeDescriptor attribute3;
-    attribute3.shaderLocation = 2;
-    attribute3.inputSlot = 1;
-    attribute3.offset = 0;
-    attribute3.format = dawn::VertexFormat::Float2;
+    dawn::VertexInputDescriptor input[2];
+    input[0].inputSlot = 0;
+    input[0].stride = sizeof(Particle);
+    input[0].stepMode = dawn::InputStepMode::Instance;
 
-    dawn::VertexInputDescriptor input2;
-    input2.inputSlot = 1;
-    input2.stride = sizeof(glm::vec2);
-    input2.stepMode = dawn::InputStepMode::Vertex;
-
-    dawn::InputState inputState = device.CreateInputStateBuilder()
-                                      .SetAttribute(&attribute1)
-                                      .SetAttribute(&attribute2)
-                                      .SetInput(&input1)
-                                      .SetAttribute(&attribute3)
-                                      .SetInput(&input2)
-                                      .GetResult();
+    input[1].inputSlot = 1;
+    input[1].stride = sizeof(glm::vec2);
+    input[1].stepMode = dawn::InputStepMode::Vertex;
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.cVertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.inputState = inputState;
+
+    descriptor.cInputState.numAttributes = 3;
+    descriptor.cInputState.attributes = attribute;
+    descriptor.cInputState.numInputs = 2;
+    descriptor.cInputState.inputs = input;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
     descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
     descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();

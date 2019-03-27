@@ -31,12 +31,17 @@ namespace dawn_native { namespace opengl {
     class RenderPipeline : public RenderPipelineBase, public PipelineGL {
       public:
         RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
+        ~RenderPipeline();
 
         GLenum GetGLPrimitiveTopology() const;
 
         void ApplyNow(PersistentPipelineState& persistentPipelineState);
 
       private:
+        void CreateVAOForInputState(const InputStateDescriptor* inputState);
+
+        // TODO(yunchao.he@intel.com): vao need to be deduplicated between pipelines.
+        GLuint mVertexArrayObject;
         GLenum mGlPrimitiveTopology;
     };
 

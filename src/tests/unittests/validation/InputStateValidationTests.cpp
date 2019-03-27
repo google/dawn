@@ -25,9 +25,13 @@ constexpr static dawn::VertexInputDescriptor kBaseInput = {
 
 class InputStateTest : public ValidationTest {
     protected:
-        void CreatePipeline(bool success, const dawn::InputState& inputState, std::string vertexSource) {
-            dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
-            dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+      void CreatePipeline(bool success,
+                          const dawn::InputStateDescriptor* state,
+                          std::string vertexSource) {
+          dawn::ShaderModule vsModule =
+              utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
+          dawn::ShaderModule fsModule =
+              utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
@@ -35,26 +39,25 @@ class InputStateTest : public ValidationTest {
                 }
             )");
 
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.cVertexStage.module = vsModule;
-            descriptor.cFragmentStage.module = fsModule;
-            descriptor.inputState = inputState;
-            descriptor.cColorStates[0]->format = dawn::TextureFormat::R8G8B8A8Unorm;
+          utils::ComboRenderPipelineDescriptor descriptor(device);
+          descriptor.cVertexStage.module = vsModule;
+          descriptor.cFragmentStage.module = fsModule;
+          if (state) {
+              descriptor.inputState = state;
+          }
+          descriptor.cColorStates[0]->format = dawn::TextureFormat::R8G8B8A8Unorm;
 
-            if (!success) {
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
-            } else {
-                device.CreateRenderPipeline(&descriptor);
-            }
-        }
+          if (!success) {
+              ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+          } else {
+              device.CreateRenderPipeline(&descriptor);
+          }
+      }
 };
 
 // Check an empty input state is valid
 TEST_F(InputStateTest, EmptyIsOk) {
-    dawn::InputState state = AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .GetResult();
-
-    CreatePipeline(true, state, R"(
+    CreatePipeline(true, nullptr, R"(
         #version 450
         void main() {
             gl_Position = vec4(0.0);
@@ -64,31 +67,30 @@ TEST_F(InputStateTest, EmptyIsOk) {
 
 // Check validation that pipeline vertex inputs are backed by attributes in the input state
 TEST_F(InputStateTest, PipelineCompatibility) {
-    dawn::VertexAttributeDescriptor attribute1;
-    attribute1.shaderLocation = 0;
-    attribute1.inputSlot = 0;
-    attribute1.offset = 0;
-    attribute1.format = dawn::VertexFormat::Float;
+    dawn::VertexAttributeDescriptor attribute[2];
+    attribute[0].shaderLocation = 0;
+    attribute[0].inputSlot = 0;
+    attribute[0].offset = 0;
+    attribute[0].format = dawn::VertexFormat::Float;
 
-    dawn::VertexAttributeDescriptor attribute2;
-    attribute2.shaderLocation = 1;
-    attribute2.inputSlot = 0;
-    attribute2.offset = sizeof(float);
-    attribute2.format = dawn::VertexFormat::Float;
+    attribute[1].shaderLocation = 1;
+    attribute[1].inputSlot = 0;
+    attribute[1].offset = sizeof(float);
+    attribute[1].format = dawn::VertexFormat::Float;
 
     dawn::VertexInputDescriptor input;
     input.inputSlot = 0;
     input.stride = 2 * sizeof(float);
     input.stepMode = dawn::InputStepMode::Vertex;
 
-    dawn::InputState state = AssertWillBeSuccess(device.CreateInputStateBuilder())
-                                 .SetInput(&input)
-                                 .SetAttribute(&attribute1)
-                                 .SetAttribute(&attribute2)
-                                 .GetResult();
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &input;
+    state.numAttributes = 2;
+    state.attributes = attribute;
 
     // Control case: pipeline with one input per attribute
-    CreatePipeline(true, state, R"(
+    CreatePipeline(true, &state, R"(
         #version 450
         layout(location = 0) in vec4 a;
         layout(location = 1) in vec4 b;
@@ -98,7 +100,7 @@ TEST_F(InputStateTest, PipelineCompatibility) {
     )");
 
     // Check it is valid for the pipeline to use a subset of the InputState
-    CreatePipeline(true, state, R"(
+    CreatePipeline(true, &state, R"(
         #version 450
         layout(location = 0) in vec4 a;
         void main() {
@@ -107,7 +109,7 @@ TEST_F(InputStateTest, PipelineCompatibility) {
     )");
 
     // Check for an error when the pipeline uses an attribute not in the input state
-    CreatePipeline(false, state, R"(
+    CreatePipeline(false, &state, R"(
         #version 450
         layout(location = 2) in vec4 a;
         void main() {
@@ -119,7 +121,17 @@ TEST_F(InputStateTest, PipelineCompatibility) {
 // Test that a stride of 0 is valid
 TEST_F(InputStateTest, StrideZero) {
     // Works ok without attributes
-    AssertWillBeSuccess(device.CreateInputStateBuilder()).SetInput(&kBaseInput).GetResult();
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &kBaseInput;
+    state.numAttributes = 0;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Works ok with attributes at a large-ish offset
     dawn::VertexAttributeDescriptor attribute;
@@ -128,22 +140,42 @@ TEST_F(InputStateTest, StrideZero) {
     attribute.offset = 128;
     attribute.format = dawn::VertexFormat::Float;
 
-    AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    state.numAttributes = 1;
+    state.attributes = &attribute;
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Test that we cannot set an already set input
 TEST_F(InputStateTest, AlreadySetInput) {
     // Control case
-    AssertWillBeSuccess(device.CreateInputStateBuilder()).SetInput(&kBaseInput).GetResult();
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &kBaseInput;
+    state.numAttributes = 0;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Oh no, input 0 is set twice
-    AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetInput(&kBaseInput)
-        .GetResult();
+    dawn::VertexInputDescriptor vertexInput[2] = {kBaseInput, kBaseInput};
+    state.numInputs = 2;
+    state.inputs = vertexInput;
+
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Check out of bounds condition on input slot
@@ -154,11 +186,26 @@ TEST_F(InputStateTest, SetInputSlotOutOfBounds) {
     input.stride = 0;
     input.stepMode = dawn::InputStepMode::Vertex;
 
-    AssertWillBeSuccess(device.CreateInputStateBuilder()).SetInput(&input).GetResult();
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &input;
+    state.numAttributes = 0;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Test input slot OOB
     input.inputSlot = kMaxVertexInputs;
-    AssertWillBeError(device.CreateInputStateBuilder()).SetInput(&input).GetResult();
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Check out of bounds condition on input stride
@@ -168,11 +215,27 @@ TEST_F(InputStateTest, SetInputStrideOutOfBounds) {
     input.inputSlot = 0;
     input.stride = kMaxVertexInputStride;
     input.stepMode = dawn::InputStepMode::Vertex;
-    AssertWillBeSuccess(device.CreateInputStateBuilder()).SetInput(&input).GetResult();
+
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &input;
+    state.numAttributes = 0;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Test input stride OOB
     input.stride = kMaxVertexInputStride + 1;
-    AssertWillBeError(device.CreateInputStateBuilder()).SetInput(&input).GetResult();
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Test that we cannot set an already set attribute
@@ -184,17 +247,30 @@ TEST_F(InputStateTest, AlreadySetAttribute) {
     attribute.offset = 0;
     attribute.format = dawn::VertexFormat::Float;
 
-    AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &kBaseInput;
+    state.numAttributes = 1;
+    state.attributes = &attribute;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Oh no, attribute 0 is set twice
-    AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .SetAttribute(&attribute)
-        .GetResult();
+    dawn::VertexAttributeDescriptor vertexAttribute[2] = {attribute, attribute};
+    state.numAttributes = 2;
+    state.attributes = vertexAttribute;
+
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Check out of bounds condition on attribute shader location
@@ -206,17 +282,27 @@ TEST_F(InputStateTest, SetAttributeLocationOutOfBounds) {
     attribute.offset = 0;
     attribute.format = dawn::VertexFormat::Float;
 
-    AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &kBaseInput;
+    state.numAttributes = 1;
+    state.attributes = &attribute;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Test attribute location OOB
     attribute.shaderLocation = kMaxVertexAttributes;
-    AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Check attribute offset out of bounds
@@ -227,17 +313,28 @@ TEST_F(InputStateTest, SetAttributeOffsetOutOfBounds) {
     attribute.inputSlot = 0;
     attribute.offset = kMaxVertexAttributeEnd - sizeof(dawn::VertexFormat::Float);
     attribute.format = dawn::VertexFormat::Float;
-    AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &kBaseInput;
+    state.numAttributes = 1;
+    state.attributes = &attribute;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Test attribute offset out of bounds
     attribute.offset = kMaxVertexAttributeEnd - 1;
-    AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Check attribute offset overflow
@@ -247,10 +344,19 @@ TEST_F(InputStateTest, SetAttributeOffsetOverflow) {
     attribute.inputSlot = 0;
     attribute.offset = std::numeric_limits<uint32_t>::max();
     attribute.format = dawn::VertexFormat::Float;
-    AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &kBaseInput;
+    state.numAttributes = 1;
+    state.attributes = &attribute;
+
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Check that all attributes must be backed by an input
@@ -262,17 +368,27 @@ TEST_F(InputStateTest, RequireInputForAttribute) {
     attribute.offset = 0;
     attribute.format = dawn::VertexFormat::Float;
 
-    AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &kBaseInput;
+    state.numAttributes = 1;
+    state.attributes = &attribute;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Attribute 0 uses input 1 which doesn't exist
     attribute.inputSlot = 1;
-    AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }
 
 // Check OOB checks for an attribute's input
@@ -284,15 +400,25 @@ TEST_F(InputStateTest, SetAttributeOOBCheckForInputs) {
     attribute.offset = 0;
     attribute.format = dawn::VertexFormat::Float;
 
-    AssertWillBeSuccess(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    dawn::InputStateDescriptor state;
+    state.numInputs = 1;
+    state.inputs = &kBaseInput;
+    state.numAttributes = 1;
+    state.attributes = &attribute;
+
+    CreatePipeline(true, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 
     // Could crash if we didn't check for OOB
     attribute.inputSlot = 1000000;
-    AssertWillBeError(device.CreateInputStateBuilder())
-        .SetInput(&kBaseInput)
-        .SetAttribute(&attribute)
-        .GetResult();
+    CreatePipeline(false, &state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
 }

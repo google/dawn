@@ -237,7 +237,11 @@ namespace {
 
         auto oFSModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, hasTexture ? oFSSourceTextured : oFSSourceUntextured);
 
-        dawn::InputStateBuilder builder = device.CreateInputStateBuilder();
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        dawn::VertexAttributeDescriptor attributes[kMaxVertexAttributes];
+        dawn::VertexInputDescriptor inputs[kMaxVertexInputs];
+        uint32_t numAttributes = 0;
+        uint32_t numInputs = 0;
         std::bitset<3> slotsSet;
         for (const auto& a : iTechnique.attributes) {
             const auto iAttributeName = a.first;
@@ -247,60 +251,58 @@ namespace {
                 fprintf(stderr, "unsupported technique parameter type %d\n", iParameter.type);
                 continue;
             }
-            dawn::VertexAttributeDescriptor attribute;
-            attribute.offset = 0;
-            attribute.format = format;
-            dawn::VertexInputDescriptor input;
-            input.stepMode = dawn::InputStepMode::Vertex;
+            attributes[numAttributes].offset = 0;
+            attributes[numAttributes].format = format;
+            inputs[numInputs].stepMode = dawn::InputStepMode::Vertex;
 
             if (iParameter.semantic == "POSITION") {
-                attribute.shaderLocation = 0;
-                attribute.inputSlot = 0;
-                input.inputSlot = 0;
-                input.stride = static_cast<uint32_t>(stridePos);
-                builder.SetAttribute(&attribute);
-                builder.SetInput(&input);
+                attributes[numAttributes].shaderLocation = 0;
+                attributes[numAttributes].inputSlot = 0;
+                inputs[numInputs].inputSlot = 0;
+                inputs[numInputs].stride = static_cast<uint32_t>(stridePos);
+                numAttributes++;
+                numInputs++;
                 slotsSet.set(0);
             } else if (iParameter.semantic == "NORMAL") {
-                attribute.shaderLocation = 1;
-                attribute.inputSlot = 1;
-                input.inputSlot = 1;
-                input.stride = static_cast<uint32_t>(strideNor);
-                builder.SetAttribute(&attribute);
-                builder.SetInput(&input);
+                attributes[numAttributes].shaderLocation = 1;
+                attributes[numAttributes].inputSlot = 1;
+                inputs[numInputs].inputSlot = 1;
+                inputs[numInputs].stride = static_cast<uint32_t>(strideNor);
+                numAttributes++;
+                numInputs++;
                 slotsSet.set(1);
             } else if (iParameter.semantic == "TEXCOORD_0") {
-                attribute.shaderLocation = 2;
-                attribute.inputSlot = 2;
-                input.inputSlot = 2;
-                input.stride = static_cast<uint32_t>(strideTxc);
-                builder.SetAttribute(&attribute);
-                builder.SetInput(&input);
+                attributes[numAttributes].shaderLocation = 2;
+                attributes[numAttributes].inputSlot = 2;
+                inputs[numInputs].inputSlot = 2;
+                inputs[numInputs].stride = static_cast<uint32_t>(strideTxc);
+                numAttributes++;
+                numInputs++;
                 slotsSet.set(2);
             } else {
                 fprintf(stderr, "unsupported technique attribute semantic %s\n", iParameter.semantic.c_str());
             }
-            // TODO: use iAttributeParameter.node?
         }
         for (uint32_t i = 0; i < slotsSet.size(); i++) {
             if (slotsSet[i]) {
                 continue;
             }
-            dawn::VertexAttributeDescriptor attribute;
-            attribute.offset = 0;
-            attribute.shaderLocation = i;
-            attribute.inputSlot = i;
-            attribute.format = dawn::VertexFormat::Float4;
+            attributes[numAttributes].offset = 0;
+            attributes[numAttributes].shaderLocation = i;
+            attributes[numAttributes].inputSlot = i;
+            attributes[numAttributes].format = dawn::VertexFormat::Float4;
 
-            dawn::VertexInputDescriptor input;
-            input.inputSlot = i;
-            input.stride = 0;
-            input.stepMode = dawn::InputStepMode::Vertex;
+            inputs[numInputs].inputSlot = i;
+            inputs[numInputs].stride = 0;
+            inputs[numInputs].stepMode = dawn::InputStepMode::Vertex;
 
-            builder.SetAttribute(&attribute);
-            builder.SetInput(&input);
+            numAttributes++;
+            numInputs++;
         }
-        auto inputState = builder.GetResult();
+        descriptor.cInputState.numAttributes = numAttributes;
+        descriptor.cInputState.attributes = attributes;
+        descriptor.cInputState.numInputs = numInputs;
+        descriptor.cInputState.inputs = inputs;
 
         constexpr dawn::ShaderStageBit kNoStages{};
         dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
@@ -313,11 +315,9 @@ namespace {
 
         auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.layout = pipelineLayout;
         descriptor.cVertexStage.module = oVSModule;
         descriptor.cFragmentStage.module = oFSModule;
-        descriptor.inputState = inputState;
         descriptor.indexFormat = dawn::IndexFormat::Uint16;
         descriptor.depthStencilState = &descriptor.cDepthStencilState;
         descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;

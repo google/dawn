@@ -42,11 +42,6 @@ class IndexFormatTest : public DawnTest {
             attribute.offset = 0;
             attribute.format = dawn::VertexFormat::Float4;
 
-            dawn::InputState inputState = device.CreateInputStateBuilder()
-                                              .SetInput(&input)
-                                              .SetAttribute(&attribute)
-                                              .GetResult();
-
             dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450
                 layout(location = 0) in vec4 pos;
@@ -68,7 +63,10 @@ class IndexFormatTest : public DawnTest {
             descriptor.cFragmentStage.module = fsModule;
             descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
             descriptor.indexFormat = format;
-            descriptor.inputState = inputState;
+            descriptor.cInputState.numInputs = 1;
+            descriptor.cInputState.inputs = &input;
+            descriptor.cInputState.numAttributes = 1;
+            descriptor.cInputState.attributes = &attribute;
             descriptor.cColorStates[0]->format = renderPass.colorFormat;
 
             return device.CreateRenderPipeline(&descriptor);

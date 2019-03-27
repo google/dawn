@@ -156,28 +156,27 @@ void init() {
             fragColor = vec4(mix(f_col, vec3(0.5, 0.5, 0.5), 0.5), 1.0);
         })");
 
-    dawn::VertexAttributeDescriptor attribute1;
-    attribute1.shaderLocation = 0;
-    attribute1.inputSlot = 0;
-    attribute1.offset = 0;
-    attribute1.format = dawn::VertexFormat::Float3;
+    dawn::VertexAttributeDescriptor attribute[2];
+    attribute[0].shaderLocation = 0;
+    attribute[0].inputSlot = 0;
+    attribute[0].offset = 0;
+    attribute[0].format = dawn::VertexFormat::Float3;
 
-    dawn::VertexAttributeDescriptor attribute2;
-    attribute2.shaderLocation = 1;
-    attribute2.inputSlot = 0;
-    attribute2.offset = 3 * sizeof(float);
-    attribute2.format = dawn::VertexFormat::Float3;
+    attribute[1].shaderLocation = 1;
+    attribute[1].inputSlot = 0;
+    attribute[1].offset = 3 * sizeof(float);
+    attribute[1].format = dawn::VertexFormat::Float3;
 
     dawn::VertexInputDescriptor input;
     input.inputSlot = 0;
     input.stride = 6 * sizeof(float);
     input.stepMode = dawn::InputStepMode::Vertex;
 
-    auto inputState = device.CreateInputStateBuilder()
-                          .SetAttribute(&attribute1)
-                          .SetAttribute(&attribute2)
-                          .SetInput(&input)
-                          .GetResult();
+    dawn::InputStateDescriptor inputState;
+    inputState.numAttributes = 2;
+    inputState.attributes = attribute;
+    inputState.numInputs = 1;
+    inputState.inputs = &input;
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
@@ -214,7 +213,7 @@ void init() {
     descriptor.layout = pl;
     descriptor.cVertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.inputState = inputState;
+    descriptor.inputState = &inputState;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
     descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
     descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
@@ -227,7 +226,7 @@ void init() {
     pDescriptor.layout = pl;
     pDescriptor.cVertexStage.module = vsModule;
     pDescriptor.cFragmentStage.module = fsModule;
-    pDescriptor.inputState = inputState;
+    pDescriptor.inputState = &inputState;
     pDescriptor.depthStencilState = &pDescriptor.cDepthStencilState;
     pDescriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
     pDescriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
@@ -241,7 +240,7 @@ void init() {
     rfDescriptor.layout = pl;
     rfDescriptor.cVertexStage.module = vsModule;
     rfDescriptor.cFragmentStage.module = fsReflectionModule;
-    rfDescriptor.inputState = inputState;
+    rfDescriptor.inputState = &inputState;
     rfDescriptor.depthStencilState = &rfDescriptor.cDepthStencilState;
     rfDescriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
     rfDescriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
