@@ -40,7 +40,8 @@ namespace dawn_native { namespace opengl {
             return nullptr;
         }
         GLuint nativeTexture = next.texture.u32;
-        return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture);
+        return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture,
+                           TextureBase::TextureState::OwnedExternal);
     }
 
     void SwapChain::OnBeforePresent(TextureBase*) {

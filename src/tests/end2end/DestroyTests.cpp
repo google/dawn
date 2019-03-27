@@ -19,7 +19,7 @@
 
 constexpr uint32_t kRTSize = 4;
 
-class DestroyBufferTest : public DawnTest {
+class DestroyTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
@@ -96,7 +96,7 @@ class DestroyBufferTest : public DawnTest {
 };
 
 // Destroy before submit will result in error, and nothing drawn
-TEST_P(DestroyBufferTest, DestroyBeforeSubmit) {
+TEST_P(DestroyTest, BufferDestroyBeforeSubmit) {
     RGBA8 notFilled(0, 0, 0, 0);
 
     dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
@@ -107,7 +107,7 @@ TEST_P(DestroyBufferTest, DestroyBeforeSubmit) {
 }
 
 // Destroy after submit will draw successfully
-TEST_P(DestroyBufferTest, DestroyAfterSubmit) {
+TEST_P(DestroyTest, BufferDestroyAfterSubmit) {
     RGBA8 filled(0, 255, 0, 255);
 
     dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
@@ -119,7 +119,7 @@ TEST_P(DestroyBufferTest, DestroyAfterSubmit) {
 
 // First submit succeeds, draws triangle, second submit fails
 // after destroy is called on the buffer, pixel does not change
-TEST_P(DestroyBufferTest, SubmitDestroySubmit) {
+TEST_P(DestroyTest, BufferSubmitDestroySubmit) {
     RGBA8 filled(0, 255, 0, 255);
 
     dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
@@ -135,4 +135,37 @@ TEST_P(DestroyBufferTest, SubmitDestroySubmit) {
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
 }
 
-DAWN_INSTANTIATE_TEST(DestroyBufferTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+// Destroy texture before submit should fail submit
+TEST_P(DestroyTest, TextureDestroyBeforeSubmit) {
+    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    renderPass.color.Destroy();
+    ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+}
+
+// Destroy after submit will draw successfully
+TEST_P(DestroyTest, TextureDestroyAfterSubmit) {
+    RGBA8 filled(0, 255, 0, 255);
+
+    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
+    renderPass.color.Destroy();
+}
+
+// First submit succeeds, draws triangle, second submit fails
+// after destroy is called on the texture
+TEST_P(DestroyTest, TextureSubmitDestroySubmit) {
+    RGBA8 filled(0, 255, 0, 255);
+
+    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    queue.Submit(1, &commands);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
+
+    renderPass.color.Destroy();
+
+    // Submit fails because texture was destroyed
+    ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+}
+
+DAWN_INSTANTIATE_TEST(DestroyTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

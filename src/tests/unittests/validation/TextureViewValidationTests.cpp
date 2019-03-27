@@ -242,4 +242,12 @@ TEST_F(TextureViewValidationTest, TextureViewFormatCompatibility) {
     }
 }
 
+// Test that it's invalid to create a texture view from a destroyed texture
+TEST_F(TextureViewValidationTest, DestroyCreateTextureView) {
+    dawn::Texture texture = Create2DArrayTexture(device, 1);
+    dawn::TextureViewDescriptor descriptor =
+        CreateDefaultTextureViewDescriptor(dawn::TextureViewDimension::e2D);
+    texture.Destroy();
+    ASSERT_DEVICE_ERROR(texture.CreateTextureView(&descriptor));
+}
 }

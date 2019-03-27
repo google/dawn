@@ -40,6 +40,8 @@ namespace dawn_native { namespace vulkan {
         void TransitionUsageNow(VkCommandBuffer commands, dawn::TextureUsageBit usage);
 
       private:
+        void DestroyImpl() override;
+
         VkImage mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;
 

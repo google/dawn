@@ -42,6 +42,8 @@ namespace dawn_native { namespace metal {
         id<MTLTexture> GetMTLTexture();
 
       private:
+        void DestroyImpl() override;
+
         id<MTLTexture> mMtlTexture = nil;
     };
 

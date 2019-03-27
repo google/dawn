@@ -194,14 +194,14 @@ namespace dawn_native { namespace metal {
     }
 
     Texture::Texture(Device* device, const TextureDescriptor* descriptor)
-        : TextureBase(device, descriptor) {
+        : TextureBase(device, descriptor, TextureState::OwnedInternal) {
         MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(descriptor);
         mMtlTexture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc];
         [mtlDesc release];
     }
 
     Texture::Texture(Device* device, const TextureDescriptor* descriptor, id<MTLTexture> mtlTexture)
-        : TextureBase(device, descriptor), mMtlTexture(mtlTexture) {
+        : TextureBase(device, descriptor, TextureState::OwnedInternal), mMtlTexture(mtlTexture) {
         [mMtlTexture retain];
     }
 
@@ -209,7 +209,7 @@ namespace dawn_native { namespace metal {
                      const TextureDescriptor* descriptor,
                      IOSurfaceRef ioSurface,
                      uint32_t plane)
-        : TextureBase(device, descriptor) {
+        : TextureBase(device, descriptor, TextureState::OwnedInternal) {
         MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(descriptor);
         mtlDesc.storageMode = MTLStorageModeManaged;
         mMtlTexture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
@@ -219,7 +219,12 @@ namespace dawn_native { namespace metal {
     }
 
     Texture::~Texture() {
+        Destroy();
+    }
+
+    void Texture::DestroyImpl() {
         [mMtlTexture release];
+        mMtlTexture = nil;
     }
 
     id<MTLTexture> Texture::GetMTLTexture() {

@@ -110,7 +110,7 @@ namespace dawn_native { namespace null {
         return new SwapChain(this, descriptor);
     }
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
-        return new Texture(this, descriptor);
+        return new Texture(this, descriptor, TextureBase::TextureState::OwnedInternal);
     }
     ResultOrError<TextureViewBase*> Device::CreateTextureViewImpl(
         TextureBase* texture,
