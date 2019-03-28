@@ -155,6 +155,22 @@ TEST_F(CommandBufferValidationTest, BeginComputePassBeforeEndPreviousPass) {
     }
 }
 
+// Test that beginning a compute pass before ending the previous pass causes an error.
+TEST_F(CommandBufferValidationTest, CallsAfterAFailedFinish) {
+    // A buffer that can't be used in CopyBufferToBuffer
+    dawn::BufferDescriptor bufferDesc;
+    bufferDesc.size = 16;
+    bufferDesc.usage = dawn::BufferUsageBit::Uniform;
+    dawn::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(buffer, 0, buffer, 0, 0);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // TODO(cwallez@chromium.org): Currently this does nothing, should it be a device error?
+    encoder.CopyBufferToBuffer(buffer, 0, buffer, 0, 0);
+}
+
 // Test that using a single buffer in multiple read usages in the same pass is allowed.
 TEST_F(CommandBufferValidationTest, BufferWithMultipleReadUsage) {
     // Create a buffer used as both vertex and index buffer.

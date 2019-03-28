@@ -808,6 +808,9 @@ namespace dawn_native {
 
     CommandBufferBase* CommandEncoderBase::Finish() {
         if (GetDevice()->ConsumedError(ValidateFinish())) {
+            // Even if finish validation fails, it is now invalid to call any encoding commands on
+            // this object, so we set its state to finished.
+            mEncodingState = EncodingState::Finished;
             return CommandBufferBase::MakeError(GetDevice());
         }
         ASSERT(!IsError());
@@ -833,6 +836,11 @@ namespace dawn_native {
     }
 
     void CommandEncoderBase::PassEnded() {
+        // This function may still be called when the command encoder is finished, just do nothing.
+        if (mEncodingState == EncodingState::Finished) {
+            return;
+        }
+
         if (mEncodingState == EncodingState::ComputePass) {
             mAllocator.Allocate<EndComputePassCmd>(Command::EndComputePass);
         } else {
