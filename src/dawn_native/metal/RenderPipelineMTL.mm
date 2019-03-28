@@ -238,17 +238,17 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        MTLDepthStencilDescriptor* ComputeDepthStencilDesc(
+        MTLDepthStencilDescriptor* MakeDepthStencilDesc(
             const DepthStencilStateDescriptor* descriptor) {
-            MTLDepthStencilDescriptor* mtlDepthStencilDescriptor =
-                [[MTLDepthStencilDescriptor new] autorelease];
+            MTLDepthStencilDescriptor* mtlDepthStencilDescriptor = [MTLDepthStencilDescriptor new];
+
             mtlDepthStencilDescriptor.depthCompareFunction =
                 ToMetalCompareFunction(descriptor->depthCompare);
             mtlDepthStencilDescriptor.depthWriteEnabled = descriptor->depthWriteEnabled;
 
             if (StencilTestEnabled(descriptor)) {
-                MTLStencilDescriptor* backFaceStencil = [[MTLStencilDescriptor new] autorelease];
-                MTLStencilDescriptor* frontFaceStencil = [[MTLStencilDescriptor new] autorelease];
+                MTLStencilDescriptor* backFaceStencil = [MTLStencilDescriptor new];
+                MTLStencilDescriptor* frontFaceStencil = [MTLStencilDescriptor new];
 
                 backFaceStencil.stencilCompareFunction =
                     ToMetalCompareFunction(descriptor->stencilBack.compare);
@@ -274,7 +274,11 @@ namespace dawn_native { namespace metal {
 
                 mtlDepthStencilDescriptor.backFaceStencil = backFaceStencil;
                 mtlDepthStencilDescriptor.frontFaceStencil = frontFaceStencil;
+
+                [backFaceStencil release];
+                [frontFaceStencil release];
             }
+
             return mtlDepthStencilDescriptor;
         }
 
@@ -316,7 +320,9 @@ namespace dawn_native { namespace metal {
 
         descriptorMTL.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());
 
-        descriptorMTL.vertexDescriptor = MakeVertexDesc();
+        MTLVertexDescriptor* vertexDesc = MakeVertexDesc();
+        descriptorMTL.vertexDescriptor = vertexDesc;
+        [vertexDesc release];
 
         // TODO(kainino@chromium.org): push constants, textures, samplers
 
@@ -324,7 +330,6 @@ namespace dawn_native { namespace metal {
             NSError* error = nil;
             mMtlRenderPipelineState = [mtlDevice newRenderPipelineStateWithDescriptor:descriptorMTL
                                                                                 error:&error];
-            [descriptorMTL.vertexDescriptor release];
             [descriptorMTL release];
             if (error != nil) {
                 NSLog(@" error => %@", error);
@@ -333,12 +338,13 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        // create depth stencil state and cache it, fetch the cached depth stencil state when we
-        // call setDepthStencilState() for a given render pipeline in CommandBuffer, in order to
+        // Create depth stencil state and cache it, fetch the cached depth stencil state when we
+        // call setDepthStencilState() for a given render pipeline in CommandEncoder, in order to
         // improve performance.
-        mMtlDepthStencilState =
-            [mtlDevice newDepthStencilStateWithDescriptor:ComputeDepthStencilDesc(
-                                                              GetDepthStencilStateDescriptor())];
+        MTLDepthStencilDescriptor* depthStencilDesc =
+            MakeDepthStencilDesc(GetDepthStencilStateDescriptor());
+        mMtlDepthStencilState = [mtlDevice newDepthStencilStateWithDescriptor:depthStencilDesc];
+        [depthStencilDesc release];
     }
 
     RenderPipeline::~RenderPipeline() {

@@ -66,7 +66,7 @@ namespace dawn_native { namespace metal {
     Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
         MTLSamplerDescriptor* mtlDesc = [MTLSamplerDescriptor new];
-        [mtlDesc autorelease];
+
         mtlDesc.minFilter = FilterModeToMinMagFilter(descriptor->minFilter);
         mtlDesc.magFilter = FilterModeToMinMagFilter(descriptor->magFilter);
         mtlDesc.mipFilter = FilterModeToMipFilter(descriptor->mipmapFilter);
@@ -81,6 +81,8 @@ namespace dawn_native { namespace metal {
         mtlDesc.borderColor = BorderColor(descriptor->borderColor);
 
         mMtlSamplerState = [device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc];
+
+        [mtlDesc release];
     }
 
     Sampler::~Sampler() {
