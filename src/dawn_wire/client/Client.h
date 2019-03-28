@@ -17,6 +17,7 @@
 
 #include <dawn_wire/Wire.h>
 
+#include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/WireDeserializeAllocator.h"
 #include "dawn_wire/client/ClientBase_autogen.h"
@@ -31,6 +32,7 @@ namespace dawn_wire { namespace client {
         ~Client();
 
         const char* HandleCommands(const char* commands, size_t size);
+        ReservedTexture ReserveTexture(DawnDevice device);
 
         void* GetCmdSpace(size_t size) {
             return mSerializer->GetCmdSpace(size);

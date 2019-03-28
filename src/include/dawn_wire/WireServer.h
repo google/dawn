@@ -32,6 +32,8 @@ namespace dawn_wire {
 
         const char* HandleCommands(const char* commands, size_t size) override final;
 
+        bool InjectTexture(DawnTexture texture, uint32_t id, uint32_t generation);
+
       private:
         std::unique_ptr<server::Server> mImpl;
     };

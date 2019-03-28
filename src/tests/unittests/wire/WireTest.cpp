@@ -74,6 +74,18 @@ void WireTest::FlushServer() {
     ASSERT_TRUE(mS2cBuf->Flush());
 }
 
+dawn_wire::WireServer* WireTest::GetWireServer() {
+    return mWireServer.get();
+}
+
+dawn_wire::WireClient* WireTest::GetWireClient() {
+    return mWireClient.get();
+}
+
+void WireTest::DeleteServer() {
+    mWireServer = nullptr;
+}
+
 void WireTest::SetupIgnoredCallExpectations() {
     if (mIgnoreSetCallbackCalls) {
         EXPECT_CALL(api, OnBuilderSetErrorCallback(_, _, _, _)).Times(AnyNumber());

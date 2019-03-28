@@ -27,4 +27,15 @@ namespace dawn_wire { namespace client {
         DeviceAllocator().Free(mDevice);
     }
 
+    ReservedTexture Client::ReserveTexture(DawnDevice cDevice) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+        ObjectAllocator<Texture>::ObjectAndSerial* allocation = TextureAllocator().New(device);
+
+        ReservedTexture result;
+        result.texture = reinterpret_cast<DawnTexture>(allocation->object.get());
+        result.id = allocation->object->id;
+        result.generation = allocation->serial;
+        return result;
+    }
+
 }}  // namespace dawn_wire::client

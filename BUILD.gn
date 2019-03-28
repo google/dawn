@@ -593,6 +593,7 @@ test("dawn_unittests") {
     "src/tests/unittests/wire/WireBufferMappingTests.cpp",
     "src/tests/unittests/wire/WireCallbackTests.cpp",
     "src/tests/unittests/wire/WireFenceTests.cpp",
+    "src/tests/unittests/wire/WireInjectTextureTests.cpp",
     "src/tests/unittests/wire/WireOptionalTests.cpp",
     "src/tests/unittests/wire/WireTest.cpp",
     "src/tests/unittests/wire/WireTest.h",

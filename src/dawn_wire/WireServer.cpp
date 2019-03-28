@@ -31,4 +31,8 @@ namespace dawn_wire {
         return mImpl->HandleCommands(commands, size);
     }
 
+    bool WireServer::InjectTexture(DawnTexture texture, uint32_t id, uint32_t generation) {
+        return mImpl->InjectTexture(texture, id, generation);
+    }
+
 }  // namespace dawn_wire

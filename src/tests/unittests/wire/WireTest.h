@@ -89,6 +89,11 @@ class WireTest : public testing::Test {
     DawnDevice apiDevice;
     DawnDevice device;
 
+    dawn_wire::WireServer* GetWireServer();
+    dawn_wire::WireClient* GetWireClient();
+
+    void DeleteServer();
+
   private:
     void SetupIgnoredCallExpectations();
     bool mIgnoreSetCallbackCalls = false;
