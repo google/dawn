@@ -47,22 +47,6 @@ namespace dawn_native {
             }
         }
 
-        bool IsTextureViewDimensionCompatibleWithTextureSampleCount(
-            dawn::TextureViewDimension textureViewDimension,
-            const uint32_t sampleCount) {
-            switch (textureViewDimension) {
-                case dawn::TextureViewDimension::Cube:
-                case dawn::TextureViewDimension::CubeArray:
-                    return sampleCount == 1;
-                case dawn::TextureViewDimension::e2D:
-                case dawn::TextureViewDimension::e2DArray:
-                    return true;
-                default:
-                    UNREACHABLE();
-                    return false;
-            }
-        }
-
         // TODO(jiawei.shao@intel.com): support validation on all texture view dimensions
         bool IsArrayLayerValidForTextureViewDimension(
             dawn::TextureViewDimension textureViewDimension,
@@ -104,9 +88,17 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("The sample count of the texture is not supported.");
             }
 
-            if (descriptor->sampleCount > 1 && descriptor->mipLevelCount > 1) {
-                return DAWN_VALIDATION_ERROR(
-                    "The mipmap level count of a multisampled texture must be 1.");
+            if (descriptor->sampleCount > 1) {
+                if (descriptor->mipLevelCount > 1) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The mipmap level count of a multisampled texture must be 1.");
+                }
+
+                // Multisampled 2D array texture is not supported because on Metal it requires the
+                // version of macOS be greater than 10.14.
+                if (descriptor->arrayLayerCount > 1) {
+                    return DAWN_VALIDATION_ERROR("Multisampled 2D array texture is not supported.");
+                }
             }
 
             return {};
@@ -126,13 +118,6 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(
                     "The dimension of the texture view is not compatible with the dimension of the"
                     "original texture");
-            }
-
-            if (!IsTextureViewDimensionCompatibleWithTextureSampleCount(
-                    descriptor->dimension, texture->GetSampleCount())) {
-                return DAWN_VALIDATION_ERROR(
-                    "The dimension of the texture view is not compatible with the sample count of "
-                    "the original texture");
             }
 
             if (!IsTextureSizeValidForTextureViewDimension(descriptor->dimension,
