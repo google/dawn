@@ -348,8 +348,10 @@ namespace dawn_native { namespace vulkan {
 
                     VkImageCopy region = ComputeImageCopyRegion(src, dst, copy->copySize);
 
+                    // The dstImage is written to so the Dawn guarantees make sure it is in the
+                    // TRANSFER_DST_OPTIMAL layout
                     device->fn.CmdCopyImage(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL, dstImage,
-                                            VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+                                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
                 } break;
 
                 case Command::BeginRenderPass: {
