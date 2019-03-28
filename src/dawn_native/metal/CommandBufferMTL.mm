@@ -624,7 +624,8 @@ namespace dawn_native { namespace metal {
 
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
-                    size_t formatSize = IndexFormatSize(lastPipeline->GetIndexFormat());
+                    size_t formatSize =
+                        IndexFormatSize(lastPipeline->GetInputStateDescriptor()->indexFormat);
 
                     // The index and instance count must be non-zero, otherwise no-op
                     if (draw->indexCount != 0 && draw->instanceCount != 0) {

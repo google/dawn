@@ -238,6 +238,7 @@ namespace {
         auto oFSModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, hasTexture ? oFSSourceTextured : oFSSourceUntextured);
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cInputState.indexFormat = dawn::IndexFormat::Uint16;
         uint32_t numAttributes = 0;
         uint32_t numInputs = 0;
         std::bitset<3> slotsSet;
@@ -306,7 +307,6 @@ namespace {
         descriptor.layout = pipelineLayout;
         descriptor.cVertexStage.module = oVSModule;
         descriptor.cFragmentStage.module = oFSModule;
-        descriptor.indexFormat = dawn::IndexFormat::Uint16;
         descriptor.depthStencilState = &descriptor.cDepthStencilState;
         descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
         descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();

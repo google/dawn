@@ -741,7 +741,8 @@ namespace dawn_native { namespace opengl {
                     pushConstants.Apply(lastPipeline, lastPipeline);
                     inputBuffers.Apply();
 
-                    dawn::IndexFormat indexFormat = lastPipeline->GetIndexFormat();
+                    dawn::IndexFormat indexFormat =
+                        lastPipeline->GetInputStateDescriptor()->indexFormat;
                     size_t formatSize = IndexFormatSize(indexFormat);
                     GLenum formatType = IndexFormatType(indexFormat);
 

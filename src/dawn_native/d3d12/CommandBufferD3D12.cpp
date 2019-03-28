@@ -815,7 +815,8 @@ namespace dawn_native { namespace d3d12 {
                     // TODO(cwallez@chromium.org): Make index buffers lazily applied, right now
                     // this will break if the pipeline is changed for one with a different index
                     // format after SetIndexBuffer
-                    bufferView.Format = DXGIIndexFormat(lastPipeline->GetIndexFormat());
+                    bufferView.Format =
+                        DXGIIndexFormat(lastPipeline->GetInputStateDescriptor()->indexFormat);
 
                     commandList->IASetIndexBuffer(&bufferView);
                 } break;

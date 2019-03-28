@@ -76,6 +76,8 @@ namespace dawn_native {
             if (descriptor->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
+            DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
+
             if (descriptor->numInputs > kMaxVertexInputs) {
                 return DAWN_VALIDATION_ERROR("Vertex Inputs number exceeds maximum");
             }
@@ -271,7 +273,6 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Input state must not be null");
         }
 
-        DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
         std::bitset<kMaxVertexInputs> inputsSetMask;
         std::bitset<kMaxVertexAttributes> attributesSetMask;
         DAWN_TRY(ValidateInputStateDescriptor(descriptor->inputState, &inputsSetMask,
@@ -338,7 +339,6 @@ namespace dawn_native {
         : PipelineBase(device,
                        descriptor->layout,
                        dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment),
-          mIndexFormat(descriptor->indexFormat),
           mInputState(*descriptor->inputState),
           mPrimitiveTopology(descriptor->primitiveTopology),
           mHasDepthStencilAttachment(descriptor->depthStencilState != nullptr),
@@ -434,11 +434,6 @@ namespace dawn_native {
     const DepthStencilStateDescriptor* RenderPipelineBase::GetDepthStencilStateDescriptor() {
         ASSERT(!IsError());
         return &mDepthStencilState;
-    }
-
-    dawn::IndexFormat RenderPipelineBase::GetIndexFormat() const {
-        ASSERT(!IsError());
-        return mIndexFormat;
     }
 
     dawn::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {

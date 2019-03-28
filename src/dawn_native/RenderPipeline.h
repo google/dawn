@@ -52,7 +52,6 @@ namespace dawn_native {
 
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot);
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor();
-        dawn::IndexFormat GetIndexFormat() const;
         dawn::PrimitiveTopology GetPrimitiveTopology() const;
 
         std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
@@ -70,7 +69,6 @@ namespace dawn_native {
       private:
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        dawn::IndexFormat mIndexFormat;
         InputStateDescriptor mInputState;
         std::bitset<kMaxVertexAttributes> mAttributesSetMask;
         std::array<VertexAttributeDescriptor, kMaxVertexAttributes> mAttributeInfos;

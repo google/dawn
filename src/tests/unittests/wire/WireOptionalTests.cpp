@@ -87,6 +87,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create the input state
     DawnInputStateDescriptor inputState;
     inputState.nextInChain = nullptr;
+    inputState.indexFormat = DAWN_INDEX_FORMAT_UINT32;
     inputState.numInputs = 0;
     inputState.inputs = nullptr;
     inputState.numAttributes = 0;
@@ -141,7 +142,6 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     pipelineDescriptor.sampleCount = 1;
     pipelineDescriptor.layout = layout;
     pipelineDescriptor.inputState = &inputState;
-    pipelineDescriptor.indexFormat = DAWN_INDEX_FORMAT_UINT32;
     pipelineDescriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
     // First case: depthStencilState is not null.

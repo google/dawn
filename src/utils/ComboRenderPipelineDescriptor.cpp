@@ -21,6 +21,8 @@ namespace utils {
     ComboInputStateDescriptor::ComboInputStateDescriptor() {
         dawn::InputStateDescriptor* descriptor = this;
 
+        descriptor->indexFormat = dawn::IndexFormat::Uint32;
+
         // Fill the default values for vertexInput.
         descriptor->numInputs = 0;
         dawn::VertexInputDescriptor vertexInput;
@@ -48,7 +50,6 @@ namespace utils {
     ComboRenderPipelineDescriptor::ComboRenderPipelineDescriptor(const dawn::Device& device) {
         dawn::RenderPipelineDescriptor* descriptor = this;
 
-        descriptor->indexFormat = dawn::IndexFormat::Uint32;
         descriptor->primitiveTopology = dawn::PrimitiveTopology::TriangleList;
         descriptor->sampleCount = 1;
 

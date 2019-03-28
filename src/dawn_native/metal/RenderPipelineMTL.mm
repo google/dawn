@@ -282,7 +282,7 @@ namespace dawn_native { namespace metal {
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
         : RenderPipelineBase(device, descriptor),
-          mMtlIndexType(MTLIndexFormat(GetIndexFormat())),
+          mMtlIndexType(MTLIndexFormat(GetInputStateDescriptor()->indexFormat)),
           mMtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())) {
         auto mtlDevice = device->GetMTLDevice();
 

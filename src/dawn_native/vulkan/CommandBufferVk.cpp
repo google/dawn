@@ -559,7 +559,8 @@ namespace dawn_native { namespace vulkan {
                     // TODO(cwallez@chromium.org): get the index type from the last render pipeline
                     // and rebind if needed on pipeline change
                     ASSERT(lastPipeline != nullptr);
-                    VkIndexType indexType = VulkanIndexType(lastPipeline->GetIndexFormat());
+                    VkIndexType indexType =
+                        VulkanIndexType(lastPipeline->GetInputStateDescriptor()->indexFormat);
                     device->fn.CmdBindIndexBuffer(
                         commands, indexBuffer, static_cast<VkDeviceSize>(cmd->offset), indexType);
                 } break;

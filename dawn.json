@@ -622,6 +622,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "index format", "type": "index format"},
             {"name": "num attributes", "type": "uint32_t"},
             {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "num attributes"},
             {"name": "num inputs", "type": "uint32_t"},
@@ -864,7 +865,6 @@
             {"name": "vertex stage", "type": "pipeline stage descriptor", "annotation": "const*"},
             {"name": "fragment stage", "type": "pipeline stage descriptor", "annotation": "const*"},
             {"name": "input state", "type": "input state descriptor", "annotation": "const*"},
-            {"name": "index format", "type": "index format"},
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "sample count", "type": "uint32_t"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},

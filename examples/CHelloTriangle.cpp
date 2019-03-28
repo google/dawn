@@ -95,13 +95,13 @@ void init() {
 
         DawnInputStateDescriptor inputState;
         inputState.nextInChain = nullptr;
+        inputState.indexFormat = DAWN_INDEX_FORMAT_UINT32;
         inputState.numInputs = 0;
         inputState.inputs = nullptr;
         inputState.numAttributes = 0;
         inputState.attributes = nullptr;
         descriptor.inputState = &inputState;
 
-        descriptor.indexFormat = DAWN_INDEX_FORMAT_UINT32;
         descriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
         descriptor.depthStencilState = nullptr;

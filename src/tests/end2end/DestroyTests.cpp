@@ -46,7 +46,6 @@ class DestroyTest : public DawnTest {
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
-        descriptor.indexFormat = dawn::IndexFormat::Uint32;
         descriptor.cInputState.numInputs = 1;
         descriptor.cInputState.cInputs[0].stride = 4 * sizeof(float);
         descriptor.cInputState.numAttributes = 1;

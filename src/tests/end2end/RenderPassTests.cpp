@@ -47,7 +47,6 @@ protected:
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
-        descriptor.indexFormat = dawn::IndexFormat::Uint32;
         descriptor.cColorStates[0]->format = kFormat;
 
         pipeline = device.CreateRenderPipeline(&descriptor);
