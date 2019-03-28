@@ -467,6 +467,11 @@ namespace dawn_native {
         return mDepthStencilState.format;
     }
 
+    uint32_t RenderPipelineBase::GetSampleCount() const {
+        ASSERT(!IsError());
+        return mSampleCount;
+    }
+
     bool RenderPipelineBase::IsCompatibleWith(const BeginRenderPassCmd* renderPass) const {
         ASSERT(!IsError());
         // TODO(cwallez@chromium.org): This is called on every SetPipeline command. Optimize it for

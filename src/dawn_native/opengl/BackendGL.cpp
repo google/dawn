@@ -32,6 +32,7 @@ namespace dawn_native { namespace opengl {
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_SCISSOR_TEST);
             glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+            glEnable(GL_MULTISAMPLE);
 
             mPCIInfo.name = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
         }

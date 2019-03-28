@@ -59,6 +59,7 @@ namespace dawn_native {
         bool HasDepthStencilAttachment() const;
         dawn::TextureFormat GetColorAttachmentFormat(uint32_t attachment) const;
         dawn::TextureFormat GetDepthStencilFormat() const;
+        uint32_t GetSampleCount() const;
 
         // A pipeline can be used in a render pass if its attachment info matches the actual
         // attachments in the render pass. This returns whether it is the case.

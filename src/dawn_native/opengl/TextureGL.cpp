@@ -24,22 +24,33 @@ namespace dawn_native { namespace opengl {
 
     namespace {
 
-        GLenum TargetForDimensionAndArrayLayers(dawn::TextureDimension dimension,
-                                                uint32_t arrayLayerCount) {
-            switch (dimension) {
+        GLenum TargetForTexture(const TextureDescriptor* descriptor) {
+            switch (descriptor->dimension) {
                 case dawn::TextureDimension::e2D:
-                    return (arrayLayerCount > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
+                    if (descriptor->arrayLayerCount > 1) {
+                        ASSERT(descriptor->sampleCount == 1);
+                        return GL_TEXTURE_2D_ARRAY;
+                    } else {
+                        if (descriptor->sampleCount > 1) {
+                            return GL_TEXTURE_2D_MULTISAMPLE;
+                        } else {
+                            return GL_TEXTURE_2D;
+                        }
+                    }
+
                 default:
                     UNREACHABLE();
                     return GL_TEXTURE_2D;
             }
         }
 
-        GLenum TargetForTextureViewDimension(dawn::TextureViewDimension dimension) {
+        GLenum TargetForTextureViewDimension(dawn::TextureViewDimension dimension,
+                                             uint32_t sampleCount) {
             switch (dimension) {
                 case dawn::TextureViewDimension::e2D:
-                    return GL_TEXTURE_2D;
+                    return (sampleCount > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
                 case dawn::TextureViewDimension::e2DArray:
+                    ASSERT(sampleCount == 1);
                     return GL_TEXTURE_2D_ARRAY;
                 case dawn::TextureViewDimension::Cube:
                     return GL_TEXTURE_CUBE_MAP;
@@ -124,6 +135,7 @@ namespace dawn_native { namespace opengl {
         uint32_t height = GetSize().height;
         uint32_t levels = GetNumMipLevels();
         uint32_t arrayLayers = GetArrayLayers();
+        uint32_t sampleCount = GetSampleCount();
 
         auto formatInfo = GetGLFormatInfo(GetFormat());
 
@@ -135,10 +147,16 @@ namespace dawn_native { namespace opengl {
         switch (GetDimension()) {
             case dawn::TextureDimension::e2D:
                 if (arrayLayers > 1) {
+                    ASSERT(!IsMultisampledTexture());
                     glTexStorage3D(mTarget, levels, formatInfo.internalFormat, width, height,
                                    arrayLayers);
                 } else {
-                    glTexStorage2D(mTarget, levels, formatInfo.internalFormat, width, height);
+                    if (IsMultisampledTexture()) {
+                        glTexStorage2DMultisample(mTarget, sampleCount, formatInfo.internalFormat,
+                                                  width, height, true);
+                    } else {
+                        glTexStorage2D(mTarget, levels, formatInfo.internalFormat, width, height);
+                    }
                 }
                 break;
             default:
@@ -155,7 +173,7 @@ namespace dawn_native { namespace opengl {
                      GLuint handle,
                      TextureState state)
         : TextureBase(device, descriptor, state), mHandle(handle) {
-        mTarget = TargetForDimensionAndArrayLayers(GetDimension(), GetArrayLayers());
+        mTarget = TargetForTexture(descriptor);
     }
 
     Texture::~Texture() {
@@ -183,7 +201,7 @@ namespace dawn_native { namespace opengl {
 
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor), mOwnsHandle(false) {
-        mTarget = TargetForTextureViewDimension(descriptor->dimension);
+        mTarget = TargetForTextureViewDimension(descriptor->dimension, texture->GetSampleCount());
 
         if (!UsageNeedsTextureView(texture->GetUsage())) {
             mHandle = 0;
