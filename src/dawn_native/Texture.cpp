@@ -182,11 +182,12 @@ namespace dawn_native {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
+
+        DAWN_TRY(device->ValidateObject(texture));
         if (texture->GetTextureState() == TextureBase::TextureState::Destroyed) {
             return DAWN_VALIDATION_ERROR("Destroyed texture used to create texture view");
         }
 
-        DAWN_TRY(device->ValidateObject(texture));
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
