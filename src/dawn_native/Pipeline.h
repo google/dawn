@@ -15,7 +15,6 @@
 #ifndef DAWNNATIVE_PIPELINE_H_
 #define DAWNNATIVE_PIPELINE_H_
 
-#include "dawn_native/Builder.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PerStage.h"

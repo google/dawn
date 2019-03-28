@@ -89,10 +89,6 @@ void ProcTableAsClass::CallDeviceErrorCallback(DawnDevice device, const char* me
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->deviceErrorCallback(message, object->userdata1);
 }
-void ProcTableAsClass::CallBuilderErrorCallback(void* builder , DawnBuilderErrorStatus status, const char* message) {
-    auto object = reinterpret_cast<ProcTableAsClass::Object*>(builder);
-    object->builderErrorCallback(status, message, object->userdata1, object->userdata2);
-}
 void ProcTableAsClass::CallMapReadCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, const void* data, uint32_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapReadCallback(status, data, dataLength, object->userdata1);
@@ -108,17 +104,6 @@ void ProcTableAsClass::CallFenceOnCompletionCallback(DawnFence fence,
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(fence);
     object->fenceOnCompletionCallback(status, object->userdata1);
 }
-
-{% for type in by_category["object"] if type.is_builder %}
-    void ProcTableAsClass::{{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, DawnBuilderErrorCallback callback, DawnCallbackUserdata userdata1, DawnCallbackUserdata userdata2) {
-        auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
-        object->builderErrorCallback = callback;
-        object->userdata1 = userdata1;
-        object->userdata2 = userdata2;
-
-        OnBuilderSetErrorCallback(reinterpret_cast<DawnBufferBuilder>(self), callback, userdata1, userdata2);
-    }
-{% endfor %}
 
 {% for type in by_category["object"] %}
     {{as_cType(type.name)}} ProcTableAsClass::GetNew{{type.name.CamelCase()}}() {

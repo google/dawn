@@ -22,7 +22,7 @@ using namespace dawn_wire;
 
 class WireInjectTextureTests : public WireTest {
   public:
-    WireInjectTextureTests() : WireTest(true) {
+    WireInjectTextureTests() {
     }
     ~WireInjectTextureTests() override = default;
 };

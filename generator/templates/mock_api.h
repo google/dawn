@@ -48,11 +48,6 @@ class ProcTableAsClass {
             {% endfor %}
             virtual void {{as_MethodSuffix(type.name, Name("reference"))}}({{as_cType(type.name)}} self) = 0;
             virtual void {{as_MethodSuffix(type.name, Name("release"))}}({{as_cType(type.name)}} self) = 0;
-
-            // Stores callback and userdata and calls OnBuilderSetErrorCallback
-            {% if type.is_builder %}
-                void {{as_MethodSuffix(type.name, Name("set error callback"))}}({{as_cType(type.name)}} self, DawnBuilderErrorCallback callback, DawnCallbackUserdata userdata1, DawnCallbackUserdata userdata2);
-            {% endif %}
         {% endfor %}
 
         // Stores callback and userdata and calls the On* methods
@@ -66,7 +61,6 @@ class ProcTableAsClass {
 
         // Special cased mockable methods
         virtual void OnDeviceSetErrorCallback(DawnDevice device, DawnDeviceErrorCallback callback, DawnCallbackUserdata userdata) = 0;
-        virtual void OnBuilderSetErrorCallback(DawnBufferBuilder builder, DawnBuilderErrorCallback callback, DawnCallbackUserdata userdata1, DawnCallbackUserdata userdata2) = 0;
         virtual void OnBufferMapReadAsyncCallback(DawnBuffer buffer, DawnBufferMapReadCallback callback, DawnCallbackUserdata userdata) = 0;
         virtual void OnBufferMapWriteAsyncCallback(DawnBuffer buffer, DawnBufferMapWriteCallback callback, DawnCallbackUserdata userdata) = 0;
         virtual void OnFenceOnCompletionCallback(DawnFence fence,
@@ -76,7 +70,6 @@ class ProcTableAsClass {
 
         // Calls the stored callbacks
         void CallDeviceErrorCallback(DawnDevice device, const char* message);
-        void CallBuilderErrorCallback(void* builder , DawnBuilderErrorStatus status, const char* message);
         void CallMapReadCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, const void* data, uint32_t dataLength);
         void CallMapWriteCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, void* data, uint32_t dataLength);
         void CallFenceOnCompletionCallback(DawnFence fence, DawnFenceCompletionStatus status);
@@ -84,7 +77,6 @@ class ProcTableAsClass {
         struct Object {
             ProcTableAsClass* procs = nullptr;
             DawnDeviceErrorCallback deviceErrorCallback = nullptr;
-            DawnBuilderErrorCallback builderErrorCallback = nullptr;
             DawnBufferMapReadCallback mapReadCallback = nullptr;
             DawnBufferMapWriteCallback mapWriteCallback = nullptr;
             DawnFenceOnCompletionCallback fenceOnCompletionCallback = nullptr;
@@ -120,7 +112,6 @@ class MockProcTable : public ProcTableAsClass {
         {% endfor %}
 
         MOCK_METHOD3(OnDeviceSetErrorCallback, void(DawnDevice device, DawnDeviceErrorCallback callback, DawnCallbackUserdata userdata));
-        MOCK_METHOD4(OnBuilderSetErrorCallback, void(DawnBufferBuilder builder, DawnBuilderErrorCallback callback, DawnCallbackUserdata userdata1, DawnCallbackUserdata userdata2));
         MOCK_METHOD3(OnBufferMapReadAsyncCallback, void(DawnBuffer buffer, DawnBufferMapReadCallback callback, DawnCallbackUserdata userdata));
         MOCK_METHOD3(OnBufferMapWriteAsyncCallback, void(DawnBuffer buffer, DawnBufferMapWriteCallback callback, DawnCallbackUserdata userdata));
         MOCK_METHOD4(OnFenceOnCompletionCallback,

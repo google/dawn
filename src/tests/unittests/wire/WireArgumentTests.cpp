@@ -21,7 +21,7 @@ using namespace dawn_wire;
 
 class WireArgumentTests : public WireTest {
   public:
-    WireArgumentTests() : WireTest(true) {
+    WireArgumentTests() {
     }
     ~WireArgumentTests() override = default;
 };

@@ -21,7 +21,7 @@
 using namespace testing;
 using namespace dawn_wire;
 
-WireTest::WireTest(bool ignoreSetCallbackCalls) : mIgnoreSetCallbackCalls(ignoreSetCallbackCalls) {
+WireTest::WireTest() {
 }
 
 WireTest::~WireTest() {
@@ -87,8 +87,5 @@ void WireTest::DeleteServer() {
 }
 
 void WireTest::SetupIgnoredCallExpectations() {
-    if (mIgnoreSetCallbackCalls) {
-        EXPECT_CALL(api, OnBuilderSetErrorCallback(_, _, _, _)).Times(AnyNumber());
-    }
     EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
 }

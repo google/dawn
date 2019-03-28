@@ -15,7 +15,6 @@
 #ifndef DAWNNATIVE_BUFFER_H_
 #define DAWNNATIVE_BUFFER_H_
 
-#include "dawn_native/Builder.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
@@ -92,18 +91,6 @@ namespace dawn_native {
         uint32_t mMapSerial = 0;
 
         BufferState mState;
-    };
-
-    // This builder class is kept around purely for testing but should not be used.
-    class BufferBuilder : public Builder<BufferBase> {
-      public:
-        BufferBuilder(DeviceBase* device) : Builder(device) {
-            UNREACHABLE();
-        }
-
-        void SetSize(uint32_t) {
-            UNREACHABLE();
-        }
     };
 
 }  // namespace dawn_native

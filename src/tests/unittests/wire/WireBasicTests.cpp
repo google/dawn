@@ -19,7 +19,7 @@ using namespace dawn_wire;
 
 class WireBasicTests : public WireTest {
   public:
-    WireBasicTests() : WireTest(true) {
+    WireBasicTests() {
     }
     ~WireBasicTests() override = default;
 };

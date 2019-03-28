@@ -16,7 +16,6 @@
 #define DAWNNATIVE_SHADERMODULE_H_
 
 #include "common/Constants.h"
-#include "dawn_native/Builder.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"

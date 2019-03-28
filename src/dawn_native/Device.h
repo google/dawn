@@ -30,7 +30,6 @@ namespace dawn_native {
     using ErrorCallback = void (*)(const char* errorMessage, void* userData);
 
     class AdapterBase;
-    class BufferBuilder;
     class FenceSignalTracker;
     class DynamicUploader;
     class StagingBufferBase;
@@ -105,10 +104,6 @@ namespace dawn_native {
         void SetErrorCallback(dawn::DeviceErrorCallback callback, dawn::CallbackUserdata userdata);
         void Reference();
         void Release();
-
-        BufferBuilder* CreateBufferBuilderForTesting() {
-            return nullptr;
-        }
 
         virtual ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(
             size_t size) = 0;

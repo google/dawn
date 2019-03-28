@@ -63,7 +63,7 @@ namespace {
 
 class WireBufferMappingTests : public WireTest {
   public:
-    WireBufferMappingTests() : WireTest(true) {
+    WireBufferMappingTests() {
     }
     ~WireBufferMappingTests() override = default;
 

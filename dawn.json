@@ -181,22 +181,6 @@
             }
         ]
     },
-    "buffer builder": {
-        "_comment": "This builder is kept for testing only",
-        "category": "object",
-        "methods": [
-            {
-                "name": "get result",
-                "returns": "buffer"
-            },
-            {
-                "name": "set size",
-                "args": [
-                    {"name": "size", "type": "uint32_t"}
-                ]
-            }
-        ]
-    },
     "buffer copy view": {
         "category": "structure",
         "extensible": true,
@@ -439,10 +423,6 @@
                 "args": [
                     {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"}
                 ]
-            },
-            {
-                "name": "create buffer builder for testing",
-                "returns": "buffer builder"
             },
             {
                 "name": "create command encoder",

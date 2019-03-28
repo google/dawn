@@ -77,7 +77,7 @@ namespace utils {
 
 class WireTest : public testing::Test {
   protected:
-    WireTest(bool ignoreSetCallbackCalls);
+    WireTest();
     ~WireTest() override;
 
     void SetUp() override;
@@ -96,7 +96,6 @@ class WireTest : public testing::Test {
 
   private:
     void SetupIgnoredCallExpectations();
-    bool mIgnoreSetCallbackCalls = false;
 
     std::unique_ptr<dawn_wire::WireServer> mWireServer;
     std::unique_ptr<dawn_wire::WireClient> mWireClient;

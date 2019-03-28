@@ -45,7 +45,7 @@ namespace {
 
 class WireFenceTests : public WireTest {
   public:
-    WireFenceTests() : WireTest(true) {
+    WireFenceTests() {
     }
     ~WireFenceTests() override = default;
 
