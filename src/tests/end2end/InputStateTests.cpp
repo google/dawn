@@ -66,7 +66,7 @@ class InputStateTest : public DawnTest {
         };
         dawn::RenderPipeline MakeTestPipeline(const dawn::InputStateDescriptor& inputState,
                                               int multiplier,
-                                              std::vector<ShaderTestSpec> testSpec) {
+                                              const std::vector<ShaderTestSpec>& testSpec) {
             std::ostringstream vs;
             vs << "#version 450\n";
 

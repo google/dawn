@@ -396,13 +396,8 @@ namespace dawn_native { namespace d3d12 {
 
     D3D12_INPUT_LAYOUT_DESC RenderPipeline::ComputeInputLayout(
         std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors) {
-        const auto& attributesSetMask = GetAttributesSetMask();
         unsigned int count = 0;
-        for (auto i : IterateBitSet(attributesSetMask)) {
-            if (!attributesSetMask[i]) {
-                continue;
-            }
-
+        for (auto i : IterateBitSet(GetAttributesSetMask())) {
             D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = (*inputElementDescriptors)[count++];
 
             const VertexAttributeDescriptor& attribute = GetAttribute(i);

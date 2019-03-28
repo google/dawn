@@ -365,11 +365,7 @@ namespace dawn_native { namespace metal {
     MTLVertexDescriptor* RenderPipeline::MakeVertexDesc() {
         MTLVertexDescriptor* mtlVertexDescriptor = [MTLVertexDescriptor new];
 
-        const auto& attributesSetMask = GetAttributesSetMask();
-        for (uint32_t i = 0; i < attributesSetMask.size(); ++i) {
-            if (!attributesSetMask[i]) {
-                continue;
-            }
+        for (uint32_t i : IterateBitSet(GetAttributesSetMask())) {
             const VertexAttributeDescriptor& info = GetAttribute(i);
 
             auto attribDesc = [MTLVertexAttributeDescriptor new];

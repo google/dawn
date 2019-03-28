@@ -197,12 +197,8 @@ namespace dawn_native { namespace opengl {
     void RenderPipeline::CreateVAOForInputState(const InputStateDescriptor* inputState) {
         glGenVertexArrays(1, &mVertexArrayObject);
         glBindVertexArray(mVertexArrayObject);
-        auto& attributesSetMask = GetAttributesSetMask();
-        for (uint32_t location = 0; location < attributesSetMask.size(); ++location) {
-            if (!attributesSetMask[location]) {
-                continue;
-            }
-            auto attribute = GetAttribute(location);
+        for (uint32_t location : IterateBitSet(GetAttributesSetMask())) {
+            const auto& attribute = GetAttribute(location);
             glEnableVertexAttribArray(location);
 
             attributesUsingInput[attribute.inputSlot][location] = true;
