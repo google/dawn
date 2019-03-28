@@ -581,6 +581,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/PushConstantsValidationTests.cpp",
     "src/tests/unittests/validation/QueueSubmitValidationTests.cpp",
     "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
+    "src/tests/unittests/validation/RenderPassValidationTests.cpp",
     "src/tests/unittests/validation/RenderPipelineValidationTests.cpp",
     "src/tests/unittests/validation/ShaderModuleValidationTests.cpp",
     "src/tests/unittests/validation/TextureValidationTests.cpp",

@@ -91,7 +91,8 @@ namespace dawn_native {
             bool matches = true;
 
             for (uint32_t i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
-                if (mLastPipelineLayout->GetBindGroupLayout(i) != mBindgroups[i]->GetLayout()) {
+                if (mBindgroups[i] == nullptr ||
+                    mLastPipelineLayout->GetBindGroupLayout(i) != mBindgroups[i]->GetLayout()) {
                     matches = false;
                     break;
                 }
