@@ -32,7 +32,6 @@ TEST_F(WireBasicTests, CallForwarded) {
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
         .WillOnce(Return(apiCmdBufEncoder));
 
-    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
     FlushClient();
 }
 
@@ -48,8 +47,6 @@ TEST_F(WireBasicTests, CreateThenCall) {
     DawnCommandBuffer apiCmdBuf = api.GetNewCommandBuffer();
     EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder)).WillOnce(Return(apiCmdBuf));
 
-    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
-    EXPECT_CALL(api, CommandBufferRelease(apiCmdBuf));
     FlushClient();
 }
 
@@ -63,7 +60,6 @@ TEST_F(WireBasicTests, RefCountKeptInClient) {
     DawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
         .WillOnce(Return(apiCmdBufEncoder));
-    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
 
     FlushClient();
 }

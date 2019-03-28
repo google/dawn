@@ -25,7 +25,7 @@ namespace {
         MOCK_METHOD2(Call, void(const char* message, DawnCallbackUserdata userdata));
     };
 
-    std::unique_ptr<MockDeviceErrorCallback> mockDeviceErrorCallback;
+    std::unique_ptr<StrictMock<MockDeviceErrorCallback>> mockDeviceErrorCallback;
     void ToMockDeviceErrorCallback(const char* message, DawnCallbackUserdata userdata) {
         mockDeviceErrorCallback->Call(message, userdata);
     }
@@ -39,7 +39,7 @@ namespace {
                           DawnCallbackUserdata userdata2));
     };
 
-    std::unique_ptr<MockBuilderErrorCallback> mockBuilderErrorCallback;
+    std::unique_ptr<StrictMock<MockBuilderErrorCallback>> mockBuilderErrorCallback;
     void ToMockBuilderErrorCallback(DawnBuilderErrorStatus status,
                                     const char* message,
                                     DawnCallbackUserdata userdata1,
@@ -58,16 +58,22 @@ class WireCallbackTests : public WireTest {
     void SetUp() override {
         WireTest::SetUp();
 
-        mockDeviceErrorCallback = std::make_unique<MockDeviceErrorCallback>();
-        mockBuilderErrorCallback = std::make_unique<MockBuilderErrorCallback>();
+        mockDeviceErrorCallback = std::make_unique<StrictMock<MockDeviceErrorCallback>>();
+        mockBuilderErrorCallback = std::make_unique<StrictMock<MockBuilderErrorCallback>>();
     }
 
     void TearDown() override {
         WireTest::TearDown();
 
-        // Delete mocks so that expectations are checked
         mockDeviceErrorCallback = nullptr;
         mockBuilderErrorCallback = nullptr;
+    }
+
+    void FlushServer() {
+        WireTest::FlushServer();
+
+        Mock::VerifyAndClearExpectations(&mockDeviceErrorCallback);
+        Mock::VerifyAndClearExpectations(&mockBuilderErrorCallback);
     }
 };
 
@@ -89,8 +95,6 @@ TEST_F(WireCallbackTests, SuccessCallbackOnBuilderSuccess) {
             return apiBuffer;
         }));
 
-    EXPECT_CALL(api, BufferBuilderRelease(apiBufferBuilder));
-    EXPECT_CALL(api, BufferRelease(apiBuffer));
     FlushClient();
 
     EXPECT_CALL(*mockBuilderErrorCallback, Call(DAWN_BUILDER_ERROR_STATUS_SUCCESS, _, 1, 2));
@@ -157,8 +161,6 @@ TEST_F(WireCallbackTests, SuccessCallbackNotForwardedToDevice) {
             return apiBuffer;
         }));
 
-    EXPECT_CALL(api, BufferBuilderRelease(apiBufferBuilder));
-    EXPECT_CALL(api, BufferRelease(apiBuffer));
     FlushClient();
     FlushServer();
 }
@@ -182,7 +184,6 @@ TEST_F(WireCallbackTests, ErrorCallbackForwardedToDevice) {
             return nullptr;
         }));
 
-    EXPECT_CALL(api, BufferBuilderRelease(apiBufferBuilder));
     FlushClient();
 
     EXPECT_CALL(*mockDeviceErrorCallback, Call(_, userdata)).Times(1);
@@ -239,8 +240,6 @@ TEST_F(WireCallbackTests, BuilderErrorCallback) {
             return apiBuffer;
         }));
 
-    EXPECT_CALL(api, BufferBuilderRelease(apiBufferBuilder));
-    EXPECT_CALL(api, BufferRelease(apiBuffer));
     FlushClient();
 
     // The error callback gets called on the client side

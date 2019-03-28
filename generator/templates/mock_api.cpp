@@ -14,6 +14,8 @@
 
 #include "mock_dawn.h"
 
+using namespace testing;
+
 namespace {
     {% for type in by_category["object"] %}
         {% for method in native_methods(type) if len(method.arguments) < 10 %}
@@ -127,4 +129,10 @@ void ProcTableAsClass::CallFenceOnCompletionCallback(DawnFence fence,
 {% endfor %}
 
 MockProcTable::MockProcTable() {
+}
+
+void MockProcTable::IgnoreAllReleaseCalls() {
+    {% for type in by_category["object"] %}
+        EXPECT_CALL(*this, {{as_MethodSuffix(type.name, Name("release"))}}(_)).Times(AnyNumber());
+    {% endfor %}
 }

@@ -40,8 +40,6 @@ TEST_F(WireArgumentTests, ValueArgument) {
 
     EXPECT_CALL(api, ComputePassEncoderDispatch(apiPass, 1, 2, 3)).Times(1);
 
-    EXPECT_CALL(api, CommandEncoderRelease(apiEncoder));
-    EXPECT_CALL(api, ComputePassEncoderRelease(apiPass));
     FlushClient();
 }
 
@@ -72,8 +70,6 @@ TEST_F(WireArgumentTests, ValueArrayArgument) {
     EXPECT_CALL(api,
                 ComputePassEncoderSetPushConstants(apiPass, DAWN_SHADER_STAGE_BIT_VERTEX, 0, 4,
                                                    ResultOf(CheckPushConstantValues, Eq(true))));
-    EXPECT_CALL(api, CommandEncoderRelease(apiEncoder));
-    EXPECT_CALL(api, ComputePassEncoderRelease(apiPass));
 
     FlushClient();
 }
@@ -168,8 +164,6 @@ TEST_F(WireArgumentTests, CStringArgument) {
                         return desc->vertexStage->entryPoint == std::string("main");
                     })))
         .WillOnce(Return(nullptr));
-    EXPECT_CALL(api, ShaderModuleRelease(apiVsModule));
-    EXPECT_CALL(api, PipelineLayoutRelease(apiLayout));
 
     FlushClient();
 }
@@ -196,9 +190,6 @@ TEST_F(WireArgumentTests, ObjectAsValueArgument) {
     dawnCommandEncoderCopyBufferToBuffer(cmdBufEncoder, buffer, 0, buffer, 4, 4);
     EXPECT_CALL(api, CommandEncoderCopyBufferToBuffer(apiEncoder, apiBuffer, 0, apiBuffer, 4, 4));
 
-    EXPECT_CALL(api, CommandEncoderRelease(apiEncoder));
-    EXPECT_CALL(api, BufferRelease(apiBuffer));
-
     FlushClient();
 }
 
@@ -222,8 +213,6 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
         apiCmdBufs[i] = api.GetNewCommandBuffer();
         EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder))
             .WillOnce(Return(apiCmdBufs[i]));
-        EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
-        EXPECT_CALL(api, CommandBufferRelease(apiCmdBufs[i]));
     }
 
     // Create queue
@@ -239,7 +228,6 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
                              return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
                          })));
 
-    EXPECT_CALL(api, QueueRelease(apiQueue));
     FlushClient();
 }
 
@@ -302,7 +290,6 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
                          })))
         .WillOnce(Return(nullptr));
 
-    EXPECT_CALL(api, BindGroupLayoutRelease(apiBgl));
     FlushClient();
 }
 
@@ -339,7 +326,6 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
             })))
         .WillOnce(Return(apiBgl));
 
-    EXPECT_CALL(api, BindGroupLayoutRelease(apiBgl));
     FlushClient();
 }
 

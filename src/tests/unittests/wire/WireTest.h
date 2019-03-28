@@ -85,11 +85,12 @@ class WireTest : public testing::Test {
     void FlushClient();
     void FlushServer();
 
-    MockProcTable api;
+    testing::StrictMock<MockProcTable> api;
     DawnDevice apiDevice;
     DawnDevice device;
 
   private:
+    void SetupIgnoredCallExpectations();
     bool mIgnoreSetCallbackCalls = false;
 
     std::unique_ptr<dawn_wire::WireServer> mWireServer;

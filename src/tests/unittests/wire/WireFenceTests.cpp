@@ -25,7 +25,7 @@ namespace {
         MOCK_METHOD2(Call, void(const char* message, DawnCallbackUserdata userdata));
     };
 
-    std::unique_ptr<MockDeviceErrorCallback> mockDeviceErrorCallback;
+    std::unique_ptr<StrictMock<MockDeviceErrorCallback>> mockDeviceErrorCallback;
     void ToMockDeviceErrorCallback(const char* message, DawnCallbackUserdata userdata) {
         mockDeviceErrorCallback->Call(message, userdata);
     }
@@ -35,7 +35,7 @@ namespace {
         MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, DawnCallbackUserdata userdata));
     };
 
-    std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
+    std::unique_ptr<StrictMock<MockFenceOnCompletionCallback>> mockFenceOnCompletionCallback;
     void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status,
                                          DawnCallbackUserdata userdata) {
         mockFenceOnCompletionCallback->Call(status, userdata);
@@ -52,14 +52,14 @@ class WireFenceTests : public WireTest {
     void SetUp() override {
         WireTest::SetUp();
 
-        mockDeviceErrorCallback = std::make_unique<MockDeviceErrorCallback>();
-        mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
+        mockDeviceErrorCallback = std::make_unique<StrictMock<MockDeviceErrorCallback>>();
+        mockFenceOnCompletionCallback =
+            std::make_unique<StrictMock<MockFenceOnCompletionCallback>>();
 
         {
             queue = dawnDeviceCreateQueue(device);
             apiQueue = api.GetNewQueue();
             EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue));
-            EXPECT_CALL(api, QueueRelease(apiQueue));
             FlushClient();
         }
         {
@@ -71,7 +71,6 @@ class WireFenceTests : public WireTest {
             fence = dawnQueueCreateFence(queue, &descriptor);
 
             EXPECT_CALL(api, QueueCreateFence(apiQueue, _)).WillOnce(Return(apiFence));
-            EXPECT_CALL(api, FenceRelease(apiFence));
             FlushClient();
         }
     }
@@ -79,9 +78,15 @@ class WireFenceTests : public WireTest {
     void TearDown() override {
         WireTest::TearDown();
 
-        // Delete mocks so that expectations are checked
         mockDeviceErrorCallback = nullptr;
         mockFenceOnCompletionCallback = nullptr;
+    }
+
+    void FlushServer() {
+        WireTest::FlushServer();
+
+        Mock::VerifyAndClearExpectations(&mockDeviceErrorCallback);
+        Mock::VerifyAndClearExpectations(&mockFenceOnCompletionCallback);
     }
 
   protected:
@@ -216,6 +221,9 @@ TEST_F(WireFenceTests, OnCompletionSynchronousValidationSuccess) {
     dawnFenceOnCompletion(fence, 2u, ToMockFenceOnCompletionCallback, 0);
     dawnFenceOnCompletion(fence, 3u, ToMockFenceOnCompletionCallback, 0);
     dawnFenceOnCompletion(fence, 4u, ToMockFenceOnCompletionCallback, 0);
+
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, _))
+        .Times(3);
 }
 
 // Without any flushes, errors should be generated when waiting on a value greater
@@ -261,8 +269,6 @@ TEST_F(WireFenceTests, DestroyBeforeOnCompletionEnd) {
     EXPECT_CALL(*mockFenceOnCompletionCallback,
                 Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, userdata))
         .Times(1);
-
-    dawnFenceRelease(fence);
 }
 
 // Test that signaling a fence on a wrong queue is invalid
@@ -270,7 +276,6 @@ TEST_F(WireFenceTests, SignalWrongQueue) {
     DawnQueue queue2 = dawnDeviceCreateQueue(device);
     DawnQueue apiQueue2 = api.GetNewQueue();
     EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue2));
-    EXPECT_CALL(api, QueueRelease(apiQueue2));
     FlushClient();
 
     DawnCallbackUserdata userdata = 1520;
@@ -285,7 +290,6 @@ TEST_F(WireFenceTests, SignalWrongQueueDoesNotUpdateValue) {
     DawnQueue queue2 = dawnDeviceCreateQueue(device);
     DawnQueue apiQueue2 = api.GetNewQueue();
     EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue2));
-    EXPECT_CALL(api, QueueRelease(apiQueue2));
     FlushClient();
 
     DawnCallbackUserdata userdata = 1024;

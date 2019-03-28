@@ -29,7 +29,7 @@ namespace {
                           DawnCallbackUserdata userdata));
     };
 
-    std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
+    std::unique_ptr<StrictMock<MockBufferMapReadCallback>> mockBufferMapReadCallback;
     void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
                                      const void* ptr,
                                      uint32_t dataLength,
@@ -48,7 +48,7 @@ namespace {
                           DawnCallbackUserdata userdata));
     };
 
-    std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;
+    std::unique_ptr<StrictMock<MockBufferMapWriteCallback>> mockBufferMapWriteCallback;
     uint32_t* lastMapWritePointer = nullptr;
     void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
                                       void* ptr,
@@ -70,8 +70,8 @@ class WireBufferMappingTests : public WireTest {
     void SetUp() override {
         WireTest::SetUp();
 
-        mockBufferMapReadCallback = std::make_unique<MockBufferMapReadCallback>();
-        mockBufferMapWriteCallback = std::make_unique<MockBufferMapWriteCallback>();
+        mockBufferMapReadCallback = std::make_unique<StrictMock<MockBufferMapReadCallback>>();
+        mockBufferMapWriteCallback = std::make_unique<StrictMock<MockBufferMapWriteCallback>>();
 
         {
             DawnBufferDescriptor descriptor;
@@ -83,7 +83,6 @@ class WireBufferMappingTests : public WireTest {
             EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
                 .WillOnce(Return(apiBuffer))
                 .RetiresOnSaturation();
-            EXPECT_CALL(api, BufferRelease(apiBuffer));
             FlushClient();
         }
         {
@@ -105,6 +104,13 @@ class WireBufferMappingTests : public WireTest {
         // Delete mocks so that expectations are checked
         mockBufferMapReadCallback = nullptr;
         mockBufferMapWriteCallback = nullptr;
+    }
+
+    void FlushServer() {
+        WireTest::FlushServer();
+
+        Mock::VerifyAndClearExpectations(&mockBufferMapReadCallback);
+        Mock::VerifyAndClearExpectations(&mockBufferMapWriteCallback);
     }
 
   protected:
@@ -194,6 +200,9 @@ TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
         .Times(1);
 
     dawnBufferRelease(errorBuffer);
+
+    FlushClient();
+    FlushServer();
 }
 
 // Check the map read callback is called with UNKNOWN when the map request would have worked, but
@@ -308,6 +317,8 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
         .WillOnce(InvokeWithoutArgs([&]() { dawnBufferRelease(buffer); }));
 
     FlushServer();
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
 
     FlushClient();
 }
@@ -513,6 +524,8 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
         .WillOnce(InvokeWithoutArgs([&]() { dawnBufferRelease(buffer); }));
 
     FlushServer();
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
 
     FlushClient();
 }

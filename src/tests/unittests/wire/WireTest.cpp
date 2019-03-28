@@ -34,10 +34,7 @@ void WireTest::SetUp() {
 
     // This SetCallback call cannot be ignored because it is done as soon as we start the server
     EXPECT_CALL(api, OnDeviceSetErrorCallback(_, _, _)).Times(Exactly(1));
-    if (mIgnoreSetCallbackCalls) {
-        EXPECT_CALL(api, OnBuilderSetErrorCallback(_, _, _, _)).Times(AnyNumber());
-    }
-    EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
+    SetupIgnoredCallExpectations();
 
     mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
     mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>(mWireServer.get());
@@ -62,13 +59,24 @@ void WireTest::TearDown() {
     // be reset before any mocks are deleted.
     // Incomplete client callbacks will be called on deletion, so the mocks
     // cannot be null.
+    api.IgnoreAllReleaseCalls();
     mWireClient = nullptr;
 }
 
 void WireTest::FlushClient() {
     ASSERT_TRUE(mC2sBuf->Flush());
+
+    Mock::VerifyAndClearExpectations(&api);
+    SetupIgnoredCallExpectations();
 }
 
 void WireTest::FlushServer() {
     ASSERT_TRUE(mS2cBuf->Flush());
+}
+
+void WireTest::SetupIgnoredCallExpectations() {
+    if (mIgnoreSetCallbackCalls) {
+        EXPECT_CALL(api, OnBuilderSetErrorCallback(_, _, _, _)).Times(AnyNumber());
+    }
+    EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
 }

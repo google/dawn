@@ -101,6 +101,8 @@ class MockProcTable : public ProcTableAsClass {
     public:
         MockProcTable();
 
+        void IgnoreAllReleaseCalls();
+
         {% for type in by_category["object"] %}
             {% for method in type.methods if len(method.arguments) < 10 %}
                 MOCK_METHOD{{len(method.arguments) + 1}}(
