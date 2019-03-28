@@ -156,27 +156,15 @@ void init() {
             fragColor = vec4(mix(f_col, vec3(0.5, 0.5, 0.5), 0.5), 1.0);
         })");
 
-    dawn::VertexAttributeDescriptor attribute[2];
-    attribute[0].shaderLocation = 0;
-    attribute[0].inputSlot = 0;
-    attribute[0].offset = 0;
-    attribute[0].format = dawn::VertexFormat::Float3;
-
-    attribute[1].shaderLocation = 1;
-    attribute[1].inputSlot = 0;
-    attribute[1].offset = 3 * sizeof(float);
-    attribute[1].format = dawn::VertexFormat::Float3;
-
-    dawn::VertexInputDescriptor input;
-    input.inputSlot = 0;
-    input.stride = 6 * sizeof(float);
-    input.stepMode = dawn::InputStepMode::Vertex;
-
-    dawn::InputStateDescriptor inputState;
+    utils::ComboInputStateDescriptor inputState;
     inputState.numAttributes = 2;
-    inputState.attributes = attribute;
+    inputState.cAttributes[0].format = dawn::VertexFormat::Float3;
+    inputState.cAttributes[1].shaderLocation = 1;
+    inputState.cAttributes[1].offset = 3 * sizeof(float);
+    inputState.cAttributes[1].format = dawn::VertexFormat::Float3;
+
     inputState.numInputs = 1;
-    inputState.inputs = &input;
+    inputState.cInputs[0].stride = 6 * sizeof(float);
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {

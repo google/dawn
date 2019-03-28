@@ -143,29 +143,29 @@ class InputStateTest : public DawnTest {
             uint32_t offset;
             VertexFormat format;
         };
-        dawn::InputStateDescriptor MakeInputState(std::vector<InputSpec> inputs,
-                                                  std::vector<AttributeSpec> attributes) {
-            dawn::InputStateDescriptor inputState;
+
+        utils::ComboInputStateDescriptor MakeInputState(
+            const std::vector<InputSpec>& inputs,
+            const std::vector<AttributeSpec>& attributes) {
+            utils::ComboInputStateDescriptor inputState;
             uint32_t numInputs = 0;
             for (const auto& input : inputs) {
-                vertexInputs[numInputs].inputSlot = input.slot;
-                vertexInputs[numInputs].stride = input.stride;
-                vertexInputs[numInputs].stepMode = input.step;
+                inputState.cInputs[numInputs].inputSlot = input.slot;
+                inputState.cInputs[numInputs].stride = input.stride;
+                inputState.cInputs[numInputs].stepMode = input.step;
                 numInputs++;
             }
 
             uint32_t numAttributes = 0;
             for (const auto& attribute : attributes) {
-                vertexAttributes[numAttributes].shaderLocation = attribute.location;
-                vertexAttributes[numAttributes].inputSlot = attribute.slot;
-                vertexAttributes[numAttributes].offset = attribute.offset;
-                vertexAttributes[numAttributes].format = attribute.format;
+                inputState.cAttributes[numAttributes].shaderLocation = attribute.location;
+                inputState.cAttributes[numAttributes].inputSlot = attribute.slot;
+                inputState.cAttributes[numAttributes].offset = attribute.offset;
+                inputState.cAttributes[numAttributes].format = attribute.format;
                 numAttributes++;
             }
             inputState.numInputs = numInputs;
-            inputState.inputs = vertexInputs;
             inputState.numAttributes = numAttributes;
-            inputState.attributes = vertexAttributes;
             return inputState;
         }
 
@@ -218,13 +218,11 @@ class InputStateTest : public DawnTest {
         }
 
         utils::BasicRenderPass renderPass;
-        dawn::VertexAttributeDescriptor vertexAttributes[kMaxVertexAttributes];
-        dawn::VertexInputDescriptor vertexInputs[kMaxVertexInputs];
 };
 
 // Test compilation and usage of the fixture :)
 TEST_P(InputStateTest, Basic) {
-    dawn::InputStateDescriptor inputState = MakeInputState(
+    utils::ComboInputStateDescriptor inputState = MakeInputState(
         {{0, 4 * sizeof(float), InputStepMode::Vertex}}, {{0, 0, 0, VertexFormat::Float4}});
     dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::Float4, InputStepMode::Vertex}
@@ -243,7 +241,7 @@ TEST_P(InputStateTest, ZeroStride) {
     // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
     DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
 
-    dawn::InputStateDescriptor inputState =
+    utils::ComboInputStateDescriptor inputState =
         MakeInputState({{0, 0, InputStepMode::Vertex}}, {{0, 0, 0, VertexFormat::Float4}});
     dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
         {0, VertexFormat::Float4, InputStepMode::Vertex}
@@ -262,7 +260,7 @@ TEST_P(InputStateTest, AttributeExpanding) {
 
     // R32F case
     {
-        dawn::InputStateDescriptor inputState =
+        utils::ComboInputStateDescriptor inputState =
             MakeInputState({{0, 0, InputStepMode::Vertex}}, {{0, 0, 0, VertexFormat::Float}});
         dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::Float, InputStepMode::Vertex}
@@ -275,7 +273,7 @@ TEST_P(InputStateTest, AttributeExpanding) {
     }
     // RG32F case
     {
-        dawn::InputStateDescriptor inputState =
+        utils::ComboInputStateDescriptor inputState =
             MakeInputState({{0, 0, InputStepMode::Vertex}}, {{0, 0, 0, VertexFormat::Float2}});
         dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::Float2, InputStepMode::Vertex}
@@ -288,7 +286,7 @@ TEST_P(InputStateTest, AttributeExpanding) {
     }
     // RGB32F case
     {
-        dawn::InputStateDescriptor inputState =
+        utils::ComboInputStateDescriptor inputState =
             MakeInputState({{0, 0, InputStepMode::Vertex}}, {{0, 0, 0, VertexFormat::Float3}});
         dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 0, {
             {0, VertexFormat::Float3, InputStepMode::Vertex}
@@ -306,7 +304,7 @@ TEST_P(InputStateTest, StrideLargerThanAttributes) {
     // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
     DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
 
-    dawn::InputStateDescriptor inputState = MakeInputState(
+    utils::ComboInputStateDescriptor inputState = MakeInputState(
         {{0, 8 * sizeof(float), InputStepMode::Vertex}}, {{0, 0, 0, VertexFormat::Float4}});
     dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::Float4, InputStepMode::Vertex}
@@ -322,7 +320,7 @@ TEST_P(InputStateTest, StrideLargerThanAttributes) {
 
 // Test two attributes at an offset, vertex version
 TEST_P(InputStateTest, TwoAttributesAtAnOffsetVertex) {
-    dawn::InputStateDescriptor inputState = MakeInputState(
+    utils::ComboInputStateDescriptor inputState = MakeInputState(
         {{0, 8 * sizeof(float), InputStepMode::Vertex}},
         {{0, 0, 0, VertexFormat::Float4}, {1, 0, 4 * sizeof(float), VertexFormat::Float4}});
     dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
@@ -339,7 +337,7 @@ TEST_P(InputStateTest, TwoAttributesAtAnOffsetVertex) {
 
 // Test two attributes at an offset, instance version
 TEST_P(InputStateTest, TwoAttributesAtAnOffsetInstance) {
-    dawn::InputStateDescriptor inputState = MakeInputState(
+    utils::ComboInputStateDescriptor inputState = MakeInputState(
         {{0, 8 * sizeof(float), InputStepMode::Instance}},
         {{0, 0, 0, VertexFormat::Float4}, {1, 0, 4 * sizeof(float), VertexFormat::Float4}});
     dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
@@ -356,7 +354,7 @@ TEST_P(InputStateTest, TwoAttributesAtAnOffsetInstance) {
 
 // Test a pure-instance input state
 TEST_P(InputStateTest, PureInstance) {
-    dawn::InputStateDescriptor inputState = MakeInputState(
+    utils::ComboInputStateDescriptor inputState = MakeInputState(
         {{0, 4 * sizeof(float), InputStepMode::Instance}}, {{0, 0, 0, VertexFormat::Float4}});
     dawn::RenderPipeline pipeline = MakeTestPipeline(inputState, 1, {
         {0, VertexFormat::Float4, InputStepMode::Instance}
@@ -374,7 +372,7 @@ TEST_P(InputStateTest, PureInstance) {
 // Test with mixed everything, vertex vs. instance, different stride and offsets
 // different attribute types
 TEST_P(InputStateTest, MixedEverything) {
-    dawn::InputStateDescriptor inputState = MakeInputState(
+    utils::ComboInputStateDescriptor inputState = MakeInputState(
         {
             {0, 12 * sizeof(float), InputStepMode::Vertex},
             {1, 10 * sizeof(float), InputStepMode::Instance},
@@ -408,7 +406,7 @@ TEST_P(InputStateTest, MixedEverything) {
 // Test input state is unaffected by unused vertex slot
 TEST_P(InputStateTest, UnusedVertexSlot) {
     // Instance input state, using slot 1
-    dawn::InputStateDescriptor instanceInputState = MakeInputState(
+    utils::ComboInputStateDescriptor instanceInputState = MakeInputState(
         {{1, 4 * sizeof(float), InputStepMode::Instance}}, {{0, 1, 0, VertexFormat::Float4}});
     dawn::RenderPipeline instancePipeline = MakeTestPipeline(
         instanceInputState, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
@@ -445,13 +443,13 @@ TEST_P(InputStateTest, UnusedVertexSlot) {
 // SetVertexBuffers should be reapplied when the input state changes.
 TEST_P(InputStateTest, MultiplePipelinesMixedInputState) {
     // Basic input state, using slot 0
-    dawn::InputStateDescriptor vertexInputState = MakeInputState(
+    utils::ComboInputStateDescriptor vertexInputState = MakeInputState(
         {{0, 4 * sizeof(float), InputStepMode::Vertex}}, {{0, 0, 0, VertexFormat::Float4}});
     dawn::RenderPipeline vertexPipeline = MakeTestPipeline(
         vertexInputState, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
 
     // Instance input state, using slot 1
-    dawn::InputStateDescriptor instanceInputState = MakeInputState(
+    utils::ComboInputStateDescriptor instanceInputState = MakeInputState(
         {{1, 4 * sizeof(float), InputStepMode::Instance}}, {{0, 1, 0, VertexFormat::Float4}});
     dawn::RenderPipeline instancePipeline = MakeTestPipeline(
         instanceInputState, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});

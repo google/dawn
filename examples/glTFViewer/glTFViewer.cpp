@@ -238,8 +238,6 @@ namespace {
         auto oFSModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, hasTexture ? oFSSourceTextured : oFSSourceUntextured);
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        dawn::VertexAttributeDescriptor attributes[kMaxVertexAttributes];
-        dawn::VertexInputDescriptor inputs[kMaxVertexInputs];
         uint32_t numAttributes = 0;
         uint32_t numInputs = 0;
         std::bitset<3> slotsSet;
@@ -251,31 +249,26 @@ namespace {
                 fprintf(stderr, "unsupported technique parameter type %d\n", iParameter.type);
                 continue;
             }
-            attributes[numAttributes].offset = 0;
-            attributes[numAttributes].format = format;
-            inputs[numInputs].stepMode = dawn::InputStepMode::Vertex;
+            descriptor.cInputState.cAttributes[numAttributes].format = format;
 
             if (iParameter.semantic == "POSITION") {
-                attributes[numAttributes].shaderLocation = 0;
-                attributes[numAttributes].inputSlot = 0;
-                inputs[numInputs].inputSlot = 0;
-                inputs[numInputs].stride = static_cast<uint32_t>(stridePos);
+                descriptor.cInputState.cInputs[numInputs].stride = static_cast<uint32_t>(stridePos);
                 numAttributes++;
                 numInputs++;
                 slotsSet.set(0);
             } else if (iParameter.semantic == "NORMAL") {
-                attributes[numAttributes].shaderLocation = 1;
-                attributes[numAttributes].inputSlot = 1;
-                inputs[numInputs].inputSlot = 1;
-                inputs[numInputs].stride = static_cast<uint32_t>(strideNor);
+                descriptor.cInputState.cAttributes[numAttributes].shaderLocation = 1;
+                descriptor.cInputState.cAttributes[numAttributes].inputSlot = 1;
+                descriptor.cInputState.cInputs[numInputs].inputSlot = 1;
+                descriptor.cInputState.cInputs[numInputs].stride = static_cast<uint32_t>(strideNor);
                 numAttributes++;
                 numInputs++;
                 slotsSet.set(1);
             } else if (iParameter.semantic == "TEXCOORD_0") {
-                attributes[numAttributes].shaderLocation = 2;
-                attributes[numAttributes].inputSlot = 2;
-                inputs[numInputs].inputSlot = 2;
-                inputs[numInputs].stride = static_cast<uint32_t>(strideTxc);
+                descriptor.cInputState.cAttributes[numAttributes].shaderLocation = 2;
+                descriptor.cInputState.cAttributes[numAttributes].inputSlot = 2;
+                descriptor.cInputState.cInputs[numInputs].inputSlot = 2;
+                descriptor.cInputState.cInputs[numInputs].stride = static_cast<uint32_t>(strideTxc);
                 numAttributes++;
                 numInputs++;
                 slotsSet.set(2);
@@ -287,22 +280,17 @@ namespace {
             if (slotsSet[i]) {
                 continue;
             }
-            attributes[numAttributes].offset = 0;
-            attributes[numAttributes].shaderLocation = i;
-            attributes[numAttributes].inputSlot = i;
-            attributes[numAttributes].format = dawn::VertexFormat::Float4;
+            descriptor.cInputState.cAttributes[numAttributes].shaderLocation = i;
+            descriptor.cInputState.cAttributes[numAttributes].inputSlot = i;
+            descriptor.cInputState.cAttributes[numAttributes].format = dawn::VertexFormat::Float4;
 
-            inputs[numInputs].inputSlot = i;
-            inputs[numInputs].stride = 0;
-            inputs[numInputs].stepMode = dawn::InputStepMode::Vertex;
+            descriptor.cInputState.cInputs[numInputs].inputSlot = i;
 
             numAttributes++;
             numInputs++;
         }
         descriptor.cInputState.numAttributes = numAttributes;
-        descriptor.cInputState.attributes = attributes;
         descriptor.cInputState.numInputs = numInputs;
-        descriptor.cInputState.inputs = inputs;
 
         constexpr dawn::ShaderStageBit kNoStages{};
         dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(

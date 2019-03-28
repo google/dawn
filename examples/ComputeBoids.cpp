@@ -114,31 +114,6 @@ void initRender() {
         }
     )");
 
-    dawn::VertexAttributeDescriptor attribute[3];
-    attribute[0].shaderLocation = 0;
-    attribute[0].inputSlot = 0;
-    attribute[0].offset = offsetof(Particle, pos);
-    attribute[0].format = dawn::VertexFormat::Float2;
-
-    attribute[1].shaderLocation = 1;
-    attribute[1].inputSlot = 0;
-    attribute[1].offset = offsetof(Particle, vel);
-    attribute[1].format = dawn::VertexFormat::Float2;
-
-    attribute[2].shaderLocation = 2;
-    attribute[2].inputSlot = 1;
-    attribute[2].offset = 0;
-    attribute[2].format = dawn::VertexFormat::Float2;
-
-    dawn::VertexInputDescriptor input[2];
-    input[0].inputSlot = 0;
-    input[0].stride = sizeof(Particle);
-    input[0].stepMode = dawn::InputStepMode::Instance;
-
-    input[1].inputSlot = 1;
-    input[1].stride = sizeof(glm::vec2);
-    input[1].stepMode = dawn::InputStepMode::Vertex;
-
     depthStencilView = CreateDefaultDepthStencilView(device);
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -146,9 +121,19 @@ void initRender() {
     descriptor.cFragmentStage.module = fsModule;
 
     descriptor.cInputState.numAttributes = 3;
-    descriptor.cInputState.attributes = attribute;
+    descriptor.cInputState.cAttributes[0].offset = offsetof(Particle, pos);
+    descriptor.cInputState.cAttributes[0].format = dawn::VertexFormat::Float2;
+    descriptor.cInputState.cAttributes[1].shaderLocation = 1;
+    descriptor.cInputState.cAttributes[1].offset = offsetof(Particle, vel);
+    descriptor.cInputState.cAttributes[1].format = dawn::VertexFormat::Float2;
+    descriptor.cInputState.cAttributes[2].shaderLocation = 2;
+    descriptor.cInputState.cAttributes[2].inputSlot = 1;
+    descriptor.cInputState.cAttributes[2].format = dawn::VertexFormat::Float2;
     descriptor.cInputState.numInputs = 2;
-    descriptor.cInputState.inputs = input;
+    descriptor.cInputState.cInputs[0].stride = sizeof(Particle);
+    descriptor.cInputState.cInputs[0].stepMode = dawn::InputStepMode::Instance;
+    descriptor.cInputState.cInputs[1].inputSlot = 1;
+    descriptor.cInputState.cInputs[1].stride = sizeof(glm::vec2);
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
     descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
     descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();

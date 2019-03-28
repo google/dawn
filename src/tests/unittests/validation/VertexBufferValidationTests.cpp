@@ -73,27 +73,14 @@ class VertexBufferValidationTest : public ValidationTest {
             descriptor.cVertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
 
-            dawn::VertexAttributeDescriptor attribute;
-            attribute.offset = 0;
-            attribute.format = dawn::VertexFormat::Float3;
-
-            dawn::VertexInputDescriptor input;
-            input.stride = 0;
-            input.stepMode = dawn::InputStepMode::Vertex;
-
-            dawn::VertexInputDescriptor vertexInputs[kMaxVertexInputs];
-            dawn::VertexAttributeDescriptor vertexAttributes[kMaxVertexAttributes];
             for (unsigned int i = 0; i < numInputs; ++i) {
-                attribute.shaderLocation = i;
-                attribute.inputSlot = i;
-                input.inputSlot = i;
-                vertexInputs[i] = input;
-                vertexAttributes[i] = attribute;
+                descriptor.cInputState.cAttributes[i].shaderLocation = i;
+                descriptor.cInputState.cAttributes[i].inputSlot = i;
+                descriptor.cInputState.cAttributes[i].format = dawn::VertexFormat::Float3;
+                descriptor.cInputState.cInputs[i].inputSlot = i;
             }
             descriptor.cInputState.numInputs = numInputs;
-            descriptor.cInputState.inputs = vertexInputs;
             descriptor.cInputState.numAttributes = numInputs;
-            descriptor.cInputState.attributes = vertexAttributes;
 
             return device.CreateRenderPipeline(&descriptor);
         }

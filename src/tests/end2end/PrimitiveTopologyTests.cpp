@@ -181,25 +181,14 @@ class PrimitiveTopologyTest : public DawnTest {
 
         // Draw the vertices with the given primitive topology and check the pixel values of the test locations
         void DoTest(dawn::PrimitiveTopology primitiveTopology, const std::vector<LocationSpec> &locationSpecs) {
-            dawn::VertexAttributeDescriptor attribute;
-            attribute.shaderLocation = 0;
-            attribute.inputSlot = 0;
-            attribute.offset = 0;
-            attribute.format = dawn::VertexFormat::Float4;
-
-            dawn::VertexInputDescriptor input;
-            input.inputSlot = 0;
-            input.stride = 4 * sizeof(float);
-            input.stepMode = dawn::InputStepMode::Vertex;
-
             utils::ComboRenderPipelineDescriptor descriptor(device);
             descriptor.cVertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
             descriptor.primitiveTopology = primitiveTopology;
             descriptor.cInputState.numInputs = 1;
-            descriptor.cInputState.inputs = &input;
+            descriptor.cInputState.cInputs[0].stride = 4 * sizeof(float);
             descriptor.cInputState.numAttributes = 1;
-            descriptor.cInputState.attributes = &attribute;
+            descriptor.cInputState.cAttributes[0].format = dawn::VertexFormat::Float4;
             descriptor.cColorStates[0]->format = renderPass.colorFormat;
 
             dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
