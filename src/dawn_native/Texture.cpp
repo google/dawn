@@ -376,14 +376,6 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError TextureBase::ValidateCanCreateTextureViewNow() const {
-        ASSERT(!IsError());
-        if (mState == TextureState::Destroyed) {
-            return DAWN_VALIDATION_ERROR("Destroyed texture used to create texture view");
-        }
-        return {};
-    }
-
     bool TextureBase::IsMultisampledTexture() const {
         ASSERT(!IsError());
         return mSampleCount > 1;
@@ -404,13 +396,26 @@ namespace dawn_native {
     }
 
     void TextureBase::Destroy() {
+        if (GetDevice()->ConsumedError(ValidateDestroy())) {
+            return;
+        }
+        ASSERT(!IsError());
+        DestroyInternal();
+    }
+
+    void TextureBase::DestroyImpl() {
+    }
+
+    void TextureBase::DestroyInternal() {
         if (mState == TextureState::OwnedInternal) {
             DestroyImpl();
         }
         mState = TextureState::Destroyed;
     }
 
-    void TextureBase::DestroyImpl() {
+    MaybeError TextureBase::ValidateDestroy() const {
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+        return {};
     }
 
     // TextureViewBase

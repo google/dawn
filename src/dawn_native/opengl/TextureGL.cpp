@@ -177,7 +177,7 @@ namespace dawn_native { namespace opengl {
     }
 
     Texture::~Texture() {
-        Destroy();
+        DestroyInternal();
     }
 
     void Texture::DestroyImpl() {

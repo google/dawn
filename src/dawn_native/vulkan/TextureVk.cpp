@@ -297,7 +297,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     Texture::~Texture() {
-        Destroy();
+        DestroyInternal();
     }
 
     void Texture::DestroyImpl() {

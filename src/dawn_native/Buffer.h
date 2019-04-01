@@ -70,6 +70,8 @@ namespace dawn_native {
                                   void* pointer,
                                   uint32_t dataLength);
 
+        void DestroyInternal();
+
       private:
         virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data);
         virtual void MapReadAsyncImpl(uint32_t serial) = 0;

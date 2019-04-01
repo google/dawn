@@ -61,7 +61,6 @@ namespace dawn_native {
         TextureState GetTextureState() const;
 
         MaybeError ValidateCanUseInSubmitNow() const;
-        MaybeError ValidateCanCreateTextureViewNow() const;
 
         bool IsMultisampledTexture() const;
 
@@ -70,10 +69,14 @@ namespace dawn_native {
         TextureViewBase* CreateTextureView(const TextureViewDescriptor* descriptor);
         void Destroy();
 
+      protected:
+        void DestroyInternal();
+
       private:
         TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
         virtual void DestroyImpl();
 
+        MaybeError ValidateDestroy() const;
         dawn::TextureDimension mDimension;
         dawn::TextureFormat mFormat;
         Extent3D mSize;

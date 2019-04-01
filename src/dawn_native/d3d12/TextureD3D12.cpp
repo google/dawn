@@ -141,7 +141,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     Texture::~Texture() {
-        Destroy();
+        DestroyInternal();
     }
 
     void Texture::DestroyImpl() {

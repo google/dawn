@@ -219,7 +219,7 @@ namespace dawn_native { namespace metal {
     }
 
     Texture::~Texture() {
-        Destroy();
+        DestroyInternal();
     }
 
     void Texture::DestroyImpl() {

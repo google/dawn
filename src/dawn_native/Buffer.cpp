@@ -235,8 +235,7 @@ namespace dawn_native {
         if (mState == BufferState::Mapped) {
             Unmap();
         }
-        DestroyImpl();
-        mState = BufferState::Destroyed;
+        DestroyInternal();
     }
 
     void BufferBase::Unmap() {
@@ -329,6 +328,13 @@ namespace dawn_native {
     MaybeError BufferBase::ValidateDestroy() const {
         DAWN_TRY(GetDevice()->ValidateObject(this));
         return {};
+    }
+
+    void BufferBase::DestroyInternal() {
+        if (mState != BufferState::Destroyed) {
+            DestroyImpl();
+        }
+        mState = BufferState::Destroyed;
     }
 
 }  // namespace dawn_native

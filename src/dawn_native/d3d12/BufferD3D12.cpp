@@ -105,7 +105,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     Buffer::~Buffer() {
-        DestroyImpl();
+        DestroyInternal();
     }
 
     uint32_t Buffer::GetD3D12Size() const {
