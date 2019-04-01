@@ -82,7 +82,7 @@ namespace dawn_native {
         ASSERT(!IsError());
 
         DeviceBase* device = GetDevice();
-        // TODO(cwallez@chromium.org): make errors here builder-level
+        // TODO(cwallez@chromium.org): make errors here creation errors
         // currently errors here do not prevent the shadermodule from being used
         const auto& resources = compiler.get_shader_resources();
 

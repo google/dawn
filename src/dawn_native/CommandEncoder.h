@@ -27,11 +27,7 @@
 namespace dawn_native {
 
     struct BeginRenderPassCmd;
-    class CommandBufferBuilder;
 
-    // CommandEncoder is temporarily a wrapper around CommandBufferBuilder so the two can coexist
-    // while code is migrated to the new shiny CommandEncoder interface. It captures any command
-    // buffer builder error and defers to trigger a device error when "Finish" is called.
     class CommandEncoderBase : public ObjectBase {
       public:
         CommandEncoderBase(DeviceBase* device);

@@ -39,14 +39,6 @@ def link_object(obj, types):
     obj.methods = [method for method in methods if not is_native_method(method)]
     obj.native_methods = [method for method in methods if is_native_method(method)]
 
-    # Compute the built object type for builders
-    if obj.is_builder:
-        for method in obj.methods:
-            if method.name.canonical_case() == "get result":
-                obj.built_type = method.return_type
-                break
-        assert(obj.built_type != None)
-
 def link_structure(struct, types):
     struct.members = common.linked_record_members(struct.json_data['members'], types)
 
@@ -276,10 +268,7 @@ def as_cProc(type_name, method_name):
 
 def as_frontendType(typ):
     if typ.category == 'object':
-        if typ.is_builder:
-            return typ.name.CamelCase() + '*'
-        else:
-            return typ.name.CamelCase() + 'Base*'
+        return typ.name.CamelCase() + 'Base*'
     elif typ.category in ['bitmask', 'enum']:
         return 'dawn::' + typ.name.CamelCase()
     elif typ.category == 'structure':
@@ -288,16 +277,7 @@ def as_frontendType(typ):
         return as_cType(typ.name)
 
 def cpp_native_methods(types, typ):
-    methods = typ.methods + typ.native_methods
-
-    if typ.is_builder:
-        methods.append(common.Method(Name('set error callback'), types['void'], [
-            common.RecordMember(Name('callback'), types['builder error callback'], 'value', False, False),
-            common.RecordMember(Name('userdata1'), types['callback userdata'], 'value', False, False),
-            common.RecordMember(Name('userdata2'), types['callback userdata'], 'value', False, False),
-        ]))
-
-    return methods
+    return typ.methods + typ.native_methods
 
 def c_native_methods(types, typ):
     return cpp_native_methods(types, typ) + [
@@ -346,7 +326,6 @@ def get_renders_for_targets(api_params, wire_json, targets):
     if 'dawn_headers' in targets:
         renders.append(FileRender('api.h', 'dawn/dawn.h', [base_params, api_params, c_params]))
         renders.append(FileRender('apicpp.h', 'dawn/dawncpp.h', [base_params, api_params, cpp_params]))
-        renders.append(FileRender('apicpp_traits.h', 'dawn/dawncpp_traits.h', [base_params, api_params, cpp_params]))
 
     if 'libdawn' in targets:
         additional_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}

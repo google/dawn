@@ -49,7 +49,6 @@ class Type:
         self.dict_name = name
         self.name = Name(name, native=native)
         self.category = json_data['category']
-        self.is_builder = self.name.canonical_case().endswith(" builder")
 
 EnumValue = namedtuple('EnumValue', ['name', 'value'])
 class EnumType(Type):

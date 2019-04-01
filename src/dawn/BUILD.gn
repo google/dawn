@@ -30,7 +30,6 @@ dawn_generator("dawn_headers_gen") {
   outputs = [
     "dawn/dawncpp.h",
     "dawn/dawn.h",
-    "dawn/dawncpp_traits.h",
   ]
 }
 

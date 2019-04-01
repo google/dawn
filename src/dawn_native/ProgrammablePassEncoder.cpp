@@ -18,6 +18,7 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 #include <string.h>
 
@@ -112,6 +113,10 @@ namespace dawn_native {
                                                    uint32_t count,
                                                    const void* data) {
         if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
+        if (mTopLevelEncoder->ConsumedError(ValidateShaderStageBit(stages))) {
             return;
         }
 

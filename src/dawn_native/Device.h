@@ -66,7 +66,7 @@ namespace dawn_native {
         virtual void TickImpl() = 0;
 
         // Many Dawn objects are completely immutable once created which means that if two
-        // builders are given the same arguments, they can return the same object. Reusing
+        // creations are given the same arguments, they can return the same object. Reusing
         // objects will help make comparisons between objects by a single pointer comparison.
         //
         // Technically no object is immutable as they have a reference count, and an
@@ -75,10 +75,10 @@ namespace dawn_native {
         // the client-server wire every creation will get a different proxy object, with a
         // different reference count.
         //
-        // When trying to create an object, we give both the builder and an example of what
-        // the built object will be, the "blueprint". The blueprint is just a FooBase object
+        // When trying to create an object, we give both the descriptor and an example of what
+        // the created object will be, the "blueprint". The blueprint is just a FooBase object
         // instead of a backend Foo object. If the blueprint doesn't match an object in the
-        // cache, then the builder is used to make a new object.
+        // cache, then the descriptor is used to make a new object.
         ResultOrError<BindGroupLayoutBase*> GetOrCreateBindGroupLayout(
             const BindGroupLayoutDescriptor* descriptor);
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
