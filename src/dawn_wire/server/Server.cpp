@@ -21,7 +21,6 @@ namespace dawn_wire { namespace server {
         // The client-server knowledge is bootstrapped with device 1.
         auto* deviceData = DeviceObjects().Allocate(1);
         deviceData->handle = device;
-        deviceData->valid = true;
 
         auto userdata = static_cast<DawnCallbackUserdata>(reinterpret_cast<intptr_t>(this));
         mProcs.deviceSetErrorCallback(device, ForwardDeviceError, userdata);
@@ -43,7 +42,6 @@ namespace dawn_wire { namespace server {
 
         data->handle = texture;
         data->serial = generation;
-        data->valid = true;
         data->allocated = true;
 
         // The texture is externally owned so it shouldn't be destroyed when we receive a destroy

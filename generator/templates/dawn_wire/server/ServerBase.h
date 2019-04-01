@@ -29,7 +29,7 @@ namespace dawn_wire { namespace server {
 
       protected:
         void DestroyAllObjects(const DawnProcTable& procs) {
-          //* Free all objects when the server is destroyed
+            //* Free all objects when the server is destroyed
             {% for type in by_category["object"] if type.name.canonical_case() != "device" %}
                 {
                     std::vector<{{as_cType(type.name)}}> handles = mKnown{{type.name.CamelCase()}}.AcquireAllHandles();
@@ -68,11 +68,7 @@ namespace dawn_wire { namespace server {
                 }
 
                 *out = data->handle;
-                if (data->valid) {
-                    return DeserializeResult::Success;
-                } else {
-                    return DeserializeResult::ErrorObject;
-                }
+                return DeserializeResult::Success;
             }
 
             DeserializeResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {

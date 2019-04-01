@@ -29,7 +29,6 @@ namespace dawn_wire {
     enum class DeserializeResult {
         Success,
         FatalError,
-        ErrorObject,
     };
 
     // Interface to allocate more space to deserialize pointed-to data.
@@ -40,8 +39,7 @@ namespace dawn_wire {
     };
 
     // Interface to convert an ID to a server object, if possible.
-    // Methods return FatalError if the ID is for a non-existent object, ErrorObject if the
-    // object is an error value and Success otherwise.
+    // Methods return FatalError if the ID is for a non-existent object and Success otherwise.
     class ObjectIdResolver {
         public:
             {% for type in by_category["object"] %}
@@ -101,10 +99,6 @@ namespace dawn_wire {
         //* Deserialize returns:
         //*  - Success if everything went well (yay!)
         //*  - FatalError is something bad happened (buffer too small for example)
-        //*  - ErrorObject if one if the deserialized object is an error value, for the implementation
-        //*    of the Maybe monad.
-        //* If the return value is not FatalError, selfId, resultId and resultSerial (if present) are
-        //* filled.
         DeserializeResult Deserialize(const char** buffer, size_t* size, DeserializeAllocator* allocator
             {%- if command.has_dawn_object -%}
                 , const ObjectIdResolver& resolver

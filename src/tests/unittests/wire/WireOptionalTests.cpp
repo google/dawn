@@ -49,6 +49,8 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
     bgDesc.bindings = &binding;
 
     dawnDeviceCreateBindGroup(device, &bgDesc);
+
+    DawnBindGroup apiDummyBindGroup = api.GetNewBindGroup();
     EXPECT_CALL(api, DeviceCreateBindGroup(
                          apiDevice, MatchesLambda([](const DawnBindGroupDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr && desc->bindingCount == 1 &&
@@ -57,7 +59,7 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
                                     desc->bindings[0].buffer == nullptr &&
                                     desc->bindings[0].textureView == nullptr;
                          })))
-        .WillOnce(Return(nullptr));
+        .WillOnce(Return(apiDummyBindGroup));
 
     FlushClient();
 }
@@ -147,6 +149,8 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     // First case: depthStencilState is not null.
     pipelineDescriptor.depthStencilState = &depthStencilState;
     dawnDeviceCreateRenderPipeline(device, &pipelineDescriptor);
+
+    DawnRenderPipeline apiDummyPipeline = api.GetNewRenderPipeline();
     EXPECT_CALL(
         api,
         DeviceCreateRenderPipeline(
@@ -172,7 +176,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
                        desc->depthStencilState->stencilReadMask == 0xff &&
                        desc->depthStencilState->stencilWriteMask == 0xff;
             })))
-        .WillOnce(Return(nullptr));
+        .WillOnce(Return(apiDummyPipeline));
 
     FlushClient();
 
@@ -184,7 +188,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
                     apiDevice, MatchesLambda([](const DawnRenderPipelineDescriptor* desc) -> bool {
                         return desc->depthStencilState == nullptr;
                     })))
-        .WillOnce(Return(nullptr));
+        .WillOnce(Return(apiDummyPipeline));
 
     FlushClient();
 }

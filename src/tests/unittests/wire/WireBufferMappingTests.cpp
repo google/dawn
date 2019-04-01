@@ -73,29 +73,16 @@ class WireBufferMappingTests : public WireTest {
         mockBufferMapReadCallback = std::make_unique<StrictMock<MockBufferMapReadCallback>>();
         mockBufferMapWriteCallback = std::make_unique<StrictMock<MockBufferMapWriteCallback>>();
 
-        {
-            DawnBufferDescriptor descriptor;
-            descriptor.nextInChain = nullptr;
+        DawnBufferDescriptor descriptor;
+        descriptor.nextInChain = nullptr;
 
-            apiBuffer = api.GetNewBuffer();
-            buffer = dawnDeviceCreateBuffer(device, &descriptor);
+        apiBuffer = api.GetNewBuffer();
+        buffer = dawnDeviceCreateBuffer(device, &descriptor);
 
-            EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
-                .WillOnce(Return(apiBuffer))
-                .RetiresOnSaturation();
-            FlushClient();
-        }
-        {
-            DawnBufferDescriptor descriptor;
-            descriptor.nextInChain = nullptr;
-
-            errorBuffer = dawnDeviceCreateBuffer(device, &descriptor);
-
-            EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
-                .WillOnce(Return(nullptr))
-                .RetiresOnSaturation();
-            FlushClient();
-        }
+        EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
+            .WillOnce(Return(apiBuffer))
+            .RetiresOnSaturation();
+        FlushClient();
     }
 
     void TearDown() override {
@@ -117,9 +104,6 @@ class WireBufferMappingTests : public WireTest {
     // A successfully created buffer
     DawnBuffer buffer;
     DawnBuffer apiBuffer;
-
-    // An buffer that wasn't created on the server side
-    DawnBuffer errorBuffer;
 };
 
 // MapRead-specific tests
@@ -171,35 +155,24 @@ TEST_F(WireBufferMappingTests, ErrorWhileMappingForRead) {
     FlushServer();
 }
 
-// Check mapping for reading a buffer that didn't get created on the server side
-TEST_F(WireBufferMappingTests, MappingForReadErrorBuffer) {
-    DawnCallbackUserdata userdata = 8655;
-    dawnBufferMapReadAsync(errorBuffer, ToMockBufferMapReadCallback, userdata);
-
-    FlushClient();
-
-    EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata))
-        .Times(1);
-
-    FlushServer();
-
-    dawnBufferUnmap(errorBuffer);
-
-    FlushClient();
-}
-
 // Check that the map read callback is called with UNKNOWN when the buffer is destroyed before the
 // request is finished
 TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
     DawnCallbackUserdata userdata = 8656;
-    dawnBufferMapReadAsync(errorBuffer, ToMockBufferMapReadCallback, userdata);
+    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, userdata);
 
+    // Return success
+    EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, nullptr, 0);
+        }));
+
+    // Destroy before the client gets the success, so the callback is called with unknown.
     EXPECT_CALL(*mockBufferMapReadCallback,
                 Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, userdata))
         .Times(1);
-
-    dawnBufferRelease(errorBuffer);
+    dawnBufferRelease(buffer);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
 
     FlushClient();
     FlushServer();
@@ -381,35 +354,27 @@ TEST_F(WireBufferMappingTests, ErrorWhileMappingForWrite) {
     FlushServer();
 }
 
-// Check mapping for writing a buffer that didn't get created on the server side
-TEST_F(WireBufferMappingTests, MappingForWriteErrorBuffer) {
-    DawnCallbackUserdata userdata = 8655;
-    dawnBufferMapWriteAsync(errorBuffer, ToMockBufferMapWriteCallback, userdata);
-
-    FlushClient();
-
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata))
-        .Times(1);
-
-    FlushServer();
-
-    dawnBufferUnmap(errorBuffer);
-
-    FlushClient();
-}
-
 // Check that the map write callback is called with UNKNOWN when the buffer is destroyed before the
 // request is finished
 TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
     DawnCallbackUserdata userdata = 8656;
-    dawnBufferMapWriteAsync(errorBuffer, ToMockBufferMapWriteCallback, userdata);
+    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, userdata);
 
+    // Return success
+    EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, nullptr, 0);
+        }));
+
+    // Destroy before the client gets the success, so the callback is called with unknown.
     EXPECT_CALL(*mockBufferMapWriteCallback,
                 Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, userdata))
         .Times(1);
+    dawnBufferRelease(buffer);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
 
-    dawnBufferRelease(errorBuffer);
+    FlushClient();
+    FlushServer();
 }
 
 // Check the map read callback is called with UNKNOWN when the map request would have worked, but

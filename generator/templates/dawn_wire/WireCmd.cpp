@@ -83,7 +83,7 @@
 //* Methods are very similar to structures that have one member corresponding to each arguments.
 //* This macro takes advantage of the similarity to output [de]serialization code for a record
 //* that is either a structure or a method, with some special cases for each.
-{% macro write_record_serialization_helpers(record, name, members, is_cmd=False, is_method=False, is_return_command=False) %}
+{% macro write_record_serialization_helpers(record, name, members, is_cmd=False, is_return_command=False) %}
     {% set Return = "Return" if is_return_command else "" %}
     {% set Cmd = "Cmd" if is_cmd else "" %}
 
@@ -218,51 +218,12 @@
             ASSERT(transfer->commandId == {{Return}}WireCmd::{{name}});
         {% endif %}
 
-        //* First assign result ObjectHandles:
-        //* Deserialize guarantees they are filled even if there is an ID for an error object
-        //* for the Maybe monad mechanism.
-        //* TODO(enga): This won't need to be done first once we have "WebGPU error handling".
-        {% set return_handles = members
-          |selectattr("is_return_value")
-          |selectattr("annotation", "equalto", "value")
-          |selectattr("type.dict_name", "equalto", "ObjectHandle")
-          |list %}
-
-        //* Strip return_handles so we don't deserialize it again
-        {% set members = members|reject("in", return_handles)|list %}
-
-        {% for member in return_handles %}
-            {% set memberName = as_varName(member.name) %}
-            {{deserialize_member(member, "transfer->" + memberName, "record->" + memberName)}}
-        {% endfor %}
-
-        //* Handle special transfer members for methods
-        {% if is_method %}
-            //* First assign selfId:
-            //* Deserialize guarantees they are filled even if there is an ID for an error object
-            //* for the Maybe monad mechanism.
-            //* TODO(enga): This won't need to be done first once we have "WebGPU error handling".
-            //*             We can also remove is_method
-            record->selfId = transfer->self;
-            //* This conversion is done after the copying of result* and selfId: Deserialize
-            //* guarantees they are filled even if there is an ID for an error object for the
-            //* Maybe monad mechanism.
-            DESERIALIZE_TRY(resolver.GetFromId(record->selfId, &record->self));
-
-            //* Strip self so we don't deserialize it again
-            {% set members = members|rejectattr("name.chunks", "equalto", ["self"])|list %}
-
-            //* The object resolver returns a success even if the object is null because the
-            //* frontend is responsible to validate that (null objects sometimes have special
-            //* meanings). However it is never valid to call a method on a null object so we
-            //* can error out in that case.
-            if (record->self == nullptr) {
-                return DeserializeResult::FatalError;
-            }
-        {% endif %}
-
         {% if record.extensible %}
             record->nextInChain = nullptr;
+        {% endif %}
+
+        {% if record.derived_method %}
+            record->selfId = transfer->self;
         {% endif %}
 
         //* Value types are directly in the transfer record, objects being replaced with their IDs.
@@ -428,15 +389,14 @@ namespace dawn_wire {
         {% for command in cmd_records["command"] %}
             {% set name = command.name.CamelCase() %}
             {{write_record_serialization_helpers(command, name, command.members,
-              is_cmd=True, is_method=command.derived_method != None)}}
+              is_cmd=True)}}
         {% endfor %}
 
         //* Output [de]serialization helpers for return commands
         {% for command in cmd_records["return command"] %}
             {% set name = command.name.CamelCase() %}
             {{write_record_serialization_helpers(command, name, command.members,
-              is_cmd=True, is_method=command.derived_method != None,
-              is_return_command=True)}}
+              is_cmd=True, is_return_command=True)}}
         {% endfor %}
     }  // anonymous namespace
 

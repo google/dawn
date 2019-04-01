@@ -37,7 +37,8 @@ TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
     ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation));
 
     dawnTextureCreateDefaultTextureView(reservation.texture);
-    EXPECT_CALL(api, TextureCreateDefaultTextureView(apiTexture)).WillOnce(Return(nullptr));
+    DawnTextureView apiDummyView = api.GetNewTextureView();
+    EXPECT_CALL(api, TextureCreateDefaultTextureView(apiTexture)).WillOnce(Return(apiDummyView));
     FlushClient();
 }
 

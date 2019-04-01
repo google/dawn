@@ -42,15 +42,6 @@ namespace dawn_wire { namespace client {
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
                         auto* allocation = self->device->GetClient()->{{method.return_type.name.CamelCase()}}Allocator().New(self->device);
-
-                        {% if type.is_builder %}
-                            //* We are in GetResult, so the callback that should be called is the
-                            //* currently set one. Copy it over to the created object and prevent the
-                            //* builder from calling the callback on destruction.
-                            allocation->object->builderCallback = self->builderCallback;
-                            self->builderCallback.canCall = false;
-                        {% endif %}
-
                         cmd.result = ObjectHandle{allocation->object->id, allocation->serial};
                     {% endif %}
 
@@ -70,18 +61,6 @@ namespace dawn_wire { namespace client {
             {% endif %}
         {% endfor %}
 
-        {% if type.is_builder %}
-            void Client{{as_MethodSuffix(type.name, Name("set error callback"))}}({{cType}} cSelf,
-                                                                                  DawnBuilderErrorCallback callback,
-                                                                                  DawnCallbackUserdata userdata1,
-                                                                                  DawnCallbackUserdata userdata2) {
-                {{Type}}* self = reinterpret_cast<{{Type}}*>(cSelf);
-                self->builderCallback.callback = callback;
-                self->builderCallback.userdata1 = userdata1;
-                self->builderCallback.userdata2 = userdata2;
-            }
-        {% endif %}
-
         {% if not type.name.canonical_case() == "device" %}
             //* When an object's refcount reaches 0, notify the server side of it and delete it.
             void Client{{as_MethodSuffix(type.name, Name("release"))}}({{cType}} cObj) {
@@ -91,8 +70,6 @@ namespace dawn_wire { namespace client {
                 if (obj->refcount > 0) {
                     return;
                 }
-
-                obj->builderCallback.Call(DAWN_BUILDER_ERROR_STATUS_UNKNOWN, "Unknown");
 
                 DestroyObjectCmd cmd;
                 cmd.objectType = ObjectType::{{type.name.CamelCase()}};

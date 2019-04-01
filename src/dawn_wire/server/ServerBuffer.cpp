@@ -52,17 +52,6 @@ namespace dawn_wire { namespace server {
 
         auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
 
-        if (!buffer->valid) {
-            // Fake the buffer returning a failure, data will be freed in this call.
-            if (isWrite) {
-                ForwardBufferMapWriteAsync(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0,
-                                           userdata);
-            } else {
-                ForwardBufferMapReadAsync(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata);
-            }
-            return true;
-        }
-
         if (isWrite) {
             mProcs.bufferMapWriteAsync(buffer->handle, ForwardBufferMapWriteAsync, userdata);
         } else {
@@ -79,8 +68,7 @@ namespace dawn_wire { namespace server {
         }
 
         auto* buffer = BufferObjects().Get(bufferId);
-        if (buffer == nullptr || !buffer->valid || buffer->mappedData == nullptr ||
-            buffer->mappedDataSize != count) {
+        if (buffer == nullptr || buffer->mappedData == nullptr || buffer->mappedDataSize != count) {
             return false;
         }
 

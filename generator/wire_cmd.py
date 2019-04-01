@@ -57,20 +57,6 @@ def compute_wire_params(api_params, wire_json):
             command.derived_method = method
             commands.append(command)
 
-        # Create builder return ErrorCallback commands
-        # This can be removed when WebGPU error handling is implemented
-        if api_object.is_builder:
-            command_name = concat_names(api_object.name, Name('error callback'))
-            built_object = common.RecordMember(Name('built object'), types['ObjectHandle'], 'value', False, False)
-            built_object.set_handle_type(api_object.built_type)
-            command = common.Command(command_name, [
-                built_object,
-                callback_status_member,
-                string_message_member,
-            ])
-            command.derived_object = api_object
-            return_commands.append(command)
-
     for (name, json_data) in wire_json['commands'].items():
         commands.append(common.Command(name, common.linked_record_members(json_data, types)))
 

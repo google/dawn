@@ -53,6 +53,11 @@ namespace dawn_wire { namespace server {
                             {%- if not loop.last -%}, {% endif %}
                         {%- endfor -%}
                     );
+                    {% if ret|length == 1 %}
+                        //* WebGPU error handling guarantees that no null object can be returned by
+                        //* object creation functions.
+                        ASSERT(*{{as_varName(ret[0].name)}} != nullptr);
+                    {% endif %}
                     return true;
                 }
             {% endif %}

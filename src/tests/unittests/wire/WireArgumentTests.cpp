@@ -158,12 +158,14 @@ TEST_F(WireArgumentTests, CStringArgument) {
     pipelineDescriptor.depthStencilState = &depthStencilState;
 
     dawnDeviceCreateRenderPipeline(device, &pipelineDescriptor);
+
+    DawnRenderPipeline apiDummyPipeline = api.GetNewRenderPipeline();
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
                     apiDevice, MatchesLambda([](const DawnRenderPipelineDescriptor* desc) -> bool {
                         return desc->vertexStage->entryPoint == std::string("main");
                     })))
-        .WillOnce(Return(nullptr));
+        .WillOnce(Return(apiDummyPipeline));
 
     FlushClient();
 }
@@ -247,6 +249,8 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
     descriptor.borderColor = DAWN_BORDER_COLOR_TRANSPARENT_BLACK;
 
     dawnDeviceCreateSampler(device, &descriptor);
+
+    DawnSampler apiDummySampler = api.GetNewSampler();
     EXPECT_CALL(api, DeviceCreateSampler(
                          apiDevice, MatchesLambda([](const DawnSamplerDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr &&
@@ -260,7 +264,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
                                     desc->borderColor == DAWN_BORDER_COLOR_TRANSPARENT_BLACK &&
                                     desc->lodMinClamp == kLodMin && desc->lodMaxClamp == kLodMax;
                          })))
-        .WillOnce(Return(nullptr));
+        .WillOnce(Return(apiDummySampler));
 
     FlushClient();
 }
@@ -281,6 +285,8 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
     descriptor.bindGroupLayouts = &bgl;
 
     dawnDeviceCreatePipelineLayout(device, &descriptor);
+
+    DawnPipelineLayout apiDummyLayout = api.GetNewPipelineLayout();
     EXPECT_CALL(api, DeviceCreatePipelineLayout(
                          apiDevice,
                          MatchesLambda([apiBgl](const DawnPipelineLayoutDescriptor* desc) -> bool {
@@ -288,7 +294,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
                                     desc->bindGroupLayoutCount == 1 &&
                                     desc->bindGroupLayouts[0] == apiBgl;
                          })))
-        .WillOnce(Return(nullptr));
+        .WillOnce(Return(apiDummyLayout));
 
     FlushClient();
 }

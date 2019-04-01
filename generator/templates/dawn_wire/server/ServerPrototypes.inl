@@ -12,17 +12,6 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-// Forwarding callbacks
-{% for type in by_category["object"] if type.is_builder%}
-    static void Forward{{type.name.CamelCase()}}(DawnBuilderErrorStatus status, const char* message, DawnCallbackUserdata userdata1, DawnCallbackUserdata userdata2);
-{% endfor %}
-
-// Error callbacks
-{% for type in by_category["object"] if type.is_builder%}
-    {% set Type = type.name.CamelCase() %}
-    void On{{Type}}Error(DawnBuilderErrorStatus status, const char* message, uint32_t id, uint32_t serial);
-{% endfor %}
-
 // Command handlers & doers
 {% for command in cmd_records["command"] if command.name.CamelCase() not in client_side_commands %}
     {% set Suffix = command.name.CamelCase() %}

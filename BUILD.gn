@@ -396,18 +396,15 @@ dawn_component("libdawn_native") {
 dawn_generator("libdawn_wire_gen") {
   target = "dawn_wire"
   outputs = [
-    "dawn_wire/TypeTraits_autogen.h",
     "dawn_wire/WireCmd_autogen.h",
     "dawn_wire/WireCmd_autogen.cpp",
     "dawn_wire/client/ApiObjects_autogen.h",
     "dawn_wire/client/ApiProcs_autogen.cpp",
     "dawn_wire/client/ApiProcs_autogen.h",
     "dawn_wire/client/ClientBase_autogen.h",
-    "dawn_wire/client/ClientDoers_autogen.cpp",
     "dawn_wire/client/ClientHandlers_autogen.cpp",
     "dawn_wire/client/ClientPrototypes_autogen.inl",
     "dawn_wire/server/ServerBase_autogen.h",
-    "dawn_wire/server/ServerCallbacks_autogen.cpp",
     "dawn_wire/server/ServerDoers_autogen.cpp",
     "dawn_wire/server/ServerHandlers_autogen.cpp",
     "dawn_wire/server/ServerPrototypes_autogen.inl",

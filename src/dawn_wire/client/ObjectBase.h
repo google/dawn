@@ -21,24 +21,6 @@ namespace dawn_wire { namespace client {
 
     class Device;
 
-    struct BuilderCallbackData {
-        bool Call(DawnBuilderErrorStatus status, const char* message) {
-            if (canCall && callback != nullptr) {
-                canCall = true;
-                callback(status, message, userdata1, userdata2);
-                return true;
-            }
-
-            return false;
-        }
-
-        // For help with development, prints all builder errors by default.
-        DawnBuilderErrorCallback callback = nullptr;
-        DawnCallbackUserdata userdata1 = 0;
-        DawnCallbackUserdata userdata2 = 0;
-        bool canCall = true;
-    };
-
     // All non-Device objects of the client side have:
     //  - A pointer to the device to get where to serialize commands
     //  - The external reference count
@@ -51,8 +33,6 @@ namespace dawn_wire { namespace client {
         Device* device;
         uint32_t refcount;
         uint32_t id;
-
-        BuilderCallbackData builderCallback;
     };
 
 }}  // namespace dawn_wire::client
