@@ -54,22 +54,6 @@ ValidationTest::~ValidationTest() {
 
 void ValidationTest::TearDown() {
     ASSERT_FALSE(mExpectError);
-
-    for (auto& expectation : mExpectations) {
-        std::string name = expectation.debugName;
-        if (name.empty()) {
-            name = "<no debug name set>";
-        }
-
-        ASSERT_TRUE(expectation.gotStatus) << "Didn't get a status for " << name;
-
-        ASSERT_NE(DAWN_BUILDER_ERROR_STATUS_UNKNOWN, expectation.status) << "Got unknown status for " << name;
-
-        bool wasSuccess = expectation.status == DAWN_BUILDER_ERROR_STATUS_SUCCESS;
-        ASSERT_EQ(expectation.expectSuccess, wasSuccess)
-            << "Got wrong status value for " << name
-            << ", status was " << expectation.status << " with \"" << expectation.statusMessage << "\"";
-    }
 }
 
 void ValidationTest::StartExpectDeviceError() {
@@ -89,30 +73,9 @@ void ValidationTest::OnDeviceError(const char* message, DawnCallbackUserdata use
     auto self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata));
     self->mDeviceErrorMessage = message;
 
-    // Skip this one specific error that is raised when a builder is used after it got an error
-    // this is important because we don't want to wrap all creation tests in ASSERT_DEVICE_ERROR.
-    // Yes the error message is misleading.
-    if (self->mDeviceErrorMessage == "Builder cannot be used after GetResult") {
-        return;
-    }
-
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
     ASSERT_FALSE(self->mError) << "Got two errors in expect block";
     self->mError = true;
-}
-
-// static
-void ValidationTest::OnBuilderErrorStatus(DawnBuilderErrorStatus status, const char* message, dawn::CallbackUserdata userdata1, dawn::CallbackUserdata userdata2) {
-    auto* self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata1));
-    size_t index = static_cast<size_t>(userdata2);
-
-    ASSERT_LT(index, self->mExpectations.size());
-
-    auto& expectation = self->mExpectations[index];
-    ASSERT_FALSE(expectation.gotStatus);
-    expectation.gotStatus = true;
-    expectation.status = status;
-    expectation.statusMessage = message;
 }
 
 ValidationTest::DummyRenderPass::DummyRenderPass(const dawn::Device& device)
