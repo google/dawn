@@ -553,8 +553,8 @@
     "filter mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name":"nearest"},
-            {"value": 1, "name":"linear"}
+            {"value": 0, "name": "nearest"},
+            {"value": 1, "name": "linear"}
         ]
     },
     "float": {

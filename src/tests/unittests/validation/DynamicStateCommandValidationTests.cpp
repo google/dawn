@@ -62,8 +62,6 @@ TEST_F(SetScissorRectTest, EmptyScissor) {
 }
 
 // Test to check that a scissor larger than the framebuffer is allowed
-// TODO(cwallez@chromium.org): scissor values seem to be integers in all APIs do the same
-// and test negative values?
 TEST_F(SetScissorRectTest, ScissorLargerThanFramebuffer) {
     DummyRenderPass renderPass(device);
 
