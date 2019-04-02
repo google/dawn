@@ -466,4 +466,4 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
 }
 
 // TODO(jiawei.shao@intel.com): enable multisampled rendering on all Dawn backends.
-DAWN_INSTANTIATE_TEST(MultisampledRenderingTest, OpenGLBackend);
+DAWN_INSTANTIATE_TEST(MultisampledRenderingTest, D3D12Backend, OpenGLBackend);

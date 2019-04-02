@@ -50,7 +50,7 @@ namespace dawn_native { namespace d3d12 {
             D3D12_TEXTURE_COPY_LOCATION copyLocation;
             copyLocation.pResource = texture.GetD3D12Resource();
             copyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-            copyLocation.SubresourceIndex = texture.GetNumMipLevels() * slice + level;
+            copyLocation.SubresourceIndex = texture.GetSubresourceIndex(level, slice);
 
             return copyLocation;
         }
@@ -343,6 +343,37 @@ namespace dawn_native { namespace d3d12 {
                     bindingTracker->samplerGPUDescriptorHeap.GetCPUHandle(0),
                     bindingTracker->samplerCPUDescriptorHeap.GetCPUHandle(0),
                     D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+            }
+        }
+
+        void ResolveMultisampledRenderPass(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                           BeginRenderPassCmd* renderPass) {
+            ASSERT(renderPass != nullptr);
+
+            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                TextureViewBase* resolveTarget =
+                    renderPass->colorAttachments[i].resolveTarget.Get();
+                if (resolveTarget == nullptr) {
+                    continue;
+                }
+
+                Texture* colorTexture =
+                    ToBackend(renderPass->colorAttachments[i].view->GetTexture());
+                Texture* resolveTexture = ToBackend(resolveTarget->GetTexture());
+
+                // Transition the usages of the color attachment and resolve target.
+                colorTexture->TransitionUsageNow(commandList, D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
+                resolveTexture->TransitionUsageNow(commandList, D3D12_RESOURCE_STATE_RESOLVE_DEST);
+
+                // Do MSAA resolve with ResolveSubResource().
+                ID3D12Resource* colorTextureHandle = colorTexture->GetD3D12Resource();
+                ID3D12Resource* resolveTextureHandle = resolveTexture->GetD3D12Resource();
+                const uint32_t resolveTextureSubresourceIndex = resolveTexture->GetSubresourceIndex(
+                    resolveTarget->GetBaseMipLevel(), resolveTarget->GetBaseArrayLayer());
+                constexpr uint32_t kColorTextureSubresourceIndex = 0;
+                commandList->ResolveSubresource(
+                    resolveTextureHandle, resolveTextureSubresourceIndex, colorTextureHandle,
+                    kColorTextureSubresourceIndex, colorTexture->GetD3D12Format());
             }
         }
 
@@ -734,6 +765,12 @@ namespace dawn_native { namespace d3d12 {
             switch (type) {
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
+
+                    // TODO(brandon1.jones@intel.com): avoid calling this function and enable MSAA
+                    // resolve in D3D12 render pass on the platforms that support this feature.
+                    if (renderPass->sampleCount > 1) {
+                        ResolveMultisampledRenderPass(commandList, renderPass);
+                    }
                     return;
                 } break;
 

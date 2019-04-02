@@ -36,6 +36,10 @@ namespace dawn_native { namespace d3d12 {
 
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                 dawn::TextureUsageBit usage);
+        void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                D3D12_RESOURCE_STATES newState);
+
+        uint32_t GetSubresourceIndex(uint32_t mipmapLevel, uint32_t arraySlice) const;
 
       private:
         // Dawn API
@@ -45,7 +49,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12Resource> mResource = {};
         ID3D12Resource* mResourcePtr = nullptr;
-        dawn::TextureUsageBit mLastUsage = dawn::TextureUsageBit::None;
+        D3D12_RESOURCE_STATES mLastState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
     };
 
     class TextureView : public TextureViewBase {

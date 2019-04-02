@@ -351,7 +351,7 @@ namespace dawn_native { namespace d3d12 {
         descriptorD3D12.RasterizerState.SlopeScaledDepthBias =
             D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
         descriptorD3D12.RasterizerState.DepthClipEnable = TRUE;
-        descriptorD3D12.RasterizerState.MultisampleEnable = FALSE;
+        descriptorD3D12.RasterizerState.MultisampleEnable = (GetSampleCount() > 1) ? TRUE : FALSE;
         descriptorD3D12.RasterizerState.AntialiasedLineEnable = FALSE;
         descriptorD3D12.RasterizerState.ForcedSampleCount = 0;
         descriptorD3D12.RasterizerState.ConservativeRaster =
@@ -376,7 +376,8 @@ namespace dawn_native { namespace d3d12 {
 
         descriptorD3D12.SampleMask = UINT_MAX;
         descriptorD3D12.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());
-        descriptorD3D12.SampleDesc.Count = 1;
+        descriptorD3D12.SampleDesc.Count = GetSampleCount();
+        descriptorD3D12.SampleDesc.Quality = 0;
 
         ASSERT_SUCCESS(device->GetD3D12Device()->CreateGraphicsPipelineState(
             &descriptorD3D12, IID_PPV_ARGS(&mPipelineState)));

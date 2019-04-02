@@ -54,13 +54,19 @@ namespace dawn_native { namespace d3d12 {
         }
 
         D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::TextureUsageBit usage,
-                                                dawn::TextureFormat format) {
+                                                dawn::TextureFormat format,
+                                                bool isMultisampledTexture) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
             if (usage & dawn::TextureUsageBit::Storage) {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
             }
-            if (usage & dawn::TextureUsageBit::OutputAttachment) {
+
+            // A multisampled resource must have either D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET or
+            // D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL set in D3D12_RESOURCE_DESC::Flags.
+            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_resource
+            // _desc
+            if ((usage & dawn::TextureUsageBit::OutputAttachment) || isMultisampledTexture) {
                 if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
                 } else {
@@ -120,10 +126,12 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.DepthOrArraySize = GetDepthOrArraySize();
         resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
         resourceDescriptor.Format = D3D12TextureFormat(GetFormat());
-        resourceDescriptor.SampleDesc.Count = 1;
+        resourceDescriptor.SampleDesc.Count = descriptor->sampleCount;
+        // TODO(bryan.bernhart@intel.com): investigate how to specify standard MSAA sample pattern.
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage(), GetFormat());
+        resourceDescriptor.Flags =
+            D3D12ResourceFlags(GetUsage(), GetFormat(), IsMultisampledTexture());
 
         mResource = ToBackend(GetDevice())
                         ->GetResourceAllocator()
@@ -169,26 +177,32 @@ namespace dawn_native { namespace d3d12 {
 
     void Texture::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                      dawn::TextureUsageBit usage) {
+        TransitionUsageNow(commandList, D3D12TextureUsage(usage, GetFormat()));
+    }
+
+    void Texture::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                     D3D12_RESOURCE_STATES newState) {
         // Avoid transitioning the texture when it isn't needed.
         // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
-        if (usage == mLastUsage) {
+        if (mLastState == newState) {
             return;
         }
-
-        D3D12_RESOURCE_STATES lastState = D3D12TextureUsage(mLastUsage, GetFormat());
-        D3D12_RESOURCE_STATES newState = D3D12TextureUsage(usage, GetFormat());
 
         D3D12_RESOURCE_BARRIER barrier;
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
         barrier.Transition.pResource = mResourcePtr;
-        barrier.Transition.StateBefore = lastState;
+        barrier.Transition.StateBefore = mLastState;
         barrier.Transition.StateAfter = newState;
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
         commandList->ResourceBarrier(1, &barrier);
 
-        mLastUsage = usage;
+        mLastState = newState;
+    }
+
+    uint32_t Texture::GetSubresourceIndex(uint32_t mipmapLevel, uint32_t arraySlice) const {
+        return GetNumMipLevels() * arraySlice + mipmapLevel;
     }
 
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
@@ -202,6 +216,7 @@ namespace dawn_native { namespace d3d12 {
         // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_srv
         // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array_srv
         // TODO(jiawei.shao@intel.com): support more texture view dimensions.
+        // TODO(jiawei.shao@intel.com): support creating SRV on multisampled textures.
         switch (descriptor->dimension) {
             case dawn::TextureViewDimension::e2D:
             case dawn::TextureViewDimension::e2DArray:
@@ -242,26 +257,43 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(GetTexture()->GetDimension() == dawn::TextureDimension::e2D);
         D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
         rtvDesc.Format = GetD3D12Format();
-        // Currently we always use D3D12_TEX2D_ARRAY_RTV because we cannot specify base array layer
-        // and layer count in D3D12_TEX2D_RTV. For 2D texture views, we treat them as 1-layer 2D
-        // array textures. (Just like how we treat SRVs)
-        // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_rtv
-        // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array_rtv
-        rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-        rtvDesc.Texture2DArray.FirstArraySlice = GetBaseArrayLayer();
-        rtvDesc.Texture2DArray.ArraySize = GetLayerCount();
-        rtvDesc.Texture2DArray.MipSlice = GetBaseMipLevel();
-        rtvDesc.Texture2DArray.PlaneSlice = 0;
+        if (GetTexture()->IsMultisampledTexture()) {
+            ASSERT(GetTexture()->GetArrayLayers() == 1 && GetTexture()->GetNumMipLevels() == 1 &&
+                   GetBaseArrayLayer() == 0 && GetBaseMipLevel() == 0);
+            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
+        } else {
+            // Currently we always use D3D12_TEX2D_ARRAY_RTV because we cannot specify base array
+            // layer and layer count in D3D12_TEX2D_RTV. For 2D texture views, we treat them as
+            // 1-layer 2D array textures. (Just like how we treat SRVs)
+            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_rtv
+            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array
+            // _rtv
+            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+            rtvDesc.Texture2DArray.FirstArraySlice = GetBaseArrayLayer();
+            rtvDesc.Texture2DArray.ArraySize = GetLayerCount();
+            rtvDesc.Texture2DArray.MipSlice = GetBaseMipLevel();
+            rtvDesc.Texture2DArray.PlaneSlice = 0;
+        }
+
         return rtvDesc;
     }
 
-    // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
     D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor() const {
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
         dsvDesc.Format = ToBackend(GetTexture())->GetD3D12Format();
-        dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-        dsvDesc.Texture2D.MipSlice = 0;
         dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+        // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
+        ASSERT(GetTexture()->GetArrayLayers() == 1 && GetTexture()->GetNumMipLevels() == 1 &&
+               GetBaseArrayLayer() == 0 && GetBaseMipLevel() == 0);
+
+        if (GetTexture()->IsMultisampledTexture()) {
+            dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
+        } else {
+            dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+            dsvDesc.Texture2D.MipSlice = 0;
+        }
+
         return dsvDesc;
     }
 
