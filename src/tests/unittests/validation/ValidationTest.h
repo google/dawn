@@ -17,7 +17,6 @@
 
 #include "gtest/gtest.h"
 #include "dawn/dawncpp.h"
-#include "dawn/dawncpp_traits.h"
 
 namespace dawn_native {
     class Instance;
