@@ -115,6 +115,10 @@ namespace dawn_native {
         if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
             return;
         }
+        if (width == 0 || height == 0) {
+            mTopLevelEncoder->HandleError("Width and height must be greater than 0.");
+            return;
+        }
 
         SetScissorRectCmd* cmd = mAllocator->Allocate<SetScissorRectCmd>(Command::SetScissorRect);
         new (cmd) SetScissorRectCmd;

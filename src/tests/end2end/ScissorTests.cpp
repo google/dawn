@@ -91,32 +91,6 @@ TEST_P(ScissorTest, LargerThanAttachment) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 99, 99);
 }
 
-// Test setting an empty scissor rect
-TEST_P(ScissorTest, EmptyRect) {
-    DAWN_SKIP_TEST_IF(IsMetal());
-    DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
-    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
-    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
-
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-        pass.SetPipeline(pipeline);
-        pass.SetScissorRect(0, 0, 0, 0);
-        pass.Draw(6, 1, 0, 0);
-        pass.EndPass();
-    }
-
-    dawn::CommandBuffer commands = encoder.Finish();
-    queue.Submit(1, &commands);
-
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 0, 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 1, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 1, 1);
-}
-
 // Test setting a partial scissor (not empty, not full attachment)
 TEST_P(ScissorTest, PartialRect) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
@@ -156,7 +130,7 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     // RenderPass 1 set the scissor
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-        pass.SetScissorRect(0, 0, 0, 0);
+        pass.SetScissorRect(1, 1, 1, 1);
         pass.EndPass();
     }
     // RenderPass 2 draw a full quad, it shouldn't be scissored

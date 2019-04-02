@@ -30,17 +30,35 @@ TEST_F(SetScissorRectTest, Success) {
     encoder.Finish();
 }
 
-// Test to check that an empty scissor is allowed
+// Test to check that an empty scissor is not allowed
 TEST_F(SetScissorRectTest, EmptyScissor) {
     DummyRenderPass renderPass(device);
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Width of scissor rect is zero.
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetScissorRect(0, 0, 0, 1);
+        pass.EndPass();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // Height of scissor rect is zero.
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetScissorRect(0, 0, 1, 0);
+        pass.EndPass();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // Both width and height of scissor rect are zero.
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetScissorRect(0, 0, 0, 0);
         pass.EndPass();
     }
-    encoder.Finish();
+    ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
 // Test to check that a scissor larger than the framebuffer is allowed
