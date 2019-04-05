@@ -154,7 +154,9 @@ namespace dawn_native { namespace vulkan {
 
                 for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
                     const auto& attachmentInfo = renderPass->colorAttachments[i];
-                    query.SetColor(i, attachmentInfo.view->GetFormat(), attachmentInfo.loadOp);
+                    bool hasResolveTarget = attachmentInfo.resolveTarget.Get() != nullptr;
+                    query.SetColor(i, attachmentInfo.view->GetFormat(), attachmentInfo.loadOp,
+                                   hasResolveTarget);
                 }
 
                 if (renderPass->hasDepthStencilAttachment) {
@@ -162,6 +164,8 @@ namespace dawn_native { namespace vulkan {
                     query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat(),
                                           attachmentInfo.depthLoadOp, attachmentInfo.stencilLoadOp);
                 }
+
+                query.SetSampleCount(renderPass->sampleCount);
 
                 renderPassVK = device->GetRenderPassCache()->GetRenderPass(query);
             }
@@ -173,7 +177,7 @@ namespace dawn_native { namespace vulkan {
             uint32_t attachmentCount = 0;
             {
                 // Fill in the attachment info that will be chained in the framebuffer create info.
-                std::array<VkImageView, kMaxColorAttachments + 1> attachments;
+                std::array<VkImageView, kMaxColorAttachments * 2 + 1> attachments;
 
                 for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
                     auto& attachmentInfo = renderPass->colorAttachments[i];
@@ -199,6 +203,17 @@ namespace dawn_native { namespace vulkan {
                     clearValues[attachmentCount].depthStencil.stencil = attachmentInfo.clearStencil;
 
                     attachmentCount++;
+                }
+
+                for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                    if (renderPass->colorAttachments[i].resolveTarget.Get() != nullptr) {
+                        TextureView* view =
+                            ToBackend(renderPass->colorAttachments[i].resolveTarget.Get());
+
+                        attachments[attachmentCount] = view->GetHandle();
+
+                        attachmentCount++;
+                    }
                 }
 
                 // Chain attachments and create the framebuffer

@@ -34,12 +34,17 @@ namespace dawn_native { namespace vulkan {
     struct RenderPassCacheQuery {
         // Use these helpers to build the query, they make sure all relevant data is initialized and
         // masks set.
-        void SetColor(uint32_t index, dawn::TextureFormat format, dawn::LoadOp loadOp);
+        void SetColor(uint32_t index,
+                      dawn::TextureFormat format,
+                      dawn::LoadOp loadOp,
+                      bool hasResolveTarget);
         void SetDepthStencil(dawn::TextureFormat format,
                              dawn::LoadOp depthLoadOp,
                              dawn::LoadOp stencilLoadOp);
+        void SetSampleCount(uint32_t sampleCount);
 
         std::bitset<kMaxColorAttachments> colorMask;
+        std::bitset<kMaxColorAttachments> resolveTargetMask;
         std::array<dawn::TextureFormat, kMaxColorAttachments> colorFormats;
         std::array<dawn::LoadOp, kMaxColorAttachments> colorLoadOp;
 
@@ -47,10 +52,14 @@ namespace dawn_native { namespace vulkan {
         dawn::TextureFormat depthStencilFormat;
         dawn::LoadOp depthLoadOp;
         dawn::LoadOp stencilLoadOp;
+
+        uint32_t sampleCount;
     };
 
     // Caches VkRenderPasses so that we don't create duplicate ones for every RenderPipeline or
-    // render pass.
+    // render pass. We always arrange the order of attachments in "color-depthstencil-resolve" order
+    // when creating render pass and framebuffer so that we can always make sure the order of
+    // attachments in the rendering pipeline matches the one of the framebuffer.
     // TODO(cwallez@chromium.org): Make it an LRU cache somehow?
     class RenderPassCache {
       public:

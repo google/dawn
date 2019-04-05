@@ -19,6 +19,7 @@
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/RenderPassCache.h"
 #include "dawn_native/vulkan/ShaderModuleVk.h"
+#include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
 
 namespace dawn_native { namespace vulkan {
@@ -351,7 +352,7 @@ namespace dawn_native { namespace vulkan {
         multisample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         multisample.pNext = nullptr;
         multisample.flags = 0;
-        multisample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+        multisample.rasterizationSamples = VulkanSampleCount(GetSampleCount());
         multisample.sampleShadingEnable = VK_FALSE;
         multisample.minSampleShading = 0.0f;
         multisample.pSampleMask = nullptr;
@@ -405,13 +406,15 @@ namespace dawn_native { namespace vulkan {
             RenderPassCacheQuery query;
 
             for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
-                query.SetColor(i, GetColorAttachmentFormat(i), dawn::LoadOp::Load);
+                query.SetColor(i, GetColorAttachmentFormat(i), dawn::LoadOp::Load, false);
             }
 
             if (HasDepthStencilAttachment()) {
                 query.SetDepthStencil(GetDepthStencilFormat(), dawn::LoadOp::Load,
                                       dawn::LoadOp::Load);
             }
+
+            query.SetSampleCount(GetSampleCount());
 
             renderPass = device->GetRenderPassCache()->GetRenderPass(query);
         }
