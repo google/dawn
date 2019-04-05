@@ -23,7 +23,7 @@ class QueueSubmitValidationTest : public ValidationTest {
 
 static void StoreTrueMapWriteCallback(DawnBufferMapAsyncStatus status,
                                       void*,
-                                      uint32_t,
+                                      uint64_t,
                                       DawnCallbackUserdata userdata) {
     bool* userdataPtr = reinterpret_cast<bool*>(static_cast<intptr_t>(userdata));
     *userdataPtr = true;

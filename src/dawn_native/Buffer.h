@@ -84,7 +84,7 @@ namespace dawn_native {
         MaybeError ValidateUnmap() const;
         MaybeError ValidateDestroy() const;
 
-        uint32_t mSize = 0;
+        uint64_t mSize = 0;
         dawn::BufferUsageBit mUsage = dawn::BufferUsageBit::None;
 
         DawnBufferMapReadCallback mMapReadCallback = nullptr;

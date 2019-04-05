@@ -861,7 +861,7 @@ namespace dawn_native { namespace d3d12 {
                 case Command::SetVertexBuffers: {
                     SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
                     auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
-                    auto offsets = mCommands.NextData<uint32_t>(cmd->count);
+                    auto offsets = mCommands.NextData<uint64_t>(cmd->count);
 
                     vertexBuffersInfo.startSlot =
                         std::min(vertexBuffersInfo.startSlot, cmd->startSlot);

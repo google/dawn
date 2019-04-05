@@ -502,10 +502,10 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
-                                               uint32_t sourceOffset,
+                                               uint64_t sourceOffset,
                                                BufferBase* destination,
-                                               uint32_t destinationOffset,
-                                               uint32_t size) {
+                                               uint64_t destinationOffset,
+                                               uint64_t size) {
         // Insert memory barrier to ensure host write operations are made visible before
         // copying from the staging buffer. However, this barrier can be removed (see note below).
         //

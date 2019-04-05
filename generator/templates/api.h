@@ -50,8 +50,8 @@
 // Custom types depending on the target language
 typedef uint64_t DawnCallbackUserdata;
 typedef void (*DawnDeviceErrorCallback)(const char* message, DawnCallbackUserdata userdata);
-typedef void (*DawnBufferMapReadCallback)(DawnBufferMapAsyncStatus status, const void* data, uint32_t dataLength, DawnCallbackUserdata userdata);
-typedef void (*DawnBufferMapWriteCallback)(DawnBufferMapAsyncStatus status, void* data, uint32_t dataLength, DawnCallbackUserdata userdata);
+typedef void (*DawnBufferMapReadCallback)(DawnBufferMapAsyncStatus status, const void* data, uint64_t dataLength, DawnCallbackUserdata userdata);
+typedef void (*DawnBufferMapWriteCallback)(DawnBufferMapAsyncStatus status, void* data, uint64_t dataLength, DawnCallbackUserdata userdata);
 typedef void (*DawnFenceOnCompletionCallback)(DawnFenceCompletionStatus status,
                                               DawnCallbackUserdata userdata);
 

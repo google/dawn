@@ -143,8 +143,8 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     std::ostringstream& AddBufferExpectation(const char* file,
                                              int line,
                                              const dawn::Buffer& buffer,
-                                             uint32_t offset,
-                                             uint32_t size,
+                                             uint64_t offset,
+                                             uint64_t size,
                                              detail::Expectation* expectation);
     std::ostringstream& AddTextureExpectation(const char* file,
                                               int line,
@@ -178,7 +178,7 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     // MapRead buffers used to get data for the expectations
     struct ReadbackSlot {
         dawn::Buffer buffer;
-        uint32_t bufferSize;
+        uint64_t bufferSize;
         const void* mappedData = nullptr;
     };
     std::vector<ReadbackSlot> mReadbackSlots;
@@ -187,7 +187,7 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     void MapSlotsSynchronously();
     static void SlotMapReadCallback(DawnBufferMapAsyncStatus status,
                                     const void* data,
-                                    uint32_t dataLength,
+                                    uint64_t dataLength,
                                     DawnCallbackUserdata userdata);
     size_t mNumPendingMapOperations = 0;
 
@@ -195,16 +195,16 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
     struct ReadbackReservation {
         dawn::Buffer buffer;
         size_t slot;
-        uint32_t offset;
+        uint64_t offset;
     };
-    ReadbackReservation ReserveReadback(uint32_t readbackSize);
+    ReadbackReservation ReserveReadback(uint64_t readbackSize);
 
     struct DeferredExpectation {
         const char* file;
         int line;
         size_t readbackSlot;
-        uint32_t readbackOffset;
-        uint32_t size;
+        uint64_t readbackOffset;
+        uint64_t size;
         uint32_t rowBytes;
         uint32_t rowPitch;
         std::unique_ptr<detail::Expectation> expectation;

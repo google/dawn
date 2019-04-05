@@ -115,7 +115,7 @@ namespace utils {
 
     dawn::Buffer CreateBufferFromData(const dawn::Device& device,
                                       const void* data,
-                                      uint32_t size,
+                                      uint64_t size,
                                       dawn::BufferUsageBit usage) {
         dawn::BufferDescriptor descriptor;
         descriptor.size = size;
@@ -234,7 +234,7 @@ namespace utils {
     }
 
     dawn::BufferCopyView CreateBufferCopyView(dawn::Buffer buffer,
-                                              uint32_t offset,
+                                              uint64_t offset,
                                               uint32_t rowPitch,
                                               uint32_t imageHeight) {
         dawn::BufferCopyView bufferCopyView;
@@ -319,8 +319,8 @@ namespace utils {
 
     BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
                                                              const dawn::Buffer& buffer,
-                                                             uint32_t offset,
-                                                             uint32_t size)
+                                                             uint64_t offset,
+                                                             uint64_t size)
         : binding(binding), buffer(buffer), offset(offset), size(size) {
     }
 

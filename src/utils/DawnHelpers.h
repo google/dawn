@@ -33,7 +33,7 @@ namespace utils {
 
     dawn::Buffer CreateBufferFromData(const dawn::Device& device,
                                       const void* data,
-                                      uint32_t size,
+                                      uint64_t size,
                                       dawn::BufferUsageBit usage);
 
     template <typename T>
@@ -44,7 +44,7 @@ namespace utils {
     }
 
     dawn::BufferCopyView CreateBufferCopyView(dawn::Buffer buffer,
-                                              uint32_t offset,
+                                              uint64_t offset,
                                               uint32_t rowPitch,
                                               uint32_t imageHeight);
     dawn::TextureCopyView CreateTextureCopyView(dawn::Texture texture,
@@ -107,8 +107,8 @@ namespace utils {
         BindingInitializationHelper(uint32_t binding, const dawn::TextureView& textureView);
         BindingInitializationHelper(uint32_t binding,
                                     const dawn::Buffer& buffer,
-                                    uint32_t offset,
-                                    uint32_t size);
+                                    uint64_t offset,
+                                    uint64_t size);
 
         dawn::BindGroupBinding GetAsBinding() const;
 
@@ -116,8 +116,8 @@ namespace utils {
         dawn::Sampler sampler;
         dawn::TextureView textureView;
         dawn::Buffer buffer;
-        uint32_t offset = 0;
-        uint32_t size = 0;
+        uint64_t offset = 0;
+        uint64_t size = 0;
     };
 
     dawn::BindGroup MakeBindGroup(

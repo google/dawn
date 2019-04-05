@@ -73,7 +73,7 @@ class DrawTest : public DawnTest {
               uint32_t firstInstance,
               RGBA8 bottomLeftExpected,
               RGBA8 topRightExpected) {
-        uint32_t zeroOffset = 0;
+        uint64_t zeroOffset = 0;
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);

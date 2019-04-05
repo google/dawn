@@ -39,14 +39,15 @@ namespace dawn_native { namespace d3d12 {
     TextureCopySplit ComputeTextureCopySplit(Origin3D origin,
                                              Extent3D copySize,
                                              uint32_t texelSize,
-                                             uint32_t offset,
+                                             uint64_t offset,
                                              uint32_t rowPitch,
                                              uint32_t imageHeight) {
         TextureCopySplit copy;
 
         ASSERT(rowPitch % texelSize == 0);
 
-        uint32_t alignedOffset = offset & ~(D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT - 1);
+        uint64_t alignedOffset =
+            offset & ~static_cast<uint64_t>(D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT - 1);
 
         copy.offset = alignedOffset;
         if (offset == alignedOffset) {
@@ -67,10 +68,11 @@ namespace dawn_native { namespace d3d12 {
         }
 
         ASSERT(alignedOffset < offset);
+        ASSERT(offset - alignedOffset < D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
 
         Origin3D texelOffset;
-        ComputeTexelOffsets(offset - alignedOffset, rowPitch, rowPitch * imageHeight, texelSize,
-                            &texelOffset);
+        ComputeTexelOffsets(static_cast<uint32_t>(offset - alignedOffset), rowPitch,
+                            rowPitch * imageHeight, texelSize, &texelOffset);
 
         uint32_t rowPitchInTexels = rowPitch / texelSize;
 

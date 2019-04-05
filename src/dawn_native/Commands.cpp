@@ -127,7 +127,7 @@ namespace dawn_native {
                     for (size_t i = 0; i < cmd->count; ++i) {
                         (&buffers[i])->~Ref<BufferBase>();
                     }
-                    commands->NextData<uint32_t>(cmd->count);
+                    commands->NextData<uint64_t>(cmd->count);
                     cmd->~SetVertexBuffersCmd();
                 } break;
             }
@@ -231,7 +231,7 @@ namespace dawn_native {
             case Command::SetVertexBuffers: {
                 auto* cmd = commands->NextCommand<SetVertexBuffersCmd>();
                 commands->NextData<Ref<BufferBase>>(cmd->count);
-                commands->NextData<uint32_t>(cmd->count);
+                commands->NextData<uint64_t>(cmd->count);
             } break;
         }
     }

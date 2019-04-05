@@ -25,14 +25,14 @@ namespace {
         MOCK_METHOD4(Call,
                      void(DawnBufferMapAsyncStatus status,
                           const uint32_t* ptr,
-                          uint32_t dataLength,
+                          uint64_t dataLength,
                           DawnCallbackUserdata userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferMapReadCallback>> mockBufferMapReadCallback;
     void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
                                      const void* ptr,
-                                     uint32_t dataLength,
+                                     uint64_t dataLength,
                                      DawnCallbackUserdata userdata) {
         // Assume the data is uint32_t to make writing matchers easier
         mockBufferMapReadCallback->Call(status, static_cast<const uint32_t*>(ptr), dataLength,
@@ -44,7 +44,7 @@ namespace {
         MOCK_METHOD4(Call,
                      void(DawnBufferMapAsyncStatus status,
                           uint32_t* ptr,
-                          uint32_t dataLength,
+                          uint64_t dataLength,
                           DawnCallbackUserdata userdata));
     };
 
@@ -52,7 +52,7 @@ namespace {
     uint32_t* lastMapWritePointer = nullptr;
     void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
                                       void* ptr,
-                                      uint32_t dataLength,
+                                      uint64_t dataLength,
                                       DawnCallbackUserdata userdata) {
         // Assume the data is uint32_t to make writing matchers easier
         lastMapWritePointer = static_cast<uint32_t*>(ptr);

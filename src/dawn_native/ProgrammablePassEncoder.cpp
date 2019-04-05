@@ -85,7 +85,7 @@ namespace dawn_native {
     void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndex,
                                                BindGroupBase* group,
                                                uint32_t dynamicOffsetCount,
-                                               const uint32_t* dynamicOffsets) {
+                                               const uint64_t* dynamicOffsets) {
         if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
             mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(group))) {
             return;

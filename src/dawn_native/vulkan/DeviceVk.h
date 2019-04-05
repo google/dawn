@@ -72,10 +72,11 @@ namespace dawn_native { namespace vulkan {
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
         MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
-                                           uint32_t sourceOffset,
+                                           uint64_t sourceOffset,
                                            BufferBase* destination,
-                                           uint32_t destinationOffset,
-                                           uint32_t size) override;
+                                           uint64_t destinationOffset,
+                                           uint64_t size) override;
+
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;

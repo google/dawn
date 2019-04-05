@@ -40,10 +40,10 @@ namespace dawn_native {
         ComputePassEncoderBase* BeginComputePass();
         RenderPassEncoderBase* BeginRenderPass(const RenderPassDescriptor* info);
         void CopyBufferToBuffer(BufferBase* source,
-                                uint32_t sourceOffset,
+                                uint64_t sourceOffset,
                                 BufferBase* destination,
-                                uint32_t destinationOffset,
-                                uint32_t size);
+                                uint64_t destinationOffset,
+                                uint64_t size);
         void CopyBufferToTexture(const BufferCopyView* source,
                                  const TextureCopyView* destination,
                                  const Extent3D* copySize);

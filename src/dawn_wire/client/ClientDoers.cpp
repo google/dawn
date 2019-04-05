@@ -27,7 +27,7 @@ namespace dawn_wire { namespace client {
     bool Client::DoBufferMapReadAsyncCallback(Buffer* buffer,
                                               uint32_t requestSerial,
                                               uint32_t status,
-                                              uint32_t dataLength,
+                                              uint64_t dataLength,
                                               const uint8_t* data) {
         // The buffer might have been deleted or recreated so this isn't an error.
         if (buffer == nullptr) {
@@ -77,7 +77,7 @@ namespace dawn_wire { namespace client {
     bool Client::DoBufferMapWriteAsyncCallback(Buffer* buffer,
                                                uint32_t requestSerial,
                                                uint32_t status,
-                                               uint32_t dataLength) {
+                                               uint64_t dataLength) {
         // The buffer might have been deleted or recreated so this isn't an error.
         if (buffer == nullptr) {
             return true;

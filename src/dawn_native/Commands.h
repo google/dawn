@@ -90,7 +90,7 @@ namespace dawn_native {
 
     struct BufferCopy {
         Ref<BufferBase> buffer;
-        uint32_t offset;       // Bytes
+        uint64_t offset;       // Bytes
         uint32_t rowPitch;     // Bytes
         uint32_t imageHeight;  // Texels
     };
@@ -105,7 +105,7 @@ namespace dawn_native {
     struct CopyBufferToBufferCmd {
         BufferCopy source;
         BufferCopy destination;
-        uint32_t size;
+        uint64_t size;
     };
 
     struct CopyBufferToTextureCmd {
@@ -194,7 +194,7 @@ namespace dawn_native {
 
     struct SetIndexBufferCmd {
         Ref<BufferBase> buffer;
-        uint32_t offset;
+        uint64_t offset;
     };
 
     struct SetVertexBuffersCmd {

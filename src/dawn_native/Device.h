@@ -108,10 +108,10 @@ namespace dawn_native {
         virtual ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(
             size_t size) = 0;
         virtual MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
-                                                   uint32_t sourceOffset,
+                                                   uint64_t sourceOffset,
                                                    BufferBase* destination,
-                                                   uint32_t destinationOffset,
-                                                   uint32_t size) = 0;
+                                                   uint64_t destinationOffset,
+                                                   uint64_t size) = 0;
 
         ResultOrError<DynamicUploader*> GetDynamicUploader() const;
 

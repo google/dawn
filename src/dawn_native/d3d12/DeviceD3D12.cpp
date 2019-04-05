@@ -253,10 +253,10 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
-                                               uint32_t sourceOffset,
+                                               uint64_t sourceOffset,
                                                BufferBase* destination,
-                                               uint32_t destinationOffset,
-                                               uint32_t size) {
+                                               uint64_t destinationOffset,
+                                               uint64_t size) {
         ToBackend(destination)
             ->TransitionUsageNow(GetPendingCommandList(), dawn::BufferUsageBit::TransferDst);
 

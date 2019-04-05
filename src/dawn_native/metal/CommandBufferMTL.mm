@@ -307,7 +307,7 @@ namespace dawn_native { namespace metal {
                         break;
                     }
 
-                    uint32_t offset = src.offset;
+                    uint64_t offset = src.offset;
 
                     // Doing all the copy except the last image.
                     if (size.depth > 1) {
@@ -419,7 +419,7 @@ namespace dawn_native { namespace metal {
                         break;
                     }
 
-                    uint32_t offset = dst.offset;
+                    uint64_t offset = dst.offset;
 
                     // Doing all the copy except the last image.
                     if (size.depth > 1) {
@@ -743,7 +743,7 @@ namespace dawn_native { namespace metal {
                 case Command::SetVertexBuffers: {
                     SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
                     auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
-                    auto offsets = mCommands.NextData<uint32_t>(cmd->count);
+                    auto offsets = mCommands.NextData<uint64_t>(cmd->count);
 
                     std::array<id<MTLBuffer>, kMaxVertexInputs> mtlBuffers;
                     std::array<NSUInteger, kMaxVertexInputs> mtlOffsets;

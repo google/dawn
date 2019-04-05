@@ -32,7 +32,7 @@ namespace dawn_native { namespace d3d12 {
             Extent3D copySize;
         };
 
-        uint32_t offset = 0;
+        uint64_t offset = 0;
         uint32_t count = 0;
         std::array<CopyInfo, kMaxTextureCopyRegions> copies;
     };
@@ -40,7 +40,7 @@ namespace dawn_native { namespace d3d12 {
     TextureCopySplit ComputeTextureCopySplit(Origin3D origin,
                                              Extent3D copySize,
                                              uint32_t texelSize,
-                                             uint32_t offset,
+                                             uint64_t offset,
                                              uint32_t rowPitch,
                                              uint32_t imageHeight);
 }}  // namespace dawn_native::d3d12

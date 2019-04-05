@@ -25,14 +25,14 @@ class MockBufferMapReadCallback {
       MOCK_METHOD4(Call,
                    void(DawnBufferMapAsyncStatus status,
                         const uint32_t* ptr,
-                        uint32_t dataLength,
+                        uint64_t dataLength,
                         DawnCallbackUserdata userdata));
 };
 
 static std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
 static void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
                                         const void* ptr,
-                                        uint32_t dataLength,
+                                        uint64_t dataLength,
                                         DawnCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapReadCallback->Call(status, reinterpret_cast<const uint32_t*>(ptr), dataLength,
@@ -44,14 +44,14 @@ class MockBufferMapWriteCallback {
       MOCK_METHOD4(Call,
                    void(DawnBufferMapAsyncStatus status,
                         uint32_t* ptr,
-                        uint32_t dataLength,
+                        uint64_t dataLength,
                         DawnCallbackUserdata userdata));
 };
 
 static std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;
 static void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
                                          void* ptr,
-                                         uint32_t dataLength,
+                                         uint64_t dataLength,
                                          DawnCallbackUserdata userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapWriteCallback->Call(status, reinterpret_cast<uint32_t*>(ptr), dataLength,
@@ -60,21 +60,21 @@ static void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
 
 class BufferValidationTest : public ValidationTest {
     protected:
-        dawn::Buffer CreateMapReadBuffer(uint32_t size) {
+        dawn::Buffer CreateMapReadBuffer(uint64_t size) {
             dawn::BufferDescriptor descriptor;
             descriptor.size = size;
             descriptor.usage = dawn::BufferUsageBit::MapRead;
 
             return device.CreateBuffer(&descriptor);
         }
-        dawn::Buffer CreateMapWriteBuffer(uint32_t size) {
+        dawn::Buffer CreateMapWriteBuffer(uint64_t size) {
             dawn::BufferDescriptor descriptor;
             descriptor.size = size;
             descriptor.usage = dawn::BufferUsageBit::MapWrite;
 
             return device.CreateBuffer(&descriptor);
         }
-        dawn::Buffer CreateSetSubDataBuffer(uint32_t size) {
+        dawn::Buffer CreateSetSubDataBuffer(uint64_t size) {
             dawn::BufferDescriptor descriptor;
             descriptor.size = size;
             descriptor.usage = dawn::BufferUsageBit::TransferDst;
@@ -455,7 +455,7 @@ TEST_F(BufferValidationTest, SetSubDataOutOfBoundsOverflow) {
 
     // An offset that when added to "2" would overflow to be zero and pass validation without
     // overflow checks.
-    uint32_t offset = uint32_t(int32_t(0) - int32_t(2));
+    uint64_t offset = uint64_t(int64_t(0) - int64_t(2));
 
     ASSERT_DEVICE_ERROR(buf.SetSubData(offset, 2, foo));
 }
@@ -492,7 +492,7 @@ TEST_F(BufferValidationTest, SetSubDataWithUnalignedOffset) {
 
     dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
-    uint32_t kOffset = 2999;
+    uint64_t kOffset = 2999;
     uint32_t value = 0x01020304;
     ASSERT_DEVICE_ERROR(buf.SetSubData(kOffset, sizeof(value), reinterpret_cast<uint8_t*>(&value)));
 }

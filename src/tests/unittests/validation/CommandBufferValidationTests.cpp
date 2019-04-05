@@ -180,7 +180,7 @@ TEST_F(CommandBufferValidationTest, BufferWithMultipleReadUsage) {
     dawn::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     // Use the buffer as both index and vertex in the same pass
-    uint32_t zero = 0;
+    uint64_t zero = 0;
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     DummyRenderPass dummyRenderPass(device);
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);

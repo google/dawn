@@ -34,8 +34,8 @@ namespace dawn_native {
 
     struct BufferBinding {
         BufferBase* buffer;
-        uint32_t offset;
-        uint32_t size;
+        uint64_t offset;
+        uint64_t size;
     };
 
     class BindGroupBase : public ObjectBase {

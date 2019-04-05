@@ -35,8 +35,8 @@ class CopyTests : public DawnTest {
         };
 
         struct BufferSpec {
-            uint32_t size;
-            uint32_t offset;
+            uint64_t size;
+            uint64_t offset;
             uint32_t rowPitch;
         };
 
@@ -123,7 +123,7 @@ class CopyTests_T2B : public CopyTests {
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel * textureSpec.arraySize);
             buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(emptyData.data()));
 
-            uint32_t bufferOffset = bufferSpec.offset;
+            uint64_t bufferOffset = bufferSpec.offset;
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
                 // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level` mip into the buffer at `offset + bufferSpec.size * slice` and `rowPitch`
                 dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
@@ -463,7 +463,7 @@ TEST_P(CopyTests_T2B, OffsetBufferAligned) {
     constexpr uint32_t kHeight = 128;
     for (unsigned int i = 0; i < 3; ++i) {
         BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
-        uint32_t offset = 512 * i;
+        uint64_t offset = 512 * i;
         bufferSpec.size += offset;
         bufferSpec.offset += offset;
         DoTest({ kWidth, kHeight, 0, 0, kWidth, kHeight, 0 }, bufferSpec);
@@ -627,7 +627,7 @@ TEST_P(CopyTests_B2T, OffsetBufferAligned) {
     constexpr uint32_t kHeight = 128;
     for (unsigned int i = 0; i < 3; ++i) {
         BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
-        uint32_t offset = 512 * i;
+        uint64_t offset = 512 * i;
         bufferSpec.size += offset;
         bufferSpec.offset += offset;
         DoTest({ kWidth, kHeight, 0, 0, kWidth, kHeight, 0 }, bufferSpec);

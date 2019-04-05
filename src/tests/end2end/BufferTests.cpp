@@ -20,7 +20,7 @@ class BufferMapReadTests : public DawnTest {
     protected:
       static void MapReadCallback(DawnBufferMapAsyncStatus status,
                                   const void* data,
-                                  uint32_t,
+                                  uint64_t,
                                   DawnCallbackUserdata userdata) {
           ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
           ASSERT_NE(nullptr, data);
@@ -87,7 +87,7 @@ class BufferMapWriteTests : public DawnTest {
     protected:
       static void MapWriteCallback(DawnBufferMapAsyncStatus status,
                                    void* data,
-                                   uint32_t,
+                                   uint64_t,
                                    DawnCallbackUserdata userdata) {
           ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
           ASSERT_NE(nullptr, data);
@@ -171,7 +171,7 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
     descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    constexpr uint32_t kOffset = 2000;
+    constexpr uint64_t kOffset = 2000;
     uint32_t value = 0x01020304;
     buffer.SetSubData(kOffset, sizeof(value), reinterpret_cast<uint8_t*>(&value));
 
@@ -189,7 +189,7 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
     // executing these commands in-flight. If this takes longer than ~2s, a device reset occurs and
     // fails the test. Since GPUs may or may not complete by then, this test must be disabled OR
     // modified to be well-below the timeout limit.
-    constexpr uint32_t kSize = 4000 * 1000;
+    constexpr uint64_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 500 * 500;
     dawn::BufferDescriptor descriptor;
     descriptor.size = kSize;
@@ -207,7 +207,7 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 
 // Test using SetSubData for lots of data
 TEST_P(BufferSetSubDataTests, LargeSetSubData) {
-    constexpr uint32_t kSize = 4000 * 1000;
+    constexpr uint64_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 1000 * 1000;
     dawn::BufferDescriptor descriptor;
     descriptor.size = kSize;

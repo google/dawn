@@ -35,7 +35,7 @@ namespace {
     };
 
     struct BufferSpec {
-        uint32_t offset;
+        uint64_t offset;
         uint32_t rowPitch;
         uint32_t imageHeight;
     };

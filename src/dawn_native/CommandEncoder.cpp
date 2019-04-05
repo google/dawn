@@ -62,12 +62,12 @@ namespace dawn_native {
             return {};
         }
 
-        bool FitsInBuffer(const BufferBase* buffer, uint32_t offset, uint32_t size) {
-            uint32_t bufferSize = buffer->GetSize();
+        bool FitsInBuffer(const BufferBase* buffer, uint64_t offset, uint64_t size) {
+            uint64_t bufferSize = buffer->GetSize();
             return offset <= bufferSize && (size <= (bufferSize - offset));
         }
 
-        MaybeError ValidateCopySizeFitsInBuffer(const BufferCopy& bufferCopy, uint32_t dataSize) {
+        MaybeError ValidateCopySizeFitsInBuffer(const BufferCopy& bufferCopy, uint64_t dataSize) {
             if (!FitsInBuffer(bufferCopy.buffer.Get(), bufferCopy.offset, dataSize)) {
                 return DAWN_VALIDATION_ERROR("Copy would overflow the buffer");
             }
@@ -75,9 +75,9 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateB2BCopySizeAlignment(uint32_t dataSize,
-                                                uint32_t srcOffset,
-                                                uint32_t dstOffset) {
+        MaybeError ValidateB2BCopySizeAlignment(uint64_t dataSize,
+                                                uint64_t srcOffset,
+                                                uint64_t dstOffset) {
             // Copy size must be a multiple of 4 bytes on macOS.
             if (dataSize % 4 != 0) {
                 return DAWN_VALIDATION_ERROR("Copy size must be a multiple of 4 bytes");
@@ -677,10 +677,10 @@ namespace dawn_native {
     }
 
     void CommandEncoderBase::CopyBufferToBuffer(BufferBase* source,
-                                                uint32_t sourceOffset,
+                                                uint64_t sourceOffset,
                                                 BufferBase* destination,
-                                                uint32_t destinationOffset,
-                                                uint32_t size) {
+                                                uint64_t destinationOffset,
+                                                uint64_t size) {
         if (ConsumedError(ValidateCanRecordTopLevelCommands())) {
             return;
         }
@@ -1165,7 +1165,7 @@ namespace dawn_native {
                 case Command::SetVertexBuffers: {
                     SetVertexBuffersCmd* cmd = mIterator.NextCommand<SetVertexBuffersCmd>();
                     auto buffers = mIterator.NextData<Ref<BufferBase>>(cmd->count);
-                    mIterator.NextData<uint32_t>(cmd->count);
+                    mIterator.NextData<uint64_t>(cmd->count);
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
                         usageTracker.BufferUsedAs(buffers[i].Get(), dawn::BufferUsageBit::Vertex);

@@ -42,7 +42,7 @@ namespace dawn_native {
         void SetBindGroup(uint32_t groupIndex,
                           BindGroupBase* group,
                           uint32_t dynamicOffsetCount,
-                          const uint32_t* dynamicOffsets);
+                          const uint64_t* dynamicOffsets);
         void SetPushConstants(dawn::ShaderStageBit stages,
                               uint32_t offset,
                               uint32_t count,

@@ -19,7 +19,7 @@
 
 class CopyCommandTest : public ValidationTest {
     protected:
-        dawn::Buffer CreateBuffer(uint32_t size, dawn::BufferUsageBit usage) {
+        dawn::Buffer CreateBuffer(uint64_t size, dawn::BufferUsageBit usage) {
             dawn::BufferDescriptor descriptor;
             descriptor.size = size;
             descriptor.usage = usage;
@@ -59,7 +59,7 @@ class CopyCommandTest : public ValidationTest {
 
         void TestB2TCopy(utils::Expectation expectation,
                          dawn::Buffer srcBuffer,
-                         uint32_t srcOffset,
+                         uint64_t srcOffset,
                          uint32_t srcRowPitch,
                          uint32_t srcImageHeight,
                          dawn::Texture destTexture,
@@ -84,7 +84,7 @@ class CopyCommandTest : public ValidationTest {
                          uint32_t srcSlice,
                          dawn::Origin3D srcOrigin,
                          dawn::Buffer destBuffer,
-                         uint32_t destOffset,
+                         uint64_t destOffset,
                          uint32_t destRowPitch,
                          uint32_t destImageHeight,
                          dawn::Extent3D extent3D) {
@@ -228,7 +228,7 @@ TEST_F(CopyCommandTest_B2B, BuffersInErrorState) {
     errorBufferDescriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferSrc;
     ASSERT_DEVICE_ERROR(dawn::Buffer errorBuffer = device.CreateBuffer(&errorBufferDescriptor));
 
-    constexpr uint32_t bufferSize = 4;
+    constexpr uint64_t bufferSize = 4;
     dawn::Buffer validBuffer = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
 
     {
@@ -249,7 +249,7 @@ class CopyCommandTest_B2T : public CopyCommandTest {
 
 // Test a successfull B2T copy
 TEST_F(CopyCommandTest_B2T, Success) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
     dawn::Texture destination = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                      dawn::TextureUsageBit::TransferDst);
@@ -302,7 +302,7 @@ TEST_F(CopyCommandTest_B2T, Success) {
 
 // Test OOB conditions on the buffer
 TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
     dawn::Texture destination = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                      dawn::TextureUsageBit::TransferDst);
@@ -333,7 +333,7 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
 
 // Test OOB conditions on the texture
 TEST_F(CopyCommandTest_B2T, OutOfBoundsOnTexture) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
     dawn::Texture destination = Create2DTexture(16, 16, 5, 2, dawn::TextureFormat::R8G8B8A8Unorm,
                                                      dawn::TextureUsageBit::TransferDst);
@@ -393,7 +393,7 @@ TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
 }
 
 TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
     dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
     dawn::Texture destination = Create2DTexture(128, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
         dawn::TextureUsageBit::TransferDst);
@@ -412,7 +412,7 @@ TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
 }
 
 TEST_F(CopyCommandTest_B2T, ImageHeightConstraint) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(5, 5, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(5, 5, 1);
     dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
     dawn::Texture destination = Create2DTexture(16, 16, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                 dawn::TextureUsageBit::TransferDst);
@@ -436,7 +436,7 @@ TEST_F(CopyCommandTest_B2T, ImageHeightConstraint) {
 
 // Test B2T copies with incorrect buffer offset usage
 TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
     dawn::Texture destination = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                      dawn::TextureUsageBit::TransferDst);
@@ -458,7 +458,7 @@ TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
 
 // Test multisampled textures cannot be used in B2T copies.
 TEST_F(CopyCommandTest_B2T, CopyToMultisampledTexture) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(16, 16, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(16, 16, 1);
     dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
     dawn::Texture destination = Create2DTexture(2, 2, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                 dawn::TextureUsageBit::TransferDst, 4);
@@ -497,7 +497,7 @@ TEST_F(CopyCommandTest_B2T, BufferOrTextureInErrorState) {
     }
 
     {
-        uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+        uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
         dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
 
         dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(source, 0, 0, 0);
@@ -513,7 +513,7 @@ class CopyCommandTest_T2B : public CopyCommandTest {
 
 // Test a successfull T2B copy
 TEST_F(CopyCommandTest_T2B, Success) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Texture source = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                 dawn::TextureUsageBit::TransferSrc);
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
@@ -566,7 +566,7 @@ TEST_F(CopyCommandTest_T2B, Success) {
 
 // Test OOB conditions on the texture
 TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Texture source = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                 dawn::TextureUsageBit::TransferSrc);
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
@@ -590,7 +590,7 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
 
 // Test OOB conditions on the buffer
 TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Texture source = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                 dawn::TextureUsageBit::TransferSrc);
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
@@ -620,7 +620,7 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
 
 // Test that we force Z=0 and Depth=1 on copies from to 2D textures
 TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Texture source = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                 dawn::TextureUsageBit::TransferSrc);
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
@@ -636,7 +636,7 @@ TEST_F(CopyCommandTest_T2B, ZDepthConstraintFor2DTextures) {
 
 // Test T2B copies with incorrect buffer usage
 TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     dawn::Texture source = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                                 dawn::TextureUsageBit::TransferSrc);
     dawn::Texture sampled = Create2DTexture(16, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
@@ -653,7 +653,7 @@ TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
 }
 
 TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
     dawn::Texture source = Create2DTexture(128, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
         dawn::TextureUsageBit::TransferDst);
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
@@ -672,7 +672,7 @@ TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
 }
 
 TEST_F(CopyCommandTest_T2B, ImageHeightConstraint) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(5, 5, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(5, 5, 1);
     dawn::Texture source = Create2DTexture(16, 16, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                            dawn::TextureUsageBit::TransferSrc);
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
@@ -696,7 +696,7 @@ TEST_F(CopyCommandTest_T2B, ImageHeightConstraint) {
 
 // Test T2B copies with incorrect buffer offset usage
 TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
-    uint32_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
     dawn::Texture source = Create2DTexture(128, 16, 5, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                            dawn::TextureUsageBit::TransferSrc);
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
@@ -718,7 +718,7 @@ TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
 TEST_F(CopyCommandTest_T2B, CopyFromMultisampledTexture) {
     dawn::Texture source = Create2DTexture(2, 2, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm,
                                            dawn::TextureUsageBit::TransferSrc, 4);
-    uint32_t bufferSize = BufferSizeForTextureCopy(16, 16, 1);
+    uint64_t bufferSize = BufferSizeForTextureCopy(16, 16, 1);
     dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
 
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
@@ -743,7 +743,7 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
     dawn::Extent3D extent3D = {1, 1, 1};
 
     {
-        uint32_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
+        uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
         dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
 
         dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(source, 0, 0, 0);

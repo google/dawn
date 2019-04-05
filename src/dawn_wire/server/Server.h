@@ -25,7 +25,7 @@ namespace dawn_wire { namespace server {
         Server* server;
         ObjectHandle buffer;
         uint32_t requestSerial;
-        uint32_t size;
+        uint64_t size;
         bool isWrite;
     };
 
@@ -51,11 +51,11 @@ namespace dawn_wire { namespace server {
         static void ForwardDeviceError(const char* message, DawnCallbackUserdata userdata);
         static void ForwardBufferMapReadAsync(DawnBufferMapAsyncStatus status,
                                               const void* ptr,
-                                              uint32_t dataLength,
+                                              uint64_t dataLength,
                                               DawnCallbackUserdata userdata);
         static void ForwardBufferMapWriteAsync(DawnBufferMapAsyncStatus status,
                                                void* ptr,
-                                               uint32_t dataLength,
+                                               uint64_t dataLength,
                                                DawnCallbackUserdata userdata);
         static void ForwardFenceCompletedValue(DawnFenceCompletionStatus status,
                                                DawnCallbackUserdata userdata);
@@ -64,11 +64,11 @@ namespace dawn_wire { namespace server {
         void OnDeviceError(const char* message);
         void OnBufferMapReadAsyncCallback(DawnBufferMapAsyncStatus status,
                                           const void* ptr,
-                                          uint32_t dataLength,
+                                          uint64_t dataLength,
                                           MapUserdata* userdata);
         void OnBufferMapWriteAsyncCallback(DawnBufferMapAsyncStatus status,
                                            void* ptr,
-                                           uint32_t dataLength,
+                                           uint64_t dataLength,
                                            MapUserdata* userdata);
         void OnFenceCompletedValueUpdated(DawnFenceCompletionStatus status,
                                           FenceCompletionUserdata* userdata);

@@ -153,7 +153,7 @@ void frame() {
     utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultTextureView()},
                                                 depthStencilView);
 
-    static const uint32_t vertexBufferOffsets[1] = {0};
+    static const uint64_t vertexBufferOffsets[1] = {0};
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);

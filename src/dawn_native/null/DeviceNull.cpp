@@ -125,10 +125,10 @@ namespace dawn_native { namespace null {
     }
 
     MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
-                                               uint32_t sourceOffset,
+                                               uint64_t sourceOffset,
                                                BufferBase* destination,
-                                               uint32_t destinationOffset,
-                                               uint32_t size) {
+                                               uint64_t destinationOffset,
+                                               uint64_t size) {
         return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer.");
     }
 

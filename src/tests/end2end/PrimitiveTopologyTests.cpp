@@ -193,7 +193,7 @@ class PrimitiveTopologyTest : public DawnTest {
 
             dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-            static const uint32_t zeroOffset = 0;
+            static const uint64_t zeroOffset = 0;
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             {
                 dawn::RenderPassEncoder pass = encoder.BeginRenderPass(

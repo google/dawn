@@ -134,13 +134,13 @@ class InputStateTest : public DawnTest {
 
         struct InputSpec {
             uint32_t slot;
-            uint32_t stride;
+            uint64_t stride;
             InputStepMode step;
         };
         struct AttributeSpec {
             uint32_t location;
             uint32_t slot;
-            uint32_t offset;
+            uint64_t offset;
             VertexFormat format;
         };
 
@@ -187,7 +187,7 @@ class InputStateTest : public DawnTest {
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
 
-            uint32_t zeroOffset = 0;
+            uint64_t zeroOffset = 0;
             for (const auto& buffer : vertexBuffers) {
                 pass.SetVertexBuffers(buffer.location, 1, buffer.buffer, &zeroOffset);
             }
@@ -422,7 +422,7 @@ TEST_P(InputStateTest, UnusedVertexSlot) {
 
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
-    uint32_t zeroOffset = 0;
+    uint64_t zeroOffset = 0;
     pass.SetVertexBuffers(0, 1, &buffer, &zeroOffset);
     pass.SetVertexBuffers(1, 1, &buffer, &zeroOffset);
 
@@ -465,7 +465,7 @@ TEST_P(InputStateTest, MultiplePipelinesMixedInputState) {
 
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
-    uint32_t zeroOffset = 0;
+    uint64_t zeroOffset = 0;
     pass.SetVertexBuffers(0, 1, &buffer, &zeroOffset);
     pass.SetVertexBuffers(1, 1, &buffer, &zeroOffset);
 

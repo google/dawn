@@ -97,7 +97,7 @@ TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
     auto pipeline1 = MakeRenderPipeline(vsModule1, 1);
 
     auto vertexBuffers = MakeVertexBuffers<2>();
-    uint32_t offsets[] = { 0, 0 };
+    uint64_t offsets[] = { 0, 0 };
 
     // Check failure when vertex buffer is not set
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -132,7 +132,7 @@ TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
     auto pipeline1 = MakeRenderPipeline(vsModule1, 1);
 
     auto vertexBuffers = MakeVertexBuffers<2>();
-    uint32_t offsets[] = { 0, 0 };
+    uint64_t offsets[] = { 0, 0 };
 
     // Check success when vertex buffer is set for each render pass
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();

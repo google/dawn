@@ -611,7 +611,7 @@ namespace dawn_native { namespace vulkan {
                 case Command::SetVertexBuffers: {
                     SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
                     auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
-                    auto offsets = mCommands.NextData<uint32_t>(cmd->count);
+                    auto offsets = mCommands.NextData<uint64_t>(cmd->count);
 
                     std::array<VkBuffer, kMaxVertexInputs> vkBuffers;
                     std::array<VkDeviceSize, kMaxVertexInputs> vkOffsets;

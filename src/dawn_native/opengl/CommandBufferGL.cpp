@@ -198,7 +198,7 @@ namespace dawn_native { namespace opengl {
             void OnSetVertexBuffers(uint32_t startSlot,
                                     uint32_t count,
                                     Ref<BufferBase>* buffers,
-                                    uint32_t* offsets) {
+                                    uint64_t* offsets) {
                 for (uint32_t i = 0; i < count; ++i) {
                     uint32_t slot = startSlot + i;
                     mVertexBuffers[slot] = ToBackend(buffers[i].Get());
@@ -234,7 +234,7 @@ namespace dawn_native { namespace opengl {
                         auto attribute = mLastPipeline->GetAttribute(location);
 
                         GLuint buffer = mVertexBuffers[slot]->GetHandle();
-                        uint32_t offset = mVertexBufferOffsets[slot];
+                        uint64_t offset = mVertexBufferOffsets[slot];
 
                         auto input = mLastPipeline->GetInput(slot);
                         auto components = VertexFormatNumComponents(attribute.format);
@@ -258,7 +258,7 @@ namespace dawn_native { namespace opengl {
 
             std::bitset<kMaxVertexInputs> mDirtyVertexBuffers;
             std::array<Buffer*, kMaxVertexInputs> mVertexBuffers;
-            std::array<uint32_t, kMaxVertexInputs> mVertexBufferOffsets;
+            std::array<uint64_t, kMaxVertexInputs> mVertexBufferOffsets;
 
             RenderPipelineBase* mLastPipeline = nullptr;
         };
@@ -692,7 +692,7 @@ namespace dawn_native { namespace opengl {
         }
 
         RenderPipeline* lastPipeline = nullptr;
-        uint32_t indexBufferBaseOffset = 0;
+        uint64_t indexBufferBaseOffset = 0;
 
         PersistentPipelineState persistentPipelineState;
 
@@ -815,7 +815,7 @@ namespace dawn_native { namespace opengl {
                 case Command::SetVertexBuffers: {
                     SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
                     auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
-                    auto offsets = mCommands.NextData<uint32_t>(cmd->count);
+                    auto offsets = mCommands.NextData<uint64_t>(cmd->count);
                     inputBuffers.OnSetVertexBuffers(cmd->startSlot, cmd->count, buffers, offsets);
                 } break;
 

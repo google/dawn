@@ -37,7 +37,7 @@ namespace dawn_native {
             }
             DAWN_TRY(device->ValidateObject(binding.buffer));
 
-            uint32_t bufferSize = binding.buffer->GetSize();
+            uint64_t bufferSize = binding.buffer->GetSize();
             if (binding.size > bufferSize) {
                 return DAWN_VALIDATION_ERROR("Buffer binding size larger than the buffer");
             }

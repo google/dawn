@@ -32,8 +32,8 @@
         "members": [
             {"name": "binding", "type": "uint32_t"},
             {"name": "buffer", "type": "buffer", "optional": true},
-            {"name": "offset", "type": "uint32_t"},
-            {"name": "size", "type": "uint32_t"},
+            {"name": "offset", "type": "uint64_t"},
+            {"name": "size", "type": "uint64_t"},
             {"name": "sampler", "type": "sampler", "optional": true},
             {"name": "texture view", "type": "texture view", "optional": true}
         ]
@@ -142,8 +142,8 @@
             {
                 "name": "set sub data",
                 "args": [
-                    {"name": "start", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
+                    {"name": "start", "type": "uint64_t"},
+                    {"name": "count", "type": "uint64_t"},
                     {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "count"}
                 ]
             },
@@ -174,7 +174,7 @@
         "extensible": true,
         "members": [
             {"name": "buffer", "type": "buffer"},
-            {"name": "offset", "type": "uint32_t"},
+            {"name": "offset", "type": "uint64_t"},
             {"name": "row pitch", "type": "uint32_t"},
             {"name": "image height", "type": "uint32_t"}
         ]
@@ -184,7 +184,7 @@
         "extensible": true,
         "members": [
             {"name": "usage", "type": "buffer usage bit"},
-            {"name": "size", "type": "uint32_t"}
+            {"name": "size", "type": "uint64_t"}
         ]
     },
     "buffer map read callback": {
@@ -267,10 +267,10 @@
                 "name": "copy buffer to buffer",
                 "args": [
                     {"name": "source", "type": "buffer"},
-                    {"name": "source offset", "type": "uint32_t"},
+                    {"name": "source offset", "type": "uint64_t"},
                     {"name": "destination", "type": "buffer"},
-                    {"name": "destination offset", "type": "uint32_t"},
-                    {"name": "size", "type": "uint32_t"}
+                    {"name": "destination offset", "type": "uint64_t"},
+                    {"name": "size", "type": "uint64_t"}
                 ],
                 "TODO": [
                     "Restrictions on the alignment of the copy? Cf Metal on OSX"
@@ -359,7 +359,7 @@
                     {"name": "group index", "type": "uint32_t"},
                     {"name": "group", "type": "bind group"},
                     {"name": "dynamic offset count", "type": "uint32_t"},
-                    {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count"}
+                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count"}
                 ]
             },
             {
@@ -573,7 +573,7 @@
         "members": [
             {"name": "shader location", "type": "uint32_t"},
             {"name": "input slot", "type": "uint32_t"},
-            {"name": "offset", "type": "uint32_t"},
+            {"name": "offset", "type": "uint64_t"},
             {"name": "format", "type": "vertex format"}
         ]
     },
@@ -582,7 +582,7 @@
         "extensible": false,
         "members": [
             {"name": "input slot", "type": "uint32_t"},
-            {"name": "stride", "type": "uint32_t"},
+            {"name": "stride", "type": "uint64_t"},
             {"name": "step mode", "type": "input step mode"}
         ]
     },
@@ -741,7 +741,7 @@
                     {"name": "group index", "type": "uint32_t"},
                     {"name": "group", "type": "bind group"},
                     {"name": "dynamic offset count", "type": "uint32_t"},
-                    {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count"}
+                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count"}
                 ]
             },
             {
@@ -806,14 +806,14 @@
                     {"name": "start slot", "type": "uint32_t"},
                     {"name": "count", "type": "uint32_t"},
                     {"name": "buffers", "type": "buffer", "annotation": "const*", "length": "count"},
-                    {"name": "offsets", "type": "uint32_t", "annotation": "const*", "length": "count"}
+                    {"name": "offsets", "type": "uint64_t", "annotation": "const*", "length": "count"}
                 ]
             },
             {
                 "name": "set index buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
-                    {"name": "offset", "type": "uint32_t"}
+                    {"name": "offset", "type": "uint64_t"}
                 ]
             },
             {

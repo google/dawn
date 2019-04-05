@@ -249,7 +249,7 @@ void frame() {
     s.a = (s.a + 1) % 256;
     s.b += 0.01f;
     if (s.b >= 1.0f) {s.b = 0.0f;}
-    static const uint32_t vertexBufferOffsets[1] = {0};
+    static const uint64_t vertexBufferOffsets[1] = {0};
 
     cameraData.view = glm::lookAt(
         glm::vec3(8.f * std::sin(glm::radians(s.b * 360.f)), 2.f, 8.f * std::cos(glm::radians(s.b * 360.f))),

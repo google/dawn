@@ -256,7 +256,7 @@ void initSim() {
 }
 
 dawn::CommandBuffer createCommandBuffer(const dawn::Texture backbuffer, size_t i) {
-    static const uint32_t zeroOffsets[1] = {0};
+    static const uint64_t zeroOffsets[1] = {0};
     auto& bufferDst = particleBuffers[(i + 1) % 2];
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 

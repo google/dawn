@@ -44,7 +44,7 @@ namespace dawn_wire { namespace client {
         // Only one mapped pointer can be active at a time because Unmap clears all the in-flight
         // requests.
         void* mappedData = nullptr;
-        size_t mappedDataSize = 0;
+        uint64_t mappedDataSize = 0;
         bool isWriteMapped = false;
     };
 

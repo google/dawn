@@ -523,7 +523,7 @@ namespace {
                 uint32_t slot = s.first;
                 auto it = iPrim.attributes.find(s.second);
                 if (it == iPrim.attributes.end()) {
-                    uint32_t zero = 0;
+                    uint64_t zero = 0;
                     pass.SetVertexBuffers(slot, 1, &defaultBuffer, &zero);
                     continue;
                 }
@@ -538,7 +538,7 @@ namespace {
                     vertexCount = static_cast<uint32_t>(iAccessor.count);
                 }
                 const auto& oBuffer = buffers.at(iAccessor.bufferView);
-                uint32_t iBufferOffset = static_cast<uint32_t>(iAccessor.byteOffset);
+                uint64_t iBufferOffset = static_cast<uint64_t>(iAccessor.byteOffset);
                 pass.SetVertexBuffers(slot, 1, &oBuffer, &iBufferOffset);
             }
 

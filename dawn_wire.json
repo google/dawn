@@ -35,14 +35,14 @@
             { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer" },
             { "name": "request serial", "type": "uint32_t" },
             { "name": "status", "type": "uint32_t" },
-            { "name": "data length", "type": "uint32_t" },
+            { "name": "data length", "type": "uint64_t" },
             { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "data length" }
         ],
         "buffer map write async callback": [
             { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer" },
             { "name": "request serial", "type": "uint32_t" },
             { "name": "status", "type": "uint32_t" },
-            { "name": "data length", "type": "uint32_t" }
+            { "name": "data length", "type": "uint64_t" }
         ],
         "device error callback": [
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
