@@ -68,9 +68,13 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
     dawn::ShaderModule module =
         utils::CreateShaderModule(device, dawn::ShaderStage::Compute, shader);
     dawn::ComputePipelineDescriptor cpDesc;
-    cpDesc.module = module;
-    cpDesc.entryPoint = "main";
     cpDesc.layout = pl;
+
+    dawn::PipelineStageDescriptor computeStage;
+    computeStage.module = module;
+    computeStage.entryPoint = "main";
+    cpDesc.computeStage = &computeStage;
+
     dawn::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
 
     dawn::BufferDescriptor bufferDesc;

@@ -149,9 +149,13 @@ class PushConstantTest: public DawnTest {
             );
 
             dawn::ComputePipelineDescriptor descriptor;
-            descriptor.module = module;
-            descriptor.entryPoint = "main";
             descriptor.layout = pl;
+
+            dawn::PipelineStageDescriptor computeStage;
+            computeStage.module = module;
+            computeStage.entryPoint = "main";
+            descriptor.computeStage = &computeStage;
+
             return device.CreateComputePipeline(&descriptor);
         }
 

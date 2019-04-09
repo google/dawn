@@ -375,8 +375,7 @@
         "extensible": true,
         "members": [
             {"name": "layout", "type": "pipeline layout"},
-            {"name": "module", "type": "shader module"},
-            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"}
+            {"name": "compute stage", "type": "pipeline stage descriptor", "annotation": "const*"}
         ]
     },
     "device": {

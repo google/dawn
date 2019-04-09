@@ -24,21 +24,9 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        DAWN_TRY(device->ValidateObject(descriptor->module));
         DAWN_TRY(device->ValidateObject(descriptor->layout));
-
-        if (descriptor->entryPoint != std::string("main")) {
-            return DAWN_VALIDATION_ERROR("Currently the entry point has to be main()");
-        }
-
-        if (descriptor->module->GetExecutionModel() != dawn::ShaderStage::Compute) {
-            return DAWN_VALIDATION_ERROR("Setting module with wrong execution model");
-        }
-
-        if (!descriptor->module->IsCompatibleWithPipelineLayout(descriptor->layout)) {
-            return DAWN_VALIDATION_ERROR("Stage not compatible with layout");
-        }
-
+        DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->computeStage,
+                                                 descriptor->layout, dawn::ShaderStage::Compute));
         return {};
     }
 
@@ -47,7 +35,7 @@ namespace dawn_native {
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
                                              const ComputePipelineDescriptor* descriptor)
         : PipelineBase(device, descriptor->layout, dawn::ShaderStageBit::Compute) {
-        ExtractModuleData(dawn::ShaderStage::Compute, descriptor->module);
+        ExtractModuleData(dawn::ShaderStage::Compute, descriptor->computeStage->module);
     }
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)

@@ -23,15 +23,14 @@ namespace dawn_native { namespace metal {
         : ComputePipelineBase(device, descriptor) {
         auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 
-        const auto& module = ToBackend(descriptor->module);
-        const char* entryPoint = descriptor->entryPoint;
-
-        auto compilationData =
-            module->GetFunction(entryPoint, dawn::ShaderStage::Compute, ToBackend(GetLayout()));
+        const ShaderModule* computeModule = ToBackend(descriptor->computeStage->module);
+        const char* computeEntryPoint = descriptor->computeStage->entryPoint;
+        ShaderModule::MetalFunctionData computeData = computeModule->GetFunction(
+            computeEntryPoint, dawn::ShaderStage::Compute, ToBackend(GetLayout()));
 
         NSError* error = nil;
         mMtlComputePipelineState =
-            [mtlDevice newComputePipelineStateWithFunction:compilationData.function error:&error];
+            [mtlDevice newComputePipelineStateWithFunction:computeData.function error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
             GetDevice()->HandleError("Error creating pipeline state");
@@ -39,7 +38,7 @@ namespace dawn_native { namespace metal {
         }
 
         // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
-        mLocalWorkgroupSize = compilationData.localWorkgroupSize;
+        mLocalWorkgroupSize = computeData.localWorkgroupSize;
     }
 
     ComputePipeline::~ComputePipeline() {

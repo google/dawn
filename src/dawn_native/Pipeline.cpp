@@ -20,6 +20,24 @@
 
 namespace dawn_native {
 
+    MaybeError ValidatePipelineStageDescriptor(DeviceBase* device,
+                                               const PipelineStageDescriptor* descriptor,
+                                               const PipelineLayoutBase* layout,
+                                               dawn::ShaderStage stage) {
+        DAWN_TRY(device->ValidateObject(descriptor->module));
+
+        if (descriptor->entryPoint != std::string("main")) {
+            return DAWN_VALIDATION_ERROR("Entry point must be \"main\"");
+        }
+        if (descriptor->module->GetExecutionModel() != stage) {
+            return DAWN_VALIDATION_ERROR("Setting module with wrong stages");
+        }
+        if (!descriptor->module->IsCompatibleWithPipelineLayout(layout)) {
+            return DAWN_VALIDATION_ERROR("Stage not compatible with layout");
+        }
+        return {};
+    }
+
     // PipelineBase
 
     PipelineBase::PipelineBase(DeviceBase* device,

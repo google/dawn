@@ -39,9 +39,13 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     auto pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     dawn::ComputePipelineDescriptor csDesc;
-    csDesc.module = module;
-    csDesc.entryPoint = "main";
     csDesc.layout = pl;
+
+    dawn::PipelineStageDescriptor computeStage;
+    computeStage.module = module;
+    computeStage.entryPoint = "main";
+    csDesc.computeStage = &computeStage;
+
     dawn::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     // Set up src storage buffer

@@ -34,6 +34,11 @@ namespace dawn_native {
         Float,
     };
 
+    MaybeError ValidatePipelineStageDescriptor(DeviceBase* device,
+                                               const PipelineStageDescriptor* descriptor,
+                                               const PipelineLayoutBase* layout,
+                                               dawn::ShaderStage stage);
+
     class PipelineBase : public ObjectBase {
       public:
         struct PushConstantInfo {
