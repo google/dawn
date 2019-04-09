@@ -209,7 +209,7 @@ protected:
         descriptor.arrayLayerCount = 1;
         descriptor.baseMipLevel = textureViewBaseMipLevel;
         descriptor.mipLevelCount = 1;
-        dawn::TextureView textureView = mTexture.CreateTextureView(&descriptor);
+        dawn::TextureView textureView = mTexture.CreateView(&descriptor);
 
         const char* fragmentShader = R"(
             #version 450
@@ -248,7 +248,7 @@ protected:
         descriptor.arrayLayerCount = kTextureViewLayerCount;
         descriptor.baseMipLevel = textureViewBaseMipLevel;
         descriptor.mipLevelCount = 1;
-        dawn::TextureView textureView = mTexture.CreateTextureView(&descriptor);
+        dawn::TextureView textureView = mTexture.CreateView(&descriptor);
 
         const char* fragmentShader = R"(
             #version 450
@@ -328,7 +328,7 @@ protected:
         descriptor.baseArrayLayer = textureViewBaseLayer;
         descriptor.arrayLayerCount = textureViewLayerCount;
 
-        dawn::TextureView cubeMapTextureView = mTexture.CreateTextureView(&descriptor);
+        dawn::TextureView cubeMapTextureView = mTexture.CreateView(&descriptor);
 
         // Check the data in the every face of the cube map (array) texture view.
         for (uint32_t layer = 0; layer < textureViewLayerCount; ++layer) {
@@ -358,7 +358,7 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     constexpr uint32_t kMipLevels = 1;
     initTexture(kLayers, kMipLevels);
 
-    dawn::TextureView textureView = mTexture.CreateDefaultTextureView();
+    dawn::TextureView textureView = mTexture.CreateDefaultView();
 
     const char* fragmentShader = R"(
             #version 450
@@ -486,7 +486,7 @@ class TextureViewRenderingTest : public DawnTest {
         descriptor.arrayLayerCount = 1;
         descriptor.baseMipLevel = textureViewBaseLevel;
         descriptor.mipLevelCount = 1;
-        dawn::TextureView textureView = texture.CreateTextureView(&descriptor);
+        dawn::TextureView textureView = texture.CreateView(&descriptor);
 
         dawn::ShaderModule vsModule = CreateDefaultVertexShaderModule(device);
 

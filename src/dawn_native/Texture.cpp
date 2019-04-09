@@ -381,7 +381,7 @@ namespace dawn_native {
         return mSampleCount > 1;
     }
 
-    TextureViewBase* TextureBase::CreateDefaultTextureView() {
+    TextureViewBase* TextureBase::CreateDefaultView() {
         TextureViewDescriptor descriptor = {};
 
         if (!IsError()) {
@@ -391,7 +391,7 @@ namespace dawn_native {
         return GetDevice()->CreateTextureView(this, &descriptor);
     }
 
-    TextureViewBase* TextureBase::CreateTextureView(const TextureViewDescriptor* descriptor) {
+    TextureViewBase* TextureBase::CreateView(const TextureViewDescriptor* descriptor) {
         return GetDevice()->CreateTextureView(this, descriptor);
     }
 

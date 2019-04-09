@@ -115,7 +115,7 @@ TEST_F(TextureValidationTest, DestroyDestroyedTexture) {
 TEST_F(TextureValidationTest, DestroyEncodeSubmit) {
     dawn::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
     dawn::Texture texture = device.CreateTexture(&descriptor);
-    dawn::TextureView textureView = texture.CreateDefaultTextureView();
+    dawn::TextureView textureView = texture.CreateDefaultView();
 
     utils::ComboRenderPassDescriptor renderPass({textureView});
 
@@ -138,7 +138,7 @@ TEST_F(TextureValidationTest, DestroyEncodeSubmit) {
 TEST_F(TextureValidationTest, EncodeDestroySubmit) {
     dawn::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
     dawn::Texture texture = device.CreateTexture(&descriptor);
-    dawn::TextureView textureView = texture.CreateDefaultTextureView();
+    dawn::TextureView textureView = texture.CreateDefaultView();
 
     utils::ComboRenderPassDescriptor renderPass({textureView});
 

@@ -28,9 +28,9 @@ class MultisampledRenderingTest : public DawnTest {
 
     void InitTexturesForTest() {
         mMultisampledColorView =
-            CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateDefaultTextureView();
+            CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateDefaultView();
         mResolveTexture = CreateTextureForOutputAttachment(kColorFormat, 1);
-        mResolveView = mResolveTexture.CreateDefaultTextureView();
+        mResolveView = mResolveTexture.CreateDefaultView();
     }
 
     dawn::RenderPipeline CreateRenderPipelineWithOneOutputForTest(bool testDepth) {
@@ -143,7 +143,7 @@ class MultisampledRenderingTest : public DawnTest {
             dawn::Texture depthStencilTexture =
                 CreateTextureForOutputAttachment(kDepthStencilFormat, kSampleCount);
             renderPass.cDepthStencilAttachmentInfo.attachment =
-                depthStencilTexture.CreateDefaultTextureView();
+                depthStencilTexture.CreateDefaultView();
             renderPass.depthStencilAttachment = &renderPass.cDepthStencilAttachmentInfo;
         }
 
@@ -338,9 +338,9 @@ TEST_P(MultisampledRenderingTest, ResolveInAnotherRenderPass) {
 // Test doing MSAA resolve into multiple resolve targets works correctly.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
     dawn::TextureView multisampledColorView2 =
-        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateDefaultTextureView();
+        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateDefaultView();
     dawn::Texture resolveTexture2 = CreateTextureForOutputAttachment(kColorFormat, 1);
-    dawn::TextureView resolveView2 = resolveTexture2.CreateDefaultTextureView();
+    dawn::TextureView resolveView2 = resolveTexture2.CreateDefaultView();
 
     dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     dawn::RenderPipeline pipeline = CreateRenderPipelineWithTwoOutputsForTest();
@@ -392,7 +392,7 @@ TEST_P(MultisampledRenderingTest, ResolveOneMultisampledTextureTwice) {
 
     // In second render pass we do MSAA resolve into resolveTexture2.
     {
-        dawn::TextureView resolveView2 = resolveTexture2.CreateDefaultTextureView();
+        dawn::TextureView resolveView2 = resolveTexture2.CreateDefaultView();
         utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
             {mMultisampledColorView}, {resolveView2}, dawn::LoadOp::Load, dawn::LoadOp::Load,
             kTestDepth);
@@ -425,7 +425,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
 
     dawn::Texture resolveTexture =
         CreateTextureForOutputAttachment(kColorFormat, 1, kBaseMipLevel + 1, 1);
-    dawn::TextureView resolveView = resolveTexture.CreateTextureView(&textureViewDescriptor);
+    dawn::TextureView resolveView = resolveTexture.CreateView(&textureViewDescriptor);
 
     dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     constexpr dawn::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
@@ -454,7 +454,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     // TODO(jiawei.shao@intel.com): investigate why this case fails on Intel and Nvidia.
     DAWN_SKIP_TEST_IF(IsMetal() && (IsIntel() || IsNvidia()));
     dawn::TextureView multisampledColorView2 =
-        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateDefaultTextureView();
+        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateDefaultView();
 
     dawn::TextureViewDescriptor baseTextureViewDescriptor;
     baseTextureViewDescriptor.dimension = dawn::TextureViewDimension::e2D;
@@ -470,7 +470,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     dawn::TextureViewDescriptor resolveViewDescriptor1 = baseTextureViewDescriptor;
     resolveViewDescriptor1.baseArrayLayer = kBaseArrayLayer1;
     resolveViewDescriptor1.baseMipLevel = kBaseMipLevel1;
-    dawn::TextureView resolveView1 = resolveTexture1.CreateTextureView(&resolveViewDescriptor1);
+    dawn::TextureView resolveView1 = resolveTexture1.CreateView(&resolveViewDescriptor1);
 
     // Create resolveTexture2 with (kBaseMipLevel2 + 1) mipmap levels and resolve into its last
     // mipmap level.
@@ -481,7 +481,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     dawn::TextureViewDescriptor resolveViewDescriptor2 = baseTextureViewDescriptor;
     resolveViewDescriptor2.baseArrayLayer = kBaseArrayLayer2;
     resolveViewDescriptor2.baseMipLevel = kBaseMipLevel2;
-    dawn::TextureView resolveView2 = resolveTexture2.CreateTextureView(&resolveViewDescriptor2);
+    dawn::TextureView resolveView2 = resolveTexture2.CreateView(&resolveViewDescriptor2);
 
     dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     dawn::RenderPipeline pipeline = CreateRenderPipelineWithTwoOutputsForTest();

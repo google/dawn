@@ -117,7 +117,7 @@ void frame() {
     DawnTexture backbuffer = dawnSwapChainGetNextTexture(swapchain);
     DawnTextureView backbufferView;
     {
-        backbufferView = dawnTextureCreateDefaultTextureView(backbuffer);
+        backbufferView = dawnTextureCreateDefaultView(backbuffer);
     }
     DawnRenderPassDescriptor renderpassInfo;
     DawnRenderPassColorAttachmentDescriptor colorAttachment;

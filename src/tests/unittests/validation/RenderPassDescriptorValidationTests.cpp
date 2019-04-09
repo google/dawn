@@ -69,11 +69,11 @@ dawn::TextureView Create2DAttachment(dawn::Device& device,
                                      dawn::TextureFormat format) {
     dawn::Texture texture = CreateTexture(
         device, dawn::TextureDimension::e2D, format, width, height, 1, 1);
-    return texture.CreateDefaultTextureView();
+    return texture.CreateDefaultView();
 }
 
 // Using BeginRenderPass with no attachments isn't valid
-TEST_F(RenderPassDescriptorValidationTest, Empty) {  
+TEST_F(RenderPassDescriptorValidationTest, Empty) {
     utils::ComboRenderPassDescriptor renderPass({}, nullptr);
     AssertBeginRenderPassError(&renderPass);
 }
@@ -222,7 +222,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         descriptor.format = kColorFormat;
         descriptor.arrayLayerCount = 5;
 
-        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        dawn::TextureView colorTextureView = colorTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({colorTextureView});
         AssertBeginRenderPassError(&renderPass);
     }
@@ -233,7 +233,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         descriptor.format = kDepthStencilFormat;
         descriptor.arrayLayerCount = 5;
 
-        dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
+        dawn::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
         AssertBeginRenderPassError(&renderPass);
     }
@@ -245,7 +245,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         descriptor.baseArrayLayer = 0;
         descriptor.arrayLayerCount = 1;
 
-        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        dawn::TextureView colorTextureView = colorTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({colorTextureView});
         AssertBeginRenderPassSuccess(&renderPass);
     }
@@ -257,7 +257,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         descriptor.baseArrayLayer = 0;
         descriptor.arrayLayerCount = 1;
 
-        dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
+        dawn::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
         AssertBeginRenderPassSuccess(&renderPass);
     }
@@ -269,7 +269,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         descriptor.baseArrayLayer = kArrayLayers - 1;
         descriptor.arrayLayerCount = 1;
 
-        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        dawn::TextureView colorTextureView = colorTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({colorTextureView});
         AssertBeginRenderPassSuccess(&renderPass);
     }
@@ -281,7 +281,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
         descriptor.baseArrayLayer = kArrayLayers - 1;
         descriptor.arrayLayerCount = 1;
 
-        dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
+        dawn::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
         AssertBeginRenderPassSuccess(&renderPass);
     }
@@ -315,7 +315,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         descriptor.format = kColorFormat;
         descriptor.mipLevelCount = 2;
 
-        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        dawn::TextureView colorTextureView = colorTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({colorTextureView});
         AssertBeginRenderPassError(&renderPass);
     }
@@ -326,7 +326,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         descriptor.format = kDepthStencilFormat;
         descriptor.mipLevelCount = 2;
 
-        dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
+        dawn::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
         AssertBeginRenderPassError(&renderPass);
     }
@@ -338,7 +338,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         descriptor.baseMipLevel = 0;
         descriptor.mipLevelCount = 1;
 
-        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        dawn::TextureView colorTextureView = colorTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({colorTextureView});
         AssertBeginRenderPassSuccess(&renderPass);
     }
@@ -350,7 +350,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         descriptor.baseMipLevel = 0;
         descriptor.mipLevelCount = 1;
 
-        dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
+        dawn::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
         AssertBeginRenderPassSuccess(&renderPass);
     }
@@ -362,7 +362,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         descriptor.baseMipLevel = kLevelCount - 1;
         descriptor.mipLevelCount = 1;
 
-        dawn::TextureView colorTextureView = colorTexture.CreateTextureView(&descriptor);
+        dawn::TextureView colorTextureView = colorTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({colorTextureView});
         AssertBeginRenderPassSuccess(&renderPass);
     }
@@ -374,7 +374,7 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepth
         descriptor.baseMipLevel = kLevelCount - 1;
         descriptor.mipLevelCount = 1;
 
-        dawn::TextureView depthStencilView = depthStencilTexture.CreateTextureView(&descriptor);
+        dawn::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
         AssertBeginRenderPassSuccess(&renderPass);
     }
@@ -394,8 +394,8 @@ TEST_F(RenderPassDescriptorValidationTest, NonMultisampledColorWithResolveTarget
     dawn::Texture resolveTargetTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
         kLevelCount, kSampleCount);
-    dawn::TextureView colorTextureView = colorTexture.CreateDefaultTextureView();
-    dawn::TextureView resolveTargetTextureView = resolveTargetTexture.CreateDefaultTextureView();
+    dawn::TextureView colorTextureView = colorTexture.CreateDefaultView();
+    dawn::TextureView resolveTargetTextureView = resolveTargetTexture.CreateDefaultView();
 
     utils::ComboRenderPassDescriptor renderPass({colorTextureView});
     renderPass.cColorAttachmentsInfoPtr[0]->resolveTarget = resolveTargetTextureView;
@@ -428,7 +428,7 @@ class MultisampledRenderPassDescriptorValidationTest : public RenderPassDescript
             device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
             kLevelCount, sampleCount);
 
-        return colorTexture.CreateDefaultTextureView();
+        return colorTexture.CreateDefaultView();
     }
 };
 
@@ -467,7 +467,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetArrayLayerMo
     dawn::Texture resolveTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers2,
         kLevelCount);
-    dawn::TextureView resolveTextureView = resolveTexture.CreateDefaultTextureView();
+    dawn::TextureView resolveTextureView = resolveTexture.CreateDefaultView();
 
     utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
     renderPass.cColorAttachmentsInfoPtr[0]->resolveTarget = resolveTextureView;
@@ -480,7 +480,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetMipmapLevelM
     dawn::Texture resolveTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
         kLevelCount2);
-    dawn::TextureView resolveTextureView = resolveTexture.CreateDefaultTextureView();
+    dawn::TextureView resolveTextureView = resolveTexture.CreateDefaultView();
 
     utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
     renderPass.cColorAttachmentsInfoPtr[0]->resolveTarget = resolveTextureView;
@@ -496,7 +496,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetUsageNoOutpu
         device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
         kLevelCount, 1, kUsage);
     dawn::TextureView nonColorUsageResolveTextureView =
-        nonColorUsageResolveTexture.CreateDefaultTextureView();
+        nonColorUsageResolveTexture.CreateDefaultView();
 
     utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
     renderPass.cColorAttachmentsInfoPtr[0]->resolveTarget = nonColorUsageResolveTextureView;
@@ -514,7 +514,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetInErrorState
     errorTextureView.baseArrayLayer = kArrayLayers + 1;
     ASSERT_DEVICE_ERROR(
         dawn::TextureView errorResolveTarget =
-        resolveTexture.CreateTextureView(&errorTextureView));
+        resolveTexture.CreateView(&errorTextureView));
 
     utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
     renderPass.cColorAttachmentsInfoPtr[0]->resolveTarget = errorResolveTarget;
@@ -536,7 +536,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetDifferentFor
     dawn::Texture resolveTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kColorFormat2, kSize, kSize, kArrayLayers,
         kLevelCount);
-    dawn::TextureView resolveTextureView = resolveTexture.CreateDefaultTextureView();
+    dawn::TextureView resolveTextureView = resolveTexture.CreateDefaultView();
 
     utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
     renderPass.cColorAttachmentsInfoPtr[0]->resolveTarget = resolveTextureView;
@@ -563,7 +563,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ColorAttachmentResolveTar
         firstMipLevelDescriptor.baseMipLevel = 0;
 
         dawn::TextureView resolveTextureView =
-            resolveTexture.CreateTextureView(&firstMipLevelDescriptor);
+            resolveTexture.CreateView(&firstMipLevelDescriptor);
 
         utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
         renderPass.cColorAttachmentsInfoPtr[0]->resolveTarget = resolveTextureView;
@@ -575,7 +575,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ColorAttachmentResolveTar
         secondMipLevelDescriptor.baseMipLevel = 1;
 
         dawn::TextureView resolveTextureView =
-            resolveTexture.CreateTextureView(&secondMipLevelDescriptor);
+            resolveTexture.CreateView(&secondMipLevelDescriptor);
 
         utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
         renderPass.cColorAttachmentsInfoPtr[0]->resolveTarget = resolveTextureView;
@@ -590,7 +590,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, DepthStencilAttachmentSam
         device, dawn::TextureDimension::e2D, kDepthStencilFormat, kSize, kSize, kArrayLayers,
         kLevelCount, kSampleCount);
     dawn::TextureView multisampledDepthStencilTextureView =
-        multisampledDepthStencilTexture.CreateDefaultTextureView();
+        multisampledDepthStencilTexture.CreateDefaultView();
 
     // It is not allowed to use a depth stencil attachment whose sample count is different from the
     // one of the color attachment.
@@ -598,7 +598,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, DepthStencilAttachmentSam
         dawn::Texture depthStencilTexture = CreateTexture(
             device, dawn::TextureDimension::e2D, kDepthStencilFormat, kSize, kSize, kArrayLayers,
             kLevelCount);
-        dawn::TextureView depthStencilTextureView = depthStencilTexture.CreateDefaultTextureView();
+        dawn::TextureView depthStencilTextureView = depthStencilTexture.CreateDefaultView();
 
         utils::ComboRenderPassDescriptor renderPass(
             {CreateMultisampledColorTextureView()}, depthStencilTextureView);
