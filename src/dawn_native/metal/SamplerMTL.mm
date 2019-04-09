@@ -46,19 +46,6 @@ namespace dawn_native { namespace metal {
                     return MTLSamplerAddressModeMirrorRepeat;
                 case dawn::AddressMode::ClampToEdge:
                     return MTLSamplerAddressModeClampToEdge;
-                case dawn::AddressMode::ClampToBorderColor:
-                    return MTLSamplerAddressModeClampToBorderColor;
-            }
-        }
-
-        MTLSamplerBorderColor BorderColor(dawn::BorderColor color) {
-            switch (color) {
-                case dawn::BorderColor::TransparentBlack:
-                    return MTLSamplerBorderColorTransparentBlack;
-                case dawn::BorderColor::OpaqueBlack:
-                    return MTLSamplerBorderColorOpaqueBlack;
-                case dawn::BorderColor::OpaqueWhite:
-                    return MTLSamplerBorderColorOpaqueWhite;
             }
         }
     }
@@ -78,7 +65,6 @@ namespace dawn_native { namespace metal {
         mtlDesc.lodMinClamp = descriptor->lodMinClamp;
         mtlDesc.lodMaxClamp = descriptor->lodMaxClamp;
         mtlDesc.compareFunction = ToMetalCompareFunction(descriptor->compareFunction);
-        mtlDesc.borderColor = BorderColor(descriptor->borderColor);
 
         mMtlSamplerState = [device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc];
 

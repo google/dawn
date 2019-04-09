@@ -40,7 +40,6 @@ namespace dawn_native {
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeV));
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeW));
         DAWN_TRY(ValidateCompareFunction(descriptor->compareFunction));
-        DAWN_TRY(ValidateBorderColor(descriptor->borderColor));
         return {};
     }
 

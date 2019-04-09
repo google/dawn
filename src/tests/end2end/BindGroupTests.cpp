@@ -233,7 +233,6 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     samplerDescriptor.lodMinClamp = kLodMin;
     samplerDescriptor.lodMaxClamp = kLodMax;
     samplerDescriptor.compareFunction = dawn::CompareFunction::Never;
-    samplerDescriptor.borderColor = dawn::BorderColor::TransparentBlack;
 
     dawn::Sampler sampler = device.CreateSampler(&samplerDescriptor);
 

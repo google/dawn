@@ -30,7 +30,7 @@ namespace dawn_native { namespace d3d12 {
         const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
 
       private:
-        D3D12_SAMPLER_DESC mSamplerDesc;
+        D3D12_SAMPLER_DESC mSamplerDesc = {};
     };
 
 }}  // namespace dawn_native::d3d12

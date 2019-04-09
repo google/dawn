@@ -29,8 +29,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
                 case dawn::AddressMode::ClampToEdge:
                     return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-                case dawn::AddressMode::ClampToBorderColor:
-                    return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
                 default:
                     UNREACHABLE();
             }
@@ -57,24 +55,11 @@ namespace dawn_native { namespace vulkan {
                     UNREACHABLE();
             }
         }
-
-        VkBorderColor VulkanBorderColor(dawn::BorderColor color) {
-            switch (color) {
-                case dawn::BorderColor::TransparentBlack:
-                    return VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
-                case dawn::BorderColor::OpaqueBlack:
-                    return VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
-                case dawn::BorderColor::OpaqueWhite:
-                    return VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-                default:
-                    UNREACHABLE();
-            }
-        }
     }  // anonymous namespace
 
     Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor), mDevice(device) {
-        VkSamplerCreateInfo createInfo;
+        VkSamplerCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
@@ -91,7 +76,6 @@ namespace dawn_native { namespace vulkan {
         createInfo.compareEnable = createInfo.compareOp == VK_COMPARE_OP_NEVER ? VK_FALSE : VK_TRUE;
         createInfo.minLod = descriptor->lodMinClamp;
         createInfo.maxLod = descriptor->lodMaxClamp;
-        createInfo.borderColor = VulkanBorderColor(descriptor->borderColor);
         createInfo.unnormalizedCoordinates = VK_FALSE;
 
         if (device->fn.CreateSampler(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=

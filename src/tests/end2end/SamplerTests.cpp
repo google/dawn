@@ -129,7 +129,6 @@ protected:
             descriptor.lodMinClamp = kLodMin;
             descriptor.lodMaxClamp = kLodMax;
             descriptor.compareFunction = dawn::CompareFunction::Never;
-            descriptor.borderColor = dawn::BorderColor::TransparentBlack;
             sampler = device.CreateSampler(&descriptor);
         }
 

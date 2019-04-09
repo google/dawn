@@ -246,7 +246,6 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
     descriptor.lodMinClamp = kLodMin;
     descriptor.lodMaxClamp = kLodMax;
     descriptor.compareFunction = DAWN_COMPARE_FUNCTION_NEVER;
-    descriptor.borderColor = DAWN_BORDER_COLOR_TRANSPARENT_BLACK;
 
     dawnDeviceCreateSampler(device, &descriptor);
 
@@ -261,7 +260,6 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
                                     desc->addressModeV == DAWN_ADDRESS_MODE_REPEAT &&
                                     desc->addressModeW == DAWN_ADDRESS_MODE_MIRRORED_REPEAT &&
                                     desc->compareFunction == DAWN_COMPARE_FUNCTION_NEVER &&
-                                    desc->borderColor == DAWN_BORDER_COLOR_TRANSPARENT_BLACK &&
                                     desc->lodMinClamp == kLodMin && desc->lodMaxClamp == kLodMax;
                          })))
         .WillOnce(Return(apiDummySampler));

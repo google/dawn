@@ -271,7 +271,6 @@ namespace utils {
         desc.lodMinClamp = kLodMin;
         desc.lodMaxClamp = kLodMax;
         desc.compareFunction = dawn::CompareFunction::Never;
-        desc.borderColor = dawn::BorderColor::TransparentBlack;
 
         return desc;
     }
