@@ -67,7 +67,21 @@ namespace dawn_native { namespace metal {
                 descriptor.colorAttachments[i].level = attachmentInfo.view->GetBaseMipLevel();
                 descriptor.colorAttachments[i].slice = attachmentInfo.view->GetBaseArrayLayer();
 
-                descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
+                ASSERT(attachmentInfo.storeOp == dawn::StoreOp::Store);
+                // TODO(jiawei.shao@intel.com): emulate MTLStoreActionStoreAndMultisampleResolve on
+                // the platforms that do not support this store action.
+                if (attachmentInfo.resolveTarget.Get() != nullptr) {
+                    descriptor.colorAttachments[i].resolveTexture =
+                        ToBackend(attachmentInfo.resolveTarget->GetTexture())->GetMTLTexture();
+                    descriptor.colorAttachments[i].resolveLevel =
+                        attachmentInfo.resolveTarget->GetBaseMipLevel();
+                    descriptor.colorAttachments[i].resolveSlice =
+                        attachmentInfo.resolveTarget->GetBaseArrayLayer();
+                    descriptor.colorAttachments[i].storeAction =
+                        MTLStoreActionStoreAndMultisampleResolve;
+                } else {
+                    descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
+                }
             }
 
             if (renderPass->hasDepthStencilAttachment) {

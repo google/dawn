@@ -324,6 +324,8 @@ namespace dawn_native { namespace metal {
         descriptorMTL.vertexDescriptor = vertexDesc;
         [vertexDesc release];
 
+        descriptorMTL.sampleCount = GetSampleCount();
+
         // TODO(kainino@chromium.org): push constants, textures, samplers
 
         {
