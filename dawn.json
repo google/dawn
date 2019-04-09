@@ -935,11 +935,11 @@
         "category": "object",
         "methods": [
             {
-                "name": "create default texture view",
+                "name": "create default view",
                 "returns": "texture view"
             },
             {
-                "name": "create texture view",
+                "name": "create view",
                 "returns": "texture view",
                 "args": [
                     {"name": "descriptor", "type": "texture view descriptor", "annotation": "const*"}

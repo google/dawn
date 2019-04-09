@@ -138,7 +138,7 @@ void frame() {
 
     size_t i = 0;
 
-    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultTextureView()},
+    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()},
                                                 depthStencilView);
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
