@@ -65,8 +65,8 @@ namespace dawn_native {
         bool IsMultisampledTexture() const;
 
         // Dawn API
-        TextureViewBase* CreateDefaultView();
-        TextureViewBase* CreateView(const TextureViewDescriptor* descriptor);
+        TextureViewBase* CreateDefaultTextureView();
+        TextureViewBase* CreateTextureView(const TextureViewDescriptor* descriptor);
         void Destroy();
 
       protected:

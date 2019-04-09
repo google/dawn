@@ -766,7 +766,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
     for (uint32_t i = 0; i < 4; ++i) {
         renderTargets[i] = device.CreateTexture(&descriptor);
-        renderTargetViews[i] = renderTargets[i].CreateDefaultView();
+        renderTargetViews[i] = renderTargets[i].CreateDefaultTextureView();
     }
 
     utils::ComboRenderPassDescriptor renderPass({renderTargetViews[0], renderTargetViews[1],

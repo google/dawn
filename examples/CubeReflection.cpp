@@ -260,7 +260,7 @@ void frame() {
     cameraBuffer.SetSubData(0, sizeof(CameraData), reinterpret_cast<uint8_t*>(&cameraData));
 
     dawn::Texture backbuffer = swapchain.GetNextTexture();
-    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()},
+    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultTextureView()},
                                                 depthStencilView);
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();

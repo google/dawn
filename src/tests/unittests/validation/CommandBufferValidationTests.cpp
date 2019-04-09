@@ -226,7 +226,7 @@ TEST_F(CommandBufferValidationTest, TextureWithReadAndWriteUsage) {
     textureDescriptor.sampleCount = 1;
     textureDescriptor.mipLevelCount = 1;
     dawn::Texture texture = device.CreateTexture(&textureDescriptor);
-    dawn::TextureView view = texture.CreateDefaultView();
+    dawn::TextureView view = texture.CreateDefaultTextureView();
 
     // Create the bind group to use the texture as sampled
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(device, {{

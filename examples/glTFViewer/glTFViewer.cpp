@@ -466,7 +466,7 @@ namespace {
             dawn::CommandBuffer cmdbuf = encoder.Finish();
             queue.Submit(1, &cmdbuf);
 
-            textures[iTextureID] = oTexture.CreateDefaultView();
+            textures[iTextureID] = oTexture.CreateDefaultTextureView();
         }
     }
 
@@ -593,7 +593,7 @@ namespace {
         const auto& defaultSceneNodes = scene.scenes.at(scene.defaultScene);
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()},
+            utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultTextureView()},
                                                         depthStencilView);
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             for (const auto& n : defaultSceneNodes) {

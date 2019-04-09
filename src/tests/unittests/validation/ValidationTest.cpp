@@ -93,7 +93,7 @@ ValidationTest::DummyRenderPass::DummyRenderPass(const dawn::Device& device)
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
     attachment = device.CreateTexture(&descriptor);
 
-    dawn::TextureView view = attachment.CreateDefaultView();
+    dawn::TextureView view = attachment.CreateDefaultTextureView();
     mColorAttachment.attachment = view;
     mColorAttachment.resolveTarget = nullptr;
     mColorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };

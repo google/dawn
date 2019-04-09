@@ -76,7 +76,7 @@ TEST_P(ClipSpaceTest, ClipSpace) {
     dawn::Texture depthStencilTexture = Create2DTextureForTest(dawn::TextureFormat::D32FloatS8Uint);
 
     utils::ComboRenderPassDescriptor renderPassDescriptor(
-        {colorTexture.CreateDefaultView()}, depthStencilTexture.CreateDefaultView());
+        {colorTexture.CreateDefaultTextureView()}, depthStencilTexture.CreateDefaultTextureView());
     renderPassDescriptor.cColorAttachmentsInfoPtr[0]->clearColor = {0.0, 1.0, 0.0, 1.0};
     renderPassDescriptor.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
 

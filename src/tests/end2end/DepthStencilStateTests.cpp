@@ -37,7 +37,7 @@ class DepthStencilStateTest : public DawnTest {
             renderTargetDescriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
             renderTarget = device.CreateTexture(&renderTargetDescriptor);
 
-            renderTargetView = renderTarget.CreateDefaultView();
+            renderTargetView = renderTarget.CreateDefaultTextureView();
 
             dawn::TextureDescriptor depthDescriptor;
             depthDescriptor.dimension = dawn::TextureDimension::e2D;
@@ -51,7 +51,7 @@ class DepthStencilStateTest : public DawnTest {
             depthDescriptor.usage = dawn::TextureUsageBit::OutputAttachment;
             depthTexture = device.CreateTexture(&depthDescriptor);
 
-            depthTextureView = depthTexture.CreateDefaultView();
+            depthTextureView = depthTexture.CreateDefaultTextureView();
 
             vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
                 #version 450

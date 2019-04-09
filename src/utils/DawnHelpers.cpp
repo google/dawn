@@ -207,7 +207,7 @@ namespace utils {
           height(texHeight),
           color(colorAttachment),
           colorFormat(textureFormat),
-          renderPassInfo({colorAttachment.CreateDefaultView()}) {
+          renderPassInfo({colorAttachment.CreateDefaultTextureView()}) {
     }
 
     BasicRenderPass CreateBasicRenderPass(const dawn::Device& device,
