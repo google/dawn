@@ -72,6 +72,11 @@ protected:
 
 // Test using two different render passes in one commandBuffer works correctly.
 TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
+    if (IsOpenGL() || IsMetal()) {
+      // crbug.com/950768
+      // This test is consistently failing on OpenGL and flaky on Metal.
+      return;
+    }
     constexpr RGBA8 kRed(255, 0, 0, 255);
     constexpr RGBA8 kGreen(0, 255, 0, 255);
 
