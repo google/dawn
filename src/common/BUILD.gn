@@ -79,6 +79,7 @@ if (is_win || is_linux || is_mac) {
       "Assert.h",
       "BitSetIterator.h",
       "Compiler.h",
+      "Constants.h",
       "DynamicLib.cpp",
       "DynamicLib.h",
       "HashUtils.h",
