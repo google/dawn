@@ -195,13 +195,6 @@ class PushConstantTest: public DawnTest {
             descriptor.cFragmentStage.module = fsModule;
             descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
 
-            dawn::BlendDescriptor blend;
-            blend.operation = dawn::BlendOperation::Add;
-            blend.srcFactor = dawn::BlendFactor::One;
-            blend.dstFactor = dawn::BlendFactor::One;
-            descriptor.cColorStates[0]->alphaBlend = blend;
-            descriptor.cColorStates[0]->colorBlend = blend;
-
             return device.CreateRenderPipeline(&descriptor);
         }
 };
