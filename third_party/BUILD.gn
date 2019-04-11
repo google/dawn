@@ -70,6 +70,10 @@ static_library("spirv_cross") {
     "${spirv_cross_dir}/spirv_common.hpp",
     "${spirv_cross_dir}/spirv_cross.cpp",
     "${spirv_cross_dir}/spirv_cross.hpp",
+    "${spirv_cross_dir}/spirv_cross_parsed_ir.cpp",
+    "${spirv_cross_dir}/spirv_cross_parsed_ir.hpp",
+    "${spirv_cross_dir}/spirv_parser.cpp",
+    "${spirv_cross_dir}/spirv_parser.hpp",
   ]
 
   need_glsl_cross = dawn_enable_opengl
@@ -110,12 +114,16 @@ static_library("spirv_cross_full_for_fuzzers") {
     "${spirv_cross_dir}/spirv_common.hpp",
     "${spirv_cross_dir}/spirv_cross.cpp",
     "${spirv_cross_dir}/spirv_cross.hpp",
+    "${spirv_cross_dir}/spirv_cross_parsed_ir.cpp",
+    "${spirv_cross_dir}/spirv_cross_parsed_ir.hpp",
     "${spirv_cross_dir}/spirv_glsl.cpp",
     "${spirv_cross_dir}/spirv_glsl.hpp",
     "${spirv_cross_dir}/spirv_hlsl.cpp",
     "${spirv_cross_dir}/spirv_hlsl.hpp",
     "${spirv_cross_dir}/spirv_msl.cpp",
     "${spirv_cross_dir}/spirv_msl.hpp",
+    "${spirv_cross_dir}/spirv_parser.cpp",
+    "${spirv_cross_dir}/spirv_parser.hpp",
   ]
 }
 
@@ -342,6 +350,7 @@ if (dawn_standalone) {
     configs += [ "//build/config/compiler:no_chromium_code" ]
 
     public_configs = [ ":glm_public_config" ]
+
     # GLM is header only but has too many files to list them.
   }
 

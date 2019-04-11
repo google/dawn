@@ -60,8 +60,7 @@ namespace dawn_native { namespace metal {
 
         // By default SPIRV-Cross will give MSL resources indices in increasing order.
         // To make the MSL indices match the indices chosen in the PipelineLayout, we build
-        // a table of MSLResourceBinding to give to SPIRV-Cross
-        std::vector<spirv_cross::MSLResourceBinding> mslBindings;
+        // a table of MSLResourceBinding to give to SPIRV-Cross.
 
         // Reserve index 0 for buffers for the push constants buffer.
         for (auto stage : IterateStages(kAllStages)) {
@@ -71,7 +70,7 @@ namespace dawn_native { namespace metal {
             binding.binding = spirv_cross::kPushConstBinding;
             binding.msl_buffer = 0;
 
-            mslBindings.push_back(binding);
+            compiler.add_msl_resource_binding(binding);
         }
 
         // Create one resource binding entry per stage per binding.
@@ -87,7 +86,7 @@ namespace dawn_native { namespace metal {
                     mslBinding.binding = binding;
                     mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler = index;
 
-                    mslBindings.push_back(mslBinding);
+                    compiler.add_msl_resource_binding(mslBinding);
                 }
             }
         }
@@ -103,7 +102,7 @@ namespace dawn_native { namespace metal {
         {
             // SPIRV-Cross also supports re-ordering attributes but it seems to do the correct thing
             // by default.
-            std::string msl = compiler.compile(nullptr, &mslBindings);
+            std::string msl = compiler.compile();
             NSString* mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];
 
             auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();

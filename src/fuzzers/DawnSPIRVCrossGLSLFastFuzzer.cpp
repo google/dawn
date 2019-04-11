@@ -28,7 +28,7 @@ namespace {
         DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, &input]() {
             // Using the options that are used by Dawn, they appear in ShaderModuleGL.cpp
             shaderc_spvc::CompileOptions options;
-            options.SetOutputLanguageVersion(440);
+            options.SetGLSLLanguageVersion(440);
             options.SetFixupClipspace(true);
             compiler.CompileSpvToGlsl(input.data(), input.size(), options);
         });
