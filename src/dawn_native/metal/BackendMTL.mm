@@ -104,6 +104,12 @@ namespace dawn_native { namespace metal {
 
             return value;
         }
+
+        bool IsMetalSupported() {
+            // Metal was first introduced in macOS 10.11
+            NSOperatingSystemVersion macOS10_11 = {10, 11, 0};
+            return [NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:macOS10_11];
+        }
     }  // anonymous namespace
 
     // The Metal backend's Adapter.
@@ -155,6 +161,9 @@ namespace dawn_native { namespace metal {
     }
 
     BackendConnection* Connect(InstanceBase* instance) {
+        if (!IsMetalSupported()) {
+            return nullptr;
+        }
         return new Backend(instance);
     }
 
