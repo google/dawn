@@ -102,6 +102,15 @@ void init() {
         inputState.attributes = nullptr;
         descriptor.inputState = &inputState;
 
+        DawnRasterizationStateDescriptor rasterizationState;
+        rasterizationState.nextInChain = nullptr;
+        rasterizationState.frontFace = DAWN_FRONT_FACE_CCW;
+        rasterizationState.cullMode = DAWN_CULL_MODE_NONE;
+        rasterizationState.depthBias = 0;
+        rasterizationState.depthBiasSlopeScale = 0.0;
+        rasterizationState.depthBiasClamp = 0.0;
+        descriptor.rasterizationState = &rasterizationState;
+
         descriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
         descriptor.depthStencilState = nullptr;

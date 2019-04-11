@@ -68,6 +68,17 @@ namespace utils {
         // Set defaults for the input state descriptors.
         descriptor->inputState = &cInputState;
 
+        // Set defaults for the rasterization state descriptor.
+        {
+            cRasterizationState.frontFace = dawn::FrontFace::CCW;
+            cRasterizationState.cullMode = dawn::CullMode::None;
+
+            cRasterizationState.depthBias = 0;
+            cRasterizationState.depthBiasSlopeScale = 0.0;
+            cRasterizationState.depthBiasClamp = 0.0;
+            descriptor->rasterizationState = &cRasterizationState;
+        }
+
         // Set defaults for the color state descriptors.
         {
             descriptor->colorStateCount = 1;

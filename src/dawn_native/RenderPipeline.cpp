@@ -97,6 +97,16 @@ namespace dawn_native {
             return {};
         }
 
+        MaybeError ValidateRasterizationStateDescriptor(
+            const RasterizationStateDescriptor* descriptor) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+            DAWN_TRY(ValidateFrontFace(descriptor->frontFace));
+            DAWN_TRY(ValidateCullMode(descriptor->cullMode));
+            return {};
+        }
+
         MaybeError ValidateColorStateDescriptor(const ColorStateDescriptor* descriptor) {
             if (descriptor->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -264,6 +274,7 @@ namespace dawn_native {
                                                  descriptor->layout, dawn::ShaderStage::Vertex));
         DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->fragmentStage,
                                                  descriptor->layout, dawn::ShaderStage::Fragment));
+        DAWN_TRY(ValidateRasterizationStateDescriptor(descriptor->rasterizationState));
 
         if ((descriptor->vertexStage->module->GetUsedVertexAttributes() & ~attributesSetMask)
                 .any()) {
@@ -323,6 +334,7 @@ namespace dawn_native {
                        dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment),
           mInputState(*descriptor->inputState),
           mPrimitiveTopology(descriptor->primitiveTopology),
+          mRasterizationState(*descriptor->rasterizationState),
           mHasDepthStencilAttachment(descriptor->depthStencilState != nullptr),
           mSampleCount(descriptor->sampleCount) {
         uint32_t location = 0;

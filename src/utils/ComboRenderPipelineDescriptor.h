@@ -39,6 +39,7 @@ namespace utils {
         dawn::PipelineStageDescriptor cFragmentStage;
 
         ComboInputStateDescriptor cInputState;
+        dawn::RasterizationStateDescriptor cRasterizationState;
         std::array<dawn::ColorStateDescriptor*, kMaxColorAttachments> cColorStates;
         dawn::DepthStencilStateDescriptor cDepthStencilState;
 

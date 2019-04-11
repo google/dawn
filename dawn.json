@@ -378,6 +378,14 @@
             {"name": "compute stage", "type": "pipeline stage descriptor", "annotation": "const*"}
         ]
     },
+    "cull mode": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "none"},
+            {"value": 1, "name": "front"},
+            {"value": 2, "name": "back"}
+        ]
+    },
     "device": {
         "category": "object",
         "methods": [
@@ -550,6 +558,13 @@
     "float": {
         "category": "native"
     },
+    "front face": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "CCW"},
+            {"value": 1, "name": "CW"}
+        ]
+    },
     "index format": {
         "category": "enum",
         "values": [
@@ -668,6 +683,18 @@
                     {"name": "descriptor", "type": "fence descriptor", "annotation": "const*"}
                 ]
             }
+        ]
+    },
+
+    "rasterization state descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "front face", "type": "front face"},
+            {"name": "cull mode", "type": "cull mode"},
+            {"name": "depth bias", "type": "int32_t"},
+            {"name": "depth bias slope scale", "type": "float"},
+            {"name": "depth bias clamp", "type": "float"}
         ]
     },
 
@@ -824,6 +851,7 @@
             {"name": "fragment stage", "type": "pipeline stage descriptor", "annotation": "const*"},
             {"name": "input state", "type": "input state descriptor", "annotation": "const*"},
             {"name": "primitive topology", "type": "primitive topology"},
+            {"name": "rasterization state", "type": "rasterization state descriptor", "annotation": "const*"},
             {"name": "sample count", "type": "uint32_t"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
             {"name": "color state count", "type": "uint32_t"},
@@ -1092,6 +1120,9 @@
         "category": "native"
     },
     "uint32_t": {
+        "category": "native"
+    },
+    "int32_t": {
         "category": "native"
     },
     "uint64_t": {

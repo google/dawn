@@ -95,6 +95,15 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     inputState.numAttributes = 0;
     inputState.attributes = nullptr;
 
+    // Create the rasterization state
+    DawnRasterizationStateDescriptor rasterizationState;
+    rasterizationState.nextInChain = nullptr;
+    rasterizationState.frontFace = DAWN_FRONT_FACE_CCW;
+    rasterizationState.cullMode = DAWN_CULL_MODE_NONE;
+    rasterizationState.depthBias = 0;
+    rasterizationState.depthBiasSlopeScale = 0.0;
+    rasterizationState.depthBiasClamp = 0.0;
+
     // Create the depth-stencil state
     DawnStencilStateFaceDescriptor stencilFace;
     stencilFace.compare = DAWN_COMPARE_FUNCTION_ALWAYS;
@@ -145,6 +154,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     pipelineDescriptor.layout = layout;
     pipelineDescriptor.inputState = &inputState;
     pipelineDescriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    pipelineDescriptor.rasterizationState = &rasterizationState;
 
     // First case: depthStencilState is not null.
     pipelineDescriptor.depthStencilState = &depthStencilState;

@@ -75,6 +75,7 @@ namespace dawn_native {
         std::bitset<kMaxVertexInputs> mInputsSetMask;
         std::array<VertexInputDescriptor, kMaxVertexInputs> mInputInfos;
         dawn::PrimitiveTopology mPrimitiveTopology;
+        RasterizationStateDescriptor mRasterizationState;
         DepthStencilStateDescriptor mDepthStencilState;
         std::array<ColorStateDescriptor, kMaxColorAttachments> mColorStates;
 
