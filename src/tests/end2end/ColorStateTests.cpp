@@ -1001,4 +1001,64 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
     }
 }
 
+// This tests a problem in the OpenGL backend where a previous color write mask
+// persisted and prevented a render pass loadOp from fully clearing the output
+// attachment.
+TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
+    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform myBlock {
+            vec4 color;
+        } myUbo;
+
+        layout(location = 0) out vec4 fragColor;
+
+        void main() {
+            fragColor = myUbo.color;
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor baseDescriptor(device);
+    baseDescriptor.layout = pipelineLayout;
+    baseDescriptor.cVertexStage.module = vsModule;
+    baseDescriptor.cFragmentStage.module = fsModule;
+    baseDescriptor.cColorStates[0]->format = renderPass.colorFormat;
+
+    basePipeline = device.CreateRenderPipeline(&baseDescriptor);
+
+    utils::ComboRenderPipelineDescriptor testDescriptor(device);
+    testDescriptor.layout = pipelineLayout;
+    testDescriptor.cVertexStage.module = vsModule;
+    testDescriptor.cFragmentStage.module = fsModule;
+    testDescriptor.cColorStates[0]->format = renderPass.colorFormat;
+    testDescriptor.cColorStates[0]->colorWriteMask = dawn::ColorWriteMask::Red;
+
+    testPipeline = device.CreateRenderPipeline(&testDescriptor);
+
+    RGBA8 base(32, 64, 128, 192);
+    RGBA8 expected(0, 0, 0, 0);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        // Clear the output attachment to |base|
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(basePipeline);
+        pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({{base}})), 0, nullptr);
+        pass.Draw(3, 1, 0, 0);
+
+        // Set a pipeline that will dirty the color write mask
+        pass.SetPipeline(testPipeline);
+        pass.EndPass();
+    }
+    {
+        // This renderpass' loadOp should clear all channels of the output attachment
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.EndPass();
+    }
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(expected, renderPass.color, kRTSize / 2, kRTSize / 2);
+}
+
 DAWN_INSTANTIATE_TEST(ColorStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
