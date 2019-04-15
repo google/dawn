@@ -44,6 +44,21 @@ namespace dawn_native { namespace vulkan {
         mPCIInfo.vendorId = mDeviceInfo.properties.vendorID;
         mPCIInfo.name = mDeviceInfo.properties.deviceName;
 
+        switch (mDeviceInfo.properties.deviceType) {
+            case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+                mDeviceType = DeviceType::IntegratedGPU;
+                break;
+            case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+                mDeviceType = DeviceType::DiscreteGPU;
+                break;
+            case VK_PHYSICAL_DEVICE_TYPE_CPU:
+                mDeviceType = DeviceType::CPU;
+                break;
+            default:
+                mDeviceType = DeviceType::Unknown;
+                break;
+        }
+
         return {};
     }
 

@@ -28,6 +28,7 @@ namespace dawn_native { namespace null {
       public:
         Adapter(InstanceBase* instance) : AdapterBase(instance, BackendType::Null) {
             mPCIInfo.name = "Null backend";
+            mDeviceType = DeviceType::CPU;
         }
         virtual ~Adapter() = default;
 

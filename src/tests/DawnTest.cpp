@@ -52,6 +52,21 @@ namespace {
         }
     }
 
+    const char* DeviceTypeName(dawn_native::DeviceType type) {
+        switch (type) {
+            case dawn_native::DeviceType::DiscreteGPU:
+                return "Discrete GPU";
+            case dawn_native::DeviceType::IntegratedGPU:
+                return "Integrated GPU";
+            case dawn_native::DeviceType::CPU:
+                return "CPU";
+            case dawn_native::DeviceType::Unknown:
+                return "Unknown";
+            default:
+                UNREACHABLE();
+        }
+    }
+
     struct MapReadUserdata {
         DawnTest* test;
         size_t slot;
@@ -130,7 +145,9 @@ void DawnTestEnvironment::SetUp() {
         deviceId << std::setfill('0') << std::uppercase << std::internal << std::hex << std::setw(4)
                  << pci.deviceId;
 
-        std::cout << " - \"" << pci.name << "\" on " << ParamName(adapter.GetBackendType()) << "\n";
+        std::cout << " - \"" << pci.name << "\"\n";
+        std::cout << "   type: " << DeviceTypeName(adapter.GetDeviceType())
+                  << ", backend: " << ParamName(adapter.GetBackendType()) << "\n";
         std::cout << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
                   << "\n";
     }

@@ -129,6 +129,12 @@ namespace dawn_native { namespace metal {
                 mPCIInfo.deviceId = GetEntryProperty(entry, CFSTR("device-id"));
                 IOObjectRelease(entry);
             }
+
+            if ([device isLowPower]) {
+                mDeviceType = DeviceType::IntegratedGPU;
+            } else {
+                mDeviceType = DeviceType::DiscreteGPU;
+            }
         }
 
         ~Adapter() override {

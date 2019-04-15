@@ -41,6 +41,10 @@ namespace dawn_native {
         return mImpl->GetBackendType();
     }
 
+    DeviceType Adapter::GetDeviceType() const {
+        return mImpl->GetDeviceType();
+    }
+
     const PCIInfo& Adapter::GetPCIInfo() const {
         return mImpl->GetPCIInfo();
     }

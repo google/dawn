@@ -29,6 +29,7 @@ namespace dawn_native {
         virtual ~AdapterBase() = default;
 
         BackendType GetBackendType() const;
+        DeviceType GetDeviceType() const;
         const PCIInfo& GetPCIInfo() const;
         InstanceBase* GetInstance() const;
 
@@ -36,6 +37,7 @@ namespace dawn_native {
 
       protected:
         PCIInfo mPCIInfo = {};
+        DeviceType mDeviceType = DeviceType::Unknown;
 
       private:
         virtual ResultOrError<DeviceBase*> CreateDeviceImpl() = 0;

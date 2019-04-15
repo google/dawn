@@ -43,6 +43,13 @@ namespace dawn_native { namespace d3d12 {
         mPCIInfo.deviceId = adapterDesc.DeviceId;
         mPCIInfo.vendorId = adapterDesc.VendorId;
 
+        if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
+            mDeviceType = DeviceType::CPU;
+        } else {
+            // TODO(cwallez@chromium.org): properly detect integrated vs. discrete.
+            mDeviceType = DeviceType::DiscreteGPU;
+        }
+
         std::wstring_convert<DeletableFacet<std::codecvt<wchar_t, char, std::mbstate_t>>> converter(
             "Error converting");
         mPCIInfo.name = converter.to_bytes(adapterDesc.Description);

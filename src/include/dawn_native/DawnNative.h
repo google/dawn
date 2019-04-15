@@ -37,6 +37,13 @@ namespace dawn_native {
         Vulkan,
     };
 
+    enum class DeviceType {
+        DiscreteGPU,
+        IntegratedGPU,
+        CPU,
+        Unknown,
+    };
+
     class InstanceBase;
     class AdapterBase;
 
@@ -53,6 +60,7 @@ namespace dawn_native {
         ~Adapter();
 
         BackendType GetBackendType() const;
+        DeviceType GetDeviceType() const;
         const PCIInfo& GetPCIInfo() const;
 
         explicit operator bool() const;
