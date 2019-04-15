@@ -117,7 +117,7 @@ namespace dawn_native {
             DAWN_TRY(ValidateBlendOperation(descriptor->colorBlend.operation));
             DAWN_TRY(ValidateBlendFactor(descriptor->colorBlend.srcFactor));
             DAWN_TRY(ValidateBlendFactor(descriptor->colorBlend.dstFactor));
-            DAWN_TRY(ValidateColorWriteMask(descriptor->colorWriteMask));
+            DAWN_TRY(ValidateColorWriteMask(descriptor->writeMask));
 
             dawn::TextureFormat format = descriptor->format;
             DAWN_TRY(ValidateTextureFormat(format));

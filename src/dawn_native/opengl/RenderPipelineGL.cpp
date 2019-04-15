@@ -103,10 +103,10 @@ namespace dawn_native { namespace opengl {
             } else {
                 glDisablei(GL_BLEND, attachment);
             }
-            glColorMaski(attachment, descriptor->colorWriteMask & dawn::ColorWriteMask::Red,
-                         descriptor->colorWriteMask & dawn::ColorWriteMask::Green,
-                         descriptor->colorWriteMask & dawn::ColorWriteMask::Blue,
-                         descriptor->colorWriteMask & dawn::ColorWriteMask::Alpha);
+            glColorMaski(attachment, descriptor->writeMask & dawn::ColorWriteMask::Red,
+                         descriptor->writeMask & dawn::ColorWriteMask::Green,
+                         descriptor->writeMask & dawn::ColorWriteMask::Blue,
+                         descriptor->writeMask & dawn::ColorWriteMask::Alpha);
         }
 
         GLuint OpenGLStencilOperation(dawn::StencilOperation stencilOperation) {

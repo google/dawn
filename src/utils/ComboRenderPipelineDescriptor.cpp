@@ -92,7 +92,7 @@ namespace utils {
             colorStateDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
             colorStateDescriptor.alphaBlend = blend;
             colorStateDescriptor.colorBlend = blend;
-            colorStateDescriptor.colorWriteMask = dawn::ColorWriteMask::All;
+            colorStateDescriptor.writeMask = dawn::ColorWriteMask::All;
             for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
                 mColorStates[i] = colorStateDescriptor;
                 cColorStates[i] = &mColorStates[i];

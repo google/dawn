@@ -84,7 +84,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     colorStateDescriptor.format = DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
     colorStateDescriptor.alphaBlend = blendDescriptor;
     colorStateDescriptor.colorBlend = blendDescriptor;
-    colorStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
+    colorStateDescriptor.writeMask = DAWN_COLOR_WRITE_MASK_ALL;
 
     // Create the input state
     DawnInputStateDescriptor inputState;

@@ -146,7 +146,7 @@ class ColorStateTest : public DawnTest {
         dawn::ColorStateDescriptor descriptor;
         descriptor.alphaBlend = blend;
         descriptor.colorBlend = blend;
-        descriptor.colorWriteMask = dawn::ColorWriteMask::All;
+        descriptor.writeMask = dawn::ColorWriteMask::All;
 
         SetupSingleSourcePipelines(descriptor);
 
@@ -176,7 +176,7 @@ class ColorStateTest : public DawnTest {
         dawn::ColorStateDescriptor descriptor;
         descriptor.colorBlend = colorBlend;
         descriptor.alphaBlend = alphaBlend;
-        descriptor.colorWriteMask = dawn::ColorWriteMask::All;
+        descriptor.writeMask = dawn::ColorWriteMask::All;
 
         SetupSingleSourcePipelines(descriptor);
 
@@ -298,7 +298,7 @@ TEST_P(ColorStateTest, Basic) {
     dawn::ColorStateDescriptor descriptor;
     descriptor.alphaBlend = blend;
     descriptor.colorBlend = blend;
-    descriptor.colorWriteMask = dawn::ColorWriteMask::All;
+    descriptor.writeMask = dawn::ColorWriteMask::All;
 
     SetupSingleSourcePipelines(descriptor);
 
@@ -680,7 +680,7 @@ TEST_P(ColorStateTest, ColorWriteMask) {
     descriptor.alphaBlend = blend;
     {
         // Test single channel color write
-        descriptor.colorWriteMask = dawn::ColorWriteMask::Red;
+        descriptor.writeMask = dawn::ColorWriteMask::Red;
         SetupSingleSourcePipelines(descriptor);
 
         RGBA8 base(32, 64, 128, 192);
@@ -692,7 +692,7 @@ TEST_P(ColorStateTest, ColorWriteMask) {
 
     {
         // Test multi channel color write
-        descriptor.colorWriteMask = dawn::ColorWriteMask::Green | dawn::ColorWriteMask::Alpha;
+        descriptor.writeMask = dawn::ColorWriteMask::Green | dawn::ColorWriteMask::Alpha;
         SetupSingleSourcePipelines(descriptor);
 
         RGBA8 base(32, 64, 128, 192);
@@ -704,7 +704,7 @@ TEST_P(ColorStateTest, ColorWriteMask) {
 
     {
         // Test no channel color write
-        descriptor.colorWriteMask = dawn::ColorWriteMask::None;
+        descriptor.writeMask = dawn::ColorWriteMask::None;
         SetupSingleSourcePipelines(descriptor);
 
         RGBA8 base(32, 64, 128, 192);
@@ -725,7 +725,7 @@ TEST_P(ColorStateTest, ColorWriteMaskBlendingDisabled) {
         descriptor.alphaBlend = blend;
         descriptor.colorBlend = blend;
 
-        descriptor.colorWriteMask = dawn::ColorWriteMask::Red;
+        descriptor.writeMask = dawn::ColorWriteMask::Red;
         SetupSingleSourcePipelines(descriptor);
 
         RGBA8 base(32, 64, 128, 192);
@@ -1031,7 +1031,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     testDescriptor.cVertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.cColorStates[0]->format = renderPass.colorFormat;
-    testDescriptor.cColorStates[0]->colorWriteMask = dawn::ColorWriteMask::Red;
+    testDescriptor.cColorStates[0]->writeMask = dawn::ColorWriteMask::Red;
 
     testPipeline = device.CreateRenderPipeline(&testDescriptor);
 

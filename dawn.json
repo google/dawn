@@ -121,7 +121,7 @@
             {"name": "format", "type": "texture format"},
             {"name": "alpha blend", "type": "blend descriptor"},
             {"name": "color blend", "type": "blend descriptor"},
-            {"name": "color write mask", "type": "color write mask"}
+            {"name": "write mask", "type": "color write mask"}
         ]
     },
     "bool": {

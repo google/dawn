@@ -199,7 +199,7 @@ namespace dawn_native { namespace vulkan {
             attachment.srcAlphaBlendFactor = VulkanBlendFactor(descriptor->alphaBlend.srcFactor);
             attachment.dstAlphaBlendFactor = VulkanBlendFactor(descriptor->alphaBlend.dstFactor);
             attachment.alphaBlendOp = VulkanBlendOperation(descriptor->alphaBlend.operation);
-            attachment.colorWriteMask = VulkanColorWriteMask(descriptor->colorWriteMask);
+            attachment.colorWriteMask = VulkanColorWriteMask(descriptor->writeMask);
             return attachment;
         }
 

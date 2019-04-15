@@ -81,7 +81,7 @@ void init() {
         colorStateDescriptor.format = swapChainFormat;
         colorStateDescriptor.alphaBlend = blendDescriptor;
         colorStateDescriptor.colorBlend = blendDescriptor;
-        colorStateDescriptor.colorWriteMask = DAWN_COLOR_WRITE_MASK_ALL;
+        colorStateDescriptor.writeMask = DAWN_COLOR_WRITE_MASK_ALL;
 
         descriptor.colorStateCount = 1;
         DawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};

@@ -188,7 +188,7 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        uint8_t D3D12RenderTargetWriteMask(dawn::ColorWriteMask colorWriteMask) {
+        uint8_t D3D12RenderTargetWriteMask(dawn::ColorWriteMask writeMask) {
             static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Red) ==
                               D3D12_COLOR_WRITE_ENABLE_RED,
                           "ColorWriteMask values must match");
@@ -201,7 +201,7 @@ namespace dawn_native { namespace d3d12 {
             static_assert(static_cast<D3D12_COLOR_WRITE_ENABLE>(dawn::ColorWriteMask::Alpha) ==
                               D3D12_COLOR_WRITE_ENABLE_ALPHA,
                           "ColorWriteMask values must match");
-            return static_cast<uint8_t>(colorWriteMask);
+            return static_cast<uint8_t>(writeMask);
         }
 
         D3D12_RENDER_TARGET_BLEND_DESC ComputeColorDesc(const ColorStateDescriptor* descriptor) {
@@ -213,8 +213,7 @@ namespace dawn_native { namespace d3d12 {
             blendDesc.SrcBlendAlpha = D3D12Blend(descriptor->alphaBlend.srcFactor);
             blendDesc.DestBlendAlpha = D3D12Blend(descriptor->alphaBlend.dstFactor);
             blendDesc.BlendOpAlpha = D3D12BlendOperation(descriptor->alphaBlend.operation);
-            blendDesc.RenderTargetWriteMask =
-                D3D12RenderTargetWriteMask(descriptor->colorWriteMask);
+            blendDesc.RenderTargetWriteMask = D3D12RenderTargetWriteMask(descriptor->writeMask);
             blendDesc.LogicOpEnable = false;
             blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
             return blendDesc;
