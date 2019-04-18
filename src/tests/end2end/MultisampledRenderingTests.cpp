@@ -31,6 +31,9 @@ class MultisampledRenderingTest : public DawnTest {
             CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateDefaultView();
         mResolveTexture = CreateTextureForOutputAttachment(kColorFormat, 1);
         mResolveView = mResolveTexture.CreateDefaultView();
+
+        mDepthStencilTexture = CreateTextureForOutputAttachment(kDepthStencilFormat, kSampleCount);
+        mDepthStencilView = mDepthStencilTexture.CreateDefaultView();
     }
 
     dawn::RenderPipeline CreateRenderPipelineWithOneOutputForTest(bool testDepth) {
@@ -140,10 +143,7 @@ class MultisampledRenderingTest : public DawnTest {
         renderPass.cDepthStencilAttachmentInfo.depthLoadOp = depthStencilLoadOp;
 
         if (hasDepthStencilAttachment) {
-            dawn::Texture depthStencilTexture =
-                CreateTextureForOutputAttachment(kDepthStencilFormat, kSampleCount);
-            renderPass.cDepthStencilAttachmentInfo.attachment =
-                depthStencilTexture.CreateDefaultView();
+            renderPass.cDepthStencilAttachmentInfo.attachment = mDepthStencilView;
             renderPass.depthStencilAttachment = &renderPass.cDepthStencilAttachmentInfo;
         }
 
@@ -179,6 +179,8 @@ class MultisampledRenderingTest : public DawnTest {
     dawn::TextureView mMultisampledColorView;
     dawn::Texture mResolveTexture;
     dawn::TextureView mResolveView;
+    dawn::Texture mDepthStencilTexture;
+    dawn::TextureView mDepthStencilView;
     dawn::BindGroupLayout mBindGroupLayout;
 
   private:
