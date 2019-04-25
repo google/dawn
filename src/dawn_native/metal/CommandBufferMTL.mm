@@ -684,6 +684,8 @@ namespace dawn_native { namespace metal {
                     lastPipeline = ToBackend(cmd->pipeline).Get();
 
                     [encoder setDepthStencilState:lastPipeline->GetMTLDepthStencilState()];
+                    [encoder setFrontFacingWinding:lastPipeline->GetMTLFrontFace()];
+                    [encoder setCullMode:lastPipeline->GetMTLCullMode()];
                     lastPipeline->Encode(encoder);
                 } break;
 

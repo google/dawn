@@ -53,6 +53,8 @@ namespace dawn_native {
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot);
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor();
         dawn::PrimitiveTopology GetPrimitiveTopology() const;
+        dawn::CullMode GetCullMode() const;
+        dawn::FrontFace GetFrontFace() const;
 
         std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
         bool HasDepthStencilAttachment() const;

@@ -435,6 +435,16 @@ namespace dawn_native {
         return mPrimitiveTopology;
     }
 
+    dawn::CullMode RenderPipelineBase::GetCullMode() const {
+        ASSERT(!IsError());
+        return mRasterizationState.cullMode;
+    }
+
+    dawn::FrontFace RenderPipelineBase::GetFrontFace() const {
+        ASSERT(!IsError());
+        return mRasterizationState.frontFace;
+    }
+
     std::bitset<kMaxColorAttachments> RenderPipelineBase::GetColorAttachmentsMask() const {
         ASSERT(!IsError());
         return mColorAttachmentsSet;

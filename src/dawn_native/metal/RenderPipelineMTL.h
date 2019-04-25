@@ -30,6 +30,8 @@ namespace dawn_native { namespace metal {
 
         MTLIndexType GetMTLIndexType() const;
         MTLPrimitiveType GetMTLPrimitiveTopology() const;
+        MTLWinding GetMTLFrontFace() const;
+        MTLCullMode GetMTLCullMode() const;
 
         void Encode(id<MTLRenderCommandEncoder> encoder);
 
@@ -40,6 +42,8 @@ namespace dawn_native { namespace metal {
 
         MTLIndexType mMtlIndexType;
         MTLPrimitiveType mMtlPrimitiveTopology;
+        MTLWinding mMtlFrontFace;
+        MTLCullMode mMtlCullMode;
         id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;
         id<MTLDepthStencilState> mMtlDepthStencilState = nil;
     };

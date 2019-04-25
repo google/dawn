@@ -282,12 +282,34 @@ namespace dawn_native { namespace metal {
             return mtlDepthStencilDescriptor;
         }
 
+        MTLWinding MTLFrontFace(dawn::FrontFace face) {
+            switch (face) {
+                case dawn::FrontFace::CCW:
+                    return MTLWindingCounterClockwise;
+                case dawn::FrontFace::CW:
+                    return MTLWindingClockwise;
+            }
+        }
+
+        MTLCullMode ToMTLCullMode(dawn::CullMode mode) {
+            switch (mode) {
+                case dawn::CullMode::None:
+                    return MTLCullModeNone;
+                case dawn::CullMode::Front:
+                    return MTLCullModeFront;
+                case dawn::CullMode::Back:
+                    return MTLCullModeBack;
+            }
+        }
+
     }  // anonymous namespace
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
         : RenderPipelineBase(device, descriptor),
           mMtlIndexType(MTLIndexFormat(GetInputStateDescriptor()->indexFormat)),
-          mMtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())) {
+          mMtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())),
+          mMtlFrontFace(MTLFrontFace(GetFrontFace())),
+          mMtlCullMode(ToMTLCullMode(GetCullMode())) {
         auto mtlDevice = device->GetMTLDevice();
 
         MTLRenderPipelineDescriptor* descriptorMTL = [MTLRenderPipelineDescriptor new];
@@ -360,6 +382,14 @@ namespace dawn_native { namespace metal {
 
     MTLPrimitiveType RenderPipeline::GetMTLPrimitiveTopology() const {
         return mMtlPrimitiveTopology;
+    }
+
+    MTLWinding RenderPipeline::GetMTLFrontFace() const {
+        return mMtlFrontFace;
+    }
+
+    MTLCullMode RenderPipeline::GetMTLCullMode() const {
+        return mMtlCullMode;
     }
 
     void RenderPipeline::Encode(id<MTLRenderCommandEncoder> encoder) {
