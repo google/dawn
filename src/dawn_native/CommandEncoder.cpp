@@ -824,9 +824,13 @@ namespace dawn_native {
     // Implementation of functions to interact with sub-encoders
 
     void CommandEncoderBase::HandleError(const char* message) {
-        if (!mGotError) {
-            mGotError = true;
-            mErrorMessage = message;
+        if (mEncodingState != EncodingState::Finished) {
+            if (!mGotError) {
+                mGotError = true;
+                mErrorMessage = message;
+            }
+        } else {
+            GetDevice()->HandleError(message);
         }
     }
 

@@ -155,8 +155,28 @@ TEST_F(CommandBufferValidationTest, BeginComputePassBeforeEndPreviousPass) {
     }
 }
 
-// Test that beginning a compute pass before ending the previous pass causes an error.
+// Test that encoding command after a successful finish produces an error
+TEST_F(CommandBufferValidationTest, CallsAfterASuccessfulFinish) {
+    // A buffer that can be used in CopyBufferToBuffer
+    dawn::BufferDescriptor copyBufferDesc;
+    copyBufferDesc.size = 16;
+    copyBufferDesc.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer copyBuffer = device.CreateBuffer(&copyBufferDesc);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.Finish();
+
+    ASSERT_DEVICE_ERROR(encoder.CopyBufferToBuffer(copyBuffer, 0, copyBuffer, 0, 0));
+}
+
+// Test that encoding command after a failed finish produces an error
 TEST_F(CommandBufferValidationTest, CallsAfterAFailedFinish) {
+    // A buffer that can be used in CopyBufferToBuffer
+    dawn::BufferDescriptor copyBufferDesc;
+    copyBufferDesc.size = 16;
+    copyBufferDesc.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    dawn::Buffer copyBuffer = device.CreateBuffer(&copyBufferDesc);
+
     // A buffer that can't be used in CopyBufferToBuffer
     dawn::BufferDescriptor bufferDesc;
     bufferDesc.size = 16;
@@ -167,8 +187,7 @@ TEST_F(CommandBufferValidationTest, CallsAfterAFailedFinish) {
     encoder.CopyBufferToBuffer(buffer, 0, buffer, 0, 0);
     ASSERT_DEVICE_ERROR(encoder.Finish());
 
-    // TODO(cwallez@chromium.org): Currently this does nothing, should it be a device error?
-    encoder.CopyBufferToBuffer(buffer, 0, buffer, 0, 0);
+    ASSERT_DEVICE_ERROR(encoder.CopyBufferToBuffer(copyBuffer, 0, copyBuffer, 0, 0));
 }
 
 // Test that using a single buffer in multiple read usages in the same pass is allowed.
