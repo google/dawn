@@ -283,10 +283,11 @@ namespace dawn_native { namespace metal {
         }
 
         MTLWinding MTLFrontFace(dawn::FrontFace face) {
+            // Note that these are inverted because we flip the Y coordinate in the vertex shader
             switch (face) {
-                case dawn::FrontFace::CCW:
-                    return MTLWindingCounterClockwise;
                 case dawn::FrontFace::CW:
+                    return MTLWindingCounterClockwise;
+                case dawn::FrontFace::CCW:
                     return MTLWindingClockwise;
             }
         }
