@@ -16,6 +16,7 @@
 #include "dawn_native/DawnNative.h"
 
 #include <gtest/gtest.h>
+
 #include <memory>
 #include <unordered_map>
 
@@ -60,11 +61,24 @@ struct RGBA8 {
 };
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
 
+struct DawnTestParam {
+    constexpr explicit DawnTestParam(dawn_native::BackendType backendType)
+        : backendType(backendType) {
+    }
+
+    dawn_native::BackendType backendType;
+
+    // TODO(jiawei.shao@intel.com): support enabling and disabling multiple workarounds.
+    const char* forceEnabledWorkaround = nullptr;
+};
+
 // Shorthands for backend types used in the DAWN_INSTANTIATE_TEST
-static constexpr dawn_native::BackendType D3D12Backend = dawn_native::BackendType::D3D12;
-static constexpr dawn_native::BackendType MetalBackend = dawn_native::BackendType::Metal;
-static constexpr dawn_native::BackendType OpenGLBackend = dawn_native::BackendType::OpenGL;
-static constexpr dawn_native::BackendType VulkanBackend = dawn_native::BackendType::Vulkan;
+static constexpr DawnTestParam D3D12Backend(dawn_native::BackendType::D3D12);
+static constexpr DawnTestParam MetalBackend(dawn_native::BackendType::Metal);
+static constexpr DawnTestParam OpenGLBackend(dawn_native::BackendType::OpenGL);
+static constexpr DawnTestParam VulkanBackend(dawn_native::BackendType::Vulkan);
+
+DawnTestParam ForceWorkaround(const DawnTestParam& originParam, const char* workaround);
 
 struct GLFWwindow;
 
@@ -107,7 +121,7 @@ class DawnTestEnvironment : public testing::Environment {
     std::unordered_map<dawn_native::BackendType, GLFWwindow*> mWindows;
 };
 
-class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
+class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
   public:
     DawnTest();
     ~DawnTest();
@@ -242,9 +256,8 @@ class DawnTest : public ::testing::TestWithParam<dawn_native::BackendType> {
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST
     bool IsBackendAvailable(dawn_native::BackendType type);
-    std::vector<dawn_native::BackendType> FilterBackends(const dawn_native::BackendType* types,
-                                                         size_t numParams);
-    std::string GetParamName(const testing::TestParamInfo<dawn_native::BackendType>& info);
+    std::vector<DawnTestParam> FilterBackends(const DawnTestParam* params, size_t numParams);
+    std::string GetParamName(const testing::TestParamInfo<DawnTestParam>& info);
 
     // All classes used to implement the deferred expectations should inherit from this.
     class Expectation {

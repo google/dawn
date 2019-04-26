@@ -510,4 +510,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     VerifyResolveTarget(kGreen, resolveTexture2, kBaseMipLevel2, kBaseArrayLayer2);
 }
 
-DAWN_INSTANTIATE_TEST(MultisampledRenderingTest, D3D12Backend, OpenGLBackend, MetalBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
+                      D3D12Backend,
+                      MetalBackend,
+                      OpenGLBackend,
+                      VulkanBackend,
+                      ForceWorkaround(MetalBackend, "emulate_store_and_msaa_resolve"));

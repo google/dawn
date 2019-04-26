@@ -142,8 +142,8 @@ namespace dawn_native { namespace metal {
         }
 
       private:
-        ResultOrError<DeviceBase*> CreateDeviceImpl() override {
-            return {new Device(this, mDevice)};
+        ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
+            return {new Device(this, mDevice, descriptor)};
         }
 
         id<MTLDevice> mDevice = nil;

@@ -17,8 +17,11 @@
 
 #include "dawn_native/Adapter.h"
 #include "dawn_native/BackendConnection.h"
+#include "dawn_native/Toggles.h"
 
+#include <array>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace dawn_native {
@@ -41,19 +44,33 @@ namespace dawn_native {
         // Used to handle error that happen up to device creation.
         bool ConsumedError(MaybeError maybeError);
 
+        // Used to query the details of a toggle. Return nullptr if toggleName is not a valid name
+        // of a toggle supported in Dawn.
+        const ToggleInfo* GetToggleInfo(const char* toggleName);
+
+        Toggle ToggleNameToEnum(const char* toggleName);
+        const char* ToggleEnumToName(Toggle toggle);
+
       private:
         // Lazily creates connections to all backends that have been compiled.
         void EnsureBackendConnections();
+
         // Finds the BackendConnection for `type` or returns an error.
         ResultOrError<BackendConnection*> FindBackend(BackendType type);
 
         MaybeError DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options);
 
+        void EnsureToggleNameToEnumMapInitialized();
+
         bool mBackendsConnected = false;
         bool mDiscoveredDefaultAdapters = false;
 
+        bool mToggleNameToEnumMapInitialized = false;
+
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<std::unique_ptr<AdapterBase>> mAdapters;
+
+        std::unordered_map<std::string, Toggle> mToggleNameToEnumMap;
     };
 
 }  // namespace dawn_native

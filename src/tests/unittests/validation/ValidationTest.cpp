@@ -16,28 +16,26 @@
 
 #include "common/Assert.h"
 #include "dawn/dawn.h"
-#include "dawn_native/DawnNative.h"
 #include "dawn_native/NullBackend.h"
 
 ValidationTest::ValidationTest() {
-    mInstance = std::make_unique<dawn_native::Instance>();
-    mInstance->DiscoverDefaultAdapters();
+    instance = std::make_unique<dawn_native::Instance>();
+    instance->DiscoverDefaultAdapters();
 
-    std::vector<dawn_native::Adapter> adapters = mInstance->GetAdapters();
+    std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
 
     // Validation tests run against the null backend, find the corresponding adapter
     bool foundNullAdapter = false;
-    dawn_native::Adapter nullAdapter;
-    for (auto adapter : adapters) {
-        if (adapter.GetBackendType() == dawn_native::BackendType::Null) {
-            nullAdapter = adapter;
+    for (auto &currentAdapter : adapters) {
+        if (currentAdapter.GetBackendType() == dawn_native::BackendType::Null) {
+            adapter = currentAdapter;
             foundNullAdapter = true;
             break;
         }
     }
 
     ASSERT(foundNullAdapter);
-    device = dawn::Device::Acquire(nullAdapter.CreateDevice());
+    device = dawn::Device::Acquire(adapter.CreateDevice());
 
     DawnProcTable procs = dawn_native::GetProcs();
     dawnSetProcs(&procs);

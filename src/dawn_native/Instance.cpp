@@ -49,6 +49,28 @@ namespace dawn_native {
     }
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
+    namespace {
+
+        struct ToggleEnumAndInfo {
+            Toggle toggle;
+            ToggleInfo info;
+        };
+
+        using ToggleEnumAndInfoList =
+            std::array<ToggleEnumAndInfo, static_cast<size_t>(Toggle::EnumCount)>;
+
+        static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {
+            {{Toggle::EmulateStoreAndMSAAResolve,
+              {"emulate_store_and_msaa_resolve",
+               "Emulate storing into multisampled color attachments and doing MSAA resolve "
+               "simultaneously. This workaround is enabled by default on the Metal drivers that do "
+               "not support MTLStoreActionStoreAndMultisampleResolve. To support StoreOp::Store on "
+               "those platforms, we should do MSAA resolve in another render pass after ending the "
+               "previous one.",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=56"}}}};
+
+    }  // anonymous namespace
+
     // InstanceBase
 
     void InstanceBase::DiscoverDefaultAdapters() {
@@ -76,6 +98,53 @@ namespace dawn_native {
     // This is just a wrapper around the real logic that uses Error.h error handling.
     bool InstanceBase::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
         return !ConsumedError(DiscoverAdaptersInternal(options));
+    }
+
+    const char* InstanceBase::ToggleEnumToName(Toggle toggle) {
+        ASSERT(toggle != Toggle::InvalidEnum);
+
+        const ToggleEnumAndInfo& toggleNameAndInfo =
+            kToggleNameAndInfoList[static_cast<size_t>(toggle)];
+        ASSERT(toggleNameAndInfo.toggle == toggle);
+        return toggleNameAndInfo.info.name;
+    }
+
+    const ToggleInfo* InstanceBase::GetToggleInfo(const char* toggleName) {
+        ASSERT(toggleName);
+
+        EnsureToggleNameToEnumMapInitialized();
+
+        const auto& iter = mToggleNameToEnumMap.find(toggleName);
+        if (iter != mToggleNameToEnumMap.cend()) {
+            return &kToggleNameAndInfoList[static_cast<size_t>(iter->second)].info;
+        }
+        return nullptr;
+    }
+
+    Toggle InstanceBase::ToggleNameToEnum(const char* toggleName) {
+        ASSERT(toggleName);
+
+        EnsureToggleNameToEnumMapInitialized();
+
+        const auto& iter = mToggleNameToEnumMap.find(toggleName);
+        if (iter != mToggleNameToEnumMap.cend()) {
+            return kToggleNameAndInfoList[static_cast<size_t>(iter->second)].toggle;
+        }
+        return Toggle::InvalidEnum;
+    }
+
+    void InstanceBase::EnsureToggleNameToEnumMapInitialized() {
+        if (mToggleNameToEnumMapInitialized) {
+            return;
+        }
+
+        for (size_t index = 0; index < kToggleNameAndInfoList.size(); ++index) {
+            const ToggleEnumAndInfo& toggleNameAndInfo = kToggleNameAndInfoList[index];
+            ASSERT(index == static_cast<size_t>(toggleNameAndInfo.toggle));
+            mToggleNameToEnumMap[toggleNameAndInfo.info.name] = toggleNameAndInfo.toggle;
+        }
+
+        mToggleNameToEnumMapInitialized = true;
     }
 
     const std::vector<std::unique_ptr<AdapterBase>>& InstanceBase::GetAdapters() const {

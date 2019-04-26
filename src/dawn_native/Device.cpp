@@ -25,6 +25,7 @@
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
+#include "dawn_native/Instance.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/RenderPipeline.h"
@@ -50,7 +51,8 @@ namespace dawn_native {
 
     // DeviceBase
 
-    DeviceBase::DeviceBase(AdapterBase* adapter) : mAdapter(adapter) {
+    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
+        : mAdapter(adapter) {
         mCaches = std::make_unique<DeviceBase::Caches>();
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
@@ -257,6 +259,42 @@ namespace dawn_native {
         }
     }
 
+    void DeviceBase::ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor) {
+        ASSERT(deviceDescriptor);
+
+        for (const char* toggleName : deviceDescriptor->forceEnabledToggles) {
+            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
+            if (toggle != Toggle::InvalidEnum) {
+                mTogglesSet.SetToggle(toggle, true);
+            }
+        }
+
+        for (const char* toggleName : deviceDescriptor->forceDisabledToggles) {
+            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
+            if (toggle != Toggle::InvalidEnum) {
+                mTogglesSet.SetToggle(toggle, false);
+            }
+        }
+    }
+
+    std::vector<const char*> DeviceBase::GetTogglesUsed() const {
+        std::vector<const char*> togglesNameInUse(mTogglesSet.toggleBitset.count());
+
+        uint32_t index = 0;
+        for (uint32_t i : IterateBitSet(mTogglesSet.toggleBitset)) {
+            const char* toggleName =
+                GetAdapter()->GetInstance()->ToggleEnumToName(static_cast<Toggle>(i));
+            togglesNameInUse[index] = toggleName;
+            ++index;
+        }
+
+        return togglesNameInUse;
+    }
+
+    bool DeviceBase::IsToggleEnabled(Toggle toggle) const {
+        return mTogglesSet.IsEnabled(toggle);
+    }
+
     // Implementation details of object creation
 
     MaybeError DeviceBase::CreateBindGroupInternal(BindGroupBase** result,
@@ -359,6 +397,10 @@ namespace dawn_native {
             DAWN_TRY(mDynamicUploader->CreateAndAppendBuffer());
         }
         return mDynamicUploader.get();
+    }
+
+    void DeviceBase::SetToggle(Toggle toggle, bool isEnabled) {
+        mTogglesSet.SetToggle(toggle, isEnabled);
     }
 
 }  // namespace dawn_native

@@ -34,7 +34,7 @@ class RingBufferTests : public testing::Test {
   protected:
     void SetUp() override {
         // TODO(bryan.bernhart@intel.com): Create this device through the adapter.
-        mDevice = std::make_unique<null::Device>(/*adapter*/ nullptr);
+        mDevice = std::make_unique<null::Device>(/*adapter*/ nullptr, /*deviceDescriptor*/ nullptr);
     }
 
     null::Device* GetDevice() const {

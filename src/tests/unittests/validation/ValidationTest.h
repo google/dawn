@@ -17,10 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "dawn/dawncpp.h"
-
-namespace dawn_native {
-    class Instance;
-}
+#include "dawn_native/DawnNative.h"
 
 #define ASSERT_DEVICE_ERROR(statement) \
     StartExpectDeviceError(); \
@@ -55,10 +52,10 @@ class ValidationTest : public testing::Test {
 
     protected:
         dawn::Device device;
+        dawn_native::Adapter adapter;
+        std::unique_ptr<dawn_native::Instance> instance;
 
     private:
-        std::unique_ptr<dawn_native::Instance> mInstance;
-
         static void OnDeviceError(const char* message, DawnCallbackUserdata userdata);
         std::string mDeviceErrorMessage;
         bool mExpectError = false;

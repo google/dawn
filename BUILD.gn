@@ -153,6 +153,7 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Texture.cpp",
     "src/dawn_native/Texture.h",
     "src/dawn_native/ToBackend.h",
+    "src/dawn_native/Toggles.h",
     "src/dawn_native/dawn_platform.h",
   ]
 
@@ -581,6 +582,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/ShaderModuleValidationTests.cpp",
     "src/tests/unittests/validation/TextureValidationTests.cpp",
     "src/tests/unittests/validation/TextureViewValidationTests.cpp",
+    "src/tests/unittests/validation/ToggleValidationTests.cpp",
     "src/tests/unittests/validation/ValidationTest.cpp",
     "src/tests/unittests/validation/ValidationTest.h",
     "src/tests/unittests/validation/VertexBufferValidationTests.cpp",

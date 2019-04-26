@@ -59,7 +59,7 @@ namespace dawn_native { namespace d3d12 {
         return mBackend;
     }
 
-    ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl() {
+    ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
         ComPtr<ID3D12Device> d3d12Device;
         if (FAILED(mBackend->GetFunctions()->d3d12CreateDevice(
                 mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3d12Device)))) {
@@ -67,7 +67,7 @@ namespace dawn_native { namespace d3d12 {
         }
 
         ASSERT(d3d12Device != nullptr);
-        return new Device(this, d3d12Device);
+        return new Device(this, d3d12Device, descriptor);
     }
 
 }}  // namespace dawn_native::d3d12

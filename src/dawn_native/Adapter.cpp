@@ -38,20 +38,21 @@ namespace dawn_native {
         return mInstance;
     }
 
-    DeviceBase* AdapterBase::CreateDevice() {
+    DeviceBase* AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
         DeviceBase* result = nullptr;
 
-        if (mInstance->ConsumedError(CreateDeviceInternal(&result))) {
+        if (mInstance->ConsumedError(CreateDeviceInternal(&result, descriptor))) {
             return nullptr;
         }
 
         return result;
     }
 
-    MaybeError AdapterBase::CreateDeviceInternal(DeviceBase** result) {
+    MaybeError AdapterBase::CreateDeviceInternal(DeviceBase** result,
+                                                 const DeviceDescriptor* descriptor) {
         // TODO(cwallez@chromium.org): This will eventually have validation that the device
         // descriptor is valid and is a subset what's allowed on this adapter.
-        DAWN_TRY_ASSIGN(*result, CreateDeviceImpl());
+        DAWN_TRY_ASSIGN(*result, CreateDeviceImpl(descriptor));
         return {};
     }
 

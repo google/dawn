@@ -67,6 +67,12 @@ namespace {
         }
     }
 
+    dawn_native::DeviceDescriptor InitWorkaround(const char* forceEnabledWorkaround) {
+        dawn_native::DeviceDescriptor deviceDescriptor;
+        deviceDescriptor.forceEnabledToggles.push_back(forceEnabledWorkaround);
+        return deviceDescriptor;
+    }
+
     struct MapReadUserdata {
         DawnTest* test;
         size_t slot;
@@ -82,6 +88,12 @@ namespace {
     DawnTestEnvironment* gTestEnv = nullptr;
 
 }  // namespace
+
+DawnTestParam ForceWorkaround(const DawnTestParam& originParam, const char* workaround) {
+    DawnTestParam newTestParam = originParam;
+    newTestParam.forceEnabledWorkaround = workaround;
+    return newTestParam;
+}
 
 // Implementation of DawnTestEnvironment
 
@@ -112,10 +124,10 @@ void DawnTestEnvironment::SetUp() {
     mInstance = std::make_unique<dawn_native::Instance>();
 
     static constexpr dawn_native::BackendType kAllBackends[] = {
-        D3D12Backend,
-        MetalBackend,
-        OpenGLBackend,
-        VulkanBackend,
+        dawn_native::BackendType::D3D12,
+        dawn_native::BackendType::Metal,
+        dawn_native::BackendType::OpenGL,
+        dawn_native::BackendType::Vulkan,
     };
 
     // Create a test window for each backend and discover an adapter using it.
@@ -191,19 +203,19 @@ DawnTest::~DawnTest() {
 }
 
 bool DawnTest::IsD3D12() const {
-    return GetParam() == D3D12Backend;
+    return GetParam().backendType == dawn_native::BackendType::D3D12;
 }
 
 bool DawnTest::IsMetal() const {
-    return GetParam() == MetalBackend;
+    return GetParam().backendType == dawn_native::BackendType::Metal;
 }
 
 bool DawnTest::IsOpenGL() const {
-    return GetParam() == OpenGLBackend;
+    return GetParam().backendType == dawn_native::BackendType::OpenGL;
 }
 
 bool DawnTest::IsVulkan() const {
-    return GetParam() == VulkanBackend;
+    return GetParam().backendType == dawn_native::BackendType::Vulkan;
 }
 
 bool DawnTest::IsAMD() const {
@@ -257,19 +269,20 @@ bool DawnTest::IsMacOS() const {
 void DawnTest::SetUp() {
     // Get an adapter for the backend to use, and create the device.
     dawn_native::Adapter backendAdapter;
+    const dawn_native::BackendType backendType = GetParam().backendType;
     {
         dawn_native::Instance* instance = gTestEnv->GetInstance();
         std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
 
         for (const dawn_native::Adapter& adapter : adapters) {
-            if (adapter.GetBackendType() == GetParam()) {
+            if (adapter.GetBackendType() == backendType) {
                 backendAdapter = adapter;
                 // On Metal, select the last adapter so that the discrete GPU is tested on
                 // multi-GPU systems.
                 // TODO(cwallez@chromium.org): Replace this with command line arguments requesting
                 // a specific device / vendor ID once the macOS 10.13 SDK is rolled and correct
                 // PCI info collection is implemented on Metal.
-                if (GetParam() != MetalBackend) {
+                if (backendType != dawn_native::BackendType::Metal) {
                     break;
                 }
             }
@@ -279,13 +292,22 @@ void DawnTest::SetUp() {
     }
 
     mPCIInfo = backendAdapter.GetPCIInfo();
-    DawnDevice backendDevice = backendAdapter.CreateDevice();
+
+    DawnDevice backendDevice;
+    const char* forceEnabledWorkaround = GetParam().forceEnabledWorkaround;
+    if (forceEnabledWorkaround != nullptr) {
+        dawn_native::DeviceDescriptor deviceDescriptor = InitWorkaround(forceEnabledWorkaround);
+        backendDevice = backendAdapter.CreateDevice(&deviceDescriptor);
+    } else {
+        backendDevice = backendAdapter.CreateDevice(nullptr);
+    }
+
     DawnProcTable backendProcs = dawn_native::GetProcs();
 
     // Get the test window and create the device using it (esp. for OpenGL)
-    GLFWwindow* testWindow = gTestEnv->GetWindowForBackend(GetParam());
+    GLFWwindow* testWindow = gTestEnv->GetWindowForBackend(backendType);
     DAWN_ASSERT(testWindow != nullptr);
-    mBinding.reset(utils::CreateBinding(GetParam(), testWindow, backendDevice));
+    mBinding.reset(utils::CreateBinding(backendType, testWindow, backendDevice));
     DAWN_ASSERT(mBinding != nullptr);
 
     // Choose whether to use the backend procs and devices directly, or set up the wire.
@@ -586,20 +608,26 @@ namespace detail {
         }
     }
 
-    std::vector<dawn_native::BackendType> FilterBackends(const dawn_native::BackendType* types,
-                                                         size_t numParams) {
-        std::vector<dawn_native::BackendType> backends;
+    std::vector<DawnTestParam> FilterBackends(const DawnTestParam* params, size_t numParams) {
+        std::vector<DawnTestParam> backends;
 
         for (size_t i = 0; i < numParams; ++i) {
-            if (IsBackendAvailable(types[i])) {
-                backends.push_back(types[i]);
+            if (IsBackendAvailable(params[i].backendType)) {
+                backends.push_back(params[i]);
             }
         }
         return backends;
     }
 
-    std::string GetParamName(const testing::TestParamInfo<dawn_native::BackendType>& info) {
-        return ParamName(info.param);
+    std::string GetParamName(const testing::TestParamInfo<DawnTestParam>& info) {
+        std::ostringstream ostream;
+        ostream << ParamName(info.param.backendType);
+
+        if (info.param.forceEnabledWorkaround != nullptr) {
+            ostream << "_" << info.param.forceEnabledWorkaround;
+        }
+
+        return ostream.str();
     }
 
     // Helper classes to set expectations

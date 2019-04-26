@@ -82,7 +82,7 @@ namespace dawn_native { namespace null {
 
     class Device : public DeviceBase {
       public:
-        Device(Adapter* adapter);
+        Device(Adapter* adapter, const DeviceDescriptor* descriptor);
         ~Device();
 
         CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) override;

@@ -37,7 +37,9 @@ namespace dawn_native { namespace d3d12 {
     // Definition of backend types
     class Device : public DeviceBase {
       public:
-        Device(Adapter* adapter, ComPtr<ID3D12Device> d3d12Device);
+        Device(Adapter* adapter,
+               ComPtr<ID3D12Device> d3d12Device,
+               const DeviceDescriptor* descriptor);
         ~Device();
 
         CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) override;

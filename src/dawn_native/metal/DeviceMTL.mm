@@ -34,13 +34,20 @@
 
 namespace dawn_native { namespace metal {
 
-    Device::Device(AdapterBase* adapter, id<MTLDevice> mtlDevice)
-        : DeviceBase(adapter),
+    Device::Device(AdapterBase* adapter,
+                   id<MTLDevice> mtlDevice,
+                   const DeviceDescriptor* descriptor)
+        : DeviceBase(adapter, descriptor),
           mMtlDevice([mtlDevice retain]),
           mMapTracker(new MapRequestTracker(this)),
           mCompletedSerial(0) {
         [mMtlDevice retain];
         mCommandQueue = [mMtlDevice newCommandQueue];
+
+        InitTogglesFromDriver();
+        if (descriptor != nil) {
+            ApplyToggleOverrides(descriptor);
+        }
     }
 
     Device::~Device() {
@@ -65,6 +72,13 @@ namespace dawn_native { namespace metal {
 
         [mMtlDevice release];
         mMtlDevice = nil;
+    }
+
+    void Device::InitTogglesFromDriver() {
+        // TODO(jiawei.shao@intel.com): check iOS feature sets
+        bool emulateStoreAndMSAAResolve =
+            ![mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
+        SetToggle(Toggle::EmulateStoreAndMSAAResolve, emulateStoreAndMSAAResolve);
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(

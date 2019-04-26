@@ -34,7 +34,7 @@ namespace dawn_native { namespace opengl {
 
     class Device : public DeviceBase {
       public:
-        Device(AdapterBase* adapter);
+        Device(AdapterBase* adapter, const DeviceDescriptor* descriptor);
         ~Device();
 
         void SubmitFenceSync();
