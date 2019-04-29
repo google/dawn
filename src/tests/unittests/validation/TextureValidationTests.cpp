@@ -95,6 +95,74 @@ TEST_F(TextureValidationTest, SampleCount) {
     }
 }
 
+// Test the validation of the mip level count
+TEST_F(TextureValidationTest, MipLevelCount) {
+    dawn::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
+
+    // mipLevelCount == 1 is allowed
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = 32;
+        descriptor.size.height = 32;
+        descriptor.mipLevelCount = 1;
+
+        device.CreateTexture(&descriptor);
+    }
+
+    // mipLevelCount == 0 is an error
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = 32;
+        descriptor.size.height = 32;
+        descriptor.mipLevelCount = 0;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // Full mip chains are allowed
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = 32;
+        descriptor.size.height = 32;
+        // Mip level sizes: 32, 16, 8, 4, 2, 1
+        descriptor.mipLevelCount = 6;
+
+        device.CreateTexture(&descriptor);
+    }
+
+    // Too big mip chains on width are disallowed
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = 31;
+        descriptor.size.height = 32;
+        // Mip level width: 31, 15, 7, 3, 1
+        descriptor.mipLevelCount = 6;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // Too big mip chains on height are disallowed
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = 32;
+        descriptor.size.height = 31;
+        // Mip level height: 31, 15, 7, 3, 1
+        descriptor.mipLevelCount = 6;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // Undefined shift check if miplevel is bigger than the integer bit width.
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = 32;
+        descriptor.size.height = 32;
+        descriptor.mipLevelCount = 100;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+}
+
 // Test that it is valid to destroy a texture
 TEST_F(TextureValidationTest, DestroyTexture) {
     dawn::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();

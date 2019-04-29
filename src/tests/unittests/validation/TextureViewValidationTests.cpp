@@ -183,7 +183,7 @@ TEST_F(TextureViewValidationTest, CreateCubeMapTextureView) {
 
     // It is an error to create a cube map texture view with width != height.
     {
-        dawn::Texture nonSquareTexture = Create2DArrayTexture(device, 18, 32, 16);
+        dawn::Texture nonSquareTexture = Create2DArrayTexture(device, 18, 32, 16, 5);
 
         dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
         descriptor.dimension = dawn::TextureViewDimension::Cube;
@@ -193,7 +193,7 @@ TEST_F(TextureViewValidationTest, CreateCubeMapTextureView) {
 
     // It is an error to create a cube map array texture view with width != height.
     {
-        dawn::Texture nonSquareTexture = Create2DArrayTexture(device, 18, 32, 16);
+        dawn::Texture nonSquareTexture = Create2DArrayTexture(device, 18, 32, 16, 5);
 
         dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
         descriptor.dimension = dawn::TextureViewDimension::CubeArray;
