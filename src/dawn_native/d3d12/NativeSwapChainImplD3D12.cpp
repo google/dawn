@@ -35,7 +35,7 @@ namespace dawn_native { namespace d3d12 {
             return usage;
         }
 
-        static constexpr unsigned int kFrameCount = 2;
+        static constexpr unsigned int kFrameCount = 3;
     }  // anonymous namespace
 
     NativeSwapChainImpl::NativeSwapChainImpl(Device* device, HWND window)
