@@ -35,7 +35,7 @@ namespace dawn_native { namespace vulkan {
             // TODO(cwallez@chromium.org): This is upside down compared to what we want, at least
             // on Linux
             config->preTransform = info.capabilities.currentTransform;
-            config->presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            config->presentMode = VK_PRESENT_MODE_FIFO_KHR;
             config->compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
             return true;
         }
