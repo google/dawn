@@ -49,8 +49,7 @@ namespace dawn_native {
 
     ComputePipelineBase::~ComputePipelineBase() {
         // Do not uncache the actual cached object if we are a blueprint
-        if (!mIsBlueprint) {
-            ASSERT(!IsError());
+        if (!mIsBlueprint && !IsError()) {
             GetDevice()->UncacheComputePipeline(this);
         }
     }

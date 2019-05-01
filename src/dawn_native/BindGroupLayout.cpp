@@ -98,8 +98,7 @@ namespace dawn_native {
 
     BindGroupLayoutBase::~BindGroupLayoutBase() {
         // Do not uncache the actual cached object if we are a blueprint
-        if (!mIsBlueprint) {
-            ASSERT(!IsError());
+        if (!mIsBlueprint && !IsError()) {
             GetDevice()->UncacheBindGroupLayout(this);
         }
     }

@@ -82,8 +82,7 @@ namespace dawn_native {
 
     ShaderModuleBase::~ShaderModuleBase() {
         // Do not uncache the actual cached object if we are a blueprint
-        if (!mIsBlueprint) {
-            ASSERT(!IsError());
+        if (!mIsBlueprint && !IsError()) {
             GetDevice()->UncacheShaderModule(this);
         }
     }

@@ -57,8 +57,7 @@ namespace dawn_native {
 
     PipelineLayoutBase::~PipelineLayoutBase() {
         // Do not uncache the actual cached object if we are a blueprint
-        if (!mIsBlueprint) {
-            ASSERT(!IsError());
+        if (!mIsBlueprint && !IsError()) {
             GetDevice()->UncachePipelineLayout(this);
         }
     }

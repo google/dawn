@@ -31,6 +31,14 @@ TEST_P(ObjectCachingTest, BindGroupLayoutDeduplication) {
     EXPECT_EQ(bgl.Get() == sameBgl.Get(), !UsesWire());
 }
 
+// Test that an error object doesn't try to uncache itself
+TEST_P(ObjectCachingTest, ErrorObjectDoesntUncache) {
+    ASSERT_DEVICE_ERROR(
+        dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer},
+                     {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}}));
+}
+
 // Test that PipelineLayouts are correctly deduplicated.
 TEST_P(ObjectCachingTest, PipelineLayoutDeduplication) {
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
