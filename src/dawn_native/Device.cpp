@@ -49,6 +49,7 @@ namespace dawn_native {
     struct DeviceBase::Caches {
         ContentLessObjectCache<BindGroupLayoutBase> bindGroupLayouts;
         ContentLessObjectCache<PipelineLayoutBase> pipelineLayouts;
+        ContentLessObjectCache<ShaderModuleBase> shaderModules;
     };
 
     // DeviceBase
@@ -138,6 +139,27 @@ namespace dawn_native {
 
     void DeviceBase::UncachePipelineLayout(PipelineLayoutBase* obj) {
         size_t removedCount = mCaches->pipelineLayouts.erase(obj);
+        ASSERT(removedCount == 1);
+    }
+
+    ResultOrError<ShaderModuleBase*> DeviceBase::GetOrCreateShaderModule(
+        const ShaderModuleDescriptor* descriptor) {
+        ShaderModuleBase blueprint(this, descriptor, true);
+
+        auto iter = mCaches->shaderModules.find(&blueprint);
+        if (iter != mCaches->shaderModules.end()) {
+            (*iter)->Reference();
+            return *iter;
+        }
+
+        ShaderModuleBase* backendObj;
+        DAWN_TRY_ASSIGN(backendObj, CreateShaderModuleImpl(descriptor));
+        mCaches->shaderModules.insert(backendObj);
+        return backendObj;
+    }
+
+    void DeviceBase::UncacheShaderModule(ShaderModuleBase* obj) {
+        size_t removedCount = mCaches->shaderModules.erase(obj);
         ASSERT(removedCount == 1);
     }
 
@@ -382,7 +404,7 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateShaderModuleInternal(ShaderModuleBase** result,
                                                       const ShaderModuleDescriptor* descriptor) {
         DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor));
-        DAWN_TRY_ASSIGN(*result, CreateShaderModuleImpl(descriptor));
+        DAWN_TRY_ASSIGN(*result, GetOrCreateShaderModule(descriptor));
         return {};
     }
 

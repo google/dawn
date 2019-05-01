@@ -48,4 +48,31 @@ TEST_P(ObjectCachingTest, PipelineLayoutDeduplication) {
     EXPECT_EQ(pl.Get() == samePl.Get(), !UsesWire());
 }
 
+// Test that ShaderModules are correctly deduplicated.
+TEST_P(ObjectCachingTest, ShaderModuleDeduplication) {
+    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            #version 450
+            layout(location = 0) out vec4 fragColor;
+            void main() {
+                fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+            })");
+    dawn::ShaderModule sameModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            #version 450
+            layout(location = 0) out vec4 fragColor;
+            void main() {
+                fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+            })");
+    dawn::ShaderModule otherModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            #version 450
+            layout(location = 0) out vec4 fragColor;
+            void main() {
+                fragColor = vec4(0.0);
+            })");
+
+    EXPECT_NE(module.Get(), otherModule.Get());
+    EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
+}
+
 DAWN_INSTANTIATE_TEST(ObjectCachingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

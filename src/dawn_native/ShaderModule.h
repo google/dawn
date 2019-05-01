@@ -37,7 +37,10 @@ namespace dawn_native {
 
     class ShaderModuleBase : public ObjectBase {
       public:
-        ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
+        ShaderModuleBase(DeviceBase* device,
+                         const ShaderModuleDescriptor* descriptor,
+                         bool blueprint = false);
+        ~ShaderModuleBase() override;
 
         static ShaderModuleBase* MakeError(DeviceBase* device);
 
@@ -68,10 +71,23 @@ namespace dawn_native {
 
         bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout);
 
+        // Functors necessary for the unordered_set<ShaderModuleBase*>-based cache.
+        struct HashFunc {
+            size_t operator()(const ShaderModuleBase* module) const;
+        };
+        struct EqualityFunc {
+            bool operator()(const ShaderModuleBase* a, const ShaderModuleBase* b) const;
+        };
+
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         bool IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout);
+
+        // TODO(cwallez@chromium.org): The code is only stored for deduplication. We could maybe
+        // store a cryptographic hash of the code instead?
+        std::vector<uint32_t> mCode;
+        bool mIsBlueprint = false;
 
         PushConstantInfo mPushConstants = {};
         ModuleBindingInfo mBindingInfo;
