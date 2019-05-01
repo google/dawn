@@ -278,7 +278,7 @@ namespace utils {
     dawn::PipelineLayout MakeBasicPipelineLayout(const dawn::Device& device,
                                                  const dawn::BindGroupLayout* bindGroupLayout) {
         dawn::PipelineLayoutDescriptor descriptor;
-        if (bindGroupLayout) {
+        if (bindGroupLayout != nullptr) {
             descriptor.bindGroupLayoutCount = 1;
             descriptor.bindGroupLayouts = bindGroupLayout;
         } else {

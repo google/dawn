@@ -114,15 +114,13 @@ namespace dawn_native {
         return mBindingInfo;
     }
 
-    // BindGroupLayoutCacheFuncs
-
-    size_t BindGroupLayoutCacheFuncs::operator()(const BindGroupLayoutBase* bgl) const {
-        return HashBindingInfo(bgl->GetBindingInfo());
+    size_t BindGroupLayoutBase::HashFunc::operator()(const BindGroupLayoutBase* bgl) const {
+        return HashBindingInfo(bgl->mBindingInfo);
     }
 
-    bool BindGroupLayoutCacheFuncs::operator()(const BindGroupLayoutBase* a,
-                                               const BindGroupLayoutBase* b) const {
-        return a->GetBindingInfo() == b->GetBindingInfo();
+    bool BindGroupLayoutBase::EqualityFunc::operator()(const BindGroupLayoutBase* a,
+                                                       const BindGroupLayoutBase* b) const {
+        return a->mBindingInfo == b->mBindingInfo;
     }
 
 }  // namespace dawn_native

@@ -166,7 +166,7 @@ void DawnTestEnvironment::SetUp() {
     std::cout << std::endl;
 }
 
-bool DawnTestEnvironment::UseWire() const {
+bool DawnTestEnvironment::UsesWire() const {
     return mUseWire;
 }
 
@@ -266,6 +266,10 @@ bool DawnTest::IsMacOS() const {
 #endif
 }
 
+bool DawnTest::UsesWire() const {
+    return gTestEnv->UsesWire();
+}
+
 void DawnTest::SetUp() {
     // Get an adapter for the backend to use, and create the device.
     dawn_native::Adapter backendAdapter;
@@ -314,7 +318,7 @@ void DawnTest::SetUp() {
     DawnDevice cDevice = nullptr;
     DawnProcTable procs;
 
-    if (gTestEnv->UseWire()) {
+    if (gTestEnv->UsesWire()) {
         mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
         mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
 
@@ -473,7 +477,7 @@ void DawnTest::SwapBuffersForCapture() {
 }
 
 void DawnTest::FlushWire() {
-    if (gTestEnv->UseWire()) {
+    if (gTestEnv->UsesWire()) {
         bool C2SFlushed = mC2sBuf->Flush();
         bool S2CFlushed = mS2cBuf->Flush();
         ASSERT(C2SFlushed);

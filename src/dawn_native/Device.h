@@ -84,6 +84,10 @@ namespace dawn_native {
             const BindGroupLayoutDescriptor* descriptor);
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
+        ResultOrError<PipelineLayoutBase*> GetOrCreatePipelineLayout(
+            const PipelineLayoutDescriptor* descriptor);
+        void UncachePipelineLayout(PipelineLayoutBase* obj);
+
         // Dawn API
         BindGroupBase* CreateBindGroup(const BindGroupDescriptor* descriptor);
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);

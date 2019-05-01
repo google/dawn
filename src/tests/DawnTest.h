@@ -106,7 +106,7 @@ class DawnTestEnvironment : public testing::Environment {
 
     void SetUp() override;
 
-    bool UseWire() const;
+    bool UsesWire() const;
     dawn_native::Instance* GetInstance() const;
     GLFWwindow* GetWindowForBackend(dawn_native::BackendType type) const;
 
@@ -145,6 +145,8 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
     bool IsWindows() const;
     bool IsLinux() const;
     bool IsMacOS() const;
+
+    bool UsesWire() const;
 
     void StartExpectDeviceError();
     bool EndExpectDeviceError();

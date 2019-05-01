@@ -15,6 +15,8 @@
 #include "dawn_native/PipelineLayout.h"
 
 #include "common/Assert.h"
+#include "common/BitSetIterator.h"
+#include "common/HashUtils.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
 
@@ -39,8 +41,9 @@ namespace dawn_native {
     // PipelineLayoutBase
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
-                                           const PipelineLayoutDescriptor* descriptor)
-        : ObjectBase(device) {
+                                           const PipelineLayoutDescriptor* descriptor,
+                                           bool blueprint)
+        : ObjectBase(device), mIsBlueprint(blueprint) {
         ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
         for (uint32_t group = 0; group < descriptor->bindGroupLayoutCount; ++group) {
             mBindGroupLayouts[group] = descriptor->bindGroupLayouts[group];
@@ -50,6 +53,14 @@ namespace dawn_native {
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : ObjectBase(device, tag) {
+    }
+
+    PipelineLayoutBase::~PipelineLayoutBase() {
+        // Do not uncache the actual cached object if we are a blueprint
+        if (!mIsBlueprint) {
+            ASSERT(!IsError());
+            GetDevice()->UncachePipelineLayout(this);
+        }
     }
 
     // static
@@ -84,6 +95,31 @@ namespace dawn_native {
             }
         }
         return kMaxBindGroups;
+    }
+
+    size_t PipelineLayoutBase::HashFunc::operator()(const PipelineLayoutBase* pl) const {
+        size_t hash = Hash(pl->mMask);
+
+        for (uint32_t group : IterateBitSet(pl->mMask)) {
+            HashCombine(&hash, pl->GetBindGroupLayout(group));
+        }
+
+        return hash;
+    }
+
+    bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
+                                                      const PipelineLayoutBase* b) const {
+        if (a->mMask != b->mMask) {
+            return false;
+        }
+
+        for (uint32_t group : IterateBitSet(a->mMask)) {
+            if (a->GetBindGroupLayout(group) != b->GetBindGroupLayout(group)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }  // namespace dawn_native
