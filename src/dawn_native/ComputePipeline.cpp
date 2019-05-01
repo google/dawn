@@ -14,6 +14,7 @@
 
 #include "dawn_native/ComputePipeline.h"
 
+#include "common/HashUtils.h"
 #include "dawn_native/Device.h"
 
 namespace dawn_native {
@@ -33,8 +34,12 @@ namespace dawn_native {
     // ComputePipelineBase
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
-                                             const ComputePipelineDescriptor* descriptor)
-        : PipelineBase(device, descriptor->layout, dawn::ShaderStageBit::Compute) {
+                                             const ComputePipelineDescriptor* descriptor,
+                                             bool blueprint)
+        : PipelineBase(device, descriptor->layout, dawn::ShaderStageBit::Compute),
+          mModule(descriptor->computeStage->module),
+          mEntryPoint(descriptor->computeStage->entryPoint),
+          mIsBlueprint(blueprint) {
         ExtractModuleData(dawn::ShaderStage::Compute, descriptor->computeStage->module);
     }
 
@@ -42,9 +47,29 @@ namespace dawn_native {
         : PipelineBase(device, tag) {
     }
 
+    ComputePipelineBase::~ComputePipelineBase() {
+        // Do not uncache the actual cached object if we are a blueprint
+        if (!mIsBlueprint) {
+            ASSERT(!IsError());
+            GetDevice()->UncacheComputePipeline(this);
+        }
+    }
+
     // static
     ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
         return new ComputePipelineBase(device, ObjectBase::kError);
+    }
+
+    size_t ComputePipelineBase::HashFunc::operator()(const ComputePipelineBase* pipeline) const {
+        size_t hash = 0;
+        HashCombine(&hash, pipeline->mModule.Get(), pipeline->mEntryPoint, pipeline->GetLayout());
+        return hash;
+    }
+
+    bool ComputePipelineBase::EqualityFunc::operator()(const ComputePipelineBase* a,
+                                                       const ComputePipelineBase* b) const {
+        return a->mModule.Get() == b->mModule.Get() && a->mEntryPoint == b->mEntryPoint &&
+               a->GetLayout() == b->GetLayout();
     }
 
 }  // namespace dawn_native

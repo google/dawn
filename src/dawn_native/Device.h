@@ -84,6 +84,10 @@ namespace dawn_native {
             const BindGroupLayoutDescriptor* descriptor);
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
+        ResultOrError<ComputePipelineBase*> GetOrCreateComputePipeline(
+            const ComputePipelineDescriptor* descriptor);
+        void UncacheComputePipeline(ComputePipelineBase* obj);
+
         ResultOrError<PipelineLayoutBase*> GetOrCreatePipelineLayout(
             const PipelineLayoutDescriptor* descriptor);
         void UncachePipelineLayout(PipelineLayoutBase* obj);

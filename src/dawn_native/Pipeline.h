@@ -48,6 +48,7 @@ namespace dawn_native {
         const PushConstantInfo& GetPushConstants(dawn::ShaderStage stage) const;
         dawn::ShaderStageBit GetStageMask() const;
         PipelineLayoutBase* GetLayout();
+        const PipelineLayoutBase* GetLayout() const;
 
       protected:
         PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, dawn::ShaderStageBit stages);

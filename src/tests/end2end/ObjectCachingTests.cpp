@@ -75,4 +75,86 @@ TEST_P(ObjectCachingTest, ShaderModuleDeduplication) {
     EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
 }
 
+// Test that ComputePipeline are correctly deduplicated wrt. their ShaderModule
+TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
+    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+            #version 450
+            void main() {
+                int i = 0;
+            })");
+    dawn::ShaderModule sameModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+            #version 450
+            void main() {
+                int i = 0;
+            })");
+    dawn::ShaderModule otherModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+            #version 450
+            void main() {
+            })");
+
+    EXPECT_NE(module.Get(), otherModule.Get());
+    EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
+
+    dawn::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, nullptr);
+
+    dawn::PipelineStageDescriptor stageDesc;
+    stageDesc.entryPoint = "main";
+    stageDesc.module = module;
+
+    dawn::ComputePipelineDescriptor desc;
+    desc.computeStage = &stageDesc;
+    desc.layout = layout;
+
+    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&desc);
+
+    stageDesc.module = sameModule;
+    dawn::ComputePipeline samePipeline = device.CreateComputePipeline(&desc);
+
+    stageDesc.module = otherModule;
+    dawn::ComputePipeline otherPipeline = device.CreateComputePipeline(&desc);
+
+    EXPECT_NE(pipeline.Get(), otherPipeline.Get());
+    EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
+}
+
+// Test that ComputePipeline are correctly deduplicated wrt. their layout
+TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
+    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}});
+    dawn::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer}});
+
+    dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+    dawn::PipelineLayout samePl = utils::MakeBasicPipelineLayout(device, &bgl);
+    dawn::PipelineLayout otherPl = utils::MakeBasicPipelineLayout(device, nullptr);
+
+    EXPECT_NE(pl.Get(), otherPl.Get());
+    EXPECT_EQ(pl.Get() == samePl.Get(), !UsesWire());
+
+    dawn::PipelineStageDescriptor stageDesc;
+    stageDesc.entryPoint = "main";
+    stageDesc.module = utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+            #version 450
+            void main() {
+                int i = 0;
+            })");
+
+    dawn::ComputePipelineDescriptor desc;
+    desc.computeStage = &stageDesc;
+
+    desc.layout = pl;
+    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&desc);
+
+    desc.layout = samePl;
+    dawn::ComputePipeline samePipeline = device.CreateComputePipeline(&desc);
+
+    desc.layout = otherPl;
+    dawn::ComputePipeline otherPipeline = device.CreateComputePipeline(&desc);
+
+    EXPECT_NE(pipeline.Get(), otherPipeline.Get());
+    EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
+}
+
 DAWN_INSTANTIATE_TEST(ObjectCachingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

@@ -48,6 +48,7 @@ namespace dawn_native {
 
     struct DeviceBase::Caches {
         ContentLessObjectCache<BindGroupLayoutBase> bindGroupLayouts;
+        ContentLessObjectCache<ComputePipelineBase> computePipelines;
         ContentLessObjectCache<PipelineLayoutBase> pipelineLayouts;
         ContentLessObjectCache<ShaderModuleBase> shaderModules;
     };
@@ -118,6 +119,27 @@ namespace dawn_native {
 
     void DeviceBase::UncacheBindGroupLayout(BindGroupLayoutBase* obj) {
         size_t removedCount = mCaches->bindGroupLayouts.erase(obj);
+        ASSERT(removedCount == 1);
+    }
+
+    ResultOrError<ComputePipelineBase*> DeviceBase::GetOrCreateComputePipeline(
+        const ComputePipelineDescriptor* descriptor) {
+        ComputePipelineBase blueprint(this, descriptor, true);
+
+        auto iter = mCaches->computePipelines.find(&blueprint);
+        if (iter != mCaches->computePipelines.end()) {
+            (*iter)->Reference();
+            return *iter;
+        }
+
+        ComputePipelineBase* backendObj;
+        DAWN_TRY_ASSIGN(backendObj, CreateComputePipelineImpl(descriptor));
+        mCaches->computePipelines.insert(backendObj);
+        return backendObj;
+    }
+
+    void DeviceBase::UncacheComputePipeline(ComputePipelineBase* obj) {
+        size_t removedCount = mCaches->computePipelines.erase(obj);
         ASSERT(removedCount == 1);
     }
 
@@ -369,7 +391,7 @@ namespace dawn_native {
         ComputePipelineBase** result,
         const ComputePipelineDescriptor* descriptor) {
         DAWN_TRY(ValidateComputePipelineDescriptor(this, descriptor));
-        DAWN_TRY_ASSIGN(*result, CreateComputePipelineImpl(descriptor));
+        DAWN_TRY_ASSIGN(*result, GetOrCreateComputePipeline(descriptor));
         return {};
     }
 

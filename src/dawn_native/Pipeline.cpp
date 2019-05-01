@@ -87,4 +87,9 @@ namespace dawn_native {
         return mLayout.Get();
     }
 
+    const PipelineLayoutBase* PipelineBase::GetLayout() const {
+        ASSERT(!IsError());
+        return mLayout.Get();
+    }
+
 }  // namespace dawn_native
