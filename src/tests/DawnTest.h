@@ -47,6 +47,7 @@
 #define ASSERT_DEVICE_ERROR(statement) \
     StartExpectDeviceError();          \
     statement;                         \
+    FlushWire();                       \
     ASSERT_TRUE(EndExpectDeviceError());
 
 struct RGBA8 {
@@ -173,6 +174,7 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
                                               detail::Expectation* expectation);
 
     void WaitABit();
+    void FlushWire();
 
     void SwapBuffersForCapture();
 
@@ -182,7 +184,6 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
     std::unique_ptr<dawn_wire::WireClient> mWireClient;
     std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
-    void FlushWire();
 
     // Tracking for validation errors
     static void OnDeviceError(const char* message, DawnCallbackUserdata userdata);

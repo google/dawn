@@ -344,6 +344,7 @@ void DawnTest::SetUp() {
     dawn::SwapChainDescriptor swapChainDesc;
     swapChainDesc.implementation = mBinding->GetSwapChainImplementation();
     swapchain = device.CreateSwapChain(&swapChainDesc);
+    FlushWire();
     swapchain.Configure(
         static_cast<dawn::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
         dawn::TextureUsageBit::OutputAttachment, 400, 400);
@@ -353,6 +354,7 @@ void DawnTest::SetUp() {
 }
 
 void DawnTest::TearDown() {
+    swapchain = dawn::SwapChain();
     FlushWire();
 
     MapSlotsSynchronously();
