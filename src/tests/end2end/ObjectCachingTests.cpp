@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 class ObjectCachingTest : public DawnTest {};
@@ -160,6 +161,126 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
 
     desc.layout = otherPl;
     dawn::ComputePipeline otherPipeline = device.CreateComputePipeline(&desc);
+
+    EXPECT_NE(pipeline.Get(), otherPipeline.Get());
+    EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
+}
+
+// Test that RenderPipelines are correctly deduplicated wrt. their layout
+TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnLayout) {
+    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}});
+    dawn::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer}});
+
+    dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+    dawn::PipelineLayout samePl = utils::MakeBasicPipelineLayout(device, &bgl);
+    dawn::PipelineLayout otherPl = utils::MakeBasicPipelineLayout(device, nullptr);
+
+    EXPECT_NE(pl.Get(), otherPl.Get());
+    EXPECT_EQ(pl.Get() == samePl.Get(), !UsesWire());
+
+    utils::ComboRenderPipelineDescriptor desc(device);
+    desc.cVertexStage.module = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            #version 450
+            void main() {
+                gl_Position = vec4(0.0);
+            })");
+    desc.cFragmentStage.module = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            #version 450
+            void main() {
+            })");
+
+    desc.layout = pl;
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    desc.layout = samePl;
+    dawn::RenderPipeline samePipeline = device.CreateRenderPipeline(&desc);
+
+    desc.layout = otherPl;
+    dawn::RenderPipeline otherPipeline = device.CreateRenderPipeline(&desc);
+
+    EXPECT_NE(pipeline.Get(), otherPipeline.Get());
+    EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
+}
+
+// Test that RenderPipelines are correctly deduplicated wrt. their vertex module
+TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnVertexModule) {
+    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            #version 450
+            void main() {
+                gl_Position = vec4(0.0);
+            })");
+    dawn::ShaderModule sameModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            #version 450
+            void main() {
+                gl_Position = vec4(0.0);
+            })");
+    dawn::ShaderModule otherModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            #version 450
+            void main() {
+                gl_Position = vec4(1.0);
+            })");
+
+    EXPECT_NE(module.Get(), otherModule.Get());
+    EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
+
+    utils::ComboRenderPipelineDescriptor desc(device);
+    desc.cFragmentStage.module = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            #version 450
+            void main() {
+            })");
+
+    desc.cVertexStage.module = module;
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    desc.cVertexStage.module = sameModule;
+    dawn::RenderPipeline samePipeline = device.CreateRenderPipeline(&desc);
+
+    desc.cVertexStage.module = otherModule;
+    dawn::RenderPipeline otherPipeline = device.CreateRenderPipeline(&desc);
+
+    EXPECT_NE(pipeline.Get(), otherPipeline.Get());
+    EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
+}
+
+// Test that RenderPipelines are correctly deduplicated wrt. their fragment module
+TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
+    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            #version 450
+            void main() {
+            })");
+    dawn::ShaderModule sameModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            #version 450
+            void main() {
+            })");
+    dawn::ShaderModule otherModule =
+        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            #version 450
+            void main() {
+                int i = 0;
+            })");
+
+    EXPECT_NE(module.Get(), otherModule.Get());
+    EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
+
+    utils::ComboRenderPipelineDescriptor desc(device);
+    desc.cVertexStage.module = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            #version 450
+            void main() {
+                gl_Position = vec4(0.0);
+            })");
+
+    desc.cFragmentStage.module = module;
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    desc.cFragmentStage.module = sameModule;
+    dawn::RenderPipeline samePipeline = device.CreateRenderPipeline(&desc);
+
+    desc.cFragmentStage.module = otherModule;
+    dawn::RenderPipeline otherPipeline = device.CreateRenderPipeline(&desc);
 
     EXPECT_NE(pipeline.Get(), otherPipeline.Get());
     EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());

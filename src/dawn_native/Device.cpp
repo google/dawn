@@ -50,6 +50,7 @@ namespace dawn_native {
         ContentLessObjectCache<BindGroupLayoutBase> bindGroupLayouts;
         ContentLessObjectCache<ComputePipelineBase> computePipelines;
         ContentLessObjectCache<PipelineLayoutBase> pipelineLayouts;
+        ContentLessObjectCache<RenderPipelineBase> renderPipelines;
         ContentLessObjectCache<ShaderModuleBase> shaderModules;
     };
 
@@ -161,6 +162,27 @@ namespace dawn_native {
 
     void DeviceBase::UncachePipelineLayout(PipelineLayoutBase* obj) {
         size_t removedCount = mCaches->pipelineLayouts.erase(obj);
+        ASSERT(removedCount == 1);
+    }
+
+    ResultOrError<RenderPipelineBase*> DeviceBase::GetOrCreateRenderPipeline(
+        const RenderPipelineDescriptor* descriptor) {
+        RenderPipelineBase blueprint(this, descriptor, true);
+
+        auto iter = mCaches->renderPipelines.find(&blueprint);
+        if (iter != mCaches->renderPipelines.end()) {
+            (*iter)->Reference();
+            return *iter;
+        }
+
+        RenderPipelineBase* backendObj;
+        DAWN_TRY_ASSIGN(backendObj, CreateRenderPipelineImpl(descriptor));
+        mCaches->renderPipelines.insert(backendObj);
+        return backendObj;
+    }
+
+    void DeviceBase::UncacheRenderPipeline(RenderPipelineBase* obj) {
+        size_t removedCount = mCaches->renderPipelines.erase(obj);
         ASSERT(removedCount == 1);
     }
 
@@ -412,7 +434,7 @@ namespace dawn_native {
         RenderPipelineBase** result,
         const RenderPipelineDescriptor* descriptor) {
         DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
-        DAWN_TRY_ASSIGN(*result, CreateRenderPipelineImpl(descriptor));
+        DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(descriptor));
         return {};
     }
 

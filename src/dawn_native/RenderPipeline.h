@@ -40,7 +40,10 @@ namespace dawn_native {
 
     class RenderPipelineBase : public PipelineBase {
       public:
-        RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
+        RenderPipelineBase(DeviceBase* device,
+                           const RenderPipelineDescriptor* descriptor,
+                           bool blueprint = false);
+        ~RenderPipelineBase() override;
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
@@ -50,8 +53,8 @@ namespace dawn_native {
         const std::bitset<kMaxVertexInputs>& GetInputsSetMask() const;
         const VertexInputDescriptor& GetInput(uint32_t slot) const;
 
-        const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot);
-        const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor();
+        const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot) const;
+        const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor() const;
         dawn::PrimitiveTopology GetPrimitiveTopology() const;
         dawn::CullMode GetCullMode() const;
         dawn::FrontFace GetFrontFace() const;
@@ -68,23 +71,43 @@ namespace dawn_native {
         std::bitset<kMaxVertexAttributes> GetAttributesUsingInput(uint32_t slot) const;
         std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexInputs> attributesUsingInput;
 
+        // Functors necessary for the unordered_set<RenderPipelineBase*>-based cache.
+        struct HashFunc {
+            size_t operator()(const RenderPipelineBase* pipeline) const;
+        };
+        struct EqualityFunc {
+            bool operator()(const RenderPipelineBase* a, const RenderPipelineBase* b) const;
+        };
+
       private:
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
+        // Vertex input
         InputStateDescriptor mInputState;
         std::bitset<kMaxVertexAttributes> mAttributesSetMask;
         std::array<VertexAttributeDescriptor, kMaxVertexAttributes> mAttributeInfos;
         std::bitset<kMaxVertexInputs> mInputsSetMask;
         std::array<VertexInputDescriptor, kMaxVertexInputs> mInputInfos;
-        dawn::PrimitiveTopology mPrimitiveTopology;
-        RasterizationStateDescriptor mRasterizationState;
+
+        // Attachments
+        bool mHasDepthStencilAttachment = false;
         DepthStencilStateDescriptor mDepthStencilState;
+        std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
         std::array<ColorStateDescriptor, kMaxColorAttachments> mColorStates;
 
-        std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
-        bool mHasDepthStencilAttachment = false;
-
+        // Other state
+        dawn::PrimitiveTopology mPrimitiveTopology;
+        RasterizationStateDescriptor mRasterizationState;
         uint32_t mSampleCount;
+
+        // Stage information
+        // TODO(cwallez@chromium.org): Store a crypto hash of the modules instead.
+        Ref<ShaderModuleBase> mVertexModule;
+        std::string mVertexEntryPoint;
+        Ref<ShaderModuleBase> mFragmentModule;
+        std::string mFragmentEntryPoint;
+
+        bool mIsBlueprint = false;
     };
 
 }  // namespace dawn_native
