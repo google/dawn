@@ -114,7 +114,7 @@ namespace dawn_wire { namespace server {
         cmd.requestSerial = data->requestSerial;
         cmd.status = status;
         cmd.dataLength = 0;
-        cmd.data = reinterpret_cast<const uint8_t*>(ptr);
+        cmd.data = static_cast<const uint8_t*>(ptr);
 
         if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
             cmd.dataLength = dataLength;

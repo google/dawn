@@ -545,7 +545,7 @@ void DawnTest::ResolveExpectations() {
 
         // Get a pointer to the mapped copy of the data for the expectation.
         const char* data =
-            reinterpret_cast<const char*>(mReadbackSlots[expectation.readbackSlot].mappedData);
+            static_cast<const char*>(mReadbackSlots[expectation.readbackSlot].mappedData);
         data += expectation.readbackOffset;
 
         uint32_t size;
@@ -652,7 +652,7 @@ namespace detail {
     testing::AssertionResult ExpectEq<T>::Check(const void* data, size_t size) {
         DAWN_ASSERT(size == sizeof(T) * mExpected.size());
 
-        const T* actual = reinterpret_cast<const T*>(data);
+        const T* actual = static_cast<const T*>(data);
 
         testing::AssertionResult failure = testing::AssertionFailure();
         for (size_t i = 0; i < mExpected.size(); ++i) {

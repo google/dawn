@@ -121,7 +121,7 @@ namespace dawn_native { namespace vulkan {
 
         allocation->mMemory = allocatedMemory;
         allocation->mOffset = 0;
-        allocation->mMappedPointer = reinterpret_cast<uint8_t*>(mappedPointer);
+        allocation->mMappedPointer = static_cast<uint8_t*>(mappedPointer);
 
         return true;
     }

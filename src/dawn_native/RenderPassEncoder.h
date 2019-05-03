@@ -55,8 +55,7 @@ namespace dawn_native {
                               T* const* buffers,
                               uint64_t const* offsets) {
             static_assert(std::is_base_of<BufferBase, T>::value, "");
-            SetVertexBuffers(startSlot, count, reinterpret_cast<BufferBase* const*>(buffers),
-                             offsets);
+            SetVertexBuffers(startSlot, count, buffers, offsets);
         }
         void SetVertexBuffers(uint32_t startSlot,
                               uint32_t count,

@@ -76,11 +76,11 @@ namespace dawn_native {
         }
         template <typename T>
         T* NextCommand() {
-            return reinterpret_cast<T*>(NextCommand(sizeof(T), alignof(T)));
+            return static_cast<T*>(NextCommand(sizeof(T), alignof(T)));
         }
         template <typename T>
         T* NextData(size_t count) {
-            return reinterpret_cast<T*>(NextData(sizeof(T) * count, alignof(T)));
+            return static_cast<T*>(NextData(sizeof(T) * count, alignof(T)));
         }
 
         // Needs to be called if iteration was stopped early.

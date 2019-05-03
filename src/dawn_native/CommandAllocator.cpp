@@ -237,7 +237,7 @@ namespace dawn_native {
         mLastAllocationSize =
             std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
 
-        uint8_t* block = reinterpret_cast<uint8_t*>(malloc(mLastAllocationSize));
+        uint8_t* block = static_cast<uint8_t*>(malloc(mLastAllocationSize));
         if (DAWN_UNLIKELY(block == nullptr)) {
             return false;
         }

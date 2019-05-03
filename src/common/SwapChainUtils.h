@@ -22,18 +22,18 @@ DawnSwapChainImplementation CreateSwapChainImplementation(T* swapChain) {
     DawnSwapChainImplementation impl = {};
     impl.userData = swapChain;
     impl.Init = [](void* userData, void* wsiContext) {
-        auto* ctx = reinterpret_cast<typename T::WSIContext*>(wsiContext);
+        auto* ctx = static_cast<typename T::WSIContext*>(wsiContext);
         reinterpret_cast<T*>(userData)->Init(ctx);
     };
     impl.Destroy = [](void* userData) { delete reinterpret_cast<T*>(userData); };
     impl.Configure = [](void* userData, DawnTextureFormat format, DawnTextureUsageBit allowedUsage,
                         uint32_t width, uint32_t height) {
-        return reinterpret_cast<T*>(userData)->Configure(format, allowedUsage, width, height);
+        return static_cast<T*>(userData)->Configure(format, allowedUsage, width, height);
     };
     impl.GetNextTexture = [](void* userData, DawnSwapChainNextTexture* nextTexture) {
-        return reinterpret_cast<T*>(userData)->GetNextTexture(nextTexture);
+        return static_cast<T*>(userData)->GetNextTexture(nextTexture);
     };
-    impl.Present = [](void* userData) { return reinterpret_cast<T*>(userData)->Present(); };
+    impl.Present = [](void* userData) { return static_cast<T*>(userData)->Present(); };
     return impl;
 }
 

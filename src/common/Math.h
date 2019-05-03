@@ -34,12 +34,12 @@ uint32_t Align(uint32_t value, size_t alignment);
 
 template <typename T>
 T* AlignPtr(T* ptr, size_t alignment) {
-    return reinterpret_cast<T*>(AlignVoidPtr(ptr, alignment));
+    return static_cast<T*>(AlignVoidPtr(ptr, alignment));
 }
 
 template <typename T>
 const T* AlignPtr(const T* ptr, size_t alignment) {
-    return reinterpret_cast<const T*>(AlignVoidPtr(const_cast<T*>(ptr), alignment));
+    return static_cast<const T*>(AlignVoidPtr(const_cast<T*>(ptr), alignment));
 }
 
 template <typename destType, typename sourceType>

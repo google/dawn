@@ -44,7 +44,7 @@ namespace dawn_native { namespace d3d12 {
             return nullptr;
         }
 
-        ID3D12Resource* nativeTexture = reinterpret_cast<ID3D12Resource*>(next.texture.ptr);
+        ID3D12Resource* nativeTexture = static_cast<ID3D12Resource*>(next.texture.ptr);
         return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture);
     }
 

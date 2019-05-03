@@ -67,7 +67,7 @@ namespace dawn_native { namespace opengl {
 
         ASSERT(optionsBase->backendType == BackendType::OpenGL);
         const AdapterDiscoveryOptions* options =
-            reinterpret_cast<const AdapterDiscoveryOptions*>(optionsBase);
+            static_cast<const AdapterDiscoveryOptions*>(optionsBase);
 
         if (options->getProc == nullptr) {
             return DAWN_VALIDATION_ERROR("AdapterDiscoveryOptions::getProc must be set");

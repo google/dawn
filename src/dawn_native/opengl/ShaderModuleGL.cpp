@@ -132,7 +132,7 @@ namespace dawn_native { namespace opengl {
     }
 
     const char* ShaderModule::GetSource() const {
-        return reinterpret_cast<const char*>(mGlslSource.data());
+        return mGlslSource.c_str();
     }
 
     const ShaderModule::CombinedSamplerInfo& ShaderModule::GetCombinedSamplerInfo() const {
