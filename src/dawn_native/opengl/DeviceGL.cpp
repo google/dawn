@@ -125,15 +125,11 @@ namespace dawn_native { namespace opengl {
             GLsync sync = mFencesInFlight.front().first;
             Serial fenceSerial = mFencesInFlight.front().second;
 
-            GLint status = 0;
-            GLsizei length;
-            glGetSynciv(sync, GL_SYNC_CONDITION, sizeof(GLint), &length, &status);
-            ASSERT(length == 1);
-
             // Fence are added in order, so we can stop searching as soon
             // as we see one that's not ready.
-            if (!status) {
-                return;
+            GLenum result = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
+            if (result == GL_TIMEOUT_EXPIRED) {
+                continue;
             }
 
             glDeleteSync(sync);
