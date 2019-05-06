@@ -135,8 +135,8 @@ TEST_F(TextureValidationTest, MipLevelCount) {
         dawn::TextureDescriptor descriptor = defaultDescriptor;
         descriptor.size.width = 31;
         descriptor.size.height = 32;
-        // Mip level width: 31, 15, 7, 3, 1
-        descriptor.mipLevelCount = 6;
+        // Mip level width: 31, 15, 7, 3, 1, 1
+        descriptor.mipLevelCount = 7;
 
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
@@ -146,8 +146,8 @@ TEST_F(TextureValidationTest, MipLevelCount) {
         dawn::TextureDescriptor descriptor = defaultDescriptor;
         descriptor.size.width = 32;
         descriptor.size.height = 31;
-        // Mip level height: 31, 15, 7, 3, 1
-        descriptor.mipLevelCount = 6;
+        // Mip level height: 31, 15, 7, 3, 1, 1
+        descriptor.mipLevelCount = 7;
 
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
@@ -160,6 +160,17 @@ TEST_F(TextureValidationTest, MipLevelCount) {
         descriptor.mipLevelCount = 100;
 
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // Non square mip map halves the resolution until a 1x1 dimension.
+    {
+        dawn::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = 32;
+        descriptor.size.height = 8;
+        // Mip maps: 32 * 8, 16 * 4, 8 * 2, 4 * 1, 2 * 1, 1 * 1
+        descriptor.mipLevelCount = 6;
+
+        device.CreateTexture(&descriptor);
     }
 }
 
