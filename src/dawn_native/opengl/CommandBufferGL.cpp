@@ -680,6 +680,13 @@ namespace dawn_native { namespace opengl {
             }
         }
 
+        // Set defaults for dynamic state before executing clears and commands.
+        PersistentPipelineState persistentPipelineState;
+        persistentPipelineState.SetDefaultState();
+        glBlendColor(0, 0, 0, 0);
+        glViewport(0, 0, renderPass->width, renderPass->height);
+        glScissor(0, 0, renderPass->width, renderPass->height);
+
         // Clear framebuffer attachments as needed
         {
             for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
@@ -725,16 +732,8 @@ namespace dawn_native { namespace opengl {
         RenderPipeline* lastPipeline = nullptr;
         uint64_t indexBufferBaseOffset = 0;
 
-        PersistentPipelineState persistentPipelineState;
-
         PushConstantTracker pushConstants;
         InputBufferTracker inputBuffers;
-
-        // Set defaults for dynamic state
-        persistentPipelineState.SetDefaultState();
-        glBlendColor(0, 0, 0, 0);
-        glViewport(0, 0, renderPass->width, renderPass->height);
-        glScissor(0, 0, renderPass->width, renderPass->height);
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
