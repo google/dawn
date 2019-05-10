@@ -14,6 +14,7 @@
 
 #include "dawn_native/d3d12/AdapterD3D12.h"
 
+#include "common/Constants.h"
 #include "dawn_native/d3d12/BackendD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
@@ -46,8 +47,23 @@ namespace dawn_native { namespace d3d12 {
         if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
             mDeviceType = DeviceType::CPU;
         } else {
-            // TODO(cwallez@chromium.org): properly detect integrated vs. discrete.
-            mDeviceType = DeviceType::DiscreteGPU;
+            // Using DXGI_ADAPTER_DESC1 approach to determine integrated vs dedicated is
+            // vendor-specific.
+            switch (mPCIInfo.vendorId) {
+                case kVendorID_Intel: {
+                    // On Intel GPUs, dedicated video memory is always set to 128MB when the GPU is
+                    // integrated.
+                    static constexpr uint64_t kDedicatedVideoMemory = 128 * 1024 * 1024;
+                    mDeviceType = (adapterDesc.DedicatedVideoMemory == kDedicatedVideoMemory)
+                                      ? DeviceType::IntegratedGPU
+                                      : DeviceType::DiscreteGPU;
+                    break;
+                }
+                default:
+                    // TODO: Support additional GPU vendors.
+                    mDeviceType = DeviceType::Unknown;
+                    break;
+            }
         }
 
         std::wstring_convert<DeletableFacet<std::codecvt<wchar_t, char, std::mbstate_t>>> converter(

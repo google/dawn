@@ -38,4 +38,11 @@ static constexpr uint32_t kTextureRowPitchAlignment = 256u;
 static constexpr float kLodMin = 0.0;
 static constexpr float kLodMax = 1000.0;
 
+static constexpr uint32_t kVendorID_AMD = 0x1002;
+static constexpr uint32_t kVendorID_ARM = 0x13B5;
+static constexpr uint32_t kVendorID_ImgTec = 0x1010;
+static constexpr uint32_t kVendorID_Intel = 0x8086;
+static constexpr uint32_t kVendorID_Nvidia = 0x10DE;
+static constexpr uint32_t kVendorID_Qualcomm = 0x5143;
+
 #endif  // COMMON_CONSTANTS_H_
