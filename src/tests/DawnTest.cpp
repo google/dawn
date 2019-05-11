@@ -293,6 +293,7 @@ void DawnTest::SetUp() {
     DawnDevice backendDevice;
     const char* forceEnabledWorkaround = GetParam().forceEnabledWorkaround;
     if (forceEnabledWorkaround != nullptr) {
+        ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
         dawn_native::DeviceDescriptor deviceDescriptor = InitWorkaround(forceEnabledWorkaround);
         backendDevice = backendAdapter.CreateDevice(&deviceDescriptor);
     } else {

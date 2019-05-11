@@ -67,7 +67,13 @@ namespace dawn_native {
                "not support MTLStoreActionStoreAndMultisampleResolve. To support StoreOp::Store on "
                "those platforms, we should do MSAA resolve in another render pass after ending the "
                "previous one.",
-               "https://bugs.chromium.org/p/dawn/issues/detail?id=56"}}}};
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=56"}},
+             {Toggle::NonzeroClearResourcesOnCreationForTesting,
+              {"nonzero_clear_resources_on_creation_for_testing",
+               "Clears texture to full 1 bits as soon as they are created, but doesn't update "
+               "the tracking state of the texture. This way we can test the logic of clearing "
+               "textures that use recycled memory.",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=145"}}}};
 
     }  // anonymous namespace
 

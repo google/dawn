@@ -643,6 +643,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/IndexFormatTests.cpp",
     "src/tests/end2end/InputStateTests.cpp",
     "src/tests/end2end/MultisampledRenderingTests.cpp",
+    "src/tests/end2end/NonzeroTextureCreationTests.cpp",
     "src/tests/end2end/ObjectCachingTests.cpp",
     "src/tests/end2end/PrimitiveTopologyTests.cpp",
     "src/tests/end2end/PushConstantTests.cpp",

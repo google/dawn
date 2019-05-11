@@ -319,6 +319,24 @@ namespace dawn_native { namespace vulkan {
                                        mMemoryAllocation.GetMemoryOffset()) != VK_SUCCESS) {
             ASSERT(false);
         }
+        if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+            VkImageSubresourceRange range = {};
+            range.aspectMask = GetVkAspectMask();
+            range.baseMipLevel = 0;
+            range.levelCount = GetNumMipLevels();
+            range.baseArrayLayer = 0;
+            range.layerCount = GetArrayLayers();
+
+            // TODO(natlee@microsoft.com): use correct union member depending on the texture format
+            VkClearColorValue clear_color = {{1.0, 1.0, 1.0, 1.0}};
+
+            TransitionUsageNow(ToBackend(GetDevice())->GetPendingCommandBuffer(),
+                               dawn::TextureUsageBit::TransferDst);
+            ToBackend(GetDevice())
+                ->fn.CmdClearColorImage(ToBackend(GetDevice())->GetPendingCommandBuffer(),
+                                        GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                        &clear_color, 1, &range);
+        }
     }
 
     // With this constructor, the lifetime of the resource is externally managed.
