@@ -53,7 +53,6 @@ namespace dawn_native {
 
         InsertDebugMarkerCmd* cmd =
             mAllocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
-        new (cmd) InsertDebugMarkerCmd;
         cmd->length = strlen(groupLabel);
 
         char* label = mAllocator->AllocateData<char>(cmd->length + 1);
@@ -65,8 +64,7 @@ namespace dawn_native {
             return;
         }
 
-        PopDebugGroupCmd* cmd = mAllocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
-        new (cmd) PopDebugGroupCmd;
+        mAllocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
     }
 
     void ProgrammablePassEncoder::PushDebugGroup(const char* groupLabel) {
@@ -75,7 +73,6 @@ namespace dawn_native {
         }
 
         PushDebugGroupCmd* cmd = mAllocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
-        new (cmd) PushDebugGroupCmd;
         cmd->length = strlen(groupLabel);
 
         char* label = mAllocator->AllocateData<char>(cmd->length + 1);
@@ -103,7 +100,6 @@ namespace dawn_native {
         }
 
         SetBindGroupCmd* cmd = mAllocator->Allocate<SetBindGroupCmd>(Command::SetBindGroup);
-        new (cmd) SetBindGroupCmd;
         cmd->index = groupIndex;
         cmd->group = group;
     }
@@ -128,7 +124,6 @@ namespace dawn_native {
 
         SetPushConstantsCmd* cmd =
             mAllocator->Allocate<SetPushConstantsCmd>(Command::SetPushConstants);
-        new (cmd) SetPushConstantsCmd;
         cmd->stages = stages;
         cmd->offset = offset;
         cmd->count = count;

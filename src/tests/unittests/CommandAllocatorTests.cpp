@@ -401,3 +401,48 @@ TEST(CommandAllocator, AllocationOverflow_8) {
         allocator.AllocateData<AlignedStruct<8>>(std::numeric_limits<size_t>::max() / 8);
     ASSERT_EQ(data, nullptr);
 }
+
+template <int DefaultValue>
+struct IntWithDefault {
+    IntWithDefault() : value(DefaultValue) {
+    }
+
+    int value;
+};
+
+// Test that the allcator correctly defaults initalizes data for Allocate
+TEST(CommandAllocator, AllocateDefaultInitializes) {
+    CommandAllocator allocator;
+
+    IntWithDefault<42>* int42 = allocator.Allocate<IntWithDefault<42>>(CommandType::Draw);
+    ASSERT_EQ(int42->value, 42);
+
+    IntWithDefault<43>* int43 = allocator.Allocate<IntWithDefault<43>>(CommandType::Draw);
+    ASSERT_EQ(int43->value, 43);
+
+    IntWithDefault<44>* int44 = allocator.Allocate<IntWithDefault<44>>(CommandType::Draw);
+    ASSERT_EQ(int44->value, 44);
+
+    CommandIterator iterator(std::move(allocator));
+    iterator.DataWasDestroyed();
+}
+
+// Test that the allcator correctly defaults initalizes data for AllocateData
+TEST(CommandAllocator, AllocateDataDefaultInitializes) {
+    CommandAllocator allocator;
+
+    IntWithDefault<33>* int33 = allocator.AllocateData<IntWithDefault<33>>(1);
+    ASSERT_EQ(int33[0].value, 33);
+
+    IntWithDefault<34>* int34 = allocator.AllocateData<IntWithDefault<34>>(2);
+    ASSERT_EQ(int34[0].value, 34);
+    ASSERT_EQ(int34[0].value, 34);
+
+    IntWithDefault<35>* int35 = allocator.AllocateData<IntWithDefault<35>>(3);
+    ASSERT_EQ(int35[0].value, 35);
+    ASSERT_EQ(int35[1].value, 35);
+    ASSERT_EQ(int35[2].value, 35);
+
+    CommandIterator iterator(std::move(allocator));
+    iterator.DataWasDestroyed();
+}

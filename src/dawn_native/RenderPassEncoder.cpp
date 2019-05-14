@@ -50,7 +50,6 @@ namespace dawn_native {
         }
 
         DrawCmd* draw = mAllocator->Allocate<DrawCmd>(Command::Draw);
-        new (draw) DrawCmd;
         draw->vertexCount = vertexCount;
         draw->instanceCount = instanceCount;
         draw->firstVertex = firstVertex;
@@ -67,7 +66,6 @@ namespace dawn_native {
         }
 
         DrawIndexedCmd* draw = mAllocator->Allocate<DrawIndexedCmd>(Command::DrawIndexed);
-        new (draw) DrawIndexedCmd;
         draw->indexCount = indexCount;
         draw->instanceCount = instanceCount;
         draw->firstIndex = firstIndex;
@@ -83,7 +81,6 @@ namespace dawn_native {
 
         SetRenderPipelineCmd* cmd =
             mAllocator->Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
-        new (cmd) SetRenderPipelineCmd;
         cmd->pipeline = pipeline;
     }
 
@@ -94,7 +91,6 @@ namespace dawn_native {
 
         SetStencilReferenceCmd* cmd =
             mAllocator->Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
-        new (cmd) SetStencilReferenceCmd;
         cmd->reference = reference;
     }
 
@@ -104,7 +100,6 @@ namespace dawn_native {
         }
 
         SetBlendColorCmd* cmd = mAllocator->Allocate<SetBlendColorCmd>(Command::SetBlendColor);
-        new (cmd) SetBlendColorCmd;
         cmd->color = *color;
     }
 
@@ -121,7 +116,6 @@ namespace dawn_native {
         }
 
         SetScissorRectCmd* cmd = mAllocator->Allocate<SetScissorRectCmd>(Command::SetScissorRect);
-        new (cmd) SetScissorRectCmd;
         cmd->x = x;
         cmd->y = y;
         cmd->width = width;
@@ -135,7 +129,6 @@ namespace dawn_native {
         }
 
         SetIndexBufferCmd* cmd = mAllocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
-        new (cmd) SetIndexBufferCmd;
         cmd->buffer = buffer;
         cmd->offset = offset;
     }
@@ -156,13 +149,12 @@ namespace dawn_native {
 
         SetVertexBuffersCmd* cmd =
             mAllocator->Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);
-        new (cmd) SetVertexBuffersCmd;
         cmd->startSlot = startSlot;
         cmd->count = count;
 
         Ref<BufferBase>* cmdBuffers = mAllocator->AllocateData<Ref<BufferBase>>(count);
         for (size_t i = 0; i < count; ++i) {
-            new (&cmdBuffers[i]) Ref<BufferBase>(buffers[i]);
+            cmdBuffers[i] = buffers[i];
         }
 
         uint64_t* cmdOffsets = mAllocator->AllocateData<uint64_t>(count);

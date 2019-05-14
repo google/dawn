@@ -113,14 +113,26 @@ namespace dawn_native {
             static_assert(sizeof(E) == sizeof(uint32_t), "");
             static_assert(alignof(E) == alignof(uint32_t), "");
             static_assert(alignof(T) <= kMaxSupportedAlignment, "");
-            return reinterpret_cast<T*>(
+            T* result = reinterpret_cast<T*>(
                 Allocate(static_cast<uint32_t>(commandId), sizeof(T), alignof(T)));
+            if (!result) {
+                return nullptr;
+            }
+            new (result) T;
+            return result;
         }
 
         template <typename T>
         T* AllocateData(size_t count) {
             static_assert(alignof(T) <= kMaxSupportedAlignment, "");
-            return reinterpret_cast<T*>(AllocateData(sizeof(T) * count, alignof(T)));
+            T* result = reinterpret_cast<T*>(AllocateData(sizeof(T) * count, alignof(T)));
+            if (!result) {
+                return nullptr;
+            }
+            for (size_t i = 0; i < count; i++) {
+                new (result + i) T;
+            }
+            return result;
         }
 
       private:

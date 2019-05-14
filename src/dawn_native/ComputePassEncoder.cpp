@@ -44,7 +44,6 @@ namespace dawn_native {
         }
 
         DispatchCmd* dispatch = mAllocator->Allocate<DispatchCmd>(Command::Dispatch);
-        new (dispatch) DispatchCmd;
         dispatch->x = x;
         dispatch->y = y;
         dispatch->z = z;
@@ -58,7 +57,6 @@ namespace dawn_native {
 
         SetComputePipelineCmd* cmd =
             mAllocator->Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);
-        new (cmd) SetComputePipelineCmd;
         cmd->pipeline = pipeline;
     }
 
