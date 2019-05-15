@@ -45,9 +45,14 @@ namespace dawn_native {
         ~BufferBase();
 
         static BufferBase* MakeError(DeviceBase* device);
+        static BufferBase* MakeErrorMapped(DeviceBase* device,
+                                           uint64_t size,
+                                           uint8_t** mappedPointer);
 
         uint32_t GetSize() const;
         dawn::BufferUsageBit GetUsage() const;
+
+        MaybeError MapAtCreation(uint8_t** mappedPointer);
 
         MaybeError ValidateCanUseInSubmitNow() const;
 
@@ -73,6 +78,7 @@ namespace dawn_native {
         void DestroyInternal();
 
       private:
+        virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) = 0;
         virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data);
         virtual void MapReadAsyncImpl(uint32_t serial) = 0;
         virtual void MapWriteAsyncImpl(uint32_t serial) = 0;

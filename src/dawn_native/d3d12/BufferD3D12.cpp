@@ -160,6 +160,13 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
+    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
+        mWrittenMappedRange = {0, GetSize()};
+        ASSERT_SUCCESS(
+            mResource->Map(0, &mWrittenMappedRange, reinterpret_cast<void**>(mappedPointer)));
+        return {};
+    }
+
     void Buffer::MapReadAsyncImpl(uint32_t serial) {
         mWrittenMappedRange = {};
         D3D12_RANGE readRange = {0, GetSize()};

@@ -34,10 +34,13 @@ namespace dawn_native { namespace metal {
         void OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite);
 
       private:
+        // Dawn API
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
+
+        MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
 
         id<MTLBuffer> mMtlBuffer = nil;
     };

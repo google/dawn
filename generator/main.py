@@ -230,9 +230,34 @@ def as_cppType(name):
     else:
         return name.CamelCase()
 
+def convert_cType_to_cppType(typ, annotation, arg, indent=0):
+    if typ.category == 'native':
+        return arg
+    if annotation == 'value':
+        if typ.category == 'object':
+            return '{}::Acquire({})'.format(as_cppType(typ.name), arg)
+        elif typ.category == 'structure':
+            converted_members = [
+                convert_cType_to_cppType(
+                    member.type, member.annotation,
+                    '{}.{}'.format(arg, as_varName(member.name)),
+                    indent + 1)
+                for member in typ.members]
+
+            converted_members = [(' ' * 4) + m for m in converted_members ]
+            converted_members = ',\n'.join(converted_members)
+
+            return as_cppType(typ.name) + ' {\n' + converted_members + '\n}'
+        else:
+            return 'static_cast<{}>({})'.format(as_cppType(typ.name), arg)
+    else:
+        return 'reinterpret_cast<{} {}>({})'.format(as_cppType(typ.name), annotation, arg)
+
 def decorate(name, typ, arg):
     if arg.annotation == 'value':
         return typ + ' ' + name
+    elif arg.annotation == '*':
+        return typ + ' * ' + name
     elif arg.annotation == 'const*':
         return typ + ' const * ' + name
     elif arg.annotation == 'const*const*':
@@ -314,6 +339,7 @@ def get_renders_for_targets(api_params, wire_json, targets):
         'as_cProc': as_cProc,
         'as_cType': as_cType,
         'as_cppType': as_cppType,
+        'convert_cType_to_cppType': convert_cType_to_cppType,
         'as_varName': as_varName,
         'decorate': decorate,
     }

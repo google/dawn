@@ -184,11 +184,16 @@ namespace dawn_native { namespace null {
         : BufferBase(device, descriptor) {
         if (GetUsage() & (dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead |
                           dawn::BufferUsageBit::MapWrite)) {
-            mBackingData = std::unique_ptr<char[]>(new char[GetSize()]);
+            mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
         }
     }
 
     Buffer::~Buffer() {
+    }
+
+    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
+        *mappedPointer = mBackingData.get();
+        return {};
     }
 
     void Buffer::MapReadOperationCompleted(uint32_t serial, void* ptr, bool isWrite) {

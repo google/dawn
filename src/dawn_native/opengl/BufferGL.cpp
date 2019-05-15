@@ -35,6 +35,13 @@ namespace dawn_native { namespace opengl {
         return mBuffer;
     }
 
+    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
+        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
+        void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+        *mappedPointer = reinterpret_cast<uint8_t*>(data);
+        return {};
+    }
+
     MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glBufferSubData(GL_ARRAY_BUFFER, start, count, data);

@@ -213,6 +213,14 @@
     "char": {
         "category": "native"
     },
+    "create buffer mapped result": {
+        "category": "structure",
+        "members": [
+            {"name": "buffer", "type": "buffer"},
+            {"name": "data length", "type": "uint64_t"},
+            {"name": "data", "type": "uint8_t", "annotation": "*", "length": "data length"}
+        ]
+    },
     "color": {
         "category": "structure",
         "members": [
@@ -406,6 +414,13 @@
             {
                 "name": "create buffer",
                 "returns": "buffer",
+                "args": [
+                    {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "create buffer mapped",
+                "returns": "create buffer mapped result",
                 "args": [
                     {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"}
                 ]

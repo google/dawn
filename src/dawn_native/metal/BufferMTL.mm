@@ -47,6 +47,11 @@ namespace dawn_native { namespace metal {
         }
     }
 
+    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
+        *mappedPointer = reinterpret_cast<uint8_t*>([mMtlBuffer contents]);
+        return {};
+    }
+
     void Buffer::MapReadAsyncImpl(uint32_t serial) {
         MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapTracker();
         tracker->Track(this, serial, false);

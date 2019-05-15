@@ -41,10 +41,13 @@ namespace dawn_native { namespace vulkan {
         void TransitionUsageNow(VkCommandBuffer commands, dawn::BufferUsageBit usage);
 
       private:
+        // Dawn API
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
+
+        MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
 
         VkBuffer mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;

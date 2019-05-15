@@ -237,6 +237,30 @@ namespace dawn_native {
 
         return result;
     }
+    DawnCreateBufferMappedResult DeviceBase::CreateBufferMapped(
+        const BufferDescriptor* descriptor) {
+        BufferBase* buffer = nullptr;
+        uint8_t* data = nullptr;
+
+        if (ConsumedError(CreateBufferInternal(&buffer, descriptor)) ||
+            ConsumedError(buffer->MapAtCreation(&data))) {
+            // Map failed. Replace the buffer with an error buffer.
+            if (buffer != nullptr) {
+                delete buffer;
+            }
+            buffer = BufferBase::MakeErrorMapped(this, descriptor->size, &data);
+        }
+
+        ASSERT(buffer != nullptr);
+        ASSERT(data != nullptr);
+
+        DawnCreateBufferMappedResult result = {};
+        result.buffer = reinterpret_cast<DawnBuffer>(buffer);
+        result.data = data;
+        result.dataLength = descriptor->size;
+
+        return result;
+    }
     CommandEncoderBase* DeviceBase::CreateCommandEncoder() {
         return new CommandEncoderBase(this);
     }

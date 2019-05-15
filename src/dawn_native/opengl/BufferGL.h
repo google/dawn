@@ -31,11 +31,14 @@ namespace dawn_native { namespace opengl {
         GLuint GetHandle() const;
 
       private:
+        // Dawn API
         MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) override;
         void MapReadAsyncImpl(uint32_t serial) override;
         void MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
+
+        MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
 
         GLuint mBuffer = 0;
     };

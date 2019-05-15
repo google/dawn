@@ -188,6 +188,11 @@ namespace dawn_native { namespace vulkan {
         mLastUsage = usage;
     }
 
+    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
+        *mappedPointer = mMemoryAllocation.GetMappedPointer();
+        return {};
+    }
+
     void Buffer::MapReadAsyncImpl(uint32_t serial) {
         Device* device = ToBackend(GetDevice());
 

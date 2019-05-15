@@ -44,6 +44,8 @@ namespace dawn_native { namespace d3d12 {
         void UnmapImpl() override;
         void DestroyImpl() override;
 
+        virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
+
         ComPtr<ID3D12Resource> mResource;
         bool mFixedResourceState = false;
         dawn::BufferUsageBit mLastUsage = dawn::BufferUsageBit::None;

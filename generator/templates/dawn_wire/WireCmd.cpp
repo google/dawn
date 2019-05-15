@@ -152,7 +152,7 @@
 
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.
-    void {{Return}}{{name}}Serialize(const {{Return}}{{name}}{{Cmd}}& record, {{Return}}{{name}}Transfer* transfer,
+    DAWN_DECLARE_UNUSED void {{Return}}{{name}}Serialize(const {{Return}}{{name}}{{Cmd}}& record, {{Return}}{{name}}Transfer* transfer,
                            char** buffer
         {%- if record.has_dawn_object -%}
             , const ObjectIdProvider& provider
@@ -200,11 +200,12 @@
             }
         {% endfor %}
     }
+    DAWN_UNUSED_FUNC({{Return}}{{name}}Serialize);
 
     //* Deserializes `transfer` into `record` getting more serialized data from `buffer` and `size`
     //* if needed, using `allocator` to store pointed-to values and `resolver` to translate object
     //* Ids to actual objects.
-    DeserializeResult {{Return}}{{name}}Deserialize({{Return}}{{name}}{{Cmd}}* record, const {{Return}}{{name}}Transfer* transfer,
+    DAWN_DECLARE_UNUSED DeserializeResult {{Return}}{{name}}Deserialize({{Return}}{{name}}{{Cmd}}* record, const {{Return}}{{name}}Transfer* transfer,
                                           const char** buffer, size_t* size, DeserializeAllocator* allocator
         {%- if record.has_dawn_object -%}
             , const ObjectIdResolver& resolver
@@ -283,6 +284,7 @@
 
         return DeserializeResult::Success;
     }
+    DAWN_UNUSED_FUNC({{Return}}{{name}}Deserialize);
 {% endmacro %}
 
 {% macro write_command_serialization_methods(command, is_return) %}
