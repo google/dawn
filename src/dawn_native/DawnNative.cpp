@@ -99,4 +99,11 @@ namespace dawn_native {
         return mImpl->GetToggleInfo(toggleName);
     }
 
+    void Instance::EnableBackendValidation(bool enableBackendValidation) {
+        mImpl->EnableBackendValidation(enableBackendValidation);
+    }
+
+    bool Instance::IsBackendValidationEnabled() {
+        return mImpl->IsBackendValidationEnabled();
+    }
 }  // namespace dawn_native

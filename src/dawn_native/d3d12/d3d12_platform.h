@@ -19,9 +19,7 @@
 #include <dxgi1_4.h>
 #include <wrl.h>
 
-#if defined(DAWN_ENABLE_ASSERTS)
-#    include <dxgidebug.h>
-#endif  // defined(DAWN_ENABLE_ASSERTS)
+#include <dxgidebug.h>
 
 using Microsoft::WRL::ComPtr;
 
