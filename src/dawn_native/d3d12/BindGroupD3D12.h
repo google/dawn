@@ -29,22 +29,21 @@ namespace dawn_native { namespace d3d12 {
       public:
         BindGroup(Device* device, const BindGroupDescriptor* descriptor);
 
-        void RecordDescriptors(const DescriptorHeapHandle& cbvSrvUavHeapStart,
-                               uint32_t* cbvUavSrvHeapOffset,
-                               const DescriptorHeapHandle& samplerHeapStart,
-                               uint32_t* samplerHeapOffset,
-                               uint64_t serial,
-                               uint32_t indexInSubmit);
+        void AllocateDescriptors(const DescriptorHeapHandle& cbvSrvUavHeapStart,
+                                 uint32_t* cbvUavSrvHeapOffset,
+                                 const DescriptorHeapHandle& samplerHeapStart,
+                                 uint32_t* samplerHeapOffset);
         uint32_t GetCbvUavSrvHeapOffset() const;
         uint32_t GetSamplerHeapOffset() const;
-        uint64_t GetHeapSerial() const;
-        uint32_t GetIndexInSubmit() const;
+
+        bool TestAndSetCounted(uint64_t heapSerial, uint32_t indexInSubmit);
 
       private:
         uint32_t mCbvUavSrvHeapOffset;
         uint32_t mSamplerHeapOffset;
+
         uint64_t mHeapSerial = 0;
-        uint32_t mIndexInSubmit;
+        uint32_t mIndexInSubmit = 0;
     };
 
 }}  // namespace dawn_native::d3d12

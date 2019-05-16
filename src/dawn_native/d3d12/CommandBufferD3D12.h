@@ -30,11 +30,10 @@ namespace dawn_native {
 
 namespace dawn_native { namespace d3d12 {
 
+    class BindGroupStateTracker;
     class Device;
     class RenderPassDescriptorHeapTracker;
     class RenderPipeline;
-
-    struct BindGroupStateTracker;
 
     struct VertexBuffersInfo {
         // startSlot and endSlot indicate the range of dirty vertex buffers.
