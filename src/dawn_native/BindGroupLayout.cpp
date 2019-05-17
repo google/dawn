@@ -87,6 +87,11 @@ namespace dawn_native {
             mBindingInfo.visibilities[index] = binding.visibility;
             mBindingInfo.types[index] = binding.type;
 
+            if (binding.type == dawn::BindingType::DynamicUniformBuffer ||
+                binding.type == dawn::BindingType::DynamicStorageBuffer) {
+                mDynamicBufferCount++;
+            }
+
             ASSERT(!mBindingInfo.mask[index]);
             mBindingInfo.mask.set(index);
         }
@@ -120,6 +125,10 @@ namespace dawn_native {
     bool BindGroupLayoutBase::EqualityFunc::operator()(const BindGroupLayoutBase* a,
                                                        const BindGroupLayoutBase* b) const {
         return a->mBindingInfo == b->mBindingInfo;
+    }
+
+    uint32_t BindGroupLayoutBase::GetDynamicBufferCount() const {
+        return mDynamicBufferCount;
     }
 
 }  // namespace dawn_native

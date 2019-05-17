@@ -543,12 +543,14 @@ namespace dawn_native {
                 dawn::BindingType type = layoutInfo.types[i];
 
                 switch (type) {
-                    case dawn::BindingType::UniformBuffer: {
+                    case dawn::BindingType::UniformBuffer:
+                    case dawn::BindingType::DynamicUniformBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
                         tracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Uniform);
                     } break;
 
-                    case dawn::BindingType::StorageBuffer: {
+                    case dawn::BindingType::StorageBuffer:
+                    case dawn::BindingType::DynamicStorageBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
                         tracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Storage);
                     } break;
@@ -559,12 +561,6 @@ namespace dawn_native {
                     } break;
 
                     case dawn::BindingType::Sampler:
-                        break;
-
-                    // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset
-                    case dawn::BindingType::DynamicUniformBuffer:
-                    case dawn::BindingType::DynamicStorageBuffer:
-                        UNREACHABLE();
                         break;
                 }
             }
@@ -1034,6 +1030,9 @@ namespace dawn_native {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
+                    if (cmd->dynamicOffsetCount > 0) {
+                        mIterator.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
 
                     TrackBindGroupResourceUsage(cmd->group.Get(), &usageTracker);
                     persistentState.SetBindGroup(cmd->index, cmd->group.Get());
@@ -1149,6 +1148,9 @@ namespace dawn_native {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
+                    if (cmd->dynamicOffsetCount > 0) {
+                        mIterator.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
 
                     TrackBindGroupResourceUsage(cmd->group.Get(), &usageTracker);
                     persistentState.SetBindGroup(cmd->index, cmd->group.Get());

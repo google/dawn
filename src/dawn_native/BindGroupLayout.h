@@ -54,11 +54,14 @@ namespace dawn_native {
             bool operator()(const BindGroupLayoutBase* a, const BindGroupLayoutBase* b) const;
         };
 
+        uint32_t GetDynamicBufferCount() const;
+
       private:
         BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         LayoutBindingInfo mBindingInfo;
         bool mIsBlueprint = false;
+        uint32_t mDynamicBufferCount = 0;
     };
 
 }  // namespace dawn_native

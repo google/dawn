@@ -115,6 +115,9 @@ namespace dawn_native {
                 } break;
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
+                    if (cmd->dynamicOffsetCount > 0) {
+                        commands->NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
                     cmd->~SetBindGroupCmd();
                 } break;
                 case Command::SetIndexBuffer: {

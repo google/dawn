@@ -190,6 +190,7 @@ namespace dawn_native {
     struct SetBindGroupCmd {
         uint32_t index;
         Ref<BindGroupBase> group;
+        uint32_t dynamicOffsetCount;
     };
 
     struct SetIndexBufferCmd {

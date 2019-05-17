@@ -83,6 +83,8 @@ namespace dawn_native {
                                                BindGroupBase* group,
                                                uint32_t dynamicOffsetCount,
                                                const uint64_t* dynamicOffsets) {
+        const BindGroupLayoutBase* layout = group->GetLayout();
+
         if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
             mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(group))) {
             return;
@@ -93,15 +95,33 @@ namespace dawn_native {
             return;
         }
 
-        // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
-        if (dynamicOffsetCount != 0) {
-            mTopLevelEncoder->HandleError("Dynamic Buffer Offset not supported yet");
-            return;
+        // Dynamic offsets count must match the number required by the layout perfectly.
+        if (layout->GetDynamicBufferCount() != dynamicOffsetCount) {
+            mTopLevelEncoder->HandleError("dynamicOffset count mismatch");
+        }
+
+        for (uint32_t i = 0; i < dynamicOffsetCount; ++i) {
+            if (dynamicOffsets[i] % kMinDynamicBufferOffsetAlignment != 0) {
+                mTopLevelEncoder->HandleError("Dynamic Buffer Offset need to be aligned");
+                return;
+            }
+
+            BufferBinding bufferBinding = group->GetBindingAsBufferBinding(i);
+
+            if (dynamicOffsets[i] >= bufferBinding.size - bufferBinding.offset) {
+                mTopLevelEncoder->HandleError("dynamic offset out of bounds");
+                return;
+            }
         }
 
         SetBindGroupCmd* cmd = mAllocator->Allocate<SetBindGroupCmd>(Command::SetBindGroup);
         cmd->index = groupIndex;
         cmd->group = group;
+        cmd->dynamicOffsetCount = dynamicOffsetCount;
+        if (dynamicOffsetCount > 0) {
+            uint64_t* offsets = mAllocator->AllocateData<uint64_t>(cmd->dynamicOffsetCount);
+            memcpy(offsets, dynamicOffsets, dynamicOffsetCount * sizeof(uint64_t));
+        }
     }
 
     void ProgrammablePassEncoder::SetPushConstants(dawn::ShaderStageBit stages,

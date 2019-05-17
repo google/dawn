@@ -15,6 +15,7 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "common/Constants.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
 class BindGroupValidationTest : public ValidationTest {
@@ -445,4 +446,261 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutCache) {
 
     // Caching should cause these to be the same.
     ASSERT_EQ(layout1.Get(), layout2.Get());
+}
+
+constexpr uint32_t kBufferElementsCount = kMinDynamicBufferOffsetAlignment / sizeof(uint32_t) + 2;
+constexpr uint32_t kBufferSize = kBufferElementsCount * sizeof(uint32_t);
+
+class SetBindGroupValidationTest : public ValidationTest {
+  public:
+    void SetUp() override {
+        std::array<float, kBufferElementsCount> uniformData = {0};
+
+        uniformData[0] = 1.0;
+        uniformData[1] = 2.0;
+        uniformData[uniformData.size() - 2] = 5.0;
+        uniformData[uniformData.size() - 1] = 6.0;
+
+        dawn::BufferDescriptor bufferDescriptor;
+        bufferDescriptor.size = kBufferSize;
+        bufferDescriptor.usage = dawn::BufferUsageBit::Storage;
+
+        mUniformBuffer = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
+                                                     dawn::BufferUsageBit::Uniform);
+        mStorageBuffer = device.CreateBuffer(&bufferDescriptor);
+
+        mBindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+                      dawn::BindingType::DynamicUniformBuffer},
+                     {1, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+                      dawn::BindingType::DynamicStorageBuffer}});
+
+        mBindGroup = utils::MakeBindGroup(
+            device, mBindGroupLayout,
+            {{0, mUniformBuffer, 0, kBufferSize}, {1, mStorageBuffer, 0, kBufferSize}});
+    }
+    // Create objects to use as resources inside test bind groups.
+
+    dawn::BindGroup mBindGroup;
+    dawn::BindGroupLayout mBindGroupLayout;
+    dawn::Buffer mUniformBuffer;
+    dawn::Buffer mStorageBuffer;
+
+    dawn::RenderPipeline CreateRenderPipeline() {
+        dawn::ShaderModule vsModule =
+            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+                #version 450
+                void main() {
+                })");
+
+        dawn::ShaderModule fsModule =
+            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+                #version 450
+                layout(std140, set = 0, binding = 0) uniform uBuffer {
+                     vec2 value1;
+                };
+                layout(std140, set = 0, binding = 1) buffer SBuffer {
+                     vec2 value2;
+                } sBuffer;
+                layout(location = 0) out uvec4 fragColor;
+                void main() {
+                })");
+
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        pipelineDescriptor.cVertexStage.module = vsModule;
+        pipelineDescriptor.cFragmentStage.module = fsModule;
+        dawn::PipelineLayout pipelineLayout =
+            utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
+        pipelineDescriptor.layout = pipelineLayout;
+        return device.CreateRenderPipeline(&pipelineDescriptor);
+    }
+
+    dawn::ComputePipeline CreateComputePipeline() {
+        dawn::ShaderModule csModule =
+            utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+                #version 450
+                const uint kTileSize = 4;
+                const uint kInstances = 11;
+
+                layout(local_size_x = kTileSize, local_size_y = kTileSize, local_size_z = 1) in;
+                layout(std140, set = 0, binding = 0) uniform UniformBuffer {
+                    float value1;
+                };
+                layout(std140, set = 0, binding = 1) buffer SBuffer {
+                    float value2;
+                } dst;
+
+        void main() {
+        })");
+
+        dawn::ComputePipelineDescriptor csDesc;
+        dawn::PipelineLayout pipelineLayout =
+            utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
+        csDesc.layout = pipelineLayout;
+
+        dawn::PipelineStageDescriptor computeStage;
+        computeStage.module = csModule;
+        computeStage.entryPoint = "main";
+        csDesc.computeStage = &computeStage;
+
+        return device.CreateComputePipeline(&csDesc);
+    }
+};
+
+// This is the test case that should work.
+TEST_F(SetBindGroupValidationTest, Basic) {
+    std::array<uint64_t, 2> offsets = {256, 0};
+
+    // RenderPipeline SetBindGroup
+    {
+        dawn::RenderPipeline renderPipeline = CreateRenderPipeline();
+        DummyRenderPass renderPass(device);
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.SetPipeline(renderPipeline);
+        renderPassEncoder.SetBindGroup(0, mBindGroup, 2, offsets.data());
+        renderPassEncoder.Draw(3, 1, 0, 0);
+        renderPassEncoder.EndPass();
+        commandEncoder.Finish();
+    }
+
+    {
+        dawn::ComputePipeline computePipeline = CreateComputePipeline();
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetPipeline(computePipeline);
+        computePassEncoder.SetBindGroup(0, mBindGroup, 2, offsets.data());
+        computePassEncoder.Dispatch(1, 1, 1);
+        computePassEncoder.EndPass();
+        commandEncoder.Finish();
+    }
+}
+
+// Test cases that test dynamic offsets count mismatch with bind group layout.
+TEST_F(SetBindGroupValidationTest, DynamicOffsetsMismatch) {
+    std::array<uint64_t, 1> mismatchOffsets = {0};
+
+    // RenderPipeline SetBindGroup
+    {
+        dawn::RenderPipeline pipeline = CreateRenderPipeline();
+        DummyRenderPass renderPass(device);
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.SetPipeline(pipeline);
+        renderPassEncoder.SetBindGroup(0, mBindGroup, 1, mismatchOffsets.data());
+        renderPassEncoder.Draw(3, 1, 0, 0);
+        renderPassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+
+    {
+        dawn::ComputePipeline computePipeline = CreateComputePipeline();
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetPipeline(computePipeline);
+        computePassEncoder.SetBindGroup(0, mBindGroup, 1, mismatchOffsets.data());
+        computePassEncoder.Dispatch(1, 1, 1);
+        computePassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+}
+
+// Test cases that test dynamic offsets not aligned
+TEST_F(SetBindGroupValidationTest, DynamicOffsetsNotAligned) {
+    std::array<uint64_t, 2> notAlignedOffsets = {1, 2};
+
+    // RenderPipeline SetBindGroup
+    {
+        dawn::RenderPipeline pipeline = CreateRenderPipeline();
+        DummyRenderPass renderPass(device);
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.SetPipeline(pipeline);
+        renderPassEncoder.SetBindGroup(0, mBindGroup, 2, notAlignedOffsets.data());
+        renderPassEncoder.Draw(3, 1, 0, 0);
+        renderPassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+
+    // ComputePipeline SetBindGroup
+    {
+        dawn::ComputePipeline pipeline = CreateComputePipeline();
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetPipeline(pipeline);
+        computePassEncoder.SetBindGroup(0, mBindGroup, 2, notAlignedOffsets.data());
+        computePassEncoder.Dispatch(1, 1, 1);
+        computePassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+}
+
+// Test cases that test dynamic uniform buffer out of bound situation.
+TEST_F(SetBindGroupValidationTest, OutOfBoundDynamicUniformBuffer) {
+    std::array<uint64_t, 2> overFlowOffsets = {512, 0};
+
+    // RenderPipeline SetBindGroup
+    {
+        dawn::RenderPipeline pipeline = CreateRenderPipeline();
+        DummyRenderPass renderPass(device);
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.SetPipeline(pipeline);
+        renderPassEncoder.SetBindGroup(0, mBindGroup, 2, overFlowOffsets.data());
+        renderPassEncoder.Draw(3, 1, 0, 0);
+        renderPassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+
+    // ComputePipeline SetBindGroup
+    {
+        dawn::ComputePipeline pipeline = CreateComputePipeline();
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetPipeline(pipeline);
+        computePassEncoder.SetBindGroup(0, mBindGroup, 2, overFlowOffsets.data());
+        computePassEncoder.Dispatch(1, 1, 1);
+        computePassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+}
+
+// Test cases that test dynamic storage buffer out of bound situation.
+TEST_F(SetBindGroupValidationTest, OutOfBoundDynamicStorageBuffer) {
+    std::array<uint64_t, 2> overFlowOffsets = {0, 512};
+
+    // RenderPipeline SetBindGroup
+    {
+        dawn::RenderPipeline pipeline = CreateRenderPipeline();
+        DummyRenderPass renderPass(device);
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.SetPipeline(pipeline);
+        renderPassEncoder.SetBindGroup(0, mBindGroup, 2, overFlowOffsets.data());
+        renderPassEncoder.Draw(3, 1, 0, 0);
+        renderPassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+
+    // ComputePipeline SetBindGroup
+    {
+        dawn::ComputePipeline pipeline = CreateComputePipeline();
+
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetPipeline(pipeline);
+        computePassEncoder.SetBindGroup(0, mBindGroup, 2, overFlowOffsets.data());
+        computePassEncoder.Dispatch(1, 1, 1);
+        computePassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
 }
