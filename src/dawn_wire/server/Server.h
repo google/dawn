@@ -73,7 +73,7 @@ namespace dawn_wire { namespace server {
         void OnFenceCompletedValueUpdated(DawnFenceCompletionStatus status,
                                           FenceCompletionUserdata* userdata);
 
-#include "dawn_wire/server/ServerPrototypes_autogen.inl"
+#include "dawn_wire/server/ServerPrototypes_autogen.inc"
 
         CommandSerializer* mSerializer = nullptr;
         WireDeserializeAllocator mAllocator;

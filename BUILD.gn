@@ -404,11 +404,11 @@ dawn_generator("libdawn_wire_gen") {
     "dawn_wire/client/ApiProcs_autogen.h",
     "dawn_wire/client/ClientBase_autogen.h",
     "dawn_wire/client/ClientHandlers_autogen.cpp",
-    "dawn_wire/client/ClientPrototypes_autogen.inl",
+    "dawn_wire/client/ClientPrototypes_autogen.inc",
     "dawn_wire/server/ServerBase_autogen.h",
     "dawn_wire/server/ServerDoers_autogen.cpp",
     "dawn_wire/server/ServerHandlers_autogen.cpp",
-    "dawn_wire/server/ServerPrototypes_autogen.inl",
+    "dawn_wire/server/ServerPrototypes_autogen.inc",
   ]
 }
 
@@ -764,7 +764,7 @@ if (dawn_standalone) {
 
   dawn_sample("glTFViewer") {
     sources = [
-      "examples/glTFViewer/Camera.inl",
+      "examples/glTFViewer/Camera.inc",
       "examples/glTFViewer/glTFViewer.cpp",
     ]
     deps = [

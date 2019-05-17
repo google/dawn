@@ -42,7 +42,7 @@
 
 #include "GLFW/glfw3.h"
 
-#include "Camera.inl"
+#include "Camera.inc"
 
 namespace gl {
     enum {

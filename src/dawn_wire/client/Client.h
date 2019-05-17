@@ -43,7 +43,7 @@ namespace dawn_wire { namespace client {
         }
 
       private:
-#include "dawn_wire/client/ClientPrototypes_autogen.inl"
+#include "dawn_wire/client/ClientPrototypes_autogen.inc"
 
         Device* mDevice = nullptr;
         CommandSerializer* mSerializer = nullptr;
