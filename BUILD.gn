@@ -762,17 +762,6 @@ if (dawn_standalone) {
     ]
   }
 
-  dawn_sample("glTFViewer") {
-    sources = [
-      "examples/glTFViewer/Camera.inc",
-      "examples/glTFViewer/glTFViewer.cpp",
-    ]
-    deps = [
-      "third_party:glm",
-      "third_party:tiny_gltf_loader",
-    ]
-  }
-
   group("dawn_samples") {
     deps = [
       ":Animometer",
@@ -780,7 +769,6 @@ if (dawn_standalone) {
       ":ComputeBoids",
       ":CppHelloTriangle",
       ":CubeReflection",
-      ":glTFViewer",
     ]
   }
 }

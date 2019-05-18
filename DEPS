@@ -78,11 +78,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # Dependencies for samples: stb and GLM
-  'third_party/stb': {
-    'url': '{github_git}/nothings/stb.git@c7110588a4d24c4bb5155c184fbb77dd90b3116e',
-    'condition': 'dawn_standalone',
-  },
+  # Dependencies for samples: GLM
   'third_party/glm': {
     'url': '{github_git}/g-truc/glm.git@06f084063fd6d9aa2ef6904517650700ae47b63d',
     'condition': 'dawn_standalone',

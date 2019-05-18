@@ -353,45 +353,4 @@ if (dawn_standalone) {
 
     # GLM is header only but has too many files to list them.
   }
-
-  # STB
-  config("stb_public_config") {
-    include_dirs = [ "stb" ]
-
-    if (!is_msvc) {
-      cflags_cc = [ "-Wno-implicit-fallthrough" ]
-    }
-  }
-  source_set("stb") {
-    public_configs = [ ":stb_public_config" ]
-    sources = [
-      "stb/stb_image.h",
-    ]
-  }
-
-  # PicoJSON
-  config("picojson_public_config") {
-    include_dirs = [ "." ]
-  }
-  source_set("picojson") {
-    public_configs = [ ":picojson_public_config" ]
-    sources = [
-      "picojson/picojson.h",
-    ]
-  }
-
-  # Tiny glTF Loader
-  config("tiny_gltf_loader_public_config") {
-    include_dirs = [ "." ]
-  }
-  source_set("tiny_gltf_loader") {
-    public_configs = [ ":tiny_gltf_loader_public_config" ]
-    public_deps = [
-      ":picojson",
-      ":stb",
-    ]
-    sources = [
-      "tinygltfloader/tiny_gltf_loader.h",
-    ]
-  }
 }
