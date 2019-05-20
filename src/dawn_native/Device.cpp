@@ -51,6 +51,7 @@ namespace dawn_native {
         ContentLessObjectCache<ComputePipelineBase> computePipelines;
         ContentLessObjectCache<PipelineLayoutBase> pipelineLayouts;
         ContentLessObjectCache<RenderPipelineBase> renderPipelines;
+        ContentLessObjectCache<SamplerBase> samplers;
         ContentLessObjectCache<ShaderModuleBase> shaderModules;
     };
 
@@ -183,6 +184,27 @@ namespace dawn_native {
 
     void DeviceBase::UncacheRenderPipeline(RenderPipelineBase* obj) {
         size_t removedCount = mCaches->renderPipelines.erase(obj);
+        ASSERT(removedCount == 1);
+    }
+
+    ResultOrError<SamplerBase*> DeviceBase::GetOrCreateSampler(
+        const SamplerDescriptor* descriptor) {
+        SamplerBase blueprint(this, descriptor, true);
+
+        auto iter = mCaches->samplers.find(&blueprint);
+        if (iter != mCaches->samplers.end()) {
+            (*iter)->Reference();
+            return *iter;
+        }
+
+        SamplerBase* backendObj;
+        DAWN_TRY_ASSIGN(backendObj, CreateSamplerImpl(descriptor));
+        mCaches->samplers.insert(backendObj);
+        return backendObj;
+    }
+
+    void DeviceBase::UncacheSampler(SamplerBase* obj) {
+        size_t removedCount = mCaches->samplers.erase(obj);
         ASSERT(removedCount == 1);
     }
 
@@ -465,7 +487,7 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateSamplerInternal(SamplerBase** result,
                                                  const SamplerDescriptor* descriptor) {
         DAWN_TRY(ValidateSamplerDescriptor(this, descriptor));
-        DAWN_TRY_ASSIGN(*result, CreateSamplerImpl(descriptor));
+        DAWN_TRY_ASSIGN(*result, GetOrCreateSampler(descriptor));
         return {};
     }
 

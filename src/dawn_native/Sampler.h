@@ -28,12 +28,35 @@ namespace dawn_native {
 
     class SamplerBase : public ObjectBase {
       public:
-        SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor);
+        SamplerBase(DeviceBase* device,
+                    const SamplerDescriptor* descriptor,
+                    bool blueprint = false);
+        ~SamplerBase() override;
 
         static SamplerBase* MakeError(DeviceBase* device);
 
+        // Functors necessary for the unordered_set<SamplerBase*>-based cache.
+        struct HashFunc {
+            size_t operator()(const SamplerBase* module) const;
+        };
+        struct EqualityFunc {
+            bool operator()(const SamplerBase* a, const SamplerBase* b) const;
+        };
+
       private:
         SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
+        // TODO(cwallez@chromium.org): Store a crypto hash of the items instead?
+        dawn::AddressMode mAddressModeU;
+        dawn::AddressMode mAddressModeV;
+        dawn::AddressMode mAddressModeW;
+        dawn::FilterMode mMagFilter;
+        dawn::FilterMode mMinFilter;
+        dawn::FilterMode mMipmapFilter;
+        float mLodMinClamp;
+        float mLodMaxClamp;
+        dawn::CompareFunction mCompareFunction;
+        bool mIsBlueprint = false;
     };
 
 }  // namespace dawn_native

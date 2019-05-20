@@ -96,6 +96,9 @@ namespace dawn_native {
             const RenderPipelineDescriptor* descriptor);
         void UncacheRenderPipeline(RenderPipelineBase* obj);
 
+        ResultOrError<SamplerBase*> GetOrCreateSampler(const SamplerDescriptor* descriptor);
+        void UncacheSampler(SamplerBase* obj);
+
         ResultOrError<ShaderModuleBase*> GetOrCreateShaderModule(
             const ShaderModuleDescriptor* descriptor);
         void UncacheShaderModule(ShaderModuleBase* obj);

@@ -286,4 +286,61 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
     EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
 }
 
+// Test that Samplers are correctly deduplicated.
+TEST_P(ObjectCachingTest, SamplerDeduplication) {
+    dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    dawn::SamplerDescriptor sameSamplerDesc = utils::GetDefaultSamplerDescriptor();
+    dawn::Sampler sameSampler = device.CreateSampler(&sameSamplerDesc);
+
+    dawn::SamplerDescriptor otherSamplerDescAddressModeU = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescAddressModeU.addressModeU = dawn::AddressMode::ClampToEdge;
+    dawn::Sampler otherSamplerAddressModeU = device.CreateSampler(&otherSamplerDescAddressModeU);
+
+    dawn::SamplerDescriptor otherSamplerDescAddressModeV = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescAddressModeV.addressModeV = dawn::AddressMode::ClampToEdge;
+    dawn::Sampler otherSamplerAddressModeV = device.CreateSampler(&otherSamplerDescAddressModeV);
+
+    dawn::SamplerDescriptor otherSamplerDescAddressModeW = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescAddressModeW.addressModeW = dawn::AddressMode::ClampToEdge;
+    dawn::Sampler otherSamplerAddressModeW = device.CreateSampler(&otherSamplerDescAddressModeW);
+
+    dawn::SamplerDescriptor otherSamplerDescMagFilter = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescMagFilter.magFilter = dawn::FilterMode::Nearest;
+    dawn::Sampler otherSamplerMagFilter = device.CreateSampler(&otherSamplerDescMagFilter);
+
+    dawn::SamplerDescriptor otherSamplerDescMinFilter = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescMinFilter.minFilter = dawn::FilterMode::Nearest;
+    dawn::Sampler otherSamplerMinFilter = device.CreateSampler(&otherSamplerDescMinFilter);
+
+    dawn::SamplerDescriptor otherSamplerDescMipmapFilter = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescMipmapFilter.mipmapFilter = dawn::FilterMode::Nearest;
+    dawn::Sampler otherSamplerMipmapFilter = device.CreateSampler(&otherSamplerDescMipmapFilter);
+
+    dawn::SamplerDescriptor otherSamplerDescLodMinClamp = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescLodMinClamp.lodMinClamp += 1;
+    dawn::Sampler otherSamplerLodMinClamp = device.CreateSampler(&otherSamplerDescLodMinClamp);
+
+    dawn::SamplerDescriptor otherSamplerDescLodMaxClamp = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescLodMaxClamp.lodMaxClamp += 1;
+    dawn::Sampler otherSamplerLodMaxClamp = device.CreateSampler(&otherSamplerDescLodMaxClamp);
+
+    dawn::SamplerDescriptor otherSamplerDescCompareFunction = utils::GetDefaultSamplerDescriptor();
+    otherSamplerDescCompareFunction.compareFunction = dawn::CompareFunction::Always;
+    dawn::Sampler otherSamplerCompareFunction =
+        device.CreateSampler(&otherSamplerDescCompareFunction);
+
+    EXPECT_NE(sampler.Get(), otherSamplerAddressModeU.Get());
+    EXPECT_NE(sampler.Get(), otherSamplerAddressModeV.Get());
+    EXPECT_NE(sampler.Get(), otherSamplerAddressModeW.Get());
+    EXPECT_NE(sampler.Get(), otherSamplerMagFilter.Get());
+    EXPECT_NE(sampler.Get(), otherSamplerMinFilter.Get());
+    EXPECT_NE(sampler.Get(), otherSamplerMipmapFilter.Get());
+    EXPECT_NE(sampler.Get(), otherSamplerLodMinClamp.Get());
+    EXPECT_NE(sampler.Get(), otherSamplerLodMaxClamp.Get());
+    EXPECT_NE(sampler.Get(), otherSamplerCompareFunction.Get());
+    EXPECT_EQ(sampler.Get() == sameSampler.Get(), !UsesWire());
+}
+
 DAWN_INSTANTIATE_TEST(ObjectCachingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
