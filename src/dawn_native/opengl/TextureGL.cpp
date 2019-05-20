@@ -166,6 +166,18 @@ namespace dawn_native { namespace opengl {
         // The texture is not complete if it uses mipmapping and not all levels up to
         // MAX_LEVEL have been defined.
         glTexParameteri(mTarget, GL_TEXTURE_MAX_LEVEL, levels - 1);
+
+        if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+            static constexpr uint32_t MAX_TEXEL_SIZE = 16;
+            ASSERT(TextureFormatPixelSize(GetFormat()) <= MAX_TEXEL_SIZE);
+            GLubyte clearColor[MAX_TEXEL_SIZE];
+            std::fill(clearColor, clearColor + MAX_TEXEL_SIZE, 255);
+
+            // TODO(natlee@microsoft.com): clear all subresources
+            for (uint32_t i = 0; i < GL_TEXTURE_MAX_LEVEL; i++) {
+                glClearTexImage(mHandle, i, formatInfo.format, formatInfo.type, clearColor);
+            }
+        }
     }
 
     Texture::Texture(Device* device,

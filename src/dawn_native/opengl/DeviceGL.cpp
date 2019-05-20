@@ -33,6 +33,9 @@ namespace dawn_native { namespace opengl {
 
     Device::Device(AdapterBase* adapter, const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor) {
+        if (descriptor != nullptr) {
+            ApplyToggleOverrides(descriptor);
+        }
     }
 
     Device::~Device() {
