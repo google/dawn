@@ -120,16 +120,18 @@ namespace dawn_native { namespace vulkan {
             usedKnobs.renderDocCapture = true;
         }
 #endif
-#if defined(DAWN_ENABLE_ASSERTS)
-        if (mGlobalInfo.standardValidation) {
-            layersToRequest.push_back(kLayerNameLunargStandardValidation);
-            usedKnobs.standardValidation = true;
+
+        if (GetInstance()->IsBackendValidationEnabled()) {
+            if (mGlobalInfo.standardValidation) {
+                layersToRequest.push_back(kLayerNameLunargStandardValidation);
+                usedKnobs.standardValidation = true;
+            }
+            if (mGlobalInfo.debugReport) {
+                extensionsToRequest.push_back(kExtensionNameExtDebugReport);
+                usedKnobs.debugReport = true;
+            }
         }
-        if (mGlobalInfo.debugReport) {
-            extensionsToRequest.push_back(kExtensionNameExtDebugReport);
-            usedKnobs.debugReport = true;
-        }
-#endif
+
         // Always request all extensions used to create VkSurfaceKHR objects so that they are
         // always available for embedders looking to create VkSurfaceKHR on our VkInstance.
         if (mGlobalInfo.macosSurface) {
