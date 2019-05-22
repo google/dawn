@@ -17,7 +17,17 @@ for setting up this environment.
 
 ## D3D12
 
-Debug markers are currently unimplemented on D3D12 pending resolution of a licensing issue.
+Debug markers on D3D12 are implemented with the [PIX Event Runtime](https://blogs.msdn.microsoft.com/pix/winpixeventruntime/).
+
+To enable marker functionality, you must:
+1. Click the download link on https://www.nuget.org/packages/WinPixEventRuntime
+2. Rename the .nupkg file to a .zip extension, then extract its contents.
+3. Copy `bin\WinPixEventRuntime.dll` into the same directory as `libdawn_native.dll`.
+4. Launch your application.
+
+You may now call the debug marker APIs mentioned above and see them from your GPU debugging tool. When using your tool, it is supported to both launch your application with the debugger attached, or attach the debugger while your application is running.
+
+D3D12 debug markers have been tested with [Microsoft PIX](https://blogs.msdn.microsoft.com/pix/download/) and [Intel Graphics Frame Analyzer](https://software.intel.com/en-us/gpa/graphics-frame-analyzer).
 
 ## Vulkan
 

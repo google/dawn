@@ -35,6 +35,7 @@ namespace dawn_native { namespace d3d12 {
         ~PlatformFunctions();
 
         MaybeError LoadFunctions();
+        bool isPIXEventRuntimeLoaded() const;
 
         // Functions from d3d12.dll
         PFN_D3D12_CREATE_DEVICE d3d12CreateDevice = nullptr;
@@ -60,14 +61,32 @@ namespace dawn_native { namespace d3d12 {
         // Functions from d3d3compiler.dll
         pD3DCompile d3dCompile = nullptr;
 
+        // Functions from WinPixEventRuntime.dll
+        using PFN_PIX_END_EVENT_ON_COMMAND_LIST =
+            HRESULT(WINAPI*)(ID3D12GraphicsCommandList* commandList);
+
+        PFN_PIX_END_EVENT_ON_COMMAND_LIST pixEndEventOnCommandList = nullptr;
+
+        using PFN_PIX_BEGIN_EVENT_ON_COMMAND_LIST = HRESULT(
+            WINAPI*)(ID3D12GraphicsCommandList* commandList, UINT64 color, _In_ PCSTR formatString);
+
+        PFN_PIX_BEGIN_EVENT_ON_COMMAND_LIST pixBeginEventOnCommandList = nullptr;
+
+        using PFN_SET_MARKER_ON_COMMAND_LIST = HRESULT(
+            WINAPI*)(ID3D12GraphicsCommandList* commandList, UINT64 color, _In_ PCSTR formatString);
+
+        PFN_SET_MARKER_ON_COMMAND_LIST pixSetMarkerOnCommandList = nullptr;
+
       private:
         MaybeError LoadD3D12();
         MaybeError LoadDXGI();
         MaybeError LoadD3DCompiler();
+        void LoadPIXRuntime();
 
         DynamicLib mD3D12Lib;
         DynamicLib mDXGILib;
         DynamicLib mD3DCompilerLib;
+        DynamicLib mPIXEventRuntimeLib;
     };
 
 }}  // namespace dawn_native::d3d12
