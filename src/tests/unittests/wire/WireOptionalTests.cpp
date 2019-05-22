@@ -87,13 +87,13 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     colorStateDescriptor.writeMask = DAWN_COLOR_WRITE_MASK_ALL;
 
     // Create the input state
-    DawnInputStateDescriptor inputState;
-    inputState.nextInChain = nullptr;
-    inputState.indexFormat = DAWN_INDEX_FORMAT_UINT32;
-    inputState.numInputs = 0;
-    inputState.inputs = nullptr;
-    inputState.numAttributes = 0;
-    inputState.attributes = nullptr;
+    DawnVertexInputDescriptor vertexInput;
+    vertexInput.nextInChain = nullptr;
+    vertexInput.indexFormat = DAWN_INDEX_FORMAT_UINT32;
+    vertexInput.numBuffers = 0;
+    vertexInput.buffers = nullptr;
+    vertexInput.numAttributes = 0;
+    vertexInput.attributes = nullptr;
 
     // Create the rasterization state
     DawnRasterizationStateDescriptor rasterizationState;
@@ -152,7 +152,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
 
     pipelineDescriptor.sampleCount = 1;
     pipelineDescriptor.layout = layout;
-    pipelineDescriptor.inputState = &inputState;
+    pipelineDescriptor.vertexInput = &vertexInput;
     pipelineDescriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     pipelineDescriptor.rasterizationState = &rasterizationState;
 

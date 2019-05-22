@@ -597,7 +597,7 @@
             {"name": "format", "type": "vertex format"}
         ]
     },
-    "vertex input descriptor": {
+    "vertex buffer descriptor": {
         "category": "structure",
         "extensible": false,
         "members": [
@@ -606,15 +606,15 @@
             {"name": "step mode", "type": "input step mode"}
         ]
     },
-    "input state descriptor": {
+    "vertex input descriptor": {
         "category": "structure",
         "extensible": true,
         "members": [
             {"name": "index format", "type": "index format"},
             {"name": "num attributes", "type": "uint32_t"},
             {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "num attributes"},
-            {"name": "num inputs", "type": "uint32_t"},
-            {"name": "inputs", "type": "vertex input descriptor", "annotation": "const*", "length": "num inputs"}
+            {"name": "num buffers", "type": "uint32_t"},
+            {"name": "buffers", "type": "vertex buffer descriptor", "annotation": "const*", "length": "num buffers"}
         ]
     },
     "input step mode": {
@@ -864,7 +864,7 @@
             {"name": "layout", "type": "pipeline layout"},
             {"name": "vertex stage", "type": "pipeline stage descriptor", "annotation": "const*"},
             {"name": "fragment stage", "type": "pipeline stage descriptor", "annotation": "const*"},
-            {"name": "input state", "type": "input state descriptor", "annotation": "const*"},
+            {"name": "vertex input", "type": "vertex input descriptor", "annotation": "const*"},
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "rasterization state", "type": "rasterization state descriptor", "annotation": "const*"},
             {"name": "sample count", "type": "uint32_t"},

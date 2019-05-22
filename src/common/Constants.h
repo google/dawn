@@ -24,12 +24,13 @@ static constexpr uint32_t kMaxBindingsPerGroup = 16u;
 static constexpr uint32_t kMaxVertexAttributes = 16u;
 // Vulkan has a standalone limit named maxVertexInputAttributeOffset (2047u at least) for vertex
 // attribute offset. The limit might be meaningless because Vulkan has another limit named
-// maxVertexInputBindingStride (2048u at least). We use maxVertexAttributeEnd (2048u) here to verify
-// vertex attribute offset, which equals to maxOffset + smallest size of vertex format (char). We
-// may use maxVertexInputStride instead in future.
+// maxVertexInputBindingStride (2048u at least). We use maxVertexAttributeEnd (2048u) here to
+// verify vertex attribute offset, which equals to maxOffset + smallest size of vertex format
+// (char). We may use maxVertexInputBindingStride (maxVertexBufferStride below) instead to replace
+// maxVertexAttributeEnd in future.
 static constexpr uint32_t kMaxVertexAttributeEnd = 2048u;
-static constexpr uint32_t kMaxVertexInputs = 16u;
-static constexpr uint32_t kMaxVertexInputStride = 2048u;
+static constexpr uint32_t kMaxVertexBuffers = 16u;
+static constexpr uint32_t kMaxVertexBufferStride = 2048u;
 static constexpr uint32_t kNumStages = 3;
 static constexpr uint32_t kMaxColorAttachments = 4u;
 static constexpr uint32_t kTextureRowPitchAlignment = 256u;

@@ -804,7 +804,7 @@ namespace dawn_native { namespace metal {
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
                     size_t formatSize =
-                        IndexFormatSize(lastPipeline->GetInputStateDescriptor()->indexFormat);
+                        IndexFormatSize(lastPipeline->GetVertexInputDescriptor()->indexFormat);
 
                     // The index and instance count must be non-zero, otherwise no-op
                     if (draw->indexCount != 0 && draw->instanceCount != 0) {
@@ -926,8 +926,8 @@ namespace dawn_native { namespace metal {
                     auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
                     auto offsets = mCommands.NextData<uint64_t>(cmd->count);
 
-                    std::array<id<MTLBuffer>, kMaxVertexInputs> mtlBuffers;
-                    std::array<NSUInteger, kMaxVertexInputs> mtlOffsets;
+                    std::array<id<MTLBuffer>, kMaxVertexBuffers> mtlBuffers;
+                    std::array<NSUInteger, kMaxVertexBuffers> mtlOffsets;
 
                     // Perhaps an "array of vertex buffers(+offsets?)" should be
                     // a Dawn API primitive to avoid reconstructing this array?

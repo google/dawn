@@ -23,11 +23,11 @@
 
 namespace utils {
 
-    class ComboInputStateDescriptor : public dawn::InputStateDescriptor {
+    class ComboVertexInputDescriptor : public dawn::VertexInputDescriptor {
       public:
-        ComboInputStateDescriptor();
+        ComboVertexInputDescriptor();
 
-        std::array<dawn::VertexInputDescriptor, kMaxVertexInputs> cInputs;
+        std::array<dawn::VertexBufferDescriptor, kMaxVertexBuffers> cBuffers;
         std::array<dawn::VertexAttributeDescriptor, kMaxVertexAttributes> cAttributes;
     };
 
@@ -38,7 +38,7 @@ namespace utils {
         dawn::PipelineStageDescriptor cVertexStage;
         dawn::PipelineStageDescriptor cFragmentStage;
 
-        ComboInputStateDescriptor cInputState;
+        ComboVertexInputDescriptor cVertexInput;
         dawn::RasterizationStateDescriptor cRasterizationState;
         std::array<dawn::ColorStateDescriptor*, kMaxColorAttachments> cColorStates;
         dawn::DepthStencilStateDescriptor cDepthStencilState;

@@ -573,7 +573,6 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/DebugMarkerValidationTests.cpp",
     "src/tests/unittests/validation/DynamicStateCommandValidationTests.cpp",
     "src/tests/unittests/validation/FenceValidationTests.cpp",
-    "src/tests/unittests/validation/InputStateValidationTests.cpp",
     "src/tests/unittests/validation/PushConstantsValidationTests.cpp",
     "src/tests/unittests/validation/QueueSubmitValidationTests.cpp",
     "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
@@ -587,6 +586,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/ValidationTest.cpp",
     "src/tests/unittests/validation/ValidationTest.h",
     "src/tests/unittests/validation/VertexBufferValidationTests.cpp",
+    "src/tests/unittests/validation/VertexInputValidationTests.cpp",
     "src/tests/unittests/wire/WireArgumentTests.cpp",
     "src/tests/unittests/wire/WireBasicTests.cpp",
     "src/tests/unittests/wire/WireBufferMappingTests.cpp",
@@ -642,7 +642,6 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/DrawTests.cpp",
     "src/tests/end2end/FenceTests.cpp",
     "src/tests/end2end/IndexFormatTests.cpp",
-    "src/tests/end2end/InputStateTests.cpp",
     "src/tests/end2end/MultisampledRenderingTests.cpp",
     "src/tests/end2end/NonzeroTextureCreationTests.cpp",
     "src/tests/end2end/ObjectCachingTests.cpp",
@@ -654,6 +653,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/ScissorTests.cpp",
     "src/tests/end2end/TextureViewTests.cpp",
     "src/tests/end2end/VertexFormatTests.cpp",
+    "src/tests/end2end/VertexInputTests.cpp",
     "src/tests/end2end/ViewportOrientationTests.cpp",
   ]
 

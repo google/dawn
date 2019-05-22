@@ -307,7 +307,7 @@ namespace dawn_native { namespace metal {
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
         : RenderPipelineBase(device, descriptor),
-          mMtlIndexType(MTLIndexFormat(GetInputStateDescriptor()->indexFormat)),
+          mMtlIndexType(MTLIndexFormat(GetVertexInputDescriptor()->indexFormat)),
           mMtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())),
           mMtlFrontFace(MTLFrontFace(GetFrontFace())),
           mMtlCullMode(ToMTLCullMode(GetCullMode())) {
@@ -416,7 +416,7 @@ namespace dawn_native { namespace metal {
         }
 
         for (uint32_t i : IterateBitSet(GetInputsSetMask())) {
-            const VertexInputDescriptor& info = GetInput(i);
+            const VertexBufferDescriptor& info = GetInput(i);
 
             auto layoutDesc = [MTLVertexBufferLayoutDescriptor new];
             if (info.stride == 0) {

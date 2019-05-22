@@ -25,33 +25,33 @@ namespace dawn_native {
     // Helper functions
     namespace {
 
-        MaybeError ValidateVertexInputDescriptor(const VertexInputDescriptor* input,
-                                                 std::bitset<kMaxVertexInputs>* inputsSetMask) {
-            DAWN_TRY(ValidateInputStepMode(input->stepMode));
-            if (input->inputSlot >= kMaxVertexInputs) {
-                return DAWN_VALIDATION_ERROR("Setting input out of bounds");
+        MaybeError ValidateVertexBufferDescriptor(const VertexBufferDescriptor* buffer,
+                                                  std::bitset<kMaxVertexBuffers>* inputsSetMask) {
+            DAWN_TRY(ValidateInputStepMode(buffer->stepMode));
+            if (buffer->inputSlot >= kMaxVertexBuffers) {
+                return DAWN_VALIDATION_ERROR("Setting vertex buffer out of bounds");
             }
-            if (input->stride > kMaxVertexInputStride) {
+            if (buffer->stride > kMaxVertexBufferStride) {
                 return DAWN_VALIDATION_ERROR("Setting input stride out of bounds");
             }
-            if ((*inputsSetMask)[input->inputSlot]) {
-                return DAWN_VALIDATION_ERROR("Setting already set input");
+            if ((*inputsSetMask)[buffer->inputSlot]) {
+                return DAWN_VALIDATION_ERROR("Setting already set vertex buffer");
             }
 
-            inputsSetMask->set(input->inputSlot);
+            inputsSetMask->set(buffer->inputSlot);
             return {};
         }
 
         MaybeError ValidateVertexAttributeDescriptor(
             const VertexAttributeDescriptor* attribute,
-            const std::bitset<kMaxVertexInputs>* inputsSetMask,
+            const std::bitset<kMaxVertexBuffers>* inputsSetMask,
             std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateVertexFormat(attribute->format));
 
             if (attribute->shaderLocation >= kMaxVertexAttributes) {
                 return DAWN_VALIDATION_ERROR("Setting attribute out of bounds");
             }
-            if (attribute->inputSlot >= kMaxVertexInputs) {
+            if (attribute->inputSlot >= kMaxVertexBuffers) {
                 return DAWN_VALIDATION_ERROR("Binding slot out of bounds");
             }
             ASSERT(kMaxVertexAttributeEnd >= VertexFormatSize(attribute->format));
@@ -70,24 +70,24 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateInputStateDescriptor(
-            const InputStateDescriptor* descriptor,
-            std::bitset<kMaxVertexInputs>* inputsSetMask,
+        MaybeError ValidateVertexInputDescriptor(
+            const VertexInputDescriptor* descriptor,
+            std::bitset<kMaxVertexBuffers>* inputsSetMask,
             std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             if (descriptor->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
             DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
 
-            if (descriptor->numInputs > kMaxVertexInputs) {
+            if (descriptor->numBuffers > kMaxVertexBuffers) {
                 return DAWN_VALIDATION_ERROR("Vertex Inputs number exceeds maximum");
             }
             if (descriptor->numAttributes > kMaxVertexAttributes) {
                 return DAWN_VALIDATION_ERROR("Vertex Attributes number exceeds maximum");
             }
 
-            for (uint32_t i = 0; i < descriptor->numInputs; ++i) {
-                DAWN_TRY(ValidateVertexInputDescriptor(&descriptor->inputs[i], inputsSetMask));
+            for (uint32_t i = 0; i < descriptor->numBuffers; ++i) {
+                DAWN_TRY(ValidateVertexBufferDescriptor(&descriptor->buffers[i], inputsSetMask));
             }
 
             for (uint32_t i = 0; i < descriptor->numAttributes; ++i) {
@@ -262,14 +262,14 @@ namespace dawn_native {
 
         DAWN_TRY(device->ValidateObject(descriptor->layout));
 
-        if (descriptor->inputState == nullptr) {
+        if (descriptor->vertexInput == nullptr) {
             return DAWN_VALIDATION_ERROR("Input state must not be null");
         }
 
-        std::bitset<kMaxVertexInputs> inputsSetMask;
+        std::bitset<kMaxVertexBuffers> inputsSetMask;
         std::bitset<kMaxVertexAttributes> attributesSetMask;
-        DAWN_TRY(ValidateInputStateDescriptor(descriptor->inputState, &inputsSetMask,
-                                              &attributesSetMask));
+        DAWN_TRY(ValidateVertexInputDescriptor(descriptor->vertexInput, &inputsSetMask,
+                                               &attributesSetMask));
         DAWN_TRY(ValidatePrimitiveTopology(descriptor->primitiveTopology));
         DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->vertexStage,
                                                  descriptor->layout, dawn::ShaderStage::Vertex));
@@ -334,7 +334,7 @@ namespace dawn_native {
         : PipelineBase(device,
                        descriptor->layout,
                        dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment),
-          mInputState(*descriptor->inputState),
+          mVertexInput(*descriptor->vertexInput),
           mHasDepthStencilAttachment(descriptor->depthStencilState != nullptr),
           mPrimitiveTopology(descriptor->primitiveTopology),
           mRasterizationState(*descriptor->rasterizationState),
@@ -345,16 +345,16 @@ namespace dawn_native {
           mFragmentEntryPoint(descriptor->fragmentStage->entryPoint),
           mIsBlueprint(blueprint) {
         uint32_t location = 0;
-        for (uint32_t i = 0; i < mInputState.numAttributes; ++i) {
-            location = mInputState.attributes[i].shaderLocation;
+        for (uint32_t i = 0; i < mVertexInput.numAttributes; ++i) {
+            location = mVertexInput.attributes[i].shaderLocation;
             mAttributesSetMask.set(location);
-            mAttributeInfos[location] = mInputState.attributes[i];
+            mAttributeInfos[location] = mVertexInput.attributes[i];
         }
         uint32_t slot = 0;
-        for (uint32_t i = 0; i < mInputState.numInputs; ++i) {
-            slot = mInputState.inputs[i].inputSlot;
+        for (uint32_t i = 0; i < mVertexInput.numBuffers; ++i) {
+            slot = mVertexInput.buffers[i].inputSlot;
             mInputsSetMask.set(slot);
-            mInputInfos[slot] = mInputState.inputs[i];
+            mInputInfos[slot] = mVertexInput.buffers[i];
         }
 
         if (mHasDepthStencilAttachment) {
@@ -405,9 +405,9 @@ namespace dawn_native {
         }
     }
 
-    const InputStateDescriptor* RenderPipelineBase::GetInputStateDescriptor() const {
+    const VertexInputDescriptor* RenderPipelineBase::GetVertexInputDescriptor() const {
         ASSERT(!IsError());
-        return &mInputState;
+        return &mVertexInput;
     }
 
     const std::bitset<kMaxVertexAttributes>& RenderPipelineBase::GetAttributesSetMask() const {
@@ -421,12 +421,12 @@ namespace dawn_native {
         return mAttributeInfos[location];
     }
 
-    const std::bitset<kMaxVertexInputs>& RenderPipelineBase::GetInputsSetMask() const {
+    const std::bitset<kMaxVertexBuffers>& RenderPipelineBase::GetInputsSetMask() const {
         ASSERT(!IsError());
         return mInputsSetMask;
     }
 
-    const VertexInputDescriptor& RenderPipelineBase::GetInput(uint32_t slot) const {
+    const VertexBufferDescriptor& RenderPipelineBase::GetInput(uint32_t slot) const {
         ASSERT(!IsError());
         ASSERT(mInputsSetMask[slot]);
         return mInputInfos[slot];
@@ -561,11 +561,11 @@ namespace dawn_native {
 
         HashCombine(&hash, pipeline->mInputsSetMask);
         for (uint32_t i : IterateBitSet(pipeline->mInputsSetMask)) {
-            const VertexInputDescriptor& desc = pipeline->GetInput(i);
+            const VertexBufferDescriptor& desc = pipeline->GetInput(i);
             HashCombine(&hash, desc.inputSlot, desc.stride, desc.stepMode);
         }
 
-        HashCombine(&hash, pipeline->mInputState.indexFormat);
+        HashCombine(&hash, pipeline->mVertexInput.indexFormat);
 
         // Hash rasterization state
         {
@@ -660,15 +660,15 @@ namespace dawn_native {
         }
 
         for (uint32_t i : IterateBitSet(a->mInputsSetMask)) {
-            const VertexInputDescriptor& descA = a->GetInput(i);
-            const VertexInputDescriptor& descB = b->GetInput(i);
+            const VertexBufferDescriptor& descA = a->GetInput(i);
+            const VertexBufferDescriptor& descB = b->GetInput(i);
             if (descA.inputSlot != descB.inputSlot || descA.stride != descB.stride ||
                 descA.stepMode != descB.stepMode) {
                 return false;
             }
         }
 
-        if (a->mInputState.indexFormat != b->mInputState.indexFormat) {
+        if (a->mVertexInput.indexFormat != b->mVertexInput.indexFormat) {
             return false;
         }
 

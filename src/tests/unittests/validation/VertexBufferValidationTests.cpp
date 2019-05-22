@@ -45,18 +45,18 @@ class VertexBufferValidationTest : public ValidationTest {
             return buffers;
         }
 
-        dawn::ShaderModule MakeVertexShader(unsigned int numInputs) {
+        dawn::ShaderModule MakeVertexShader(unsigned int numBuffers) {
             std::ostringstream vs;
             vs << "#version 450\n";
-            for (unsigned int i = 0; i < numInputs; ++i) {
+            for (unsigned int i = 0; i < numBuffers; ++i) {
                 vs << "layout(location = " << i << ") in vec3 a_position" << i << ";\n";
             }
             vs << "void main() {\n";
 
             vs << "gl_Position = vec4(";
-            for (unsigned int i = 0; i < numInputs; ++i) {
+            for (unsigned int i = 0; i < numBuffers; ++i) {
                 vs << "a_position" << i;
-                if (i != numInputs - 1) {
+                if (i != numBuffers - 1) {
                     vs << " + ";
                 }
             }
@@ -68,19 +68,19 @@ class VertexBufferValidationTest : public ValidationTest {
         }
 
         dawn::RenderPipeline MakeRenderPipeline(const dawn::ShaderModule& vsModule,
-                                                unsigned int numInputs) {
+                                                unsigned int numBuffers) {
             utils::ComboRenderPipelineDescriptor descriptor(device);
             descriptor.cVertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
 
-            for (unsigned int i = 0; i < numInputs; ++i) {
-                descriptor.cInputState.cAttributes[i].shaderLocation = i;
-                descriptor.cInputState.cAttributes[i].inputSlot = i;
-                descriptor.cInputState.cAttributes[i].format = dawn::VertexFormat::Float3;
-                descriptor.cInputState.cInputs[i].inputSlot = i;
+            for (unsigned int i = 0; i < numBuffers; ++i) {
+                descriptor.cVertexInput.cAttributes[i].shaderLocation = i;
+                descriptor.cVertexInput.cAttributes[i].inputSlot = i;
+                descriptor.cVertexInput.cAttributes[i].format = dawn::VertexFormat::Float3;
+                descriptor.cVertexInput.cBuffers[i].inputSlot = i;
             }
-            descriptor.cInputState.numInputs = numInputs;
-            descriptor.cInputState.numAttributes = numInputs;
+            descriptor.cVertexInput.numBuffers = numBuffers;
+            descriptor.cVertexInput.numAttributes = numBuffers;
 
             return device.CreateRenderPipeline(&descriptor);
         }
@@ -88,7 +88,7 @@ class VertexBufferValidationTest : public ValidationTest {
         dawn::ShaderModule fsModule;
 };
 
-TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
+TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     DummyRenderPass renderPass(device);
     auto vsModule2 = MakeVertexShader(2);
     auto vsModule1 = MakeVertexShader(1);
@@ -123,7 +123,7 @@ TEST_F(VertexBufferValidationTest, VertexInputsInheritedBetweenPipelines) {
     encoder.Finish();
 }
 
-TEST_F(VertexBufferValidationTest, VertexInputsNotInheritedBetweenRendePasses) {
+TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) {
     DummyRenderPass renderPass(device);
     auto vsModule2 = MakeVertexShader(2);
     auto vsModule1 = MakeVertexShader(1);

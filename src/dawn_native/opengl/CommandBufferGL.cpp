@@ -210,8 +210,8 @@ namespace dawn_native { namespace opengl {
         };
 
         // Vertex buffers and index buffers are implemented as part of an OpenGL VAO that
-        // corresponds to an InputState. On the contrary in Dawn they are part of the global state.
-        // This means that we have to re-apply these buffers on an InputState change.
+        // corresponds to an VertexInput. On the contrary in Dawn they are part of the global state.
+        // This means that we have to re-apply these buffers on an VertexInput change.
         class InputBufferTracker {
           public:
             void OnSetIndexBuffer(BufferBase* buffer) {
@@ -230,7 +230,7 @@ namespace dawn_native { namespace opengl {
                 }
 
                 // Use 64 bit masks and make sure there are no shift UB
-                static_assert(kMaxVertexInputs <= 8 * sizeof(unsigned long long) - 1, "");
+                static_assert(kMaxVertexBuffers <= 8 * sizeof(unsigned long long) - 1, "");
                 mDirtyVertexBuffers |= ((1ull << count) - 1ull) << startSlot;
             }
 
@@ -286,9 +286,9 @@ namespace dawn_native { namespace opengl {
             bool mIndexBufferDirty = false;
             Buffer* mIndexBuffer = nullptr;
 
-            std::bitset<kMaxVertexInputs> mDirtyVertexBuffers;
-            std::array<Buffer*, kMaxVertexInputs> mVertexBuffers;
-            std::array<uint64_t, kMaxVertexInputs> mVertexBufferOffsets;
+            std::bitset<kMaxVertexBuffers> mDirtyVertexBuffers;
+            std::array<Buffer*, kMaxVertexBuffers> mVertexBuffers;
+            std::array<uint64_t, kMaxVertexBuffers> mVertexBufferOffsets;
 
             RenderPipelineBase* mLastPipeline = nullptr;
         };
@@ -772,7 +772,7 @@ namespace dawn_native { namespace opengl {
                     inputBuffers.Apply();
 
                     dawn::IndexFormat indexFormat =
-                        lastPipeline->GetInputStateDescriptor()->indexFormat;
+                        lastPipeline->GetVertexInputDescriptor()->indexFormat;
                     size_t formatSize = IndexFormatSize(indexFormat);
                     GLenum formatType = IndexFormatType(indexFormat);
 

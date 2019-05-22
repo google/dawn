@@ -653,7 +653,7 @@ namespace dawn_native { namespace d3d12 {
         commandList->IASetVertexBuffers(startSlot, count,
                                         &vertexBuffersInfo->d3d12BufferViews[startSlot]);
 
-        vertexBuffersInfo->startSlot = kMaxVertexInputs;
+        vertexBuffersInfo->startSlot = kMaxVertexBuffers;
         vertexBuffersInfo->endSlot = 0;
     }
 
@@ -893,7 +893,7 @@ namespace dawn_native { namespace d3d12 {
                     // this will break if the pipeline is changed for one with a different index
                     // format after SetIndexBuffer
                     bufferView.Format =
-                        DXGIIndexFormat(lastPipeline->GetInputStateDescriptor()->indexFormat);
+                        DXGIIndexFormat(lastPipeline->GetVertexInputDescriptor()->indexFormat);
 
                     commandList->IASetIndexBuffer(&bufferView);
                 } break;

@@ -575,7 +575,7 @@ namespace dawn_native { namespace vulkan {
                     // and rebind if needed on pipeline change
                     ASSERT(lastPipeline != nullptr);
                     VkIndexType indexType =
-                        VulkanIndexType(lastPipeline->GetInputStateDescriptor()->indexFormat);
+                        VulkanIndexType(lastPipeline->GetVertexInputDescriptor()->indexFormat);
                     device->fn.CmdBindIndexBuffer(
                         commands, indexBuffer, static_cast<VkDeviceSize>(cmd->offset), indexType);
                 } break;
@@ -613,8 +613,8 @@ namespace dawn_native { namespace vulkan {
                     auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
                     auto offsets = mCommands.NextData<uint64_t>(cmd->count);
 
-                    std::array<VkBuffer, kMaxVertexInputs> vkBuffers;
-                    std::array<VkDeviceSize, kMaxVertexInputs> vkOffsets;
+                    std::array<VkBuffer, kMaxVertexBuffers> vkBuffers;
+                    std::array<VkDeviceSize, kMaxVertexBuffers> vkOffsets;
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
                         Buffer* buffer = ToBackend(buffers[i].Get());

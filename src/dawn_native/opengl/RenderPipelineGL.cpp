@@ -182,7 +182,7 @@ namespace dawn_native { namespace opengl {
         modules[dawn::ShaderStage::Fragment] = ToBackend(descriptor->fragmentStage->module);
 
         PipelineGL::Initialize(ToBackend(GetLayout()), modules);
-        CreateVAOForInputState(descriptor->inputState);
+        CreateVAOForVertexInput(descriptor->vertexInput);
     }
 
     RenderPipeline::~RenderPipeline() {
@@ -194,7 +194,7 @@ namespace dawn_native { namespace opengl {
         return mGlPrimitiveTopology;
     }
 
-    void RenderPipeline::CreateVAOForInputState(const InputStateDescriptor* inputState) {
+    void RenderPipeline::CreateVAOForVertexInput(const VertexInputDescriptor* vertexInput) {
         glGenVertexArrays(1, &mVertexArrayObject);
         glBindVertexArray(mVertexArrayObject);
         for (uint32_t location : IterateBitSet(GetAttributesSetMask())) {

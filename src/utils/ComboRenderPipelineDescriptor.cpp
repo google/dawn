@@ -18,21 +18,21 @@
 
 namespace utils {
 
-    ComboInputStateDescriptor::ComboInputStateDescriptor() {
-        dawn::InputStateDescriptor* descriptor = this;
+    ComboVertexInputDescriptor::ComboVertexInputDescriptor() {
+        dawn::VertexInputDescriptor* descriptor = this;
 
         descriptor->indexFormat = dawn::IndexFormat::Uint32;
 
-        // Fill the default values for vertexInput.
-        descriptor->numInputs = 0;
-        dawn::VertexInputDescriptor vertexInput;
-        vertexInput.inputSlot = 0;
-        vertexInput.stride = 0;
-        vertexInput.stepMode = dawn::InputStepMode::Vertex;
-        for (uint32_t i = 0; i < kMaxVertexInputs; ++i) {
-            cInputs[i] = vertexInput;
+        // Fill the default values for vertexBuffer.
+        descriptor->numBuffers = 0;
+        dawn::VertexBufferDescriptor vertexBuffer;
+        vertexBuffer.inputSlot = 0;
+        vertexBuffer.stride = 0;
+        vertexBuffer.stepMode = dawn::InputStepMode::Vertex;
+        for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
+            cBuffers[i] = vertexBuffer;
         }
-        descriptor->inputs = &cInputs[0];
+        descriptor->buffers = &cBuffers[0];
 
         // Fill the default values for vertexAttribute.
         descriptor->numAttributes = 0;
@@ -66,7 +66,7 @@ namespace utils {
         }
 
         // Set defaults for the input state descriptors.
-        descriptor->inputState = &cInputState;
+        descriptor->vertexInput = &cVertexInput;
 
         // Set defaults for the rasterization state descriptor.
         {

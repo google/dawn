@@ -17,15 +17,15 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
-class InputStateTest : public ValidationTest {
-    protected:
-      void CreatePipeline(bool success,
-                          const utils::ComboInputStateDescriptor& state,
-                          std::string vertexSource) {
-          dawn::ShaderModule vsModule =
-              utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
-          dawn::ShaderModule fsModule =
-              utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+class VertexInputTest : public ValidationTest {
+  protected:
+    void CreatePipeline(bool success,
+                        const utils::ComboVertexInputDescriptor& state,
+                        std::string vertexSource) {
+        dawn::ShaderModule vsModule =
+            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
+        dawn::ShaderModule fsModule =
+            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
@@ -33,23 +33,23 @@ class InputStateTest : public ValidationTest {
                 }
             )");
 
-          utils::ComboRenderPipelineDescriptor descriptor(device);
-          descriptor.cVertexStage.module = vsModule;
-          descriptor.cFragmentStage.module = fsModule;
-          descriptor.inputState = &state;
-          descriptor.cColorStates[0]->format = dawn::TextureFormat::R8G8B8A8Unorm;
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.vertexInput = &state;
+        descriptor.cColorStates[0]->format = dawn::TextureFormat::R8G8B8A8Unorm;
 
-          if (!success) {
-              ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
-          } else {
-              device.CreateRenderPipeline(&descriptor);
-          }
-      }
+        if (!success) {
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+        } else {
+            device.CreateRenderPipeline(&descriptor);
+        }
+    }
 };
 
 // Check an empty input state is valid
-TEST_F(InputStateTest, EmptyIsOk) {
-    utils::ComboInputStateDescriptor state;
+TEST_F(VertexInputTest, EmptyIsOk) {
+    utils::ComboVertexInputDescriptor state;
     CreatePipeline(true, state, R"(
         #version 450
         void main() {
@@ -58,11 +58,11 @@ TEST_F(InputStateTest, EmptyIsOk) {
     )");
 }
 
-// Check validation that pipeline vertex inputs are backed by attributes in the input state
-TEST_F(InputStateTest, PipelineCompatibility) {
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
-    state.cInputs[0].stride = 2 * sizeof(float);
+// Check validation that pipeline vertex buffers are backed by attributes in the vertex input
+TEST_F(VertexInputTest, PipelineCompatibility) {
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
+    state.cBuffers[0].stride = 2 * sizeof(float);
     state.numAttributes = 2;
     state.cAttributes[1].shaderLocation = 1;
     state.cAttributes[1].offset = sizeof(float);
@@ -77,7 +77,7 @@ TEST_F(InputStateTest, PipelineCompatibility) {
         }
     )");
 
-    // Check it is valid for the pipeline to use a subset of the InputState
+    // Check it is valid for the pipeline to use a subset of the VertexInput
     CreatePipeline(true, state, R"(
         #version 450
         layout(location = 0) in vec4 a;
@@ -97,10 +97,10 @@ TEST_F(InputStateTest, PipelineCompatibility) {
 }
 
 // Test that a stride of 0 is valid
-TEST_F(InputStateTest, StrideZero) {
+TEST_F(VertexInputTest, StrideZero) {
     // Works ok without attributes
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
     CreatePipeline(true, state, R"(
         #version 450
         void main() {
@@ -120,10 +120,10 @@ TEST_F(InputStateTest, StrideZero) {
 }
 
 // Test that we cannot set an already set input
-TEST_F(InputStateTest, AlreadySetInput) {
+TEST_F(VertexInputTest, AlreadySetInput) {
     // Control case
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
     CreatePipeline(true, state, R"(
         #version 450
         void main() {
@@ -132,7 +132,7 @@ TEST_F(InputStateTest, AlreadySetInput) {
     )");
 
     // Oh no, input 0 is set twice
-    state.numInputs = 2;
+    state.numBuffers = 2;
     CreatePipeline(false, state, R"(
         #version 450
         void main() {
@@ -142,11 +142,11 @@ TEST_F(InputStateTest, AlreadySetInput) {
 }
 
 // Check out of bounds condition on input slot
-TEST_F(InputStateTest, SetInputSlotOutOfBounds) {
+TEST_F(VertexInputTest, SetInputSlotOutOfBounds) {
     // Control case, setting last input slot
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
-    state.cInputs[0].inputSlot = kMaxVertexInputs - 1;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
+    state.cBuffers[0].inputSlot = kMaxVertexBuffers - 1;
     CreatePipeline(true, state, R"(
         #version 450
         void main() {
@@ -155,7 +155,7 @@ TEST_F(InputStateTest, SetInputSlotOutOfBounds) {
     )");
 
     // Test input slot OOB
-    state.cInputs[0].inputSlot = kMaxVertexInputs;
+    state.cBuffers[0].inputSlot = kMaxVertexBuffers;
     CreatePipeline(false, state, R"(
         #version 450
         void main() {
@@ -165,11 +165,11 @@ TEST_F(InputStateTest, SetInputSlotOutOfBounds) {
 }
 
 // Check out of bounds condition on input stride
-TEST_F(InputStateTest, SetInputStrideOutOfBounds) {
+TEST_F(VertexInputTest, SetInputStrideOutOfBounds) {
     // Control case, setting max input stride
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
-    state.cInputs[0].stride = kMaxVertexInputStride;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
+    state.cBuffers[0].stride = kMaxVertexBufferStride;
     CreatePipeline(true, state, R"(
         #version 450
         void main() {
@@ -178,7 +178,7 @@ TEST_F(InputStateTest, SetInputStrideOutOfBounds) {
     )");
 
     // Test input stride OOB
-    state.cInputs[0].stride = kMaxVertexInputStride + 1;
+    state.cBuffers[0].stride = kMaxVertexBufferStride + 1;
     CreatePipeline(false, state, R"(
         #version 450
         void main() {
@@ -188,10 +188,10 @@ TEST_F(InputStateTest, SetInputStrideOutOfBounds) {
 }
 
 // Test that we cannot set an already set attribute
-TEST_F(InputStateTest, AlreadySetAttribute) {
+TEST_F(VertexInputTest, AlreadySetAttribute) {
     // Control case, setting last attribute
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
     state.numAttributes = 1;
     CreatePipeline(true, state, R"(
         #version 450
@@ -211,10 +211,10 @@ TEST_F(InputStateTest, AlreadySetAttribute) {
 }
 
 // Check out of bounds condition on attribute shader location
-TEST_F(InputStateTest, SetAttributeLocationOutOfBounds) {
+TEST_F(VertexInputTest, SetAttributeLocationOutOfBounds) {
     // Control case, setting last attribute shader location
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
     state.numAttributes = 1;
     state.cAttributes[0].shaderLocation = kMaxVertexAttributes - 1;
     CreatePipeline(true, state, R"(
@@ -235,10 +235,10 @@ TEST_F(InputStateTest, SetAttributeLocationOutOfBounds) {
 }
 
 // Check attribute offset out of bounds
-TEST_F(InputStateTest, SetAttributeOffsetOutOfBounds) {
+TEST_F(VertexInputTest, SetAttributeOffsetOutOfBounds) {
     // Control case, setting max attribute offset for FloatR32 vertex format
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
     state.numAttributes = 1;
     state.cAttributes[0].offset = kMaxVertexAttributeEnd - sizeof(dawn::VertexFormat::Float);
     CreatePipeline(true, state, R"(
@@ -259,9 +259,9 @@ TEST_F(InputStateTest, SetAttributeOffsetOutOfBounds) {
 }
 
 // Check attribute offset overflow
-TEST_F(InputStateTest, SetAttributeOffsetOverflow) {
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
+TEST_F(VertexInputTest, SetAttributeOffsetOverflow) {
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
     state.numAttributes = 1;
     state.cAttributes[0].offset = std::numeric_limits<uint32_t>::max();
     CreatePipeline(false, state, R"(
@@ -273,10 +273,10 @@ TEST_F(InputStateTest, SetAttributeOffsetOverflow) {
 }
 
 // Check that all attributes must be backed by an input
-TEST_F(InputStateTest, RequireInputForAttribute) {
+TEST_F(VertexInputTest, RequireInputForAttribute) {
     // Control case
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
     state.numAttributes = 1;
     CreatePipeline(true, state, R"(
         #version 450
@@ -296,10 +296,10 @@ TEST_F(InputStateTest, RequireInputForAttribute) {
 }
 
 // Check OOB checks for an attribute's input
-TEST_F(InputStateTest, SetAttributeOOBCheckForInputs) {
+TEST_F(VertexInputTest, SetAttributeOOBCheckForInputs) {
     // Control case
-    utils::ComboInputStateDescriptor state;
-    state.numInputs = 1;
+    utils::ComboVertexInputDescriptor state;
+    state.numBuffers = 1;
     state.numAttributes = 1;
     CreatePipeline(true, state, R"(
         #version 450

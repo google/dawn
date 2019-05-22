@@ -409,7 +409,7 @@ namespace dawn_native { namespace d3d12 {
             inputElementDescriptor.Format = VertexFormatType(attribute.format);
             inputElementDescriptor.InputSlot = attribute.inputSlot;
 
-            const VertexInputDescriptor& input = GetInput(attribute.inputSlot);
+            const VertexBufferDescriptor& input = GetInput(attribute.inputSlot);
 
             inputElementDescriptor.AlignedByteOffset = attribute.offset;
             inputElementDescriptor.InputSlotClass = InputStepModeFunction(input.stepMode);

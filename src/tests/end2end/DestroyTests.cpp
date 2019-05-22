@@ -46,10 +46,10 @@ class DestroyTest : public DawnTest {
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
-        descriptor.cInputState.numInputs = 1;
-        descriptor.cInputState.cInputs[0].stride = 4 * sizeof(float);
-        descriptor.cInputState.numAttributes = 1;
-        descriptor.cInputState.cAttributes[0].format = dawn::VertexFormat::Float4;
+        descriptor.cVertexInput.numBuffers = 1;
+        descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
+        descriptor.cVertexInput.numAttributes = 1;
+        descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float4;
         descriptor.cColorStates[0]->format = renderPass.colorFormat;
 
         pipeline = device.CreateRenderPipeline(&descriptor);

@@ -47,11 +47,11 @@ namespace dawn_native {
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
-        const InputStateDescriptor* GetInputStateDescriptor() const;
+        const VertexInputDescriptor* GetVertexInputDescriptor() const;
         const std::bitset<kMaxVertexAttributes>& GetAttributesSetMask() const;
         const VertexAttributeDescriptor& GetAttribute(uint32_t location) const;
-        const std::bitset<kMaxVertexInputs>& GetInputsSetMask() const;
-        const VertexInputDescriptor& GetInput(uint32_t slot) const;
+        const std::bitset<kMaxVertexBuffers>& GetInputsSetMask() const;
+        const VertexBufferDescriptor& GetInput(uint32_t slot) const;
 
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot) const;
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor() const;
@@ -69,7 +69,7 @@ namespace dawn_native {
         // attachments in the render pass. This returns whether it is the case.
         bool IsCompatibleWith(const BeginRenderPassCmd* renderPassCmd) const;
         std::bitset<kMaxVertexAttributes> GetAttributesUsingInput(uint32_t slot) const;
-        std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexInputs> attributesUsingInput;
+        std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexBuffers> attributesUsingInput;
 
         // Functors necessary for the unordered_set<RenderPipelineBase*>-based cache.
         struct HashFunc {
@@ -83,11 +83,11 @@ namespace dawn_native {
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         // Vertex input
-        InputStateDescriptor mInputState;
+        VertexInputDescriptor mVertexInput;
         std::bitset<kMaxVertexAttributes> mAttributesSetMask;
         std::array<VertexAttributeDescriptor, kMaxVertexAttributes> mAttributeInfos;
-        std::bitset<kMaxVertexInputs> mInputsSetMask;
-        std::array<VertexInputDescriptor, kMaxVertexInputs> mInputInfos;
+        std::bitset<kMaxVertexBuffers> mInputsSetMask;
+        std::array<VertexBufferDescriptor, kMaxVertexBuffers> mInputInfos;
 
         // Attachments
         bool mHasDepthStencilAttachment = false;

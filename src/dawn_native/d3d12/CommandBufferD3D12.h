@@ -41,9 +41,9 @@ namespace dawn_native { namespace d3d12 {
         // represent the union of the dirty ranges (the union may have non-dirty
         // data in the middle of the range).
         const RenderPipeline* lastRenderPipeline = nullptr;
-        uint32_t startSlot = kMaxVertexInputs;
+        uint32_t startSlot = kMaxVertexBuffers;
         uint32_t endSlot = 0;
-        std::array<D3D12_VERTEX_BUFFER_VIEW, kMaxVertexInputs> d3d12BufferViews = {};
+        std::array<D3D12_VERTEX_BUFFER_VIEW, kMaxVertexBuffers> d3d12BufferViews = {};
     };
 
     class CommandBuffer : public CommandBufferBase {

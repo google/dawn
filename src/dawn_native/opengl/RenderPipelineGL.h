@@ -38,7 +38,7 @@ namespace dawn_native { namespace opengl {
         void ApplyNow(PersistentPipelineState& persistentPipelineState);
 
       private:
-        void CreateVAOForInputState(const InputStateDescriptor* inputState);
+        void CreateVAOForVertexInput(const VertexInputDescriptor* vertexInput);
 
         // TODO(yunchao.he@intel.com): vao need to be deduplicated between pipelines.
         GLuint mVertexArrayObject;

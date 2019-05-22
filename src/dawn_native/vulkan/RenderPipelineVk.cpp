@@ -296,11 +296,11 @@ namespace dawn_native { namespace vulkan {
             shaderStages[1].pName = descriptor->fragmentStage->entryPoint;
         }
 
-        std::array<VkVertexInputBindingDescription, kMaxVertexInputs> mBindings;
+        std::array<VkVertexInputBindingDescription, kMaxVertexBuffers> mBindings;
         std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes> mAttributes;
-        const InputStateDescriptor* inputState = GetInputStateDescriptor();
-        VkPipelineVertexInputStateCreateInfo inputStateCreateInfo =
-            ComputeInputStateDesc(inputState, &mBindings, &mAttributes);
+        const VertexInputDescriptor* vertexInput = GetVertexInputDescriptor();
+        VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo =
+            ComputeVertexInputDesc(vertexInput, &mBindings, &mAttributes);
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly;
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -427,7 +427,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
         createInfo.stageCount = 2;
         createInfo.pStages = shaderStages;
-        createInfo.pVertexInputState = &inputStateCreateInfo;
+        createInfo.pVertexInputState = &vertexInputCreateInfo;
         createInfo.pInputAssemblyState = &inputAssembly;
         createInfo.pTessellationState = nullptr;
         createInfo.pViewportState = &viewport;
@@ -448,9 +448,9 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeInputStateDesc(
-        const InputStateDescriptor* inputState,
-        std::array<VkVertexInputBindingDescription, kMaxVertexInputs>* mBindings,
+    VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(
+        const VertexInputDescriptor* vertexInput,
+        std::array<VkVertexInputBindingDescription, kMaxVertexBuffers>* mBindings,
         std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes>* mAttributes) {
         // Fill in the "binding info" that will be chained in the create info
         uint32_t bindingCount = 0;

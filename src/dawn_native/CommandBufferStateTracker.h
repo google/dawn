@@ -53,7 +53,7 @@ namespace dawn_native {
         ValidationAspects mAspects;
 
         std::array<BindGroupBase*, kMaxBindGroups> mBindgroups = {};
-        std::bitset<kMaxVertexInputs> mInputsSet;
+        std::bitset<kMaxVertexBuffers> mInputsSet;
 
         PipelineLayoutBase* mLastPipelineLayout = nullptr;
         RenderPipelineBase* mLastRenderPipeline = nullptr;

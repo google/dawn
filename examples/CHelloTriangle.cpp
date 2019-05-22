@@ -93,14 +93,14 @@ void init() {
         pl.bindGroupLayouts = nullptr;
         descriptor.layout = dawnDeviceCreatePipelineLayout(device, &pl);
 
-        DawnInputStateDescriptor inputState;
-        inputState.nextInChain = nullptr;
-        inputState.indexFormat = DAWN_INDEX_FORMAT_UINT32;
-        inputState.numInputs = 0;
-        inputState.inputs = nullptr;
-        inputState.numAttributes = 0;
-        inputState.attributes = nullptr;
-        descriptor.inputState = &inputState;
+        DawnVertexInputDescriptor vertexInput;
+        vertexInput.nextInChain = nullptr;
+        vertexInput.indexFormat = DAWN_INDEX_FORMAT_UINT32;
+        vertexInput.numBuffers = 0;
+        vertexInput.buffers = nullptr;
+        vertexInput.numAttributes = 0;
+        vertexInput.attributes = nullptr;
+        descriptor.vertexInput = &vertexInput;
 
         DawnRasterizationStateDescriptor rasterizationState;
         rasterizationState.nextInChain = nullptr;
