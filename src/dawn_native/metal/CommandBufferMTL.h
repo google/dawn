@@ -21,7 +21,6 @@
 #import <Metal/Metal.h>
 
 namespace dawn_native {
-    struct BeginRenderPassCmd;
     class CommandEncoderBase;
 }
 

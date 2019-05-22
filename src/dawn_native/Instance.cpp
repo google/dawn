@@ -73,7 +73,15 @@ namespace dawn_native {
                "Clears texture to full 1 bits as soon as they are created, but doesn't update "
                "the tracking state of the texture. This way we can test the logic of clearing "
                "textures that use recycled memory.",
-               "https://bugs.chromium.org/p/dawn/issues/detail?id=145"}}}};
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=145"}},
+             {Toggle::AlwaysResolveIntoZeroLevelAndLayer,
+              {"always_resolve_into_zero_level_and_layer",
+               "When the resolve target is a texture view that is created on the non-zero level or "
+               "layer of a texture, we first resolve into a temporarily 2D texture with only one "
+               "mipmap level and one array layer, and copy the result of MSAA resolve into the "
+               "true resolve target. This workaround is enabled by default on the Metal drivers "
+               "that have bugs when setting non-zero resolveLevel or resolveSlice.",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=56"}}}};
 
     }  // anonymous namespace
 

@@ -119,6 +119,7 @@ namespace dawn_native { namespace metal {
             return descriptor;
         }
 
+        // Helper function for Toggle EmulateStoreAndMSAAResolve
         void ResolveInAnotherRenderPass(
             id<MTLCommandBuffer> commandBuffer,
             const MTLRenderPassDescriptor* mtlRenderPass,
@@ -145,6 +146,48 @@ namespace dawn_native { namespace metal {
             id<MTLRenderCommandEncoder> encoder =
                 [commandBuffer renderCommandEncoderWithDescriptor:mtlRenderPassForResolve];
             [encoder endEncoding];
+        }
+
+        // Helper functions for Toggle AlwaysResolveIntoZeroLevelAndLayer
+        id<MTLTexture> CreateResolveTextureForWorkaround(Device* device,
+                                                         MTLPixelFormat mtlFormat,
+                                                         uint32_t width,
+                                                         uint32_t height) {
+            MTLTextureDescriptor* mtlDesc = [MTLTextureDescriptor new];
+            mtlDesc.textureType = MTLTextureType2D;
+            mtlDesc.usage = MTLTextureUsageRenderTarget;
+            mtlDesc.pixelFormat = mtlFormat;
+            mtlDesc.width = width;
+            mtlDesc.height = height;
+            mtlDesc.depth = 1;
+            mtlDesc.mipmapLevelCount = 1;
+            mtlDesc.arrayLength = 1;
+            mtlDesc.storageMode = MTLStorageModePrivate;
+            mtlDesc.sampleCount = 1;
+            id<MTLTexture> resolveTexture =
+                [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc];
+            [mtlDesc release];
+            return resolveTexture;
+        }
+
+        void CopyIntoTrueResolveTarget(id<MTLCommandBuffer> commandBuffer,
+                                       id<MTLTexture> mtlTrueResolveTexture,
+                                       uint32_t trueResolveLevel,
+                                       uint32_t trueResolveSlice,
+                                       id<MTLTexture> temporaryResolveTexture,
+                                       uint32_t width,
+                                       uint32_t height,
+                                       GlobalEncoders* encoders) {
+            encoders->EnsureBlit(commandBuffer);
+            [encoders->blit copyFromTexture:temporaryResolveTexture
+                                sourceSlice:0
+                                sourceLevel:0
+                               sourceOrigin:MTLOriginMake(0, 0, 0)
+                                 sourceSize:MTLSizeMake(width, height, 1)
+                                  toTexture:mtlTrueResolveTexture
+                           destinationSlice:trueResolveSlice
+                           destinationLevel:trueResolveLevel
+                          destinationOrigin:MTLOriginMake(0, 0, 0)];
         }
 
         // Handles a call to SetBindGroup, directing the commands to the correct encoder.
@@ -626,6 +669,61 @@ namespace dawn_native { namespace metal {
         ASSERT(mtlRenderPass && globalEncoders);
 
         Device* device = ToBackend(GetDevice());
+
+        // Handle Toggle AlwaysResolveIntoZeroLevelAndLayer. We must handle this before applying
+        // the store + MSAA resolve workaround, otherwise this toggle will never be handled because
+        // the resolve texture is removed when applying the store + MSAA resolve workaround.
+        if (device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer)) {
+            std::array<id<MTLTexture>, kMaxColorAttachments> trueResolveTextures = {};
+            std::array<uint32_t, kMaxColorAttachments> trueResolveLevels = {};
+            std::array<uint32_t, kMaxColorAttachments> trueResolveSlices = {};
+
+            // Use temporary resolve texture on the resolve targets with non-zero resolveLevel or
+            // resolveSlice.
+            bool useTemporaryResolveTexture = false;
+            std::array<id<MTLTexture>, kMaxColorAttachments> temporaryResolveTextures = {};
+            for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
+                if (mtlRenderPass.colorAttachments[i].resolveTexture == nil) {
+                    continue;
+                }
+
+                if (mtlRenderPass.colorAttachments[i].resolveLevel == 0 &&
+                    mtlRenderPass.colorAttachments[i].resolveSlice == 0) {
+                    continue;
+                }
+
+                trueResolveTextures[i] = mtlRenderPass.colorAttachments[i].resolveTexture;
+                trueResolveLevels[i] = mtlRenderPass.colorAttachments[i].resolveLevel;
+                trueResolveSlices[i] = mtlRenderPass.colorAttachments[i].resolveSlice;
+
+                const MTLPixelFormat mtlFormat = trueResolveTextures[i].pixelFormat;
+                temporaryResolveTextures[i] =
+                    CreateResolveTextureForWorkaround(device, mtlFormat, width, height);
+
+                mtlRenderPass.colorAttachments[i].resolveTexture = temporaryResolveTextures[i];
+                mtlRenderPass.colorAttachments[i].resolveLevel = 0;
+                mtlRenderPass.colorAttachments[i].resolveSlice = 0;
+                useTemporaryResolveTexture = true;
+            }
+
+            // If we need to use a temporary resolve texture we need to copy the result of MSAA
+            // resolve back to the true resolve targets.
+            if (useTemporaryResolveTexture) {
+                EncodeRenderPass(commandBuffer, mtlRenderPass, globalEncoders, width, height);
+                for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
+                    if (trueResolveTextures[i] == nil) {
+                        continue;
+                    }
+
+                    ASSERT(temporaryResolveTextures[i] != nil);
+                    CopyIntoTrueResolveTarget(commandBuffer, trueResolveTextures[i],
+                                              trueResolveLevels[i], trueResolveSlices[i],
+                                              temporaryResolveTextures[i], width, height,
+                                              globalEncoders);
+                }
+                return;
+            }
+        }
 
         // Handle Store + MSAA resolve workaround (Toggle EmulateStoreAndMSAAResolve).
         if (device->IsToggleEnabled(Toggle::EmulateStoreAndMSAAResolve)) {
