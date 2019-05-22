@@ -108,6 +108,9 @@ namespace dawn_wire { namespace client {
 
             buffer->isWriteMapped = true;
             buffer->mappedDataSize = dataLength;
+            // |mappedData| is freed in Unmap or the Buffer destructor.
+            // TODO(enga): Add dependency injection for buffer mapping so staging
+            // memory can live in shared memory.
             buffer->mappedData = malloc(dataLength);
             memset(buffer->mappedData, 0, dataLength);
 

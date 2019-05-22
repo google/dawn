@@ -25,6 +25,11 @@
             { "name": "data length", "type": "uint32_t" },
             { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "data length" }
         ],
+        "device create buffer mapped": [
+            { "name": "device", "type": "device" },
+            { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
+            { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" }
+        ],
         "destroy object": [
             { "name": "object type", "type": "ObjectType" },
             { "name": "object id", "type": "ObjectId" }

@@ -494,3 +494,146 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
 
     FlushClient();
 }
+
+// Test successful CreateBufferMapped
+TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
+    DawnBufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = 4;
+
+    DawnBuffer apiBuffer = api.GetNewBuffer();
+    DawnCreateBufferMappedResult apiResult;
+    uint32_t apiBufferData = 1234;
+    apiResult.buffer = apiBuffer;
+    apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
+    apiResult.dataLength = 4;
+
+    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+
+    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+        .WillOnce(Return(apiResult))
+        .RetiresOnSaturation();
+
+    FlushClient();
+
+    dawnBufferUnmap(result.buffer);
+    EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
+
+    FlushClient();
+}
+
+// Test that releasing after CreateBufferMapped does not call Unmap
+TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
+    DawnBufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = 4;
+
+    DawnBuffer apiBuffer = api.GetNewBuffer();
+    DawnCreateBufferMappedResult apiResult;
+    uint32_t apiBufferData = 1234;
+    apiResult.buffer = apiBuffer;
+    apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
+    apiResult.dataLength = 4;
+
+    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+
+    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+        .WillOnce(Return(apiResult))
+        .RetiresOnSaturation();
+
+    FlushClient();
+
+    dawnBufferRelease(result.buffer);
+    EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
+
+    FlushClient();
+}
+
+// Test that it is valid to map a buffer after CreateBufferMapped and Unmap
+TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
+    DawnBufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = 4;
+
+    DawnBuffer apiBuffer = api.GetNewBuffer();
+    DawnCreateBufferMappedResult apiResult;
+    uint32_t apiBufferData = 9863;
+    apiResult.buffer = apiBuffer;
+    apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
+    apiResult.dataLength = 4;
+
+    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+
+    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+        .WillOnce(Return(apiResult))
+        .RetiresOnSaturation();
+
+    FlushClient();
+
+    dawnBufferUnmap(result.buffer);
+    EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
+
+    FlushClient();
+
+    DawnCallbackUserdata userdata = 2499;
+    dawnBufferMapWriteAsync(result.buffer, ToMockBufferMapWriteCallback, userdata);
+
+    uint32_t zero = 0;
+    EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
+                                     &apiBufferData, sizeof(uint32_t));
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapWriteCallback,
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
+                     Pointee(Eq(zero)), sizeof(uint32_t), userdata))
+        .Times(1);
+
+    FlushServer();
+}
+
+// Test that it is invalid to map a buffer after CreateBufferMapped before Unmap
+TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
+    DawnBufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = 4;
+
+    DawnBuffer apiBuffer = api.GetNewBuffer();
+    DawnCreateBufferMappedResult apiResult;
+    uint32_t apiBufferData = 9863;
+    apiResult.buffer = apiBuffer;
+    apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
+    apiResult.dataLength = 4;
+
+    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+
+    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+        .WillOnce(Return(apiResult))
+        .RetiresOnSaturation();
+
+    FlushClient();
+
+    DawnCallbackUserdata userdata = 2499;
+    dawnBufferMapWriteAsync(result.buffer, ToMockBufferMapWriteCallback, userdata);
+
+    EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0);
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapWriteCallback,
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata))
+        .Times(1);
+
+    FlushServer();
+
+    dawnBufferUnmap(result.buffer);
+    EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
+
+    FlushClient();
+}

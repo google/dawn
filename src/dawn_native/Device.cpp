@@ -280,6 +280,7 @@ namespace dawn_native {
         result.buffer = reinterpret_cast<DawnBuffer>(buffer);
         result.data = data;
         result.dataLength = descriptor->size;
+        memset(result.data, 0, result.dataLength);
 
         return result;
     }
