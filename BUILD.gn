@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
+import("generator/dawn_generator.gni")
 import("scripts/dawn_component.gni")
 import("scripts/dawn_features.gni")
 import("scripts/dawn_overrides_with_defaults.gni")
-import("generator/dawn_generator.gni")
 
 import("//testing/test.gni")
 
@@ -579,6 +579,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
     "src/tests/unittests/validation/RenderPassValidationTests.cpp",
     "src/tests/unittests/validation/RenderPipelineValidationTests.cpp",
+    "src/tests/unittests/validation/SamplerValidationTests.cpp",
     "src/tests/unittests/validation/ShaderModuleValidationTests.cpp",
     "src/tests/unittests/validation/TextureValidationTests.cpp",
     "src/tests/unittests/validation/TextureViewValidationTests.cpp",

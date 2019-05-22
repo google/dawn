@@ -18,11 +18,17 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
+#include <cmath>
+
 namespace dawn_native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
+
+        if (!std::isfinite(descriptor->lodMinClamp) || !std::isfinite(descriptor->lodMaxClamp)) {
+            return DAWN_VALIDATION_ERROR("LOD must be finite");
         }
 
         if (descriptor->lodMinClamp < 0 || descriptor->lodMaxClamp < 0) {
@@ -95,6 +101,15 @@ namespace dawn_native {
     }
 
     bool SamplerBase::EqualityFunc::operator()(const SamplerBase* a, const SamplerBase* b) const {
+        if (a == b) {
+            return true;
+        }
+
+        ASSERT(std::isfinite(a->mLodMinClamp));
+        ASSERT(std::isfinite(b->mLodMinClamp));
+        ASSERT(std::isfinite(a->mLodMaxClamp));
+        ASSERT(std::isfinite(b->mLodMaxClamp));
+
         return a->mAddressModeU == b->mAddressModeU && a->mAddressModeV == b->mAddressModeV &&
                a->mAddressModeW == b->mAddressModeW && a->mMagFilter == b->mMagFilter &&
                a->mMinFilter == b->mMinFilter && a->mMipmapFilter == b->mMipmapFilter &&
