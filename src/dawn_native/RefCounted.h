@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_REFCOUNTED_H_
 #define DAWNNATIVE_REFCOUNTED_H_
 
+#include <atomic>
 #include <cstdint>
 
 namespace dawn_native {
@@ -24,19 +25,14 @@ namespace dawn_native {
         RefCounted();
         virtual ~RefCounted();
 
-        void ReferenceInternal();
-        void ReleaseInternal();
-
-        uint32_t GetExternalRefs() const;
-        uint32_t GetInternalRefs() const;
+        uint64_t GetRefCount() const;
 
         // Dawn API
         void Reference();
         void Release();
 
       protected:
-        uint32_t mExternalRefs = 1;
-        uint32_t mInternalRefs = 1;
+        std::atomic_uint64_t mRefCount = {1};
     };
 
     template <typename T>
@@ -111,12 +107,12 @@ namespace dawn_native {
       private:
         void Reference() const {
             if (mPointee != nullptr) {
-                mPointee->ReferenceInternal();
+                mPointee->Reference();
             }
         }
         void Release() const {
             if (mPointee != nullptr) {
-                mPointee->ReleaseInternal();
+                mPointee->Release();
             }
         }
 

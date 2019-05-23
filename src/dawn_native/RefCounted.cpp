@@ -24,53 +24,21 @@ namespace dawn_native {
     RefCounted::~RefCounted() {
     }
 
-    void RefCounted::ReferenceInternal() {
-        ASSERT(mInternalRefs != 0);
-
-        // TODO(cwallez@chromium.org): what to do on overflow?
-        mInternalRefs++;
-    }
-
-    void RefCounted::ReleaseInternal() {
-        ASSERT(mInternalRefs != 0);
-
-        mInternalRefs--;
-
-        if (mInternalRefs == 0) {
-            ASSERT(mExternalRefs == 0);
-            // TODO(cwallez@chromium.org): would this work with custom allocators?
-            delete this;
-        }
-    }
-
-    uint32_t RefCounted::GetExternalRefs() const {
-        return mExternalRefs;
-    }
-
-    uint32_t RefCounted::GetInternalRefs() const {
-        return mInternalRefs;
+    uint64_t RefCounted::GetRefCount() const {
+        return mRefCount;
     }
 
     void RefCounted::Reference() {
-        ASSERT(mInternalRefs != 0);
-
-        // mExternalRefs != 0 counts as one internal ref.
-        if (mExternalRefs == 0) {
-            ReferenceInternal();
-        }
-
-        // TODO(cwallez@chromium.org): what to do on overflow?
-        mExternalRefs++;
+        ASSERT(mRefCount != 0);
+        mRefCount++;
     }
 
     void RefCounted::Release() {
-        ASSERT(mInternalRefs != 0);
-        ASSERT(mExternalRefs != 0);
+        ASSERT(mRefCount != 0);
 
-        mExternalRefs--;
-        // mExternalRefs != 0 counts as one internal ref.
-        if (mExternalRefs == 0) {
-            ReleaseInternal();
+        mRefCount--;
+        if (mRefCount == 0) {
+            delete this;
         }
     }
 

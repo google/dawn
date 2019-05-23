@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
+#include <thread>
 
 #include "dawn_native/RefCounted.h"
 
@@ -38,8 +39,8 @@ struct RCTest : public RefCounted {
     bool* deleted = nullptr;
 };
 
-// Test that RCs start with one external ref, and removing it destroys the object.
-TEST(RefCounted, StartsWithOneExternalRef) {
+// Test that RCs start with one ref, and removing it destroys the object.
+TEST(RefCounted, StartsWithOneRef) {
     bool deleted = false;
     auto test = new RCTest(&deleted);
 
@@ -47,39 +48,51 @@ TEST(RefCounted, StartsWithOneExternalRef) {
     ASSERT_TRUE(deleted);
 }
 
-// Test internal refs keep the RC alive.
-TEST(RefCounted, InternalRefKeepsAlive) {
+// Test adding refs keep the RC alive.
+TEST(RefCounted, AddingRefKeepsAlive) {
     bool deleted = false;
     auto test = new RCTest(&deleted);
 
-    test->ReferenceInternal();
-    test->Release();
-    ASSERT_FALSE(deleted);
-
-    test->ReleaseInternal();
-    ASSERT_TRUE(deleted);
-}
-
-// Test that when adding an external ref from 0, an internal ref is added
-TEST(RefCounted, AddExternalRefFromZero) {
-    bool deleted = false;
-    auto test = new RCTest(&deleted);
-
-    test->ReferenceInternal();
-    test->Release();
-    ASSERT_FALSE(deleted);
-
-    // Reference adds an internal ref and release removes one
     test->Reference();
     test->Release();
     ASSERT_FALSE(deleted);
 
-    test->ReleaseInternal();
+    test->Release();
     ASSERT_TRUE(deleted);
 }
 
-// Test Ref remove internal reference when going out of scope
-TEST(Ref, EndOfScopeRemovesInternalRef) {
+// Test that Reference and Release atomically change the refcount.
+TEST(RefCounted, RaceOnReferenceRelease) {
+    bool deleted = false;
+    auto* test = new RCTest(&deleted);
+
+    auto referenceManyTimes = [test]() {
+        for (uint32_t i = 0; i < 100000; ++i) {
+            test->Reference();
+        }
+    };
+    std::thread t1(referenceManyTimes);
+    std::thread t2(referenceManyTimes);
+
+    t1.join();
+    t2.join();
+    ASSERT_EQ(test->GetRefCount(), 200001u);
+
+    auto releaseManyTimes = [test]() {
+        for (uint32_t i = 0; i < 100000; ++i) {
+            test->Release();
+        }
+    };
+
+    std::thread t3(releaseManyTimes);
+    std::thread t4(releaseManyTimes);
+    t3.join();
+    t4.join();
+    ASSERT_EQ(test->GetRefCount(), 1u);
+}
+
+// Test Ref remove reference when going out of scope
+TEST(Ref, EndOfScopeRemovesRef) {
     bool deleted = false;
     {
         Ref<RCTest> test(new RCTest(&deleted));
