@@ -640,6 +640,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/DestroyTests.cpp",
     "src/tests/end2end/DrawIndexedTests.cpp",
     "src/tests/end2end/DrawTests.cpp",
+    "src/tests/end2end/DynamicBufferOffsetTests.cpp",
     "src/tests/end2end/FenceTests.cpp",
     "src/tests/end2end/IndexFormatTests.cpp",
     "src/tests/end2end/MultisampledRenderingTests.cpp",

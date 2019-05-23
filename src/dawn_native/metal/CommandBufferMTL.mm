@@ -196,10 +196,13 @@ namespace dawn_native { namespace metal {
         // types.
         void ApplyBindGroup(uint32_t index,
                             BindGroup* group,
+                            uint32_t dynamicOffsetCount,
+                            uint64_t* dynamicOffsets,
                             PipelineLayout* pipelineLayout,
                             id<MTLRenderCommandEncoder> render,
                             id<MTLComputeCommandEncoder> compute) {
             const auto& layout = group->GetLayout()->GetBindingInfo();
+            uint32_t currentDynamicBufferIndex = 0;
 
             // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup
             // so that we only have to do one setVertexBuffers and one setFragmentBuffers
@@ -283,11 +286,33 @@ namespace dawn_native { namespace metal {
                         }
                     } break;
 
-                    // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
+                    // TODO(shaobo.yan@intel.com): Record bound buffer status to use setBufferOffset
+                    // to achieve better performance.
                     case dawn::BindingType::DynamicUniformBuffer:
-                    case dawn::BindingType::DynamicStorageBuffer:
-                        UNREACHABLE();
-                        break;
+                    case dawn::BindingType::DynamicStorageBuffer: {
+                        ASSERT(currentDynamicBufferIndex < dynamicOffsetCount);
+                        BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
+                        const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
+                        NSUInteger offset =
+                            binding.offset + dynamicOffsets[currentDynamicBufferIndex];
+                        currentDynamicBufferIndex += 1;
+
+                        if (hasVertStage) {
+                            [render setVertexBuffers:&buffer
+                                             offsets:&offset
+                                           withRange:NSMakeRange(vertIndex, 1)];
+                        }
+                        if (hasFragStage) {
+                            [render setFragmentBuffers:&buffer
+                                               offsets:&offset
+                                             withRange:NSMakeRange(fragIndex, 1)];
+                        }
+                        if (hasComputeStage) {
+                            [compute setBuffers:&buffer
+                                        offsets:&offset
+                                      withRange:NSMakeRange(computeIndex, 1)];
+                        }
+                    } break;
                 }
             }
         }
@@ -649,8 +674,14 @@ namespace dawn_native { namespace metal {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    ApplyBindGroup(cmd->index, ToBackend(cmd->group.Get()),
-                                   ToBackend(lastPipeline->GetLayout()), nil, encoder);
+                    uint64_t* dynamicOffsets = nullptr;
+                    if (cmd->dynamicOffsetCount > 0) {
+                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
+
+                    ApplyBindGroup(cmd->index, ToBackend(cmd->group.Get()), cmd->dynamicOffsetCount,
+                                   dynamicOffsets, ToBackend(lastPipeline->GetLayout()), nil,
+                                   encoder);
                 } break;
 
                 default: { UNREACHABLE(); } break;
@@ -910,8 +941,14 @@ namespace dawn_native { namespace metal {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    ApplyBindGroup(cmd->index, ToBackend(cmd->group.Get()),
-                                   ToBackend(lastPipeline->GetLayout()), encoder, nil);
+                    uint64_t* dynamicOffsets = nullptr;
+                    if (cmd->dynamicOffsetCount > 0) {
+                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
+
+                    ApplyBindGroup(cmd->index, ToBackend(cmd->group.Get()), cmd->dynamicOffsetCount,
+                                   dynamicOffsets, ToBackend(lastPipeline->GetLayout()), encoder,
+                                   nil);
                 } break;
 
                 case Command::SetIndexBuffer: {

@@ -42,6 +42,8 @@ namespace dawn_native { namespace metal {
                     switch (groupInfo.types[binding]) {
                         case dawn::BindingType::UniformBuffer:
                         case dawn::BindingType::StorageBuffer:
+                        case dawn::BindingType::DynamicUniformBuffer:
+                        case dawn::BindingType::DynamicStorageBuffer:
                             mIndexInfo[stage][group][binding] = bufferIndex;
                             bufferIndex++;
                             break;
@@ -52,11 +54,6 @@ namespace dawn_native { namespace metal {
                         case dawn::BindingType::SampledTexture:
                             mIndexInfo[stage][group][binding] = textureIndex;
                             textureIndex++;
-                            break;
-                        // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset
-                        case dawn::BindingType::DynamicUniformBuffer:
-                        case dawn::BindingType::DynamicStorageBuffer:
-                            UNREACHABLE();
                             break;
                     }
                 }
