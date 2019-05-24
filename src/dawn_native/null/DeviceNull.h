@@ -102,6 +102,9 @@ namespace dawn_native { namespace null {
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
 
+        MaybeError IncrementMemoryUsage(size_t bytes);
+        void DecrementMemoryUsage(size_t bytes);
+
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
@@ -128,6 +131,9 @@ namespace dawn_native { namespace null {
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
+
+        static constexpr size_t kMaxMemoryUsage = 256 * 1024 * 1024;
+        size_t mMemoryUsage = 0;
     };
 
     class Buffer : public BufferBase {
