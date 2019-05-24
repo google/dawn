@@ -14,6 +14,7 @@
 
 #include "dawn_native/d3d12/TextureD3D12.h"
 
+#include "dawn_native/d3d12/DescriptorHeapAllocator.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocator.h"
 
@@ -138,6 +139,25 @@ namespace dawn_native { namespace d3d12 {
                         ->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
                                    D3D12_RESOURCE_STATE_COMMON);
         mResourcePtr = mResource.Get();
+
+        if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+            TransitionUsageNow(device->GetPendingCommandList(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+            uint32_t arrayLayerCount = GetArrayLayers();
+
+            DescriptorHeapAllocator* descriptorHeapAllocator = device->GetDescriptorHeapAllocator();
+            DescriptorHeapHandle rtvHeap =
+                descriptorHeapAllocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1);
+            D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(0);
+
+            const float clearColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+            // TODO(natlee@microsoft.com): clear all array layers for 2D array textures
+            for (int i = 0; i < resourceDescriptor.MipLevels; i++) {
+                D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = GetRTVDescriptor(i, arrayLayerCount, 0);
+                device->GetD3D12Device()->CreateRenderTargetView(mResourcePtr, &rtvDesc, rtvHandle);
+                device->GetPendingCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0,
+                                                                       nullptr);
+            }
+        }
     }
 
     // With this constructor, the lifetime of the ID3D12Resource is externally managed.
@@ -201,6 +221,34 @@ namespace dawn_native { namespace d3d12 {
         mLastState = newState;
     }
 
+    D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(uint32_t mipSlice,
+                                                            uint32_t arrayLayers,
+                                                            uint32_t baseArrayLayer) const {
+        ASSERT(GetDimension() == dawn::TextureDimension::e2D);
+        D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+        rtvDesc.Format = GetD3D12Format();
+        if (IsMultisampledTexture()) {
+            ASSERT(GetNumMipLevels() == 1);
+            ASSERT(arrayLayers == 1);
+            ASSERT(baseArrayLayer == 0);
+            ASSERT(mipSlice == 0);
+            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
+        } else {
+            // Currently we always use D3D12_TEX2D_ARRAY_RTV because we cannot specify base array
+            // layer and layer count in D3D12_TEX2D_RTV. For 2D texture views, we treat them as
+            // 1-layer 2D array textures. (Just like how we treat SRVs)
+            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_rtv
+            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array
+            // _rtv
+            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+            rtvDesc.Texture2DArray.FirstArraySlice = baseArrayLayer;
+            rtvDesc.Texture2DArray.ArraySize = arrayLayers;
+            rtvDesc.Texture2DArray.MipSlice = mipSlice;
+            rtvDesc.Texture2DArray.PlaneSlice = 0;
+        }
+        return rtvDesc;
+    }
+
     uint32_t Texture::GetSubresourceIndex(uint32_t mipmapLevel, uint32_t arraySlice) const {
         return GetNumMipLevels() * arraySlice + mipmapLevel;
     }
@@ -254,28 +302,8 @@ namespace dawn_native { namespace d3d12 {
     }
 
     D3D12_RENDER_TARGET_VIEW_DESC TextureView::GetRTVDescriptor() const {
-        ASSERT(GetTexture()->GetDimension() == dawn::TextureDimension::e2D);
-        D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
-        rtvDesc.Format = GetD3D12Format();
-        if (GetTexture()->IsMultisampledTexture()) {
-            ASSERT(GetTexture()->GetArrayLayers() == 1 && GetTexture()->GetNumMipLevels() == 1 &&
-                   GetBaseArrayLayer() == 0 && GetBaseMipLevel() == 0);
-            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
-        } else {
-            // Currently we always use D3D12_TEX2D_ARRAY_RTV because we cannot specify base array
-            // layer and layer count in D3D12_TEX2D_RTV. For 2D texture views, we treat them as
-            // 1-layer 2D array textures. (Just like how we treat SRVs)
-            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_rtv
-            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array
-            // _rtv
-            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-            rtvDesc.Texture2DArray.FirstArraySlice = GetBaseArrayLayer();
-            rtvDesc.Texture2DArray.ArraySize = GetLayerCount();
-            rtvDesc.Texture2DArray.MipSlice = GetBaseMipLevel();
-            rtvDesc.Texture2DArray.PlaneSlice = 0;
-        }
-
-        return rtvDesc;
+        return ToBackend(GetTexture())
+            ->GetRTVDescriptor(GetBaseMipLevel(), GetLayerCount(), GetBaseArrayLayer());
     }
 
     D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor() const {

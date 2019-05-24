@@ -47,6 +47,9 @@ namespace dawn_native { namespace d3d12 {
                    ComPtr<ID3D12Device> d3d12Device,
                    const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor), mD3d12Device(d3d12Device) {
+        if (descriptor != nullptr) {
+            ApplyToggleOverrides(descriptor);
+        }
         // Create device-global objects
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;

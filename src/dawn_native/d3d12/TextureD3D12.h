@@ -40,6 +40,9 @@ namespace dawn_native { namespace d3d12 {
                                 D3D12_RESOURCE_STATES newState);
 
         uint32_t GetSubresourceIndex(uint32_t mipmapLevel, uint32_t arraySlice) const;
+        D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(uint32_t mipSlice,
+                                                       uint32_t arrayLayers,
+                                                       uint32_t baseArrayLayer) const;
 
       private:
         // Dawn API
