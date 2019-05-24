@@ -203,6 +203,12 @@ DawnTest::~DawnTest() {
     swapchain = dawn::SwapChain();
     device = dawn::Device();
 
+    mWireClient = nullptr;
+    mWireServer = nullptr;
+    if (gTestEnv->UsesWire()) {
+        backendProcs.deviceRelease(backendDevice);
+    }
+
     dawnSetProcs(nullptr);
 }
 
@@ -301,7 +307,6 @@ void DawnTest::SetUp() {
 
     mPCIInfo = backendAdapter.GetPCIInfo();
 
-    DawnDevice backendDevice;
     const char* forceEnabledWorkaround = GetParam().forceEnabledWorkaround;
     if (forceEnabledWorkaround != nullptr) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
@@ -311,7 +316,7 @@ void DawnTest::SetUp() {
         backendDevice = backendAdapter.CreateDevice(nullptr);
     }
 
-    DawnProcTable backendProcs = dawn_native::GetProcs();
+    backendProcs = dawn_native::GetProcs();
 
     // Get the test window and create the device using it (esp. for OpenGL)
     GLFWwindow* testWindow = gTestEnv->GetWindowForBackend(backendType);

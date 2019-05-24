@@ -157,6 +157,9 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
     dawn::Queue queue;
     dawn::SwapChain swapchain;
 
+    DawnProcTable backendProcs = {};
+    DawnDevice backendDevice = nullptr;
+
     // Helper methods to implement the EXPECT_ macros
     std::ostringstream& AddBufferExpectation(const char* file,
                                              int line,
