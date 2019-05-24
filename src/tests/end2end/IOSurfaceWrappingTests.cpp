@@ -106,6 +106,7 @@ namespace {
 }  // anonymous namespace
 
 // A small fixture used to initialize default data for the IOSurface validation tests.
+// These tests are skipped if the harness is using the wire.
 class IOSurfaceValidationTests : public IOSurfaceTestBase {
   public:
     IOSurfaceValidationTests() {
@@ -127,12 +128,14 @@ class IOSurfaceValidationTests : public IOSurfaceTestBase {
 
 // Test a successful wrapping of an IOSurface in a texture
 TEST_P(IOSurfaceValidationTests, Success) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     dawn::Texture texture = WrapIOSurface(&descriptor, defaultIOSurface.get(), 0);
     ASSERT_NE(texture.Get(), nullptr);
 }
 
 // Test an error occurs if the texture descriptor is invalid
 TEST_P(IOSurfaceValidationTests, InvalidTextureDescriptor) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.nextInChain = this;
 
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
@@ -142,6 +145,7 @@ TEST_P(IOSurfaceValidationTests, InvalidTextureDescriptor) {
 
 // Test an error occurs if the plane is too large
 TEST_P(IOSurfaceValidationTests, PlaneTooLarge) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 1));
     ASSERT_EQ(texture.Get(), nullptr);
@@ -150,6 +154,7 @@ TEST_P(IOSurfaceValidationTests, PlaneTooLarge) {
 // Test an error occurs if the descriptor dimension isn't 2D
 // TODO(cwallez@chromium.org): Reenable when 1D or 3D textures are implemented
 TEST_P(IOSurfaceValidationTests, DISABLED_InvalidTextureDimension) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.dimension = dawn::TextureDimension::e2D;
 
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
@@ -159,6 +164,7 @@ TEST_P(IOSurfaceValidationTests, DISABLED_InvalidTextureDimension) {
 
 // Test an error occurs if the descriptor mip level count isn't 1
 TEST_P(IOSurfaceValidationTests, InvalidMipLevelCount) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.mipLevelCount = 2;
 
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
@@ -168,6 +174,7 @@ TEST_P(IOSurfaceValidationTests, InvalidMipLevelCount) {
 
 // Test an error occurs if the descriptor array layer count isn't 1
 TEST_P(IOSurfaceValidationTests, InvalidArrayLayerCount) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.arrayLayerCount = 2;
 
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
@@ -177,6 +184,7 @@ TEST_P(IOSurfaceValidationTests, InvalidArrayLayerCount) {
 
 // Test an error occurs if the descriptor sample count isn't 1
 TEST_P(IOSurfaceValidationTests, InvalidSampleCount) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.sampleCount = 4;
 
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
@@ -186,6 +194,7 @@ TEST_P(IOSurfaceValidationTests, InvalidSampleCount) {
 
 // Test an error occurs if the descriptor width doesn't match the surface's
 TEST_P(IOSurfaceValidationTests, InvalidWidth) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.size.width = 11;
 
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
@@ -195,6 +204,7 @@ TEST_P(IOSurfaceValidationTests, InvalidWidth) {
 
 // Test an error occurs if the descriptor height doesn't match the surface's
 TEST_P(IOSurfaceValidationTests, InvalidHeight) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.size.height = 11;
 
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
@@ -204,6 +214,7 @@ TEST_P(IOSurfaceValidationTests, InvalidHeight) {
 
 // Test an error occurs if the descriptor format isn't compatible with the IOSurface's
 TEST_P(IOSurfaceValidationTests, InvalidFormat) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.format = dawn::TextureFormat::R8Unorm;
 
     ASSERT_DEVICE_ERROR(dawn::Texture texture =
@@ -212,6 +223,7 @@ TEST_P(IOSurfaceValidationTests, InvalidFormat) {
 }
 
 // Fixture to test using IOSurfaces through different usages.
+// These tests are skipped if the harness is using the wire.
 class IOSurfaceUsageTests : public IOSurfaceTestBase {
   public:
     // Test that sampling a 1x1 works.
@@ -357,6 +369,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
 
 // Test sampling from a R8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromR8IOSurface) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'L008', 1);
 
     uint8_t data = 0x01;
@@ -366,6 +379,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromR8IOSurface) {
 
 // Test clearing a R8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearR8IOSurface) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'L008', 1);
 
     uint8_t data = 0x01;
@@ -374,6 +388,7 @@ TEST_P(IOSurfaceUsageTests, ClearR8IOSurface) {
 
 // Test sampling from a RG8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromRG8IOSurface) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, '2C08', 2);
 
     uint16_t data = 0x0102;  // Stored as (G, R)
@@ -383,6 +398,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromRG8IOSurface) {
 
 // Test clearing a RG8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearRG8IOSurface) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, '2C08', 2);
 
     uint16_t data = 0x0201;
@@ -391,6 +407,7 @@ TEST_P(IOSurfaceUsageTests, ClearRG8IOSurface) {
 
 // Test sampling from a BGRA8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromBGRA8888IOSurface) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'BGRA', 4);
 
     uint32_t data = 0x01020304;  // Stored as (A, R, G, B)
@@ -400,6 +417,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromBGRA8888IOSurface) {
 
 // Test clearing a BGRA8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearBGRA8IOSurface) {
+    DAWN_SKIP_TEST_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'BGRA', 4);
 
     uint32_t data = 0x04010203;
