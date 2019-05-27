@@ -105,9 +105,21 @@ namespace dawn_native { namespace vulkan {
 
         class DescriptorSetTracker {
           public:
-            void OnSetBindGroup(uint32_t index, VkDescriptorSet set) {
+            void OnSetBindGroup(uint32_t index,
+                                VkDescriptorSet set,
+                                uint32_t dynamicOffsetCount,
+                                uint64_t* dynamicOffsets) {
                 mDirtySets.set(index);
                 mSets[index] = set;
+                mDynamicOffsetCounts[index] = dynamicOffsetCount;
+                if (dynamicOffsetCount > 0) {
+                    // Vulkan backend use uint32_t as dynamic offsets type, it is not correct.
+                    // Vulkan should use VkDeviceSize. Dawn vulkan backend has to handle this.
+                    for (uint32_t i = 0; i < dynamicOffsetCount; ++i) {
+                        ASSERT(dynamicOffsets[i] <= std::numeric_limits<uint32_t>::max());
+                        mDynamicOffsets[index][i] = static_cast<uint32_t>(dynamicOffsets[i]);
+                    }
+                }
             }
 
             void OnPipelineLayoutChange(PipelineLayout* layout) {
@@ -131,9 +143,11 @@ namespace dawn_native { namespace vulkan {
 
             void Flush(Device* device, VkCommandBuffer commands, VkPipelineBindPoint bindPoint) {
                 for (uint32_t dirtyIndex : IterateBitSet(mDirtySets)) {
-                    device->fn.CmdBindDescriptorSets(commands, bindPoint,
-                                                     mCurrentLayout->GetHandle(), dirtyIndex, 1,
-                                                     &mSets[dirtyIndex], 0, nullptr);
+                    device->fn.CmdBindDescriptorSets(
+                        commands, bindPoint, mCurrentLayout->GetHandle(), dirtyIndex, 1,
+                        &mSets[dirtyIndex], mDynamicOffsetCounts[dirtyIndex],
+                        mDynamicOffsetCounts[dirtyIndex] > 0 ? mDynamicOffsets[dirtyIndex].data()
+                                                             : nullptr);
                 }
                 mDirtySets.reset();
             }
@@ -142,6 +156,8 @@ namespace dawn_native { namespace vulkan {
             PipelineLayout* mCurrentLayout = nullptr;
             std::array<VkDescriptorSet, kMaxBindGroups> mSets;
             std::bitset<kMaxBindGroups> mDirtySets;
+            std::array<uint32_t, kMaxBindGroups> mDynamicOffsetCounts;
+            std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups> mDynamicOffsets;
         };
 
         void RecordBeginRenderPass(VkCommandBuffer commands,
@@ -414,8 +430,13 @@ namespace dawn_native { namespace vulkan {
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                     VkDescriptorSet set = ToBackend(cmd->group.Get())->GetHandle();
+                    uint64_t* dynamicOffsets = nullptr;
+                    if (cmd->dynamicOffsetCount > 0) {
+                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
 
-                    descriptorSets.OnSetBindGroup(cmd->index, set);
+                    descriptorSets.OnSetBindGroup(cmd->index, set, cmd->dynamicOffsetCount,
+                                                  dynamicOffsets);
                 } break;
 
                 case Command::SetComputePipeline: {
@@ -552,8 +573,13 @@ namespace dawn_native { namespace vulkan {
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                     VkDescriptorSet set = ToBackend(cmd->group.Get())->GetHandle();
+                    uint64_t* dynamicOffsets = nullptr;
+                    if (cmd->dynamicOffsetCount > 0) {
+                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
 
-                    descriptorSets.OnSetBindGroup(cmd->index, set);
+                    descriptorSets.OnSetBindGroup(cmd->index, set, cmd->dynamicOffsetCount,
+                                                  dynamicOffsets);
                 } break;
 
                 case Command::SetBlendColor: {

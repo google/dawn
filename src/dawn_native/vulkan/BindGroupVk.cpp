@@ -81,7 +81,9 @@ namespace dawn_native { namespace vulkan {
 
             switch (layoutInfo.types[bindingIndex]) {
                 case dawn::BindingType::UniformBuffer:
-                case dawn::BindingType::StorageBuffer: {
+                case dawn::BindingType::StorageBuffer:
+                case dawn::BindingType::DynamicUniformBuffer:
+                case dawn::BindingType::DynamicStorageBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                     writeBufferInfo[numWrites].buffer = ToBackend(binding.buffer)->GetHandle();
@@ -109,10 +111,6 @@ namespace dawn_native { namespace vulkan {
                     write.pImageInfo = &writeImageInfo[numWrites];
                 } break;
 
-                case dawn::BindingType::DynamicUniformBuffer:
-                case dawn::BindingType::DynamicStorageBuffer:
-                    UNREACHABLE();
-                    break;
                 default:
                     UNREACHABLE();
             }

@@ -56,7 +56,6 @@ class DynamicBufferOffsetTests : public DawnTest {
     }
     // Create objects to use as resources inside test bind groups.
 
-    const void* mappedData = nullptr;
     dawn::BindGroup mBindGroup;
     dawn::BindGroupLayout mBindGroupLayout;
     dawn::Buffer mUniformBuffer;
@@ -212,4 +211,4 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsComputePipeline) {
                                kMinDynamicBufferOffsetAlignment, expectedData.size());
 }
 
-DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests, MetalBackend);
+DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests, MetalBackend, VulkanBackend);
