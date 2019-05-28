@@ -80,6 +80,9 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
 
 // Basic shared memory test
 TEST_P(ComputeSharedMemoryTests, Basic) {
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=159
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsNvidia());
+
     BasicTest(R"(
         #version 450
         const uint kTileSize = 4;
