@@ -511,5 +511,8 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
                       MetalBackend,
                       OpenGLBackend,
                       VulkanBackend,
-                      ForceWorkaround(MetalBackend, "emulate_store_and_msaa_resolve"),
-                      ForceWorkaround(MetalBackend, "always_resolve_into_zero_level_and_layer"));
+                      ForceWorkarounds(MetalBackend, {"emulate_store_and_msaa_resolve"}),
+                      ForceWorkarounds(MetalBackend, {"always_resolve_into_zero_level_and_layer"}),
+                      ForceWorkarounds(MetalBackend,
+                                       {"always_resolve_into_zero_level_and_layer",
+                                        "emulate_store_and_msaa_resolve"}));

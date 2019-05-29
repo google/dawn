@@ -67,12 +67,6 @@ namespace {
         }
     }
 
-    dawn_native::DeviceDescriptor InitWorkaround(const char* forceEnabledWorkaround) {
-        dawn_native::DeviceDescriptor deviceDescriptor;
-        deviceDescriptor.forceEnabledToggles.push_back(forceEnabledWorkaround);
-        return deviceDescriptor;
-    }
-
     struct MapReadUserdata {
         DawnTest* test;
         size_t slot;
@@ -82,9 +76,15 @@ namespace {
 
 }  // namespace
 
-DawnTestParam ForceWorkaround(const DawnTestParam& originParam, const char* workaround) {
+const DawnTestParam D3D12Backend(dawn_native::BackendType::D3D12);
+const DawnTestParam MetalBackend(dawn_native::BackendType::Metal);
+const DawnTestParam OpenGLBackend(dawn_native::BackendType::OpenGL);
+const DawnTestParam VulkanBackend(dawn_native::BackendType::Vulkan);
+
+DawnTestParam ForceWorkarounds(const DawnTestParam& originParam,
+                               std::initializer_list<const char*> forceEnabledWorkarounds) {
     DawnTestParam newTestParam = originParam;
-    newTestParam.forceEnabledWorkaround = workaround;
+    newTestParam.forceEnabledWorkarounds = forceEnabledWorkarounds;
     return newTestParam;
 }
 
@@ -307,14 +307,13 @@ void DawnTest::SetUp() {
 
     mPCIInfo = backendAdapter.GetPCIInfo();
 
-    const char* forceEnabledWorkaround = GetParam().forceEnabledWorkaround;
-    if (forceEnabledWorkaround != nullptr) {
+    DawnDevice backendDevice;
+    for (const char* forceEnabledWorkaround : GetParam().forceEnabledWorkarounds) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
-        dawn_native::DeviceDescriptor deviceDescriptor = InitWorkaround(forceEnabledWorkaround);
-        backendDevice = backendAdapter.CreateDevice(&deviceDescriptor);
-    } else {
-        backendDevice = backendAdapter.CreateDevice(nullptr);
     }
+    dawn_native::DeviceDescriptor deviceDescriptor;
+    deviceDescriptor.forceEnabledToggles = GetParam().forceEnabledWorkarounds;
+    backendDevice = backendAdapter.CreateDevice(&deviceDescriptor);
 
     backendProcs = dawn_native::GetProcs();
 
@@ -639,8 +638,8 @@ namespace detail {
         std::ostringstream ostream;
         ostream << ParamName(info.param.backendType);
 
-        if (info.param.forceEnabledWorkaround != nullptr) {
-            ostream << "_" << info.param.forceEnabledWorkaround;
+        for (const char* forceEnabledWorkaround : info.param.forceEnabledWorkarounds) {
+            ostream << "_" << forceEnabledWorkaround;
         }
 
         return ostream.str();

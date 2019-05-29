@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 // Getting data back from Dawn is done in an async manners so all expectations are "deferred"
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
@@ -63,34 +64,33 @@ struct RGBA8 {
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
 
 struct DawnTestParam {
-    constexpr explicit DawnTestParam(dawn_native::BackendType backendType)
-        : backendType(backendType) {
+    explicit DawnTestParam(dawn_native::BackendType backendType) : backendType(backendType) {
     }
 
     dawn_native::BackendType backendType;
 
-    // TODO(jiawei.shao@intel.com): support enabling and disabling multiple workarounds.
-    const char* forceEnabledWorkaround = nullptr;
+    std::vector<const char*> forceEnabledWorkarounds;
 };
 
 // Shorthands for backend types used in the DAWN_INSTANTIATE_TEST
-static constexpr DawnTestParam D3D12Backend(dawn_native::BackendType::D3D12);
-static constexpr DawnTestParam MetalBackend(dawn_native::BackendType::Metal);
-static constexpr DawnTestParam OpenGLBackend(dawn_native::BackendType::OpenGL);
-static constexpr DawnTestParam VulkanBackend(dawn_native::BackendType::Vulkan);
+extern const DawnTestParam D3D12Backend;
+extern const DawnTestParam MetalBackend;
+extern const DawnTestParam OpenGLBackend;
+extern const DawnTestParam VulkanBackend;
 
-DawnTestParam ForceWorkaround(const DawnTestParam& originParam, const char* workaround);
+DawnTestParam ForceWorkarounds(const DawnTestParam& originParam,
+                               std::initializer_list<const char*> forceEnabledWorkarounds);
 
 struct GLFWwindow;
 
 namespace utils {
     class BackendBinding;
     class TerribleCommandBuffer;
-}
+}  // namespace utils
 
 namespace detail {
     class Expectation;
-}
+}  // namespace detail
 
 namespace dawn_wire {
     class WireClient;
