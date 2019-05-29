@@ -361,8 +361,7 @@ void DawnTest::SetUp() {
         static_cast<dawn::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
         dawn::TextureUsageBit::OutputAttachment, 400, 400);
 
-    device.SetErrorCallback(OnDeviceError,
-                            static_cast<DawnCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+    device.SetErrorCallback(OnDeviceError, this);
 }
 
 void DawnTest::TearDown() {
@@ -387,8 +386,8 @@ bool DawnTest::EndExpectDeviceError() {
 }
 
 // static
-void DawnTest::OnDeviceError(const char* message, DawnCallbackUserdata userdata) {
-    DawnTest* self = reinterpret_cast<DawnTest*>(static_cast<uintptr_t>(userdata));
+void DawnTest::OnDeviceError(const char* message, void* userdata) {
+    DawnTest* self = static_cast<DawnTest*>(userdata);
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
     ASSERT_FALSE(self->mError) << "Got two errors in expect block";
@@ -520,11 +519,10 @@ void DawnTest::MapSlotsSynchronously() {
 
     // Map all readback slots
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
-        auto userdata = new MapReadUserdata{this, i};
+        MapReadUserdata* userdata = new MapReadUserdata{this, i};
 
         auto& slot = mReadbackSlots[i];
-        slot.buffer.MapReadAsync(SlotMapReadCallback, static_cast<dawn::CallbackUserdata>(
-                                                          reinterpret_cast<uintptr_t>(userdata)));
+        slot.buffer.MapReadAsync(SlotMapReadCallback, userdata);
     }
 
     // Busy wait until all map operations are done.
@@ -537,10 +535,10 @@ void DawnTest::MapSlotsSynchronously() {
 void DawnTest::SlotMapReadCallback(DawnBufferMapAsyncStatus status,
                                    const void* data,
                                    uint64_t,
-                                   DawnCallbackUserdata userdata_) {
+                                   void* userdata_) {
     DAWN_ASSERT(status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
 
-    auto userdata = reinterpret_cast<MapReadUserdata*>(static_cast<uintptr_t>(userdata_));
+    auto userdata = static_cast<MapReadUserdata*>(userdata_);
     userdata->test->mReadbackSlots[userdata->slot].mappedData = data;
     userdata->test->mNumPendingMapOperations--;
 

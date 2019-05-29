@@ -26,14 +26,14 @@ class MockBufferMapReadCallback {
                    void(DawnBufferMapAsyncStatus status,
                         const uint32_t* ptr,
                         uint64_t dataLength,
-                        DawnCallbackUserdata userdata));
+                        void* userdata));
 };
 
 static std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
 static void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
                                         const void* ptr,
                                         uint64_t dataLength,
-                                        DawnCallbackUserdata userdata) {
+                                        void* userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapReadCallback->Call(status, reinterpret_cast<const uint32_t*>(ptr), dataLength,
                                     userdata);
@@ -45,14 +45,14 @@ class MockBufferMapWriteCallback {
                    void(DawnBufferMapAsyncStatus status,
                         uint32_t* ptr,
                         uint64_t dataLength,
-                        DawnCallbackUserdata userdata));
+                        void* userdata));
 };
 
 static std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;
 static void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
                                          void* ptr,
                                          uint64_t dataLength,
-                                         DawnCallbackUserdata userdata) {
+                                         void* userdata) {
     // Assume the data is uint32_t to make writing matchers easier
     mockBufferMapWriteCallback->Call(status, reinterpret_cast<uint32_t*>(ptr), dataLength,
                                      userdata);
@@ -166,11 +166,10 @@ TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
 TEST_F(BufferValidationTest, MapReadSuccess) {
     dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40598;
-    buf.MapReadAsync(ToMockBufferMapReadCallback, userdata);
+    buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
         .Times(1);
     queue.Submit(0, nullptr);
 
@@ -181,11 +180,10 @@ TEST_F(BufferValidationTest, MapReadSuccess) {
 TEST_F(BufferValidationTest, MapWriteSuccess) {
     dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40598;
-    buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata);
+    buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
         .Times(1);
     queue.Submit(0, nullptr);
 
@@ -208,12 +206,11 @@ TEST_F(BufferValidationTest, MapReadWrongUsage) {
 
     dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
-    dawn::CallbackUserdata userdata = 40600;
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, _))
         .Times(1);
 
-    ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, userdata));
+    ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr));
 }
 
 // Test map writing a buffer with wrong current usage
@@ -224,29 +221,26 @@ TEST_F(BufferValidationTest, MapWriteWrongUsage) {
 
     dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
-    dawn::CallbackUserdata userdata = 40600;
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, _))
         .Times(1);
 
-    ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata));
+    ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
 }
 
 // Test map reading a buffer that is already mapped
 TEST_F(BufferValidationTest, MapReadAlreadyMapped) {
     dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    dawn::CallbackUserdata userdata1 = 40601;
-    buf.MapReadAsync(ToMockBufferMapReadCallback, userdata1);
+    buf.MapReadAsync(ToMockBufferMapReadCallback, this + 0);
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata1))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, this + 0))
         .Times(1);
 
-    dawn::CallbackUserdata userdata2 = 40602;
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, userdata2))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, this + 1))
         .Times(1);
-    ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, userdata2));
+    ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, this + 1));
 
     queue.Submit(0, nullptr);
 }
@@ -255,17 +249,15 @@ TEST_F(BufferValidationTest, MapReadAlreadyMapped) {
 TEST_F(BufferValidationTest, MapWriteAlreadyMapped) {
     dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    dawn::CallbackUserdata userdata1 = 40601;
-    buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata1);
+    buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 0);
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata1))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, this + 0))
         .Times(1);
 
-    dawn::CallbackUserdata userdata2 = 40602;
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, userdata2))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, this + 1))
         .Times(1);
-    ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata2));
+    ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 1));
 
     queue.Submit(0, nullptr);
 }
@@ -275,11 +267,10 @@ TEST_F(BufferValidationTest, MapWriteAlreadyMapped) {
 TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
     dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40603;
-    buf.MapReadAsync(ToMockBufferMapReadCallback, userdata);
+    buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, _))
         .Times(1);
     buf.Unmap();
 
@@ -292,11 +283,10 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
 TEST_F(BufferValidationTest, MapWriteUnmapBeforeResult) {
     dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40603;
-    buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata);
+    buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, _))
         .Times(1);
     buf.Unmap();
 
@@ -312,11 +302,10 @@ TEST_F(BufferValidationTest, DISABLED_MapReadDestroyBeforeResult) {
     {
         dawn::Buffer buf = CreateMapReadBuffer(4);
 
-        dawn::CallbackUserdata userdata = 40604;
-        buf.MapReadAsync(ToMockBufferMapReadCallback, userdata);
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
         EXPECT_CALL(*mockBufferMapReadCallback,
-                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, userdata))
+                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, _))
             .Times(1);
     }
 
@@ -332,11 +321,10 @@ TEST_F(BufferValidationTest, DISABLED_MapWriteDestroyBeforeResult) {
     {
         dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-        dawn::CallbackUserdata userdata = 40604;
-        buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata);
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
         EXPECT_CALL(*mockBufferMapWriteCallback,
-                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, userdata))
+                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, _))
             .Times(1);
     }
 
@@ -350,20 +338,17 @@ TEST_F(BufferValidationTest, DISABLED_MapWriteDestroyBeforeResult) {
 TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
     dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40605;
-    buf.MapReadAsync(ToMockBufferMapReadCallback, userdata);
+    buf.MapReadAsync(ToMockBufferMapReadCallback, this + 0);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, this + 0))
         .Times(1);
     buf.Unmap();
 
-    userdata ++;
-
-    buf.MapReadAsync(ToMockBufferMapReadCallback, userdata);
+    buf.MapReadAsync(ToMockBufferMapReadCallback, this + 1);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, this + 1))
         .Times(1);
     queue.Submit(0, nullptr);
 }
@@ -374,20 +359,17 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
 TEST_F(BufferValidationTest, MapWriteUnmapBeforeResultThenMapAgain) {
     dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40605;
-    buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata);
+    buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 0);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, this + 0))
         .Times(1);
     buf.Unmap();
 
-    userdata ++;
-
-    buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata);
+    buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 1);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, this + 1))
         .Times(1);
     queue.Submit(0, nullptr);
 }
@@ -396,11 +378,10 @@ TEST_F(BufferValidationTest, MapWriteUnmapBeforeResultThenMapAgain) {
 TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
     dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40678;
-    buf.MapReadAsync(ToMockBufferMapReadCallback, userdata);
+    buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
         .WillOnce(InvokeWithoutArgs([&]() { buf.Unmap(); }));
 
     queue.Submit(0, nullptr);
@@ -410,11 +391,10 @@ TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
 TEST_F(BufferValidationTest, UnmapInsideMapWriteCallback) {
     dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40678;
-    buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata);
+    buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
         .WillOnce(InvokeWithoutArgs([&]() { buf.Unmap(); }));
 
     queue.Submit(0, nullptr);
@@ -424,11 +404,10 @@ TEST_F(BufferValidationTest, UnmapInsideMapWriteCallback) {
 TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
     dawn::Buffer buf = CreateMapReadBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40679;
-    buf.MapReadAsync(ToMockBufferMapReadCallback, userdata);
+    buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
         .WillOnce(InvokeWithoutArgs([&]() { buf = dawn::Buffer(); }));
 
     queue.Submit(0, nullptr);
@@ -438,11 +417,10 @@ TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
 TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
     dawn::Buffer buf = CreateMapWriteBuffer(4);
 
-    dawn::CallbackUserdata userdata = 40679;
-    buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata);
+    buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, userdata))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
         .WillOnce(InvokeWithoutArgs([&]() { buf = dawn::Buffer(); }));
 
     queue.Submit(0, nullptr);
@@ -530,12 +508,12 @@ TEST_F(BufferValidationTest, DestroyUnmappedBuffer) {
 TEST_F(BufferValidationTest, DestroyMappedBuffer) {
     {
         dawn::Buffer buf = CreateMapReadBuffer(4);
-        buf.MapReadAsync(ToMockBufferMapReadCallback, 30303);
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
         buf.Destroy();
     }
     {
         dawn::Buffer buf = CreateMapWriteBuffer(4);
-        buf.MapWriteAsync(ToMockBufferMapWriteCallback, 30233);
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
         buf.Destroy();
     }
 }
@@ -544,22 +522,20 @@ TEST_F(BufferValidationTest, DestroyMappedBuffer) {
 TEST_F(BufferValidationTest, DestroyMappedBufferCausesImplicitUnmap) {
     {
         dawn::Buffer buf = CreateMapReadBuffer(4);
-        dawn::CallbackUserdata userdata = 40598;
-        buf.MapReadAsync(ToMockBufferMapReadCallback, userdata);
+        buf.MapReadAsync(ToMockBufferMapReadCallback, this + 0);
         // Buffer is destroyed. Callback should be called with UNKNOWN status
         EXPECT_CALL(*mockBufferMapReadCallback,
-                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, userdata))
+                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, this + 0))
             .Times(1);
         buf.Destroy();
         queue.Submit(0, nullptr);
     }
     {
         dawn::Buffer buf = CreateMapWriteBuffer(4);
-        dawn::CallbackUserdata userdata = 23980;
-        buf.MapWriteAsync(ToMockBufferMapWriteCallback, userdata);
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 1);
         // Buffer is destroyed. Callback should be called with UNKNOWN status
         EXPECT_CALL(*mockBufferMapWriteCallback,
-                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, userdata))
+                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, this + 1))
             .Times(1);
         buf.Destroy();
         queue.Submit(0, nullptr);
@@ -592,12 +568,12 @@ TEST_F(BufferValidationTest, MapDestroyedBuffer) {
     {
         dawn::Buffer buf = CreateMapReadBuffer(4);
         buf.Destroy();
-        ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, 11303));
+        ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr));
     }
     {
         dawn::Buffer buf = CreateMapWriteBuffer(4);
         buf.Destroy();
-        ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, 56303));
+        ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
     }
 }
 
@@ -613,14 +589,14 @@ TEST_F(BufferValidationTest, SetSubDataDestroyedBuffer) {
 TEST_F(BufferValidationTest, MapMappedbuffer) {
     {
         dawn::Buffer buf = CreateMapReadBuffer(4);
-        buf.MapReadAsync(ToMockBufferMapReadCallback, 43309);
-        ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, 34309));
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
+        ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr));
         queue.Submit(0, nullptr);
     }
     {
         dawn::Buffer buf = CreateMapWriteBuffer(4);
-        buf.MapWriteAsync(ToMockBufferMapWriteCallback, 20301);
-        ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, 40303));
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
+        ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
         queue.Submit(0, nullptr);
     }
 }
@@ -629,14 +605,14 @@ TEST_F(BufferValidationTest, MapMappedbuffer) {
 TEST_F(BufferValidationTest, SetSubDataMappedBuffer) {
     {
         dawn::Buffer buf = CreateMapReadBuffer(4);
-        buf.MapReadAsync(ToMockBufferMapReadCallback, 42899);
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
         uint8_t foo = 0;
         ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
         queue.Submit(0, nullptr);
     }
     {
         dawn::Buffer buf = CreateMapWriteBuffer(4);
-        buf.MapWriteAsync(ToMockBufferMapWriteCallback, 40329);
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
         uint8_t foo = 0;
         ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
         queue.Submit(0, nullptr);
@@ -675,7 +651,7 @@ TEST_F(BufferValidationTest, SubmitMappedBuffer) {
         dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
         dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
 
-        bufA.MapWriteAsync(ToMockBufferMapWriteCallback, 40329);
+        bufA.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
@@ -687,7 +663,7 @@ TEST_F(BufferValidationTest, SubmitMappedBuffer) {
         dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
         dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
 
-        bufB.MapReadAsync(ToMockBufferMapReadCallback, 11329);
+        bufB.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
@@ -729,7 +705,7 @@ TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
         dawn::Buffer buf = CreateMapReadBuffer(4);
         // Buffer starts unmapped. Unmap should succeed.
         buf.Unmap();
-        buf.MapReadAsync(ToMockBufferMapReadCallback, 30603);
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
         buf.Unmap();
         // Unmapping twice should succeed
         buf.Unmap();
@@ -738,7 +714,7 @@ TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
         dawn::Buffer buf = CreateMapWriteBuffer(4);
         // Buffer starts unmapped. Unmap should succeed.
         buf.Unmap();
-        buf.MapWriteAsync(ToMockBufferMapWriteCallback, 23890);
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
         // Unmapping twice should succeed
         buf.Unmap();
         buf.Unmap();

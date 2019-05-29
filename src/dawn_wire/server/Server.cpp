@@ -22,8 +22,7 @@ namespace dawn_wire { namespace server {
         auto* deviceData = DeviceObjects().Allocate(1);
         deviceData->handle = device;
 
-        auto userdata = static_cast<DawnCallbackUserdata>(reinterpret_cast<intptr_t>(this));
-        mProcs.deviceSetErrorCallback(device, ForwardDeviceError, userdata);
+        mProcs.deviceSetErrorCallback(device, ForwardDeviceError, this);
     }
 
     Server::~Server() {

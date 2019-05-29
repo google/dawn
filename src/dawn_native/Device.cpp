@@ -75,8 +75,7 @@ namespace dawn_native {
         }
     }
 
-    void DeviceBase::SetErrorCallback(dawn::DeviceErrorCallback callback,
-                                      dawn::CallbackUserdata userdata) {
+    void DeviceBase::SetErrorCallback(dawn::DeviceErrorCallback callback, void* userdata) {
         mErrorCallback = callback;
         mErrorUserdata = userdata;
     }

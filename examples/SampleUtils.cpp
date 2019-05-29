@@ -31,7 +31,7 @@
 #include <cstring>
 #include <iostream>
 
-void PrintDeviceError(const char* message, dawn::CallbackUserdata) {
+void PrintDeviceError(const char* message, void*) {
     std::cout << "Device error: " << message << std::endl;
 }
 
@@ -136,7 +136,7 @@ dawn::Device CreateCppDawnDevice() {
     }
 
     dawnSetProcs(&procs);
-    procs.deviceSetErrorCallback(cDevice, PrintDeviceError, 0);
+    procs.deviceSetErrorCallback(cDevice, PrintDeviceError, nullptr);
     return dawn::Device::Acquire(cDevice);
 }
 

@@ -211,8 +211,7 @@ namespace dawn_native {
         }
     }
 
-    void BufferBase::MapReadAsync(DawnBufferMapReadCallback callback,
-                                  DawnCallbackUserdata userdata) {
+    void BufferBase::MapReadAsync(DawnBufferMapReadCallback callback, void* userdata) {
         if (GetDevice()->ConsumedError(ValidateMap(dawn::BufferUsageBit::MapRead))) {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata);
             return;
@@ -250,8 +249,7 @@ namespace dawn_native {
         return {};
     }
 
-    void BufferBase::MapWriteAsync(DawnBufferMapWriteCallback callback,
-                                   DawnCallbackUserdata userdata) {
+    void BufferBase::MapWriteAsync(DawnBufferMapWriteCallback callback, void* userdata) {
         if (GetDevice()->ConsumedError(ValidateMap(dawn::BufferUsageBit::MapWrite))) {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata);
             return;

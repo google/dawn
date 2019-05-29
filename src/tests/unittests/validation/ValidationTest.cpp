@@ -40,7 +40,7 @@ ValidationTest::ValidationTest() {
     DawnProcTable procs = dawn_native::GetProcs();
     dawnSetProcs(&procs);
 
-    device.SetErrorCallback(ValidationTest::OnDeviceError, static_cast<DawnCallbackUserdata>(reinterpret_cast<uintptr_t>(this)));
+    device.SetErrorCallback(ValidationTest::OnDeviceError, this);
 }
 
 ValidationTest::~ValidationTest() {
@@ -67,8 +67,8 @@ std::string ValidationTest::GetLastDeviceErrorMessage() const {
 }
 
 // static
-void ValidationTest::OnDeviceError(const char* message, DawnCallbackUserdata userdata) {
-    auto self = reinterpret_cast<ValidationTest*>(static_cast<uintptr_t>(userdata));
+void ValidationTest::OnDeviceError(const char* message, void* userdata) {
+    auto self = static_cast<ValidationTest*>(userdata);
     self->mDeviceErrorMessage = message;
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;

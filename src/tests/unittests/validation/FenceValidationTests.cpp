@@ -20,7 +20,7 @@ using namespace testing;
 
 class MockFenceOnCompletionCallback {
   public:
-    MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, DawnCallbackUserdata userdata));
+    MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, void* userdata));
 };
 
 struct FenceOnCompletionExpectation {
@@ -30,8 +30,7 @@ struct FenceOnCompletionExpectation {
 };
 
 static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
-static void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status,
-                                            DawnCallbackUserdata userdata) {
+static void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status, void* userdata) {
     mockFenceOnCompletionCallback->Call(status, userdata);
 }
 
@@ -42,11 +41,9 @@ class FenceValidationTest : public ValidationTest {
         expectation->fence = fence;
         expectation->value = value;
         expectation->status = status;
-        DawnCallbackUserdata userdata =
-            static_cast<DawnCallbackUserdata>(reinterpret_cast<uintptr_t>(expectation));
 
-        EXPECT_CALL(*mockFenceOnCompletionCallback, Call(status, userdata)).Times(1);
-        fence.OnCompletion(value, ToMockFenceOnCompletionCallback, userdata);
+        EXPECT_CALL(*mockFenceOnCompletionCallback, Call(status, expectation)).Times(1);
+        fence.OnCompletion(value, ToMockFenceOnCompletionCallback, expectation);
     }
 
     void Flush() {
@@ -98,13 +95,15 @@ TEST_F(FenceValidationTest, OnCompletionImmediate) {
     descriptor.initialValue = 1;
     dawn::Fence fence = queue.CreateFence(&descriptor);
 
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, 0))
+    EXPECT_CALL(*mockFenceOnCompletionCallback,
+                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 0))
         .Times(1);
-    fence.OnCompletion(0u, ToMockFenceOnCompletionCallback, 0);
+    fence.OnCompletion(0u, ToMockFenceOnCompletionCallback, this + 0);
 
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, 1))
+    EXPECT_CALL(*mockFenceOnCompletionCallback,
+                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 1))
         .Times(1);
-    fence.OnCompletion(1u, ToMockFenceOnCompletionCallback, 1);
+    fence.OnCompletion(1u, ToMockFenceOnCompletionCallback, this + 1);
 }
 
 // Test setting OnCompletion handlers for values > signaled value
@@ -114,15 +113,15 @@ TEST_F(FenceValidationTest, OnCompletionLargerThanSignaled) {
     dawn::Fence fence = queue.CreateFence(&descriptor);
 
     // Cannot signal for values > signaled value
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_ERROR, 0))
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_ERROR, nullptr))
         .Times(1);
-    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, 0));
+    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, nullptr));
 
     // Can set handler after signaling
     queue.Signal(fence, 2);
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, 0))
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, nullptr))
         .Times(1);
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, 0);
+    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, nullptr);
 
     Flush();
 }
@@ -133,9 +132,9 @@ TEST_F(FenceValidationTest, GetCompletedValueInsideCallback) {
     dawn::Fence fence = queue.CreateFence(&descriptor);
 
     queue.Signal(fence, 3);
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, 0);
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, 0))
-        .WillOnce(Invoke([&](DawnFenceCompletionStatus status, DawnCallbackUserdata userdata) {
+    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, nullptr);
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, nullptr))
+        .WillOnce(Invoke([&](DawnFenceCompletionStatus status, void* userdata) {
             EXPECT_EQ(fence.GetCompletedValue(), 3u);
         }));
 
@@ -148,8 +147,8 @@ TEST_F(FenceValidationTest, GetCompletedValueAfterCallback) {
     dawn::Fence fence = queue.CreateFence(&descriptor);
 
     queue.Signal(fence, 2);
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, 0);
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, 0))
+    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, nullptr);
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, nullptr))
         .Times(1);
 
     Flush();

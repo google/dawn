@@ -65,7 +65,7 @@ namespace dawn_native {
 
     void FenceBase::OnCompletion(uint64_t value,
                                  dawn::FenceOnCompletionCallback callback,
-                                 dawn::CallbackUserdata userdata) {
+                                 void* userdata) {
         if (GetDevice()->ConsumedError(ValidateOnCompletion(value))) {
             callback(DAWN_FENCE_COMPLETION_STATUS_ERROR, userdata);
             return;

@@ -122,7 +122,7 @@ namespace dawn_native {
 
         void Tick();
 
-        void SetErrorCallback(dawn::DeviceErrorCallback callback, dawn::CallbackUserdata userdata);
+        void SetErrorCallback(dawn::DeviceErrorCallback callback, void* userdata);
         void Reference();
         void Release();
 
@@ -204,7 +204,7 @@ namespace dawn_native {
         std::unique_ptr<FenceSignalTracker> mFenceSignalTracker;
 
         dawn::DeviceErrorCallback mErrorCallback = nullptr;
-        dawn::CallbackUserdata mErrorUserdata = 0;
+        void* mErrorUserdata = 0;
         uint32_t mRefCount = 1;
 
         TogglesSet mTogglesSet;

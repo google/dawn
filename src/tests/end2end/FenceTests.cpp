@@ -20,12 +20,11 @@
 
 class MockFenceOnCompletionCallback {
   public:
-    MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, DawnCallbackUserdata userdata));
+    MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, void* userdata));
 };
 
 static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
-static void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status,
-                                            DawnCallbackUserdata userdata) {
+static void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status, void* userdata) {
     mockFenceOnCompletionCallback->Call(status, userdata);
 }
 class FenceTests : public DawnTest {
@@ -89,35 +88,30 @@ TEST_P(FenceTests, OnCompletionOrdering) {
 
     queue.Signal(fence, 4);
 
-    DawnCallbackUserdata userdata0 = 1282;
-    DawnCallbackUserdata userdata1 = 4382;
-    DawnCallbackUserdata userdata2 = 1211;
-    DawnCallbackUserdata userdata3 = 1882;
-
     {
         testing::InSequence s;
 
         EXPECT_CALL(*mockFenceOnCompletionCallback,
-                    Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata0))
+                    Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 0))
             .Times(1);
 
         EXPECT_CALL(*mockFenceOnCompletionCallback,
-                    Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata1))
+                    Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 1))
             .Times(1);
 
         EXPECT_CALL(*mockFenceOnCompletionCallback,
-                    Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata2))
+                    Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 2))
             .Times(1);
 
         EXPECT_CALL(*mockFenceOnCompletionCallback,
-                    Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata3))
+                    Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 3))
             .Times(1);
     }
 
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, userdata2);
-    fence.OnCompletion(0u, ToMockFenceOnCompletionCallback, userdata0);
-    fence.OnCompletion(3u, ToMockFenceOnCompletionCallback, userdata3);
-    fence.OnCompletion(1u, ToMockFenceOnCompletionCallback, userdata1);
+    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, this + 2);
+    fence.OnCompletion(0u, ToMockFenceOnCompletionCallback, this + 0);
+    fence.OnCompletion(3u, ToMockFenceOnCompletionCallback, this + 3);
+    fence.OnCompletion(1u, ToMockFenceOnCompletionCallback, this + 1);
 
     WaitForCompletedValue(fence, 4);
 }
@@ -131,11 +125,9 @@ TEST_P(FenceTests, MultipleSignalOnCompletion) {
     queue.Signal(fence, 2);
     queue.Signal(fence, 4);
 
-    DawnCallbackUserdata userdata = 1234;
-    EXPECT_CALL(*mockFenceOnCompletionCallback,
-                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata))
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, nullptr))
         .Times(1);
-    fence.OnCompletion(3u, ToMockFenceOnCompletionCallback, userdata);
+    fence.OnCompletion(3u, ToMockFenceOnCompletionCallback, nullptr);
 
     WaitForCompletedValue(fence, 4);
 }
@@ -148,31 +140,26 @@ TEST_P(FenceTests, OnCompletionMultipleCallbacks) {
 
     queue.Signal(fence, 4);
 
-    DawnCallbackUserdata userdata0 = 2341;
-    DawnCallbackUserdata userdata1 = 4598;
-    DawnCallbackUserdata userdata2 = 5690;
-    DawnCallbackUserdata userdata3 = 2783;
-
     EXPECT_CALL(*mockFenceOnCompletionCallback,
-                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata0))
+                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 0))
         .Times(1);
 
     EXPECT_CALL(*mockFenceOnCompletionCallback,
-                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata1))
+                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 1))
         .Times(1);
 
     EXPECT_CALL(*mockFenceOnCompletionCallback,
-                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata2))
+                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 2))
         .Times(1);
 
     EXPECT_CALL(*mockFenceOnCompletionCallback,
-                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata3))
+                Call(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, this + 3))
         .Times(1);
 
-    fence.OnCompletion(4u, ToMockFenceOnCompletionCallback, userdata0);
-    fence.OnCompletion(4u, ToMockFenceOnCompletionCallback, userdata1);
-    fence.OnCompletion(4u, ToMockFenceOnCompletionCallback, userdata2);
-    fence.OnCompletion(4u, ToMockFenceOnCompletionCallback, userdata3);
+    fence.OnCompletion(4u, ToMockFenceOnCompletionCallback, this + 0);
+    fence.OnCompletion(4u, ToMockFenceOnCompletionCallback, this + 1);
+    fence.OnCompletion(4u, ToMockFenceOnCompletionCallback, this + 2);
+    fence.OnCompletion(4u, ToMockFenceOnCompletionCallback, this + 3);
 
     WaitForCompletedValue(fence, 4u);
 }
@@ -192,31 +179,26 @@ TEST_P(FenceTests, DISABLED_DestroyBeforeOnCompletionEnd) {
 
         queue.Signal(testFence, 4);
 
-        DawnCallbackUserdata userdata0 = 1341;
-        DawnCallbackUserdata userdata1 = 1598;
-        DawnCallbackUserdata userdata2 = 1690;
-        DawnCallbackUserdata userdata3 = 1783;
-
         EXPECT_CALL(*mockFenceOnCompletionCallback,
-                    Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, userdata0))
+                    Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, this + 0))
             .Times(1);
 
         EXPECT_CALL(*mockFenceOnCompletionCallback,
-                    Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, userdata1))
+                    Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, this + 1))
             .Times(1);
 
         EXPECT_CALL(*mockFenceOnCompletionCallback,
-                    Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, userdata2))
+                    Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, this + 2))
             .Times(1);
 
         EXPECT_CALL(*mockFenceOnCompletionCallback,
-                    Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, userdata3))
+                    Call(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, this + 3))
             .Times(1);
 
-        testFence.OnCompletion(1u, ToMockFenceOnCompletionCallback, userdata0);
-        testFence.OnCompletion(2u, ToMockFenceOnCompletionCallback, userdata1);
-        testFence.OnCompletion(2u, ToMockFenceOnCompletionCallback, userdata2);
-        testFence.OnCompletion(3u, ToMockFenceOnCompletionCallback, userdata3);
+        testFence.OnCompletion(1u, ToMockFenceOnCompletionCallback, this + 0);
+        testFence.OnCompletion(2u, ToMockFenceOnCompletionCallback, this + 1);
+        testFence.OnCompletion(2u, ToMockFenceOnCompletionCallback, this + 2);
+        testFence.OnCompletion(3u, ToMockFenceOnCompletionCallback, this + 3);
     }
 
     // Wait for another fence to be sure all callbacks have cleared

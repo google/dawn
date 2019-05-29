@@ -48,17 +48,16 @@ namespace dawn_wire { namespace server {
         void* GetCmdSpace(size_t size);
 
         // Forwarding callbacks
-        static void ForwardDeviceError(const char* message, DawnCallbackUserdata userdata);
+        static void ForwardDeviceError(const char* message, void* userdata);
         static void ForwardBufferMapReadAsync(DawnBufferMapAsyncStatus status,
                                               const void* ptr,
                                               uint64_t dataLength,
-                                              DawnCallbackUserdata userdata);
+                                              void* userdata);
         static void ForwardBufferMapWriteAsync(DawnBufferMapAsyncStatus status,
                                                void* ptr,
                                                uint64_t dataLength,
-                                               DawnCallbackUserdata userdata);
-        static void ForwardFenceCompletedValue(DawnFenceCompletionStatus status,
-                                               DawnCallbackUserdata userdata);
+                                               void* userdata);
+        static void ForwardFenceCompletedValue(DawnFenceCompletionStatus status, void* userdata);
 
         // Error callbacks
         void OnDeviceError(const char* message);

@@ -48,12 +48,16 @@
 {% endfor %}
 
 // Custom types depending on the target language
-typedef uint64_t DawnCallbackUserdata;
-typedef void (*DawnDeviceErrorCallback)(const char* message, DawnCallbackUserdata userdata);
-typedef void (*DawnBufferMapReadCallback)(DawnBufferMapAsyncStatus status, const void* data, uint64_t dataLength, DawnCallbackUserdata userdata);
-typedef void (*DawnBufferMapWriteCallback)(DawnBufferMapAsyncStatus status, void* data, uint64_t dataLength, DawnCallbackUserdata userdata);
-typedef void (*DawnFenceOnCompletionCallback)(DawnFenceCompletionStatus status,
-                                              DawnCallbackUserdata userdata);
+typedef void (*DawnDeviceErrorCallback)(const char* message, void* userdata);
+typedef void (*DawnBufferMapReadCallback)(DawnBufferMapAsyncStatus status,
+                                          const void* data,
+                                          uint64_t dataLength,
+                                          void* userdata);
+typedef void (*DawnBufferMapWriteCallback)(DawnBufferMapAsyncStatus status,
+                                           void* data,
+                                           uint64_t dataLength,
+                                           void* userdata);
+typedef void (*DawnFenceOnCompletionCallback)(DawnFenceCompletionStatus status, void* userdata);
 
 #ifdef __cplusplus
 extern "C" {

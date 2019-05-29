@@ -58,8 +58,8 @@ namespace dawn_native {
 
         // Dawn API
         void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);
-        void MapReadAsync(DawnBufferMapReadCallback callback, DawnCallbackUserdata userdata);
-        void MapWriteAsync(DawnBufferMapWriteCallback callback, DawnCallbackUserdata userdata);
+        void MapReadAsync(DawnBufferMapReadCallback callback, void* userdata);
+        void MapWriteAsync(DawnBufferMapWriteCallback callback, void* userdata);
         void Unmap();
         void Destroy();
 
@@ -95,7 +95,7 @@ namespace dawn_native {
 
         DawnBufferMapReadCallback mMapReadCallback = nullptr;
         DawnBufferMapWriteCallback mMapWriteCallback = nullptr;
-        DawnCallbackUserdata mMapUserdata = 0;
+        void* mMapUserdata = 0;
         uint32_t mMapSerial = 0;
 
         BufferState mState;

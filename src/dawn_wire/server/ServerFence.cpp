@@ -18,9 +18,8 @@
 
 namespace dawn_wire { namespace server {
 
-    void Server::ForwardFenceCompletedValue(DawnFenceCompletionStatus status,
-                                            DawnCallbackUserdata userdata) {
-        auto data = reinterpret_cast<FenceCompletionUserdata*>(static_cast<uintptr_t>(userdata));
+    void Server::ForwardFenceCompletedValue(DawnFenceCompletionStatus status, void* userdata) {
+        auto data = static_cast<FenceCompletionUserdata*>(userdata);
         data->server->OnFenceCompletedValueUpdated(status, data);
     }
 

@@ -50,7 +50,9 @@ void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, DawnDevice* d
     {% endfor %}
 }
 
-void ProcTableAsClass::DeviceSetErrorCallback(DawnDevice self, DawnDeviceErrorCallback callback, DawnCallbackUserdata userdata) {
+void ProcTableAsClass::DeviceSetErrorCallback(DawnDevice self,
+                                              DawnDeviceErrorCallback callback,
+                                              void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->deviceErrorCallback = callback;
     object->userdata1 = userdata;
@@ -58,7 +60,9 @@ void ProcTableAsClass::DeviceSetErrorCallback(DawnDevice self, DawnDeviceErrorCa
     OnDeviceSetErrorCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapReadAsync(DawnBuffer self, DawnBufferMapReadCallback callback, DawnCallbackUserdata userdata) {
+void ProcTableAsClass::BufferMapReadAsync(DawnBuffer self,
+                                          DawnBufferMapReadCallback callback,
+                                          void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapReadCallback = callback;
     object->userdata1 = userdata;
@@ -66,7 +70,9 @@ void ProcTableAsClass::BufferMapReadAsync(DawnBuffer self, DawnBufferMapReadCall
     OnBufferMapReadAsyncCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapWriteAsync(DawnBuffer self, DawnBufferMapWriteCallback callback, DawnCallbackUserdata userdata) {
+void ProcTableAsClass::BufferMapWriteAsync(DawnBuffer self,
+                                           DawnBufferMapWriteCallback callback,
+                                           void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapWriteCallback = callback;
     object->userdata1 = userdata;
@@ -77,7 +83,7 @@ void ProcTableAsClass::BufferMapWriteAsync(DawnBuffer self, DawnBufferMapWriteCa
 void ProcTableAsClass::FenceOnCompletion(DawnFence self,
                                          uint64_t value,
                                          DawnFenceOnCompletionCallback callback,
-                                         DawnCallbackUserdata userdata) {
+                                         void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->fenceOnCompletionCallback = callback;
     object->userdata1 = userdata;

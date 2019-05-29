@@ -25,41 +25,41 @@
     ASSERT_TRUE(EndExpectDeviceError());
 
 class ValidationTest : public testing::Test {
-    public:
-        ValidationTest();
-        ~ValidationTest();
+  public:
+    ValidationTest();
+    ~ValidationTest();
 
-        void TearDown() override;
+    void TearDown() override;
 
-        void StartExpectDeviceError();
-        bool EndExpectDeviceError();
-        std::string GetLastDeviceErrorMessage() const;
+    void StartExpectDeviceError();
+    bool EndExpectDeviceError();
+    std::string GetLastDeviceErrorMessage() const;
 
-        // Helper functions to create objects to test validation.
+    // Helper functions to create objects to test validation.
 
-        struct DummyRenderPass : public dawn::RenderPassDescriptor{
-          public:
-            DummyRenderPass(const dawn::Device& device);
-            dawn::Texture attachment;
-            dawn::TextureFormat attachmentFormat;
-            uint32_t width;
-            uint32_t height;
+    struct DummyRenderPass : public dawn::RenderPassDescriptor {
+      public:
+        DummyRenderPass(const dawn::Device& device);
+        dawn::Texture attachment;
+        dawn::TextureFormat attachmentFormat;
+        uint32_t width;
+        uint32_t height;
 
-          private:
-            dawn::RenderPassColorAttachmentDescriptor mColorAttachment;
-            dawn::RenderPassColorAttachmentDescriptor* mColorAttachments[1];
-        };
+      private:
+        dawn::RenderPassColorAttachmentDescriptor mColorAttachment;
+        dawn::RenderPassColorAttachmentDescriptor* mColorAttachments[1];
+    };
 
-    protected:
-        dawn::Device device;
-        dawn_native::Adapter adapter;
-        std::unique_ptr<dawn_native::Instance> instance;
+  protected:
+    dawn::Device device;
+    dawn_native::Adapter adapter;
+    std::unique_ptr<dawn_native::Instance> instance;
 
-    private:
-        static void OnDeviceError(const char* message, DawnCallbackUserdata userdata);
-        std::string mDeviceErrorMessage;
-        bool mExpectError = false;
-        bool mError = false;
+  private:
+    static void OnDeviceError(const char* message, void* userdata);
+    std::string mDeviceErrorMessage;
+    bool mExpectError = false;
+    bool mError = false;
 };
 
 #endif // TESTS_UNITTESTS_VALIDATIONTEST_H_

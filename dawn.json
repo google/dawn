@@ -142,14 +142,14 @@
                 "name": "map read async",
                 "args": [
                     {"name": "callback", "type": "buffer map read callback"},
-                    {"name": "userdata", "type": "callback userdata"}
+                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
             {
                 "name": "map write async",
                 "args": [
                     {"name": "callback", "type": "buffer map write callback"},
-                    {"name": "userdata", "type": "callback userdata"}
+                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
             {
@@ -206,9 +206,6 @@
             {"value": 64, "name": "uniform"},
             {"value": 128, "name": "storage"}
         ]
-    },
-    "callback userdata": {
-        "category": "natively defined"
     },
     "char": {
         "category": "native"
@@ -489,7 +486,7 @@
                 "name": "set error callback",
                 "args": [
                     {"name": "callback", "type": "device error callback"},
-                    {"name": "userdata", "type": "callback userdata"}
+                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             }
         ]
@@ -539,7 +536,7 @@
                 "args": [
                     {"name": "value", "type": "uint64_t"},
                     {"name": "callback", "type": "fence on completion callback"},
-                    {"name": "userdata", "type": "callback userdata"}
+                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             }
         ]

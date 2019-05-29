@@ -21,17 +21,15 @@ class BufferMapReadTests : public DawnTest {
       static void MapReadCallback(DawnBufferMapAsyncStatus status,
                                   const void* data,
                                   uint64_t,
-                                  DawnCallbackUserdata userdata) {
+                                  void* userdata) {
           ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
           ASSERT_NE(nullptr, data);
 
-          auto test = reinterpret_cast<BufferMapReadTests*>(static_cast<uintptr_t>(userdata));
-          test->mappedData = data;
+          static_cast<BufferMapReadTests*>(userdata)->mappedData = data;
       }
 
       const void* MapReadAsyncAndWait(const dawn::Buffer& buffer) {
-          buffer.MapReadAsync(MapReadCallback, static_cast<dawn::CallbackUserdata>(
-                                                   reinterpret_cast<uintptr_t>(this)));
+          buffer.MapReadAsync(MapReadCallback, this);
 
           while (mappedData == nullptr) {
               WaitABit();
@@ -88,17 +86,15 @@ class BufferMapWriteTests : public DawnTest {
       static void MapWriteCallback(DawnBufferMapAsyncStatus status,
                                    void* data,
                                    uint64_t,
-                                   DawnCallbackUserdata userdata) {
+                                   void* userdata) {
           ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
           ASSERT_NE(nullptr, data);
 
-          auto test = reinterpret_cast<BufferMapWriteTests*>(static_cast<uintptr_t>(userdata));
-          test->mappedData = data;
+          static_cast<BufferMapWriteTests*>(userdata)->mappedData = data;
       }
 
       void* MapWriteAsyncAndWait(const dawn::Buffer& buffer) {
-          buffer.MapWriteAsync(MapWriteCallback, static_cast<dawn::CallbackUserdata>(
-                                                     reinterpret_cast<uintptr_t>(this)));
+          buffer.MapWriteAsync(MapWriteCallback, this);
 
           while (mappedData == nullptr) {
               WaitABit();
@@ -301,14 +297,14 @@ TEST_P(CreateBufferMappedTests, CreateThenMapSuccess) {
 
     bool done = false;
     result.buffer.MapWriteAsync(
-        [](DawnBufferMapAsyncStatus status, void* data, uint64_t, DawnCallbackUserdata userdata) {
+        [](DawnBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
             ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
             ASSERT_NE(nullptr, data);
 
-            *reinterpret_cast<uint32_t*>(data) = myData2;
-            *reinterpret_cast<bool*>(static_cast<uintptr_t>(userdata)) = true;
+            *static_cast<uint32_t*>(data) = myData2;
+            *static_cast<bool*>(userdata) = true;
         },
-        static_cast<DawnCallbackUserdata>(reinterpret_cast<uintptr_t>(&done)));
+        &done);
 
     while (!done) {
         WaitABit();
@@ -333,14 +329,13 @@ TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailure) {
     ASSERT_DEVICE_ERROR([&]() {
         bool done = false;
         result.buffer.MapWriteAsync(
-            [](DawnBufferMapAsyncStatus status, void* data, uint64_t,
-               DawnCallbackUserdata userdata) {
+            [](DawnBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
                 ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, status);
                 ASSERT_EQ(nullptr, data);
 
-                *reinterpret_cast<bool*>(static_cast<uintptr_t>(userdata)) = true;
+                *static_cast<bool*>(userdata) = true;
             },
-            static_cast<DawnCallbackUserdata>(reinterpret_cast<uintptr_t>(&done)));
+            &done);
 
         while (!done) {
             WaitABit();

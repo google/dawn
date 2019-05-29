@@ -31,7 +31,7 @@ namespace dawn_wire { namespace client {
 
         struct OnCompletionData {
             DawnFenceOnCompletionCallback completionCallback = nullptr;
-            DawnCallbackUserdata userdata = 0;
+            void* userdata = nullptr;
         };
         Queue* queue = nullptr;
         uint64_t signaledValue = 0;

@@ -20,7 +20,7 @@ namespace dawn_wire { namespace client {
 
     void ClientBufferMapReadAsync(DawnBuffer cBuffer,
                                   DawnBufferMapReadCallback callback,
-                                  DawnCallbackUserdata userdata) {
+                                  void* userdata) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 
         uint32_t serial = buffer->requestSerial++;
@@ -45,7 +45,7 @@ namespace dawn_wire { namespace client {
 
     void ClientBufferMapWriteAsync(DawnBuffer cBuffer,
                                    DawnBufferMapWriteCallback callback,
-                                   DawnCallbackUserdata userdata) {
+                                   void* userdata) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 
         uint32_t serial = buffer->requestSerial++;
@@ -109,7 +109,7 @@ namespace dawn_wire { namespace client {
     void ClientFenceOnCompletion(DawnFence cFence,
                                  uint64_t value,
                                  DawnFenceOnCompletionCallback callback,
-                                 DawnCallbackUserdata userdata) {
+                                 void* userdata) {
         Fence* fence = reinterpret_cast<Fence*>(cFence);
         if (value > fence->signaledValue) {
             fence->device->HandleError("Value greater than fence signaled value");
@@ -222,7 +222,7 @@ namespace dawn_wire { namespace client {
 
     void ClientDeviceSetErrorCallback(DawnDevice cSelf,
                                       DawnDeviceErrorCallback callback,
-                                      DawnCallbackUserdata userdata) {
+                                      void* userdata) {
         Device* device = reinterpret_cast<Device*>(cSelf);
         device->SetErrorCallback(callback, userdata);
     }

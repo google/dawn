@@ -143,7 +143,7 @@ def linked_record_members(json_data, types):
     for (member, m) in zip(members, json_data):
         if member.annotation != 'value':
             if not 'length' in m:
-                if member.type.category == 'structure':
+                if member.type.category != 'object':
                     member.length = "constant"
                     member.constant_length = 1
                 else:

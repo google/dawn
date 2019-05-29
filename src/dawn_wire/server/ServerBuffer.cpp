@@ -44,13 +44,11 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        auto* data = new MapUserdata;
-        data->server = this;
-        data->buffer = ObjectHandle{bufferId, buffer->serial};
-        data->requestSerial = requestSerial;
-        data->isWrite = isWrite;
-
-        auto userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
+        MapUserdata* userdata = new MapUserdata;
+        userdata->server = this;
+        userdata->buffer = ObjectHandle{bufferId, buffer->serial};
+        userdata->requestSerial = requestSerial;
+        userdata->isWrite = isWrite;
 
         if (isWrite) {
             mProcs.bufferMapWriteAsync(buffer->handle, ForwardBufferMapWriteAsync, userdata);
@@ -103,16 +101,16 @@ namespace dawn_wire { namespace server {
     void Server::ForwardBufferMapReadAsync(DawnBufferMapAsyncStatus status,
                                            const void* ptr,
                                            uint64_t dataLength,
-                                           DawnCallbackUserdata userdata) {
-        auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
+                                           void* userdata) {
+        auto data = static_cast<MapUserdata*>(userdata);
         data->server->OnBufferMapReadAsyncCallback(status, ptr, dataLength, data);
     }
 
     void Server::ForwardBufferMapWriteAsync(DawnBufferMapAsyncStatus status,
                                             void* ptr,
                                             uint64_t dataLength,
-                                            DawnCallbackUserdata userdata) {
-        auto data = reinterpret_cast<MapUserdata*>(static_cast<uintptr_t>(userdata));
+                                            void* userdata) {
+        auto data = static_cast<MapUserdata*>(userdata);
         data->server->OnBufferMapWriteAsyncCallback(status, ptr, dataLength, data);
     }
 

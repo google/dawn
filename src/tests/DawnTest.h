@@ -192,7 +192,7 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
 
     // Tracking for validation errors
-    static void OnDeviceError(const char* message, DawnCallbackUserdata userdata);
+    static void OnDeviceError(const char* message, void* userdata);
     bool mExpectError = false;
     bool mError = false;
 
@@ -209,7 +209,7 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
     static void SlotMapReadCallback(DawnBufferMapAsyncStatus status,
                                     const void* data,
                                     uint64_t dataLength,
-                                    DawnCallbackUserdata userdata);
+                                    void* userdata);
     size_t mNumPendingMapOperations = 0;
 
     // Reserve space where the data for an expectation can be copied
