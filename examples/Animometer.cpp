@@ -25,15 +25,18 @@
 dawn::Device device;
 dawn::Queue queue;
 dawn::SwapChain swapchain;
-dawn::TextureView depthStencilView;
 dawn::RenderPipeline pipeline;
+dawn::BindGroup bindGroup;
+dawn::Buffer ubo;
 
 float RandomFloat(float min, float max) {
     float zeroOne = rand() / float(RAND_MAX);
     return zeroOne * (max - min) + min;
 }
 
-struct ShaderData {
+constexpr size_t kNumTriangles = 10000;
+
+struct alignas(kMinDynamicBufferOffsetAlignment) ShaderData {
     float scale;
     float time;
     float offsetX;
@@ -55,7 +58,7 @@ void init() {
     dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
         #version 450
 
-        layout(push_constant) uniform ConstantsBlock {
+        layout(std140, set = 0, binding = 0) uniform Constants {
             float scale;
             float time;
             float offsetX;
@@ -97,8 +100,7 @@ void init() {
             ypos = yrot + c.offsetY;
             v_color = vec4(fade, 1.0 - fade, 0.0, 1.0) + color;
             gl_Position = vec4(xpos, ypos, 0.0, 1.0);
-        })"
-    );
+        })");
 
     dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
         #version 450
@@ -108,18 +110,18 @@ void init() {
             fragColor = v_color;
         })");
 
-    depthStencilView = CreateDefaultDepthStencilView(device);
+    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStageBit::Vertex, dawn::BindingType::DynamicUniformBuffer}});
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
     descriptor.cVertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.depthStencilState = &descriptor.cDepthStencilState;
-    descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
     descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
 
     pipeline = device.CreateRenderPipeline(&descriptor);
 
-    shaderData.resize(10000);
+    shaderData.resize(kNumTriangles);
     for (auto& data : shaderData) {
         data.scale = RandomFloat(0.2f, 0.4f);
         data.time = 0.0;
@@ -128,6 +130,14 @@ void init() {
         data.scalar = RandomFloat(0.5f, 2.0f);
         data.scalarOffset = RandomFloat(0.0f, 10.0f);
     }
+
+    dawn::BufferDescriptor bufferDesc;
+    bufferDesc.size = kNumTriangles * sizeof(ShaderData);
+    bufferDesc.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::Uniform;
+    ubo = device.CreateBuffer(&bufferDesc);
+
+    bindGroup =
+        utils::MakeBindGroup(device, bgl, {{0, ubo, 0, kNumTriangles * sizeof(ShaderData)}});
 }
 
 void frame() {
@@ -135,21 +145,22 @@ void frame() {
 
     static int f = 0;
     f++;
+    for (auto& data : shaderData) {
+        data.time = f / 60.0f;
+    }
+    ubo.SetSubData(0, kNumTriangles * sizeof(ShaderData),
+                   reinterpret_cast<const uint8_t*>(shaderData.data()));
 
-    size_t i = 0;
-
-    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()},
-                                                depthStencilView);
+    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()});
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
 
-        for (int k = 0; k < 10000; k++) {
-            shaderData[i].time = f / 60.0f;
-            pass.SetPushConstants(dawn::ShaderStageBit::Vertex, 0, 6, reinterpret_cast<uint32_t*>(&shaderData[i]));
+        for (size_t i = 0; i < kNumTriangles; i++) {
+            uint64_t offset = i * sizeof(ShaderData);
+            pass.SetBindGroup(0, bindGroup, 1, &offset);
             pass.Draw(3, 1, 0, 0);
-            i++;
         }
 
         pass.EndPass();

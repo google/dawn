@@ -43,10 +43,6 @@ namespace dawn_native {
                           BindGroupBase* group,
                           uint32_t dynamicOffsetCount,
                           const uint64_t* dynamicOffsets);
-        void SetPushConstants(dawn::ShaderStageBit stages,
-                              uint32_t offset,
-                              uint32_t count,
-                              const void* data);
 
       protected:
         // Construct an "error" programmable pass encoder.

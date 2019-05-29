@@ -40,7 +40,6 @@ namespace dawn_native {
           mModule(descriptor->computeStage->module),
           mEntryPoint(descriptor->computeStage->entryPoint),
           mIsBlueprint(blueprint) {
-        ExtractModuleData(dawn::ShaderStage::Compute, descriptor->computeStage->module);
     }
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)

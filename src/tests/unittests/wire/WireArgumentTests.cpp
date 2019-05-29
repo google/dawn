@@ -16,6 +16,8 @@
 
 #include "common/Constants.h"
 
+#include <array>
+
 using namespace testing;
 using namespace dawn_wire;
 
@@ -44,22 +46,33 @@ TEST_F(WireArgumentTests, ValueArgument) {
 }
 
 // Test that the wire is able to send arrays of numerical values
-static constexpr uint32_t testPushConstantValues[4] = {0, 42, 0xDEADBEEFu, 0xFFFFFFFFu};
-
-bool CheckPushConstantValues(const uint32_t* values) {
-    for (int i = 0; i < 4; ++i) {
-        if (values[i] != testPushConstantValues[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
 TEST_F(WireArgumentTests, ValueArrayArgument) {
+    // Create a bindgroup.
+    DawnBindGroupLayoutDescriptor bglDescriptor;
+    bglDescriptor.nextInChain = nullptr;
+    bglDescriptor.bindingCount = 0;
+    bglDescriptor.bindings = nullptr;
+
+    DawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDescriptor);
+    DawnBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
+    EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _)).WillOnce(Return(apiBgl));
+
+    DawnBindGroupDescriptor bindGroupDescriptor;
+    bindGroupDescriptor.nextInChain = nullptr;
+    bindGroupDescriptor.layout = bgl;
+    bindGroupDescriptor.bindingCount = 0;
+    bindGroupDescriptor.bindings = nullptr;
+
+    DawnBindGroup bindGroup = dawnDeviceCreateBindGroup(device, &bindGroupDescriptor);
+    DawnBindGroup apiBindGroup = api.GetNewBindGroup();
+    EXPECT_CALL(api, DeviceCreateBindGroup(apiDevice, _)).WillOnce(Return(apiBindGroup));
+
+    // Use the bindgroup in SetBindGroup that takes an array of value offsets.
     DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
     DawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
-    dawnComputePassEncoderSetPushConstants(pass, DAWN_SHADER_STAGE_BIT_VERTEX, 0, 4,
-                                           testPushConstantValues);
+
+    std::array<uint64_t, 4> testOffsets = {0, 42, 0xDEAD'BEEF'DEAD'BEEFu, 0xFFFF'FFFF'FFFF'FFFFu};
+    dawnComputePassEncoderSetBindGroup(pass, 0, bindGroup, testOffsets.size(), testOffsets.data());
 
     DawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
@@ -67,9 +80,16 @@ TEST_F(WireArgumentTests, ValueArrayArgument) {
     DawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
     EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder)).WillOnce(Return(apiPass));
 
-    EXPECT_CALL(api,
-                ComputePassEncoderSetPushConstants(apiPass, DAWN_SHADER_STAGE_BIT_VERTEX, 0, 4,
-                                                   ResultOf(CheckPushConstantValues, Eq(true))));
+    EXPECT_CALL(api, ComputePassEncoderSetBindGroup(
+                         apiPass, 0, apiBindGroup, testOffsets.size(),
+                         MatchesLambda([testOffsets](const uint64_t* offsets) -> bool {
+                             for (size_t i = 0; i < testOffsets.size(); i++) {
+                                 if (offsets[i] != testOffsets[i]) {
+                                     return false;
+                                 }
+                             }
+                             return true;
+                         })));
 
     FlushClient();
 }
@@ -280,6 +300,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
     DawnBindGroupLayoutDescriptor bglDescriptor;
+    bglDescriptor.nextInChain = nullptr;
     bglDescriptor.bindingCount = 0;
     bglDescriptor.bindings = nullptr;
 

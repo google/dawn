@@ -138,77 +138,6 @@ namespace dawn_native { namespace opengl {
             }
         }
 
-        // Push constants are implemented using OpenGL uniforms, however they aren't part of the
-        // global OpenGL state but are part of the program state instead. This means that we have to
-        // reapply push constants on pipeline change.
-        //
-        // This structure tracks the current values of push constants as well as dirty bits for push
-        // constants that should be applied before the next draw or dispatch.
-        class PushConstantTracker {
-          public:
-            PushConstantTracker() {
-                for (auto stage : IterateStages(kAllStages)) {
-                    mValues[stage].fill(0);
-                    // No need to set dirty bits as a pipeline will be set before the next operation
-                    // using push constants.
-                }
-            }
-
-            void OnSetPushConstants(dawn::ShaderStageBit stages,
-                                    uint32_t count,
-                                    uint32_t offset,
-                                    const uint32_t* data) {
-                for (auto stage : IterateStages(stages)) {
-                    memcpy(&mValues[stage][offset], data, count * sizeof(uint32_t));
-
-                    // Use 64 bit masks and make sure there are no shift UB
-                    static_assert(kMaxPushConstants <= 8 * sizeof(unsigned long long) - 1, "");
-                    mDirtyBits[stage] |= ((1ull << count) - 1ull) << offset;
-                }
-            }
-
-            void OnSetPipeline(PipelineBase* pipeline) {
-                for (auto stage : IterateStages(kAllStages)) {
-                    mDirtyBits[stage] = pipeline->GetPushConstants(stage).mask;
-                }
-            }
-
-            void Apply(PipelineBase* pipeline, PipelineGL* glPipeline) {
-                for (auto stage : IterateStages(kAllStages)) {
-                    const auto& pushConstants = pipeline->GetPushConstants(stage);
-                    const auto& glPushConstants = glPipeline->GetGLPushConstants(stage);
-
-                    for (uint32_t constant :
-                         IterateBitSet(mDirtyBits[stage] & pushConstants.mask)) {
-                        GLint location = glPushConstants[constant];
-                        switch (pushConstants.types[constant]) {
-                            case PushConstantType::Int:
-                                glUniform1i(location,
-                                            *reinterpret_cast<GLint*>(&mValues[stage][constant]));
-                                break;
-                            case PushConstantType::UInt:
-                                glUniform1ui(location,
-                                             *reinterpret_cast<GLuint*>(&mValues[stage][constant]));
-                                break;
-                            case PushConstantType::Float:
-                                float value;
-                                // Use a memcpy to avoid strict-aliasing warnings, even if it is
-                                // still technically undefined behavior.
-                                memcpy(&value, &mValues[stage][constant], sizeof(value));
-                                glUniform1f(location, value);
-                                break;
-                        }
-                    }
-
-                    mDirtyBits[stage].reset();
-                }
-            }
-
-          private:
-            PerStage<std::array<uint32_t, kMaxPushConstants>> mValues;
-            PerStage<std::bitset<kMaxPushConstants>> mDirtyBits;
-        };
-
         // Vertex buffers and index buffers are implemented as part of an OpenGL VAO that
         // corresponds to an VertexInput. On the contrary in Dawn they are part of the global state.
         // This means that we have to re-apply these buffers on an VertexInput change.
@@ -555,7 +484,6 @@ namespace dawn_native { namespace opengl {
     }
 
     void CommandBuffer::ExecuteComputePass() {
-        PushConstantTracker pushConstants;
         ComputePipeline* lastPipeline = nullptr;
 
         Command type;
@@ -568,7 +496,6 @@ namespace dawn_native { namespace opengl {
 
                 case Command::Dispatch: {
                     DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
-                    pushConstants.Apply(lastPipeline, lastPipeline);
                     glDispatchCompute(dispatch->x, dispatch->y, dispatch->z);
                     // TODO(cwallez@chromium.org): add barriers to the API
                     glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -577,15 +504,7 @@ namespace dawn_native { namespace opengl {
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
                     lastPipeline = ToBackend(cmd->pipeline).Get();
-
                     lastPipeline->ApplyNow();
-                    pushConstants.OnSetPipeline(lastPipeline);
-                } break;
-
-                case Command::SetPushConstants: {
-                    SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
-                    uint32_t* data = mCommands.NextData<uint32_t>(cmd->count);
-                    pushConstants.OnSetPushConstants(cmd->stages, cmd->count, cmd->offset, data);
                 } break;
 
                 case Command::SetBindGroup: {
@@ -732,7 +651,6 @@ namespace dawn_native { namespace opengl {
         RenderPipeline* lastPipeline = nullptr;
         uint64_t indexBufferBaseOffset = 0;
 
-        PushConstantTracker pushConstants;
         InputBufferTracker inputBuffers;
 
         Command type;
@@ -751,7 +669,6 @@ namespace dawn_native { namespace opengl {
 
                 case Command::Draw: {
                     DrawCmd* draw = mCommands.NextCommand<DrawCmd>();
-                    pushConstants.Apply(lastPipeline, lastPipeline);
                     inputBuffers.Apply();
 
                     if (draw->firstInstance > 0) {
@@ -768,7 +685,6 @@ namespace dawn_native { namespace opengl {
 
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
-                    pushConstants.Apply(lastPipeline, lastPipeline);
                     inputBuffers.Apply();
 
                     dawn::IndexFormat indexFormat =
@@ -805,14 +721,7 @@ namespace dawn_native { namespace opengl {
                     lastPipeline = ToBackend(cmd->pipeline).Get();
                     lastPipeline->ApplyNow(persistentPipelineState);
 
-                    pushConstants.OnSetPipeline(lastPipeline);
                     inputBuffers.OnSetPipeline(lastPipeline);
-                } break;
-
-                case Command::SetPushConstants: {
-                    SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
-                    uint32_t* data = mCommands.NextData<uint32_t>(cmd->count);
-                    pushConstants.OnSetPushConstants(cmd->stages, cmd->count, cmd->offset, data);
                 } break;
 
                 case Command::SetStencilReference: {

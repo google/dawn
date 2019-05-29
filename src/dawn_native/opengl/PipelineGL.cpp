@@ -70,29 +70,6 @@ namespace dawn_native { namespace opengl {
             return shader;
         };
 
-        auto FillPushConstants = [](const ShaderModule* module, GLPushConstantInfo* info,
-                                    GLuint program) {
-            const auto& moduleInfo = module->GetPushConstants();
-            for (uint32_t i = 0; i < moduleInfo.names.size(); i++) {
-                (*info)[i] = -1;
-
-                unsigned int size = moduleInfo.sizes[i];
-                if (size == 0) {
-                    continue;
-                }
-
-                GLint location = glGetUniformLocation(program, moduleInfo.names[i].c_str());
-                if (location == -1) {
-                    continue;
-                }
-
-                for (uint32_t offset = 0; offset < size; offset++) {
-                    (*info)[i + offset] = location + offset;
-                }
-                i += size - 1;
-            }
-        };
-
         mProgram = glCreateProgram();
 
         dawn::ShaderStageBit activeStages = dawn::ShaderStageBit::None;
@@ -121,10 +98,6 @@ namespace dawn_native { namespace opengl {
                 std::cout << "Program link failed:\n";
                 std::cout << buffer.data() << std::endl;
             }
-        }
-
-        for (dawn::ShaderStage stage : IterateStages(activeStages)) {
-            FillPushConstants(modules[stage], &mGlPushConstants[stage], mProgram);
         }
 
         glUseProgram(mProgram);
@@ -198,11 +171,6 @@ namespace dawn_native { namespace opengl {
                 textureUnit++;
             }
         }
-    }
-
-    const PipelineGL::GLPushConstantInfo& PipelineGL::GetGLPushConstants(
-        dawn::ShaderStage stage) const {
-        return mGlPushConstants[stage];
     }
 
     const std::vector<GLuint>& PipelineGL::GetTextureUnitsForSampler(GLuint index) const {

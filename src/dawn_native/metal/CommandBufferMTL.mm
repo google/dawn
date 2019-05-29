@@ -628,14 +628,9 @@ namespace dawn_native { namespace metal {
 
     void CommandBuffer::EncodeComputePass(id<MTLCommandBuffer> commandBuffer) {
         ComputePipeline* lastPipeline = nullptr;
-        std::array<uint32_t, kMaxPushConstants> pushConstants;
 
         // Will be autoreleased
         id<MTLComputeCommandEncoder> encoder = [commandBuffer computeCommandEncoder];
-
-        // Set default values for push constants
-        pushConstants.fill(0);
-        [encoder setBytes:&pushConstants length:sizeof(uint32_t) * kMaxPushConstants atIndex:0];
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -657,19 +652,6 @@ namespace dawn_native { namespace metal {
                     lastPipeline = ToBackend(cmd->pipeline).Get();
 
                     lastPipeline->Encode(encoder);
-                } break;
-
-                case Command::SetPushConstants: {
-                    SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
-                    uint32_t* values = mCommands.NextData<uint32_t>(cmd->count);
-
-                    if (cmd->stages & dawn::ShaderStageBit::Compute) {
-                        memcpy(&pushConstants[cmd->offset], values, cmd->count * sizeof(uint32_t));
-
-                        [encoder setBytes:&pushConstants
-                                   length:sizeof(uint32_t) * kMaxPushConstants
-                                  atIndex:0];
-                    }
                 } break;
 
                 case Command::SetBindGroup: {
@@ -792,23 +774,9 @@ namespace dawn_native { namespace metal {
         id<MTLBuffer> indexBuffer = nil;
         uint32_t indexBufferBaseOffset = 0;
 
-        std::array<uint32_t, kMaxPushConstants> vertexPushConstants;
-        std::array<uint32_t, kMaxPushConstants> fragmentPushConstants;
-
         // This will be autoreleased
         id<MTLRenderCommandEncoder> encoder =
             [commandBuffer renderCommandEncoderWithDescriptor:mtlRenderPass];
-
-        // Set default values for push constants
-        vertexPushConstants.fill(0);
-        fragmentPushConstants.fill(0);
-
-        [encoder setVertexBytes:&vertexPushConstants
-                         length:sizeof(uint32_t) * kMaxPushConstants
-                        atIndex:0];
-        [encoder setFragmentBytes:&fragmentPushConstants
-                           length:sizeof(uint32_t) * kMaxPushConstants
-                          atIndex:0];
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -883,27 +851,6 @@ namespace dawn_native { namespace metal {
                     [encoder setFrontFacingWinding:lastPipeline->GetMTLFrontFace()];
                     [encoder setCullMode:lastPipeline->GetMTLCullMode()];
                     lastPipeline->Encode(encoder);
-                } break;
-
-                case Command::SetPushConstants: {
-                    SetPushConstantsCmd* cmd = mCommands.NextCommand<SetPushConstantsCmd>();
-                    uint32_t* values = mCommands.NextData<uint32_t>(cmd->count);
-
-                    if (cmd->stages & dawn::ShaderStageBit::Vertex) {
-                        memcpy(&vertexPushConstants[cmd->offset], values,
-                               cmd->count * sizeof(uint32_t));
-                        [encoder setVertexBytes:&vertexPushConstants
-                                         length:sizeof(uint32_t) * kMaxPushConstants
-                                        atIndex:0];
-                    }
-
-                    if (cmd->stages & dawn::ShaderStageBit::Fragment) {
-                        memcpy(&fragmentPushConstants[cmd->offset], values,
-                               cmd->count * sizeof(uint32_t));
-                        [encoder setFragmentBytes:&fragmentPushConstants
-                                           length:sizeof(uint32_t) * kMaxPushConstants
-                                          atIndex:0];
-                    }
                 } break;
 
                 case Command::SetStencilReference: {

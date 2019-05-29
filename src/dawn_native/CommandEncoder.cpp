@@ -1016,18 +1016,6 @@ namespace dawn_native {
                     persistentState.SetComputePipeline(pipeline);
                 } break;
 
-                case Command::SetPushConstants: {
-                    SetPushConstantsCmd* cmd = mIterator.NextCommand<SetPushConstantsCmd>();
-                    mIterator.NextData<uint32_t>(cmd->count);
-                    // Validation of count and offset has already been done when the command was
-                    // recorded because it impacts the size of an allocation in the
-                    // CommandAllocator.
-                    if (cmd->stages & ~dawn::ShaderStageBit::Compute) {
-                        return DAWN_VALIDATION_ERROR(
-                            "SetPushConstants stage must be compute or 0 in compute passes");
-                    }
-                } break;
-
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mIterator.NextCommand<SetBindGroupCmd>();
                     if (cmd->dynamicOffsetCount > 0) {
@@ -1118,20 +1106,6 @@ namespace dawn_native {
                     }
 
                     persistentState.SetRenderPipeline(pipeline);
-                } break;
-
-                case Command::SetPushConstants: {
-                    SetPushConstantsCmd* cmd = mIterator.NextCommand<SetPushConstantsCmd>();
-                    mIterator.NextData<uint32_t>(cmd->count);
-                    // Validation of count and offset has already been done when the command was
-                    // recorded because it impacts the size of an allocation in the
-                    // CommandAllocator.
-                    if (cmd->stages &
-                        ~(dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment)) {
-                        return DAWN_VALIDATION_ERROR(
-                            "SetPushConstants stage must be a subset of (vertex|fragment) in "
-                            "render passes");
-                    }
                 } break;
 
                 case Command::SetStencilReference: {

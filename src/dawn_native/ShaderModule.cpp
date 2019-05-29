@@ -125,56 +125,8 @@ namespace dawn_native {
                 UNREACHABLE();
         }
 
-        // Extract push constants
-        mPushConstants.mask.reset();
-        mPushConstants.sizes.fill(0);
-        mPushConstants.types.fill(PushConstantType::Int);
-
         if (resources.push_constant_buffers.size() > 0) {
-            auto interfaceBlock = resources.push_constant_buffers[0];
-
-            const auto& blockType = compiler.get_type(interfaceBlock.type_id);
-            ASSERT(blockType.basetype == spirv_cross::SPIRType::Struct);
-
-            for (uint32_t i = 0; i < blockType.member_types.size(); i++) {
-                ASSERT(compiler.get_member_decoration_bitset(blockType.self, i)
-                           .get(spv::DecorationOffset));
-
-                uint32_t offset =
-                    compiler.get_member_decoration(blockType.self, i, spv::DecorationOffset);
-                ASSERT(offset % 4 == 0);
-                offset /= 4;
-
-                auto memberType = compiler.get_type(blockType.member_types[i]);
-                PushConstantType constantType;
-                if (memberType.basetype == spirv_cross::SPIRType::Int) {
-                    constantType = PushConstantType::Int;
-                } else if (memberType.basetype == spirv_cross::SPIRType::UInt) {
-                    constantType = PushConstantType::UInt;
-                } else {
-                    ASSERT(memberType.basetype == spirv_cross::SPIRType::Float);
-                    constantType = PushConstantType::Float;
-                }
-
-                // TODO(cwallez@chromium.org): check for overflows and make the logic better take
-                // into account things like the array of types with padding.
-                uint32_t size = memberType.vecsize * memberType.columns;
-                // Handle unidimensional arrays
-                if (!memberType.array.empty()) {
-                    size *= memberType.array[0];
-                }
-
-                if (offset + size > kMaxPushConstants) {
-                    device->HandleError("Push constant block too big in the SPIRV");
-                    return;
-                }
-
-                mPushConstants.mask.set(offset);
-                mPushConstants.names[offset] =
-                    interfaceBlock.name + "." + compiler.get_member_name(blockType.self, i);
-                mPushConstants.sizes[offset] = size;
-                mPushConstants.types[offset] = constantType;
-            }
+            GetDevice()->HandleError("Push constants aren't supported.");
         }
 
         // Fill in bindingInfo with the SPIRV bindings
@@ -245,11 +197,6 @@ namespace dawn_native {
                 }
             }
         }
-    }
-
-    const ShaderModuleBase::PushConstantInfo& ShaderModuleBase::GetPushConstants() const {
-        ASSERT(!IsError());
-        return mPushConstants;
     }
 
     const ShaderModuleBase::ModuleBindingInfo& ShaderModuleBase::GetBindingInfo() const {

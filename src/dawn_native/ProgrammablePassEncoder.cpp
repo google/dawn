@@ -124,34 +124,6 @@ namespace dawn_native {
         }
     }
 
-    void ProgrammablePassEncoder::SetPushConstants(dawn::ShaderStageBit stages,
-                                                   uint32_t offset,
-                                                   uint32_t count,
-                                                   const void* data) {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
-
-        if (mTopLevelEncoder->ConsumedError(ValidateShaderStageBit(stages))) {
-            return;
-        }
-
-        // TODO(cwallez@chromium.org): check for overflows
-        if (offset + count > kMaxPushConstants) {
-            mTopLevelEncoder->HandleError("Setting too many push constants");
-            return;
-        }
-
-        SetPushConstantsCmd* cmd =
-            mAllocator->Allocate<SetPushConstantsCmd>(Command::SetPushConstants);
-        cmd->stages = stages;
-        cmd->offset = offset;
-        cmd->count = count;
-
-        uint32_t* values = mAllocator->AllocateData<uint32_t>(count);
-        memcpy(values, data, count * sizeof(uint32_t));
-    }
-
     MaybeError ProgrammablePassEncoder::ValidateCanRecordCommands() const {
         if (mAllocator == nullptr) {
             return DAWN_VALIDATION_ERROR("Recording in an error or already ended pass encoder");

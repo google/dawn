@@ -377,8 +377,6 @@ namespace dawn_native {
             mDepthStencilState.stencilReadMask = 0xff;
             mDepthStencilState.stencilWriteMask = 0xff;
         }
-        ExtractModuleData(dawn::ShaderStage::Vertex, descriptor->vertexStage->module);
-        ExtractModuleData(dawn::ShaderStage::Fragment, descriptor->fragmentStage->module);
 
         for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
             mColorAttachmentsSet.set(i);

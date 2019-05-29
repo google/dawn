@@ -34,11 +34,9 @@ namespace dawn_native { namespace opengl {
 
         void Initialize(const PipelineLayout* layout, const PerStage<const ShaderModule*>& modules);
 
-        using GLPushConstantInfo = std::array<GLint, kMaxPushConstants>;
         using BindingLocations =
             std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
 
-        const GLPushConstantInfo& GetGLPushConstants(dawn::ShaderStage stage) const;
         const std::vector<GLuint>& GetTextureUnitsForSampler(GLuint index) const;
         const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
         GLuint GetProgramHandle() const;
@@ -47,7 +45,6 @@ namespace dawn_native { namespace opengl {
 
       private:
         GLuint mProgram;
-        PerStage<GLPushConstantInfo> mGlPushConstants;
         std::vector<std::vector<GLuint>> mUnitsForSamplers;
         std::vector<std::vector<GLuint>> mUnitsForTextures;
     };

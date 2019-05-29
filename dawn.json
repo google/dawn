@@ -337,19 +337,6 @@
                 ]
             },
             {
-                "name": "set push constants",
-                "TODO": [
-                    "data should be void*",
-                    "TODO Vulkan has an additional stage mask"
-                ],
-                "args": [
-                    {"name": "stages", "type": "shader stage bit"},
-                    {"name": "offset", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "data", "type": "uint32_t", "annotation": "const*", "length": "count"}
-                ]
-            },
-            {
                 "name": "set bind group",
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
@@ -749,19 +736,6 @@
                 "name": "set pipeline",
                 "args": [
                     {"name": "pipeline", "type": "render pipeline"}
-                ]
-            },
-            {
-                "name": "set push constants",
-                "TODO": [
-                    "data should be void*",
-                    "TODO Vulkan has an additional stage mask"
-                ],
-                "args": [
-                    {"name": "stages", "type": "shader stage bit"},
-                    {"name": "offset", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "data", "type": "uint32_t", "annotation": "const*", "length": "count"}
                 ]
             },
             {

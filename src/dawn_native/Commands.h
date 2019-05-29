@@ -47,7 +47,6 @@ namespace dawn_native {
         PushDebugGroup,
         SetComputePipeline,
         SetRenderPipeline,
-        SetPushConstants,
         SetStencilReference,
         SetScissorRect,
         SetBlendColor,
@@ -167,12 +166,6 @@ namespace dawn_native {
 
     struct SetRenderPipelineCmd {
         Ref<RenderPipelineBase> pipeline;
-    };
-
-    struct SetPushConstantsCmd {
-        dawn::ShaderStageBit stages;
-        uint32_t offset;
-        uint32_t count;
     };
 
     struct SetStencilReferenceCmd {
