@@ -307,7 +307,6 @@ void DawnTest::SetUp() {
 
     mPCIInfo = backendAdapter.GetPCIInfo();
 
-    DawnDevice backendDevice;
     for (const char* forceEnabledWorkaround : GetParam().forceEnabledWorkarounds) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
     }
