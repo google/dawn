@@ -85,6 +85,40 @@ namespace dawn_native {
             }
         }
 
+        bool IsBCFormat(dawn::TextureFormat format) {
+            switch (format) {
+                case dawn::TextureFormat::BC1RGBAUnorm:
+                case dawn::TextureFormat::BC1RGBAUnormSrgb:
+                case dawn::TextureFormat::BC2RGBAUnorm:
+                case dawn::TextureFormat::BC2RGBAUnormSrgb:
+                case dawn::TextureFormat::BC3RGBAUnorm:
+                case dawn::TextureFormat::BC3RGBAUnormSrgb:
+                case dawn::TextureFormat::BC4RUnorm:
+                case dawn::TextureFormat::BC4RSnorm:
+                case dawn::TextureFormat::BC5RGUnorm:
+                case dawn::TextureFormat::BC5RGSnorm:
+                case dawn::TextureFormat::BC6HRGBUfloat:
+                case dawn::TextureFormat::BC6HRGBSfloat:
+                case dawn::TextureFormat::BC7RGBAUnorm:
+                case dawn::TextureFormat::BC7RGBAUnormSrgb:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsCompressedFormat(dawn::TextureFormat format) {
+            return IsBCFormat(format);
+        }
+
+        bool Is4x4CompressedFormat(dawn::TextureFormat format) {
+            return IsBCFormat(format);
+        }
+
+        bool IsWritableFormat(dawn::TextureFormat format) {
+            return !IsBCFormat(format);
+        }
+
         // TODO(jiawei.shao@intel.com): support more sample count.
         MaybeError ValidateSampleCount(const TextureDescriptor* descriptor) {
             if (!IsValidSampleCount(descriptor->sampleCount)) {
@@ -101,6 +135,11 @@ namespace dawn_native {
                 // version of macOS be greater than 10.14.
                 if (descriptor->arrayLayerCount > 1) {
                     return DAWN_VALIDATION_ERROR("Multisampled 2D array texture is not supported.");
+                }
+
+                if (IsCompressedFormat(descriptor->format)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The sample counts of the textures in BC formats must be 1.");
                 }
             }
 
@@ -157,14 +196,46 @@ namespace dawn_native {
             return descriptor;
         }
 
+        MaybeError ValidateTextureSize(const TextureDescriptor* descriptor) {
+            ASSERT(descriptor->size.width != 0 && descriptor->size.height != 0);
+
+            if (Log2(std::max(descriptor->size.width, descriptor->size.height)) + 1 <
+                descriptor->mipLevelCount) {
+                return DAWN_VALIDATION_ERROR("Texture has too many mip levels");
+            }
+
+            if (Is4x4CompressedFormat(descriptor->format)) {
+                if (descriptor->size.width % 4 != 0 || descriptor->size.height % 4 != 0) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The size of the texture is incompatible with the texture format");
+                }
+            }
+
+            return {};
+        }
     }  // anonymous namespace
+
+    MaybeError ValidateTextureUsageBit(const TextureDescriptor* descriptor) {
+        DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
+        if (!IsWritableFormat(descriptor->format)) {
+            constexpr dawn::TextureUsageBit kValidUsage = dawn::TextureUsageBit::Sampled |
+                                                          dawn::TextureUsageBit::TransferSrc |
+                                                          dawn::TextureUsageBit::TransferDst;
+            if (descriptor->usage & (~kValidUsage)) {
+                return DAWN_VALIDATION_ERROR(
+                    "Texture format is incompatible with the texture usage");
+            }
+        }
+
+        return {};
+    }
 
     MaybeError ValidateTextureDescriptor(DeviceBase*, const TextureDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
+        DAWN_TRY(ValidateTextureUsageBit(descriptor));
         DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
         DAWN_TRY(ValidateSampleCount(descriptor));
@@ -176,10 +247,7 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
 
-        if (Log2(std::max(descriptor->size.width, descriptor->size.height)) + 1 <
-            descriptor->mipLevelCount) {
-            return DAWN_VALIDATION_ERROR("Texture has too many mip levels");
-        }
+        DAWN_TRY(ValidateTextureSize(descriptor));
 
         return {};
     }
