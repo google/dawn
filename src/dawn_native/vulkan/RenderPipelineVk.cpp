@@ -121,6 +121,22 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
+        bool ShouldEnablePrimitiveRestart(dawn::PrimitiveTopology topology) {
+            // Primitive restart is always enabled in WebGPU but Vulkan validation rules ask that
+            // primitive restart be only enabled on primitive topologies that support restarting.
+            switch (topology) {
+                case dawn::PrimitiveTopology::PointList:
+                case dawn::PrimitiveTopology::LineList:
+                case dawn::PrimitiveTopology::TriangleList:
+                    return false;
+                case dawn::PrimitiveTopology::LineStrip:
+                case dawn::PrimitiveTopology::TriangleStrip:
+                    return true;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
         VkBlendFactor VulkanBlendFactor(dawn::BlendFactor factor) {
             switch (factor) {
                 case dawn::BlendFactor::Zero:
@@ -307,8 +323,7 @@ namespace dawn_native { namespace vulkan {
         inputAssembly.pNext = nullptr;
         inputAssembly.flags = 0;
         inputAssembly.topology = VulkanPrimitiveTopology(GetPrimitiveTopology());
-        // Primitive restart is always enabled in Dawn (because of Metal)
-        inputAssembly.primitiveRestartEnable = VK_TRUE;
+        inputAssembly.primitiveRestartEnable = ShouldEnablePrimitiveRestart(GetPrimitiveTopology());
 
         // A dummy viewport/scissor info. The validation layers force use to provide at least one
         // scissor and one viewport here, even if we choose to make them dynamic.
