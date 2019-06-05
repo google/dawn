@@ -27,6 +27,13 @@ namespace dawn_native {
         DynamicUploader(DeviceBase* device);
         ~DynamicUploader() = default;
 
+        // We add functions to Create/Release StagingBuffers to the DynamicUploader as there's
+        // currently no place to track the allocated staging buffers such that they're freed after
+        // pending coommands are finished. This should be changed when better resource allocation is
+        // implemented.
+        ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size);
+        void ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer);
+
         ResultOrError<UploadHandle> Allocate(uint32_t requiredSize, uint32_t alignment);
         void Tick(Serial lastCompletedSerial);
 
@@ -41,6 +48,7 @@ namespace dawn_native {
         static constexpr size_t kBaseUploadBufferSize = 64000;
 
         std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
+        SerialQueue<std::unique_ptr<StagingBufferBase>> mReleasedStagingBuffers;
         DeviceBase* mDevice;
     };
 }  // namespace dawn_native

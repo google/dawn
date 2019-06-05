@@ -54,9 +54,9 @@ void SerialQueue<T>::Enqueue(const T& value, Serial serial) {
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
 
     if (this->Empty() || this->mStorage.back().first < serial) {
-        this->mStorage.emplace_back(SerialPair(serial, {}));
+        this->mStorage.emplace_back(serial, std::vector<T>{});
     }
-    this->mStorage.back().second.emplace_back(value);
+    this->mStorage.back().second.push_back(value);
 }
 
 template <typename T>
@@ -64,23 +64,23 @@ void SerialQueue<T>::Enqueue(T&& value, Serial serial) {
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
 
     if (this->Empty() || this->mStorage.back().first < serial) {
-        this->mStorage.emplace_back(SerialPair(serial, {}));
+        this->mStorage.emplace_back(serial, std::vector<T>{});
     }
-    this->mStorage.back().second.emplace_back(value);
+    this->mStorage.back().second.push_back(std::move(value));
 }
 
 template <typename T>
 void SerialQueue<T>::Enqueue(const std::vector<T>& values, Serial serial) {
     DAWN_ASSERT(values.size() > 0);
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
-    this->mStorage.emplace_back(SerialPair(serial, {values}));
+    this->mStorage.emplace_back(serial, values);
 }
 
 template <typename T>
 void SerialQueue<T>::Enqueue(std::vector<T>&& values, Serial serial) {
     DAWN_ASSERT(values.size() > 0);
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
-    this->mStorage.emplace_back(SerialPair(serial, {values}));
+    this->mStorage.emplace_back(serial, values);
 }
 
 #endif  // COMMON_SERIALQUEUE_H_

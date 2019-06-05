@@ -21,6 +21,19 @@ namespace dawn_native {
     DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {
     }
 
+    ResultOrError<std::unique_ptr<StagingBufferBase>> DynamicUploader::CreateStagingBuffer(
+        size_t size) {
+        std::unique_ptr<StagingBufferBase> stagingBuffer;
+        DAWN_TRY_ASSIGN(stagingBuffer, mDevice->CreateStagingBuffer(size));
+        DAWN_TRY(stagingBuffer->Initialize());
+        return stagingBuffer;
+    }
+
+    void DynamicUploader::ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer) {
+        mReleasedStagingBuffers.Enqueue(std::move(stagingBuffer),
+                                        mDevice->GetPendingCommandSerial());
+    }
+
     MaybeError DynamicUploader::CreateAndAppendBuffer(size_t size) {
         std::unique_ptr<RingBuffer> ringBuffer = std::make_unique<RingBuffer>(mDevice, size);
         DAWN_TRY(ringBuffer->Initialize());
@@ -69,6 +82,7 @@ namespace dawn_native {
                 mRingBuffers.erase(mRingBuffers.begin() + i);
             }
         }
+        mReleasedStagingBuffers.ClearUpTo(lastCompletedSerial);
     }
 
     RingBuffer* DynamicUploader::GetLargestBuffer() {
