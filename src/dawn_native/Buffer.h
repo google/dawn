@@ -49,7 +49,7 @@ namespace dawn_native {
                                            uint64_t size,
                                            uint8_t** mappedPointer);
 
-        uint32_t GetSize() const;
+        uint64_t GetSize() const;
         dawn::BufferUsageBit GetUsage() const;
 
         MaybeError MapAtCreation(uint8_t** mappedPointer);
@@ -85,6 +85,9 @@ namespace dawn_native {
         virtual void UnmapImpl() = 0;
         virtual void DestroyImpl() = 0;
 
+        virtual bool IsMapWritable() const = 0;
+        MaybeError CopyFromStagingBuffer();
+
         MaybeError ValidateSetSubData(uint32_t start, uint32_t count) const;
         MaybeError ValidateMap(dawn::BufferUsageBit requiredUsage) const;
         MaybeError ValidateUnmap() const;
@@ -97,6 +100,8 @@ namespace dawn_native {
         DawnBufferMapWriteCallback mMapWriteCallback = nullptr;
         void* mMapUserdata = 0;
         uint32_t mMapSerial = 0;
+
+        std::unique_ptr<StagingBufferBase> mStagingBuffer;
 
         BufferState mState;
     };

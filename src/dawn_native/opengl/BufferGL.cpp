@@ -35,6 +35,12 @@ namespace dawn_native { namespace opengl {
         return mBuffer;
     }
 
+    bool Buffer::IsMapWritable() const {
+        // TODO(enga): All buffers in GL can be mapped. Investigate if mapping them will cause the
+        // driver to migrate it to shared memory.
+        return true;
+    }
+
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);

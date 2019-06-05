@@ -56,6 +56,18 @@ namespace dawn_native { namespace null {
         return new Backend(instance);
     }
 
+    struct CopyFromStagingToBufferOperation : PendingOperation {
+        virtual void Execute() {
+            destination->CopyFromStaging(staging, sourceOffset, destinationOffset, size);
+        }
+
+        StagingBufferBase* staging;
+        Buffer* destination;
+        uint64_t sourceOffset;
+        uint64_t destinationOffset;
+        uint64_t size;
+    };
+
     // Device
 
     Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
@@ -69,8 +81,7 @@ namespace dawn_native { namespace null {
     Device::~Device() {
         mDynamicUploader = nullptr;
 
-        // Ensure any in-flight maps have been cleaned up.
-        SubmitPendingOperations();
+        mPendingOperations.clear();
         ASSERT(mMemoryUsage == 0);
     }
 
@@ -140,7 +151,16 @@ namespace dawn_native { namespace null {
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
-        return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer.");
+        auto operation = std::make_unique<CopyFromStagingToBufferOperation>();
+        operation->staging = source;
+        operation->destination = reinterpret_cast<Buffer*>(destination);
+        operation->sourceOffset = sourceOffset;
+        operation->destinationOffset = destinationOffset;
+        operation->size = size;
+
+        ToBackend(GetDevice())->AddPendingOperation(std::move(operation));
+
+        return {};
     }
 
     MaybeError Device::IncrementMemoryUsage(size_t bytes) {
@@ -201,8 +221,8 @@ namespace dawn_native { namespace null {
 
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
-        if (GetUsage() & (dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead |
-                          dawn::BufferUsageBit::MapWrite)) {
+        if (GetUsage() & (dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::TransferSrc |
+                          dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
             mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
         }
     }
@@ -210,6 +230,12 @@ namespace dawn_native { namespace null {
     Buffer::~Buffer() {
         DestroyInternal();
         ToBackend(GetDevice())->DecrementMemoryUsage(GetSize());
+    }
+
+    bool Buffer::IsMapWritable() const {
+        // Only return true for mappable buffers so we can test cases that need / don't need a
+        // staging buffer.
+        return (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) != 0;
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
@@ -223,6 +249,14 @@ namespace dawn_native { namespace null {
         } else {
             CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr, GetSize());
         }
+    }
+
+    void Buffer::CopyFromStaging(StagingBufferBase* staging,
+                                 uint64_t sourceOffset,
+                                 uint64_t destinationOffset,
+                                 uint64_t size) {
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(staging->GetMappedPointer());
+        memcpy(mBackingData.get() + destinationOffset, ptr + sourceOffset, size);
     }
 
     MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
@@ -243,13 +277,13 @@ namespace dawn_native { namespace null {
     void Buffer::MapAsyncImplCommon(uint32_t serial, bool isWrite) {
         ASSERT(mBackingData);
 
-        auto operation = new BufferMapReadOperation;
+        auto operation = std::make_unique<BufferMapReadOperation>();
         operation->buffer = this;
         operation->ptr = mBackingData.get();
         operation->serial = serial;
         operation->isWrite = isWrite;
 
-        ToBackend(GetDevice())->AddPendingOperation(std::unique_ptr<PendingOperation>(operation));
+        ToBackend(GetDevice())->AddPendingOperation(std::move(operation));
     }
 
     void Buffer::UnmapImpl() {
@@ -324,10 +358,18 @@ namespace dawn_native { namespace null {
 
     // StagingBuffer
 
-    StagingBuffer::StagingBuffer(size_t size, Device* device) : StagingBufferBase(size) {
+    StagingBuffer::StagingBuffer(size_t size, Device* device)
+        : StagingBufferBase(size), mDevice(device) {
+    }
+
+    StagingBuffer::~StagingBuffer() {
+        if (mBuffer) {
+            mDevice->DecrementMemoryUsage(GetSize());
+        }
     }
 
     MaybeError StagingBuffer::Initialize() {
+        DAWN_TRY(mDevice->IncrementMemoryUsage(GetSize()));
         mBuffer = std::make_unique<uint8_t[]>(GetSize());
         mMappedPointer = mBuffer.get();
         return {};

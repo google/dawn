@@ -38,6 +38,7 @@ namespace dawn_native { namespace opengl {
         void UnmapImpl() override;
         void DestroyImpl() override;
 
+        bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
 
         GLuint mBuffer = 0;

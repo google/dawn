@@ -47,6 +47,7 @@ namespace dawn_native { namespace vulkan {
         void UnmapImpl() override;
         void DestroyImpl() override;
 
+        bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
 
         VkBuffer mHandle = VK_NULL_HANDLE;

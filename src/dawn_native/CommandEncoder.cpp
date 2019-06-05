@@ -484,7 +484,7 @@ namespace dawn_native {
 
                     if (!readOnly && !singleUse) {
                         return DAWN_VALIDATION_ERROR(
-                            "Buffer used as writeable usage and another usage in pass");
+                            "Buffer used as writable usage and another usage in pass");
                     }
                 }
 

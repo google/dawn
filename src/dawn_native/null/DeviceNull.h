@@ -142,6 +142,10 @@ namespace dawn_native { namespace null {
         ~Buffer();
 
         void MapReadOperationCompleted(uint32_t serial, void* ptr, bool isWrite);
+        void CopyFromStaging(StagingBufferBase* staging,
+                             uint64_t sourceOffset,
+                             uint64_t destinationOffset,
+                             uint64_t size);
 
       private:
         // Dawn API
@@ -151,6 +155,7 @@ namespace dawn_native { namespace null {
         void UnmapImpl() override;
         void DestroyImpl() override;
 
+        bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
         void MapAsyncImplCommon(uint32_t serial, bool isWrite);
 
@@ -201,9 +206,11 @@ namespace dawn_native { namespace null {
     class StagingBuffer : public StagingBufferBase {
       public:
         StagingBuffer(size_t size, Device* device);
+        ~StagingBuffer() override;
         MaybeError Initialize() override;
 
       private:
+        Device* mDevice;
         std::unique_ptr<uint8_t[]> mBuffer;
     };
 

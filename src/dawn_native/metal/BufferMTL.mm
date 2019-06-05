@@ -47,6 +47,11 @@ namespace dawn_native { namespace metal {
         }
     }
 
+    bool Buffer::IsMapWritable() const {
+        // TODO(enga): Handle CPU-visible memory on UMA
+        return (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) != 0;
+    }
+
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
         *mappedPointer = reinterpret_cast<uint8_t*>([mMtlBuffer contents]);
         return {};

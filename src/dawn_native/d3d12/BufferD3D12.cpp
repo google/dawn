@@ -79,7 +79,10 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage());
+        // Add TransferDst for non-mappable buffer initialization in CreateBufferMapped
+        // and robust resource initialization.
+        resourceDescriptor.Flags =
+            D3D12ResourceFlags(GetUsage() | dawn::BufferUsageBit::TransferDst);
 
         auto heapType = D3D12HeapType(GetUsage());
         auto bufferUsage = D3D12_RESOURCE_STATE_COMMON;
@@ -158,6 +161,11 @@ namespace dawn_native { namespace d3d12 {
         } else {
             CallMapReadCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
         }
+    }
+
+    bool Buffer::IsMapWritable() const {
+        // TODO(enga): Handle CPU-visible memory on UMA
+        return (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) != 0;
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {

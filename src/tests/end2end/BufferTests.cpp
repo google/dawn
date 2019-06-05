@@ -226,10 +226,34 @@ DAWN_INSTANTIATE_TEST(BufferSetSubDataTests,
                      OpenGLBackend,
                      VulkanBackend);
 
-class CreateBufferMappedTests : public DawnTest {};
+class CreateBufferMappedTests : public DawnTest {
+    protected:
+      static void MapReadCallback(DawnBufferMapAsyncStatus status,
+                                  const void* data,
+                                  uint64_t,
+                                  void* userdata) {
+          ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+          ASSERT_NE(nullptr, data);
 
-// Test that the simplest CreateBufferMapped works.
-TEST_P(CreateBufferMappedTests, SmallSyncWrite) {
+          static_cast<CreateBufferMappedTests*>(userdata)->mappedData = data;
+      }
+
+      const void* MapReadAsyncAndWait(const dawn::Buffer& buffer) {
+          buffer.MapReadAsync(MapReadCallback, this);
+
+          while (mappedData == nullptr) {
+              WaitABit();
+          }
+
+          return mappedData;
+      }
+
+    private:
+        const void* mappedData = nullptr;
+};
+
+// Test that the simplest CreateBufferMapped works for MapWrite buffers.
+TEST_P(CreateBufferMappedTests, MapWriteUsageSmall) {
     dawn::BufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.size = 4;
@@ -244,8 +268,42 @@ TEST_P(CreateBufferMappedTests, SmallSyncWrite) {
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
 
-// Test CreateBufferMapped for a large buffer
-TEST_P(CreateBufferMappedTests, LargeSyncWrite) {
+// Test that the simplest CreateBufferMapped works for MapRead buffers.
+TEST_P(CreateBufferMappedTests, MapReadUsageSmall) {
+    dawn::BufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::MapRead;
+
+    uint32_t myData = 230502;
+    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
+    ASSERT_EQ(result.dataLength, descriptor.size);
+    memcpy(result.data, &myData, sizeof(myData));
+    result.buffer.Unmap();
+
+    const void* mappedData = MapReadAsyncAndWait(result.buffer);
+    ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
+    result.buffer.Unmap();
+}
+
+// Test that the simplest CreateBufferMapped works for non-mappable buffers.
+TEST_P(CreateBufferMappedTests, NonMappableUsageSmall) {
+    dawn::BufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc;
+
+    uint32_t myData = 4239;
+    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
+    ASSERT_EQ(result.dataLength, descriptor.size);
+    memcpy(result.data, &myData, sizeof(myData));
+    result.buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
+}
+
+// Test CreateBufferMapped for a large MapWrite buffer
+TEST_P(CreateBufferMappedTests, MapWriteUsageLarge) {
     constexpr uint64_t kDataSize = 1000 * 1000;
     std::vector<uint32_t> myData;
     for (uint32_t i = 0; i < kDataSize; ++i) {
@@ -265,13 +323,71 @@ TEST_P(CreateBufferMappedTests, LargeSyncWrite) {
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
 }
 
+// Test CreateBufferMapped for a large MapRead buffer
+TEST_P(CreateBufferMappedTests, MapReadUsageLarge) {
+    constexpr uint64_t kDataSize = 1000 * 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    dawn::BufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = static_cast<uint64_t>(kDataSize * sizeof(uint32_t));
+    descriptor.usage = dawn::BufferUsageBit::MapRead;
+
+    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
+    ASSERT_EQ(result.dataLength, descriptor.size);
+    memcpy(result.data, myData.data(), kDataSize * sizeof(uint32_t));
+    result.buffer.Unmap();
+
+    const void* mappedData = MapReadAsyncAndWait(result.buffer);
+    ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
+    result.buffer.Unmap();
+}
+
+// Test CreateBufferMapped for a large non-mappable buffer
+TEST_P(CreateBufferMappedTests, NonMappableUsageLarge) {
+    constexpr uint64_t kDataSize = 1000 * 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    dawn::BufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = static_cast<uint64_t>(kDataSize * sizeof(uint32_t));
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc;
+
+    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
+    ASSERT_EQ(result.dataLength, descriptor.size);
+    memcpy(result.data, myData.data(), kDataSize * sizeof(uint32_t));
+    result.buffer.Unmap();
+
+    EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
+}
+
 // Test that CreateBufferMapped returns zero-initialized data
 // TODO(enga): This should use the testing toggle to initialize resources to 1.
-TEST_P(CreateBufferMappedTests, ZeroInitialized) {
+TEST_P(CreateBufferMappedTests, MappableZeroInitialized) {
     dawn::BufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.size = 4;
     descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+
+    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
+    ASSERT_EQ(result.dataLength, descriptor.size);
+    ASSERT_EQ(*result.data, 0);
+    result.buffer.Unmap();
+}
+
+// Test that CreateBufferMapped returns zero-initialized data
+// TODO(enga): This should use the testing toggle to initialize resources to 1.
+TEST_P(CreateBufferMappedTests, NonMappableZeroInitialized) {
+    dawn::BufferDescriptor descriptor;
+    descriptor.nextInChain = nullptr;
+    descriptor.size = 4;
+    descriptor.usage = dawn::BufferUsageBit::TransferSrc;
 
     dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
     ASSERT_EQ(result.dataLength, descriptor.size);

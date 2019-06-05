@@ -109,7 +109,9 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.size = GetSize();
-        createInfo.usage = VulkanBufferUsage(GetUsage());
+        // Add TransferDst for non-mappable buffer initialization in CreateBufferMapped
+        // and robust resource initialization.
+        createInfo.usage = VulkanBufferUsage(GetUsage() | dawn::BufferUsageBit::TransferDst);
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = 0;
@@ -186,6 +188,11 @@ namespace dawn_native { namespace vulkan {
                                     nullptr);
 
         mLastUsage = usage;
+    }
+
+    bool Buffer::IsMapWritable() const {
+        // TODO(enga): Handle CPU-visible memory on UMA
+        return mMemoryAllocation.GetMappedPointer() != nullptr;
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
