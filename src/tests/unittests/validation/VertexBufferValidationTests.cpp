@@ -74,13 +74,13 @@ class VertexBufferValidationTest : public ValidationTest {
             descriptor.cFragmentStage.module = fsModule;
 
             for (unsigned int i = 0; i < numBuffers; ++i) {
+                descriptor.cVertexInput.cBuffers[i].numAttributes = 1;
+                descriptor.cVertexInput.cBuffers[i].attributes =
+                    &descriptor.cVertexInput.cAttributes[i];
                 descriptor.cVertexInput.cAttributes[i].shaderLocation = i;
-                descriptor.cVertexInput.cAttributes[i].inputSlot = i;
                 descriptor.cVertexInput.cAttributes[i].format = dawn::VertexFormat::Float3;
-                descriptor.cVertexInput.cBuffers[i].inputSlot = i;
             }
             descriptor.cVertexInput.numBuffers = numBuffers;
-            descriptor.cVertexInput.numAttributes = numBuffers;
 
             return device.CreateRenderPipeline(&descriptor);
         }

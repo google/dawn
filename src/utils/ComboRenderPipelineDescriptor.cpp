@@ -22,29 +22,28 @@ namespace utils {
         dawn::VertexInputDescriptor* descriptor = this;
 
         descriptor->indexFormat = dawn::IndexFormat::Uint32;
-
-        // Fill the default values for vertexBuffer.
         descriptor->numBuffers = 0;
-        dawn::VertexBufferDescriptor vertexBuffer;
-        vertexBuffer.inputSlot = 0;
-        vertexBuffer.stride = 0;
-        vertexBuffer.stepMode = dawn::InputStepMode::Vertex;
-        for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
-            cBuffers[i] = vertexBuffer;
-        }
-        descriptor->buffers = &cBuffers[0];
 
-        // Fill the default values for vertexAttribute.
-        descriptor->numAttributes = 0;
+        // Fill the default values for vertexBuffers and vertexAttributes in buffers.
         dawn::VertexAttributeDescriptor vertexAttribute;
         vertexAttribute.shaderLocation = 0;
-        vertexAttribute.inputSlot = 0;
         vertexAttribute.offset = 0;
         vertexAttribute.format = dawn::VertexFormat::Float;
         for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
             cAttributes[i] = vertexAttribute;
         }
-        descriptor->attributes = &cAttributes[0];
+        for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
+            cBuffers[i].stride = 0;
+            cBuffers[i].stepMode = dawn::InputStepMode::Vertex;
+            cBuffers[i].numAttributes = 0;
+            cBuffers[i].attributes = nullptr;
+        }
+        // cBuffers[i].attributes points to somewhere in cAttributes. cBuffers[0].attributes
+        // points to &cAttributes[0] by default. Assuming cBuffers[0] has two attributes, then
+        // cBuffers[1].attributes should point to &cAttributes[2]. Likewise, if cBuffers[1]
+        // has 3 attributes, then cBuffers[2].attributes should point to &cAttributes[5].
+        cBuffers[0].attributes = &cAttributes[0];
+        descriptor->buffers = &cBuffers[0];
     }
 
     ComboRenderPipelineDescriptor::ComboRenderPipelineDescriptor(const dawn::Device& device) {

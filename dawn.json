@@ -576,7 +576,6 @@
         "extensible": false,
         "members": [
             {"name": "shader location", "type": "uint32_t"},
-            {"name": "input slot", "type": "uint32_t"},
             {"name": "offset", "type": "uint64_t"},
             {"name": "format", "type": "vertex format"}
         ]
@@ -585,9 +584,10 @@
         "category": "structure",
         "extensible": false,
         "members": [
-            {"name": "input slot", "type": "uint32_t"},
             {"name": "stride", "type": "uint64_t"},
-            {"name": "step mode", "type": "input step mode"}
+            {"name": "step mode", "type": "input step mode"},
+            {"name": "num attributes", "type": "uint32_t"},
+            {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "num attributes"}
         ]
     },
     "vertex input descriptor": {
@@ -595,8 +595,6 @@
         "extensible": true,
         "members": [
             {"name": "index format", "type": "index format"},
-            {"name": "num attributes", "type": "uint32_t"},
-            {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "num attributes"},
             {"name": "num buffers", "type": "uint32_t"},
             {"name": "buffers", "type": "vertex buffer descriptor", "annotation": "const*", "length": "num buffers"}
         ]

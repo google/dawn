@@ -122,8 +122,6 @@ TEST_F(WireArgumentTests, CStringArgument) {
     vertexInput.indexFormat = DAWN_INDEX_FORMAT_UINT32;
     vertexInput.numBuffers = 0;
     vertexInput.buffers = nullptr;
-    vertexInput.numAttributes = 0;
-    vertexInput.attributes = nullptr;
 
     // Create the rasterization state
     DawnRasterizationStateDescriptor rasterizationState;

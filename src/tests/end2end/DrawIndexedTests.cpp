@@ -48,7 +48,7 @@ class DrawIndexedTest : public DawnTest {
             descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
             descriptor.cVertexInput.numBuffers = 1;
             descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
-            descriptor.cVertexInput.numAttributes = 1;
+            descriptor.cVertexInput.cBuffers[0].numAttributes = 1;
             descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float4;
             descriptor.cColorStates[0]->format = renderPass.colorFormat;
 

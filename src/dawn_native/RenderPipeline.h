@@ -38,6 +38,19 @@ namespace dawn_native {
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState);
     bool BlendEnabled(const ColorStateDescriptor* mColorState);
 
+    struct VertexAttributeInfo {
+        uint32_t shaderLocation;
+        uint32_t inputSlot;
+        uint64_t offset;
+        dawn::VertexFormat format;
+    };
+
+    struct VertexBufferInfo {
+        uint32_t inputSlot;
+        uint64_t stride;
+        dawn::InputStepMode stepMode;
+    };
+
     class RenderPipelineBase : public PipelineBase {
       public:
         RenderPipelineBase(DeviceBase* device,
@@ -49,9 +62,9 @@ namespace dawn_native {
 
         const VertexInputDescriptor* GetVertexInputDescriptor() const;
         const std::bitset<kMaxVertexAttributes>& GetAttributesSetMask() const;
-        const VertexAttributeDescriptor& GetAttribute(uint32_t location) const;
+        const VertexAttributeInfo& GetAttribute(uint32_t location) const;
         const std::bitset<kMaxVertexBuffers>& GetInputsSetMask() const;
-        const VertexBufferDescriptor& GetInput(uint32_t slot) const;
+        const VertexBufferInfo& GetInput(uint32_t slot) const;
 
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot) const;
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor() const;
@@ -85,9 +98,9 @@ namespace dawn_native {
         // Vertex input
         VertexInputDescriptor mVertexInput;
         std::bitset<kMaxVertexAttributes> mAttributesSetMask;
-        std::array<VertexAttributeDescriptor, kMaxVertexAttributes> mAttributeInfos;
+        std::array<VertexAttributeInfo, kMaxVertexAttributes> mAttributeInfos;
         std::bitset<kMaxVertexBuffers> mInputsSetMask;
-        std::array<VertexBufferDescriptor, kMaxVertexBuffers> mInputInfos;
+        std::array<VertexBufferInfo, kMaxVertexBuffers> mInputInfos;
 
         // Attachments
         bool mHasDepthStencilAttachment = false;

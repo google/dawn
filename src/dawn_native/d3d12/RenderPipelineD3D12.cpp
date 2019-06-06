@@ -400,7 +400,7 @@ namespace dawn_native { namespace d3d12 {
         for (auto i : IterateBitSet(GetAttributesSetMask())) {
             D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = (*inputElementDescriptors)[count++];
 
-            const VertexAttributeDescriptor& attribute = GetAttribute(i);
+            const VertexAttributeInfo& attribute = GetAttribute(i);
 
             // If the HLSL semantic is TEXCOORDN the SemanticName should be "TEXCOORD" and the
             // SemanticIndex N
@@ -409,7 +409,7 @@ namespace dawn_native { namespace d3d12 {
             inputElementDescriptor.Format = VertexFormatType(attribute.format);
             inputElementDescriptor.InputSlot = attribute.inputSlot;
 
-            const VertexBufferDescriptor& input = GetInput(attribute.inputSlot);
+            const VertexBufferInfo& input = GetInput(attribute.inputSlot);
 
             inputElementDescriptor.AlignedByteOffset = attribute.offset;
             inputElementDescriptor.InputSlotClass = InputStepModeFunction(input.stepMode);

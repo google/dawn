@@ -405,7 +405,7 @@ namespace dawn_native { namespace metal {
         MTLVertexDescriptor* mtlVertexDescriptor = [MTLVertexDescriptor new];
 
         for (uint32_t i : IterateBitSet(GetAttributesSetMask())) {
-            const VertexAttributeDescriptor& info = GetAttribute(i);
+            const VertexAttributeInfo& info = GetAttribute(i);
 
             auto attribDesc = [MTLVertexAttributeDescriptor new];
             attribDesc.format = VertexFormatType(info.format);
@@ -416,7 +416,7 @@ namespace dawn_native { namespace metal {
         }
 
         for (uint32_t i : IterateBitSet(GetInputsSetMask())) {
-            const VertexBufferDescriptor& info = GetInput(i);
+            const VertexBufferInfo& info = GetInput(i);
 
             auto layoutDesc = [MTLVertexBufferLayoutDescriptor new];
             if (info.stride == 0) {
@@ -425,7 +425,7 @@ namespace dawn_native { namespace metal {
                 // max(attrib.offset + sizeof(attrib) for each attrib)
                 size_t max_stride = 0;
                 for (uint32_t attribIndex : IterateBitSet(GetAttributesSetMask())) {
-                    const VertexAttributeDescriptor& attrib = GetAttribute(attribIndex);
+                    const VertexAttributeInfo& attrib = GetAttribute(attribIndex);
                     // Only use the attributes that use the current input
                     if (attrib.inputSlot != info.inputSlot) {
                         continue;
