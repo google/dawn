@@ -135,7 +135,7 @@
                 "args": [
                     {"name": "start", "type": "uint64_t"},
                     {"name": "count", "type": "uint64_t"},
-                    {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "count"}
+                    {"name": "data", "type": "void", "annotation": "const*", "length": "count"}
                 ]
             },
             {
@@ -215,7 +215,7 @@
         "members": [
             {"name": "buffer", "type": "buffer"},
             {"name": "data length", "type": "uint64_t"},
-            {"name": "data", "type": "uint8_t", "annotation": "*", "length": "data length"}
+            {"name": "data", "type": "void", "annotation": "*", "length": "data length"}
         ]
     },
     "color": {

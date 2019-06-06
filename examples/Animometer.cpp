@@ -148,8 +148,7 @@ void frame() {
     for (auto& data : shaderData) {
         data.time = f / 60.0f;
     }
-    ubo.SetSubData(0, kNumTriangles * sizeof(ShaderData),
-                   reinterpret_cast<const uint8_t*>(shaderData.data()));
+    ubo.SetSubData(0, kNumTriangles * sizeof(ShaderData), shaderData.data());
 
     utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()});
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();

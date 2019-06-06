@@ -57,7 +57,7 @@ namespace dawn_native {
         MaybeError ValidateCanUseInSubmitNow() const;
 
         // Dawn API
-        void SetSubData(uint32_t start, uint32_t count, const uint8_t* data);
+        void SetSubData(uint32_t start, uint32_t count, const void* data);
         void MapReadAsync(DawnBufferMapReadCallback callback, void* userdata);
         void MapWriteAsync(DawnBufferMapWriteCallback callback, void* userdata);
         void Unmap();
@@ -79,7 +79,7 @@ namespace dawn_native {
 
       private:
         virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) = 0;
-        virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data);
+        virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const void* data);
         virtual void MapReadAsyncImpl(uint32_t serial) = 0;
         virtual void MapWriteAsyncImpl(uint32_t serial) = 0;
         virtual void UnmapImpl() = 0;

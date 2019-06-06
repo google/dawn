@@ -257,7 +257,7 @@ void frame() {
         glm::vec3(0.0f, -1.0f, 0.0f)
     );
 
-    cameraBuffer.SetSubData(0, sizeof(CameraData), reinterpret_cast<uint8_t*>(&cameraData));
+    cameraBuffer.SetSubData(0, sizeof(CameraData), &cameraData);
 
     dawn::Texture backbuffer = swapchain.GetNextTexture();
     utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()},

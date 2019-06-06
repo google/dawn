@@ -20,6 +20,12 @@
             { "name": "request serial", "type": "uint32_t" },
             { "name": "is write", "type": "bool" }
         ],
+        "buffer set sub data internal": [
+            {"name": "buffer id", "type": "ObjectId" },
+            {"name": "start", "type": "uint64_t"},
+            {"name": "count", "type": "uint64_t"},
+            {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "count"}
+        ],
         "buffer update mapped data": [
             { "name": "buffer id", "type": "ObjectId" },
             { "name": "data length", "type": "uint32_t" },
@@ -58,10 +64,15 @@
         ]
     },
     "special items": {
+        "client_side_structures": [
+            "CreateBufferMappedResult"
+        ],
         "client_side_commands": [
+            "BufferSetSubData",
             "FenceGetCompletedValue"
         ],
         "client_handwritten_commands": [
+            "BufferSetSubData",
             "BufferUnmap",
             "DeviceCreateBufferMapped",
             "QueueCreateFence",

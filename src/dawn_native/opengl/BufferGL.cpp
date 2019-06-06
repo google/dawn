@@ -48,7 +48,7 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
-    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
+    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const void* data) {
         glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
         glBufferSubData(GL_ARRAY_BUFFER, start, count, data);
         return {};

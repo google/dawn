@@ -53,7 +53,7 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
     dawn::Buffer dst = device.CreateBuffer(&dstDesc);
 
     const uint32_t zero = 0;
-    dst.SetSubData(0, sizeof(zero), reinterpret_cast<const uint8_t*>(&zero));
+    dst.SetSubData(0, sizeof(zero), &zero);
 
     // Set up bind group and issue dispatch
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {

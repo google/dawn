@@ -128,6 +128,24 @@ namespace dawn_wire { namespace client {
         fence->requests.Enqueue(std::move(request), value);
     }
 
+    void ClientBufferSetSubData(DawnBuffer cBuffer,
+                                uint64_t start,
+                                uint64_t count,
+                                const void* data) {
+        Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+
+        BufferSetSubDataInternalCmd cmd;
+        cmd.bufferId = buffer->id;
+        cmd.start = start;
+        cmd.count = count;
+        cmd.data = static_cast<const uint8_t*>(data);
+
+        Client* wireClient = buffer->device->GetClient();
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer = static_cast<char*>(wireClient->GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer);
+    }
+
     void ClientBufferUnmap(DawnBuffer cBuffer) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
 

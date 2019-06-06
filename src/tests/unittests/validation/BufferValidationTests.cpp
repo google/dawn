@@ -440,7 +440,7 @@ TEST_F(BufferValidationTest, SetSubDataSuccess) {
     dawn::Buffer buf = CreateSetSubDataBuffer(4);
 
     uint32_t foo = 0x01020304;
-    buf.SetSubData(0, sizeof(foo), reinterpret_cast<uint8_t*>(&foo));
+    buf.SetSubData(0, sizeof(foo), &foo);
 }
 
 // Test error case for SetSubData out of bounds
@@ -498,7 +498,7 @@ TEST_F(BufferValidationTest, SetSubDataWithUnalignedOffset) {
 
     uint64_t kOffset = 2999;
     uint32_t value = 0x01020304;
-    ASSERT_DEVICE_ERROR(buf.SetSubData(kOffset, sizeof(value), reinterpret_cast<uint8_t*>(&value)));
+    ASSERT_DEVICE_ERROR(buf.SetSubData(kOffset, sizeof(value), &value));
 }
 
 // Test that it is valid to destroy an unmapped buffer

@@ -59,7 +59,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     for (uint32_t i = 0; i < kNumUints; ++i) {
         expected[i] = (i + 1u) * 0x11111111u;
     }
-    src.SetSubData(0, sizeof(expected), reinterpret_cast<const uint8_t*>(expected.data()));
+    src.SetSubData(0, sizeof(expected), expected.data());
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), src, 0, kNumUints);
 
     // Set up dst storage buffer
@@ -70,7 +70,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     dawn::Buffer dst = device.CreateBuffer(&dstDesc);
 
     std::array<uint32_t, kNumUints> zero{};
-    dst.SetSubData(0, sizeof(zero), reinterpret_cast<const uint8_t*>(zero.data()));
+    dst.SetSubData(0, sizeof(zero), zero.data());
 
     // Set up bind group and issue dispatch
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {

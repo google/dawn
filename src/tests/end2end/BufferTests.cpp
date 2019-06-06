@@ -50,7 +50,7 @@ TEST_P(BufferMapReadTests, SmallReadAtZero) {
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t myData = 0x01020304;
-    buffer.SetSubData(0, sizeof(myData), reinterpret_cast<uint8_t*>(&myData));
+    buffer.SetSubData(0, sizeof(myData), &myData);
 
     const void* mappedData = MapReadAsyncAndWait(buffer);
     ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
@@ -71,7 +71,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
     descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    buffer.SetSubData(0, kDataSize * sizeof(uint32_t), reinterpret_cast<uint8_t*>(myData.data()));
+    buffer.SetSubData(0, kDataSize * sizeof(uint32_t), myData.data());
 
     const void* mappedData = MapReadAsyncAndWait(buffer);
     ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
@@ -155,7 +155,7 @@ TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t value = 0x01020304;
-    buffer.SetSubData(0, sizeof(value), reinterpret_cast<uint8_t*>(&value));
+    buffer.SetSubData(0, sizeof(value), &value);
 
     EXPECT_BUFFER_U32_EQ(value, buffer, 0);
 }
@@ -169,7 +169,7 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
 
     constexpr uint64_t kOffset = 2000;
     uint32_t value = 0x01020304;
-    buffer.SetSubData(kOffset, sizeof(value), reinterpret_cast<uint8_t*>(&value));
+    buffer.SetSubData(kOffset, sizeof(value), &value);
 
     EXPECT_BUFFER_U32_EQ(value, buffer, kOffset);
 }
@@ -194,7 +194,7 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 
     std::vector<uint32_t> expectedData;
     for (uint32_t i = 0; i < kElements; ++i) {
-        buffer.SetSubData(i * sizeof(uint32_t), sizeof(i), reinterpret_cast<uint8_t*>(&i));
+        buffer.SetSubData(i * sizeof(uint32_t), sizeof(i), &i);
         expectedData.push_back(i);
     }
 
@@ -215,7 +215,7 @@ TEST_P(BufferSetSubDataTests, LargeSetSubData) {
         expectedData.push_back(i);
     }
 
-    buffer.SetSubData(0, kElements * sizeof(uint32_t), reinterpret_cast<uint8_t*>(expectedData.data()));
+    buffer.SetSubData(0, kElements * sizeof(uint32_t), expectedData.data());
 
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
 }
@@ -377,7 +377,7 @@ TEST_P(CreateBufferMappedTests, MappableZeroInitialized) {
 
     dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
     ASSERT_EQ(result.dataLength, descriptor.size);
-    ASSERT_EQ(*result.data, 0);
+    ASSERT_EQ(*reinterpret_cast<uint8_t*>(result.data), 0);
     result.buffer.Unmap();
 }
 
@@ -391,7 +391,7 @@ TEST_P(CreateBufferMappedTests, NonMappableZeroInitialized) {
 
     dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
     ASSERT_EQ(result.dataLength, descriptor.size);
-    ASSERT_EQ(*result.data, 0);
+    ASSERT_EQ(*reinterpret_cast<uint8_t*>(result.data), 0);
     result.buffer.Unmap();
 }
 

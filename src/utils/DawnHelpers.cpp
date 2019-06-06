@@ -122,7 +122,7 @@ namespace utils {
         descriptor.usage = usage | dawn::BufferUsageBit::TransferDst;
 
         dawn::Buffer buffer = device.CreateBuffer(&descriptor);
-        buffer.SetSubData(0, size, reinterpret_cast<const uint8_t*>(data));
+        buffer.SetSubData(0, size, data);
         return buffer;
     }
 

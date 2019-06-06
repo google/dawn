@@ -259,7 +259,7 @@ namespace dawn_native { namespace null {
         memcpy(mBackingData.get() + destinationOffset, ptr + sourceOffset, size);
     }
 
-    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const uint8_t* data) {
+    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const void* data) {
         ASSERT(start + count <= GetSize());
         ASSERT(mBackingData);
         memcpy(mBackingData.get() + start, data, count);

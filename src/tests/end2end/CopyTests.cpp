@@ -121,7 +121,8 @@ class CopyTests_T2B : public CopyTests {
             bufDescriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
             dawn::Buffer buffer = device.CreateBuffer(&bufDescriptor);
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel * textureSpec.arraySize);
-            buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(emptyData.data()));
+            buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)),
+                              emptyData.data());
 
             uint64_t bufferOffset = bufferSpec.offset;
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
@@ -184,7 +185,8 @@ protected:
 
         std::vector<RGBA8> bufferData(bufferSpec.size / kBytesPerTexel);
         FillBufferData(bufferData.data(), bufferData.size());
-        buffer.SetSubData(0, static_cast<uint32_t>(bufferData.size() * sizeof(RGBA8)), reinterpret_cast<const uint8_t*>(bufferData.data()));
+        buffer.SetSubData(0, static_cast<uint32_t>(bufferData.size() * sizeof(RGBA8)),
+                          bufferData.data());
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         dawn::TextureDescriptor descriptor;

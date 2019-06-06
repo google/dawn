@@ -383,8 +383,10 @@ namespace dawn_wire {
         //* Output structure [de]serialization first because it is used by commands.
         {% for type in by_category["structure"] %}
             {% set name = as_cType(type.name) %}
-            {{write_record_serialization_helpers(type, name, type.members,
-              is_cmd=False)}}
+            {% if type.name.CamelCase() not in client_side_structures %}
+                {{write_record_serialization_helpers(type, name, type.members,
+                  is_cmd=False)}}
+            {% endif %}
         {% endfor %}
 
         //* Output [de]serialization helpers for commands

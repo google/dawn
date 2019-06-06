@@ -27,21 +27,22 @@ def compute_wire_params(api_params, wire_json):
     commands = []
     return_commands = []
 
-    string_message_member = common.RecordMember(Name('message'), types['char'], 'const*', False, False)
-    string_message_member.length = 'strlen'
-
-    callback_status_member = common.RecordMember(Name('status'), types['uint32_t'], 'value', False, False)
-
     # Generate commands from object methods
     for api_object in wire_params['by_category']['object']:
         for method in api_object.methods:
+            command_name = concat_names(api_object.name, method.name)
+            command_suffix = Name(command_name).CamelCase()
+
+            # Only object return values or void are supported. Other methods must be handwritten.
             if method.return_type.category != 'object' and method.return_type.name.canonical_case() != 'void':
-                # No other return types supported
+                assert(command_suffix in wire_json['special items']['client_handwritten_commands'])
+                continue
+
+            if command_suffix in wire_json['special items']['client_side_commands']:
                 continue
 
             # Create object method commands by prepending "self"
             members = [common.RecordMember(Name('self'), types[api_object.dict_name], 'value', False, False)]
-
             members += method.arguments
 
             # Client->Server commands that return an object return the result object handle
@@ -50,9 +51,7 @@ def compute_wire_params(api_params, wire_json):
                 result.set_handle_type(method.return_type)
                 members.append(result)
 
-            command_name = concat_names(api_object.name, method.name)
             command = common.Command(command_name, members)
-
             command.derived_object = api_object
             command.derived_method = method
             commands.append(command)

@@ -28,7 +28,7 @@ TEST_P(BasicTests, BufferSetSubData) {
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t value = 0x01020304;
-    buffer.SetSubData(0, sizeof(value), reinterpret_cast<uint8_t*>(&value));
+    buffer.SetSubData(0, sizeof(value), &value);
 
     EXPECT_BUFFER_U32_EQ(value, buffer, 0);
 }
