@@ -96,7 +96,7 @@ void init() {
         DawnVertexInputDescriptor vertexInput;
         vertexInput.nextInChain = nullptr;
         vertexInput.indexFormat = DAWN_INDEX_FORMAT_UINT32;
-        vertexInput.numBuffers = 0;
+        vertexInput.bufferCount = 0;
         vertexInput.buffers = nullptr;
         descriptor.vertexInput = &vertexInput;
 

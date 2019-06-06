@@ -125,9 +125,9 @@ void init() {
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
     descriptor.cVertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.cVertexInput.numBuffers = 1;
+    descriptor.cVertexInput.bufferCount = 1;
     descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
-    descriptor.cVertexInput.cBuffers[0].numAttributes = 1;
+    descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
     descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float4;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
     descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;

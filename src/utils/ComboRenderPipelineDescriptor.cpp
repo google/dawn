@@ -22,7 +22,7 @@ namespace utils {
         dawn::VertexInputDescriptor* descriptor = this;
 
         descriptor->indexFormat = dawn::IndexFormat::Uint32;
-        descriptor->numBuffers = 0;
+        descriptor->bufferCount = 0;
 
         // Fill the default values for vertexBuffers and vertexAttributes in buffers.
         dawn::VertexAttributeDescriptor vertexAttribute;
@@ -35,7 +35,7 @@ namespace utils {
         for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
             cBuffers[i].stride = 0;
             cBuffers[i].stepMode = dawn::InputStepMode::Vertex;
-            cBuffers[i].numAttributes = 0;
+            cBuffers[i].attributeCount = 0;
             cBuffers[i].attributes = nullptr;
         }
         // cBuffers[i].attributes points to somewhere in cAttributes. cBuffers[0].attributes

@@ -47,7 +47,7 @@ class VertexInputTest : public ValidationTest {
     }
 };
 
-// Check an empty input state is valid
+// Check an empty vertex input is valid
 TEST_F(VertexInputTest, EmptyIsOk) {
     utils::ComboVertexInputDescriptor state;
     CreatePipeline(true, state, R"(
@@ -61,9 +61,9 @@ TEST_F(VertexInputTest, EmptyIsOk) {
 // Check validation that pipeline vertex buffers are backed by attributes in the vertex input
 TEST_F(VertexInputTest, PipelineCompatibility) {
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
+    state.bufferCount = 1;
     state.cBuffers[0].stride = 2 * sizeof(float);
-    state.cBuffers[0].numAttributes = 2;
+    state.cBuffers[0].attributeCount = 2;
     state.cAttributes[0].shaderLocation = 0;
     state.cAttributes[1].shaderLocation = 1;
     state.cAttributes[1].offset = sizeof(float);
@@ -87,7 +87,7 @@ TEST_F(VertexInputTest, PipelineCompatibility) {
         }
     )");
 
-    // Check for an error when the pipeline uses an attribute not in the input state
+    // Check for an error when the pipeline uses an attribute not in the vertex input
     CreatePipeline(false, state, R"(
         #version 450
         layout(location = 2) in vec4 a;
@@ -101,9 +101,9 @@ TEST_F(VertexInputTest, PipelineCompatibility) {
 TEST_F(VertexInputTest, StrideZero) {
     // Works ok without attributes
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
+    state.bufferCount = 1;
     state.cBuffers[0].stride = 0;
-    state.cBuffers[0].numAttributes = 1;
+    state.cBuffers[0].attributeCount = 1;
     CreatePipeline(true, state, R"(
         #version 450
         void main() {
@@ -126,9 +126,9 @@ TEST_F(VertexInputTest, StrideZero) {
 TEST_F(VertexInputTest, SetOffsetOutOfBounds) {
     // Control case, setting correct stride and offset
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
+    state.bufferCount = 1;
     state.cBuffers[0].stride = 2 * sizeof(float);
-    state.cBuffers[0].numAttributes = 2;
+    state.cBuffers[0].attributeCount = 2;
     state.cAttributes[0].shaderLocation = 0;
     state.cAttributes[1].shaderLocation = 1;
     state.cAttributes[1].offset = sizeof(float);
@@ -162,9 +162,9 @@ TEST_F(VertexInputTest, SetOffsetOutOfBounds) {
 TEST_F(VertexInputTest, SetVertexBuffersNumLimit) {
     // Control case, setting max vertex buffer number
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = kMaxVertexBuffers;
+    state.bufferCount = kMaxVertexBuffers;
     for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
-        state.cBuffers[i].numAttributes = 1;
+        state.cBuffers[i].attributeCount = 1;
         state.cBuffers[i].attributes = &state.cAttributes[i];
         state.cAttributes[i].shaderLocation = i;
     }
@@ -176,7 +176,7 @@ TEST_F(VertexInputTest, SetVertexBuffersNumLimit) {
     )");
 
     // Test vertex buffer number exceed the limit
-    state.numBuffers = kMaxVertexBuffers + 1;
+    state.bufferCount = kMaxVertexBuffers + 1;
     CreatePipeline(false, state, R"(
         #version 450
         void main() {
@@ -189,8 +189,8 @@ TEST_F(VertexInputTest, SetVertexBuffersNumLimit) {
 TEST_F(VertexInputTest, SetVertexAttributesNumLimit) {
     // Control case, setting max vertex attribute number
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 2;
-    state.cBuffers[0].numAttributes = kMaxVertexAttributes;
+    state.bufferCount = 2;
+    state.cBuffers[0].attributeCount = kMaxVertexAttributes;
     for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
         state.cAttributes[i].shaderLocation = i;
     }
@@ -202,7 +202,7 @@ TEST_F(VertexInputTest, SetVertexAttributesNumLimit) {
     )");
 
     // Test vertex attribute number exceed the limit
-    state.cBuffers[1].numAttributes = 1;
+    state.cBuffers[1].attributeCount = 1;
     state.cBuffers[1].attributes = &state.cAttributes[kMaxVertexAttributes - 1];
     CreatePipeline(false, state, R"(
         #version 450
@@ -216,9 +216,9 @@ TEST_F(VertexInputTest, SetVertexAttributesNumLimit) {
 TEST_F(VertexInputTest, SetInputStrideOutOfBounds) {
     // Control case, setting max input stride
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
+    state.bufferCount = 1;
     state.cBuffers[0].stride = kMaxVertexBufferStride;
-    state.cBuffers[0].numAttributes = 1;
+    state.cBuffers[0].attributeCount = 1;
     CreatePipeline(true, state, R"(
         #version 450
         void main() {
@@ -240,8 +240,8 @@ TEST_F(VertexInputTest, SetInputStrideOutOfBounds) {
 TEST_F(VertexInputTest, AlreadySetAttribute) {
     // Control case, setting attribute 0
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
-    state.cBuffers[0].numAttributes = 1;
+    state.bufferCount = 1;
+    state.cBuffers[0].attributeCount = 1;
     state.cAttributes[0].shaderLocation = 0;
     CreatePipeline(true, state, R"(
         #version 450
@@ -251,7 +251,7 @@ TEST_F(VertexInputTest, AlreadySetAttribute) {
     )");
 
     // Oh no, attribute 0 is set twice
-    state.cBuffers[0].numAttributes = 2;
+    state.cBuffers[0].attributeCount = 2;
     state.cAttributes[0].shaderLocation = 0;
     state.cAttributes[1].shaderLocation = 0;
     CreatePipeline(false, state, R"(
@@ -266,8 +266,8 @@ TEST_F(VertexInputTest, AlreadySetAttribute) {
 TEST_F(VertexInputTest, SetSameShaderLocation) {
     // Control case, setting different shader locations in two attributes
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
-    state.cBuffers[0].numAttributes = 2;
+    state.bufferCount = 1;
+    state.cBuffers[0].attributeCount = 2;
     state.cAttributes[0].shaderLocation = 0;
     state.cAttributes[1].shaderLocation = 1;
     state.cAttributes[1].offset = sizeof(float);
@@ -288,10 +288,10 @@ TEST_F(VertexInputTest, SetSameShaderLocation) {
     )");
 
     // Test same shader location in two attributes in different buffers
-    state.numBuffers = 2;
-    state.cBuffers[0].numAttributes = 1;
+    state.bufferCount = 2;
+    state.cBuffers[0].attributeCount = 1;
     state.cAttributes[0].shaderLocation = 0;
-    state.cBuffers[1].numAttributes = 1;
+    state.cBuffers[1].attributeCount = 1;
     state.cBuffers[1].attributes = &state.cAttributes[1];
     state.cAttributes[1].shaderLocation = 0;
     CreatePipeline(false, state, R"(
@@ -306,8 +306,8 @@ TEST_F(VertexInputTest, SetSameShaderLocation) {
 TEST_F(VertexInputTest, SetAttributeLocationOutOfBounds) {
     // Control case, setting last attribute shader location
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
-    state.cBuffers[0].numAttributes = 1;
+    state.bufferCount = 1;
+    state.cBuffers[0].attributeCount = 1;
     state.cAttributes[0].shaderLocation = kMaxVertexAttributes - 1;
     CreatePipeline(true, state, R"(
         #version 450
@@ -330,8 +330,8 @@ TEST_F(VertexInputTest, SetAttributeLocationOutOfBounds) {
 TEST_F(VertexInputTest, SetAttributeOffsetOutOfBounds) {
     // Control case, setting max attribute offset for FloatR32 vertex format
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
-    state.cBuffers[0].numAttributes = 1;
+    state.bufferCount = 1;
+    state.cBuffers[0].attributeCount = 1;
     state.cAttributes[0].offset = kMaxVertexAttributeEnd - sizeof(dawn::VertexFormat::Float);
     CreatePipeline(true, state, R"(
         #version 450
@@ -353,8 +353,8 @@ TEST_F(VertexInputTest, SetAttributeOffsetOutOfBounds) {
 // Check attribute offset overflow
 TEST_F(VertexInputTest, SetAttributeOffsetOverflow) {
     utils::ComboVertexInputDescriptor state;
-    state.numBuffers = 1;
-    state.cBuffers[0].numAttributes = 1;
+    state.bufferCount = 1;
+    state.cBuffers[0].attributeCount = 1;
     state.cAttributes[0].offset = std::numeric_limits<uint32_t>::max();
     CreatePipeline(false, state, R"(
         #version 450

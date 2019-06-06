@@ -120,17 +120,17 @@ void initRender() {
     descriptor.cVertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
 
-    descriptor.cVertexInput.numBuffers = 2;
+    descriptor.cVertexInput.bufferCount = 2;
     descriptor.cVertexInput.cBuffers[0].stride = sizeof(Particle);
     descriptor.cVertexInput.cBuffers[0].stepMode = dawn::InputStepMode::Instance;
-    descriptor.cVertexInput.cBuffers[0].numAttributes = 2;
+    descriptor.cVertexInput.cBuffers[0].attributeCount = 2;
     descriptor.cVertexInput.cAttributes[0].offset = offsetof(Particle, pos);
     descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float2;
     descriptor.cVertexInput.cAttributes[1].shaderLocation = 1;
     descriptor.cVertexInput.cAttributes[1].offset = offsetof(Particle, vel);
     descriptor.cVertexInput.cAttributes[1].format = dawn::VertexFormat::Float2;
     descriptor.cVertexInput.cBuffers[1].stride = sizeof(glm::vec2);
-    descriptor.cVertexInput.cBuffers[1].numAttributes = 1;
+    descriptor.cVertexInput.cBuffers[1].attributeCount = 1;
     descriptor.cVertexInput.cBuffers[1].attributes = &descriptor.cVertexInput.cAttributes[2];
     descriptor.cVertexInput.cAttributes[2].shaderLocation = 2;
     descriptor.cVertexInput.cAttributes[2].format = dawn::VertexFormat::Float2;

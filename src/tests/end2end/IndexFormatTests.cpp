@@ -53,9 +53,9 @@ class IndexFormatTest : public DawnTest {
             descriptor.cFragmentStage.module = fsModule;
             descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
             descriptor.cVertexInput.indexFormat = format;
-            descriptor.cVertexInput.numBuffers = 1;
+            descriptor.cVertexInput.bufferCount = 1;
             descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
-            descriptor.cVertexInput.cBuffers[0].numAttributes = 1;
+            descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
             descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float4;
             descriptor.cColorStates[0]->format = renderPass.colorFormat;
 

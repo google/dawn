@@ -586,8 +586,8 @@
         "members": [
             {"name": "stride", "type": "uint64_t"},
             {"name": "step mode", "type": "input step mode"},
-            {"name": "num attributes", "type": "uint32_t"},
-            {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "num attributes"}
+            {"name": "attribute count", "type": "uint32_t"},
+            {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "attribute count"}
         ]
     },
     "vertex input descriptor": {
@@ -595,8 +595,8 @@
         "extensible": true,
         "members": [
             {"name": "index format", "type": "index format"},
-            {"name": "num buffers", "type": "uint32_t"},
-            {"name": "buffers", "type": "vertex buffer descriptor", "annotation": "const*", "length": "num buffers"}
+            {"name": "buffer count", "type": "uint32_t"},
+            {"name": "buffers", "type": "vertex buffer descriptor", "annotation": "const*", "length": "buffer count"}
         ]
     },
     "input step mode": {

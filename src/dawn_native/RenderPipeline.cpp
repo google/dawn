@@ -58,7 +58,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Setting input stride out of bounds");
             }
 
-            for (uint32_t i = 0; i < buffer->numAttributes; ++i) {
+            for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
                 DAWN_TRY(ValidateVertexAttributeDescriptor(&buffer->attributes[i], buffer->stride,
                                                            attributesSetMask));
             }
@@ -74,15 +74,15 @@ namespace dawn_native {
             }
             DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
 
-            if (descriptor->numBuffers > kMaxVertexBuffers) {
+            if (descriptor->bufferCount > kMaxVertexBuffers) {
                 return DAWN_VALIDATION_ERROR("Vertex Inputs number exceeds maximum");
             }
 
             uint32_t totalAttributesNum = 0;
-            for (uint32_t i = 0; i < descriptor->numBuffers; ++i) {
+            for (uint32_t i = 0; i < descriptor->bufferCount; ++i) {
                 DAWN_TRY(
                     ValidateVertexBufferDescriptor(&descriptor->buffers[i], attributesSetMask));
-                totalAttributesNum += descriptor->buffers[i].numAttributes;
+                totalAttributesNum += descriptor->buffers[i].attributeCount;
             }
 
             // Every vertex attribute has a member called shaderLocation, and there are some
@@ -338,14 +338,14 @@ namespace dawn_native {
           mFragmentModule(descriptor->fragmentStage->module),
           mFragmentEntryPoint(descriptor->fragmentStage->entryPoint),
           mIsBlueprint(blueprint) {
-        for (uint32_t slot = 0; slot < mVertexInput.numBuffers; ++slot) {
+        for (uint32_t slot = 0; slot < mVertexInput.bufferCount; ++slot) {
             mInputsSetMask.set(slot);
             mInputInfos[slot].inputSlot = slot;
             mInputInfos[slot].stride = mVertexInput.buffers[slot].stride;
             mInputInfos[slot].stepMode = mVertexInput.buffers[slot].stepMode;
 
             uint32_t location = 0;
-            for (uint32_t i = 0; i < mVertexInput.buffers[slot].numAttributes; ++i) {
+            for (uint32_t i = 0; i < mVertexInput.buffers[slot].attributeCount; ++i) {
                 location = mVertexInput.buffers[slot].attributes[i].shaderLocation;
                 mAttributesSetMask.set(location);
                 mAttributeInfos[location].shaderLocation = location;

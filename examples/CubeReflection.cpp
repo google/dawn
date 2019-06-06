@@ -157,13 +157,13 @@ void init() {
         })");
 
     utils::ComboVertexInputDescriptor vertexInput;
-    vertexInput.cBuffers[0].numAttributes = 2;
+    vertexInput.cBuffers[0].attributeCount = 2;
     vertexInput.cAttributes[0].format = dawn::VertexFormat::Float3;
     vertexInput.cAttributes[1].shaderLocation = 1;
     vertexInput.cAttributes[1].offset = 3 * sizeof(float);
     vertexInput.cAttributes[1].format = dawn::VertexFormat::Float3;
 
-    vertexInput.numBuffers = 1;
+    vertexInput.bufferCount = 1;
     vertexInput.cBuffers[0].stride = 6 * sizeof(float);
 
     auto bgl = utils::MakeBindGroupLayout(

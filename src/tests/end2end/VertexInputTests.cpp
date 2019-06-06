@@ -150,13 +150,13 @@ class VertexInputTest : public DawnTest {
     utils::ComboVertexInputDescriptor MakeVertexInput(
         const std::vector<VertexBufferSpec>& buffers) {
         utils::ComboVertexInputDescriptor vertexInput;
-        uint32_t numBuffers = 0;
+        uint32_t bufferCount = 0;
         uint32_t totalNumAttributes = 0;
         for (const VertexBufferSpec& buffer : buffers) {
-            vertexInput.cBuffers[numBuffers].stride = buffer.stride;
-            vertexInput.cBuffers[numBuffers].stepMode = buffer.step;
+            vertexInput.cBuffers[bufferCount].stride = buffer.stride;
+            vertexInput.cBuffers[bufferCount].stepMode = buffer.step;
 
-            vertexInput.cBuffers[numBuffers].attributes =
+            vertexInput.cBuffers[bufferCount].attributes =
                 &vertexInput.cAttributes[totalNumAttributes];
 
             for (const VertexAttributeSpec& attribute : buffer.attributes) {
@@ -165,13 +165,13 @@ class VertexInputTest : public DawnTest {
                 vertexInput.cAttributes[totalNumAttributes].format = attribute.format;
                 totalNumAttributes++;
             }
-            vertexInput.cBuffers[numBuffers].numAttributes =
+            vertexInput.cBuffers[bufferCount].attributeCount =
                 static_cast<uint32_t>(buffer.attributes.size());
 
-            numBuffers++;
+            bufferCount++;
         }
 
-        vertexInput.numBuffers = numBuffers;
+        vertexInput.bufferCount = bufferCount;
         return vertexInput;
     }
 
