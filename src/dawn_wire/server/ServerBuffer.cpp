@@ -20,10 +20,11 @@
 namespace dawn_wire { namespace server {
 
     bool Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
-        auto* selfData = BufferObjects().Get(cmd.selfId);
-        DAWN_ASSERT(selfData != nullptr);
+        auto* buffer = BufferObjects().Get(cmd.selfId);
+        DAWN_ASSERT(buffer != nullptr);
 
-        selfData->mappedData = nullptr;
+        buffer->mappedData = nullptr;
+        buffer->mapWriteState = BufferMapWriteState::Unmapped;
 
         return true;
     }
@@ -70,7 +71,14 @@ namespace dawn_wire { namespace server {
 
         DawnCreateBufferMappedResult result = mProcs.deviceCreateBufferMapped(device, descriptor);
         ASSERT(result.buffer != nullptr);
-        ASSERT(result.data != nullptr);
+        if (result.data == nullptr && result.dataLength != 0) {
+            // Non-zero dataLength but null data is used to indicate an allocation error.
+            resultData->mapWriteState = BufferMapWriteState::MapError;
+        } else {
+            // The buffer is mapped and has a valid mappedData pointer.
+            // The buffer may still be an error with fake staging data.
+            resultData->mapWriteState = BufferMapWriteState::Mapped;
+        }
         resultData->handle = result.buffer;
         resultData->mappedData = result.data;
         resultData->mappedDataSize = result.dataLength;
@@ -103,11 +111,22 @@ namespace dawn_wire { namespace server {
         }
 
         auto* buffer = BufferObjects().Get(bufferId);
-        if (buffer == nullptr || buffer->mappedData == nullptr || buffer->mappedDataSize != count) {
+        if (buffer == nullptr || buffer->mappedDataSize != count) {
             return false;
+        }
+        switch (buffer->mapWriteState) {
+            case BufferMapWriteState::Unmapped:
+                return false;
+            case BufferMapWriteState::MapError:
+                // The buffer is mapped but there was an error allocating mapped data.
+                // Do not perform the memcpy.
+                return true;
+            case BufferMapWriteState::Mapped:
+                break;
         }
 
         ASSERT(data != nullptr);
+        ASSERT(buffer->mappedData != nullptr);
         memcpy(buffer->mappedData, data, count);
 
         return true;
@@ -180,6 +199,7 @@ namespace dawn_wire { namespace server {
         cmd.Serialize(allocatedBuffer);
 
         if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+            bufferData->mapWriteState = BufferMapWriteState::Mapped;
             bufferData->mappedData = ptr;
             bufferData->mappedDataSize = dataLength;
         }

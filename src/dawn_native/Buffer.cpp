@@ -37,7 +37,8 @@ namespace dawn_native {
                 ASSERT(mappedPointer != nullptr);
 
                 ErrorBuffer* buffer = new ErrorBuffer(device);
-                buffer->mFakeMappedData = std::unique_ptr<uint8_t[]>(new uint8_t[size]);
+                buffer->mFakeMappedData =
+                    std::unique_ptr<uint8_t[]>(new (std::nothrow) uint8_t[size]);
                 *mappedPointer = buffer->mFakeMappedData.get();
 
                 return buffer;

@@ -263,23 +263,30 @@ namespace dawn_native {
         BufferBase* buffer = nullptr;
         uint8_t* data = nullptr;
 
+        uint64_t size = descriptor->size;
         if (ConsumedError(CreateBufferInternal(&buffer, descriptor)) ||
             ConsumedError(buffer->MapAtCreation(&data))) {
             // Map failed. Replace the buffer with an error buffer.
             if (buffer != nullptr) {
                 delete buffer;
             }
-            buffer = BufferBase::MakeErrorMapped(this, descriptor->size, &data);
+            buffer = BufferBase::MakeErrorMapped(this, size, &data);
         }
 
         ASSERT(buffer != nullptr);
-        ASSERT(data != nullptr);
+        if (data == nullptr) {
+            // |data| may be nullptr if there was an OOM in MakeErrorMapped.
+            // Non-zero dataLength and nullptr data is used to indicate there should be
+            // mapped data but the allocation failed.
+            ASSERT(buffer->IsError());
+        } else {
+            memset(data, 0, size);
+        }
 
         DawnCreateBufferMappedResult result = {};
         result.buffer = reinterpret_cast<DawnBuffer>(buffer);
         result.data = data;
-        result.dataLength = descriptor->size;
-        memset(result.data, 0, result.dataLength);
+        result.dataLength = size;
 
         return result;
     }

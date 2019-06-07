@@ -37,10 +37,13 @@ namespace dawn_wire { namespace server {
     template <typename T>
     struct ObjectData : public ObjectDataBase<T> {};
 
+    enum class BufferMapWriteState { Unmapped, Mapped, MapError };
+
     template <>
     struct ObjectData<DawnBuffer> : public ObjectDataBase<DawnBuffer> {
         void* mappedData = nullptr;
         size_t mappedDataSize = 0;
+        BufferMapWriteState mapWriteState = BufferMapWriteState::Unmapped;
     };
 
     // Keeps track of the mapping between client IDs and backend objects.
