@@ -44,6 +44,7 @@ template("dawn_generator") {
   # The base arguments for the generator: from this dawn.json, generate this
   # target using templates in this directory.
   generator_args = [
+    "--dawn-json",
     rebase_path("${dawn_root}/dawn.json", root_build_dir),
     "--wire-json",
     rebase_path("${dawn_root}/dawn_wire.json", root_build_dir),
