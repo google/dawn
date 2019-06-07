@@ -68,6 +68,34 @@ namespace dawn_native { namespace d3d12 {
         mResourceAllocator = std::make_unique<ResourceAllocator>(this);
 
         NextSerial();
+
+        // Initialize indirect commands
+        D3D12_INDIRECT_ARGUMENT_DESC argumentDesc = {};
+        argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+
+        D3D12_COMMAND_SIGNATURE_DESC programDesc = {};
+        programDesc.ByteStride = 3 * sizeof(uint32_t);
+        programDesc.NumArgumentDescs = 1;
+        programDesc.pArgumentDescs = &argumentDesc;
+
+        ToBackend(GetDevice())
+            ->GetD3D12Device()
+            ->CreateCommandSignature(&programDesc, NULL, IID_PPV_ARGS(&mDispatchIndirectSignature));
+
+        argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+        programDesc.ByteStride = 4 * sizeof(uint32_t);
+
+        ToBackend(GetDevice())
+            ->GetD3D12Device()
+            ->CreateCommandSignature(&programDesc, NULL, IID_PPV_ARGS(&mDrawIndirectSignature));
+
+        argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+        programDesc.ByteStride = 5 * sizeof(uint32_t);
+
+        ToBackend(GetDevice())
+            ->GetD3D12Device()
+            ->CreateCommandSignature(&programDesc, NULL,
+                                     IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
     }
 
     Device::~Device() {
@@ -99,6 +127,18 @@ namespace dawn_native { namespace d3d12 {
 
     ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() const {
         return mCommandQueue;
+    }
+
+    ComPtr<ID3D12CommandSignature> Device::GetDispatchIndirectSignature() const {
+        return mDispatchIndirectSignature;
+    }
+
+    ComPtr<ID3D12CommandSignature> Device::GetDrawIndirectSignature() const {
+        return mDrawIndirectSignature;
+    }
+
+    ComPtr<ID3D12CommandSignature> Device::GetDrawIndexedIndirectSignature() const {
+        return mDrawIndexedIndirectSignature;
     }
 
     DescriptorHeapAllocator* Device::GetDescriptorHeapAllocator() const {
