@@ -34,14 +34,22 @@ namespace dawn_native {
             if (attribute->shaderLocation >= kMaxVertexAttributes) {
                 return DAWN_VALIDATION_ERROR("Setting attribute out of bounds");
             }
+
+            // No underflow is possible because the max vertex format size is smaller than
+            // kMaxVertexAttributeEnd.
             ASSERT(kMaxVertexAttributeEnd >= VertexFormatSize(attribute->format));
-            ASSERT(vertexBufferStride == 0 ||
-                   vertexBufferStride >= VertexFormatSize(attribute->format));
-            if (attribute->offset > kMaxVertexAttributeEnd - VertexFormatSize(attribute->format) ||
-                (vertexBufferStride > 0 &&
-                 attribute->offset + VertexFormatSize(attribute->format) > vertexBufferStride)) {
+            if (attribute->offset > kMaxVertexAttributeEnd - VertexFormatSize(attribute->format)) {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
             }
+
+            // No overflow is possible because the offset is already validated to be less
+            // than kMaxVertexAttributeEnd.
+            ASSERT(attribute->offset < kMaxVertexAttributeEnd);
+            if (vertexBufferStride > 0 &&
+                attribute->offset + VertexFormatSize(attribute->format) > vertexBufferStride) {
+                return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
+            }
+
             if ((*attributesSetMask)[attribute->shaderLocation]) {
                 return DAWN_VALIDATION_ERROR("Setting already set attribute");
             }

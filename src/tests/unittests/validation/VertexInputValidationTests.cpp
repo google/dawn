@@ -363,3 +363,18 @@ TEST_F(VertexInputTest, SetAttributeOffsetOverflow) {
         }
     )");
 }
+
+// Check for some potential underflow in the vertex input validation
+TEST_F(VertexInputTest, VertexFormatLargerThanNonZeroStride) {
+    utils::ComboVertexInputDescriptor state;
+    state.bufferCount = 1;
+    state.cBuffers[0].stride = 4;
+    state.cBuffers[0].attributeCount = 1;
+    state.cAttributes[0].format = dawn::VertexFormat::Float4;
+    CreatePipeline(false, state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
+}
