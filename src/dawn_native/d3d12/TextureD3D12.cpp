@@ -172,6 +172,30 @@ namespace dawn_native { namespace d3d12 {
         DestroyInternal();
     }
 
+    bool Texture::CreateD3D12ResourceBarrierIfNeeded(D3D12_RESOURCE_BARRIER* barrier,
+                                                     dawn::TextureUsageBit newUsage) const {
+        return CreateD3D12ResourceBarrierIfNeeded(barrier,
+                                                  D3D12TextureUsage(newUsage, GetFormat()));
+    }
+
+    bool Texture::CreateD3D12ResourceBarrierIfNeeded(D3D12_RESOURCE_BARRIER* barrier,
+                                                     D3D12_RESOURCE_STATES newState) const {
+        // Avoid transitioning the texture when it isn't needed.
+        // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
+        if (mLastState == newState) {
+            return false;
+        }
+
+        barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier->Transition.pResource = mResourcePtr;
+        barrier->Transition.StateBefore = mLastState;
+        barrier->Transition.StateAfter = newState;
+        barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+        return true;
+    }
+
     void Texture::DestroyImpl() {
         // If we own the resource, release it.
         ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
@@ -195,6 +219,10 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
+    void Texture::SetUsage(dawn::TextureUsageBit newUsage) {
+        mLastState = D3D12TextureUsage(newUsage, GetFormat());
+    }
+
     void Texture::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                      dawn::TextureUsageBit usage) {
         TransitionUsageNow(commandList, D3D12TextureUsage(usage, GetFormat()));
@@ -202,21 +230,10 @@ namespace dawn_native { namespace d3d12 {
 
     void Texture::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                      D3D12_RESOURCE_STATES newState) {
-        // Avoid transitioning the texture when it isn't needed.
-        // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
-        if (mLastState == newState) {
-            return;
-        }
-
         D3D12_RESOURCE_BARRIER barrier;
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier.Transition.pResource = mResourcePtr;
-        barrier.Transition.StateBefore = mLastState;
-        barrier.Transition.StateAfter = newState;
-        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-        commandList->ResourceBarrier(1, &barrier);
+        if (CreateD3D12ResourceBarrierIfNeeded(&barrier, newState)) {
+            commandList->ResourceBarrier(1, &barrier);
+        }
 
         mLastState = newState;
     }

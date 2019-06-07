@@ -29,11 +29,13 @@ namespace dawn_native { namespace d3d12 {
         Buffer(Device* device, const BufferDescriptor* descriptor);
         ~Buffer();
 
+        bool CreateD3D12ResourceBarrierIfNeeded(D3D12_RESOURCE_BARRIER* barrier,
+                                                dawn::BufferUsageBit newUsage) const;
         uint32_t GetD3D12Size() const;
         ComPtr<ID3D12Resource> GetD3D12Resource();
         D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
         void OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite);
-
+        void SetUsage(dawn::BufferUsageBit newUsage);
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                 dawn::BufferUsageBit usage);
 

@@ -31,9 +31,13 @@ namespace dawn_native { namespace d3d12 {
         Texture(Device* device, const TextureDescriptor* descriptor, ID3D12Resource* nativeTexture);
         ~Texture();
 
+        bool CreateD3D12ResourceBarrierIfNeeded(D3D12_RESOURCE_BARRIER* barrier,
+                                                dawn::TextureUsageBit newUsage) const;
+        bool CreateD3D12ResourceBarrierIfNeeded(D3D12_RESOURCE_BARRIER* barrier,
+                                                D3D12_RESOURCE_STATES newState) const;
         DXGI_FORMAT GetD3D12Format() const;
         ID3D12Resource* GetD3D12Resource() const;
-
+        void SetUsage(dawn::TextureUsageBit newUsage);
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                 dawn::TextureUsageBit usage);
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,

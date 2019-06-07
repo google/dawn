@@ -111,6 +111,32 @@ namespace dawn_native { namespace d3d12 {
         DestroyInternal();
     }
 
+    bool Buffer::CreateD3D12ResourceBarrierIfNeeded(D3D12_RESOURCE_BARRIER* barrier,
+                                                    dawn::BufferUsageBit newUsage) const {
+        // Resources in upload and readback heaps must be kept in the COPY_SOURCE/DEST state
+        if (mFixedResourceState) {
+            ASSERT(mLastUsage == newUsage);
+            return false;
+        }
+
+        // We can skip transitions to already current usages.
+        // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
+        if ((mLastUsage & newUsage) == newUsage) {
+            return false;
+        }
+
+        D3D12_RESOURCE_STATES lastState = D3D12BufferUsage(mLastUsage);
+        D3D12_RESOURCE_STATES newState = D3D12BufferUsage(newUsage);
+        barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier->Transition.pResource = mResource.Get();
+        barrier->Transition.StateBefore = lastState;
+        barrier->Transition.StateAfter = newState;
+        barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+        return true;
+    }
+
     uint32_t Buffer::GetD3D12Size() const {
         // TODO(enga@google.com): TODO investigate if this needs to be a constraint at the API level
         return Align(GetSize(), 256);
@@ -120,33 +146,17 @@ namespace dawn_native { namespace d3d12 {
         return mResource;
     }
 
+    void Buffer::SetUsage(dawn::BufferUsageBit newUsage) {
+        mLastUsage = newUsage;
+    }
+
     void Buffer::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                     dawn::BufferUsageBit usage) {
-        // Resources in upload and readback heaps must be kept in the COPY_SOURCE/DEST state
-        if (mFixedResourceState) {
-            ASSERT(usage == mLastUsage);
-            return;
-        }
-
-        // We can skip transitions to already current usages.
-        // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
-        bool lastIncludesTarget = (mLastUsage & usage) == usage;
-        if (lastIncludesTarget) {
-            return;
-        }
-
-        D3D12_RESOURCE_STATES lastState = D3D12BufferUsage(mLastUsage);
-        D3D12_RESOURCE_STATES newState = D3D12BufferUsage(usage);
-
         D3D12_RESOURCE_BARRIER barrier;
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier.Transition.pResource = mResource.Get();
-        barrier.Transition.StateBefore = lastState;
-        barrier.Transition.StateAfter = newState;
-        barrier.Transition.Subresource = 0;
 
-        commandList->ResourceBarrier(1, &barrier);
+        if (CreateD3D12ResourceBarrierIfNeeded(&barrier, usage)) {
+            commandList->ResourceBarrier(1, &barrier);
+        }
 
         mLastUsage = usage;
     }
