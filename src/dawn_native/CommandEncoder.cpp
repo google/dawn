@@ -62,17 +62,20 @@ namespace dawn_native {
             return {};
         }
 
-        bool FitsInBuffer(const BufferBase* buffer, uint64_t offset, uint64_t size) {
+        MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
+                                                uint64_t offset,
+                                                uint64_t size) {
             uint64_t bufferSize = buffer->GetSize();
-            return offset <= bufferSize && (size <= (bufferSize - offset));
-        }
-
-        MaybeError ValidateCopySizeFitsInBuffer(const BufferCopy& bufferCopy, uint64_t dataSize) {
-            if (!FitsInBuffer(bufferCopy.buffer.Get(), bufferCopy.offset, dataSize)) {
+            bool fitsInBuffer = offset <= bufferSize && (size <= (bufferSize - offset));
+            if (!fitsInBuffer) {
                 return DAWN_VALIDATION_ERROR("Copy would overflow the buffer");
             }
 
             return {};
+        }
+
+        MaybeError ValidateCopySizeFitsInBuffer(const BufferCopy& bufferCopy, uint64_t dataSize) {
+            return ValidateCopySizeFitsInBuffer(bufferCopy.buffer, bufferCopy.offset, dataSize);
         }
 
         MaybeError ValidateB2BCopySizeAlignment(uint64_t dataSize,
@@ -690,10 +693,10 @@ namespace dawn_native {
 
         CopyBufferToBufferCmd* copy =
             mAllocator.Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
-        copy->source.buffer = source;
-        copy->source.offset = sourceOffset;
-        copy->destination.buffer = destination;
-        copy->destination.offset = destinationOffset;
+        copy->source = source;
+        copy->sourceOffset = sourceOffset;
+        copy->destination = destination;
+        copy->destinationOffset = destinationOffset;
         copy->size = size;
     }
 
@@ -877,18 +880,20 @@ namespace dawn_native {
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mIterator.NextCommand<CopyBufferToBufferCmd>();
 
-                    DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->source, copy->size));
-                    DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->destination, copy->size));
-                    DAWN_TRY(ValidateB2BCopySizeAlignment(copy->size, copy->source.offset,
-                                                          copy->destination.offset));
+                    DAWN_TRY(
+                        ValidateCopySizeFitsInBuffer(copy->source, copy->sourceOffset, copy->size));
+                    DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->destination,
+                                                          copy->destinationOffset, copy->size));
+                    DAWN_TRY(ValidateB2BCopySizeAlignment(copy->size, copy->sourceOffset,
+                                                          copy->destinationOffset));
 
-                    DAWN_TRY(ValidateCanUseAs(copy->source.buffer.Get(),
-                                              dawn::BufferUsageBit::TransferSrc));
-                    DAWN_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
+                    DAWN_TRY(
+                        ValidateCanUseAs(copy->source.Get(), dawn::BufferUsageBit::TransferSrc));
+                    DAWN_TRY(ValidateCanUseAs(copy->destination.Get(),
                                               dawn::BufferUsageBit::TransferDst));
 
-                    mResourceUsages.topLevelBuffers.insert(copy->source.buffer.Get());
-                    mResourceUsages.topLevelBuffers.insert(copy->destination.buffer.Get());
+                    mResourceUsages.topLevelBuffers.insert(copy->source.Get());
+                    mResourceUsages.topLevelBuffers.insert(copy->destination.Get());
                 } break;
 
                 case Command::CopyBufferToTexture: {

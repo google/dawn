@@ -469,15 +469,15 @@ namespace dawn_native { namespace d3d12 {
 
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
-                    Buffer* srcBuffer = ToBackend(copy->source.buffer.Get());
-                    Buffer* dstBuffer = ToBackend(copy->destination.buffer.Get());
+                    Buffer* srcBuffer = ToBackend(copy->source.Get());
+                    Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
                     srcBuffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferSrc);
                     dstBuffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferDst);
 
                     commandList->CopyBufferRegion(
-                        dstBuffer->GetD3D12Resource().Get(), copy->destination.offset,
-                        srcBuffer->GetD3D12Resource().Get(), copy->source.offset, copy->size);
+                        dstBuffer->GetD3D12Resource().Get(), copy->destinationOffset,
+                        srcBuffer->GetD3D12Resource().Get(), copy->sourceOffset, copy->size);
                 } break;
 
                 case Command::CopyBufferToTexture: {

@@ -301,21 +301,19 @@ namespace dawn_native { namespace vulkan {
             switch (type) {
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
-                    auto& src = copy->source;
-                    auto& dst = copy->destination;
+                    Buffer* srcBuffer = ToBackend(copy->source.Get());
+                    Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
-                    ToBackend(src.buffer)
-                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferSrc);
-                    ToBackend(dst.buffer)
-                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferDst);
+                    srcBuffer->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferSrc);
+                    dstBuffer->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferDst);
 
                     VkBufferCopy region;
-                    region.srcOffset = src.offset;
-                    region.dstOffset = dst.offset;
+                    region.srcOffset = copy->sourceOffset;
+                    region.dstOffset = copy->destinationOffset;
                     region.size = copy->size;
 
-                    VkBuffer srcHandle = ToBackend(src.buffer)->GetHandle();
-                    VkBuffer dstHandle = ToBackend(dst.buffer)->GetHandle();
+                    VkBuffer srcHandle = srcBuffer->GetHandle();
+                    VkBuffer dstHandle = dstBuffer->GetHandle();
                     device->fn.CmdCopyBuffer(commands, srcHandle, dstHandle, 1, &region);
                 } break;
 

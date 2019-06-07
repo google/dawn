@@ -102,8 +102,10 @@ namespace dawn_native {
     };
 
     struct CopyBufferToBufferCmd {
-        BufferCopy source;
-        BufferCopy destination;
+        Ref<BufferBase> source;
+        uint64_t sourceOffset;
+        Ref<BufferBase> destination;
+        uint64_t destinationOffset;
         uint64_t size;
     };
 

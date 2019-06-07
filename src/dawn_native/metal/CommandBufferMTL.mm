@@ -348,14 +348,12 @@ namespace dawn_native { namespace metal {
 
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
-                    auto& src = copy->source;
-                    auto& dst = copy->destination;
 
                     encoders.EnsureBlit(commandBuffer);
-                    [encoders.blit copyFromBuffer:ToBackend(src.buffer)->GetMTLBuffer()
-                                     sourceOffset:src.offset
-                                         toBuffer:ToBackend(dst.buffer)->GetMTLBuffer()
-                                destinationOffset:dst.offset
+                    [encoders.blit copyFromBuffer:ToBackend(copy->source)->GetMTLBuffer()
+                                     sourceOffset:copy->sourceOffset
+                                         toBuffer:ToBackend(copy->destination)->GetMTLBuffer()
+                                destinationOffset:copy->destinationOffset
                                              size:copy->size];
                 } break;
 

@@ -360,13 +360,11 @@ namespace dawn_native { namespace opengl {
 
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
-                    auto& src = copy->source;
-                    auto& dst = copy->destination;
 
-                    glBindBuffer(GL_PIXEL_PACK_BUFFER, ToBackend(src.buffer)->GetHandle());
-                    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, ToBackend(dst.buffer)->GetHandle());
-                    glCopyBufferSubData(GL_PIXEL_PACK_BUFFER, GL_PIXEL_UNPACK_BUFFER, src.offset,
-                                        dst.offset, copy->size);
+                    glBindBuffer(GL_PIXEL_PACK_BUFFER, ToBackend(copy->source)->GetHandle());
+                    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, ToBackend(copy->destination)->GetHandle());
+                    glCopyBufferSubData(GL_PIXEL_PACK_BUFFER, GL_PIXEL_UNPACK_BUFFER,
+                                        copy->sourceOffset, copy->destinationOffset, copy->size);
 
                     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
                     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
