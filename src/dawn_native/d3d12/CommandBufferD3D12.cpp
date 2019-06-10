@@ -684,17 +684,6 @@ namespace dawn_native { namespace d3d12 {
                     commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
                 } break;
 
-                case Command::DispatchIndirect: {
-                    DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
-
-                    Buffer* buffer = ToBackend(dispatch->indirectBuffer.Get());
-                    ComPtr<ID3D12CommandSignature> signature =
-                        ToBackend(GetDevice())->GetDispatchIndirectSignature();
-                    commandList->ExecuteIndirect(signature.Get(), 1,
-                                                 buffer->GetD3D12Resource().Get(),
-                                                 dispatch->indirectOffset, nullptr, 0);
-                } break;
-
                 case Command::EndComputePass: {
                     mCommands.NextCommand<EndComputePassCmd>();
                     return;
@@ -827,30 +816,6 @@ namespace dawn_native { namespace d3d12 {
                     commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
                                                       draw->firstIndex, draw->baseVertex,
                                                       draw->firstInstance);
-                } break;
-
-                case Command::DrawIndirect: {
-                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
-
-                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
-                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
-                    ComPtr<ID3D12CommandSignature> signature =
-                        ToBackend(GetDevice())->GetDrawIndirectSignature();
-                    commandList->ExecuteIndirect(signature.Get(), 1,
-                                                 buffer->GetD3D12Resource().Get(),
-                                                 draw->indirectOffset, nullptr, 0);
-                } break;
-
-                case Command::DrawIndexedIndirect: {
-                    DrawIndexedIndirectCmd* draw = mCommands.NextCommand<DrawIndexedIndirectCmd>();
-
-                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
-                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
-                    ComPtr<ID3D12CommandSignature> signature =
-                        ToBackend(GetDevice())->GetDrawIndexedIndirectSignature();
-                    commandList->ExecuteIndirect(signature.Get(), 1,
-                                                 buffer->GetD3D12Resource().Get(),
-                                                 draw->indirectOffset, nullptr, 0);
                 } break;
 
                 case Command::InsertDebugMarker: {

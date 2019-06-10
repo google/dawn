@@ -999,13 +999,6 @@ namespace dawn_native {
                     DAWN_TRY(persistentState.ValidateCanDispatch());
                 } break;
 
-                case Command::DispatchIndirect: {
-                    DispatchIndirectCmd* cmd = mIterator.NextCommand<DispatchIndirectCmd>();
-                    DAWN_TRY(persistentState.ValidateCanDispatch());
-                    usageTracker.BufferUsedAs(cmd->indirectBuffer.Get(),
-                                              dawn::BufferUsageBit::Indirect);
-                } break;
-
                 case Command::InsertDebugMarker: {
                     InsertDebugMarkerCmd* cmd = mIterator.NextCommand<InsertDebugMarkerCmd>();
                     mIterator.NextData<char>(cmd->length + 1);
@@ -1090,20 +1083,6 @@ namespace dawn_native {
                 case Command::DrawIndexed: {
                     mIterator.NextCommand<DrawIndexedCmd>();
                     DAWN_TRY(persistentState.ValidateCanDrawIndexed());
-                } break;
-
-                case Command::DrawIndirect: {
-                    DrawIndirectCmd* cmd = mIterator.NextCommand<DrawIndirectCmd>();
-                    DAWN_TRY(persistentState.ValidateCanDraw());
-                    usageTracker.BufferUsedAs(cmd->indirectBuffer.Get(),
-                                              dawn::BufferUsageBit::Indirect);
-                } break;
-
-                case Command::DrawIndexedIndirect: {
-                    DrawIndexedIndirectCmd* cmd = mIterator.NextCommand<DrawIndexedIndirectCmd>();
-                    DAWN_TRY(persistentState.ValidateCanDrawIndexed());
-                    usageTracker.BufferUsedAs(cmd->indirectBuffer.Get(),
-                                              dawn::BufferUsageBit::Indirect);
                 } break;
 
                 case Command::InsertDebugMarker: {

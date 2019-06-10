@@ -38,11 +38,8 @@ namespace dawn_native {
         CopyTextureToBuffer,
         CopyTextureToTexture,
         Dispatch,
-        DispatchIndirect,
         Draw,
         DrawIndexed,
-        DrawIndirect,
-        DrawIndexedIndirect,
         EndComputePass,
         EndRenderPass,
         InsertDebugMarker,
@@ -136,11 +133,6 @@ namespace dawn_native {
         uint32_t z;
     };
 
-    struct DispatchIndirectCmd {
-        Ref<BufferBase> indirectBuffer;
-        uint64_t indirectOffset;
-    };
-
     struct DrawCmd {
         uint32_t vertexCount;
         uint32_t instanceCount;
@@ -154,16 +146,6 @@ namespace dawn_native {
         uint32_t firstIndex;
         int32_t baseVertex;
         uint32_t firstInstance;
-    };
-
-    struct DrawIndirectCmd {
-        Ref<BufferBase> indirectBuffer;
-        uint64_t indirectOffset;
-    };
-
-    struct DrawIndexedIndirectCmd {
-        Ref<BufferBase> indirectBuffer;
-        uint64_t indirectOffset;
     };
 
     struct EndComputePassCmd {};

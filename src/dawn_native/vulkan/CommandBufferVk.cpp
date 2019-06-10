@@ -425,16 +425,6 @@ namespace dawn_native { namespace vulkan {
                     device->fn.CmdDispatch(commands, dispatch->x, dispatch->y, dispatch->z);
                 } break;
 
-                case Command::DispatchIndirect: {
-                    DispatchIndirectCmd* Dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
-                    VkBuffer indirectBuffer = ToBackend(Dispatch->indirectBuffer)->GetHandle();
-
-                    descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_COMPUTE);
-                    device->fn.CmdDispatchIndirect(
-                        commands, indirectBuffer,
-                        static_cast<VkDeviceSize>(Dispatch->indirectOffset));
-                } break;
-
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                     VkDescriptorSet set = ToBackend(cmd->group.Get())->GetHandle();
@@ -529,26 +519,6 @@ namespace dawn_native { namespace vulkan {
                     device->fn.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
                                               draw->firstIndex, draw->baseVertex,
                                               draw->firstInstance);
-                } break;
-
-                case Command::DrawIndirect: {
-                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
-                    VkBuffer indirectBuffer = ToBackend(draw->indirectBuffer)->GetHandle();
-
-                    descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                    device->fn.CmdDrawIndirect(commands, indirectBuffer,
-                                               static_cast<VkDeviceSize>(draw->indirectOffset), 1,
-                                               0);
-                } break;
-
-                case Command::DrawIndexedIndirect: {
-                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
-                    VkBuffer indirectBuffer = ToBackend(draw->indirectBuffer)->GetHandle();
-
-                    descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                    device->fn.CmdDrawIndexedIndirect(
-                        commands, indirectBuffer, static_cast<VkDeviceSize>(draw->indirectOffset),
-                        1, 0);
                 } break;
 
                 case Command::InsertDebugMarker: {

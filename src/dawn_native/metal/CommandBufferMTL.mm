@@ -645,17 +645,6 @@ namespace dawn_native { namespace metal {
                             threadsPerThreadgroup:lastPipeline->GetLocalWorkGroupSize()];
                 } break;
 
-                case Command::DispatchIndirect: {
-                    DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
-
-                    Buffer* buffer = ToBackend(dispatch->indirectBuffer.Get());
-                    id<MTLBuffer> indirectBuffer = buffer->GetMTLBuffer();
-                    [encoder dispatchThreadgroupsWithIndirectBuffer:indirectBuffer
-                                               indirectBufferOffset:dispatch->indirectOffset
-                                              threadsPerThreadgroup:lastPipeline
-                                                                        ->GetLocalWorkGroupSize()];
-                } break;
-
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
                     lastPipeline = ToBackend(cmd->pipeline).Get();
@@ -826,29 +815,6 @@ namespace dawn_native { namespace metal {
                                             baseVertex:draw->baseVertex
                                           baseInstance:draw->firstInstance];
                     }
-                } break;
-
-                case Command::DrawIndirect: {
-                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
-
-                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
-                    id<MTLBuffer> indirectBuffer = buffer->GetMTLBuffer();
-                    [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
-                              indirectBuffer:indirectBuffer
-                        indirectBufferOffset:draw->indirectOffset];
-                } break;
-
-                case Command::DrawIndexedIndirect: {
-                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
-
-                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
-                    id<MTLBuffer> indirectBuffer = buffer->GetMTLBuffer();
-                    [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
-                                         indexType:lastPipeline->GetMTLIndexType()
-                                       indexBuffer:indexBuffer
-                                 indexBufferOffset:indexBufferBaseOffset
-                                    indirectBuffer:indirectBuffer
-                              indirectBufferOffset:draw->indirectOffset];
                 } break;
 
                 case Command::InsertDebugMarker: {

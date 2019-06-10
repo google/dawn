@@ -51,10 +51,6 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12Device> GetD3D12Device() const;
         ComPtr<ID3D12CommandQueue> GetCommandQueue() const;
 
-        ComPtr<ID3D12CommandSignature> GetDispatchIndirectSignature() const;
-        ComPtr<ID3D12CommandSignature> GetDrawIndirectSignature() const;
-        ComPtr<ID3D12CommandSignature> GetDrawIndexedIndirectSignature() const;
-
         DescriptorHeapAllocator* GetDescriptorHeapAllocator() const;
         MapRequestTracker* GetMapRequestTracker() const;
         ResourceAllocator* GetResourceAllocator() const;
@@ -110,10 +106,6 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12Device> mD3d12Device;
         ComPtr<ID3D12CommandQueue> mCommandQueue;
-
-        ComPtr<ID3D12CommandSignature> mDispatchIndirectSignature;
-        ComPtr<ID3D12CommandSignature> mDrawIndirectSignature;
-        ComPtr<ID3D12CommandSignature> mDrawIndexedIndirectSignature;
 
         struct PendingCommandList {
             ComPtr<ID3D12GraphicsCommandList> commandList;

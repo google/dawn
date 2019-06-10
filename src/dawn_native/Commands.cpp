@@ -58,10 +58,6 @@ namespace dawn_native {
                     DispatchCmd* dispatch = commands->NextCommand<DispatchCmd>();
                     dispatch->~DispatchCmd();
                 } break;
-                case Command::DispatchIndirect: {
-                    DispatchIndirectCmd* dispatch = commands->NextCommand<DispatchIndirectCmd>();
-                    dispatch->~DispatchIndirectCmd();
-                } break;
                 case Command::Draw: {
                     DrawCmd* draw = commands->NextCommand<DrawCmd>();
                     draw->~DrawCmd();
@@ -69,14 +65,6 @@ namespace dawn_native {
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = commands->NextCommand<DrawIndexedCmd>();
                     draw->~DrawIndexedCmd();
-                } break;
-                case Command::DrawIndirect: {
-                    DrawIndirectCmd* draw = commands->NextCommand<DrawIndirectCmd>();
-                    draw->~DrawIndirectCmd();
-                } break;
-                case Command::DrawIndexedIndirect: {
-                    DrawIndexedIndirectCmd* draw = commands->NextCommand<DrawIndexedIndirectCmd>();
-                    draw->~DrawIndexedIndirectCmd();
                 } break;
                 case Command::EndComputePass: {
                     EndComputePassCmd* cmd = commands->NextCommand<EndComputePassCmd>();
@@ -175,24 +163,12 @@ namespace dawn_native {
                 commands->NextCommand<DispatchCmd>();
                 break;
 
-            case Command::DispatchIndirect:
-                commands->NextCommand<DispatchIndirectCmd>();
-                break;
-
             case Command::Draw:
                 commands->NextCommand<DrawCmd>();
                 break;
 
             case Command::DrawIndexed:
                 commands->NextCommand<DrawIndexedCmd>();
-                break;
-
-            case Command::DrawIndirect:
-                commands->NextCommand<DrawIndirectCmd>();
-                break;
-
-            case Command::DrawIndexedIndirect:
-                commands->NextCommand<DrawIndexedIndirectCmd>();
                 break;
 
             case Command::EndComputePass:

@@ -204,8 +204,7 @@
             {"value": 16, "name": "index"},
             {"value": 32, "name": "vertex"},
             {"value": 64, "name": "uniform"},
-            {"value": 128, "name": "storage"},
-            {"value": 256, "name": "indirect"}
+            {"value": 128, "name": "storage"}
         ]
     },
     "char": {
@@ -352,13 +351,6 @@
                     {"name": "x", "type": "uint32_t"},
                     {"name": "y", "type": "uint32_t"},
                     {"name": "z", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "dispatch indirect",
-                "args": [
-                  {"name": "indirect buffer", "type": "buffer"},
-                  {"name": "indirect offset", "type": "uint64_t"}
                 ]
             },
             {
@@ -771,20 +763,6 @@
                     {"name": "base vertex", "type": "int32_t"},
                     {"name": "first instance", "type": "uint32_t"}
                 ]
-            },
-            {
-              "name": "draw indirect",
-              "args": [
-                    {"name": "indirect buffer", "type": "buffer"},
-                    {"name": "indirect offset", "type": "uint64_t"}
-              ]
-            },
-            {
-              "name": "draw indexed indirect",
-              "args": [
-                    {"name": "indirect buffer", "type": "buffer"},
-                    {"name": "indirect offset", "type": "uint64_t"}
-              ]
             },
             {
                 "name": "insert debug marker",

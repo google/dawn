@@ -43,9 +43,6 @@ namespace dawn_native {
                          int32_t baseVertex,
                          uint32_t firstInstance);
 
-        void DrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
-        void DrawIndexedIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
-
         void SetPipeline(RenderPipelineBase* pipeline);
 
         void SetStencilReference(uint32_t reference);
