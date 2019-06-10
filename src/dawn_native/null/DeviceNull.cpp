@@ -221,10 +221,7 @@ namespace dawn_native { namespace null {
 
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
-        if (GetUsage() & (dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::TransferSrc |
-                          dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
-            mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
-        }
+        mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
     }
 
     Buffer::~Buffer() {
