@@ -14,6 +14,7 @@
 
 #include "dawn_native/RenderPassEncoder.h"
 
+#include "common/Constants.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
@@ -71,6 +72,42 @@ namespace dawn_native {
         draw->firstIndex = firstIndex;
         draw->baseVertex = baseVertex;
         draw->firstInstance = firstInstance;
+    }
+
+    void RenderPassEncoderBase::DrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
+        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
+            mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(indirectBuffer))) {
+            return;
+        }
+
+        if (indirectOffset >= indirectBuffer->GetSize() ||
+            indirectOffset + kDrawIndirectSize > indirectBuffer->GetSize()) {
+            mTopLevelEncoder->HandleError("Indirect offset out of bounds");
+            return;
+        }
+
+        DrawIndirectCmd* cmd = mAllocator->Allocate<DrawIndirectCmd>(Command::DrawIndirect);
+        cmd->indirectBuffer = indirectBuffer;
+        cmd->indirectOffset = indirectOffset;
+    }
+
+    void RenderPassEncoderBase::DrawIndexedIndirect(BufferBase* indirectBuffer,
+                                                    uint64_t indirectOffset) {
+        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
+            mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(indirectBuffer))) {
+            return;
+        }
+
+        if (indirectOffset >= indirectBuffer->GetSize() ||
+            indirectOffset + kDrawIndexedIndirectSize > indirectBuffer->GetSize()) {
+            mTopLevelEncoder->HandleError("Indirect offset out of bounds");
+            return;
+        }
+
+        DrawIndexedIndirectCmd* cmd =
+            mAllocator->Allocate<DrawIndexedIndirectCmd>(Command::DrawIndexedIndirect);
+        cmd->indirectBuffer = indirectBuffer;
+        cmd->indirectOffset = indirectOffset;
     }
 
     void RenderPassEncoderBase::SetPipeline(RenderPipelineBase* pipeline) {

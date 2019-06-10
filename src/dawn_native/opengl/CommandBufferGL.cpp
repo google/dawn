@@ -499,6 +499,18 @@ namespace dawn_native { namespace opengl {
                     glMemoryBarrier(GL_ALL_BARRIER_BITS);
                 } break;
 
+                case Command::DispatchIndirect: {
+                    DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
+
+                    uint64_t indirectBufferOffset = dispatch->indirectOffset;
+                    Buffer* indirectBuffer = ToBackend(dispatch->indirectBuffer.Get());
+
+                    glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, indirectBuffer->GetHandle());
+                    glDispatchComputeIndirect(static_cast<GLintptr>(indirectBufferOffset));
+                    // TODO(cwallez@chromium.org): add barriers to the API
+                    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+                } break;
+
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
                     lastPipeline = ToBackend(cmd->pipeline).Get();
@@ -704,6 +716,36 @@ namespace dawn_native { namespace opengl {
                                                     indexBufferBaseOffset),
                             draw->instanceCount, draw->baseVertex);
                     }
+                } break;
+
+                case Command::DrawIndirect: {
+                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
+                    inputBuffers.Apply();
+
+                    uint64_t indirectBufferOffset = draw->indirectOffset;
+                    Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+
+                    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBuffer->GetHandle());
+                    glDrawArraysIndirect(
+                        lastPipeline->GetGLPrimitiveTopology(),
+                        reinterpret_cast<void*>(static_cast<intptr_t>(indirectBufferOffset)));
+                } break;
+
+                case Command::DrawIndexedIndirect: {
+                    DrawIndexedIndirectCmd* draw = mCommands.NextCommand<DrawIndexedIndirectCmd>();
+                    inputBuffers.Apply();
+
+                    dawn::IndexFormat indexFormat =
+                        lastPipeline->GetVertexInputDescriptor()->indexFormat;
+                    GLenum formatType = IndexFormatType(indexFormat);
+
+                    uint64_t indirectBufferOffset = draw->indirectOffset;
+                    Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+
+                    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBuffer->GetHandle());
+                    glDrawElementsIndirect(
+                        lastPipeline->GetGLPrimitiveTopology(), formatType,
+                        reinterpret_cast<void*>(static_cast<intptr_t>(indirectBufferOffset)));
                 } break;
 
                 case Command::InsertDebugMarker:

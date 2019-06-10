@@ -14,6 +14,7 @@
 
 #include "dawn_native/ComputePassEncoder.h"
 
+#include "dawn_native/Buffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/ComputePipeline.h"
@@ -47,6 +48,25 @@ namespace dawn_native {
         dispatch->x = x;
         dispatch->y = y;
         dispatch->z = z;
+    }
+
+    void ComputePassEncoderBase::DispatchIndirect(BufferBase* indirectBuffer,
+                                                  uint64_t indirectOffset) {
+        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
+            mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(indirectBuffer))) {
+            return;
+        }
+
+        if (indirectOffset >= indirectBuffer->GetSize() ||
+            indirectOffset + kDispatchIndirectSize > indirectBuffer->GetSize()) {
+            mTopLevelEncoder->HandleError("Indirect offset out of bounds");
+            return;
+        }
+
+        DispatchIndirectCmd* dispatch =
+            mAllocator->Allocate<DispatchIndirectCmd>(Command::DispatchIndirect);
+        dispatch->indirectBuffer = indirectBuffer;
+        dispatch->indirectOffset = indirectOffset;
     }
 
     void ComputePassEncoderBase::SetPipeline(ComputePipelineBase* pipeline) {

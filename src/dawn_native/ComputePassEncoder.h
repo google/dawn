@@ -34,6 +34,7 @@ namespace dawn_native {
                                                  CommandEncoderBase* topLevelEncoder);
 
         void Dispatch(uint32_t x, uint32_t y, uint32_t z);
+        void DispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
         void SetPipeline(ComputePipelineBase* pipeline);
 
       protected:
