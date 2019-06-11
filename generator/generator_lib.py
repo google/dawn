@@ -96,9 +96,25 @@ def _do_renders(renders, template_dir):
     loader = PreprocessingLoader(template_dir)
     env = jinja2.Environment(loader=loader, lstrip_blocks=True, trim_blocks=True, line_comment_prefix='//*')
 
+    def do_assert(expr):
+        assert expr
+        return ''
+
+    def debug(text):
+        print(text)
+
+    base_params = {
+        'enumerate': enumerate,
+        'format': format,
+        'len': len,
+        'debug': debug,
+        'assert': do_assert,
+    }
+
     outputs = []
     for render in renders:
         params = {}
+        params.update(base_params)
         for param_dict in render.params_dicts:
             params.update(param_dict)
         content = env.get_template(render.template).render(**params)

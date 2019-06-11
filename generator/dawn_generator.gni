@@ -14,19 +14,20 @@
 
 import("../scripts/dawn_overrides_with_defaults.gni")
 
-###############################################################################
-# Template to wrap the Dawn code generator
-###############################################################################
-
-# Template to help with invocation of the Dawn code generator, looks like this:
+# Template to help invoking Dawn code generators based on generator_lib
 #
 #   dawn_generator("my_target_gen") {
-#     # Which generator target to output
-#     target = "my_target"
+#     # The script and generator specific arguments
+#     script = [ "my_awesome_generator.py" ]
+#     args = [
+#       "--be-awesome",
+#       "yes"
+#     ]
+#
 #     # The list of expected outputs, generation fails if there's a mismatch
 #     outputs = [
-#       "MyTarget.cpp",
-#       "MyTarget.h",
+#       "MyAwesomeTarget.cpp",
+#       "MyAwesomeTarget.h",
 #     ]
 #
 #     # Optional, use a custom generated file directory.
@@ -41,18 +42,10 @@ import("../scripts/dawn_overrides_with_defaults.gni")
 #   }
 #
 template("dawn_generator") {
-  # The base arguments for the generator: from this dawn.json, generate this
-  # target using templates in this directory.
-  generator_args = [
-    "--dawn-json",
-    rebase_path("${dawn_root}/dawn.json", root_build_dir),
-    "--wire-json",
-    rebase_path("${dawn_root}/dawn_wire.json", root_build_dir),
-    "--template-dir",
-    rebase_path("${dawn_root}/generator/templates", root_build_dir),
-    "--targets",
-    invoker.target,
-  ]
+  generator_args = []
+  if (defined(invoker.args)) {
+    generator_args += invoker.args
+  }
 
   # Use the Jinja2 version pulled from the DEPS file. We do it so we don't
   # have version problems, and users don't have to install Jinja2.
@@ -103,7 +96,7 @@ template("dawn_generator") {
   # The code generator invocation that will write the JSON tarball, check the
   # outputs are what's expected and write a depfile for Ninja.
   action("${target_name}_json_tarball") {
-    script = "${dawn_root}/generator/main.py"
+    script = invoker.script
     outputs = [
       json_tarball,
     ]
@@ -112,7 +105,7 @@ template("dawn_generator") {
   }
 
   # Extract the JSON tarball into the gen_dir
-  action("${target_name}") {
+  action(target_name) {
     script = "${dawn_root}/generator/extract_json.py"
     args = [
       rebase_path(json_tarball, root_build_dir),
@@ -132,5 +125,35 @@ template("dawn_generator") {
     foreach(source, invoker.outputs) {
       outputs += [ "${gen_dir}/${source}" ]
     }
+  }
+}
+
+# Helper generator for calling the generator from dawn.json
+#
+#   dawn_json_generator("my_target_gen") {
+#     # Which generator target to output
+#     target = "my_target"
+#
+#     # Also supports `outputs` and `custom_gen_dir` like dawn_generator.
+#   }
+template("dawn_json_generator") {
+  dawn_generator(target_name) {
+
+    script = "${dawn_root}/generator/dawn_json_generator.py"
+
+    # The base arguments for the generator: from this dawn.json, generate this
+    # target using templates in this directory.
+    args = [
+      "--dawn-json",
+      rebase_path("${dawn_root}/dawn.json", root_build_dir),
+      "--wire-json",
+      rebase_path("${dawn_root}/dawn_wire.json", root_build_dir),
+      "--template-dir",
+      rebase_path("${dawn_root}/generator/templates", root_build_dir),
+      "--targets",
+      invoker.target,
+    ]
+
+    forward_variables_from(invoker, "*", ["target"])
   }
 }

@@ -33,7 +33,7 @@ config("libdawn_native_internal") {
   }
 }
 
-dawn_generator("libdawn_native_utils_gen") {
+dawn_json_generator("libdawn_native_utils_gen") {
   target = "dawn_native_utils"
   outputs = [
     "dawn_native/ProcTable.cpp",
@@ -394,7 +394,7 @@ dawn_component("libdawn_native") {
 # libdawn_wire
 ###############################################################################
 
-dawn_generator("libdawn_wire_gen") {
+dawn_json_generator("libdawn_wire_gen") {
   target = "dawn_wire"
   outputs = [
     "dawn_wire/WireCmd_autogen.h",
@@ -524,7 +524,7 @@ static_library("dawn_utils") {
 # Dawn test targets
 ###############################################################################
 
-dawn_generator("mock_dawn_gen") {
+dawn_json_generator("mock_dawn_gen") {
   target = "mock_dawn"
   outputs = [
     "mock/mock_dawn.h",

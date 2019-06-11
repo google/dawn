@@ -21,7 +21,7 @@ import("${dawn_root}/generator/dawn_generator.gni")
 # Dawn headers
 ###############################################################################
 
-dawn_generator("dawn_headers_gen") {
+dawn_json_generator("dawn_headers_gen") {
   target = "dawn_headers"
 
   # Generate as if we were in the main BUILD.gn because that was historically
@@ -51,7 +51,7 @@ source_set("dawn_headers") {
 # libdawn
 ###############################################################################
 
-dawn_generator("libdawn_gen") {
+dawn_json_generator("libdawn_gen") {
   target = "libdawn"
   outputs = [
     "dawn/dawncpp.cpp",
