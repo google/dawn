@@ -58,6 +58,50 @@ TEST_F(VertexInputTest, EmptyIsOk) {
     )");
 }
 
+// Check null buffer is valid
+TEST_F(VertexInputTest, NullBufferIsOk) {
+    utils::ComboVertexInputDescriptor state;
+    // One null buffer (buffer[0]) is OK
+    state.bufferCount = 1;
+    state.cBuffers[0].stride = 0;
+    state.cBuffers[0].attributeCount = 0;
+    state.cBuffers[0].attributes = nullptr;
+    CreatePipeline(true, state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
+
+    // One null buffer (buffer[0]) followed by a buffer (buffer[1]) is OK
+    state.bufferCount = 2;
+    state.cBuffers[1].stride = 0;
+    state.cBuffers[1].attributeCount = 1;
+    state.cBuffers[1].attributes = &state.cAttributes[0];
+    state.cAttributes[0].shaderLocation = 0;
+    CreatePipeline(true, state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
+
+    // Null buffer (buffer[2]) sitting between buffers (buffer[1] and buffer[3]) is OK
+    state.bufferCount = 4;
+    state.cBuffers[2].attributeCount = 0;
+    state.cBuffers[2].attributes = nullptr;
+    state.cBuffers[3].attributeCount = 1;
+    state.cBuffers[3].attributes = &state.cAttributes[1];
+    state.cAttributes[1].shaderLocation = 1;
+    CreatePipeline(true, state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
+}
+
+// Check validation that pipeline vertex buffers are backed by attributes in the vertex input
 // Check validation that pipeline vertex buffers are backed by attributes in the vertex input
 TEST_F(VertexInputTest, PipelineCompatibility) {
     utils::ComboVertexInputDescriptor state;

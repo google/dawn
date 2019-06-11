@@ -408,10 +408,9 @@ TEST_P(VertexInputTest, MixedEverything) {
 // Test input state is unaffected by unused vertex slot
 TEST_P(VertexInputTest, UnusedVertexSlot) {
     // Instance input state, using slot 1
-    // TODO(yunchao.he@intel.com): This is not actually testing slot 1 right now,
-    // need to allow null for buffer[0].
     utils::ComboVertexInputDescriptor instanceVertexInput = MakeVertexInput(
-        {{4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}});
+        {{0, InputStepMode::Vertex, {}},
+         {4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}});
     dawn::RenderPipeline instancePipeline = MakeTestPipeline(
         instanceVertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
 
@@ -453,10 +452,9 @@ TEST_P(VertexInputTest, MultiplePipelinesMixedVertexInput) {
         MakeTestPipeline(vertexVertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
 
     // Instance input state, using slot 1
-    // TODO(yunchao.he@intel.com): This is not actually testing slot 1 right now,
-    // need to allow null for buffer[0].
     utils::ComboVertexInputDescriptor instanceVertexInput = MakeVertexInput(
-        {{4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}});
+        {{0, InputStepMode::Instance, {}},
+         {4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}});
     dawn::RenderPipeline instancePipeline = MakeTestPipeline(
         instanceVertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
 

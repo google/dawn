@@ -347,8 +347,11 @@ namespace dawn_native {
           mFragmentEntryPoint(descriptor->fragmentStage->entryPoint),
           mIsBlueprint(blueprint) {
         for (uint32_t slot = 0; slot < mVertexInput.bufferCount; ++slot) {
+            if (mVertexInput.buffers[slot].attributeCount == 0) {
+                continue;
+            }
+
             mInputsSetMask.set(slot);
-            mInputInfos[slot].inputSlot = slot;
             mInputInfos[slot].stride = mVertexInput.buffers[slot].stride;
             mInputInfos[slot].stepMode = mVertexInput.buffers[slot].stepMode;
 
@@ -566,7 +569,7 @@ namespace dawn_native {
         HashCombine(&hash, pipeline->mInputsSetMask);
         for (uint32_t i : IterateBitSet(pipeline->mInputsSetMask)) {
             const VertexBufferInfo& desc = pipeline->GetInput(i);
-            HashCombine(&hash, desc.inputSlot, desc.stride, desc.stepMode);
+            HashCombine(&hash, desc.stride, desc.stepMode);
         }
 
         HashCombine(&hash, pipeline->mVertexInput.indexFormat);
@@ -666,8 +669,7 @@ namespace dawn_native {
         for (uint32_t i : IterateBitSet(a->mInputsSetMask)) {
             const VertexBufferInfo& descA = a->GetInput(i);
             const VertexBufferInfo& descB = b->GetInput(i);
-            if (descA.inputSlot != descB.inputSlot || descA.stride != descB.stride ||
-                descA.stepMode != descB.stepMode) {
+            if (descA.stride != descB.stride || descA.stepMode != descB.stepMode) {
                 return false;
             }
         }

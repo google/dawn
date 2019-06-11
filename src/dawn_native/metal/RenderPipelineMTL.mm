@@ -415,8 +415,8 @@ namespace dawn_native { namespace metal {
             [attribDesc release];
         }
 
-        for (uint32_t i : IterateBitSet(GetInputsSetMask())) {
-            const VertexBufferInfo& info = GetInput(i);
+        for (uint32_t vbInputSlot : IterateBitSet(GetInputsSetMask())) {
+            const VertexBufferInfo& info = GetInput(vbInputSlot);
 
             auto layoutDesc = [MTLVertexBufferLayoutDescriptor new];
             if (info.stride == 0) {
@@ -427,7 +427,7 @@ namespace dawn_native { namespace metal {
                 for (uint32_t attribIndex : IterateBitSet(GetAttributesSetMask())) {
                     const VertexAttributeInfo& attrib = GetAttribute(attribIndex);
                     // Only use the attributes that use the current input
-                    if (attrib.inputSlot != info.inputSlot) {
+                    if (attrib.inputSlot != vbInputSlot) {
                         continue;
                     }
                     max_stride = std::max(max_stride,
@@ -444,7 +444,7 @@ namespace dawn_native { namespace metal {
                 layoutDesc.stride = info.stride;
             }
             // TODO(cwallez@chromium.org): make the offset depend on the pipeline layout
-            mtlVertexDescriptor.layouts[kMaxBindingsPerGroup + i] = layoutDesc;
+            mtlVertexDescriptor.layouts[kMaxBindingsPerGroup + vbInputSlot] = layoutDesc;
             [layoutDesc release];
         }
         return mtlVertexDescriptor;

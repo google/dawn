@@ -46,7 +46,6 @@ namespace dawn_native {
     };
 
     struct VertexBufferInfo {
-        uint32_t inputSlot;
         uint64_t stride;
         dawn::InputStepMode stepMode;
     };
