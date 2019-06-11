@@ -62,6 +62,7 @@ namespace dawn_native {
         mCaches = std::make_unique<DeviceBase::Caches>();
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
+        SetDefaultToggles();
     }
 
     DeviceBase::~DeviceBase() {
@@ -411,7 +412,6 @@ namespace dawn_native {
                 mTogglesSet.SetToggle(toggle, true);
             }
         }
-
         for (const char* toggleName : deviceDescriptor->forceDisabledToggles) {
             Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
             if (toggle != Toggle::InvalidEnum) {
@@ -436,6 +436,11 @@ namespace dawn_native {
 
     bool DeviceBase::IsToggleEnabled(Toggle toggle) const {
         return mTogglesSet.IsEnabled(toggle);
+    }
+
+    void DeviceBase::SetDefaultToggles() {
+        // Sets the default-enabled toggles
+        mTogglesSet.SetToggle(Toggle::LazyClearResourceOnFirstUse, true);
     }
 
     // Implementation details of object creation

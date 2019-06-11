@@ -410,6 +410,57 @@ namespace dawn_native { namespace vulkan {
         mLastUsage = usage;
     }
 
+    void Texture::ClearTexture(VkCommandBuffer commands,
+                               uint32_t baseMipLevel,
+                               uint32_t levelCount,
+                               uint32_t baseArrayLayer,
+                               uint32_t layerCount) {
+        if (GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
+            VkImageSubresourceRange range = {};
+            range.aspectMask = GetVkAspectMask();
+            range.baseMipLevel = baseMipLevel;
+            range.levelCount = levelCount;
+            range.baseArrayLayer = baseArrayLayer;
+            range.layerCount = layerCount;
+
+            TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
+            if (TextureFormatHasDepthOrStencil(GetFormat())) {
+                VkClearDepthStencilValue clear_color[1];
+                clear_color[0].depth = 0.0f;
+                clear_color[0].stencil = 0u;
+                ToBackend(GetDevice())
+                    ->fn.CmdClearDepthStencilImage(commands, GetHandle(),
+                                                   VulkanImageLayout(GetUsage(), GetFormat()),
+                                                   clear_color, 1, &range);
+            } else {
+                VkClearColorValue clear_color[1];
+                clear_color[0].float32[0] = 0.0f;
+                clear_color[0].float32[1] = 0.0f;
+                clear_color[0].float32[2] = 0.0f;
+                clear_color[0].float32[3] = 0.0f;
+                ToBackend(GetDevice())
+                    ->fn.CmdClearColorImage(commands, GetHandle(),
+                                            VulkanImageLayout(GetUsage(), GetFormat()), clear_color,
+                                            1, &range);
+            }
+            SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+                                               layerCount);
+        }
+    }
+
+    void Texture::EnsureSubresourceContentInitialized(VkCommandBuffer commands,
+                                                      uint32_t baseMipLevel,
+                                                      uint32_t levelCount,
+                                                      uint32_t baseArrayLayer,
+                                                      uint32_t layerCount) {
+        if (!IsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+                                             layerCount)) {
+            // If subresource has not been initialized, clear it to black as it could contain dirty
+            // bits from recycled memory
+            ClearTexture(commands, baseMipLevel, levelCount, baseArrayLayer, layerCount);
+        }
+    }
+
     // TODO(jiawei.shao@intel.com): create texture view by TextureViewDescriptor
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor) {

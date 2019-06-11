@@ -70,6 +70,7 @@ struct DawnTestParam {
     dawn_native::BackendType backendType;
 
     std::vector<const char*> forceEnabledWorkarounds;
+    std::vector<const char*> forceDisabledWorkarounds;
 };
 
 // Shorthands for backend types used in the DAWN_INSTANTIATE_TEST
@@ -79,7 +80,8 @@ extern const DawnTestParam OpenGLBackend;
 extern const DawnTestParam VulkanBackend;
 
 DawnTestParam ForceWorkarounds(const DawnTestParam& originParam,
-                               std::initializer_list<const char*> forceEnabledWorkarounds);
+                               std::initializer_list<const char*> forceEnabledWorkarounds,
+                               std::initializer_list<const char*> forceDisabledWorkarounds = {});
 
 struct GLFWwindow;
 

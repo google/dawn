@@ -82,9 +82,11 @@ const DawnTestParam OpenGLBackend(dawn_native::BackendType::OpenGL);
 const DawnTestParam VulkanBackend(dawn_native::BackendType::Vulkan);
 
 DawnTestParam ForceWorkarounds(const DawnTestParam& originParam,
-                               std::initializer_list<const char*> forceEnabledWorkarounds) {
+                               std::initializer_list<const char*> forceEnabledWorkarounds,
+                               std::initializer_list<const char*> forceDisabledWorkarounds) {
     DawnTestParam newTestParam = originParam;
     newTestParam.forceEnabledWorkarounds = forceEnabledWorkarounds;
+    newTestParam.forceDisabledWorkarounds = forceDisabledWorkarounds;
     return newTestParam;
 }
 
@@ -310,8 +312,12 @@ void DawnTest::SetUp() {
     for (const char* forceEnabledWorkaround : GetParam().forceEnabledWorkarounds) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
     }
+    for (const char* forceDisabledWorkaround : GetParam().forceDisabledWorkarounds) {
+        ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceDisabledWorkaround) != nullptr);
+    }
     dawn_native::DeviceDescriptor deviceDescriptor;
     deviceDescriptor.forceEnabledToggles = GetParam().forceEnabledWorkarounds;
+    deviceDescriptor.forceDisabledToggles = GetParam().forceDisabledWorkarounds;
     backendDevice = backendAdapter.CreateDevice(&deviceDescriptor);
 
     backendProcs = dawn_native::GetProcs();

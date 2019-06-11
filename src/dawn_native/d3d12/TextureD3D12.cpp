@@ -266,10 +266,6 @@ namespace dawn_native { namespace d3d12 {
         return rtvDesc;
     }
 
-    uint32_t Texture::GetSubresourceIndex(uint32_t mipmapLevel, uint32_t arraySlice) const {
-        return GetNumMipLevels() * arraySlice + mipmapLevel;
-    }
-
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor) {
         mSrvDesc.Format = D3D12TextureFormat(descriptor->format);

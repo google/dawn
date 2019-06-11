@@ -39,9 +39,19 @@ namespace dawn_native { namespace vulkan {
         // `commands`.
         // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
         void TransitionUsageNow(VkCommandBuffer commands, dawn::TextureUsageBit usage);
+        void EnsureSubresourceContentInitialized(VkCommandBuffer commands,
+                                                 uint32_t baseMipLevel,
+                                                 uint32_t levelCount,
+                                                 uint32_t baseArrayLayer,
+                                                 uint32_t layerCount);
 
       private:
         void DestroyImpl() override;
+        void ClearTexture(VkCommandBuffer commands,
+                          uint32_t baseMipLevel,
+                          uint32_t levelCount,
+                          uint32_t baseArrayLayer,
+                          uint32_t layerCount);
 
         VkImage mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;

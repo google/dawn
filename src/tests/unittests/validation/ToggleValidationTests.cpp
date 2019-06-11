@@ -41,12 +41,6 @@ TEST_F(ToggleValidationTest, QueryToggleInfo) {
 
 // Tests overriding toggles when creating a device works correctly.
 TEST_F(ToggleValidationTest, OverrideToggleUsage) {
-    // Dawn unittests use null Adapters, so there should be no toggles that are enabled by default
-    {
-        std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(device.Get());
-        ASSERT_EQ(0u, toggleNames.size());
-    }
-
     // Create device with a valid name of a toggle
     {
         const char* kValidToggleName = "emulate_store_and_msaa_resolve";
@@ -55,18 +49,30 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
 
         DawnDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
         std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(deviceWithToggle);
-        ASSERT_EQ(1u, toggleNames.size());
-        ASSERT_EQ(0, strcmp(kValidToggleName, toggleNames[0]));
+        bool validToggleExists = false;
+        for (const char* toggle : toggleNames) {
+            if (strcmp(toggle, kValidToggleName) == 0) {
+                validToggleExists = true;
+            }
+        }
+        ASSERT_EQ(validToggleExists, true);
     }
 
     // Create device with an invalid toggle name
     {
+        const char* kInvalidToggleName = "!@#$%^&*";
         dawn_native::DeviceDescriptor descriptor;
-        descriptor.forceEnabledToggles.push_back("!@#$%^&*");
+        descriptor.forceEnabledToggles.push_back(kInvalidToggleName);
 
         DawnDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
         std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(deviceWithToggle);
-        ASSERT_EQ(0u, toggleNames.size());
+        bool InvalidToggleExists = false;
+        for (const char* toggle : toggleNames) {
+            if (strcmp(toggle, kInvalidToggleName) == 0) {
+                InvalidToggleExists = true;
+            }
+        }
+        ASSERT_EQ(InvalidToggleExists, false);
     }
 }
 }  // anonymous namespace

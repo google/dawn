@@ -17,6 +17,7 @@
 #include <algorithm>
 
 #include "common/Assert.h"
+#include "common/Constants.h"
 #include "common/Math.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ValidationUtils_autogen.h"
@@ -399,6 +400,9 @@ namespace dawn_native {
           mSampleCount(descriptor->sampleCount),
           mUsage(descriptor->usage),
           mState(state) {
+        uint32_t subresourceCount =
+            GetSubresourceIndex(descriptor->mipLevelCount, descriptor->arrayLayerCount);
+        mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
     }
 
     TextureBase::TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -442,6 +446,48 @@ namespace dawn_native {
     TextureBase::TextureState TextureBase::GetTextureState() const {
         ASSERT(!IsError());
         return mState;
+    }
+
+    uint32_t TextureBase::GetSubresourceIndex(uint32_t mipLevel, uint32_t arraySlice) const {
+        ASSERT(arraySlice <= kMaxTexture2DArrayLayers);
+        ASSERT(mipLevel <= kMaxTexture2DMipLevels);
+        static_assert(kMaxTexture2DMipLevels <=
+                          std::numeric_limits<uint32_t>::max() / kMaxTexture2DArrayLayers,
+                      "texture size overflows uint32_t");
+        return GetNumMipLevels() * arraySlice + mipLevel;
+    }
+
+    bool TextureBase::IsSubresourceContentInitialized(uint32_t baseMipLevel,
+                                                      uint32_t levelCount,
+                                                      uint32_t baseArrayLayer,
+                                                      uint32_t layerCount) const {
+        ASSERT(!IsError());
+        for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount; ++mipLevel) {
+            for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
+                 ++arrayLayer) {
+                uint32_t subresourceIndex = GetSubresourceIndex(mipLevel, arrayLayer);
+                ASSERT(subresourceIndex < mIsSubresourceContentInitializedAtIndex.size());
+                if (!mIsSubresourceContentInitializedAtIndex[subresourceIndex]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void TextureBase::SetIsSubresourceContentInitialized(uint32_t baseMipLevel,
+                                                         uint32_t levelCount,
+                                                         uint32_t baseArrayLayer,
+                                                         uint32_t layerCount) {
+        ASSERT(!IsError());
+        for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount; ++mipLevel) {
+            for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
+                 ++arrayLayer) {
+                uint32_t subresourceIndex = GetSubresourceIndex(mipLevel, arrayLayer);
+                ASSERT(subresourceIndex < mIsSubresourceContentInitializedAtIndex.size());
+                mIsSubresourceContentInitializedAtIndex[subresourceIndex] = true;
+            }
+        }
     }
 
     MaybeError TextureBase::ValidateCanUseInSubmitNow() const {

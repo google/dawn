@@ -21,6 +21,8 @@
 
 #include "dawn_native/dawn_platform.h"
 
+#include <vector>
+
 namespace dawn_native {
     MaybeError ValidateTextureDescriptor(DeviceBase* device, const TextureDescriptor* descriptor);
     MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
@@ -59,6 +61,15 @@ namespace dawn_native {
         uint32_t GetSampleCount() const;
         dawn::TextureUsageBit GetUsage() const;
         TextureState GetTextureState() const;
+        uint32_t GetSubresourceIndex(uint32_t mipLevel, uint32_t arraySlice) const;
+        bool IsSubresourceContentInitialized(uint32_t baseMipLevel,
+                                             uint32_t levelCount,
+                                             uint32_t baseArrayLayer,
+                                             uint32_t layerCount) const;
+        void SetIsSubresourceContentInitialized(uint32_t baseMipLevel,
+                                                uint32_t levelCount,
+                                                uint32_t baseArrayLayer,
+                                                uint32_t layerCount);
 
         MaybeError ValidateCanUseInSubmitNow() const;
 
@@ -85,6 +96,9 @@ namespace dawn_native {
         uint32_t mSampleCount;
         dawn::TextureUsageBit mUsage = dawn::TextureUsageBit::None;
         TextureState mState;
+
+        // TODO(natlee@microsoft.com): Use a more optimized data structure to save space
+        std::vector<bool> mIsSubresourceContentInitializedAtIndex;
     };
 
     class TextureViewBase : public ObjectBase {

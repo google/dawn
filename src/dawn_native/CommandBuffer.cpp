@@ -15,6 +15,7 @@
 #include "dawn_native/CommandBuffer.h"
 
 #include "dawn_native/CommandEncoder.h"
+#include "dawn_native/Texture.h"
 
 namespace dawn_native {
 
@@ -35,4 +36,14 @@ namespace dawn_native {
         return mResourceUsages;
     }
 
+    bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
+                                       const Extent3D copySize,
+                                       const uint32_t mipLevel) {
+        if (texture->GetSize().depth == copySize.depth &&
+            (texture->GetSize().width >> mipLevel) == copySize.width &&
+            (texture->GetSize().height >> mipLevel) == copySize.height) {
+            return true;
+        }
+        return false;
+    }
 }  // namespace dawn_native

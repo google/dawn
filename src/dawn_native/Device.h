@@ -193,6 +193,7 @@ namespace dawn_native {
                                              const TextureViewDescriptor* descriptor);
 
         void ConsumeError(ErrorData* error);
+        void SetDefaultToggles();
 
         AdapterBase* mAdapter = nullptr;
 

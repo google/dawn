@@ -35,6 +35,9 @@ namespace dawn_native {
 
         CommandBufferResourceUsage mResourceUsages;
     };
+    bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
+                                       const Extent3D copySize,
+                                       const uint32_t mipLevel);
 
 }  // namespace dawn_native
 

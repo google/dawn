@@ -25,6 +25,7 @@ namespace dawn_native {
         EmulateStoreAndMSAAResolve,
         NonzeroClearResourcesOnCreationForTesting,
         AlwaysResolveIntoZeroLevelAndLayer,
+        LazyClearResourceOnFirstUse,
 
         EnumCount,
         InvalidEnum = EnumCount,

@@ -171,8 +171,16 @@ namespace dawn_native { namespace vulkan {
                 for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
                     const auto& attachmentInfo = renderPass->colorAttachments[i];
                     bool hasResolveTarget = attachmentInfo.resolveTarget.Get() != nullptr;
-                    query.SetColor(i, attachmentInfo.view->GetFormat(), attachmentInfo.loadOp,
-                                   hasResolveTarget);
+
+                    dawn::LoadOp loadOp = attachmentInfo.loadOp;
+                    if (loadOp == dawn::LoadOp::Load && attachmentInfo.view->GetTexture() &&
+                        !attachmentInfo.view->GetTexture()->IsSubresourceContentInitialized(
+                            attachmentInfo.view->GetBaseMipLevel(), 1,
+                            attachmentInfo.view->GetBaseArrayLayer(), 1)) {
+                        loadOp = dawn::LoadOp::Clear;
+                    }
+
+                    query.SetColor(i, attachmentInfo.view->GetFormat(), loadOp, hasResolveTarget);
                 }
 
                 if (renderPass->hasDepthStencilAttachment) {
@@ -289,6 +297,11 @@ namespace dawn_native { namespace vulkan {
             }
             for (size_t i = 0; i < usages.textures.size(); ++i) {
                 Texture* texture = ToBackend(usages.textures[i]);
+
+                // TODO(natlee@microsoft.com): Update clearing here when subresource tracking is
+                // implemented
+                texture->EnsureSubresourceContentInitialized(
+                    commands, 0, texture->GetNumMipLevels(), 0, texture->GetArrayLayers());
                 texture->TransitionUsageNow(commands, usages.textureUsages[i]);
             }
         };
@@ -322,16 +335,26 @@ namespace dawn_native { namespace vulkan {
                     auto& src = copy->source;
                     auto& dst = copy->destination;
 
+                    VkBufferImageCopy region =
+                        ComputeBufferImageCopyRegion(src, dst, copy->copySize);
+                    VkImageSubresourceLayers subresource = region.imageSubresource;
+
+                    if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
+                                                      subresource.mipLevel)) {
+                        // Since texture has been overwritten, it has been "initialized"
+                        dst.texture->SetIsSubresourceContentInitialized(
+                            subresource.mipLevel, 1, subresource.baseArrayLayer, 1);
+                    } else {
+                        ToBackend(dst.texture)
+                            ->EnsureSubresourceContentInitialized(commands, subresource.mipLevel, 1,
+                                                                  subresource.baseArrayLayer, 1);
+                    }
                     ToBackend(src.buffer)
                         ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferSrc);
                     ToBackend(dst.texture)
                         ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
-
                     VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
-
-                    VkBufferImageCopy region =
-                        ComputeBufferImageCopyRegion(src, dst, copy->copySize);
 
                     // The image is written to so the Dawn guarantees make sure it is in the
                     // TRANSFER_DST_OPTIMAL layout
@@ -345,6 +368,14 @@ namespace dawn_native { namespace vulkan {
                     auto& src = copy->source;
                     auto& dst = copy->destination;
 
+                    VkBufferImageCopy region =
+                        ComputeBufferImageCopyRegion(dst, src, copy->copySize);
+                    VkImageSubresourceLayers subresource = region.imageSubresource;
+
+                    ToBackend(src.texture)
+                        ->EnsureSubresourceContentInitialized(commands, subresource.mipLevel, 1,
+                                                              subresource.baseArrayLayer, 1);
+
                     ToBackend(src.texture)
                         ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferSrc);
                     ToBackend(dst.buffer)
@@ -352,10 +383,6 @@ namespace dawn_native { namespace vulkan {
 
                     VkImage srcImage = ToBackend(src.texture)->GetHandle();
                     VkBuffer dstBuffer = ToBackend(dst.buffer)->GetHandle();
-
-                    VkBufferImageCopy region =
-                        ComputeBufferImageCopyRegion(dst, src, copy->copySize);
-
                     // The Dawn TransferSrc usage is always mapped to GENERAL
                     device->fn.CmdCopyImageToBuffer(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
                                                     dstBuffer, 1, &region);
@@ -367,15 +394,30 @@ namespace dawn_native { namespace vulkan {
                     TextureCopy& src = copy->source;
                     TextureCopy& dst = copy->destination;
 
+                    VkImageCopy region = ComputeImageCopyRegion(src, dst, copy->copySize);
+                    VkImageSubresourceLayers dstSubresource = region.dstSubresource;
+                    VkImageSubresourceLayers srcSubresource = region.srcSubresource;
+
+                    ToBackend(src.texture)
+                        ->EnsureSubresourceContentInitialized(commands, srcSubresource.mipLevel, 1,
+                                                              srcSubresource.baseArrayLayer, 1);
+                    if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
+                                                      dstSubresource.mipLevel)) {
+                        // Since destination texture has been overwritten, it has been "initialized"
+                        dst.texture->SetIsSubresourceContentInitialized(
+                            dstSubresource.mipLevel, 1, dstSubresource.baseArrayLayer, 1);
+                    } else {
+                        ToBackend(dst.texture)
+                            ->EnsureSubresourceContentInitialized(commands, dstSubresource.mipLevel,
+                                                                  1, dstSubresource.baseArrayLayer,
+                                                                  1);
+                    }
                     ToBackend(src.texture)
                         ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferSrc);
                     ToBackend(dst.texture)
                         ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
-
                     VkImage srcImage = ToBackend(src.texture)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
-
-                    VkImageCopy region = ComputeImageCopyRegion(src, dst, copy->copySize);
 
                     // The dstImage is written to so the Dawn guarantees make sure it is in the
                     // TRANSFER_DST_OPTIMAL layout
@@ -511,6 +553,20 @@ namespace dawn_native { namespace vulkan {
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
                     device->fn.CmdEndRenderPass(commands);
+                    for (uint32_t i : IterateBitSet(renderPassCmd->colorAttachmentsSet)) {
+                        auto& attachmentInfo = renderPassCmd->colorAttachments[i];
+                        TextureView* view = ToBackend(attachmentInfo.view.Get());
+                        switch (attachmentInfo.storeOp) {
+                            case dawn::StoreOp::Store: {
+                                attachmentInfo.view->GetTexture()
+                                    ->SetIsSubresourceContentInitialized(
+                                        view->GetBaseMipLevel(), view->GetLevelCount(),
+                                        view->GetBaseArrayLayer(), view->GetLayerCount());
+                            } break;
+
+                            default: { UNREACHABLE(); } break;
+                        }
+                    }
                     return;
                 } break;
 
