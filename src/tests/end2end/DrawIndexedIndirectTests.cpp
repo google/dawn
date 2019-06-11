@@ -135,12 +135,16 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
     // Test a draw with only the last 3 indices of the second quad (bottom left triangle)
     Test({3, 1, 3, 4, 0}, 0, 0, filled, notFilled);
 
+    const int negFour = -4;
+    uint32_t unsignedNegFour;
+    std::memcpy(&unsignedNegFour, &negFour, sizeof(int));
+
     // Test negative baseVertex
     // Test a draw with only the first 3 indices of the first quad (bottom left triangle)
-    Test({3, 1, 0, -4, 0}, 6 * sizeof(uint32_t), 0, filled, notFilled);
+    Test({3, 1, 0, unsignedNegFour, 0}, 6 * sizeof(uint32_t), 0, filled, notFilled);
 
     // Test a draw with only the last 3 indices of the first quad (top right triangle)
-    Test({3, 1, 3, -4, 0}, 6 * sizeof(uint32_t), 0, notFilled, filled);
+    Test({3, 1, 3, unsignedNegFour, 0}, 6 * sizeof(uint32_t), 0, notFilled, filled);
 }
 
 TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
