@@ -187,7 +187,8 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ComputeTextureCopyBufferSize(const Extent3D& copySize,
+        MaybeError ComputeTextureCopyBufferSize(dawn::TextureFormat textureFormat,
+                                                const Extent3D& copySize,
                                                 uint32_t rowPitch,
                                                 uint32_t imageHeight,
                                                 uint32_t* bufferSize) {
@@ -195,7 +196,8 @@ namespace dawn_native {
 
             // TODO(cwallez@chromium.org): check for overflows
             uint32_t slicePitch = rowPitch * imageHeight;
-            uint32_t sliceSize = rowPitch * (copySize.height - 1) + copySize.width;
+            uint32_t sliceSize = rowPitch * (copySize.height - 1) +
+                                 copySize.width * TextureFormatPixelSize(textureFormat);
             *bufferSize = (slicePitch * (copySize.depth - 1)) + sliceSize;
 
             return {};
@@ -906,9 +908,9 @@ namespace dawn_native {
                     DAWN_TRY(ValidateRowPitch(copy->destination.texture->GetFormat(),
                                               copy->copySize, copy->source.rowPitch));
 
-                    DAWN_TRY(ComputeTextureCopyBufferSize(copy->copySize, copy->source.rowPitch,
-                                                          copy->source.imageHeight,
-                                                          &bufferCopySize));
+                    DAWN_TRY(ComputeTextureCopyBufferSize(
+                        copy->destination.texture->GetFormat(), copy->copySize,
+                        copy->source.rowPitch, copy->source.imageHeight, &bufferCopySize));
 
                     DAWN_TRY(ValidateCopySizeFitsInTexture(copy->destination, copy->copySize));
                     DAWN_TRY(ValidateCopySizeFitsInBuffer(copy->source, bufferCopySize));
@@ -933,7 +935,8 @@ namespace dawn_native {
                     DAWN_TRY(ValidateRowPitch(copy->source.texture->GetFormat(), copy->copySize,
                                               copy->destination.rowPitch));
                     DAWN_TRY(ComputeTextureCopyBufferSize(
-                        copy->copySize, copy->destination.rowPitch, copy->destination.imageHeight,
+                        copy->source.texture->GetFormat(), copy->copySize,
+                        copy->destination.rowPitch, copy->destination.imageHeight,
                         &bufferCopySize));
 
                     DAWN_TRY(ValidateCopySizeFitsInTexture(copy->source, copy->copySize));

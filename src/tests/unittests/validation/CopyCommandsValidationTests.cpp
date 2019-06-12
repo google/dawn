@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "tests/unittests/validation/ValidationTest.h"
@@ -44,9 +45,27 @@ class CopyCommandTest : public ValidationTest {
             return tex;
         }
 
-        uint32_t BufferSizeForTextureCopy(uint32_t width, uint32_t height, uint32_t depth) {
-            uint32_t rowPitch = Align(width * 4, kTextureRowPitchAlignment);
-            return (rowPitch * (height - 1) + width) * depth;
+        // TODO(jiawei.shao@intel.com): support more pixel formats
+        uint32_t TextureFormatPixelSize(dawn::TextureFormat format) {
+            switch (format) {
+                case dawn::TextureFormat::R8G8Unorm:
+                    return 2;
+                case dawn::TextureFormat::R8G8B8A8Unorm:
+                    return 4;
+                default:
+                    UNREACHABLE();
+                    return 0;
+            }
+        }
+
+        uint32_t BufferSizeForTextureCopy(
+            uint32_t width,
+            uint32_t height,
+            uint32_t depth,
+            dawn::TextureFormat format = dawn::TextureFormat::R8G8B8A8Unorm) {
+            uint32_t bytesPerPixel = TextureFormatPixelSize(format);
+            uint32_t rowPitch = Align(width * bytesPerPixel, kTextureRowPitchAlignment);
+            return (rowPitch * (height - 1) + width * bytesPerPixel) * depth;
         }
 
         void ValidateExpectation(dawn::CommandEncoder encoder, utils::Expectation expectation) {
@@ -315,12 +334,13 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
     TestB2TCopy(utils::Expectation::Failure, source, 4, 256, 0, destination, 0, 0, {0, 0, 0},
                 {4, 4, 1});
 
-    // OOB on the buffer because (row pitch * (height - 1) + width) * depth overflows
+    // OOB on the buffer because (row pitch * (height - 1) + width * bytesPerPixel) * depth
+    // overflows
     TestB2TCopy(utils::Expectation::Failure, source, 0, 512, 0, destination, 0, 0, {0, 0, 0},
                 {4, 3, 1});
 
     // Not OOB on the buffer although row pitch * height overflows
-    // but (row pitch * (height - 1) + width) * depth does not overlow
+    // but (row pitch * (height - 1) + width * bytesPerPixel) * depth does not overflow
     {
         uint32_t sourceBufferSize = BufferSizeForTextureCopy(7, 3, 1);
         ASSERT_TRUE(256 * 3 > sourceBufferSize) << "row pitch * height should overflow buffer";
@@ -508,6 +528,56 @@ TEST_F(CopyCommandTest_B2T, BufferOrTextureInErrorState) {
     }
 }
 
+// Regression tests for a bug in the computation of texture copy buffer size in Dawn.
+TEST_F(CopyCommandTest_B2T, TextureCopyBufferSizeLastRowComputation) {
+    constexpr uint32_t kRowPitch = 256;
+    constexpr uint32_t kWidth = 4;
+    constexpr uint32_t kHeight = 4;
+
+    constexpr std::array<dawn::TextureFormat, 2> kFormats = {dawn::TextureFormat::R8G8B8A8Unorm,
+                                                             dawn::TextureFormat::R8G8Unorm};
+
+    {
+        // kRowPitch * (kHeight - 1) + kWidth is not large enough to be the valid buffer size in
+        // this test because the buffer sizes in B2T copies are not in texels but in bytes.
+        constexpr uint32_t kInvalidBufferSize = kRowPitch * (kHeight - 1) + kWidth;
+
+        for (dawn::TextureFormat format : kFormats) {
+            dawn::Buffer source =
+                CreateBuffer(kInvalidBufferSize, dawn::BufferUsageBit::TransferSrc);
+            dawn::Texture destination =
+                Create2DTexture(kWidth, kHeight, 1, 1, format, dawn::TextureUsageBit::TransferDst);
+            TestB2TCopy(utils::Expectation::Failure, source, 0, kRowPitch, 0, destination, 0, 0,
+                        {0, 0, 0}, {kWidth, kHeight, 1});
+        }
+    }
+
+    {
+        for (dawn::TextureFormat format : kFormats) {
+            uint32_t validBufferSize = BufferSizeForTextureCopy(kWidth, kHeight, 1, format);
+            dawn::Texture destination =
+                Create2DTexture(kWidth, kHeight, 1, 1, format, dawn::TextureUsageBit::TransferDst);
+
+            // Verify the return value of BufferSizeForTextureCopy() is exactly the minimum valid
+            // buffer size in this test.
+            {
+                uint32_t invalidBuffferSize = validBufferSize - 1;
+                dawn::Buffer source =
+                    CreateBuffer(invalidBuffferSize, dawn::BufferUsageBit::TransferSrc);
+                TestB2TCopy(utils::Expectation::Failure, source, 0, kRowPitch, 0, destination, 0, 0,
+                            {0, 0, 0}, {kWidth, kHeight, 1});
+            }
+
+            {
+                dawn::Buffer source =
+                    CreateBuffer(validBufferSize, dawn::BufferUsageBit::TransferSrc);
+                TestB2TCopy(utils::Expectation::Success, source, 0, kRowPitch, 0, destination, 0, 0,
+                            {0, 0, 0}, {kWidth, kHeight, 1});
+            }
+        }
+    }
+}
+
 class CopyCommandTest_T2B : public CopyCommandTest {
 };
 
@@ -603,12 +673,13 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 4, 256, 0,
                 {4, 4, 1});
 
-    // OOB on the buffer because (row pitch * (height - 1) + width) * depth overflows
+    // OOB on the buffer because (row pitch * (height - 1) + width * bytesPerPixel) * depth
+    // overflows
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 512, 0,
                 {4, 3, 1});
 
     // Not OOB on the buffer although row pitch * height overflows
-    // but (row pitch * (height - 1) + width) * depth does not overlow
+    // but (row pitch * (height - 1) + width * bytesPerPixel) * depth does not overflow
     {
         uint32_t destinationBufferSize = BufferSizeForTextureCopy(7, 3, 1);
         ASSERT_TRUE(256 * 3 > destinationBufferSize) << "row pitch * height should overflow buffer";
@@ -763,6 +834,57 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyTextureToBuffer(&textureCopyView, &errorBufferCopyView, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Regression tests for a bug in the computation of texture copy buffer size in Dawn.
+TEST_F(CopyCommandTest_T2B, TextureCopyBufferSizeLastRowComputation) {
+    constexpr uint32_t kRowPitch = 256;
+    constexpr uint32_t kWidth = 4;
+    constexpr uint32_t kHeight = 4;
+
+    constexpr std::array<dawn::TextureFormat, 2> kFormats = {dawn::TextureFormat::R8G8B8A8Unorm,
+                                                             dawn::TextureFormat::R8G8Unorm};
+
+    {
+        // kRowPitch * (kHeight - 1) + kWidth is not large enough to be the valid buffer size in
+        // this test because the buffer sizes in T2B copies are not in texels but in bytes.
+        constexpr uint32_t kInvalidBufferSize = kRowPitch * (kHeight - 1) + kWidth;
+
+        for (dawn::TextureFormat format : kFormats) {
+            dawn::Texture source =
+                Create2DTexture(kWidth, kHeight, 1, 1, format, dawn::TextureUsageBit::TransferDst);
+
+            dawn::Buffer destination =
+                CreateBuffer(kInvalidBufferSize, dawn::BufferUsageBit::TransferSrc);
+            TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0,
+                        kRowPitch, 0, {kWidth, kHeight, 1});
+        }
+    }
+
+    {
+        for (dawn::TextureFormat format : kFormats) {
+            uint32_t validBufferSize = BufferSizeForTextureCopy(kWidth, kHeight, 1, format);
+            dawn::Texture source =
+                Create2DTexture(kWidth, kHeight, 1, 1, format, dawn::TextureUsageBit::TransferSrc);
+
+            // Verify the return value of BufferSizeForTextureCopy() is exactly the minimum valid
+            // buffer size in this test.
+            {
+                uint32_t invalidBufferSize = validBufferSize - 1;
+                dawn::Buffer destination =
+                    CreateBuffer(invalidBufferSize, dawn::BufferUsageBit::TransferDst);
+                TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0,
+                            kRowPitch, 0, {kWidth, kHeight, 1});
+            }
+
+            {
+                dawn::Buffer destination =
+                    CreateBuffer(validBufferSize, dawn::BufferUsageBit::TransferDst);
+                TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0,
+                            kRowPitch, 0, {kWidth, kHeight, 1});
+            }
+        }
     }
 }
 
