@@ -43,13 +43,18 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(SUCCEEDED(hr));
     }
 
-    Device::Device(Adapter* adapter,
-                   ComPtr<ID3D12Device> d3d12Device,
-                   const DeviceDescriptor* descriptor)
-        : DeviceBase(adapter, descriptor), mD3d12Device(d3d12Device) {
+    Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
+        : DeviceBase(adapter, descriptor) {
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
         }
+    }
+
+    MaybeError Device::Initialize() {
+        mD3d12Device = ToBackend(GetAdapter())->GetDevice();
+
+        ASSERT(mD3d12Device != nullptr);
+
         // Create device-global objects
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -96,6 +101,8 @@ namespace dawn_native { namespace d3d12 {
             ->GetD3D12Device()
             ->CreateCommandSignature(&programDesc, NULL,
                                      IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
+
+        return {};
     }
 
     Device::~Device() {

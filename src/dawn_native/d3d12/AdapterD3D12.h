@@ -17,6 +17,7 @@
 
 #include "dawn_native/Adapter.h"
 
+#include "dawn_native/d3d12/D3D12Info.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -28,13 +29,21 @@ namespace dawn_native { namespace d3d12 {
         Adapter(Backend* backend, ComPtr<IDXGIAdapter1> hardwareAdapter);
         virtual ~Adapter() = default;
 
+        const D3D12DeviceInfo& GetDeviceInfo() const;
+        IDXGIAdapter1* GetHardwareAdapter() const;
         Backend* GetBackend() const;
+        ComPtr<ID3D12Device> GetDevice() const;
+
+        MaybeError Initialize();
 
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
 
         ComPtr<IDXGIAdapter1> mHardwareAdapter;
+        ComPtr<ID3D12Device> mD3d12Device;
+
         Backend* mBackend;
+        D3D12DeviceInfo mDeviceInfo = {};
     };
 
 }}  // namespace dawn_native::d3d12

@@ -38,6 +38,36 @@ namespace dawn_native { namespace d3d12 {
         : AdapterBase(backend->GetInstance(), BackendType::D3D12),
           mHardwareAdapter(hardwareAdapter),
           mBackend(backend) {
+    }
+
+    const D3D12DeviceInfo& Adapter::GetDeviceInfo() const {
+        return mDeviceInfo;
+    }
+
+    IDXGIAdapter1* Adapter::GetHardwareAdapter() const {
+        return mHardwareAdapter.Get();
+    }
+
+    Backend* Adapter::GetBackend() const {
+        return mBackend;
+    }
+
+    ComPtr<ID3D12Device> Adapter::GetDevice() const {
+        return mD3d12Device;
+    }
+
+    MaybeError Adapter::Initialize() {
+        // D3D12 cannot check for feature support without a device.
+        // Create the device to populate the adapter properties then reuse it when needed for actual
+        // rendering.
+        const PlatformFunctions* functions = GetBackend()->GetFunctions();
+        if (FAILED(functions->d3d12CreateDevice(GetHardwareAdapter(), D3D_FEATURE_LEVEL_11_0,
+                                                _uuidof(ID3D12Device), &mD3d12Device))) {
+            return DAWN_CONTEXT_LOST_ERROR("D3D12CreateDevice failed");
+        }
+
+        DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
+
         DXGI_ADAPTER_DESC1 adapterDesc;
         mHardwareAdapter->GetDesc1(&adapterDesc);
 
@@ -47,43 +77,20 @@ namespace dawn_native { namespace d3d12 {
         if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
             mDeviceType = DeviceType::CPU;
         } else {
-            // Using DXGI_ADAPTER_DESC1 approach to determine integrated vs dedicated is
-            // vendor-specific.
-            switch (mPCIInfo.vendorId) {
-                case kVendorID_Intel: {
-                    // On Intel GPUs, dedicated video memory is always set to 128MB when the GPU is
-                    // integrated.
-                    static constexpr uint64_t kDedicatedVideoMemory = 128 * 1024 * 1024;
-                    mDeviceType = (adapterDesc.DedicatedVideoMemory == kDedicatedVideoMemory)
-                                      ? DeviceType::IntegratedGPU
-                                      : DeviceType::DiscreteGPU;
-                    break;
-                }
-                default:
-                    // TODO: Support additional GPU vendors.
-                    mDeviceType = DeviceType::Unknown;
-                    break;
-            }
+            mDeviceType = (mDeviceInfo.isUMA) ? DeviceType::IntegratedGPU : DeviceType::DiscreteGPU;
         }
 
         std::wstring_convert<DeletableFacet<std::codecvt<wchar_t, char, std::mbstate_t>>> converter(
             "Error converting");
         mPCIInfo.name = converter.to_bytes(adapterDesc.Description);
-    }
 
-    Backend* Adapter::GetBackend() const {
-        return mBackend;
+        return {};
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
-        ComPtr<ID3D12Device> d3d12Device;
-        if (FAILED(mBackend->GetFunctions()->d3d12CreateDevice(
-                mHardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3d12Device)))) {
-            return DAWN_CONTEXT_LOST_ERROR("D3D12CreateDevice failed");
-        }
-
-        ASSERT(d3d12Device != nullptr);
-        return new Device(this, d3d12Device, descriptor);
+        std::unique_ptr<Device> device = std::make_unique<Device>(this, descriptor);
+        DAWN_TRY(device->Initialize());
+        return device.release();
     }
 
 }}  // namespace dawn_native::d3d12

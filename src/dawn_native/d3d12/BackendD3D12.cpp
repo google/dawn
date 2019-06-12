@@ -92,10 +92,13 @@ namespace dawn_native { namespace d3d12 {
             }
 
             ASSERT(dxgiAdapter != nullptr);
-            if (SUCCEEDED(mFunctions->d3d12CreateDevice(dxgiAdapter.Get(), D3D_FEATURE_LEVEL_11_0,
-                                                        _uuidof(ID3D12Device), nullptr))) {
-                adapters.push_back(std::make_unique<Adapter>(this, dxgiAdapter));
+
+            std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(this, dxgiAdapter);
+            if (GetInstance()->ConsumedError(adapter->Initialize())) {
+                continue;
             }
+
+            adapters.push_back(std::move(adapter));
         }
 
         return adapters;

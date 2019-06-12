@@ -176,6 +176,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/CommandBufferD3D12.h",
       "src/dawn_native/d3d12/ComputePipelineD3D12.cpp",
       "src/dawn_native/d3d12/ComputePipelineD3D12.h",
+      "src/dawn_native/d3d12/D3D12Info.cpp",
+      "src/dawn_native/d3d12/D3D12Info.h",
       "src/dawn_native/d3d12/DescriptorHeapAllocator.cpp",
       "src/dawn_native/d3d12/DescriptorHeapAllocator.h",
       "src/dawn_native/d3d12/DeviceD3D12.cpp",
