@@ -94,19 +94,6 @@ dawn_fuzzer_test("dawn_spirv_cross_glsl_fast_fuzzer") {
 
 # TODO(rharrison): Remove asan_options once signal trap is no longer
 #                  needed.
-# Varies both the options and input data
-dawn_fuzzer_test("dawn_spirv_cross_glsl_full_fuzzer") {
-  sources = [
-    "DawnSPIRVCrossGLSLFullFuzzer.cpp",
-  ]
-  deps = [
-    ":dawn_spirv_cross_fuzzer_common",
-  ]
-  asan_options = [ "allow_user_segv_handler=1" ]
-}
-
-# TODO(rharrison): Remove asan_options once signal trap is no longer
-#                  needed.
 # Uses Dawn specific options and varies input data
 dawn_fuzzer_test("dawn_spirv_cross_hlsl_fast_fuzzer") {
   sources = [
@@ -120,36 +107,10 @@ dawn_fuzzer_test("dawn_spirv_cross_hlsl_fast_fuzzer") {
 
 # TODO(rharrison): Remove asan_options once signal trap is no longer
 #                  needed.
-# Varies both the options and input data
-dawn_fuzzer_test("dawn_spirv_cross_hlsl_full_fuzzer") {
-  sources = [
-    "DawnSPIRVCrossHLSLFullFuzzer.cpp",
-  ]
-  deps = [
-    ":dawn_spirv_cross_fuzzer_common",
-  ]
-  asan_options = [ "allow_user_segv_handler=1" ]
-}
-
-# TODO(rharrison): Remove asan_options once signal trap is no longer
-#                  needed.
 # Uses Dawn specific options and varies input data
 dawn_fuzzer_test("dawn_spirv_cross_msl_fast_fuzzer") {
   sources = [
     "DawnSPIRVCrossMSLFastFuzzer.cpp",
-  ]
-  deps = [
-    ":dawn_spirv_cross_fuzzer_common",
-  ]
-  asan_options = [ "allow_user_segv_handler=1" ]
-}
-
-# TODO(rharrison): Remove asan_options once signal trap is no longer
-#                  needed.
-# Varies both the options and input data
-dawn_fuzzer_test("dawn_spirv_cross_msl_full_fuzzer") {
-  sources = [
-    "DawnSPIRVCrossMSLFullFuzzer.cpp",
   ]
   deps = [
     ":dawn_spirv_cross_fuzzer_common",

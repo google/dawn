@@ -30,8 +30,4 @@ namespace DawnSPIRVCrossFuzzer {
 
     // Used to fuzz by mutating the input data, but with fixed options to the compiler
     int Run(const uint8_t* data, size_t size, Task task);
-
-    // Used to fuzz by mutating both the input data and options to the compiler
-    int RunWithOptions(const uint8_t* data, size_t size, TaskWithOptions task);
-
 }  // namespace DawnSPIRVCrossFuzzer

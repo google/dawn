@@ -76,15 +76,4 @@ namespace DawnSPIRVCrossFuzzer {
         return 0;
     }
 
-    int RunWithOptions(const uint8_t* data, size_t size, TaskWithOptions task) {
-        shaderc_spvc::CompileOptions options;
-        size_t used = options.SetForFuzzing(data, size);
-        if (used == 0) {
-            // not enough data to set options
-            return 0;
-        }
-
-        return Run(data + used, size - used, std::bind(task, std::placeholders::_1, options));
-    }
-
 }  // namespace DawnSPIRVCrossFuzzer
