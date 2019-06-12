@@ -44,6 +44,9 @@ namespace dawn_native { namespace vulkan {
             if (usage & dawn::BufferUsageBit::Storage) {
                 flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
             }
+            if (usage & dawn::BufferUsageBit::Indirect) {
+                flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+            }
 
             return flags;
         }
@@ -64,6 +67,9 @@ namespace dawn_native { namespace vulkan {
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+            }
+            if (usage & dawn::BufferUsageBit::Indirect) {
+                flags |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
             }
 
             return flags;
@@ -95,6 +101,9 @@ namespace dawn_native { namespace vulkan {
             }
             if (usage & dawn::BufferUsageBit::Storage) {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            }
+            if (usage & dawn::BufferUsageBit::Indirect) {
+                flags |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
             }
 
             return flags;

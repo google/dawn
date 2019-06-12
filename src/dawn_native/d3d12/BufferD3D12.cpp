@@ -51,6 +51,9 @@ namespace dawn_native { namespace d3d12 {
             if (usage & dawn::BufferUsageBit::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
+            if (usage & dawn::BufferUsageBit::Indirect) {
+                resourceState |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
+            }
 
             return resourceState;
         }

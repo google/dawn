@@ -468,13 +468,13 @@ namespace dawn_native { namespace vulkan {
                 } break;
 
                 case Command::DispatchIndirect: {
-                    DispatchIndirectCmd* Dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
-                    VkBuffer indirectBuffer = ToBackend(Dispatch->indirectBuffer)->GetHandle();
+                    DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
+                    VkBuffer indirectBuffer = ToBackend(dispatch->indirectBuffer)->GetHandle();
 
                     descriptorSets.Flush(device, commands, VK_PIPELINE_BIND_POINT_COMPUTE);
                     device->fn.CmdDispatchIndirect(
                         commands, indirectBuffer,
-                        static_cast<VkDeviceSize>(Dispatch->indirectOffset));
+                        static_cast<VkDeviceSize>(dispatch->indirectOffset));
                 } break;
 
                 case Command::SetBindGroup: {
