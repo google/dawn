@@ -14,13 +14,16 @@
 
 #include "dawn_native/opengl/PersistentPipelineStateGL.h"
 
+#include "dawn_native/opengl/OpenGLFunctions.h"
+
 namespace dawn_native { namespace opengl {
 
-    void PersistentPipelineState::SetDefaultState() {
-        CallGLStencilFunc();
+    void PersistentPipelineState::SetDefaultState(const OpenGLFunctions& gl) {
+        CallGLStencilFunc(gl);
     }
 
-    void PersistentPipelineState::SetStencilFuncsAndMask(GLenum stencilBackCompareFunction,
+    void PersistentPipelineState::SetStencilFuncsAndMask(const OpenGLFunctions& gl,
+                                                         GLenum stencilBackCompareFunction,
                                                          GLenum stencilFrontCompareFunction,
                                                          uint32_t stencilReadMask) {
         if (mStencilBackCompareFunction == stencilBackCompareFunction &&
@@ -32,23 +35,24 @@ namespace dawn_native { namespace opengl {
         mStencilBackCompareFunction = stencilBackCompareFunction;
         mStencilFrontCompareFunction = stencilFrontCompareFunction;
         mStencilReadMask = stencilReadMask;
-        CallGLStencilFunc();
+        CallGLStencilFunc(gl);
     }
 
-    void PersistentPipelineState::SetStencilReference(uint32_t stencilReference) {
+    void PersistentPipelineState::SetStencilReference(const OpenGLFunctions& gl,
+                                                      uint32_t stencilReference) {
         if (mStencilReference == stencilReference) {
             return;
         }
 
         mStencilReference = stencilReference;
-        CallGLStencilFunc();
+        CallGLStencilFunc(gl);
     }
 
-    void PersistentPipelineState::CallGLStencilFunc() {
-        glStencilFuncSeparate(GL_BACK, mStencilBackCompareFunction, mStencilReference,
-                              mStencilReadMask);
-        glStencilFuncSeparate(GL_FRONT, mStencilFrontCompareFunction, mStencilReference,
-                              mStencilReadMask);
+    void PersistentPipelineState::CallGLStencilFunc(const OpenGLFunctions& gl) {
+        gl.StencilFuncSeparate(GL_BACK, mStencilBackCompareFunction, mStencilReference,
+                               mStencilReadMask);
+        gl.StencilFuncSeparate(GL_FRONT, mStencilFrontCompareFunction, mStencilReference,
+                               mStencilReadMask);
     }
 
 }}  // namespace dawn_native::opengl

@@ -20,8 +20,7 @@
 #include "common/Platform.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/opengl/Forward.h"
-
-#include "glad/glad.h"
+#include "dawn_native/opengl/OpenGLFunctions.h"
 
 #include <queue>
 
@@ -34,8 +33,13 @@ namespace dawn_native { namespace opengl {
 
     class Device : public DeviceBase {
       public:
-        Device(AdapterBase* adapter, const DeviceDescriptor* descriptor);
+        Device(AdapterBase* adapter,
+               const DeviceDescriptor* descriptor,
+               const OpenGLFunctions& functions);
         ~Device();
+
+        // Contains all the OpenGL entry points, glDoFoo is called via device->gl.DoFoo.
+        const OpenGLFunctions gl;
 
         void SubmitFenceSync();
 

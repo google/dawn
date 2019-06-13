@@ -22,9 +22,9 @@ namespace dawn_native { namespace opengl {
 
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
-        glGenBuffers(1, &mBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        glBufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);
+        device->gl.GenBuffers(1, &mBuffer);
+        device->gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+        device->gl.BufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);
     }
 
     Buffer::~Buffer() {
@@ -42,41 +42,51 @@ namespace dawn_native { namespace opengl {
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
-        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+
+        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+        void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         *mappedPointer = reinterpret_cast<uint8_t*>(data);
         return {};
     }
 
     MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const void* data) {
-        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        glBufferSubData(GL_ARRAY_BUFFER, start, count, data);
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+
+        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+        gl.BufferSubData(GL_ARRAY_BUFFER, start, count, data);
         return {};
     }
 
     void Buffer::MapReadAsyncImpl(uint32_t serial) {
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
-        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+        void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
         CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
     }
 
     void Buffer::MapWriteAsyncImpl(uint32_t serial) {
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
-        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+        void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
     }
 
     void Buffer::UnmapImpl() {
-        glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        glUnmapBuffer(GL_ARRAY_BUFFER);
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+
+        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+        gl.UnmapBuffer(GL_ARRAY_BUFFER);
     }
 
     void Buffer::DestroyImpl() {
-        glDeleteBuffers(1, &mBuffer);
+        ToBackend(GetDevice())->gl.DeleteBuffers(1, &mBuffer);
         mBuffer = 0;
     }
 

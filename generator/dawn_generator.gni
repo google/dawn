@@ -47,6 +47,11 @@ template("dawn_generator") {
     generator_args += invoker.args
   }
 
+  generator_args += [
+    "--template-dir",
+    rebase_path("${dawn_root}/generator/templates", root_build_dir),
+  ]
+
   # Use the Jinja2 version pulled from the DEPS file. We do it so we don't
   # have version problems, and users don't have to install Jinja2.
   jinja2_python_path = rebase_path("${dawn_jinja2_dir}/..")
@@ -138,7 +143,6 @@ template("dawn_generator") {
 #   }
 template("dawn_json_generator") {
   dawn_generator(target_name) {
-
     script = "${dawn_root}/generator/dawn_json_generator.py"
 
     # The base arguments for the generator: from this dawn.json, generate this
@@ -148,12 +152,10 @@ template("dawn_json_generator") {
       rebase_path("${dawn_root}/dawn.json", root_build_dir),
       "--wire-json",
       rebase_path("${dawn_root}/dawn_wire.json", root_build_dir),
-      "--template-dir",
-      rebase_path("${dawn_root}/generator/templates", root_build_dir),
       "--targets",
       invoker.target,
     ]
 
-    forward_variables_from(invoker, "*", ["target"])
+    forward_variables_from(invoker, "*", [ "target" ])
   }
 }

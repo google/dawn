@@ -23,26 +23,33 @@ namespace dawn_native { namespace opengl {
 
     class Adapter : public AdapterBase {
       public:
-        Adapter(InstanceBase* instance, const AdapterDiscoveryOptions* options)
-            : AdapterBase(instance, BackendType::OpenGL) {
-            // Use getProc to populate GLAD.
-            gladLoadGLLoader(reinterpret_cast<GLADloadproc>(options->getProc));
+        Adapter(InstanceBase* instance) : AdapterBase(instance, BackendType::OpenGL) {
+        }
+
+        MaybeError Initialize(const AdapterDiscoveryOptions* options) {
+            // Use getProc to populate the dispatch table
+            DAWN_TRY(mFunctions.Initialize(options->getProc));
 
             // Set state that never changes between devices.
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_SCISSOR_TEST);
-            glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
-            glEnable(GL_MULTISAMPLE);
+            mFunctions.Enable(GL_DEPTH_TEST);
+            mFunctions.Enable(GL_SCISSOR_TEST);
+            mFunctions.Enable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+            mFunctions.Enable(GL_MULTISAMPLE);
 
-            mPCIInfo.name = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+            mPCIInfo.name = reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER));
+
+            return {};
         }
-        virtual ~Adapter() = default;
+
+        ~Adapter() override = default;
 
       private:
+        OpenGLFunctions mFunctions;
+
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
             // There is no limit on the number of devices created from this adapter because they can
             // all share the same backing OpenGL context.
-            return {new Device(this, descriptor)};
+            return {new Device(this, descriptor, mFunctions)};
         }
     };
 
@@ -58,9 +65,8 @@ namespace dawn_native { namespace opengl {
 
     ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* optionsBase) {
-        // TODO(cwallez@chromium.org): For now we can only create a single adapter because glad uses
-        // static variables to store the pointers to OpenGL procs. Also, if we could create
-        // multiple adapters, we would need to figure out what to do about MakeCurrent.
+        // TODO(cwallez@chromium.org): For now only create a single OpenGL adapter because don't
+        // know how to handle MakeCurrent.
         if (mCreatedAdapter) {
             return DAWN_VALIDATION_ERROR("The OpenGL backend can only create a single adapter");
         }
@@ -73,10 +79,12 @@ namespace dawn_native { namespace opengl {
             return DAWN_VALIDATION_ERROR("AdapterDiscoveryOptions::getProc must be set");
         }
 
-        std::vector<std::unique_ptr<AdapterBase>> adapters;
-        adapters.push_back(std::make_unique<Adapter>(GetInstance(), options));
+        std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(GetInstance());
+        DAWN_TRY(adapter->Initialize(options));
 
         mCreatedAdapter = true;
+        std::vector<std::unique_ptr<AdapterBase>> adapters;
+        adapters.push_back(std::unique_ptr<AdapterBase>(adapter.release()));
         return std::move(adapters);
     }
 

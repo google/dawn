@@ -23,7 +23,7 @@
 
 namespace dawn_native { namespace opengl {
 
-    class Device;
+    struct OpenGLFunctions;
     class PersistentPipelineState;
     class PipelineLayout;
     class ShaderModule;
@@ -32,7 +32,9 @@ namespace dawn_native { namespace opengl {
       public:
         PipelineGL();
 
-        void Initialize(const PipelineLayout* layout, const PerStage<const ShaderModule*>& modules);
+        void Initialize(const OpenGLFunctions& gl,
+                        const PipelineLayout* layout,
+                        const PerStage<const ShaderModule*>& modules);
 
         using BindingLocations =
             std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
@@ -41,7 +43,7 @@ namespace dawn_native { namespace opengl {
         const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
         GLuint GetProgramHandle() const;
 
-        void ApplyNow();
+        void ApplyNow(const OpenGLFunctions& gl);
 
       private:
         GLuint mProgram;

@@ -44,7 +44,7 @@ import jinja2
 
 # A custom Jinja2 template loader that removes the extra indentation
 # of the template blocks so that the output is correctly indented
-class PreprocessingLoader(jinja2.BaseLoader):
+class _PreprocessingLoader(jinja2.BaseLoader):
     def __init__(self, path):
         self.path = path
 
@@ -93,7 +93,7 @@ class PreprocessingLoader(jinja2.BaseLoader):
 _FileOutput = namedtuple('FileOutput', ['name', 'content'])
 
 def _do_renders(renders, template_dir):
-    loader = PreprocessingLoader(template_dir)
+    loader = _PreprocessingLoader(template_dir)
     env = jinja2.Environment(loader=loader, lstrip_blocks=True, trim_blocks=True, line_comment_prefix='//*')
 
     def do_assert(expr):

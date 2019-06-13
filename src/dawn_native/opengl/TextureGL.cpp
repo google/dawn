@@ -88,9 +88,9 @@ namespace dawn_native { namespace opengl {
             }
         }
 
-        GLuint GenTexture() {
+        GLuint GenTexture(const OpenGLFunctions& gl) {
             GLuint handle = 0;
-            glGenTextures(1, &handle);
+            gl.GenTextures(1, &handle);
             return handle;
         }
 
@@ -130,7 +130,9 @@ namespace dawn_native { namespace opengl {
     // Texture
 
     Texture::Texture(Device* device, const TextureDescriptor* descriptor)
-        : Texture(device, descriptor, GenTexture(), TextureState::OwnedInternal) {
+        : Texture(device, descriptor, GenTexture(device->gl), TextureState::OwnedInternal) {
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+
         uint32_t width = GetSize().width;
         uint32_t height = GetSize().height;
         uint32_t levels = GetNumMipLevels();
@@ -139,7 +141,7 @@ namespace dawn_native { namespace opengl {
 
         auto formatInfo = GetGLFormatInfo(GetFormat());
 
-        glBindTexture(mTarget, mHandle);
+        gl.BindTexture(mTarget, mHandle);
 
         // glTextureView() requires the value of GL_TEXTURE_IMMUTABLE_FORMAT for origtexture to be
         // GL_TRUE, so the storage of the texture must be allocated with glTexStorage*D.
@@ -148,14 +150,14 @@ namespace dawn_native { namespace opengl {
             case dawn::TextureDimension::e2D:
                 if (arrayLayers > 1) {
                     ASSERT(!IsMultisampledTexture());
-                    glTexStorage3D(mTarget, levels, formatInfo.internalFormat, width, height,
-                                   arrayLayers);
+                    gl.TexStorage3D(mTarget, levels, formatInfo.internalFormat, width, height,
+                                    arrayLayers);
                 } else {
                     if (IsMultisampledTexture()) {
-                        glTexStorage2DMultisample(mTarget, sampleCount, formatInfo.internalFormat,
-                                                  width, height, true);
+                        gl.TexStorage2DMultisample(mTarget, sampleCount, formatInfo.internalFormat,
+                                                   width, height, true);
                     } else {
-                        glTexStorage2D(mTarget, levels, formatInfo.internalFormat, width, height);
+                        gl.TexStorage2D(mTarget, levels, formatInfo.internalFormat, width, height);
                     }
                 }
                 break;
@@ -165,7 +167,7 @@ namespace dawn_native { namespace opengl {
 
         // The texture is not complete if it uses mipmapping and not all levels up to
         // MAX_LEVEL have been defined.
-        glTexParameteri(mTarget, GL_TEXTURE_MAX_LEVEL, levels - 1);
+        gl.TexParameteri(mTarget, GL_TEXTURE_MAX_LEVEL, levels - 1);
 
         if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
             static constexpr uint32_t MAX_TEXEL_SIZE = 16;
@@ -175,7 +177,7 @@ namespace dawn_native { namespace opengl {
 
             // TODO(natlee@microsoft.com): clear all subresources
             for (uint32_t i = 0; i < GL_TEXTURE_MAX_LEVEL; i++) {
-                glClearTexImage(mHandle, i, formatInfo.format, formatInfo.type, clearColor);
+                gl.ClearTexImage(mHandle, i, formatInfo.format, formatInfo.type, clearColor);
             }
         }
     }
@@ -193,7 +195,7 @@ namespace dawn_native { namespace opengl {
     }
 
     void Texture::DestroyImpl() {
-        glDeleteTextures(1, &mHandle);
+        ToBackend(GetDevice())->gl.DeleteTextures(1, &mHandle);
         mHandle = 0;
     }
 
@@ -222,20 +224,21 @@ namespace dawn_native { namespace opengl {
         } else {
             // glTextureView() is supported on OpenGL version >= 4.3
             // TODO(jiawei.shao@intel.com): support texture view on OpenGL version <= 4.2
-            mHandle = GenTexture();
+            const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+            mHandle = GenTexture(gl);
             const Texture* textureGL = ToBackend(texture);
             TextureFormatInfo textureViewFormat = GetGLFormatInfo(descriptor->format);
-            glTextureView(mHandle, mTarget, textureGL->GetHandle(),
-                          textureViewFormat.internalFormat, descriptor->baseMipLevel,
-                          descriptor->mipLevelCount, descriptor->baseArrayLayer,
-                          descriptor->arrayLayerCount);
+            gl.TextureView(mHandle, mTarget, textureGL->GetHandle(),
+                           textureViewFormat.internalFormat, descriptor->baseMipLevel,
+                           descriptor->mipLevelCount, descriptor->baseArrayLayer,
+                           descriptor->arrayLayerCount);
             mOwnsHandle = true;
         }
     }
 
     TextureView::~TextureView() {
         if (mOwnsHandle) {
-            glDeleteTextures(1, &mHandle);
+            ToBackend(GetDevice())->gl.DeleteTextures(1, &mHandle);
         }
     }
 

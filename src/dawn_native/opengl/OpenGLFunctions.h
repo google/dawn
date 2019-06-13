@@ -1,4 +1,4 @@
-// Copyright 2017 The Dawn Authors
+// Copyright 2019 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/opengl/ComputePipelineGL.h"
+#ifndef DAWNNATIVE_OPENGL_OPENGLFUNCTIONS_H_
+#define DAWNNATIVE_OPENGL_OPENGLFUNCTIONS_H_
 
-#include "dawn_native/opengl/DeviceGL.h"
+#include "dawn_native/opengl/OpenGLFunctionsBase_autogen.h"
 
 namespace dawn_native { namespace opengl {
 
-    ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor)
-        : ComputePipelineBase(device, descriptor) {
-        PerStage<const ShaderModule*> modules(nullptr);
-        modules[dawn::ShaderStage::Compute] = ToBackend(descriptor->computeStage->module);
+    struct OpenGLFunctions : OpenGLFunctionsBase {
+      public:
+        MaybeError Initialize(GetProcAddress getProc);
 
-        PipelineGL::Initialize(device->gl, ToBackend(descriptor->layout), modules);
-    }
+      private:
+        uint32_t mMajorVersion;
+        uint32_t mMinorVersion;
 
-    void ComputePipeline::ApplyNow() {
-        PipelineGL::ApplyNow(ToBackend(GetDevice())->gl);
-    }
+        enum class Standard {
+            Desktop,
+            ES,
+        };
+        Standard mStandard;
+    };
 
 }}  // namespace dawn_native::opengl
+
+#endif  // DAWNNATIVE_OPENGL_OPENGLFUNCTIONS_H_
