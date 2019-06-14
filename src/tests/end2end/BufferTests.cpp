@@ -226,6 +226,7 @@ DAWN_INSTANTIATE_TEST(BufferSetSubDataTests,
                      OpenGLBackend,
                      VulkanBackend);
 
+// TODO(enga): These tests should use the testing toggle to initialize resources to 1.
 class CreateBufferMappedTests : public DawnTest {
     protected:
       static void MapReadCallback(DawnBufferMapAsyncStatus status,
@@ -248,37 +249,97 @@ class CreateBufferMappedTests : public DawnTest {
           return mappedData;
       }
 
+      void CheckResultStartsZeroed(const dawn::CreateBufferMappedResult& result, uint64_t size) {
+          ASSERT_EQ(result.dataLength, size);
+          for (uint64_t i = 0; i < result.dataLength; ++i) {
+              uint8_t value = *(reinterpret_cast<uint8_t*>(result.data) + i);
+              ASSERT_EQ(value, 0u);
+          }
+      }
+
+      dawn::CreateBufferMappedResult CreateBufferMapped(dawn::BufferUsageBit usage, uint64_t size) {
+          dawn::BufferDescriptor descriptor;
+          descriptor.nextInChain = nullptr;
+          descriptor.size = size;
+          descriptor.usage = usage;
+
+          dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
+          CheckResultStartsZeroed(result, size);
+          return result;
+      }
+
+      dawn::CreateBufferMappedResult CreateBufferMappedWithData(dawn::BufferUsageBit usage,
+                                                                const std::vector<uint32_t>& data) {
+          size_t byteLength = data.size() * sizeof(uint32_t);
+          dawn::CreateBufferMappedResult result = CreateBufferMapped(usage, byteLength);
+          memcpy(result.data, data.data(), byteLength);
+
+          return result;
+      }
+
+      template <DawnBufferMapAsyncStatus expectedStatus = DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS>
+      dawn::CreateBufferMappedResult CreateBufferMappedAsyncAndWait(dawn::BufferUsageBit usage,
+                                                                    uint64_t size) {
+          dawn::BufferDescriptor descriptor;
+          descriptor.nextInChain = nullptr;
+          descriptor.size = size;
+          descriptor.usage = usage;
+
+          struct ResultInfo {
+              dawn::CreateBufferMappedResult result;
+              bool done = false;
+          } resultInfo;
+
+          device.CreateBufferMappedAsync(
+              &descriptor,
+              [](DawnBufferMapAsyncStatus status, DawnCreateBufferMappedResult result,
+                 void* userdata) {
+                  ASSERT_EQ(status, expectedStatus);
+                  auto* resultInfo = reinterpret_cast<ResultInfo*>(userdata);
+                  resultInfo->result.buffer = dawn::Buffer::Acquire(result.buffer);
+                  resultInfo->result.data = result.data;
+                  resultInfo->result.dataLength = result.dataLength;
+                  resultInfo->done = true;
+              },
+              &resultInfo);
+
+          while (!resultInfo.done) {
+              WaitABit();
+          }
+
+          CheckResultStartsZeroed(resultInfo.result, size);
+
+          return resultInfo.result;
+      }
+
+      dawn::CreateBufferMappedResult CreateBufferMappedAsyncWithDataAndWait(
+          dawn::BufferUsageBit usage,
+          const std::vector<uint32_t>& data) {
+          size_t byteLength = data.size() * sizeof(uint32_t);
+          dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncAndWait(usage, byteLength);
+          memcpy(result.data, data.data(), byteLength);
+
+          return result;
+      }
+
     private:
         const void* mappedData = nullptr;
 };
 
 // Test that the simplest CreateBufferMapped works for MapWrite buffers.
 TEST_P(CreateBufferMappedTests, MapWriteUsageSmall) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
-
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    memcpy(result.data, &myData, sizeof(myData));
+    dawn::CreateBufferMappedResult result = CreateBufferMappedWithData(
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc, {myData});
     result.buffer.Unmap();
-
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
 
 // Test that the simplest CreateBufferMapped works for MapRead buffers.
 TEST_P(CreateBufferMappedTests, MapReadUsageSmall) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::MapRead;
-
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    memcpy(result.data, &myData, sizeof(myData));
+    dawn::CreateBufferMappedResult result =
+        CreateBufferMappedWithData(dawn::BufferUsageBit::MapRead, {myData});
     result.buffer.Unmap();
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
@@ -288,15 +349,9 @@ TEST_P(CreateBufferMappedTests, MapReadUsageSmall) {
 
 // Test that the simplest CreateBufferMapped works for non-mappable buffers.
 TEST_P(CreateBufferMappedTests, NonMappableUsageSmall) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::TransferSrc;
-
     uint32_t myData = 4239;
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    memcpy(result.data, &myData, sizeof(myData));
+    dawn::CreateBufferMappedResult result =
+        CreateBufferMappedWithData(dawn::BufferUsageBit::TransferSrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
@@ -310,14 +365,8 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageLarge) {
         myData.push_back(i);
     }
 
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = static_cast<uint64_t>(kDataSize * sizeof(uint32_t));
-    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
-
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    memcpy(result.data, myData.data(), kDataSize * sizeof(uint32_t));
+    dawn::CreateBufferMappedResult result = CreateBufferMappedWithData(
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
@@ -331,14 +380,8 @@ TEST_P(CreateBufferMappedTests, MapReadUsageLarge) {
         myData.push_back(i);
     }
 
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = static_cast<uint64_t>(kDataSize * sizeof(uint32_t));
-    descriptor.usage = dawn::BufferUsageBit::MapRead;
-
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    memcpy(result.data, myData.data(), kDataSize * sizeof(uint32_t));
+    dawn::CreateBufferMappedResult result =
+        CreateBufferMappedWithData(dawn::BufferUsageBit::MapRead, myData);
     result.buffer.Unmap();
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
@@ -354,59 +397,19 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageLarge) {
         myData.push_back(i);
     }
 
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = static_cast<uint64_t>(kDataSize * sizeof(uint32_t));
-    descriptor.usage = dawn::BufferUsageBit::TransferSrc;
-
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    memcpy(result.data, myData.data(), kDataSize * sizeof(uint32_t));
+    dawn::CreateBufferMappedResult result =
+        CreateBufferMappedWithData(dawn::BufferUsageBit::TransferSrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
 }
 
-// Test that CreateBufferMapped returns zero-initialized data
-// TODO(enga): This should use the testing toggle to initialize resources to 1.
-TEST_P(CreateBufferMappedTests, MappableZeroInitialized) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
-
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    ASSERT_EQ(*reinterpret_cast<uint8_t*>(result.data), 0);
-    result.buffer.Unmap();
-}
-
-// Test that CreateBufferMapped returns zero-initialized data
-// TODO(enga): This should use the testing toggle to initialize resources to 1.
-TEST_P(CreateBufferMappedTests, NonMappableZeroInitialized) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::TransferSrc;
-
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    ASSERT_EQ(*reinterpret_cast<uint8_t*>(result.data), 0);
-    result.buffer.Unmap();
-}
-
 // Test that mapping a buffer is valid after CreateBufferMapped and Unmap
 TEST_P(CreateBufferMappedTests, CreateThenMapSuccess) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
-
     static uint32_t myData = 230502;
     static uint32_t myData2 = 1337;
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    memcpy(result.data, &myData, sizeof(myData));
+    dawn::CreateBufferMappedResult result = CreateBufferMappedWithData(
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
@@ -432,15 +435,9 @@ TEST_P(CreateBufferMappedTests, CreateThenMapSuccess) {
 
 // Test that is is invalid to map a buffer twice when using CreateBufferMapped
 TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailure) {
-    dawn::BufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
-
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-    ASSERT_EQ(result.dataLength, descriptor.size);
-    memcpy(result.data, &myData, sizeof(myData));
+    dawn::CreateBufferMappedResult result = CreateBufferMappedWithData(
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc, {myData});
 
     ASSERT_DEVICE_ERROR([&]() {
         bool done = false;
@@ -459,6 +456,140 @@ TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailure) {
     }());
 
     // CreateBufferMapped is unaffected by the MapWrite error.
+    result.buffer.Unmap();
+    EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
+}
+
+// Test that the simplest CreateBufferMappedAsync works for MapWrite buffers.
+TEST_P(CreateBufferMappedTests, MapWriteUsageSmallAsync) {
+    uint32_t myData = 230502;
+    dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc, {myData});
+    result.buffer.Unmap();
+    EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
+}
+
+// Test that the simplest CreateBufferMappedAsync works for MapRead buffers.
+TEST_P(CreateBufferMappedTests, MapReadUsageSmallAsync) {
+    uint32_t myData = 230502;
+    dawn::CreateBufferMappedResult result =
+        CreateBufferMappedAsyncWithDataAndWait(dawn::BufferUsageBit::MapRead, {myData});
+    result.buffer.Unmap();
+
+    const void* mappedData = MapReadAsyncAndWait(result.buffer);
+    ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
+    result.buffer.Unmap();
+}
+
+// Test that the simplest CreateBufferMappedAsync works for non-mappable buffers.
+TEST_P(CreateBufferMappedTests, NonMappableUsageSmallAsync) {
+    uint32_t myData = 4239;
+    dawn::CreateBufferMappedResult result =
+        CreateBufferMappedAsyncWithDataAndWait(dawn::BufferUsageBit::TransferSrc, {myData});
+    result.buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
+}
+
+// Test CreateBufferMappedAsync for a large MapWrite buffer
+TEST_P(CreateBufferMappedTests, MapWriteUsageLargeAsync) {
+    constexpr uint64_t kDataSize = 1000 * 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc, {myData});
+    result.buffer.Unmap();
+
+    EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
+}
+
+// Test CreateBufferMappedAsync for a large MapRead buffer
+TEST_P(CreateBufferMappedTests, MapReadUsageLargeAsync) {
+    constexpr uint64_t kDataSize = 1000 * 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    dawn::CreateBufferMappedResult result =
+        CreateBufferMappedAsyncWithDataAndWait(dawn::BufferUsageBit::MapRead, {myData});
+    result.buffer.Unmap();
+
+    const void* mappedData = MapReadAsyncAndWait(result.buffer);
+    ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
+    result.buffer.Unmap();
+}
+
+// Test CreateBufferMappedAsync for a large non-mappable buffer
+TEST_P(CreateBufferMappedTests, NonMappableUsageLargeAsync) {
+    constexpr uint64_t kDataSize = 1000 * 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    dawn::CreateBufferMappedResult result =
+        CreateBufferMappedAsyncWithDataAndWait(dawn::BufferUsageBit::TransferSrc, {myData});
+    result.buffer.Unmap();
+
+    EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
+}
+
+// Test that mapping a buffer is valid after CreateBufferMappedAsync and Unmap
+TEST_P(CreateBufferMappedTests, CreateThenMapSuccessAsync) {
+    static uint32_t myData = 230502;
+    static uint32_t myData2 = 1337;
+    dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc, {myData});
+    result.buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
+
+    bool done = false;
+    result.buffer.MapWriteAsync(
+        [](DawnBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
+            ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+            ASSERT_NE(nullptr, data);
+
+            *static_cast<uint32_t*>(data) = myData2;
+            *static_cast<bool*>(userdata) = true;
+        },
+        &done);
+
+    while (!done) {
+        WaitABit();
+    }
+
+    result.buffer.Unmap();
+    EXPECT_BUFFER_U32_EQ(myData2, result.buffer, 0);
+}
+
+// Test that is is invalid to map a buffer twice when using CreateBufferMappedAsync
+TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailureAsync) {
+    uint32_t myData = 230502;
+    dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
+        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc, {myData});
+
+    ASSERT_DEVICE_ERROR([&]() {
+        bool done = false;
+        result.buffer.MapWriteAsync(
+            [](DawnBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
+                ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, status);
+                ASSERT_EQ(nullptr, data);
+
+                *static_cast<bool*>(userdata) = true;
+            },
+            &done);
+
+        while (!done) {
+            WaitABit();
+        }
+    }());
+
+    // CreateBufferMappedAsync is unaffected by the MapWrite error.
     result.buffer.Unmap();
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }

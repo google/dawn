@@ -60,6 +60,17 @@ void ProcTableAsClass::DeviceSetErrorCallback(DawnDevice self,
     OnDeviceSetErrorCallback(self, callback, userdata);
 }
 
+void ProcTableAsClass::DeviceCreateBufferMappedAsync(DawnDevice self,
+                                                     const DawnBufferDescriptor* descriptor,
+                                                     DawnBufferCreateMappedCallback callback,
+                                                     void* userdata) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+    object->createBufferMappedCallback = callback;
+    object->userdata1 = userdata;
+
+    OnDeviceCreateBufferMappedAsyncCallback(self, descriptor, callback, userdata);
+}
+
 void ProcTableAsClass::BufferMapReadAsync(DawnBuffer self,
                                           DawnBufferMapReadCallback callback,
                                           void* userdata) {
@@ -95,12 +106,16 @@ void ProcTableAsClass::CallDeviceErrorCallback(DawnDevice device, const char* me
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->deviceErrorCallback(message, object->userdata1);
 }
-void ProcTableAsClass::CallMapReadCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, const void* data, uint32_t dataLength) {
+void ProcTableAsClass::CallCreateBufferMappedCallback(DawnDevice device, DawnBufferMapAsyncStatus status, DawnCreateBufferMappedResult result) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
+    object->createBufferMappedCallback(status, result, object->userdata1);
+}
+void ProcTableAsClass::CallMapReadCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, const void* data, uint64_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapReadCallback(status, data, dataLength, object->userdata1);
 }
 
-void ProcTableAsClass::CallMapWriteCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, void* data, uint32_t dataLength) {
+void ProcTableAsClass::CallMapWriteCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, void* data, uint64_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapWriteCallback(status, data, dataLength, object->userdata1);
 }

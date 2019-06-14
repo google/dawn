@@ -36,6 +36,12 @@
             { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
             { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" }
         ],
+        "device create buffer mapped async": [
+            { "name": "device", "type": "device" },
+            { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
+            { "name": "request serial", "type": "uint32_t" },
+            { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" }
+        ],
         "destroy object": [
             { "name": "object type", "type": "ObjectType" },
             { "name": "object id", "type": "ObjectId" }
@@ -75,6 +81,7 @@
             "BufferSetSubData",
             "BufferUnmap",
             "DeviceCreateBufferMapped",
+            "DeviceCreateBufferMappedAsync",
             "QueueCreateFence",
             "FenceGetCompletedValue",
             "QueueSignal"

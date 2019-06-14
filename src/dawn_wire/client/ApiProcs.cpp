@@ -101,6 +101,57 @@ namespace dawn_wire { namespace client {
         return result;
     }
 
+    void ClientDeviceCreateBufferMappedAsync(DawnDevice cDevice,
+                                             const DawnBufferDescriptor* descriptor,
+                                             DawnBufferCreateMappedCallback callback,
+                                             void* userdata) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+        Client* wireClient = device->GetClient();
+
+        auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(device);
+        Buffer* buffer = bufferObjectAndSerial->object.get();
+
+        uint32_t serial = buffer->requestSerial++;
+
+        struct CreateBufferMappedInfo {
+            DawnBuffer buffer;
+            DawnBufferCreateMappedCallback callback;
+            void* userdata;
+        };
+
+        CreateBufferMappedInfo* info = new CreateBufferMappedInfo;
+        info->buffer = reinterpret_cast<DawnBuffer>(buffer);
+        info->callback = callback;
+        info->userdata = userdata;
+
+        Buffer::MapRequestData request;
+        request.writeCallback = [](DawnBufferMapAsyncStatus status, void* data, uint64_t dataLength,
+                                   void* userdata) {
+            auto info = std::unique_ptr<CreateBufferMappedInfo>(
+                static_cast<CreateBufferMappedInfo*>(userdata));
+
+            DawnCreateBufferMappedResult result;
+            result.buffer = info->buffer;
+            result.data = data;
+            result.dataLength = dataLength;
+
+            info->callback(status, result, info->userdata);
+        };
+        request.userdata = info;
+        request.isWrite = true;
+        buffer->requests[serial] = request;
+
+        DeviceCreateBufferMappedAsyncCmd cmd;
+        cmd.device = cDevice;
+        cmd.descriptor = descriptor;
+        cmd.requestSerial = serial;
+        cmd.result = ObjectHandle{buffer->id, bufferObjectAndSerial->serial};
+
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer = static_cast<char*>(wireClient->GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer, *wireClient);
+    }
+
     uint64_t ClientFenceGetCompletedValue(DawnFence cSelf) {
         auto fence = reinterpret_cast<Fence*>(cSelf);
         return fence->completedValue;

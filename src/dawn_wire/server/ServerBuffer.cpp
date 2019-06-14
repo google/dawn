@@ -86,6 +86,32 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
+    bool Server::DoDeviceCreateBufferMappedAsync(DawnDevice device,
+                                                 const DawnBufferDescriptor* descriptor,
+                                                 uint32_t requestSerial,
+                                                 ObjectHandle bufferResult) {
+        if (!DoDeviceCreateBufferMapped(device, descriptor, bufferResult)) {
+            return false;
+        }
+
+        auto* bufferData = BufferObjects().Get(bufferResult.id);
+        ASSERT(bufferData != nullptr);
+
+        ReturnBufferMapWriteAsyncCallbackCmd cmd;
+        cmd.buffer = ObjectHandle{bufferResult.id, bufferResult.serial};
+        cmd.requestSerial = requestSerial;
+        cmd.status = bufferData->mapWriteState == BufferMapWriteState::Mapped
+                         ? DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS
+                         : DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR;
+        cmd.dataLength = bufferData->mappedDataSize;
+
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer);
+
+        return true;
+    }
+
     bool Server::DoBufferSetSubDataInternal(ObjectId bufferId,
                                             uint64_t start,
                                             uint64_t offset,

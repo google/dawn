@@ -108,6 +108,9 @@ namespace dawn_native {
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
         BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
         DawnCreateBufferMappedResult CreateBufferMapped(const BufferDescriptor* descriptor);
+        void CreateBufferMappedAsync(const BufferDescriptor* descriptor,
+                                     dawn::BufferCreateMappedCallback callback,
+                                     void* userdata);
         CommandEncoderBase* CreateCommandEncoder();
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
@@ -202,7 +205,15 @@ namespace dawn_native {
         struct Caches;
         std::unique_ptr<Caches> mCaches;
 
+        struct DeferredCreateBufferMappedAsync {
+            dawn::BufferCreateMappedCallback callback;
+            DawnBufferMapAsyncStatus status;
+            DawnCreateBufferMappedResult result;
+            void* userdata;
+        };
+
         std::unique_ptr<FenceSignalTracker> mFenceSignalTracker;
+        std::vector<DeferredCreateBufferMappedAsync> mDeferredCreateBufferMappedAsyncResults;
 
         dawn::DeviceErrorCallback mErrorCallback = nullptr;
         void* mErrorUserdata = 0;

@@ -68,6 +68,7 @@ namespace dawn_native {
     DeviceBase::~DeviceBase() {
         // Devices must explicitly free the uploader
         ASSERT(mDynamicUploader == nullptr);
+        ASSERT(mDeferredCreateBufferMappedAsyncResults.empty());
     }
 
     void DeviceBase::HandleError(const char* message) {
@@ -291,6 +292,25 @@ namespace dawn_native {
 
         return result;
     }
+    void DeviceBase::CreateBufferMappedAsync(const BufferDescriptor* descriptor,
+                                             dawn::BufferCreateMappedCallback callback,
+                                             void* userdata) {
+        DawnCreateBufferMappedResult result = CreateBufferMapped(descriptor);
+
+        DawnBufferMapAsyncStatus status = DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS;
+        if (result.data == nullptr || result.dataLength != descriptor->size) {
+            status = DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR;
+        }
+
+        DeferredCreateBufferMappedAsync deferred_info;
+        deferred_info.callback = callback;
+        deferred_info.status = status;
+        deferred_info.result = result;
+        deferred_info.userdata = userdata;
+
+        // The callback is deferred so it matches the async behavior of WebGPU.
+        mDeferredCreateBufferMappedAsyncResults.push_back(deferred_info);
+    }
     CommandEncoderBase* DeviceBase::CreateCommandEncoder() {
         return new CommandEncoderBase(this);
     }
@@ -387,6 +407,12 @@ namespace dawn_native {
 
     void DeviceBase::Tick() {
         TickImpl();
+        {
+            auto deferredResults = std::move(mDeferredCreateBufferMappedAsyncResults);
+            for (const auto& deferred : deferredResults) {
+                deferred.callback(deferred.status, deferred.result, deferred.userdata);
+            }
+        }
         mFenceSignalTracker->Tick(GetCompletedCommandSerial());
     }
 

@@ -160,6 +160,9 @@
             }
         ]
     },
+    "buffer create mapped callback": {
+        "category": "natively defined"
+    },
     "buffer copy view": {
         "category": "structure",
         "extensible": true,
@@ -415,6 +418,14 @@
                 "returns": "create buffer mapped result",
                 "args": [
                     {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "create buffer mapped async",
+                "args": [
+                    {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"},
+                    {"name": "callback", "type": "buffer create mapped callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
             {
