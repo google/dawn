@@ -14,8 +14,8 @@
 
 #include "dawn_native/d3d12/D3D12Info.h"
 
-#include "dawn_native/D3D12/AdapterD3D12.h"
-#include "dawn_native/D3D12/BackendD3D12.h"
+#include "dawn_native/d3d12/AdapterD3D12.h"
+#include "dawn_native/d3d12/BackendD3D12.h"
 
 #include "dawn_native/d3d12/PlatformFunctions.h"
 
