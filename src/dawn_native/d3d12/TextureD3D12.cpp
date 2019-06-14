@@ -186,6 +186,28 @@ namespace dawn_native { namespace d3d12 {
             return false;
         }
 
+        // The COMMON state represents a state where no write operations can be pending, and where
+        // all pixels are uncompressed. This makes it possible to transition to some states without
+        // synchronization (i.e. without an explicit ResourceBarrier call). This can be to 1) a
+        // single write state, or 2) multiple read states.
+        //
+        // Destination states that qualify for an implicit transition for a non-simulataneous-access
+        // texture: NON_PIXEL_SHADER_RESOURCE, PIXEL_SHADER_RESOURCE, COPY_SRC, COPY_DEST
+        // https://docs.microsoft.com/en-us/windows/desktop/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12#implicit-state-transitions
+        {
+            static constexpr D3D12_RESOURCE_STATES kD3D12TextureReadOnlyStates =
+                D3D12_RESOURCE_STATE_COPY_SOURCE | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
+                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+
+            if (mLastState == D3D12_RESOURCE_STATE_COMMON) {
+                bool singleWriteState = (newState == D3D12_RESOURCE_STATE_COPY_DEST);
+                bool readOnlyState = newState == (newState & kD3D12TextureReadOnlyStates);
+                if (singleWriteState ^ readOnlyState) {
+                    return false;
+                }
+            }
+        }
+
         barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
         barrier->Transition.pResource = mResourcePtr;

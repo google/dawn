@@ -130,6 +130,30 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_RESOURCE_STATES lastState = D3D12BufferUsage(mLastUsage);
         D3D12_RESOURCE_STATES newState = D3D12BufferUsage(newUsage);
+
+        // The COMMON state represents a state where no write operations can be pending, which makes
+        // it possible to transition to some states without synchronizaton (i.e. without an explicit
+        // ResourceBarrier call). This can be to 1) a single write state, or 2) multiple read
+        // states.
+        //
+        // Destination states used in Dawn that qualify for implicit transition for a buffer:
+        // COPY_SOURCE, VERTEX_AND_CONSTANT_BUFFER, INDEX_BUFFER, COPY_DEST, UNORDERED_ACCESS
+        // https://docs.microsoft.com/en-us/windows/desktop/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12#implicit-state-transitions
+        {
+            static constexpr D3D12_RESOURCE_STATES kD3D12BufferReadOnlyStates =
+                D3D12_RESOURCE_STATE_COPY_SOURCE | D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER |
+                D3D12_RESOURCE_STATE_INDEX_BUFFER;
+
+            if (lastState == D3D12_RESOURCE_STATE_COMMON) {
+                bool singleWriteState = ((newState == D3D12_RESOURCE_STATE_COPY_DEST) ||
+                                         (newState == D3D12_RESOURCE_STATE_UNORDERED_ACCESS));
+                bool readOnlyState = newState == (newState & kD3D12BufferReadOnlyStates);
+                if (singleWriteState ^ readOnlyState) {
+                    return false;
+                }
+            }
+        }
+
         barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
         barrier->Transition.pResource = mResource.Get();
