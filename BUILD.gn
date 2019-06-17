@@ -292,6 +292,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/opengl/DeviceGL.cpp",
       "src/dawn_native/opengl/DeviceGL.h",
       "src/dawn_native/opengl/Forward.h",
+      "src/dawn_native/opengl/NativeSwapChainImplGL.cpp",
+      "src/dawn_native/opengl/NativeSwapChainImplGL.h",
       "src/dawn_native/opengl/OpenGLFunctions.cpp",
       "src/dawn_native/opengl/OpenGLFunctions.h",
       "src/dawn_native/opengl/PersistentPipelineStateGL.cpp",
@@ -533,7 +535,6 @@ static_library("dawn_utils") {
 
   if (dawn_enable_opengl) {
     sources += [ "src/utils/OpenGLBinding.cpp" ]
-    deps += [ "third_party:glad" ]
   }
 
   if (dawn_enable_vulkan) {

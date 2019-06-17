@@ -17,12 +17,33 @@
 
 #include "dawn_native/OpenGLBackend.h"
 
+#include "common/SwapChainUtils.h"
 #include "dawn_native/opengl/DeviceGL.h"
+#include "dawn_native/opengl/NativeSwapChainImplGL.h"
 
 namespace dawn_native { namespace opengl {
 
     AdapterDiscoveryOptions::AdapterDiscoveryOptions()
         : AdapterDiscoveryOptionsBase(BackendType::OpenGL) {
+    }
+
+    DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device,
+                                                          PresentCallback present,
+                                                          void* presentUserdata) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+
+        DawnSwapChainImplementation impl;
+        impl = CreateSwapChainImplementation(
+            new NativeSwapChainImpl(backendDevice, present, presentUserdata));
+        impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
+
+        return impl;
+    }
+
+    DawnTextureFormat GetNativeSwapChainPreferredFormat(
+        const DawnSwapChainImplementation* swapChain) {
+        NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
+        return static_cast<DawnTextureFormat>(impl->GetPreferredFormat());
     }
 
 }}  // namespace dawn_native::opengl
