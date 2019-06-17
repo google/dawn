@@ -49,11 +49,12 @@ if (dawn_enable_opengl) {
     script = "generator/opengl_loader_generator.py"
     args = [
       "--gl-xml",
-      rebase_path("third_party/gl.xml", root_build_dir),
+      rebase_path("third_party/khronos/gl.xml", root_build_dir),
     ]
     outputs = [
       "dawn_native/opengl/OpenGLFunctionsBase_autogen.cpp",
       "dawn_native/opengl/OpenGLFunctionsBase_autogen.h",
+      "dawn_native/opengl/opengl_platform_autogen.h",
     ]
   }
 }
@@ -277,7 +278,7 @@ source_set("libdawn_native_sources") {
   if (dawn_enable_opengl) {
     deps += [
       ":libdawn_native_opengl_loader_gen",
-      "third_party:glad",
+      "third_party:khronos_platform",
     ]
     sources += get_target_outputs(":libdawn_native_opengl_loader_gen")
     sources += [
@@ -316,6 +317,7 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/opengl/TextureGL.h",
       "src/dawn_native/opengl/UtilsGL.cpp",
       "src/dawn_native/opengl/UtilsGL.h",
+      "src/dawn_native/opengl/opengl_platform.h",
     ]
   }
 
@@ -406,7 +408,6 @@ dawn_component("libdawn_native") {
   }
   if (dawn_enable_opengl) {
     sources += [ "src/dawn_native/opengl/OpenGLBackend.cpp" ]
-    deps += [ "third_party:glad" ]
   }
   if (dawn_enable_vulkan) {
     sources += [ "src/dawn_native/vulkan/VulkanBackend.cpp" ]

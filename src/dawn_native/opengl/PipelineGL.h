@@ -17,7 +17,7 @@
 
 #include "dawn_native/Pipeline.h"
 
-#include "glad/glad.h"
+#include "dawn_native/opengl/opengl_platform.h"
 
 #include <vector>
 

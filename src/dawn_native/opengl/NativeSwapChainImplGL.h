@@ -18,7 +18,7 @@
 #include "dawn_native/OpenGLBackend.h"
 
 #include "dawn_native/dawn_platform.h"
-#include "glad/glad.h"
+#include "dawn_native/opengl/opengl_platform.h"
 
 namespace dawn_native { namespace opengl {
 

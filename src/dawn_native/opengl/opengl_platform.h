@@ -12,16 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_OPENGL_UTILSGL_H_
-#define DAWNNATIVE_OPENGL_UTILSGL_H_
-
-#include "dawn_native/dawn_platform.h"
-#include "dawn_native/opengl/opengl_platform.h"
-
-namespace dawn_native { namespace opengl {
-
-    GLuint ToOpenGLCompareFunction(dawn::CompareFunction compareFunction);
-
-}}  // namespace dawn_native::opengl
-
-#endif  // DAWNNATIVE_OPENGL_UTILSGL_H_
+#include "dawn_native/opengl/opengl_platform_autogen.h"
