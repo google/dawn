@@ -171,7 +171,7 @@ namespace dawn_native { namespace opengl {
 
         if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
             static constexpr uint32_t MAX_TEXEL_SIZE = 16;
-            ASSERT(TextureFormatPixelSize(GetFormat()) <= MAX_TEXEL_SIZE);
+            ASSERT(TextureFormatTexelBlockSizeInBytes(GetFormat()) <= MAX_TEXEL_SIZE);
             GLubyte clearColor[MAX_TEXEL_SIZE];
             std::fill(clearColor, clearColor + MAX_TEXEL_SIZE, 255);
 

@@ -1081,3 +1081,312 @@ TEST_F(CopyCommandTest_T2T, MultisampledCopies) {
                     destinationMultiSampled4x, 0, 0, {0, 0, 0}, {15, 15, 1});
     }
 }
+
+class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
+  protected:
+    dawn::Texture Create2DTexture(dawn::TextureFormat format,
+                                  uint32_t mipmapLevels = 1,
+                                  uint32_t width = kWidth,
+                                  uint32_t height = kHeight) {
+        constexpr dawn::TextureUsageBit kUsage = dawn::TextureUsageBit::TransferDst |
+                                                 dawn::TextureUsageBit::TransferSrc |
+                                                 dawn::TextureUsageBit::Sampled;
+        constexpr uint32_t kArrayLayers = 1;
+        return CopyCommandTest::Create2DTexture(width, height, mipmapLevels, kArrayLayers, format,
+                                                kUsage, 1);
+    }
+
+    static uint32_t CompressedFormatBlockSizeInBytes(dawn::TextureFormat format) {
+        switch (format) {
+            case dawn::TextureFormat::BC1RGBAUnorm:
+            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+            case dawn::TextureFormat::BC4RSnorm:
+            case dawn::TextureFormat::BC4RUnorm:
+                return 8;
+            case dawn::TextureFormat::BC2RGBAUnorm:
+            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+            case dawn::TextureFormat::BC3RGBAUnorm:
+            case dawn::TextureFormat::BC3RGBAUnormSrgb:
+            case dawn::TextureFormat::BC5RGSnorm:
+            case dawn::TextureFormat::BC5RGUnorm:
+            case dawn::TextureFormat::BC6HRGBSfloat:
+            case dawn::TextureFormat::BC6HRGBUfloat:
+            case dawn::TextureFormat::BC7RGBAUnorm:
+            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+                return 16;
+            default:
+                UNREACHABLE();
+                return 0;
+        }
+    }
+
+    void TestBothTBCopies(utils::Expectation expectation,
+                          dawn::Buffer buffer,
+                          uint64_t bufferOffset,
+                          uint32_t bufferRowPitch,
+                          uint32_t imageHeight,
+                          dawn::Texture texture,
+                          uint32_t level,
+                          uint32_t arraySlice,
+                          dawn::Origin3D origin,
+                          dawn::Extent3D extent3D) {
+        TestB2TCopy(expectation, buffer, bufferOffset, bufferRowPitch, imageHeight, texture, level,
+                    arraySlice, origin, extent3D);
+        TestT2BCopy(expectation, texture, level, arraySlice, origin, buffer, bufferOffset,
+                    bufferRowPitch, imageHeight, extent3D);
+    }
+
+    void TestBothT2TCopies(utils::Expectation expectation,
+                           dawn::Texture texture1,
+                           uint32_t level1,
+                           uint32_t slice1,
+                           dawn::Origin3D origin1,
+                           dawn::Texture texture2,
+                           uint32_t level2,
+                           uint32_t slice2,
+                           dawn::Origin3D origin2,
+                           dawn::Extent3D extent3D) {
+        TestT2TCopy(expectation, texture1, level1, slice1, origin1, texture2, level2, slice2,
+                    origin2, extent3D);
+        TestT2TCopy(expectation, texture2, level2, slice2, origin2, texture1, level1, slice1,
+                    origin1, extent3D);
+    }
+
+    static constexpr uint32_t kWidth = 16;
+    static constexpr uint32_t kHeight = 16;
+
+    const std::array<dawn::TextureFormat, 14> kBCFormats = {
+        dawn::TextureFormat::BC1RGBAUnorm,  dawn::TextureFormat::BC1RGBAUnormSrgb,
+        dawn::TextureFormat::BC2RGBAUnorm,  dawn::TextureFormat::BC2RGBAUnormSrgb,
+        dawn::TextureFormat::BC3RGBAUnorm,  dawn::TextureFormat::BC3RGBAUnormSrgb,
+        dawn::TextureFormat::BC4RUnorm,     dawn::TextureFormat::BC4RSnorm,
+        dawn::TextureFormat::BC5RGUnorm,    dawn::TextureFormat::BC5RGSnorm,
+        dawn::TextureFormat::BC6HRGBUfloat, dawn::TextureFormat::BC6HRGBSfloat,
+        dawn::TextureFormat::BC7RGBAUnorm,  dawn::TextureFormat::BC7RGBAUnormSrgb};
+};
+
+// Tests to verify that bufferOffset must be a multiple of the compressed texture blocks in bytes
+// in buffer-to-texture or texture-to-buffer copies with compressed texture formats.
+TEST_F(CopyCommandTest_CompressedTextureFormats, BufferOffset) {
+    dawn::Buffer buffer =
+        CreateBuffer(512, dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst);
+
+    for (dawn::TextureFormat bcFormat : kBCFormats) {
+        dawn::Texture texture = Create2DTexture(bcFormat);
+
+        // Valid usages of BufferOffset in B2T and T2B copies with compressed texture formats.
+        {
+            uint32_t validBufferOffset = CompressedFormatBlockSizeInBytes(bcFormat);
+            TestBothTBCopies(utils::Expectation::Success, buffer, validBufferOffset, 256, 4,
+                             texture, 0, 0, {0, 0, 0}, {4, 4, 1});
+        }
+
+        // Failures on invalid bufferOffset.
+        {
+            uint32_t kInvalidBufferOffset = CompressedFormatBlockSizeInBytes(bcFormat) / 2;
+            TestBothTBCopies(utils::Expectation::Failure, buffer, kInvalidBufferOffset, 256, 4,
+                             texture, 0, 0, {0, 0, 0}, {4, 4, 1});
+        }
+    }
+}
+
+// Tests to verify that RowPitch must not be smaller than (width / blockWidth) * blockSizeInBytes
+// and it is valid to use 0 as RowPitch in buffer-to-texture or texture-to-buffer copies with
+// compressed texture formats.
+// Note that in Dawn we require RowPitch be a multiple of 256, which ensures RowPitch will always be
+// the multiple of compressed texture block width in bytes.
+TEST_F(CopyCommandTest_CompressedTextureFormats, RowPitch) {
+    dawn::Buffer buffer =
+        CreateBuffer(1024, dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst);
+
+    {
+        constexpr uint32_t kTestWidth = 160;
+        constexpr uint32_t kTestHeight = 160;
+
+        // Failures on the RowPitch that is not large enough.
+        {
+            constexpr uint32_t kSmallRowPitch = 256;
+            for (dawn::TextureFormat bcFormat : kBCFormats) {
+                dawn::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
+                TestBothTBCopies(utils::Expectation::Failure, buffer, 0, kSmallRowPitch, 4, texture,
+                                 0, 0, {0, 0, 0}, {kTestWidth, 4, 1});
+            }
+        }
+
+        // Test it is not valid to use a RowPitch that is not a multiple of 256.
+        {
+            for (dawn::TextureFormat bcFormat : kBCFormats) {
+                dawn::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
+                uint32_t inValidRowPitch =
+                    kTestWidth / 4 * CompressedFormatBlockSizeInBytes(bcFormat);
+                ASSERT_NE(0u, inValidRowPitch % 256);
+                TestBothTBCopies(utils::Expectation::Failure, buffer, 0, inValidRowPitch, 4,
+                                 texture, 0, 0, {0, 0, 0}, {kTestWidth, 4, 1});
+            }
+        }
+
+        // Test the smallest valid RowPitch should work.
+        {
+            for (dawn::TextureFormat bcFormat : kBCFormats) {
+                dawn::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
+                uint32_t smallestValidRowPitch =
+                    Align(kTestWidth / 4 * CompressedFormatBlockSizeInBytes(bcFormat), 256);
+                TestBothTBCopies(utils::Expectation::Success, buffer, 0, smallestValidRowPitch, 4,
+                                 texture, 0, 0, {0, 0, 0}, {kTestWidth, 4, 1});
+            }
+        }
+    }
+
+    // Test RowPitch == 0.
+    {
+        constexpr uint32_t kZeroRowPitch = 0;
+        constexpr uint32_t kTestHeight = 128;
+
+        {
+            constexpr uint32_t kValidWidth = 128;
+            for (dawn::TextureFormat bcFormat : kBCFormats) {
+                dawn::Texture texture = Create2DTexture(bcFormat, 1, kValidWidth, kTestHeight);
+                TestBothTBCopies(utils::Expectation::Success, buffer, 0, kZeroRowPitch, 4, texture,
+                                 0, 0, {0, 0, 0}, {kValidWidth, 4, 1});
+            }
+        }
+
+        {
+            constexpr uint32_t kInValidWidth = 16;
+            for (dawn::TextureFormat bcFormat : kBCFormats) {
+                dawn::Texture texture = Create2DTexture(bcFormat, 1, kInValidWidth, kTestHeight);
+                TestBothTBCopies(utils::Expectation::Failure, buffer, 0, kZeroRowPitch, 4, texture,
+                                 0, 0, {0, 0, 0}, {kInValidWidth, 4, 1});
+            }
+        }
+    }
+}
+
+// Tests to verify that imageHeight must be a multiple of the compressed texture block height in
+// buffer-to-texture or texture-to-buffer copies with compressed texture formats.
+TEST_F(CopyCommandTest_CompressedTextureFormats, ImageHeight) {
+    dawn::Buffer buffer =
+        CreateBuffer(512, dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst);
+
+    for (dawn::TextureFormat bcFormat : kBCFormats) {
+        dawn::Texture texture = Create2DTexture(bcFormat);
+
+        // Valid usages of imageHeight in B2T and T2B copies with compressed texture formats.
+        {
+            constexpr uint32_t kValidImageHeight = 8;
+            TestBothTBCopies(utils::Expectation::Success, buffer, 0, 256, kValidImageHeight,
+                             texture, 0, 0, {0, 0, 0}, {4, 4, 1});
+        }
+
+        // Failures on invalid imageHeight.
+        {
+            constexpr uint32_t kInvalidImageHeight = 3;
+            TestBothTBCopies(utils::Expectation::Failure, buffer, 0, 256, kInvalidImageHeight,
+                             texture, 0, 0, {0, 0, 0}, {4, 4, 1});
+        }
+    }
+}
+
+// Tests to verify that ImageOffset.x must be a multiple of the compressed texture block width and
+// ImageOffset.y must be a multiple of the compressed texture block height in buffer-to-texture,
+// texture-to-buffer or texture-to-texture copies with compressed texture formats.
+TEST_F(CopyCommandTest_CompressedTextureFormats, ImageOffset) {
+    dawn::Buffer buffer =
+        CreateBuffer(512, dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst);
+
+    for (dawn::TextureFormat bcFormat : kBCFormats) {
+        dawn::Texture texture = Create2DTexture(bcFormat);
+        dawn::Texture texture2 = Create2DTexture(bcFormat);
+
+        constexpr dawn::Origin3D kSmallestValidOrigin3D = {4, 4, 0};
+
+        // Valid usages of ImageOffset in B2T, T2B and T2T copies with compressed texture formats.
+        {
+            TestBothTBCopies(utils::Expectation::Success, buffer, 0, 256, 4, texture, 0, 0,
+                             kSmallestValidOrigin3D, {4, 4, 1});
+            TestBothT2TCopies(utils::Expectation::Success, texture, 0, 0, {0, 0, 0}, texture2, 0, 0,
+                              kSmallestValidOrigin3D, {4, 4, 1});
+        }
+
+        // Failures on invalid ImageOffset.x.
+        {
+            constexpr dawn::Origin3D kInvalidOrigin3D = {kSmallestValidOrigin3D.x - 1,
+                                                         kSmallestValidOrigin3D.y, 0};
+            TestBothTBCopies(utils::Expectation::Failure, buffer, 0, 256, 4, texture, 0, 0,
+                             kInvalidOrigin3D, {4, 4, 1});
+            TestBothT2TCopies(utils::Expectation::Failure, texture, 0, 0, kInvalidOrigin3D,
+                              texture2, 0, 0, {0, 0, 0}, {4, 4, 1});
+        }
+
+        // Failures on invalid ImageOffset.y.
+        {
+            constexpr dawn::Origin3D kInvalidOrigin3D = {kSmallestValidOrigin3D.x,
+                                                         kSmallestValidOrigin3D.y - 1, 0};
+            TestBothTBCopies(utils::Expectation::Failure, buffer, 0, 256, 4, texture, 0, 0,
+                             kInvalidOrigin3D, {4, 4, 1});
+            TestBothT2TCopies(utils::Expectation::Failure, texture, 0, 0, kInvalidOrigin3D,
+                              texture2, 0, 0, {0, 0, 0}, {4, 4, 1});
+        }
+    }
+}
+
+// Tests to verify that ImageExtent.x must be a multiple of the compressed texture block width and
+// ImageExtent.y must be a multiple of the compressed texture block height in buffer-to-texture,
+// texture-to-buffer or texture-to-texture copies with compressed texture formats.
+TEST_F(CopyCommandTest_CompressedTextureFormats, ImageExtent) {
+    dawn::Buffer buffer =
+        CreateBuffer(512, dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst);
+
+    constexpr uint32_t kMipmapLevels = 3;
+    constexpr uint32_t kTestWidth = 60;
+    constexpr uint32_t kTestHeight = 60;
+
+    for (dawn::TextureFormat bcFormat : kBCFormats) {
+        dawn::Texture texture = Create2DTexture(bcFormat, kMipmapLevels, kTestWidth, kTestHeight);
+        dawn::Texture texture2 = Create2DTexture(bcFormat, kMipmapLevels, kTestWidth, kTestHeight);
+
+        constexpr dawn::Extent3D kSmallestValidExtent3D = {4, 4, 1};
+
+        // Valid usages of ImageExtent in B2T, T2B and T2T copies with compressed texture formats.
+        {
+            TestBothTBCopies(utils::Expectation::Success, buffer, 0, 256, 8, texture, 0, 0,
+                             {0, 0, 0}, kSmallestValidExtent3D);
+            TestBothT2TCopies(utils::Expectation::Success, texture, 0, 0, {0, 0, 0}, texture2, 0, 0,
+                              {0, 0, 0}, kSmallestValidExtent3D);
+        }
+
+        // Valid usages of ImageExtent in B2T, T2B and T2T copies with compressed texture formats
+        // and non-zero mipmap levels.
+        {
+            constexpr uint32_t kTestMipmapLevel = 2;
+            constexpr dawn::Origin3D kTestOrigin = {
+                (kTestWidth >> kTestMipmapLevel) - kSmallestValidExtent3D.width + 1,
+                (kTestHeight >> kTestMipmapLevel) - kSmallestValidExtent3D.height + 1, 0};
+
+            TestBothTBCopies(utils::Expectation::Success, buffer, 0, 256, 4, texture,
+                             kTestMipmapLevel, 0, kTestOrigin, kSmallestValidExtent3D);
+            TestBothT2TCopies(utils::Expectation::Success, texture, kTestMipmapLevel, 0,
+                              kTestOrigin, texture2, 0, 0, {0, 0, 0}, kSmallestValidExtent3D);
+        }
+
+        // Failures on invalid ImageExtent.x.
+        {
+            constexpr dawn::Extent3D kInValidExtent3D = {kSmallestValidExtent3D.width - 1,
+                                                         kSmallestValidExtent3D.height, 1};
+            TestBothTBCopies(utils::Expectation::Failure, buffer, 0, 256, 4, texture, 0, 0,
+                             {0, 0, 0}, kInValidExtent3D);
+            TestBothT2TCopies(utils::Expectation::Failure, texture, 0, 0, {0, 0, 0}, texture2, 0, 0,
+                              {0, 0, 0}, kInValidExtent3D);
+        }
+
+        // Failures on invalid ImageExtent.y.
+        {
+            constexpr dawn::Extent3D kInValidExtent3D = {kSmallestValidExtent3D.width,
+                                                         kSmallestValidExtent3D.height - 1, 1};
+            TestBothTBCopies(utils::Expectation::Failure, buffer, 0, 256, 4, texture, 0, 0,
+                             {0, 0, 0}, kInValidExtent3D);
+            TestBothT2TCopies(utils::Expectation::Failure, texture, 0, 0, {0, 0, 0}, texture2, 0, 0,
+                              {0, 0, 0}, kInValidExtent3D);
+        }
+    }
+}

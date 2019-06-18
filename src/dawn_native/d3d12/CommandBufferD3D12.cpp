@@ -505,7 +505,8 @@ namespace dawn_native { namespace d3d12 {
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->destination.origin, copy->copySize,
-                        static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())),
+                        static_cast<uint32_t>(
+                            TextureFormatTexelBlockSizeInBytes(texture->GetFormat())),
                         copy->source.offset, copy->source.rowPitch, copy->source.imageHeight);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
@@ -549,7 +550,8 @@ namespace dawn_native { namespace d3d12 {
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->source.origin, copy->copySize,
-                        static_cast<uint32_t>(TextureFormatPixelSize(texture->GetFormat())),
+                        static_cast<uint32_t>(
+                            TextureFormatTexelBlockSizeInBytes(texture->GetFormat())),
                         copy->destination.offset, copy->destination.rowPitch,
                         copy->destination.imageHeight);
 

@@ -112,10 +112,6 @@ namespace dawn_native {
             return IsBCFormat(format);
         }
 
-        bool Is4x4CompressedFormat(dawn::TextureFormat format) {
-            return IsBCFormat(format);
-        }
-
         bool IsWritableFormat(dawn::TextureFormat format) {
             return !IsBCFormat(format);
         }
@@ -216,6 +212,28 @@ namespace dawn_native {
         }
     }  // anonymous namespace
 
+    bool Is4x4CompressedFormat(dawn::TextureFormat format) {
+        return IsBCFormat(format);
+    }
+
+    // We treat non-compressed texture formats as the block texture formats in 1x1 blocks.
+    uint32_t TextureFormatBlockWidthInTexels(dawn::TextureFormat format) {
+        if (Is4x4CompressedFormat(format)) {
+            return 4;
+        }
+
+        return 1;
+    }
+
+    // We treat non-compressed texture formats as the block texture formats in 1x1 blocks.
+    uint32_t TextureFormatBlockHeightInTexels(dawn::TextureFormat format) {
+        if (Is4x4CompressedFormat(format)) {
+            return 4;
+        }
+
+        return 1;
+    }
+
     MaybeError ValidateTextureUsageBit(const TextureDescriptor* descriptor) {
         DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
         if (!IsWritableFormat(descriptor->format)) {
@@ -289,8 +307,10 @@ namespace dawn_native {
         return {};
     }
 
-    uint32_t TextureFormatPixelSize(dawn::TextureFormat format) {
+    // We treat non-compressed texture formats as the block texture formats in 1x1 blocks.
+    uint32_t TextureFormatTexelBlockSizeInBytes(dawn::TextureFormat format) {
         switch (format) {
+            // Non-compressed texture formats
             case dawn::TextureFormat::R8Unorm:
             case dawn::TextureFormat::R8Uint:
                 return 1;
@@ -303,6 +323,25 @@ namespace dawn_native {
                 return 4;
             case dawn::TextureFormat::D32FloatS8Uint:
                 return 8;
+
+            // BC formats
+            case dawn::TextureFormat::BC1RGBAUnorm:
+            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+            case dawn::TextureFormat::BC4RSnorm:
+            case dawn::TextureFormat::BC4RUnorm:
+                return 8;
+            case dawn::TextureFormat::BC2RGBAUnorm:
+            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+            case dawn::TextureFormat::BC3RGBAUnorm:
+            case dawn::TextureFormat::BC3RGBAUnormSrgb:
+            case dawn::TextureFormat::BC5RGSnorm:
+            case dawn::TextureFormat::BC5RGUnorm:
+            case dawn::TextureFormat::BC6HRGBSfloat:
+            case dawn::TextureFormat::BC6HRGBUfloat:
+            case dawn::TextureFormat::BC7RGBAUnorm:
+            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+                return 16;
+
             default:
                 UNREACHABLE();
         }
@@ -418,6 +457,8 @@ namespace dawn_native {
         ASSERT(!IsError());
         return mDimension;
     }
+
+    // TODO(jiawei.shao@intel.com): return more information about texture format
     dawn::TextureFormat TextureBase::GetFormat() const {
         ASSERT(!IsError());
         return mFormat;

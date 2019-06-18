@@ -454,7 +454,7 @@ namespace dawn_native { namespace metal {
                     // Doing the last row copy with the exact number of bytes in last row.
                     // Like copy to a 1D texture to workaround the issue.
                     uint32_t lastRowDataSize =
-                        copySize.width * TextureFormatPixelSize(texture->GetFormat());
+                        copySize.width * TextureFormatTexelBlockSizeInBytes(texture->GetFormat());
 
                     [encoders.blit
                              copyFromBuffer:buffer->GetMTLBuffer()
@@ -568,7 +568,7 @@ namespace dawn_native { namespace metal {
                     // Doing the last row copy with the exact number of bytes in last row.
                     // Like copy from a 1D texture to workaround the issue.
                     uint32_t lastRowDataSize =
-                        copySize.width * TextureFormatPixelSize(texture->GetFormat());
+                        copySize.width * TextureFormatTexelBlockSizeInBytes(texture->GetFormat());
 
                     [encoders.blit
                                  copyFromTexture:texture->GetMTLTexture()

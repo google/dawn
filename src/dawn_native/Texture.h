@@ -29,13 +29,17 @@ namespace dawn_native {
                                              const TextureBase* texture,
                                              const TextureViewDescriptor* descriptor);
 
-    uint32_t TextureFormatPixelSize(dawn::TextureFormat format);
+    uint32_t TextureFormatTexelBlockSizeInBytes(dawn::TextureFormat format);
     bool TextureFormatHasDepth(dawn::TextureFormat format);
     bool TextureFormatHasStencil(dawn::TextureFormat format);
     bool TextureFormatHasDepthOrStencil(dawn::TextureFormat format);
     bool IsColorRenderableTextureFormat(dawn::TextureFormat format);
     bool IsDepthStencilRenderableTextureFormat(dawn::TextureFormat format);
     bool IsValidSampleCount(uint32_t sampleCount);
+
+    bool Is4x4CompressedFormat(dawn::TextureFormat format);
+    uint32_t TextureFormatBlockWidthInTexels(dawn::TextureFormat format);
+    uint32_t TextureFormatBlockHeightInTexels(dawn::TextureFormat format);
 
     static constexpr dawn::TextureUsageBit kReadOnlyTextureUsages =
         dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::Sampled |
