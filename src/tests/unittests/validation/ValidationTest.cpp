@@ -77,8 +77,7 @@ void ValidationTest::OnDeviceError(const char* message, void* userdata) {
 }
 
 ValidationTest::DummyRenderPass::DummyRenderPass(const dawn::Device& device)
-    : attachmentFormat(dawn::TextureFormat::R8G8B8A8Unorm), width(400), height(400) {
-
+    : attachmentFormat(dawn::TextureFormat::RGBA8Unorm), width(400), height(400) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
     descriptor.size.width = width;

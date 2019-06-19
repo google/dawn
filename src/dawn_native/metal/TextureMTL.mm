@@ -108,9 +108,9 @@ namespace dawn_native { namespace metal {
         ResultOrError<dawn::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
             switch (format) {
                 case 'BGRA':
-                    return dawn::TextureFormat::B8G8R8A8Unorm;
+                    return dawn::TextureFormat::BGRA8Unorm;
                 case '2C08':
-                    return dawn::TextureFormat::R8G8Unorm;
+                    return dawn::TextureFormat::RG8Unorm;
                 case 'L008':
                     return dawn::TextureFormat::R8Unorm;
                 default:
@@ -121,21 +121,21 @@ namespace dawn_native { namespace metal {
 
     MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::RGBA8Unorm:
                 return MTLPixelFormatRGBA8Unorm;
-            case dawn::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::RG8Unorm:
                 return MTLPixelFormatRG8Unorm;
             case dawn::TextureFormat::R8Unorm:
                 return MTLPixelFormatR8Unorm;
-            case dawn::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::RGBA8Uint:
                 return MTLPixelFormatRGBA8Uint;
-            case dawn::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::RG8Uint:
                 return MTLPixelFormatRG8Uint;
             case dawn::TextureFormat::R8Uint:
                 return MTLPixelFormatR8Uint;
-            case dawn::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::BGRA8Unorm:
                 return MTLPixelFormatBGRA8Unorm;
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return MTLPixelFormatDepth32Float_Stencil8;
             default:
                 UNREACHABLE();

@@ -195,7 +195,7 @@ namespace utils {
         : width(0),
           height(0),
           color(nullptr),
-          colorFormat(dawn::TextureFormat::R8G8B8A8Unorm),
+          colorFormat(dawn::TextureFormat::RGBA8Unorm),
           renderPassInfo({}) {
     }
 
@@ -215,7 +215,7 @@ namespace utils {
                                           uint32_t height) {
         DAWN_ASSERT(width > 0 && height > 0);
 
-        dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+        dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
 
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;

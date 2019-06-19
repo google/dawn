@@ -213,21 +213,21 @@ namespace dawn_native { namespace vulkan {
     // Converts Dawn texture format to Vulkan formats.
     VkFormat VulkanImageFormat(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::RGBA8Unorm:
                 return VK_FORMAT_R8G8B8A8_UNORM;
-            case dawn::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::RG8Unorm:
                 return VK_FORMAT_R8G8_UNORM;
             case dawn::TextureFormat::R8Unorm:
                 return VK_FORMAT_R8_UNORM;
-            case dawn::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::RGBA8Uint:
                 return VK_FORMAT_R8G8B8A8_UINT;
-            case dawn::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::RG8Uint:
                 return VK_FORMAT_R8G8_UINT;
             case dawn::TextureFormat::R8Uint:
                 return VK_FORMAT_R8_UINT;
-            case dawn::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::BGRA8Unorm:
                 return VK_FORMAT_B8G8R8A8_UNORM;
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return VK_FORMAT_D32_SFLOAT_S8_UINT;
             default:
                 UNREACHABLE();

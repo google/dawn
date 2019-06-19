@@ -81,7 +81,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     blendDescriptor.dstFactor = DAWN_BLEND_FACTOR_ONE;
     DawnColorStateDescriptor colorStateDescriptor;
     colorStateDescriptor.nextInChain = nullptr;
-    colorStateDescriptor.format = DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+    colorStateDescriptor.format = DAWN_TEXTURE_FORMAT_RGBA8_UNORM;
     colorStateDescriptor.alphaBlend = blendDescriptor;
     colorStateDescriptor.colorBlend = blendDescriptor;
     colorStateDescriptor.writeMask = DAWN_COLOR_WRITE_MASK_ALL;
@@ -111,7 +111,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
 
     DawnDepthStencilStateDescriptor depthStencilState;
     depthStencilState.nextInChain = nullptr;
-    depthStencilState.format = DAWN_TEXTURE_FORMAT_D32_FLOAT_S8_UINT;
+    depthStencilState.format = DAWN_TEXTURE_FORMAT_DEPTH24_PLUS_STENCIL8;
     depthStencilState.depthWriteEnabled = false;
     depthStencilState.depthCompare = DAWN_COMPARE_FUNCTION_ALWAYS;
     depthStencilState.stencilBack = stencilFace;

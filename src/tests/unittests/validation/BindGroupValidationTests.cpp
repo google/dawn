@@ -44,7 +44,7 @@ class BindGroupValidationTest : public ValidationTest {
             descriptor.size = {16, 16, 1};
             descriptor.arrayLayerCount = 1;
             descriptor.sampleCount = 1;
-            descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+            descriptor.format = dawn::TextureFormat::RGBA8Unorm;
             descriptor.mipLevelCount = 1;
             descriptor.usage = dawn::TextureUsageBit::Sampled;
             mSampledTexture = device.CreateTexture(&descriptor);
@@ -216,7 +216,7 @@ TEST_F(BindGroupValidationTest, TextureBindingType) {
     // Setting the texture view to an error texture view is an error.
     {
         dawn::TextureViewDescriptor viewDesc;
-        viewDesc.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        viewDesc.format = dawn::TextureFormat::RGBA8Unorm;
         viewDesc.dimension = dawn::TextureViewDimension::e2D;
         viewDesc.baseMipLevel = 0;
         viewDesc.mipLevelCount = 0;
@@ -298,7 +298,7 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
     descriptor.size = {16, 16, 1};
     descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
-    descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+    descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
     dawn::Texture outputTexture = device.CreateTexture(&descriptor);

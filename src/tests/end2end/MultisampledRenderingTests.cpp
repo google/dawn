@@ -173,8 +173,9 @@ class MultisampledRenderingTest : public DawnTest {
     constexpr static uint32_t kWidth = 3;
     constexpr static uint32_t kHeight = 3;
     constexpr static uint32_t kSampleCount = 4;
-    constexpr static dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
-    constexpr static dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+    constexpr static dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
+    constexpr static dawn::TextureFormat kDepthStencilFormat =
+        dawn::TextureFormat::Depth24PlusStencil8;
 
     dawn::TextureView mMultisampledColorView;
     dawn::Texture mResolveTexture;

@@ -238,7 +238,7 @@ TEST_F(CommandBufferValidationTest, TextureWithReadAndWriteUsage) {
     // Create a texture that will be used both as a sampled texture and a render target
     dawn::TextureDescriptor textureDescriptor;
     textureDescriptor.usage = dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::OutputAttachment;
-    textureDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+    textureDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
     textureDescriptor.dimension = dawn::TextureDimension::e2D;
     textureDescriptor.size = {1, 1, 1};
     textureDescriptor.arrayLayerCount = 1;

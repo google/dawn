@@ -314,14 +314,14 @@ namespace dawn_native {
             case dawn::TextureFormat::R8Unorm:
             case dawn::TextureFormat::R8Uint:
                 return 1;
-            case dawn::TextureFormat::R8G8Unorm:
-            case dawn::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::RG8Unorm:
+            case dawn::TextureFormat::RG8Uint:
                 return 2;
-            case dawn::TextureFormat::R8G8B8A8Unorm:
-            case dawn::TextureFormat::R8G8B8A8Uint:
-            case dawn::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::RGBA8Unorm:
+            case dawn::TextureFormat::RGBA8Uint:
+            case dawn::TextureFormat::BGRA8Unorm:
                 return 4;
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return 8;
 
             // BC formats
@@ -349,7 +349,7 @@ namespace dawn_native {
 
     bool TextureFormatHasDepth(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return true;
             default:
                 return false;
@@ -358,7 +358,7 @@ namespace dawn_native {
 
     bool TextureFormatHasStencil(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return true;
             default:
                 return false;
@@ -367,7 +367,7 @@ namespace dawn_native {
 
     bool TextureFormatHasDepthOrStencil(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return true;
             default:
                 return false;
@@ -376,16 +376,16 @@ namespace dawn_native {
 
     bool IsColorRenderableTextureFormat(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::B8G8R8A8Unorm:
-            case dawn::TextureFormat::R8G8B8A8Uint:
-            case dawn::TextureFormat::R8G8B8A8Unorm:
-            case dawn::TextureFormat::R8G8Uint:
-            case dawn::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::BGRA8Unorm:
+            case dawn::TextureFormat::RGBA8Uint:
+            case dawn::TextureFormat::RGBA8Unorm:
+            case dawn::TextureFormat::RG8Uint:
+            case dawn::TextureFormat::RG8Unorm:
             case dawn::TextureFormat::R8Uint:
             case dawn::TextureFormat::R8Unorm:
                 return true;
 
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return false;
 
             default:
@@ -396,14 +396,14 @@ namespace dawn_native {
 
     bool IsDepthStencilRenderableTextureFormat(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return true;
 
-            case dawn::TextureFormat::B8G8R8A8Unorm:
-            case dawn::TextureFormat::R8G8B8A8Uint:
-            case dawn::TextureFormat::R8G8B8A8Unorm:
-            case dawn::TextureFormat::R8G8Uint:
-            case dawn::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::BGRA8Unorm:
+            case dawn::TextureFormat::RGBA8Uint:
+            case dawn::TextureFormat::RGBA8Unorm:
+            case dawn::TextureFormat::RG8Uint:
+            case dawn::TextureFormat::RG8Unorm:
             case dawn::TextureFormat::R8Uint:
             case dawn::TextureFormat::R8Unorm:
                 return false;

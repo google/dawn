@@ -23,7 +23,7 @@
 #include <array>
 
 constexpr static unsigned int kRTSize = 64;
-constexpr dawn::TextureFormat kDefaultFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+constexpr dawn::TextureFormat kDefaultFormat = dawn::TextureFormat::RGBA8Unorm;
 constexpr uint32_t kBytesPerTexel = 4;
 
 namespace {

@@ -135,7 +135,7 @@ void initRender() {
     descriptor.cVertexInput.cAttributes[2].shaderLocation = 2;
     descriptor.cVertexInput.cAttributes[2].format = dawn::VertexFormat::Float2;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
-    descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+    descriptor.cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
     descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
 
     renderPipeline = device.CreateRenderPipeline(&descriptor);

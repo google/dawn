@@ -18,7 +18,7 @@
 #include "utils/DawnHelpers.h"
 
 constexpr uint32_t kRTSize = 16;
-constexpr dawn::TextureFormat kFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+constexpr dawn::TextureFormat kFormat = dawn::TextureFormat::RGBA8Unorm;
 
 class RenderPassTest : public DawnTest {
 protected:

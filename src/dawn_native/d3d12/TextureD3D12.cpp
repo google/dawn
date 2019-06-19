@@ -93,21 +93,21 @@ namespace dawn_native { namespace d3d12 {
 
     DXGI_FORMAT D3D12TextureFormat(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::R8G8B8A8Unorm:
+            case dawn::TextureFormat::RGBA8Unorm:
                 return DXGI_FORMAT_R8G8B8A8_UNORM;
-            case dawn::TextureFormat::R8G8Unorm:
+            case dawn::TextureFormat::RG8Unorm:
                 return DXGI_FORMAT_R8G8_UNORM;
             case dawn::TextureFormat::R8Unorm:
                 return DXGI_FORMAT_R8_UNORM;
-            case dawn::TextureFormat::R8G8B8A8Uint:
+            case dawn::TextureFormat::RGBA8Uint:
                 return DXGI_FORMAT_R8G8B8A8_UINT;
-            case dawn::TextureFormat::R8G8Uint:
+            case dawn::TextureFormat::RG8Uint:
                 return DXGI_FORMAT_R8G8_UINT;
             case dawn::TextureFormat::R8Uint:
                 return DXGI_FORMAT_R8_UINT;
-            case dawn::TextureFormat::B8G8R8A8Unorm:
+            case dawn::TextureFormat::BGRA8Unorm:
                 return DXGI_FORMAT_B8G8R8A8_UNORM;
-            case dawn::TextureFormat::D32FloatS8Uint:
+            case dawn::TextureFormat::Depth24PlusStencil8:
                 return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
             default:
                 UNREACHABLE();

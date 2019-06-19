@@ -131,7 +131,7 @@ namespace dawn_native { namespace opengl {
 
         GLint GetStencilMaskFromStencilFormat(dawn::TextureFormat depthStencilFormat) {
             switch (depthStencilFormat) {
-                case dawn::TextureFormat::D32FloatS8Uint:
+                case dawn::TextureFormat::Depth24PlusStencil8:
                     return 0xFF;
                 default:
                     UNREACHABLE();
@@ -583,10 +583,10 @@ namespace dawn_native { namespace opengl {
                 // TODO(kainino@chromium.org): the color clears (later in
                 // this function) may be undefined for non-normalized integer formats.
                 dawn::TextureFormat format = textureView->GetTexture()->GetFormat();
-                ASSERT(format == dawn::TextureFormat::R8G8B8A8Unorm ||
-                       format == dawn::TextureFormat::R8G8Unorm ||
+                ASSERT(format == dawn::TextureFormat::RGBA8Unorm ||
+                       format == dawn::TextureFormat::RG8Unorm ||
                        format == dawn::TextureFormat::R8Unorm ||
-                       format == dawn::TextureFormat::B8G8R8A8Unorm);
+                       format == dawn::TextureFormat::BGRA8Unorm);
             }
             gl.DrawBuffers(attachmentCount, drawBuffers.data());
 
@@ -614,7 +614,7 @@ namespace dawn_native { namespace opengl {
 
                 // TODO(kainino@chromium.org): the depth/stencil clears (later in
                 // this function) may be undefined for other texture formats.
-                ASSERT(format == dawn::TextureFormat::D32FloatS8Uint);
+                ASSERT(format == dawn::TextureFormat::Depth24PlusStencil8);
             }
         }
 

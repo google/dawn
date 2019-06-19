@@ -97,8 +97,8 @@ TEST_F(RenderPipelineValidationTest, SampleCount) {
 // in the render pass.
 TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
     constexpr uint32_t kMultisampledCount = 4;
-    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
-    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::Depth24PlusStencil8;
 
     dawn::TextureDescriptor baseTextureDescriptor;
     baseTextureDescriptor.size.width = 4;

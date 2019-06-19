@@ -32,7 +32,7 @@ class TextureZeroInitTest : public DawnTest {
         descriptor.size.depth = 1;
         descriptor.arrayLayerCount = arrayLayerCount;
         descriptor.sampleCount = 1;
-        descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        descriptor.format = dawn::TextureFormat::RGBA8Unorm;
         descriptor.mipLevelCount = mipLevelCount;
         descriptor.usage = usage;
         return descriptor;
@@ -40,7 +40,7 @@ class TextureZeroInitTest : public DawnTest {
     dawn::TextureViewDescriptor CreateTextureViewDescriptor(uint32_t baseMipLevel,
                                                             uint32_t baseArrayLayer) {
         dawn::TextureViewDescriptor descriptor;
-        descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        descriptor.format = dawn::TextureFormat::RGBA8Unorm;
         descriptor.baseArrayLayer = baseArrayLayer;
         descriptor.arrayLayerCount = 1;
         descriptor.baseMipLevel = baseMipLevel;
@@ -73,7 +73,7 @@ TEST_P(TextureZeroInitTest, MipMapClearsToZero) {
     dawn::TextureView view = texture.CreateView(&viewDescriptor);
 
     utils::BasicRenderPass renderPass =
-        utils::BasicRenderPass(kSize, kSize, texture, dawn::TextureFormat::R8G8B8A8Unorm);
+        utils::BasicRenderPass(kSize, kSize, texture, dawn::TextureFormat::RGBA8Unorm);
 
     renderPass.renderPassInfo.cColorAttachmentsInfoPtr[0]->attachment = view;
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -102,7 +102,7 @@ TEST_P(TextureZeroInitTest, ArrayLayerClearsToZero) {
     dawn::TextureView view = texture.CreateView(&viewDescriptor);
 
     utils::BasicRenderPass renderPass =
-        utils::BasicRenderPass(kSize, kSize, texture, dawn::TextureFormat::R8G8B8A8Unorm);
+        utils::BasicRenderPass(kSize, kSize, texture, dawn::TextureFormat::RGBA8Unorm);
 
     renderPass.renderPassInfo.cColorAttachmentsInfoPtr[0]->attachment = view;
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();

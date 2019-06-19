@@ -82,14 +82,15 @@ TEST_F(RenderPassDescriptorValidationTest, Empty) {
 TEST_F(RenderPassDescriptorValidationTest, OneAttachment) {
     // One color attachment
     {
-        dawn::TextureView color = Create2DAttachment(device, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm);
+        dawn::TextureView color = Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
         utils::ComboRenderPassDescriptor renderPass({color});
 
         AssertBeginRenderPassSuccess(&renderPass);
     }
     // One depth-stencil attachment
     {
-        dawn::TextureView depthStencil = Create2DAttachment(device, 1, 1, dawn::TextureFormat::D32FloatS8Uint);
+        dawn::TextureView depthStencil =
+            Create2DAttachment(device, 1, 1, dawn::TextureFormat::Depth24PlusStencil8);
         utils::ComboRenderPassDescriptor renderPass({}, depthStencil);
 
         AssertBeginRenderPassSuccess(&renderPass);
@@ -98,14 +99,10 @@ TEST_F(RenderPassDescriptorValidationTest, OneAttachment) {
 
 // Test OOB color attachment indices are handled
 TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentOutOfBounds) {
-    dawn::TextureView color1 = Create2DAttachment(device, 1, 1,
-                                                  dawn::TextureFormat::R8G8B8A8Unorm);
-    dawn::TextureView color2 = Create2DAttachment(device, 1, 1,
-                                                  dawn::TextureFormat::R8G8B8A8Unorm);
-    dawn::TextureView color3 = Create2DAttachment(device, 1, 1,
-                                                  dawn::TextureFormat::R8G8B8A8Unorm);
-    dawn::TextureView color4 = Create2DAttachment(device, 1, 1,
-                                                  dawn::TextureFormat::R8G8B8A8Unorm);
+    dawn::TextureView color1 = Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
+    dawn::TextureView color2 = Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
+    dawn::TextureView color3 = Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
+    dawn::TextureView color4 = Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
     // For setting the color attachment, control case
     {
         utils::ComboRenderPassDescriptor renderPass({color1, color2, color3, color4});
@@ -129,8 +126,8 @@ TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentOutOfBounds) {
         colorAttachment3.attachment = color3;
         colorAttachment4.attachment = color4;
 
-        dawn::TextureView color5 = Create2DAttachment(device, 1, 1,
-                                                      dawn::TextureFormat::R8G8B8A8Unorm);
+        dawn::TextureView color5 =
+            Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
         dawn::RenderPassColorAttachmentDescriptor colorAttachment5 = colorAttachment1;
         colorAttachment5.attachment = color5;
 
@@ -149,12 +146,14 @@ TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentOutOfBounds) {
 
 // Attachments must have the same size
 TEST_F(RenderPassDescriptorValidationTest, SizeMustMatch) {
-    dawn::TextureView color1x1A = Create2DAttachment(device, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm);
-    dawn::TextureView color1x1B = Create2DAttachment(device, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm);
-    dawn::TextureView color2x2 = Create2DAttachment(device, 2, 2, dawn::TextureFormat::R8G8B8A8Unorm);
+    dawn::TextureView color1x1A = Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
+    dawn::TextureView color1x1B = Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
+    dawn::TextureView color2x2 = Create2DAttachment(device, 2, 2, dawn::TextureFormat::RGBA8Unorm);
 
-    dawn::TextureView depthStencil1x1 = Create2DAttachment(device, 1, 1, dawn::TextureFormat::D32FloatS8Uint);
-    dawn::TextureView depthStencil2x2 = Create2DAttachment(device, 2, 2, dawn::TextureFormat::D32FloatS8Uint);
+    dawn::TextureView depthStencil1x1 =
+        Create2DAttachment(device, 1, 1, dawn::TextureFormat::Depth24PlusStencil8);
+    dawn::TextureView depthStencil2x2 =
+        Create2DAttachment(device, 2, 2, dawn::TextureFormat::Depth24PlusStencil8);
 
     // Control case: all the same size (1x1)
     {
@@ -177,8 +176,9 @@ TEST_F(RenderPassDescriptorValidationTest, SizeMustMatch) {
 
 // Attachments formats must match whether they are used for color or depth-stencil
 TEST_F(RenderPassDescriptorValidationTest, FormatMismatch) {
-    dawn::TextureView color = Create2DAttachment(device, 1, 1, dawn::TextureFormat::R8G8B8A8Unorm);
-    dawn::TextureView depthStencil = Create2DAttachment(device, 1, 1, dawn::TextureFormat::D32FloatS8Uint);
+    dawn::TextureView color = Create2DAttachment(device, 1, 1, dawn::TextureFormat::RGBA8Unorm);
+    dawn::TextureView depthStencil =
+        Create2DAttachment(device, 1, 1, dawn::TextureFormat::Depth24PlusStencil8);
 
     // Using depth-stencil for color
     {
@@ -198,8 +198,8 @@ TEST_F(RenderPassDescriptorValidationTest, FormatMismatch) {
 TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepthStencil) {
     constexpr uint32_t kLevelCount = 1;
     constexpr uint32_t kSize = 32;
-    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
-    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::Depth24PlusStencil8;
 
     constexpr uint32_t kArrayLayers = 10;
 
@@ -291,8 +291,8 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
 TEST_F(RenderPassDescriptorValidationTest, TextureViewLevelCountForColorAndDepthStencil) {
     constexpr uint32_t kArrayLayers = 1;
     constexpr uint32_t kSize = 32;
-    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
-    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::Depth24PlusStencil8;
 
     constexpr uint32_t kLevelCount = 4;
 
@@ -386,7 +386,7 @@ TEST_F(RenderPassDescriptorValidationTest, NonMultisampledColorWithResolveTarget
     static constexpr uint32_t kLevelCount = 1;
     static constexpr uint32_t kSize = 32;
     static constexpr uint32_t kSampleCount = 1;
-    static constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+    static constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
 
     dawn::Texture colorTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
@@ -420,7 +420,7 @@ class MultisampledRenderPassDescriptorValidationTest : public RenderPassDescript
     static constexpr uint32_t kLevelCount = 1;
     static constexpr uint32_t kSize = 32;
     static constexpr uint32_t kSampleCount = 4;
-    static constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+    static constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
 
   private:
     dawn::TextureView CreateColorTextureView(uint32_t sampleCount) {
@@ -532,7 +532,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, MultisampledColorWithReso
 
 // It is not allowed to use a resolve target in a format different from the color attachment.
 TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetDifferentFormat) {
-    constexpr dawn::TextureFormat kColorFormat2 = dawn::TextureFormat::B8G8R8A8Unorm;
+    constexpr dawn::TextureFormat kColorFormat2 = dawn::TextureFormat::BGRA8Unorm;
     dawn::Texture resolveTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kColorFormat2, kSize, kSize, kArrayLayers,
         kLevelCount);
@@ -585,7 +585,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ColorAttachmentResolveTar
 
 // Tests on the sample count of depth stencil attachment.
 TEST_F(MultisampledRenderPassDescriptorValidationTest, DepthStencilAttachmentSampleCount) {
-    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::D32FloatS8Uint;
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::Depth24PlusStencil8;
     dawn::Texture multisampledDepthStencilTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kDepthStencilFormat, kSize, kSize, kArrayLayers,
         kLevelCount, kSampleCount);

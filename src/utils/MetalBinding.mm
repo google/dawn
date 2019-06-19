@@ -46,7 +46,7 @@ namespace utils {
                                      DawnTextureUsageBit usage,
                                      uint32_t width,
                                      uint32_t height) {
-            if (format != DAWN_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM) {
+            if (format != DAWN_TEXTURE_FORMAT_BGRA8_UNORM) {
                 return "unsupported format";
             }
             ASSERT(width > 0);
@@ -122,7 +122,7 @@ namespace utils {
         }
 
         DawnTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return DAWN_TEXTURE_FORMAT_B8_G8_R8_A8_UNORM;
+            return DAWN_TEXTURE_FORMAT_BGRA8_UNORM;
         }
 
       private:

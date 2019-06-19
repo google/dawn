@@ -45,7 +45,7 @@ class TextureValidationTest : public ValidationTest {
     static constexpr uint32_t kDefaultMipLevels = 1;
     static constexpr uint32_t kDefaultSampleCount = 1;
 
-    static constexpr dawn::TextureFormat kDefaultTextureFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+    static constexpr dawn::TextureFormat kDefaultTextureFormat = dawn::TextureFormat::RGBA8Unorm;
 };
 
 // Test the validation of sample count

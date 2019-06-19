@@ -64,22 +64,22 @@ namespace dawn_native { namespace opengl {
 
         TextureFormatInfo GetGLFormatInfo(dawn::TextureFormat format) {
             switch (format) {
-                case dawn::TextureFormat::R8G8B8A8Unorm:
+                case dawn::TextureFormat::RGBA8Unorm:
                     return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
-                case dawn::TextureFormat::R8G8Unorm:
+                case dawn::TextureFormat::RG8Unorm:
                     return {GL_RG8, GL_RG, GL_UNSIGNED_BYTE};
                 case dawn::TextureFormat::R8Unorm:
                     return {GL_R8, GL_RED, GL_UNSIGNED_BYTE};
-                case dawn::TextureFormat::R8G8B8A8Uint:
+                case dawn::TextureFormat::RGBA8Uint:
                     return {GL_RGBA8UI, GL_RGBA, GL_UNSIGNED_INT};
-                case dawn::TextureFormat::R8G8Uint:
+                case dawn::TextureFormat::RG8Uint:
                     return {GL_RG8UI, GL_RG, GL_UNSIGNED_INT};
                 case dawn::TextureFormat::R8Uint:
                     return {GL_R8UI, GL_RED, GL_UNSIGNED_INT};
-                case dawn::TextureFormat::B8G8R8A8Unorm:
+                case dawn::TextureFormat::BGRA8Unorm:
                     // This doesn't have an enum for the internal format in OpenGL, so use RGBA8.
                     return {GL_RGBA8, GL_BGRA, GL_UNSIGNED_BYTE};
-                case dawn::TextureFormat::D32FloatS8Uint:
+                case dawn::TextureFormat::Depth24PlusStencil8:
                     return {GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL,
                             GL_FLOAT_32_UNSIGNED_INT_24_8_REV};
                 default:

@@ -88,7 +88,7 @@ namespace utils {
             blend.srcFactor = dawn::BlendFactor::One;
             blend.dstFactor = dawn::BlendFactor::Zero;
             dawn::ColorStateDescriptor colorStateDescriptor;
-            colorStateDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+            colorStateDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
             colorStateDescriptor.alphaBlend = blend;
             colorStateDescriptor.colorBlend = blend;
             colorStateDescriptor.writeMask = dawn::ColorWriteMask::All;
@@ -106,7 +106,7 @@ namespace utils {
             stencilFace.depthFailOp = dawn::StencilOperation::Keep;
             stencilFace.passOp = dawn::StencilOperation::Keep;
 
-            cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+            cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
             cDepthStencilState.depthWriteEnabled = false;
             cDepthStencilState.depthCompare = dawn::CompareFunction::Always;
             cDepthStencilState.stencilBack = stencilFace;

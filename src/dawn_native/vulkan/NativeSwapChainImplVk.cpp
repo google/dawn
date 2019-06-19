@@ -30,7 +30,7 @@ namespace dawn_native { namespace vulkan {
             // driver. Need to generalize
             config->nativeFormat = VK_FORMAT_B8G8R8A8_UNORM;
             config->colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-            config->format = dawn::TextureFormat::B8G8R8A8Unorm;
+            config->format = dawn::TextureFormat::BGRA8Unorm;
             config->minImageCount = 3;
             // TODO(cwallez@chromium.org): This is upside down compared to what we want, at least
             // on Linux

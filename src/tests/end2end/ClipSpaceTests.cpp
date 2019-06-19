@@ -72,8 +72,9 @@ class ClipSpaceTest : public DawnTest {
 
 // Test that the clip space is correctly configured.
 TEST_P(ClipSpaceTest, ClipSpace) {
-    dawn::Texture colorTexture = Create2DTextureForTest(dawn::TextureFormat::R8G8B8A8Unorm);
-    dawn::Texture depthStencilTexture = Create2DTextureForTest(dawn::TextureFormat::D32FloatS8Uint);
+    dawn::Texture colorTexture = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
+    dawn::Texture depthStencilTexture =
+        Create2DTextureForTest(dawn::TextureFormat::Depth24PlusStencil8);
 
     utils::ComboRenderPassDescriptor renderPassDescriptor(
         {colorTexture.CreateDefaultView()}, depthStencilTexture.CreateDefaultView());

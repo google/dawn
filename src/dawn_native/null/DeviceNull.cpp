@@ -350,7 +350,7 @@ namespace dawn_native { namespace null {
     }
 
     dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
-        return dawn::TextureFormat::R8G8B8A8Unorm;
+        return dawn::TextureFormat::RGBA8Unorm;
     }
 
     // StagingBuffer

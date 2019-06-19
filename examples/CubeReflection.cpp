@@ -203,7 +203,7 @@ void init() {
     descriptor.cFragmentStage.module = fsModule;
     descriptor.vertexInput = &vertexInput;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
-    descriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+    descriptor.cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
     descriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
     descriptor.cDepthStencilState.depthWriteEnabled = true;
     descriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
@@ -216,7 +216,7 @@ void init() {
     pDescriptor.cFragmentStage.module = fsModule;
     pDescriptor.vertexInput = &vertexInput;
     pDescriptor.depthStencilState = &pDescriptor.cDepthStencilState;
-    pDescriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+    pDescriptor.cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
     pDescriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
     pDescriptor.cDepthStencilState.stencilFront.passOp = dawn::StencilOperation::Replace;
     pDescriptor.cDepthStencilState.stencilBack.passOp = dawn::StencilOperation::Replace;
@@ -230,7 +230,7 @@ void init() {
     rfDescriptor.cFragmentStage.module = fsReflectionModule;
     rfDescriptor.vertexInput = &vertexInput;
     rfDescriptor.depthStencilState = &rfDescriptor.cDepthStencilState;
-    rfDescriptor.cDepthStencilState.format = dawn::TextureFormat::D32FloatS8Uint;
+    rfDescriptor.cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
     rfDescriptor.cColorStates[0]->format = GetPreferredSwapChainTextureFormat();
     rfDescriptor.cDepthStencilState.stencilFront.compare = dawn::CompareFunction::Equal;
     rfDescriptor.cDepthStencilState.stencilBack.compare = dawn::CompareFunction::Equal;

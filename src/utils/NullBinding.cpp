@@ -33,7 +33,7 @@ namespace utils {
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
         DawnTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM;
+            return DAWN_TEXTURE_FORMAT_RGBA8_UNORM;
         }
 
       private:

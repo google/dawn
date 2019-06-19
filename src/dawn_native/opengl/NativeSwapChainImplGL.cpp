@@ -46,7 +46,7 @@ namespace dawn_native { namespace opengl {
                                                       DawnTextureUsageBit usage,
                                                       uint32_t width,
                                                       uint32_t height) {
-        if (format != DAWN_TEXTURE_FORMAT_R8_G8_B8_A8_UNORM) {
+        if (format != DAWN_TEXTURE_FORMAT_RGBA8_UNORM) {
             return "unsupported format";
         }
         ASSERT(width > 0);
@@ -81,7 +81,7 @@ namespace dawn_native { namespace opengl {
     }
 
     dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
-        return dawn::TextureFormat::R8G8B8A8Unorm;
+        return dawn::TextureFormat::RGBA8Unorm;
     }
 
 }}  // namespace dawn_native::opengl

@@ -83,7 +83,7 @@ class CopyTests_T2B : public CopyTests {
             descriptor.size.depth = 1;
             descriptor.arrayLayerCount = textureSpec.arraySize;
             descriptor.sampleCount = 1;
-            descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+            descriptor.format = dawn::TextureFormat::RGBA8Unorm;
             descriptor.mipLevelCount = textureSpec.level + 1;
             descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;
             dawn::Texture texture = device.CreateTexture(&descriptor);
@@ -196,7 +196,7 @@ protected:
         descriptor.size.depth = 1;
         descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
-        descriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        descriptor.format = dawn::TextureFormat::RGBA8Unorm;
         descriptor.mipLevelCount = textureSpec.level + 1;
         descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;
         dawn::Texture texture = device.CreateTexture(&descriptor);
@@ -275,7 +275,7 @@ class CopyTests_T2T : public CopyTests {
         srcDescriptor.size.depth = 1;
         srcDescriptor.arrayLayerCount = srcSpec.arraySize;
         srcDescriptor.sampleCount = 1;
-        srcDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        srcDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
         srcDescriptor.mipLevelCount = srcSpec.level + 1;
         srcDescriptor.usage =
             dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst;
@@ -288,7 +288,7 @@ class CopyTests_T2T : public CopyTests {
         dstDescriptor.size.depth = 1;
         dstDescriptor.arrayLayerCount = dstSpec.arraySize;
         dstDescriptor.sampleCount = 1;
-        dstDescriptor.format = dawn::TextureFormat::R8G8B8A8Unorm;
+        dstDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
         dstDescriptor.mipLevelCount = dstSpec.level + 1;
         dstDescriptor.usage =
             dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst;

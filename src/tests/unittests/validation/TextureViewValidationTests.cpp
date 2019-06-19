@@ -23,7 +23,7 @@ constexpr uint32_t kWidth = 32u;
 constexpr uint32_t kHeight = 32u;
 constexpr uint32_t kDefaultMipLevels = 6u;
 
-constexpr dawn::TextureFormat kDefaultTextureFormat = dawn::TextureFormat::R8G8B8A8Unorm;
+constexpr dawn::TextureFormat kDefaultTextureFormat = dawn::TextureFormat::RGBA8Unorm;
 
 dawn::Texture Create2DArrayTexture(dawn::Device& device,
                                    uint32_t arrayLayerCount,
@@ -213,7 +213,7 @@ TEST_F(TextureViewValidationTest, TextureViewFormatCompatibility) {
     // It is an error to create a texture view in depth-stencil format on a RGBA texture.
     {
         dawn::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
-        descriptor.format = dawn::TextureFormat::D32FloatS8Uint;
+        descriptor.format = dawn::TextureFormat::Depth24PlusStencil8;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
 }
