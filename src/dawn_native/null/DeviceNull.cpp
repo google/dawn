@@ -158,7 +158,7 @@ namespace dawn_native { namespace null {
         operation->destinationOffset = destinationOffset;
         operation->size = size;
 
-        ToBackend(GetDevice())->AddPendingOperation(std::move(operation));
+        AddPendingOperation(std::move(operation));
 
         return {};
     }

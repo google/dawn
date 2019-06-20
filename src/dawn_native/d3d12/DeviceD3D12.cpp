@@ -83,24 +83,20 @@ namespace dawn_native { namespace d3d12 {
         programDesc.NumArgumentDescs = 1;
         programDesc.pArgumentDescs = &argumentDesc;
 
-        ToBackend(GetDevice())
-            ->GetD3D12Device()
-            ->CreateCommandSignature(&programDesc, NULL, IID_PPV_ARGS(&mDispatchIndirectSignature));
+        GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
+                                                 IID_PPV_ARGS(&mDispatchIndirectSignature));
 
         argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
         programDesc.ByteStride = 4 * sizeof(uint32_t);
 
-        ToBackend(GetDevice())
-            ->GetD3D12Device()
-            ->CreateCommandSignature(&programDesc, NULL, IID_PPV_ARGS(&mDrawIndirectSignature));
+        GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
+                                                 IID_PPV_ARGS(&mDrawIndirectSignature));
 
         argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
         programDesc.ByteStride = 5 * sizeof(uint32_t);
 
-        ToBackend(GetDevice())
-            ->GetD3D12Device()
-            ->CreateCommandSignature(&programDesc, NULL,
-                                     IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
+        GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
+                                                 IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
 
         return {};
     }

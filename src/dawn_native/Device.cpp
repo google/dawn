@@ -96,10 +96,6 @@ namespace dawn_native {
         return mAdapter;
     }
 
-    DeviceBase* DeviceBase::GetDevice() {
-        return this;
-    }
-
     FenceSignalTracker* DeviceBase::GetFenceSignalTracker() const {
         return mFenceSignalTracker.get();
     }
