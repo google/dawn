@@ -82,7 +82,7 @@ namespace dawn_native { namespace metal {
 
         bool RequiresCreatingNewTextureView(const TextureBase* texture,
                                             const TextureViewDescriptor* textureViewDescriptor) {
-            if (texture->GetFormat() != textureViewDescriptor->format) {
+            if (texture->GetFormat().format != textureViewDescriptor->format) {
                 return true;
             }
 

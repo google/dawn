@@ -505,9 +505,8 @@ namespace dawn_native { namespace d3d12 {
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->destination.origin, copy->copySize,
-                        static_cast<uint32_t>(
-                            TextureFormatTexelBlockSizeInBytes(texture->GetFormat())),
-                        copy->source.offset, copy->source.rowPitch, copy->source.imageHeight);
+                        texture->GetFormat().blockByteSize, copy->source.offset,
+                        copy->source.rowPitch, copy->source.imageHeight);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
                         CreateTextureCopyLocationForTexture(*texture, copy->destination.level,
@@ -549,9 +548,7 @@ namespace dawn_native { namespace d3d12 {
                     buffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferDst);
 
                     auto copySplit = ComputeTextureCopySplit(
-                        copy->source.origin, copy->copySize,
-                        static_cast<uint32_t>(
-                            TextureFormatTexelBlockSizeInBytes(texture->GetFormat())),
+                        copy->source.origin, copy->copySize, texture->GetFormat().blockByteSize,
                         copy->destination.offset, copy->destination.rowPitch,
                         copy->destination.imageHeight);
 
@@ -749,9 +746,9 @@ namespace dawn_native { namespace d3d12 {
                 Texture* texture = ToBackend(renderPass->depthStencilAttachment.view->GetTexture());
 
                 // Load op - depth/stencil
-                bool doDepthClear = TextureFormatHasDepth(texture->GetFormat()) &&
+                bool doDepthClear = texture->GetFormat().HasDepth() &&
                                     (attachmentInfo.depthLoadOp == dawn::LoadOp::Clear);
-                bool doStencilClear = TextureFormatHasStencil(texture->GetFormat()) &&
+                bool doStencilClear = texture->GetFormat().HasStencil() &&
                                       (attachmentInfo.stencilLoadOp == dawn::LoadOp::Clear);
 
                 D3D12_CLEAR_FLAGS clearFlags = {};

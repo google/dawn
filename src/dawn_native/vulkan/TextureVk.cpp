@@ -51,7 +51,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Computes which vulkan access type could be required for the given Dawn usage.
-        VkAccessFlags VulkanAccessFlags(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
+        VkAccessFlags VulkanAccessFlags(dawn::TextureUsageBit usage, const Format& format) {
             VkAccessFlags flags = 0;
 
             if (usage & dawn::TextureUsageBit::TransferSrc) {
@@ -67,7 +67,7 @@ namespace dawn_native { namespace vulkan {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             }
             if (usage & dawn::TextureUsageBit::OutputAttachment) {
-                if (TextureFormatHasDepthOrStencil(format)) {
+                if (format.HasDepthOrStencil()) {
                     flags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
                              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
                 } else {
@@ -88,7 +88,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Chooses which Vulkan image layout should be used for the given Dawn usage
-        VkImageLayout VulkanImageLayout(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
+        VkImageLayout VulkanImageLayout(dawn::TextureUsageBit usage, const Format& format) {
             if (usage == dawn::TextureUsageBit::None) {
                 return VK_IMAGE_LAYOUT_UNDEFINED;
             }
@@ -114,7 +114,7 @@ namespace dawn_native { namespace vulkan {
                 case dawn::TextureUsageBit::Storage:
                     return VK_IMAGE_LAYOUT_GENERAL;
                 case dawn::TextureUsageBit::OutputAttachment:
-                    if (TextureFormatHasDepthOrStencil(format)) {
+                    if (format.HasDepthOrStencil()) {
                         return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
                     } else {
                         return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -128,7 +128,7 @@ namespace dawn_native { namespace vulkan {
 
         // Computes which Vulkan pipeline stage can access a texture in the given Dawn usage
         VkPipelineStageFlags VulkanPipelineStage(dawn::TextureUsageBit usage,
-                                                 dawn::TextureFormat format) {
+                                                 const Format& format) {
             VkPipelineStageFlags flags = 0;
 
             if (usage == dawn::TextureUsageBit::None) {
@@ -145,7 +145,7 @@ namespace dawn_native { namespace vulkan {
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
             if (usage & dawn::TextureUsageBit::OutputAttachment) {
-                if (TextureFormatHasDepthOrStencil(format)) {
+                if (format.HasDepthOrStencil()) {
                     flags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                              VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
                     // TODO(cwallez@chromium.org): This is missing the stage where the depth and
@@ -170,22 +170,20 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Computes which Vulkan texture aspects are relevant for the given Dawn format
-        VkImageAspectFlags VulkanAspectMask(dawn::TextureFormat format) {
-            bool isDepth = TextureFormatHasDepth(format);
-            bool isStencil = TextureFormatHasStencil(format);
-
-            VkImageAspectFlags flags = 0;
-            if (isDepth) {
-                flags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        VkImageAspectFlags VulkanAspectMask(const Format& format) {
+            switch (format.aspect) {
+                case Format::Aspect::Color:
+                    return VK_IMAGE_ASPECT_COLOR_BIT;
+                case Format::Aspect::Depth:
+                    return VK_IMAGE_ASPECT_DEPTH_BIT;
+                case Format::Aspect::Stencil:
+                    return VK_IMAGE_ASPECT_STENCIL_BIT;
+                case Format::Aspect::DepthStencil:
+                    return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+                default:
+                    UNREACHABLE();
+                    return 0;
             }
-            if (isStencil) {
-                flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
-            }
-
-            if (flags != 0) {
-                return flags;
-            }
-            return VK_IMAGE_ASPECT_COLOR_BIT;
         }
 
         VkExtent3D VulkanExtent3D(const Extent3D& extent) {
@@ -236,7 +234,7 @@ namespace dawn_native { namespace vulkan {
 
     // Converts the Dawn usage flags to Vulkan usage flags. Also needs the format to choose
     // between color and depth attachment usages.
-    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, dawn::TextureFormat format) {
+    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, const Format& format) {
         VkImageUsageFlags flags = 0;
 
         if (usage & dawn::TextureUsageBit::TransferSrc) {
@@ -252,7 +250,7 @@ namespace dawn_native { namespace vulkan {
             flags |= VK_IMAGE_USAGE_STORAGE_BIT;
         }
         if (usage & dawn::TextureUsageBit::OutputAttachment) {
-            if (TextureFormatHasDepthOrStencil(format)) {
+            if (format.HasDepthOrStencil()) {
                 flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             } else {
                 flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -283,7 +281,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.imageType = VulkanImageType(GetDimension());
-        createInfo.format = VulkanImageFormat(GetFormat());
+        createInfo.format = VulkanImageFormat(GetFormat().format);
         createInfo.extent = VulkanExtent3D(GetSize());
         createInfo.mipLevels = GetNumMipLevels();
         createInfo.arrayLayers = GetArrayLayers();
@@ -334,7 +332,7 @@ namespace dawn_native { namespace vulkan {
             TransitionUsageNow(ToBackend(GetDevice())->GetPendingCommandBuffer(),
                                dawn::TextureUsageBit::TransferDst);
 
-            if (TextureFormatHasDepthOrStencil(GetFormat())) {
+            if (GetFormat().HasDepthOrStencil()) {
                 VkClearDepthStencilValue clear_color[1];
                 clear_color[0].depth = 1.0f;
                 clear_color[0].stencil = 1u;
@@ -396,7 +394,7 @@ namespace dawn_native { namespace vulkan {
             return;
         }
 
-        dawn::TextureFormat format = GetFormat();
+        const Format& format = GetFormat();
 
         VkPipelineStageFlags srcStages = VulkanPipelineStage(mLastUsage, format);
         VkPipelineStageFlags dstStages = VulkanPipelineStage(usage, format);
@@ -439,7 +437,7 @@ namespace dawn_native { namespace vulkan {
         range.layerCount = layerCount;
 
         TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
-        if (TextureFormatHasDepthOrStencil(GetFormat())) {
+        if (GetFormat().HasDepthOrStencil()) {
             VkClearDepthStencilValue clear_color[1];
             clear_color[0].depth = 0.0f;
             clear_color[0].stencil = 0u;
@@ -490,7 +488,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.format = VulkanImageFormat(descriptor->format);
         createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
                                                    VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-        createInfo.subresourceRange.aspectMask = VulkanAspectMask(descriptor->format);
+        createInfo.subresourceRange.aspectMask = VulkanAspectMask(GetFormat());
         createInfo.subresourceRange.baseMipLevel = descriptor->baseMipLevel;
         createInfo.subresourceRange.levelCount = descriptor->mipLevelCount;
         createInfo.subresourceRange.baseArrayLayer = descriptor->baseArrayLayer;

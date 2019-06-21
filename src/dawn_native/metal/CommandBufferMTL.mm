@@ -89,9 +89,9 @@ namespace dawn_native { namespace metal {
                 // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
                 id<MTLTexture> texture =
                     ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
-                dawn::TextureFormat format = attachmentInfo.view->GetTexture()->GetFormat();
+                const Format& format = attachmentInfo.view->GetTexture()->GetFormat();
 
-                if (TextureFormatHasDepth(format)) {
+                if (format.HasDepth()) {
                     descriptor.depthAttachment.texture = texture;
                     descriptor.depthAttachment.storeAction = MTLStoreActionStore;
 
@@ -103,7 +103,7 @@ namespace dawn_native { namespace metal {
                     }
                 }
 
-                if (TextureFormatHasStencil(format)) {
+                if (format.HasStencil()) {
                     descriptor.stencilAttachment.texture = texture;
                     descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
 
@@ -453,8 +453,7 @@ namespace dawn_native { namespace metal {
 
                     // Doing the last row copy with the exact number of bytes in last row.
                     // Like copy to a 1D texture to workaround the issue.
-                    uint32_t lastRowDataSize =
-                        copySize.width * TextureFormatTexelBlockSizeInBytes(texture->GetFormat());
+                    uint32_t lastRowDataSize = copySize.width * texture->GetFormat().blockByteSize;
 
                     [encoders.blit
                              copyFromBuffer:buffer->GetMTLBuffer()
@@ -567,8 +566,7 @@ namespace dawn_native { namespace metal {
 
                     // Doing the last row copy with the exact number of bytes in last row.
                     // Like copy from a 1D texture to workaround the issue.
-                    uint32_t lastRowDataSize =
-                        copySize.width * TextureFormatTexelBlockSizeInBytes(texture->GetFormat());
+                    uint32_t lastRowDataSize = copySize.width * texture->GetFormat().blockByteSize;
 
                     [encoders.blit
                                  copyFromTexture:texture->GetMTLTexture()

@@ -389,9 +389,8 @@ namespace dawn_native { namespace opengl {
                     gl.ActiveTexture(GL_TEXTURE0);
                     gl.BindTexture(target, texture->GetHandle());
 
-                    gl.PixelStorei(
-                        GL_UNPACK_ROW_LENGTH,
-                        src.rowPitch / TextureFormatTexelBlockSizeInBytes(texture->GetFormat()));
+                    gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
+                                   src.rowPitch / texture->GetFormat().blockByteSize);
                     gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.imageHeight);
                     switch (texture->GetDimension()) {
                         case dawn::TextureDimension::e2D:
@@ -452,9 +451,8 @@ namespace dawn_native { namespace opengl {
                     }
 
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
-                    gl.PixelStorei(
-                        GL_PACK_ROW_LENGTH,
-                        dst.rowPitch / TextureFormatTexelBlockSizeInBytes(texture->GetFormat()));
+                    gl.PixelStorei(GL_PACK_ROW_LENGTH,
+                                   dst.rowPitch / texture->GetFormat().blockByteSize);
                     gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.imageHeight);
                     ASSERT(copySize.depth == 1 && src.origin.z == 0);
                     void* offset = reinterpret_cast<void*>(static_cast<uintptr_t>(dst.offset));
@@ -582,7 +580,7 @@ namespace dawn_native { namespace opengl {
 
                 // TODO(kainino@chromium.org): the color clears (later in
                 // this function) may be undefined for non-normalized integer formats.
-                dawn::TextureFormat format = textureView->GetTexture()->GetFormat();
+                dawn::TextureFormat format = textureView->GetTexture()->GetFormat().format;
                 ASSERT(format == dawn::TextureFormat::RGBA8Unorm ||
                        format == dawn::TextureFormat::RG8Unorm ||
                        format == dawn::TextureFormat::R8Unorm ||
@@ -593,20 +591,25 @@ namespace dawn_native { namespace opengl {
             if (renderPass->hasDepthStencilAttachment) {
                 TextureViewBase* textureView = renderPass->depthStencilAttachment.view.Get();
                 GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
-                dawn::TextureFormat format = textureView->GetTexture()->GetFormat();
+                const Format& format = textureView->GetTexture()->GetFormat();
 
                 // Attach depth/stencil buffer.
                 GLenum glAttachment = 0;
                 // TODO(kainino@chromium.org): it may be valid to just always use
                 // GL_DEPTH_STENCIL_ATTACHMENT here.
-                if (TextureFormatHasDepth(format)) {
-                    if (TextureFormatHasStencil(format)) {
-                        glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
-                    } else {
+                switch (format.aspect) {
+                    case Format::Aspect::Depth:
                         glAttachment = GL_DEPTH_ATTACHMENT;
-                    }
-                } else {
-                    glAttachment = GL_STENCIL_ATTACHMENT;
+                        break;
+                    case Format::Aspect::Stencil:
+                        glAttachment = GL_STENCIL_ATTACHMENT;
+                        break;
+                    case Format::Aspect::DepthStencil:
+                        glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
+                        break;
+                    default:
+                        UNREACHABLE();
+                        break;
                 }
 
                 GLenum target = ToBackend(textureView->GetTexture())->GetGLTarget();
@@ -614,7 +617,7 @@ namespace dawn_native { namespace opengl {
 
                 // TODO(kainino@chromium.org): the depth/stencil clears (later in
                 // this function) may be undefined for other texture formats.
-                ASSERT(format == dawn::TextureFormat::Depth24PlusStencil8);
+                ASSERT(format.format == dawn::TextureFormat::Depth24PlusStencil8);
             }
         }
 
@@ -639,20 +642,19 @@ namespace dawn_native { namespace opengl {
 
             if (renderPass->hasDepthStencilAttachment) {
                 const auto& attachmentInfo = renderPass->depthStencilAttachment;
-                dawn::TextureFormat attachmentFormat =
-                    attachmentInfo.view->GetTexture()->GetFormat();
+                const Format& attachmentFormat = attachmentInfo.view->GetTexture()->GetFormat();
 
                 // Load op - depth/stencil
-                bool doDepthClear = TextureFormatHasDepth(attachmentFormat) &&
+                bool doDepthClear = attachmentFormat.HasDepth() &&
                                     (attachmentInfo.depthLoadOp == dawn::LoadOp::Clear);
-                bool doStencilClear = TextureFormatHasStencil(attachmentFormat) &&
+                bool doStencilClear = attachmentFormat.HasStencil() &&
                                       (attachmentInfo.stencilLoadOp == dawn::LoadOp::Clear);
 
                 if (doDepthClear) {
                     gl.DepthMask(GL_TRUE);
                 }
                 if (doStencilClear) {
-                    gl.StencilMask(GetStencilMaskFromStencilFormat(attachmentFormat));
+                    gl.StencilMask(GetStencilMaskFromStencilFormat(attachmentFormat.format));
                 }
 
                 if (doDepthClear && doStencilClear) {

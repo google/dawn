@@ -23,7 +23,7 @@
 namespace dawn_native { namespace vulkan {
 
     VkFormat VulkanImageFormat(dawn::TextureFormat format);
-    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, dawn::TextureFormat format);
+    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, const Format& format);
     VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount);
 
     class Texture : public TextureBase {

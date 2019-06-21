@@ -102,7 +102,7 @@ namespace dawn_native { namespace opengl {
 
         bool RequiresCreatingNewTextureView(const TextureBase* texture,
                                             const TextureViewDescriptor* textureViewDescriptor) {
-            if (texture->GetFormat() != textureViewDescriptor->format) {
+            if (texture->GetFormat().format != textureViewDescriptor->format) {
                 return true;
             }
 
@@ -139,7 +139,7 @@ namespace dawn_native { namespace opengl {
         uint32_t arrayLayers = GetArrayLayers();
         uint32_t sampleCount = GetSampleCount();
 
-        auto formatInfo = GetGLFormatInfo(GetFormat());
+        auto formatInfo = GetGLFormatInfo(GetFormat().format);
 
         gl.BindTexture(mTarget, mHandle);
 
@@ -171,7 +171,7 @@ namespace dawn_native { namespace opengl {
 
         if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
             static constexpr uint32_t MAX_TEXEL_SIZE = 16;
-            ASSERT(TextureFormatTexelBlockSizeInBytes(GetFormat()) <= MAX_TEXEL_SIZE);
+            ASSERT(GetFormat().blockByteSize <= MAX_TEXEL_SIZE);
             GLubyte clearColor[MAX_TEXEL_SIZE];
             std::fill(clearColor, clearColor + MAX_TEXEL_SIZE, 255);
 
@@ -208,7 +208,7 @@ namespace dawn_native { namespace opengl {
     }
 
     TextureFormatInfo Texture::GetGLFormat() const {
-        return GetGLFormatInfo(GetFormat());
+        return GetGLFormatInfo(GetFormat().format);
     }
 
     // TextureView

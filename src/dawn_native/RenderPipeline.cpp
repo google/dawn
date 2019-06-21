@@ -124,9 +124,9 @@ namespace dawn_native {
             DAWN_TRY(ValidateBlendFactor(descriptor->colorBlend.dstFactor));
             DAWN_TRY(ValidateColorWriteMask(descriptor->writeMask));
 
-            dawn::TextureFormat format = descriptor->format;
-            DAWN_TRY(ValidateTextureFormat(format));
-            if (!IsColorRenderableTextureFormat(format)) {
+            Format format;
+            DAWN_TRY_ASSIGN(format, ConvertFormat(descriptor->format));
+            if (!format.IsColor() || !format.isRenderable) {
                 return DAWN_VALIDATION_ERROR("Color format must be color renderable");
             }
 
@@ -148,9 +148,9 @@ namespace dawn_native {
             DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.depthFailOp));
             DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.passOp));
 
-            dawn::TextureFormat format = descriptor->format;
-            DAWN_TRY(ValidateTextureFormat(format));
-            if (!IsDepthStencilRenderableTextureFormat(format)) {
+            Format format;
+            DAWN_TRY_ASSIGN(format, ConvertFormat(descriptor->format));
+            if (!format.HasDepthOrStencil() || !format.isRenderable) {
                 return DAWN_VALIDATION_ERROR(
                     "Depth stencil format must be depth-stencil renderable");
             }
@@ -503,7 +503,8 @@ namespace dawn_native {
         }
 
         for (uint32_t i : IterateBitSet(mColorAttachmentsSet)) {
-            if (renderPass->colorAttachments[i].view->GetFormat() != mColorStates[i].format) {
+            if (renderPass->colorAttachments[i].view->GetFormat().format !=
+                mColorStates[i].format) {
                 return false;
             }
         }
@@ -513,7 +514,8 @@ namespace dawn_native {
         }
 
         if (mHasDepthStencilAttachment &&
-            (renderPass->depthStencilAttachment.view->GetFormat() != mDepthStencilState.format)) {
+            (renderPass->depthStencilAttachment.view->GetFormat().format !=
+             mDepthStencilState.format)) {
             return false;
         }
 

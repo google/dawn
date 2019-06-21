@@ -21,8 +21,7 @@
 namespace dawn_native { namespace d3d12 {
 
     namespace {
-        D3D12_RESOURCE_STATES D3D12TextureUsage(dawn::TextureUsageBit usage,
-                                                dawn::TextureFormat format) {
+        D3D12_RESOURCE_STATES D3D12TextureUsage(dawn::TextureUsageBit usage, const Format& format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
             // Present is an exclusive flag.
@@ -44,7 +43,7 @@ namespace dawn_native { namespace d3d12 {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
             if (usage & dawn::TextureUsageBit::OutputAttachment) {
-                if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
+                if (format.HasDepthOrStencil()) {
                     resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
                 } else {
                     resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -55,7 +54,7 @@ namespace dawn_native { namespace d3d12 {
         }
 
         D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::TextureUsageBit usage,
-                                                dawn::TextureFormat format,
+                                                const Format& format,
                                                 bool isMultisampledTexture) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
@@ -68,7 +67,7 @@ namespace dawn_native { namespace d3d12 {
             // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_resource
             // _desc
             if ((usage & dawn::TextureUsageBit::OutputAttachment) || isMultisampledTexture) {
-                if (TextureFormatHasDepth(format) || TextureFormatHasStencil(format)) {
+                if (format.HasDepthOrStencil()) {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
                 } else {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -126,7 +125,7 @@ namespace dawn_native { namespace d3d12 {
 
         resourceDescriptor.DepthOrArraySize = GetDepthOrArraySize();
         resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
-        resourceDescriptor.Format = D3D12TextureFormat(GetFormat());
+        resourceDescriptor.Format = D3D12TextureFormat(GetFormat().format);
         resourceDescriptor.SampleDesc.Count = descriptor->sampleCount;
         // TODO(bryan.bernhart@intel.com): investigate how to specify standard MSAA sample pattern.
         resourceDescriptor.SampleDesc.Quality = 0;
@@ -225,7 +224,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     DXGI_FORMAT Texture::GetD3D12Format() const {
-        return D3D12TextureFormat(GetFormat());
+        return D3D12TextureFormat(GetFormat().format);
     }
 
     ID3D12Resource* Texture::GetD3D12Resource() const {
@@ -329,7 +328,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     DXGI_FORMAT TextureView::GetD3D12Format() const {
-        return D3D12TextureFormat(GetFormat());
+        return D3D12TextureFormat(GetFormat().format);
     }
 
     const D3D12_SHADER_RESOURCE_VIEW_DESC& TextureView::GetSRVDescriptor() const {

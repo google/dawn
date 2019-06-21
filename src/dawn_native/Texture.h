@@ -29,17 +29,7 @@ namespace dawn_native {
                                              const TextureBase* texture,
                                              const TextureViewDescriptor* descriptor);
 
-    uint32_t TextureFormatTexelBlockSizeInBytes(dawn::TextureFormat format);
-    bool TextureFormatHasDepth(dawn::TextureFormat format);
-    bool TextureFormatHasStencil(dawn::TextureFormat format);
-    bool TextureFormatHasDepthOrStencil(dawn::TextureFormat format);
-    bool IsColorRenderableTextureFormat(dawn::TextureFormat format);
-    bool IsDepthStencilRenderableTextureFormat(dawn::TextureFormat format);
     bool IsValidSampleCount(uint32_t sampleCount);
-
-    bool Is4x4CompressedFormat(dawn::TextureFormat format);
-    uint32_t TextureFormatBlockWidthInTexels(dawn::TextureFormat format);
-    uint32_t TextureFormatBlockHeightInTexels(dawn::TextureFormat format);
 
     static constexpr dawn::TextureUsageBit kReadOnlyTextureUsages =
         dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::Sampled |
@@ -48,6 +38,36 @@ namespace dawn_native {
     static constexpr dawn::TextureUsageBit kWritableTextureUsages =
         dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Storage |
         dawn::TextureUsageBit::OutputAttachment;
+
+    struct Format {
+        enum Aspect {
+            Color,
+            Depth,
+            Stencil,
+            DepthStencil,
+        };
+
+        dawn::TextureFormat format;
+        bool isRenderable;
+        bool isCompressed;
+        Aspect aspect;
+
+        uint32_t blockByteSize;
+        uint32_t blockWidth;
+        uint32_t blockHeight;
+
+        bool IsColor() const;
+        bool HasDepth() const;
+        bool HasStencil() const;
+        bool HasDepthOrStencil() const;
+    };
+
+    // Returns the Format corresponding to the dawn::TextureFormat or an error if the format
+    // isn't valid.
+    ResultOrError<Format> ConvertFormat(dawn::TextureFormat format);
+
+    // Returns the Format corresponding to the dawn::TextureFormat and assumes the format is valid.
+    Format ConvertValidFormat(dawn::TextureFormat format);
 
     class TextureBase : public ObjectBase {
       public:
@@ -58,7 +78,7 @@ namespace dawn_native {
         static TextureBase* MakeError(DeviceBase* device);
 
         dawn::TextureDimension GetDimension() const;
-        dawn::TextureFormat GetFormat() const;
+        const Format& GetFormat() const;
         const Extent3D& GetSize() const;
         uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
@@ -93,7 +113,8 @@ namespace dawn_native {
 
         MaybeError ValidateDestroy() const;
         dawn::TextureDimension mDimension;
-        dawn::TextureFormat mFormat;
+        // TODO(cwallez@chromium.org): This should be deduplicated in the Device
+        Format mFormat;
         Extent3D mSize;
         uint32_t mArrayLayerCount;
         uint32_t mMipLevelCount;
@@ -114,7 +135,7 @@ namespace dawn_native {
         const TextureBase* GetTexture() const;
         TextureBase* GetTexture();
 
-        dawn::TextureFormat GetFormat() const;
+        const Format& GetFormat() const;
         uint32_t GetBaseMipLevel() const;
         uint32_t GetLevelCount() const;
         uint32_t GetBaseArrayLayer() const;
@@ -125,7 +146,8 @@ namespace dawn_native {
 
         Ref<TextureBase> mTexture;
 
-        dawn::TextureFormat mFormat;
+        // TODO(cwallez@chromium.org): This should be deduplicated in the Device
+        Format mFormat;
         uint32_t mBaseMipLevel;
         uint32_t mMipLevelCount;
         uint32_t mBaseArrayLayer;
