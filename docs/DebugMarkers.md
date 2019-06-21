@@ -27,7 +27,9 @@ To enable marker functionality, you must:
 
 You may now call the debug marker APIs mentioned above and see them from your GPU debugging tool. When using your tool, it is supported to both launch your application with the debugger attached, or attach the debugger while your application is running.
 
-D3D12 debug markers have been tested with [Microsoft PIX](https://blogs.msdn.microsoft.com/pix/download/) and [Intel Graphics Frame Analyzer](https://software.intel.com/en-us/gpa/graphics-frame-analyzer).
+D3D12 debug markers have been tested with [Microsoft PIX](https://devblogs.microsoft.com/pix/) and [Intel Graphics Frame Analyzer](https://software.intel.com/en-us/gpa/graphics-frame-analyzer).
+
+Unfortunately, PIX's UI does does not lend itself to capturing single frame applications like tests. You must enable capture from within your application. To do this in Dawn tests, pass the --begin-capture-on-startup flag to dawn_end2end_tests.exe.
 
 ## Vulkan
 

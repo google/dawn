@@ -117,6 +117,7 @@ class DawnTestEnvironment : public testing::Environment {
 
     bool mUseWire = false;
     bool mEnableBackendValidation = false;
+    bool mBeginCaptureOnStartup = false;
     std::unique_ptr<dawn_native::Instance> mInstance;
 
     // Windows don't usually like to be bound to one API than the other, for example switching

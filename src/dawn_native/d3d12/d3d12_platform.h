@@ -19,6 +19,9 @@
 #include <dxgi1_4.h>
 #include <wrl.h>
 
+// DXProgrammableCapture.h takes a dependency on other platform header
+// files, so it must be defined after them.
+#include <DXProgrammableCapture.h>
 #include <dxgidebug.h>
 
 using Microsoft::WRL::ComPtr;

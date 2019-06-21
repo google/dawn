@@ -103,7 +103,16 @@ namespace dawn_native {
         mImpl->EnableBackendValidation(enableBackendValidation);
     }
 
-    bool Instance::IsBackendValidationEnabled() {
+    bool Instance::IsBackendValidationEnabled() const {
         return mImpl->IsBackendValidationEnabled();
     }
+
+    void Instance::EnableBeginCaptureOnStartup(bool beginCaptureOnStartup) {
+        mImpl->EnableBeginCaptureOnStartup(beginCaptureOnStartup);
+    }
+
+    bool Instance::IsBeginCaptureOnStartupEnabled() const {
+        return mImpl->IsBeginCaptureOnStartupEnabled();
+    }
+
 }  // namespace dawn_native

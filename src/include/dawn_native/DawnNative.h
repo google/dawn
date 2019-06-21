@@ -127,7 +127,11 @@ namespace dawn_native {
 
         // Enable backend's validation layers if it has.
         void EnableBackendValidation(bool enableBackendValidation);
-        bool IsBackendValidationEnabled();
+        bool IsBackendValidationEnabled() const;
+
+        // Enable debug capture on Dawn startup
+        void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
+        bool IsBeginCaptureOnStartupEnabled() const;
 
       private:
         InstanceBase* mImpl = nullptr;

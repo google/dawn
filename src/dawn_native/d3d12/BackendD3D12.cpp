@@ -24,7 +24,8 @@ namespace dawn_native { namespace d3d12 {
     namespace {
 
         ResultOrError<ComPtr<IDXGIFactory4>> CreateFactory(const PlatformFunctions* functions,
-                                                           bool enableBackendValidation) {
+                                                           bool enableBackendValidation,
+                                                           bool beginCaptureOnStartup) {
             ComPtr<IDXGIFactory4> factory;
 
             uint32_t dxgiFactoryFlags = 0;
@@ -49,6 +50,14 @@ namespace dawn_native { namespace d3d12 {
                                                      DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
                     }
                 }
+
+                if (beginCaptureOnStartup) {
+                    ComPtr<IDXGraphicsAnalysis> graphicsAnalysis;
+                    if (SUCCEEDED(functions->dxgiGetDebugInterface1(
+                            0, IID_PPV_ARGS(&graphicsAnalysis)))) {
+                        graphicsAnalysis->BeginCapture();
+                    }
+                }
             }
 
             if (FAILED(functions->createDxgiFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)))) {
@@ -68,8 +77,11 @@ namespace dawn_native { namespace d3d12 {
         mFunctions = std::make_unique<PlatformFunctions>();
         DAWN_TRY(mFunctions->LoadFunctions());
 
-        DAWN_TRY_ASSIGN(
-            mFactory, CreateFactory(mFunctions.get(), GetInstance()->IsBackendValidationEnabled()));
+        const auto instance = GetInstance();
+
+        DAWN_TRY_ASSIGN(mFactory,
+                        CreateFactory(mFunctions.get(), instance->IsBackendValidationEnabled(),
+                                      instance->IsBeginCaptureOnStartupEnabled()));
 
         return {};
     }

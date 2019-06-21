@@ -52,7 +52,10 @@ namespace dawn_native {
         const char* ToggleEnumToName(Toggle toggle);
 
         void EnableBackendValidation(bool enableBackendValidation);
-        bool IsBackendValidationEnabled();
+        bool IsBackendValidationEnabled() const;
+
+        void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
+        bool IsBeginCaptureOnStartupEnabled() const;
 
       private:
         // Lazily creates connections to all backends that have been compiled.
@@ -70,6 +73,7 @@ namespace dawn_native {
 
         bool mToggleNameToEnumMapInitialized = false;
         bool mEnableBackendValidation = false;
+        bool mBeginCaptureOnStartup = false;
 
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<std::unique_ptr<AdapterBase>> mAdapters;

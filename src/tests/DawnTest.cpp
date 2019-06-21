@@ -109,13 +109,20 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
             continue;
         }
 
+        if (strcmp("-c", argv[i]) == 0 || strcmp("--begin-capture-on-startup", argv[i]) == 0) {
+            mBeginCaptureOnStartup = true;
+            continue;
+        }
+
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
             std::cout << "\n\nUsage: " << argv[0]
-                      << " [GTEST_FLAGS...] [-w] [--enable-validation-layers]\n";
-            std::cout << "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n";
-            std::cout << "  -d, --enable-backend-validation: Enable backend validation (defaults"
-                      << " to disabled)\n";
-            std::cout << std::endl;
+                      << " [GTEST_FLAGS...] [-w] [--enable-validation-layers]\n"
+                         "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
+                         "  -d, --enable-backend-validation: Enable backend validation (defaults"
+                         " to disabled)\n"
+                         "  -c, --begin-capture-on-startup: Begin debug capture on startup "
+                         "(defaults to no capture)"
+                      << std::endl;
             continue;
         }
     }
@@ -126,6 +133,7 @@ void DawnTestEnvironment::SetUp() {
 
     mInstance = std::make_unique<dawn_native::Instance>();
     mInstance->EnableBackendValidation(mEnableBackendValidation);
+    mInstance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
 
     static constexpr dawn_native::BackendType kAllBackends[] = {
         dawn_native::BackendType::D3D12,
@@ -142,12 +150,18 @@ void DawnTestEnvironment::SetUp() {
         }
     }
 
-    std::cout << "Testing configuration\n";
-    std::cout << "---------------------\n";
-    std::cout << "UseWire: " << (mUseWire ? "true" : "false") << "\n";
-    std::cout << "EnableBackendValidation: " << (mEnableBackendValidation ? "true" : "false")
-              << "\n";
-    std::cout << "\n";
+    std::cout << "Testing configuration\n"
+                 "---------------------\n"
+                 "UseWire: "
+              << (mUseWire ? "true" : "false")
+              << "\n"
+                 "EnableBackendValidation: "
+              << (mEnableBackendValidation ? "true" : "false")
+              << "\n"
+                 "BeginCaptureOnStartup: "
+              << (mBeginCaptureOnStartup ? "true" : "false")
+              << "\n"
+                 "\n";
 
     // Preparing for outputting hex numbers
     std::cout << std::showbase << std::hex << std::setfill('0') << std::setw(4);
