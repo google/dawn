@@ -34,6 +34,12 @@ namespace {
             // Using the options that are used by Dawn, they appear in ShaderModuleD3D12.cpp
             options.SetFlipVertY(true);
             options.SetHLSLShaderModel(51);
+            // TODO (hao.x.li@intel.com): The HLSLPointCoordCompat and HLSLPointSizeCompat are
+            // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,
+            // but should be removed once WebGPU requires there is no gl_PointSize builtin.
+            // See https://github.com/gpuweb/gpuweb/issues/332
+            options.SetHLSLPointCoordCompat(true);
+            options.SetHLSLPointSizeCompat(true);
             compiler.CompileSpvToHlsl(input.data(), input.size(), options);
         });
 
