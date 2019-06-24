@@ -441,6 +441,14 @@ namespace dawn_native { namespace d3d12 {
             }
 
             for (size_t i = 0; i < usages.textures.size(); ++i) {
+                Texture* texture = ToBackend(usages.textures[i]);
+                // TODO(natlee@microsoft.com): Update clearing here when subresource tracking is
+                // implemented
+                texture->EnsureSubresourceContentInitialized(
+                    commandList, 0, texture->GetNumMipLevels(), 0, texture->GetArrayLayers());
+            }
+
+            for (size_t i = 0; i < usages.textures.size(); ++i) {
                 D3D12_RESOURCE_BARRIER barrier;
                 if (ToBackend(usages.textures[i])
                         ->CreateD3D12ResourceBarrierIfNeeded(&barrier, usages.textureUsages[i])) {
@@ -500,6 +508,15 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* buffer = ToBackend(copy->source.buffer.Get());
                     Texture* texture = ToBackend(copy->destination.texture.Get());
 
+                    if (IsCompleteSubresourceCopiedTo(texture, copy->copySize,
+                                                      copy->destination.level)) {
+                        texture->SetIsSubresourceContentInitialized(copy->destination.level, 1,
+                                                                    copy->destination.slice, 1);
+                    } else {
+                        texture->EnsureSubresourceContentInitialized(
+                            commandList, copy->destination.level, 1, copy->destination.slice, 1);
+                    }
+
                     buffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferSrc);
                     texture->TransitionUsageNow(commandList, dawn::TextureUsageBit::TransferDst);
 
@@ -543,6 +560,9 @@ namespace dawn_native { namespace d3d12 {
                     CopyTextureToBufferCmd* copy = mCommands.NextCommand<CopyTextureToBufferCmd>();
                     Texture* texture = ToBackend(copy->source.texture.Get());
                     Buffer* buffer = ToBackend(copy->destination.buffer.Get());
+
+                    texture->EnsureSubresourceContentInitialized(commandList, copy->source.level, 1,
+                                                                 copy->source.slice, 1);
 
                     texture->TransitionUsageNow(commandList, dawn::TextureUsageBit::TransferSrc);
                     buffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferDst);
@@ -591,6 +611,16 @@ namespace dawn_native { namespace d3d12 {
                     Texture* source = ToBackend(copy->source.texture.Get());
                     Texture* destination = ToBackend(copy->destination.texture.Get());
 
+                    source->EnsureSubresourceContentInitialized(commandList, copy->source.level, 1,
+                                                                copy->source.slice, 1);
+                    if (IsCompleteSubresourceCopiedTo(destination, copy->copySize,
+                                                      copy->destination.level)) {
+                        destination->SetIsSubresourceContentInitialized(copy->destination.level, 1,
+                                                                        copy->destination.slice, 1);
+                    } else {
+                        destination->EnsureSubresourceContentInitialized(
+                            commandList, copy->destination.level, 1, copy->destination.slice, 1);
+                    }
                     source->TransitionUsageNow(commandList, dawn::TextureUsageBit::TransferSrc);
                     destination->TransitionUsageNow(commandList,
                                                     dawn::TextureUsageBit::TransferDst);
@@ -599,7 +629,6 @@ namespace dawn_native { namespace d3d12 {
                                            destination->GetSize(), copy->copySize)) {
                         commandList->CopyResource(destination->GetD3D12Resource(),
                                                   source->GetD3D12Resource());
-
                     } else {
                         D3D12_TEXTURE_COPY_LOCATION srcLocation =
                             CreateTextureCopyLocationForTexture(*source, copy->source.level,
@@ -732,18 +761,43 @@ namespace dawn_native { namespace d3d12 {
         {
             for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
                 auto& attachmentInfo = renderPass->colorAttachments[i];
+                TextureView* view = ToBackend(attachmentInfo.view.Get());
 
                 // Load op - color
+                ASSERT(view->GetLevelCount() == 1);
+                ASSERT(view->GetLayerCount() == 1);
                 if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
                     D3D12_CPU_DESCRIPTOR_HANDLE handle = args.RTVs[i];
                     commandList->ClearRenderTargetView(handle, &attachmentInfo.clearColor.r, 0,
                                                        nullptr);
+                } else if (attachmentInfo.loadOp == dawn::LoadOp::Load && view->GetTexture()) {
+                    ToBackend(view->GetTexture())
+                        ->EnsureSubresourceContentInitialized(commandList, view->GetBaseMipLevel(),
+                                                              1, view->GetBaseArrayLayer(), 1);
+                }
+                switch (attachmentInfo.storeOp) {
+                    case dawn::StoreOp::Store: {
+                        view->GetTexture()->SetIsSubresourceContentInitialized(
+                            view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                    } break;
+
+                    default: { UNREACHABLE(); } break;
                 }
             }
 
             if (renderPass->hasDepthStencilAttachment) {
                 auto& attachmentInfo = renderPass->depthStencilAttachment;
                 Texture* texture = ToBackend(renderPass->depthStencilAttachment.view->GetTexture());
+                if ((texture->GetFormat().HasDepth() &&
+                     attachmentInfo.depthLoadOp == dawn::LoadOp::Load) ||
+                    (texture->GetFormat().HasStencil() &&
+                     attachmentInfo.stencilLoadOp == dawn::LoadOp::Load)) {
+                    texture->EnsureSubresourceContentInitialized(
+                        commandList, attachmentInfo.view->GetBaseMipLevel(),
+                        attachmentInfo.view->GetLevelCount(),
+                        attachmentInfo.view->GetBaseArrayLayer(),
+                        attachmentInfo.view->GetLayerCount());
+                }
 
                 // Load op - depth/stencil
                 bool doDepthClear = texture->GetFormat().HasDepth() &&
@@ -766,6 +820,11 @@ namespace dawn_native { namespace d3d12 {
                     uint8_t clearStencil = static_cast<uint8_t>(attachmentInfo.clearStencil);
                     commandList->ClearDepthStencilView(
                         handle, clearFlags, attachmentInfo.clearDepth, clearStencil, 0, nullptr);
+                    texture->SetIsSubresourceContentInitialized(
+                        attachmentInfo.view->GetBaseMipLevel(),
+                        attachmentInfo.view->GetLevelCount(),
+                        attachmentInfo.view->GetBaseArrayLayer(),
+                        attachmentInfo.view->GetLayerCount());
                 }
             }
         }

@@ -43,13 +43,24 @@ namespace dawn_native { namespace d3d12 {
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                 D3D12_RESOURCE_STATES newState);
 
-        D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(uint32_t mipSlice,
-                                                       uint32_t arrayLayers,
-                                                       uint32_t baseArrayLayer) const;
+        D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(uint32_t baseMipLevel,
+                                                       uint32_t baseArrayLayer,
+                                                       uint32_t layerCount) const;
+        D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor(uint32_t baseMipLevel) const;
+        void EnsureSubresourceContentInitialized(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                                 uint32_t baseMipLevel,
+                                                 uint32_t levelCount,
+                                                 uint32_t baseArrayLayer,
+                                                 uint32_t layerCount);
 
       private:
         // Dawn API
         void DestroyImpl() override;
+        void ClearTexture(ComPtr<ID3D12GraphicsCommandList> commandList,
+                          uint32_t baseMipLevel,
+                          uint32_t levelCount,
+                          uint32_t baseArrayLayer,
+                          uint32_t layerCount);
 
         UINT16 GetDepthOrArraySize();
 
