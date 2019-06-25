@@ -109,6 +109,7 @@ class DawnTestEnvironment : public testing::Environment {
     void SetUp() override;
 
     bool UsesWire() const;
+    bool IsBackendValidationEnabled() const;
     dawn_native::Instance* GetInstance() const;
     GLFWwindow* GetWindowForBackend(dawn_native::BackendType type) const;
 
@@ -151,6 +152,7 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
     bool IsMacOS() const;
 
     bool UsesWire() const;
+    bool IsBackendValidationEnabled() const;
 
     void StartExpectDeviceError();
     bool EndExpectDeviceError();

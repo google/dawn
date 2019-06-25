@@ -190,6 +190,10 @@ bool DawnTestEnvironment::UsesWire() const {
     return mUseWire;
 }
 
+bool DawnTestEnvironment::IsBackendValidationEnabled() const {
+    return mEnableBackendValidation;
+}
+
 dawn_native::Instance* DawnTestEnvironment::GetInstance() const {
     return mInstance.get();
 }
@@ -294,6 +298,10 @@ bool DawnTest::IsMacOS() const {
 
 bool DawnTest::UsesWire() const {
     return gTestEnv->UsesWire();
+}
+
+bool DawnTest::IsBackendValidationEnabled() const {
+    return gTestEnv->IsBackendValidationEnabled();
 }
 
 void DawnTest::SetUp() {
