@@ -19,129 +19,132 @@
 #include "utils/DawnHelpers.h"
 
 class CopyCommandTest : public ValidationTest {
-    protected:
-        dawn::Buffer CreateBuffer(uint64_t size, dawn::BufferUsageBit usage) {
-            dawn::BufferDescriptor descriptor;
-            descriptor.size = size;
-            descriptor.usage = usage;
+  protected:
+    dawn::Buffer CreateBuffer(uint64_t size, dawn::BufferUsageBit usage) {
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = usage;
 
-            return device.CreateBuffer(&descriptor);
+        return device.CreateBuffer(&descriptor);
+    }
+
+    dawn::Texture Create2DTexture(uint32_t width,
+                                  uint32_t height,
+                                  uint32_t mipLevelCount,
+                                  uint32_t arrayLayerCount,
+                                  dawn::TextureFormat format,
+                                  dawn::TextureUsageBit usage,
+                                  uint32_t sampleCount = 1) {
+        dawn::TextureDescriptor descriptor;
+        descriptor.dimension = dawn::TextureDimension::e2D;
+        descriptor.size.width = width;
+        descriptor.size.height = height;
+        descriptor.size.depth = 1;
+        descriptor.arrayLayerCount = arrayLayerCount;
+        descriptor.sampleCount = sampleCount;
+        descriptor.format = format;
+        descriptor.mipLevelCount = mipLevelCount;
+        descriptor.usage = usage;
+        dawn::Texture tex = device.CreateTexture(&descriptor);
+        return tex;
+    }
+
+    // TODO(jiawei.shao@intel.com): support more pixel formats
+    uint32_t TextureFormatPixelSize(dawn::TextureFormat format) {
+        switch (format) {
+            case dawn::TextureFormat::RG8Unorm:
+                return 2;
+            case dawn::TextureFormat::RGBA8Unorm:
+                return 4;
+            default:
+                UNREACHABLE();
+                return 0;
         }
+    }
 
-        dawn::Texture Create2DTexture(uint32_t width, uint32_t height, uint32_t mipLevelCount,
-                                      uint32_t arrayLayerCount, dawn::TextureFormat format,
-                                      dawn::TextureUsageBit usage, uint32_t sampleCount = 1) {
-            dawn::TextureDescriptor descriptor;
-            descriptor.dimension = dawn::TextureDimension::e2D;
-            descriptor.size.width = width;
-            descriptor.size.height = height;
-            descriptor.size.depth = 1;
-            descriptor.arrayLayerCount = arrayLayerCount;
-            descriptor.sampleCount = sampleCount;
-            descriptor.format = format;
-            descriptor.mipLevelCount = mipLevelCount;
-            descriptor.usage = usage;
-            dawn::Texture tex = device.CreateTexture(&descriptor);
-            return tex;
+    uint32_t BufferSizeForTextureCopy(
+        uint32_t width,
+        uint32_t height,
+        uint32_t depth,
+        dawn::TextureFormat format = dawn::TextureFormat::RGBA8Unorm) {
+        uint32_t bytesPerPixel = TextureFormatPixelSize(format);
+        uint32_t rowPitch = Align(width * bytesPerPixel, kTextureRowPitchAlignment);
+        return (rowPitch * (height - 1) + width * bytesPerPixel) * depth;
+    }
+
+    void ValidateExpectation(dawn::CommandEncoder encoder, utils::Expectation expectation) {
+        if (expectation == utils::Expectation::Success) {
+            encoder.Finish();
+        } else {
+            ASSERT_DEVICE_ERROR(encoder.Finish());
         }
+    }
 
-        // TODO(jiawei.shao@intel.com): support more pixel formats
-        uint32_t TextureFormatPixelSize(dawn::TextureFormat format) {
-            switch (format) {
-                case dawn::TextureFormat::RG8Unorm:
-                    return 2;
-                case dawn::TextureFormat::RGBA8Unorm:
-                    return 4;
-                default:
-                    UNREACHABLE();
-                    return 0;
-            }
-        }
+    void TestB2TCopy(utils::Expectation expectation,
+                     dawn::Buffer srcBuffer,
+                     uint64_t srcOffset,
+                     uint32_t srcRowPitch,
+                     uint32_t srcImageHeight,
+                     dawn::Texture destTexture,
+                     uint32_t destLevel,
+                     uint32_t destSlice,
+                     dawn::Origin3D destOrigin,
+                     dawn::Extent3D extent3D) {
+        dawn::BufferCopyView bufferCopyView =
+            utils::CreateBufferCopyView(srcBuffer, srcOffset, srcRowPitch, srcImageHeight);
+        dawn::TextureCopyView textureCopyView =
+            utils::CreateTextureCopyView(destTexture, destLevel, destSlice, destOrigin);
 
-        uint32_t BufferSizeForTextureCopy(
-            uint32_t width,
-            uint32_t height,
-            uint32_t depth,
-            dawn::TextureFormat format = dawn::TextureFormat::RGBA8Unorm) {
-            uint32_t bytesPerPixel = TextureFormatPixelSize(format);
-            uint32_t rowPitch = Align(width * bytesPerPixel, kTextureRowPitchAlignment);
-            return (rowPitch * (height - 1) + width * bytesPerPixel) * depth;
-        }
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &extent3D);
 
-        void ValidateExpectation(dawn::CommandEncoder encoder, utils::Expectation expectation) {
-            if (expectation == utils::Expectation::Success) {
-                encoder.Finish();
-            } else {
-                ASSERT_DEVICE_ERROR(encoder.Finish());
-            }
-        }
+        ValidateExpectation(encoder, expectation);
+    }
 
-        void TestB2TCopy(utils::Expectation expectation,
-                         dawn::Buffer srcBuffer,
-                         uint64_t srcOffset,
-                         uint32_t srcRowPitch,
-                         uint32_t srcImageHeight,
-                         dawn::Texture destTexture,
-                         uint32_t destLevel,
-                         uint32_t destSlice,
-                         dawn::Origin3D destOrigin,
-                         dawn::Extent3D extent3D) {
-            dawn::BufferCopyView bufferCopyView =
-                utils::CreateBufferCopyView(srcBuffer, srcOffset, srcRowPitch, srcImageHeight);
-            dawn::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(destTexture, destLevel, destSlice, destOrigin);
+    void TestT2BCopy(utils::Expectation expectation,
+                     dawn::Texture srcTexture,
+                     uint32_t srcLevel,
+                     uint32_t srcSlice,
+                     dawn::Origin3D srcOrigin,
+                     dawn::Buffer destBuffer,
+                     uint64_t destOffset,
+                     uint32_t destRowPitch,
+                     uint32_t destImageHeight,
+                     dawn::Extent3D extent3D) {
+        dawn::BufferCopyView bufferCopyView =
+            utils::CreateBufferCopyView(destBuffer, destOffset, destRowPitch, destImageHeight);
+        dawn::TextureCopyView textureCopyView =
+            utils::CreateTextureCopyView(srcTexture, srcLevel, srcSlice, srcOrigin);
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &extent3D);
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D);
 
-            ValidateExpectation(encoder, expectation);
-        }
+        ValidateExpectation(encoder, expectation);
+    }
 
-        void TestT2BCopy(utils::Expectation expectation,
-                         dawn::Texture srcTexture,
-                         uint32_t srcLevel,
-                         uint32_t srcSlice,
-                         dawn::Origin3D srcOrigin,
-                         dawn::Buffer destBuffer,
-                         uint64_t destOffset,
-                         uint32_t destRowPitch,
-                         uint32_t destImageHeight,
-                         dawn::Extent3D extent3D) {
-            dawn::BufferCopyView bufferCopyView =
-                utils::CreateBufferCopyView(destBuffer, destOffset, destRowPitch, destImageHeight);
-            dawn::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(srcTexture, srcLevel, srcSlice, srcOrigin);
+    void TestT2TCopy(utils::Expectation expectation,
+                     dawn::Texture srcTexture,
+                     uint32_t srcLevel,
+                     uint32_t srcSlice,
+                     dawn::Origin3D srcOrigin,
+                     dawn::Texture dstTexture,
+                     uint32_t dstLevel,
+                     uint32_t dstSlice,
+                     dawn::Origin3D dstOrigin,
+                     dawn::Extent3D extent3D) {
+        dawn::TextureCopyView srcTextureCopyView =
+            utils::CreateTextureCopyView(srcTexture, srcLevel, srcSlice, srcOrigin);
+        dawn::TextureCopyView dstTextureCopyView =
+            utils::CreateTextureCopyView(dstTexture, dstLevel, dstSlice, dstOrigin);
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D);
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &extent3D);
 
-            ValidateExpectation(encoder, expectation);
-        }
-
-        void TestT2TCopy(utils::Expectation expectation,
-                         dawn::Texture srcTexture,
-                         uint32_t srcLevel,
-                         uint32_t srcSlice,
-                         dawn::Origin3D srcOrigin,
-                         dawn::Texture dstTexture,
-                         uint32_t dstLevel,
-                         uint32_t dstSlice,
-                         dawn::Origin3D dstOrigin,
-                         dawn::Extent3D extent3D) {
-            dawn::TextureCopyView srcTextureCopyView =
-                utils::CreateTextureCopyView(srcTexture, srcLevel, srcSlice, srcOrigin);
-            dawn::TextureCopyView dstTextureCopyView =
-                utils::CreateTextureCopyView(dstTexture, dstLevel, dstSlice, dstOrigin);
-
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &extent3D);
-
-            ValidateExpectation(encoder, expectation);
-        }
+        ValidateExpectation(encoder, expectation);
+    }
 };
 
-class CopyCommandTest_B2B : public CopyCommandTest {
-};
+class CopyCommandTest_B2B : public CopyCommandTest {};
 
 // TODO(cwallez@chromium.org): Test that copies are forbidden inside renderpasses
 
@@ -263,8 +266,7 @@ TEST_F(CopyCommandTest_B2B, BuffersInErrorState) {
     }
 }
 
-class CopyCommandTest_B2T : public CopyCommandTest {
-};
+class CopyCommandTest_B2T : public CopyCommandTest {};
 
 // Test a successfull B2T copy
 TEST_F(CopyCommandTest_B2T, Success) {
@@ -344,7 +346,8 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
     {
         uint32_t sourceBufferSize = BufferSizeForTextureCopy(7, 3, 1);
         ASSERT_TRUE(256 * 3 > sourceBufferSize) << "row pitch * height should overflow buffer";
-        dawn::Buffer sourceBuffer = CreateBuffer(sourceBufferSize, dawn::BufferUsageBit::TransferSrc);
+        dawn::Buffer sourceBuffer =
+            CreateBuffer(sourceBufferSize, dawn::BufferUsageBit::TransferSrc);
 
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
                     {7, 3, 1});
@@ -577,8 +580,33 @@ TEST_F(CopyCommandTest_B2T, TextureCopyBufferSizeLastRowComputation) {
     }
 }
 
-class CopyCommandTest_T2B : public CopyCommandTest {
-};
+// Test copy from buffer to mip map of non square texture
+TEST_F(CopyCommandTest_B2T, CopyToMipmapOfNonSquareTexture) {
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 2, 1);
+    dawn::Buffer source = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferSrc);
+    uint32_t maxMipmapLevel = 3;
+    dawn::Texture destination =
+        Create2DTexture(4, 2, maxMipmapLevel, 1, dawn::TextureFormat::RGBA8Unorm,
+                        dawn::TextureUsageBit::TransferDst);
+
+    // Copy to top level mip map
+    TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, maxMipmapLevel - 1, 0,
+                {0, 0, 0}, {1, 1, 1});
+    // Copy to high level mip map
+    TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, maxMipmapLevel - 2, 0,
+                {0, 0, 0}, {2, 1, 1});
+    // Mip level out of range
+    TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, maxMipmapLevel, 0,
+                {0, 0, 0}, {1, 1, 1});
+    // Copy origin out of range
+    TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, maxMipmapLevel - 2, 0,
+                {1, 0, 0}, {2, 1, 1});
+    // Copy size out of range
+    TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, maxMipmapLevel - 2, 0,
+                {0, 0, 0}, {2, 2, 1});
+}
+
+class CopyCommandTest_T2B : public CopyCommandTest {};
 
 // Test a successfull T2B copy
 TEST_F(CopyCommandTest_T2B, Success) {
@@ -682,7 +710,8 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     {
         uint32_t destinationBufferSize = BufferSizeForTextureCopy(7, 3, 1);
         ASSERT_TRUE(256 * 3 > destinationBufferSize) << "row pitch * height should overflow buffer";
-        dawn::Buffer destinationBuffer = CreateBuffer(destinationBufferSize, dawn::BufferUsageBit::TransferDst);
+        dawn::Buffer destinationBuffer =
+            CreateBuffer(destinationBufferSize, dawn::BufferUsageBit::TransferDst);
         TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destinationBuffer, 0, 256,
                     0, {7, 3, 1});
     }
@@ -886,6 +915,31 @@ TEST_F(CopyCommandTest_T2B, TextureCopyBufferSizeLastRowComputation) {
     }
 }
 
+// Test copy from mip map of non square texture to buffer
+TEST_F(CopyCommandTest_T2B, CopyFromMipmapOfNonSquareTexture) {
+    uint32_t maxMipmapLevel = 3;
+    dawn::Texture source = Create2DTexture(4, 2, maxMipmapLevel, 1, dawn::TextureFormat::RGBA8Unorm,
+                                           dawn::TextureUsageBit::TransferSrc);
+    uint64_t bufferSize = BufferSizeForTextureCopy(4, 2, 1);
+    dawn::Buffer destination = CreateBuffer(bufferSize, dawn::BufferUsageBit::TransferDst);
+
+    // Copy from top level mip map
+    TestT2BCopy(utils::Expectation::Success, source, maxMipmapLevel - 1, 0, {0, 0, 0}, destination,
+                0, 256, 0, {1, 1, 1});
+    // Copy from high level mip map
+    TestT2BCopy(utils::Expectation::Success, source, maxMipmapLevel - 2, 0, {0, 0, 0}, destination,
+                0, 256, 0, {2, 1, 1});
+    // Mip level out of range
+    TestT2BCopy(utils::Expectation::Failure, source, maxMipmapLevel, 0, {0, 0, 0}, destination, 0,
+                256, 0, {2, 1, 1});
+    // Copy origin out of range
+    TestT2BCopy(utils::Expectation::Failure, source, maxMipmapLevel - 2, 0, {2, 0, 0}, destination,
+                0, 256, 0, {2, 1, 1});
+    // Copy size out of range
+    TestT2BCopy(utils::Expectation::Failure, source, maxMipmapLevel - 2, 0, {1, 0, 0}, destination,
+                0, 256, 0, {2, 1, 1});
+}
+
 class CopyCommandTest_T2T : public CopyCommandTest {};
 
 TEST_F(CopyCommandTest_T2T, Success) {
@@ -1078,6 +1132,31 @@ TEST_F(CopyCommandTest_T2T, MultisampledCopies) {
         TestT2TCopy(utils::Expectation::Failure, sourceMultiSampled4x, 0, 0, {0, 0, 0},
                     destinationMultiSampled4x, 0, 0, {0, 0, 0}, {15, 15, 1});
     }
+}
+
+// Test copy to mip map of non square textures
+TEST_F(CopyCommandTest_T2T, CopyToMipmapOfNonSquareTexture) {
+    uint32_t maxMipmapLevel = 3;
+    dawn::Texture source = Create2DTexture(4, 2, maxMipmapLevel, 1, dawn::TextureFormat::RGBA8Unorm,
+                                           dawn::TextureUsageBit::TransferSrc);
+    dawn::Texture destination =
+        Create2DTexture(4, 2, maxMipmapLevel, 1, dawn::TextureFormat::RGBA8Unorm,
+                        dawn::TextureUsageBit::TransferDst);
+    // Copy to top level mip map
+    TestT2TCopy(utils::Expectation::Success, source, maxMipmapLevel - 1, 0, {0, 0, 0}, destination,
+                maxMipmapLevel - 1, 0, {0, 0, 0}, {1, 1, 1});
+    // Copy to high level mip map
+    TestT2TCopy(utils::Expectation::Success, source, maxMipmapLevel - 2, 0, {0, 0, 0}, destination,
+                maxMipmapLevel - 2, 0, {0, 0, 0}, {2, 1, 1});
+    // Mip level out of range
+    TestT2TCopy(utils::Expectation::Failure, source, maxMipmapLevel, 0, {0, 0, 0}, destination,
+                maxMipmapLevel, 0, {0, 0, 0}, {2, 1, 1});
+    // Copy origin out of range
+    TestT2TCopy(utils::Expectation::Failure, source, maxMipmapLevel - 2, 0, {2, 0, 0}, destination,
+                maxMipmapLevel - 2, 0, {2, 0, 0}, {2, 1, 1});
+    // Copy size out of range
+    TestT2TCopy(utils::Expectation::Failure, source, maxMipmapLevel - 2, 0, {1, 0, 0}, destination,
+                maxMipmapLevel - 2, 0, {0, 0, 0}, {2, 1, 1});
 }
 
 class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {

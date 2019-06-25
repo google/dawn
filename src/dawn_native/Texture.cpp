@@ -497,6 +497,25 @@ namespace dawn_native {
         return mSampleCount > 1;
     }
 
+    Extent3D TextureBase::GetMipLevelSize(uint64_t level) const {
+        Extent3D extent;
+        extent.width = std::max(mSize.width >> level, 1u);
+        extent.height = std::max(mSize.height >> level, 1u);
+        extent.depth = std::max(mSize.depth >> level, 1u);
+
+        // Compressed Textures will have paddings if their width or height is not a multiple of
+        // 4 at non-zero mipmap levels.
+        if (mFormat.isCompressed) {
+            // TODO(jiawei.shao@intel.com): check if there are any overflows.
+            uint32_t blockWidth = mFormat.blockWidth;
+            uint32_t blockHeight = mFormat.blockHeight;
+            extent.width = (extent.width + blockWidth - 1) / blockWidth * blockWidth;
+            extent.height = (extent.height + blockHeight - 1) / blockHeight * blockHeight;
+        }
+
+        return extent;
+    }
+
     TextureViewBase* TextureBase::CreateDefaultView() {
         TextureViewDescriptor descriptor = {};
 

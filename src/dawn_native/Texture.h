@@ -99,6 +99,8 @@ namespace dawn_native {
 
         bool IsMultisampledTexture() const;
 
+        Extent3D GetMipLevelSize(uint64_t level) const;
+
         // Dawn API
         TextureViewBase* CreateDefaultView();
         TextureViewBase* CreateView(const TextureViewDescriptor* descriptor);

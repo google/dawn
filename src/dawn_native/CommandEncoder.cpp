@@ -47,24 +47,12 @@ namespace dawn_native {
             // overflows.
             uint64_t level = textureCopy.level;
 
-            uint32_t widthAtLevel = texture->GetSize().width >> level;
-            uint32_t heightAtLevel = texture->GetSize().height >> level;
-
-            // Compressed Textures will have paddings if their width or height is not a multiple of
-            // 4 at non-zero mipmap levels.
-            const Format& textureFormat = texture->GetFormat();
-            if (textureFormat.isCompressed) {
-                // TODO(jiawei.shao@intel.com): check if there are any overflows.
-                uint32_t blockWidth = textureFormat.blockWidth;
-                uint32_t blockHeight = textureFormat.blockHeight;
-                widthAtLevel = (widthAtLevel + blockWidth - 1) / blockWidth * blockWidth;
-                heightAtLevel = (heightAtLevel + blockHeight - 1) / blockHeight * blockHeight;
-            }
+            Extent3D extent = texture->GetMipLevelSize(level);
 
             if (uint64_t(textureCopy.origin.x) + uint64_t(copySize.width) >
-                    static_cast<uint64_t>(widthAtLevel) ||
+                    static_cast<uint64_t>(extent.width) ||
                 uint64_t(textureCopy.origin.y) + uint64_t(copySize.height) >
-                    static_cast<uint64_t>(heightAtLevel)) {
+                    static_cast<uint64_t>(extent.height)) {
                 return DAWN_VALIDATION_ERROR("Copy would touch outside of the texture");
             }
 
