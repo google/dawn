@@ -16,6 +16,8 @@
 
 #include "common/Math.h"
 
+#include <cmath>
+
 // Tests for ScanForward
 TEST(Math, ScanForward) {
     // Test extrema
@@ -132,4 +134,19 @@ TEST(Math, IsAligned) {
     for (uint32_t i = 1; i < 64; ++i) {
         ASSERT_FALSE(IsAligned(64 + i, 64));
     }
+}
+
+// Tests for float32 to float16 conversion
+TEST(Math, Float32ToFloat16) {
+    ASSERT_EQ(Float32ToFloat16(0.0f), 0x0000);
+    ASSERT_EQ(Float32ToFloat16(-0.0f), 0x8000);
+
+    ASSERT_EQ(Float32ToFloat16(INFINITY), 0x7C00);
+    ASSERT_EQ(Float32ToFloat16(-INFINITY), 0xFC00);
+
+    // Check that NaN is converted to a value in one of the float16 NaN ranges
+    uint16_t nan16 = Float32ToFloat16(NAN);
+    ASSERT_TRUE(nan16 > 0xFC00 || (nan16 < 0x8000 && nan16 > 0x7C00));
+
+    ASSERT_EQ(Float32ToFloat16(1.0f), 0x3C00);
 }

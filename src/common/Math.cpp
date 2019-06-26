@@ -85,8 +85,10 @@ uint16_t Float32ToFloat16(float fp32) {
     uint32_t sign16 = (fp32i & 0x80000000) >> 16;
     uint32_t mantissaAndExponent = fp32i & 0x7FFFFFFF;
 
-    if (mantissaAndExponent > 0x47FFEFFF) {  // Infinity
-        return static_cast<uint16_t>(sign16 | 0x7FFF);
+    if (mantissaAndExponent > 0x7F800000) {  // NaN
+        return 0x7FFF;
+    } else if (mantissaAndExponent > 0x47FFEFFF) {  // Infinity
+        return static_cast<uint16_t>(sign16 | 0x7C00);
     } else if (mantissaAndExponent < 0x38800000) {  // Denormal
         uint32_t mantissa = (mantissaAndExponent & 0x007FFFFF) | 0x00800000;
         int32_t exponent = 113 - (mantissaAndExponent >> 23);
