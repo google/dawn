@@ -67,6 +67,13 @@ class EnumType(Type):
         Type.__init__(self, name, json_data)
         self.values = [EnumValue(Name(m['name']), m['value']) for m in self.json_data['values']]
 
+        # Assert that all values are unique in enums
+        all_values = set()
+        for value in self.values:
+            if value.value in all_values:
+                raise Exception("Duplicate value {} in enum {}".format(value.value, name))
+            all_values.add(value.value)
+
 BitmaskValue = namedtuple('BitmaskValue', ['name', 'value'])
 class BitmaskType(Type):
     def __init__(self, name, json_data):
