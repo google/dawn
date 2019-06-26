@@ -141,7 +141,7 @@ namespace dawn_native { namespace null {
         Buffer(Device* device, const BufferDescriptor* descriptor);
         ~Buffer();
 
-        void MapReadOperationCompleted(uint32_t serial, void* ptr, bool isWrite);
+        void MapOperationCompleted(uint32_t serial, void* ptr, bool isWrite);
         void CopyFromStaging(StagingBufferBase* staging,
                              uint64_t sourceOffset,
                              uint64_t destinationOffset,

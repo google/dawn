@@ -62,7 +62,7 @@ namespace dawn_native { namespace null {
         }
 
         StagingBufferBase* staging;
-        Buffer* destination;
+        Ref<Buffer> destination;
         uint64_t sourceOffset;
         uint64_t destinationOffset;
         uint64_t size;
@@ -153,7 +153,7 @@ namespace dawn_native { namespace null {
                                                uint64_t size) {
         auto operation = std::make_unique<CopyFromStagingToBufferOperation>();
         operation->staging = source;
-        operation->destination = reinterpret_cast<Buffer*>(destination);
+        operation->destination = ToBackend(destination);
         operation->sourceOffset = sourceOffset;
         operation->destinationOffset = destinationOffset;
         operation->size = size;
@@ -208,9 +208,9 @@ namespace dawn_native { namespace null {
 
     // Buffer
 
-    struct BufferMapReadOperation : PendingOperation {
+    struct BufferMapOperation : PendingOperation {
         virtual void Execute() {
-            buffer->MapReadOperationCompleted(serial, ptr, isWrite);
+            buffer->MapOperationCompleted(serial, ptr, isWrite);
         }
 
         Ref<Buffer> buffer;
@@ -240,7 +240,7 @@ namespace dawn_native { namespace null {
         return {};
     }
 
-    void Buffer::MapReadOperationCompleted(uint32_t serial, void* ptr, bool isWrite) {
+    void Buffer::MapOperationCompleted(uint32_t serial, void* ptr, bool isWrite) {
         if (isWrite) {
             CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr, GetSize());
         } else {
@@ -274,7 +274,7 @@ namespace dawn_native { namespace null {
     void Buffer::MapAsyncImplCommon(uint32_t serial, bool isWrite) {
         ASSERT(mBackingData);
 
-        auto operation = std::make_unique<BufferMapReadOperation>();
+        auto operation = std::make_unique<BufferMapOperation>();
         operation->buffer = this;
         operation->ptr = mBackingData.get();
         operation->serial = serial;
