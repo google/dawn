@@ -59,16 +59,21 @@ namespace dawn_native { namespace d3d12 {
                 case dawn::BindingType::StorageBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
+                    // Since SPIRV-Cross outputs HLSL shaders with RWByteAddressBuffer,
+                    // we must use D3D12_BUFFER_UAV_FLAG_RAW when making the
+                    // UNORDERED_ACCESS_VIEW_DESC. Using D3D12_BUFFER_UAV_FLAG_RAW requires
+                    // that we use DXGI_FORMAT_R32_TYPELESS as the format of the view.
+                    // DXGI_FORMAT_R32_TYPELESS requires that the element size be 4
+                    // byte aligned. Since binding.size and binding.offset are in bytes,
+                    // we need to divide by 4 to obtain the element size.
                     D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-                    // TODO(enga@google.com): investigate if this needs to be a constraint at the
-                    // API level
-                    desc.Buffer.NumElements = Align(binding.size, 256);
-                    desc.Format = DXGI_FORMAT_UNKNOWN;
+                    desc.Buffer.NumElements = binding.size / 4;
+                    desc.Format = DXGI_FORMAT_R32_TYPELESS;
                     desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-                    desc.Buffer.FirstElement = binding.offset;
-                    desc.Buffer.StructureByteStride = 1;
+                    desc.Buffer.FirstElement = binding.offset / 4;
+                    desc.Buffer.StructureByteStride = 0;
                     desc.Buffer.CounterOffsetInBytes = 0;
-                    desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+                    desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
 
                     d3d12Device->CreateUnorderedAccessView(
                         ToBackend(binding.buffer)->GetD3D12Resource().Get(), nullptr, &desc,

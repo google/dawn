@@ -97,9 +97,6 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
 
 // Test that a trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
-    // TODO(cwallez@chromium.org): Fails on D3D12, could be a spirv-cross issue?
-    DAWN_SKIP_TEST_IF(IsD3D12());
-
     BasicTest(R"(
         #version 450
         #define kInstances 4
@@ -114,7 +111,8 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
 
 // Test that a slightly-less-trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
-    // TODO(kainino@chromium.org): Fails on D3D12. Probably due to a limitation in SPIRV-Cross?
+    // TODO(kainino@chromium.org): Fails on D3D12 due to SPIRV-Cross not supporting
+    // reading structs from ByteAddressBuffer.
     DAWN_SKIP_TEST_IF(IsD3D12());
 
     BasicTest(R"(
@@ -134,9 +132,6 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
 
 // Test that a trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
-    // TODO(cwallez@chromium.org): Fails on D3D12, could be a spirv-cross issue?
-    DAWN_SKIP_TEST_IF(IsD3D12());
-
     BasicTest(R"(
         #version 450
         #define kInstances 4

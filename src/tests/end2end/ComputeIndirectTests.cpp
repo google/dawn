@@ -110,8 +110,6 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
 
 // Test basic indirect
 TEST_P(ComputeIndirectTests, Basic) {
-    // See https://bugs.chromium.org/p/dawn/issues/detail?id=159
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsNvidia());
     // TODO(hao.x.li@intel.com): Test failing on Metal with validation layer on, which blocks
     // end2end tests run with validation layer in bots. Suppress this while we're fixing.
     // See https://bugs.chromium.org/p/dawn/issues/detail?id=139
@@ -122,8 +120,6 @@ TEST_P(ComputeIndirectTests, Basic) {
 
 // Test indirect with buffer offset
 TEST_P(ComputeIndirectTests, IndirectOffset) {
-    // See https://bugs.chromium.org/p/dawn/issues/detail?id=159
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsNvidia());
     // TODO(hao.x.li@intel.com): Test failing on Metal with validation layer on, which blocks
     // end2end tests run with validation layer in bots. Suppress this while we're fixing.
     // See https://bugs.chromium.org/p/dawn/issues/detail?id=139
