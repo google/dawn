@@ -23,10 +23,11 @@
 repo_path=$(dirname "$0")/..
 
 glslang_dir="third_party/glslang/"
+shaderc_dir="third_party/shaderc/"
 spirv_cross_dir="third_party/spirv-cross/"
 spirv_headers_dir="third_party/spirv-headers/"
 spirv_tools_dir="third_party/SPIRV-Tools/"
 
 cd "$repo_path"
 
-roll-dep "${glslang_dir}" "${spirv_cross_dir}" "${spirv_headers_dir}" "${spirv_tools_dir}"
+roll-dep "$@" "${glslang_dir}" "${shaderc_dir}" "${spirv_cross_dir}" "${spirv_headers_dir}" "${spirv_tools_dir}"
