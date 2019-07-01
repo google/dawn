@@ -52,4 +52,6 @@ destType BitCast(const sourceType& source) {
 
 uint16_t Float32ToFloat16(float fp32);
 
+float SRGBToLinear(float srgb);
+
 #endif  // COMMON_MATH_H_

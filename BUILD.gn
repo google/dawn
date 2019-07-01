@@ -679,6 +679,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/RenderPassTests.cpp",
     "src/tests/end2end/SamplerTests.cpp",
     "src/tests/end2end/ScissorTests.cpp",
+    "src/tests/end2end/TextureFormatTests.cpp",
     "src/tests/end2end/TextureViewTests.cpp",
     "src/tests/end2end/TextureZeroInitTests.cpp",
     "src/tests/end2end/VertexFormatTests.cpp",

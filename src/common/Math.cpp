@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 
 #include <algorithm>
+#include <cmath>
 
 #if defined(DAWN_COMPILER_MSVC)
 #    include <intrin.h>
@@ -105,5 +106,21 @@ uint16_t Float32ToFloat16(float fp32) {
         return static_cast<uint16_t>(sign16 | (mantissaAndExponent + 0xC8000000 + 0x00000FFF +
                                                ((mantissaAndExponent >> 13) & 1)) >>
                                                   13);
+    }
+}
+
+// Based on the Khronos Data Format Specification 1.2 Section 13.3 sRGB transfer functions
+float SRGBToLinear(float srgb) {
+    // sRGB is always used in unsigned normalized formats so clamp to [0.0, 1.0]
+    if (srgb <= 0.0f) {
+        return 0.0f;
+    } else if (srgb > 1.0f) {
+        return 1.0f;
+    }
+
+    if (srgb < 0.04045f) {
+        return srgb / 12.92f;
+    } else {
+        return std::pow((srgb + 0.055f) / 1.055f, 2.4f);
     }
 }

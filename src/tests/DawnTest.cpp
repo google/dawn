@@ -688,7 +688,6 @@ namespace detail {
 
         const T* actual = static_cast<const T*>(data);
 
-        testing::AssertionResult failure = testing::AssertionFailure();
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (actual[i] != mExpected[i]) {
                 testing::AssertionResult result = testing::AssertionFailure()

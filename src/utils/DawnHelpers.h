@@ -97,7 +97,7 @@ namespace utils {
     //   utils::MakeBindGroup(device, layout, {
     //       {0, mySampler},
     //       {1, myBuffer, offset, size},
-    //       {3, myTexture}
+    //       {3, myTextureView}
     //   });
 
     // Structure with one constructor per-type of bindings, so that the initializer_list accepts

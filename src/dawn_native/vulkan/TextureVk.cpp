@@ -211,22 +211,131 @@ namespace dawn_native { namespace vulkan {
     // Converts Dawn texture format to Vulkan formats.
     VkFormat VulkanImageFormat(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::RGBA8Unorm:
-                return VK_FORMAT_R8G8B8A8_UNORM;
-            case dawn::TextureFormat::RG8Unorm:
-                return VK_FORMAT_R8G8_UNORM;
             case dawn::TextureFormat::R8Unorm:
                 return VK_FORMAT_R8_UNORM;
-            case dawn::TextureFormat::RGBA8Uint:
-                return VK_FORMAT_R8G8B8A8_UINT;
-            case dawn::TextureFormat::RG8Uint:
-                return VK_FORMAT_R8G8_UINT;
+            case dawn::TextureFormat::R8Snorm:
+                return VK_FORMAT_R8_SNORM;
             case dawn::TextureFormat::R8Uint:
                 return VK_FORMAT_R8_UINT;
+            case dawn::TextureFormat::R8Sint:
+                return VK_FORMAT_R8_SINT;
+
+            case dawn::TextureFormat::R16Unorm:
+                return VK_FORMAT_R16_UNORM;
+            case dawn::TextureFormat::R16Snorm:
+                return VK_FORMAT_R16_SNORM;
+            case dawn::TextureFormat::R16Uint:
+                return VK_FORMAT_R16_UINT;
+            case dawn::TextureFormat::R16Sint:
+                return VK_FORMAT_R16_SINT;
+            case dawn::TextureFormat::R16Float:
+                return VK_FORMAT_R16_SFLOAT;
+            case dawn::TextureFormat::RG8Unorm:
+                return VK_FORMAT_R8G8_UNORM;
+            case dawn::TextureFormat::RG8Snorm:
+                return VK_FORMAT_R8G8_SNORM;
+            case dawn::TextureFormat::RG8Uint:
+                return VK_FORMAT_R8G8_UINT;
+            case dawn::TextureFormat::RG8Sint:
+                return VK_FORMAT_R8G8_SINT;
+            case dawn::TextureFormat::B5G6R5Unorm:
+                return VK_FORMAT_B5G6R5_UNORM_PACK16;
+
+            case dawn::TextureFormat::R32Uint:
+                return VK_FORMAT_R32_UINT;
+            case dawn::TextureFormat::R32Sint:
+                return VK_FORMAT_R32_SINT;
+            case dawn::TextureFormat::R32Float:
+                return VK_FORMAT_R32_SFLOAT;
+            case dawn::TextureFormat::RG16Unorm:
+                return VK_FORMAT_R16G16_UNORM;
+            case dawn::TextureFormat::RG16Snorm:
+                return VK_FORMAT_R16G16_SNORM;
+            case dawn::TextureFormat::RG16Uint:
+                return VK_FORMAT_R16G16_UINT;
+            case dawn::TextureFormat::RG16Sint:
+                return VK_FORMAT_R16G16_SINT;
+            case dawn::TextureFormat::RG16Float:
+                return VK_FORMAT_R16G16_SFLOAT;
+            case dawn::TextureFormat::RGBA8Unorm:
+                return VK_FORMAT_R8G8B8A8_UNORM;
+            case dawn::TextureFormat::RGBA8UnormSrgb:
+                return VK_FORMAT_R8G8B8A8_SRGB;
+            case dawn::TextureFormat::RGBA8Snorm:
+                return VK_FORMAT_R8G8B8A8_SNORM;
+            case dawn::TextureFormat::RGBA8Uint:
+                return VK_FORMAT_R8G8B8A8_UINT;
+            case dawn::TextureFormat::RGBA8Sint:
+                return VK_FORMAT_R8G8B8A8_SINT;
             case dawn::TextureFormat::BGRA8Unorm:
                 return VK_FORMAT_B8G8R8A8_UNORM;
+            case dawn::TextureFormat::BGRA8UnormSrgb:
+                return VK_FORMAT_B8G8R8A8_SRGB;
+            case dawn::TextureFormat::A2RGB10Unorm:
+                return VK_FORMAT_A2R10G10B10_UNORM_PACK32;
+            case dawn::TextureFormat::B10GR11Float:
+                return VK_FORMAT_B10G11R11_UFLOAT_PACK32;
+
+            case dawn::TextureFormat::RG32Uint:
+                return VK_FORMAT_R32G32_UINT;
+            case dawn::TextureFormat::RG32Sint:
+                return VK_FORMAT_R32G32_SINT;
+            case dawn::TextureFormat::RG32Float:
+                return VK_FORMAT_R32G32_SFLOAT;
+            case dawn::TextureFormat::RGBA16Unorm:
+                return VK_FORMAT_R16G16B16A16_UNORM;
+            case dawn::TextureFormat::RGBA16Snorm:
+                return VK_FORMAT_R16G16B16A16_SNORM;
+            case dawn::TextureFormat::RGBA16Uint:
+                return VK_FORMAT_R16G16B16A16_UINT;
+            case dawn::TextureFormat::RGBA16Sint:
+                return VK_FORMAT_R16G16B16A16_SINT;
+            case dawn::TextureFormat::RGBA16Float:
+                return VK_FORMAT_R16G16B16A16_SFLOAT;
+
+            case dawn::TextureFormat::RGBA32Uint:
+                return VK_FORMAT_R32G32B32A32_UINT;
+            case dawn::TextureFormat::RGBA32Sint:
+                return VK_FORMAT_R32G32B32A32_SINT;
+            case dawn::TextureFormat::RGBA32Float:
+                return VK_FORMAT_R32G32B32A32_SFLOAT;
+
+            case dawn::TextureFormat::Depth32Float:
+                return VK_FORMAT_D32_SFLOAT;
+            case dawn::TextureFormat::Depth24Plus:
+                return VK_FORMAT_D32_SFLOAT;
             case dawn::TextureFormat::Depth24PlusStencil8:
                 return VK_FORMAT_D32_SFLOAT_S8_UINT;
+
+            case dawn::TextureFormat::BC1RGBAUnorm:
+                return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
+            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+                return VK_FORMAT_BC1_RGBA_SRGB_BLOCK;
+            case dawn::TextureFormat::BC2RGBAUnorm:
+                return VK_FORMAT_BC2_UNORM_BLOCK;
+            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+                return VK_FORMAT_BC2_SRGB_BLOCK;
+            case dawn::TextureFormat::BC3RGBAUnorm:
+                return VK_FORMAT_BC3_UNORM_BLOCK;
+            case dawn::TextureFormat::BC3RGBAUnormSrgb:
+                return VK_FORMAT_BC3_SRGB_BLOCK;
+            case dawn::TextureFormat::BC4RSnorm:
+                return VK_FORMAT_BC4_SNORM_BLOCK;
+            case dawn::TextureFormat::BC4RUnorm:
+                return VK_FORMAT_BC4_UNORM_BLOCK;
+            case dawn::TextureFormat::BC5RGSnorm:
+                return VK_FORMAT_BC5_SNORM_BLOCK;
+            case dawn::TextureFormat::BC5RGUnorm:
+                return VK_FORMAT_BC5_UNORM_BLOCK;
+            case dawn::TextureFormat::BC6HRGBSfloat:
+                return VK_FORMAT_BC6H_SFLOAT_BLOCK;
+            case dawn::TextureFormat::BC6HRGBUfloat:
+                return VK_FORMAT_BC6H_UFLOAT_BLOCK;
+            case dawn::TextureFormat::BC7RGBAUnorm:
+                return VK_FORMAT_BC7_UNORM_BLOCK;
+            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+                return VK_FORMAT_BC7_SRGB_BLOCK;
+
             default:
                 UNREACHABLE();
         }

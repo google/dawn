@@ -150,3 +150,14 @@ TEST(Math, Float32ToFloat16) {
 
     ASSERT_EQ(Float32ToFloat16(1.0f), 0x3C00);
 }
+
+// Tests for SRGBToLinear
+TEST(Math, SRGBToLinear) {
+    ASSERT_EQ(SRGBToLinear(0.0f), 0.0f);
+    ASSERT_EQ(SRGBToLinear(1.0f), 1.0f);
+
+    ASSERT_EQ(SRGBToLinear(-1.0f), 0.0f);
+    ASSERT_EQ(SRGBToLinear(2.0f), 1.0f);
+
+    ASSERT_FLOAT_EQ(SRGBToLinear(0.5f), 0.21404114f);
+}

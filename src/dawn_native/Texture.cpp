@@ -129,19 +129,65 @@ namespace dawn_native {
 
             switch (format) {
                 case dawn::TextureFormat::R8Unorm:
+                case dawn::TextureFormat::R8Snorm:
                 case dawn::TextureFormat::R8Uint:
+                case dawn::TextureFormat::R8Sint:
                     return MakeColorFormat(format, true, 1);
+
+                case dawn::TextureFormat::R16Unorm:
+                case dawn::TextureFormat::R16Snorm:
+                case dawn::TextureFormat::R16Uint:
+                case dawn::TextureFormat::R16Sint:
+                case dawn::TextureFormat::R16Float:
                 case dawn::TextureFormat::RG8Unorm:
+                case dawn::TextureFormat::RG8Snorm:
                 case dawn::TextureFormat::RG8Uint:
+                case dawn::TextureFormat::RG8Sint:
+                case dawn::TextureFormat::B5G6R5Unorm:
                     return MakeColorFormat(format, true, 2);
+
+                case dawn::TextureFormat::R32Uint:
+                case dawn::TextureFormat::R32Sint:
+                case dawn::TextureFormat::R32Float:
+                case dawn::TextureFormat::RG16Unorm:
+                case dawn::TextureFormat::RG16Snorm:
+                case dawn::TextureFormat::RG16Uint:
+                case dawn::TextureFormat::RG16Sint:
+                case dawn::TextureFormat::RG16Float:
                 case dawn::TextureFormat::RGBA8Unorm:
+                case dawn::TextureFormat::RGBA8UnormSrgb:
+                case dawn::TextureFormat::RGBA8Snorm:
                 case dawn::TextureFormat::RGBA8Uint:
+                case dawn::TextureFormat::RGBA8Sint:
                 case dawn::TextureFormat::BGRA8Unorm:
+                case dawn::TextureFormat::BGRA8UnormSrgb:
+                case dawn::TextureFormat::A2RGB10Unorm:
+                case dawn::TextureFormat::B10GR11Float:
                     return MakeColorFormat(format, true, 4);
+
+                case dawn::TextureFormat::RG32Uint:
+                case dawn::TextureFormat::RG32Sint:
+                case dawn::TextureFormat::RG32Float:
+                case dawn::TextureFormat::RGBA16Unorm:
+                case dawn::TextureFormat::RGBA16Snorm:
+                case dawn::TextureFormat::RGBA16Uint:
+                case dawn::TextureFormat::RGBA16Sint:
+                case dawn::TextureFormat::RGBA16Float:
+                    return MakeColorFormat(format, true, 8);
+
+                case dawn::TextureFormat::RGBA32Uint:
+                case dawn::TextureFormat::RGBA32Sint:
+                case dawn::TextureFormat::RGBA32Float:
+                    return MakeColorFormat(format, true, 16);
+
+                case dawn::TextureFormat::Depth32Float:
+                case dawn::TextureFormat::Depth24Plus:
+                    return MakeDepthStencilFormat(format, Format::Aspect::Depth, 4);
                 case dawn::TextureFormat::Depth24PlusStencil8:
                     // TODO(cwallez@chromium.org): It isn't clear if this format should be copyable
                     // because its size isn't well defined, is it 4, 5 or 8?
                     return MakeDepthStencilFormat(format, Format::Aspect::DepthStencil, 4);
+
                 case dawn::TextureFormat::BC1RGBAUnorm:
                 case dawn::TextureFormat::BC1RGBAUnormSrgb:
                 case dawn::TextureFormat::BC4RSnorm:
