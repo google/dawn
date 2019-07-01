@@ -53,16 +53,16 @@ class TextureZeroInitTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         const char* vs =
             R"(#version 450
-        const vec3 pos[6] = vec3[6](vec3(-1.0f, -1.0f, 0.0f),
-                                    vec3(-1.0f,  1.0f, 0.0f),
-                                    vec3( 1.0f, -1.0f, 0.0f),
-                                    vec3( 1.0f,  1.0f, 0.0f),
-                                    vec3(-1.0f,  1.0f, 0.0f),
-                                    vec3( 1.0f, -1.0f, 0.0f)
+        const vec2 pos[6] = vec2[6](vec2(-1.0f, -1.0f),
+                                    vec2(-1.0f,  1.0f),
+                                    vec2( 1.0f, -1.0f),
+                                    vec2( 1.0f,  1.0f),
+                                    vec2(-1.0f,  1.0f),
+                                    vec2( 1.0f, -1.0f)
                                     );
 
         void main() {
-           gl_Position = vec4(pos[gl_VertexIndex], 1.0);
+           gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
         })";
         pipelineDescriptor.cVertexStage.module =
             utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vs);
@@ -89,7 +89,7 @@ class TextureZeroInitTest : public DawnTest {
 };
 
 // This tests that the code path of CopyTextureToBuffer clears correctly to Zero after first usage
-TEST_P(TextureZeroInitTest, RecycleTextureMemoryClear) {
+TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
     dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
         1, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc,
         kColorFormat);
@@ -102,7 +102,7 @@ TEST_P(TextureZeroInitTest, RecycleTextureMemoryClear) {
 
 // Test that non-zero mip level clears subresource to Zero after first use
 // This goes through the BeginRenderPass's code path
-TEST_P(TextureZeroInitTest, MipMapClearsToZero) {
+TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
     dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
         4, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc,
         kColorFormat);
@@ -131,7 +131,7 @@ TEST_P(TextureZeroInitTest, MipMapClearsToZero) {
 
 // Test that non-zero array layers clears subresource to Zero after first use.
 // This goes through the BeginRenderPass's code path
-TEST_P(TextureZeroInitTest, ArrayLayerClearsToZero) {
+TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
     dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
         1, 4, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc,
         kColorFormat);
@@ -170,9 +170,11 @@ TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
     std::vector<uint8_t> data(4 * kSize * kSize, 100);
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::TransferSrc);
+
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
     dawn::Extent3D copySize = {kSize, kSize, 1};
+
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
     dawn::CommandBuffer commands = encoder.Finish();
@@ -196,9 +198,11 @@ TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
     std::vector<uint8_t> data(4 * kSize * kSize, 100);
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::TransferSrc);
+
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
     dawn::Extent3D copySize = {kSize / 2, kSize, 1};
+
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
     dawn::CommandBuffer commands = encoder.Finish();
@@ -300,7 +304,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 
 // This tests the texture with depth attachment and load op load will init depth stencil texture to
 // 0s.
-TEST_P(TextureZeroInitTest, DepthClear) {
+TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
     dawn::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
         1, 1,
         dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst |
@@ -334,7 +338,7 @@ TEST_P(TextureZeroInitTest, DepthClear) {
 
 // This tests the texture with stencil attachment and load op load will init depth stencil texture
 // to 0s.
-TEST_P(TextureZeroInitTest, StencilClear) {
+TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
     dawn::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
         1, 1,
         dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst |
@@ -368,7 +372,7 @@ TEST_P(TextureZeroInitTest, StencilClear) {
 
 // This tests the texture with depth stencil attachment and load op load will init depth stencil
 // texture to 0s.
-TEST_P(TextureZeroInitTest, DepthStencilClear) {
+TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
     dawn::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
         1, 1,
         dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst |
