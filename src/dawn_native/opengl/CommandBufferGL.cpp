@@ -26,6 +26,7 @@
 #include "dawn_native/opengl/RenderPipelineGL.h"
 #include "dawn_native/opengl/SamplerGL.h"
 #include "dawn_native/opengl/TextureGL.h"
+#include "dawn_native/opengl/UtilsGL.h"
 
 #include <cstring>
 
@@ -126,15 +127,6 @@ namespace dawn_native { namespace opengl {
                     return true;
                 default:
                     return false;
-            }
-        }
-
-        GLint GetStencilMaskFromStencilFormat(dawn::TextureFormat depthStencilFormat) {
-            switch (depthStencilFormat) {
-                case dawn::TextureFormat::Depth24PlusStencil8:
-                    return 0xFF;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -349,17 +341,34 @@ namespace dawn_native { namespace opengl {
     void CommandBuffer::Execute() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
+        auto TransitionForPass = [](const PassResourceUsage& usages) {
+            for (size_t i = 0; i < usages.textures.size(); i++) {
+                Texture* texture = ToBackend(usages.textures[i]);
+                texture->EnsureSubresourceContentInitialized(0, texture->GetNumMipLevels(), 0,
+                                                             texture->GetArrayLayers());
+            }
+        };
+
+        const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
+        uint32_t nextPassNumber = 0;
+
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
+                    TransitionForPass(passResourceUsages[nextPassNumber]);
                     ExecuteComputePass();
+
+                    nextPassNumber++;
                 } break;
 
                 case Command::BeginRenderPass: {
                     auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
+                    TransitionForPass(passResourceUsages[nextPassNumber]);
                     ExecuteRenderPass(cmd);
+
+                    nextPassNumber++;
                 } break;
 
                 case Command::CopyBufferToBuffer: {
@@ -384,6 +393,11 @@ namespace dawn_native { namespace opengl {
                     Texture* texture = ToBackend(dst.texture.Get());
                     GLenum target = texture->GetGLTarget();
                     auto format = texture->GetGLFormat();
+                    if (IsCompleteSubresourceCopiedTo(texture, copySize, dst.level)) {
+                        texture->SetIsSubresourceContentInitialized(dst.level, 1, dst.slice, 1);
+                    } else {
+                        texture->EnsureSubresourceContentInitialized(dst.level, 1, dst.slice, 1);
+                    }
 
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
                     gl.ActiveTexture(GL_TEXTURE0);
@@ -426,6 +440,7 @@ namespace dawn_native { namespace opengl {
                     auto format = texture->GetGLFormat();
                     GLenum target = texture->GetGLTarget();
 
+                    texture->EnsureSubresourceContentInitialized(src.level, 1, src.slice, 1);
                     // The only way to move data from a texture to a buffer in GL is via
                     // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
                     gl.BindTexture(target, texture->GetHandle());
@@ -473,7 +488,12 @@ namespace dawn_native { namespace opengl {
                     auto& copySize = copy->copySize;
                     Texture* srcTexture = ToBackend(src.texture.Get());
                     Texture* dstTexture = ToBackend(dst.texture.Get());
-
+                    srcTexture->EnsureSubresourceContentInitialized(src.level, 1, src.slice, 1);
+                    if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.level)) {
+                        dstTexture->SetIsSubresourceContentInitialized(dst.level, 1, dst.slice, 1);
+                    } else {
+                        dstTexture->EnsureSubresourceContentInitialized(dst.level, 1, dst.slice, 1);
+                    }
                     gl.CopyImageSubData(srcTexture->GetHandle(), srcTexture->GetGLTarget(),
                                         src.level, src.origin.x, src.origin.y, src.slice,
                                         dstTexture->GetHandle(), dstTexture->GetGLTarget(),
@@ -683,7 +703,6 @@ namespace dawn_native { namespace opengl {
                     if (renderPass->sampleCount > 1) {
                         ResolveMultisampledRenderTargets(gl, renderPass);
                     }
-
                     gl.DeleteFramebuffers(1, &fbo);
                     return;
                 } break;

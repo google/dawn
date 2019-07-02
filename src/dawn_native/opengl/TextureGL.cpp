@@ -14,8 +14,10 @@
 
 #include "dawn_native/opengl/TextureGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
+#include "dawn_native/opengl/UtilsGL.h"
 
 #include "common/Assert.h"
+#include "dawn_native/Commands.h"
 
 #include <algorithm>
 #include <vector>
@@ -174,9 +176,8 @@ namespace dawn_native { namespace opengl {
             ASSERT(GetFormat().blockByteSize <= MAX_TEXEL_SIZE);
             GLubyte clearColor[MAX_TEXEL_SIZE];
             std::fill(clearColor, clearColor + MAX_TEXEL_SIZE, 255);
-
             // TODO(natlee@microsoft.com): clear all subresources
-            for (uint32_t i = 0; i < GL_TEXTURE_MAX_LEVEL; i++) {
+            for (uint32_t i = 0; i < GetNumMipLevels(); i++) {
                 gl.ClearTexImage(mHandle, i, formatInfo.format, formatInfo.type, clearColor);
             }
         }
@@ -209,6 +210,60 @@ namespace dawn_native { namespace opengl {
 
     TextureFormatInfo Texture::GetGLFormat() const {
         return GetGLFormatInfo(GetFormat().format);
+    }
+
+    void Texture::ClearTexture(GLint baseMipLevel,
+                               GLint levelCount,
+                               GLint baseArrayLayer,
+                               uint32_t layerCount) {
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+        if (GetFormat().HasDepthOrStencil()) {
+            bool doDepthClear = GetFormat().HasDepth();
+            bool doStencilClear = GetFormat().HasStencil();
+            GLfloat depth = 0.0f;
+            GLint stencil = 0u;
+            if (doDepthClear) {
+                gl.DepthMask(GL_TRUE);
+            }
+            if (doStencilClear) {
+                gl.StencilMask(GetStencilMaskFromStencilFormat(GetFormat().format));
+            }
+
+            GLuint framebuffer = 0;
+            gl.GenFramebuffers(1, &framebuffer);
+            gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+            gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GetGLTarget(),
+                                    GetHandle(), 0);
+            if (doDepthClear && doStencilClear) {
+                gl.ClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
+            } else if (doDepthClear) {
+                gl.ClearBufferfv(GL_DEPTH, 0, &depth);
+            } else if (doStencilClear) {
+                gl.ClearBufferiv(GL_STENCIL, 0, &stencil);
+            }
+            gl.DeleteFramebuffers(1, &framebuffer);
+        } else {
+            auto formatInfo = GetGLFormatInfo(GetFormat().format);
+            for (GLint level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                gl.ClearTexSubImage(mHandle, level, 0, 0, baseArrayLayer, GetSize().width,
+                                    GetSize().height, layerCount, formatInfo.format,
+                                    formatInfo.type, nullptr);
+            }
+        }
+        SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer, layerCount);
+    }
+
+    void Texture::EnsureSubresourceContentInitialized(uint32_t baseMipLevel,
+                                                      uint32_t levelCount,
+                                                      uint32_t baseArrayLayer,
+                                                      uint32_t layerCount) {
+        if (!GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
+            return;
+        }
+        if (!IsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+                                             layerCount)) {
+            ClearTexture(baseMipLevel, levelCount, baseArrayLayer, layerCount);
+        }
     }
 
     // TextureView

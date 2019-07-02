@@ -403,8 +403,29 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), srcTexture, 0, 0, kSize, kSize, 0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(TextureZeroInitTest,
-                      ForceWorkarounds(D3D12Backend,
-                                       {"nonzero_clear_resources_on_creation_for_testing"}),
-                      ForceWorkarounds(VulkanBackend,
-                                       {"nonzero_clear_resources_on_creation_for_testing"}));
+// This tests the color attachments clear to 0s
+TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
+    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
+        1, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc,
+        kColorFormat);
+    dawn::Texture texture = device.CreateTexture(&descriptor);
+    utils::BasicRenderPass renderPass = utils::BasicRenderPass(kSize, kSize, texture, kColorFormat);
+    renderPass.renderPassInfo.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Load;
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.EndPass();
+    }
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
+    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color, 0, 0, kSize, kSize, 0, 0);
+}
+
+DAWN_INSTANTIATE_TEST(
+    TextureZeroInitTest,
+    ForceWorkarounds(D3D12Backend, {"nonzero_clear_resources_on_creation_for_testing"}),
+    ForceWorkarounds(OpenGLBackend, {"nonzero_clear_resources_on_creation_for_testing"}),
+    ForceWorkarounds(VulkanBackend, {"nonzero_clear_resources_on_creation_for_testing"}));

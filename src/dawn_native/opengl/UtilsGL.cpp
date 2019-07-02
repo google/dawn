@@ -41,4 +41,12 @@ namespace dawn_native { namespace opengl {
         }
     }
 
+    GLint GetStencilMaskFromStencilFormat(dawn::TextureFormat depthStencilFormat) {
+        switch (depthStencilFormat) {
+            case dawn::TextureFormat::Depth24PlusStencil8:
+                return 0xFF;
+            default:
+                UNREACHABLE();
+        }
+    }
 }}  // namespace dawn_native::opengl
