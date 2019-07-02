@@ -107,9 +107,16 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateImageHeight(uint32_t imageHeight, uint32_t copyHeight) {
+        MaybeError ValidateImageHeight(const Format& format,
+                                       uint32_t imageHeight,
+                                       uint32_t copyHeight) {
             if (imageHeight < copyHeight) {
                 return DAWN_VALIDATION_ERROR("Image height must not be less than the copy height.");
+            }
+
+            if (imageHeight % format.blockHeight != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "Image height must be a multiple of compressed texture format block width");
             }
 
             return {};
@@ -196,8 +203,7 @@ namespace dawn_native {
                                                 uint32_t rowPitch,
                                                 uint32_t imageHeight,
                                                 uint32_t* bufferSize) {
-            DAWN_TRY(ValidateImageHeight(imageHeight, copySize.height));
-
+            ASSERT(imageHeight >= copySize.height);
             uint32_t blockByteSize = textureFormat.blockByteSize;
             uint32_t blockWidth = textureFormat.blockWidth;
             uint32_t blockHeight = textureFormat.blockHeight;
@@ -225,15 +231,6 @@ namespace dawn_native {
             if (rowPitch < copySize.width / format.blockWidth * format.blockByteSize) {
                 return DAWN_VALIDATION_ERROR(
                     "Row pitch must not be less than the number of bytes per row");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateImageHeight(const Format& format, uint32_t imageHeight) {
-            if (imageHeight % format.blockHeight != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "Image height must be a multiple of compressed texture format block width");
             }
 
             return {};
@@ -952,7 +949,7 @@ namespace dawn_native {
                         ValidateTextureSampleCountInCopyCommands(copy->destination.texture.Get()));
 
                     DAWN_TRY(ValidateImageHeight(copy->destination.texture->GetFormat(),
-                                                 copy->source.imageHeight));
+                                                 copy->source.imageHeight, copy->copySize.height));
                     DAWN_TRY(ValidateImageOrigin(copy->destination.texture->GetFormat(),
                                                  copy->destination.origin));
                     DAWN_TRY(ValidateImageCopySize(copy->destination.texture->GetFormat(),
@@ -986,7 +983,8 @@ namespace dawn_native {
                     DAWN_TRY(ValidateTextureSampleCountInCopyCommands(copy->source.texture.Get()));
 
                     DAWN_TRY(ValidateImageHeight(copy->source.texture->GetFormat(),
-                                                 copy->destination.imageHeight));
+                                                 copy->destination.imageHeight,
+                                                 copy->copySize.height));
                     DAWN_TRY(ValidateImageOrigin(copy->source.texture->GetFormat(),
                                                  copy->source.origin));
                     DAWN_TRY(
