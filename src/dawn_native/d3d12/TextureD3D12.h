@@ -64,8 +64,7 @@ namespace dawn_native { namespace d3d12 {
 
         UINT16 GetDepthOrArraySize();
 
-        ComPtr<ID3D12Resource> mResource = {};
-        ID3D12Resource* mResourcePtr = nullptr;
+        ComPtr<ID3D12Resource> mResource;
         D3D12_RESOURCE_STATES mLastState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
     };
 

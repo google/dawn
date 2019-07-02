@@ -143,7 +143,6 @@ namespace dawn_native { namespace d3d12 {
                         ->GetResourceAllocator()
                         ->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
                                    D3D12_RESOURCE_STATE_COMMON);
-        mResourcePtr = mResource.Get();
 
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
             DescriptorHeapAllocator* descriptorHeapAllocator = device->GetDescriptorHeapAllocator();
@@ -154,7 +153,8 @@ namespace dawn_native { namespace d3d12 {
                     descriptorHeapAllocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
                 D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
                 D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(0);
-                device->GetD3D12Device()->CreateDepthStencilView(mResourcePtr, &dsvDesc, dsvHandle);
+                device->GetD3D12Device()->CreateDepthStencilView(mResource.Get(), &dsvDesc,
+                                                                 dsvHandle);
 
                 D3D12_CLEAR_FLAGS clearFlags = {};
                 if (GetFormat().HasDepth()) {
@@ -178,7 +178,7 @@ namespace dawn_native { namespace d3d12 {
                 for (int i = 0; i < resourceDescriptor.MipLevels; i++) {
                     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc =
                         GetRTVDescriptor(i, 0, GetArrayLayers());
-                    device->GetD3D12Device()->CreateRenderTargetView(mResourcePtr, &rtvDesc,
+                    device->GetD3D12Device()->CreateRenderTargetView(mResource.Get(), &rtvDesc,
                                                                      rtvHandle);
                     device->GetPendingCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0,
                                                                            nullptr);
@@ -191,8 +191,7 @@ namespace dawn_native { namespace d3d12 {
     Texture::Texture(Device* device,
                      const TextureDescriptor* descriptor,
                      ID3D12Resource* nativeTexture)
-        : TextureBase(device, descriptor, TextureState::OwnedExternal),
-          mResourcePtr(nativeTexture) {
+        : TextureBase(device, descriptor, TextureState::OwnedExternal), mResource(nativeTexture) {
     }
 
     Texture::~Texture() {
@@ -237,7 +236,7 @@ namespace dawn_native { namespace d3d12 {
 
         barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier->Transition.pResource = mResourcePtr;
+        barrier->Transition.pResource = mResource.Get();
         barrier->Transition.StateBefore = mLastState;
         barrier->Transition.StateAfter = newState;
         barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -256,7 +255,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ID3D12Resource* Texture::GetD3D12Resource() const {
-        return mResourcePtr;
+        return mResource.Get();
     }
 
     UINT16 Texture::GetDepthOrArraySize() {
@@ -345,7 +344,7 @@ namespace dawn_native { namespace d3d12 {
                 descriptorHeapAllocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
             D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
             D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(baseMipLevel);
-            device->GetD3D12Device()->CreateDepthStencilView(mResourcePtr, &dsvDesc, dsvHandle);
+            device->GetD3D12Device()->CreateDepthStencilView(mResource.Get(), &dsvDesc, dsvHandle);
 
             D3D12_CLEAR_FLAGS clearFlags = {};
             if (GetFormat().HasDepth()) {
@@ -367,7 +366,8 @@ namespace dawn_native { namespace d3d12 {
             for (uint32_t i = baseMipLevel; i < baseMipLevel + levelCount; i++) {
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc =
                     GetRTVDescriptor(i, baseArrayLayer, layerCount);
-                device->GetD3D12Device()->CreateRenderTargetView(mResourcePtr, &rtvDesc, rtvHandle);
+                device->GetD3D12Device()->CreateRenderTargetView(mResource.Get(), &rtvDesc,
+                                                                 rtvHandle);
                 commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
             }
         }
