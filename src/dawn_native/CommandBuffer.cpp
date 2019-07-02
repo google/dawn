@@ -39,7 +39,7 @@ namespace dawn_native {
     bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
                                        const Extent3D copySize,
                                        const uint32_t mipLevel) {
-        Extent3D extent = texture->GetMipLevelSize(mipLevel);
+        Extent3D extent = texture->GetMipLevelPhysicalSize(mipLevel);
 
         if (extent.depth == copySize.depth && extent.width == copySize.width &&
             extent.height == copySize.height) {

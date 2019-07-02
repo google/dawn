@@ -577,6 +577,12 @@ namespace dawn_native { namespace vulkan {
         }
         if (!IsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
                                              layerCount)) {
+            // TODO(jiawei.shao@intel.com): initialize textures in BC formats with Buffer-to-Texture
+            // copies.
+            if (GetFormat().isCompressed) {
+                return;
+            }
+
             // If subresource has not been initialized, clear it to black as it could contain dirty
             // bits from recycled memory
             ClearTexture(commands, baseMipLevel, levelCount, baseArrayLayer, layerCount);

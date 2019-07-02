@@ -341,6 +341,9 @@ namespace dawn_native { namespace vulkan {
         // Always require imageCubeArray because it is a core Dawn feature
         usedKnobs.features.imageCubeArray = VK_TRUE;
 
+        // TODO(jiawei.shao@intel.com): support BC formats as extension
+        usedKnobs.features.textureCompressionBC = VK_TRUE;
+
         // Find a universal queue family
         {
             constexpr uint32_t kUniversalFlags =

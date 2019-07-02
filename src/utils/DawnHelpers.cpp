@@ -215,8 +215,6 @@ namespace utils {
                                           uint32_t height) {
         DAWN_ASSERT(width > 0 && height > 0);
 
-        dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
-
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
         descriptor.size.width = width;
@@ -224,13 +222,13 @@ namespace utils {
         descriptor.size.depth = 1;
         descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
-        descriptor.format = kColorFormat;
+        descriptor.format = BasicRenderPass::kDefaultColorFormat;
         descriptor.mipLevelCount = 1;
         descriptor.usage =
             dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
         dawn::Texture color = device.CreateTexture(&descriptor);
 
-        return BasicRenderPass(width, height, color, kColorFormat);
+        return BasicRenderPass(width, height, color);
     }
 
     dawn::BufferCopyView CreateBufferCopyView(dawn::Buffer buffer,

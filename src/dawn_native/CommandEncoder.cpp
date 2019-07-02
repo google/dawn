@@ -47,7 +47,7 @@ namespace dawn_native {
             // overflows.
             uint64_t level = textureCopy.level;
 
-            Extent3D extent = texture->GetMipLevelSize(level);
+            Extent3D extent = texture->GetMipLevelPhysicalSize(level);
 
             if (uint64_t(textureCopy.origin.x) + uint64_t(copySize.width) >
                     static_cast<uint64_t>(extent.width) ||

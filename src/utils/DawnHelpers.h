@@ -73,7 +73,9 @@ namespace utils {
         BasicRenderPass(uint32_t width,
                         uint32_t height,
                         dawn::Texture color,
-                        dawn::TextureFormat texture);
+                        dawn::TextureFormat texture = kDefaultColorFormat);
+
+        static constexpr dawn::TextureFormat kDefaultColorFormat = dawn::TextureFormat::RGBA8Unorm;
 
         uint32_t width;
         uint32_t height;

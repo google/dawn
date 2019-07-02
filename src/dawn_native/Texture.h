@@ -99,7 +99,13 @@ namespace dawn_native {
 
         bool IsMultisampledTexture() const;
 
-        Extent3D GetMipLevelSize(uint64_t level) const;
+        // For a texture with non-block-compressed texture format, its physical size is always equal
+        // to its virtual size. For a texture with block compressed texture format, the physical
+        // size is the one with paddings if necessary, which is always a multiple of the block size
+        // and used in texture copying. The virtual size is the one without paddings, which is not
+        // required to be a multiple of the block size and used in texture sampling.
+        Extent3D GetMipLevelPhysicalSize(uint64_t level) const;
+        Extent3D GetMipLevelVirtualSize(uint64_t level) const;
 
         // Dawn API
         TextureViewBase* CreateDefaultView();
