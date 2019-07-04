@@ -826,6 +826,17 @@
                 ]
             },
             {
+                "name": "set viewport",
+                "args": [
+                    {"name": "x", "type": "float"},
+                    {"name": "y", "type": "float"},
+                    {"name": "width", "type": "float"},
+                    {"name": "height", "type": "float"},
+                    {"name": "min depth", "type": "float"},
+                    {"name": "max depth", "type": "float"}
+                ]
+            },
+            {
                 "name": "set scissor rect",
                 "args": [
                     {"name": "x", "type": "uint32_t"},

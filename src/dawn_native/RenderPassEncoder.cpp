@@ -21,6 +21,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/RenderPipeline.h"
 
+#include <math.h>
 #include <string.h>
 
 namespace dawn_native {
@@ -138,6 +139,44 @@ namespace dawn_native {
 
         SetBlendColorCmd* cmd = mAllocator->Allocate<SetBlendColorCmd>(Command::SetBlendColor);
         cmd->color = *color;
+    }
+
+    void RenderPassEncoderBase::SetViewport(float x,
+                                            float y,
+                                            float width,
+                                            float height,
+                                            float minDepth,
+                                            float maxDepth) {
+        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
+        if (isnan(x) || isnan(y) || isnan(width) || isnan(height) || isnan(minDepth) ||
+            isnan(maxDepth)) {
+            mTopLevelEncoder->HandleError("NaN is not allowed.");
+            return;
+        }
+
+        // TODO(yunchao.he@intel.com): there are more restrictions for x, y, width and height in
+        // Vulkan, and height can be a negative value in Vulkan 1.1. Revisit this part later (say,
+        // for WebGPU v1).
+        if (width <= 0 || height <= 0) {
+            mTopLevelEncoder->HandleError("Width and height must be greater than 0.");
+            return;
+        }
+
+        if (minDepth < 0 || minDepth > 1 || maxDepth < 0 || maxDepth > 1) {
+            mTopLevelEncoder->HandleError("minDepth and maxDepth must be in [0, 1].");
+            return;
+        }
+
+        SetViewportCmd* cmd = mAllocator->Allocate<SetViewportCmd>(Command::SetViewport);
+        cmd->x = x;
+        cmd->y = y;
+        cmd->width = width;
+        cmd->height = height;
+        cmd->minDepth = minDepth;
+        cmd->maxDepth = maxDepth;
     }
 
     void RenderPassEncoderBase::SetScissorRect(uint32_t x,

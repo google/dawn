@@ -14,6 +14,215 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include <cmath>
+
+class SetViewportTest : public ValidationTest {};
+
+// Test to check basic use of SetViewport
+TEST_F(SetViewportTest, Success) {
+    DummyRenderPass renderPass(device);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 1.0, 0.0, 1.0);
+        pass.EndPass();
+    }
+    encoder.Finish();
+}
+
+// Test to check that NaN in viewport parameters is not allowed
+TEST_F(SetViewportTest, ViewportParameterNaN) {
+    DummyRenderPass renderPass(device);
+
+    // x or y is NaN.
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(NAN, 0.0, 1.0, 1.0, 0.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // width or height is NaN.
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, NAN, 1.0, 0.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // minDepth or maxDepth is NaN.
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 1.0, NAN, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Test to check that an empty viewport is not allowed
+TEST_F(SetViewportTest, EmptyViewport) {
+    DummyRenderPass renderPass(device);
+
+    // Width of viewport is zero.
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 0.0, 1.0, 0.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Height of viewport is zero.
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 0.0, 0.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Both width and height of viewport are zero.
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Test to check that viewport larger than the framebuffer is allowed
+TEST_F(SetViewportTest, ViewportLargerThanFramebuffer) {
+    DummyRenderPass renderPass(device);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, renderPass.width + 1, renderPass.height + 1, 0.0, 1.0);
+        pass.EndPass();
+    }
+    encoder.Finish();
+}
+
+// Test to check that negative x in viewport is allowed
+TEST_F(SetViewportTest, NegativeX) {
+    DummyRenderPass renderPass(device);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(-1.0, 0.0, 1.0, 1.0, 0.0, 1.0);
+        pass.EndPass();
+    }
+    encoder.Finish();
+}
+
+// Test to check that negative y in viewport is allowed
+TEST_F(SetViewportTest, NegativeY) {
+    DummyRenderPass renderPass(device);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, -1.0, 1.0, 1.0, 0.0, 1.0);
+        pass.EndPass();
+    }
+    encoder.Finish();
+}
+
+// Test to check that negative width in viewport is not allowed
+TEST_F(SetViewportTest, NegativeWidth) {
+    DummyRenderPass renderPass(device);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, -1.0, 1.0, 0.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Test to check that negative height in viewport is not allowed
+TEST_F(SetViewportTest, NegativeHeight) {
+    DummyRenderPass renderPass(device);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 0.0, -1.0, 0.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Test to check that minDepth out of range [0, 1] is not allowed
+TEST_F(SetViewportTest, MinDepthOutOfRange) {
+    DummyRenderPass renderPass(device);
+
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 1.0, -1.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 1.0, 2.0, 1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Test to check that maxDepth out of range [0, 1] is not allowed
+TEST_F(SetViewportTest, MaxDepthOutOfRange) {
+    DummyRenderPass renderPass(device);
+
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 1.0, 0.0, -1.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 1.0, 0.0, 2.0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Test to check that minDepth equal or less than maxDepth is allowed
+TEST_F(SetViewportTest, MinDepthEqualOrLessThanMaxDepth) {
+    DummyRenderPass renderPass(device);
+
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 1.0, 0.5, 0.5);
+        pass.EndPass();
+        encoder.Finish();
+    }
+
+    {
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetViewport(0.0, 0.0, 1.0, 1.0, 0.8, 0.5);
+        pass.EndPass();
+        encoder.Finish();
+    }
+}
+
 class SetScissorRectTest : public ValidationTest {
 };
 

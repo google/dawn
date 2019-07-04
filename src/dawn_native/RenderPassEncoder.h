@@ -50,6 +50,12 @@ namespace dawn_native {
 
         void SetStencilReference(uint32_t reference);
         void SetBlendColor(const Color* color);
+        void SetViewport(float x,
+                         float y,
+                         float width,
+                         float height,
+                         float minDepth,
+                         float maxDepth);
         void SetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
         template <typename T>

@@ -51,6 +51,7 @@ namespace dawn_native {
         SetComputePipeline,
         SetRenderPipeline,
         SetStencilReference,
+        SetViewport,
         SetScissorRect,
         SetBlendColor,
         SetBindGroup,
@@ -190,6 +191,10 @@ namespace dawn_native {
 
     struct SetStencilReferenceCmd {
         uint32_t reference;
+    };
+
+    struct SetViewportCmd {
+        float x, y, width, height, minDepth, maxDepth;
     };
 
     struct SetScissorRectCmd {

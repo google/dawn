@@ -112,6 +112,10 @@ namespace dawn_native {
                     SetStencilReferenceCmd* cmd = commands->NextCommand<SetStencilReferenceCmd>();
                     cmd->~SetStencilReferenceCmd();
                 } break;
+                case Command::SetViewport: {
+                    SetViewportCmd* cmd = commands->NextCommand<SetViewportCmd>();
+                    cmd->~SetViewportCmd();
+                } break;
                 case Command::SetScissorRect: {
                     SetScissorRectCmd* cmd = commands->NextCommand<SetScissorRectCmd>();
                     cmd->~SetScissorRectCmd();
@@ -227,6 +231,10 @@ namespace dawn_native {
 
             case Command::SetStencilReference:
                 commands->NextCommand<SetStencilReferenceCmd>();
+                break;
+
+            case Command::SetViewport:
+                commands->NextCommand<SetViewportCmd>();
                 break;
 
             case Command::SetScissorRect:

@@ -1209,6 +1209,10 @@ namespace dawn_native {
                     mIterator.NextCommand<SetBlendColorCmd>();
                 } break;
 
+                case Command::SetViewport: {
+                    mIterator.NextCommand<SetViewportCmd>();
+                } break;
+
                 case Command::SetScissorRect: {
                     mIterator.NextCommand<SetScissorRectCmd>();
                 } break;
