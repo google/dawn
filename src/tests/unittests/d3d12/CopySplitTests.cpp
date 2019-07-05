@@ -14,11 +14,12 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/d3d12/d3d12_platform.h"
-#include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "dawn_native/Texture.h"
+#include "dawn_native/d3d12/TextureCopySplitter.h"
+#include "dawn_native/d3d12/d3d12_platform.h"
 
 using namespace dawn_native::d3d12;
 
@@ -31,7 +32,9 @@ namespace {
         uint32_t width;
         uint32_t height;
         uint32_t depth;
-        uint32_t texelSize;
+        uint32_t texelBlockSizeInBytes;
+        uint32_t blockWidth = 1;
+        uint32_t blockHeight = 1;
     };
 
     struct BufferSpec {
@@ -116,15 +119,25 @@ namespace {
     void ValidateBufferOffset(const TextureSpec& textureSpec, const BufferSpec& bufferSpec, const TextureCopySplit& copySplit) {
         ASSERT_TRUE(copySplit.count > 0);
 
+        uint32_t texelsPerBlock = textureSpec.blockWidth * textureSpec.blockHeight;
         for (uint32_t i = 0; i < copySplit.count; ++i) {
             const auto& copy = copySplit.copies[i];
 
-            uint32_t rowPitchInTexels = bufferSpec.rowPitch / textureSpec.texelSize;
-            uint32_t slicePitchInTexels = rowPitchInTexels * bufferSpec.imageHeight;
-            uint32_t absoluteTexelOffset = copySplit.offset / textureSpec.texelSize + copy.bufferOffset.x + copy.bufferOffset.y * rowPitchInTexels + copy.bufferOffset.z * slicePitchInTexels;
+            uint32_t rowPitchInTexels =
+                bufferSpec.rowPitch / textureSpec.texelBlockSizeInBytes * texelsPerBlock;
+            uint32_t slicePitchInTexels =
+                rowPitchInTexels * (bufferSpec.imageHeight / textureSpec.blockHeight);
+            uint32_t absoluteTexelOffset =
+                copySplit.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock +
+                copy.bufferOffset.x / textureSpec.blockWidth * texelsPerBlock +
+                copy.bufferOffset.y / textureSpec.blockHeight * rowPitchInTexels +
+                copy.bufferOffset.z * slicePitchInTexels;
 
-            ASSERT(absoluteTexelOffset >= bufferSpec.offset / textureSpec.texelSize);
-            uint32_t relativeTexelOffset = absoluteTexelOffset - bufferSpec.offset / textureSpec.texelSize;
+            ASSERT(absoluteTexelOffset >=
+                   bufferSpec.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock);
+            uint32_t relativeTexelOffset =
+                absoluteTexelOffset -
+                bufferSpec.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock;
 
             uint32_t z = relativeTexelOffset / slicePitchInTexels;
             uint32_t y = (relativeTexelOffset % slicePitchInTexels) / rowPitchInTexels;
@@ -147,9 +160,9 @@ namespace {
 
     std::ostream& operator<<(std::ostream& os, const TextureSpec& textureSpec) {
         os << "TextureSpec("
-            << "[(" << textureSpec.x << ", " << textureSpec.y << ", " << textureSpec.z << "), (" << textureSpec.width << ", " << textureSpec.height << ", " << textureSpec.depth << ")], "
-            << textureSpec.texelSize
-            << ")";
+           << "[(" << textureSpec.x << ", " << textureSpec.y << ", " << textureSpec.z << "), ("
+           << textureSpec.width << ", " << textureSpec.height << ", " << textureSpec.depth << ")], "
+           << textureSpec.texelBlockSizeInBytes << ")";
         return os;
     }
 
@@ -186,32 +199,62 @@ namespace {
         {59, 13, 0, 257, 31, 1, 4},
         {17, 73, 0, 17, 93, 1, 4},
         {17, 73, 59, 17, 93, 99, 4},
+
+        {0, 0, 0, 4, 4, 1, 8, 4, 4},
+        {64, 16, 0, 4, 4, 1, 8, 4, 4},
+        {64, 16, 8, 4, 4, 1, 8, 4, 4},
+        {0, 0, 0, 4, 4, 1, 16, 4, 4},
+        {64, 16, 0, 4, 4, 1, 16, 4, 4},
+        {64, 16, 8, 4, 4, 1, 16, 4, 4},
+
+        {0, 0, 0, 1024, 1024, 1, 8, 4, 4},
+        {256, 512, 0, 1024, 1024, 1, 8, 4, 4},
+        {64, 48, 0, 1024, 1024, 1, 8, 4, 4},
+        {64, 48, 16, 1024, 1024, 1, 8, 4, 4},
+        {0, 0, 0, 1024, 1024, 1, 16, 4, 4},
+        {256, 512, 0, 1024, 1024, 1, 16, 4, 4},
+        {64, 48, 0, 1024, 1024, 1, 4, 16, 4},
+        {64, 48, 16, 1024, 1024, 1, 16, 4, 4},
     };
 
     // Define base buffer sizes to work with: some offsets aligned, some unaligned. rowPitch is the minimum required
     std::array<BufferSpec, 13> BaseBufferSpecs(const TextureSpec& textureSpec) {
-        uint32_t rowPitch = Align(textureSpec.texelSize * textureSpec.width, kTextureRowPitchAlignment);
+        uint32_t rowPitch =
+            Align(textureSpec.texelBlockSizeInBytes * textureSpec.width, kTextureRowPitchAlignment);
 
         auto alignNonPow2 = [](uint32_t value, uint32_t size) -> uint32_t {
             return value == 0 ? 0 : ((value - 1) / size + 1) * size;
         };
 
         return {
-            BufferSpec{alignNonPow2(0, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(512, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(1024, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(1024, textureSpec.texelSize), rowPitch, textureSpec.height * 2},
+            BufferSpec{alignNonPow2(0, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(512, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(1024, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(1024, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height * 2},
 
-            BufferSpec{alignNonPow2(32, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(64, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(64, textureSpec.texelSize), rowPitch, textureSpec.height * 2},
+            BufferSpec{alignNonPow2(32, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(64, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(64, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height * 2},
 
-            BufferSpec{alignNonPow2(31, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(257, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(511, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(513, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(1023, textureSpec.texelSize), rowPitch, textureSpec.height},
-            BufferSpec{alignNonPow2(1023, textureSpec.texelSize), rowPitch, textureSpec.height * 2},
+            BufferSpec{alignNonPow2(31, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(257, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(511, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(513, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(1023, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(1023, textureSpec.texelBlockSizeInBytes), rowPitch,
+                       textureSpec.height * 2},
         };
     }
 
@@ -228,9 +271,15 @@ namespace {
 class CopySplitTest : public testing::Test {
     protected:
         TextureCopySplit DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
+            ASSERT(textureSpec.width % textureSpec.blockWidth == 0 &&
+                   textureSpec.height % textureSpec.blockHeight == 0);
+            dawn_native::Format fakeFormat = {};
+            fakeFormat.blockWidth = textureSpec.blockWidth;
+            fakeFormat.blockHeight = textureSpec.blockHeight;
+            fakeFormat.blockByteSize = textureSpec.texelBlockSizeInBytes;
             TextureCopySplit copySplit = ComputeTextureCopySplit(
                 {textureSpec.x, textureSpec.y, textureSpec.z},
-                {textureSpec.width, textureSpec.height, textureSpec.depth}, textureSpec.texelSize,
+                {textureSpec.width, textureSpec.height, textureSpec.depth}, fakeFormat,
                 bufferSpec.offset, bufferSpec.rowPitch, bufferSpec.imageHeight);
             ValidateCopySplit(textureSpec, bufferSpec, copySplit);
             return copySplit;
@@ -255,6 +304,9 @@ TEST_F(CopySplitTest, General) {
 TEST_F(CopySplitTest, TextureWidth) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t val : kCheckValues) {
+            if (val % textureSpec.blockWidth != 0) {
+                continue;
+            }
             textureSpec.width = val;
             for (BufferSpec bufferSpec : BaseBufferSpecs(textureSpec)) {
 
@@ -273,6 +325,9 @@ TEST_F(CopySplitTest, TextureWidth) {
 TEST_F(CopySplitTest, TextureHeight) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t val : kCheckValues) {
+            if (val % textureSpec.blockHeight != 0) {
+                continue;
+            }
             textureSpec.height = val;
             for (BufferSpec bufferSpec : BaseBufferSpecs(textureSpec)) {
 
@@ -327,7 +382,7 @@ TEST_F(CopySplitTest, TextureY) {
 TEST_F(CopySplitTest, TexelSize) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t texelSize : {4, 8, 16, 32, 64}) {
-            textureSpec.texelSize = texelSize;
+            textureSpec.texelBlockSizeInBytes = texelSize;
             for (BufferSpec bufferSpec : BaseBufferSpecs(textureSpec)) {
 
                 TextureCopySplit copySplit = DoTest(textureSpec, bufferSpec);
@@ -346,7 +401,7 @@ TEST_F(CopySplitTest, BufferOffset) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (BufferSpec bufferSpec : BaseBufferSpecs(textureSpec)) {
             for (uint32_t val : kCheckValues) {
-                bufferSpec.offset = textureSpec.texelSize * val;
+                bufferSpec.offset = textureSpec.texelBlockSizeInBytes * val;
 
                 TextureCopySplit copySplit = DoTest(textureSpec, bufferSpec);
                 if (HasFatalFailure()) {

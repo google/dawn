@@ -83,7 +83,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
             bufferRowPitchInBytes =
                 copyWidthInBlockAtLevel * CompressedFormatBlockSizeInBytes(copyConfig.format);
         }
-        uint32_t uploadBufferSize = bufferRowPitchInBytes * copyHeightInBlockAtLevel;
+        uint32_t uploadBufferSize =
+            copyConfig.bufferOffset + bufferRowPitchInBytes * copyHeightInBlockAtLevel;
 
         // Fill uploadData with the pre-prepared one-block compressed texture data.
         std::vector<uint8_t> uploadData(uploadBufferSize, 0);
@@ -546,5 +547,107 @@ TEST_P(CompressedTextureBCFormatTest, CopyPartofTextureSubResourceIntoNonZeroMip
     }
 }
 
-// TODO(jiawei.shao@intel.com): support BC formats on D3D12, Metal and OpenGL backend
-DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest, VulkanBackend);
+// Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
+// extent exactly fit the RowPitch.
+TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
+    CopyConfig config;
+    config.textureWidthLevel0 = 8;
+    config.textureHeightLevel0 = 8;
+    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+
+    const uint32_t blockCountPerRow = config.textureWidthLevel0 / kBCBlockWidthInTexels;
+
+    for (dawn::TextureFormat format : kBCFormats) {
+        config.format = format;
+
+        const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
+        const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
+
+        config.bufferOffset = (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes;
+
+        TestCopyRegionIntoBCFormatTextures(config);
+    }
+}
+
+// Test the special case of the B2T copies on the D3D12 backend that the buffer offset exceeds the
+// slice pitch (slicePitch = rowPitch * (imageHeightInTexels / blockHeightInTexels)). On D3D12
+// backend the texelOffset.y will be greater than 0 after calcuting the texelOffset in the function
+// ComputeTexelOffsets().
+TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
+    CopyConfig config;
+    config.textureWidthLevel0 = 8;
+    config.textureHeightLevel0 = 8;
+    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+
+    const uint32_t blockCountPerRow = config.textureWidthLevel0 / kBCBlockWidthInTexels;
+    const uint32_t slicePitchInBytes =
+        config.rowPitchAlignment * (config.textureHeightLevel0 / kBCBlockHeightInTexels);
+
+    for (dawn::TextureFormat format : kBCFormats) {
+        config.format = format;
+
+        const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
+        const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
+
+        config.bufferOffset = (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes +
+                              config.rowPitchAlignment + slicePitchInBytes;
+
+        TestCopyRegionIntoBCFormatTextures(config);
+    }
+}
+
+// Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
+// extent exceed the RowPitch. On D3D12 backend two copies are required for this case.
+TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitch) {
+    CopyConfig config;
+    config.textureWidthLevel0 = 8;
+    config.textureHeightLevel0 = 8;
+    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+
+    const uint32_t blockCountPerRow = config.textureWidthLevel0 / kBCBlockWidthInTexels;
+
+    constexpr uint32_t kExceedRowBlockCount = 1;
+
+    for (dawn::TextureFormat format : kBCFormats) {
+        config.format = format;
+
+        const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
+        const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
+        config.bufferOffset =
+            (blockCountPerRowPitch - blockCountPerRow + kExceedRowBlockCount) * blockSizeInBytes;
+
+        TestCopyRegionIntoBCFormatTextures(config);
+    }
+}
+
+// Test the special case of the B2T copies on the D3D12 backend that the slicePitch is equal to the
+// rowPitch. On D3D12 backend the texelOffset.z will be greater than 0 after calcuting the
+// texelOffset in the function ComputeTexelOffsets().
+TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
+    CopyConfig config;
+    config.textureWidthLevel0 = 8;
+    config.textureHeightLevel0 = kBCBlockHeightInTexels;
+    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+
+    const uint32_t blockCountPerRow = config.textureWidthLevel0 / kBCBlockWidthInTexels;
+    const uint32_t slicePitchInBytes = config.rowPitchAlignment;
+
+    for (dawn::TextureFormat format : kBCFormats) {
+        config.format = format;
+
+        const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
+        const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
+
+        config.bufferOffset =
+            (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes + slicePitchInBytes;
+
+        TestCopyRegionIntoBCFormatTextures(config);
+    }
+}
+
+// TODO(jiawei.shao@intel.com): support BC formats on Metal and OpenGL backend
+DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest, D3D12Backend, VulkanBackend);

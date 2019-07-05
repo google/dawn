@@ -521,9 +521,8 @@ namespace dawn_native { namespace d3d12 {
                     texture->TransitionUsageNow(commandList, dawn::TextureUsageBit::TransferDst);
 
                     auto copySplit = ComputeTextureCopySplit(
-                        copy->destination.origin, copy->copySize,
-                        texture->GetFormat().blockByteSize, copy->source.offset,
-                        copy->source.rowPitch, copy->source.imageHeight);
+                        copy->destination.origin, copy->copySize, texture->GetFormat(),
+                        copy->source.offset, copy->source.rowPitch, copy->source.imageHeight);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
                         CreateTextureCopyLocationForTexture(*texture, copy->destination.level,
@@ -568,7 +567,7 @@ namespace dawn_native { namespace d3d12 {
                     buffer->TransitionUsageNow(commandList, dawn::BufferUsageBit::TransferDst);
 
                     auto copySplit = ComputeTextureCopySplit(
-                        copy->source.origin, copy->copySize, texture->GetFormat().blockByteSize,
+                        copy->source.origin, copy->copySize, texture->GetFormat(),
                         copy->destination.offset, copy->destination.rowPitch,
                         copy->destination.imageHeight);
 
