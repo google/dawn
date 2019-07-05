@@ -420,6 +420,11 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 
 // Test texture-to-texture whole-size copies with BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmapLevel) {
+    // TODO(cwallez@chromium.org): This consistently fails on with the 12th pixel being opaque black
+    // instead of opaque red on Win10 FYI Release (NVIDIA GeForce GTX 1660). See
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=981393
+    DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
+
     CopyConfig config;
     config.textureHeightLevel0 = 60;
     config.textureWidthLevel0 = 60;
