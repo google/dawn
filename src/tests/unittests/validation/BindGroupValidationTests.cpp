@@ -448,40 +448,27 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutCache) {
     ASSERT_EQ(layout1.Get(), layout2.Get());
 }
 
-constexpr uint32_t kBufferElementsCount = kMinDynamicBufferOffsetAlignment / sizeof(uint32_t) + 2;
-constexpr uint32_t kBufferSize = kBufferElementsCount * sizeof(uint32_t);
+constexpr uint64_t kBufferSize = 2 * kMinDynamicBufferOffsetAlignment + 8;
+constexpr uint32_t kBindingSize = 9;
 
 class SetBindGroupValidationTest : public ValidationTest {
   public:
     void SetUp() override {
-        std::array<float, kBufferElementsCount> uniformData = {0};
-
-        uniformData[0] = 1.0;
-        uniformData[1] = 2.0;
-        uniformData[uniformData.size() - 2] = 5.0;
-        uniformData[uniformData.size() - 1] = 6.0;
-
-        dawn::BufferDescriptor bufferDescriptor;
-        bufferDescriptor.size = kBufferSize;
-        bufferDescriptor.usage = dawn::BufferUsageBit::Storage;
-
-        mUniformBuffer = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
-                                                     dawn::BufferUsageBit::Uniform);
-        mStorageBuffer = device.CreateBuffer(&bufferDescriptor);
-
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
                       dawn::BindingType::DynamicUniformBuffer},
                      {1, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
                       dawn::BindingType::DynamicStorageBuffer}});
-
-        mBindGroup = utils::MakeBindGroup(
-            device, mBindGroupLayout,
-            {{0, mUniformBuffer, 0, kBufferSize}, {1, mStorageBuffer, 0, kBufferSize}});
     }
-    // Create objects to use as resources inside test bind groups.
 
-    dawn::BindGroup mBindGroup;
+    dawn::Buffer CreateBuffer(uint64_t bufferSize, dawn::BufferUsageBit usage) {
+        dawn::BufferDescriptor bufferDescriptor;
+        bufferDescriptor.size = bufferSize;
+        bufferDescriptor.usage = usage;
+
+        return device.CreateBuffer(&bufferDescriptor);
+    }
+
     dawn::BindGroupLayout mBindGroupLayout;
     dawn::Buffer mUniformBuffer;
     dawn::Buffer mStorageBuffer;
@@ -497,10 +484,10 @@ class SetBindGroupValidationTest : public ValidationTest {
             utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
                 #version 450
                 layout(std140, set = 0, binding = 0) uniform uBuffer {
-                     vec2 value1;
+                    vec2 value1;
                 };
                 layout(std140, set = 0, binding = 1) buffer SBuffer {
-                     vec2 value2;
+                    vec2 value2;
                 } sBuffer;
                 layout(location = 0) out uvec4 fragColor;
                 void main() {
@@ -545,162 +532,161 @@ class SetBindGroupValidationTest : public ValidationTest {
 
         return device.CreateComputePipeline(&csDesc);
     }
-};
 
-// This is the test case that should work.
-TEST_F(SetBindGroupValidationTest, Basic) {
-    std::array<uint64_t, 2> offsets = {256, 0};
-
-    // RenderPipeline SetBindGroup
-    {
+    void TestRenderPassBindGroup(dawn::BindGroup bindGroup,
+                                 uint64_t* offsets,
+                                 uint32_t count,
+                                 bool expectation) {
         dawn::RenderPipeline renderPipeline = CreateRenderPipeline();
         DummyRenderPass renderPass(device);
 
         dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
         renderPassEncoder.SetPipeline(renderPipeline);
-        renderPassEncoder.SetBindGroup(0, mBindGroup, 2, offsets.data());
+        renderPassEncoder.SetBindGroup(0, bindGroup, count, offsets);
         renderPassEncoder.Draw(3, 1, 0, 0);
         renderPassEncoder.EndPass();
-        commandEncoder.Finish();
+        if (!expectation) {
+            ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+        } else {
+            commandEncoder.Finish();
+        }
     }
 
-    {
+    void TestComputePassBindGroup(dawn::BindGroup bindGroup,
+                                  uint64_t* offsets,
+                                  uint32_t count,
+                                  bool expectation) {
         dawn::ComputePipeline computePipeline = CreateComputePipeline();
 
         dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
         computePassEncoder.SetPipeline(computePipeline);
-        computePassEncoder.SetBindGroup(0, mBindGroup, 2, offsets.data());
+        computePassEncoder.SetBindGroup(0, bindGroup, count, offsets);
         computePassEncoder.Dispatch(1, 1, 1);
         computePassEncoder.EndPass();
-        commandEncoder.Finish();
+        if (!expectation) {
+            ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+        } else {
+            commandEncoder.Finish();
+        }
     }
+};
+
+// This is the test case that should work.
+TEST_F(SetBindGroupValidationTest, Basic) {
+    // Set up the bind group.
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, mBindGroupLayout,
+        {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
+
+    std::array<uint64_t, 2> offsets = {256, 0};
+
+    TestRenderPassBindGroup(bindGroup, offsets.data(), 2, true);
+
+    TestComputePassBindGroup(bindGroup, offsets.data(), 2, true);
 }
 
 // Test cases that test dynamic offsets count mismatch with bind group layout.
 TEST_F(SetBindGroupValidationTest, DynamicOffsetsMismatch) {
+    // Set up bind group.
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, mBindGroupLayout,
+        {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
+
+    // Number of offsets mismatch.
     std::array<uint64_t, 1> mismatchOffsets = {0};
 
-    // RenderPipeline SetBindGroup
-    {
-        dawn::RenderPipeline pipeline = CreateRenderPipeline();
-        DummyRenderPass renderPass(device);
+    TestRenderPassBindGroup(bindGroup, mismatchOffsets.data(), 1, false);
 
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
-        renderPassEncoder.SetPipeline(pipeline);
-        renderPassEncoder.SetBindGroup(0, mBindGroup, 1, mismatchOffsets.data());
-        renderPassEncoder.Draw(3, 1, 0, 0);
-        renderPassEncoder.EndPass();
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
-
-    {
-        dawn::ComputePipeline computePipeline = CreateComputePipeline();
-
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
-        computePassEncoder.SetPipeline(computePipeline);
-        computePassEncoder.SetBindGroup(0, mBindGroup, 1, mismatchOffsets.data());
-        computePassEncoder.Dispatch(1, 1, 1);
-        computePassEncoder.EndPass();
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
+    TestComputePassBindGroup(bindGroup, mismatchOffsets.data(), 1, false);
 }
 
 // Test cases that test dynamic offsets not aligned
 TEST_F(SetBindGroupValidationTest, DynamicOffsetsNotAligned) {
+    // Set up bind group.
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, mBindGroupLayout,
+        {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
+
+    // Dynamic offsets are not aligned.
     std::array<uint64_t, 2> notAlignedOffsets = {1, 2};
 
-    // RenderPipeline SetBindGroup
-    {
-        dawn::RenderPipeline pipeline = CreateRenderPipeline();
-        DummyRenderPass renderPass(device);
+    TestRenderPassBindGroup(bindGroup, notAlignedOffsets.data(), 2, false);
 
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
-        renderPassEncoder.SetPipeline(pipeline);
-        renderPassEncoder.SetBindGroup(0, mBindGroup, 2, notAlignedOffsets.data());
-        renderPassEncoder.Draw(3, 1, 0, 0);
-        renderPassEncoder.EndPass();
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
-
-    // ComputePipeline SetBindGroup
-    {
-        dawn::ComputePipeline pipeline = CreateComputePipeline();
-
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
-        computePassEncoder.SetPipeline(pipeline);
-        computePassEncoder.SetBindGroup(0, mBindGroup, 2, notAlignedOffsets.data());
-        computePassEncoder.Dispatch(1, 1, 1);
-        computePassEncoder.EndPass();
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
+    TestComputePassBindGroup(bindGroup, notAlignedOffsets.data(), 2, false);
 }
 
 // Test cases that test dynamic uniform buffer out of bound situation.
-TEST_F(SetBindGroupValidationTest, OutOfBoundDynamicUniformBuffer) {
-    std::array<uint64_t, 2> overFlowOffsets = {512, 0};
+TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicUniformBuffer) {
+    // Set up bind group.
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, mBindGroupLayout,
+        {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
 
-    // RenderPipeline SetBindGroup
-    {
-        dawn::RenderPipeline pipeline = CreateRenderPipeline();
-        DummyRenderPass renderPass(device);
+    // Dynamic offset + offset is larger than buffer size.
+    std::array<uint64_t, 2> overFlowOffsets = {1024, 0};
 
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
-        renderPassEncoder.SetPipeline(pipeline);
-        renderPassEncoder.SetBindGroup(0, mBindGroup, 2, overFlowOffsets.data());
-        renderPassEncoder.Draw(3, 1, 0, 0);
-        renderPassEncoder.EndPass();
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
+    TestRenderPassBindGroup(bindGroup, overFlowOffsets.data(), 2, false);
 
-    // ComputePipeline SetBindGroup
-    {
-        dawn::ComputePipeline pipeline = CreateComputePipeline();
-
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
-        computePassEncoder.SetPipeline(pipeline);
-        computePassEncoder.SetBindGroup(0, mBindGroup, 2, overFlowOffsets.data());
-        computePassEncoder.Dispatch(1, 1, 1);
-        computePassEncoder.EndPass();
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
+    TestComputePassBindGroup(bindGroup, overFlowOffsets.data(), 2, false);
 }
 
 // Test cases that test dynamic storage buffer out of bound situation.
-TEST_F(SetBindGroupValidationTest, OutOfBoundDynamicStorageBuffer) {
-    std::array<uint64_t, 2> overFlowOffsets = {0, 512};
+TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicStorageBuffer) {
+    // Set up bind group.
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, mBindGroupLayout,
+        {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
 
-    // RenderPipeline SetBindGroup
-    {
-        dawn::RenderPipeline pipeline = CreateRenderPipeline();
-        DummyRenderPass renderPass(device);
+    // Dynamic offset + offset is larger than buffer size.
+    std::array<uint64_t, 2> overFlowOffsets = {0, 1024};
 
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
-        renderPassEncoder.SetPipeline(pipeline);
-        renderPassEncoder.SetBindGroup(0, mBindGroup, 2, overFlowOffsets.data());
-        renderPassEncoder.Draw(3, 1, 0, 0);
-        renderPassEncoder.EndPass();
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
+    TestRenderPassBindGroup(bindGroup, overFlowOffsets.data(), 2, false);
 
-    // ComputePipeline SetBindGroup
-    {
-        dawn::ComputePipeline pipeline = CreateComputePipeline();
+    TestComputePassBindGroup(bindGroup, overFlowOffsets.data(), 2, false);
+}
 
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
-        computePassEncoder.SetPipeline(pipeline);
-        computePassEncoder.SetBindGroup(0, mBindGroup, 2, overFlowOffsets.data());
-        computePassEncoder.Dispatch(1, 1, 1);
-        computePassEncoder.EndPass();
-        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
-    }
+// Test cases that test dynamic uniform buffer out of bound situation because of binding size.
+TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicUniformBuffer) {
+    // Set up bind group, but binding size is larger than
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, mBindGroupLayout,
+        {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
+
+    // Dynamic offset + offset isn't larger than buffer size.
+    // But with binding size, it will trigger OOB error.
+    std::array<uint64_t, 2> offsets = {512, 0};
+
+    TestRenderPassBindGroup(bindGroup, offsets.data(), 2, false);
+
+    TestComputePassBindGroup(bindGroup, offsets.data(), 2, false);
+}
+
+// Test cases that test dynamic storage buffer out of bound situation because of binding size.
+TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicStorageBuffer) {
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, mBindGroupLayout,
+        {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
+    // Dynamic offset + offset isn't larger than buffer size.
+    // But with binding size, it will trigger OOB error.
+    std::array<uint64_t, 2> offsets = {0, 512};
+
+    TestRenderPassBindGroup(bindGroup, offsets.data(), 2, false);
+
+    TestComputePassBindGroup(bindGroup, offsets.data(), 2, false);
 }

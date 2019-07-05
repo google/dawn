@@ -89,7 +89,6 @@ namespace dawn_native { namespace vulkan {
                     writeBufferInfo[numWrites].buffer = ToBackend(binding.buffer)->GetHandle();
                     writeBufferInfo[numWrites].offset = binding.offset;
                     writeBufferInfo[numWrites].range = binding.size;
-
                     write.pBufferInfo = &writeBufferInfo[numWrites];
                 } break;
 

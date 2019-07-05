@@ -340,6 +340,8 @@ namespace dawn_native { namespace vulkan {
         usedKnobs.features.independentBlend = VK_TRUE;
         // Always require imageCubeArray because it is a core Dawn feature
         usedKnobs.features.imageCubeArray = VK_TRUE;
+        // Always require fragmentStoresAndAtomics because it is required by end2end tests.
+        usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
 
         // TODO(jiawei.shao@intel.com): support BC formats as extension
         usedKnobs.features.textureCompressionBC = VK_TRUE;
