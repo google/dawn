@@ -662,6 +662,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/ComputeIndirectTests.cpp",
     "src/tests/end2end/ComputeSharedMemoryTests.cpp",
     "src/tests/end2end/CopyTests.cpp",
+    "src/tests/end2end/CullingTests.cpp",
     "src/tests/end2end/DebugMarkerTests.cpp",
     "src/tests/end2end/DepthStencilStateTests.cpp",
     "src/tests/end2end/DestroyTests.cpp",

@@ -138,6 +138,19 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
+        D3D12_CULL_MODE D3D12CullMode(dawn::CullMode mode) {
+            switch (mode) {
+                case dawn::CullMode::None:
+                    return D3D12_CULL_MODE_NONE;
+                case dawn::CullMode::Front:
+                    return D3D12_CULL_MODE_FRONT;
+                case dawn::CullMode::Back:
+                    return D3D12_CULL_MODE_BACK;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
         D3D12_BLEND D3D12Blend(dawn::BlendFactor factor) {
             switch (factor) {
                 case dawn::BlendFactor::Zero:
@@ -343,8 +356,9 @@ namespace dawn_native { namespace d3d12 {
         }
 
         descriptorD3D12.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
-        descriptorD3D12.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
-        descriptorD3D12.RasterizerState.FrontCounterClockwise = FALSE;
+        descriptorD3D12.RasterizerState.CullMode = D3D12CullMode(GetCullMode());
+        descriptorD3D12.RasterizerState.FrontCounterClockwise =
+            (GetFrontFace() == dawn::FrontFace::CCW) ? TRUE : FALSE;
         descriptorD3D12.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         descriptorD3D12.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
         descriptorD3D12.RasterizerState.SlopeScaledDepthBias =

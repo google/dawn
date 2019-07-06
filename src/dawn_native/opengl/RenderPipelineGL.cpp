@@ -40,6 +40,23 @@ namespace dawn_native { namespace opengl {
             }
         }
 
+        void ApplyFrontFaceAndCulling(const OpenGLFunctions& gl,
+                                      dawn::FrontFace face,
+                                      dawn::CullMode mode) {
+            if (mode == dawn::CullMode::None) {
+                gl.Disable(GL_CULL_FACE);
+            } else {
+                gl.Enable(GL_CULL_FACE);
+                // Note that we invert winding direction in OpenGL. Because Y axis is up in OpenGL,
+                // which is different from WebGPU and other backends (Y axis is down).
+                GLenum direction = (face == dawn::FrontFace::CCW) ? GL_CW : GL_CCW;
+                gl.FrontFace(direction);
+
+                GLenum cullMode = (mode == dawn::CullMode::Front) ? GL_FRONT : GL_BACK;
+                gl.CullFace(cullMode);
+            }
+        }
+
         GLenum GLBlendFactor(dawn::BlendFactor factor, bool alpha) {
             switch (factor) {
                 case dawn::BlendFactor::Zero:
@@ -235,6 +252,8 @@ namespace dawn_native { namespace opengl {
 
         ASSERT(mVertexArrayObject);
         gl.BindVertexArray(mVertexArrayObject);
+
+        ApplyFrontFaceAndCulling(gl, GetFrontFace(), GetCullMode());
 
         ApplyDepthStencilState(gl, GetDepthStencilStateDescriptor(), &persistentPipelineState);
 

@@ -137,6 +137,26 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
+        VkFrontFace VulkanFrontFace(dawn::FrontFace face) {
+            switch (face) {
+                case dawn::FrontFace::CCW:
+                    return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+                case dawn::FrontFace::CW:
+                    return VK_FRONT_FACE_CLOCKWISE;
+            }
+        }
+
+        VkCullModeFlagBits VulkanCullMode(dawn::CullMode mode) {
+            switch (mode) {
+                case dawn::CullMode::None:
+                    return VK_CULL_MODE_NONE;
+                case dawn::CullMode::Front:
+                    return VK_CULL_MODE_FRONT_BIT;
+                case dawn::CullMode::Back:
+                    return VK_CULL_MODE_BACK_BIT;
+            }
+        }
+
         VkBlendFactor VulkanBlendFactor(dawn::BlendFactor factor) {
             switch (factor) {
                 case dawn::BlendFactor::Zero:
@@ -355,8 +375,8 @@ namespace dawn_native { namespace vulkan {
         rasterization.depthClampEnable = VK_FALSE;
         rasterization.rasterizerDiscardEnable = VK_FALSE;
         rasterization.polygonMode = VK_POLYGON_MODE_FILL;
-        rasterization.cullMode = VK_CULL_MODE_NONE;
-        rasterization.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterization.cullMode = VulkanCullMode(GetCullMode());
+        rasterization.frontFace = VulkanFrontFace(GetFrontFace());
         rasterization.depthBiasEnable = VK_FALSE;
         rasterization.depthBiasConstantFactor = 0.0f;
         rasterization.depthBiasClamp = 0.0f;
