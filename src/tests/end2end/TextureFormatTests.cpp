@@ -367,7 +367,7 @@ class TextureFormatTest : public DawnTest {
         ASSERT(sizeof(float) * formatInfo.componentCount == formatInfo.texelByteSize);
         ASSERT(formatInfo.type == Float);
 
-        std::vector<float> textureData = {+0.0f,  -0.0f, 1.0f,     1.0e-29,
+        std::vector<float> textureData = {+0.0f,  -0.0f, 1.0f,     1.0e-29f,
                                           1.0e29, NAN,   INFINITY, -INFINITY};
 
         DoSampleTest(formatInfo, textureData, textureData);
@@ -377,8 +377,8 @@ class TextureFormatTest : public DawnTest {
         ASSERT(sizeof(int16_t) * formatInfo.componentCount == formatInfo.texelByteSize);
         ASSERT(formatInfo.type == Float);
 
-        std::vector<float> expectedData = {+0.0f, -0.0f, 1.0f,     1.0e-4,
-                                           1.0e4, NAN,   INFINITY, -INFINITY};
+        std::vector<float> expectedData = {+0.0f,  -0.0f, 1.0f,     1.0e-4f,
+                                           1.0e4f, NAN,   INFINITY, -INFINITY};
         std::vector<uint16_t> textureData;
         for (float value : expectedData) {
             textureData.push_back(Float32ToFloat16(value));
