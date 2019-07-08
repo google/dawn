@@ -327,7 +327,7 @@ TEST_P(ObjectCachingTest, SamplerDeduplication) {
     dawn::Sampler otherSamplerLodMaxClamp = device.CreateSampler(&otherSamplerDescLodMaxClamp);
 
     dawn::SamplerDescriptor otherSamplerDescCompareFunction = utils::GetDefaultSamplerDescriptor();
-    otherSamplerDescCompareFunction.compareFunction = dawn::CompareFunction::Always;
+    otherSamplerDescCompareFunction.compare = dawn::CompareFunction::Always;
     dawn::Sampler otherSamplerCompareFunction =
         device.CreateSampler(&otherSamplerDescCompareFunction);
 

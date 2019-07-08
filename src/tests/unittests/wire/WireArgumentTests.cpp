@@ -273,7 +273,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
     descriptor.addressModeW = DAWN_ADDRESS_MODE_MIRRORED_REPEAT;
     descriptor.lodMinClamp = kLodMin;
     descriptor.lodMaxClamp = kLodMax;
-    descriptor.compareFunction = DAWN_COMPARE_FUNCTION_NEVER;
+    descriptor.compare = DAWN_COMPARE_FUNCTION_NEVER;
 
     dawnDeviceCreateSampler(device, &descriptor);
 
@@ -287,7 +287,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
                                     desc->addressModeU == DAWN_ADDRESS_MODE_CLAMP_TO_EDGE &&
                                     desc->addressModeV == DAWN_ADDRESS_MODE_REPEAT &&
                                     desc->addressModeW == DAWN_ADDRESS_MODE_MIRRORED_REPEAT &&
-                                    desc->compareFunction == DAWN_COMPARE_FUNCTION_NEVER &&
+                                    desc->compare == DAWN_COMPARE_FUNCTION_NEVER &&
                                     desc->lodMinClamp == kLodMin && desc->lodMaxClamp == kLodMax;
                          })))
         .WillOnce(Return(apiDummySampler));

@@ -128,7 +128,7 @@ protected:
             descriptor.addressModeW = w.mMode;
             descriptor.lodMinClamp = kLodMin;
             descriptor.lodMaxClamp = kLodMax;
-            descriptor.compareFunction = dawn::CompareFunction::Never;
+            descriptor.compare = dawn::CompareFunction::Never;
             sampler = device.CreateSampler(&descriptor);
         }
 

@@ -101,7 +101,7 @@ protected:
         samplerDescriptor.addressModeW = kAddressMode;
         samplerDescriptor.lodMinClamp = kLodMin;
         samplerDescriptor.lodMaxClamp = kLodMax;
-        samplerDescriptor.compareFunction = dawn::CompareFunction::Never;
+        samplerDescriptor.compare = dawn::CompareFunction::Never;
         mSampler = device.CreateSampler(&samplerDescriptor);
 
         mPipelineLayout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);

@@ -268,7 +268,7 @@ namespace utils {
         desc.addressModeW = dawn::AddressMode::Repeat;
         desc.lodMinClamp = kLodMin;
         desc.lodMaxClamp = kLodMax;
-        desc.compareFunction = dawn::CompareFunction::Never;
+        desc.compare = dawn::CompareFunction::Never;
 
         return desc;
     }

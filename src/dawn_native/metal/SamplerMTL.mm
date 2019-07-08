@@ -64,7 +64,7 @@ namespace dawn_native { namespace metal {
 
         mtlDesc.lodMinClamp = descriptor->lodMinClamp;
         mtlDesc.lodMaxClamp = descriptor->lodMaxClamp;
-        mtlDesc.compareFunction = ToMetalCompareFunction(descriptor->compareFunction);
+        mtlDesc.compareFunction = ToMetalCompareFunction(descriptor->compare);
 
         mMtlSamplerState = [device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc];
 

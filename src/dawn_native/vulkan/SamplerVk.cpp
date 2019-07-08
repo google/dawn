@@ -72,7 +72,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.mipLodBias = 0.0f;
         createInfo.anisotropyEnable = VK_FALSE;
         createInfo.maxAnisotropy = 1.0f;
-        createInfo.compareOp = ToVulkanCompareOp(descriptor->compareFunction);
+        createInfo.compareOp = ToVulkanCompareOp(descriptor->compare);
         createInfo.compareEnable = createInfo.compareOp == VK_COMPARE_OP_NEVER ? VK_FALSE : VK_TRUE;
         createInfo.minLod = descriptor->lodMinClamp;
         createInfo.maxLod = descriptor->lodMaxClamp;

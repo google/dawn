@@ -83,7 +83,7 @@ namespace dawn_native { namespace d3d12 {
         mSamplerDesc.AddressW = AddressMode(descriptor->addressModeW);
         mSamplerDesc.MipLODBias = 0.f;
         mSamplerDesc.MaxAnisotropy = 1;
-        mSamplerDesc.ComparisonFunc = ToD3D12ComparisonFunc(descriptor->compareFunction);
+        mSamplerDesc.ComparisonFunc = ToD3D12ComparisonFunc(descriptor->compare);
         mSamplerDesc.MinLOD = descriptor->lodMinClamp;
         mSamplerDesc.MaxLOD = descriptor->lodMaxClamp;
     }

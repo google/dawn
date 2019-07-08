@@ -87,10 +87,10 @@ namespace dawn_native { namespace opengl {
         gl.SamplerParameterf(mHandle, GL_TEXTURE_MIN_LOD, descriptor->lodMinClamp);
         gl.SamplerParameterf(mHandle, GL_TEXTURE_MAX_LOD, descriptor->lodMaxClamp);
 
-        if (ToOpenGLCompareFunction(descriptor->compareFunction) != GL_NEVER) {
+        if (ToOpenGLCompareFunction(descriptor->compare) != GL_NEVER) {
             gl.SamplerParameteri(mHandle, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
             gl.SamplerParameteri(mHandle, GL_TEXTURE_COMPARE_FUNC,
-                                 ToOpenGLCompareFunction(descriptor->compareFunction));
+                                 ToOpenGLCompareFunction(descriptor->compare));
         }
     }
 

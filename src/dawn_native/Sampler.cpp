@@ -46,7 +46,7 @@ namespace dawn_native {
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeU));
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeV));
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeW));
-        DAWN_TRY(ValidateCompareFunction(descriptor->compareFunction));
+        DAWN_TRY(ValidateCompareFunction(descriptor->compare));
         return {};
     }
 
@@ -64,7 +64,7 @@ namespace dawn_native {
           mMipmapFilter(descriptor->mipmapFilter),
           mLodMinClamp(descriptor->lodMinClamp),
           mLodMaxClamp(descriptor->lodMaxClamp),
-          mCompareFunction(descriptor->compareFunction),
+          mCompareFunction(descriptor->compare),
           mIsBlueprint(blueprint) {
     }
 

@@ -901,7 +901,7 @@
             {"name": "mipmap filter", "type": "filter mode"},
             {"name": "lod min clamp", "type": "float"},
             {"name": "lod max clamp", "type": "float"},
-            {"name": "compare function", "type": "compare function"}
+            {"name": "compare", "type": "compare function"}
         ]
     },
     "shader module": {
