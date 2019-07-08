@@ -112,6 +112,8 @@ class DawnTestEnvironment : public testing::Environment {
     bool IsBackendValidationEnabled() const;
     dawn_native::Instance* GetInstance() const;
     GLFWwindow* GetWindowForBackend(dawn_native::BackendType type) const;
+    bool HasVendorIdFilter() const;
+    uint32_t GetVendorIdFilter() const;
 
   private:
     void CreateBackendWindow(dawn_native::BackendType type);
@@ -119,6 +121,8 @@ class DawnTestEnvironment : public testing::Environment {
     bool mUseWire = false;
     bool mEnableBackendValidation = false;
     bool mBeginCaptureOnStartup = false;
+    bool mHasVendorIdFilter = false;
+    uint32_t mVendorIdFilter = 0;
     std::unique_ptr<dawn_native::Instance> mInstance;
 
     // Windows don't usually like to be bound to one API than the other, for example switching
@@ -156,6 +160,9 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
 
     void StartExpectDeviceError();
     bool EndExpectDeviceError();
+
+    bool HasVendorIdFilter() const;
+    uint32_t GetVendorIdFilter() const;
 
   protected:
     dawn::Device device;
