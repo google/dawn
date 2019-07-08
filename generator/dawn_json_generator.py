@@ -94,7 +94,8 @@ class NativelyDefined(Type):
 # Methods and structures are both "records", so record members correspond to
 # method arguments or structure members.
 class RecordMember:
-    def __init__(self, name, typ, annotation, optional, is_return_value):
+    def __init__(self, name, typ, annotation, optional=False,
+                 is_return_value=False, default_value=None):
         self.name = name
         self.type = typ
         self.annotation = annotation
@@ -102,6 +103,7 @@ class RecordMember:
         self.optional = optional
         self.is_return_value = is_return_value
         self.handle_type = None
+        self.default_value = default_value
 
     def set_handle_type(self, handle_type):
         assert self.type.dict_name == "ObjectHandle"
@@ -150,8 +152,10 @@ def linked_record_members(json_data, types):
     members_by_name = {}
     for m in json_data:
         member = RecordMember(Name(m['name']), types[m['type']],
-                              m.get('annotation', 'value'), m.get('optional', False),
-                              m.get('is_return_value', False))
+                              m.get('annotation', 'value'),
+                              optional=m.get('optional', False),
+                              is_return_value=m.get('is_return_value', False),
+                              default_value=m.get('default', None))
         handle_type = m.get('handle_type')
         if handle_type:
             member.set_handle_type(types[handle_type])
@@ -299,12 +303,12 @@ def compute_wire_params(api_params, wire_json):
                 continue
 
             # Create object method commands by prepending "self"
-            members = [RecordMember(Name('self'), types[api_object.dict_name], 'value', False, False)]
+            members = [RecordMember(Name('self'), types[api_object.dict_name], 'value')]
             members += method.arguments
 
             # Client->Server commands that return an object return the result object handle
             if method.return_type.category == 'object':
-                result = RecordMember(Name('result'), types['ObjectHandle'], 'value', False, True)
+                result = RecordMember(Name('result'), types['ObjectHandle'], 'value', is_return_value=True)
                 result.set_handle_type(method.return_type)
                 members.append(result)
 

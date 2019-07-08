@@ -103,8 +103,8 @@ class _PreprocessingLoader(jinja2.BaseLoader):
             source = self.preprocess(f.read())
         return source, path, lambda: mtime == os.path.getmtime(path)
 
-    blockstart = re.compile('{%-?\s*(if|for|block)[^}]*%}')
-    blockend = re.compile('{%-?\s*end(if|for|block)[^}]*%}')
+    blockstart = re.compile('{%-?\s*(if|elif|else|for|block|macro)[^}]*%}')
+    blockend = re.compile('{%-?\s*(end(if|for|block|macro)|elif|else)[^}]*%}')
 
     def preprocess(self, source):
         lines = source.split('\n')

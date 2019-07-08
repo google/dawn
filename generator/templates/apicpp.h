@@ -61,102 +61,115 @@ namespace dawn {
 
     template<typename Derived, typename CType>
     class ObjectBase {
-        public:
-            ObjectBase() = default;
-            ObjectBase(CType handle): mHandle(handle) {
+      public:
+        ObjectBase() = default;
+        ObjectBase(CType handle): mHandle(handle) {
+            if (mHandle) Derived::DawnReference(mHandle);
+        }
+        ~ObjectBase() {
+            if (mHandle) Derived::DawnRelease(mHandle);
+        }
+
+        ObjectBase(ObjectBase const& other)
+            : ObjectBase(other.Get()) {
+        }
+        Derived& operator=(ObjectBase const& other) {
+            if (&other != this) {
+                if (mHandle) Derived::DawnRelease(mHandle);
+                mHandle = other.mHandle;
                 if (mHandle) Derived::DawnReference(mHandle);
             }
-            ~ObjectBase() {
+
+            return static_cast<Derived&>(*this);
+        }
+
+        ObjectBase(ObjectBase&& other) {
+            mHandle = other.mHandle;
+            other.mHandle = 0;
+        }
+        Derived& operator=(ObjectBase&& other) {
+            if (&other != this) {
                 if (mHandle) Derived::DawnRelease(mHandle);
-            }
-
-            ObjectBase(ObjectBase const& other)
-                : ObjectBase(other.Get()) {
-            }
-            Derived& operator=(ObjectBase const& other) {
-                if (&other != this) {
-                    if (mHandle) Derived::DawnRelease(mHandle);
-                    mHandle = other.mHandle;
-                    if (mHandle) Derived::DawnReference(mHandle);
-                }
-
-                return static_cast<Derived&>(*this);
-            }
-
-            ObjectBase(ObjectBase&& other) {
                 mHandle = other.mHandle;
                 other.mHandle = 0;
             }
-            Derived& operator=(ObjectBase&& other) {
-                if (&other != this) {
-                    if (mHandle) Derived::DawnRelease(mHandle);
-                    mHandle = other.mHandle;
-                    other.mHandle = 0;
-                }
 
-                return static_cast<Derived&>(*this);
-            }
+            return static_cast<Derived&>(*this);
+        }
 
-            ObjectBase(std::nullptr_t) {}
-            Derived& operator=(std::nullptr_t) {
-                if (mHandle != nullptr) {
-                    Derived::DawnRelease(mHandle);
-                    mHandle = nullptr;
-                }
-                return static_cast<Derived&>(*this);
+        ObjectBase(std::nullptr_t) {}
+        Derived& operator=(std::nullptr_t) {
+            if (mHandle != nullptr) {
+                Derived::DawnRelease(mHandle);
+                mHandle = nullptr;
             }
+            return static_cast<Derived&>(*this);
+        }
 
-            explicit operator bool() const {
-                return mHandle != nullptr;
-            }
-            CType Get() const {
-                return mHandle;
-            }
-            CType Release() {
-                CType result = mHandle;
-                mHandle = 0;
-                return result;
-            }
-            static Derived Acquire(CType handle) {
-                Derived result;
-                result.mHandle = handle;
-                return result;
-            }
+        explicit operator bool() const {
+            return mHandle != nullptr;
+        }
+        CType Get() const {
+            return mHandle;
+        }
+        CType Release() {
+            CType result = mHandle;
+            mHandle = 0;
+            return result;
+        }
+        static Derived Acquire(CType handle) {
+            Derived result;
+            result.mHandle = handle;
+            return result;
+        }
 
-        protected:
-            CType mHandle = nullptr;
+      protected:
+        CType mHandle = nullptr;
     };
 
-    {% macro render_cpp_method_declaration(type, method) %}
-        {% set CppType = as_cppType(type.name) %}
-        DAWN_EXPORT {{as_cppType(method.return_type.name)}} {{method.name.CamelCase()}}(
-            {%- for arg in method.arguments -%}
-                {%- if not loop.first %}, {% endif -%}
-                {%- if arg.type.category == "object" and arg.annotation == "value" -%}
-                    {{as_cppType(arg.type.name)}} const& {{as_varName(arg.name)}}
-                {%- else -%}
-                    {{as_annotated_cppType(arg)}}
-                {%- endif -%}
-            {%- endfor -%}
-        ) const
-    {%- endmacro %}
+{% macro render_cpp_default_value(member) -%}
+    {%- if member.annotation in ["*", "const*", "const*const*"] and member.optional -%}
+        {{" "}}= nullptr
+    {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
+        {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+    {%- elif member.type.category == "native" and member.default_value != None -%}
+        {{" "}}= {{member.default_value}}
+    {%- else -%}
+        {{assert(member.default_value == None)}}
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro render_cpp_method_declaration(type, method) %}
+    {% set CppType = as_cppType(type.name) %}
+    DAWN_EXPORT {{as_cppType(method.return_type.name)}} {{method.name.CamelCase()}}(
+        {%- for arg in method.arguments -%}
+            {%- if not loop.first %}, {% endif -%}
+            {%- if arg.type.category == "object" and arg.annotation == "value" -%}
+                {{as_cppType(arg.type.name)}} const& {{as_varName(arg.name)}}
+            {%- else -%}
+                {{as_annotated_cppType(arg)}}
+            {%- endif -%}
+            {{render_cpp_default_value(arg)}}
+        {%- endfor -%}
+    ) const
+{%- endmacro %}
 
     {% for type in by_category["object"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
         class {{CppType}} : public ObjectBase<{{CppType}}, {{CType}}> {
-            public:
-                using ObjectBase::ObjectBase;
-                using ObjectBase::operator=;
+          public:
+            using ObjectBase::ObjectBase;
+            using ObjectBase::operator=;
 
-                {% for method in native_methods(type) %}
-                    {{render_cpp_method_declaration(type, method)}};
-                {% endfor %}
+            {% for method in native_methods(type) %}
+                {{render_cpp_method_declaration(type, method)}};
+            {% endfor %}
 
-            private:
-                friend ObjectBase<{{CppType}}, {{CType}}>;
-                static DAWN_EXPORT void DawnReference({{CType}} handle);
-                static DAWN_EXPORT void DawnRelease({{CType}} handle);
+          private:
+            friend ObjectBase<{{CppType}}, {{CType}}>;
+            static DAWN_EXPORT void DawnReference({{CType}} handle);
+            static DAWN_EXPORT void DawnRelease({{CType}} handle);
         };
 
     {% endfor %}
@@ -167,7 +180,7 @@ namespace dawn {
                 const void* nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
-                {{as_annotated_cppType(member)}};
+                {{as_annotated_cppType(member)}}{{render_cpp_default_value(member)}};
             {% endfor %}
         };
 

@@ -31,7 +31,7 @@
         "members": [
             {"name": "binding", "type": "uint32_t"},
             {"name": "buffer", "type": "buffer", "optional": true},
-            {"name": "offset", "type": "uint64_t"},
+            {"name": "offset", "type": "uint64_t", "default": "0"},
             {"name": "size", "type": "uint64_t"},
             {"name": "sampler", "type": "sampler", "optional": true},
             {"name": "texture view", "type": "texture view", "optional": true}
@@ -81,9 +81,9 @@
         "category": "structure",
         "extensible": false,
         "members": [
-            {"name": "operation", "type": "blend operation"},
-            {"name": "src factor", "type": "blend factor"},
-            {"name": "dst factor", "type": "blend factor"}
+            {"name": "operation", "type": "blend operation", "default": "add"},
+            {"name": "src factor", "type": "blend factor", "default": "one"},
+            {"name": "dst factor", "type": "blend factor", "default": "zero"}
         ]
     },
     "blend factor": {
@@ -121,7 +121,7 @@
             {"name": "format", "type": "texture format"},
             {"name": "alpha blend", "type": "blend descriptor"},
             {"name": "color blend", "type": "blend descriptor"},
-            {"name": "write mask", "type": "color write mask"}
+            {"name": "write mask", "type": "color write mask", "default": "all"}
         ]
     },
     "bool": {
@@ -168,7 +168,7 @@
         "extensible": true,
         "members": [
             {"name": "buffer", "type": "buffer"},
-            {"name": "offset", "type": "uint64_t"},
+            {"name": "offset", "type": "uint64_t", "default": 0},
             {"name": "row pitch", "type": "uint32_t"},
             {"name": "image height", "type": "uint32_t"}
         ]
@@ -353,8 +353,8 @@
                 "name": "dispatch",
                 "args": [
                     {"name": "x", "type": "uint32_t"},
-                    {"name": "y", "type": "uint32_t"},
-                    {"name": "z", "type": "uint32_t"}
+                    {"name": "y", "type": "uint32_t", "default": "1"},
+                    {"name": "z", "type": "uint32_t", "default": "1"}
                 ]
             },
             {
@@ -502,12 +502,12 @@
         "extensible": true,
         "members": [
             {"name": "format", "type": "texture format"},
-            {"name": "depth write enabled", "type": "bool"},
-            {"name": "depth compare", "type": "compare function"},
+            {"name": "depth write enabled", "type": "bool", "default": "false"},
+            {"name": "depth compare", "type": "compare function", "default": "always"},
             {"name": "stencil front", "type": "stencil state face descriptor"},
             {"name": "stencil back", "type": "stencil state face descriptor"},
-            {"name": "stencil read mask", "type": "uint32_t"},
-            {"name": "stencil write mask", "type": "uint32_t"}
+            {"name": "stencil read mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
+            {"name": "stencil write mask", "type": "uint32_t", "default": "0xFFFFFFFF"}
         ]
     },
     "device error callback": {
@@ -563,7 +563,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "initial value", "type": "uint64_t"}
+            {"name": "initial value", "type": "uint64_t", "default": "0"}
         ]
     },
     "filter mode": {
@@ -595,7 +595,7 @@
         "extensible": false,
         "members": [
             {"name": "shader location", "type": "uint32_t"},
-            {"name": "offset", "type": "uint64_t"},
+            {"name": "offset", "type": "uint64_t", "default": "0"},
             {"name": "format", "type": "vertex format"}
         ]
     },
@@ -604,7 +604,7 @@
         "extensible": false,
         "members": [
             {"name": "stride", "type": "uint64_t"},
-            {"name": "step mode", "type": "input step mode"},
+            {"name": "step mode", "type": "input step mode", "default": "vertex"},
             {"name": "attribute count", "type": "uint32_t"},
             {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "attribute count"}
         ]
@@ -613,7 +613,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "index format", "type": "index format"},
+            {"name": "index format", "type": "index format", "default": "uint32"},
             {"name": "buffer count", "type": "uint32_t"},
             {"name": "buffers", "type": "vertex buffer descriptor", "annotation": "const*", "length": "buffer count"}
         ]
@@ -641,9 +641,9 @@
     "origin 3D": {
         "category": "structure",
         "members": [
-            {"name": "x", "type": "uint32_t"},
-            {"name": "y", "type": "uint32_t"},
-            {"name": "z", "type": "uint32_t"}
+            {"name": "x", "type": "uint32_t", "default": "0"},
+            {"name": "y", "type": "uint32_t", "default": "0"},
+            {"name": "z", "type": "uint32_t", "default": "0"}
         ]
     },
     "pipeline layout": {
@@ -706,11 +706,11 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "front face", "type": "front face"},
-            {"name": "cull mode", "type": "cull mode"},
-            {"name": "depth bias", "type": "int32_t"},
-            {"name": "depth bias slope scale", "type": "float"},
-            {"name": "depth bias clamp", "type": "float"}
+            {"name": "front face", "type": "front face", "default": "CCW"},
+            {"name": "cull mode", "type": "cull mode", "default": "none"},
+            {"name": "depth bias", "type": "int32_t", "default": "0"},
+            {"name": "depth bias slope scale", "type": "float", "default": "0.0f"},
+            {"name": "depth bias clamp", "type": "float", "default": "0.0f"}
         ]
     },
 
@@ -734,7 +734,7 @@
             {"name": "clear depth", "type": "float"},
             {"name": "stencil load op", "type": "load op"},
             {"name": "stencil store op", "type": "store op"},
-            {"name": "clear stencil", "type": "uint32_t"}
+            {"name": "clear stencil", "type": "uint32_t", "default": "0"}
         ]
     },
 
@@ -880,7 +880,7 @@
             {"name": "vertex input", "type": "vertex input descriptor", "annotation": "const*"},
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "rasterization state", "type": "rasterization state descriptor", "annotation": "const*"},
-            {"name": "sample count", "type": "uint32_t"},
+            {"name": "sample count", "type": "uint32_t", "default": "1"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
             {"name": "color state count", "type": "uint32_t"},
             {"name": "color states", "type": "color state descriptor", "annotation": "const*const*", "length": "color state count"}
@@ -893,15 +893,15 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "address mode u", "type": "address mode"},
-            {"name": "address mode v", "type": "address mode"},
-            {"name": "address mode w", "type": "address mode"},
-            {"name": "mag filter", "type": "filter mode"},
-            {"name": "min filter", "type": "filter mode"},
-            {"name": "mipmap filter", "type": "filter mode"},
-            {"name": "lod min clamp", "type": "float"},
-            {"name": "lod max clamp", "type": "float"},
-            {"name": "compare", "type": "compare function"}
+            {"name": "address mode u", "type": "address mode", "default": "clamp to edge"},
+            {"name": "address mode v", "type": "address mode", "default": "clamp to edge"},
+            {"name": "address mode w", "type": "address mode", "default": "clamp to edge"},
+            {"name": "mag filter", "type": "filter mode", "default": "nearest"},
+            {"name": "min filter", "type": "filter mode", "default": "nearest"},
+            {"name": "mipmap filter", "type": "filter mode", "default": "nearest"},
+            {"name": "lod min clamp", "type": "float", "default": "0.0f"},
+            {"name": "lod max clamp", "type": "float", "default": "1000.0f"},
+            {"name": "compare", "type": "compare function", "default": "never"}
         ]
     },
     "shader module": {
@@ -949,10 +949,10 @@
         "category": "structure",
         "extensible": false,
         "members": [
-            {"name": "compare", "type": "compare function"},
-            {"name": "fail op", "type": "stencil operation"},
-            {"name": "depth fail op", "type": "stencil operation"},
-            {"name": "pass op", "type": "stencil operation"}
+            {"name": "compare", "type": "compare function", "default": "always"},
+            {"name": "fail op", "type": "stencil operation", "default": "keep"},
+            {"name": "depth fail op", "type": "stencil operation", "default": "keep"},
+            {"name": "pass op", "type": "stencil operation", "default": "keep"}
         ]
     },
     "swap chain": {
@@ -1018,8 +1018,8 @@
         "extensible": true,
         "members": [
             {"name": "texture", "type": "texture"},
-            {"name": "mip level", "type": "uint32_t"},
-            {"name": "array layer", "type": "uint32_t"},
+            {"name": "mip level", "type": "uint32_t", "default": "0"},
+            {"name": "array layer", "type": "uint32_t", "default": "0"},
             {"name": "origin", "type": "origin 3D"}
         ]
     },
@@ -1028,12 +1028,12 @@
         "extensible": true,
         "members": [
             {"name": "usage", "type": "texture usage bit"},
-            {"name": "dimension", "type": "texture dimension"},
+            {"name": "dimension", "type": "texture dimension", "default": "2D"},
             {"name": "size", "type": "extent 3D"},
-            {"name": "array layer count", "type": "uint32_t"},
+            {"name": "array layer count", "type": "uint32_t", "default": "1"},
             {"name": "format", "type": "texture format"},
-            {"name": "mip level count", "type": "uint32_t"},
-            {"name": "sample count", "type": "uint32_t"}
+            {"name": "mip level count", "type": "uint32_t", "default": 1},
+            {"name": "sample count", "type": "uint32_t", "default": 1}
         ]
     },
     "texture dimension": {
@@ -1132,10 +1132,10 @@
         "members": [
             {"name": "format", "type": "texture format"},
             {"name": "dimension", "type": "texture view dimension"},
-            {"name": "base mip level", "type": "uint32_t"},
-            {"name": "mip level count", "type": "uint32_t"},
-            {"name": "base array layer", "type": "uint32_t"},
-            {"name": "array layer count", "type": "uint32_t"}
+            {"name": "base mip level", "type": "uint32_t", "default": "0"},
+            {"name": "mip level count", "type": "uint32_t", "default": "1"},
+            {"name": "base array layer", "type": "uint32_t", "default": "0"},
+            {"name": "array layer count", "type": "uint32_t", "default": "1"}
         ],
         "TODO": [
             "jiawei.shao@intel.com: Allow choosing the aspect (depth vs. stencil)"
