@@ -1006,11 +1006,11 @@
         ]
     },
     "texture aspect": {
-        "category": "bitmask",
+        "category": "enum",
         "values": [
-            {"value": 1, "name": "color"},
-            {"value": 2, "name": "depth"},
-            {"value": 4, "name": "stencil"}
+            {"value": 0, "name": "all"},
+            {"value": 1, "name": "stencil only"},
+            {"value": 2, "name": "depth only"}
         ]
     },
     "texture copy view": {
