@@ -26,10 +26,10 @@ namespace dawn_native { namespace vulkan {
         VkBufferUsageFlags VulkanBufferUsage(dawn::BufferUsageBit usage) {
             VkBufferUsageFlags flags = 0;
 
-            if (usage & dawn::BufferUsageBit::TransferSrc) {
+            if (usage & dawn::BufferUsageBit::CopySrc) {
                 flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
             }
-            if (usage & dawn::BufferUsageBit::TransferDst) {
+            if (usage & dawn::BufferUsageBit::CopyDst) {
                 flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
             }
             if (usage & dawn::BufferUsageBit::Index) {
@@ -57,7 +57,7 @@ namespace dawn_native { namespace vulkan {
             if (usage & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
                 flags |= VK_PIPELINE_STAGE_HOST_BIT;
             }
-            if (usage & (dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst)) {
+            if (usage & (dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
             if (usage & (dawn::BufferUsageBit::Index | dawn::BufferUsageBit::Vertex)) {
@@ -84,10 +84,10 @@ namespace dawn_native { namespace vulkan {
             if (usage & dawn::BufferUsageBit::MapWrite) {
                 flags |= VK_ACCESS_HOST_WRITE_BIT;
             }
-            if (usage & dawn::BufferUsageBit::TransferSrc) {
+            if (usage & dawn::BufferUsageBit::CopySrc) {
                 flags |= VK_ACCESS_TRANSFER_READ_BIT;
             }
-            if (usage & dawn::BufferUsageBit::TransferDst) {
+            if (usage & dawn::BufferUsageBit::CopyDst) {
                 flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
             }
             if (usage & dawn::BufferUsageBit::Index) {
@@ -118,9 +118,9 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.size = GetSize();
-        // Add TransferDst for non-mappable buffer initialization in CreateBufferMapped
+        // Add CopyDst for non-mappable buffer initialization in CreateBufferMapped
         // and robust resource initialization.
-        createInfo.usage = VulkanBufferUsage(GetUsage() | dawn::BufferUsageBit::TransferDst);
+        createInfo.usage = VulkanBufferUsage(GetUsage() | dawn::BufferUsageBit::CopyDst);
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = 0;

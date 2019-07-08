@@ -29,10 +29,10 @@ namespace dawn_native { namespace d3d12 {
                 return D3D12_RESOURCE_STATE_PRESENT;
             }
 
-            if (usage & dawn::TextureUsageBit::TransferSrc) {
+            if (usage & dawn::TextureUsageBit::CopySrc) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
             }
-            if (usage & dawn::TextureUsageBit::TransferDst) {
+            if (usage & dawn::TextureUsageBit::CopyDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
             if (usage & dawn::TextureUsageBit::Sampled) {

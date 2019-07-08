@@ -309,8 +309,8 @@ namespace dawn_native {
             DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
             if (format.isCompressed) {
                 constexpr dawn::TextureUsageBit kValidUsage = dawn::TextureUsageBit::Sampled |
-                                                              dawn::TextureUsageBit::TransferSrc |
-                                                              dawn::TextureUsageBit::TransferDst;
+                                                              dawn::TextureUsageBit::CopySrc |
+                                                              dawn::TextureUsageBit::CopyDst;
                 if (descriptor->usage & (~kValidUsage)) {
                     return DAWN_VALIDATION_ERROR(
                         "Compressed texture format is incompatible with the texture usage");

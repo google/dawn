@@ -762,7 +762,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
 
     for (uint32_t i = 0; i < 4; ++i) {
         renderTargets[i] = device.CreateTexture(&descriptor);

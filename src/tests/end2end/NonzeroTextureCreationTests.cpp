@@ -37,7 +37,7 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClearsOneBits) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     RGBA8 filledWithOnes(255, 255, 255, 255);
@@ -57,7 +57,7 @@ TEST_P(NonzeroTextureCreationTests, MipMapClears) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = mipLevels;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<RGBA8> expected;
@@ -82,7 +82,7 @@ TEST_P(NonzeroTextureCreationTests, ArrayLayerClears) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<RGBA8> expected;

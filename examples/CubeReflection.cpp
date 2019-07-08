@@ -176,7 +176,7 @@ void init() {
 
     dawn::BufferDescriptor cameraBufDesc;
     cameraBufDesc.size = sizeof(CameraData);
-    cameraBufDesc.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::Uniform;
+    cameraBufDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::Uniform;
     cameraBuffer = device.CreateBuffer(&cameraBufDesc);
 
     glm::mat4 transform(1.0);

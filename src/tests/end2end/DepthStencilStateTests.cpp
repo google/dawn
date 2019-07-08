@@ -34,7 +34,8 @@ class DepthStencilStateTest : public DawnTest {
             renderTargetDescriptor.sampleCount = 1;
             renderTargetDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
             renderTargetDescriptor.mipLevelCount = 1;
-            renderTargetDescriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+            renderTargetDescriptor.usage =
+                dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
             renderTarget = device.CreateTexture(&renderTargetDescriptor);
 
             renderTargetView = renderTarget.CreateDefaultView();

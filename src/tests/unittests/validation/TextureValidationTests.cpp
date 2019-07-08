@@ -243,7 +243,7 @@ class CompressedTextureFormatsValidationTests : public TextureValidationTest {
     dawn::TextureDescriptor CreateDefaultTextureDescriptor() {
         dawn::TextureDescriptor descriptor =
             TextureValidationTest::CreateDefaultTextureDescriptor();
-        descriptor.usage = dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst |
+        descriptor.usage = dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst |
                            dawn::TextureUsageBit::Sampled;
         return descriptor;
     }
@@ -296,7 +296,7 @@ TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
 
 // Test the validation of texture usages when creating textures in compressed texture formats.
 TEST_F(CompressedTextureFormatsValidationTests, TextureUsage) {
-    // Test that only TransferSrc, TransferDst and Sampled are accepted as the texture usage of the
+    // Test that only CopySrc, CopyDst and Sampled are accepted as the texture usage of the
     // textures in BC formats.
     for (dawn::TextureFormat format : kBCFormats) {
         {

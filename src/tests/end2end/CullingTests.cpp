@@ -60,7 +60,7 @@ class CullingTest : public DawnTest {
         textureDescriptor.dimension = dawn::TextureDimension::e2D;
         textureDescriptor.format = format;
         textureDescriptor.usage =
-            dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+            dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
         textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.sampleCount = 1;

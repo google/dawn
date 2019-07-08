@@ -36,10 +36,10 @@ namespace dawn_native { namespace d3d12 {
         D3D12_RESOURCE_STATES D3D12BufferUsage(dawn::BufferUsageBit usage) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
-            if (usage & dawn::BufferUsageBit::TransferSrc) {
+            if (usage & dawn::BufferUsageBit::CopySrc) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
             }
-            if (usage & dawn::BufferUsageBit::TransferDst) {
+            if (usage & dawn::BufferUsageBit::CopyDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
             if (usage & (dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Uniform)) {
@@ -82,10 +82,9 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        // Add TransferDst for non-mappable buffer initialization in CreateBufferMapped
+        // Add CopyDst for non-mappable buffer initialization in CreateBufferMapped
         // and robust resource initialization.
-        resourceDescriptor.Flags =
-            D3D12ResourceFlags(GetUsage() | dawn::BufferUsageBit::TransferDst);
+        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage() | dawn::BufferUsageBit::CopyDst);
 
         auto heapType = D3D12HeapType(GetUsage());
         auto bufferUsage = D3D12_RESOURCE_STATE_COMMON;
@@ -95,7 +94,7 @@ namespace dawn_native { namespace d3d12 {
         if (heapType == D3D12_HEAP_TYPE_READBACK) {
             bufferUsage |= D3D12_RESOURCE_STATE_COPY_DEST;
             mFixedResourceState = true;
-            mLastUsage = dawn::BufferUsageBit::TransferDst;
+            mLastUsage = dawn::BufferUsageBit::CopyDst;
         }
 
         // D3D12 requires buffers on the UPLOAD heap to have the D3D12_RESOURCE_STATE_GENERIC_READ
@@ -103,7 +102,7 @@ namespace dawn_native { namespace d3d12 {
         if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
             bufferUsage |= D3D12_RESOURCE_STATE_GENERIC_READ;
             mFixedResourceState = true;
-            mLastUsage = dawn::BufferUsageBit::TransferSrc;
+            mLastUsage = dawn::BufferUsageBit::CopySrc;
         }
 
         mResource =

@@ -83,7 +83,8 @@ void initBuffers() {
     for (size_t i = 0; i < 2; i++) {
         dawn::BufferDescriptor descriptor;
         descriptor.size = sizeof(Particle) * kNumParticles;
-        descriptor.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Storage;
+        descriptor.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::Vertex |
+                           dawn::BufferUsageBit::Storage;
         particleBuffers[i] = device.CreateBuffer(&descriptor);
 
         particleBuffers[i].SetSubData(0,

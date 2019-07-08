@@ -58,7 +58,7 @@ void initTextures() {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
+    descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled;
     texture = device.CreateTexture(&descriptor);
 
     dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
@@ -70,7 +70,8 @@ void initTextures() {
         data[i] = static_cast<uint8_t>(i % 253);
     }
 
-    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::TransferSrc);
+    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
     dawn::Extent3D copySize = {1024, 1024, 1};

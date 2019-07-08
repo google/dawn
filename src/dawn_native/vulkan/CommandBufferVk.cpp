@@ -366,8 +366,8 @@ namespace dawn_native { namespace vulkan {
                     Buffer* srcBuffer = ToBackend(copy->source.Get());
                     Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
-                    srcBuffer->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferSrc);
-                    dstBuffer->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferDst);
+                    srcBuffer->TransitionUsageNow(commands, dawn::BufferUsageBit::CopySrc);
+                    dstBuffer->TransitionUsageNow(commands, dawn::BufferUsageBit::CopyDst);
 
                     VkBufferCopy region;
                     region.srcOffset = copy->sourceOffset;
@@ -399,9 +399,9 @@ namespace dawn_native { namespace vulkan {
                                                                   subresource.baseArrayLayer, 1);
                     }
                     ToBackend(src.buffer)
-                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferSrc);
+                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::CopySrc);
                     ToBackend(dst.texture)
-                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
+                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::CopyDst);
                     VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 
@@ -426,13 +426,13 @@ namespace dawn_native { namespace vulkan {
                                                               subresource.baseArrayLayer, 1);
 
                     ToBackend(src.texture)
-                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferSrc);
+                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::CopySrc);
                     ToBackend(dst.buffer)
-                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::TransferDst);
+                        ->TransitionUsageNow(commands, dawn::BufferUsageBit::CopyDst);
 
                     VkImage srcImage = ToBackend(src.texture)->GetHandle();
                     VkBuffer dstBuffer = ToBackend(dst.buffer)->GetHandle();
-                    // The Dawn TransferSrc usage is always mapped to GENERAL
+                    // The Dawn CopySrc usage is always mapped to GENERAL
                     device->fn.CmdCopyImageToBuffer(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
                                                     dstBuffer, 1, &region);
                 } break;
@@ -462,9 +462,9 @@ namespace dawn_native { namespace vulkan {
                                                                   1);
                     }
                     ToBackend(src.texture)
-                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferSrc);
+                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::CopySrc);
                     ToBackend(dst.texture)
-                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
+                        ->TransitionUsageNow(commands, dawn::TextureUsageBit::CopyDst);
                     VkImage srcImage = ToBackend(src.texture)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 

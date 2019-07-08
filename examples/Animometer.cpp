@@ -133,7 +133,7 @@ void init() {
 
     dawn::BufferDescriptor bufferDesc;
     bufferDesc.size = kNumTriangles * sizeof(ShaderData);
-    bufferDesc.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::Uniform;
+    bufferDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::Uniform;
     ubo = device.CreateBuffer(&bufferDesc);
 
     bindGroup =

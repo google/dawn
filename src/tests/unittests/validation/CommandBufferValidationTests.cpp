@@ -160,7 +160,7 @@ TEST_F(CommandBufferValidationTest, CallsAfterASuccessfulFinish) {
     // A buffer that can be used in CopyBufferToBuffer
     dawn::BufferDescriptor copyBufferDesc;
     copyBufferDesc.size = 16;
-    copyBufferDesc.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    copyBufferDesc.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
     dawn::Buffer copyBuffer = device.CreateBuffer(&copyBufferDesc);
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -174,7 +174,7 @@ TEST_F(CommandBufferValidationTest, CallsAfterAFailedFinish) {
     // A buffer that can be used in CopyBufferToBuffer
     dawn::BufferDescriptor copyBufferDesc;
     copyBufferDesc.size = 16;
-    copyBufferDesc.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    copyBufferDesc.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
     dawn::Buffer copyBuffer = device.CreateBuffer(&copyBufferDesc);
 
     // A buffer that can't be used in CopyBufferToBuffer

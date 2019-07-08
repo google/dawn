@@ -40,8 +40,8 @@ class DynamicBufferOffsetTests : public DawnTest {
         dawn::BufferDescriptor storageBufferDescriptor;
         storageBufferDescriptor.size = kBufferSize;
         storageBufferDescriptor.usage = dawn::BufferUsageBit::Storage |
-                                        dawn::BufferUsageBit::TransferDst |
-                                        dawn::BufferUsageBit::TransferSrc;
+                                        dawn::BufferUsageBit::CopyDst |
+                                        dawn::BufferUsageBit::CopySrc;
 
         mStorageBuffer = device.CreateBuffer(&storageBufferDescriptor);
 

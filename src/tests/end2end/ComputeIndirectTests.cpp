@@ -69,8 +69,8 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
     // Set up dst storage buffer to contain dispatch x, y, z
     dawn::Buffer dst = utils::CreateBufferFromData<uint32_t>(device,
                                                              dawn::BufferUsageBit::Storage |
-                                                                 dawn::BufferUsageBit::TransferSrc |
-                                                                 dawn::BufferUsageBit::TransferDst,
+                                                                 dawn::BufferUsageBit::CopySrc |
+                                                                 dawn::BufferUsageBit::CopyDst,
                                                              {0, 0, 0});
 
     std::vector<uint32_t> indirectBufferData = bufferList;

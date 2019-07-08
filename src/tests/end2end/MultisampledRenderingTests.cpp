@@ -95,8 +95,7 @@ class MultisampledRenderingTest : public DawnTest {
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;
-        descriptor.usage =
-            dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+        descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
         return device.CreateTexture(&descriptor);
     }
 

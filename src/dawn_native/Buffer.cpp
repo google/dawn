@@ -91,15 +91,15 @@ namespace dawn_native {
         dawn::BufferUsageBit usage = descriptor->usage;
 
         const dawn::BufferUsageBit kMapWriteAllowedUsages =
-            dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+            dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::CopySrc;
         if (usage & dawn::BufferUsageBit::MapWrite && (usage & kMapWriteAllowedUsages) != usage) {
-            return DAWN_VALIDATION_ERROR("Only TransferSrc is allowed with MapWrite");
+            return DAWN_VALIDATION_ERROR("Only CopySrc is allowed with MapWrite");
         }
 
         const dawn::BufferUsageBit kMapReadAllowedUsages =
-            dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+            dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::CopyDst;
         if (usage & dawn::BufferUsageBit::MapRead && (usage & kMapReadAllowedUsages) != usage) {
-            return DAWN_VALIDATION_ERROR("Only TransferDst is allowed with MapRead");
+            return DAWN_VALIDATION_ERROR("Only CopyDst is allowed with MapRead");
         }
 
         return {};
@@ -374,8 +374,8 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Buffer subdata out of range");
         }
 
-        if (!(mUsage & dawn::BufferUsageBit::TransferDst)) {
-            return DAWN_VALIDATION_ERROR("Buffer needs the transfer dst usage bit");
+        if (!(mUsage & dawn::BufferUsageBit::CopyDst)) {
+            return DAWN_VALIDATION_ERROR("Buffer needs the CopyDst usage bit");
         }
 
         return {};

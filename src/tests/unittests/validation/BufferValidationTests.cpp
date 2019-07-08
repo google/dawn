@@ -77,7 +77,7 @@ class BufferValidationTest : public ValidationTest {
         dawn::Buffer CreateSetSubDataBuffer(uint64_t size) {
             dawn::BufferDescriptor descriptor;
             descriptor.size = size;
-            descriptor.usage = dawn::BufferUsageBit::TransferDst;
+            descriptor.usage = dawn::BufferUsageBit::CopyDst;
 
             return device.CreateBuffer(&descriptor);
         }
@@ -125,11 +125,11 @@ TEST_F(BufferValidationTest, CreationSuccess) {
 
 // Test restriction on usages allowed with MapRead and MapWrite
 TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
-    // MapRead with TransferDst is ok
+    // MapRead with CopyDst is ok
     {
         dawn::BufferDescriptor descriptor;
         descriptor.size = 4;
-        descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferDst;
+        descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::CopyDst;
 
         device.CreateBuffer(&descriptor);
     }
@@ -143,11 +143,11 @@ TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
         ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
     }
 
-    // MapWrite with TransferSrc is ok
+    // MapWrite with CopySrc is ok
     {
         dawn::BufferDescriptor descriptor;
         descriptor.size = 4;
-        descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferSrc;
+        descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::CopySrc;
 
         device.CreateBuffer(&descriptor);
     }
@@ -200,8 +200,7 @@ TEST_F(BufferValidationTest, CreateBufferMappedSuccess) {
 
 // Test the success case for non-mappable CreateBufferMapped
 TEST_F(BufferValidationTest, NonMappableCreateBufferMappedSuccess) {
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMapped(4, dawn::BufferUsageBit::TransferSrc);
+    dawn::CreateBufferMappedResult result = CreateBufferMapped(4, dawn::BufferUsageBit::CopySrc);
     ASSERT_NE(result.data, nullptr);
     ASSERT_EQ(result.dataLength, 4u);
     result.buffer.Unmap();
@@ -211,7 +210,7 @@ TEST_F(BufferValidationTest, NonMappableCreateBufferMappedSuccess) {
 TEST_F(BufferValidationTest, MapReadWrongUsage) {
     dawn::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::TransferDst;
+    descriptor.usage = dawn::BufferUsageBit::CopyDst;
 
     dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
@@ -226,7 +225,7 @@ TEST_F(BufferValidationTest, MapReadWrongUsage) {
 TEST_F(BufferValidationTest, MapWriteWrongUsage) {
     dawn::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::TransferSrc;
+    descriptor.usage = dawn::BufferUsageBit::CopySrc;
 
     dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
@@ -480,7 +479,7 @@ TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
 TEST_F(BufferValidationTest, SetSubDataWithUnalignedSize) {
     dawn::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    descriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
 
     dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
@@ -492,7 +491,7 @@ TEST_F(BufferValidationTest, SetSubDataWithUnalignedSize) {
 TEST_F(BufferValidationTest, SetSubDataWithUnalignedOffset) {
     dawn::BufferDescriptor descriptor;
     descriptor.size = 4000;
-    descriptor.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::TransferDst;
+    descriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
 
     dawn::Buffer buf = device.CreateBuffer(&descriptor);
 
@@ -646,11 +645,11 @@ TEST_F(BufferValidationTest, SetSubDataMappedBuffer) {
 TEST_F(BufferValidationTest, SubmitBufferWithMapUsage) {
     dawn::BufferDescriptor descriptorA;
     descriptorA.size = 4;
-    descriptorA.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::MapWrite;
+    descriptorA.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::MapWrite;
 
     dawn::BufferDescriptor descriptorB;
     descriptorB.size = 4;
-    descriptorB.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead;
+    descriptorB.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::MapRead;
 
     dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
     dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
@@ -665,11 +664,11 @@ TEST_F(BufferValidationTest, SubmitBufferWithMapUsage) {
 TEST_F(BufferValidationTest, SubmitMappedBuffer) {
     dawn::BufferDescriptor descriptorA;
     descriptorA.size = 4;
-    descriptorA.usage = dawn::BufferUsageBit::TransferSrc | dawn::BufferUsageBit::MapWrite;
+    descriptorA.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::MapWrite;
 
     dawn::BufferDescriptor descriptorB;
     descriptorB.size = 4;
-    descriptorB.usage = dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::MapRead;
+    descriptorB.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::MapRead;
     {
         dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
         dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
@@ -720,11 +719,11 @@ TEST_F(BufferValidationTest, SubmitMappedBuffer) {
 TEST_F(BufferValidationTest, SubmitDestroyedBuffer) {
     dawn::BufferDescriptor descriptorA;
     descriptorA.size = 4;
-    descriptorA.usage = dawn::BufferUsageBit::TransferSrc;
+    descriptorA.usage = dawn::BufferUsageBit::CopySrc;
 
     dawn::BufferDescriptor descriptorB;
     descriptorB.size = 4;
-    descriptorB.usage = dawn::BufferUsageBit::TransferDst;
+    descriptorB.usage = dawn::BufferUsageBit::CopyDst;
 
     dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
     dawn::Buffer bufB = device.CreateBuffer(&descriptorB);

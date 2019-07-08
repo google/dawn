@@ -48,8 +48,8 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
     // Set up dst storage buffer
     dawn::BufferDescriptor dstDesc;
     dstDesc.size = sizeof(uint32_t);
-    dstDesc.usage = dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::TransferSrc |
-                    dawn::BufferUsageBit::TransferDst;
+    dstDesc.usage = dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::CopySrc |
+                    dawn::BufferUsageBit::CopyDst;
     dawn::Buffer dst = device.CreateBuffer(&dstDesc);
 
     const uint32_t zero = 0;

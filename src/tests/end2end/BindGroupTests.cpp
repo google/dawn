@@ -79,8 +79,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
 
     dawn::BufferDescriptor bufferDesc;
     bufferDesc.size = sizeof(float);
-    bufferDesc.usage = dawn::BufferUsageBit::TransferDst |
-                       dawn::BufferUsageBit::Uniform;
+    bufferDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::Uniform;
     dawn::Buffer buffer = device.CreateBuffer(&bufferDesc);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(float)}});
 
@@ -249,7 +248,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
+    descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled;
     dawn::Texture texture = device.CreateTexture(&descriptor);
     dawn::TextureView textureView = texture.CreateDefaultView();
 
@@ -262,7 +261,8 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     for (int i = 0; i < size; i++) {
         data[i] = RGBA8(0, 255, 0, 255);
     }
-    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), sizeInBytes, dawn::BufferUsageBit::TransferSrc);
+    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), sizeInBytes,
+                                                             dawn::BufferUsageBit::CopySrc);
 
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {
         {0, buffer, 0, sizeof(transform)},

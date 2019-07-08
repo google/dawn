@@ -54,10 +54,10 @@ namespace dawn_native { namespace vulkan {
         VkAccessFlags VulkanAccessFlags(dawn::TextureUsageBit usage, const Format& format) {
             VkAccessFlags flags = 0;
 
-            if (usage & dawn::TextureUsageBit::TransferSrc) {
+            if (usage & dawn::TextureUsageBit::CopySrc) {
                 flags |= VK_ACCESS_TRANSFER_READ_BIT;
             }
-            if (usage & dawn::TextureUsageBit::TransferDst) {
+            if (usage & dawn::TextureUsageBit::CopyDst) {
                 flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
             }
             if (usage & dawn::TextureUsageBit::Sampled) {
@@ -99,16 +99,16 @@ namespace dawn_native { namespace vulkan {
 
             // Usage has a single bit so we can switch on its value directly.
             switch (usage) {
-                case dawn::TextureUsageBit::TransferDst:
+                case dawn::TextureUsageBit::CopyDst:
                     return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 case dawn::TextureUsageBit::Sampled:
                     return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 // Vulkan texture copy functions require the image to be in _one_  known layout.
                 // Depending on whether parts of the texture have been transitioned to only
-                // TransferSrc or a combination with something else, the texture could be in a
+                // CopySrc or a combination with something else, the texture could be in a
                 // combination of GENERAL and TRANSFER_SRC_OPTIMAL. This would be a problem, so we
-                // make TransferSrc use GENERAL.
-                case dawn::TextureUsageBit::TransferSrc:
+                // make CopySrc use GENERAL.
+                case dawn::TextureUsageBit::CopySrc:
                 // Writable storage textures must use general. If we could know the texture is read
                 // only we could use SHADER_READ_ONLY_OPTIMAL
                 case dawn::TextureUsageBit::Storage:
@@ -136,7 +136,7 @@ namespace dawn_native { namespace vulkan {
                 // which case there is no need to wait on anything to stop accessing this texture.
                 return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             }
-            if (usage & (dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst)) {
+            if (usage & (dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
             if (usage & (dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::Storage)) {
@@ -344,10 +344,10 @@ namespace dawn_native { namespace vulkan {
     VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, const Format& format) {
         VkImageUsageFlags flags = 0;
 
-        if (usage & dawn::TextureUsageBit::TransferSrc) {
+        if (usage & dawn::TextureUsageBit::CopySrc) {
             flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         }
-        if (usage & dawn::TextureUsageBit::TransferDst) {
+        if (usage & dawn::TextureUsageBit::CopyDst) {
             flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         }
         if (usage & dawn::TextureUsageBit::Sampled) {
@@ -437,7 +437,7 @@ namespace dawn_native { namespace vulkan {
             range.baseArrayLayer = 0;
             range.layerCount = GetArrayLayers();
             TransitionUsageNow(ToBackend(GetDevice())->GetPendingCommandBuffer(),
-                               dawn::TextureUsageBit::TransferDst);
+                               dawn::TextureUsageBit::CopyDst);
 
             if (GetFormat().HasDepthOrStencil()) {
                 VkClearDepthStencilValue clear_color[1];
@@ -543,7 +543,7 @@ namespace dawn_native { namespace vulkan {
         range.baseArrayLayer = baseArrayLayer;
         range.layerCount = layerCount;
 
-        TransitionUsageNow(commands, dawn::TextureUsageBit::TransferDst);
+        TransitionUsageNow(commands, dawn::TextureUsageBit::CopyDst);
         if (GetFormat().HasDepthOrStencil()) {
             VkClearDepthStencilValue clear_color[1];
             clear_color[0].depth = 0.0f;

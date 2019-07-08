@@ -26,12 +26,12 @@ namespace dawn_native {
     MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);
 
     static constexpr dawn::BufferUsageBit kReadOnlyBufferUsages =
-        dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::TransferSrc |
+        dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::CopySrc |
         dawn::BufferUsageBit::Index | dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Uniform;
 
-    static constexpr dawn::BufferUsageBit kWritableBufferUsages =
-        dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::TransferDst |
-        dawn::BufferUsageBit::Storage;
+    static constexpr dawn::BufferUsageBit kWritableBufferUsages = dawn::BufferUsageBit::MapWrite |
+                                                                  dawn::BufferUsageBit::CopyDst |
+                                                                  dawn::BufferUsageBit::Storage;
 
     class BufferBase : public ObjectBase {
         enum class BufferState {

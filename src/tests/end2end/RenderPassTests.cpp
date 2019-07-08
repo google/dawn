@@ -62,8 +62,7 @@ protected:
         descriptor.sampleCount = 1;
         descriptor.format = kFormat;
         descriptor.mipLevelCount = 1;
-        descriptor.usage =
-            dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::TransferSrc;
+        descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
         return device.CreateTexture(&descriptor);
     }
 

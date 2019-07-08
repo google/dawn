@@ -491,7 +491,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetMipmapLevelM
 // include dawn::TextureUsageBit::OutputAttachment.
 TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetUsageNoOutputAttachment) {
     constexpr dawn::TextureUsageBit kUsage =
-        dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::TransferSrc;
+        dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::CopySrc;
     dawn::Texture nonColorUsageResolveTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
         kLevelCount, 1, kUsage);

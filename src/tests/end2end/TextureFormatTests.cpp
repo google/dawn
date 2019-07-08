@@ -210,7 +210,7 @@ class TextureFormatTest : public DawnTest {
 
         // Create the texture we will sample from
         dawn::TextureDescriptor textureDesc;
-        textureDesc.usage = dawn::TextureUsageBit::TransferDst | dawn::TextureUsageBit::Sampled;
+        textureDesc.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled;
         textureDesc.dimension = dawn::TextureDimension::e2D;
         textureDesc.size = {width, 1, 1};
         textureDesc.arrayLayerCount = 1;
@@ -221,12 +221,12 @@ class TextureFormatTest : public DawnTest {
         dawn::Texture texture = device.CreateTexture(&textureDesc);
 
         dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
-            device, textureData, textureDataSize, dawn::BufferUsageBit::TransferSrc);
+            device, textureData, textureDataSize, dawn::BufferUsageBit::CopySrc);
 
         // Create the texture that we will render results to
         dawn::TextureDescriptor renderTargetDesc;
         renderTargetDesc.usage =
-            dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::OutputAttachment;
+            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::OutputAttachment;
         renderTargetDesc.dimension = dawn::TextureDimension::e2D;
         renderTargetDesc.size = {width, 1, 1};
         renderTargetDesc.arrayLayerCount = 1;
@@ -238,8 +238,7 @@ class TextureFormatTest : public DawnTest {
 
         // Create the readback buffer for the data in renderTarget
         dawn::BufferDescriptor readbackBufferDesc;
-        readbackBufferDesc.usage =
-            dawn::BufferUsageBit::TransferDst | dawn::BufferUsageBit::TransferSrc;
+        readbackBufferDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::CopySrc;
         readbackBufferDesc.size = 4 * width * formatInfo.componentCount;
         dawn::Buffer readbackBuffer = device.CreateBuffer(&readbackBufferDesc);
 

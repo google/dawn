@@ -28,7 +28,7 @@ dawn::Texture Create2DTexture(dawn::Device device,
                               uint32_t arrayLayerCount = 1,
                               uint32_t mipLevelCount = 1,
                               dawn::TextureUsageBit usage = dawn::TextureUsageBit::Sampled |
-                                                            dawn::TextureUsageBit::TransferDst) {
+                                                            dawn::TextureUsageBit::CopyDst) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
     descriptor.format = format;
@@ -101,7 +101,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
         // Copy texture data from a staging buffer to the destination texture.
         dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-            device, uploadData.data(), uploadBufferSize, dawn::BufferUsageBit::TransferSrc);
+            device, uploadData.data(), uploadBufferSize, dawn::BufferUsageBit::CopySrc);
         dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
             stagingBuffer, copyConfig.bufferOffset, copyConfig.rowPitchAlignment, 0);
         dawn::TextureCopyView textureCopyView =
@@ -449,7 +449,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
         dawn::Texture bcTextureSrc = Create2DTexture(
             device, config.format, config.textureWidthLevel0, config.textureHeightLevel0,
             config.arrayLayerCount, config.mipmapLevelCount,
-            dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst);
+            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst);
         CopyDataIntoCompressedTexture(bcTextureSrc, config);
 
         // Create bcTexture and copy from the content in bcTextureSrc into it.
@@ -521,7 +521,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyPartofTextureSubResourceIntoNonZeroMip
         dawn::Texture bcTextureSrc = Create2DTexture(
             device, srcConfig.format, srcConfig.textureWidthLevel0, srcConfig.textureHeightLevel0,
             srcConfig.arrayLayerCount, srcConfig.mipmapLevelCount,
-            dawn::TextureUsageBit::TransferSrc | dawn::TextureUsageBit::TransferDst);
+            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst);
         CopyDataIntoCompressedTexture(bcTextureSrc, srcConfig);
         dawn::TextureCopyView textureCopyViewSrc =
             utils::CreateTextureCopyView(bcTextureSrc, srcConfig.baseMipmapLevel,
