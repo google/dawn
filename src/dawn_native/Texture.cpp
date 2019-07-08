@@ -143,7 +143,6 @@ namespace dawn_native {
                 case dawn::TextureFormat::RG8Snorm:
                 case dawn::TextureFormat::RG8Uint:
                 case dawn::TextureFormat::RG8Sint:
-                case dawn::TextureFormat::B5G6R5Unorm:
                     return MakeColorFormat(format, true, 2);
 
                 case dawn::TextureFormat::R32Uint:

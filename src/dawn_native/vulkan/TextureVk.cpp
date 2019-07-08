@@ -238,8 +238,6 @@ namespace dawn_native { namespace vulkan {
                 return VK_FORMAT_R8G8_UINT;
             case dawn::TextureFormat::RG8Sint:
                 return VK_FORMAT_R8G8_SINT;
-            case dawn::TextureFormat::B5G6R5Unorm:
-                return VK_FORMAT_B5G6R5_UNORM_PACK16;
 
             case dawn::TextureFormat::R32Uint:
                 return VK_FORMAT_R32_UINT;

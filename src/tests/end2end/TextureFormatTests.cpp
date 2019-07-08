@@ -616,36 +616,13 @@ TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
                  1.0e-3);
 }
 
-// Test the B5G6R5Unorm format
-TEST_P(TextureFormatTest, B5G6R5Unorm) {
-    auto MakeBGR565 = [](uint32_t r, uint32_t g, uint32_t b) -> uint16_t {
-        ASSERT((r & 0x1F) == r);
-        ASSERT((g & 0x3F) == g);
-        ASSERT((b & 0x1F) == b);
-        return b << 11 | g << 5 | r;
-    };
-
-    std::vector<uint16_t> textureData = {MakeBGR565(0, 0, 0), MakeBGR565(31, 63, 31),
-                                         MakeBGR565(9, 18, 27), MakeBGR565(0, 0, 0)};
-    // This is one of the only 3-channel formats, so we don't have specific testing for them. Alpha
-    // should slways be sampled as 1
-    // clang-format off
-    std::vector<float> expectedData = {
-        0.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        9 / 31.0f, 18 / 63.0f, 27 / 31.0f, 1.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
-    // clang-format on
-
-    DoSampleTest({dawn::TextureFormat::B5G6R5Unorm, 2, Float, 4}, textureData, expectedData,
-                 1.0e-3);
-}
-
 // Test the A2RGB10Unorm format
 // TODO(cwallez@chromium.org): This is actually RGB10A2 in WebGPU but Vulkan doesn't support that
 // format. Do all platforms have A in the high bits?
 TEST_P(TextureFormatTest, A2RGB10Unorm) {
+    // TODO(cwallez@chromium.org): The format R and B channel are inverted compared to what Metal
+    // does.
+    DAWN_SKIP_TEST_IF(IsMetal());
     auto MakeA2RGB10 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t {
         ASSERT((r & 0x3FF) == r);
         ASSERT((g & 0x3FF) == g);
@@ -716,4 +693,4 @@ TEST_P(TextureFormatTest, B10GR11Float) {
 // TODO(cwallez@chromium.org): Add tests for depth-stencil formats when we know if they are copyable
 // in WebGPU.
 
-DAWN_INSTANTIATE_TEST(TextureFormatTest, VulkanBackend);
+DAWN_INSTANTIATE_TEST(TextureFormatTest, MetalBackend, VulkanBackend);

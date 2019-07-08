@@ -121,25 +121,105 @@ namespace dawn_native { namespace metal {
 
     MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::RGBA8Unorm:
-                return MTLPixelFormatRGBA8Unorm;
-            case dawn::TextureFormat::RG8Unorm:
-                return MTLPixelFormatRG8Unorm;
             case dawn::TextureFormat::R8Unorm:
                 return MTLPixelFormatR8Unorm;
-            case dawn::TextureFormat::RGBA8Uint:
-                return MTLPixelFormatRGBA8Uint;
-            case dawn::TextureFormat::RG8Uint:
-                return MTLPixelFormatRG8Uint;
+            case dawn::TextureFormat::R8Snorm:
+                return MTLPixelFormatR8Snorm;
             case dawn::TextureFormat::R8Uint:
                 return MTLPixelFormatR8Uint;
+            case dawn::TextureFormat::R8Sint:
+                return MTLPixelFormatR8Sint;
+
+            case dawn::TextureFormat::R16Unorm:
+                return MTLPixelFormatR16Unorm;
+            case dawn::TextureFormat::R16Snorm:
+                return MTLPixelFormatR16Snorm;
+            case dawn::TextureFormat::R16Uint:
+                return MTLPixelFormatR16Uint;
+            case dawn::TextureFormat::R16Sint:
+                return MTLPixelFormatR16Sint;
+            case dawn::TextureFormat::R16Float:
+                return MTLPixelFormatR16Float;
+            case dawn::TextureFormat::RG8Unorm:
+                return MTLPixelFormatRG8Unorm;
+            case dawn::TextureFormat::RG8Snorm:
+                return MTLPixelFormatRG8Snorm;
+            case dawn::TextureFormat::RG8Uint:
+                return MTLPixelFormatRG8Uint;
+            case dawn::TextureFormat::RG8Sint:
+                return MTLPixelFormatRG8Sint;
+
+            case dawn::TextureFormat::R32Uint:
+                return MTLPixelFormatR32Uint;
+            case dawn::TextureFormat::R32Sint:
+                return MTLPixelFormatR32Sint;
+            case dawn::TextureFormat::R32Float:
+                return MTLPixelFormatR32Float;
+            case dawn::TextureFormat::RG16Unorm:
+                return MTLPixelFormatRG16Unorm;
+            case dawn::TextureFormat::RG16Snorm:
+                return MTLPixelFormatRG16Snorm;
+            case dawn::TextureFormat::RG16Uint:
+                return MTLPixelFormatRG16Uint;
+            case dawn::TextureFormat::RG16Sint:
+                return MTLPixelFormatRG16Sint;
+            case dawn::TextureFormat::RG16Float:
+                return MTLPixelFormatRG16Float;
+            case dawn::TextureFormat::RGBA8Unorm:
+                return MTLPixelFormatRGBA8Unorm;
+            case dawn::TextureFormat::RGBA8UnormSrgb:
+                return MTLPixelFormatRGBA8Unorm_sRGB;
+            case dawn::TextureFormat::RGBA8Snorm:
+                return MTLPixelFormatRGBA8Snorm;
+            case dawn::TextureFormat::RGBA8Uint:
+                return MTLPixelFormatRGBA8Uint;
+            case dawn::TextureFormat::RGBA8Sint:
+                return MTLPixelFormatRGBA8Sint;
             case dawn::TextureFormat::BGRA8Unorm:
                 return MTLPixelFormatBGRA8Unorm;
+            case dawn::TextureFormat::BGRA8UnormSrgb:
+                return MTLPixelFormatBGRA8Unorm_sRGB;
+            case dawn::TextureFormat::A2RGB10Unorm:
+                // TODO(cwallez@chromium.org): The format expectations are inverted compared to the
+                // implementation of the format in Metal.
+                UNREACHABLE();
+                return MTLPixelFormatRGB10A2Unorm;
+            case dawn::TextureFormat::B10GR11Float:
+                return MTLPixelFormatRG11B10Float;
+
+            case dawn::TextureFormat::RG32Uint:
+                return MTLPixelFormatRG32Uint;
+            case dawn::TextureFormat::RG32Sint:
+                return MTLPixelFormatRG32Sint;
+            case dawn::TextureFormat::RG32Float:
+                return MTLPixelFormatRG32Float;
+            case dawn::TextureFormat::RGBA16Unorm:
+                return MTLPixelFormatRGBA16Unorm;
+            case dawn::TextureFormat::RGBA16Snorm:
+                return MTLPixelFormatRGBA16Snorm;
+            case dawn::TextureFormat::RGBA16Uint:
+                return MTLPixelFormatRGBA16Uint;
+            case dawn::TextureFormat::RGBA16Sint:
+                return MTLPixelFormatRGBA16Sint;
+            case dawn::TextureFormat::RGBA16Float:
+                return MTLPixelFormatRGBA16Float;
+
+            case dawn::TextureFormat::RGBA32Uint:
+                return MTLPixelFormatRGBA32Uint;
+            case dawn::TextureFormat::RGBA32Sint:
+                return MTLPixelFormatRGBA32Sint;
+            case dawn::TextureFormat::RGBA32Float:
+                return MTLPixelFormatRGBA32Float;
+
+            case dawn::TextureFormat::Depth32Float:
+                return MTLPixelFormatDepth32Float;
+            case dawn::TextureFormat::Depth24Plus:
+                return MTLPixelFormatDepth32Float;
             case dawn::TextureFormat::Depth24PlusStencil8:
                 return MTLPixelFormatDepth32Float_Stencil8;
+
             default:
                 UNREACHABLE();
-                return MTLPixelFormatRGBA8Unorm;
         }
     }
 
