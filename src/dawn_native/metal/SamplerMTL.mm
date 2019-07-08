@@ -42,7 +42,7 @@ namespace dawn_native { namespace metal {
             switch (mode) {
                 case dawn::AddressMode::Repeat:
                     return MTLSamplerAddressModeRepeat;
-                case dawn::AddressMode::MirroredRepeat:
+                case dawn::AddressMode::MirrorRepeat:
                     return MTLSamplerAddressModeMirrorRepeat;
                 case dawn::AddressMode::ClampToEdge:
                     return MTLSamplerAddressModeClampToEdge;

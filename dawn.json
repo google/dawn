@@ -18,7 +18,7 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "repeat"},
-            {"value": 1, "name": "mirrored repeat"},
+            {"value": 1, "name": "mirror repeat"},
             {"value": 2, "name": "clamp to edge"}
         ]
     },

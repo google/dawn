@@ -24,7 +24,7 @@ namespace dawn_native { namespace d3d12 {
             switch (mode) {
                 case dawn::AddressMode::Repeat:
                     return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-                case dawn::AddressMode::MirroredRepeat:
+                case dawn::AddressMode::MirrorRepeat:
                     return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
                 case dawn::AddressMode::ClampToEdge:
                     return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;

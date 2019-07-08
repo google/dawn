@@ -31,7 +31,7 @@ namespace {
     };
     AddressModeTestCase addressModes[] = {
         { dawn::AddressMode::Repeat,           0, 255, },
-        { dawn::AddressMode::MirroredRepeat, 255,   0, },
+        { dawn::AddressMode::MirrorRepeat, 255,   0, },
         { dawn::AddressMode::ClampToEdge,    255, 255, },
     };
 }

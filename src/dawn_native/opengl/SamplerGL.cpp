@@ -61,7 +61,7 @@ namespace dawn_native { namespace opengl {
             switch (mode) {
                 case dawn::AddressMode::Repeat:
                     return GL_REPEAT;
-                case dawn::AddressMode::MirroredRepeat:
+                case dawn::AddressMode::MirrorRepeat:
                     return GL_MIRRORED_REPEAT;
                 case dawn::AddressMode::ClampToEdge:
                     return GL_CLAMP_TO_EDGE;

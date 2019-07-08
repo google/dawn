@@ -25,7 +25,7 @@ namespace dawn_native { namespace vulkan {
             switch (mode) {
                 case dawn::AddressMode::Repeat:
                     return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-                case dawn::AddressMode::MirroredRepeat:
+                case dawn::AddressMode::MirrorRepeat:
                     return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
                 case dawn::AddressMode::ClampToEdge:
                     return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;

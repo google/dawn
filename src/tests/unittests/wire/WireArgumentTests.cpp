@@ -270,7 +270,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
     descriptor.mipmapFilter = DAWN_FILTER_MODE_LINEAR;
     descriptor.addressModeU = DAWN_ADDRESS_MODE_CLAMP_TO_EDGE;
     descriptor.addressModeV = DAWN_ADDRESS_MODE_REPEAT;
-    descriptor.addressModeW = DAWN_ADDRESS_MODE_MIRRORED_REPEAT;
+    descriptor.addressModeW = DAWN_ADDRESS_MODE_MIRROR_REPEAT;
     descriptor.lodMinClamp = kLodMin;
     descriptor.lodMaxClamp = kLodMax;
     descriptor.compare = DAWN_COMPARE_FUNCTION_NEVER;
@@ -286,7 +286,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
                                     desc->mipmapFilter == DAWN_FILTER_MODE_LINEAR &&
                                     desc->addressModeU == DAWN_ADDRESS_MODE_CLAMP_TO_EDGE &&
                                     desc->addressModeV == DAWN_ADDRESS_MODE_REPEAT &&
-                                    desc->addressModeW == DAWN_ADDRESS_MODE_MIRRORED_REPEAT &&
+                                    desc->addressModeW == DAWN_ADDRESS_MODE_MIRROR_REPEAT &&
                                     desc->compare == DAWN_COMPARE_FUNCTION_NEVER &&
                                     desc->lodMinClamp == kLodMin && desc->lodMaxClamp == kLodMax;
                          })))
