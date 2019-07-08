@@ -50,7 +50,7 @@ namespace dawn_native { namespace vulkan {
                                           const Extent3D& copySize) {
             Extent3D validTextureCopyExtent = copySize;
             const TextureBase* texture = textureCopy.texture.Get();
-            Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(textureCopy.level);
+            Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(textureCopy.mipLevel);
             if (textureCopy.origin.x + copySize.width > virtualSizeAtLevel.width) {
                 ASSERT(texture->GetFormat().isCompressed);
                 validTextureCopyExtent.width = virtualSizeAtLevel.width - textureCopy.origin.x;
@@ -78,8 +78,8 @@ namespace dawn_native { namespace vulkan {
             region.bufferImageHeight = bufferCopy.imageHeight;
 
             region.imageSubresource.aspectMask = texture->GetVkAspectMask();
-            region.imageSubresource.mipLevel = textureCopy.level;
-            region.imageSubresource.baseArrayLayer = textureCopy.slice;
+            region.imageSubresource.mipLevel = textureCopy.mipLevel;
+            region.imageSubresource.baseArrayLayer = textureCopy.arrayLayer;
             region.imageSubresource.layerCount = 1;
 
             region.imageOffset.x = textureCopy.origin.x;
@@ -103,8 +103,8 @@ namespace dawn_native { namespace vulkan {
             VkImageCopy region;
 
             region.srcSubresource.aspectMask = srcTexture->GetVkAspectMask();
-            region.srcSubresource.mipLevel = srcCopy.level;
-            region.srcSubresource.baseArrayLayer = srcCopy.slice;
+            region.srcSubresource.mipLevel = srcCopy.mipLevel;
+            region.srcSubresource.baseArrayLayer = srcCopy.arrayLayer;
             region.srcSubresource.layerCount = 1;
 
             region.srcOffset.x = srcCopy.origin.x;
@@ -112,8 +112,8 @@ namespace dawn_native { namespace vulkan {
             region.srcOffset.z = srcCopy.origin.z;
 
             region.dstSubresource.aspectMask = dstTexture->GetVkAspectMask();
-            region.dstSubresource.mipLevel = dstCopy.level;
-            region.dstSubresource.baseArrayLayer = dstCopy.slice;
+            region.dstSubresource.mipLevel = dstCopy.mipLevel;
+            region.dstSubresource.baseArrayLayer = dstCopy.arrayLayer;
             region.dstSubresource.layerCount = 1;
 
             region.dstOffset.x = dstCopy.origin.x;

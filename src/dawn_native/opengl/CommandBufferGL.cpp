@@ -393,10 +393,12 @@ namespace dawn_native { namespace opengl {
                     Texture* texture = ToBackend(dst.texture.Get());
                     GLenum target = texture->GetGLTarget();
                     auto format = texture->GetGLFormat();
-                    if (IsCompleteSubresourceCopiedTo(texture, copySize, dst.level)) {
-                        texture->SetIsSubresourceContentInitialized(dst.level, 1, dst.slice, 1);
+                    if (IsCompleteSubresourceCopiedTo(texture, copySize, dst.mipLevel)) {
+                        texture->SetIsSubresourceContentInitialized(dst.mipLevel, 1, dst.arrayLayer,
+                                                                    1);
                     } else {
-                        texture->EnsureSubresourceContentInitialized(dst.level, 1, dst.slice, 1);
+                        texture->EnsureSubresourceContentInitialized(dst.mipLevel, 1,
+                                                                     dst.arrayLayer, 1);
                     }
 
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
@@ -410,13 +412,14 @@ namespace dawn_native { namespace opengl {
                         case dawn::TextureDimension::e2D:
                             if (texture->GetArrayLayers() > 1) {
                                 gl.TexSubImage3D(
-                                    target, dst.level, dst.origin.x, dst.origin.y, dst.slice,
-                                    copySize.width, copySize.height, 1, format.format, format.type,
+                                    target, dst.mipLevel, dst.origin.x, dst.origin.y,
+                                    dst.arrayLayer, copySize.width, copySize.height, 1,
+                                    format.format, format.type,
                                     reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
                             } else {
                                 gl.TexSubImage2D(
-                                    target, dst.level, dst.origin.x, dst.origin.y, copySize.width,
-                                    copySize.height, format.format, format.type,
+                                    target, dst.mipLevel, dst.origin.x, dst.origin.y,
+                                    copySize.width, copySize.height, format.format, format.type,
                                     reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
                             }
                             break;
@@ -440,7 +443,8 @@ namespace dawn_native { namespace opengl {
                     auto format = texture->GetGLFormat();
                     GLenum target = texture->GetGLTarget();
 
-                    texture->EnsureSubresourceContentInitialized(src.level, 1, src.slice, 1);
+                    texture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
+                                                                 1);
                     // The only way to move data from a texture to a buffer in GL is via
                     // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
                     gl.BindTexture(target, texture->GetHandle());
@@ -453,11 +457,11 @@ namespace dawn_native { namespace opengl {
                             if (texture->GetArrayLayers() > 1) {
                                 gl.FramebufferTextureLayer(
                                     GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture->GetHandle(),
-                                    src.level, src.slice);
+                                    src.mipLevel, src.arrayLayer);
                             } else {
                                 gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                                         GL_TEXTURE_2D, texture->GetHandle(),
-                                                        src.level);
+                                                        src.mipLevel);
                             }
                             break;
 
@@ -488,16 +492,19 @@ namespace dawn_native { namespace opengl {
                     auto& copySize = copy->copySize;
                     Texture* srcTexture = ToBackend(src.texture.Get());
                     Texture* dstTexture = ToBackend(dst.texture.Get());
-                    srcTexture->EnsureSubresourceContentInitialized(src.level, 1, src.slice, 1);
-                    if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.level)) {
-                        dstTexture->SetIsSubresourceContentInitialized(dst.level, 1, dst.slice, 1);
+                    srcTexture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
+                                                                    1);
+                    if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.mipLevel)) {
+                        dstTexture->SetIsSubresourceContentInitialized(dst.mipLevel, 1,
+                                                                       dst.arrayLayer, 1);
                     } else {
-                        dstTexture->EnsureSubresourceContentInitialized(dst.level, 1, dst.slice, 1);
+                        dstTexture->EnsureSubresourceContentInitialized(dst.mipLevel, 1,
+                                                                        dst.arrayLayer, 1);
                     }
                     gl.CopyImageSubData(srcTexture->GetHandle(), srcTexture->GetGLTarget(),
-                                        src.level, src.origin.x, src.origin.y, src.slice,
+                                        src.mipLevel, src.origin.x, src.origin.y, src.arrayLayer,
                                         dstTexture->GetHandle(), dstTexture->GetGLTarget(),
-                                        dst.level, dst.origin.x, dst.origin.y, dst.slice,
+                                        dst.mipLevel, dst.origin.x, dst.origin.y, dst.arrayLayer,
                                         copySize.width, copySize.height, 1);
                 } break;
 

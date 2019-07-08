@@ -409,8 +409,8 @@ namespace dawn_native { namespace metal {
                                   sourceBytesPerImage:(src.rowPitch * src.imageHeight)
                                            sourceSize:size
                                             toTexture:texture->GetMTLTexture()
-                                     destinationSlice:dst.slice
-                                     destinationLevel:dst.level
+                                     destinationSlice:dst.arrayLayer
+                                     destinationLevel:dst.mipLevel
                                     destinationOrigin:origin];
                         break;
                     }
@@ -426,8 +426,8 @@ namespace dawn_native { namespace metal {
                             sourceBytesPerImage:(src.rowPitch * src.imageHeight)
                                      sourceSize:MTLSizeMake(size.width, size.height, size.depth - 1)
                                       toTexture:texture->GetMTLTexture()
-                               destinationSlice:dst.slice
-                               destinationLevel:dst.level
+                               destinationSlice:dst.arrayLayer
+                               destinationLevel:dst.mipLevel
                               destinationOrigin:origin];
 
                         // Update offset to copy to the last image.
@@ -442,8 +442,8 @@ namespace dawn_native { namespace metal {
                                   sourceBytesPerImage:(src.rowPitch * (src.imageHeight - 1))
                                            sourceSize:MTLSizeMake(size.width, size.height - 1, 1)
                                             toTexture:texture->GetMTLTexture()
-                                     destinationSlice:dst.slice
-                                     destinationLevel:dst.level
+                                     destinationSlice:dst.arrayLayer
+                                     destinationLevel:dst.mipLevel
                                     destinationOrigin:MTLOriginMake(origin.x, origin.y,
                                                                     origin.z + size.depth - 1)];
 
@@ -462,8 +462,8 @@ namespace dawn_native { namespace metal {
                         sourceBytesPerImage:lastRowDataSize
                                  sourceSize:MTLSizeMake(size.width, 1, 1)
                                   toTexture:texture->GetMTLTexture()
-                           destinationSlice:dst.slice
-                           destinationLevel:dst.level
+                           destinationSlice:dst.arrayLayer
+                           destinationLevel:dst.mipLevel
                           destinationOrigin:MTLOriginMake(origin.x, origin.y + size.height - 1,
                                                           origin.z + size.depth - 1)];
                 } break;
@@ -515,8 +515,8 @@ namespace dawn_native { namespace metal {
 
                     if (!needWorkaround) {
                         [encoders.blit copyFromTexture:texture->GetMTLTexture()
-                                           sourceSlice:src.slice
-                                           sourceLevel:src.level
+                                           sourceSlice:src.arrayLayer
+                                           sourceLevel:src.mipLevel
                                           sourceOrigin:origin
                                             sourceSize:size
                                               toBuffer:buffer->GetMTLBuffer()
@@ -533,8 +533,8 @@ namespace dawn_native { namespace metal {
                         size.depth = copySize.depth - 1;
 
                         [encoders.blit copyFromTexture:texture->GetMTLTexture()
-                                           sourceSlice:src.slice
-                                           sourceLevel:src.level
+                                           sourceSlice:src.arrayLayer
+                                           sourceLevel:src.mipLevel
                                           sourceOrigin:origin
                                             sourceSize:MTLSizeMake(size.width, size.height,
                                                                    size.depth - 1)
@@ -550,8 +550,8 @@ namespace dawn_native { namespace metal {
                     // Doing all the copy in last image except the last row.
                     if (size.height > 1) {
                         [encoders.blit copyFromTexture:texture->GetMTLTexture()
-                                           sourceSlice:src.slice
-                                           sourceLevel:src.level
+                                           sourceSlice:src.arrayLayer
+                                           sourceLevel:src.mipLevel
                                           sourceOrigin:MTLOriginMake(origin.x, origin.y,
                                                                      origin.z + size.depth - 1)
                                             sourceSize:MTLSizeMake(size.width, size.height - 1, 1)
@@ -570,8 +570,8 @@ namespace dawn_native { namespace metal {
 
                     [encoders.blit
                                  copyFromTexture:texture->GetMTLTexture()
-                                     sourceSlice:src.slice
-                                     sourceLevel:src.level
+                                     sourceSlice:src.arrayLayer
+                                     sourceLevel:src.mipLevel
                                     sourceOrigin:MTLOriginMake(origin.x, origin.y + size.height - 1,
                                                                origin.z + size.depth - 1)
                                       sourceSize:MTLSizeMake(size.width, 1, 1)
@@ -605,13 +605,13 @@ namespace dawn_native { namespace metal {
                     encoders.EnsureBlit(commandBuffer);
 
                     [encoders.blit copyFromTexture:srcTexture->GetMTLTexture()
-                                       sourceSlice:copy->source.slice
-                                       sourceLevel:copy->source.level
+                                       sourceSlice:copy->source.arrayLayer
+                                       sourceLevel:copy->source.mipLevel
                                       sourceOrigin:srcOrigin
                                         sourceSize:size
                                          toTexture:dstTexture->GetMTLTexture()
-                                  destinationSlice:copy->destination.slice
-                                  destinationLevel:copy->destination.level
+                                  destinationSlice:copy->destination.arrayLayer
+                                  destinationLevel:copy->destination.mipLevel
                                  destinationOrigin:dstOrigin];
                 } break;
 

@@ -35,20 +35,18 @@ namespace dawn_native {
         MaybeError ValidateCopySizeFitsInTexture(const TextureCopy& textureCopy,
                                                  const Extent3D& copySize) {
             const TextureBase* texture = textureCopy.texture.Get();
-            if (textureCopy.level >= texture->GetNumMipLevels()) {
-                return DAWN_VALIDATION_ERROR("Copy mip-level out of range");
+            if (textureCopy.mipLevel >= texture->GetNumMipLevels()) {
+                return DAWN_VALIDATION_ERROR("Copy mipLevel out of range");
             }
 
-            if (textureCopy.slice >= texture->GetArrayLayers()) {
-                return DAWN_VALIDATION_ERROR("Copy array-layer out of range");
+            if (textureCopy.arrayLayer >= texture->GetArrayLayers()) {
+                return DAWN_VALIDATION_ERROR("Copy arrayLayer out of range");
             }
+
+            Extent3D extent = texture->GetMipLevelPhysicalSize(textureCopy.mipLevel);
 
             // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
             // overflows.
-            uint64_t level = textureCopy.level;
-
-            Extent3D extent = texture->GetMipLevelPhysicalSize(level);
-
             if (uint64_t(textureCopy.origin.x) + uint64_t(copySize.width) >
                     static_cast<uint64_t>(extent.width) ||
                 uint64_t(textureCopy.origin.y) + uint64_t(copySize.height) >
@@ -766,8 +764,8 @@ namespace dawn_native {
         copy->destination.texture = destination->texture;
         copy->destination.origin = destination->origin;
         copy->copySize = *copySize;
-        copy->destination.level = destination->level;
-        copy->destination.slice = destination->slice;
+        copy->destination.mipLevel = destination->mipLevel;
+        copy->destination.arrayLayer = destination->arrayLayer;
         if (source->rowPitch == 0) {
             copy->source.rowPitch =
                 ComputeDefaultRowPitch(destination->texture->GetFormat(), copySize->width);
@@ -801,8 +799,8 @@ namespace dawn_native {
         copy->source.texture = source->texture;
         copy->source.origin = source->origin;
         copy->copySize = *copySize;
-        copy->source.level = source->level;
-        copy->source.slice = source->slice;
+        copy->source.mipLevel = source->mipLevel;
+        copy->source.arrayLayer = source->arrayLayer;
         copy->destination.buffer = destination->buffer;
         copy->destination.offset = destination->offset;
         if (destination->rowPitch == 0) {
@@ -837,12 +835,12 @@ namespace dawn_native {
             mAllocator.Allocate<CopyTextureToTextureCmd>(Command::CopyTextureToTexture);
         copy->source.texture = source->texture;
         copy->source.origin = source->origin;
-        copy->source.level = source->level;
-        copy->source.slice = source->slice;
+        copy->source.mipLevel = source->mipLevel;
+        copy->source.arrayLayer = source->arrayLayer;
         copy->destination.texture = destination->texture;
         copy->destination.origin = destination->origin;
-        copy->destination.level = destination->level;
-        copy->destination.slice = destination->slice;
+        copy->destination.mipLevel = destination->mipLevel;
+        copy->destination.arrayLayer = destination->arrayLayer;
         copy->copySize = *copySize;
     }
 

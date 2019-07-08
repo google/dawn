@@ -100,8 +100,8 @@ namespace dawn_native {
 
     struct TextureCopy {
         Ref<TextureBase> texture;
-        uint32_t level;
-        uint32_t slice;
+        uint32_t mipLevel;
+        uint32_t arrayLayer;
         Origin3D origin;  // Texels
     };
 
