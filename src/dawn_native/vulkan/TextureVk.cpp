@@ -269,9 +269,9 @@ namespace dawn_native { namespace vulkan {
                 return VK_FORMAT_B8G8R8A8_UNORM;
             case dawn::TextureFormat::BGRA8UnormSrgb:
                 return VK_FORMAT_B8G8R8A8_SRGB;
-            case dawn::TextureFormat::A2RGB10Unorm:
-                return VK_FORMAT_A2R10G10B10_UNORM_PACK32;
-            case dawn::TextureFormat::B10GR11Float:
+            case dawn::TextureFormat::RGB10A2Unorm:
+                return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
+            case dawn::TextureFormat::RG11B10Float:
                 return VK_FORMAT_B10G11R11_UFLOAT_PACK32;
 
             case dawn::TextureFormat::RG32Uint:

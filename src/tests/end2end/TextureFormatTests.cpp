@@ -615,23 +615,18 @@ TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
                  1.0e-3);
 }
 
-// Test the A2RGB10Unorm format
-// TODO(cwallez@chromium.org): This is actually RGB10A2 in WebGPU but Vulkan doesn't support that
-// format. Do all platforms have A in the high bits?
-TEST_P(TextureFormatTest, A2RGB10Unorm) {
-    // TODO(cwallez@chromium.org): The format R and B channel are inverted compared to what Metal
-    // does.
-    DAWN_SKIP_TEST_IF(IsMetal());
-    auto MakeA2RGB10 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t {
+// Test the RGB10A2Unorm format
+TEST_P(TextureFormatTest, RGB10A2Unorm) {
+    auto MakeRGB10A2 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t {
         ASSERT((r & 0x3FF) == r);
         ASSERT((g & 0x3FF) == g);
         ASSERT((b & 0x3FF) == b);
         ASSERT((a & 0x3) == a);
-        return a << 30 | r << 20 | g << 10 | b;
+        return r | g << 10 | b << 20 | a << 30;
     };
 
-    std::vector<uint32_t> textureData = {MakeA2RGB10(0, 0, 0, 0), MakeA2RGB10(1023, 1023, 1023, 1),
-                                         MakeA2RGB10(243, 578, 765, 2), MakeA2RGB10(0, 0, 0, 3)};
+    std::vector<uint32_t> textureData = {MakeRGB10A2(0, 0, 0, 0), MakeRGB10A2(1023, 1023, 1023, 1),
+                                         MakeRGB10A2(243, 578, 765, 2), MakeRGB10A2(0, 0, 0, 3)};
     // clang-format off
     std::vector<float> expectedData = {
         0.0f, 0.0f, 0.0f, 0.0f,
@@ -641,14 +636,12 @@ TEST_P(TextureFormatTest, A2RGB10Unorm) {
     };
     // clang-format on
 
-    DoSampleTest({dawn::TextureFormat::A2RGB10Unorm, 4, Float, 4}, textureData, expectedData,
+    DoSampleTest({dawn::TextureFormat::RGB10A2Unorm, 4, Float, 4}, textureData, expectedData,
                  2.0e-3);
 }
 
-// Test the B10GR11Float format
-// TODO(cwallez@chromium.org): This is actually GR11B10 in WebGPU but Vulkan doesn't support that
-// format. Do all platforms have it reversed?
-TEST_P(TextureFormatTest, B10GR11Float) {
+// Test the RG11B10Float format
+TEST_P(TextureFormatTest, RG11B10Float) {
     constexpr uint32_t kFloat11Zero = 0;
     constexpr uint32_t kFloat11Infinity = 0x7C0;
     constexpr uint32_t kFloat11Nan = 0x7C1;
@@ -659,20 +652,20 @@ TEST_P(TextureFormatTest, B10GR11Float) {
     constexpr uint32_t kFloat10Nan = 0x3E1;
     constexpr uint32_t kFloat10One = 0x1E0;
 
-    auto MakeB10GR11 = [](uint32_t r, uint32_t g, uint32_t b) {
+    auto MakeRG11B10 = [](uint32_t r, uint32_t g, uint32_t b) {
         ASSERT((r & 0x7FF) == r);
         ASSERT((g & 0x7FF) == g);
         ASSERT((b & 0x3FF) == b);
-        return b << 22 | g << 11 | r;
+        return r | g << 11 | b << 22;
     };
 
     // Test each of (0, 1, INFINITY, NaN) for each component but never two with the same value at a
     // time.
     std::vector<uint32_t> textureData = {
-        MakeB10GR11(kFloat11Zero, kFloat11Infinity, kFloat10Nan),
-        MakeB10GR11(kFloat11Infinity, kFloat11Nan, kFloat10One),
-        MakeB10GR11(kFloat11Nan, kFloat11One, kFloat10Zero),
-        MakeB10GR11(kFloat11One, kFloat11Zero, kFloat10Infinity),
+        MakeRG11B10(kFloat11Zero, kFloat11Infinity, kFloat10Nan),
+        MakeRG11B10(kFloat11Infinity, kFloat11Nan, kFloat10One),
+        MakeRG11B10(kFloat11Nan, kFloat11One, kFloat10Zero),
+        MakeRG11B10(kFloat11One, kFloat11Zero, kFloat10Infinity),
     };
 
     // This is one of the only 3-channel formats, so we don't have specific testing for them. Alpha
@@ -686,7 +679,7 @@ TEST_P(TextureFormatTest, B10GR11Float) {
     };
     // clang-format on
 
-    DoSampleTest({dawn::TextureFormat::B10GR11Float, 4, Float, 4}, textureData, expectedData);
+    DoSampleTest({dawn::TextureFormat::RG11B10Float, 4, Float, 4}, textureData, expectedData);
 }
 
 // TODO(cwallez@chromium.org): Add tests for depth-stencil formats when we know if they are copyable

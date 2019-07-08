@@ -1075,8 +1075,8 @@
             {"value": 25, "name": "RGBA8 sint"},
             {"value": 26, "name": "BGRA8 unorm"},
             {"value": 27, "name": "BGRA8 unorm srgb"},
-            {"value": 28, "name": "A2 RGB10 unorm"},
-            {"value": 29, "name": "B10 GR11 float"},
+            {"value": 28, "name": "RGB10 A2 unorm"},
+            {"value": 29, "name": "RG11 B10 float"},
 
             {"value": 30, "name": "RG32 float"},
             {"value": 31, "name": "RG32 uint"},

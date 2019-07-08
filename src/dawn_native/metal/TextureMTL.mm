@@ -179,12 +179,9 @@ namespace dawn_native { namespace metal {
                 return MTLPixelFormatBGRA8Unorm;
             case dawn::TextureFormat::BGRA8UnormSrgb:
                 return MTLPixelFormatBGRA8Unorm_sRGB;
-            case dawn::TextureFormat::A2RGB10Unorm:
-                // TODO(cwallez@chromium.org): The format expectations are inverted compared to the
-                // implementation of the format in Metal.
-                UNREACHABLE();
+            case dawn::TextureFormat::RGB10A2Unorm:
                 return MTLPixelFormatRGB10A2Unorm;
-            case dawn::TextureFormat::B10GR11Float:
+            case dawn::TextureFormat::RG11B10Float:
                 return MTLPixelFormatRG11B10Float;
 
             case dawn::TextureFormat::RG32Uint:
