@@ -97,20 +97,97 @@ namespace dawn_native { namespace d3d12 {
 
     DXGI_FORMAT D3D12TextureFormat(dawn::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::RGBA8Unorm:
-                return DXGI_FORMAT_R8G8B8A8_UNORM;
-            case dawn::TextureFormat::RG8Unorm:
-                return DXGI_FORMAT_R8G8_UNORM;
             case dawn::TextureFormat::R8Unorm:
                 return DXGI_FORMAT_R8_UNORM;
-            case dawn::TextureFormat::RGBA8Uint:
-                return DXGI_FORMAT_R8G8B8A8_UINT;
-            case dawn::TextureFormat::RG8Uint:
-                return DXGI_FORMAT_R8G8_UINT;
+            case dawn::TextureFormat::R8Snorm:
+                return DXGI_FORMAT_R8_SNORM;
             case dawn::TextureFormat::R8Uint:
                 return DXGI_FORMAT_R8_UINT;
+            case dawn::TextureFormat::R8Sint:
+                return DXGI_FORMAT_R8_SINT;
+
+            case dawn::TextureFormat::R16Unorm:
+                return DXGI_FORMAT_R16_UNORM;
+            case dawn::TextureFormat::R16Snorm:
+                return DXGI_FORMAT_R16_SNORM;
+            case dawn::TextureFormat::R16Uint:
+                return DXGI_FORMAT_R16_UINT;
+            case dawn::TextureFormat::R16Sint:
+                return DXGI_FORMAT_R16_SINT;
+            case dawn::TextureFormat::R16Float:
+                return DXGI_FORMAT_R16_FLOAT;
+            case dawn::TextureFormat::RG8Unorm:
+                return DXGI_FORMAT_R8G8_UNORM;
+            case dawn::TextureFormat::RG8Snorm:
+                return DXGI_FORMAT_R8G8_SNORM;
+            case dawn::TextureFormat::RG8Uint:
+                return DXGI_FORMAT_R8G8_UINT;
+            case dawn::TextureFormat::RG8Sint:
+                return DXGI_FORMAT_R8G8_SINT;
+
+            case dawn::TextureFormat::R32Uint:
+                return DXGI_FORMAT_R32_UINT;
+            case dawn::TextureFormat::R32Sint:
+                return DXGI_FORMAT_R32_SINT;
+            case dawn::TextureFormat::R32Float:
+                return DXGI_FORMAT_R32_FLOAT;
+            case dawn::TextureFormat::RG16Unorm:
+                return DXGI_FORMAT_R16G16_UNORM;
+            case dawn::TextureFormat::RG16Snorm:
+                return DXGI_FORMAT_R16G16_SNORM;
+            case dawn::TextureFormat::RG16Uint:
+                return DXGI_FORMAT_R16G16_UINT;
+            case dawn::TextureFormat::RG16Sint:
+                return DXGI_FORMAT_R16G16_SINT;
+            case dawn::TextureFormat::RG16Float:
+                return DXGI_FORMAT_R16G16_FLOAT;
+            case dawn::TextureFormat::RGBA8Unorm:
+                return DXGI_FORMAT_R8G8B8A8_UNORM;
+            case dawn::TextureFormat::RGBA8UnormSrgb:
+                return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+            case dawn::TextureFormat::RGBA8Snorm:
+                return DXGI_FORMAT_R8G8B8A8_SNORM;
+            case dawn::TextureFormat::RGBA8Uint:
+                return DXGI_FORMAT_R8G8B8A8_UINT;
+            case dawn::TextureFormat::RGBA8Sint:
+                return DXGI_FORMAT_R8G8B8A8_SINT;
             case dawn::TextureFormat::BGRA8Unorm:
                 return DXGI_FORMAT_B8G8R8A8_UNORM;
+            case dawn::TextureFormat::BGRA8UnormSrgb:
+                return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+            case dawn::TextureFormat::RGB10A2Unorm:
+                return DXGI_FORMAT_R10G10B10A2_UNORM;
+            case dawn::TextureFormat::RG11B10Float:
+                return DXGI_FORMAT_R11G11B10_FLOAT;
+
+            case dawn::TextureFormat::RG32Uint:
+                return DXGI_FORMAT_R32G32_UINT;
+            case dawn::TextureFormat::RG32Sint:
+                return DXGI_FORMAT_R32G32_SINT;
+            case dawn::TextureFormat::RG32Float:
+                return DXGI_FORMAT_R32G32_FLOAT;
+            case dawn::TextureFormat::RGBA16Unorm:
+                return DXGI_FORMAT_R16G16B16A16_UNORM;
+            case dawn::TextureFormat::RGBA16Snorm:
+                return DXGI_FORMAT_R16G16B16A16_SNORM;
+            case dawn::TextureFormat::RGBA16Uint:
+                return DXGI_FORMAT_R16G16B16A16_UINT;
+            case dawn::TextureFormat::RGBA16Sint:
+                return DXGI_FORMAT_R16G16B16A16_SINT;
+            case dawn::TextureFormat::RGBA16Float:
+                return DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+            case dawn::TextureFormat::RGBA32Uint:
+                return DXGI_FORMAT_R32G32B32A32_UINT;
+            case dawn::TextureFormat::RGBA32Sint:
+                return DXGI_FORMAT_R32G32B32A32_SINT;
+            case dawn::TextureFormat::RGBA32Float:
+                return DXGI_FORMAT_R32G32B32A32_FLOAT;
+
+            case dawn::TextureFormat::Depth32Float:
+                return DXGI_FORMAT_D32_FLOAT;
+            case dawn::TextureFormat::Depth24Plus:
+                return DXGI_FORMAT_D32_FLOAT;
             case dawn::TextureFormat::Depth24PlusStencil8:
                 return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 
