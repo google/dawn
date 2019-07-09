@@ -55,7 +55,8 @@
         "members": [
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage bit"},
-            {"name": "type", "type": "binding type"}
+            {"name": "type", "type": "binding type"},
+            {"name": "dynamic", "type": "bool", "default": "false" }
         ]
     },
     "bind group layout descriptor": {
@@ -70,11 +71,9 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "uniform buffer"},
-            {"value": 1, "name": "sampler"},
-            {"value": 2, "name": "sampled texture"},
-            {"value": 3, "name": "storage buffer"},
-            {"value": 4, "name": "dynamic uniform buffer"},
-            {"value": 5, "name": "dynamic storage buffer"}
+            {"value": 1, "name": "storage buffer"},
+            {"value": 2, "name": "sampler"},
+            {"value": 3, "name": "sampled texture"}
         ]
     },
     "blend descriptor": {

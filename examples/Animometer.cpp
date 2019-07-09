@@ -111,7 +111,7 @@ void init() {
         })");
 
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStageBit::Vertex, dawn::BindingType::DynamicUniformBuffer}});
+        device, {{0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer, true}});
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);

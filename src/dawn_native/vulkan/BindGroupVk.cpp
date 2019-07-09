@@ -77,13 +77,12 @@ namespace dawn_native { namespace vulkan {
             write.dstBinding = bindingIndex;
             write.dstArrayElement = 0;
             write.descriptorCount = 1;
-            write.descriptorType = VulkanDescriptorType(layoutInfo.types[bindingIndex]);
+            write.descriptorType = VulkanDescriptorType(layoutInfo.types[bindingIndex],
+                                                        layoutInfo.dynamic[bindingIndex]);
 
             switch (layoutInfo.types[bindingIndex]) {
                 case dawn::BindingType::UniformBuffer:
-                case dawn::BindingType::StorageBuffer:
-                case dawn::BindingType::DynamicUniformBuffer:
-                case dawn::BindingType::DynamicStorageBuffer: {
+                case dawn::BindingType::StorageBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                     writeBufferInfo[numWrites].buffer = ToBackend(binding.buffer)->GetHandle();

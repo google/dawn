@@ -456,9 +456,9 @@ class SetBindGroupValidationTest : public ValidationTest {
     void SetUp() override {
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
-                      dawn::BindingType::DynamicUniformBuffer},
+                      dawn::BindingType::UniformBuffer, true},
                      {1, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
-                      dawn::BindingType::DynamicStorageBuffer}});
+                      dawn::BindingType::StorageBuffer, true}});
     }
 
     dawn::Buffer CreateBuffer(uint64_t bufferSize, dawn::BufferUsageBit usage) {

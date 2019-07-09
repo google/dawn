@@ -126,18 +126,23 @@ namespace dawn_native {
             // Perform binding-type specific validation.
             switch (layoutInfo.types[bindingIndex]) {
                 case dawn::BindingType::UniformBuffer:
-                case dawn::BindingType::DynamicUniformBuffer:
                     DAWN_TRY(ValidateBufferBinding(device, binding, dawn::BufferUsageBit::Uniform));
                     break;
                 case dawn::BindingType::StorageBuffer:
-                case dawn::BindingType::DynamicStorageBuffer:
                     DAWN_TRY(ValidateBufferBinding(device, binding, dawn::BufferUsageBit::Storage));
                     break;
                 case dawn::BindingType::SampledTexture:
+                    if (layoutInfo.dynamic[bindingIndex]) {
+                        return DAWN_VALIDATION_ERROR(
+                            "SampledTextures are expected to be not dynamic");
+                    }
                     DAWN_TRY(
                         ValidateTextureBinding(device, binding, dawn::TextureUsageBit::Sampled));
                     break;
                 case dawn::BindingType::Sampler:
+                    if (layoutInfo.dynamic[bindingIndex]) {
+                        return DAWN_VALIDATION_ERROR("Samplers are expected to be not dynamic");
+                    }
                     DAWN_TRY(ValidateSamplerBinding(device, binding));
                     break;
             }
@@ -207,10 +212,7 @@ namespace dawn_native {
         ASSERT(binding < kMaxBindingsPerGroup);
         ASSERT(mLayout->GetBindingInfo().mask[binding]);
         ASSERT(mLayout->GetBindingInfo().types[binding] == dawn::BindingType::UniformBuffer ||
-               mLayout->GetBindingInfo().types[binding] == dawn::BindingType::StorageBuffer ||
-               mLayout->GetBindingInfo().types[binding] ==
-                   dawn::BindingType::DynamicUniformBuffer ||
-               mLayout->GetBindingInfo().types[binding] == dawn::BindingType::DynamicStorageBuffer);
+               mLayout->GetBindingInfo().types[binding] == dawn::BindingType::StorageBuffer);
         BufferBase* buffer = static_cast<BufferBase*>(mBindings[binding].Get());
         return {buffer, mOffsets[binding], mSizes[binding]};
     }

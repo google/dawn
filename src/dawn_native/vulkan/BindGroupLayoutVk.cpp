@@ -39,20 +39,22 @@ namespace dawn_native { namespace vulkan {
 
     }  // anonymous namespace
 
-    VkDescriptorType VulkanDescriptorType(dawn::BindingType type) {
+    VkDescriptorType VulkanDescriptorType(dawn::BindingType type, bool isDynamic) {
         switch (type) {
             case dawn::BindingType::UniformBuffer:
+                if (isDynamic) {
+                    return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                }
                 return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             case dawn::BindingType::Sampler:
                 return VK_DESCRIPTOR_TYPE_SAMPLER;
             case dawn::BindingType::SampledTexture:
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             case dawn::BindingType::StorageBuffer:
+                if (isDynamic) {
+                    return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+                }
                 return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            case dawn::BindingType::DynamicUniformBuffer:
-                return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-            case dawn::BindingType::DynamicStorageBuffer:
-                return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
             default:
                 UNREACHABLE();
         }
@@ -70,7 +72,8 @@ namespace dawn_native { namespace vulkan {
         for (uint32_t bindingIndex : IterateBitSet(info.mask)) {
             auto& binding = bindings[numBindings];
             binding.binding = bindingIndex;
-            binding.descriptorType = VulkanDescriptorType(info.types[bindingIndex]);
+            binding.descriptorType =
+                VulkanDescriptorType(info.types[bindingIndex], info.dynamic[bindingIndex]);
             binding.descriptorCount = 1;
             binding.stageFlags = VulkanShaderStageFlags(info.visibilities[bindingIndex]);
             binding.pImmutableSamplers = nullptr;
@@ -122,14 +125,12 @@ namespace dawn_native { namespace vulkan {
         auto ToDescriptorType = [](dawn::BindingType type) -> DescriptorType {
             switch (type) {
                 case dawn::BindingType::UniformBuffer:
-                case dawn::BindingType::DynamicUniformBuffer:
                     return UNIFORM_BUFFER;
                 case dawn::BindingType::Sampler:
                     return SAMPLER;
                 case dawn::BindingType::SampledTexture:
                     return SAMPLED_IMAGE;
                 case dawn::BindingType::StorageBuffer:
-                case dawn::BindingType::DynamicStorageBuffer:
                     return STORAGE_BUFFER;
                 default:
                     UNREACHABLE();
@@ -145,7 +146,8 @@ namespace dawn_native { namespace vulkan {
 
             if (descriptorTypeIndex[type] == -1) {
                 descriptorTypeIndex[type] = numSizes;
-                result[numSizes].type = VulkanDescriptorType(info.types[bindingIndex]);
+                result[numSizes].type =
+                    VulkanDescriptorType(info.types[bindingIndex], info.dynamic[bindingIndex]);
                 result[numSizes].descriptorCount = 1;
                 numSizes++;
             } else {

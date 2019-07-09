@@ -47,9 +47,9 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
-                      dawn::BindingType::DynamicUniformBuffer},
+                      dawn::BindingType::UniformBuffer, true},
                      {1, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
-                      dawn::BindingType::DynamicStorageBuffer}});
+                      dawn::BindingType::StorageBuffer, true}});
 
         mBindGroup = utils::MakeBindGroup(
             device, mBindGroupLayout,

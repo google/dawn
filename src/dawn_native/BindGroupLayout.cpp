@@ -87,8 +87,8 @@ namespace dawn_native {
             mBindingInfo.visibilities[index] = binding.visibility;
             mBindingInfo.types[index] = binding.type;
 
-            if (binding.type == dawn::BindingType::DynamicUniformBuffer ||
-                binding.type == dawn::BindingType::DynamicStorageBuffer) {
+            if (binding.dynamic) {
+                mBindingInfo.dynamic.set(index);
                 mDynamicBufferCount++;
             }
 

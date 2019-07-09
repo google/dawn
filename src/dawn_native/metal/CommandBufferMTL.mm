@@ -235,7 +235,14 @@ namespace dawn_native { namespace metal {
                     case dawn::BindingType::StorageBuffer: {
                         BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                         const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
-                        const NSUInteger offset = binding.offset;
+                        NSUInteger offset = binding.offset;
+
+                        // TODO(shaobo.yan@intel.com): Record bound buffer status to use
+                        // setBufferOffset to achieve better performance.
+                        if (layout.dynamic[bindingIndex]) {
+                            offset += dynamicOffsets[currentDynamicBufferIndex];
+                            currentDynamicBufferIndex++;
+                        }
 
                         if (hasVertStage) {
                             [render setVertexBuffers:&buffer
@@ -283,34 +290,6 @@ namespace dawn_native { namespace metal {
                         }
                         if (hasComputeStage) {
                             [compute setTexture:textureView->GetMTLTexture() atIndex:computeIndex];
-                        }
-                    } break;
-
-                    // TODO(shaobo.yan@intel.com): Record bound buffer status to use setBufferOffset
-                    // to achieve better performance.
-                    case dawn::BindingType::DynamicUniformBuffer:
-                    case dawn::BindingType::DynamicStorageBuffer: {
-                        ASSERT(currentDynamicBufferIndex < dynamicOffsetCount);
-                        BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
-                        const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
-                        NSUInteger offset =
-                            binding.offset + dynamicOffsets[currentDynamicBufferIndex];
-                        currentDynamicBufferIndex += 1;
-
-                        if (hasVertStage) {
-                            [render setVertexBuffers:&buffer
-                                             offsets:&offset
-                                           withRange:NSMakeRange(vertIndex, 1)];
-                        }
-                        if (hasFragStage) {
-                            [render setFragmentBuffers:&buffer
-                                               offsets:&offset
-                                             withRange:NSMakeRange(fragIndex, 1)];
-                        }
-                        if (hasComputeStage) {
-                            [compute setBuffers:&buffer
-                                        offsets:&offset
-                                      withRange:NSMakeRange(computeIndex, 1)];
                         }
                     } break;
                 }

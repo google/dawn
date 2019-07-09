@@ -66,17 +66,6 @@ namespace dawn_native {
         return {};
     }
 
-    dawn::BindingType NonDynamicBindingType(dawn::BindingType type) {
-        switch (type) {
-            case dawn::BindingType::DynamicUniformBuffer:
-                return dawn::BindingType::UniformBuffer;
-            case dawn::BindingType::DynamicStorageBuffer:
-                return dawn::BindingType::StorageBuffer;
-            default:
-                return type;
-        }
-    }
-
     // ShaderModuleBase
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
@@ -247,9 +236,7 @@ namespace dawn_native {
                 continue;
             }
 
-            // DynamicUniformBuffer and DynamicStorageBuffer are uniform buffer and
-            // storage buffer in shader. Need to translate them.
-            if (NonDynamicBindingType(layoutBindingType) != moduleInfo.type) {
+            if (layoutBindingType != moduleInfo.type) {
                 return false;
             }
 

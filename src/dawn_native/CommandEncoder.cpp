@@ -588,14 +588,12 @@ namespace dawn_native {
                 dawn::BindingType type = layoutInfo.types[i];
 
                 switch (type) {
-                    case dawn::BindingType::UniformBuffer:
-                    case dawn::BindingType::DynamicUniformBuffer: {
+                    case dawn::BindingType::UniformBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
                         tracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Uniform);
                     } break;
 
-                    case dawn::BindingType::StorageBuffer:
-                    case dawn::BindingType::DynamicStorageBuffer: {
+                    case dawn::BindingType::StorageBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
                         tracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Storage);
                     } break;
