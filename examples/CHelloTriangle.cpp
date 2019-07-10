@@ -141,7 +141,7 @@ void frame() {
     }
     DawnCommandBuffer commands;
     {
-        DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
+        DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device, nullptr);
 
         DawnRenderPassEncoder pass = dawnCommandEncoderBeginRenderPass(encoder, &renderpassInfo);
         dawnRenderPassEncoderSetPipeline(pass, pipeline);
@@ -149,7 +149,7 @@ void frame() {
         dawnRenderPassEncoderEndPass(pass);
         dawnRenderPassEncoderRelease(pass);
 
-        commands = dawnCommandEncoderFinish(encoder);
+        commands = dawnCommandEncoderFinish(encoder, nullptr);
         dawnCommandEncoderRelease(encoder);
     }
 

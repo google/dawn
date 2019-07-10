@@ -244,23 +244,34 @@
     "command buffer": {
         "category": "object"
     },
+    "command buffer descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": []
+    },
     "command encoder": {
         "category": "object",
         "methods": [
             {
                 "name": "finish",
-                "returns": "command buffer"
+                "returns": "command buffer",
+                "args": [
+                    {"name": "descriptor", "type": "command buffer descriptor", "annotation": "const*", "optional": true}
+                ]
             },
             {
                 "name": "begin compute pass",
-                "returns": "compute pass encoder"
+                "returns": "compute pass encoder",
+                "args": [
+                    {"name": "descriptor", "type": "compute pass descriptor", "annotation": "const*", "optional": true}
+                ]
             },
             {
                 "name": "begin render pass",
+                "returns": "render pass encoder",
                 "args": [
-                    {"name": "info", "type": "render pass descriptor", "annotation": "const*"}
-                ],
-                "returns": "render pass encoder"
+                    {"name": "descriptor", "type": "render pass descriptor", "annotation": "const*"}
+                ]
             },
             {
                 "name": "copy buffer to buffer",
@@ -301,6 +312,11 @@
             }
         ]
     },
+    "command encoder descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": []
+    },
     "compare function": {
         "category": "enum",
         "values": [
@@ -313,6 +329,11 @@
             {"value": 6, "name": "not equal"},
             {"value": 7, "name": "always"}
         ]
+    },
+    "compute pass descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": []
     },
     "compute pass encoder": {
         "category": "object",
@@ -429,7 +450,10 @@
             },
             {
                 "name": "create command encoder",
-                "returns": "command encoder"
+                "returns": "command encoder",
+                "args": [
+                    {"name": "descriptor", "type": "command encoder descriptor", "annotation": "const*", "optional": true}
+                ]
             },
             {
                 "name": "create compute pipeline",

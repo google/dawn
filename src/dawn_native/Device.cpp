@@ -307,8 +307,9 @@ namespace dawn_native {
         // The callback is deferred so it matches the async behavior of WebGPU.
         mDeferredCreateBufferMappedAsyncResults.push_back(deferred_info);
     }
-    CommandEncoderBase* DeviceBase::CreateCommandEncoder() {
-        return new CommandEncoderBase(this);
+    CommandEncoderBase* DeviceBase::CreateCommandEncoder(
+        const CommandEncoderDescriptor* descriptor) {
+        return new CommandEncoderBase(this, descriptor);
     }
     ComputePipelineBase* DeviceBase::CreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {

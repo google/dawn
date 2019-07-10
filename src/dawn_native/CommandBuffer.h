@@ -25,7 +25,7 @@ namespace dawn_native {
 
     class CommandBufferBase : public ObjectBase {
       public:
-        CommandBufferBase(DeviceBase* device, CommandEncoderBase* encoder);
+        CommandBufferBase(CommandEncoderBase* encoder, const CommandBufferDescriptor* descriptor);
         static CommandBufferBase* MakeError(DeviceBase* device);
 
         const CommandBufferResourceUsage& GetResourceUsages() const;

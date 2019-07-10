@@ -30,15 +30,15 @@ class WireArgumentTests : public WireTest {
 
 // Test that the wire is able to send numerical values
 TEST_F(WireArgumentTests, ValueArgument) {
-    DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
-    DawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
+    DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device, nullptr);
+    DawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder, nullptr);
     dawnComputePassEncoderDispatch(pass, 1, 2, 3);
 
     DawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr)).WillOnce(Return(apiEncoder));
 
     DawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
-    EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder)).WillOnce(Return(apiPass));
+    EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder, nullptr)).WillOnce(Return(apiPass));
 
     EXPECT_CALL(api, ComputePassEncoderDispatch(apiPass, 1, 2, 3)).Times(1);
 
@@ -68,17 +68,17 @@ TEST_F(WireArgumentTests, ValueArrayArgument) {
     EXPECT_CALL(api, DeviceCreateBindGroup(apiDevice, _)).WillOnce(Return(apiBindGroup));
 
     // Use the bindgroup in SetBindGroup that takes an array of value offsets.
-    DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device);
-    DawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder);
+    DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device, nullptr);
+    DawnComputePassEncoder pass = dawnCommandEncoderBeginComputePass(encoder, nullptr);
 
     std::array<uint64_t, 4> testOffsets = {0, 42, 0xDEAD'BEEF'DEAD'BEEFu, 0xFFFF'FFFF'FFFF'FFFFu};
     dawnComputePassEncoderSetBindGroup(pass, 0, bindGroup, testOffsets.size(), testOffsets.data());
 
     DawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr)).WillOnce(Return(apiEncoder));
 
     DawnComputePassEncoder apiPass = api.GetNewComputePassEncoder();
-    EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder)).WillOnce(Return(apiPass));
+    EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder, nullptr)).WillOnce(Return(apiPass));
 
     EXPECT_CALL(api, ComputePassEncoderSetBindGroup(
                          apiPass, 0, apiBindGroup, testOffsets.size(),
@@ -201,9 +201,9 @@ TEST_F(WireArgumentTests, CStringArgument) {
 
 // Test that the wire is able to send objects as value arguments
 TEST_F(WireArgumentTests, ObjectAsValueArgument) {
-    DawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
+    DawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device, nullptr);
     DawnCommandEncoder apiEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice)).WillOnce(Return(apiEncoder));
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr)).WillOnce(Return(apiEncoder));
 
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
@@ -232,16 +232,16 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
     // CreateCommandEncoder might be swapped since they are equivalent in term of matchers
     Sequence s;
     for (int i = 0; i < 2; ++i) {
-        DawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device);
-        cmdBufs[i] = dawnCommandEncoderFinish(cmdBufEncoder);
+        DawnCommandEncoder cmdBufEncoder = dawnDeviceCreateCommandEncoder(device, nullptr);
+        cmdBufs[i] = dawnCommandEncoderFinish(cmdBufEncoder, nullptr);
 
         DawnCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
-        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice))
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
             .InSequence(s)
             .WillOnce(Return(apiCmdBufEncoder));
 
         apiCmdBufs[i] = api.GetNewCommandBuffer();
-        EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder))
+        EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder, nullptr))
             .WillOnce(Return(apiCmdBufs[i]));
     }
 

@@ -30,7 +30,7 @@ namespace dawn_native { namespace vulkan {
 
     class CommandBuffer : public CommandBufferBase {
       public:
-        CommandBuffer(Device* device, CommandEncoderBase* encoder);
+        CommandBuffer(CommandEncoderBase* encoder, const CommandBufferDescriptor* descriptor);
         ~CommandBuffer();
 
         void RecordCommands(VkCommandBuffer commands);

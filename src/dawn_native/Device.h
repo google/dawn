@@ -56,7 +56,9 @@ namespace dawn_native {
 
         FenceSignalTracker* GetFenceSignalTracker() const;
 
-        virtual CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder) = 0;
+        virtual CommandBufferBase* CreateCommandBuffer(
+            CommandEncoderBase* encoder,
+            const CommandBufferDescriptor* descriptor) = 0;
 
         virtual Serial GetCompletedCommandSerial() const = 0;
         virtual Serial GetLastSubmittedCommandSerial() const = 0;
@@ -108,7 +110,7 @@ namespace dawn_native {
         void CreateBufferMappedAsync(const BufferDescriptor* descriptor,
                                      dawn::BufferCreateMappedCallback callback,
                                      void* userdata);
-        CommandEncoderBase* CreateCommandEncoder();
+        CommandEncoderBase* CreateCommandEncoder(const CommandEncoderDescriptor* descriptor);
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
         QueueBase* CreateQueue();
