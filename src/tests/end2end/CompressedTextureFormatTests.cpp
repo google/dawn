@@ -55,6 +55,7 @@ struct CopyConfig {
     uint32_t baseArrayLayer = 0;
     uint32_t bufferOffset = 0;
     uint32_t rowPitchAlignment = kTextureRowPitchAlignment;
+    uint32_t imageHeight = 0;
 };
 
 class CompressedTextureBCFormatTest : public DawnTest {
@@ -102,8 +103,9 @@ class CompressedTextureBCFormatTest : public DawnTest {
         // Copy texture data from a staging buffer to the destination texture.
         dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
             device, uploadData.data(), uploadBufferSize, dawn::BufferUsageBit::CopySrc);
-        dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
-            stagingBuffer, copyConfig.bufferOffset, copyConfig.rowPitchAlignment, 0);
+        dawn::BufferCopyView bufferCopyView =
+            utils::CreateBufferCopyView(stagingBuffer, copyConfig.bufferOffset,
+                                        copyConfig.rowPitchAlignment, copyConfig.imageHeight);
         dawn::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(bcCompressedTexture, copyConfig.baseMipmapLevel,
                                          copyConfig.baseArrayLayer, copyConfig.copyOrigin3D);
@@ -654,5 +656,56 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
     }
 }
 
-// TODO(jiawei.shao@intel.com): support BC formats on Metal and OpenGL backend
-DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest, D3D12Backend, VulkanBackend);
+// Test the workaround in the B2T copies when (bufferSize - bufferOffset < bytesPerImage *
+// copyExtent.depth) on Metal backends. As copyExtent.depth can only be 1 for BC formats, on Metal
+// backend we will use two copies to implement such copy.
+TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
+    CopyConfig config;
+    config.textureWidthLevel0 = 8;
+    config.textureHeightLevel0 = 8;
+    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+
+    config.imageHeight = config.textureHeightLevel0 * 2;
+
+    for (dawn::TextureFormat format : kBCFormats) {
+        config.format = format;
+        TestCopyRegionIntoBCFormatTextures(config);
+    }
+}
+
+// Test the workaround in the B2T copies when (bufferSize - bufferOffset < bytesPerImage *
+// copyExtent.depth) and copyExtent needs to be clamped.
+TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
+    CopyConfig config;
+    config.textureHeightLevel0 = 56;
+    config.textureWidthLevel0 = 56;
+    config.rowPitchAlignment = kTextureRowPitchAlignment;
+
+    constexpr uint32_t kMipmapLevelCount = 3;
+    config.mipmapLevelCount = kMipmapLevelCount;
+    config.baseMipmapLevel = kMipmapLevelCount - 1;
+
+    // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
+    // required in the copies.
+    const uint32_t kActualWidthAtLevel = config.textureWidthLevel0 >> config.baseMipmapLevel;
+    const uint32_t kActualHeightAtLevel = config.textureHeightLevel0 >> config.baseMipmapLevel;
+    ASSERT(kActualWidthAtLevel % kBCBlockWidthInTexels != 0);
+    ASSERT(kActualHeightAtLevel % kBCBlockHeightInTexels != 0);
+
+    const uint32_t kCopyWidthAtLevel = (kActualWidthAtLevel + kBCBlockWidthInTexels - 1) /
+                                       kBCBlockWidthInTexels * kBCBlockWidthInTexels;
+    const uint32_t kCopyHeightAtLevel = (kActualHeightAtLevel + kBCBlockHeightInTexels - 1) /
+                                        kBCBlockHeightInTexels * kBCBlockHeightInTexels;
+
+    config.copyExtent3D = {kCopyWidthAtLevel, kCopyHeightAtLevel, 1};
+
+    config.imageHeight = kCopyHeightAtLevel * 2;
+
+    for (dawn::TextureFormat format : kBCFormats) {
+        config.format = format;
+        TestCopyRegionIntoBCFormatTextures(config);
+    }
+}
+
+// TODO(jiawei.shao@intel.com): support BC formats on OpenGL backend
+DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest, D3D12Backend, MetalBackend, VulkanBackend);

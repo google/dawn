@@ -314,6 +314,7 @@ namespace dawn_native { namespace metal {
         TextureBufferCopySplit ComputeTextureBufferCopySplit(Origin3D origin,
                                                              Extent3D copyExtent,
                                                              Format textureFormat,
+                                                             Extent3D virtualSizeAtLevel,
                                                              uint64_t bufferSize,
                                                              uint64_t bufferOffset,
                                                              uint32_t rowPitch,
@@ -323,9 +324,10 @@ namespace dawn_native { namespace metal {
             // When copying textures from/to an unpacked buffer, the Metal validation layer doesn't
             // compute the correct range when checking if the buffer is big enough to contain the
             // data for the whole copy. Instead of looking at the position of the last texel in the
-            // buffer, it computes the volume of the 3D box with rowPitch * imageHeight *
-            // copySize.depth. For example considering the pixel buffer below where in memory, each
-            // row data (D) of the texture is followed by some padding data (P):
+            // buffer, it computes the volume of the 3D box with rowPitch * (imageHeight /
+            // format.blockHeight) * copySize.depth. For example considering the pixel buffer below
+            // where in memory, each row data (D) of the texture is followed by some padding data
+            // (P):
             //     |DDDDDDD|PP|
             //     |DDDDDDD|PP|
             //     |DDDDDDD|PP|
@@ -336,7 +338,21 @@ namespace dawn_native { namespace metal {
 
             // We work around this limitation by detecting when Metal would complain and copy the
             // last image and row separately using tight sourceBytesPerRow or sourceBytesPerImage.
-            uint32_t bytesPerImage = rowPitch * imageHeight;
+            uint32_t rowPitchCountPerImage = imageHeight / textureFormat.blockHeight;
+            uint32_t bytesPerImage = rowPitch * rowPitchCountPerImage;
+
+            // Metal validation layer requires that if the texture's pixel format is a compressed
+            // format, the sourceSize must be a multiple of the pixel format's block size or be
+            // clamped to the edge of the texture if the block extends outside the bounds of a
+            // texture.
+            uint32_t clampedCopyExtentWidth =
+                (origin.x + copyExtent.width > virtualSizeAtLevel.width)
+                    ? (virtualSizeAtLevel.width - origin.x)
+                    : copyExtent.width;
+            uint32_t clampedCopyExtentHeight =
+                (origin.y + copyExtent.height > virtualSizeAtLevel.height)
+                    ? (virtualSizeAtLevel.height - origin.y)
+                    : copyExtent.height;
 
             // Check whether buffer size is big enough.
             bool needWorkaround = bufferSize - bufferOffset < bytesPerImage * copyExtent.depth;
@@ -347,7 +363,7 @@ namespace dawn_native { namespace metal {
                 copy.copies[0].bytesPerImage = bytesPerImage;
                 copy.copies[0].textureOrigin = MTLOriginMake(origin.x, origin.y, origin.z);
                 copy.copies[0].copyExtent =
-                    MTLSizeMake(copyExtent.width, copyExtent.height, copyExtent.depth);
+                    MTLSizeMake(clampedCopyExtentWidth, clampedCopyExtentHeight, copyExtent.depth);
                 return copy;
             }
 
@@ -359,8 +375,8 @@ namespace dawn_native { namespace metal {
                 copy.copies[copy.count].bytesPerRow = rowPitch;
                 copy.copies[copy.count].bytesPerImage = bytesPerImage;
                 copy.copies[copy.count].textureOrigin = MTLOriginMake(origin.x, origin.y, origin.z);
-                copy.copies[copy.count].copyExtent =
-                    MTLSizeMake(copyExtent.width, copyExtent.height, copyExtent.depth - 1);
+                copy.copies[copy.count].copyExtent = MTLSizeMake(
+                    clampedCopyExtentWidth, clampedCopyExtentHeight, copyExtent.depth - 1);
 
                 ++copy.count;
 
@@ -369,30 +385,40 @@ namespace dawn_native { namespace metal {
             }
 
             // Doing all the copy in last image except the last row.
-            if (copyExtent.height > 1) {
+            uint32_t copyBlockRowCount = copyExtent.height / textureFormat.blockHeight;
+            if (copyBlockRowCount > 1) {
                 copy.copies[copy.count].bufferOffset = currentOffset;
                 copy.copies[copy.count].bytesPerRow = rowPitch;
-                copy.copies[copy.count].bytesPerImage = rowPitch * (imageHeight - 1);
+                copy.copies[copy.count].bytesPerImage = rowPitch * (copyBlockRowCount - 1);
                 copy.copies[copy.count].textureOrigin =
                     MTLOriginMake(origin.x, origin.y, origin.z + copyExtent.depth - 1);
-                copy.copies[copy.count].copyExtent =
-                    MTLSizeMake(copyExtent.width, copyExtent.height - 1, 1);
+
+                ASSERT(copyExtent.height - textureFormat.blockHeight < virtualSizeAtLevel.height);
+                copy.copies[copy.count].copyExtent = MTLSizeMake(
+                    clampedCopyExtentWidth, copyExtent.height - textureFormat.blockHeight, 1);
 
                 ++copy.count;
 
                 // Update offset to copy to the last row.
-                currentOffset += (copyExtent.height - 1) * rowPitch;
+                currentOffset += (copyBlockRowCount - 1) * rowPitch;
             }
 
             // Doing the last row copy with the exact number of bytes in last row.
             // Workaround this issue in a way just like the copy to a 1D texture.
-            uint32_t lastRowDataSize = copyExtent.width * textureFormat.blockByteSize;
+            uint32_t lastRowDataSize =
+                (copyExtent.width / textureFormat.blockWidth) * textureFormat.blockByteSize;
+            uint32_t lastRowCopyExtentHeight =
+                textureFormat.blockHeight + clampedCopyExtentHeight - copyExtent.height;
+            ASSERT(lastRowCopyExtentHeight <= textureFormat.blockHeight);
+
             copy.copies[copy.count].bufferOffset = currentOffset;
             copy.copies[copy.count].bytesPerRow = lastRowDataSize;
             copy.copies[copy.count].bytesPerImage = lastRowDataSize;
-            copy.copies[copy.count].textureOrigin = MTLOriginMake(
-                origin.x, origin.y + copyExtent.height - 1, origin.z + copyExtent.depth - 1);
-            copy.copies[copy.count].copyExtent = MTLSizeMake(copyExtent.width, 1, 1);
+            copy.copies[copy.count].textureOrigin =
+                MTLOriginMake(origin.x, origin.y + copyExtent.height - textureFormat.blockHeight,
+                              origin.z + copyExtent.depth - 1);
+            copy.copies[copy.count].copyExtent =
+                MTLSizeMake(clampedCopyExtentWidth, lastRowCopyExtentHeight, 1);
             ++copy.count;
 
             return copy;
@@ -446,9 +472,10 @@ namespace dawn_native { namespace metal {
                     Buffer* buffer = ToBackend(src.buffer.Get());
                     Texture* texture = ToBackend(dst.texture.Get());
 
+                    Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(dst.mipLevel);
                     TextureBufferCopySplit splittedCopies = ComputeTextureBufferCopySplit(
-                        dst.origin, copySize, texture->GetFormat(), buffer->GetSize(), src.offset,
-                        src.rowPitch, src.imageHeight);
+                        dst.origin, copySize, texture->GetFormat(), virtualSizeAtLevel,
+                        buffer->GetSize(), src.offset, src.rowPitch, src.imageHeight);
 
                     encoders.EnsureBlit(commandBuffer);
                     for (uint32_t i = 0; i < splittedCopies.count; ++i) {
@@ -473,9 +500,10 @@ namespace dawn_native { namespace metal {
                     Texture* texture = ToBackend(src.texture.Get());
                     Buffer* buffer = ToBackend(dst.buffer.Get());
 
+                    Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(src.mipLevel);
                     TextureBufferCopySplit splittedCopies = ComputeTextureBufferCopySplit(
-                        src.origin, copySize, texture->GetFormat(), buffer->GetSize(), dst.offset,
-                        dst.rowPitch, dst.imageHeight);
+                        src.origin, copySize, texture->GetFormat(), virtualSizeAtLevel,
+                        buffer->GetSize(), dst.offset, dst.rowPitch, dst.imageHeight);
 
                     encoders.EnsureBlit(commandBuffer);
                     for (uint32_t i = 0; i < splittedCopies.count; ++i) {

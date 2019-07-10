@@ -215,6 +215,12 @@ namespace dawn_native { namespace metal {
             case dawn::TextureFormat::Depth24PlusStencil8:
                 return MTLPixelFormatDepth32Float_Stencil8;
 
+            // TODO(jiawei.shao@intel.com): support all BC formats
+            case dawn::TextureFormat::BC5RGSnorm:
+                return MTLPixelFormatBC5_RGSnorm;
+            case dawn::TextureFormat::BC5RGUnorm:
+                return MTLPixelFormatBC5_RGUnorm;
+
             default:
                 UNREACHABLE();
         }
