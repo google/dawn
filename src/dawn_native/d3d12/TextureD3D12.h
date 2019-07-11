@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_TEXTURED3D12_H_
 #define DAWNNATIVE_D3D12_TEXTURED3D12_H_
 
+#include "common/Serial.h"
 #include "dawn_native/Texture.h"
 
 #include "dawn_native/d3d12/d3d12_platform.h"
@@ -31,13 +32,10 @@ namespace dawn_native { namespace d3d12 {
         Texture(Device* device, const TextureDescriptor* descriptor, ID3D12Resource* nativeTexture);
         ~Texture();
 
-        bool CreateD3D12ResourceBarrierIfNeeded(D3D12_RESOURCE_BARRIER* barrier,
-                                                dawn::TextureUsageBit newUsage) const;
-        bool CreateD3D12ResourceBarrierIfNeeded(D3D12_RESOURCE_BARRIER* barrier,
-                                                D3D12_RESOURCE_STATES newState) const;
         DXGI_FORMAT GetD3D12Format() const;
         ID3D12Resource* GetD3D12Resource() const;
-        void SetUsage(dawn::TextureUsageBit newUsage);
+        bool TransitionUsageAndGetResourceBarrier(D3D12_RESOURCE_BARRIER* barrier,
+                                                  dawn::TextureUsageBit newUsage);
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                 dawn::TextureUsageBit usage);
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
@@ -64,8 +62,14 @@ namespace dawn_native { namespace d3d12 {
 
         UINT16 GetDepthOrArraySize();
 
+        bool TransitionUsageAndGetResourceBarrier(D3D12_RESOURCE_BARRIER* barrier,
+                                                  D3D12_RESOURCE_STATES newState);
+
         ComPtr<ID3D12Resource> mResource;
         D3D12_RESOURCE_STATES mLastState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+
+        Serial mLastUsedSerial = UINT64_MAX;
+        bool mValidToDecay = false;
     };
 
     class TextureView : public TextureViewBase {

@@ -435,10 +435,9 @@ namespace dawn_native { namespace d3d12 {
             for (size_t i = 0; i < usages.buffers.size(); ++i) {
                 D3D12_RESOURCE_BARRIER barrier;
                 if (ToBackend(usages.buffers[i])
-                        ->CreateD3D12ResourceBarrierIfNeeded(&barrier, usages.bufferUsages[i])) {
+                        ->TransitionUsageAndGetResourceBarrier(&barrier, usages.bufferUsages[i])) {
                     barriers.push_back(barrier);
                 }
-                ToBackend(usages.buffers[i])->SetUsage(usages.bufferUsages[i]);
             }
 
             for (size_t i = 0; i < usages.textures.size(); ++i) {
@@ -452,10 +451,9 @@ namespace dawn_native { namespace d3d12 {
             for (size_t i = 0; i < usages.textures.size(); ++i) {
                 D3D12_RESOURCE_BARRIER barrier;
                 if (ToBackend(usages.textures[i])
-                        ->CreateD3D12ResourceBarrierIfNeeded(&barrier, usages.textureUsages[i])) {
+                        ->TransitionUsageAndGetResourceBarrier(&barrier, usages.textureUsages[i])) {
                     barriers.push_back(barrier);
                 }
-                ToBackend(usages.textures[i])->SetUsage(usages.textureUsages[i]);
             }
 
             if (barriers.size()) {
