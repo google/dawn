@@ -43,11 +43,11 @@ class CullingTest : public DawnTest {
         // RGBA8 format for the back buffer. So (gl_FragCoord.xy - vec2(0.5)) / 255 in shader code
         // will make the pixel's R and G channels exactly equal to the pixel's x and y coordinates.
         const char* fs =
-            "#version 450\n"
-            "layout(location = 0) out vec4 fragColor;"
-            "void main() {\n"
-            "   fragColor = vec4((gl_FragCoord.xy - vec2(0.5)) / 255, 0.0, 1.0);\n"
-            "}\n";
+            R"(#version 450
+            layout(location = 0) out vec4 fragColor;
+            void main() {
+               fragColor = vec4((gl_FragCoord.xy - vec2(0.5)) / 255, 0.0, 1.0);
+            })";
         pipelineDescriptor.cFragmentStage.module =
             utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fs);
 

@@ -40,11 +40,11 @@ class ClipSpaceTest : public DawnTest {
             utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vs);
 
         const char* fs =
-            "#version 450\n"
-            "layout(location = 0) out vec4 fragColor;"
-            "void main() {\n"
-            "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
-            "}\n";
+            R"(#version 450
+            layout(location = 0) out vec4 fragColor;
+            void main() {
+               fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            })";
         pipelineDescriptor.cFragmentStage.module =
             utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fs);
 
