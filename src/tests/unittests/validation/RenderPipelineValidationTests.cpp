@@ -51,7 +51,8 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
     device.CreateRenderPipeline(&descriptor);
 }
 
-TEST_F(RenderPipelineValidationTest, ColorState) {
+// Tests that at least one color state is required.
+TEST_F(RenderPipelineValidationTest, ColorStateRequired) {
     {
         // This one succeeds because attachment 0 is the color attachment
         utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -67,6 +68,29 @@ TEST_F(RenderPipelineValidationTest, ColorState) {
         descriptor.cVertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.colorStateCount = 0;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
+
+// Tests that the color formats must be renderable.
+TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
+    {
+        // Succeeds because RGBA8Unorm is renderable
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    {
+        // Fails because RG11B10Float is non-renderable
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.cColorStates[0]->format = dawn::TextureFormat::RG11B10Float;
 
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }

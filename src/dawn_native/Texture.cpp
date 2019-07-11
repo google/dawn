@@ -161,8 +161,9 @@ namespace dawn_native {
                 case dawn::TextureFormat::BGRA8Unorm:
                 case dawn::TextureFormat::BGRA8UnormSrgb:
                 case dawn::TextureFormat::RGB10A2Unorm:
-                case dawn::TextureFormat::RG11B10Float:
                     return MakeColorFormat(format, true, 4);
+                case dawn::TextureFormat::RG11B10Float:
+                    return MakeColorFormat(format, false, 4);
 
                 case dawn::TextureFormat::RG32Uint:
                 case dawn::TextureFormat::RG32Sint:
@@ -307,14 +308,19 @@ namespace dawn_native {
 
         MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor, const Format& format) {
             DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
-            if (format.isCompressed) {
-                constexpr dawn::TextureUsageBit kValidUsage = dawn::TextureUsageBit::Sampled |
-                                                              dawn::TextureUsageBit::CopySrc |
-                                                              dawn::TextureUsageBit::CopyDst;
-                if (descriptor->usage & (~kValidUsage)) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Compressed texture format is incompatible with the texture usage");
-                }
+
+            constexpr dawn::TextureUsageBit kValidCompressedUsages =
+                dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::CopySrc |
+                dawn::TextureUsageBit::CopyDst;
+            if (format.isCompressed && (descriptor->usage & (~kValidCompressedUsages))) {
+                return DAWN_VALIDATION_ERROR(
+                    "Compressed texture format is incompatible with the texture usage");
+            }
+
+            if (!format.isRenderable &&
+                (descriptor->usage & dawn::TextureUsageBit::OutputAttachment)) {
+                return DAWN_VALIDATION_ERROR(
+                    "Non-renderable format used with OutputAttachment usage");
             }
 
             return {};

@@ -235,6 +235,21 @@ TEST_F(TextureValidationTest, EncodeDestroySubmit) {
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 }
 
+// Test it is an error to create an OutputAttachment texture with a non-renderable format.
+TEST_F(TextureValidationTest, NonRenderableAndOutputAttachment) {
+    dawn::TextureDescriptor descriptor;
+    descriptor.size = {1, 1, 1};
+    descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+
+    // Succeeds because RGBA8Unorm is renderable
+    descriptor.format = dawn::TextureFormat::RGBA8Unorm;
+    device.CreateTexture(&descriptor);
+
+    // Fails because RG11B10Float is non-renderable
+    descriptor.format = dawn::TextureFormat::RG11B10Float;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+}
+
 // TODO(jiawei.shao@intel.com): use compressed texture formats as extensions.
 // TODO(jiawei.shao@intel.com): add tests to verify we cannot create 1D or 3D textures with
 // compressed texture formats.
