@@ -185,7 +185,7 @@ class TextureFormatTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor desc(device);
 
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             void main() {
                 const vec2 pos[3] = vec2[3](
@@ -225,7 +225,7 @@ class TextureFormatTest : public DawnTest {
         fsSource << "}";
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fsSource.str().c_str());
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fsSource.str().c_str());
 
         desc.cVertexStage.module = vsModule;
         desc.cFragmentStage.module = fsModule;

@@ -274,9 +274,9 @@ namespace dawn_native {
         DAWN_TRY(ValidateVertexInputDescriptor(descriptor->vertexInput, &attributesSetMask));
         DAWN_TRY(ValidatePrimitiveTopology(descriptor->primitiveTopology));
         DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->vertexStage,
-                                                 descriptor->layout, dawn::ShaderStage::Vertex));
+                                                 descriptor->layout, ShaderStage::Vertex));
         DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->fragmentStage,
-                                                 descriptor->layout, dawn::ShaderStage::Fragment));
+                                                 descriptor->layout, ShaderStage::Fragment));
         DAWN_TRY(ValidateRasterizationStateDescriptor(descriptor->rasterizationState));
 
         if ((descriptor->vertexStage->module->GetUsedVertexAttributes() & ~attributesSetMask)

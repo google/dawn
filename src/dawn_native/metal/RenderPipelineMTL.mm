@@ -317,13 +317,13 @@ namespace dawn_native { namespace metal {
         const ShaderModule* vertexModule = ToBackend(descriptor->vertexStage->module);
         const char* vertexEntryPoint = descriptor->vertexStage->entryPoint;
         ShaderModule::MetalFunctionData vertexData = vertexModule->GetFunction(
-            vertexEntryPoint, dawn::ShaderStage::Vertex, ToBackend(GetLayout()));
+            vertexEntryPoint, ShaderStage::Vertex, ToBackend(GetLayout()));
         descriptorMTL.vertexFunction = vertexData.function;
 
         const ShaderModule* fragmentModule = ToBackend(descriptor->fragmentStage->module);
         const char* fragmentEntryPoint = descriptor->fragmentStage->entryPoint;
         ShaderModule::MetalFunctionData fragmentData = fragmentModule->GetFunction(
-            fragmentEntryPoint, dawn::ShaderStage::Fragment, ToBackend(GetLayout()));
+            fragmentEntryPoint, ShaderStage::Fragment, ToBackend(GetLayout()));
         descriptorMTL.fragmentFunction = fragmentData.function;
 
         if (HasDepthStencilAttachment()) {

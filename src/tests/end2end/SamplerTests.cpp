@@ -50,7 +50,7 @@ protected:
 
         auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
 
-        auto vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+        auto vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             void main() {
                 const vec2 pos[6] = vec2[6](vec2(-2.f, -2.f),
@@ -62,7 +62,7 @@ protected:
                 gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
             }
         )");
-        auto fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        auto fsModule = utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             layout(set = 0, binding = 0) uniform sampler sampler0;
             layout(set = 0, binding = 1) uniform texture2D texture0;

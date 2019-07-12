@@ -47,7 +47,7 @@ namespace {
     }
 
     dawn::ShaderModule CreateDefaultVertexShaderModule(dawn::Device device) {
-        return utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+        return utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             layout (location = 0) out vec2 o_texCoord;
             void main() {
@@ -165,7 +165,7 @@ protected:
         });
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fragmentShader);
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fragmentShader);
 
         utils::ComboRenderPipelineDescriptor textureDescriptor(device);
         textureDescriptor.cVertexStage.module = mVSModule;
@@ -503,7 +503,7 @@ class TextureViewRenderingTest : public DawnTest {
             }
         )";
         dawn::ShaderModule oneColorFsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, oneColorFragmentShader);
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, oneColorFragmentShader);
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.cVertexStage.module = vsModule;

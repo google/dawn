@@ -198,8 +198,8 @@ namespace dawn_native { namespace opengl {
           mVertexArrayObject(0),
           mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {
         PerStage<const ShaderModule*> modules(nullptr);
-        modules[dawn::ShaderStage::Vertex] = ToBackend(descriptor->vertexStage->module);
-        modules[dawn::ShaderStage::Fragment] = ToBackend(descriptor->fragmentStage->module);
+        modules[ShaderStage::Vertex] = ToBackend(descriptor->vertexStage->module);
+        modules[ShaderStage::Fragment] = ToBackend(descriptor->fragmentStage->module);
 
         PipelineGL::Initialize(device->gl, ToBackend(GetLayout()), modules);
         CreateVAOForVertexInput(descriptor->vertexInput);

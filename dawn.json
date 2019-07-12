@@ -938,14 +938,6 @@
             {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
         ]
     },
-    "shader stage": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "vertex"},
-            {"value": 1, "name": "fragment"},
-            {"value": 2, "name": "compute"}
-        ]
-    },
     "shader stage bit": {
         "category": "bitmask",
         "values": [

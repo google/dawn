@@ -268,7 +268,8 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         // The simplest texture sampling pipeline.
         dawn::RenderPipeline pipeline;
         {
-            dawn::ShaderModule vs = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            dawn::ShaderModule vs =
+                utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
                 #version 450
                 layout (location = 0) out vec2 o_texCoord;
                 void main() {
@@ -289,7 +290,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                 }
             )");
             dawn::ShaderModule fs =
-                utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+                utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform sampler sampler0;
                 layout(set = 0, binding = 1) uniform texture2D texture0;

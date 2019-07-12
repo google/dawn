@@ -37,7 +37,7 @@ class ClipSpaceTest : public DawnTest {
            gl_Position = vec4(pos[gl_VertexIndex], 1.0);
        })";
         pipelineDescriptor.cVertexStage.module =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vs);
+            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vs);
 
         const char* fs =
             R"(#version 450
@@ -46,7 +46,7 @@ class ClipSpaceTest : public DawnTest {
                fragColor = vec4(1.0, 0.0, 0.0, 1.0);
             })";
         pipelineDescriptor.cFragmentStage.module =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fs);
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fs);
 
         pipelineDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::LessEqual;
         pipelineDescriptor.depthStencilState = &pipelineDescriptor.cDepthStencilState;

@@ -25,22 +25,24 @@
 
 namespace dawn_native {
 
-    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Vertex) < kNumStages, "");
-    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Fragment) < kNumStages, "");
-    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Compute) < kNumStages, "");
+    enum class ShaderStage { Vertex, Fragment, Compute };
+
+    static_assert(static_cast<uint32_t>(ShaderStage::Vertex) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(ShaderStage::Fragment) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(ShaderStage::Compute) < kNumStages, "");
 
     static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Vertex) ==
-                      (1 << static_cast<uint32_t>(dawn::ShaderStage::Vertex)),
+                      (1 << static_cast<uint32_t>(ShaderStage::Vertex)),
                   "");
     static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Fragment) ==
-                      (1 << static_cast<uint32_t>(dawn::ShaderStage::Fragment)),
+                      (1 << static_cast<uint32_t>(ShaderStage::Fragment)),
                   "");
     static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Compute) ==
-                      (1 << static_cast<uint32_t>(dawn::ShaderStage::Compute)),
+                      (1 << static_cast<uint32_t>(ShaderStage::Compute)),
                   "");
 
-    BitSetIterator<kNumStages, dawn::ShaderStage> IterateStages(dawn::ShaderStageBit stages);
-    dawn::ShaderStageBit StageBit(dawn::ShaderStage stage);
+    BitSetIterator<kNumStages, ShaderStage> IterateStages(dawn::ShaderStageBit stages);
+    dawn::ShaderStageBit StageBit(ShaderStage stage);
 
     static constexpr dawn::ShaderStageBit kAllStages =
         static_cast<dawn::ShaderStageBit>((1 << kNumStages) - 1);
@@ -53,11 +55,11 @@ namespace dawn_native {
             mData.fill(initialValue);
         }
 
-        T& operator[](dawn::ShaderStage stage) {
+        T& operator[](ShaderStage stage) {
             DAWN_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];
         }
-        const T& operator[](dawn::ShaderStage stage) const {
+        const T& operator[](ShaderStage stage) const {
             DAWN_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];
         }

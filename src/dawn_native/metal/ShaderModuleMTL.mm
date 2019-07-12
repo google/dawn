@@ -26,13 +26,13 @@ namespace dawn_native { namespace metal {
 
     namespace {
 
-        spv::ExecutionModel SpirvExecutionModelForStage(dawn::ShaderStage stage) {
+        spv::ExecutionModel SpirvExecutionModelForStage(ShaderStage stage) {
             switch (stage) {
-                case dawn::ShaderStage::Vertex:
+                case ShaderStage::Vertex:
                     return spv::ExecutionModelVertex;
-                case dawn::ShaderStage::Fragment:
+                case ShaderStage::Fragment:
                     return spv::ExecutionModelFragment;
-                case dawn::ShaderStage::Compute:
+                case ShaderStage::Compute:
                     return spv::ExecutionModelGLCompute;
                 default:
                     UNREACHABLE();
@@ -48,7 +48,7 @@ namespace dawn_native { namespace metal {
     }
 
     ShaderModule::MetalFunctionData ShaderModule::GetFunction(const char* functionName,
-                                                              dawn::ShaderStage functionStage,
+                                                              ShaderStage functionStage,
                                                               const PipelineLayout* layout) const {
         spirv_cross::CompilerMSL compiler(mSpirv);
 

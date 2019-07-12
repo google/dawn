@@ -20,7 +20,8 @@
 class ScissorTest: public DawnTest {
   protected:
     dawn::RenderPipeline CreateQuadPipeline(dawn::TextureFormat format) {
-        dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+        dawn::ShaderModule vsModule =
+            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             const vec2 pos[6] = vec2[6](
                 vec2(-1.0f, -1.0f), vec2(-1.0f, 1.0f), vec2(1.0f, -1.0f),
@@ -30,7 +31,8 @@ class ScissorTest: public DawnTest {
                 gl_Position = vec4(pos[gl_VertexIndex], 0.5, 1.0);
             })");
 
-        dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        dawn::ShaderModule fsModule =
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             layout(location = 0) out vec4 fragColor;
             void main() {

@@ -23,9 +23,9 @@ class VertexInputTest : public ValidationTest {
                         const utils::ComboVertexInputDescriptor& state,
                         std::string vertexSource) {
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vertexSource.c_str());
+            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vertexSource.c_str());
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {

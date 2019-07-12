@@ -121,7 +121,7 @@ void init() {
 
     initBuffers();
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
         #version 450
         layout(set = 0, binding = 0) uniform cameraData {
             mat4 view;
@@ -136,10 +136,10 @@ void init() {
         void main() {
             f_col = col;
             gl_Position = camera.proj * camera.view * modelMatrix * vec4(pos, 1.0);
-        })"
-    );
+        })");
 
-    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
         layout(location = 0) out vec4 fragColor;
@@ -148,7 +148,7 @@ void init() {
         })");
 
     dawn::ShaderModule fsReflectionModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
         layout(location = 0) out vec4 fragColor;

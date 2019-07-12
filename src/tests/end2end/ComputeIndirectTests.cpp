@@ -53,7 +53,7 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
 
     // Set up shader and pipeline
     dawn::ShaderModule module =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Compute, shaderSource);
+        utils::CreateShaderModule(device, utils::ShaderStage::Compute, shaderSource);
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     dawn::ComputePipelineDescriptor csDesc;

@@ -32,7 +32,7 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
                 });
 
     // Set up shader and pipeline
-    auto module = utils::CreateShaderModule(device, dawn::ShaderStage::Compute, shader);
+    auto module = utils::CreateShaderModule(device, utils::ShaderStage::Compute, shader);
     auto pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     dawn::ComputePipelineDescriptor csDesc;

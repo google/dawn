@@ -20,9 +20,9 @@ using namespace dawn_native;
 
 // Tests for StageBit
 TEST(PerStage, StageBit) {
-    ASSERT_EQ(StageBit(dawn::ShaderStage::Vertex), dawn::ShaderStageBit::Vertex);
-    ASSERT_EQ(StageBit(dawn::ShaderStage::Fragment), dawn::ShaderStageBit::Fragment);
-    ASSERT_EQ(StageBit(dawn::ShaderStage::Compute), dawn::ShaderStageBit::Compute);
+    ASSERT_EQ(StageBit(ShaderStage::Vertex), dawn::ShaderStageBit::Vertex);
+    ASSERT_EQ(StageBit(ShaderStage::Fragment), dawn::ShaderStageBit::Fragment);
+    ASSERT_EQ(StageBit(ShaderStage::Compute), dawn::ShaderStageBit::Compute);
 }
 
 // Basic test for the PerStage container
@@ -30,9 +30,9 @@ TEST(PerStage, PerStage) {
     PerStage<int> data;
 
     // Store data using dawn::ShaderStage
-    data[dawn::ShaderStage::Vertex] = 42;
-    data[dawn::ShaderStage::Fragment] = 3;
-    data[dawn::ShaderStage::Compute] = -1;
+    data[ShaderStage::Vertex] = 42;
+    data[ShaderStage::Fragment] = 3;
+    data[ShaderStage::Compute] = -1;
 
     // Load it using dawn::ShaderStageBit
     ASSERT_EQ(data[dawn::ShaderStageBit::Vertex], 42);
@@ -43,9 +43,9 @@ TEST(PerStage, PerStage) {
 // Test IterateStages with kAllStages
 TEST(PerStage, IterateAllStages) {
     PerStage<int> counts;
-    counts[dawn::ShaderStage::Vertex] = 0;
-    counts[dawn::ShaderStage::Fragment] = 0;
-    counts[dawn::ShaderStage::Compute] = 0;
+    counts[ShaderStage::Vertex] = 0;
+    counts[ShaderStage::Fragment] = 0;
+    counts[ShaderStage::Compute] = 0;
 
     for (auto stage : IterateStages(kAllStages)) {
         counts[stage] ++;
@@ -59,9 +59,9 @@ TEST(PerStage, IterateAllStages) {
 // Test IterateStages with one stage
 TEST(PerStage, IterateOneStage) {
     PerStage<int> counts;
-    counts[dawn::ShaderStage::Vertex] = 0;
-    counts[dawn::ShaderStage::Fragment] = 0;
-    counts[dawn::ShaderStage::Compute] = 0;
+    counts[ShaderStage::Vertex] = 0;
+    counts[ShaderStage::Fragment] = 0;
+    counts[ShaderStage::Compute] = 0;
 
     for (auto stage : IterateStages(dawn::ShaderStageBit::Fragment)) {
         counts[stage] ++;
@@ -75,9 +75,9 @@ TEST(PerStage, IterateOneStage) {
 // Test IterateStages with no stage
 TEST(PerStage, IterateNoStages) {
     PerStage<int> counts;
-    counts[dawn::ShaderStage::Vertex] = 0;
-    counts[dawn::ShaderStage::Fragment] = 0;
-    counts[dawn::ShaderStage::Compute] = 0;
+    counts[ShaderStage::Vertex] = 0;
+    counts[ShaderStage::Fragment] = 0;
+    counts[ShaderStage::Compute] = 0;
 
     for (auto stage : IterateStages(dawn::ShaderStageBit::Fragment & dawn::ShaderStageBit::Vertex)) {
         counts[stage] ++;

@@ -28,13 +28,13 @@ namespace dawn_native { namespace opengl {
 
     namespace {
 
-        GLenum GLShaderType(dawn::ShaderStage stage) {
+        GLenum GLShaderType(ShaderStage stage) {
             switch (stage) {
-                case dawn::ShaderStage::Vertex:
+                case ShaderStage::Vertex:
                     return GL_VERTEX_SHADER;
-                case dawn::ShaderStage::Fragment:
+                case ShaderStage::Fragment:
                     return GL_FRAGMENT_SHADER;
-                case dawn::ShaderStage::Compute:
+                case ShaderStage::Compute:
                     return GL_COMPUTE_SHADER;
                 default:
                     UNREACHABLE();
@@ -75,13 +75,13 @@ namespace dawn_native { namespace opengl {
         mProgram = gl.CreateProgram();
 
         dawn::ShaderStageBit activeStages = dawn::ShaderStageBit::None;
-        for (dawn::ShaderStage stage : IterateStages(kAllStages)) {
+        for (ShaderStage stage : IterateStages(kAllStages)) {
             if (modules[stage] != nullptr) {
                 activeStages |= StageBit(stage);
             }
         }
 
-        for (dawn::ShaderStage stage : IterateStages(activeStages)) {
+        for (ShaderStage stage : IterateStages(activeStages)) {
             GLuint shader = CreateShader(gl, GLShaderType(stage), modules[stage]->GetSource());
             gl.AttachShader(mProgram, shader);
         }
@@ -143,7 +143,7 @@ namespace dawn_native { namespace opengl {
         // Compute links between stages for combined samplers, then bind them to texture units
         {
             std::set<CombinedSampler> combinedSamplersSet;
-            for (dawn::ShaderStage stage : IterateStages(activeStages)) {
+            for (ShaderStage stage : IterateStages(activeStages)) {
                 for (const auto& combined : modules[stage]->GetCombinedSamplerInfo()) {
                     combinedSamplersSet.insert(combined);
                 }

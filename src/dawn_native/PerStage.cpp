@@ -16,12 +16,12 @@
 
 namespace dawn_native {
 
-    BitSetIterator<kNumStages, dawn::ShaderStage> IterateStages(dawn::ShaderStageBit stages) {
+    BitSetIterator<kNumStages, ShaderStage> IterateStages(dawn::ShaderStageBit stages) {
         std::bitset<kNumStages> bits(static_cast<uint32_t>(stages));
-        return BitSetIterator<kNumStages, dawn::ShaderStage>(bits);
+        return BitSetIterator<kNumStages, ShaderStage>(bits);
     }
 
-    dawn::ShaderStageBit StageBit(dawn::ShaderStage stage) {
+    dawn::ShaderStageBit StageBit(ShaderStage stage) {
         ASSERT(static_cast<uint32_t>(stage) < kNumStages);
         return static_cast<dawn::ShaderStageBit>(1 << static_cast<uint32_t>(stage));
     }

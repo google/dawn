@@ -60,7 +60,7 @@ namespace dawn_native { namespace metal {
     }
 
     const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
-        dawn::ShaderStage stage) const {
+        ShaderStage stage) const {
         return mIndexInfo[stage];
     }
 

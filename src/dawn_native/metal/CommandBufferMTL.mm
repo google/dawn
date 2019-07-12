@@ -219,15 +219,15 @@ namespace dawn_native { namespace metal {
 
                 if (hasVertStage) {
                     vertIndex = pipelineLayout->GetBindingIndexInfo(
-                        dawn::ShaderStage::Vertex)[index][bindingIndex];
+                        ShaderStage::Vertex)[index][bindingIndex];
                 }
                 if (hasFragStage) {
                     fragIndex = pipelineLayout->GetBindingIndexInfo(
-                        dawn::ShaderStage::Fragment)[index][bindingIndex];
+                        ShaderStage::Fragment)[index][bindingIndex];
                 }
                 if (hasComputeStage) {
                     computeIndex = pipelineLayout->GetBindingIndexInfo(
-                        dawn::ShaderStage::Compute)[index][bindingIndex];
+                        ShaderStage::Compute)[index][bindingIndex];
                 }
 
                 switch (layout.types[bindingIndex]) {

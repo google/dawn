@@ -25,8 +25,7 @@ class RenderPassValidationTest : public ValidationTest {};
 
 // Test that it is invalid to draw in a render pass with missing bind groups
 TEST_F(RenderPassValidationTest, MissingBindGroup) {
-    dawn::ShaderModule vsModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
 #version 450
 layout (set = 0, binding = 0) uniform vertexUniformBuffer {
     mat2 transform;
@@ -37,7 +36,7 @@ void main() {
 })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
 #version 450
 layout (set = 1, binding = 0) uniform fragmentUniformBuffer {
     vec4 color;

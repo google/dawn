@@ -19,6 +19,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
+#include "dawn_native/PerStage.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -58,7 +59,7 @@ namespace dawn_native {
 
         const ModuleBindingInfo& GetBindingInfo() const;
         const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
-        dawn::ShaderStage GetExecutionModel() const;
+        ShaderStage GetExecutionModel() const;
 
         bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout);
 
@@ -82,7 +83,7 @@ namespace dawn_native {
 
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
-        dawn::ShaderStage mExecutionModel;
+        ShaderStage mExecutionModel;
     };
 
 }  // namespace dawn_native

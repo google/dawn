@@ -23,7 +23,7 @@ namespace dawn_native {
     MaybeError ValidatePipelineStageDescriptor(DeviceBase* device,
                                                const PipelineStageDescriptor* descriptor,
                                                const PipelineLayoutBase* layout,
-                                               dawn::ShaderStage stage) {
+                                               ShaderStage stage) {
         DAWN_TRY(device->ValidateObject(descriptor->module));
 
         if (descriptor->entryPoint != std::string("main")) {

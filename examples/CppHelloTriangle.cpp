@@ -94,15 +94,15 @@ void init() {
     initBuffers();
     initTextures();
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec4 pos;
         void main() {
             gl_Position = pos;
-        })"
-    );
+        })");
 
-    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
         #version 450
         layout(set = 0, binding = 0) uniform sampler mySampler;
         layout(set = 0, binding = 1) uniform texture2D myTexture;

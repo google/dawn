@@ -54,7 +54,7 @@ class DepthStencilStateTest : public DawnTest {
 
             depthTextureView = depthTexture.CreateDefaultView();
 
-            vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
                     vec3 color;
@@ -69,7 +69,7 @@ class DepthStencilStateTest : public DawnTest {
                 }
             )");
 
-            fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            fsModule = utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
                     vec3 color;

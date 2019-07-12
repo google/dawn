@@ -28,13 +28,13 @@ namespace utils {
 
     namespace {
 
-        shaderc_shader_kind ShadercShaderKind(dawn::ShaderStage stage) {
+        shaderc_shader_kind ShadercShaderKind(ShaderStage stage) {
             switch (stage) {
-                case dawn::ShaderStage::Vertex:
+                case ShaderStage::Vertex:
                     return shaderc_glsl_vertex_shader;
-                case dawn::ShaderStage::Fragment:
+                case ShaderStage::Fragment:
                     return shaderc_glsl_fragment_shader;
-                case dawn::ShaderStage::Compute:
+                case ShaderStage::Compute:
                     return shaderc_glsl_compute_shader;
                 default:
                     UNREACHABLE();
@@ -60,7 +60,7 @@ namespace utils {
     }  // anonymous namespace
 
     dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
-                                          dawn::ShaderStage stage,
+                                          ShaderStage stage,
                                           const char* source) {
         shaderc_shader_kind kind = ShadercShaderKind(stage);
 

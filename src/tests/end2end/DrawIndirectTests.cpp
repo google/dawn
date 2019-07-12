@@ -27,7 +27,7 @@ class DrawIndirectTest : public DawnTest {
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
                 #version 450
                 layout(location = 0) in vec4 pos;
                 void main() {
@@ -35,7 +35,7 @@ class DrawIndirectTest : public DawnTest {
                 })");
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {

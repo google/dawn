@@ -312,13 +312,13 @@ namespace dawn_native { namespace d3d12 {
             const char* compileTarget = nullptr;
             D3D12_SHADER_BYTECODE* shader = nullptr;
             switch (stage) {
-                case dawn::ShaderStage::Vertex:
+                case ShaderStage::Vertex:
                     module = ToBackend(descriptor->vertexStage->module);
                     entryPoint = descriptor->vertexStage->entryPoint;
                     shader = &descriptorD3D12.VS;
                     compileTarget = "vs_5_1";
                     break;
-                case dawn::ShaderStage::Fragment:
+                case ShaderStage::Fragment:
                     module = ToBackend(descriptor->fragmentStage->module);
                     entryPoint = descriptor->fragmentStage->entryPoint;
                     shader = &descriptorD3D12.PS;

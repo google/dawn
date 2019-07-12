@@ -37,7 +37,7 @@ class CullingTest : public DawnTest {
            gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
        })";
         pipelineDescriptor.cVertexStage.module =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, vs);
+            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vs);
 
         // gl_FragCoord of pixel(x, y) in framebuffer coordinate is (x + 0.5, y + 0.5). And we use
         // RGBA8 format for the back buffer. So (gl_FragCoord.xy - vec2(0.5)) / 255 in shader code
@@ -49,7 +49,7 @@ class CullingTest : public DawnTest {
                fragColor = vec4((gl_FragCoord.xy - vec2(0.5)) / 255, 0.0, 1.0);
             })";
         pipelineDescriptor.cFragmentStage.module =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, fs);
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fs);
 
         // Set culling mode and front face according to the parameters
         pipelineDescriptor.cRasterizationState.frontFace = frontFace;

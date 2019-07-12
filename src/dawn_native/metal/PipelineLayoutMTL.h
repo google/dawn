@@ -35,7 +35,7 @@ namespace dawn_native { namespace metal {
 
         using BindingIndexInfo =
             std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;
-        const BindingIndexInfo& GetBindingIndexInfo(dawn::ShaderStage stage) const;
+        const BindingIndexInfo& GetBindingIndexInfo(ShaderStage stage) const;
 
       private:
         PerStage<BindingIndexInfo> mIndexInfo;

@@ -55,7 +55,7 @@ void init() {
     swapchain.Configure(GetPreferredSwapChainTextureFormat(),
                         dawn::TextureUsageBit::OutputAttachment, 640, 480);
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
         #version 450
 
         layout(std140, set = 0, binding = 0) uniform Constants {
@@ -102,7 +102,8 @@ void init() {
             gl_Position = vec4(xpos, ypos, 0.0, 1.0);
         })");
 
-    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+    dawn::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         layout(location = 0) in vec4 v_color;

@@ -31,7 +31,7 @@ namespace dawn_native {
     MaybeError ValidatePipelineStageDescriptor(DeviceBase* device,
                                                const PipelineStageDescriptor* descriptor,
                                                const PipelineLayoutBase* layout,
-                                               dawn::ShaderStage stage);
+                                               ShaderStage stage);
 
     class PipelineBase : public ObjectBase {
       public:

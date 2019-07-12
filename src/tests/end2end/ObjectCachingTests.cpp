@@ -59,21 +59,21 @@ TEST_P(ObjectCachingTest, PipelineLayoutDeduplication) {
 
 // Test that ShaderModules are correctly deduplicated.
 TEST_P(ObjectCachingTest, ShaderModuleDeduplication) {
-    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+    dawn::ShaderModule module = utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             layout(location = 0) out vec4 fragColor;
             void main() {
                 fragColor = vec4(0.0, 1.0, 0.0, 1.0);
             })");
     dawn::ShaderModule sameModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             layout(location = 0) out vec4 fragColor;
             void main() {
                 fragColor = vec4(0.0, 1.0, 0.0, 1.0);
             })");
     dawn::ShaderModule otherModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             layout(location = 0) out vec4 fragColor;
             void main() {
@@ -86,19 +86,19 @@ TEST_P(ObjectCachingTest, ShaderModuleDeduplication) {
 
 // Test that ComputePipeline are correctly deduplicated wrt. their ShaderModule
 TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
-    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+    dawn::ShaderModule module = utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
             #version 450
             void main() {
                 int i = 0;
             })");
     dawn::ShaderModule sameModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
             #version 450
             void main() {
                 int i = 0;
             })");
     dawn::ShaderModule otherModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
             #version 450
             void main() {
             })");
@@ -144,7 +144,7 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
 
     dawn::PipelineStageDescriptor stageDesc;
     stageDesc.entryPoint = "main";
-    stageDesc.module = utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+    stageDesc.module = utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
             #version 450
             void main() {
                 int i = 0;
@@ -181,12 +181,12 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnLayout) {
     EXPECT_EQ(pl.Get() == samePl.Get(), !UsesWire());
 
     utils::ComboRenderPipelineDescriptor desc(device);
-    desc.cVertexStage.module = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+    desc.cVertexStage.module = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             void main() {
                 gl_Position = vec4(0.0);
             })");
-    desc.cFragmentStage.module = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+    desc.cFragmentStage.module = utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             void main() {
             })");
@@ -206,18 +206,19 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnLayout) {
 
 // Test that RenderPipelines are correctly deduplicated wrt. their vertex module
 TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnVertexModule) {
-    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+    dawn::ShaderModule module = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             void main() {
                 gl_Position = vec4(0.0);
             })");
-    dawn::ShaderModule sameModule = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+    dawn::ShaderModule sameModule =
+        utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             void main() {
                 gl_Position = vec4(0.0);
             })");
     dawn::ShaderModule otherModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             void main() {
                 gl_Position = vec4(1.0);
@@ -227,7 +228,7 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnVertexModule) {
     EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
 
     utils::ComboRenderPipelineDescriptor desc(device);
-    desc.cFragmentStage.module = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+    desc.cFragmentStage.module = utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             void main() {
             })");
@@ -247,17 +248,17 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnVertexModule) {
 
 // Test that RenderPipelines are correctly deduplicated wrt. their fragment module
 TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
-    dawn::ShaderModule module = utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+    dawn::ShaderModule module = utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             void main() {
             })");
     dawn::ShaderModule sameModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             void main() {
             })");
     dawn::ShaderModule otherModule =
-        utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
             #version 450
             void main() {
                 int i = 0;
@@ -267,7 +268,7 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
     EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
 
     utils::ComboRenderPipelineDescriptor desc(device);
-    desc.cVertexStage.module = utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+    desc.cVertexStage.module = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
             #version 450
             void main() {
                 gl_Position = vec4(0.0);

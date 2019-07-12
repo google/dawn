@@ -27,7 +27,7 @@ namespace dawn_native {
 
         DAWN_TRY(device->ValidateObject(descriptor->layout));
         DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->computeStage,
-                                                 descriptor->layout, dawn::ShaderStage::Compute));
+                                                 descriptor->layout, ShaderStage::Compute));
         return {};
     }
 

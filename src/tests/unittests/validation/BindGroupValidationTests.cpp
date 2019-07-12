@@ -475,13 +475,13 @@ class SetBindGroupValidationTest : public ValidationTest {
 
     dawn::RenderPipeline CreateRenderPipeline() {
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                 })");
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
                 #version 450
                 layout(std140, set = 0, binding = 0) uniform uBuffer {
                     vec2 value1;
@@ -504,7 +504,7 @@ class SetBindGroupValidationTest : public ValidationTest {
 
     dawn::ComputePipeline CreateComputePipeline() {
         dawn::ShaderModule csModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
                 #version 450
                 const uint kTileSize = 4;
                 const uint kInstances = 11;

@@ -65,7 +65,7 @@ class DynamicBufferOffsetTests : public DawnTest {
 
     dawn::RenderPipeline CreateRenderPipeline() {
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                     const vec2 pos[3] = vec2[3](vec2(-1.0f, 0.0f), vec2(-1.0f, -1.0f), vec2(0.0f, -1.0f));
@@ -73,7 +73,7 @@ class DynamicBufferOffsetTests : public DawnTest {
                 })");
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
                 #version 450
                 layout(std140, set = 0, binding = 0) uniform uBuffer {
                      uvec2 value;
@@ -100,7 +100,7 @@ class DynamicBufferOffsetTests : public DawnTest {
 
     dawn::ComputePipeline CreateComputePipeline() {
         dawn::ShaderModule csModule =
-            utils::CreateShaderModule(device, dawn::ShaderStage::Compute, R"(
+            utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
                 #version 450
                 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
                 layout(std140, set = 0, binding = 0) uniform UniformBuffer {

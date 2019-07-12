@@ -26,7 +26,7 @@ namespace dawn_native { namespace metal {
         const ShaderModule* computeModule = ToBackend(descriptor->computeStage->module);
         const char* computeEntryPoint = descriptor->computeStage->entryPoint;
         ShaderModule::MetalFunctionData computeData = computeModule->GetFunction(
-            computeEntryPoint, dawn::ShaderStage::Compute, ToBackend(GetLayout()));
+            computeEntryPoint, ShaderStage::Compute, ToBackend(GetLayout()));
 
         NSError* error = nil;
         mMtlComputePipelineState =
