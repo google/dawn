@@ -311,6 +311,14 @@ namespace dawn_native { namespace metal {
             std::array<CopyInfo, kMaxTextureBufferCopyRegions> copies;
         };
 
+        MTLOrigin MakeMTLOrigin(Origin3D origin) {
+            return MTLOriginMake(origin.x, origin.y, origin.z);
+        }
+
+        MTLSize MakeMTLSize(Extent3D extent) {
+            return MTLSizeMake(extent.width, extent.height, extent.depth);
+        }
+
         TextureBufferCopySplit ComputeTextureBufferCopySplit(Origin3D origin,
                                                              Extent3D copyExtent,
                                                              Format textureFormat,
@@ -361,7 +369,7 @@ namespace dawn_native { namespace metal {
                 copy.copies[0].bufferOffset = bufferOffset;
                 copy.copies[0].bytesPerRow = rowPitch;
                 copy.copies[0].bytesPerImage = bytesPerImage;
-                copy.copies[0].textureOrigin = MTLOriginMake(origin.x, origin.y, origin.z);
+                copy.copies[0].textureOrigin = MakeMTLOrigin(origin);
                 copy.copies[0].copyExtent =
                     MTLSizeMake(clampedCopyExtentWidth, clampedCopyExtentHeight, copyExtent.depth);
                 return copy;
@@ -374,7 +382,7 @@ namespace dawn_native { namespace metal {
                 copy.copies[copy.count].bufferOffset = currentOffset;
                 copy.copies[copy.count].bytesPerRow = rowPitch;
                 copy.copies[copy.count].bytesPerImage = bytesPerImage;
-                copy.copies[copy.count].textureOrigin = MTLOriginMake(origin.x, origin.y, origin.z);
+                copy.copies[copy.count].textureOrigin = MakeMTLOrigin(origin);
                 copy.copies[copy.count].copyExtent = MTLSizeMake(
                     clampedCopyExtentWidth, clampedCopyExtentHeight, copyExtent.depth - 1);
 
@@ -526,32 +534,17 @@ namespace dawn_native { namespace metal {
                     Texture* srcTexture = ToBackend(copy->source.texture.Get());
                     Texture* dstTexture = ToBackend(copy->destination.texture.Get());
 
-                    MTLOrigin srcOrigin;
-                    srcOrigin.x = copy->source.origin.x;
-                    srcOrigin.y = copy->source.origin.y;
-                    srcOrigin.z = copy->source.origin.z;
-
-                    MTLOrigin dstOrigin;
-                    dstOrigin.x = copy->destination.origin.x;
-                    dstOrigin.y = copy->destination.origin.y;
-                    dstOrigin.z = copy->destination.origin.z;
-
-                    MTLSize size;
-                    size.width = copy->copySize.width;
-                    size.height = copy->copySize.height;
-                    size.depth = copy->copySize.depth;
-
                     encoders.EnsureBlit(commandBuffer);
 
                     [encoders.blit copyFromTexture:srcTexture->GetMTLTexture()
                                        sourceSlice:copy->source.arrayLayer
                                        sourceLevel:copy->source.mipLevel
-                                      sourceOrigin:srcOrigin
-                                        sourceSize:size
+                                      sourceOrigin:MakeMTLOrigin(copy->source.origin)
+                                        sourceSize:MakeMTLSize(copy->copySize)
                                          toTexture:dstTexture->GetMTLTexture()
                                   destinationSlice:copy->destination.arrayLayer
                                   destinationLevel:copy->destination.mipLevel
-                                 destinationOrigin:dstOrigin];
+                                 destinationOrigin:MakeMTLOrigin(copy->destination.origin)];
                 } break;
 
                 default: { UNREACHABLE(); } break;
