@@ -109,6 +109,10 @@ uint16_t Float32ToFloat16(float fp32) {
     }
 }
 
+bool IsFloat16NaN(uint16_t fp16) {
+    return (fp16 & 0x7FFF) > 0x7C00;
+}
+
 // Based on the Khronos Data Format Specification 1.2 Section 13.3 sRGB transfer functions
 float SRGBToLinear(float srgb) {
     // sRGB is always used in unsigned normalized formats so clamp to [0.0, 1.0]

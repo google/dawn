@@ -51,6 +51,7 @@ destType BitCast(const sourceType& source) {
 }
 
 uint16_t Float32ToFloat16(float fp32);
+bool IsFloat16NaN(uint16_t fp16);
 
 float SRGBToLinear(float srgb);
 

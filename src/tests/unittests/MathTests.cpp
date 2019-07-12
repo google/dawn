@@ -151,6 +151,20 @@ TEST(Math, Float32ToFloat16) {
     ASSERT_EQ(Float32ToFloat16(1.0f), 0x3C00);
 }
 
+// Tests for IsFloat16NaN
+TEST(Math, IsFloat16NaN) {
+    ASSERT_FALSE(IsFloat16NaN(0u));
+    ASSERT_FALSE(IsFloat16NaN(0u));
+    ASSERT_FALSE(IsFloat16NaN(Float32ToFloat16(1.0f)));
+    ASSERT_FALSE(IsFloat16NaN(Float32ToFloat16(INFINITY)));
+    ASSERT_FALSE(IsFloat16NaN(Float32ToFloat16(-INFINITY)));
+
+    ASSERT_TRUE(IsFloat16NaN(Float32ToFloat16(INFINITY) + 1));
+    ASSERT_TRUE(IsFloat16NaN(Float32ToFloat16(-INFINITY) + 1));
+    ASSERT_TRUE(IsFloat16NaN(0x7FFF));
+    ASSERT_TRUE(IsFloat16NaN(0xFFFF));
+}
+
 // Tests for SRGBToLinear
 TEST(Math, SRGBToLinear) {
     ASSERT_EQ(SRGBToLinear(0.0f), 0.0f);
