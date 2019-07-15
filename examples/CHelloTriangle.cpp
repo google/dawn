@@ -112,6 +112,8 @@ void init() {
         descriptor.rasterizationState = &rasterizationState;
 
         descriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        descriptor.sampleMask = 0xFFFFFFFF;
+        descriptor.alphaToCoverageEnabled = false;
 
         descriptor.depthStencilState = nullptr;
 

@@ -610,6 +610,11 @@ namespace dawn_native {
 
                     case dawn::BindingType::Sampler:
                         break;
+
+                    case dawn::BindingType::StorageTexture:
+                    case dawn::BindingType::ReadonlyStorageBuffer:
+                        UNREACHABLE();
+                        break;
                 }
             }
         }

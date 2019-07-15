@@ -323,6 +323,10 @@ namespace dawn_native {
                     "Non-renderable format used with OutputAttachment usage");
             }
 
+            if (descriptor->usage & dawn::TextureUsageBit::Storage) {
+                return DAWN_VALIDATION_ERROR("storage textures aren't supported (yet)");
+            }
+
             return {};
         }
 
@@ -345,6 +349,10 @@ namespace dawn_native {
             descriptor->size.depth == 0 || descriptor->arrayLayerCount == 0 ||
             descriptor->mipLevelCount == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
+        }
+
+        if (descriptor->dimension != dawn::TextureDimension::e2D) {
+            return DAWN_VALIDATION_ERROR("Texture dimension must be 2D (for now)");
         }
 
         DAWN_TRY(ValidateTextureSize(descriptor, format));

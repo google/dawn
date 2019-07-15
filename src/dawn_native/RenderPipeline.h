@@ -111,6 +111,8 @@ namespace dawn_native {
         dawn::PrimitiveTopology mPrimitiveTopology;
         RasterizationStateDescriptor mRasterizationState;
         uint32_t mSampleCount;
+        uint32_t mSampleMask;
+        bool mAlphaToCoverageEnabled;
 
         // Stage information
         // TODO(cwallez@chromium.org): Store a crypto hash of the modules instead.

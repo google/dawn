@@ -149,6 +149,8 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     pipelineDescriptor.colorStates = colorStatesPtr;
 
     pipelineDescriptor.sampleCount = 1;
+    pipelineDescriptor.sampleMask = 0xFFFFFFFF;
+    pipelineDescriptor.alphaToCoverageEnabled = false;
     pipelineDescriptor.layout = layout;
     pipelineDescriptor.vertexInput = &vertexInput;
     pipelineDescriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

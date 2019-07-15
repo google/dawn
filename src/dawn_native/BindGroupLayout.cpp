@@ -52,6 +52,15 @@ namespace dawn_native {
                         return DAWN_VALIDATION_ERROR("Samplers and textures cannot be dynamic");
                     }
                     break;
+                case dawn::BindingType::ReadonlyStorageBuffer:
+                    return DAWN_VALIDATION_ERROR("readonly storage buffers aren't supported (yet)");
+                case dawn::BindingType::StorageTexture:
+                    return DAWN_VALIDATION_ERROR("storage textures aren't supported (yet)");
+            }
+
+            if (binding.multisampled) {
+                return DAWN_VALIDATION_ERROR(
+                    "BindGroupLayoutBinding::multisampled must be false (for now)");
             }
 
             bindingsSet.set(binding.binding);
@@ -62,6 +71,7 @@ namespace dawn_native {
     namespace {
         size_t HashBindingInfo(const BindGroupLayoutBase::LayoutBindingInfo& info) {
             size_t hash = Hash(info.mask);
+            HashCombine(&hash, info.dynamic, info.multisampled);
 
             for (uint32_t binding : IterateBitSet(info.mask)) {
                 HashCombine(&hash, info.visibilities[binding], info.types[binding]);
@@ -72,7 +82,7 @@ namespace dawn_native {
 
         bool operator==(const BindGroupLayoutBase::LayoutBindingInfo& a,
                         const BindGroupLayoutBase::LayoutBindingInfo& b) {
-            if (a.mask != b.mask) {
+            if (a.mask != b.mask || a.dynamic != b.dynamic || a.multisampled != b.multisampled) {
                 return false;
             }
 
@@ -104,6 +114,8 @@ namespace dawn_native {
                 mBindingInfo.dynamic.set(index);
                 mDynamicBufferCount++;
             }
+
+            mBindingInfo.multisampled.set(index, binding.multisampled);
 
             ASSERT(!mBindingInfo.mask[index]);
             mBindingInfo.mask.set(index);

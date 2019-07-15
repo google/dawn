@@ -292,6 +292,11 @@ namespace dawn_native { namespace metal {
                             [compute setTexture:textureView->GetMTLTexture() atIndex:computeIndex];
                         }
                     } break;
+
+                    case dawn::BindingType::StorageTexture:
+                    case dawn::BindingType::ReadonlyStorageBuffer:
+                        UNREACHABLE();
+                        break;
                 }
             }
         }

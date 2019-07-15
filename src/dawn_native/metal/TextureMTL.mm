@@ -60,6 +60,8 @@ namespace dawn_native { namespace metal {
                     } else {
                         return (arrayLayers > 1) ? MTLTextureType2DArray : MTLTextureType2D;
                     }
+                default:
+                    UNREACHABLE();
             }
         }
 

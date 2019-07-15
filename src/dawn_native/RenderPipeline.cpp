@@ -305,6 +305,14 @@ namespace dawn_native {
             DAWN_TRY(ValidateDepthStencilStateDescriptor(descriptor->depthStencilState));
         }
 
+        if (descriptor->sampleMask != 0xFFFFFFFF) {
+            return DAWN_VALIDATION_ERROR("sampleMask must be 0xFFFFFFFF (for now)");
+        }
+
+        if (descriptor->alphaToCoverageEnabled) {
+            return DAWN_VALIDATION_ERROR("alphaToCoverageEnabled isn't supported (yet)");
+        }
+
         return {};
     }
 
@@ -341,6 +349,8 @@ namespace dawn_native {
           mPrimitiveTopology(descriptor->primitiveTopology),
           mRasterizationState(*descriptor->rasterizationState),
           mSampleCount(descriptor->sampleCount),
+          mSampleMask(descriptor->sampleMask),
+          mAlphaToCoverageEnabled(descriptor->alphaToCoverageEnabled),
           mVertexModule(descriptor->vertexStage->module),
           mVertexEntryPoint(descriptor->vertexStage->entryPoint),
           mFragmentModule(descriptor->fragmentStage->module),
@@ -589,7 +599,8 @@ namespace dawn_native {
         }
 
         // Hash other state
-        HashCombine(&hash, pipeline->mSampleCount, pipeline->mPrimitiveTopology);
+        HashCombine(&hash, pipeline->mSampleCount, pipeline->mPrimitiveTopology,
+                    pipeline->mSampleMask, pipeline->mAlphaToCoverageEnabled);
 
         return hash;
     }
@@ -700,7 +711,9 @@ namespace dawn_native {
         }
 
         // Check other state
-        if (a->mSampleCount != b->mSampleCount || a->mPrimitiveTopology != b->mPrimitiveTopology) {
+        if (a->mSampleCount != b->mSampleCount || a->mPrimitiveTopology != b->mPrimitiveTopology ||
+            a->mSampleMask != b->mSampleMask ||
+            a->mAlphaToCoverageEnabled != b->mAlphaToCoverageEnabled) {
             return false;
         }
 

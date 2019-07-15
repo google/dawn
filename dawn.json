@@ -56,7 +56,8 @@
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage bit"},
             {"name": "type", "type": "binding type"},
-            {"name": "dynamic", "type": "bool", "default": "false" }
+            {"name": "dynamic", "type": "bool", "default": "false" },
+            {"name": "multisampled", "type": "bool", "default": "false" }
         ]
     },
     "bind group layout descriptor": {
@@ -72,8 +73,10 @@
         "values": [
             {"value": 0, "name": "uniform buffer"},
             {"value": 1, "name": "storage buffer"},
-            {"value": 2, "name": "sampler"},
-            {"value": 3, "name": "sampled texture"}
+            {"value": 2, "name": "readonly storage buffer"},
+            {"value": 3, "name": "sampler"},
+            {"value": 4, "name": "sampled texture"},
+            {"value": 5, "name": "storage texture"}
         ]
     },
     "blend descriptor": {
@@ -906,7 +909,9 @@
             {"name": "sample count", "type": "uint32_t", "default": "1"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
             {"name": "color state count", "type": "uint32_t"},
-            {"name": "color states", "type": "color state descriptor", "annotation": "const*const*", "length": "color state count"}
+            {"name": "color states", "type": "color state descriptor", "annotation": "const*const*", "length": "color state count"},
+            {"name": "sample mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
+            {"name": "alpha to coverage enabled", "type": "bool", "default": "false"}
         ]
     },
     "sampler": {
@@ -1054,7 +1059,9 @@
     "texture dimension": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "2D"}
+            {"value": 0, "name": "1D"},
+            {"value": 1, "name": "2D"},
+            {"value": 2, "name": "3D"}
         ]
     },
     "texture format": {
@@ -1162,10 +1169,12 @@
     "texture view dimension": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "2D"},
-            {"value": 1, "name": "2D array"},
-            {"value": 2, "name": "cube"},
-            {"value": 3, "name": "cube array"}
+            {"value": 0, "name": "1D"},
+            {"value": 1, "name": "2D"},
+            {"value": 2, "name": "2D array"},
+            {"value": 3, "name": "cube"},
+            {"value": 4, "name": "cube array"},
+            {"value": 5, "name": "3D"}
         ],
         "TODO": [
             "jiawei.shao@intel.com: support 1D and 3D texture views"

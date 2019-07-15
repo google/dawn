@@ -135,7 +135,12 @@ namespace dawn_native { namespace opengl {
                         // emulation
                         break;
 
-                    // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
+                    case dawn::BindingType::StorageTexture:
+                    case dawn::BindingType::ReadonlyStorageBuffer:
+                        UNREACHABLE();
+                        break;
+
+                        // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
                 }
             }
         }
