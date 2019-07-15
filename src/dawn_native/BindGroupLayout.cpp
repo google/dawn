@@ -31,7 +31,7 @@ namespace dawn_native {
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
         for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
-            auto& binding = descriptor->bindings[i];
+            const BindGroupLayoutBinding& binding = descriptor->bindings[i];
             DAWN_TRY(ValidateShaderStageBit(binding.visibility));
             DAWN_TRY(ValidateBindingType(binding.type));
 
@@ -41,6 +41,19 @@ namespace dawn_native {
             if (bindingsSet[binding.binding]) {
                 return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
             }
+
+            switch (binding.type) {
+                case dawn::BindingType::UniformBuffer:
+                case dawn::BindingType::StorageBuffer:
+                    break;
+                case dawn::BindingType::SampledTexture:
+                case dawn::BindingType::Sampler:
+                    if (binding.dynamic) {
+                        return DAWN_VALIDATION_ERROR("Samplers and textures cannot be dynamic");
+                    }
+                    break;
+            }
+
             bindingsSet.set(binding.binding);
         }
         return {};

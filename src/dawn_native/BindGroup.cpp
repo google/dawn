@@ -132,17 +132,10 @@ namespace dawn_native {
                     DAWN_TRY(ValidateBufferBinding(device, binding, dawn::BufferUsageBit::Storage));
                     break;
                 case dawn::BindingType::SampledTexture:
-                    if (layoutInfo.dynamic[bindingIndex]) {
-                        return DAWN_VALIDATION_ERROR(
-                            "SampledTextures are expected to be not dynamic");
-                    }
                     DAWN_TRY(
                         ValidateTextureBinding(device, binding, dawn::TextureUsageBit::Sampled));
                     break;
                 case dawn::BindingType::Sampler:
-                    if (layoutInfo.dynamic[bindingIndex]) {
-                        return DAWN_VALIDATION_ERROR("Samplers are expected to be not dynamic");
-                    }
                     DAWN_TRY(ValidateSamplerBinding(device, binding));
                     break;
             }

@@ -422,13 +422,35 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutBindingOOB) {
 // This test verifies that the BindGroupLayout bindings are correctly validated, even if the
 // binding ids are out-of-order.
 TEST_F(BindGroupLayoutValidationTest, BindGroupBinding) {
-    auto layout = utils::MakeBindGroupLayout(
+    utils::MakeBindGroupLayout(
         device, {
                     {1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                     {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
                 });
 }
 
+// Check that dynamic = true is only allowed with buffer bindings.
+TEST_F(BindGroupLayoutValidationTest, DynamicAndTypeCompatibility) {
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer, true},
+                });
+
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer, true},
+                });
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::SampledTexture, true},
+                }));
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::Sampler, true},
+                }));
+}
 
 // This test verifies that the BindGroupLayout cache is successfully caching/deduplicating objects.
 //
