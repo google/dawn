@@ -27,15 +27,15 @@ class CullingTest : public DawnTest {
         // 2. The bottom-right one is clockwise (CW)
         const char* vs =
             R"(#version 450
-        const vec2 pos[6] = vec2[6](vec2(-1.0f, -1.0f),
+            const vec2 pos[6] = vec2[6](vec2(-1.0f, -1.0f),
                                     vec2(-1.0f,  0.0f),
                                     vec2( 0.0f, -1.0f),
                                     vec2( 0.0f,  1.0f),
                                     vec2( 1.0f,  0.0f),
                                     vec2( 1.0f,  1.0f));
-        void main() {
-           gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
-       })";
+            void main() {
+                gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
+            })";
         pipelineDescriptor.cVertexStage.module =
             utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vs);
 

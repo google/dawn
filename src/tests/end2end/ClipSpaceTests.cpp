@@ -27,15 +27,15 @@ class ClipSpaceTest : public DawnTest {
         // 2. The depth value of the bottom-right one is <= 0.5
         const char* vs =
             R"(#version 450
-        const vec3 pos[6] = vec3[6](vec3(-1.0f, -1.0f, 1.0f),
+            const vec3 pos[6] = vec3[6](vec3(-1.0f, -1.0f, 1.0f),
                                     vec3(-1.0f,  1.0f, 0.5f),
                                     vec3( 1.0f, -1.0f, 0.5f),
                                     vec3( 1.0f, -1.0f, 0.5f),
                                     vec3(-1.0f,  1.0f, 0.5f),
                                     vec3( 1.0f,  1.0f, 0.0f));
-        void main() {
-           gl_Position = vec4(pos[gl_VertexIndex], 1.0);
-       })";
+            void main() {
+                gl_Position = vec4(pos[gl_VertexIndex], 1.0);
+            })";
         pipelineDescriptor.cVertexStage.module =
             utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vs);
 
