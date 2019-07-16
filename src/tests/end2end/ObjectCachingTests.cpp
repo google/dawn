@@ -32,6 +32,19 @@ TEST_P(ObjectCachingTest, BindGroupLayoutDeduplication) {
     EXPECT_EQ(bgl.Get() == sameBgl.Get(), !UsesWire());
 }
 
+// Test that two similar bind group layouts won't refer to the same one.
+TEST_P(ObjectCachingTest, BindGroupLayoutDynamic) {
+    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer, true}});
+    dawn::BindGroupLayout sameBgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer, true}});
+    dawn::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer, false}});
+
+    EXPECT_NE(bgl.Get(), otherBgl.Get());
+    EXPECT_EQ(bgl.Get() == sameBgl.Get(), !UsesWire());
+}
+
 // Test that an error object doesn't try to uncache itself
 TEST_P(ObjectCachingTest, ErrorObjectDoesntUncache) {
     ASSERT_DEVICE_ERROR(
