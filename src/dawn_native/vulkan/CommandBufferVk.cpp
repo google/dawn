@@ -743,6 +743,19 @@ namespace dawn_native { namespace vulkan {
                                                       cmd->reference);
                 } break;
 
+                case Command::SetViewport: {
+                    SetViewportCmd* cmd = mCommands.NextCommand<SetViewportCmd>();
+                    VkViewport viewport;
+                    viewport.x = cmd->x;
+                    viewport.y = cmd->y;
+                    viewport.width = cmd->width;
+                    viewport.height = cmd->height;
+                    viewport.minDepth = cmd->minDepth;
+                    viewport.maxDepth = cmd->maxDepth;
+
+                    device->fn.CmdSetViewport(commands, 0, 1, &viewport);
+                } break;
+
                 case Command::SetScissorRect: {
                     SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
                     VkRect2D rect;

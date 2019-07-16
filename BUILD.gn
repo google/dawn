@@ -687,6 +687,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/VertexFormatTests.cpp",
     "src/tests/end2end/VertexInputTests.cpp",
     "src/tests/end2end/ViewportOrientationTests.cpp",
+    "src/tests/end2end/ViewportTests.cpp",
   ]
 
   libs = []
