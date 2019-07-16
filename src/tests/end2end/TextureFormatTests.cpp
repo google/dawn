@@ -435,7 +435,7 @@ class TextureFormatTest : public DawnTest {
         ASSERT(formatInfo.type == Float);
 
         std::vector<float> textureData = {+0.0f,  -0.0f, 1.0f,     1.0e-29f,
-                                          1.0e29, NAN,   INFINITY, -INFINITY};
+                                          1.0e29f, NAN,   INFINITY, -INFINITY};
 
         DoFloatFormatSamplingTest(formatInfo, textureData, textureData);
         DoFormatRenderingTest(formatInfo, textureData, textureData);
@@ -452,7 +452,7 @@ class TextureFormatTest : public DawnTest {
             textureData.push_back(Float32ToFloat16(value));
         }
 
-        DoFloatFormatSamplingTest(formatInfo, textureData, uncompressedData, 1.0e-5);
+        DoFloatFormatSamplingTest(formatInfo, textureData, uncompressedData, 1.0e-5f);
 
         // Use a special expectation that knows that all Float16 NaNs are equivalent.
         DoFormatRenderingTest(formatInfo, uncompressedData, textureData,
