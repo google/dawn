@@ -905,7 +905,7 @@
             {"name": "fragment stage", "type": "pipeline stage descriptor", "annotation": "const*"},
             {"name": "vertex input", "type": "vertex input descriptor", "annotation": "const*"},
             {"name": "primitive topology", "type": "primitive topology"},
-            {"name": "rasterization state", "type": "rasterization state descriptor", "annotation": "const*"},
+            {"name": "rasterization state", "type": "rasterization state descriptor", "annotation": "const*", "optional": true},
             {"name": "sample count", "type": "uint32_t", "default": "1"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
             {"name": "color state count", "type": "uint32_t"},

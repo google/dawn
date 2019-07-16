@@ -20,13 +20,25 @@
 
 namespace dawn_native {
 
+{% macro render_cpp_default_value(member) -%}
+    {%- if member.annotation in ["*", "const*", "const*const*"] and member.optional -%}
+        {{" "}}= nullptr
+    {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
+        {{" "}}= dawn::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+    {%- elif member.type.category == "native" and member.default_value != None -%}
+        {{" "}}= {{member.default_value}}
+    {%- else -%}
+        {{assert(member.default_value == None)}}
+    {%- endif -%}
+{%- endmacro %}
+
     {% for type in by_category["structure"] %}
         struct {{as_cppType(type.name)}} {
             {% if type.extensible %}
                 const void* nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
-                {{as_annotated_frontendType(member)}};
+                {{as_annotated_frontendType(member)}} {{render_cpp_default_value(member)}};
             {% endfor %}
         };
 
