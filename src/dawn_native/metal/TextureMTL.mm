@@ -217,11 +217,34 @@ namespace dawn_native { namespace metal {
             case dawn::TextureFormat::Depth24PlusStencil8:
                 return MTLPixelFormatDepth32Float_Stencil8;
 
-            // TODO(jiawei.shao@intel.com): support all BC formats
+            case dawn::TextureFormat::BC1RGBAUnorm:
+                return MTLPixelFormatBC1_RGBA;
+            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+                return MTLPixelFormatBC1_RGBA_sRGB;
+            case dawn::TextureFormat::BC2RGBAUnorm:
+                return MTLPixelFormatBC2_RGBA;
+            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+                return MTLPixelFormatBC2_RGBA_sRGB;
+            case dawn::TextureFormat::BC3RGBAUnorm:
+                return MTLPixelFormatBC3_RGBA;
+            case dawn::TextureFormat::BC3RGBAUnormSrgb:
+                return MTLPixelFormatBC3_RGBA_sRGB;
+            case dawn::TextureFormat::BC4RSnorm:
+                return MTLPixelFormatBC4_RSnorm;
+            case dawn::TextureFormat::BC4RUnorm:
+                return MTLPixelFormatBC4_RUnorm;
             case dawn::TextureFormat::BC5RGSnorm:
                 return MTLPixelFormatBC5_RGSnorm;
             case dawn::TextureFormat::BC5RGUnorm:
                 return MTLPixelFormatBC5_RGUnorm;
+            case dawn::TextureFormat::BC6HRGBSfloat:
+                return MTLPixelFormatBC6H_RGBFloat;
+            case dawn::TextureFormat::BC6HRGBUfloat:
+                return MTLPixelFormatBC6H_RGBUfloat;
+            case dawn::TextureFormat::BC7RGBAUnorm:
+                return MTLPixelFormatBC7_RGBAUnorm;
+            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+                return MTLPixelFormatBC7_RGBAUnorm_sRGB;
 
             default:
                 UNREACHABLE();

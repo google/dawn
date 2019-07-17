@@ -191,11 +191,34 @@ namespace dawn_native { namespace d3d12 {
             case dawn::TextureFormat::Depth24PlusStencil8:
                 return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 
-            // TODO(jiawei.shao@intel.com): support all BC formats
+            case dawn::TextureFormat::BC1RGBAUnorm:
+                return DXGI_FORMAT_BC1_UNORM;
+            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+                return DXGI_FORMAT_BC1_UNORM_SRGB;
+            case dawn::TextureFormat::BC2RGBAUnorm:
+                return DXGI_FORMAT_BC2_UNORM;
+            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+                return DXGI_FORMAT_BC2_UNORM_SRGB;
+            case dawn::TextureFormat::BC3RGBAUnorm:
+                return DXGI_FORMAT_BC3_UNORM;
+            case dawn::TextureFormat::BC3RGBAUnormSrgb:
+                return DXGI_FORMAT_BC3_UNORM_SRGB;
+            case dawn::TextureFormat::BC4RSnorm:
+                return DXGI_FORMAT_BC4_SNORM;
+            case dawn::TextureFormat::BC4RUnorm:
+                return DXGI_FORMAT_BC4_UNORM;
             case dawn::TextureFormat::BC5RGSnorm:
                 return DXGI_FORMAT_BC5_SNORM;
             case dawn::TextureFormat::BC5RGUnorm:
                 return DXGI_FORMAT_BC5_UNORM;
+            case dawn::TextureFormat::BC6HRGBSfloat:
+                return DXGI_FORMAT_BC6H_SF16;
+            case dawn::TextureFormat::BC6HRGBUfloat:
+                return DXGI_FORMAT_BC6H_UF16;
+            case dawn::TextureFormat::BC7RGBAUnorm:
+                return DXGI_FORMAT_BC7_UNORM;
+            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+                return DXGI_FORMAT_BC7_UNORM_SRGB;
 
             default:
                 UNREACHABLE();

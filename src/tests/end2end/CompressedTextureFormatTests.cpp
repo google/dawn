@@ -235,11 +235,23 @@ class CompressedTextureBCFormatTest : public DawnTest {
     }
 
     // Return the BC block size in bytes.
-    // TODO(jiawei.shao@intel.com): support all BC formats.
     static uint32_t CompressedFormatBlockSizeInBytes(dawn::TextureFormat format) {
         switch (format) {
+            case dawn::TextureFormat::BC1RGBAUnorm:
+            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+            case dawn::TextureFormat::BC4RSnorm:
+            case dawn::TextureFormat::BC4RUnorm:
+                return 8;
+            case dawn::TextureFormat::BC2RGBAUnorm:
+            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+            case dawn::TextureFormat::BC3RGBAUnorm:
+            case dawn::TextureFormat::BC3RGBAUnormSrgb:
             case dawn::TextureFormat::BC5RGSnorm:
             case dawn::TextureFormat::BC5RGUnorm:
+            case dawn::TextureFormat::BC6HRGBSfloat:
+            case dawn::TextureFormat::BC6HRGBUfloat:
+            case dawn::TextureFormat::BC7RGBAUnorm:
+            case dawn::TextureFormat::BC7RGBAUnormSrgb:
                 return 16;
             default:
                 UNREACHABLE();
@@ -248,9 +260,43 @@ class CompressedTextureBCFormatTest : public DawnTest {
     }
 
     // Return the pre-prepared one-block BC texture data.
-    // TODO(jiawei.shao@intel.com): prepare texture data for all BC formats.
     static std::vector<uint8_t> GetOneBlockBCFormatTextureData(dawn::TextureFormat bcFormat) {
         switch (bcFormat) {
+            // The expected data represents 4x4 pixel images with the left side dark red and the
+            // right side dark green. We specify the same compressed data in both sRGB and non-sRGB
+            // tests, but the rendering result should be different because for sRGB formats, the
+            // red, green, and blue components are converted from an sRGB color space to a linear
+            // color space as part of filtering.
+            case dawn::TextureFormat::BC1RGBAUnorm:
+            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+                return {0x0, 0xC0, 0x60, 0x6, 0x50, 0x50, 0x50, 0x50};
+            case dawn::TextureFormat::BC7RGBAUnorm:
+            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+                return {0x50, 0x18, 0xfc, 0xf, 0x0,  0x30, 0xe3, 0xe1,
+                        0xe1, 0xe1, 0xc1, 0xf, 0xfc, 0xc0, 0xf,  0xfc};
+
+            // The expected data represents 4x4 pixel images with the left side dark red and the
+            // right side dark green. The pixels in the left side of the block all have an alpha
+            // value equal to 0x88. We specify the same compressed data in both sRGB and non-sRGB
+            // tests, but the rendering result should be different because for sRGB formats, the
+            // red, green, and blue components are converted from an sRGB color space to a linear
+            // color space as part of filtering, and any alpha component is left unchanged.
+            case dawn::TextureFormat::BC2RGBAUnorm:
+            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+                return {0x88, 0xFF, 0x88, 0xFF, 0x88, 0xFF, 0x88, 0xFF,
+                        0x0,  0xC0, 0x60, 0x6,  0x50, 0x50, 0x50, 0x50};
+            case dawn::TextureFormat::BC3RGBAUnorm:
+            case dawn::TextureFormat::BC3RGBAUnormSrgb:
+                return {0x88, 0xFF, 0x40, 0x2, 0x24, 0x40, 0x2,  0x24,
+                        0x0,  0xC0, 0x60, 0x6, 0x50, 0x50, 0x50, 0x50};
+
+            // The expected data represents 4x4 pixel images with the left side red and the
+            // right side black.
+            case dawn::TextureFormat::BC4RSnorm:
+                return {0x7F, 0x0, 0x40, 0x2, 0x24, 0x40, 0x2, 0x24};
+            case dawn::TextureFormat::BC4RUnorm:
+                return {0xFF, 0x0, 0x40, 0x2, 0x24, 0x40, 0x2, 0x24};
+
             // The expected data represents 4x4 pixel images with the left side red and the right
             // side green and was encoded with DirectXTex from Microsoft.
             case dawn::TextureFormat::BC5RGSnorm:
@@ -259,6 +305,13 @@ class CompressedTextureBCFormatTest : public DawnTest {
             case dawn::TextureFormat::BC5RGUnorm:
                 return {0xff, 0x0, 0x40, 0x2,  0x24, 0x40, 0x2,  0x24,
                         0xff, 0x0, 0x9,  0x90, 0x0,  0x9,  0x90, 0x0};
+            case dawn::TextureFormat::BC6HRGBSfloat:
+                return {0xe3, 0x1f, 0x0, 0x0,  0x0, 0xe0, 0x1f, 0x0,
+                        0x0,  0xff, 0x0, 0xff, 0x0, 0xff, 0x0,  0xff};
+            case dawn::TextureFormat::BC6HRGBUfloat:
+                return {0xe3, 0x3d, 0x0, 0x0,  0x0, 0xe0, 0x3d, 0x0,
+                        0x0,  0xff, 0x0, 0xff, 0x0, 0xff, 0x0,  0xff};
+
             default:
                 UNREACHABLE();
                 return {};
@@ -267,32 +320,68 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
     // Return the texture data that is decoded from the result of GetOneBlockBCFormatTextureData in
     // RGBA8 formats.
-    // TODO(jiawei.shao@intel.com): prepare texture data for all BC formats.
     static std::vector<RGBA8> GetExpectedData(dawn::TextureFormat bcFormat,
                                               const dawn::Extent3D& testRegion) {
+        constexpr RGBA8 kRed(255, 0, 0, 255);
+        constexpr RGBA8 kGreen(0, 255, 0, 255);
+        constexpr RGBA8 kBlack(0, 0, 0, 255);
+        constexpr RGBA8 kDarkRed(198, 0, 0, 255);
+        constexpr RGBA8 kDarkGreen(0, 207, 0, 255);
+        constexpr RGBA8 kDarkRedSRGB(144, 0, 0, 255);
+        constexpr RGBA8 kDarkGreenSRGB(0, 159, 0, 255);
+
+        constexpr uint8_t kLeftAlpha = 0x88;
+        constexpr uint8_t kRightAlpha = 0xFF;
+
         switch (bcFormat) {
+            case dawn::TextureFormat::BC1RGBAUnorm:
+            case dawn::TextureFormat::BC7RGBAUnorm:
+                return FillExpectedData(testRegion, kDarkRed, kDarkGreen);
+
+            case dawn::TextureFormat::BC2RGBAUnorm:
+            case dawn::TextureFormat::BC3RGBAUnorm: {
+                constexpr RGBA8 kLeftColor = RGBA8(kDarkRed.r, 0, 0, kLeftAlpha);
+                constexpr RGBA8 kRightColor = RGBA8(0, kDarkGreen.g, 0, kRightAlpha);
+                return FillExpectedData(testRegion, kLeftColor, kRightColor);
+            }
+
+            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+                return FillExpectedData(testRegion, kDarkRedSRGB, kDarkGreenSRGB);
+
+            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+            case dawn::TextureFormat::BC3RGBAUnormSrgb: {
+                constexpr RGBA8 kLeftColor = RGBA8(kDarkRedSRGB.r, 0, 0, kLeftAlpha);
+                constexpr RGBA8 kRightColor = RGBA8(0, kDarkGreenSRGB.g, 0, kRightAlpha);
+                return FillExpectedData(testRegion, kLeftColor, kRightColor);
+            }
+
+            case dawn::TextureFormat::BC4RSnorm:
+            case dawn::TextureFormat::BC4RUnorm:
+                return FillExpectedData(testRegion, kRed, kBlack);
+
             case dawn::TextureFormat::BC5RGSnorm:
             case dawn::TextureFormat::BC5RGUnorm:
-                return FillExpectedDataWithPureRedAndPureGreen(testRegion);
+            case dawn::TextureFormat::BC6HRGBSfloat:
+            case dawn::TextureFormat::BC6HRGBUfloat:
+                return FillExpectedData(testRegion, kRed, kGreen);
+
             default:
                 UNREACHABLE();
                 return {};
         }
     }
 
-    // Get one kind of expected data that is filled with pure green and pure red.
-    static std::vector<RGBA8> FillExpectedDataWithPureRedAndPureGreen(
-        const dawn::Extent3D& testRegion) {
+    static std::vector<RGBA8> FillExpectedData(const dawn::Extent3D& testRegion,
+                                               RGBA8 leftColorInBlock,
+                                               RGBA8 rightColorInBlock) {
         ASSERT(testRegion.depth == 1);
 
-        constexpr RGBA8 kRed(255, 0, 0, 255);
-        constexpr RGBA8 kGreen(0, 255, 0, 255);
-
-        std::vector<RGBA8> expectedData(testRegion.width * testRegion.height, kRed);
+        std::vector<RGBA8> expectedData(testRegion.width * testRegion.height, leftColorInBlock);
         for (uint32_t y = 0; y < testRegion.height; ++y) {
             for (uint32_t x = 0; x < testRegion.width; ++x) {
                 if (x % kBCBlockWidthInTexels >= kBCBlockWidthInTexels / 2) {
-                    expectedData[testRegion.width * y + x] = kGreen;
+                    expectedData[testRegion.width * y + x] = rightColorInBlock;
                 }
             }
         }
@@ -313,9 +402,15 @@ class CompressedTextureBCFormatTest : public DawnTest {
         return sizeAtLevel;
     }
 
-    // TODO(jiawei.shao@intel.com): support all BC formats.
-    const std::array<dawn::TextureFormat, 2> kBCFormats = {dawn::TextureFormat::BC5RGSnorm,
-                                                           dawn::TextureFormat::BC5RGUnorm};
+    const std::array<dawn::TextureFormat, 14> kBCFormats = {
+        dawn::TextureFormat::BC1RGBAUnorm,  dawn::TextureFormat::BC1RGBAUnormSrgb,
+        dawn::TextureFormat::BC2RGBAUnorm,  dawn::TextureFormat::BC2RGBAUnormSrgb,
+        dawn::TextureFormat::BC3RGBAUnorm,  dawn::TextureFormat::BC3RGBAUnormSrgb,
+        dawn::TextureFormat::BC4RSnorm,     dawn::TextureFormat::BC4RUnorm,
+        dawn::TextureFormat::BC5RGSnorm,    dawn::TextureFormat::BC5RGUnorm,
+        dawn::TextureFormat::BC6HRGBSfloat, dawn::TextureFormat::BC6HRGBUfloat,
+        dawn::TextureFormat::BC7RGBAUnorm,  dawn::TextureFormat::BC7RGBAUnormSrgb};
+
     // Tthe block width and height in texels are 4 for all BC formats.
     static constexpr uint32_t kBCBlockWidthInTexels = 4;
     static constexpr uint32_t kBCBlockHeightInTexels = 4;
