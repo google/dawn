@@ -21,6 +21,8 @@
 
 namespace dawn {
 
+    static constexpr uint64_t kWholeSize = DAWN_WHOLE_SIZE;
+
     {% for type in by_category["enum"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {
             {% for value in type.values %}

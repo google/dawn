@@ -21,6 +21,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+const uint64_t DAWN_WHOLE_SIZE = 0xffffffffffffffffULL; // UINT64_MAX
+
 {% for type in by_category["object"] %}
     typedef struct {{as_cType(type.name)}}Impl* {{as_cType(type.name)}};
 {% endfor %}
