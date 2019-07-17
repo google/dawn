@@ -14,10 +14,40 @@
 
 #include "dawn_native/opengl/BackendGL.h"
 
+#include "common/Constants.h"
 #include "dawn_native/OpenGLBackend.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
+#include <cstring>
+
 namespace dawn_native { namespace opengl {
+
+    namespace {
+
+        struct Vendor {
+            const char* vendorName;
+            uint32_t vendorId;
+        };
+
+        const Vendor kVendors[] = {{"ATI", kVendorID_AMD},
+                                   {"ARM", kVendorID_ARM},
+                                   {"Imagination", kVendorID_ImgTec},
+                                   {"Intel", kVendorID_Intel},
+                                   {"NVIDIA", kVendorID_Nvidia},
+                                   {"Qualcomm", kVendorID_Qualcomm}};
+
+        uint32_t GetVendorIdFromVendors(const char* vendor) {
+            uint32_t vendorId = 0;
+            for (const auto& it : kVendors) {
+                // Matching vendor name with vendor string
+                if (strstr(vendor, it.vendorName) != nullptr) {
+                    vendorId = it.vendorId;
+                    break;
+                }
+            }
+            return vendorId;
+        }
+    }  // namespace
 
     // The OpenGL backend's Adapter.
 
@@ -37,6 +67,10 @@ namespace dawn_native { namespace opengl {
             mFunctions.Enable(GL_MULTISAMPLE);
 
             mPCIInfo.name = reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER));
+
+            // Workaroud to find vendor id from vendor name
+            const char* vendor = reinterpret_cast<const char*>(mFunctions.GetString(GL_VENDOR));
+            mPCIInfo.vendorId = GetVendorIdFromVendors(vendor);
 
             return {};
         }

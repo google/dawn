@@ -114,7 +114,7 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
             continue;
         }
 
-        if (strstr(argv[i], "--adapter-vendor-id") != 0) {
+        if (strstr(argv[i], "--adapter-vendor-id") != nullptr) {
             const char* value = strchr(argv[i], '=');
             if (value != nullptr) {
                 mVendorIdFilter = strtoul(value + 1, nullptr, 16);
@@ -343,9 +343,7 @@ void DawnTest::SetUp() {
 
         for (const dawn_native::Adapter& adapter : adapters) {
             if (adapter.GetBackendType() == backendType) {
-                // TODO(hao.x.li@intel.com): Filter adapter for OpenGL backend once
-                // https://bugs.chromium.org/p/dawn/issues/detail?id=184 is resolved.
-                if (HasVendorIdFilter() && backendType != dawn_native::BackendType::OpenGL) {
+                if (HasVendorIdFilter()) {
                     if (adapter.GetPCIInfo().vendorId == GetVendorIdFilter()) {
                         backendAdapter = adapter;
                         break;
