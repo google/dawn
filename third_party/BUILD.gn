@@ -117,13 +117,33 @@ config("khronos_headers_public") {
   include_dirs = [ "khronos" ]
 }
 
+config("vulkan_headers_config") {
+  include_dirs = [ "khronos" ]
+  if (is_win) {
+    defines = [ "VK_USE_PLATFORM_WIN32_KHR" ]
+  }
+  if (is_linux) {
+    defines = [ "VK_USE_PLATFORM_XCB_KHR" ]
+  }
+  if (is_android) {
+    defines = [ "VK_USE_PLATFORM_ANDROID_KHR" ]
+  }
+  if (is_fuchsia) {
+    defines = [ "VK_USE_PLATFORM_FUCHSIA" ]
+  }
+}
+
 source_set("vulkan_headers") {
   sources = [
+    "khronos/vulkan/vk_icd.h",
+    "khronos/vulkan/vk_layer.h",
     "khronos/vulkan/vk_platform.h",
+    "khronos/vulkan/vk_sdk_platform.h",
     "khronos/vulkan/vulkan.h",
+    "khronos/vulkan/vulkan_core.h",
   ]
 
-  public_configs = [ ":khronos_headers_public" ]
+  public_configs = [ ":vulkan_headers_config" ]
 }
 
 source_set("khronos_platform") {

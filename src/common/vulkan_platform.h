@@ -145,20 +145,6 @@ class alignas(kNativeVkHandleAlignment) VkNonDispatchableHandle {
     static_assert(sizeof(object) == sizeof(object##Native), "");           \
     static_assert(alignof(object) == kNativeVkHandleAlignment, "");
 
-// Ensure platform-specific extensions are declared appropriately.
-#if defined(DAWN_PLATFORM_LINUX)
-#    define VK_USE_PLATFORM_XLIB_KHR
-#    define VK_USE_PLATFORM_XCB_KHR
-// NOTE: For now the line below is undefined to take care of systems that don't
-//       have the Wayland headers installed on the system.
-// #    define VK_USE_PLATFORM_WAYLAND_KHR
-#elif defined(DAWN_PLATFORM_WINDOWS)
-#    define VK_USE_PLATFORM_WIN32_KHR
-#elif defined(DAWN_PLATFORM_ANDROID)
-#    define VK_USE_PLATFORM_ANDROID_KHR
-#elif defined(DAWN_PLATFORM_FUCHSIA)
-#    define VK_USE_PLATFORM_FUCHSIA
-#endif
 #    include <vulkan/vulkan.h>
 
     // VK_NULL_HANDLE is defined to 0 but we don't want our handle type to compare to arbitrary
