@@ -23,6 +23,9 @@
 #elif defined(__APPLE__)
 #    define DAWN_PLATFORM_APPLE 1
 #    define DAWN_PLATFORM_POSIX 1
+#elif defined(__Fuchsia__)
+#    define DAWN_PLATFORM_FUCHSIA 1
+#    define DAWN_PLATFORM_POSIX 1
 #else
 #    error "Unsupported platform."
 #endif
