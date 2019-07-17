@@ -411,7 +411,6 @@ dawn_component("libdawn_native") {
   }
   if (dawn_enable_vulkan) {
     sources += [ "src/dawn_native/vulkan/VulkanBackend.cpp" ]
-    deps += [ "third_party:vulkan_headers" ]
   }
 }
 
@@ -540,7 +539,6 @@ static_library("dawn_utils") {
 
   if (dawn_enable_vulkan) {
     sources += [ "src/utils/VulkanBinding.cpp" ]
-    deps += [ "third_party:vulkan_headers" ]
   }
 }
 
