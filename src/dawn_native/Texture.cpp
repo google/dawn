@@ -373,6 +373,11 @@ namespace dawn_native {
         }
 
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
+        if (descriptor->dimension == dawn::TextureViewDimension::e1D ||
+            descriptor->dimension == dawn::TextureViewDimension::e3D) {
+            return DAWN_VALIDATION_ERROR("Texture view dimension must be 2D compatible.");
+        }
+
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
         // TODO(jiawei.shao@intel.com): check stuff based on resource limits
