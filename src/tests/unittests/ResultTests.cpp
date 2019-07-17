@@ -38,6 +38,7 @@ void TestSuccess(Result<T, E>* result, T expectedSuccess) {
 
 static int dummyError = 0xbeef;
 static float dummySuccess = 42.0f;
+static const float dummyConstSuccess = 42.0f;
 
 // Result<void, E*>
 
@@ -136,6 +137,50 @@ TEST(ResultBothPointer, ReturningSuccess) {
 
     Result<float*, int*> result = CreateSuccess();
     TestSuccess(&result, &dummySuccess);
+}
+
+// Result<const T*, E*>
+
+// Test constructing an error Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, ConstructingError) {
+    Result<const float*, int*> result(&dummyError);
+    TestError(&result, &dummyError);
+}
+
+// Test moving an error Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, MovingError) {
+    Result<const float*, int*> result(&dummyError);
+    Result<const float*, int*> movedResult(std::move(result));
+    TestError(&movedResult, &dummyError);
+}
+
+// Test returning an error Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, ReturningError) {
+    auto CreateError = []() -> Result<const float*, int*> { return {&dummyError}; };
+
+    Result<const float*, int*> result = CreateError();
+    TestError(&result, &dummyError);
+}
+
+// Test constructing a success Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, ConstructingSuccess) {
+    Result<const float*, int*> result(&dummyConstSuccess);
+    TestSuccess(&result, &dummyConstSuccess);
+}
+
+// Test moving a success Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, MovingSuccess) {
+    Result<const float*, int*> result(&dummyConstSuccess);
+    Result<const float*, int*> movedResult(std::move(result));
+    TestSuccess(&movedResult, &dummyConstSuccess);
+}
+
+// Test returning a success Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, ReturningSuccess) {
+    auto CreateSuccess = []() -> Result<const float*, int*> { return {&dummyConstSuccess}; };
+
+    Result<const float*, int*> result = CreateSuccess();
+    TestSuccess(&result, &dummyConstSuccess);
 }
 
 // Result<T, E>

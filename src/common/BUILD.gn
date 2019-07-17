@@ -86,6 +86,7 @@ if (is_win || is_linux || is_mac) {
       "Math.cpp",
       "Math.h",
       "Platform.h",
+      "Result.cpp",
       "Result.h",
       "Serial.h",
       "SerialMap.h",

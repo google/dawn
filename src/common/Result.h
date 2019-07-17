@@ -85,6 +85,27 @@ constexpr size_t alignof_if_defined_else_default<T, Default, decltype(alignof(T)
 
 // Specialization of Result when both the error an success are pointers. It is implemented as a
 // tagged pointer. The tag for Success is 0 so that returning the value is fastest.
+
+namespace detail {
+    // Utility functions to manipulate the tagged pointer. Some of them don't need to be templated
+    // but we really want them inlined so we keep them in the headers
+    enum PayloadType {
+        Success = 0,
+        Error = 1,
+        Empty = 2,
+    };
+
+    intptr_t MakePayload(const void* pointer, PayloadType type);
+    PayloadType GetPayloadType(intptr_t payload);
+
+    template <typename T>
+    static T* GetSuccessFromPayload(intptr_t payload);
+    template <typename E>
+    static E* GetErrorFromPayload(intptr_t payload);
+
+    constexpr static intptr_t kEmptyPayload = Empty;
+}  // namespace detail
+
 template <typename T, typename E>
 class DAWN_NO_DISCARD Result<T*, E*> {
   public:
@@ -108,21 +129,33 @@ class DAWN_NO_DISCARD Result<T*, E*> {
     E* AcquireError();
 
   private:
-    enum PayloadType {
-        Success = 0,
-        Error = 1,
-        Empty = 2,
-    };
+    intptr_t mPayload = detail::kEmptyPayload;
+};
 
-    // Utility functions to manipulate the tagged pointer. Some of them don't need to be templated
-    // but we really want them inlined so we keep them in the headers
-    static intptr_t MakePayload(void* pointer, PayloadType type);
-    static PayloadType GetPayloadType(intptr_t payload);
-    static T* GetSuccessFromPayload(intptr_t payload);
-    static E* GetErrorFromPayload(intptr_t payload);
+template <typename T, typename E>
+class DAWN_NO_DISCARD Result<const T*, E*> {
+  public:
+    static_assert(alignof_if_defined_else_default<T, 4> >= 4,
+                  "Result<T*, E*> reserves two bits for tagging pointers");
+    static_assert(alignof_if_defined_else_default<E, 4> >= 4,
+                  "Result<T*, E*> reserves two bits for tagging pointers");
 
-    constexpr static intptr_t kEmptyPayload = Empty;
-    intptr_t mPayload = kEmptyPayload;
+    Result(const T* success);
+    Result(E* error);
+
+    Result(Result<const T*, E*>&& other);
+    Result<const T*, E*>& operator=(Result<const T*, E>&& other);
+
+    ~Result();
+
+    bool IsError() const;
+    bool IsSuccess() const;
+
+    const T* AcquireSuccess();
+    E* AcquireError();
+
+  private:
+    intptr_t mPayload = detail::kEmptyPayload;
 };
 
 // Catchall definition of Result<T, E> implemented as a tagged struct. It could be improved to use
@@ -205,79 +238,124 @@ E* Result<void, E*>::AcquireError() {
     return error;
 }
 
+// Implementation details of the tagged pointer Results
+namespace detail {
+
+    template <typename T>
+    T* GetSuccessFromPayload(intptr_t payload) {
+        ASSERT(GetPayloadType(payload) == Success);
+        return reinterpret_cast<T*>(payload);
+    }
+
+    template <typename E>
+    E* GetErrorFromPayload(intptr_t payload) {
+        ASSERT(GetPayloadType(payload) == Error);
+        return reinterpret_cast<E*>(payload ^ 1);
+    }
+
+}  // namespace detail
+
 // Implementation of Result<T*, E*>
 template <typename T, typename E>
-Result<T*, E*>::Result(T* success) : mPayload(MakePayload(success, Success)) {
+Result<T*, E*>::Result(T* success) : mPayload(detail::MakePayload(success, detail::Success)) {
 }
 
 template <typename T, typename E>
-Result<T*, E*>::Result(E* error) : mPayload(MakePayload(error, Error)) {
+Result<T*, E*>::Result(E* error) : mPayload(detail::MakePayload(error, detail::Error)) {
 }
 
 template <typename T, typename E>
 Result<T*, E*>::Result(Result<T*, E*>&& other) : mPayload(other.mPayload) {
-    other.mPayload = kEmptyPayload;
+    other.mPayload = detail::kEmptyPayload;
 }
 
 template <typename T, typename E>
 Result<T*, E*>& Result<T*, E*>::operator=(Result<T*, E>&& other) {
-    ASSERT(mPayload == kEmptyPayload);
+    ASSERT(mPayload == detail::kEmptyPayload);
     mPayload = other.mPayload;
-    other.mPayload = kEmptyPayload;
+    other.mPayload = detail::kEmptyPayload;
     return *this;
 }
 
 template <typename T, typename E>
 Result<T*, E*>::~Result() {
-    ASSERT(mPayload == kEmptyPayload);
+    ASSERT(mPayload == detail::kEmptyPayload);
 }
 
 template <typename T, typename E>
 bool Result<T*, E*>::IsError() const {
-    return GetPayloadType(mPayload) == Error;
+    return detail::GetPayloadType(mPayload) == detail::Error;
 }
 
 template <typename T, typename E>
 bool Result<T*, E*>::IsSuccess() const {
-    return GetPayloadType(mPayload) == Success;
+    return detail::GetPayloadType(mPayload) == detail::Success;
 }
 
 template <typename T, typename E>
 T* Result<T*, E*>::AcquireSuccess() {
-    T* success = GetSuccessFromPayload(mPayload);
-    mPayload = kEmptyPayload;
+    T* success = detail::GetSuccessFromPayload<T>(mPayload);
+    mPayload = detail::kEmptyPayload;
     return success;
 }
 
 template <typename T, typename E>
 E* Result<T*, E*>::AcquireError() {
-    E* error = GetErrorFromPayload(mPayload);
-    mPayload = kEmptyPayload;
+    E* error = detail::GetErrorFromPayload<E>(mPayload);
+    mPayload = detail::kEmptyPayload;
     return error;
 }
 
+// Implementation of Result<const T*, E*>
 template <typename T, typename E>
-intptr_t Result<T*, E*>::MakePayload(void* pointer, PayloadType type) {
-    intptr_t payload = reinterpret_cast<intptr_t>(pointer);
-    ASSERT((payload & 3) == 0);
-    return payload | type;
+Result<const T*, E*>::Result(const T* success)
+    : mPayload(detail::MakePayload(success, detail::Success)) {
 }
 
 template <typename T, typename E>
-typename Result<T*, E*>::PayloadType Result<T*, E*>::GetPayloadType(intptr_t payload) {
-    return static_cast<PayloadType>(payload & 3);
+Result<const T*, E*>::Result(E* error) : mPayload(detail::MakePayload(error, detail::Error)) {
 }
 
 template <typename T, typename E>
-T* Result<T*, E*>::GetSuccessFromPayload(intptr_t payload) {
-    ASSERT(GetPayloadType(payload) == Success);
-    return reinterpret_cast<T*>(payload);
+Result<const T*, E*>::Result(Result<const T*, E*>&& other) : mPayload(other.mPayload) {
+    other.mPayload = detail::kEmptyPayload;
 }
 
 template <typename T, typename E>
-E* Result<T*, E*>::GetErrorFromPayload(intptr_t payload) {
-    ASSERT(GetPayloadType(payload) == Error);
-    return reinterpret_cast<E*>(payload ^ 1);
+Result<const T*, E*>& Result<const T*, E*>::operator=(Result<const T*, E>&& other) {
+    ASSERT(mPayload == detail::kEmptyPayload);
+    mPayload = other.mPayload;
+    other.mPayload = detail::kEmptyPayload;
+    return *this;
+}
+
+template <typename T, typename E>
+Result<const T*, E*>::~Result() {
+    ASSERT(mPayload == detail::kEmptyPayload);
+}
+
+template <typename T, typename E>
+bool Result<const T*, E*>::IsError() const {
+    return detail::GetPayloadType(mPayload) == detail::Error;
+}
+
+template <typename T, typename E>
+bool Result<const T*, E*>::IsSuccess() const {
+    return detail::GetPayloadType(mPayload) == detail::Success;
+}
+
+template <typename T, typename E>
+const T* Result<const T*, E*>::AcquireSuccess() {
+    T* success = detail::GetSuccessFromPayload<T>(mPayload);
+    mPayload = detail::kEmptyPayload;
+    return success;
+}
+
+template <typename T, typename E>
+E* Result<const T*, E*>::AcquireError() {
+    E* error = detail::GetErrorFromPayload<E>(mPayload);
+    mPayload = detail::kEmptyPayload;
+    return error;
 }
 
 // Implementation of Result<T, E>
