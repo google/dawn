@@ -133,6 +133,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Fence.h",
     "src/dawn_native/FenceSignalTracker.cpp",
     "src/dawn_native/FenceSignalTracker.h",
+    "src/dawn_native/Format.cpp",
+    "src/dawn_native/Format.h",
     "src/dawn_native/Forward.h",
     "src/dawn_native/Instance.cpp",
     "src/dawn_native/Instance.h",

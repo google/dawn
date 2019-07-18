@@ -48,6 +48,9 @@ namespace dawn_native {
 
     template <typename T>
     class PerStage;
+
+    struct Format;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_FORWARD_H_

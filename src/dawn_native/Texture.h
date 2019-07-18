@@ -24,7 +24,8 @@
 #include <vector>
 
 namespace dawn_native {
-    MaybeError ValidateTextureDescriptor(DeviceBase* device, const TextureDescriptor* descriptor);
+    MaybeError ValidateTextureDescriptor(const DeviceBase* device,
+                                         const TextureDescriptor* descriptor);
     MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                              const TextureBase* texture,
                                              const TextureViewDescriptor* descriptor);
@@ -38,36 +39,6 @@ namespace dawn_native {
     static constexpr dawn::TextureUsageBit kWritableTextureUsages =
         dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Storage |
         dawn::TextureUsageBit::OutputAttachment;
-
-    struct Format {
-        enum Aspect {
-            Color,
-            Depth,
-            Stencil,
-            DepthStencil,
-        };
-
-        dawn::TextureFormat format;
-        bool isRenderable;
-        bool isCompressed;
-        Aspect aspect;
-
-        uint32_t blockByteSize;
-        uint32_t blockWidth;
-        uint32_t blockHeight;
-
-        bool IsColor() const;
-        bool HasDepth() const;
-        bool HasStencil() const;
-        bool HasDepthOrStencil() const;
-    };
-
-    // Returns the Format corresponding to the dawn::TextureFormat or an error if the format
-    // isn't valid.
-    ResultOrError<Format> ConvertFormat(dawn::TextureFormat format);
-
-    // Returns the Format corresponding to the dawn::TextureFormat and assumes the format is valid.
-    Format ConvertValidFormat(dawn::TextureFormat format);
 
     class TextureBase : public ObjectBase {
       public:
@@ -122,7 +93,7 @@ namespace dawn_native {
         MaybeError ValidateDestroy() const;
         dawn::TextureDimension mDimension;
         // TODO(cwallez@chromium.org): This should be deduplicated in the Device
-        Format mFormat;
+        const Format& mFormat;
         Extent3D mSize;
         uint32_t mArrayLayerCount;
         uint32_t mMipLevelCount;
@@ -155,7 +126,7 @@ namespace dawn_native {
         Ref<TextureBase> mTexture;
 
         // TODO(cwallez@chromium.org): This should be deduplicated in the Device
-        Format mFormat;
+        const Format& mFormat;
         uint32_t mBaseMipLevel;
         uint32_t mMipLevelCount;
         uint32_t mBaseArrayLayer;

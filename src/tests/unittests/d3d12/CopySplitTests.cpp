@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
-#include "dawn_native/Texture.h"
+#include "dawn_native/Format.h"
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 

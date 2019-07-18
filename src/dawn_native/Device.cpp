@@ -63,6 +63,8 @@ namespace dawn_native {
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
         SetDefaultToggles();
+
+        mFormatTable = BuildFormatTable(this);
     }
 
     DeviceBase::~DeviceBase() {
@@ -98,6 +100,27 @@ namespace dawn_native {
 
     FenceSignalTracker* DeviceBase::GetFenceSignalTracker() const {
         return mFenceSignalTracker.get();
+    }
+
+    ResultOrError<const Format*> DeviceBase::GetInternalFormat(dawn::TextureFormat format) const {
+        size_t index = ComputeFormatIndex(format);
+        if (index >= mFormatTable.size()) {
+            return DAWN_VALIDATION_ERROR("Unknown texture format");
+        }
+
+        const Format* internalFormat = &mFormatTable[index];
+        if (!internalFormat->isSupported) {
+            return DAWN_VALIDATION_ERROR("Unsupported texture format");
+        }
+
+        return internalFormat;
+    }
+
+    const Format& DeviceBase::GetValidInternalFormat(dawn::TextureFormat format) const {
+        size_t index = ComputeFormatIndex(format);
+        ASSERT(index < mFormatTable.size());
+        ASSERT(mFormatTable[index].isSupported);
+        return mFormatTable[index];
     }
 
     ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateBindGroupLayout(

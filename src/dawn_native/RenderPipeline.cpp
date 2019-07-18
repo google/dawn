@@ -18,7 +18,6 @@
 #include "common/HashUtils.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
-#include "dawn_native/Texture.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 namespace dawn_native {
@@ -112,7 +111,8 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateColorStateDescriptor(const ColorStateDescriptor* descriptor) {
+        MaybeError ValidateColorStateDescriptor(const DeviceBase* device,
+                                                const ColorStateDescriptor* descriptor) {
             if (descriptor->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
@@ -124,9 +124,9 @@ namespace dawn_native {
             DAWN_TRY(ValidateBlendFactor(descriptor->colorBlend.dstFactor));
             DAWN_TRY(ValidateColorWriteMask(descriptor->writeMask));
 
-            Format format;
-            DAWN_TRY_ASSIGN(format, ConvertFormat(descriptor->format));
-            if (!format.IsColor() || !format.isRenderable) {
+            const Format* format;
+            DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
+            if (!format->IsColor() || !format->isRenderable) {
                 return DAWN_VALIDATION_ERROR("Color format must be color renderable");
             }
 
@@ -134,6 +134,7 @@ namespace dawn_native {
         }
 
         MaybeError ValidateDepthStencilStateDescriptor(
+            const DeviceBase* device,
             const DepthStencilStateDescriptor* descriptor) {
             if (descriptor->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -148,9 +149,9 @@ namespace dawn_native {
             DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.depthFailOp));
             DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.passOp));
 
-            Format format;
-            DAWN_TRY_ASSIGN(format, ConvertFormat(descriptor->format));
-            if (!format.HasDepthOrStencil() || !format.isRenderable) {
+            const Format* format;
+            DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
+            if (!format->HasDepthOrStencil() || !format->isRenderable) {
                 return DAWN_VALIDATION_ERROR(
                     "Depth stencil format must be depth-stencil renderable");
             }
@@ -258,7 +259,7 @@ namespace dawn_native {
         return VertexFormatNumComponents(format) * VertexFormatComponentSize(format);
     }
 
-    MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
+    MaybeError ValidateRenderPipelineDescriptor(const DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -301,11 +302,11 @@ namespace dawn_native {
         }
 
         for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
-            DAWN_TRY(ValidateColorStateDescriptor(descriptor->colorStates[i]));
+            DAWN_TRY(ValidateColorStateDescriptor(device, descriptor->colorStates[i]));
         }
 
         if (descriptor->depthStencilState) {
-            DAWN_TRY(ValidateDepthStencilStateDescriptor(descriptor->depthStencilState));
+            DAWN_TRY(ValidateDepthStencilStateDescriptor(device, descriptor->depthStencilState));
         }
 
         if (descriptor->sampleMask != 0xFFFFFFFF) {

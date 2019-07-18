@@ -93,7 +93,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.imageExtent.height = height;
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VulkanImageUsage(static_cast<dawn::TextureUsageBit>(usage),
-                                                 ConvertValidFormat(mConfig.format));
+                                                 mDevice->GetValidInternalFormat(mConfig.format));
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;

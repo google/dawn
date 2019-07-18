@@ -86,134 +86,8 @@ namespace dawn_native {
             }
         }
 
-        // Returns a format with a blockByteSize of 0 for an invalid input format
-        Format ConvertFormatInternal(dawn::TextureFormat format) {
-            auto MakeColorFormat = [](dawn::TextureFormat format, bool renderable,
-                                      uint32_t byteSize) -> Format {
-                Format result;
-                result.format = format;
-                result.isRenderable = renderable;
-                result.isCompressed = false;
-                result.aspect = Format::Aspect::Color;
-                result.blockByteSize = byteSize;
-                result.blockWidth = 1;
-                result.blockHeight = 1;
-                return result;
-            };
-
-            auto MakeDepthStencilFormat = [](dawn::TextureFormat format, Format::Aspect aspect,
-                                             uint32_t byteSize) -> Format {
-                Format result;
-                result.format = format;
-                result.isRenderable = true;
-                result.isCompressed = false;
-                result.aspect = aspect;
-                result.blockByteSize = byteSize;
-                result.blockWidth = 1;
-                result.blockHeight = 1;
-                return result;
-            };
-
-            auto MakeCompressedFormat = [](dawn::TextureFormat format, uint32_t byteSize,
-                                           uint32_t width, uint32_t height) -> Format {
-                Format result;
-                result.format = format;
-                result.isRenderable = false;
-                result.isCompressed = true;
-                result.aspect = Format::Aspect::Color;
-                result.blockByteSize = byteSize;
-                result.blockWidth = width;
-                result.blockHeight = height;
-                return result;
-            };
-
-            switch (format) {
-                case dawn::TextureFormat::R8Unorm:
-                case dawn::TextureFormat::R8Snorm:
-                case dawn::TextureFormat::R8Uint:
-                case dawn::TextureFormat::R8Sint:
-                    return MakeColorFormat(format, true, 1);
-
-                case dawn::TextureFormat::R16Unorm:
-                case dawn::TextureFormat::R16Snorm:
-                case dawn::TextureFormat::R16Uint:
-                case dawn::TextureFormat::R16Sint:
-                case dawn::TextureFormat::R16Float:
-                case dawn::TextureFormat::RG8Unorm:
-                case dawn::TextureFormat::RG8Snorm:
-                case dawn::TextureFormat::RG8Uint:
-                case dawn::TextureFormat::RG8Sint:
-                    return MakeColorFormat(format, true, 2);
-
-                case dawn::TextureFormat::R32Uint:
-                case dawn::TextureFormat::R32Sint:
-                case dawn::TextureFormat::R32Float:
-                case dawn::TextureFormat::RG16Unorm:
-                case dawn::TextureFormat::RG16Snorm:
-                case dawn::TextureFormat::RG16Uint:
-                case dawn::TextureFormat::RG16Sint:
-                case dawn::TextureFormat::RG16Float:
-                case dawn::TextureFormat::RGBA8Unorm:
-                case dawn::TextureFormat::RGBA8UnormSrgb:
-                case dawn::TextureFormat::RGBA8Snorm:
-                case dawn::TextureFormat::RGBA8Uint:
-                case dawn::TextureFormat::RGBA8Sint:
-                case dawn::TextureFormat::BGRA8Unorm:
-                case dawn::TextureFormat::BGRA8UnormSrgb:
-                case dawn::TextureFormat::RGB10A2Unorm:
-                    return MakeColorFormat(format, true, 4);
-                case dawn::TextureFormat::RG11B10Float:
-                    return MakeColorFormat(format, false, 4);
-
-                case dawn::TextureFormat::RG32Uint:
-                case dawn::TextureFormat::RG32Sint:
-                case dawn::TextureFormat::RG32Float:
-                case dawn::TextureFormat::RGBA16Unorm:
-                case dawn::TextureFormat::RGBA16Snorm:
-                case dawn::TextureFormat::RGBA16Uint:
-                case dawn::TextureFormat::RGBA16Sint:
-                case dawn::TextureFormat::RGBA16Float:
-                    return MakeColorFormat(format, true, 8);
-
-                case dawn::TextureFormat::RGBA32Uint:
-                case dawn::TextureFormat::RGBA32Sint:
-                case dawn::TextureFormat::RGBA32Float:
-                    return MakeColorFormat(format, true, 16);
-
-                case dawn::TextureFormat::Depth32Float:
-                case dawn::TextureFormat::Depth24Plus:
-                    return MakeDepthStencilFormat(format, Format::Aspect::Depth, 4);
-                case dawn::TextureFormat::Depth24PlusStencil8:
-                    // TODO(cwallez@chromium.org): It isn't clear if this format should be copyable
-                    // because its size isn't well defined, is it 4, 5 or 8?
-                    return MakeDepthStencilFormat(format, Format::Aspect::DepthStencil, 4);
-
-                case dawn::TextureFormat::BC1RGBAUnorm:
-                case dawn::TextureFormat::BC1RGBAUnormSrgb:
-                case dawn::TextureFormat::BC4RSnorm:
-                case dawn::TextureFormat::BC4RUnorm:
-                    return MakeCompressedFormat(format, 8, 4, 4);
-                case dawn::TextureFormat::BC2RGBAUnorm:
-                case dawn::TextureFormat::BC2RGBAUnormSrgb:
-                case dawn::TextureFormat::BC3RGBAUnorm:
-                case dawn::TextureFormat::BC3RGBAUnormSrgb:
-                case dawn::TextureFormat::BC5RGSnorm:
-                case dawn::TextureFormat::BC5RGUnorm:
-                case dawn::TextureFormat::BC6HRGBSfloat:
-                case dawn::TextureFormat::BC6HRGBUfloat:
-                case dawn::TextureFormat::BC7RGBAUnorm:
-                case dawn::TextureFormat::BC7RGBAUnormSrgb:
-                    return MakeCompressedFormat(format, 16, 4, 4);
-
-                default:
-                    Format result = {};
-                    result.blockByteSize = 0;
-                    return result;
-            }
-        }
-
         // TODO(jiawei.shao@intel.com): support more sample count.
-        MaybeError ValidateSampleCount(const TextureDescriptor* descriptor, const Format& format) {
+        MaybeError ValidateSampleCount(const TextureDescriptor* descriptor, const Format* format) {
             if (!IsValidSampleCount(descriptor->sampleCount)) {
                 return DAWN_VALIDATION_ERROR("The sample count of the texture is not supported.");
             }
@@ -230,7 +104,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("Multisampled 2D array texture is not supported.");
                 }
 
-                if (format.isCompressed) {
+                if (format->isCompressed) {
                     return DAWN_VALIDATION_ERROR(
                         "The sample counts of the textures in BC formats must be 1.");
                 }
@@ -289,7 +163,7 @@ namespace dawn_native {
             return descriptor;
         }
 
-        MaybeError ValidateTextureSize(const TextureDescriptor* descriptor, const Format& format) {
+        MaybeError ValidateTextureSize(const TextureDescriptor* descriptor, const Format* format) {
             ASSERT(descriptor->size.width != 0 && descriptor->size.height != 0);
 
             if (Log2(std::max(descriptor->size.width, descriptor->size.height)) + 1 <
@@ -297,8 +171,8 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Texture has too many mip levels");
             }
 
-            if (format.isCompressed && (descriptor->size.width % format.blockWidth != 0 ||
-                                        descriptor->size.height % format.blockHeight != 0)) {
+            if (format->isCompressed && (descriptor->size.width % format->blockWidth != 0 ||
+                                         descriptor->size.height % format->blockHeight != 0)) {
                 return DAWN_VALIDATION_ERROR(
                     "The size of the texture is incompatible with the texture format");
             }
@@ -306,18 +180,18 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor, const Format& format) {
+        MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor, const Format* format) {
             DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
 
             constexpr dawn::TextureUsageBit kValidCompressedUsages =
                 dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::CopySrc |
                 dawn::TextureUsageBit::CopyDst;
-            if (format.isCompressed && (descriptor->usage & (~kValidCompressedUsages))) {
+            if (format->isCompressed && (descriptor->usage & (~kValidCompressedUsages))) {
                 return DAWN_VALIDATION_ERROR(
                     "Compressed texture format is incompatible with the texture usage");
             }
 
-            if (!format.isRenderable &&
+            if (!format->isRenderable &&
                 (descriptor->usage & dawn::TextureUsageBit::OutputAttachment)) {
                 return DAWN_VALIDATION_ERROR(
                     "Non-renderable format used with OutputAttachment usage");
@@ -332,13 +206,14 @@ namespace dawn_native {
 
     }  // anonymous namespace
 
-    MaybeError ValidateTextureDescriptor(DeviceBase*, const TextureDescriptor* descriptor) {
+    MaybeError ValidateTextureDescriptor(const DeviceBase* device,
+                                         const TextureDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        Format format;
-        DAWN_TRY_ASSIGN(format, ConvertFormat(descriptor->format));
+        const Format* format;
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
 
         DAWN_TRY(ValidateTextureUsage(descriptor, format));
         DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
@@ -412,36 +287,6 @@ namespace dawn_native {
         }
     }
 
-    ResultOrError<Format> ConvertFormat(dawn::TextureFormat format) {
-        Format result = ConvertFormatInternal(format);
-        if (result.blockByteSize == 0) {
-            return DAWN_VALIDATION_ERROR("Invalid texture format");
-        }
-        return result;
-    }
-
-    Format ConvertValidFormat(dawn::TextureFormat format) {
-        Format result = ConvertFormatInternal(format);
-        ASSERT(result.blockByteSize != 0);
-        return result;
-    }
-
-    bool Format::IsColor() const {
-        return aspect == Aspect::Color;
-    }
-
-    bool Format::HasDepth() const {
-        return aspect == Depth || aspect == DepthStencil;
-    }
-
-    bool Format::HasStencil() const {
-        return aspect == Stencil || aspect == DepthStencil;
-    }
-
-    bool Format::HasDepthOrStencil() const {
-        return aspect != Color;
-    }
-
     // TextureBase
 
     TextureBase::TextureBase(DeviceBase* device,
@@ -449,7 +294,7 @@ namespace dawn_native {
                              TextureState state)
         : ObjectBase(device),
           mDimension(descriptor->dimension),
-          mFormat(ConvertValidFormat(descriptor->format)),
+          mFormat(device->GetValidInternalFormat(descriptor->format)),
           mSize(descriptor->size),
           mArrayLayerCount(descriptor->arrayLayerCount),
           mMipLevelCount(descriptor->mipLevelCount),
@@ -461,8 +306,10 @@ namespace dawn_native {
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
     }
 
+    static Format kUnusedFormat;
+
     TextureBase::TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag) {
+        : ObjectBase(device, tag), mFormat(kUnusedFormat) {
     }
 
     // static
@@ -627,7 +474,7 @@ namespace dawn_native {
     TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : ObjectBase(texture->GetDevice()),
           mTexture(texture),
-          mFormat(ConvertValidFormat(descriptor->format)),
+          mFormat(GetDevice()->GetValidInternalFormat(descriptor->format)),
           mBaseMipLevel(descriptor->baseMipLevel),
           mMipLevelCount(descriptor->mipLevelCount),
           mBaseArrayLayer(descriptor->baseArrayLayer),
@@ -635,7 +482,7 @@ namespace dawn_native {
     }
 
     TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag) {
+        : ObjectBase(device, tag), mFormat(kUnusedFormat) {
     }
 
     // static

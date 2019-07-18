@@ -15,12 +15,13 @@
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 
 #include "common/Assert.h"
+#include "dawn_native/Format.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
 
     namespace {
-        Origin3D ComputeTexelOffsets(Format format,
+        Origin3D ComputeTexelOffsets(const Format& format,
                                      uint32_t offset,
                                      uint32_t rowPitch,
                                      uint32_t slicePitch) {
@@ -36,7 +37,7 @@ namespace dawn_native { namespace d3d12 {
 
     TextureCopySplit ComputeTextureCopySplit(Origin3D origin,
                                              Extent3D copySize,
-                                             Format format,
+                                             const Format& format,
                                              uint64_t offset,
                                              uint32_t rowPitch,
                                              uint32_t imageHeight) {

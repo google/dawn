@@ -28,7 +28,7 @@
 
 namespace dawn_native {
 
-    MaybeError ValidatePipelineStageDescriptor(DeviceBase* device,
+    MaybeError ValidatePipelineStageDescriptor(const DeviceBase* device,
                                                const PipelineStageDescriptor* descriptor,
                                                const PipelineLayoutBase* layout,
                                                ShaderStage stage);

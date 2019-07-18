@@ -28,7 +28,7 @@ namespace dawn_native {
 
     class DeviceBase;
 
-    MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
+    MaybeError ValidateRenderPipelineDescriptor(const DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
     size_t IndexFormatSize(dawn::IndexFormat format);
     uint32_t VertexFormatNumComponents(dawn::VertexFormat format);
