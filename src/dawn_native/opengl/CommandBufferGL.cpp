@@ -655,6 +655,7 @@ namespace dawn_native { namespace opengl {
         persistentPipelineState.SetDefaultState(gl);
         gl.BlendColor(0, 0, 0, 0);
         gl.Viewport(0, 0, renderPass->width, renderPass->height);
+        gl.DepthRangef(0.0, 1.0);
         gl.Scissor(0, 0, renderPass->width, renderPass->height);
 
         // Clear framebuffer attachments as needed
@@ -806,6 +807,13 @@ namespace dawn_native { namespace opengl {
                 case Command::SetStencilReference: {
                     SetStencilReferenceCmd* cmd = mCommands.NextCommand<SetStencilReferenceCmd>();
                     persistentPipelineState.SetStencilReference(gl, cmd->reference);
+                } break;
+
+                case Command::SetViewport: {
+                    SetViewportCmd* cmd = mCommands.NextCommand<SetViewportCmd>();
+                    gl.Viewport(static_cast<int>(cmd->x), static_cast<int>(cmd->y),
+                                static_cast<int>(cmd->width), static_cast<int>(cmd->height));
+                    gl.DepthRangef(cmd->minDepth, cmd->maxDepth);
                 } break;
 
                 case Command::SetScissorRect: {

@@ -19,7 +19,7 @@
 
 class ViewportTest : public DawnTest {
   protected:
-    dawn::RenderPipeline CreatePipelineForTest() {
+    dawn::RenderPipeline CreatePipelineForTest(dawn::CompareFunction depthCompare) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
 
         // Draw two triangles:
@@ -57,7 +57,7 @@ class ViewportTest : public DawnTest {
         pipelineDescriptor.cFragmentStage.module =
             utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fs);
 
-        pipelineDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Less;
+        pipelineDescriptor.cDepthStencilState.depthCompare = depthCompare;
         pipelineDescriptor.depthStencilState = &pipelineDescriptor.cDepthStencilState;
 
         return device.CreateRenderPipeline(&pipelineDescriptor);
@@ -97,28 +97,60 @@ class ViewportTest : public DawnTest {
     };
 
     void DoTest(const TestInfo& info) {
-        dawn::Texture colorTexture = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
-        dawn::Texture depthStencilTexture =
+        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+
+        // Create render targets for 2 render passes.
+        dawn::Texture colorTexture1 = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
+        dawn::Texture depthStencilTexture1 =
             Create2DTextureForTest(dawn::TextureFormat::Depth24PlusStencil8);
 
-        utils::ComboRenderPassDescriptor renderPassDescriptor(
-            {colorTexture.CreateDefaultView()}, depthStencilTexture.CreateDefaultView());
-        renderPassDescriptor.cColorAttachmentsInfoPtr[0]->clearColor = {0.0, 0.0, 1.0, 1.0};
-        renderPassDescriptor.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
+        dawn::Texture colorTexture2 = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
+        dawn::Texture depthStencilTexture2 =
+            Create2DTextureForTest(dawn::TextureFormat::Depth24PlusStencil8);
 
-        renderPassDescriptor.cDepthStencilAttachmentInfo.clearDepth = info.clearDepth;
-        renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+        // Create render pass 1
+        // Note that we may explicitly call SetViewport() in this pass
+        {
+            utils::ComboRenderPassDescriptor renderPassDescriptor1(
+                {colorTexture1.CreateDefaultView()}, depthStencilTexture1.CreateDefaultView());
+            renderPassDescriptor1.cColorAttachmentsInfoPtr[0]->clearColor = {0.0, 0.0, 1.0, 1.0};
+            renderPassDescriptor1.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
 
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder renderPass = commandEncoder.BeginRenderPass(&renderPassDescriptor);
-        renderPass.SetPipeline(CreatePipelineForTest());
-        if (info.setViewport) {
-            ViewportParams viewport = info.viewport;
-            renderPass.SetViewport(viewport.x, viewport.y, viewport.width, viewport.height,
-                                   viewport.minDepth, viewport.maxDepth);
+            renderPassDescriptor1.cDepthStencilAttachmentInfo.clearDepth = info.clearDepth;
+            renderPassDescriptor1.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+
+            dawn::RenderPassEncoder renderPass1 =
+                commandEncoder.BeginRenderPass(&renderPassDescriptor1);
+            renderPass1.SetPipeline(CreatePipelineForTest(dawn::CompareFunction::Less));
+            if (info.setViewport) {
+                ViewportParams viewport = info.viewport;
+                renderPass1.SetViewport(viewport.x, viewport.y, viewport.width, viewport.height,
+                                        viewport.minDepth, viewport.maxDepth);
+            }
+            renderPass1.Draw(6, 1, 0, 0);
+            renderPass1.EndPass();
         }
-        renderPass.Draw(6, 1, 0, 0);
-        renderPass.EndPass();
+
+        // Create render pass 2
+        // Note that we never explicitly call SetViewport() in this pass.
+        // Its viewport(x, y, width, height, minDepth, maxDepth) should be
+        // (0, 0, rendertarget's width, rendertarget's height, 0.0, 1.0) by default.
+        {
+            utils::ComboRenderPassDescriptor renderPassDescriptor2(
+                {colorTexture2.CreateDefaultView()}, depthStencilTexture2.CreateDefaultView());
+            renderPassDescriptor2.cColorAttachmentsInfoPtr[0]->clearColor = {0.0, 0.0, 1.0, 1.0};
+            renderPassDescriptor2.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
+
+            renderPassDescriptor2.cDepthStencilAttachmentInfo.clearDepth = 0.5;
+            renderPassDescriptor2.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+
+            dawn::RenderPassEncoder renderPass2 =
+                commandEncoder.BeginRenderPass(&renderPassDescriptor2);
+            renderPass2.SetPipeline(CreatePipelineForTest(dawn::CompareFunction::Greater));
+            renderPass2.Draw(6, 1, 0, 0);
+            renderPass2.EndPass();
+        }
+
         dawn::CommandBuffer commandBuffer = commandEncoder.Finish();
         dawn::Queue queue = device.CreateQueue();
         queue.Submit(1, &commandBuffer);
@@ -129,9 +161,16 @@ class ViewportTest : public DawnTest {
             RGBA8(0, 0, 255, 255),  // background is blue
         };
 
-        EXPECT_PIXEL_RGBA8_EQ(kColor[info.topLeftPoint], colorTexture, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(kColor[info.topLeftPoint], colorTexture1, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(kColor[info.bottomRightPoint], colorTexture1, kSize - 1, kSize - 1);
 
-        EXPECT_PIXEL_RGBA8_EQ(kColor[info.bottomRightPoint], colorTexture, kSize - 1, kSize - 1);
+        // In render pass 2. Point(0, 0) is tend to be covered by the top-left triangle. Point(3, 3)
+        // is tend to be covered by the bottom-right triangle. However, the bottom-right triangle's
+        // depth values are <= 0.5. And the depthCompare is Greater. As a result, point(0, 0) will
+        // be drawn as usual, its color is the top-left triangle's color. But point(3, 3) will not
+        // be drawn by any triangles. Its color is the backgroud color.
+        EXPECT_PIXEL_RGBA8_EQ(kColor[TopLeftTriangleColor], colorTexture2, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(kColor[BackgroundColor], colorTexture2, kSize - 1, kSize - 1);
     }
 
     static constexpr uint32_t kSize = 4;
@@ -325,4 +364,4 @@ TEST_P(ViewportTest, ShrinkViewportAndShiftToBottomRightAndApplyDepth) {
     DoTest(info);
 }
 
-DAWN_INSTANTIATE_TEST(ViewportTest, VulkanBackend);
+DAWN_INSTANTIATE_TEST(ViewportTest, OpenGLBackend, VulkanBackend);
