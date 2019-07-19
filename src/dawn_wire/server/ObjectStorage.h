@@ -16,6 +16,7 @@
 #define DAWNWIRE_SERVER_OBJECTSTORAGE_H_
 
 #include "dawn_wire/WireCmd_autogen.h"
+#include "dawn_wire/WireServer.h"
 
 #include <algorithm>
 #include <map>
@@ -41,8 +42,9 @@ namespace dawn_wire { namespace server {
 
     template <>
     struct ObjectData<DawnBuffer> : public ObjectDataBase<DawnBuffer> {
-        void* mappedData = nullptr;
-        size_t mappedDataSize = 0;
+        // TODO(enga): Use a tagged pointer to save space.
+        std::unique_ptr<MemoryTransferService::ReadHandle> readHandle;
+        std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle;
         BufferMapWriteState mapWriteState = BufferMapWriteState::Unmapped;
     };
 
@@ -59,7 +61,7 @@ namespace dawn_wire { namespace server {
             Data reservation;
             reservation.handle = nullptr;
             reservation.allocated = false;
-            mKnown.push_back(reservation);
+            mKnown.push_back(std::move(reservation));
         }
 
         // Get a backend objects for a given client ID.
@@ -104,7 +106,7 @@ namespace dawn_wire { namespace server {
             data.handle = nullptr;
 
             if (id >= mKnown.size()) {
-                mKnown.push_back(data);
+                mKnown.push_back(std::move(data));
                 return &mKnown.back();
             }
 
@@ -112,7 +114,7 @@ namespace dawn_wire { namespace server {
                 return nullptr;
             }
 
-            mKnown[id] = data;
+            mKnown[id] = std::move(data);
             return &mKnown[id];
         }
 

@@ -123,7 +123,7 @@
         {% endfor %}
 
         //* Gather how much space will be needed for pointer members.
-        {% for member in members if member.annotation != "value" and member.length != "strlen" %}
+        {% for member in members if member.annotation != "value" and member.length != "strlen" and not member.skip_serialize %}
             {% if member.type.category != "object" and member.optional %}
                 if (record.{{as_varName(member.name)}} != nullptr)
             {% endif %}
@@ -181,7 +181,7 @@
         {% endfor %}
 
         //* Allocate space and write the non-value arguments in it.
-        {% for member in members if member.annotation != "value" and member.length != "strlen" %}
+        {% for member in members if member.annotation != "value" and member.length != "strlen" and not member.skip_serialize %}
             {% set memberName = as_varName(member.name) %}
 
             {% if member.type.category != "object" and member.optional %}

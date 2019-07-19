@@ -20,13 +20,16 @@
 namespace dawn_wire { namespace server {
 
     class Server;
+    class MemoryTransferService;
 
     struct MapUserdata {
         Server* server;
         ObjectHandle buffer;
         uint32_t requestSerial;
         uint64_t size;
-        bool isWrite;
+        // TODO(enga): Use a tagged pointer to save space.
+        std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
+        std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
     };
 
     struct FenceCompletionUserdata {
@@ -37,7 +40,10 @@ namespace dawn_wire { namespace server {
 
     class Server : public ServerBase {
       public:
-        Server(DawnDevice device, const DawnProcTable& procs, CommandSerializer* serializer);
+        Server(DawnDevice device,
+               const DawnProcTable& procs,
+               CommandSerializer* serializer,
+               MemoryTransferService* memoryTransferService);
         ~Server();
 
         const char* HandleCommands(const char* commands, size_t size);
@@ -77,7 +83,11 @@ namespace dawn_wire { namespace server {
         CommandSerializer* mSerializer = nullptr;
         WireDeserializeAllocator mAllocator;
         DawnProcTable mProcs;
+        std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
+        MemoryTransferService* mMemoryTransferService = nullptr;
     };
+
+    std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 
 }}  // namespace dawn_wire::server
 

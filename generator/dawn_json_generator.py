@@ -95,7 +95,8 @@ class NativelyDefined(Type):
 # method arguments or structure members.
 class RecordMember:
     def __init__(self, name, typ, annotation, optional=False,
-                 is_return_value=False, default_value=None):
+                 is_return_value=False, default_value=None,
+                 skip_serialize=False):
         self.name = name
         self.type = typ
         self.annotation = annotation
@@ -104,6 +105,7 @@ class RecordMember:
         self.is_return_value = is_return_value
         self.handle_type = None
         self.default_value = default_value
+        self.skip_serialize = skip_serialize
 
     def set_handle_type(self, handle_type):
         assert self.type.dict_name == "ObjectHandle"
@@ -155,7 +157,8 @@ def linked_record_members(json_data, types):
                               m.get('annotation', 'value'),
                               optional=m.get('optional', False),
                               is_return_value=m.get('is_return_value', False),
-                              default_value=m.get('default', None))
+                              default_value=m.get('default', None),
+                              skip_serialize=m.get('skip_serialize', False))
         handle_type = m.get('handle_type')
         if handle_type:
             member.set_handle_type(types[handle_type])

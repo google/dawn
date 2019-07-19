@@ -17,7 +17,8 @@
 
 namespace dawn_wire {
 
-    WireClient::WireClient(CommandSerializer* serializer) : mImpl(new client::Client(serializer)) {
+    WireClient::WireClient(const WireClientDescriptor& descriptor)
+        : mImpl(new client::Client(descriptor.serializer, descriptor.memoryTransferService)) {
     }
 
     WireClient::~WireClient() {
@@ -39,5 +40,23 @@ namespace dawn_wire {
     ReservedTexture WireClient::ReserveTexture(DawnDevice device) {
         return mImpl->ReserveTexture(device);
     }
+
+    namespace client {
+        MemoryTransferService::~MemoryTransferService() = default;
+
+        MemoryTransferService::ReadHandle*
+        MemoryTransferService::CreateReadHandle(DawnBuffer buffer, uint64_t offset, size_t size) {
+            return CreateReadHandle(size);
+        }
+
+        MemoryTransferService::WriteHandle*
+        MemoryTransferService::CreateWriteHandle(DawnBuffer buffer, uint64_t offset, size_t size) {
+            return CreateWriteHandle(size);
+        }
+
+        MemoryTransferService::ReadHandle::~ReadHandle() = default;
+
+        MemoryTransferService::WriteHandle::~WriteHandle() = default;
+    }  // namespace client
 
 }  // namespace dawn_wire

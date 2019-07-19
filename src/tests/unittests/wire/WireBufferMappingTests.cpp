@@ -99,6 +99,7 @@ class WireBufferMappingTests : public WireTest {
 
         DawnBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
+        descriptor.size = kBufferSize;
 
         apiBuffer = api.GetNewBuffer();
         buffer = dawnDeviceCreateBuffer(device, &descriptor);
@@ -127,6 +128,7 @@ class WireBufferMappingTests : public WireTest {
     }
 
   protected:
+    static constexpr uint64_t kBufferSize = sizeof(uint32_t);
     // A successfully created buffer
     DawnBuffer buffer;
     DawnBuffer apiBuffer;
@@ -142,13 +144,13 @@ TEST_F(WireBufferMappingTests, MappingForReadSuccessBuffer) {
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
-                                    sizeof(uint32_t));
+                                    kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                                 Pointee(Eq(bufferContent)), sizeof(uint32_t), _))
+                                                 Pointee(Eq(bufferContent)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
@@ -208,7 +210,7 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
-                                    sizeof(uint32_t));
+                                    kBufferSize);
         }));
 
     FlushClient();
@@ -232,14 +234,14 @@ TEST_F(WireBufferMappingTests, MappingForReadingErrorWhileAlreadyMappedGetsNullp
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
-                                    sizeof(uint32_t));
+                                    kBufferSize);
         }))
         .RetiresOnSaturation();
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                                 Pointee(Eq(bufferContent)), sizeof(uint32_t), _))
+                                                 Pointee(Eq(bufferContent)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
@@ -267,13 +269,13 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapReadCallback) {
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
-                                    sizeof(uint32_t));
+                                    kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                                 Pointee(Eq(bufferContent)), sizeof(uint32_t), _))
+                                                 Pointee(Eq(bufferContent)), kBufferSize, _))
         .WillOnce(InvokeWithoutArgs([&]() { dawnBufferUnmap(buffer); }));
 
     FlushServer();
@@ -292,13 +294,13 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
-                                    sizeof(uint32_t));
+                                    kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                                 Pointee(Eq(bufferContent)), sizeof(uint32_t), _))
+                                                 Pointee(Eq(bufferContent)), kBufferSize, _))
         .WillOnce(InvokeWithoutArgs([&]() { dawnBufferRelease(buffer); }));
 
     FlushServer();
@@ -321,14 +323,14 @@ TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &serverBufferContent, sizeof(uint32_t));
+                                     &serverBufferContent, kBufferSize);
         }));
 
     FlushClient();
 
     // The map write callback always gets a buffer full of zeroes.
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), sizeof(uint32_t), _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
@@ -395,7 +397,7 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForWrite) {
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &bufferContent, sizeof(uint32_t));
+                                     &bufferContent, kBufferSize);
         }));
 
     FlushClient();
@@ -420,14 +422,14 @@ TEST_F(WireBufferMappingTests, MappingForWritingErrorWhileAlreadyMappedGetsNullp
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &bufferContent, sizeof(uint32_t));
+                                     &bufferContent, kBufferSize);
         }))
         .RetiresOnSaturation();
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), sizeof(uint32_t), _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
@@ -457,13 +459,13 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapWriteCallback) {
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &bufferContent, sizeof(uint32_t));
+                                     &bufferContent, kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), sizeof(uint32_t), _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(InvokeWithoutArgs([&]() { dawnBufferUnmap(buffer); }));
 
     FlushServer();
@@ -483,13 +485,13 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &bufferContent, sizeof(uint32_t));
+                                     &bufferContent, kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), sizeof(uint32_t), _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(InvokeWithoutArgs([&]() { dawnBufferRelease(buffer); }));
 
     FlushServer();
@@ -585,13 +587,13 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &apiBufferData, sizeof(uint32_t));
+                                     &apiBufferData, kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), sizeof(uint32_t), _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
@@ -643,12 +645,13 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
 TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.size = kBufferSize;
 
     DawnCreateBufferMappedResult apiResult;
     uint32_t serverBufferContent = 31337;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
-    apiResult.dataLength = 4;
+    apiResult.dataLength = kBufferSize;
 
     uint32_t updatedContent = 4242;
     uint32_t zero = 0;
@@ -663,8 +666,8 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
 
     DawnBuffer buffer;
     // The callback always gets a buffer full of zeroes.
-    EXPECT_CALL(*mockCreateBufferMappedCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _,
-                                                      Pointee(Eq(zero)), sizeof(uint32_t), _))
+    EXPECT_CALL(*mockCreateBufferMappedCallback,
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(::testing::SaveArg<1>(&buffer));
 
     FlushServer();
@@ -689,7 +692,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
     DawnCreateBufferMappedResult apiResult;
     apiResult.buffer = apiBuffer;
     apiResult.data = nullptr;  // error mapping
-    apiResult.dataLength = 4;
+    apiResult.dataLength = kBufferSize;
 
     dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback, nullptr);
 
@@ -717,12 +720,13 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
 TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.size = kBufferSize;
 
     DawnCreateBufferMappedResult apiResult;
     uint32_t serverBufferContent = 31337;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
-    apiResult.dataLength = 4;
+    apiResult.dataLength = kBufferSize;
 
     uint32_t zero = 0;
 
@@ -736,8 +740,8 @@ TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
 
     DawnBuffer buffer;
     // The callback always gets a buffer full of zeroes.
-    EXPECT_CALL(*mockCreateBufferMappedCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _,
-                                                      Pointee(Eq(zero)), sizeof(uint32_t), _))
+    EXPECT_CALL(*mockCreateBufferMappedCallback,
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
                         InvokeWithoutArgs([&]() { dawnBufferUnmap(buffer); })));
 
@@ -753,12 +757,13 @@ TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
 TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.size = kBufferSize;
 
     DawnCreateBufferMappedResult apiResult;
     uint32_t serverBufferContent = 31337;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
-    apiResult.dataLength = 4;
+    apiResult.dataLength = kBufferSize;
 
     uint32_t zero = 0;
 
@@ -772,8 +777,8 @@ TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
 
     DawnBuffer buffer;
     // The callback always gets a buffer full of zeroes.
-    EXPECT_CALL(*mockCreateBufferMappedCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _,
-                                                      Pointee(Eq(zero)), sizeof(uint32_t), _))
+    EXPECT_CALL(*mockCreateBufferMappedCallback,
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
                         InvokeWithoutArgs([&]() { dawnBufferRelease(buffer); })));
 
@@ -789,12 +794,13 @@ TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
 TEST_F(WireBufferMappingTests, DestroyInsideCreateBufferMappedAsyncCallback) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.size = kBufferSize;
 
     DawnCreateBufferMappedResult apiResult;
     uint32_t serverBufferContent = 31337;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
-    apiResult.dataLength = 4;
+    apiResult.dataLength = kBufferSize;
 
     uint32_t zero = 0;
 
@@ -808,8 +814,8 @@ TEST_F(WireBufferMappingTests, DestroyInsideCreateBufferMappedAsyncCallback) {
 
     DawnBuffer buffer;
     // The callback always gets a buffer full of zeroes.
-    EXPECT_CALL(*mockCreateBufferMappedCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _,
-                                                      Pointee(Eq(zero)), sizeof(uint32_t), _))
+    EXPECT_CALL(*mockCreateBufferMappedCallback,
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
                         InvokeWithoutArgs([&]() { dawnBufferDestroy(buffer); })));
 

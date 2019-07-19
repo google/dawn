@@ -39,10 +39,18 @@ void WireTest::SetUp() {
     mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
     mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>(mWireServer.get());
 
-    mWireServer.reset(new WireServer(mockDevice, mockProcs, mS2cBuf.get()));
+    WireServerDescriptor serverDesc = {};
+    serverDesc.device = mockDevice;
+    serverDesc.procs = &mockProcs;
+    serverDesc.serializer = mS2cBuf.get();
+
+    mWireServer.reset(new WireServer(serverDesc));
     mC2sBuf->SetHandler(mWireServer.get());
 
-    mWireClient.reset(new WireClient(mC2sBuf.get()));
+    WireClientDescriptor clientDesc = {};
+    clientDesc.serializer = mC2sBuf.get();
+
+    mWireClient.reset(new WireClient(clientDesc));
     mS2cBuf->SetHandler(mWireClient.get());
 
     device = mWireClient->GetDevice();

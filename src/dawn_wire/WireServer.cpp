@@ -17,10 +17,11 @@
 
 namespace dawn_wire {
 
-    WireServer::WireServer(DawnDevice device,
-                           const DawnProcTable& procs,
-                           CommandSerializer* serializer)
-        : mImpl(new server::Server(device, procs, serializer)) {
+    WireServer::WireServer(const WireServerDescriptor& descriptor)
+        : mImpl(new server::Server(descriptor.device,
+                                   *descriptor.procs,
+                                   descriptor.serializer,
+                                   descriptor.memoryTransferService)) {
     }
 
     WireServer::~WireServer() {
@@ -34,5 +35,18 @@ namespace dawn_wire {
     bool WireServer::InjectTexture(DawnTexture texture, uint32_t id, uint32_t generation) {
         return mImpl->InjectTexture(texture, id, generation);
     }
+
+    namespace server {
+        MemoryTransferService::~MemoryTransferService() = default;
+
+        MemoryTransferService::ReadHandle::~ReadHandle() = default;
+
+        MemoryTransferService::WriteHandle::~WriteHandle() = default;
+
+        void MemoryTransferService::WriteHandle::SetTarget(void* data, size_t dataLength) {
+            mTargetData = data;
+            mDataLength = dataLength;
+        }
+    }  // namespace server
 
 }  // namespace dawn_wire

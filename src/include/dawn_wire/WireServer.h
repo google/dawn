@@ -23,11 +23,19 @@ namespace dawn_wire {
 
     namespace server {
         class Server;
+        class MemoryTransferService;
     }
+
+    struct DAWN_WIRE_EXPORT WireServerDescriptor {
+        DawnDevice device;
+        const DawnProcTable* procs;
+        CommandSerializer* serializer;
+        server::MemoryTransferService* memoryTransferService = nullptr;
+    };
 
     class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
       public:
-        WireServer(DawnDevice device, const DawnProcTable& procs, CommandSerializer* serializer);
+        WireServer(const WireServerDescriptor& descriptor);
         ~WireServer();
 
         const char* HandleCommands(const char* commands, size_t size) override final;
@@ -37,6 +45,53 @@ namespace dawn_wire {
       private:
         std::unique_ptr<server::Server> mImpl;
     };
+
+    namespace server {
+        class DAWN_WIRE_EXPORT MemoryTransferService {
+          public:
+            class ReadHandle;
+            class WriteHandle;
+
+            virtual ~MemoryTransferService();
+
+            // Deserialize data to create Read/Write handles. These handles are for the client
+            // to Read/Write data.
+            virtual bool DeserializeReadHandle(const void* deserializePointer,
+                                               size_t deserializeSize,
+                                               ReadHandle** readHandle) = 0;
+            virtual bool DeserializeWriteHandle(const void* deserializePointer,
+                                                size_t deserializeSize,
+                                                WriteHandle** writeHandle) = 0;
+
+            class ReadHandle {
+              public:
+                // Initialize the handle data.
+                // Serialize into |serializePointer| so the client can update handle data.
+                // If |serializePointer| is nullptr, this returns the required serialization space.
+                virtual size_t SerializeInitialData(const void* data,
+                                                    size_t dataLength,
+                                                    void* serializePointer = nullptr) = 0;
+                virtual ~ReadHandle();
+            };
+
+            class WriteHandle {
+              public:
+                // Set the target for writes from the client. DeserializeFlush should copy data
+                // into the target.
+                void SetTarget(void* data, size_t dataLength);
+
+                // This function takes in the serialized result of
+                // client::MemoryTransferService::WriteHandle::SerializeFlush.
+                virtual bool DeserializeFlush(const void* deserializePointer,
+                                              size_t deserializeSize) = 0;
+                virtual ~WriteHandle();
+
+              protected:
+                void* mTargetData = nullptr;
+                size_t mDataLength = 0;
+            };
+        };
+    }  // namespace server
 
 }  // namespace dawn_wire
 
