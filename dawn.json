@@ -547,15 +547,6 @@
             {"name": "depth", "type": "uint32_t"}
         ]
     },
-    "face": {
-        "category": "bitmask",
-        "values": [
-            {"value": 0, "name": "none"},
-            {"value": 1, "name": "back"},
-            {"value": 2, "name": "front"},
-            {"value": 3, "name": "both"}
-        ]
-    },
     "fence": {
         "category": "object",
         "methods": [
