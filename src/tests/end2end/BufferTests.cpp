@@ -176,10 +176,6 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
 
 // Stress test for many calls to SetSubData
 TEST_P(BufferSetSubDataTests, ManySetSubData) {
-    // Test failing on Mac Metal Intel, maybe because Metal runs out of space to encode commands.
-    // See https://bugs.chromium.org/p/dawn/issues/detail?id=108
-    DAWN_SKIP_TEST_IF(IsMacOS() && IsMetal() && IsIntel());
-
     // Test failing on Linux Vulkan Intel. It works on Ubuntu 14.04 but fails on
     // 19.04.
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=980737
