@@ -69,6 +69,12 @@ inline testing::Matcher<MatcherLambdaArgument<Lambda>> MatchesLambda(Lambda lamb
 namespace dawn_wire {
     class WireClient;
     class WireServer;
+    namespace client {
+        class MemoryTransferService;
+    }  // namespace client
+    namespace server {
+        class MemoryTransferService;
+    }  // namespace server
 }  // namespace dawn_wire
 
 namespace utils {
@@ -82,8 +88,9 @@ class WireTest : public testing::Test {
 
     void SetUp() override;
     void TearDown() override;
-    void FlushClient();
-    void FlushServer();
+
+    void FlushClient(bool success = true);
+    void FlushServer(bool success = true);
 
     testing::StrictMock<MockProcTable> api;
     DawnDevice apiDevice;
@@ -96,6 +103,9 @@ class WireTest : public testing::Test {
 
   private:
     void SetupIgnoredCallExpectations();
+
+    virtual dawn_wire::client::MemoryTransferService* GetClientMemoryTransferService();
+    virtual dawn_wire::server::MemoryTransferService* GetServerMemoryTransferService();
 
     std::unique_ptr<dawn_wire::WireServer> mWireServer;
     std::unique_ptr<dawn_wire::WireClient> mWireClient;

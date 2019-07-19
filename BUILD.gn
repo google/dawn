@@ -578,6 +578,12 @@ test("dawn_unittests") {
 
   sources = get_target_outputs(":mock_dawn_gen")
   sources += [
+    "src/dawn_wire/client/ClientMemoryTransferService_mock.cpp",
+    "src/dawn_wire/client/ClientMemoryTransferService_mock.h",
+    "src/dawn_wire/server/ServerMemoryTransferService_mock.cpp",
+    "src/dawn_wire/server/ServerMemoryTransferService_mock.h",
+  ]
+  sources += [
     "src/tests/unittests/BitSetIteratorTests.cpp",
     "src/tests/unittests/CommandAllocatorTests.cpp",
     "src/tests/unittests/EnumClassBitmasksTests.cpp",
@@ -620,6 +626,7 @@ test("dawn_unittests") {
     "src/tests/unittests/wire/WireErrorCallbackTests.cpp",
     "src/tests/unittests/wire/WireFenceTests.cpp",
     "src/tests/unittests/wire/WireInjectTextureTests.cpp",
+    "src/tests/unittests/wire/WireMemoryTransferServiceTests.cpp",
     "src/tests/unittests/wire/WireOptionalTests.cpp",
     "src/tests/unittests/wire/WireTest.cpp",
     "src/tests/unittests/wire/WireTest.h",
