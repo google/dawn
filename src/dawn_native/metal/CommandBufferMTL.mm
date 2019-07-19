@@ -825,6 +825,19 @@ namespace dawn_native { namespace metal {
                     [encoder setStencilReferenceValue:cmd->reference];
                 } break;
 
+                case Command::SetViewport: {
+                    SetViewportCmd* cmd = mCommands.NextCommand<SetViewportCmd>();
+                    MTLViewport viewport;
+                    viewport.originX = cmd->x;
+                    viewport.originY = cmd->y;
+                    viewport.width = cmd->width;
+                    viewport.height = cmd->height;
+                    viewport.znear = cmd->minDepth;
+                    viewport.zfar = cmd->maxDepth;
+
+                    [encoder setViewport:viewport];
+                } break;
+
                 case Command::SetScissorRect: {
                     SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
                     MTLScissorRect rect;

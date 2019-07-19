@@ -968,6 +968,19 @@ namespace dawn_native { namespace d3d12 {
                     commandList->OMSetStencilRef(cmd->reference);
                 } break;
 
+                case Command::SetViewport: {
+                    SetViewportCmd* cmd = mCommands.NextCommand<SetViewportCmd>();
+                    D3D12_VIEWPORT viewport;
+                    viewport.TopLeftX = cmd->x;
+                    viewport.TopLeftY = cmd->y;
+                    viewport.Width = cmd->width;
+                    viewport.Height = cmd->height;
+                    viewport.MinDepth = cmd->minDepth;
+                    viewport.MaxDepth = cmd->maxDepth;
+
+                    commandList->RSSetViewports(1, &viewport);
+                } break;
+
                 case Command::SetScissorRect: {
                     SetScissorRectCmd* cmd = mCommands.NextCommand<SetScissorRectCmd>();
                     D3D12_RECT rect;
