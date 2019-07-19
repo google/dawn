@@ -15,6 +15,8 @@
 #include "dawn_native/RingBuffer.h"
 #include "dawn_native/Device.h"
 
+#include <limits>
+
 // Note: Current RingBuffer implementation uses two indices (start and end) to implement a circular
 // queue. However, this approach defines a full queue when one element is still unused.
 //

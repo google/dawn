@@ -17,6 +17,7 @@
 
 #include "common/Platform.h"
 
+#include <bitset>
 #include <functional>
 
 // Wrapper around std::hash to make it a templated function instead of a functor. It is marginally

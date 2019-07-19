@@ -19,6 +19,7 @@
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
+#include <string.h>
 #include <cstdio>
 #include <utility>
 

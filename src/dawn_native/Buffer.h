@@ -21,6 +21,8 @@
 
 #include "dawn_native/dawn_platform.h"
 
+#include <memory>
+
 namespace dawn_native {
 
     MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);
