@@ -33,8 +33,6 @@ namespace dawn_native {
                                 CommandEncoderBase* topLevelEncoder,
                                 CommandAllocator* allocator);
 
-        void EndPass();
-
         void InsertDebugMarker(const char* groupLabel);
         void PopDebugGroup();
         void PushDebugGroup(const char* groupLabel);

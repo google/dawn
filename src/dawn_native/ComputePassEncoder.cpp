@@ -39,6 +39,15 @@ namespace dawn_native {
         return new ComputePassEncoderBase(device, topLevelEncoder, ObjectBase::kError);
     }
 
+    void ComputePassEncoderBase::EndPass() {
+        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
+            return;
+        }
+
+        mTopLevelEncoder->PassEnded();
+        mAllocator = nullptr;
+    }
+
     void ComputePassEncoderBase::Dispatch(uint32_t x, uint32_t y, uint32_t z) {
         if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
             return;

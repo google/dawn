@@ -33,6 +33,8 @@ namespace dawn_native {
         static ComputePassEncoderBase* MakeError(DeviceBase* device,
                                                  CommandEncoderBase* topLevelEncoder);
 
+        void EndPass();
+
         void Dispatch(uint32_t x, uint32_t y, uint32_t z);
         void DispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
         void SetPipeline(ComputePipelineBase* pipeline);

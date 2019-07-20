@@ -38,15 +38,6 @@ namespace dawn_native {
         : ObjectBase(device, errorTag), mTopLevelEncoder(topLevelEncoder), mAllocator(nullptr) {
     }
 
-    void ProgrammablePassEncoder::EndPass() {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
-
-        mTopLevelEncoder->PassEnded();
-        mAllocator = nullptr;
-    }
-
     void ProgrammablePassEncoder::InsertDebugMarker(const char* groupLabel) {
         if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
             return;
