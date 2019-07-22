@@ -15,10 +15,12 @@
 #include "dawn_native/opengl/BackendGL.h"
 
 #include "common/Constants.h"
+#include "dawn_native/Instance.h"
 #include "dawn_native/OpenGLBackend.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
 #include <cstring>
+#include <iostream>
 
 namespace dawn_native { namespace opengl {
 
@@ -47,7 +49,71 @@ namespace dawn_native { namespace opengl {
             }
             return vendorId;
         }
-    }  // namespace
+
+        void KHRONOS_APIENTRY OnGLDebugMessage(GLenum source,
+                                               GLenum type,
+                                               GLuint id,
+                                               GLenum severity,
+                                               GLsizei length,
+                                               const GLchar* message,
+                                               const void* userParam) {
+            const char* sourceText;
+            switch (source) {
+                case GL_DEBUG_SOURCE_API:
+                    sourceText = "OpenGL";
+                    break;
+                case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+                    sourceText = "Window System";
+                    break;
+                case GL_DEBUG_SOURCE_SHADER_COMPILER:
+                    sourceText = "Shader Compiler";
+                    break;
+                case GL_DEBUG_SOURCE_THIRD_PARTY:
+                    sourceText = "Third Party";
+                    break;
+                case GL_DEBUG_SOURCE_APPLICATION:
+                    sourceText = "Application";
+                    break;
+                case GL_DEBUG_SOURCE_OTHER:
+                    sourceText = "Other";
+                    break;
+                default:
+                    sourceText = "UNKNOWN";
+                    break;
+            }
+
+            const char* severityText;
+            switch (severity) {
+                case GL_DEBUG_SEVERITY_HIGH:
+                    severityText = "High";
+                    break;
+                case GL_DEBUG_SEVERITY_MEDIUM:
+                    severityText = "Medium";
+                    break;
+                case GL_DEBUG_SEVERITY_LOW:
+                    severityText = "Low";
+                    break;
+                case GL_DEBUG_SEVERITY_NOTIFICATION:
+                    severityText = "Notification";
+                    break;
+                default:
+                    severityText = "UNKNOWN";
+                    break;
+            }
+
+            if (type == GL_DEBUG_TYPE_ERROR) {
+                std::cout << "OpenGL error:" << std::endl;
+                std::cout << "    Source: " << sourceText << std::endl;
+                std::cout << "    ID: " << id << std::endl;
+                std::cout << "    Severity: " << severityText << std::endl;
+                std::cout << "    Message: " << message << std::endl;
+
+                // Abort on an error when in Debug mode.
+                UNREACHABLE();
+            }
+        }
+
+    }  // anonymous namespace
 
     // The OpenGL backend's Adapter.
 
@@ -59,6 +125,36 @@ namespace dawn_native { namespace opengl {
         MaybeError Initialize(const AdapterDiscoveryOptions* options) {
             // Use getProc to populate the dispatch table
             DAWN_TRY(mFunctions.Initialize(options->getProc));
+
+            // Use the debug output functionality to get notified about GL errors
+            // TODO(cwallez@chromium.org): add support for the KHR_debug and ARB_debug_output
+            // extensions
+            bool hasDebugOutput = mFunctions.IsAtLeastGL(4, 3) || mFunctions.IsAtLeastGLES(3, 2);
+
+            if (GetInstance()->IsBackendValidationEnabled() && hasDebugOutput) {
+                mFunctions.Enable(GL_DEBUG_OUTPUT);
+                mFunctions.Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+                // Any GL error; dangerous undefined behavior; any shader compiler and linker errors
+                mFunctions.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH,
+                                               0, nullptr, GL_TRUE);
+
+                // Severe performance warnings; GLSL or other shader compiler and linker warnings;
+                // use of currently deprecated behavior
+                mFunctions.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM,
+                                               0, nullptr, GL_TRUE);
+
+                // Performance warnings from redundant state changes; trivial undefined behavior
+                // This is disabled because we do an incredible amount of redundant state changes.
+                mFunctions.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0,
+                                               nullptr, GL_FALSE);
+
+                // Any message which is not an error or performance concern
+                mFunctions.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE,
+                                               GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr,
+                                               GL_FALSE);
+                mFunctions.DebugMessageCallback(&OnGLDebugMessage, nullptr);
+            }
 
             // Set state that never changes between devices.
             mFunctions.Enable(GL_DEPTH_TEST);

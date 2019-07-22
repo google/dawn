@@ -44,20 +44,8 @@ using GLDEBUGPROC = void(KHRONOS_APIENTRY*)(GLenum source,
                                             GLsizei length,
                                             const GLchar* message,
                                             const void* userParam);
-using GLDEBUGPROCARB = void(KHRONOS_APIENTRY*)(GLenum source,
-                                               GLenum type,
-                                               GLuint id,
-                                               GLenum severity,
-                                               GLsizei length,
-                                               const GLchar* message,
-                                               const void* userParam);
-using GLDEBUGPROCKHR = void(KHRONOS_APIENTRY*)(GLenum source,
-                                               GLenum type,
-                                               GLuint id,
-                                               GLenum severity,
-                                               GLsizei length,
-                                               const GLchar* message,
-                                               const void* userParam);
+using GLDEBUGPROCARB = GLDEBUGPROC;
+using GLDEBUGPROCKHR = GLDEBUGPROC;
 using GLDEBUGPROCAMD = void(KHRONOS_APIENTRY*)(GLuint id,
                                                GLenum category,
                                                GLenum severity,

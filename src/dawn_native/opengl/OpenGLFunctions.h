@@ -23,6 +23,9 @@ namespace dawn_native { namespace opengl {
       public:
         MaybeError Initialize(GetProcAddress getProc);
 
+        bool IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion);
+        bool IsAtLeastGLES(uint32_t majorVersion, uint32_t minorVersion);
+
       private:
         uint32_t mMajorVersion;
         uint32_t mMinorVersion;
