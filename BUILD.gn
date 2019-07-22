@@ -95,6 +95,11 @@ source_set("libdawn_native_sources") {
   configs += [ ":libdawn_native_internal" ]
   libs = []
 
+  # Dependencies that are needed to compile libdawn_native entry points in
+  # FooBackend.cpp need to be public deps so they are propagated to the
+  # libdawn_native target
+  public_deps = []
+
   sources = get_target_outputs(":libdawn_native_utils_gen")
   sources += [
     "src/dawn_native/Adapter.cpp",
@@ -280,7 +285,7 @@ source_set("libdawn_native_sources") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [
+    public_deps += [
       ":libdawn_native_opengl_loader_gen",
       "third_party:khronos_platform",
     ]
@@ -326,7 +331,7 @@ source_set("libdawn_native_sources") {
   }
 
   if (dawn_enable_vulkan) {
-    deps += [ "third_party:vulkan_headers" ]
+    public_deps += [ "third_party:vulkan_headers" ]
     sources += [
       "src/dawn_native/vulkan/AdapterVk.cpp",
       "src/dawn_native/vulkan/AdapterVk.h",
