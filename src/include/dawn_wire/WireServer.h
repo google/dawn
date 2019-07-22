@@ -63,7 +63,7 @@ namespace dawn_wire {
                                                 size_t deserializeSize,
                                                 WriteHandle** writeHandle) = 0;
 
-            class ReadHandle {
+            class DAWN_WIRE_EXPORT ReadHandle {
               public:
                 // Initialize the handle data.
                 // Serialize into |serializePointer| so the client can update handle data.
@@ -74,7 +74,7 @@ namespace dawn_wire {
                 virtual ~ReadHandle();
             };
 
-            class WriteHandle {
+            class DAWN_WIRE_EXPORT WriteHandle {
               public:
                 // Set the target for writes from the client. DeserializeFlush should copy data
                 // into the target.

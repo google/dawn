@@ -74,7 +74,7 @@ namespace dawn_wire {
             virtual ReadHandle* CreateReadHandle(DawnBuffer, uint64_t offset, size_t size);
             virtual WriteHandle* CreateWriteHandle(DawnBuffer, uint64_t offset, size_t size);
 
-            class ReadHandle {
+            class DAWN_WIRE_EXPORT ReadHandle {
               public:
                 // Serialize the handle into |serializePointer| so it can be received by the server.
                 // If |serializePointer| is nullptr, this returns the required serialization space.
@@ -93,7 +93,7 @@ namespace dawn_wire {
                 virtual ~ReadHandle();
             };
 
-            class WriteHandle {
+            class DAWN_WIRE_EXPORT WriteHandle {
               public:
                 // Serialize the handle into |serializePointer| so it can be received by the server.
                 // If |serializePointer| is nullptr, this returns the required serialization space.
