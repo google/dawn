@@ -408,7 +408,7 @@ namespace dawn_native {
         return mSampleCount > 1;
     }
 
-    Extent3D TextureBase::GetMipLevelVirtualSize(uint64_t level) const {
+    Extent3D TextureBase::GetMipLevelVirtualSize(uint32_t level) const {
         Extent3D extent;
         extent.width = std::max(mSize.width >> level, 1u);
         extent.height = std::max(mSize.height >> level, 1u);
@@ -416,7 +416,7 @@ namespace dawn_native {
         return extent;
     }
 
-    Extent3D TextureBase::GetMipLevelPhysicalSize(uint64_t level) const {
+    Extent3D TextureBase::GetMipLevelPhysicalSize(uint32_t level) const {
         Extent3D extent = GetMipLevelVirtualSize(level);
 
         // Compressed Textures will have paddings if their width or height is not a multiple of

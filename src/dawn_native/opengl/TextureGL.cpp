@@ -245,9 +245,10 @@ namespace dawn_native { namespace opengl {
         } else {
             auto formatInfo = GetGLFormatInfo(GetFormat().format);
             for (GLint level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
-                gl.ClearTexSubImage(mHandle, level, 0, 0, baseArrayLayer, GetSize().width,
-                                    GetSize().height, layerCount, formatInfo.format,
-                                    formatInfo.type, nullptr);
+                Extent3D mipSize = GetMipLevelPhysicalSize(level);
+                gl.ClearTexSubImage(mHandle, level, 0, 0, baseArrayLayer, mipSize.width,
+                                    mipSize.height, layerCount, formatInfo.format, formatInfo.type,
+                                    nullptr);
             }
         }
         SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer, layerCount);
