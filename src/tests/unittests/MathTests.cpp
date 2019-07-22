@@ -33,15 +33,18 @@ TEST(Math, ScanForward) {
 // Tests for Log2
 TEST(Math, Log2) {
     // Test extrema
-    ASSERT_EQ(Log2(1), 0u);
-    ASSERT_EQ(Log2(0xFFFFFFFF), 31u);
+    ASSERT_EQ(Log2(1u), 0u);
+    ASSERT_EQ(Log2(0xFFFFFFFFu), 31u);
+    ASSERT_EQ(Log2(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF)), 63u);
 
     // Test boundary between two logs
-    ASSERT_EQ(Log2(0x80000000), 31u);
-    ASSERT_EQ(Log2(0x7FFFFFFF), 30u);
+    ASSERT_EQ(Log2(0x80000000u), 31u);
+    ASSERT_EQ(Log2(0x7FFFFFFFu), 30u);
+    ASSERT_EQ(Log2(static_cast<uint64_t>(0x8000000000000000)), 63u);
+    ASSERT_EQ(Log2(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), 62u);
 
-    ASSERT_EQ(Log2(16), 4u);
-    ASSERT_EQ(Log2(15), 3u);
+    ASSERT_EQ(Log2(16u), 4u);
+    ASSERT_EQ(Log2(15u), 3u);
 }
 
 // Tests for IsPowerOfTwo
@@ -52,6 +55,19 @@ TEST(Math, IsPowerOfTwo) {
 
     ASSERT_TRUE(IsPowerOfTwo(0x8000000));
     ASSERT_FALSE(IsPowerOfTwo(0x8000400));
+}
+
+// Tests for NextPowerOfTwo
+TEST(Math, NextPowerOfTwo) {
+    // Test extrema
+    ASSERT_EQ(NextPowerOfTwo(0), 1ull);
+    ASSERT_EQ(NextPowerOfTwo(0x7FFFFFFFFFFFFFFF), 0x8000000000000000);
+
+    // Test boundary between powers-of-two.
+    ASSERT_EQ(NextPowerOfTwo(31), 32ull);
+    ASSERT_EQ(NextPowerOfTwo(33), 64ull);
+
+    ASSERT_EQ(NextPowerOfTwo(32), 32ull);
 }
 
 // Tests for AlignPtr
