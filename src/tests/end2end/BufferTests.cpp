@@ -176,11 +176,6 @@ TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
 
 // Stress test for many calls to SetSubData
 TEST_P(BufferSetSubDataTests, ManySetSubData) {
-    // Test failing on Linux Vulkan Intel. It works on Ubuntu 14.04 but fails on
-    // 19.04.
-    // See https://bugs.chromium.org/p/chromium/issues/detail?id=980737
-    DAWN_SKIP_TEST_IF(IsLinux() && IsVulkan() && IsIntel());
-
     // Note: Increasing the size of the buffer will likely cause timeout issues.
     // In D3D12, timeout detection occurs when the GPU scheduler tries but cannot preempt the task
     // executing these commands in-flight. If this takes longer than ~2s, a device reset occurs and
