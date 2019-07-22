@@ -120,13 +120,18 @@ namespace dawn_native { namespace opengl {
                 switch (groupInfo.types[binding]) {
                     case dawn::BindingType::UniformBuffer: {
                         GLint location = gl.GetUniformBlockIndex(mProgram, name.c_str());
-                        gl.UniformBlockBinding(mProgram, location, indices[group][binding]);
+                        if (location != -1) {
+                            gl.UniformBlockBinding(mProgram, location, indices[group][binding]);
+                        }
                     } break;
 
                     case dawn::BindingType::StorageBuffer: {
                         GLuint location = gl.GetProgramResourceIndex(
                             mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
-                        gl.ShaderStorageBlockBinding(mProgram, location, indices[group][binding]);
+                        if (location != GL_INVALID_INDEX) {
+                            gl.ShaderStorageBlockBinding(mProgram, location,
+                                                         indices[group][binding]);
+                        }
                     } break;
 
                     case dawn::BindingType::Sampler:
@@ -161,6 +166,11 @@ namespace dawn_native { namespace opengl {
             for (const auto& combined : combinedSamplersSet) {
                 std::string name = combined.GetName();
                 GLint location = gl.GetUniformLocation(mProgram, name.c_str());
+
+                if (location == -1) {
+                    continue;
+                }
+
                 gl.Uniform1i(location, textureUnit);
 
                 GLuint samplerIndex =
