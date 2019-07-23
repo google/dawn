@@ -412,15 +412,151 @@ TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
     renderPass.renderPassInfo.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Load;
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-        pass.EndPass();
-    }
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.EndPass();
+
     dawn::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color, 0, 0, kSize, kSize, 0, 0);
+}
+
+// This tests the clearing of sampled textures in render pass
+TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
+    // Create needed resources
+    dawn::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, dawn::TextureUsageBit::Sampled, kColorFormat);
+    dawn::Texture texture = device.CreateTexture(&descriptor);
+
+    dawn::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
+        1, 1, dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::OutputAttachment,
+        kColorFormat);
+    dawn::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
+
+    dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
+                 {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture}});
+
+    // Create render pipeline
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    renderPipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
+    renderPipelineDescriptor.cVertexStage.module =
+        utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(#version 450
+        const vec2 pos[6] = vec2[6](vec2(-1.0f, -1.0f),
+                                    vec2(-1.0f,  1.0f),
+                                    vec2( 1.0f, -1.0f),
+                                    vec2( 1.0f,  1.0f),
+                                    vec2(-1.0f,  1.0f),
+                                    vec2( 1.0f, -1.0f)
+                                    );
+
+        void main() {
+           gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
+        })");
+    renderPipelineDescriptor.cFragmentStage.module =
+        utils::CreateShaderModule(device, utils::ShaderStage::Fragment,
+                                  R"(#version 450
+        layout(set = 0, binding = 0) uniform sampler sampler0;
+        layout(set = 0, binding = 1) uniform texture2D texture0;
+        layout(location = 0) out vec4 fragColor;
+        void main() {
+           fragColor = texelFetch(sampler2D(texture0, sampler0), ivec2(gl_FragCoord), 0);
+        })");
+    renderPipelineDescriptor.cColorStates[0]->format = kColorFormat;
+    dawn::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+
+    // Create bindgroup
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, bindGroupLayout, {{0, sampler}, {1, texture.CreateDefaultView()}});
+
+    // Encode pass and submit
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    utils::ComboRenderPassDescriptor renderPassDesc({renderTexture.CreateDefaultView()});
+    renderPassDesc.cColorAttachmentsInfoPtr[0]->clearColor = {1.0, 1.0, 1.0, 1.0};
+    renderPassDesc.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    pass.SetPipeline(renderPipeline);
+    pass.SetBindGroup(0, bindGroup, 0, nullptr);
+    pass.Draw(6, 1, 0, 0);
+    pass.EndPass();
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Expect the rendered texture to be cleared
+    std::vector<RGBA8> expectedWithZeros(kSize * kSize, {0, 0, 0, 0});
+    EXPECT_TEXTURE_RGBA8_EQ(expectedWithZeros.data(), renderTexture, 0, 0, kSize, kSize, 0, 0);
+}
+
+// This tests the clearing of sampled textures during compute pass
+TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
+    // Create needed resources
+    dawn::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, dawn::TextureUsageBit::Sampled, kColorFormat);
+    descriptor.size.width = 1;
+    descriptor.size.height = 1;
+    dawn::Texture texture = device.CreateTexture(&descriptor);
+
+    uint32_t bufferSize = 4 * sizeof(uint32_t);
+    dawn::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.size = bufferSize;
+    bufferDescriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::Storage |
+                             dawn::BufferUsageBit::CopyDst;
+    dawn::Buffer bufferTex = device.CreateBuffer(&bufferDescriptor);
+    // Add data to buffer to ensure it is initialized
+    uint32_t data = 100;
+    bufferTex.SetSubData(0, sizeof(data), &data);
+
+    dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStageBit::Compute, dawn::BindingType::SampledTexture},
+                 {1, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
+                 {2, dawn::ShaderStageBit::Compute, dawn::BindingType::Sampler}});
+
+    // Create compute pipeline
+    dawn::ComputePipelineDescriptor computePipelineDescriptor;
+    computePipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
+    dawn::PipelineStageDescriptor computeStage;
+    const char* cs =
+        R"(#version 450
+        layout(binding = 0) uniform texture2D sampleTex;
+        layout(std430, binding = 1) buffer BufferTex {
+           vec4 result;
+        } bufferTex;
+        layout(binding = 2) uniform sampler sampler0;
+        void main() {
+           bufferTex.result =
+                 texelFetch(sampler2D(sampleTex, sampler0), ivec2(0,0), 0);
+        })";
+    computeStage.module = utils::CreateShaderModule(device, utils::ShaderStage::Compute, cs);
+    computeStage.entryPoint = "main";
+    computePipelineDescriptor.computeStage = &computeStage;
+    dawn::ComputePipeline computePipeline =
+        device.CreateComputePipeline(&computePipelineDescriptor);
+
+    // Create bindgroup
+    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+        device, bindGroupLayout,
+        {{0, texture.CreateDefaultView()}, {1, bufferTex, 0, bufferSize}, {2, sampler}});
+
+    // Encode the pass and submit
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(computePipeline);
+    pass.SetBindGroup(0, bindGroup, 0, nullptr);
+    pass.Dispatch(1, 1, 1);
+    pass.EndPass();
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Expect the buffer to be zeroed out by the compute pass
+    std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferTex, 0, 4);
 }
 
 DAWN_INSTANTIATE_TEST(
