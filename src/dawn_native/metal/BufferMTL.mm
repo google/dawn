@@ -57,14 +57,16 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
         MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapTracker();
         tracker->Track(this, serial, false);
+        return {};
     }
 
-    void Buffer::MapWriteAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
         MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapTracker();
         tracker->Track(this, serial, true);
+        return {};
     }
 
     void Buffer::UnmapImpl() {

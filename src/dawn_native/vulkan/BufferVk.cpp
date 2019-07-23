@@ -209,7 +209,7 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
         Device* device = ToBackend(GetDevice());
 
         VkCommandBuffer commands = device->GetPendingCommandBuffer();
@@ -220,9 +220,10 @@ namespace dawn_native { namespace vulkan {
 
         MapRequestTracker* tracker = device->GetMapRequestTracker();
         tracker->Track(this, serial, memory, false);
+        return {};
     }
 
-    void Buffer::MapWriteAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
         Device* device = ToBackend(GetDevice());
 
         VkCommandBuffer commands = device->GetPendingCommandBuffer();
@@ -233,6 +234,7 @@ namespace dawn_native { namespace vulkan {
 
         MapRequestTracker* tracker = device->GetMapRequestTracker();
         tracker->Track(this, serial, memory, true);
+        return {};
     }
 
     void Buffer::UnmapImpl() {

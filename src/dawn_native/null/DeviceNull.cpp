@@ -264,12 +264,14 @@ namespace dawn_native { namespace null {
         return {};
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
         MapAsyncImplCommon(serial, false);
+        return {};
     }
 
-    void Buffer::MapWriteAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
         MapAsyncImplCommon(serial, true);
+        return {};
     }
 
     void Buffer::MapAsyncImplCommon(uint32_t serial, bool isWrite) {

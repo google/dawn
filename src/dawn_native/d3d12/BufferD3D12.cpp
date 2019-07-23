@@ -215,7 +215,7 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
         mWrittenMappedRange = {};
         D3D12_RANGE readRange = {0, GetSize()};
         char* data = nullptr;
@@ -225,9 +225,10 @@ namespace dawn_native { namespace d3d12 {
         // writes available when the fence is passed.
         MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
         tracker->Track(this, serial, data, false);
+        return {};
     }
 
-    void Buffer::MapWriteAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
         mWrittenMappedRange = {0, GetSize()};
         char* data = nullptr;
         ASSERT_SUCCESS(mResource->Map(0, &mWrittenMappedRange, reinterpret_cast<void**>(&data)));
@@ -236,6 +237,7 @@ namespace dawn_native { namespace d3d12 {
         // writes available on queue submission.
         MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
         tracker->Track(this, serial, data, true);
+        return {};
     }
 
     void Buffer::UnmapImpl() {

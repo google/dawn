@@ -58,7 +58,7 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
-    void Buffer::MapReadAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
@@ -66,9 +66,10 @@ namespace dawn_native { namespace opengl {
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
         CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
+        return {};
     }
 
-    void Buffer::MapWriteAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
@@ -76,6 +77,7 @@ namespace dawn_native { namespace opengl {
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
+        return {};
     }
 
     void Buffer::UnmapImpl() {

@@ -82,8 +82,8 @@ namespace dawn_native {
       private:
         virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) = 0;
         virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const void* data);
-        virtual void MapReadAsyncImpl(uint32_t serial) = 0;
-        virtual void MapWriteAsyncImpl(uint32_t serial) = 0;
+        virtual MaybeError MapReadAsyncImpl(uint32_t serial) = 0;
+        virtual MaybeError MapWriteAsyncImpl(uint32_t serial) = 0;
         virtual void UnmapImpl() = 0;
         virtual void DestroyImpl() = 0;
 

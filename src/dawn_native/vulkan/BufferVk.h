@@ -42,8 +42,8 @@ namespace dawn_native { namespace vulkan {
 
       private:
         // Dawn API
-        void MapReadAsyncImpl(uint32_t serial) override;
-        void MapWriteAsyncImpl(uint32_t serial) override;
+        MaybeError MapReadAsyncImpl(uint32_t serial) override;
+        MaybeError MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
 
