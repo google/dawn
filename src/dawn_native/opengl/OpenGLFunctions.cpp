@@ -15,6 +15,7 @@
 #include "dawn_native/opengl/OpenGLFunctions.h"
 
 #include <cctype>
+#include <tuple>
 
 namespace dawn_native { namespace opengl {
 
