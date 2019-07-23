@@ -22,7 +22,7 @@
 #include "dawn_native/RenderPipeline.h"
 
 #include <math.h>
-#include <string.h>
+#include <cstring>
 
 namespace dawn_native {
 
