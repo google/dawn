@@ -302,6 +302,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/opengl/DeviceGL.cpp",
       "src/dawn_native/opengl/DeviceGL.h",
       "src/dawn_native/opengl/Forward.h",
+      "src/dawn_native/opengl/GLFormat.cpp",
+      "src/dawn_native/opengl/GLFormat.h",
       "src/dawn_native/opengl/NativeSwapChainImplGL.cpp",
       "src/dawn_native/opengl/NativeSwapChainImplGL.h",
       "src/dawn_native/opengl/OpenGLFunctions.cpp",

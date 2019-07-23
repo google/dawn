@@ -38,6 +38,7 @@ namespace dawn_native { namespace opengl {
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
         }
+        mFormatTable = BuildGLFormatTable();
     }
 
     Device::~Device() {
@@ -52,6 +53,15 @@ namespace dawn_native { namespace opengl {
         mDynamicUploader = nullptr;
 
         Tick();
+    }
+
+    const GLFormat& Device::GetGLFormat(const Format& format) {
+        ASSERT(format.isSupported);
+        ASSERT(format.GetIndex() < mFormatTable.size());
+
+        const GLFormat& result = mFormatTable[format.GetIndex()];
+        ASSERT(result.isSupportedOnBackend);
+        return result;
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(

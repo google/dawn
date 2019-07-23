@@ -20,6 +20,7 @@
 #include "common/Platform.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/opengl/Forward.h"
+#include "dawn_native/opengl/GLFormat.h"
 #include "dawn_native/opengl/OpenGLFunctions.h"
 
 #include <queue>
@@ -40,6 +41,8 @@ namespace dawn_native { namespace opengl {
 
         // Contains all the OpenGL entry points, glDoFoo is called via device->gl.DoFoo.
         const OpenGLFunctions gl;
+
+        const GLFormat& GetGLFormat(const Format& format);
 
         void SubmitFenceSync();
 
@@ -87,6 +90,8 @@ namespace dawn_native { namespace opengl {
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
         std::queue<std::pair<GLsync, Serial>> mFencesInFlight;
+
+        GLFormatTable mFormatTable;
     };
 
 }}  // namespace dawn_native::opengl

@@ -13,14 +13,10 @@
 // limitations under the License.
 
 #include "dawn_native/opengl/TextureGL.h"
-#include "dawn_native/opengl/DeviceGL.h"
-#include "dawn_native/opengl/UtilsGL.h"
 
 #include "common/Assert.h"
-#include "dawn_native/Commands.h"
-
-#include <algorithm>
-#include <vector>
+#include "dawn_native/opengl/DeviceGL.h"
+#include "dawn_native/opengl/UtilsGL.h"
 
 namespace dawn_native { namespace opengl {
 
@@ -61,32 +57,6 @@ namespace dawn_native { namespace opengl {
                 default:
                     UNREACHABLE();
                     return GL_TEXTURE_2D;
-            }
-        }
-
-        TextureFormatInfo GetGLFormatInfo(dawn::TextureFormat format) {
-            switch (format) {
-                case dawn::TextureFormat::RGBA8Unorm:
-                    return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
-                case dawn::TextureFormat::RG8Unorm:
-                    return {GL_RG8, GL_RG, GL_UNSIGNED_BYTE};
-                case dawn::TextureFormat::R8Unorm:
-                    return {GL_R8, GL_RED, GL_UNSIGNED_BYTE};
-                case dawn::TextureFormat::RGBA8Uint:
-                    return {GL_RGBA8UI, GL_RGBA, GL_UNSIGNED_INT};
-                case dawn::TextureFormat::RG8Uint:
-                    return {GL_RG8UI, GL_RG, GL_UNSIGNED_INT};
-                case dawn::TextureFormat::R8Uint:
-                    return {GL_R8UI, GL_RED, GL_UNSIGNED_INT};
-                case dawn::TextureFormat::BGRA8Unorm:
-                    // This doesn't have an enum for the internal format in OpenGL, so use RGBA8.
-                    return {GL_RGBA8, GL_BGRA, GL_UNSIGNED_BYTE};
-                case dawn::TextureFormat::Depth24PlusStencil8:
-                    return {GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL,
-                            GL_FLOAT_32_UNSIGNED_INT_24_8_REV};
-                default:
-                    UNREACHABLE();
-                    return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
             }
         }
 
@@ -141,7 +111,7 @@ namespace dawn_native { namespace opengl {
         uint32_t arrayLayers = GetArrayLayers();
         uint32_t sampleCount = GetSampleCount();
 
-        auto formatInfo = GetGLFormatInfo(GetFormat().format);
+        const GLFormat& glFormat = GetGLFormat();
 
         gl.BindTexture(mTarget, mHandle);
 
@@ -152,14 +122,14 @@ namespace dawn_native { namespace opengl {
             case dawn::TextureDimension::e2D:
                 if (arrayLayers > 1) {
                     ASSERT(!IsMultisampledTexture());
-                    gl.TexStorage3D(mTarget, levels, formatInfo.internalFormat, width, height,
+                    gl.TexStorage3D(mTarget, levels, glFormat.internalFormat, width, height,
                                     arrayLayers);
                 } else {
                     if (IsMultisampledTexture()) {
-                        gl.TexStorage2DMultisample(mTarget, sampleCount, formatInfo.internalFormat,
+                        gl.TexStorage2DMultisample(mTarget, sampleCount, glFormat.internalFormat,
                                                    width, height, true);
                     } else {
-                        gl.TexStorage2D(mTarget, levels, formatInfo.internalFormat, width, height);
+                        gl.TexStorage2D(mTarget, levels, glFormat.internalFormat, width, height);
                     }
                 }
                 break;
@@ -178,7 +148,7 @@ namespace dawn_native { namespace opengl {
             std::fill(clearColor, clearColor + MAX_TEXEL_SIZE, 255);
             // TODO(natlee@microsoft.com): clear all subresources
             for (uint32_t i = 0; i < GetNumMipLevels(); i++) {
-                gl.ClearTexImage(mHandle, i, formatInfo.format, formatInfo.type, clearColor);
+                gl.ClearTexImage(mHandle, i, glFormat.format, glFormat.type, clearColor);
             }
         }
     }
@@ -208,8 +178,8 @@ namespace dawn_native { namespace opengl {
         return mTarget;
     }
 
-    TextureFormatInfo Texture::GetGLFormat() const {
-        return GetGLFormatInfo(GetFormat().format);
+    const GLFormat& Texture::GetGLFormat() const {
+        return ToBackend(GetDevice())->GetGLFormat(GetFormat());
     }
 
     void Texture::ClearTexture(GLint baseMipLevel,
@@ -243,11 +213,11 @@ namespace dawn_native { namespace opengl {
             }
             gl.DeleteFramebuffers(1, &framebuffer);
         } else {
-            auto formatInfo = GetGLFormatInfo(GetFormat().format);
+            const GLFormat& glFormat = GetGLFormat();
             for (GLint level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
                 Extent3D mipSize = GetMipLevelPhysicalSize(level);
                 gl.ClearTexSubImage(mHandle, level, 0, 0, baseArrayLayer, mipSize.width,
-                                    mipSize.height, layerCount, formatInfo.format, formatInfo.type,
+                                    mipSize.height, layerCount, glFormat.format, glFormat.type,
                                     nullptr);
             }
         }
@@ -283,11 +253,10 @@ namespace dawn_native { namespace opengl {
             const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
             mHandle = GenTexture(gl);
             const Texture* textureGL = ToBackend(texture);
-            TextureFormatInfo textureViewFormat = GetGLFormatInfo(descriptor->format);
-            gl.TextureView(mHandle, mTarget, textureGL->GetHandle(),
-                           textureViewFormat.internalFormat, descriptor->baseMipLevel,
-                           descriptor->mipLevelCount, descriptor->baseArrayLayer,
-                           descriptor->arrayLayerCount);
+            const GLFormat& glFormat = ToBackend(GetDevice())->GetGLFormat(GetFormat());
+            gl.TextureView(mHandle, mTarget, textureGL->GetHandle(), glFormat.internalFormat,
+                           descriptor->baseMipLevel, descriptor->mipLevelCount,
+                           descriptor->baseArrayLayer, descriptor->arrayLayerCount);
             mOwnsHandle = true;
         }
     }

@@ -22,12 +22,7 @@
 namespace dawn_native { namespace opengl {
 
     class Device;
-
-    struct TextureFormatInfo {
-        GLenum internalFormat;
-        GLenum format;
-        GLenum type;
-    };
+    struct GLFormat;
 
     class Texture : public TextureBase {
       public:
@@ -40,7 +35,7 @@ namespace dawn_native { namespace opengl {
 
         GLuint GetHandle() const;
         GLenum GetGLTarget() const;
-        TextureFormatInfo GetGLFormat() const;
+        const GLFormat& GetGLFormat() const;
 
         void EnsureSubresourceContentInitialized(uint32_t baseMipLevel,
                                                  uint32_t levelCount,

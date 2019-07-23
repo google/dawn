@@ -394,7 +394,7 @@ namespace dawn_native { namespace opengl {
                     Buffer* buffer = ToBackend(src.buffer.Get());
                     Texture* texture = ToBackend(dst.texture.Get());
                     GLenum target = texture->GetGLTarget();
-                    auto format = texture->GetGLFormat();
+                    const GLFormat& format = texture->GetGLFormat();
                     if (IsCompleteSubresourceCopiedTo(texture, copySize, dst.mipLevel)) {
                         texture->SetIsSubresourceContentInitialized(dst.mipLevel, 1, dst.arrayLayer,
                                                                     1);
@@ -442,7 +442,7 @@ namespace dawn_native { namespace opengl {
                     auto& copySize = copy->copySize;
                     Texture* texture = ToBackend(src.texture.Get());
                     Buffer* buffer = ToBackend(dst.buffer.Get());
-                    auto format = texture->GetGLFormat();
+                    const GLFormat& format = texture->GetGLFormat();
                     GLenum target = texture->GetGLTarget();
 
                     texture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
