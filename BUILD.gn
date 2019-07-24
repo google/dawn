@@ -130,6 +130,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Device.h",
     "src/dawn_native/DynamicUploader.cpp",
     "src/dawn_native/DynamicUploader.h",
+    "src/dawn_native/EncodingContext.cpp",
+    "src/dawn_native/EncodingContext.h",
     "src/dawn_native/Error.cpp",
     "src/dawn_native/Error.h",
     "src/dawn_native/ErrorData.cpp",

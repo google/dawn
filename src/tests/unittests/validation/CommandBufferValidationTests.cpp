@@ -49,9 +49,7 @@ TEST_F(CommandBufferValidationTest, EndedMidRenderPass) {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         ASSERT_DEVICE_ERROR(encoder.Finish());
-        // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
-        // produces a encoder error.
-        pass.EndPass();
+        ASSERT_DEVICE_ERROR(pass.EndPass());
     }
 }
 
@@ -78,9 +76,7 @@ TEST_F(CommandBufferValidationTest, EndedMidComputePass) {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         dawn::ComputePassEncoder pass = encoder.BeginComputePass();
         ASSERT_DEVICE_ERROR(encoder.Finish());
-        // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
-        // produces a encoder error.
-        pass.EndPass();
+        ASSERT_DEVICE_ERROR(pass.EndPass());
     }
 }
 
@@ -101,8 +97,6 @@ TEST_F(CommandBufferValidationTest, RenderPassEndedTwice) {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
-        // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
-        // produces a encoder error.
         pass.EndPass();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -123,8 +117,6 @@ TEST_F(CommandBufferValidationTest, ComputePassEndedTwice) {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         dawn::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.EndPass();
-        // TODO(cwallez@chromium.org) this should probably be a device error, but currently it
-        // produces a encoder error.
         pass.EndPass();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }

@@ -27,11 +27,12 @@ namespace dawn_native {
     class RenderPassEncoderBase : public RenderEncoderBase {
       public:
         RenderPassEncoderBase(DeviceBase* device,
-                              CommandEncoderBase* topLevelEncoder,
-                              CommandAllocator* allocator);
+                              CommandEncoderBase* commandEncoder,
+                              EncodingContext* encodingContext);
 
         static RenderPassEncoderBase* MakeError(DeviceBase* device,
-                                                CommandEncoderBase* topLevelEncoder);
+                                                CommandEncoderBase* commandEncoder,
+                                                EncodingContext* encodingContext);
 
         void EndPass();
 
@@ -47,8 +48,14 @@ namespace dawn_native {
 
       protected:
         RenderPassEncoderBase(DeviceBase* device,
-                              CommandEncoderBase* topLevelEncoder,
+                              CommandEncoderBase* commandEncoder,
+                              EncodingContext* encodingContext,
                               ErrorTag errorTag);
+
+      private:
+        // For render and compute passes, the encoding context is borrowed from the command encoder.
+        // Keep a reference to the encoder to make sure the context isn't freed.
+        Ref<CommandEncoderBase> mCommandEncoder;
     };
 
 }  // namespace dawn_native

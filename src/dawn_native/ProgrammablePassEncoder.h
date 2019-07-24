@@ -29,9 +29,7 @@ namespace dawn_native {
     // Base class for shared functionality between ComputePassEncoder and RenderPassEncoder.
     class ProgrammablePassEncoder : public ObjectBase {
       public:
-        ProgrammablePassEncoder(DeviceBase* device,
-                                CommandEncoderBase* topLevelEncoder,
-                                CommandAllocator* allocator);
+        ProgrammablePassEncoder(DeviceBase* device, EncodingContext* encodingContext);
 
         void InsertDebugMarker(const char* groupLabel);
         void PopDebugGroup();
@@ -45,16 +43,10 @@ namespace dawn_native {
       protected:
         // Construct an "error" programmable pass encoder.
         ProgrammablePassEncoder(DeviceBase* device,
-                                CommandEncoderBase* topLevelEncoder,
+                                EncodingContext* encodingContext,
                                 ErrorTag errorTag);
 
-        MaybeError ValidateCanRecordCommands() const;
-
-        // The allocator is borrowed from the top level encoder. Keep a reference to the encoder
-        // to make sure the allocator isn't freed.
-        Ref<CommandEncoderBase> mTopLevelEncoder = nullptr;
-        // mAllocator is cleared at the end of the pass so it acts as a tag that EndPass was called
-        CommandAllocator* mAllocator = nullptr;
+        EncodingContext* mEncodingContext = nullptr;
     };
 
 }  // namespace dawn_native

@@ -22,9 +22,7 @@ namespace dawn_native {
 
     class RenderEncoderBase : public ProgrammablePassEncoder {
       public:
-        RenderEncoderBase(DeviceBase* device,
-                          CommandEncoderBase* topLevelEncoder,
-                          CommandAllocator* allocator);
+        RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext);
 
         void Draw(uint32_t vertexCount,
                   uint32_t instanceCount,
@@ -57,9 +55,7 @@ namespace dawn_native {
 
       protected:
         // Construct an "error" render encoder base.
-        RenderEncoderBase(DeviceBase* device,
-                          CommandEncoderBase* topLevelEncoder,
-                          ErrorTag errorTag);
+        RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
     };
 
 }  // namespace dawn_native

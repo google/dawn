@@ -17,7 +17,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "dawn_native/CommandAllocator.h"
+#include "dawn_native/EncodingContext.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PassResourceUsage.h"
@@ -31,7 +31,6 @@ namespace dawn_native {
     class CommandEncoderBase : public ObjectBase {
       public:
         CommandEncoderBase(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
-        ~CommandEncoderBase();
 
         CommandIterator AcquireCommands();
         CommandBufferResourceUsage AcquireResourceUsages();
@@ -55,41 +54,17 @@ namespace dawn_native {
                                   const Extent3D* copySize);
         CommandBufferBase* Finish(const CommandBufferDescriptor* descriptor);
 
-        // Functions to interact with the encoders
-        void HandleError(const char* message);
-        void ConsumeError(ErrorData* error);
-        bool ConsumedError(MaybeError maybeError) {
-            if (DAWN_UNLIKELY(maybeError.IsError())) {
-                ConsumeError(maybeError.AcquireError());
-                return true;
-            }
-            return false;
-        }
-
-        void PassEnded();
-
       private:
         MaybeError ValidateFinish(const CommandBufferDescriptor* descriptor);
-        MaybeError ValidateComputePass();
-        MaybeError ValidateRenderPass(BeginRenderPassCmd* renderPass);
-        MaybeError ValidateCanRecordTopLevelCommands() const;
+        MaybeError ValidateComputePass(CommandIterator* commands);
+        MaybeError ValidateRenderPass(CommandIterator* commands, BeginRenderPassCmd* renderPass);
 
-        enum class EncodingState : uint8_t;
-        EncodingState mEncodingState;
-
-        void MoveToIterator();
-        CommandAllocator mAllocator;
-        CommandIterator mIterator;
-        bool mWasMovedToIterator = false;
-        bool mWereCommandsAcquired = false;
+        EncodingContext mEncodingContext;
 
         bool mWereResourceUsagesAcquired = false;
         CommandBufferResourceUsage mResourceUsages;
 
         unsigned int mDebugGroupStackSize = 0;
-
-        bool mGotError = false;
-        std::string mErrorMessage;
     };
 
 }  // namespace dawn_native

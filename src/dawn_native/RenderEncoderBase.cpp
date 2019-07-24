@@ -26,31 +26,29 @@
 
 namespace dawn_native {
 
-    RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
-                                         CommandEncoderBase* topLevelEncoder,
-                                         CommandAllocator* allocator)
-        : ProgrammablePassEncoder(device, topLevelEncoder, allocator) {
+    RenderEncoderBase::RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext)
+        : ProgrammablePassEncoder(device, encodingContext) {
     }
 
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
-                                         CommandEncoderBase* topLevelEncoder,
+                                         EncodingContext* encodingContext,
                                          ErrorTag errorTag)
-        : ProgrammablePassEncoder(device, topLevelEncoder, errorTag) {
+        : ProgrammablePassEncoder(device, encodingContext, errorTag) {
     }
 
     void RenderEncoderBase::Draw(uint32_t vertexCount,
                                  uint32_t instanceCount,
                                  uint32_t firstVertex,
                                  uint32_t firstInstance) {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            DrawCmd* draw = allocator->Allocate<DrawCmd>(Command::Draw);
+            draw->vertexCount = vertexCount;
+            draw->instanceCount = instanceCount;
+            draw->firstVertex = firstVertex;
+            draw->firstInstance = firstInstance;
 
-        DrawCmd* draw = mAllocator->Allocate<DrawCmd>(Command::Draw);
-        draw->vertexCount = vertexCount;
-        draw->instanceCount = instanceCount;
-        draw->firstVertex = firstVertex;
-        draw->firstInstance = firstInstance;
+            return {};
+        });
     }
 
     void RenderEncoderBase::DrawIndexed(uint32_t indexCount,
@@ -58,102 +56,103 @@ namespace dawn_native {
                                         uint32_t firstIndex,
                                         int32_t baseVertex,
                                         uint32_t firstInstance) {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            DrawIndexedCmd* draw = allocator->Allocate<DrawIndexedCmd>(Command::DrawIndexed);
+            draw->indexCount = indexCount;
+            draw->instanceCount = instanceCount;
+            draw->firstIndex = firstIndex;
+            draw->baseVertex = baseVertex;
+            draw->firstInstance = firstInstance;
 
-        DrawIndexedCmd* draw = mAllocator->Allocate<DrawIndexedCmd>(Command::DrawIndexed);
-        draw->indexCount = indexCount;
-        draw->instanceCount = instanceCount;
-        draw->firstIndex = firstIndex;
-        draw->baseVertex = baseVertex;
-        draw->firstInstance = firstInstance;
+            return {};
+        });
     }
 
     void RenderEncoderBase::DrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
-            mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(indirectBuffer))) {
-            return;
-        }
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
 
-        if (indirectOffset >= indirectBuffer->GetSize() ||
-            indirectOffset + kDrawIndirectSize > indirectBuffer->GetSize()) {
-            mTopLevelEncoder->HandleError("Indirect offset out of bounds");
-            return;
-        }
+            if (indirectOffset >= indirectBuffer->GetSize() ||
+                indirectOffset + kDrawIndirectSize > indirectBuffer->GetSize()) {
+                return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
+            }
 
-        DrawIndirectCmd* cmd = mAllocator->Allocate<DrawIndirectCmd>(Command::DrawIndirect);
-        cmd->indirectBuffer = indirectBuffer;
-        cmd->indirectOffset = indirectOffset;
+            DrawIndirectCmd* cmd = allocator->Allocate<DrawIndirectCmd>(Command::DrawIndirect);
+            cmd->indirectBuffer = indirectBuffer;
+            cmd->indirectOffset = indirectOffset;
+
+            return {};
+        });
     }
 
     void RenderEncoderBase::DrawIndexedIndirect(BufferBase* indirectBuffer,
                                                 uint64_t indirectOffset) {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
-            mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(indirectBuffer))) {
-            return;
-        }
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
 
-        if (indirectOffset >= indirectBuffer->GetSize() ||
-            indirectOffset + kDrawIndexedIndirectSize > indirectBuffer->GetSize()) {
-            mTopLevelEncoder->HandleError("Indirect offset out of bounds");
-            return;
-        }
+            if ((indirectOffset >= indirectBuffer->GetSize() ||
+                 indirectOffset + kDrawIndexedIndirectSize > indirectBuffer->GetSize())) {
+                return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
+            }
 
-        DrawIndexedIndirectCmd* cmd =
-            mAllocator->Allocate<DrawIndexedIndirectCmd>(Command::DrawIndexedIndirect);
-        cmd->indirectBuffer = indirectBuffer;
-        cmd->indirectOffset = indirectOffset;
+            DrawIndexedIndirectCmd* cmd =
+                allocator->Allocate<DrawIndexedIndirectCmd>(Command::DrawIndexedIndirect);
+            cmd->indirectBuffer = indirectBuffer;
+            cmd->indirectOffset = indirectOffset;
+
+            return {};
+        });
     }
 
     void RenderEncoderBase::SetPipeline(RenderPipelineBase* pipeline) {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
-            mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(pipeline))) {
-            return;
-        }
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            DAWN_TRY(GetDevice()->ValidateObject(pipeline));
 
-        SetRenderPipelineCmd* cmd =
-            mAllocator->Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
-        cmd->pipeline = pipeline;
+            SetRenderPipelineCmd* cmd =
+                allocator->Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
+            cmd->pipeline = pipeline;
+
+            return {};
+        });
     }
 
     void RenderEncoderBase::SetIndexBuffer(BufferBase* buffer, uint64_t offset) {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands()) ||
-            mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(buffer))) {
-            return;
-        }
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            DAWN_TRY(GetDevice()->ValidateObject(buffer));
 
-        SetIndexBufferCmd* cmd = mAllocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
-        cmd->buffer = buffer;
-        cmd->offset = offset;
+            SetIndexBufferCmd* cmd =
+                allocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
+            cmd->buffer = buffer;
+            cmd->offset = offset;
+
+            return {};
+        });
     }
 
     void RenderEncoderBase::SetVertexBuffers(uint32_t startSlot,
                                              uint32_t count,
                                              BufferBase* const* buffers,
                                              uint64_t const* offsets) {
-        if (mTopLevelEncoder->ConsumedError(ValidateCanRecordCommands())) {
-            return;
-        }
-
-        for (size_t i = 0; i < count; ++i) {
-            if (mTopLevelEncoder->ConsumedError(GetDevice()->ValidateObject(buffers[i]))) {
-                return;
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            for (size_t i = 0; i < count; ++i) {
+                DAWN_TRY(GetDevice()->ValidateObject(buffers[i]));
             }
-        }
 
-        SetVertexBuffersCmd* cmd =
-            mAllocator->Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);
-        cmd->startSlot = startSlot;
-        cmd->count = count;
+            SetVertexBuffersCmd* cmd =
+                allocator->Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);
+            cmd->startSlot = startSlot;
+            cmd->count = count;
 
-        Ref<BufferBase>* cmdBuffers = mAllocator->AllocateData<Ref<BufferBase>>(count);
-        for (size_t i = 0; i < count; ++i) {
-            cmdBuffers[i] = buffers[i];
-        }
+            Ref<BufferBase>* cmdBuffers = allocator->AllocateData<Ref<BufferBase>>(count);
+            for (size_t i = 0; i < count; ++i) {
+                cmdBuffers[i] = buffers[i];
+            }
 
-        uint64_t* cmdOffsets = mAllocator->AllocateData<uint64_t>(count);
-        memcpy(cmdOffsets, offsets, count * sizeof(uint64_t));
+            uint64_t* cmdOffsets = allocator->AllocateData<uint64_t>(count);
+            memcpy(cmdOffsets, offsets, count * sizeof(uint64_t));
+
+            return {};
+        });
     }
 
 }  // namespace dawn_native
