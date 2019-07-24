@@ -100,7 +100,11 @@ class BufferMapWriteTests : public DawnTest {
               WaitABit();
           }
 
-          return mappedData;
+          // Ensure the prior write's status is updated.
+          void* resultPointer = mappedData;
+          mappedData = nullptr;
+
+          return resultPointer;
       }
 
     private:
@@ -140,6 +144,35 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
     buffer.Unmap();
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
+}
+
+// Stress test mapping many buffers.
+TEST_P(BufferMapWriteTests, ManyWrites) {
+    constexpr uint32_t kDataSize = 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    std::vector<dawn::Buffer> buffers;
+
+    constexpr uint32_t kBuffers = 100;
+    for (uint32_t i = 0; i < kBuffers; ++i) {
+        dawn::BufferDescriptor descriptor;
+        descriptor.size = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
+        descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::CopySrc;
+        dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+
+        void* mappedData = MapWriteAsyncAndWait(buffer);
+        memcpy(mappedData, myData.data(), kDataSize * sizeof(uint32_t));
+        buffer.Unmap();
+
+        buffers.push_back(buffer);  // Destroy buffers upon return.
+    }
+
+    for (uint32_t i = 0; i < kBuffers; ++i) {
+        EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffers[i], 0, kDataSize);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
