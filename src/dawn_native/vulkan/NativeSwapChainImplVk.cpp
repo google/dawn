@@ -57,7 +57,7 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    void NativeSwapChainImpl::Init(DawnWSIContextVulkan* /*context*/) {
+    void NativeSwapChainImpl::UpdateSurfaceConfig() {
         if (mDevice->ConsumedError(
                 GatherSurfaceInfo(*ToBackend(mDevice->GetAdapter()), mSurface, &mInfo))) {
             ASSERT(false);
@@ -68,10 +68,16 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
+    void NativeSwapChainImpl::Init(DawnWSIContextVulkan* /*context*/) {
+        UpdateSurfaceConfig();
+    }
+
     DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
                                                       DawnTextureUsageBit usage,
                                                       uint32_t width,
                                                       uint32_t height) {
+        UpdateSurfaceConfig();
+
         ASSERT(mInfo.capabilities.minImageExtent.width <= width);
         ASSERT(mInfo.capabilities.maxImageExtent.width >= width);
         ASSERT(mInfo.capabilities.minImageExtent.height <= height);
@@ -81,6 +87,7 @@ namespace dawn_native { namespace vulkan {
         // TODO(cwallez@chromium.org): need to check usage works too
 
         // Create the swapchain with the configuration we chose
+        VkSwapchainKHR oldSwapchain = mSwapChain;
         VkSwapchainCreateInfoKHR createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         createInfo.pNext = nullptr;
@@ -101,7 +108,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.compositeAlpha = mConfig.compositeAlpha;
         createInfo.presentMode = mConfig.presentMode;
         createInfo.clipped = false;
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
+        createInfo.oldSwapchain = oldSwapchain;
 
         if (mDevice->fn.CreateSwapchainKHR(mDevice->GetVkDevice(), &createInfo, nullptr,
                                            &mSwapChain) != VK_SUCCESS) {
@@ -146,6 +153,10 @@ namespace dawn_native { namespace vulkan {
             mDevice->fn.CmdPipelineBarrier(commands, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                                            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0,
                                            nullptr, 1, &barrier);
+        }
+
+        if (oldSwapchain != VK_NULL_HANDLE) {
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(oldSwapchain);
         }
 
         return DAWN_SWAP_CHAIN_NO_ERROR;

@@ -52,6 +52,8 @@ namespace dawn_native { namespace vulkan {
         };
 
       private:
+        void UpdateSurfaceConfig();
+
         VkSurfaceKHR mSurface = VK_NULL_HANDLE;
         VkSwapchainKHR mSwapChain = VK_NULL_HANDLE;
         std::vector<VkImage> mSwapChainImages;
