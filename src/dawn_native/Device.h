@@ -32,6 +32,7 @@ namespace dawn_native {
     using ErrorCallback = void (*)(const char* errorMessage, void* userData);
 
     class AdapterBase;
+    class AttachmentState;
     class FenceSignalTracker;
     class DynamicUploader;
     class StagingBufferBase;
@@ -112,6 +113,10 @@ namespace dawn_native {
         ResultOrError<ShaderModuleBase*> GetOrCreateShaderModule(
             const ShaderModuleDescriptor* descriptor);
         void UncacheShaderModule(ShaderModuleBase* obj);
+
+        AttachmentState* GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor);
+        AttachmentState* GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
+        void UncacheAttachmentState(AttachmentState* obj);
 
         // Dawn API
         BindGroupBase* CreateBindGroup(const BindGroupDescriptor* descriptor);

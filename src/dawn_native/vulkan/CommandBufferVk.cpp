@@ -197,7 +197,8 @@ namespace dawn_native { namespace vulkan {
             {
                 RenderPassCacheQuery query;
 
-                for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                for (uint32_t i :
+                     IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                     auto& attachmentInfo = renderPass->colorAttachments[i];
                     TextureView* view = ToBackend(attachmentInfo.view.Get());
                     bool hasResolveTarget = attachmentInfo.resolveTarget.Get() != nullptr;
@@ -223,7 +224,7 @@ namespace dawn_native { namespace vulkan {
                                    hasResolveTarget);
                 }
 
-                if (renderPass->hasDepthStencilAttachment) {
+                if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                     auto& attachmentInfo = renderPass->depthStencilAttachment;
                     query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat().format,
                                           attachmentInfo.depthLoadOp, attachmentInfo.stencilLoadOp);
@@ -238,7 +239,7 @@ namespace dawn_native { namespace vulkan {
                     }
                 }
 
-                query.SetSampleCount(renderPass->sampleCount);
+                query.SetSampleCount(renderPass->attachmentState->GetSampleCount());
 
                 renderPassVK = device->GetRenderPassCache()->GetRenderPass(query);
             }
@@ -252,7 +253,8 @@ namespace dawn_native { namespace vulkan {
                 // Fill in the attachment info that will be chained in the framebuffer create info.
                 std::array<VkImageView, kMaxColorAttachments * 2 + 1> attachments;
 
-                for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                for (uint32_t i :
+                     IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                     auto& attachmentInfo = renderPass->colorAttachments[i];
                     TextureView* view = ToBackend(attachmentInfo.view.Get());
 
@@ -266,7 +268,7 @@ namespace dawn_native { namespace vulkan {
                     attachmentCount++;
                 }
 
-                if (renderPass->hasDepthStencilAttachment) {
+                if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                     auto& attachmentInfo = renderPass->depthStencilAttachment;
                     TextureView* view = ToBackend(attachmentInfo.view.Get());
 
@@ -278,7 +280,8 @@ namespace dawn_native { namespace vulkan {
                     attachmentCount++;
                 }
 
-                for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+                for (uint32_t i :
+                     IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                     if (renderPass->colorAttachments[i].resolveTarget.Get() != nullptr) {
                         TextureView* view =
                             ToBackend(renderPass->colorAttachments[i].resolveTarget.Get());

@@ -678,22 +678,19 @@ namespace dawn_native {
                 BeginRenderPassCmd* cmd =
                     allocator->Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
 
-                for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-                    if (descriptor->colorAttachments[i] != nullptr) {
-                        cmd->colorAttachmentsSet.set(i);
-                        cmd->colorAttachments[i].view = descriptor->colorAttachments[i]->attachment;
-                        cmd->colorAttachments[i].resolveTarget =
-                            descriptor->colorAttachments[i]->resolveTarget;
-                        cmd->colorAttachments[i].loadOp = descriptor->colorAttachments[i]->loadOp;
-                        cmd->colorAttachments[i].storeOp = descriptor->colorAttachments[i]->storeOp;
-                        cmd->colorAttachments[i].clearColor =
-                            descriptor->colorAttachments[i]->clearColor;
-                    }
+                cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
+
+                for (uint32_t i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+                    cmd->colorAttachments[i].view = descriptor->colorAttachments[i]->attachment;
+                    cmd->colorAttachments[i].resolveTarget =
+                        descriptor->colorAttachments[i]->resolveTarget;
+                    cmd->colorAttachments[i].loadOp = descriptor->colorAttachments[i]->loadOp;
+                    cmd->colorAttachments[i].storeOp = descriptor->colorAttachments[i]->storeOp;
+                    cmd->colorAttachments[i].clearColor =
+                        descriptor->colorAttachments[i]->clearColor;
                 }
 
-                cmd->hasDepthStencilAttachment = descriptor->depthStencilAttachment != nullptr;
-                if (cmd->hasDepthStencilAttachment) {
-                    cmd->hasDepthStencilAttachment = true;
+                if (cmd->attachmentState->HasDepthStencilAttachment()) {
                     cmd->depthStencilAttachment.view =
                         descriptor->depthStencilAttachment->attachment;
                     cmd->depthStencilAttachment.clearDepth =
@@ -712,7 +709,6 @@ namespace dawn_native {
 
                 cmd->width = width;
                 cmd->height = height;
-                cmd->sampleCount = sampleCount;
 
                 return {};
             });
@@ -1071,7 +1067,7 @@ namespace dawn_native {
         CommandBufferStateTracker persistentState;
 
         // Track usage of the render pass attachments
-        for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+        for (uint32_t i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
             RenderPassColorAttachmentInfo* colorAttachment = &renderPass->colorAttachments[i];
             TextureBase* texture = colorAttachment->view->GetTexture();
             usageTracker.TextureUsedAs(texture, dawn::TextureUsageBit::OutputAttachment);
@@ -1083,7 +1079,7 @@ namespace dawn_native {
             }
         }
 
-        if (renderPass->hasDepthStencilAttachment) {
+        if (renderPass->attachmentState->HasDepthStencilAttachment()) {
             TextureBase* texture = renderPass->depthStencilAttachment.view->GetTexture();
             usageTracker.TextureUsedAs(texture, dawn::TextureUsageBit::OutputAttachment);
         }

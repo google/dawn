@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_RENDERPIPELINE_H_
 #define DAWNNATIVE_RENDERPIPELINE_H_
 
+#include "dawn_native/AttachmentState.h"
 #include "dawn_native/Pipeline.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -102,15 +103,13 @@ namespace dawn_native {
         std::array<VertexBufferInfo, kMaxVertexBuffers> mInputInfos;
 
         // Attachments
-        bool mHasDepthStencilAttachment = false;
+        Ref<AttachmentState> mAttachmentState;
         DepthStencilStateDescriptor mDepthStencilState;
-        std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
         std::array<ColorStateDescriptor, kMaxColorAttachments> mColorStates;
 
         // Other state
         dawn::PrimitiveTopology mPrimitiveTopology;
         RasterizationStateDescriptor mRasterizationState;
-        uint32_t mSampleCount;
         uint32_t mSampleMask;
         bool mAlphaToCoverageEnabled;
 

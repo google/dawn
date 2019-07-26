@@ -249,8 +249,9 @@ namespace dawn_native { namespace d3d12 {
         void TrackRenderPass(const BeginRenderPassCmd* renderPass) {
             DAWN_ASSERT(mRTVHeap.Get() == nullptr && mDSVHeap.Get() == nullptr);
 
-            mNumRTVs += static_cast<uint32_t>(renderPass->colorAttachmentsSet.count());
-            if (renderPass->hasDepthStencilAttachment) {
+            mNumRTVs += static_cast<uint32_t>(
+                renderPass->attachmentState->GetColorAttachmentsMask().count());
+            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 ++mNumDSVs;
             }
         }
@@ -273,9 +274,11 @@ namespace dawn_native { namespace d3d12 {
             OMSetRenderTargetArgs args = {};
 
             unsigned int rtvIndex = 0;
-            uint32_t rtvCount = static_cast<uint32_t>(renderPass->colorAttachmentsSet.count());
+            uint32_t rtvCount = static_cast<uint32_t>(
+                renderPass->attachmentState->GetColorAttachmentsMask().count());
             DAWN_ASSERT(mAllocatedRTVs + rtvCount <= mNumRTVs);
-            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+            for (uint32_t i :
+                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 TextureView* view = ToBackend(renderPass->colorAttachments[i].view).Get();
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = mRTVHeap.GetCPUHandle(mAllocatedRTVs);
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = view->GetRTVDescriptor();
@@ -288,7 +291,7 @@ namespace dawn_native { namespace d3d12 {
             }
             args.numRTVs = rtvIndex;
 
-            if (renderPass->hasDepthStencilAttachment) {
+            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 DAWN_ASSERT(mAllocatedDSVs < mNumDSVs);
                 TextureView* view = ToBackend(renderPass->depthStencilAttachment.view).Get();
                 D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDSVHeap.GetCPUHandle(mAllocatedDSVs);
@@ -372,7 +375,8 @@ namespace dawn_native { namespace d3d12 {
                                            BeginRenderPassCmd* renderPass) {
             ASSERT(renderPass != nullptr);
 
-            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+            for (uint32_t i :
+                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 TextureViewBase* resolveTarget =
                     renderPass->colorAttachments[i].resolveTarget.Get();
                 if (resolveTarget == nullptr) {
@@ -759,7 +763,8 @@ namespace dawn_native { namespace d3d12 {
 
         // Clear framebuffer attachments as needed and transition to render target
         {
-            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+            for (uint32_t i :
+                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 auto& attachmentInfo = renderPass->colorAttachments[i];
                 TextureView* view = ToBackend(attachmentInfo.view.Get());
 
@@ -785,7 +790,7 @@ namespace dawn_native { namespace d3d12 {
                 }
             }
 
-            if (renderPass->hasDepthStencilAttachment) {
+            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 auto& attachmentInfo = renderPass->depthStencilAttachment;
                 Texture* texture = ToBackend(renderPass->depthStencilAttachment.view->GetTexture());
                 if ((texture->GetFormat().HasDepth() &&
@@ -864,7 +869,7 @@ namespace dawn_native { namespace d3d12 {
 
                     // TODO(brandon1.jones@intel.com): avoid calling this function and enable MSAA
                     // resolve in D3D12 render pass on the platforms that support this feature.
-                    if (renderPass->sampleCount > 1) {
+                    if (renderPass->attachmentState->GetSampleCount() > 1) {
                         ResolveMultisampledRenderPass(commandList, renderPass);
                     }
                     return;

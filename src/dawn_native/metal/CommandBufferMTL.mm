@@ -50,7 +50,8 @@ namespace dawn_native { namespace metal {
         MTLRenderPassDescriptor* CreateMTLRenderPassDescriptor(BeginRenderPassCmd* renderPass) {
             MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
 
-            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+            for (uint32_t i :
+                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 auto& attachmentInfo = renderPass->colorAttachments[i];
 
                 if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
@@ -83,7 +84,7 @@ namespace dawn_native { namespace metal {
                 }
             }
 
-            if (renderPass->hasDepthStencilAttachment) {
+            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 auto& attachmentInfo = renderPass->depthStencilAttachment;
 
                 // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.

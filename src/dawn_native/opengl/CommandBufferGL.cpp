@@ -283,7 +283,8 @@ namespace dawn_native { namespace opengl {
             GLuint readFbo = 0;
             GLuint writeFbo = 0;
 
-            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+            for (uint32_t i :
+                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 if (renderPass->colorAttachments[i].resolveTarget.Get() != nullptr) {
                     if (readFbo == 0) {
                         ASSERT(writeFbo == 0);
@@ -590,7 +591,8 @@ namespace dawn_native { namespace opengl {
             // Construct GL framebuffer
 
             unsigned int attachmentCount = 0;
-            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+            for (uint32_t i :
+                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 TextureViewBase* textureView = renderPass->colorAttachments[i].view.Get();
                 GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
 
@@ -617,7 +619,7 @@ namespace dawn_native { namespace opengl {
             }
             gl.DrawBuffers(attachmentCount, drawBuffers.data());
 
-            if (renderPass->hasDepthStencilAttachment) {
+            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 TextureViewBase* textureView = renderPass->depthStencilAttachment.view.Get();
                 GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
                 const Format& format = textureView->GetTexture()->GetFormat();
@@ -660,7 +662,8 @@ namespace dawn_native { namespace opengl {
 
         // Clear framebuffer attachments as needed
         {
-            for (uint32_t i : IterateBitSet(renderPass->colorAttachmentsSet)) {
+            for (uint32_t i :
+                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 const auto& attachmentInfo = renderPass->colorAttachments[i];
 
                 // Load op - color
@@ -670,7 +673,7 @@ namespace dawn_native { namespace opengl {
                 }
             }
 
-            if (renderPass->hasDepthStencilAttachment) {
+            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 const auto& attachmentInfo = renderPass->depthStencilAttachment;
                 const Format& attachmentFormat = attachmentInfo.view->GetTexture()->GetFormat();
 
@@ -710,7 +713,7 @@ namespace dawn_native { namespace opengl {
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
 
-                    if (renderPass->sampleCount > 1) {
+                    if (renderPass->attachmentState->GetSampleCount() > 1) {
                         ResolveMultisampledRenderTargets(gl, renderPass);
                     }
                     gl.DeleteFramebuffers(1, &fbo);

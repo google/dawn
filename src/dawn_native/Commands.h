@@ -17,6 +17,7 @@
 
 #include "common/Constants.h"
 
+#include "dawn_native/AttachmentState.h"
 #include "dawn_native/Texture.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -80,15 +81,13 @@ namespace dawn_native {
     };
 
     struct BeginRenderPassCmd {
-        std::bitset<kMaxColorAttachments> colorAttachmentsSet;
+        Ref<AttachmentState> attachmentState;
         RenderPassColorAttachmentInfo colorAttachments[kMaxColorAttachments];
-        bool hasDepthStencilAttachment;
         RenderPassDepthStencilAttachmentInfo depthStencilAttachment;
 
-        // Cache the width, height and sample count of all attachments for convenience
+        // Cache the width and height of all attachments for convenience
         uint32_t width;
         uint32_t height;
-        uint32_t sampleCount;
     };
 
     struct BufferCopy {

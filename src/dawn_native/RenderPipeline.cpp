@@ -349,9 +349,8 @@ namespace dawn_native {
                        descriptor->layout,
                        dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment),
           mVertexInput(*descriptor->vertexInput),
-          mHasDepthStencilAttachment(descriptor->depthStencilState != nullptr),
+          mAttachmentState(device->GetOrCreateAttachmentState(descriptor)),
           mPrimitiveTopology(descriptor->primitiveTopology),
-          mSampleCount(descriptor->sampleCount),
           mSampleMask(descriptor->sampleMask),
           mAlphaToCoverageEnabled(descriptor->alphaToCoverageEnabled),
           mVertexModule(descriptor->vertexStage->module),
@@ -385,7 +384,7 @@ namespace dawn_native {
             mRasterizationState = RasterizationStateDescriptor();
         }
 
-        if (mHasDepthStencilAttachment) {
+        if (mAttachmentState->HasDepthStencilAttachment()) {
             mDepthStencilState = *descriptor->depthStencilState;
         } else {
             // These default values below are useful for backends to fill information.
@@ -406,8 +405,7 @@ namespace dawn_native {
             mDepthStencilState.stencilWriteMask = 0xff;
         }
 
-        for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
-            mColorAttachmentsSet.set(i);
+        for (uint32_t i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
             mColorStates[i] = *descriptor->colorStates[i];
         }
 
@@ -487,12 +485,12 @@ namespace dawn_native {
 
     std::bitset<kMaxColorAttachments> RenderPipelineBase::GetColorAttachmentsMask() const {
         ASSERT(!IsError());
-        return mColorAttachmentsSet;
+        return mAttachmentState->GetColorAttachmentsMask();
     }
 
     bool RenderPipelineBase::HasDepthStencilAttachment() const {
         ASSERT(!IsError());
-        return mHasDepthStencilAttachment;
+        return mAttachmentState->HasDepthStencilAttachment();
     }
 
     dawn::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(uint32_t attachment) const {
@@ -502,49 +500,22 @@ namespace dawn_native {
 
     dawn::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
         ASSERT(!IsError());
-        ASSERT(mHasDepthStencilAttachment);
+        ASSERT(mAttachmentState->HasDepthStencilAttachment());
         return mDepthStencilState.format;
     }
 
     uint32_t RenderPipelineBase::GetSampleCount() const {
         ASSERT(!IsError());
-        return mSampleCount;
+        return mAttachmentState->GetSampleCount();
     }
 
     MaybeError RenderPipelineBase::ValidateCompatibleWith(
         const BeginRenderPassCmd* renderPass) const {
         ASSERT(!IsError());
-        // TODO(cwallez@chromium.org): This is called on every SetPipeline command. Optimize it for
-        // example by caching some "attachment compatibility" object that would make the
-        // compatibility check a single pointer comparison.
 
-        if (renderPass->colorAttachmentsSet != mColorAttachmentsSet) {
+        if (renderPass->attachmentState.Get() != mAttachmentState.Get()) {
             return DAWN_VALIDATION_ERROR(
-                "Pipeline doesn't have same color attachments set as renderPass");
-        }
-
-        for (uint32_t i : IterateBitSet(mColorAttachmentsSet)) {
-            if (renderPass->colorAttachments[i].view->GetFormat().format !=
-                mColorStates[i].format) {
-                return DAWN_VALIDATION_ERROR(
-                    "Pipeline color attachment format doesn't match renderPass");
-            }
-        }
-
-        if (renderPass->hasDepthStencilAttachment != mHasDepthStencilAttachment) {
-            return DAWN_VALIDATION_ERROR(
-                "Pipeline depth stencil attachment doesn't match renderPass");
-        }
-
-        if (mHasDepthStencilAttachment &&
-            (renderPass->depthStencilAttachment.view->GetFormat().format !=
-             mDepthStencilState.format)) {
-            return DAWN_VALIDATION_ERROR(
-                "Pipeline depth stencil attachment format doesn't match renderPass");
-        }
-
-        if (renderPass->sampleCount != mSampleCount) {
-            return DAWN_VALIDATION_ERROR("Pipeline sample count doesn't match renderPass");
+                "Pipeline attachment state is not compatible with render pass");
         }
 
         return {};
@@ -564,20 +535,23 @@ namespace dawn_native {
         HashCombine(&hash, pipeline->mVertexModule.Get(), pipeline->mFragmentEntryPoint);
         HashCombine(&hash, pipeline->mFragmentModule.Get(), pipeline->mFragmentEntryPoint);
 
+        // Hierarchically hash the attachment state.
+        // It contains the attachments set, texture formats, and sample count.
+        HashCombine(&hash, pipeline->mAttachmentState.Get());
+
         // Hash attachments
-        HashCombine(&hash, pipeline->mColorAttachmentsSet);
-        for (uint32_t i : IterateBitSet(pipeline->mColorAttachmentsSet)) {
+        for (uint32_t i : IterateBitSet(pipeline->mAttachmentState->GetColorAttachmentsMask())) {
             const ColorStateDescriptor& desc = *pipeline->GetColorStateDescriptor(i);
-            HashCombine(&hash, desc.format, desc.writeMask);
+            HashCombine(&hash, desc.writeMask);
             HashCombine(&hash, desc.colorBlend.operation, desc.colorBlend.srcFactor,
                         desc.colorBlend.dstFactor);
             HashCombine(&hash, desc.alphaBlend.operation, desc.alphaBlend.srcFactor,
                         desc.alphaBlend.dstFactor);
         }
 
-        if (pipeline->mHasDepthStencilAttachment) {
+        if (pipeline->mAttachmentState->HasDepthStencilAttachment()) {
             const DepthStencilStateDescriptor& desc = pipeline->mDepthStencilState;
-            HashCombine(&hash, desc.format, desc.depthWriteEnabled, desc.depthCompare);
+            HashCombine(&hash, desc.depthWriteEnabled, desc.depthCompare);
             HashCombine(&hash, desc.stencilReadMask, desc.stencilWriteMask);
             HashCombine(&hash, desc.stencilFront.compare, desc.stencilFront.failOp,
                         desc.stencilFront.depthFailOp, desc.stencilFront.passOp);
@@ -608,8 +582,8 @@ namespace dawn_native {
         }
 
         // Hash other state
-        HashCombine(&hash, pipeline->mSampleCount, pipeline->mPrimitiveTopology,
-                    pipeline->mSampleMask, pipeline->mAlphaToCoverageEnabled);
+        HashCombine(&hash, pipeline->mPrimitiveTopology, pipeline->mSampleMask,
+                    pipeline->mAlphaToCoverageEnabled);
 
         return hash;
     }
@@ -624,16 +598,16 @@ namespace dawn_native {
             return false;
         }
 
-        // Check attachments
-        if (a->mColorAttachmentsSet != b->mColorAttachmentsSet ||
-            a->mHasDepthStencilAttachment != b->mHasDepthStencilAttachment) {
+        // Check the attachment state.
+        // It contains the attachments set, texture formats, and sample count.
+        if (a->mAttachmentState.Get() != b->mAttachmentState.Get()) {
             return false;
         }
 
-        for (uint32_t i : IterateBitSet(a->mColorAttachmentsSet)) {
+        for (uint32_t i : IterateBitSet(a->mAttachmentState->GetColorAttachmentsMask())) {
             const ColorStateDescriptor& descA = *a->GetColorStateDescriptor(i);
             const ColorStateDescriptor& descB = *b->GetColorStateDescriptor(i);
-            if (descA.format != descB.format || descA.writeMask != descB.writeMask) {
+            if (descA.writeMask != descB.writeMask) {
                 return false;
             }
             if (descA.colorBlend.operation != descB.colorBlend.operation ||
@@ -648,11 +622,10 @@ namespace dawn_native {
             }
         }
 
-        if (a->mHasDepthStencilAttachment) {
+        if (a->mAttachmentState->HasDepthStencilAttachment()) {
             const DepthStencilStateDescriptor& descA = a->mDepthStencilState;
             const DepthStencilStateDescriptor& descB = b->mDepthStencilState;
-            if (descA.format != descB.format ||
-                descA.depthWriteEnabled != descB.depthWriteEnabled ||
+            if (descA.depthWriteEnabled != descB.depthWriteEnabled ||
                 descA.depthCompare != descB.depthCompare) {
                 return false;
             }
@@ -720,8 +693,7 @@ namespace dawn_native {
         }
 
         // Check other state
-        if (a->mSampleCount != b->mSampleCount || a->mPrimitiveTopology != b->mPrimitiveTopology ||
-            a->mSampleMask != b->mSampleMask ||
+        if (a->mPrimitiveTopology != b->mPrimitiveTopology || a->mSampleMask != b->mSampleMask ||
             a->mAlphaToCoverageEnabled != b->mAlphaToCoverageEnabled) {
             return false;
         }

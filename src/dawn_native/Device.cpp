@@ -15,6 +15,7 @@
 #include "dawn_native/Device.h"
 
 #include "dawn_native/Adapter.h"
+#include "dawn_native/AttachmentState.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
@@ -47,6 +48,7 @@ namespace dawn_native {
         std::unordered_set<Object*, typename Object::HashFunc, typename Object::EqualityFunc>;
 
     struct DeviceBase::Caches {
+        ContentLessObjectCache<AttachmentStateBlueprint> attachmentStates;
         ContentLessObjectCache<BindGroupLayoutBase> bindGroupLayouts;
         ContentLessObjectCache<ComputePipelineBase> computePipelines;
         ContentLessObjectCache<PipelineLayoutBase> pipelineLayouts;
@@ -246,6 +248,43 @@ namespace dawn_native {
 
     void DeviceBase::UncacheShaderModule(ShaderModuleBase* obj) {
         size_t removedCount = mCaches->shaderModules.erase(obj);
+        ASSERT(removedCount == 1);
+    }
+
+    AttachmentState* DeviceBase::GetOrCreateAttachmentState(
+        const RenderPipelineDescriptor* descriptor) {
+        AttachmentStateBlueprint blueprint(descriptor);
+
+        auto iter = mCaches->attachmentStates.find(&blueprint);
+        if (iter != mCaches->attachmentStates.end()) {
+            AttachmentState* cachedState = static_cast<AttachmentState*>(*iter);
+            cachedState->Reference();
+            return cachedState;
+        }
+
+        AttachmentState* attachmentState = new AttachmentState(this, blueprint);
+        mCaches->attachmentStates.insert(attachmentState);
+        return attachmentState;
+    }
+
+    AttachmentState* DeviceBase::GetOrCreateAttachmentState(
+        const RenderPassDescriptor* descriptor) {
+        AttachmentStateBlueprint blueprint(descriptor);
+
+        auto iter = mCaches->attachmentStates.find(&blueprint);
+        if (iter != mCaches->attachmentStates.end()) {
+            AttachmentState* cachedState = static_cast<AttachmentState*>(*iter);
+            cachedState->Reference();
+            return cachedState;
+        }
+
+        AttachmentState* attachmentState = new AttachmentState(this, blueprint);
+        mCaches->attachmentStates.insert(attachmentState);
+        return attachmentState;
+    }
+
+    void DeviceBase::UncacheAttachmentState(AttachmentState* obj) {
+        size_t removedCount = mCaches->attachmentStates.erase(obj);
         ASSERT(removedCount == 1);
     }
 

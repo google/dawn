@@ -104,6 +104,8 @@ source_set("libdawn_native_sources") {
   sources += [
     "src/dawn_native/Adapter.cpp",
     "src/dawn_native/Adapter.h",
+    "src/dawn_native/AttachmentState.cpp",
+    "src/dawn_native/AttachmentState.h",
     "src/dawn_native/BackendConnection.cpp",
     "src/dawn_native/BackendConnection.h",
     "src/dawn_native/BindGroup.cpp",
