@@ -563,6 +563,7 @@ namespace dawn_native { namespace vulkan {
                                         clear_color, 1, &range);
         }
         SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer, layerCount);
+        GetDevice()->IncrementLazyClearCountForTesting();
     }
 
     void Texture::EnsureSubresourceContentInitialized(VkCommandBuffer commands,

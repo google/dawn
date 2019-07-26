@@ -151,6 +151,8 @@ namespace dawn_native {
 
         std::vector<const char*> GetTogglesUsed() const;
         bool IsToggleEnabled(Toggle toggle) const;
+        size_t GetLazyClearCountForTesting();
+        void IncrementLazyClearCountForTesting();
 
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);
@@ -232,6 +234,7 @@ namespace dawn_native {
         FormatTable mFormatTable;
 
         TogglesSet mTogglesSet;
+        size_t mLazyClearCountForTesting = 0;
     };
 
 }  // namespace dawn_native

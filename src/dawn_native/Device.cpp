@@ -484,6 +484,14 @@ namespace dawn_native {
         return mTogglesSet.IsEnabled(toggle);
     }
 
+    size_t DeviceBase::GetLazyClearCountForTesting() {
+        return mLazyClearCountForTesting;
+    }
+
+    void DeviceBase::IncrementLazyClearCountForTesting() {
+        ++mLazyClearCountForTesting;
+    }
+
     void DeviceBase::SetDefaultToggles() {
         // Sets the default-enabled toggles
         mTogglesSet.SetToggle(Toggle::LazyClearResourceOnFirstUse, true);

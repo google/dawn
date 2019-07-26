@@ -115,4 +115,9 @@ namespace dawn_native {
         return mImpl->IsBeginCaptureOnStartupEnabled();
     }
 
+    size_t GetLazyClearCountForTesting(DawnDevice device) {
+        dawn_native::DeviceBase* deviceBase = reinterpret_cast<dawn_native::DeviceBase*>(device);
+        return deviceBase->GetLazyClearCountForTesting();
+    }
+
 }  // namespace dawn_native

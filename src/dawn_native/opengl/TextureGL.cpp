@@ -222,6 +222,7 @@ namespace dawn_native { namespace opengl {
             }
         }
         SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer, layerCount);
+        GetDevice()->IncrementLazyClearCountForTesting();
     }
 
     void Texture::EnsureSubresourceContentInitialized(uint32_t baseMipLevel,

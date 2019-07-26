@@ -143,6 +143,8 @@ namespace dawn_native {
     // Query the names of all the toggles that are enabled in device
     DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(DawnDevice device);
 
+    // Backdoor to get the number of lazy clears for testing
+    DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(DawnDevice device);
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DAWNNATIVE_H_
