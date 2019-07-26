@@ -59,11 +59,11 @@ uint32_t Log2(uint64_t value) {
 #endif
 }
 
-uint64_t NextPowerOfTwo(uint64_t x) {
+uint64_t NextPowerOfTwo(uint64_t n) {
 #if defined(DAWN_COMPILER_MSVC)
-    return x == 1 ? 1 : 1ull << (64 - __lzcnt64(x - 1));
+    return n <= 1 ? 1 : 1ull << (64 - __lzcnt64(n - 1));
 #else
-    return x == 1 ? 1 : 1ull << (64 - __builtin_clzll(x - 1));
+    return n == 1 ? 1 : 1ull << (64 - __builtin_clzll(n - 1));
 #endif
 }
 
