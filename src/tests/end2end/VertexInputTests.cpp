@@ -487,6 +487,28 @@ TEST_P(VertexInputTest, MultiplePipelinesMixedVertexInput) {
     CheckResult(1, 4);
 }
 
+// Checks that using the last vertex buffer doesn't overflow the vertex buffer table in Metal.
+TEST_P(VertexInputTest, LastAllowedVertexBuffer) {
+    constexpr uint32_t kBufferIndex = kMaxVertexBuffers - 1;
+
+    utils::ComboVertexInputDescriptor vertexInput;
+    // All the other vertex buffers default to no attributes
+    vertexInput.bufferCount = kMaxVertexBuffers;
+    vertexInput.cBuffers[kBufferIndex].stride = 4 * sizeof(float);
+    vertexInput.cBuffers[kBufferIndex].stepMode = InputStepMode::Vertex;
+    vertexInput.cBuffers[kBufferIndex].attributeCount = 1;
+    vertexInput.cBuffers[kBufferIndex].attributes = &vertexInput.cAttributes[0];
+    vertexInput.cAttributes[0].shaderLocation = 0;
+    vertexInput.cAttributes[0].offset = 0;
+    vertexInput.cAttributes[0].format = VertexFormat::Float4;
+
+    dawn::RenderPipeline pipeline =
+        MakeTestPipeline(vertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
+
+    dawn::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5});
+    DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{kMaxVertexBuffers - 1, &buffer0}});
+}
+
 DAWN_INSTANTIATE_TEST(VertexInputTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
 
 // TODO for the input state:

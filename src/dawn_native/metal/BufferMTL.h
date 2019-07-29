@@ -29,7 +29,7 @@ namespace dawn_native { namespace metal {
         Buffer(Device* device, const BufferDescriptor* descriptor);
         ~Buffer();
 
-        id<MTLBuffer> GetMTLBuffer();
+        id<MTLBuffer> GetMTLBuffer() const;
 
         void OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite);
 

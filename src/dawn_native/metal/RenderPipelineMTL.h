@@ -37,6 +37,10 @@ namespace dawn_native { namespace metal {
 
         id<MTLDepthStencilState> GetMTLDepthStencilState();
 
+        // For each Dawn vertex buffer, give the index in which it will be positioned in the Metal
+        // vertex buffer table.
+        uint32_t GetMtlVertexBufferIndex(uint32_t dawnIndex) const;
+
       private:
         MTLVertexDescriptor* MakeVertexDesc();
 
@@ -46,6 +50,7 @@ namespace dawn_native { namespace metal {
         MTLCullMode mMtlCullMode;
         id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;
         id<MTLDepthStencilState> mMtlDepthStencilState = nil;
+        std::array<uint32_t, kMaxVertexBuffers> mMtlVertexBufferIndices;
     };
 
 }}  // namespace dawn_native::metal
