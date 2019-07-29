@@ -166,7 +166,7 @@ namespace dawn_native { namespace vulkan {
         appInfo.applicationVersion = 0;
         appInfo.pEngineName = nullptr;
         appInfo.engineVersion = 0;
-        appInfo.apiVersion = VK_API_VERSION_1_0;
+        appInfo.apiVersion = mGlobalInfo.apiVersion;
 
         VkInstanceCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

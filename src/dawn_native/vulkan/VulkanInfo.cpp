@@ -120,6 +120,19 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
+        // Gather info on available API version
+        {
+            uint32_t supportedAPIVersion = VK_MAKE_VERSION(1, 0, 0);
+            if (vkFunctions.EnumerateInstanceVersion) {
+                vkFunctions.EnumerateInstanceVersion(&supportedAPIVersion);
+            }
+
+            // Use Vulkan 1.1 if it's available.
+            info.apiVersion = (supportedAPIVersion >= VK_MAKE_VERSION(1, 1, 0))
+                                  ? VK_MAKE_VERSION(1, 1, 0)
+                                  : VK_MAKE_VERSION(1, 0, 0);
+        }
+
         // TODO(cwallez@chromium:org): Each layer can expose additional extensions, query them?
 
         return info;

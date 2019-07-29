@@ -59,6 +59,7 @@ namespace dawn_native { namespace vulkan {
     struct VulkanGlobalInfo : VulkanGlobalKnobs {
         std::vector<VkLayerProperties> layers;
         std::vector<VkExtensionProperties> extensions;
+        uint32_t apiVersion;
         // TODO(cwallez@chromium.org): layer instance extensions
     };
 

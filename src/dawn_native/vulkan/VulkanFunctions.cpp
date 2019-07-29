@@ -34,6 +34,10 @@ namespace dawn_native { namespace vulkan {
         GET_GLOBAL_PROC(EnumerateInstanceExtensionProperties);
         GET_GLOBAL_PROC(EnumerateInstanceLayerProperties);
 
+        // Is not available in Vulkan 1.0, so allow nullptr
+        EnumerateInstanceVersion = reinterpret_cast<decltype(EnumerateInstanceVersion)>(
+            GetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
+
         return {};
     }
 

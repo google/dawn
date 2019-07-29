@@ -45,6 +45,9 @@ namespace dawn_native { namespace vulkan {
         // before querying the instance procs in case we need to error out during initialization.
         PFN_vkDestroyInstance DestroyInstance = nullptr;
 
+        // Core Vulkan 1.1
+        PFN_vkEnumerateInstanceVersion EnumerateInstanceVersion = nullptr;
+
         // ---------- Instance procs
 
         // Core Vulkan 1.0
