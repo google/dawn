@@ -112,6 +112,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/BindGroup.h",
     "src/dawn_native/BindGroupLayout.cpp",
     "src/dawn_native/BindGroupLayout.h",
+    "src/dawn_native/BuddyAllocator.cpp",
+    "src/dawn_native/BuddyAllocator.h",
     "src/dawn_native/Buffer.cpp",
     "src/dawn_native/Buffer.h",
     "src/dawn_native/CommandAllocator.cpp",
@@ -598,6 +600,7 @@ test("dawn_unittests") {
   ]
   sources += [
     "src/tests/unittests/BitSetIteratorTests.cpp",
+    "src/tests/unittests/BuddyAllocatorTests.cpp",
     "src/tests/unittests/CommandAllocatorTests.cpp",
     "src/tests/unittests/EnumClassBitmasksTests.cpp",
     "src/tests/unittests/ErrorTests.cpp",
