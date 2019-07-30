@@ -729,3 +729,15 @@ TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicStorageBuffer) {
 
     TestComputePassBindGroup(bindGroup, offsets.data(), 2, false);
 }
+
+// Test that an error is produced (and no ASSERTs fired) when using an error bindgroup in
+// SetBindGroup
+TEST_F(SetBindGroupValidationTest, ErrorBindGroup) {
+    // Bindgroup creation fails because not all bindings are specified.
+    dawn::BindGroup bindGroup;
+    ASSERT_DEVICE_ERROR(bindGroup = utils::MakeBindGroup(device, mBindGroupLayout, {}));
+
+    TestRenderPassBindGroup(bindGroup, nullptr, 0, false);
+
+    TestComputePassBindGroup(bindGroup, nullptr, 0, false);
+}

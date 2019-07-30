@@ -75,8 +75,6 @@ namespace dawn_native {
                                                uint32_t dynamicOffsetCount,
                                                const uint64_t* dynamicOffsets) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            const BindGroupLayoutBase* layout = group->GetLayout();
-
             DAWN_TRY(GetDevice()->ValidateObject(group));
 
             if (groupIndex >= kMaxBindGroups) {
@@ -84,6 +82,7 @@ namespace dawn_native {
             }
 
             // Dynamic offsets count must match the number required by the layout perfectly.
+            const BindGroupLayoutBase* layout = group->GetLayout();
             if (layout->GetDynamicBufferCount() != dynamicOffsetCount) {
                 return DAWN_VALIDATION_ERROR("dynamicOffset count mismatch");
             }
