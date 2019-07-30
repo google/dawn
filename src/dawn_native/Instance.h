@@ -49,7 +49,6 @@ namespace dawn_native {
         const ToggleInfo* GetToggleInfo(const char* toggleName);
 
         Toggle ToggleNameToEnum(const char* toggleName);
-        const char* ToggleEnumToName(Toggle toggle);
 
         void EnableBackendValidation(bool enableBackendValidation);
         bool IsBackendValidationEnabled() const;
@@ -66,19 +65,16 @@ namespace dawn_native {
 
         MaybeError DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options);
 
-        void EnsureToggleNameToEnumMapInitialized();
-
         bool mBackendsConnected = false;
         bool mDiscoveredDefaultAdapters = false;
 
-        bool mToggleNameToEnumMapInitialized = false;
         bool mEnableBackendValidation = false;
         bool mBeginCaptureOnStartup = false;
 
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<std::unique_ptr<AdapterBase>> mAdapters;
 
-        std::unordered_map<std::string, Toggle> mToggleNameToEnumMap;
+        TogglesInfo mTogglesInfo;
     };
 
 }  // namespace dawn_native

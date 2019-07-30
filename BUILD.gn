@@ -183,6 +183,7 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Texture.cpp",
     "src/dawn_native/Texture.h",
     "src/dawn_native/ToBackend.h",
+    "src/dawn_native/Toggles.cpp",
     "src/dawn_native/Toggles.h",
     "src/dawn_native/dawn_platform.h",
   ]

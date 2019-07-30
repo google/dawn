@@ -506,17 +506,7 @@ namespace dawn_native {
     }
 
     std::vector<const char*> DeviceBase::GetTogglesUsed() const {
-        std::vector<const char*> togglesNameInUse(mTogglesSet.toggleBitset.count());
-
-        uint32_t index = 0;
-        for (uint32_t i : IterateBitSet(mTogglesSet.toggleBitset)) {
-            const char* toggleName =
-                GetAdapter()->GetInstance()->ToggleEnumToName(static_cast<Toggle>(i));
-            togglesNameInUse[index] = toggleName;
-            ++index;
-        }
-
-        return togglesNameInUse;
+        return mTogglesSet.GetEnabledToggleNames();
     }
 
     bool DeviceBase::IsToggleEnabled(Toggle toggle) const {
