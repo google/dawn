@@ -472,6 +472,21 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutCache) {
     ASSERT_EQ(layout1.Get(), layout2.Get());
 }
 
+// This test verifies that visibility of bindings in BindGroupLayout can't be none
+TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
+                });
+
+    dawn::BindGroupLayoutBinding binding = {0, dawn::ShaderStageBit::None,
+                                            dawn::BindingType::UniformBuffer};
+    dawn::BindGroupLayoutDescriptor descriptor;
+    descriptor.bindingCount = 1;
+    descriptor.bindings = &binding;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+}
+
 constexpr uint64_t kBufferSize = 2 * kMinDynamicBufferOffsetAlignment + 8;
 constexpr uint32_t kBindingSize = 9;
 

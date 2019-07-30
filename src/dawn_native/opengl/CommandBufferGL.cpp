@@ -220,9 +220,12 @@ namespace dawn_native { namespace opengl {
                             uint32_t index,
                             BindGroupBase* group,
                             PipelineLayout* pipelineLayout,
-                            PipelineGL* pipeline) {
+                            PipelineGL* pipeline,
+                            uint32_t dynamicOffsetCount,
+                            uint64_t* dynamicOffsets) {
             const auto& indices = pipelineLayout->GetBindingIndexInfo()[index];
             const auto& layout = group->GetLayout()->GetBindingInfo();
+            uint32_t currentDynamicIndex = 0;
 
             for (uint32_t bindingIndex : IterateBitSet(layout.mask)) {
                 switch (layout.types[bindingIndex]) {
@@ -230,8 +233,14 @@ namespace dawn_native { namespace opengl {
                         BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                         GLuint buffer = ToBackend(binding.buffer)->GetHandle();
                         GLuint uboIndex = indices[bindingIndex];
+                        GLuint offset = binding.offset;
 
-                        gl.BindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer, binding.offset,
+                        if (layout.dynamic[bindingIndex]) {
+                            offset += dynamicOffsets[currentDynamicIndex];
+                            ++currentDynamicIndex;
+                        }
+
+                        gl.BindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer, offset,
                                            binding.size);
                     } break;
 
@@ -261,9 +270,15 @@ namespace dawn_native { namespace opengl {
                         BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                         GLuint buffer = ToBackend(binding.buffer)->GetHandle();
                         GLuint ssboIndex = indices[bindingIndex];
+                        GLuint offset = binding.offset;
 
-                        gl.BindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer,
-                                           binding.offset, binding.size);
+                        if (layout.dynamic[bindingIndex]) {
+                            offset += dynamicOffsets[currentDynamicIndex];
+                            ++currentDynamicIndex;
+                        }
+
+                        gl.BindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer, offset,
+                                           binding.size);
                     } break;
 
                     case dawn::BindingType::StorageTexture:
@@ -555,8 +570,13 @@ namespace dawn_native { namespace opengl {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+                    uint64_t* dynamicOffsets = nullptr;
+                    if (cmd->dynamicOffsetCount > 0) {
+                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
                     ApplyBindGroup(gl, cmd->index, cmd->group.Get(),
-                                   ToBackend(lastPipeline->GetLayout()), lastPipeline);
+                                   ToBackend(lastPipeline->GetLayout()), lastPipeline,
+                                   cmd->dynamicOffsetCount, dynamicOffsets);
                 } break;
 
                 default: { UNREACHABLE(); } break;
@@ -830,8 +850,13 @@ namespace dawn_native { namespace opengl {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+                    uint64_t* dynamicOffsets = nullptr;
+                    if (cmd->dynamicOffsetCount > 0) {
+                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
                     ApplyBindGroup(gl, cmd->index, cmd->group.Get(),
-                                   ToBackend(lastPipeline->GetLayout()), lastPipeline);
+                                   ToBackend(lastPipeline->GetLayout()), lastPipeline,
+                                   cmd->dynamicOffsetCount, dynamicOffsets);
                 } break;
 
                 case Command::SetIndexBuffer: {
