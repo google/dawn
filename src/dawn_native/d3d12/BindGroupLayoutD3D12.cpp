@@ -24,6 +24,13 @@ namespace dawn_native { namespace d3d12 {
         const auto& groupInfo = GetBindingInfo();
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
+            // For dynamic resources, Dawn uses root descriptor in D3D12 backend.
+            // So there is no need to allocate the descriptor from descriptor heap. Skip counting
+            // dynamic resources for calculating size of descriptor heap.
+            if (groupInfo.dynamic[binding]) {
+                continue;
+            }
+
             switch (groupInfo.types[binding]) {
                 case dawn::BindingType::UniformBuffer:
                     mBindingOffsets[binding] = mDescriptorCounts[CBV]++;
@@ -42,8 +49,6 @@ namespace dawn_native { namespace d3d12 {
                 case dawn::BindingType::ReadonlyStorageBuffer:
                     UNREACHABLE();
                     break;
-
-                    // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
             }
         }
 
@@ -89,6 +94,25 @@ namespace dawn_native { namespace d3d12 {
         descriptorOffsets[Sampler] = 0;
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
+            if (groupInfo.dynamic[binding]) {
+                // Dawn is using values in mBindingOffsets to decide register number in HLSL.
+                // Root descriptor needs to set this value to set correct register number in
+                // generated HLSL shader.
+                switch (groupInfo.types[binding]) {
+                    case dawn::BindingType::UniformBuffer:
+                    case dawn::BindingType::StorageBuffer:
+                        mBindingOffsets[binding] = baseRegister++;
+                        break;
+                    case dawn::BindingType::SampledTexture:
+                    case dawn::BindingType::Sampler:
+                    case dawn::BindingType::StorageTexture:
+                    case dawn::BindingType::ReadonlyStorageBuffer:
+                        UNREACHABLE();
+                        break;
+                }
+                continue;
+            }
+
             switch (groupInfo.types[binding]) {
                 case dawn::BindingType::UniformBuffer:
                     mBindingOffsets[binding] += descriptorOffsets[CBV];

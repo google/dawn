@@ -42,6 +42,12 @@ namespace dawn_native { namespace d3d12 {
 
         auto d3d12Device = ToBackend(GetDevice())->GetD3D12Device();
         for (uint32_t bindingIndex : IterateBitSet(layout.mask)) {
+            // It's not necessary to create descriptors in descriptor heap for dynamic resources.
+            // So skip allocating descriptors in descriptor heaps for dynamic buffers.
+            if (layout.dynamic[bindingIndex]) {
+                continue;
+            }
+
             switch (layout.types[bindingIndex]) {
                 case dawn::BindingType::UniformBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);

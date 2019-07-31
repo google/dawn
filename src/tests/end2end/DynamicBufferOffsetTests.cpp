@@ -27,15 +27,20 @@ class DynamicBufferOffsetTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // Mix up dynamic and non dynamic resources in one bind group and using not continuous
+        // binding number to cover more cases.
         std::array<uint32_t, kBufferElementsCount> uniformData = {0};
-
         uniformData[0] = 1;
         uniformData[1] = 2;
-        uniformData[uniformData.size() - 2] = 5;
-        uniformData[uniformData.size() - 1] = 6;
 
         mUniformBuffer = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
                                                      dawn::BufferUsageBit::Uniform);
+
+        uniformData[uniformData.size() - 2] = 5;
+        uniformData[uniformData.size() - 1] = 6;
+
+        mDynamicUniformBuffer = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
+                                                            dawn::BufferUsageBit::Uniform);
 
         dawn::BufferDescriptor storageBufferDescriptor;
         storageBufferDescriptor.size = kBufferSize;
@@ -45,15 +50,23 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         mStorageBuffer = device.CreateBuffer(&storageBufferDescriptor);
 
+        mDynamicStorageBuffer = device.CreateBuffer(&storageBufferDescriptor);
+
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
-                      dawn::BindingType::UniformBuffer, true},
+                      dawn::BindingType::UniformBuffer},
                      {1, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+                      dawn::BindingType::StorageBuffer},
+                     {3, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+                      dawn::BindingType::UniformBuffer, true},
+                     {4, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
                       dawn::BindingType::StorageBuffer, true}});
 
-        mBindGroup = utils::MakeBindGroup(
-            device, mBindGroupLayout,
-            {{0, mUniformBuffer, 0, kBindingSize}, {1, mStorageBuffer, 0, kBindingSize}});
+        mBindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
+                                          {{0, mUniformBuffer, 0, kBindingSize},
+                                           {1, mStorageBuffer, 0, kBindingSize},
+                                           {3, mDynamicUniformBuffer, 0, kBindingSize},
+                                           {4, mDynamicStorageBuffer, 0, kBindingSize}});
     }
     // Create objects to use as resources inside test bind groups.
 
@@ -61,6 +74,8 @@ class DynamicBufferOffsetTests : public DawnTest {
     dawn::BindGroupLayout mBindGroupLayout;
     dawn::Buffer mUniformBuffer;
     dawn::Buffer mStorageBuffer;
+    dawn::Buffer mDynamicUniformBuffer;
+    dawn::Buffer mDynamicStorageBuffer;
     dawn::Texture mColorAttachment;
 
     dawn::RenderPipeline CreateRenderPipeline() {
@@ -75,15 +90,22 @@ class DynamicBufferOffsetTests : public DawnTest {
         dawn::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
                 #version 450
-                layout(std140, set = 0, binding = 0) uniform uBuffer {
+                layout(std140, set = 0, binding = 0) uniform uBufferNotDynamic {
+                    uvec2 notDynamicValue;
+                };
+                layout(std140, set = 0, binding = 1) buffer sBufferNotDynamic {
+                    uvec2 notDynamicResult;
+                } mid;
+                layout(std140, set = 0, binding = 3) uniform uBuffer {
                      uvec2 value;
                 };
-                layout(std140, set = 0, binding = 1) buffer SBuffer {
+                layout(std140, set = 0, binding = 4) buffer SBuffer {
                      uvec2 result;
                 } sBuffer;
                 layout(location = 0) out vec4 fragColor;
                 void main() {
-                    sBuffer.result.xy = value.xy;
+                    mid.notDynamicResult.xy = notDynamicValue.xy;
+                    sBuffer.result.xy = value.xy + mid.notDynamicResult.xy;
                     fragColor = vec4(value.x / 255.0f, value.y / 255.0f, 1.0f, 1.0f);
                 })");
 
@@ -103,15 +125,22 @@ class DynamicBufferOffsetTests : public DawnTest {
             utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
                 #version 450
                 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-                layout(std140, set = 0, binding = 0) uniform UniformBuffer {
-                    uvec2 value;
+                layout(std140, set = 0, binding = 0) uniform uBufferNotDynamic {
+                    uvec2 notDynamicValue;
                 };
-                layout(std140, set = 0, binding = 1) buffer SBuffer {
-                    uvec2 result;
+                layout(std140, set = 0, binding = 1) buffer sBufferNotDynamic {
+                    uvec2 notDynamicResult;
+                } mid;
+                layout(std140, set = 0, binding = 3) uniform uBuffer {
+                     uvec2 value;
+                };
+                layout(std140, set = 0, binding = 4) buffer SBuffer {
+                     uvec2 result;
                 } sBuffer;
 
                 void main() {
-                    sBuffer.result.xy = value.xy;
+                    mid.notDynamicResult.xy = notDynamicValue.xy;
+                    sBuffer.result.xy = value.xy + mid.notDynamicResult.xy;
                 })");
 
         dawn::ComputePipelineDescriptor csDesc;
@@ -144,9 +173,9 @@ TEST_P(DynamicBufferOffsetTests, BasicRenderPipeline) {
     dawn::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
-    std::vector<uint32_t> expectedData = {1, 2};
+    std::vector<uint32_t> expectedData = {2, 4};
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(1, 2, 255, 255), renderPass.color, 0, 0);
-    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffer, 0, expectedData.size());
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer, 0, expectedData.size());
 }
 
 // Have non-zero dynamic offsets.
@@ -166,9 +195,9 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsRenderPipeline) {
     dawn::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
-    std::vector<uint32_t> expectedData = {5, 6};
+    std::vector<uint32_t> expectedData = {6, 8};
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(5, 6, 255, 255), renderPass.color, 0, 0);
-    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffer,
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer,
                                kMinDynamicBufferOffsetAlignment, expectedData.size());
 }
 
@@ -187,8 +216,8 @@ TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
     dawn::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
-    std::vector<uint32_t> expectedData = {1, 2};
-    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffer, 0, expectedData.size());
+    std::vector<uint32_t> expectedData = {2, 4};
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer, 0, expectedData.size());
 }
 
 // Have non-zero dynamic offsets.
@@ -207,9 +236,13 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsComputePipeline) {
     dawn::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
-    std::vector<uint32_t> expectedData = {5, 6};
-    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffer,
+    std::vector<uint32_t> expectedData = {6, 8};
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer,
                                kMinDynamicBufferOffsetAlignment, expectedData.size());
 }
 
-DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests,
+                      D3D12Backend,
+                      MetalBackend,
+                      OpenGLBackend,
+                      VulkanBackend);

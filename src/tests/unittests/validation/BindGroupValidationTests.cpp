@@ -406,6 +406,34 @@ TEST_F(BindGroupValidationTest, ErrorLayout) {
 }
 
 class BindGroupLayoutValidationTest : public ValidationTest {
+  public:
+    void TestCreateBindGroupLayout(dawn::BindGroupLayoutBinding* binding,
+                                   uint32_t count,
+                                   bool expected) {
+        dawn::BindGroupLayoutDescriptor descriptor;
+
+        descriptor.bindingCount = count;
+        descriptor.bindings = binding;
+
+        if (!expected) {
+            ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+        } else {
+            device.CreateBindGroupLayout(&descriptor);
+        }
+    }
+
+    void TestCreatePipelineLayout(dawn::BindGroupLayout* bgl, uint32_t count, bool expected) {
+        dawn::PipelineLayoutDescriptor descriptor;
+
+        descriptor.bindGroupLayoutCount = count;
+        descriptor.bindGroupLayouts = bgl;
+
+        if (!expected) {
+            ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&descriptor));
+        } else {
+            device.CreatePipelineLayout(&descriptor);
+        }
+    }
 };
 
 // Tests setting OOB checks for kMaxBindingsPerGroup in bind group layouts.
@@ -485,6 +513,74 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
     descriptor.bindingCount = 1;
     descriptor.bindings = &binding;
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+}
+
+// Check that dynamic buffer numbers exceed maximum value in one bind group layout.
+TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
+    dawn::BindGroupLayout bgl[2];
+    std::vector<dawn::BindGroupLayoutBinding> maxUniformDB;
+    std::vector<dawn::BindGroupLayoutBinding> maxStorageDB;
+
+    for (uint32_t i = 0; i < kMaxDynamicUniformBufferCount; ++i) {
+        maxUniformDB.push_back(
+            {i, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer, true});
+    }
+
+    for (uint32_t i = 0; i < kMaxDynamicStorageBufferCount; ++i) {
+        maxStorageDB.push_back(
+            {i, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer, true});
+    }
+
+    auto MakeBindGroupLayout = [&](dawn::BindGroupLayoutBinding* binding,
+                                   uint32_t count) -> dawn::BindGroupLayout {
+        dawn::BindGroupLayoutDescriptor descriptor;
+        descriptor.bindingCount = count;
+        descriptor.bindings = binding;
+        return device.CreateBindGroupLayout(&descriptor);
+    };
+
+    {
+        bgl[0] = MakeBindGroupLayout(maxUniformDB.data(), maxUniformDB.size());
+        bgl[1] = MakeBindGroupLayout(maxStorageDB.data(), maxStorageDB.size());
+
+        TestCreatePipelineLayout(bgl, 2, true);
+    }
+
+    // Check dynamic uniform buffers excedd maximum in pipeline layout.
+    {
+        bgl[0] = MakeBindGroupLayout(maxUniformDB.data(), maxUniformDB.size());
+        bgl[1] = utils::MakeBindGroupLayout(
+            device, {
+                        {0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer, true},
+                    });
+
+        TestCreatePipelineLayout(bgl, 2, false);
+    }
+
+    // Check dynamic storage buffers exceed maximum in pipeline layout
+    {
+        bgl[0] = MakeBindGroupLayout(maxStorageDB.data(), maxStorageDB.size());
+        bgl[1] = utils::MakeBindGroupLayout(
+            device, {
+                        {0, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer, true},
+                    });
+
+        TestCreatePipelineLayout(bgl, 2, false);
+    }
+
+    // Check dynamic uniform buffers exceed maximum in bind group layout.
+    {
+        maxUniformDB.push_back({kMaxDynamicUniformBufferCount, dawn::ShaderStageBit::Compute,
+                                dawn::BindingType::UniformBuffer, true});
+        TestCreateBindGroupLayout(maxUniformDB.data(), maxUniformDB.size(), false);
+    }
+
+    // Check dynamic storage buffers exceed maximum in bind group layout.
+    {
+        maxStorageDB.push_back({kMaxDynamicStorageBufferCount, dawn::ShaderStageBit::Compute,
+                                dawn::BindingType::StorageBuffer, true});
+        TestCreateBindGroupLayout(maxStorageDB.data(), maxStorageDB.size(), false);
+    }
 }
 
 constexpr uint64_t kBufferSize = 2 * kMinDynamicBufferOffsetAlignment + 8;
