@@ -407,7 +407,7 @@ TEST_P(IOSurfaceUsageTests, ClearRG8IOSurface) {
 }
 
 // Test sampling from a BGRA8 IOSurface
-TEST_P(IOSurfaceUsageTests, SampleFromBGRA8888IOSurface) {
+TEST_P(IOSurfaceUsageTests, SampleFromBGRA8IOSurface) {
     DAWN_SKIP_TEST_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'BGRA', 4);
 
@@ -423,6 +423,25 @@ TEST_P(IOSurfaceUsageTests, ClearBGRA8IOSurface) {
 
     uint32_t data = 0x04010203;
     DoClearTest(ioSurface.get(), dawn::TextureFormat::BGRA8Unorm, &data, sizeof(data));
+}
+
+// Test sampling from an RGBA8 IOSurface
+TEST_P(IOSurfaceUsageTests, SampleFromRGBA8IOSurface) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'RGBA', 4);
+
+    uint32_t data = 0x01020304;  // Stored as (A, B, G, R)
+    DoSampleTest(ioSurface.get(), dawn::TextureFormat::RGBA8Unorm, &data, sizeof(data),
+                 RGBA8(4, 3, 2, 1));
+}
+
+// Test clearing an RGBA8 IOSurface
+TEST_P(IOSurfaceUsageTests, ClearRGBA8IOSurface) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'RGBA', 4);
+
+    uint32_t data = 0x04030201;
+    DoClearTest(ioSurface.get(), dawn::TextureFormat::RGBA8Unorm, &data, sizeof(data));
 }
 
 DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend);

@@ -109,6 +109,8 @@ namespace dawn_native { namespace metal {
 
         ResultOrError<dawn::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
             switch (format) {
+                case 'RGBA':
+                    return dawn::TextureFormat::RGBA8Unorm;
                 case 'BGRA':
                     return dawn::TextureFormat::BGRA8Unorm;
                 case '2C08':
