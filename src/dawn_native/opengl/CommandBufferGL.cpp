@@ -636,14 +636,6 @@ namespace dawn_native { namespace opengl {
                 }
                 drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
                 attachmentCount = i + 1;
-
-                // TODO(kainino@chromium.org): the color clears (later in
-                // this function) may be undefined for non-normalized integer formats.
-                dawn::TextureFormat format = textureView->GetTexture()->GetFormat().format;
-                ASSERT(format == dawn::TextureFormat::RGBA8Unorm ||
-                       format == dawn::TextureFormat::RG8Unorm ||
-                       format == dawn::TextureFormat::R8Unorm ||
-                       format == dawn::TextureFormat::BGRA8Unorm);
             }
             gl.DrawBuffers(attachmentCount, drawBuffers.data());
 
@@ -673,12 +665,10 @@ namespace dawn_native { namespace opengl {
 
                 GLenum target = ToBackend(textureView->GetTexture())->GetGLTarget();
                 gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, target, texture, 0);
-
-                // TODO(kainino@chromium.org): the depth/stencil clears (later in
-                // this function) may be undefined for other texture formats.
-                ASSERT(format.format == dawn::TextureFormat::Depth24PlusStencil8);
             }
         }
+
+        ASSERT(gl.CheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
         // Set defaults for dynamic state before executing clears and commands.
         PersistentPipelineState persistentPipelineState;
@@ -695,6 +685,10 @@ namespace dawn_native { namespace opengl {
                 const auto& attachmentInfo = renderPass->colorAttachments[i];
 
                 // Load op - color
+                // TODO(cwallez@chromium.org): Choose the clear function depending on the
+                // componentType: things work for now because the clear color is always a float, but
+                // when that's fixed will lose precision on integer formats when converting to
+                // float.
                 if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
                     gl.ColorMaski(i, true, true, true, true);
                     gl.ClearBufferfv(GL_COLOR, i, &attachmentInfo.clearColor.r);

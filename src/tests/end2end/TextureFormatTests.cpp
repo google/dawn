@@ -438,7 +438,8 @@ class TextureFormatTest : public DawnTest {
                                           1.0e29f, NAN,   INFINITY, -INFINITY};
 
         DoFloatFormatSamplingTest(formatInfo, textureData, textureData);
-        DoFormatRenderingTest(formatInfo, textureData, textureData);
+        DoFormatRenderingTest(formatInfo, textureData, textureData,
+                              new ExpectFloatWithTolerance(textureData, 0.0f));
     }
 
     void DoFloat16Test(FormatTestInfo formatInfo) {
@@ -506,121 +507,193 @@ TEST_P(TextureFormatTest, BGRA8Unorm) {
 
 // Test the R8Snorm format
 TEST_P(TextureFormatTest, R8Snorm) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSnormTest<int8_t>({dawn::TextureFormat::R8Snorm, 1, Float, 1});
 }
 
 // Test the RG8Snorm format
 TEST_P(TextureFormatTest, RG8Snorm) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSnormTest<int8_t>({dawn::TextureFormat::RG8Snorm, 2, Float, 2});
 }
 
 // Test the RGBA8Snorm format
 TEST_P(TextureFormatTest, RGBA8Snorm) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSnormTest<int8_t>({dawn::TextureFormat::RGBA8Snorm, 4, Float, 4});
 }
 
 // Test the R16Snorm format
 TEST_P(TextureFormatTest, R16Snorm) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSnormTest<int16_t>({dawn::TextureFormat::R16Snorm, 2, Float, 1});
 }
 
 // Test the RG16Snorm format
 TEST_P(TextureFormatTest, RG16Snorm) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSnormTest<int16_t>({dawn::TextureFormat::RG16Snorm, 4, Float, 2});
 }
 
 // Test the RGBA16Snorm format
 TEST_P(TextureFormatTest, RGBA16Snorm) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSnormTest<int16_t>({dawn::TextureFormat::RGBA16Snorm, 8, Float, 4});
 }
 
 // Test the R8Uint format
 TEST_P(TextureFormatTest, R8Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint8_t>({dawn::TextureFormat::R8Uint, 1, Uint, 1});
 }
 
 // Test the RG8Uint format
 TEST_P(TextureFormatTest, RG8Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint8_t>({dawn::TextureFormat::RG8Uint, 2, Uint, 2});
 }
 
 // Test the RGBA8Uint format
 TEST_P(TextureFormatTest, RGBA8Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint8_t>({dawn::TextureFormat::RGBA8Uint, 4, Uint, 4});
 }
 
 // Test the R16Uint format
 TEST_P(TextureFormatTest, R16Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint16_t>({dawn::TextureFormat::R16Uint, 2, Uint, 1});
 }
 
 // Test the RG16Uint format
 TEST_P(TextureFormatTest, RG16Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint16_t>({dawn::TextureFormat::RG16Uint, 4, Uint, 2});
 }
 
 // Test the RGBA16Uint format
 TEST_P(TextureFormatTest, RGBA16Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint16_t>({dawn::TextureFormat::RGBA16Uint, 8, Uint, 4});
 }
 
 // Test the R32Uint format
 TEST_P(TextureFormatTest, R32Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint32_t>({dawn::TextureFormat::R32Uint, 4, Uint, 1});
 }
 
 // Test the RG32Uint format
 TEST_P(TextureFormatTest, RG32Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint32_t>({dawn::TextureFormat::RG32Uint, 8, Uint, 2});
 }
 
 // Test the RGBA32Uint format
 TEST_P(TextureFormatTest, RGBA32Uint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoUintTest<uint32_t>({dawn::TextureFormat::RGBA32Uint, 16, Uint, 4});
 }
 
 // Test the R8Sint format
 TEST_P(TextureFormatTest, R8Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int8_t>({dawn::TextureFormat::R8Sint, 1, Sint, 1});
 }
 
 // Test the RG8Sint format
 TEST_P(TextureFormatTest, RG8Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int8_t>({dawn::TextureFormat::RG8Sint, 2, Sint, 2});
 }
 
 // Test the RGBA8Sint format
 TEST_P(TextureFormatTest, RGBA8Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int8_t>({dawn::TextureFormat::RGBA8Sint, 4, Sint, 4});
 }
 
 // Test the R16Sint format
 TEST_P(TextureFormatTest, R16Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int16_t>({dawn::TextureFormat::R16Sint, 2, Sint, 1});
 }
 
 // Test the RG16Sint format
 TEST_P(TextureFormatTest, RG16Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int16_t>({dawn::TextureFormat::RG16Sint, 4, Sint, 2});
 }
 
 // Test the RGBA16Sint format
 TEST_P(TextureFormatTest, RGBA16Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int16_t>({dawn::TextureFormat::RGBA16Sint, 8, Sint, 4});
 }
 
 // Test the R32Sint format
 TEST_P(TextureFormatTest, R32Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int32_t>({dawn::TextureFormat::R32Sint, 4, Sint, 1});
 }
 
 // Test the RG32Sint format
 TEST_P(TextureFormatTest, RG32Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int32_t>({dawn::TextureFormat::RG32Sint, 8, Sint, 2});
 }
 
 // Test the RGBA32Sint format
 TEST_P(TextureFormatTest, RGBA32Sint) {
+    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
+    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
+
     DoSintTest<int32_t>({dawn::TextureFormat::RGBA32Sint, 16, Sint, 4});
 }
 
@@ -676,6 +749,10 @@ TEST_P(TextureFormatTest, RGBA8UnormSrgb) {
 
 // Test the BGRA8UnormSrgb format
 TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
+    // TODO(cwallez@chromium.org): This format doesn't exist in OpenGL, emulate it using
+    // RGBA8UnormSrgb and swizzling / shader twiddling
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
     std::vector<uint8_t> textureData = {0, 1, maxValue, 64, 35, 68, 152, 168};
 
@@ -769,4 +846,4 @@ TEST_P(TextureFormatTest, RG11B10Float) {
 // TODO(cwallez@chromium.org): Add tests for depth-stencil formats when we know if they are copyable
 // in WebGPU.
 
-DAWN_INSTANTIATE_TEST(TextureFormatTest, D3D12Backend, MetalBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(TextureFormatTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

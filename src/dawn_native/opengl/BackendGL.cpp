@@ -161,6 +161,7 @@ namespace dawn_native { namespace opengl {
             mFunctions.Enable(GL_SCISSOR_TEST);
             mFunctions.Enable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
             mFunctions.Enable(GL_MULTISAMPLE);
+            mFunctions.Enable(GL_FRAMEBUFFER_SRGB);
 
             mPCIInfo.name = reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER));
 

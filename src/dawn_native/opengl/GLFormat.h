@@ -27,6 +27,11 @@ namespace dawn_native { namespace opengl {
         GLenum format = 0;
         GLenum type = 0;
         bool isSupportedOnBackend = false;
+
+        // OpenGL has different functions depending on the format component type, for example
+        // glClearBufferfv is only valid on formats with the Float ComponentType
+        enum ComponentType { Float, Int, Uint, DepthStencil };
+        ComponentType componentType;
     };
 
     using GLFormatTable = std::array<GLFormat, kKnownFormatCount>;
