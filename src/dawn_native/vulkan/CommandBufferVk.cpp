@@ -560,6 +560,53 @@ namespace dawn_native { namespace vulkan {
                     descriptorSets.OnPipelineLayoutChange(ToBackend(pipeline->GetLayout()));
                 } break;
 
+                case Command::InsertDebugMarker: {
+                    if (device->GetDeviceInfo().debugMarker) {
+                        InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
+                        const char* label = mCommands.NextData<char>(cmd->length + 1);
+                        VkDebugMarkerMarkerInfoEXT markerInfo;
+                        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+                        markerInfo.pNext = nullptr;
+                        markerInfo.pMarkerName = label;
+                        // Default color to black
+                        markerInfo.color[0] = 0.0;
+                        markerInfo.color[1] = 0.0;
+                        markerInfo.color[2] = 0.0;
+                        markerInfo.color[3] = 1.0;
+                        device->fn.CmdDebugMarkerInsertEXT(commands, &markerInfo);
+                    } else {
+                        SkipCommand(&mCommands, Command::InsertDebugMarker);
+                    }
+                } break;
+
+                case Command::PopDebugGroup: {
+                    if (device->GetDeviceInfo().debugMarker) {
+                        mCommands.NextCommand<PopDebugGroupCmd>();
+                        device->fn.CmdDebugMarkerEndEXT(commands);
+                    } else {
+                        SkipCommand(&mCommands, Command::PopDebugGroup);
+                    }
+                } break;
+
+                case Command::PushDebugGroup: {
+                    if (device->GetDeviceInfo().debugMarker) {
+                        PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
+                        const char* label = mCommands.NextData<char>(cmd->length + 1);
+                        VkDebugMarkerMarkerInfoEXT markerInfo;
+                        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+                        markerInfo.pNext = nullptr;
+                        markerInfo.pMarkerName = label;
+                        // Default color to black
+                        markerInfo.color[0] = 0.0;
+                        markerInfo.color[1] = 0.0;
+                        markerInfo.color[2] = 0.0;
+                        markerInfo.color[3] = 1.0;
+                        device->fn.CmdDebugMarkerBeginEXT(commands, &markerInfo);
+                    } else {
+                        SkipCommand(&mCommands, Command::PushDebugGroup);
+                    }
+                } break;
+
                 default: { UNREACHABLE(); } break;
             }
         }

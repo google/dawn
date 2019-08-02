@@ -660,6 +660,30 @@ namespace dawn_native { namespace metal {
                                    encoder);
                 } break;
 
+                case Command::InsertDebugMarker: {
+                    InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
+                    char* label = mCommands.NextData<char>(cmd->length + 1);
+                    NSString* mtlLabel = [[NSString alloc] initWithUTF8String:label];
+
+                    [encoder insertDebugSignpost:mtlLabel];
+                    [mtlLabel release];
+                } break;
+
+                case Command::PopDebugGroup: {
+                    mCommands.NextCommand<PopDebugGroupCmd>();
+
+                    [encoder popDebugGroup];
+                } break;
+
+                case Command::PushDebugGroup: {
+                    PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
+                    char* label = mCommands.NextData<char>(cmd->length + 1);
+                    NSString* mtlLabel = [[NSString alloc] initWithUTF8String:label];
+
+                    [encoder pushDebugGroup:mtlLabel];
+                    [mtlLabel release];
+                } break;
+
                 default: { UNREACHABLE(); } break;
             }
         }
@@ -847,7 +871,7 @@ namespace dawn_native { namespace metal {
 
                 case Command::InsertDebugMarker: {
                     InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                    auto label = mCommands.NextData<char>(cmd->length + 1);
+                    char* label = mCommands.NextData<char>(cmd->length + 1);
                     NSString* mtlLabel = [[NSString alloc] initWithUTF8String:label];
 
                     [encoder insertDebugSignpost:mtlLabel];
@@ -862,7 +886,7 @@ namespace dawn_native { namespace metal {
 
                 case Command::PushDebugGroup: {
                     PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                    auto label = mCommands.NextData<char>(cmd->length + 1);
+                    char* label = mCommands.NextData<char>(cmd->length + 1);
                     NSString* mtlLabel = [[NSString alloc] initWithUTF8String:label];
 
                     [encoder pushDebugGroup:mtlLabel];

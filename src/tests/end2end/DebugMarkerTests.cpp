@@ -30,6 +30,13 @@ TEST_P(DebugMarkerTests, NoFailureWithoutDebugToolAttached) {
         pass.PopDebugGroup();
         pass.EndPass();
     }
+    {
+        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.PushDebugGroup("Event Start");
+        pass.InsertDebugMarker("Marker");
+        pass.PopDebugGroup();
+        pass.EndPass();
+    }
 
     dawn::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
