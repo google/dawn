@@ -35,7 +35,7 @@ namespace dawn_native { namespace d3d12 {
         ~PlatformFunctions();
 
         MaybeError LoadFunctions();
-        bool isPIXEventRuntimeLoaded() const;
+        bool IsPIXEventRuntimeLoaded() const;
 
         // Functions from d3d12.dll
         PFN_D3D12_CREATE_DEVICE d3d12CreateDevice = nullptr;

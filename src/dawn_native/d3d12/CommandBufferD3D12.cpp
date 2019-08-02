@@ -816,7 +816,7 @@ namespace dawn_native { namespace d3d12 {
                     InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
                     const char* label = mCommands.NextData<char>(cmd->length + 1);
 
-                    if (ToBackend(GetDevice())->GetFunctions()->isPIXEventRuntimeLoaded()) {
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                         // PIX color is 1 byte per channel in ARGB format
                         constexpr uint64_t kPIXBlackColor = 0xff000000;
                         ToBackend(GetDevice())
@@ -828,7 +828,7 @@ namespace dawn_native { namespace d3d12 {
                 case Command::PopDebugGroup: {
                     mCommands.NextCommand<PopDebugGroupCmd>();
 
-                    if (ToBackend(GetDevice())->GetFunctions()->isPIXEventRuntimeLoaded()) {
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                         ToBackend(GetDevice())
                             ->GetFunctions()
                             ->pixEndEventOnCommandList(commandList.Get());
@@ -839,7 +839,7 @@ namespace dawn_native { namespace d3d12 {
                     PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
                     const char* label = mCommands.NextData<char>(cmd->length + 1);
 
-                    if (ToBackend(GetDevice())->GetFunctions()->isPIXEventRuntimeLoaded()) {
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                         // PIX color is 1 byte per channel in ARGB format
                         constexpr uint64_t kPIXBlackColor = 0xff000000;
                         ToBackend(GetDevice())
@@ -1018,7 +1018,7 @@ namespace dawn_native { namespace d3d12 {
                     InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
                     const char* label = mCommands.NextData<char>(cmd->length + 1);
 
-                    if (ToBackend(GetDevice())->GetFunctions()->isPIXEventRuntimeLoaded()) {
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                         // PIX color is 1 byte per channel in ARGB format
                         constexpr uint64_t kPIXBlackColor = 0xff000000;
                         ToBackend(GetDevice())
@@ -1030,7 +1030,7 @@ namespace dawn_native { namespace d3d12 {
                 case Command::PopDebugGroup: {
                     mCommands.NextCommand<PopDebugGroupCmd>();
 
-                    if (ToBackend(GetDevice())->GetFunctions()->isPIXEventRuntimeLoaded()) {
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                         ToBackend(GetDevice())
                             ->GetFunctions()
                             ->pixEndEventOnCommandList(commandList.Get());
@@ -1041,7 +1041,7 @@ namespace dawn_native { namespace d3d12 {
                     PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
                     const char* label = mCommands.NextData<char>(cmd->length + 1);
 
-                    if (ToBackend(GetDevice())->GetFunctions()->isPIXEventRuntimeLoaded()) {
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
                         // PIX color is 1 byte per channel in ARGB format
                         constexpr uint64_t kPIXBlackColor = 0xff000000;
                         ToBackend(GetDevice())

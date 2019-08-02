@@ -71,7 +71,7 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    bool PlatformFunctions::isPIXEventRuntimeLoaded() const {
+    bool PlatformFunctions::IsPIXEventRuntimeLoaded() const {
         return mPIXEventRuntimeLib.Valid();
     }
 
