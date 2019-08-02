@@ -271,6 +271,11 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Input state must not be null");
         }
 
+        // TODO(crbug.com/dawn/136): Support vertex-only pipelines.
+        if (descriptor->fragmentStage == nullptr) {
+            return DAWN_VALIDATION_ERROR("Null fragment stage is not supported (yet)");
+        }
+
         std::bitset<kMaxVertexAttributes> attributesSetMask;
         DAWN_TRY(ValidateVertexInputDescriptor(descriptor->vertexInput, &attributesSetMask));
         DAWN_TRY(ValidatePrimitiveTopology(descriptor->primitiveTopology));
