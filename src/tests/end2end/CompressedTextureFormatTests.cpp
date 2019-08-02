@@ -67,9 +67,24 @@ class CompressedTextureBCFormatTest : public DawnTest {
                      {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture}});
     }
 
+    std::vector<const char*> GetRequiredExtensions() override {
+        mIsBCFormatSupported = SupportsExtensions({"texture_compression_bc"});
+        if (!mIsBCFormatSupported) {
+            return {};
+        }
+
+        return {"texture_compression_bc"};
+    }
+
+    bool IsBCFormatSupported() const {
+        return mIsBCFormatSupported;
+    }
+
     // Copy the compressed texture data into the destination texture as is specified in copyConfig.
     void CopyDataIntoCompressedTexture(dawn::Texture bcCompressedTexture,
                                        const CopyConfig& copyConfig) {
+        ASSERT(IsBCFormatSupported());
+
         // Compute the upload buffer size with rowPitchAlignment and the copy region.
         uint32_t actualWidthAtLevel = copyConfig.textureWidthLevel0 >> copyConfig.baseMipmapLevel;
         uint32_t actualHeightAtLevel = copyConfig.textureHeightLevel0 >> copyConfig.baseMipmapLevel;
@@ -121,6 +136,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
                                            dawn::TextureFormat bcFormat,
                                            uint32_t baseArrayLayer = 0,
                                            uint32_t baseMipLevel = 0) {
+        ASSERT(IsBCFormatSupported());
+
         dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
         samplerDesc.minFilter = dawn::FilterMode::Nearest;
         samplerDesc.magFilter = dawn::FilterMode::Nearest;
@@ -140,6 +157,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
     // Create a render pipeline for sampling from a BC texture and rendering into the render target.
     dawn::RenderPipeline CreateRenderPipelineForTest() {
+        ASSERT(IsBCFormatSupported());
+
         dawn::PipelineLayout pipelineLayout =
             utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
 
@@ -183,6 +202,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
                                             const dawn::Origin3D& expectedOrigin,
                                             const dawn::Extent3D& expectedExtent,
                                             const std::vector<RGBA8>& expected) {
+        ASSERT(IsBCFormatSupported());
+
         ASSERT(expected.size() == renderTargetSize.width * renderTargetSize.height);
         utils::BasicRenderPass renderPass =
             utils::CreateBasicRenderPass(device, renderTargetSize.width, renderTargetSize.height);
@@ -207,6 +228,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
     // Run the tests that copies pre-prepared BC format data into a BC texture and verifies if we
     // can render correctly with the pixel values sampled from the BC texture.
     void TestCopyRegionIntoBCFormatTextures(const CopyConfig& config) {
+        ASSERT(IsBCFormatSupported());
+
         dawn::Texture bcTexture = Create2DTexture(device, config.format, config.textureWidthLevel0,
                                                   config.textureHeightLevel0,
                                                   config.arrayLayerCount, config.mipmapLevelCount);
@@ -416,10 +439,14 @@ class CompressedTextureBCFormatTest : public DawnTest {
     static constexpr uint32_t kBCBlockHeightInTexels = 4;
 
     dawn::BindGroupLayout mBindGroupLayout;
+
+    bool mIsBCFormatSupported = false;
 };
 
 // Test copying into the whole BC texture with 2x2 blocks and sampling from it.
 TEST_P(CompressedTextureBCFormatTest, Basic) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureWidthLevel0 = 8;
     config.textureHeightLevel0 = 8;
@@ -433,6 +460,8 @@ TEST_P(CompressedTextureBCFormatTest, Basic) {
 
 // Test copying into a sub-region of a texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureHeightLevel0 = 8;
     config.textureWidthLevel0 = 8;
@@ -451,6 +480,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
 
 // Test using rowPitch == 0 in the copies with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureHeightLevel0 = 8;
 
@@ -468,6 +499,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
 
 // Test copying into the non-zero layer of a 2D array texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureHeightLevel0 = 8;
     config.textureWidthLevel0 = 8;
@@ -486,6 +519,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
 
 // Test copying into a non-zero mipmap level of a texture with BC texture formats.
 TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureHeightLevel0 = 60;
     config.textureWidthLevel0 = 60;
@@ -517,6 +552,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 
 // Test texture-to-texture whole-size copies with BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmapLevel) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     // TODO(cwallez@chromium.org): This consistently fails on with the 12th pixel being opaque black
     // instead of opaque red on Win10 FYI Release (NVIDIA GeForce GTX 1660). See
     // https://bugs.chromium.org/p/chromium/issues/detail?id=981393
@@ -576,6 +613,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
 
 // Test BC format texture-to-texture partial copies.
 TEST_P(CompressedTextureBCFormatTest, CopyPartofTextureSubResourceIntoNonZeroMipmapLevel) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on Vulkan. Currently this test causes an error if
     // Vulkan validation layer is enabled.
@@ -652,6 +691,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyPartofTextureSubResourceIntoNonZeroMip
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
 // extent exactly fit the RowPitch.
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureWidthLevel0 = 8;
     config.textureHeightLevel0 = 8;
@@ -677,6 +718,8 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
 // backend the texelOffset.y will be greater than 0 after calcuting the texelOffset in the function
 // ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureWidthLevel0 = 8;
     config.textureHeightLevel0 = 8;
@@ -703,6 +746,8 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
 // extent exceed the RowPitch. On D3D12 backend two copies are required for this case.
 TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitch) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureWidthLevel0 = 8;
     config.textureHeightLevel0 = 8;
@@ -729,6 +774,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
 // rowPitch. On D3D12 backend the texelOffset.z will be greater than 0 after calcuting the
 // texelOffset in the function ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureWidthLevel0 = 8;
     config.textureHeightLevel0 = kBCBlockHeightInTexels;
@@ -755,6 +802,8 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
 // copyExtent.depth) on Metal backends. As copyExtent.depth can only be 1 for BC formats, on Metal
 // backend we will use two copies to implement such copy.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureWidthLevel0 = 8;
     config.textureHeightLevel0 = 8;
@@ -771,6 +820,8 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
 // Test the workaround in the B2T copies when (bufferSize - bufferOffset < bytesPerImage *
 // copyExtent.depth) and copyExtent needs to be clamped.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
     CopyConfig config;
     config.textureHeightLevel0 = 56;
     config.textureWidthLevel0 = 56;
@@ -803,4 +854,8 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
 }
 
 // TODO(jiawei.shao@intel.com): support BC formats on OpenGL backend
-DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest, D3D12Backend, MetalBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest,
+                      D3D12Backend,
+                      MetalBackend,
+                      OpenGLBackend,
+                      VulkanBackend);

@@ -17,6 +17,7 @@
 
 #include "dawn_native/Adapter.h"
 #include "dawn_native/BackendConnection.h"
+#include "dawn_native/Extensions.h"
 #include "dawn_native/Toggles.h"
 
 #include <array>
@@ -47,8 +48,14 @@ namespace dawn_native {
         // Used to query the details of a toggle. Return nullptr if toggleName is not a valid name
         // of a toggle supported in Dawn.
         const ToggleInfo* GetToggleInfo(const char* toggleName);
-
         Toggle ToggleNameToEnum(const char* toggleName);
+
+        // Used to query the details of an extension. Return nullptr if extensionName is not a valid
+        // name of an extension supported in Dawn.
+        const ExtensionInfo* GetExtensionInfo(const char* extensionName);
+        Extension ExtensionNameToEnum(const char* extensionName);
+        ExtensionsSet ExtensionNamesToExtensionsSet(
+            const std::vector<const char*>& requiredExtensions);
 
         void EnableBackendValidation(bool enableBackendValidation);
         bool IsBackendValidationEnabled() const;
@@ -74,6 +81,7 @@ namespace dawn_native {
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<std::unique_ptr<AdapterBase>> mAdapters;
 
+        ExtensionsInfo mExtensionsInfo;
         TogglesInfo mTogglesInfo;
     };
 

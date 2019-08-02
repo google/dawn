@@ -182,6 +182,11 @@ namespace dawn_native { namespace metal {
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
             return {new Device(this, mDevice, descriptor)};
         }
+        void InitializeSupportedExtensions() {
+            if ([mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
+                mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
+            }
+        }
 
         id<MTLDevice> mDevice = nil;
     };

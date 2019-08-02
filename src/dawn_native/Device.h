@@ -17,6 +17,7 @@
 
 #include "common/Serial.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/Extensions.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
@@ -154,7 +155,9 @@ namespace dawn_native {
 
         ResultOrError<DynamicUploader*> GetDynamicUploader() const;
 
+        std::vector<const char*> GetEnabledExtensions() const;
         std::vector<const char*> GetTogglesUsed() const;
+        bool IsExtensionEnabled(Extension extension) const;
         bool IsToggleEnabled(Toggle toggle) const;
         size_t GetLazyClearCountForTesting();
         void IncrementLazyClearCountForTesting();
@@ -212,6 +215,8 @@ namespace dawn_native {
                                              TextureBase* texture,
                                              const TextureViewDescriptor* descriptor);
 
+        void ApplyExtensions(const DeviceDescriptor* deviceDescriptor);
+
         void ConsumeError(ErrorData* error);
         void SetDefaultToggles();
 
@@ -240,6 +245,8 @@ namespace dawn_native {
 
         TogglesSet mTogglesSet;
         size_t mLazyClearCountForTesting = 0;
+
+        ExtensionsSet mEnabledExtensions;
     };
 
 }  // namespace dawn_native

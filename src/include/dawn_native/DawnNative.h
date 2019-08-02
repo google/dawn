@@ -50,6 +50,7 @@ namespace dawn_native {
     // An optional parameter of Adapter::CreateDevice() to send additional information when creating
     // a Device. For example, we can use it to enable a workaround, optimization or feature.
     struct DAWN_NATIVE_EXPORT DeviceDescriptor {
+        std::vector<const char*> requiredExtensions;
         std::vector<const char*> forceEnabledToggles;
         std::vector<const char*> forceDisabledToggles;
     };
@@ -62,6 +63,11 @@ namespace dawn_native {
         const char* description;
         const char* url;
     };
+
+    // A struct to record the information of an extension. An extension is a GPU feature that is not
+    // required to be supported by all Dawn backends and can only be used when it is enabled on the
+    // creation of device.
+    using ExtensionInfo = ToggleInfo;
 
     // An adapter is an object that represent on possibility of creating devices in the system.
     // Most of the time it will represent a combination of a physical GPU and an API. Not that the
@@ -78,6 +84,7 @@ namespace dawn_native {
         BackendType GetBackendType() const;
         DeviceType GetDeviceType() const;
         const PCIInfo& GetPCIInfo() const;
+        std::vector<const char*> GetSupportedExtensions() const;
 
         explicit operator bool() const;
 

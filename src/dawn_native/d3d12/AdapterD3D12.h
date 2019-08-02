@@ -38,6 +38,7 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
+        void InitializeSupportedExtensions();
 
         ComPtr<IDXGIAdapter1> mHardwareAdapter;
         ComPtr<ID3D12Device> mD3d12Device;

@@ -333,9 +333,31 @@ uint32_t DawnTest::GetVendorIdFilter() const {
     return gTestEnv->GetVendorIdFilter();
 }
 
+std::vector<const char*> DawnTest::GetRequiredExtensions() {
+    return {};
+}
+
+// This function can only be called after SetUp() because it requires mBackendAdapter to be
+// initialized.
+bool DawnTest::SupportsExtensions(const std::vector<const char*>& extensions) {
+    ASSERT(mBackendAdapter);
+
+    std::set<std::string> supportedExtensionsSet;
+    for (const char* supportedExtensionName : mBackendAdapter.GetSupportedExtensions()) {
+        supportedExtensionsSet.insert(supportedExtensionName);
+    }
+
+    for (const char* extensionName : extensions) {
+        if (supportedExtensionsSet.find(extensionName) == supportedExtensionsSet.end()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void DawnTest::SetUp() {
-    // Get an adapter for the backend to use, and create the device.
-    dawn_native::Adapter backendAdapter;
+    // Initialize mBackendAdapter, and create the device.
     const dawn_native::BackendType backendType = GetParam().backendType;
     {
         dawn_native::Instance* instance = gTestEnv->GetInstance();
@@ -345,11 +367,11 @@ void DawnTest::SetUp() {
             if (adapter.GetBackendType() == backendType) {
                 if (HasVendorIdFilter()) {
                     if (adapter.GetPCIInfo().vendorId == GetVendorIdFilter()) {
-                        backendAdapter = adapter;
+                        mBackendAdapter = adapter;
                         break;
                     }
                 } else {
-                    backendAdapter = adapter;
+                    mBackendAdapter = adapter;
 
                     // On Metal, select the last adapter so that the discrete GPU is tested on
                     // multi-GPU systems.
@@ -363,10 +385,10 @@ void DawnTest::SetUp() {
             }
         }
 
-        ASSERT(backendAdapter);
+        ASSERT(mBackendAdapter);
     }
 
-    mPCIInfo = backendAdapter.GetPCIInfo();
+    mPCIInfo = mBackendAdapter.GetPCIInfo();
 
     for (const char* forceEnabledWorkaround : GetParam().forceEnabledWorkarounds) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
@@ -377,7 +399,9 @@ void DawnTest::SetUp() {
     dawn_native::DeviceDescriptor deviceDescriptor;
     deviceDescriptor.forceEnabledToggles = GetParam().forceEnabledWorkarounds;
     deviceDescriptor.forceDisabledToggles = GetParam().forceDisabledWorkarounds;
-    backendDevice = backendAdapter.CreateDevice(&deviceDescriptor);
+    deviceDescriptor.requiredExtensions = GetRequiredExtensions();
+    backendDevice = mBackendAdapter.CreateDevice(&deviceDescriptor);
+    ASSERT_NE(nullptr, backendDevice);
 
     backendProcs = dawn_native::GetProcs();
 

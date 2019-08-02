@@ -18,6 +18,7 @@
 #include "dawn_native/DawnNative.h"
 
 #include "dawn_native/Error.h"
+#include "dawn_native/Extensions.h"
 
 namespace dawn_native {
 
@@ -35,9 +36,14 @@ namespace dawn_native {
 
         DeviceBase* CreateDevice(const DeviceDescriptor* descriptor = nullptr);
 
+        ExtensionsSet GetSupportedExtensions() const;
+        bool SupportsAllRequestedExtensions(
+            const std::vector<const char*>& requestedExtensions) const;
+
       protected:
         PCIInfo mPCIInfo = {};
         DeviceType mDeviceType = DeviceType::Unknown;
+        ExtensionsSet mSupportedExtensions;
 
       private:
         virtual ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) = 0;

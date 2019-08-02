@@ -344,8 +344,11 @@ namespace dawn_native { namespace vulkan {
         // Always require fragmentStoresAndAtomics because it is required by end2end tests.
         usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
 
-        // TODO(jiawei.shao@intel.com): support BC formats as extension
-        usedKnobs.features.textureCompressionBC = VK_TRUE;
+        if (IsExtensionEnabled(Extension::TextureCompressionBC)) {
+            ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionBC ==
+                   VK_TRUE);
+            usedKnobs.features.textureCompressionBC = VK_TRUE;
+        }
 
         // Find a universal queue family
         {

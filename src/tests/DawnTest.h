@@ -206,6 +206,14 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
 
     void SwapBuffersForCapture();
 
+    bool SupportsExtensions(const std::vector<const char*>& extensions);
+
+    // Called in SetUp() to get the extensions required to be enabled in the tests. The tests must
+    // check if the required extensions are supported by the adapter in this function and guarantee
+    // the returned extensions are all supported by the adapter. The tests may provide different
+    // code path to handle the situation when not all extensions are supported.
+    virtual std::vector<const char*> GetRequiredExtensions();
+
   private:
     // Things used to set up testing through the Wire.
     std::unique_ptr<dawn_wire::WireServer> mWireServer;
@@ -263,6 +271,8 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
     std::unique_ptr<utils::BackendBinding> mBinding;
 
     dawn_native::PCIInfo mPCIInfo;
+
+    dawn_native::Adapter mBackendAdapter;
 };
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:

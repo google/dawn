@@ -86,6 +86,19 @@ namespace dawn_native {
         return mTogglesInfo.ToggleNameToEnum(toggleName);
     }
 
+    const ExtensionInfo* InstanceBase::GetExtensionInfo(const char* extensionName) {
+        return mExtensionsInfo.GetExtensionInfo(extensionName);
+    }
+
+    Extension InstanceBase::ExtensionNameToEnum(const char* extensionName) {
+        return mExtensionsInfo.ExtensionNameToEnum(extensionName);
+    }
+
+    ExtensionsSet InstanceBase::ExtensionNamesToExtensionsSet(
+        const std::vector<const char*>& requiredExtensions) {
+        return mExtensionsInfo.ExtensionNamesToExtensionsSet(requiredExtensions);
+    }
+
     const std::vector<std::unique_ptr<AdapterBase>>& InstanceBase::GetAdapters() const {
         return mAdapters;
     }

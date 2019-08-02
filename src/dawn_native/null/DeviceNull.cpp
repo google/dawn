@@ -17,6 +17,7 @@
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/DynamicUploader.h"
+#include "dawn_native/Instance.h"
 
 #include <spirv-cross/spirv_cross.hpp>
 
@@ -24,19 +25,24 @@ namespace dawn_native { namespace null {
 
     // Implementation of pre-Device objects: the null adapter, null backend connection and Connect()
 
-    class Adapter : public AdapterBase {
-      public:
-        Adapter(InstanceBase* instance) : AdapterBase(instance, BackendType::Null) {
-            mPCIInfo.name = "Null backend";
-            mDeviceType = DeviceType::CPU;
-        }
-        virtual ~Adapter() = default;
+    Adapter::Adapter(InstanceBase* instance) : AdapterBase(instance, BackendType::Null) {
+        mPCIInfo.name = "Null backend";
+        mDeviceType = DeviceType::CPU;
 
-      private:
-        ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
-            return {new Device(this, descriptor)};
-        }
-    };
+        // Enable all extensions by default for the convenience of tests.
+        mSupportedExtensions.extensionsBitSet.flip();
+    }
+
+    Adapter::~Adapter() = default;
+
+    // Used for the tests that intend to use an adapter without all extensions enabled.
+    void Adapter::SetSupportedExtensions(const std::vector<const char*>& requiredExtensions) {
+        mSupportedExtensions = GetInstance()->ExtensionNamesToExtensionsSet(requiredExtensions);
+    }
+
+    ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
+        return {new Device(this, descriptor)};
+    }
 
     class Backend : public BackendConnection {
       public:

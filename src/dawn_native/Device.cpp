@@ -66,6 +66,10 @@ namespace dawn_native {
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
         SetDefaultToggles();
 
+        if (descriptor != nullptr) {
+            ApplyExtensions(descriptor);
+        }
+
         mFormatTable = BuildFormatTable(this);
     }
 
@@ -505,8 +509,24 @@ namespace dawn_native {
         }
     }
 
+    void DeviceBase::ApplyExtensions(const DeviceDescriptor* deviceDescriptor) {
+        ASSERT(deviceDescriptor);
+        ASSERT(GetAdapter()->SupportsAllRequestedExtensions(deviceDescriptor->requiredExtensions));
+
+        mEnabledExtensions = GetAdapter()->GetInstance()->ExtensionNamesToExtensionsSet(
+            deviceDescriptor->requiredExtensions);
+    }
+
+    std::vector<const char*> DeviceBase::GetEnabledExtensions() const {
+        return mEnabledExtensions.GetEnabledExtensionNames();
+    }
+
     std::vector<const char*> DeviceBase::GetTogglesUsed() const {
         return mTogglesSet.GetEnabledToggleNames();
+    }
+
+    bool DeviceBase::IsExtensionEnabled(Extension extension) const {
+        return mEnabledExtensions.IsEnabled(extension);
     }
 
     bool DeviceBase::IsToggleEnabled(Toggle toggle) const {
