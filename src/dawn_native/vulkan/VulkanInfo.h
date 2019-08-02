@@ -32,6 +32,13 @@ namespace dawn_native { namespace vulkan {
     extern const char kExtensionNameExtDebugMarker[];
     extern const char kExtensionNameExtDebugReport[];
     extern const char kExtensionNameMvkMacosSurface[];
+    extern const char kExtensionNameKhrExternalMemory[];
+    extern const char kExtensionNameKhrExternalMemoryCapabilities[];
+    extern const char kExtensionNameKhrExternalMemoryFD[];
+    extern const char kExtensionNameKhrExternalSemaphore[];
+    extern const char kExtensionNameKhrExternalSemaphoreCapabilities[];
+    extern const char kExtensionNameKhrExternalSemaphoreFD[];
+    extern const char kExtensionNameKhrGetPhysicalDeviceProperties2[];
     extern const char kExtensionNameKhrSurface[];
     extern const char kExtensionNameKhrSwapchain[];
     extern const char kExtensionNameKhrWaylandSurface[];
@@ -48,6 +55,9 @@ namespace dawn_native { namespace vulkan {
 
         // Extensions
         bool debugReport = false;
+        bool externalMemoryCapabilities = false;
+        bool externalSemaphoreCapabilities = false;
+        bool getPhysicalDeviceProperties2 = false;
         bool macosSurface = false;
         bool surface = false;
         bool waylandSurface = false;
@@ -69,6 +79,10 @@ namespace dawn_native { namespace vulkan {
 
         // Extensions
         bool debugMarker = false;
+        bool externalMemory = false;
+        bool externalMemoryFD = false;
+        bool externalSemaphore = false;
+        bool externalSemaphoreFD = false;
         bool swapchain = false;
     };
 

@@ -38,6 +38,16 @@ namespace dawn_native { namespace vulkan {
     const char kExtensionNameExtDebugMarker[] = "VK_EXT_debug_marker";
     const char kExtensionNameExtDebugReport[] = "VK_EXT_debug_report";
     const char kExtensionNameMvkMacosSurface[] = "VK_MVK_macos_surface";
+    const char kExtensionNameKhrExternalMemory[] = "VK_KHR_external_memory";
+    const char kExtensionNameKhrExternalMemoryCapabilities[] =
+        "VK_KHR_external_memory_capabilities";
+    const char kExtensionNameKhrExternalMemoryFD[] = "VK_KHR_external_memory_fd";
+    const char kExtensionNameKhrExternalSemaphore[] = "VK_KHR_external_semaphore";
+    const char kExtensionNameKhrExternalSemaphoreCapabilities[] =
+        "VK_KHR_external_semaphore_capabilities";
+    const char kExtensionNameKhrExternalSemaphoreFD[] = "VK_KHR_external_semaphore_fd";
+    const char kExtensionNameKhrGetPhysicalDeviceProperties2[] =
+        "VK_KHR_get_physical_device_properties2";
     const char kExtensionNameKhrSurface[] = "VK_KHR_surface";
     const char kExtensionNameKhrSwapchain[] = "VK_KHR_swapchain";
     const char kExtensionNameKhrWaylandSurface[] = "VK_KHR_wayland_surface";
@@ -101,6 +111,15 @@ namespace dawn_native { namespace vulkan {
                 }
                 if (IsExtensionName(extension, kExtensionNameMvkMacosSurface)) {
                     info.macosSurface = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrExternalMemoryCapabilities)) {
+                    info.externalMemoryCapabilities = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrExternalSemaphoreCapabilities)) {
+                    info.externalSemaphoreCapabilities = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrGetPhysicalDeviceProperties2)) {
+                    info.getPhysicalDeviceProperties2 = true;
                 }
                 if (IsExtensionName(extension, kExtensionNameKhrSurface)) {
                     info.surface = true;
@@ -224,7 +243,18 @@ namespace dawn_native { namespace vulkan {
                 if (IsExtensionName(extension, kExtensionNameExtDebugMarker)) {
                     info.debugMarker = true;
                 }
-
+                if (IsExtensionName(extension, kExtensionNameKhrExternalMemory)) {
+                    info.externalMemory = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrExternalMemoryFD)) {
+                    info.externalMemoryFD = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrExternalSemaphore)) {
+                    info.externalSemaphore = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameKhrExternalSemaphoreFD)) {
+                    info.externalSemaphoreFD = true;
+                }
                 if (IsExtensionName(extension, kExtensionNameKhrSwapchain)) {
                     info.swapchain = true;
                 }

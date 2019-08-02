@@ -23,14 +23,14 @@ class DynamicLib;
 
 namespace dawn_native { namespace vulkan {
 
-    struct VulkanGlobalKnobs;
+    struct VulkanGlobalInfo;
     struct VulkanDeviceKnobs;
 
     // Stores the Vulkan entry points. Also loads them from the dynamic library
     // and the vkGet*ProcAddress entry points.
     struct VulkanFunctions {
         MaybeError LoadGlobalProcs(const DynamicLib& vulkanLib);
-        MaybeError LoadInstanceProcs(VkInstance instance, const VulkanGlobalKnobs& usedGlobals);
+        MaybeError LoadInstanceProcs(VkInstance instance, const VulkanGlobalInfo& globalInfo);
         MaybeError LoadDeviceProcs(VkDevice device, const VulkanDeviceKnobs& usedKnobs);
 
         // ---------- Global procs
@@ -83,6 +83,28 @@ namespace dawn_native { namespace vulkan {
         PFN_vkGetPhysicalDeviceSurfaceFormatsKHR GetPhysicalDeviceSurfaceFormatsKHR = nullptr;
         PFN_vkGetPhysicalDeviceSurfacePresentModesKHR GetPhysicalDeviceSurfacePresentModesKHR =
             nullptr;
+
+        // Core Vulkan 1.1 promoted extensions
+
+        // VK_KHR_external_memory_capabilities
+        PFN_vkGetPhysicalDeviceExternalBufferPropertiesKHR
+            GetPhysicalDeviceExternalBufferPropertiesKHR = nullptr;
+
+        // VK_KHR_external_semaphore_capabilities
+        PFN_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR
+            GetPhysicalDeviceExternalSemaphorePropertiesKHR = nullptr;
+
+        // VK_KHR_get_physical_device_properties2
+        PFN_vkGetPhysicalDeviceFeatures2KHR GetPhysicalDeviceFeatures2KHR = nullptr;
+        PFN_vkGetPhysicalDeviceProperties2KHR GetPhysicalDeviceProperties2KHR = nullptr;
+        PFN_vkGetPhysicalDeviceFormatProperties2KHR GetPhysicalDeviceFormatProperties2KHR = nullptr;
+        PFN_vkGetPhysicalDeviceImageFormatProperties2KHR
+            GetPhysicalDeviceImageFormatProperties2KHR = nullptr;
+        PFN_vkGetPhysicalDeviceQueueFamilyProperties2KHR
+            GetPhysicalDeviceQueueFamilyProperties2KHR = nullptr;
+        PFN_vkGetPhysicalDeviceMemoryProperties2KHR GetPhysicalDeviceMemoryProperties2KHR = nullptr;
+        PFN_vkGetPhysicalDeviceSparseImageFormatProperties2KHR
+            GetPhysicalDeviceSparseImageFormatProperties2KHR = nullptr;
 
         // ---------- Device procs
 
@@ -218,6 +240,14 @@ namespace dawn_native { namespace vulkan {
         PFN_vkGetSwapchainImagesKHR GetSwapchainImagesKHR = nullptr;
         PFN_vkAcquireNextImageKHR AcquireNextImageKHR = nullptr;
         PFN_vkQueuePresentKHR QueuePresentKHR = nullptr;
+
+        // VK_KHR_external_memory_fd
+        PFN_vkGetMemoryFdKHR GetMemoryFdKHR = nullptr;
+        PFN_vkGetMemoryFdPropertiesKHR GetMemoryFdPropertiesKHR = nullptr;
+
+        // VK_KHR_external_semaphore_fd
+        PFN_vkImportSemaphoreFdKHR ImportSemaphoreFdKHR = nullptr;
+        PFN_vkGetSemaphoreFdKHR GetSemaphoreFdKHR = nullptr;
     };
 
 }}  // namespace dawn_native::vulkan

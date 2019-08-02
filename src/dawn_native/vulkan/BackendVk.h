@@ -30,6 +30,7 @@ namespace dawn_native { namespace vulkan {
 
         const VulkanFunctions& GetFunctions() const;
         VkInstance GetVkInstance() const;
+        const VulkanGlobalInfo& GetGlobalInfo() const;
 
         MaybeError Initialize();
 
