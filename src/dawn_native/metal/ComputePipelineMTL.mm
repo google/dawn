@@ -39,6 +39,7 @@ namespace dawn_native { namespace metal {
 
         // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
         mLocalWorkgroupSize = computeData.localWorkgroupSize;
+        mRequiresStorageBufferLength = computeData.needsStorageBufferLength;
     }
 
     ComputePipeline::~ComputePipeline() {
@@ -51,6 +52,10 @@ namespace dawn_native { namespace metal {
 
     MTLSize ComputePipeline::GetLocalWorkGroupSize() const {
         return mLocalWorkgroupSize;
+    }
+
+    bool ComputePipeline::RequiresStorageBufferLength() const {
+        return mRequiresStorageBufferLength;
     }
 
 }}  // namespace dawn_native::metal

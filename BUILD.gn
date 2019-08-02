@@ -705,6 +705,7 @@ test("dawn_end2end_tests") {
     "src/tests/end2end/MultisampledRenderingTests.cpp",
     "src/tests/end2end/NonzeroTextureCreationTests.cpp",
     "src/tests/end2end/ObjectCachingTests.cpp",
+    "src/tests/end2end/OpArrayLengthTests.cpp",
     "src/tests/end2end/PrimitiveTopologyTests.cpp",
     "src/tests/end2end/RenderPassLoadOpTests.cpp",
     "src/tests/end2end/RenderPassTests.cpp",

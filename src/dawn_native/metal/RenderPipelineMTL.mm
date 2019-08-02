@@ -319,12 +319,18 @@ namespace dawn_native { namespace metal {
         ShaderModule::MetalFunctionData vertexData = vertexModule->GetFunction(
             vertexEntryPoint, ShaderStage::Vertex, ToBackend(GetLayout()));
         descriptorMTL.vertexFunction = vertexData.function;
+        if (vertexData.needsStorageBufferLength) {
+            mStagesRequiringStorageBufferLength |= dawn::ShaderStageBit::Vertex;
+        }
 
         const ShaderModule* fragmentModule = ToBackend(descriptor->fragmentStage->module);
         const char* fragmentEntryPoint = descriptor->fragmentStage->entryPoint;
         ShaderModule::MetalFunctionData fragmentData = fragmentModule->GetFunction(
             fragmentEntryPoint, ShaderStage::Fragment, ToBackend(GetLayout()));
         descriptorMTL.fragmentFunction = fragmentData.function;
+        if (fragmentData.needsStorageBufferLength) {
+            mStagesRequiringStorageBufferLength |= dawn::ShaderStageBit::Fragment;
+        }
 
         if (HasDepthStencilAttachment()) {
             // TODO(kainino@chromium.org): Handle depth-only and stencil-only formats.
@@ -403,6 +409,10 @@ namespace dawn_native { namespace metal {
     uint32_t RenderPipeline::GetMtlVertexBufferIndex(uint32_t dawnIndex) const {
         ASSERT(dawnIndex < kMaxVertexBuffers);
         return mMtlVertexBufferIndices[dawnIndex];
+    }
+
+    dawn::ShaderStageBit RenderPipeline::GetStagesRequiringStorageBufferLength() const {
+        return mStagesRequiringStorageBufferLength;
     }
 
     MTLVertexDescriptor* RenderPipeline::MakeVertexDesc() {

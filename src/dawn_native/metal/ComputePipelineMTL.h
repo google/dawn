@@ -30,10 +30,12 @@ namespace dawn_native { namespace metal {
 
         void Encode(id<MTLComputeCommandEncoder> encoder);
         MTLSize GetLocalWorkGroupSize() const;
+        bool RequiresStorageBufferLength() const;
 
       private:
         id<MTLComputePipelineState> mMtlComputePipelineState = nil;
         MTLSize mLocalWorkgroupSize;
+        bool mRequiresStorageBufferLength;
     };
 
 }}  // namespace dawn_native::metal

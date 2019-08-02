@@ -35,6 +35,7 @@ namespace dawn_native { namespace metal {
         struct MetalFunctionData {
             id<MTLFunction> function;
             MTLSize localWorkgroupSize;
+            bool needsStorageBufferLength;
             ~MetalFunctionData() {
                 [function release];
             }
