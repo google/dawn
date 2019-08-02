@@ -22,6 +22,8 @@
 
 namespace dawn_native { namespace vulkan {
 
+    struct CommandRecordingContext;
+
     VkFormat VulkanImageFormat(dawn::TextureFormat format);
     VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, const Format& format);
     VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount);
@@ -38,8 +40,9 @@ namespace dawn_native { namespace vulkan {
         // Transitions the texture to be used as `usage`, recording any necessary barrier in
         // `commands`.
         // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
-        void TransitionUsageNow(VkCommandBuffer commands, dawn::TextureUsageBit usage);
-        void EnsureSubresourceContentInitialized(VkCommandBuffer commands,
+        void TransitionUsageNow(CommandRecordingContext* recordingContext,
+                                dawn::TextureUsageBit usage);
+        void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                  uint32_t baseMipLevel,
                                                  uint32_t levelCount,
                                                  uint32_t baseArrayLayer,
@@ -47,7 +50,7 @@ namespace dawn_native { namespace vulkan {
 
       private:
         void DestroyImpl() override;
-        void ClearTexture(VkCommandBuffer commands,
+        void ClearTexture(CommandRecordingContext* recordingContext,
                           uint32_t baseMipLevel,
                           uint32_t levelCount,
                           uint32_t baseArrayLayer,

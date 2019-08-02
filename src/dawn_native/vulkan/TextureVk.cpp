@@ -15,6 +15,7 @@
 #include "dawn_native/vulkan/TextureVk.h"
 
 #include "dawn_native/vulkan/AdapterVk.h"
+#include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 
@@ -436,7 +437,7 @@ namespace dawn_native { namespace vulkan {
             range.levelCount = GetNumMipLevels();
             range.baseArrayLayer = 0;
             range.layerCount = GetArrayLayers();
-            TransitionUsageNow(ToBackend(GetDevice())->GetPendingCommandBuffer(),
+            TransitionUsageNow(ToBackend(GetDevice())->GetPendingRecordingContext(),
                                dawn::TextureUsageBit::CopyDst);
 
             if (GetFormat().HasDepthOrStencil()) {
@@ -494,7 +495,8 @@ namespace dawn_native { namespace vulkan {
         return VulkanAspectMask(GetFormat());
     }
 
-    void Texture::TransitionUsageNow(VkCommandBuffer commands, dawn::TextureUsageBit usage) {
+    void Texture::TransitionUsageNow(CommandRecordingContext* recordingContext,
+                                     dawn::TextureUsageBit usage) {
         // Avoid encoding barriers when it isn't needed.
         bool lastReadOnly = (mLastUsage & kReadOnlyTextureUsages) == mLastUsage;
         if (lastReadOnly && mLastUsage == usage) {
@@ -525,13 +527,13 @@ namespace dawn_native { namespace vulkan {
         barrier.subresourceRange.layerCount = GetArrayLayers();
 
         ToBackend(GetDevice())
-            ->fn.CmdPipelineBarrier(commands, srcStages, dstStages, 0, 0, nullptr, 0, nullptr, 1,
-                                    &barrier);
+            ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
+                                    nullptr, 0, nullptr, 1, &barrier);
 
         mLastUsage = usage;
     }
 
-    void Texture::ClearTexture(VkCommandBuffer commands,
+    void Texture::ClearTexture(CommandRecordingContext* recordingContext,
                                uint32_t baseMipLevel,
                                uint32_t levelCount,
                                uint32_t baseArrayLayer,
@@ -543,13 +545,13 @@ namespace dawn_native { namespace vulkan {
         range.baseArrayLayer = baseArrayLayer;
         range.layerCount = layerCount;
 
-        TransitionUsageNow(commands, dawn::TextureUsageBit::CopyDst);
+        TransitionUsageNow(recordingContext, dawn::TextureUsageBit::CopyDst);
         if (GetFormat().HasDepthOrStencil()) {
             VkClearDepthStencilValue clear_color[1];
             clear_color[0].depth = 0.0f;
             clear_color[0].stencil = 0u;
             ToBackend(GetDevice())
-                ->fn.CmdClearDepthStencilImage(commands, GetHandle(),
+                ->fn.CmdClearDepthStencilImage(recordingContext->commandBuffer, GetHandle(),
                                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clear_color, 1,
                                                &range);
         } else {
@@ -559,14 +561,15 @@ namespace dawn_native { namespace vulkan {
             clear_color[0].float32[2] = 0.0f;
             clear_color[0].float32[3] = 0.0f;
             ToBackend(GetDevice())
-                ->fn.CmdClearColorImage(commands, GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                        clear_color, 1, &range);
+                ->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
+                                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clear_color, 1,
+                                        &range);
         }
         SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer, layerCount);
         GetDevice()->IncrementLazyClearCountForTesting();
     }
 
-    void Texture::EnsureSubresourceContentInitialized(VkCommandBuffer commands,
+    void Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                       uint32_t baseMipLevel,
                                                       uint32_t levelCount,
                                                       uint32_t baseArrayLayer,
@@ -584,7 +587,7 @@ namespace dawn_native { namespace vulkan {
 
             // If subresource has not been initialized, clear it to black as it could contain dirty
             // bits from recycled memory
-            ClearTexture(commands, baseMipLevel, levelCount, baseArrayLayer, layerCount);
+            ClearTexture(recordingContext, baseMipLevel, levelCount, baseArrayLayer, layerCount);
         }
     }
 

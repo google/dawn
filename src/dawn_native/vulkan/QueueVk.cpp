@@ -15,6 +15,7 @@
 #include "dawn_native/vulkan/QueueVk.h"
 
 #include "dawn_native/vulkan/CommandBufferVk.h"
+#include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 
 namespace dawn_native { namespace vulkan {
@@ -30,9 +31,9 @@ namespace dawn_native { namespace vulkan {
 
         device->Tick();
 
-        VkCommandBuffer commandBuffer = device->GetPendingCommandBuffer();
+        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
         for (uint32_t i = 0; i < commandCount; ++i) {
-            ToBackend(commands[i])->RecordCommands(commandBuffer);
+            ToBackend(commands[i])->RecordCommands(recordingContext);
         }
 
         device->SubmitPendingCommands();

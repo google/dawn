@@ -108,7 +108,8 @@ namespace dawn_native { namespace vulkan {
         }
         mUnusedCommands.clear();
 
-        ASSERT(mWaitSemaphores.empty());
+        ASSERT(mRecordingContext.waitSemaphores.empty());
+        ASSERT(mRecordingContext.signalSemaphores.empty());
 
         for (VkFence fence : mUnusedFences) {
             fn.DestroyFence(mVkDevice, fence, nullptr);
@@ -276,6 +277,14 @@ namespace dawn_native { namespace vulkan {
         return mPendingCommands.commandBuffer;
     }
 
+    CommandRecordingContext* Device::GetPendingRecordingContext() {
+        if (mRecordingContext.commandBuffer == VK_NULL_HANDLE) {
+            mRecordingContext.commandBuffer = GetPendingCommandBuffer();
+        }
+
+        return &mRecordingContext;
+    }
+
     void Device::SubmitPendingCommands() {
         if (mPendingCommands.pool == VK_NULL_HANDLE) {
             return;
@@ -285,19 +294,21 @@ namespace dawn_native { namespace vulkan {
             ASSERT(false);
         }
 
-        std::vector<VkPipelineStageFlags> dstStageMasks(mWaitSemaphores.size(),
+        std::vector<VkPipelineStageFlags> dstStageMasks(mRecordingContext.waitSemaphores.size(),
                                                         VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
         VkSubmitInfo submitInfo;
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.pNext = nullptr;
-        submitInfo.waitSemaphoreCount = static_cast<uint32_t>(mWaitSemaphores.size());
-        submitInfo.pWaitSemaphores = mWaitSemaphores.data();
+        submitInfo.waitSemaphoreCount =
+            static_cast<uint32_t>(mRecordingContext.waitSemaphores.size());
+        submitInfo.pWaitSemaphores = mRecordingContext.waitSemaphores.data();
         submitInfo.pWaitDstStageMask = dstStageMasks.data();
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &mPendingCommands.commandBuffer;
-        submitInfo.signalSemaphoreCount = 0;
-        submitInfo.pSignalSemaphores = 0;
+        submitInfo.signalSemaphoreCount =
+            static_cast<uint32_t>(mRecordingContext.signalSemaphores.size());
+        submitInfo.pSignalSemaphores = mRecordingContext.signalSemaphores.data();
 
         VkFence fence = GetUnusedFence();
         if (fn.QueueSubmit(mQueue, 1, &submitInfo, fence) != VK_SUCCESS) {
@@ -309,14 +320,15 @@ namespace dawn_native { namespace vulkan {
         mPendingCommands = CommandPoolAndBuffer();
         mFencesInFlight.emplace(fence, mLastSubmittedSerial);
 
-        for (VkSemaphore semaphore : mWaitSemaphores) {
+        for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
             mDeleter->DeleteWhenUnused(semaphore);
         }
-        mWaitSemaphores.clear();
-    }
 
-    void Device::AddWaitSemaphore(VkSemaphore semaphore) {
-        mWaitSemaphores.push_back(semaphore);
+        for (VkSemaphore semaphore : mRecordingContext.signalSemaphores) {
+            mDeleter->DeleteWhenUnused(semaphore);
+        }
+
+        mRecordingContext = CommandRecordingContext();
     }
 
     ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalDevice) {
@@ -529,7 +541,7 @@ namespace dawn_native { namespace vulkan {
         // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
         // buffer.
         ToBackend(destination)
-            ->TransitionUsageNow(GetPendingCommandBuffer(), dawn::BufferUsageBit::CopyDst);
+            ->TransitionUsageNow(GetPendingRecordingContext(), dawn::BufferUsageBit::CopyDst);
 
         VkBufferCopy copy;
         copy.srcOffset = sourceOffset;

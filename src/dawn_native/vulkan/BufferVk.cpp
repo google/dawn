@@ -163,7 +163,8 @@ namespace dawn_native { namespace vulkan {
         return mHandle;
     }
 
-    void Buffer::TransitionUsageNow(VkCommandBuffer commands, dawn::BufferUsageBit usage) {
+    void Buffer::TransitionUsageNow(CommandRecordingContext* recordingContext,
+                                    dawn::BufferUsageBit usage) {
         bool lastIncludesTarget = (mLastUsage & usage) == usage;
         bool lastReadOnly = (mLastUsage & kReadOnlyBufferUsages) == mLastUsage;
 
@@ -193,8 +194,8 @@ namespace dawn_native { namespace vulkan {
         barrier.size = GetSize();
 
         ToBackend(GetDevice())
-            ->fn.CmdPipelineBarrier(commands, srcStages, dstStages, 0, 0, nullptr, 1, &barrier, 0,
-                                    nullptr);
+            ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
+                                    nullptr, 1, &barrier, 0, nullptr);
 
         mLastUsage = usage;
     }
@@ -212,8 +213,8 @@ namespace dawn_native { namespace vulkan {
     MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
         Device* device = ToBackend(GetDevice());
 
-        VkCommandBuffer commands = device->GetPendingCommandBuffer();
-        TransitionUsageNow(commands, dawn::BufferUsageBit::MapRead);
+        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+        TransitionUsageNow(recordingContext, dawn::BufferUsageBit::MapRead);
 
         uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);
@@ -226,8 +227,8 @@ namespace dawn_native { namespace vulkan {
     MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
         Device* device = ToBackend(GetDevice());
 
-        VkCommandBuffer commands = device->GetPendingCommandBuffer();
-        TransitionUsageNow(commands, dawn::BufferUsageBit::MapWrite);
+        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+        TransitionUsageNow(recordingContext, dawn::BufferUsageBit::MapWrite);
 
         uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);
