@@ -112,18 +112,18 @@ namespace dawn_native {
 
         // 1 byte color formats
         AddColorFormat(dawn::TextureFormat::R8Unorm, true, 1);
-        AddColorFormat(dawn::TextureFormat::R8Snorm, true, 1);
+        AddColorFormat(dawn::TextureFormat::R8Snorm, false, 1);
         AddColorFormat(dawn::TextureFormat::R8Uint, true, 1);
         AddColorFormat(dawn::TextureFormat::R8Sint, true, 1);
 
         // 2 bytes color formats
         AddColorFormat(dawn::TextureFormat::R16Unorm, true, 2);
-        AddColorFormat(dawn::TextureFormat::R16Snorm, true, 2);
+        AddColorFormat(dawn::TextureFormat::R16Snorm, false, 2);
         AddColorFormat(dawn::TextureFormat::R16Uint, true, 2);
         AddColorFormat(dawn::TextureFormat::R16Sint, true, 2);
         AddColorFormat(dawn::TextureFormat::R16Float, true, 2);
         AddColorFormat(dawn::TextureFormat::RG8Unorm, true, 2);
-        AddColorFormat(dawn::TextureFormat::RG8Snorm, true, 2);
+        AddColorFormat(dawn::TextureFormat::RG8Snorm, false, 2);
         AddColorFormat(dawn::TextureFormat::RG8Uint, true, 2);
         AddColorFormat(dawn::TextureFormat::RG8Sint, true, 2);
 
@@ -132,13 +132,13 @@ namespace dawn_native {
         AddColorFormat(dawn::TextureFormat::R32Sint, true, 4);
         AddColorFormat(dawn::TextureFormat::R32Float, true, 4);
         AddColorFormat(dawn::TextureFormat::RG16Unorm, true, 4);
-        AddColorFormat(dawn::TextureFormat::RG16Snorm, true, 4);
+        AddColorFormat(dawn::TextureFormat::RG16Snorm, false, 4);
         AddColorFormat(dawn::TextureFormat::RG16Uint, true, 4);
         AddColorFormat(dawn::TextureFormat::RG16Sint, true, 4);
         AddColorFormat(dawn::TextureFormat::RG16Float, true, 4);
         AddColorFormat(dawn::TextureFormat::RGBA8Unorm, true, 4);
         AddColorFormat(dawn::TextureFormat::RGBA8UnormSrgb, true, 4);
-        AddColorFormat(dawn::TextureFormat::RGBA8Snorm, true, 4);
+        AddColorFormat(dawn::TextureFormat::RGBA8Snorm, false, 4);
         AddColorFormat(dawn::TextureFormat::RGBA8Uint, true, 4);
         AddColorFormat(dawn::TextureFormat::RGBA8Sint, true, 4);
         AddColorFormat(dawn::TextureFormat::BGRA8Unorm, true, 4);
@@ -152,7 +152,7 @@ namespace dawn_native {
         AddColorFormat(dawn::TextureFormat::RG32Sint, true, 8);
         AddColorFormat(dawn::TextureFormat::RG32Float, true, 8);
         AddColorFormat(dawn::TextureFormat::RGBA16Unorm, true, 8);
-        AddColorFormat(dawn::TextureFormat::RGBA16Snorm, true, 8);
+        AddColorFormat(dawn::TextureFormat::RGBA16Snorm, false, 8);
         AddColorFormat(dawn::TextureFormat::RGBA16Uint, true, 8);
         AddColorFormat(dawn::TextureFormat::RGBA16Sint, true, 8);
         AddColorFormat(dawn::TextureFormat::RGBA16Float, true, 8);

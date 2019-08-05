@@ -394,11 +394,7 @@ class TextureFormatTest : public DawnTest {
         std::vector<float> uncompressedData = {0.0f, 1.0f / maxValue, 1.0f, -1.0f};
 
         DoFloatFormatSamplingTest(formatInfo, textureData, uncompressedData, 0.0001f / maxValue);
-
-        // It is not possible to render minValue because -1.0f is the minimum and corresponds to
-        // -maxValue (minValue is - maxValue -1)
-        textureData[3] = -maxValue;
-        DoFormatRenderingTest(formatInfo, uncompressedData, textureData);
+        // Snorm formats aren't renderable because they are not guaranteed renderable in Vulkan
     }
 
     template <typename T>
@@ -507,49 +503,31 @@ TEST_P(TextureFormatTest, BGRA8Unorm) {
 
 // Test the R8Snorm format
 TEST_P(TextureFormatTest, R8Snorm) {
-    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
-
     DoSnormTest<int8_t>({dawn::TextureFormat::R8Snorm, 1, Float, 1});
 }
 
 // Test the RG8Snorm format
 TEST_P(TextureFormatTest, RG8Snorm) {
-    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
-
     DoSnormTest<int8_t>({dawn::TextureFormat::RG8Snorm, 2, Float, 2});
 }
 
 // Test the RGBA8Snorm format
 TEST_P(TextureFormatTest, RGBA8Snorm) {
-    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
-
     DoSnormTest<int8_t>({dawn::TextureFormat::RGBA8Snorm, 4, Float, 4});
 }
 
 // Test the R16Snorm format
 TEST_P(TextureFormatTest, R16Snorm) {
-    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
-
     DoSnormTest<int16_t>({dawn::TextureFormat::R16Snorm, 2, Float, 1});
 }
 
 // Test the RG16Snorm format
 TEST_P(TextureFormatTest, RG16Snorm) {
-    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
-
     DoSnormTest<int16_t>({dawn::TextureFormat::RG16Snorm, 4, Float, 2});
 }
 
 // Test the RGBA16Snorm format
 TEST_P(TextureFormatTest, RGBA16Snorm) {
-    // TODO(cwallez@chromium.org): This fails on the Mesa Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsLinux() && IsIntel());
-
     DoSnormTest<int16_t>({dawn::TextureFormat::RGBA16Snorm, 8, Float, 4});
 }
 

@@ -245,9 +245,18 @@ TEST_F(TextureValidationTest, NonRenderableAndOutputAttachment) {
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     device.CreateTexture(&descriptor);
 
-    // Fails because RG11B10Float is non-renderable
-    descriptor.format = dawn::TextureFormat::RG11B10Float;
-    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    dawn::TextureFormat nonRenderableFormats[] = {
+        dawn::TextureFormat::RG11B10Float, dawn::TextureFormat::R8Snorm,
+        dawn::TextureFormat::RG8Snorm,     dawn::TextureFormat::RGBA8Snorm,
+        dawn::TextureFormat::R16Snorm,     dawn::TextureFormat::RG16Snorm,
+        dawn::TextureFormat::RGBA16Snorm,
+    };
+
+    for (dawn::TextureFormat format : nonRenderableFormats) {
+        // Fails because `format` is non-renderable
+        descriptor.format = format;
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
 }
 
 // TODO(jiawei.shao@intel.com): add tests to verify we cannot create 1D or 3D textures with
