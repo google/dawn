@@ -138,7 +138,7 @@ void init() {
     ubo = device.CreateBuffer(&bufferDesc);
 
     bindGroup =
-        utils::MakeBindGroup(device, bgl, {{0, ubo, 0, kNumTriangles * sizeof(ShaderData)}});
+        utils::MakeBindGroup(device, bgl, {{0, ubo, 0, sizeof(ShaderData)}});
 }
 
 void frame() {
