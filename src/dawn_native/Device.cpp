@@ -77,6 +77,14 @@ namespace dawn_native {
         // Devices must explicitly free the uploader
         ASSERT(mDynamicUploader == nullptr);
         ASSERT(mDeferredCreateBufferMappedAsyncResults.empty());
+
+        ASSERT(mCaches->attachmentStates.empty());
+        ASSERT(mCaches->bindGroupLayouts.empty());
+        ASSERT(mCaches->computePipelines.empty());
+        ASSERT(mCaches->pipelineLayouts.empty());
+        ASSERT(mCaches->renderPipelines.empty());
+        ASSERT(mCaches->samplers.empty());
+        ASSERT(mCaches->shaderModules.empty());
     }
 
     void DeviceBase::HandleError(const char* message) {
@@ -255,35 +263,33 @@ namespace dawn_native {
         ASSERT(removedCount == 1);
     }
 
-    AttachmentState* DeviceBase::GetOrCreateAttachmentState(
+    Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
         const RenderPipelineDescriptor* descriptor) {
         AttachmentStateBlueprint blueprint(descriptor);
 
         auto iter = mCaches->attachmentStates.find(&blueprint);
         if (iter != mCaches->attachmentStates.end()) {
-            AttachmentState* cachedState = static_cast<AttachmentState*>(*iter);
-            cachedState->Reference();
-            return cachedState;
+            return static_cast<AttachmentState*>(*iter);
         }
 
-        AttachmentState* attachmentState = new AttachmentState(this, blueprint);
-        mCaches->attachmentStates.insert(attachmentState);
+        Ref<AttachmentState> attachmentState = new AttachmentState(this, blueprint);
+        attachmentState->Release();
+        mCaches->attachmentStates.insert(attachmentState.Get());
         return attachmentState;
     }
 
-    AttachmentState* DeviceBase::GetOrCreateAttachmentState(
+    Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
         const RenderPassDescriptor* descriptor) {
         AttachmentStateBlueprint blueprint(descriptor);
 
         auto iter = mCaches->attachmentStates.find(&blueprint);
         if (iter != mCaches->attachmentStates.end()) {
-            AttachmentState* cachedState = static_cast<AttachmentState*>(*iter);
-            cachedState->Reference();
-            return cachedState;
+            return static_cast<AttachmentState*>(*iter);
         }
 
-        AttachmentState* attachmentState = new AttachmentState(this, blueprint);
-        mCaches->attachmentStates.insert(attachmentState);
+        Ref<AttachmentState> attachmentState = new AttachmentState(this, blueprint);
+        attachmentState->Release();
+        mCaches->attachmentStates.insert(attachmentState.Get());
         return attachmentState;
     }
 

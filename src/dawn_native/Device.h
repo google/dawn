@@ -115,8 +115,8 @@ namespace dawn_native {
             const ShaderModuleDescriptor* descriptor);
         void UncacheShaderModule(ShaderModuleBase* obj);
 
-        AttachmentState* GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor);
-        AttachmentState* GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
+        Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor);
+        Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
         void UncacheAttachmentState(AttachmentState* obj);
 
         // Dawn API
