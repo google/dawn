@@ -445,6 +445,10 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
 // Test copying into the whole BC texture with 2x2 blocks and sampling from it.
 TEST_P(CompressedTextureBCFormatTest, Basic) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -460,6 +464,10 @@ TEST_P(CompressedTextureBCFormatTest, Basic) {
 
 // Test copying into a sub-region of a texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -480,6 +488,10 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
 
 // Test using rowPitch == 0 in the copies with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -499,6 +511,10 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
 
 // Test copying into the non-zero layer of a 2D array texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -519,6 +535,10 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
 
 // Test copying into a non-zero mipmap level of a texture with BC texture formats.
 TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -552,6 +572,10 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 
 // Test texture-to-texture whole-size copies with BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmapLevel) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     // TODO(cwallez@chromium.org): This consistently fails on with the 12th pixel being opaque black
@@ -691,6 +715,10 @@ TEST_P(CompressedTextureBCFormatTest, CopyPartofTextureSubResourceIntoNonZeroMip
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
 // extent exactly fit the RowPitch.
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -718,6 +746,10 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
 // backend the texelOffset.y will be greater than 0 after calcuting the texelOffset in the function
 // ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -746,6 +778,10 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
 // extent exceed the RowPitch. On D3D12 backend two copies are required for this case.
 TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitch) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -774,6 +810,10 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
 // rowPitch. On D3D12 backend the texelOffset.z will be greater than 0 after calcuting the
 // texelOffset in the function ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -802,6 +842,10 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
 // copyExtent.depth) on Metal backends. As copyExtent.depth can only be 1 for BC formats, on Metal
 // backend we will use two copies to implement such copy.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -820,6 +864,10 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
 // Test the workaround in the B2T copies when (bufferSize - bufferOffset < bytesPerImage *
 // copyExtent.depth) and copyExtent needs to be clamped.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
+    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
+    // bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;

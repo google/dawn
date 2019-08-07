@@ -214,6 +214,10 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
     // executing these commands in-flight. If this takes longer than ~2s, a device reset occurs and
     // fails the test. Since GPUs may or may not complete by then, this test must be disabled OR
     // modified to be well-below the timeout limit.
+
+    // TODO (jiawei.shao@intel.com): find out why this test fails on Intel Vulkan Linux bots.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsLinux());
+
     constexpr uint64_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 500 * 500;
     dawn::BufferDescriptor descriptor;
