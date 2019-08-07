@@ -20,39 +20,13 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
-// Create a 2D texture for sampling in the tests.
-dawn::Texture Create2DTexture(dawn::Device device,
-                              dawn::TextureFormat format,
-                              uint32_t width,
-                              uint32_t height,
-                              uint32_t arrayLayerCount = 1,
-                              uint32_t mipLevelCount = 1,
-                              dawn::TextureUsageBit usage = dawn::TextureUsageBit::Sampled |
-                                                            dawn::TextureUsageBit::CopyDst) {
-    dawn::TextureDescriptor descriptor;
-    descriptor.dimension = dawn::TextureDimension::e2D;
-    descriptor.format = format;
-    descriptor.size.width = width;
-    descriptor.size.height = height;
-    descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = arrayLayerCount;
-    descriptor.sampleCount = 1;
-    descriptor.mipLevelCount = mipLevelCount;
-    descriptor.usage = usage;
-    return device.CreateTexture(&descriptor);
-}
-
 // The helper struct to configure the copies between buffers and textures.
 struct CopyConfig {
-    dawn::TextureFormat format;
-    uint32_t textureWidthLevel0;
-    uint32_t textureHeightLevel0;
+    dawn::TextureDescriptor textureDescriptor;
     dawn::Extent3D copyExtent3D;
     dawn::Origin3D copyOrigin3D = {0, 0, 0};
-    uint32_t arrayLayerCount = 1;
-    uint32_t mipmapLevelCount = 1;
-    uint32_t baseMipmapLevel = 0;
-    uint32_t baseArrayLayer = 0;
+    uint32_t viewMipmapLevel = 0;
+    uint32_t viewArrayLayer = 0;
     uint32_t bufferOffset = 0;
     uint32_t rowPitchAlignment = kTextureRowPitchAlignment;
     uint32_t imageHeight = 0;
@@ -81,13 +55,14 @@ class CompressedTextureBCFormatTest : public DawnTest {
     }
 
     // Copy the compressed texture data into the destination texture as is specified in copyConfig.
-    void CopyDataIntoCompressedTexture(dawn::Texture bcCompressedTexture,
-                                       const CopyConfig& copyConfig) {
+    void InitializeDataInCompressedTexture(dawn::Texture bcCompressedTexture,
+                                           const CopyConfig& copyConfig) {
         ASSERT(IsBCFormatSupported());
 
         // Compute the upload buffer size with rowPitchAlignment and the copy region.
-        uint32_t actualWidthAtLevel = copyConfig.textureWidthLevel0 >> copyConfig.baseMipmapLevel;
-        uint32_t actualHeightAtLevel = copyConfig.textureHeightLevel0 >> copyConfig.baseMipmapLevel;
+        const dawn::Extent3D textureSize = copyConfig.textureDescriptor.size;
+        uint32_t actualWidthAtLevel = textureSize.width >> copyConfig.viewMipmapLevel;
+        uint32_t actualHeightAtLevel = textureSize.height >> copyConfig.viewMipmapLevel;
         uint32_t copyWidthInBlockAtLevel =
             (actualWidthAtLevel + kBCBlockWidthInTexels - 1) / kBCBlockWidthInTexels;
         uint32_t copyHeightInBlockAtLevel =
@@ -97,7 +72,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
             bufferRowPitchInBytes = copyConfig.rowPitchAlignment;
         } else {
             bufferRowPitchInBytes =
-                copyWidthInBlockAtLevel * CompressedFormatBlockSizeInBytes(copyConfig.format);
+                copyWidthInBlockAtLevel *
+                CompressedFormatBlockSizeInBytes(copyConfig.textureDescriptor.format);
         }
         uint32_t uploadBufferSize =
             copyConfig.bufferOffset + bufferRowPitchInBytes * copyHeightInBlockAtLevel;
@@ -105,7 +81,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
         // Fill uploadData with the pre-prepared one-block compressed texture data.
         std::vector<uint8_t> uploadData(uploadBufferSize, 0);
         std::vector<uint8_t> oneBlockCompressedTextureData =
-            GetOneBlockBCFormatTextureData(copyConfig.format);
+            GetOneBlockBCFormatTextureData(copyConfig.textureDescriptor.format);
         for (uint32_t h = 0; h < copyHeightInBlockAtLevel; ++h) {
             for (uint32_t w = 0; w < copyWidthInBlockAtLevel; ++w) {
                 uint32_t uploadBufferOffset = copyConfig.bufferOffset + bufferRowPitchInBytes * h +
@@ -122,8 +98,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
             utils::CreateBufferCopyView(stagingBuffer, copyConfig.bufferOffset,
                                         copyConfig.rowPitchAlignment, copyConfig.imageHeight);
         dawn::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(bcCompressedTexture, copyConfig.baseMipmapLevel,
-                                         copyConfig.baseArrayLayer, copyConfig.copyOrigin3D);
+            utils::CreateTextureCopyView(bcCompressedTexture, copyConfig.viewMipmapLevel,
+                                         copyConfig.viewArrayLayer, copyConfig.copyOrigin3D);
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyConfig.copyExtent3D);
@@ -230,13 +206,11 @@ class CompressedTextureBCFormatTest : public DawnTest {
     void TestCopyRegionIntoBCFormatTextures(const CopyConfig& config) {
         ASSERT(IsBCFormatSupported());
 
-        dawn::Texture bcTexture = Create2DTexture(device, config.format, config.textureWidthLevel0,
-                                                  config.textureHeightLevel0,
-                                                  config.arrayLayerCount, config.mipmapLevelCount);
-        CopyDataIntoCompressedTexture(bcTexture, config);
+        dawn::Texture bcTexture = CreateTextureWithCompressedData(config);
 
-        dawn::BindGroup bindGroup = CreateBindGroupForTest(
-            bcTexture, config.format, config.baseArrayLayer, config.baseMipmapLevel);
+        dawn::BindGroup bindGroup =
+            CreateBindGroupForTest(bcTexture, config.textureDescriptor.format,
+                                   config.viewArrayLayer, config.viewMipmapLevel);
         dawn::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
 
         dawn::Extent3D virtualSizeAtLevel = GetVirtualSizeAtLevel(config);
@@ -252,9 +226,38 @@ class CompressedTextureBCFormatTest : public DawnTest {
             noPaddingExtent3D.height = virtualSizeAtLevel.height - config.copyOrigin3D.y;
         }
 
-        std::vector<RGBA8> expectedData = GetExpectedData(config.format, virtualSizeAtLevel);
+        std::vector<RGBA8> expectedData =
+            GetExpectedData(config.textureDescriptor.format, virtualSizeAtLevel);
         VerifyCompressedTexturePixelValues(renderPipeline, bindGroup, virtualSizeAtLevel,
                                            config.copyOrigin3D, noPaddingExtent3D, expectedData);
+    }
+
+    // Create a texture and initialize it with the pre-prepared compressed texture data.
+    dawn::Texture CreateTextureWithCompressedData(CopyConfig config) {
+        dawn::Texture bcTexture = device.CreateTexture(&config.textureDescriptor);
+        InitializeDataInCompressedTexture(bcTexture, config);
+        return bcTexture;
+    }
+
+    dawn::Texture CreateTextureFromTexture(dawn::Texture srcTexture,
+                                           CopyConfig srcConfig,
+                                           CopyConfig dstConfig) {
+        dawn::Texture dstTexture = device.CreateTexture(&dstConfig.textureDescriptor);
+
+        dawn::TextureCopyView textureCopyViewSrc =
+            utils::CreateTextureCopyView(srcTexture, srcConfig.viewMipmapLevel,
+                                         srcConfig.viewArrayLayer, srcConfig.copyOrigin3D);
+        dawn::TextureCopyView textureCopyViewDst =
+            utils::CreateTextureCopyView(dstTexture, dstConfig.viewMipmapLevel,
+                                         dstConfig.viewArrayLayer, dstConfig.copyOrigin3D);
+
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToTexture(&textureCopyViewSrc, &textureCopyViewDst,
+                                     &dstConfig.copyExtent3D);
+        dawn::CommandBuffer copy = encoder.Finish();
+        queue.Submit(1, &copy);
+
+        return dstTexture;
     }
 
     // Return the BC block size in bytes.
@@ -412,8 +415,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
     }
 
     static dawn::Extent3D GetVirtualSizeAtLevel(const CopyConfig& config) {
-        return {config.textureWidthLevel0 >> config.baseMipmapLevel,
-                config.textureHeightLevel0 >> config.baseMipmapLevel, 1};
+        return {config.textureDescriptor.size.width >> config.viewMipmapLevel,
+                config.textureDescriptor.size.height >> config.viewMipmapLevel, 1};
     }
 
     static dawn::Extent3D GetPhysicalSizeAtLevel(const CopyConfig& config) {
@@ -438,6 +441,9 @@ class CompressedTextureBCFormatTest : public DawnTest {
     static constexpr uint32_t kBCBlockWidthInTexels = 4;
     static constexpr uint32_t kBCBlockHeightInTexels = 4;
 
+    static constexpr dawn::TextureUsageBit kDefaultBCFormatTextureUsage =
+        dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::CopyDst;
+
     dawn::BindGroupLayout mBindGroupLayout;
 
     bool mIsBCFormatSupported = false;
@@ -452,12 +458,12 @@ TEST_P(CompressedTextureBCFormatTest, Basic) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureWidthLevel0 = 8;
-    config.textureHeightLevel0 = 8;
-    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {8, 8, 1};
+    config.copyExtent3D = config.textureDescriptor.size;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
 }
@@ -471,9 +477,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureHeightLevel0 = 8;
-    config.textureWidthLevel0 = 8;
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {8, 8, 1};
 
     const dawn::Origin3D kOrigin = {4, 4, 0};
     const dawn::Extent3D kExtent3D = {4, 4, 1};
@@ -481,7 +486,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
     config.copyExtent3D = kExtent3D;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
 }
@@ -495,16 +500,18 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureHeightLevel0 = 8;
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size.height = 8;
+    config.textureDescriptor.size.depth = 1;
 
     config.rowPitchAlignment = 0;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
-        config.textureWidthLevel0 = kTextureRowPitchAlignment /
-                                    CompressedFormatBlockSizeInBytes(config.format) *
-                                    kBCBlockWidthInTexels;
-        config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+        config.textureDescriptor.format = format;
+        config.textureDescriptor.size.width = kTextureRowPitchAlignment /
+                                              CompressedFormatBlockSizeInBytes(format) *
+                                              kBCBlockWidthInTexels;
+        config.copyExtent3D = config.textureDescriptor.size;
         TestCopyRegionIntoBCFormatTextures(config);
     }
 }
@@ -518,17 +525,16 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureHeightLevel0 = 8;
-    config.textureWidthLevel0 = 8;
-    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {8, 8, 1};
+    config.copyExtent3D = config.textureDescriptor.size;
 
     constexpr uint32_t kArrayLayerCount = 3;
-    config.arrayLayerCount = kArrayLayerCount;
-    config.baseArrayLayer = kArrayLayerCount - 1;
+    config.textureDescriptor.arrayLayerCount = kArrayLayerCount;
+    config.viewArrayLayer = kArrayLayerCount - 1;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
 }
@@ -542,18 +548,18 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureHeightLevel0 = 60;
-    config.textureWidthLevel0 = 60;
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {60, 60, 1};
 
     constexpr uint32_t kMipmapLevelCount = 3;
-    config.mipmapLevelCount = kMipmapLevelCount;
-    config.baseMipmapLevel = kMipmapLevelCount - 1;
+    config.textureDescriptor.mipLevelCount = kMipmapLevelCount;
+    config.viewMipmapLevel = kMipmapLevelCount - 1;
 
     // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
     // required in the copies.
-    const uint32_t kActualWidthAtLevel = config.textureWidthLevel0 >> config.baseMipmapLevel;
-    const uint32_t kActualHeightAtLevel = config.textureHeightLevel0 >> config.baseMipmapLevel;
+    const dawn::Extent3D textureSizeLevel0 = config.textureDescriptor.size;
+    const uint32_t kActualWidthAtLevel = textureSizeLevel0.width >> config.viewMipmapLevel;
+    const uint32_t kActualHeightAtLevel = textureSizeLevel0.height >> config.viewMipmapLevel;
     ASSERT(kActualWidthAtLevel % kBCBlockWidthInTexels != 0);
     ASSERT(kActualHeightAtLevel % kBCBlockHeightInTexels != 0);
 
@@ -565,7 +571,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     config.copyExtent3D = {kCopyWidthAtLevel, kCopyHeightAtLevel, 1};
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
 }
@@ -584,13 +590,11 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
     DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
 
     CopyConfig config;
-    config.textureHeightLevel0 = 60;
-    config.textureWidthLevel0 = 60;
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.textureDescriptor.size = {60, 60, 1};
 
     constexpr uint32_t kMipmapLevelCount = 3;
-    config.mipmapLevelCount = kMipmapLevelCount;
-    config.baseMipmapLevel = kMipmapLevelCount - 1;
+    config.textureDescriptor.mipLevelCount = kMipmapLevelCount;
+    config.viewMipmapLevel = kMipmapLevelCount - 1;
 
     // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
     // required in the copies.
@@ -603,33 +607,24 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
     for (dawn::TextureFormat format : kBCFormats) {
         // Create bcTextureSrc as the source texture and initialize it with pre-prepared BC
         // compressed data.
-        config.format = format;
-        dawn::Texture bcTextureSrc = Create2DTexture(
-            device, config.format, config.textureWidthLevel0, config.textureHeightLevel0,
-            config.arrayLayerCount, config.mipmapLevelCount,
-            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst);
-        CopyDataIntoCompressedTexture(bcTextureSrc, config);
+        config.textureDescriptor.format = format;
+        // Add the usage bit for both source and destination textures so that we don't need to
+        // create two copy configs.
+        config.textureDescriptor.usage = dawn::TextureUsageBit::CopySrc |
+                                         dawn::TextureUsageBit::CopyDst |
+                                         dawn::TextureUsageBit::Sampled;
+
+        dawn::Texture bcTextureSrc = CreateTextureWithCompressedData(config);
 
         // Create bcTexture and copy from the content in bcTextureSrc into it.
-        dawn::Texture bcTexture = Create2DTexture(device, config.format, config.textureWidthLevel0,
-                                                  config.textureHeightLevel0,
-                                                  config.arrayLayerCount, config.mipmapLevelCount);
-        dawn::TextureCopyView textureCopyViewSrc = utils::CreateTextureCopyView(
-            bcTextureSrc, config.baseMipmapLevel, config.baseArrayLayer, config.copyOrigin3D);
-        dawn::TextureCopyView textureCopyViewDst = utils::CreateTextureCopyView(
-            bcTexture, config.baseMipmapLevel, config.baseArrayLayer, config.copyOrigin3D);
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToTexture(&textureCopyViewSrc, &textureCopyViewDst,
-                                     &config.copyExtent3D);
-        dawn::CommandBuffer copy = encoder.Finish();
-        queue.Submit(1, &copy);
+        dawn::Texture bcTextureDst = CreateTextureFromTexture(bcTextureSrc, config, config);
 
         // Verify if we can use bcTexture as sampled textures correctly.
         dawn::BindGroup bindGroup = CreateBindGroupForTest(
-            bcTexture, config.format, config.baseArrayLayer, config.baseMipmapLevel);
+            bcTextureDst, format, config.viewArrayLayer, config.viewMipmapLevel);
         dawn::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
 
-        std::vector<RGBA8> expectedData = GetExpectedData(config.format, kVirtualSize);
+        std::vector<RGBA8> expectedData = GetExpectedData(format, kVirtualSize);
         VerifyCompressedTexturePixelValues(renderPipeline, bindGroup, kVirtualSize,
                                            config.copyOrigin3D, kVirtualSize, expectedData);
     }
@@ -645,22 +640,16 @@ TEST_P(CompressedTextureBCFormatTest, CopyPartofTextureSubResourceIntoNonZeroMip
     DAWN_SKIP_TEST_IF(IsVulkan());
 
     CopyConfig srcConfig;
-    srcConfig.textureHeightLevel0 = 60;
-    srcConfig.textureWidthLevel0 = 60;
-    srcConfig.rowPitchAlignment = kTextureRowPitchAlignment;
-    srcConfig.mipmapLevelCount = 1;
-    srcConfig.baseMipmapLevel = srcConfig.mipmapLevelCount - 1;
+    srcConfig.textureDescriptor.size = {60, 60, 1};
+    srcConfig.viewMipmapLevel = srcConfig.textureDescriptor.mipLevelCount - 1;
 
     const dawn::Extent3D kSrcVirtualSize = GetVirtualSizeAtLevel(srcConfig);
 
     CopyConfig dstConfig;
-    dstConfig.textureHeightLevel0 = 60;
-    dstConfig.textureWidthLevel0 = 60;
-    dstConfig.rowPitchAlignment = kTextureRowPitchAlignment;
-
+    dstConfig.textureDescriptor.size = {60, 60, 1};
     constexpr uint32_t kMipmapLevelCount = 3;
-    dstConfig.mipmapLevelCount = kMipmapLevelCount;
-    dstConfig.baseMipmapLevel = kMipmapLevelCount - 1;
+    dstConfig.textureDescriptor.mipLevelCount = kMipmapLevelCount;
+    dstConfig.viewMipmapLevel = kMipmapLevelCount - 1;
 
     // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
     // required in the copies.
@@ -677,36 +666,25 @@ TEST_P(CompressedTextureBCFormatTest, CopyPartofTextureSubResourceIntoNonZeroMip
     for (dawn::TextureFormat format : kBCFormats) {
         // Create bcTextureSrc as the source texture and initialize it with pre-prepared BC
         // compressed data.
-        srcConfig.format = format;
-        dawn::Texture bcTextureSrc = Create2DTexture(
-            device, srcConfig.format, srcConfig.textureWidthLevel0, srcConfig.textureHeightLevel0,
-            srcConfig.arrayLayerCount, srcConfig.mipmapLevelCount,
-            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst);
-        CopyDataIntoCompressedTexture(bcTextureSrc, srcConfig);
+        srcConfig.textureDescriptor.format = format;
+        srcConfig.textureDescriptor.usage =
+            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst;
+        dawn::Texture bcTextureSrc = CreateTextureWithCompressedData(srcConfig);
         dawn::TextureCopyView textureCopyViewSrc =
-            utils::CreateTextureCopyView(bcTextureSrc, srcConfig.baseMipmapLevel,
-                                         srcConfig.baseArrayLayer, srcConfig.copyOrigin3D);
+            utils::CreateTextureCopyView(bcTextureSrc, srcConfig.viewMipmapLevel,
+                                         srcConfig.viewArrayLayer, srcConfig.copyOrigin3D);
 
         // Create bcTexture and copy from the content in bcTextureSrc into it.
-        dstConfig.format = format;
-        dawn::Texture bcTexture = Create2DTexture(
-            device, dstConfig.format, dstConfig.textureWidthLevel0, dstConfig.textureHeightLevel0,
-            dstConfig.arrayLayerCount, dstConfig.mipmapLevelCount);
-        dawn::TextureCopyView textureCopyViewDst = utils::CreateTextureCopyView(
-            bcTexture, dstConfig.baseMipmapLevel, dstConfig.baseArrayLayer, dstConfig.copyOrigin3D);
-
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToTexture(&textureCopyViewSrc, &textureCopyViewDst,
-                                     &dstConfig.copyExtent3D);
-        dawn::CommandBuffer copy = encoder.Finish();
-        queue.Submit(1, &copy);
+        dstConfig.textureDescriptor.format = format;
+        dstConfig.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+        dawn::Texture bcTextureDst = CreateTextureFromTexture(bcTextureSrc, srcConfig, dstConfig);
 
         // Verify if we can use bcTexture as sampled textures correctly.
         dawn::BindGroup bindGroup = CreateBindGroupForTest(
-            bcTexture, dstConfig.format, dstConfig.baseArrayLayer, dstConfig.baseMipmapLevel);
+            bcTextureDst, format, dstConfig.viewArrayLayer, dstConfig.viewMipmapLevel);
         dawn::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
 
-        std::vector<RGBA8> expectedData = GetExpectedData(dstConfig.format, kDstVirtualSize);
+        std::vector<RGBA8> expectedData = GetExpectedData(format, kDstVirtualSize);
         VerifyCompressedTexturePixelValues(renderPipeline, bindGroup, kDstVirtualSize,
                                            dstConfig.copyOrigin3D, kDstVirtualSize, expectedData);
     }
@@ -722,15 +700,14 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureWidthLevel0 = 8;
-    config.textureHeightLevel0 = 8;
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
-    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {8, 8, 1};
+    config.copyExtent3D = config.textureDescriptor.size;
 
-    const uint32_t blockCountPerRow = config.textureWidthLevel0 / kBCBlockWidthInTexels;
+    const uint32_t blockCountPerRow = config.textureDescriptor.size.width / kBCBlockWidthInTexels;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
         const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
@@ -753,17 +730,17 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureWidthLevel0 = 8;
-    config.textureHeightLevel0 = 8;
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
-    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {8, 8, 1};
+    config.copyExtent3D = config.textureDescriptor.size;
 
-    const uint32_t blockCountPerRow = config.textureWidthLevel0 / kBCBlockWidthInTexels;
+    const dawn::Extent3D textureSizeLevel0 = config.textureDescriptor.size;
+    const uint32_t blockCountPerRow = textureSizeLevel0.width / kBCBlockWidthInTexels;
     const uint32_t slicePitchInBytes =
-        config.rowPitchAlignment * (config.textureHeightLevel0 / kBCBlockHeightInTexels);
+        config.rowPitchAlignment * (textureSizeLevel0.height / kBCBlockHeightInTexels);
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
         const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
@@ -785,17 +762,16 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureWidthLevel0 = 8;
-    config.textureHeightLevel0 = 8;
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
-    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {8, 8, 1};
+    config.copyExtent3D = config.textureDescriptor.size;
 
-    const uint32_t blockCountPerRow = config.textureWidthLevel0 / kBCBlockWidthInTexels;
+    const uint32_t blockCountPerRow = config.textureDescriptor.size.width / kBCBlockWidthInTexels;
 
     constexpr uint32_t kExceedRowBlockCount = 1;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
         const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
@@ -817,16 +793,15 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureWidthLevel0 = 8;
-    config.textureHeightLevel0 = kBCBlockHeightInTexels;
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
-    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {8, kBCBlockHeightInTexels, 1};
+    config.copyExtent3D = config.textureDescriptor.size;
 
-    const uint32_t blockCountPerRow = config.textureWidthLevel0 / kBCBlockWidthInTexels;
+    const uint32_t blockCountPerRow = config.textureDescriptor.size.width / kBCBlockWidthInTexels;
     const uint32_t slicePitchInBytes = config.rowPitchAlignment;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
         const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
@@ -849,14 +824,14 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureWidthLevel0 = 8;
-    config.textureHeightLevel0 = 8;
-    config.copyExtent3D = {config.textureWidthLevel0, config.textureHeightLevel0, 1};
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {8, 8, 1};
+    config.copyExtent3D = config.textureDescriptor.size;
 
-    config.imageHeight = config.textureHeightLevel0 * 2;
+    config.imageHeight = config.textureDescriptor.size.height * 2;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
 }
@@ -871,18 +846,18 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
-    config.textureHeightLevel0 = 56;
-    config.textureWidthLevel0 = 56;
-    config.rowPitchAlignment = kTextureRowPitchAlignment;
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {56, 56, 1};
 
     constexpr uint32_t kMipmapLevelCount = 3;
-    config.mipmapLevelCount = kMipmapLevelCount;
-    config.baseMipmapLevel = kMipmapLevelCount - 1;
+    config.textureDescriptor.mipLevelCount = kMipmapLevelCount;
+    config.viewMipmapLevel = kMipmapLevelCount - 1;
 
     // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
     // required in the copies.
-    const uint32_t kActualWidthAtLevel = config.textureWidthLevel0 >> config.baseMipmapLevel;
-    const uint32_t kActualHeightAtLevel = config.textureHeightLevel0 >> config.baseMipmapLevel;
+    const dawn::Extent3D textureSizeLevel0 = config.textureDescriptor.size;
+    const uint32_t kActualWidthAtLevel = textureSizeLevel0.width >> config.viewMipmapLevel;
+    const uint32_t kActualHeightAtLevel = textureSizeLevel0.height >> config.viewMipmapLevel;
     ASSERT(kActualWidthAtLevel % kBCBlockWidthInTexels != 0);
     ASSERT(kActualHeightAtLevel % kBCBlockHeightInTexels != 0);
 
@@ -896,7 +871,7 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
     config.imageHeight = kCopyHeightAtLevel * 2;
 
     for (dawn::TextureFormat format : kBCFormats) {
-        config.format = format;
+        config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
 }
