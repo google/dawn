@@ -52,7 +52,7 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         mDynamicStorageBuffer = device.CreateBuffer(&storageBufferDescriptor);
 
-        mBindGroupLayout = utils::MakeBindGroupLayout(
+        mDefaultBindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
                       dawn::BindingType::UniformBuffer},
                      {1, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
@@ -62,7 +62,9 @@ class DynamicBufferOffsetTests : public DawnTest {
                      {4, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
                       dawn::BindingType::StorageBuffer, true}});
 
-        mBindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
+        mDefaultPipelineLayout = utils::MakeBasicPipelineLayout(device, &mDefaultBindGroupLayout);
+
+        mBindGroup = utils::MakeBindGroup(device, mDefaultBindGroupLayout,
                                           {{0, mUniformBuffer, 0, kBindingSize},
                                            {1, mStorageBuffer, 0, kBindingSize},
                                            {3, mDynamicUniformBuffer, 0, kBindingSize},
@@ -71,58 +73,16 @@ class DynamicBufferOffsetTests : public DawnTest {
     // Create objects to use as resources inside test bind groups.
 
     dawn::BindGroup mBindGroup;
-    dawn::BindGroupLayout mBindGroupLayout;
+    dawn::BindGroupLayout mDefaultBindGroupLayout;
+    dawn::PipelineLayout mDefaultPipelineLayout;
     dawn::Buffer mUniformBuffer;
     dawn::Buffer mStorageBuffer;
     dawn::Buffer mDynamicUniformBuffer;
     dawn::Buffer mDynamicStorageBuffer;
     dawn::Texture mColorAttachment;
 
-    dawn::RenderPipeline CreateRenderPipeline() {
-        dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
-                #version 450
-                void main() {
-                    const vec2 pos[3] = vec2[3](vec2(-1.0f, 0.0f), vec2(-1.0f, -1.0f), vec2(0.0f, -1.0f));
-                    gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
-                })");
-
-        dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
-                #version 450
-                layout(std140, set = 0, binding = 0) uniform uBufferNotDynamic {
-                    uvec2 notDynamicValue;
-                };
-                layout(std140, set = 0, binding = 1) buffer sBufferNotDynamic {
-                    uvec2 notDynamicResult;
-                } mid;
-                layout(std140, set = 0, binding = 3) uniform uBuffer {
-                     uvec2 value;
-                };
-                layout(std140, set = 0, binding = 4) buffer SBuffer {
-                     uvec2 result;
-                } sBuffer;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    mid.notDynamicResult.xy = notDynamicValue.xy;
-                    sBuffer.result.xy = value.xy + mid.notDynamicResult.xy;
-                    fragColor = vec4(value.x / 255.0f, value.y / 255.0f, 1.0f, 1.0f);
-                })");
-
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.cVertexStage.module = vsModule;
-        pipelineDescriptor.cFragmentStage.module = fsModule;
-        pipelineDescriptor.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
-        dawn::PipelineLayout pipelineLayout =
-            utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-        pipelineDescriptor.layout = pipelineLayout;
-
-        return device.CreateRenderPipeline(&pipelineDescriptor);
-    }
-
-    dawn::ComputePipeline CreateComputePipeline() {
-        dawn::ShaderModule csModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
+    dawn::ShaderModule CreateDefaultCsModule() {
+        return utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
                 #version 450
                 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
                 layout(std140, set = 0, binding = 0) uniform uBufferNotDynamic {
@@ -142,24 +102,135 @@ class DynamicBufferOffsetTests : public DawnTest {
                     mid.notDynamicResult.xy = notDynamicValue.xy;
                     sBuffer.result.xy = value.xy + mid.notDynamicResult.xy;
                 })");
+    }
 
+    dawn::ShaderModule CreateDefaultVsModule() {
+        return utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+                #version 450
+                void main() {
+                    const vec2 pos[3] = vec2[3](vec2(-1.0f, 0.0f), vec2(-1.0f, -1.0f), vec2(0.0f, -1.0f));
+                    gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
+                })");
+    }
+
+    dawn::ShaderModule CreateDefaultFsModule() {
+        return utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+                #version 450
+                layout(std140, set = 0, binding = 0) uniform uBufferNotDynamic {
+                    uvec2 notDynamicValue;
+                };
+                layout(std140, set = 0, binding = 1) buffer sBufferNotDynamic {
+                    uvec2 notDynamicResult;
+                } mid;
+                layout(std140, set = 0, binding = 3) uniform uBuffer {
+                     uvec2 value;
+                };
+                layout(std140, set = 0, binding = 4) buffer SBuffer {
+                     uvec2 result;
+                } sBuffer;
+                layout(location = 0) out vec4 fragColor;
+                void main() {
+                    mid.notDynamicResult.xy = notDynamicValue.xy;
+                    sBuffer.result.xy = value.xy + mid.notDynamicResult.xy;
+                    fragColor = vec4(value.x / 255.0f, value.y / 255.0f, 1.0f, 1.0f);
+                })");
+    }
+
+    dawn::ShaderModule CreateInheritCsModule() {
+        return utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
+                #version 450
+                layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+                layout(std140, set = 0, binding = 0) uniform uBufferNotDynamic {
+                    uvec2 notDynamicValue;
+                };
+                layout(std140, set = 0, binding = 1) buffer sBufferNotDynamic {
+                    uvec2 notDynamicResult;
+                } mid;
+                layout(std140, set = 0, binding = 3) uniform uBuffer {
+                     uvec2 value;
+                };
+                layout(std140, set = 0, binding = 4) buffer SBuffer {
+                     uvec2 result;
+                } sBuffer;
+                layout(std140, set = 1, binding = 0) uniform paddingBlock {
+                    uvec2 padding;
+                };
+
+                void main() {
+                    mid.notDynamicResult.xy = notDynamicValue.xy;
+                    sBuffer.result.xy = 2 * (value.xy + mid.notDynamicResult.xy);
+                })");
+    }
+
+    dawn::ShaderModule CreateInheritFsModule() {
+        return utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+                #version 450
+                layout(std140, set = 0, binding = 0) uniform uBufferNotDynamic {
+                    uvec2 notDynamicValue;
+                };
+                layout(std140, set = 0, binding = 1) buffer sBufferNotDynamic {
+                    uvec2 notDynamicResult;
+                } mid;
+                layout(std140, set = 0, binding = 3) uniform uBuffer {
+                     uvec2 value;
+                };
+                layout(std140, set = 0, binding = 4) buffer SBuffer {
+                     uvec2 result;
+                } sBuffer;
+                layout(std140, set = 1, binding = 0) uniform paddingBlock {
+                    uvec2 padding;
+                };
+                layout(location = 0) out vec4 fragColor;
+
+                void main() {
+                    mid.notDynamicResult.xy = notDynamicValue.xy;
+                    sBuffer.result.xy = 2 * (value.xy + mid.notDynamicResult.xy);
+                    fragColor = vec4(value.x / 255.0f, value.y / 255.0f, 1.0f, 1.0f);
+                })");
+    }
+
+    dawn::RenderPipeline CreateRenderPipeline(dawn::PipelineLayout layout,
+                                              dawn::ShaderModule vs,
+                                              dawn::ShaderModule fs) {
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        pipelineDescriptor.cVertexStage.module = vs;
+        pipelineDescriptor.cFragmentStage.module = fs;
+        pipelineDescriptor.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
+        pipelineDescriptor.layout = layout;
+
+        return device.CreateRenderPipeline(&pipelineDescriptor);
+    }
+
+    dawn::ComputePipeline CreateComputePipeline(dawn::PipelineLayout layout,
+                                                dawn::ShaderModule cs) {
         dawn::ComputePipelineDescriptor csDesc;
-        dawn::PipelineLayout pipelineLayout =
-            utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-        csDesc.layout = pipelineLayout;
+        csDesc.layout = layout;
 
         dawn::PipelineStageDescriptor computeStage;
-        computeStage.module = csModule;
+        computeStage.module = cs;
         computeStage.entryPoint = "main";
         csDesc.computeStage = &computeStage;
 
         return device.CreateComputePipeline(&csDesc);
     }
+
+    dawn::RenderPipeline CreateDefaultRenderPipeline() {
+        dawn::ShaderModule vs = this->CreateDefaultVsModule();
+        dawn::ShaderModule fs = this->CreateDefaultFsModule();
+
+        return this->CreateRenderPipeline(mDefaultPipelineLayout, vs, fs);
+    }
+
+    dawn::ComputePipeline CreateDefaultComputePipeline() {
+        dawn::ShaderModule cs = this->CreateDefaultCsModule();
+
+        return this->CreateComputePipeline(mDefaultPipelineLayout, cs);
+    }
 };
 
 // Dynamic offsets are all zero and no effect to result.
 TEST_P(DynamicBufferOffsetTests, BasicRenderPipeline) {
-    dawn::RenderPipeline pipeline = CreateRenderPipeline();
+    dawn::RenderPipeline pipeline = CreateDefaultRenderPipeline();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -180,7 +251,7 @@ TEST_P(DynamicBufferOffsetTests, BasicRenderPipeline) {
 
 // Have non-zero dynamic offsets.
 TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsRenderPipeline) {
-    dawn::RenderPipeline pipeline = CreateRenderPipeline();
+    dawn::RenderPipeline pipeline = CreateDefaultRenderPipeline();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -203,7 +274,7 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsRenderPipeline) {
 
 // Dynamic offsets are all zero and no effect to result.
 TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
-    dawn::ComputePipeline pipeline = CreateComputePipeline();
+    dawn::ComputePipeline pipeline = CreateDefaultComputePipeline();
 
     std::array<uint64_t, 2> offsets = {0, 0};
 
@@ -222,7 +293,7 @@ TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
 
 // Have non-zero dynamic offsets.
 TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsComputePipeline) {
-    dawn::ComputePipeline pipeline = CreateComputePipeline();
+    dawn::ComputePipeline pipeline = CreateDefaultComputePipeline();
 
     std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
                                        kMinDynamicBufferOffsetAlignment};
@@ -239,6 +310,147 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsComputePipeline) {
     std::vector<uint32_t> expectedData = {6, 8};
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer,
                                kMinDynamicBufferOffsetAlignment, expectedData.size());
+}
+
+// Test inherit dynamic offsets on render pipeline
+TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsRenderPipeline) {
+    // Using default pipeline and setting dynamic offsets
+    dawn::RenderPipeline pipeline = CreateDefaultRenderPipeline();
+
+    dawn::ShaderModule testVs = CreateDefaultVsModule();
+    dawn::ShaderModule testFs = CreateInheritFsModule();
+    dawn::BindGroupLayout bgl[2];
+    bgl[0] = mDefaultBindGroupLayout;
+    bgl[1] = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}});
+    dawn::PipelineLayoutDescriptor descriptor;
+    descriptor.bindGroupLayoutCount = 2;
+    descriptor.bindGroupLayouts = bgl;
+    dawn::PipelineLayout layout = device.CreatePipelineLayout(&descriptor);
+    dawn::RenderPipeline testPipeline = CreateRenderPipeline(layout, testVs, testFs);
+
+    std::array<uint32_t, kBufferElementsCount> uniformData = {0};
+
+    dawn::Buffer uniformBuffer = utils::CreateBufferFromData(
+        device, uniformData.data(), kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::BindGroup bindGroup =
+        utils::MakeBindGroup(device, bgl[1], {{0, uniformBuffer, 0, kBindingSize}});
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
+                                       kMinDynamicBufferOffsetAlignment};
+    dawn::RenderPassEncoder renderPassEncoder =
+        commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
+    renderPassEncoder.SetPipeline(pipeline);
+    renderPassEncoder.SetBindGroup(0, mBindGroup, offsets.size(), offsets.data());
+    renderPassEncoder.Draw(3, 1, 0, 0);
+    renderPassEncoder.SetPipeline(testPipeline);
+    renderPassEncoder.SetBindGroup(1, bindGroup, 0, nullptr);
+    renderPassEncoder.Draw(3, 1, 0, 0);
+    renderPassEncoder.EndPass();
+    dawn::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<uint32_t> expectedData = {12, 16};
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(5, 6, 255, 255), renderPass.color, 0, 0);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer,
+                               kMinDynamicBufferOffsetAlignment, expectedData.size());
+}
+
+// Test inherit dynamic offsets on compute pipeline
+TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsComputePipeline) {
+    dawn::ComputePipeline pipeline = CreateDefaultComputePipeline();
+
+    dawn::ShaderModule testCs = CreateInheritCsModule();
+    dawn::BindGroupLayout bgl[2];
+    bgl[0] = mDefaultBindGroupLayout;
+    bgl[1] = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer}});
+    dawn::PipelineLayoutDescriptor descriptor;
+    descriptor.bindGroupLayoutCount = 2;
+    descriptor.bindGroupLayouts = bgl;
+    dawn::PipelineLayout layout = device.CreatePipelineLayout(&descriptor);
+    dawn::ComputePipeline testPipeline = CreateComputePipeline(layout, testCs);
+
+    std::array<uint32_t, kBufferElementsCount> uniformData = {0};
+
+    dawn::Buffer uniformBuffer = utils::CreateBufferFromData(
+        device, uniformData.data(), kBufferSize, dawn::BufferUsageBit::Uniform);
+    dawn::BindGroup bindGroup =
+        utils::MakeBindGroup(device, bgl[1], {{0, uniformBuffer, 0, kBindingSize}});
+
+    std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
+                                       kMinDynamicBufferOffsetAlignment};
+
+    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    computePassEncoder.SetPipeline(pipeline);
+    computePassEncoder.SetBindGroup(0, mBindGroup, offsets.size(), offsets.data());
+    computePassEncoder.Dispatch(1, 1, 1);
+    computePassEncoder.SetPipeline(testPipeline);
+    computePassEncoder.SetBindGroup(1, bindGroup, 0, nullptr);
+    computePassEncoder.Dispatch(1, 1, 1);
+    computePassEncoder.EndPass();
+    dawn::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<uint32_t> expectedData = {12, 16};
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer,
+                               kMinDynamicBufferOffsetAlignment, expectedData.size());
+}
+
+// Setting multiple dynamic offsets for the same bindgroup in one render pass.
+TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffestsMultipleTimesRenderPipeline) {
+    // Using default pipeline and setting dynamic offsets
+    dawn::RenderPipeline pipeline = CreateDefaultRenderPipeline();
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
+                                       kMinDynamicBufferOffsetAlignment};
+    std::array<uint64_t, 2> testOffsets = {0, 0};
+
+    dawn::RenderPassEncoder renderPassEncoder =
+        commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
+    renderPassEncoder.SetPipeline(pipeline);
+    renderPassEncoder.SetBindGroup(0, mBindGroup, offsets.size(), offsets.data());
+    renderPassEncoder.Draw(3, 1, 0, 0);
+    renderPassEncoder.SetBindGroup(0, mBindGroup, testOffsets.size(), testOffsets.data());
+    renderPassEncoder.Draw(3, 1, 0, 0);
+    renderPassEncoder.EndPass();
+    dawn::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<uint32_t> expectedData = {2, 4};
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(1, 2, 255, 255), renderPass.color, 0, 0);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer, 0, expectedData.size());
+}
+
+// Setting multiple dynamic offsets for the same bindgroup in one compute pass.
+// TODO(shaobo.yan@intel.com) : enable this test after resolving dawn issue 198.
+TEST_P(DynamicBufferOffsetTests, DISABLED_UpdateDynamicOffestsMultipleTimesComputePipeline) {
+    dawn::ComputePipeline pipeline = CreateDefaultComputePipeline();
+
+    std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
+                                       kMinDynamicBufferOffsetAlignment};
+    std::array<uint64_t, 2> testOffsets = {0, 0};
+
+    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    computePassEncoder.SetPipeline(pipeline);
+    computePassEncoder.SetBindGroup(0, mBindGroup, offsets.size(), offsets.data());
+    computePassEncoder.Dispatch(1, 1, 1);
+    computePassEncoder.SetBindGroup(0, mBindGroup, testOffsets.size(), testOffsets.data());
+    computePassEncoder.Dispatch(1, 1, 1);
+    computePassEncoder.EndPass();
+    dawn::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<uint32_t> expectedData = {2, 4};
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mDynamicStorageBuffer, 0, expectedData.size());
 }
 
 DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests,
