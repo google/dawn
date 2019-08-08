@@ -154,24 +154,21 @@ namespace dawn_native { namespace d3d12 {
                           uint32_t dynamicOffsetCount,
                           uint64_t* dynamicOffsets,
                           bool force = false) {
-            // Usually, the application won't set the same offsets many times,
-            // so always try to apply dynamic offsets even if the offsets stay the same
-            if (dynamicOffsetCount) {
-                // Update dynamic offsets
-                const BindGroupLayout::LayoutBindingInfo& layout =
-                    group->GetLayout()->GetBindingInfo();
+            if (mBindGroups[index] != group || force) {
+                mBindGroups[index] = group;
                 uint32_t currentDynamicBufferIndex = 0;
 
+                const BindGroupLayout::LayoutBindingInfo& layout =
+                    group->GetLayout()->GetBindingInfo();
                 for (uint32_t bindingIndex : IterateBitSet(layout.dynamic)) {
                     ASSERT(dynamicOffsetCount > 0);
                     uint32_t parameterIndex =
                         pipelineLayout->GetDynamicRootParameterIndex(index, bindingIndex);
                     BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
 
-                    // Calculate buffer locations that root descriptors links to. The location
-                    // is (base buffer location + initial offset + dynamic offset)
-                    uint64_t dynamicOffset = dynamicOffsets[currentDynamicBufferIndex];
-                    uint64_t offset = binding.offset + dynamicOffset;
+                    // Calculate buffer locations that root descriptors links to. The location is
+                    // (base buffer location + initial offset + dynamic offset)
+                    uint64_t offset = dynamicOffsets[currentDynamicBufferIndex++] + binding.offset;
                     D3D12_GPU_VIRTUAL_ADDRESS bufferLocation =
                         ToBackend(binding.buffer)->GetVA() + offset;
 
@@ -201,15 +198,7 @@ namespace dawn_native { namespace d3d12 {
                             UNREACHABLE();
                             break;
                     }
-
-                    // Record current dynamic offsets for inheriting
-                    mLastDynamicOffsets[index][currentDynamicBufferIndex] = dynamicOffset;
-                    ++currentDynamicBufferIndex;
                 }
-            }
-
-            if (mBindGroups[index] != group || force) {
-                mBindGroups[index] = group;
                 uint32_t cbvUavSrvCount =
                     ToBackend(group->GetLayout())->GetCbvUavSrvDescriptorCount();
                 uint32_t samplerCount = ToBackend(group->GetLayout())->GetSamplerDescriptorCount();
@@ -255,11 +244,12 @@ namespace dawn_native { namespace d3d12 {
             for (uint32_t i = 0; i < inheritUntil; ++i) {
                 const BindGroupLayout* layout = ToBackend(mBindGroups[i]->GetLayout());
                 const uint32_t dynamicBufferCount = layout->GetDynamicBufferCount();
-
-                // Inherit dynamic offsets
+                // TODO(shaobo.yan@intel.com) : Need to handle dynamic resources inherited with last
+                // dynamic offsets.
                 if (dynamicBufferCount > 0) {
+                    std::vector<uint64_t> zeroOffsets(dynamicBufferCount, 0);
                     SetBindGroup(commandList, newLayout, mBindGroups[i], i, dynamicBufferCount,
-                                 mLastDynamicOffsets[i].data(), true);
+                                 zeroOffsets.data(), true);
                 } else {
                     SetBindGroup(commandList, newLayout, mBindGroups[i], i, 0, nullptr, true);
                 }
@@ -290,8 +280,6 @@ namespace dawn_native { namespace d3d12 {
         uint32_t mSamplerDescriptorHeapSize = 0;
         std::array<BindGroup*, kMaxBindGroups> mBindGroups = {};
         std::deque<BindGroup*> mBindGroupsList = {};
-        std::array<std::array<uint64_t, kMaxDynamicBufferCount>, kMaxBindGroups>
-            mLastDynamicOffsets;
         bool mInCompute = false;
 
         DescriptorHeapHandle mCbvSrvUavGPUDescriptorHeap = {};
@@ -817,11 +805,9 @@ namespace dawn_native { namespace d3d12 {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                     BindGroup* group = ToBackend(cmd->group.Get());
                     uint64_t* dynamicOffsets = nullptr;
-
                     if (cmd->dynamicOffsetCount > 0) {
                         dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
                     }
-
                     bindingTracker->SetBindGroup(commandList, lastLayout, group, cmd->index,
                                                  cmd->dynamicOffsetCount, dynamicOffsets);
                 } break;
@@ -1118,7 +1104,6 @@ namespace dawn_native { namespace d3d12 {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                     BindGroup* group = ToBackend(cmd->group.Get());
                     uint64_t* dynamicOffsets = nullptr;
-
                     if (cmd->dynamicOffsetCount > 0) {
                         dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
                     }
