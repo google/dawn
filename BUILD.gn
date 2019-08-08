@@ -154,6 +154,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/ObjectBase.cpp",
     "src/dawn_native/ObjectBase.h",
     "src/dawn_native/PassResourceUsage.h",
+    "src/dawn_native/PassResourceUsageTracker.cpp",
+    "src/dawn_native/PassResourceUsageTracker.h",
     "src/dawn_native/PerStage.cpp",
     "src/dawn_native/PerStage.h",
     "src/dawn_native/Pipeline.cpp",

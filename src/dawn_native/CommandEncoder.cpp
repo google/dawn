@@ -23,6 +23,7 @@
 #include "dawn_native/ComputePassEncoder.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
 
@@ -475,117 +476,6 @@ namespace dawn_native {
             return {};
         }
 
-        enum class PassType {
-            Render,
-            Compute,
-        };
-
-        // Helper class to encapsulate the logic of tracking per-resource usage during the
-        // validation of command buffer passes. It is used both to know if there are validation
-        // errors, and to get a list of resources used per pass for backends that need the
-        // information.
-        class PassResourceUsageTracker {
-          public:
-            void BufferUsedAs(BufferBase* buffer, dawn::BufferUsageBit usage) {
-                // std::map's operator[] will create the key and return 0 if the key didn't exist
-                // before.
-                dawn::BufferUsageBit& storedUsage = mBufferUsages[buffer];
-
-                if (usage == dawn::BufferUsageBit::Storage &&
-                    storedUsage & dawn::BufferUsageBit::Storage) {
-                    mStorageUsedMultipleTimes = true;
-                }
-
-                storedUsage |= usage;
-            }
-
-            void TextureUsedAs(TextureBase* texture, dawn::TextureUsageBit usage) {
-                // std::map's operator[] will create the key and return 0 if the key didn't exist
-                // before.
-                dawn::TextureUsageBit& storedUsage = mTextureUsages[texture];
-
-                if (usage == dawn::TextureUsageBit::Storage &&
-                    storedUsage & dawn::TextureUsageBit::Storage) {
-                    mStorageUsedMultipleTimes = true;
-                }
-
-                storedUsage |= usage;
-            }
-
-            // Performs the per-pass usage validation checks
-            MaybeError ValidateUsages(PassType pass) const {
-                // Storage resources cannot be used twice in the same compute pass
-                if (pass == PassType::Compute && mStorageUsedMultipleTimes) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Storage resource used multiple times in compute pass");
-                }
-
-                // Buffers can only be used as single-write or multiple read.
-                for (auto& it : mBufferUsages) {
-                    BufferBase* buffer = it.first;
-                    dawn::BufferUsageBit usage = it.second;
-
-                    if (usage & ~buffer->GetUsage()) {
-                        return DAWN_VALIDATION_ERROR("Buffer missing usage for the pass");
-                    }
-
-                    bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
-                    bool singleUse = dawn::HasZeroOrOneBits(usage);
-
-                    if (!readOnly && !singleUse) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Buffer used as writable usage and another usage in pass");
-                    }
-                }
-
-                // Textures can only be used as single-write or multiple read.
-                // TODO(cwallez@chromium.org): implement per-subresource tracking
-                for (auto& it : mTextureUsages) {
-                    TextureBase* texture = it.first;
-                    dawn::TextureUsageBit usage = it.second;
-
-                    if (usage & ~texture->GetUsage()) {
-                        return DAWN_VALIDATION_ERROR("Texture missing usage for the pass");
-                    }
-
-                    // For textures the only read-only usage in a pass is Sampled, so checking the
-                    // usage constraint simplifies to checking a single usage bit is set.
-                    if (!dawn::HasZeroOrOneBits(it.second)) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Texture used with more than one usage in pass");
-                    }
-                }
-
-                return {};
-            }
-
-            // Returns the per-pass usage for use by backends for APIs with explicit barriers.
-            PassResourceUsage AcquireResourceUsage() {
-                PassResourceUsage result;
-                result.buffers.reserve(mBufferUsages.size());
-                result.bufferUsages.reserve(mBufferUsages.size());
-                result.textures.reserve(mTextureUsages.size());
-                result.textureUsages.reserve(mTextureUsages.size());
-
-                for (auto& it : mBufferUsages) {
-                    result.buffers.push_back(it.first);
-                    result.bufferUsages.push_back(it.second);
-                }
-
-                for (auto& it : mTextureUsages) {
-                    result.textures.push_back(it.first);
-                    result.textureUsages.push_back(it.second);
-                }
-
-                return result;
-            }
-
-          private:
-            std::map<BufferBase*, dawn::BufferUsageBit> mBufferUsages;
-            std::map<TextureBase*, dawn::TextureUsageBit> mTextureUsages;
-            bool mStorageUsedMultipleTimes = false;
-        };
-
         void TrackBindGroupResourceUsage(BindGroupBase* group, PassResourceUsageTracker* tracker) {
             const auto& layoutInfo = group->GetLayout()->GetBindingInfo();
 
@@ -1003,7 +893,7 @@ namespace dawn_native {
 
                     DAWN_TRY(ValidateDebugGroups(mDebugGroupStackSize));
 
-                    DAWN_TRY(usageTracker.ValidateUsages(PassType::Compute));
+                    DAWN_TRY(usageTracker.ValidateComputePassUsages());
                     mResourceUsages.perPass.push_back(usageTracker.AcquireResourceUsage());
                     return {};
                 } break;
@@ -1092,7 +982,7 @@ namespace dawn_native {
 
                     DAWN_TRY(ValidateDebugGroups(mDebugGroupStackSize));
 
-                    DAWN_TRY(usageTracker.ValidateUsages(PassType::Render));
+                    DAWN_TRY(usageTracker.ValidateRenderPassUsages());
                     mResourceUsages.perPass.push_back(usageTracker.AcquireResourceUsage());
                     return {};
                 } break;
