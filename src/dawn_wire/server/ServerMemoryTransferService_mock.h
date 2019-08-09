@@ -29,9 +29,10 @@ namespace dawn_wire { namespace server {
             MockReadHandle(MockMemoryTransferService* service);
             ~MockReadHandle() override;
 
-            size_t SerializeInitialData(const void* data,
-                                        size_t dataLength,
-                                        void* serializePointer) override;
+            size_t SerializeInitialDataSize(const void* data, size_t dataLength) override;
+            void SerializeInitialData(const void* data,
+                                      size_t dataLength,
+                                      void* serializePointer) override;
 
           private:
             MockMemoryTransferService* mService;
@@ -74,11 +75,13 @@ namespace dawn_wire { namespace server {
                           size_t deserializeSize,
                           WriteHandle** writeHandle));
 
+        MOCK_METHOD3(OnReadHandleSerializeInitialDataSize,
+                     size_t(const ReadHandle* readHandle, const void* data, size_t dataLength));
         MOCK_METHOD4(OnReadHandleSerializeInitialData,
-                     size_t(const ReadHandle* readHandle,
-                            const void* data,
-                            size_t dataLength,
-                            void* serializePointer));
+                     void(const ReadHandle* readHandle,
+                          const void* data,
+                          size_t dataLength,
+                          void* serializePointer));
         MOCK_METHOD1(OnReadHandleDestroy, void(const ReadHandle* readHandle));
 
         MOCK_METHOD3(OnWriteHandleDeserializeFlush,

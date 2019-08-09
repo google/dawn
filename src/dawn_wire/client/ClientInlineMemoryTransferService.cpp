@@ -26,8 +26,11 @@ namespace dawn_wire { namespace client {
 
             ~ReadHandleImpl() override = default;
 
-            size_t SerializeCreate(void*) override {
+            size_t SerializeCreateSize() override {
                 return 0;
+            }
+
+            void SerializeCreate(void*) override {
             }
 
             bool DeserializeInitialData(const void* deserializePointer,
@@ -61,8 +64,11 @@ namespace dawn_wire { namespace client {
 
             ~WriteHandleImpl() override = default;
 
-            size_t SerializeCreate(void*) override {
+            size_t SerializeCreateSize() override {
                 return 0;
+            }
+
+            void SerializeCreate(void*) override {
             }
 
             std::pair<void*, size_t> Open() override {
@@ -71,12 +77,14 @@ namespace dawn_wire { namespace client {
                 return std::make_pair(mStagingData.get(), mSize);
             }
 
-            size_t SerializeFlush(void* serializePointer) override {
-                if (serializePointer != nullptr) {
-                    ASSERT(mStagingData != nullptr);
-                    memcpy(serializePointer, mStagingData.get(), mSize);
-                }
+            size_t SerializeFlushSize() override {
                 return mSize;
+            }
+
+            void SerializeFlush(void* serializePointer) override {
+                ASSERT(mStagingData != nullptr);
+                ASSERT(serializePointer != nullptr);
+                memcpy(serializePointer, mStagingData.get(), mSize);
             }
 
           private:

@@ -26,10 +26,15 @@ namespace dawn_wire { namespace server {
         mService->OnReadHandleDestroy(this);
     }
 
-    size_t MockMemoryTransferService::MockReadHandle::SerializeInitialData(const void* data,
-                                                                           size_t dataLength,
-                                                                           void* serializePointer) {
-        return mService->OnReadHandleSerializeInitialData(this, data, dataLength, serializePointer);
+    size_t MockMemoryTransferService::MockReadHandle::SerializeInitialDataSize(const void* data,
+                                                                               size_t dataLength) {
+        return mService->OnReadHandleSerializeInitialDataSize(this, data, dataLength);
+    }
+
+    void MockMemoryTransferService::MockReadHandle::SerializeInitialData(const void* data,
+                                                                         size_t dataLength,
+                                                                         void* serializePointer) {
+        mService->OnReadHandleSerializeInitialData(this, data, dataLength, serializePointer);
     }
 
     MockMemoryTransferService::MockWriteHandle::MockWriteHandle(MockMemoryTransferService* service)

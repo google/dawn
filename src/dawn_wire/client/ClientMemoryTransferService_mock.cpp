@@ -27,8 +27,12 @@ namespace dawn_wire { namespace client {
         mService->OnReadHandleDestroy(this);
     }
 
-    size_t MockMemoryTransferService::MockReadHandle::SerializeCreate(void* serializePointer) {
-        return mService->OnReadHandleSerializeCreate(this, serializePointer);
+    size_t MockMemoryTransferService::MockReadHandle::SerializeCreateSize() {
+        return mService->OnReadHandleSerializeCreateSize(this);
+    }
+
+    void MockMemoryTransferService::MockReadHandle::SerializeCreate(void* serializePointer) {
+        mService->OnReadHandleSerializeCreate(this, serializePointer);
     }
 
     bool MockMemoryTransferService::MockReadHandle::DeserializeInitialData(
@@ -50,16 +54,24 @@ namespace dawn_wire { namespace client {
         mService->OnWriteHandleDestroy(this);
     }
 
-    size_t MockMemoryTransferService::MockWriteHandle::SerializeCreate(void* serializePointer) {
-        return mService->OnWriteHandleSerializeCreate(this, serializePointer);
+    size_t MockMemoryTransferService::MockWriteHandle::SerializeCreateSize() {
+        return mService->OnWriteHandleSerializeCreateSize(this);
+    }
+
+    void MockMemoryTransferService::MockWriteHandle::SerializeCreate(void* serializePointer) {
+        mService->OnWriteHandleSerializeCreate(this, serializePointer);
     }
 
     std::pair<void*, size_t> MockMemoryTransferService::MockWriteHandle::Open() {
         return mService->OnWriteHandleOpen(this);
     }
 
-    size_t MockMemoryTransferService::MockWriteHandle::SerializeFlush(void* serializePointer) {
-        return mService->OnWriteHandleSerializeFlush(this, serializePointer);
+    size_t MockMemoryTransferService::MockWriteHandle::SerializeFlushSize() {
+        return mService->OnWriteHandleSerializeFlushSize(this);
+    }
+
+    void MockMemoryTransferService::MockWriteHandle::SerializeFlush(void* serializePointer) {
+        mService->OnWriteHandleSerializeFlush(this, serializePointer);
     }
 
     MockMemoryTransferService::MockMemoryTransferService() = default;

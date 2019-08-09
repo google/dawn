@@ -27,7 +27,7 @@ namespace dawn_wire { namespace client {
                 std::is_same<Handle, MemoryTransferService::WriteHandle>::value;
 
             // Get the serialization size of the handle.
-            size_t handleCreateInfoLength = handle->SerializeCreate();
+            size_t handleCreateInfoLength = handle->SerializeCreateSize();
 
             BufferMapAsyncCmd cmd;
             cmd.bufferId = buffer->id;
@@ -171,7 +171,7 @@ namespace dawn_wire { namespace client {
         buffer->writeHandle = std::move(writeHandle);
 
         // Get the serialization size of the WriteHandle.
-        size_t handleCreateInfoLength = buffer->writeHandle->SerializeCreate();
+        size_t handleCreateInfoLength = buffer->writeHandle->SerializeCreateSize();
 
         DeviceCreateBufferMappedCmd cmd;
         cmd.device = cDevice;
@@ -246,7 +246,7 @@ namespace dawn_wire { namespace client {
         buffer->requests[serial] = std::move(request);
 
         // Get the serialization size of the WriteHandle.
-        size_t handleCreateInfoLength = writeHandle->SerializeCreate();
+        size_t handleCreateInfoLength = writeHandle->SerializeCreateSize();
 
         DeviceCreateBufferMappedAsyncCmd cmd;
         cmd.device = cDevice;
@@ -326,7 +326,7 @@ namespace dawn_wire { namespace client {
             ASSERT(buffer->readHandle == nullptr);
 
             // Get the serialization size of metadata to flush writes.
-            size_t writeFlushInfoLength = buffer->writeHandle->SerializeFlush();
+            size_t writeFlushInfoLength = buffer->writeHandle->SerializeFlushSize();
 
             BufferUpdateMappedDataCmd cmd;
             cmd.bufferId = buffer->id;

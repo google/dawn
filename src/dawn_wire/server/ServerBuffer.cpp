@@ -254,7 +254,7 @@ namespace dawn_wire { namespace server {
         size_t initialDataInfoLength = 0;
         if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
             // Get the serialization size of the message to initialize ReadHandle data.
-            initialDataInfoLength = data->readHandle->SerializeInitialData(ptr, dataLength);
+            initialDataInfoLength = data->readHandle->SerializeInitialDataSize(ptr, dataLength);
         } else {
             dataLength = 0;
         }

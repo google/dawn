@@ -76,9 +76,11 @@ namespace dawn_wire {
 
             class DAWN_WIRE_EXPORT ReadHandle {
               public:
+                // Get the required serialization size for SerializeCreate
+                virtual size_t SerializeCreateSize() = 0;
+
                 // Serialize the handle into |serializePointer| so it can be received by the server.
-                // If |serializePointer| is nullptr, this returns the required serialization space.
-                virtual size_t SerializeCreate(void* serializePointer = nullptr) = 0;
+                virtual void SerializeCreate(void* serializePointer) = 0;
 
                 // Load initial data and open the handle for reading.
                 // This function takes in the serialized result of
@@ -95,19 +97,24 @@ namespace dawn_wire {
 
             class DAWN_WIRE_EXPORT WriteHandle {
               public:
+                // Get the required serialization size for SerializeCreate
+                virtual size_t SerializeCreateSize() = 0;
+
                 // Serialize the handle into |serializePointer| so it can be received by the server.
-                // If |serializePointer| is nullptr, this returns the required serialization space.
-                virtual size_t SerializeCreate(void* serializePointer = nullptr) = 0;
+                virtual void SerializeCreate(void* serializePointer) = 0;
 
                 // Open the handle for reading. The data returned should be zero-initialized.
                 // The data returned must live at least until the WriteHandle is destructed.
                 // On failure, the pointer returned should be null.
                 virtual std::pair<void*, size_t> Open() = 0;
 
+                // Get the required serialization size for SerializeFlush
+                virtual size_t SerializeFlushSize() = 0;
+
                 // Flush writes to the handle. This should serialize info to send updates to the
                 // server.
-                // If |serializePointer| is nullptr, this returns the required serialization space.
-                virtual size_t SerializeFlush(void* serializePointer = nullptr) = 0;
+                virtual void SerializeFlush(void* serializePointer) = 0;
+
                 virtual ~WriteHandle();
             };
         };

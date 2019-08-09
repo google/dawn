@@ -230,8 +230,9 @@ class WireMemoryTransferServiceTests : public WireTest {
     }
 
     void ExpectReadHandleSerialization(ClientReadHandle* handle) {
+        EXPECT_CALL(clientMemoryTransferService, OnReadHandleSerializeCreateSize(handle))
+            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeCreateInfo); }));
         EXPECT_CALL(clientMemoryTransferService, OnReadHandleSerializeCreate(handle, _))
-            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeCreateInfo); }))
             .WillOnce(WithArg<1>([&](void* serializePointer) {
                 memcpy(serializePointer, &mSerializeCreateInfo, sizeof(mSerializeCreateInfo));
                 return sizeof(mSerializeCreateInfo);
@@ -261,8 +262,9 @@ class WireMemoryTransferServiceTests : public WireTest {
     }
 
     void ExpectServerReadHandleInitialize(ServerReadHandle* handle) {
+        EXPECT_CALL(serverMemoryTransferService, OnReadHandleSerializeInitialDataSize(handle, _, _))
+            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeInitialDataInfo); }));
         EXPECT_CALL(serverMemoryTransferService, OnReadHandleSerializeInitialData(handle, _, _, _))
-            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeInitialDataInfo); }))
             .WillOnce(WithArg<3>([&](void* serializePointer) {
                 memcpy(serializePointer, &mSerializeInitialDataInfo,
                        sizeof(mSerializeInitialDataInfo));
@@ -307,8 +309,9 @@ class WireMemoryTransferServiceTests : public WireTest {
     }
 
     void ExpectWriteHandleSerialization(ClientWriteHandle* handle) {
+        EXPECT_CALL(clientMemoryTransferService, OnWriteHandleSerializeCreateSize(handle))
+            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeCreateInfo); }));
         EXPECT_CALL(clientMemoryTransferService, OnWriteHandleSerializeCreate(handle, _))
-            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeCreateInfo); }))
             .WillOnce(WithArg<1>([&](void* serializePointer) {
                 memcpy(serializePointer, &mSerializeCreateInfo, sizeof(mSerializeCreateInfo));
                 return sizeof(mSerializeCreateInfo);
@@ -353,8 +356,9 @@ class WireMemoryTransferServiceTests : public WireTest {
     }
 
     void ExpectClientWriteHandleSerializeFlush(ClientWriteHandle* handle) {
+        EXPECT_CALL(clientMemoryTransferService, OnWriteHandleSerializeFlushSize(handle))
+            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeFlushInfo); }));
         EXPECT_CALL(clientMemoryTransferService, OnWriteHandleSerializeFlush(handle, _))
-            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeFlushInfo); }))
             .WillOnce(WithArg<1>([&](void* serializePointer) {
                 memcpy(serializePointer, &mSerializeFlushInfo, sizeof(mSerializeFlushInfo));
                 return sizeof(mSerializeFlushInfo);

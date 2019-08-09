@@ -29,7 +29,8 @@ namespace dawn_wire { namespace client {
             explicit MockReadHandle(MockMemoryTransferService* service);
             ~MockReadHandle() override;
 
-            size_t SerializeCreate(void* serializePointer) override;
+            size_t SerializeCreateSize() override;
+            void SerializeCreate(void* serializePointer) override;
             bool DeserializeInitialData(const void* deserializePointer,
                                         size_t deserializeSize,
                                         const void** data,
@@ -44,9 +45,11 @@ namespace dawn_wire { namespace client {
             explicit MockWriteHandle(MockMemoryTransferService* service);
             ~MockWriteHandle() override;
 
-            size_t SerializeCreate(void* serializePointer) override;
+            size_t SerializeCreateSize() override;
+            void SerializeCreate(void* serializePointer) override;
             std::pair<void*, size_t> Open() override;
-            size_t SerializeFlush(void* serializePointer) override;
+            size_t SerializeFlushSize() override;
+            void SerializeFlush(void* serializePointer) override;
 
           private:
             MockMemoryTransferService* mService;
@@ -64,8 +67,8 @@ namespace dawn_wire { namespace client {
         MOCK_METHOD1(OnCreateReadHandle, ReadHandle*(size_t));
         MOCK_METHOD1(OnCreateWriteHandle, WriteHandle*(size_t));
 
-        MOCK_METHOD2(OnReadHandleSerializeCreate,
-                     size_t(const ReadHandle*, void* serializePointer));
+        MOCK_METHOD1(OnReadHandleSerializeCreateSize, size_t(const ReadHandle*));
+        MOCK_METHOD2(OnReadHandleSerializeCreate, void(const ReadHandle*, void* serializePointer));
         MOCK_METHOD5(OnReadHandleDeserializeInitialData,
                      bool(const ReadHandle*,
                           const uint32_t* deserializePointer,
@@ -74,11 +77,13 @@ namespace dawn_wire { namespace client {
                           size_t* dataLength));
         MOCK_METHOD1(OnReadHandleDestroy, void(const ReadHandle*));
 
+        MOCK_METHOD1(OnWriteHandleSerializeCreateSize, size_t(const void* WriteHandle));
         MOCK_METHOD2(OnWriteHandleSerializeCreate,
-                     size_t(const void* WriteHandle, void* serializePointer));
+                     void(const void* WriteHandle, void* serializePointer));
         MOCK_METHOD1(OnWriteHandleOpen, std::pair<void*, size_t>(const void* WriteHandle));
+        MOCK_METHOD1(OnWriteHandleSerializeFlushSize, size_t(const void* WriteHandle));
         MOCK_METHOD2(OnWriteHandleSerializeFlush,
-                     size_t(const void* WriteHandle, void* serializePointer));
+                     void(const void* WriteHandle, void* serializePointer));
         MOCK_METHOD1(OnWriteHandleDestroy, void(const void* WriteHandle));
     };
 
