@@ -40,7 +40,8 @@ namespace dawn_native { namespace opengl {
         void EnsureSubresourceContentInitialized(uint32_t baseMipLevel,
                                                  uint32_t levelCount,
                                                  uint32_t baseArrayLayer,
-                                                 uint32_t layerCount);
+                                                 uint32_t layerCount,
+                                                 bool isLazyClear = true);
 
       private:
         void DestroyImpl() override;

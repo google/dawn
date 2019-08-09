@@ -221,20 +221,24 @@ namespace dawn_native { namespace opengl {
                                     nullptr);
             }
         }
-        SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer, layerCount);
-        GetDevice()->IncrementLazyClearCountForTesting();
     }
 
     void Texture::EnsureSubresourceContentInitialized(uint32_t baseMipLevel,
                                                       uint32_t levelCount,
                                                       uint32_t baseArrayLayer,
-                                                      uint32_t layerCount) {
+                                                      uint32_t layerCount,
+                                                      bool isLazyClear) {
         if (!GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
         if (!IsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
                                              layerCount)) {
             ClearTexture(baseMipLevel, levelCount, baseArrayLayer, layerCount);
+            if (isLazyClear) {
+                GetDevice()->IncrementLazyClearCountForTesting();
+            }
+            SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+                                               layerCount);
         }
     }
 

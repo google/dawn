@@ -121,7 +121,7 @@ TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
         pass.EndPass();
     }
     dawn::CommandBuffer commands = encoder.Finish();
-    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+    EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     uint32_t mipSize = kSize >> 2;
     std::vector<RGBA8> expected(mipSize * mipSize, {0, 0, 0, 0});
@@ -149,7 +149,7 @@ TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
         pass.EndPass();
     }
     dawn::CommandBuffer commands = encoder.Finish();
-    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+    EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
 
@@ -328,8 +328,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
     dawn::CommandBuffer commandBuffer = encoder.Finish();
-    // Expect 2 lazy clears, one for the srcTexture and one for the depthStencilTexture
-    EXPECT_LAZY_CLEAR(2u, queue.Submit(1, &commandBuffer));
+    // Expect 1 lazy clear for the depthStencilTexture
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
     // Expect the texture to be red because depth test passed.
     std::vector<RGBA8> expected(kSize * kSize, {255, 0, 0, 255});
@@ -363,8 +363,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
     dawn::CommandBuffer commandBuffer = encoder.Finish();
-    // Expect 2 lazy clears, one for srcTexture and one for depthStencilTexture.
-    EXPECT_LAZY_CLEAR(2u, queue.Submit(1, &commandBuffer));
+    // Expect 1 lazy clear for depthStencilTexture.
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
     // Expect the texture to be red because stencil test passed.
     std::vector<RGBA8> expected(kSize * kSize, {255, 0, 0, 255});
@@ -397,8 +397,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
     dawn::CommandBuffer commandBuffer = encoder.Finish();
-    // Expect 2 lazy clears, one for srcTexture and one for depthStencilTexture.
-    EXPECT_LAZY_CLEAR(2u, queue.Submit(1, &commandBuffer));
+    // Expect 1 lazy clear for depthStencilTexture.
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
     // Expect the texture to be red because both depth and stencil tests passed.
     std::vector<RGBA8> expected(kSize * kSize, {255, 0, 0, 255});
@@ -419,7 +419,7 @@ TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
     pass.EndPass();
 
     dawn::CommandBuffer commands = encoder.Finish();
-    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+    EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color, 0, 0, kSize, kSize, 0, 0);
@@ -487,8 +487,8 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
     dawn::CommandBuffer commands = encoder.Finish();
-    // Expect 2 lazy clears, one for the sampled texture src and one for the rendered target texture
-    EXPECT_LAZY_CLEAR(2u, queue.Submit(1, &commands));
+    // Expect 1 lazy clear for sampled texture
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
     // Expect the rendered texture to be cleared
     std::vector<RGBA8> expectedWithZeros(kSize * kSize, {0, 0, 0, 0});

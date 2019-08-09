@@ -503,10 +503,13 @@ namespace dawn_native { namespace d3d12 {
 
             for (size_t i = 0; i < usages.textures.size(); ++i) {
                 Texture* texture = ToBackend(usages.textures[i]);
-                // TODO(natlee@microsoft.com): Update clearing here when subresource tracking is
-                // implemented
-                texture->EnsureSubresourceContentInitialized(
-                    commandList, 0, texture->GetNumMipLevels(), 0, texture->GetArrayLayers());
+                // Clear textures that are not output attachments. Output attachments will be
+                // cleared during record render pass if the texture subresource has not been
+                // initialized before the render pass.
+                if (!(usages.textureUsages[i] & dawn::TextureUsageBit::OutputAttachment)) {
+                    texture->EnsureSubresourceContentInitialized(
+                        commandList, 0, texture->GetNumMipLevels(), 0, texture->GetArrayLayers());
+                }
             }
 
             for (size_t i = 0; i < usages.textures.size(); ++i) {
@@ -869,15 +872,26 @@ namespace dawn_native { namespace d3d12 {
                 // Load op - color
                 ASSERT(view->GetLevelCount() == 1);
                 ASSERT(view->GetLayerCount() == 1);
-                if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
+                if (attachmentInfo.loadOp == dawn::LoadOp::Clear ||
+                    (attachmentInfo.loadOp == dawn::LoadOp::Load &&
+                     !view->GetTexture()->IsSubresourceContentInitialized(
+                         view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1))) {
                     D3D12_CPU_DESCRIPTOR_HANDLE handle = args.RTVs[i];
                     commandList->ClearRenderTargetView(handle, &attachmentInfo.clearColor.r, 0,
                                                        nullptr);
-                } else if (attachmentInfo.loadOp == dawn::LoadOp::Load && view->GetTexture()) {
-                    ToBackend(view->GetTexture())
-                        ->EnsureSubresourceContentInitialized(commandList, view->GetBaseMipLevel(),
-                                                              1, view->GetBaseArrayLayer(), 1);
                 }
+
+                TextureView* resolveView = ToBackend(attachmentInfo.resolveTarget.Get());
+                if (resolveView != nullptr) {
+                    // We need to set the resolve target to initialized so that it does not get
+                    // cleared later in the pipeline. The texture will be resolved from the source
+                    // color attachment, which will be correctly initialized.
+                    ToBackend(resolveView->GetTexture())
+                        ->SetIsSubresourceContentInitialized(
+                            resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
+                            resolveView->GetBaseArrayLayer(), resolveView->GetLayerCount());
+                }
+
                 switch (attachmentInfo.storeOp) {
                     case dawn::StoreOp::Store: {
                         view->GetTexture()->SetIsSubresourceContentInitialized(

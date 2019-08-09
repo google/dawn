@@ -362,8 +362,14 @@ namespace dawn_native { namespace opengl {
         auto TransitionForPass = [](const PassResourceUsage& usages) {
             for (size_t i = 0; i < usages.textures.size(); i++) {
                 Texture* texture = ToBackend(usages.textures[i]);
-                texture->EnsureSubresourceContentInitialized(0, texture->GetNumMipLevels(), 0,
-                                                             texture->GetArrayLayers());
+                // We count the lazy clears for non output attachment textures and depth stencil
+                // textures in order to match the backdoor lazy clear counts in Vulkan and D3D12.
+                bool isLazyClear =
+                    ((!(usages.textureUsages[i] & dawn::TextureUsageBit::OutputAttachment) &&
+                      texture->GetFormat().IsColor()) ||
+                     texture->GetFormat().HasDepthOrStencil());
+                texture->EnsureSubresourceContentInitialized(
+                    0, texture->GetNumMipLevels(), 0, texture->GetArrayLayers(), isLazyClear);
             }
         };
 
