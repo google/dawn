@@ -24,6 +24,7 @@
 #include "common/SwapChainUtils.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/NativeSwapChainImplVk.h"
+#include "dawn_native/vulkan/TextureVk.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -51,5 +52,33 @@ namespace dawn_native { namespace vulkan {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
         return static_cast<DawnTextureFormat>(impl->GetPreferredFormat());
     }
+
+#ifdef DAWN_PLATFORM_LINUX
+    DawnTexture WrapVulkanImageOpaqueFD(DawnDevice cDevice,
+                                        const ExternalImageDescriptorOpaqueFD* descriptor) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+
+        TextureBase* texture = device->CreateTextureWrappingVulkanImage(
+            descriptor, descriptor->memoryFD, descriptor->waitFDs);
+
+        return reinterpret_cast<DawnTexture>(texture);
+    }
+
+    int ExportSignalSemaphoreOpaqueFD(DawnDevice cDevice, DawnTexture cTexture) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+        Texture* texture = reinterpret_cast<Texture*>(cTexture);
+
+        if (!texture) {
+            return -1;
+        }
+
+        ExternalSemaphoreHandle outHandle;
+        if (device->ConsumedError(device->SignalAndExportExternalTexture(texture, &outHandle))) {
+            return -1;
+        }
+
+        return outHandle;
+    }
+#endif
 
 }}  // namespace dawn_native::vulkan

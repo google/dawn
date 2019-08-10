@@ -18,7 +18,9 @@
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/DynamicUploader.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/BackendVk.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
@@ -67,6 +69,9 @@ namespace dawn_native { namespace vulkan {
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mMemoryAllocator = std::make_unique<MemoryAllocator>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
+
+        mExternalMemoryService = std::make_unique<external_memory::Service>(this);
+        mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(this);
 
         return {};
     }
@@ -567,5 +572,92 @@ namespace dawn_native { namespace vulkan {
                                ToBackend(destination)->GetHandle(), 1, &copy);
 
         return {};
+    }
+
+    MaybeError Device::ImportExternalImage(const ExternalImageDescriptor* descriptor,
+                                           ExternalMemoryHandle memoryHandle,
+                                           const std::vector<ExternalSemaphoreHandle>& waitHandles,
+                                           VkSemaphore* outSignalSemaphore,
+                                           VkDeviceMemory* outAllocation,
+                                           std::vector<VkSemaphore>* outWaitSemaphores) {
+        // Check services support this combination of handle type / image info
+        if (!mExternalSemaphoreService->Supported()) {
+            return DAWN_VALIDATION_ERROR("External semaphore usage not supported");
+        }
+        if (!mExternalMemoryService->Supported()) {
+            return DAWN_VALIDATION_ERROR("External memory usage not supported");
+        }
+
+        // Create an external semaphore to signal when the texture is done being used
+        DAWN_TRY_ASSIGN(*outSignalSemaphore,
+                        mExternalSemaphoreService->CreateExportableSemaphore());
+
+        // Import the external image's memory
+        DAWN_TRY_ASSIGN(*outAllocation,
+                        mExternalMemoryService->ImportMemory(
+                            memoryHandle, descriptor->allocationSize, descriptor->memoryTypeIndex));
+
+        // Import semaphores we have to wait on before using the texture
+        for (const ExternalSemaphoreHandle& handle : waitHandles) {
+            VkSemaphore semaphore = VK_NULL_HANDLE;
+            DAWN_TRY_ASSIGN(semaphore, mExternalSemaphoreService->ImportSemaphore(handle));
+            outWaitSemaphores->push_back(semaphore);
+        }
+
+        return {};
+    }
+
+    MaybeError Device::SignalAndExportExternalTexture(Texture* texture,
+                                                      ExternalSemaphoreHandle* outHandle) {
+        DAWN_TRY(ValidateObject(texture));
+
+        VkSemaphore outSignalSemaphore;
+        DAWN_TRY(texture->SignalAndDestroy(&outSignalSemaphore));
+
+        // This has to happen right after SignalAndDestroy, since the semaphore will be
+        // deleted when the fenced deleter runs after the queue submission
+        DAWN_TRY_ASSIGN(*outHandle, mExternalSemaphoreService->ExportSemaphore(outSignalSemaphore));
+
+        return {};
+    }
+
+    TextureBase* Device::CreateTextureWrappingVulkanImage(
+        const ExternalImageDescriptor* descriptor,
+        ExternalMemoryHandle memoryHandle,
+        const std::vector<ExternalSemaphoreHandle>& waitHandles) {
+        const TextureDescriptor* textureDescriptor =
+            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+
+        // Initial validation
+        if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
+            return nullptr;
+        }
+        if (ConsumedError(ValidateVulkanImageCanBeWrapped(this, textureDescriptor))) {
+            return nullptr;
+        }
+
+        VkSemaphore signalSemaphore = VK_NULL_HANDLE;
+        VkDeviceMemory allocation = VK_NULL_HANDLE;
+        std::vector<VkSemaphore> waitSemaphores;
+        waitSemaphores.reserve(waitHandles.size());
+
+        // If failed, cleanup
+        if (ConsumedError(ImportExternalImage(descriptor, memoryHandle, waitHandles,
+                                              &signalSemaphore, &allocation, &waitSemaphores))) {
+            // Clear the signal semaphore
+            fn.DestroySemaphore(GetVkDevice(), signalSemaphore, nullptr);
+
+            // Clear image memory
+            fn.FreeMemory(GetVkDevice(), allocation, nullptr);
+
+            // Clear any wait semaphores we were able to import
+            for (VkSemaphore semaphore : waitSemaphores) {
+                fn.DestroySemaphore(GetVkDevice(), semaphore, nullptr);
+            }
+            return nullptr;
+        }
+
+        return new Texture(this, descriptor, textureDescriptor, signalSemaphore, allocation,
+                           waitSemaphores);
     }
 }}  // namespace dawn_native::vulkan

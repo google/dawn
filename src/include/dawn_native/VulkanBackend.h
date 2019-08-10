@@ -23,12 +23,44 @@
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
+
+    // Common properties of external images
+    struct ExternalImageDescriptor {
+        const DawnTextureDescriptor* cTextureDescriptor;  // Must match image creation params
+        bool isCleared;               // Sets whether the texture will be cleared before use
+        VkDeviceSize allocationSize;  // Must match VkMemoryAllocateInfo from image creation
+        uint32_t memoryTypeIndex;     // Must match VkMemoryAllocateInfo from image creation
+    };
+
     DAWN_NATIVE_EXPORT VkInstance GetInstance(DawnDevice device);
 
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device,
                                                                              VkSurfaceKHR surface);
     DAWN_NATIVE_EXPORT DawnTextureFormat
     GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
+
+// Can't use DAWN_PLATFORM_LINUX since header included in both dawn and chrome
+#ifdef __linux__
+        // Descriptor for opaque file descriptor image import
+        struct ExternalImageDescriptorOpaqueFD : ExternalImageDescriptor {
+            int memoryFD;  // A file descriptor from an export of the memory of the image
+            std::vector<int> waitFDs;  // File descriptors of semaphores which will be waited on
+        };
+
+        // Imports an external vulkan image from an opaque file descriptor. Internally, this uses
+        // external memory / semaphore extensions to import the image. Then, waits on the provided
+        // |descriptor->waitFDs| before the texture can be used. Finally, a signal semaphore
+        // can be exported, transferring control back to the caller.
+        // On failure, returns a nullptr
+        DAWN_NATIVE_EXPORT DawnTexture
+        WrapVulkanImageOpaqueFD(DawnDevice cDevice,
+                                const ExternalImageDescriptorOpaqueFD* descriptor);
+
+        // Exports a signal semaphore from a wrapped texture. This must be called on wrapped
+        // textures before they are destroyed. On failure, returns -1
+        DAWN_NATIVE_EXPORT int ExportSignalSemaphoreOpaqueFD(DawnDevice cDevice,
+                                                             DawnTexture cTexture);
+#endif  // __linux__
 }}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKANBACKEND_H_

@@ -14,6 +14,7 @@
 
 #include "dawn_native/vulkan/TextureVk.h"
 
+#include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/DeviceVk.h"
@@ -379,12 +380,33 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
+    MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
+                                               const TextureDescriptor* descriptor) {
+        if (descriptor->dimension != dawn::TextureDimension::e2D) {
+            return DAWN_VALIDATION_ERROR("Texture must be 2D");
+        }
+
+        if (descriptor->mipLevelCount != 1) {
+            return DAWN_VALIDATION_ERROR("Mip level count must be 1");
+        }
+
+        if (descriptor->arrayLayerCount != 1) {
+            return DAWN_VALIDATION_ERROR("Array layer count must be 1");
+        }
+
+        if (descriptor->sampleCount != 1) {
+            return DAWN_VALIDATION_ERROR("Sample count must be 1");
+        }
+
+        return {};
+    }
+
     Texture::Texture(Device* device, const TextureDescriptor* descriptor)
         : TextureBase(device, descriptor, TextureState::OwnedInternal) {
         // Create the Vulkan image "container". We don't need to check that the format supports the
         // combination of sample, usage etc. because validation should have been done in the Dawn
         // frontend already based on the minimum supported formats in the Vulkan spec
-        VkImageCreateInfo createInfo;
+        VkImageCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
@@ -466,6 +488,95 @@ namespace dawn_native { namespace vulkan {
         : TextureBase(device, descriptor, TextureState::OwnedExternal), mHandle(nativeImage) {
     }
 
+    // Internally managed, but imported from file descriptor
+    Texture::Texture(Device* device,
+                     const ExternalImageDescriptor* descriptor,
+                     const TextureDescriptor* textureDescriptor,
+                     VkSemaphore signalSemaphore,
+                     VkDeviceMemory externalMemoryAllocation,
+                     std::vector<VkSemaphore> waitSemaphores)
+        : TextureBase(device, textureDescriptor, TextureState::OwnedInternal),
+          mExternalAllocation(externalMemoryAllocation),
+          mExternalState(ExternalState::PendingAcquire),
+          mSignalSemaphore(signalSemaphore),
+          mWaitRequirements(std::move(waitSemaphores)) {
+        VkImageCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = VK_IMAGE_CREATE_ALIAS_BIT_KHR;
+        createInfo.imageType = VulkanImageType(GetDimension());
+        createInfo.format = VulkanImageFormat(GetFormat().format);
+        createInfo.extent = VulkanExtent3D(GetSize());
+        createInfo.mipLevels = GetNumMipLevels();
+        createInfo.arrayLayers = GetArrayLayers();
+        createInfo.samples = VulkanSampleCount(GetSampleCount());
+        createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        createInfo.usage = VulkanImageUsage(GetUsage(), GetFormat());
+        createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        createInfo.queueFamilyIndexCount = 0;
+        createInfo.pQueueFamilyIndices = nullptr;
+        createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        ASSERT(IsSampleCountSupported(device, createInfo));
+
+        // We always set VK_IMAGE_USAGE_TRANSFER_DST_BIT unconditionally beause the Vulkan images
+        // that are used in vkCmdClearColorImage() must have been created with this flag, which is
+        // also required for the implementation of robust resource initialization.
+        createInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+        if (device->fn.CreateImage(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
+            VK_SUCCESS) {
+            ASSERT(false);
+        }
+
+        // Create the image memory and associate it with the container
+        VkMemoryRequirements requirements;
+        device->fn.GetImageMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
+
+        ASSERT(requirements.size <= descriptor->allocationSize);
+
+        if (device->fn.BindImageMemory(device->GetVkDevice(), mHandle, mExternalAllocation, 0) !=
+            VK_SUCCESS) {
+            ASSERT(false);
+        }
+
+        // Don't clear imported texture if already cleared
+        if (descriptor->isCleared) {
+            SetIsSubresourceContentInitialized(0, 1, 0, 1);
+        }
+    }
+
+    MaybeError Texture::SignalAndDestroy(VkSemaphore* outSignalSemaphore) {
+        Device* device = ToBackend(GetDevice());
+
+        if (mExternalState == ExternalState::Released) {
+            return DAWN_VALIDATION_ERROR("Can't export signal semaphore from signaled texture");
+        }
+
+        if (mExternalAllocation == VK_NULL_HANDLE) {
+            return DAWN_VALIDATION_ERROR(
+                "Can't export signal semaphore from destroyed / non-external texture");
+        }
+
+        ASSERT(mSignalSemaphore != VK_NULL_HANDLE);
+
+        // Release the texture
+        mExternalState = ExternalState::PendingRelease;
+        TransitionUsageNow(device->GetPendingRecordingContext(), dawn::TextureUsageBit::None);
+
+        // Queue submit to signal we are done with the texture
+        device->GetPendingRecordingContext()->signalSemaphores.push_back(mSignalSemaphore);
+        device->SubmitPendingCommands();
+
+        // Write out the signal semaphore
+        *outSignalSemaphore = mSignalSemaphore;
+        mSignalSemaphore = VK_NULL_HANDLE;
+
+        // Destroy the texture so it can't be used again
+        DestroyInternal();
+        return {};
+    }
+
     Texture::~Texture() {
         DestroyInternal();
     }
@@ -479,12 +590,20 @@ namespace dawn_native { namespace vulkan {
             // freed after the VkImage is destroyed and this is taken care of by the
             // FencedDeleter.
             device->GetMemoryAllocator()->Free(&mMemoryAllocation);
-
-            if (mHandle != VK_NULL_HANDLE) {
-                device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-            }
         }
+
+        if (mHandle != VK_NULL_HANDLE) {
+            device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+        }
+
+        if (mExternalAllocation != VK_NULL_HANDLE) {
+            device->GetFencedDeleter()->DeleteWhenUnused(mExternalAllocation);
+        }
+
         mHandle = VK_NULL_HANDLE;
+        mExternalAllocation = VK_NULL_HANDLE;
+        // If a signal semaphore exists it should be requested before we delete the texture
+        ASSERT(mSignalSemaphore == VK_NULL_HANDLE);
     }
 
     VkImage Texture::GetHandle() const {
@@ -499,7 +618,7 @@ namespace dawn_native { namespace vulkan {
                                      dawn::TextureUsageBit usage) {
         // Avoid encoding barriers when it isn't needed.
         bool lastReadOnly = (mLastUsage & kReadOnlyTextureUsages) == mLastUsage;
-        if (lastReadOnly && mLastUsage == usage) {
+        if (lastReadOnly && mLastUsage == usage && mLastExternalState == mExternalState) {
             return;
         }
 
@@ -515,8 +634,6 @@ namespace dawn_native { namespace vulkan {
         barrier.dstAccessMask = VulkanAccessFlags(usage, format);
         barrier.oldLayout = VulkanImageLayout(mLastUsage, format);
         barrier.newLayout = VulkanImageLayout(usage, format);
-        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = mHandle;
         // This transitions the whole resource but assumes it is a 2D texture
         ASSERT(GetDimension() == dawn::TextureDimension::e2D);
@@ -526,11 +643,36 @@ namespace dawn_native { namespace vulkan {
         barrier.subresourceRange.baseArrayLayer = 0;
         barrier.subresourceRange.layerCount = GetArrayLayers();
 
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+        if (mExternalState == ExternalState::PendingAcquire) {
+            // Transfer texture from external queue to graphics queue
+            barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
+            barrier.dstQueueFamilyIndex = ToBackend(GetDevice())->GetGraphicsQueueFamily();
+            // Don't override oldLayout to leave it as VK_IMAGE_LAYOUT_UNDEFINED
+            // TODO(http://crbug.com/dawn/200)
+            mExternalState = ExternalState::Acquired;
+
+        } else if (mExternalState == ExternalState::PendingRelease) {
+            // Transfer texture from graphics queue to external queue
+            barrier.srcQueueFamilyIndex = ToBackend(GetDevice())->GetGraphicsQueueFamily();
+            barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
+            barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+            mExternalState = ExternalState::Released;
+        }
+
+        // Move required semaphores into waitSemaphores
+        recordingContext->waitSemaphores.insert(recordingContext->waitSemaphores.end(),
+                                                mWaitRequirements.begin(), mWaitRequirements.end());
+        mWaitRequirements.clear();
+
         ToBackend(GetDevice())
             ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
                                     nullptr, 0, nullptr, 1, &barrier);
 
         mLastUsage = usage;
+        mLastExternalState = mExternalState;
     }
 
     void Texture::ClearTexture(CommandRecordingContext* recordingContext,

@@ -208,6 +208,9 @@ namespace dawn_native {
 
     MaybeError ValidateTextureDescriptor(const DeviceBase* device,
                                          const TextureDescriptor* descriptor) {
+        if (descriptor == nullptr) {
+            return DAWN_VALIDATION_ERROR("Texture descriptor is nullptr");
+        }
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }

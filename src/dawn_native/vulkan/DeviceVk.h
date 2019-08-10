@@ -25,6 +25,9 @@
 #include "dawn_native/vulkan/VulkanFunctions.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
+#include "dawn_native/vulkan/external_memory/MemoryService.h"
+#include "dawn_native/vulkan/external_semaphore/SemaphoreService.h"
+
 #include <memory>
 #include <queue>
 
@@ -32,6 +35,7 @@ namespace dawn_native { namespace vulkan {
 
     class Adapter;
     class BufferUploader;
+    struct ExternalImageDescriptor;
     class FencedDeleter;
     class MapRequestTracker;
     class MemoryAllocator;
@@ -63,6 +67,14 @@ namespace dawn_native { namespace vulkan {
         CommandRecordingContext* GetPendingRecordingContext();
         Serial GetPendingCommandSerial() const override;
         void SubmitPendingCommands();
+
+        TextureBase* CreateTextureWrappingVulkanImage(
+            const ExternalImageDescriptor* descriptor,
+            ExternalMemoryHandle memoryHandle,
+            const std::vector<ExternalSemaphoreHandle>& waitHandles);
+
+        MaybeError SignalAndExportExternalTexture(Texture* texture,
+                                                  ExternalSemaphoreHandle* outHandle);
 
         // Dawn API
         CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder,
@@ -119,6 +131,9 @@ namespace dawn_native { namespace vulkan {
         std::unique_ptr<MemoryAllocator> mMemoryAllocator;
         std::unique_ptr<RenderPassCache> mRenderPassCache;
 
+        std::unique_ptr<external_memory::Service> mExternalMemoryService;
+        std::unique_ptr<external_semaphore::Service> mExternalSemaphoreService;
+
         VkFence GetUnusedFence();
         void CheckPassedFences();
 
@@ -143,8 +158,14 @@ namespace dawn_native { namespace vulkan {
         SerialQueue<CommandPoolAndBuffer> mCommandsInFlight;
         std::vector<CommandPoolAndBuffer> mUnusedCommands;
         CommandPoolAndBuffer mPendingCommands;
-
         CommandRecordingContext mRecordingContext;
+
+        MaybeError ImportExternalImage(const ExternalImageDescriptor* descriptor,
+                                       ExternalMemoryHandle memoryHandle,
+                                       const std::vector<ExternalSemaphoreHandle>& waitHandles,
+                                       VkSemaphore* outSignalSemaphore,
+                                       VkDeviceMemory* outAllocation,
+                                       std::vector<VkSemaphore>* outWaitSemaphores);
     };
 
 }}  // namespace dawn_native::vulkan

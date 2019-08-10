@@ -362,6 +362,7 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/vulkan/ComputePipelineVk.h",
       "src/dawn_native/vulkan/DeviceVk.cpp",
       "src/dawn_native/vulkan/DeviceVk.h",
+      "src/dawn_native/vulkan/ExternalHandle.h",
       "src/dawn_native/vulkan/FencedDeleter.cpp",
       "src/dawn_native/vulkan/FencedDeleter.h",
       "src/dawn_native/vulkan/Forward.h",
@@ -395,7 +396,21 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/vulkan/VulkanFunctions.h",
       "src/dawn_native/vulkan/VulkanInfo.cpp",
       "src/dawn_native/vulkan/VulkanInfo.h",
+      "src/dawn_native/vulkan/external_memory/MemoryService.h",
+      "src/dawn_native/vulkan/external_semaphore/SemaphoreService.h",
     ]
+
+    if (is_linux) {
+      sources += [
+        "src/dawn_native/vulkan/external_memory/MemoryServiceOpaqueFD.cpp",
+        "src/dawn_native/vulkan/external_semaphore/SemaphoreServiceOpaqueFD.cpp",
+      ]
+    } else {
+      sources += [
+        "src/dawn_native/vulkan/external_memory/MemoryServiceNull.cpp",
+        "src/dawn_native/vulkan/external_semaphore/SemaphoreServiceNull.cpp",
+      ]
+    }
   }
 }
 
@@ -667,8 +682,9 @@ test("dawn_unittests") {
   }
 }
 
-test("dawn_end2end_tests") {
+source_set("dawn_end2end_tests_sources") {
   configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  testonly = true
 
   deps = [
     ":dawn_utils",
@@ -681,7 +697,6 @@ test("dawn_end2end_tests") {
   ]
 
   sources = [
-    "src/tests/DawnTest.cpp",
     "src/tests/DawnTest.h",
     "src/tests/end2end/BasicTests.cpp",
     "src/tests/end2end/BindGroupTests.cpp",
@@ -729,6 +744,59 @@ test("dawn_end2end_tests") {
 
     libs += [ "IOSurface.framework" ]
   }
+}
+
+source_set("dawn_white_box_tests_sources") {
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  testonly = true
+
+  deps = [
+    ":dawn_utils",
+    ":libdawn_native",
+    ":libdawn_native_sources",
+    ":libdawn_wire",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:libdawn",
+    "third_party:glfw",
+    "third_party:gmock_and_gtest",
+  ]
+
+  sources = [
+    "src/tests/DawnTest.h",
+  ]
+
+  if (dawn_enable_vulkan) {
+    deps += [ "third_party:vulkan_headers" ]
+
+    if (is_linux) {
+      sources += [ "src/tests/white_box/VulkanImageWrappingTests.cpp" ]
+    }
+  }
+
+  libs = []
+}
+
+test("dawn_end2end_tests") {
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+
+  deps = [
+    ":dawn_end2end_tests_sources",
+    ":dawn_utils",
+    ":dawn_white_box_tests_sources",
+    ":libdawn_native",
+    ":libdawn_wire",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:libdawn",
+    "third_party:glfw",
+    "third_party:gmock_and_gtest",
+  ]
+
+  sources = [
+    "src/tests/DawnTest.cpp",
+    "src/tests/DawnTest.h",
+  ]
+
+  libs = []
 
   # When building inside Chromium, use their gtest main function because it is
   # needed to run in swarming correctly.

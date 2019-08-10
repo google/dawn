@@ -42,6 +42,7 @@ namespace dawn_native { namespace vulkan {
         MemoryAllocator(Device* device);
         ~MemoryAllocator();
 
+        int FindBestTypeIndex(VkMemoryRequirements requirements, bool mappable);
         bool Allocate(VkMemoryRequirements requirements,
                       bool mappable,
                       DeviceMemoryAllocation* allocation);

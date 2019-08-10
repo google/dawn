@@ -41,9 +41,7 @@ namespace dawn_native { namespace vulkan {
     MemoryAllocator::~MemoryAllocator() {
     }
 
-    bool MemoryAllocator::Allocate(VkMemoryRequirements requirements,
-                                   bool mappable,
-                                   DeviceMemoryAllocation* allocation) {
+    int MemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements, bool mappable) {
         const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
 
         // Find a suitable memory type for this allocation
@@ -92,6 +90,14 @@ namespace dawn_native { namespace vulkan {
                 continue;
             }
         }
+
+        return bestType;
+    }
+
+    bool MemoryAllocator::Allocate(VkMemoryRequirements requirements,
+                                   bool mappable,
+                                   DeviceMemoryAllocation* allocation) {
+        int bestType = FindBestTypeIndex(requirements, mappable);
 
         // TODO(cwallez@chromium.org): I think the Vulkan spec guarantees this should never happen
         if (bestType == -1) {
