@@ -25,7 +25,16 @@ namespace dawn_native { namespace metal {
         const size_t bufferSize = GetSize();
         mBuffer = [mDevice->GetMTLDevice() newBufferWithLength:bufferSize
                                                        options:MTLResourceStorageModeShared];
+
+        if (mBuffer == nil) {
+            return DAWN_CONTEXT_LOST_ERROR("Unable to allocate buffer.");
+        }
+
         mMappedPointer = [mBuffer contents];
+        if (mMappedPointer == nullptr) {
+            return DAWN_CONTEXT_LOST_ERROR("Unable to map staging buffer.");
+        }
+
         return {};
     }
 
