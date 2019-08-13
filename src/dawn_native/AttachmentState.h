@@ -33,8 +33,9 @@ namespace dawn_native {
     class AttachmentStateBlueprint {
       public:
         // Note: Descriptors must be validated before the AttachmentState is constructed.
-        AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor);
-        AttachmentStateBlueprint(const RenderPassDescriptor* descriptor);
+        explicit AttachmentStateBlueprint(const RenderBundleEncoderDescriptor* descriptor);
+        explicit AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor);
+        explicit AttachmentStateBlueprint(const RenderPassDescriptor* descriptor);
 
         AttachmentStateBlueprint(const AttachmentStateBlueprint& rhs);
 

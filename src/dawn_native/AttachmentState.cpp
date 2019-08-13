@@ -21,6 +21,19 @@
 
 namespace dawn_native {
 
+    AttachmentStateBlueprint::AttachmentStateBlueprint(
+        const RenderBundleEncoderDescriptor* descriptor)
+        : mHasDepthStencilAttachment(descriptor->depthStencilFormat != nullptr),
+          mSampleCount(descriptor->sampleCount) {
+        for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
+            mColorAttachmentsSet.set(i);
+            mColorFormats[i] = descriptor->colorFormats[i];
+        }
+        if (mHasDepthStencilAttachment) {
+            mDepthStencilFormat = *descriptor->depthStencilFormat;
+        }
+    }
+
     AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor)
         : mHasDepthStencilAttachment(descriptor->depthStencilState != nullptr),
           mSampleCount(descriptor->sampleCount) {

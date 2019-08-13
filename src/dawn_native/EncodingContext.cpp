@@ -76,6 +76,10 @@ namespace dawn_native {
     }
 
     MaybeError EncodingContext::Finish() {
+        if (IsFinished()) {
+            return DAWN_VALIDATION_ERROR("Command encoding already finished");
+        }
+
         const void* currentEncoder = mCurrentEncoder;
         const void* topLevelEncoder = mTopLevelEncoder;
 

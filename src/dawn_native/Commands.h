@@ -46,6 +46,7 @@ namespace dawn_native {
         DrawIndexedIndirect,
         EndComputePass,
         EndRenderPass,
+        ExecuteBundles,
         InsertDebugMarker,
         PopDebugGroup,
         PushDebugGroup,
@@ -169,6 +170,10 @@ namespace dawn_native {
     struct EndComputePassCmd {};
 
     struct EndRenderPassCmd {};
+
+    struct ExecuteBundlesCmd {
+        uint32_t count;
+    };
 
     struct InsertDebugMarkerCmd {
         uint32_t length;

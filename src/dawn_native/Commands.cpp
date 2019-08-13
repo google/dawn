@@ -18,6 +18,7 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/ComputePipeline.h"
+#include "dawn_native/RenderBundle.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Texture.h"
 
@@ -85,6 +86,14 @@ namespace dawn_native {
                 case Command::EndRenderPass: {
                     EndRenderPassCmd* cmd = commands->NextCommand<EndRenderPassCmd>();
                     cmd->~EndRenderPassCmd();
+                } break;
+                case Command::ExecuteBundles: {
+                    ExecuteBundlesCmd* cmd = commands->NextCommand<ExecuteBundlesCmd>();
+                    auto bundles = commands->NextData<Ref<RenderBundleBase>>(cmd->count);
+                    for (size_t i = 0; i < cmd->count; ++i) {
+                        (&bundles[i])->~Ref<RenderBundleBase>();
+                    }
+                    cmd->~ExecuteBundlesCmd();
                 } break;
                 case Command::InsertDebugMarker: {
                     InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
@@ -206,6 +215,11 @@ namespace dawn_native {
             case Command::EndRenderPass:
                 commands->NextCommand<EndRenderPassCmd>();
                 break;
+
+            case Command::ExecuteBundles: {
+                auto* cmd = commands->NextCommand<ExecuteBundlesCmd>();
+                commands->NextData<Ref<RenderBundleBase>>(cmd->count);
+            } break;
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();

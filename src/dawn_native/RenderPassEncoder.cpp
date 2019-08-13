@@ -19,6 +19,7 @@
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/RenderBundle.h"
 #include "dawn_native/RenderPipeline.h"
 
 #include <math.h>
@@ -125,6 +126,26 @@ namespace dawn_native {
             cmd->y = y;
             cmd->width = width;
             cmd->height = height;
+
+            return {};
+        });
+    }
+
+    void RenderPassEncoderBase::ExecuteBundles(uint32_t count,
+                                               RenderBundleBase* const* renderBundles) {
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            for (uint32_t i = 0; i < count; ++i) {
+                DAWN_TRY(GetDevice()->ValidateObject(renderBundles[i]));
+            }
+
+            ExecuteBundlesCmd* cmd =
+                allocator->Allocate<ExecuteBundlesCmd>(Command::ExecuteBundles);
+            cmd->count = count;
+
+            Ref<RenderBundleBase>* bundles = allocator->AllocateData<Ref<RenderBundleBase>>(count);
+            for (uint32_t i = 0; i < count; ++i) {
+                bundles[i] = renderBundles[i];
+            }
 
             return {};
         });

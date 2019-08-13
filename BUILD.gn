@@ -191,6 +191,10 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Queue.h",
     "src/dawn_native/RefCounted.cpp",
     "src/dawn_native/RefCounted.h",
+    "src/dawn_native/RenderBundle.cpp",
+    "src/dawn_native/RenderBundle.h",
+    "src/dawn_native/RenderBundleEncoder.cpp",
+    "src/dawn_native/RenderBundleEncoder.h",
     "src/dawn_native/RenderEncoderBase.cpp",
     "src/dawn_native/RenderEncoderBase.h",
     "src/dawn_native/RenderPassEncoder.cpp",
@@ -549,6 +553,8 @@ static_library("dawn_utils") {
   configs += [ "${dawn_root}/src/common:dawn_internal" ]
 
   sources = [
+    "src/utils/ComboRenderBundleEncoderDescriptor.cpp",
+    "src/utils/ComboRenderBundleEncoderDescriptor.h",
     "src/utils/ComboRenderPipelineDescriptor.cpp",
     "src/utils/ComboRenderPipelineDescriptor.h",
     "src/utils/DawnHelpers.cpp",
@@ -684,6 +690,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/DynamicStateCommandValidationTests.cpp",
     "src/tests/unittests/validation/FenceValidationTests.cpp",
     "src/tests/unittests/validation/QueueSubmitValidationTests.cpp",
+    "src/tests/unittests/validation/RenderBundleValidationTests.cpp",
     "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
     "src/tests/unittests/validation/RenderPassValidationTests.cpp",
     "src/tests/unittests/validation/RenderPipelineValidationTests.cpp",

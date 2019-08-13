@@ -29,6 +29,7 @@
 #include "dawn_native/Instance.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
+#include "dawn_native/RenderBundleEncoder.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Sampler.h"
 #include "dawn_native/ShaderModule.h"
@@ -268,33 +269,34 @@ namespace dawn_native {
     }
 
     Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
-        const RenderPipelineDescriptor* descriptor) {
-        AttachmentStateBlueprint blueprint(descriptor);
-
-        auto iter = mCaches->attachmentStates.find(&blueprint);
+        AttachmentStateBlueprint* blueprint) {
+        auto iter = mCaches->attachmentStates.find(blueprint);
         if (iter != mCaches->attachmentStates.end()) {
             return static_cast<AttachmentState*>(*iter);
         }
 
-        Ref<AttachmentState> attachmentState = new AttachmentState(this, blueprint);
+        Ref<AttachmentState> attachmentState = new AttachmentState(this, *blueprint);
         attachmentState->Release();
         mCaches->attachmentStates.insert(attachmentState.Get());
         return attachmentState;
     }
 
     Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
+        const RenderBundleEncoderDescriptor* descriptor) {
+        AttachmentStateBlueprint blueprint(descriptor);
+        return GetOrCreateAttachmentState(&blueprint);
+    }
+
+    Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
+        const RenderPipelineDescriptor* descriptor) {
+        AttachmentStateBlueprint blueprint(descriptor);
+        return GetOrCreateAttachmentState(&blueprint);
+    }
+
+    Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
         const RenderPassDescriptor* descriptor) {
         AttachmentStateBlueprint blueprint(descriptor);
-
-        auto iter = mCaches->attachmentStates.find(&blueprint);
-        if (iter != mCaches->attachmentStates.end()) {
-            return static_cast<AttachmentState*>(*iter);
-        }
-
-        Ref<AttachmentState> attachmentState = new AttachmentState(this, blueprint);
-        attachmentState->Release();
-        mCaches->attachmentStates.insert(attachmentState.Get());
-        return attachmentState;
+        return GetOrCreateAttachmentState(&blueprint);
     }
 
     void DeviceBase::UncacheAttachmentState(AttachmentState* obj) {
@@ -424,6 +426,16 @@ namespace dawn_native {
 
         if (ConsumedError(CreateSamplerInternal(&result, descriptor))) {
             return SamplerBase::MakeError(this);
+        }
+
+        return result;
+    }
+    RenderBundleEncoderBase* DeviceBase::CreateRenderBundleEncoder(
+        const RenderBundleEncoderDescriptor* descriptor) {
+        RenderBundleEncoderBase* result = nullptr;
+
+        if (ConsumedError(CreateRenderBundleEncoderInternal(&result, descriptor))) {
+            return RenderBundleEncoderBase::MakeError(this);
         }
 
         return result;
@@ -598,6 +610,14 @@ namespace dawn_native {
 
     MaybeError DeviceBase::CreateQueueInternal(QueueBase** result) {
         DAWN_TRY_ASSIGN(*result, CreateQueueImpl());
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateRenderBundleEncoderInternal(
+        RenderBundleEncoderBase** result,
+        const RenderBundleEncoderDescriptor* descriptor) {
+        DAWN_TRY(ValidateRenderBundleEncoderDescriptor(this, descriptor));
+        *result = new RenderBundleEncoderBase(this, descriptor);
         return {};
     }
 

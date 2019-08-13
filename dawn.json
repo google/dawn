@@ -484,6 +484,13 @@
                 "returns": "queue"
             },
             {
+                "name": "create render bundle encoder",
+                "returns": "render bundle encoder",
+                "args": [
+                    {"name": "descriptor", "type": "render bundle encoder descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "create sampler",
                 "returns": "sampler",
                 "args": [
@@ -731,6 +738,120 @@
         ]
     },
 
+    "render bundle": {
+        "category": "object"
+    },
+
+    "render bundle encoder": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "set pipeline",
+                "args": [
+                    {"name": "pipeline", "type": "render pipeline"}
+                ]
+            },
+            {
+                "name": "set bind group",
+                "args": [
+                    {"name": "group index", "type": "uint32_t"},
+                    {"name": "group", "type": "bind group"},
+                    {"name": "dynamic offset count", "type": "uint32_t"},
+                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count"}
+                ]
+            },
+            {
+                "name": "draw",
+                "args": [
+                    {"name": "vertex count", "type": "uint32_t"},
+                    {"name": "instance count", "type": "uint32_t"},
+                    {"name": "first vertex", "type": "uint32_t"},
+                    {"name": "first instance", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "draw indexed",
+                "args": [
+                    {"name": "index count", "type": "uint32_t"},
+                    {"name": "instance count", "type": "uint32_t"},
+                    {"name": "first index", "type": "uint32_t"},
+                    {"name": "base vertex", "type": "int32_t"},
+                    {"name": "first instance", "type": "uint32_t"}
+                ]
+            },
+            {
+              "name": "draw indirect",
+              "args": [
+                    {"name": "indirect buffer", "type": "buffer"},
+                    {"name": "indirect offset", "type": "uint64_t"}
+              ]
+            },
+            {
+              "name": "draw indexed indirect",
+              "args": [
+                    {"name": "indirect buffer", "type": "buffer"},
+                    {"name": "indirect offset", "type": "uint64_t"}
+              ]
+            },
+            {
+                "name": "insert debug marker",
+                "args": [
+                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "pop debug group",
+                "args": []
+            },
+            {
+                "name": "push debug group",
+                "args": [
+                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set vertex buffers",
+                "args": [
+                    {"name": "start slot", "type": "uint32_t"},
+                    {"name": "count", "type": "uint32_t"},
+                    {"name": "buffers", "type": "buffer", "annotation": "const*", "length": "count"},
+                    {"name": "offsets", "type": "uint64_t", "annotation": "const*", "length": "count"}
+                ]
+            },
+            {
+                "name": "set index buffer",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "offset", "type": "uint64_t"}
+                ]
+            },
+            {
+                "name": "finish",
+                "returns": "render bundle",
+                "args": [
+                    {"name": "descriptor", "type": "render bundle descriptor", "annotation": "const*", "optional": true}
+                ]
+            }
+        ]
+    },
+
+    "render bundle descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": []
+    },
+
+    "render bundle encoder descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "color formats count", "type": "uint32_t"},
+            {"name": "color formats", "type": "texture format", "annotation": "const*", "length": "color formats count"},
+            {"name": "depth stencil format", "type": "texture format", "annotation": "const*", "optional": true},
+            {"name": "sample count", "type": "uint32_t", "default": "1"}
+        ]
+    },
+
     "render pass color attachment descriptor": {
         "category": "structure",
         "members": [
@@ -812,6 +933,13 @@
               "args": [
                     {"name": "indirect buffer", "type": "buffer"},
                     {"name": "indirect offset", "type": "uint64_t"}
+              ]
+            },
+            {
+              "name": "execute bundles",
+              "args": [
+                  {"name": "bundles count", "type": "uint32_t"},
+                  {"name": "bundles", "type": "render bundle", "annotation": "const*", "length": "bundles count"}
               ]
             },
             {

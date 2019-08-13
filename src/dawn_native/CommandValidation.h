@@ -22,9 +22,13 @@
 
 namespace dawn_native {
 
+    class AttachmentState;
     struct BeginRenderPassCmd;
     struct PassResourceUsage;
 
+    MaybeError ValidateRenderBundle(CommandIterator* commands,
+                                    const AttachmentState* attachmentState,
+                                    PassResourceUsage* resourceUsage);
     MaybeError ValidateRenderPass(CommandIterator* commands,
                                   BeginRenderPassCmd* renderPass,
                                   std::vector<PassResourceUsage>* perPassResourceUsages);
