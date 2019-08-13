@@ -33,7 +33,7 @@ declare_args() {
 
   # Enables the compilation of Dawn's OpenGL backend
   # (best effort, non-conformant)
-  dawn_enable_opengl = is_linux
+  dawn_enable_opengl = is_linux && !is_chromeos
 
   # Enables the compilation of Dawn's Vulkan backend
   dawn_enable_vulkan = is_linux || is_win

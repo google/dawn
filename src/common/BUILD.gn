@@ -60,6 +60,10 @@ config("dawn_internal") {
     defines += [ "DAWN_ENABLE_BACKEND_VULKAN" ]
   }
 
+  if (is_linux && !is_chromeos) {
+    defines += [ "DAWN_USE_X11" ]
+  }
+
   # Only internal Dawn targets can use this config, this means only targets in
   # this BUILD.gn file.
   visibility = [ ":*" ]
