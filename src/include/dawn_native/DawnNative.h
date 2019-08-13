@@ -21,6 +21,10 @@
 #include <string>
 #include <vector>
 
+namespace dawn_platform {
+    class Platform;
+}  // namespace dawn_platform
+
 namespace dawn_native {
 
     struct PCIInfo {
@@ -139,6 +143,9 @@ namespace dawn_native {
         // Enable debug capture on Dawn startup
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
         bool IsBeginCaptureOnStartupEnabled() const;
+
+        void SetPlatform(dawn_platform::Platform* platform);
+        dawn_platform::Platform* GetPlatform() const;
 
       private:
         InstanceBase* mImpl = nullptr;

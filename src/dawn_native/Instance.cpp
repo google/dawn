@@ -192,4 +192,12 @@ namespace dawn_native {
         return mBeginCaptureOnStartup;
     }
 
+    void InstanceBase::SetPlatform(dawn_platform::Platform* platform) {
+        mPlatform = platform;
+    }
+
+    dawn_platform::Platform* InstanceBase::GetPlatform() const {
+        return mPlatform;
+    }
+
 }  // namespace dawn_native

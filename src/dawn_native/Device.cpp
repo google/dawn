@@ -112,6 +112,10 @@ namespace dawn_native {
         return mAdapter;
     }
 
+    dawn_platform::Platform* DeviceBase::GetPlatform() const {
+        return GetAdapter()->GetInstance()->GetPlatform();
+    }
+
     FenceSignalTracker* DeviceBase::GetFenceSignalTracker() const {
         return mFenceSignalTracker.get();
     }

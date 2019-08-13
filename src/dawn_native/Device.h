@@ -56,6 +56,7 @@ namespace dawn_native {
         MaybeError ValidateObject(const ObjectBase* object) const;
 
         AdapterBase* GetAdapter() const;
+        dawn_platform::Platform* GetPlatform() const;
 
         FenceSignalTracker* GetFenceSignalTracker() const;
 

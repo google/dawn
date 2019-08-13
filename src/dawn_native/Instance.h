@@ -63,6 +63,9 @@ namespace dawn_native {
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
         bool IsBeginCaptureOnStartupEnabled() const;
 
+        void SetPlatform(dawn_platform::Platform* platform);
+        dawn_platform::Platform* GetPlatform() const;
+
       private:
         // Lazily creates connections to all backends that have been compiled.
         void EnsureBackendConnections();
@@ -77,6 +80,8 @@ namespace dawn_native {
 
         bool mEnableBackendValidation = false;
         bool mBeginCaptureOnStartup = false;
+
+        dawn_platform::Platform* mPlatform = nullptr;
 
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<std::unique_ptr<AdapterBase>> mAdapters;

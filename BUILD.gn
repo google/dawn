@@ -21,6 +21,25 @@ import("scripts/dawn_overrides_with_defaults.gni")
 import("//testing/test.gni")
 
 ###############################################################################
+# dawn_platform
+###############################################################################
+
+source_set("dawn_platform") {
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+
+  sources = [
+    "${dawn_root}/src/include/dawn_platform/DawnPlatform.h",
+    "src/dawn_platform/tracing/EventTracer.cpp",
+    "src/dawn_platform/tracing/EventTracer.h",
+    "src/dawn_platform/tracing/TraceEvent.h",
+  ]
+
+  deps = [
+    "${dawn_root}/src/common",
+  ]
+}
+
+###############################################################################
 # libdawn_native
 ###############################################################################
 
@@ -98,7 +117,9 @@ source_set("libdawn_native_sources") {
   # Dependencies that are needed to compile libdawn_native entry points in
   # FooBackend.cpp need to be public deps so they are propagated to the
   # libdawn_native target
-  public_deps = []
+  public_deps = [
+    ":dawn_platform",
+  ]
 
   sources = get_target_outputs(":libdawn_native_utils_gen")
   sources += [

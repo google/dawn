@@ -27,6 +27,7 @@
 #include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
+#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <map>
 
@@ -667,6 +668,8 @@ namespace dawn_native {
     }
 
     CommandBufferBase* CommandEncoderBase::Finish(const CommandBufferDescriptor* descriptor) {
+        TRACE_EVENT0(GetDevice()->GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"),
+                     "CommandEncoderBase::Finish");
         if (GetDevice()->ConsumedError(ValidateFinish(descriptor))) {
             // Even if finish validation fails, it is now invalid to call any encoding commands on
             // this object, so we set its state to finished.

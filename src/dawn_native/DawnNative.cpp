@@ -15,6 +15,7 @@
 #include "dawn_native/DawnNative.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/Instance.h"
+#include "dawn_platform/DawnPlatform.h"
 
 // Contains the entry-points into dawn_native
 
@@ -118,6 +119,14 @@ namespace dawn_native {
 
     bool Instance::IsBeginCaptureOnStartupEnabled() const {
         return mImpl->IsBeginCaptureOnStartupEnabled();
+    }
+
+    void Instance::SetPlatform(dawn_platform::Platform* platform) {
+        mImpl->SetPlatform(platform);
+    }
+
+    dawn_platform::Platform* Instance::GetPlatform() const {
+        return mImpl->GetPlatform();
     }
 
     size_t GetLazyClearCountForTesting(DawnDevice device) {

@@ -20,6 +20,7 @@
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
 #include "dawn_native/Texture.h"
+#include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn_native {
 
@@ -29,6 +30,8 @@ namespace dawn_native {
     }
 
     void QueueBase::Submit(uint32_t commandCount, CommandBufferBase* const* commands) {
+        TRACE_EVENT0(GetDevice()->GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"),
+                     "Queue::Submit");
         if (GetDevice()->ConsumedError(ValidateSubmit(commandCount, commands))) {
             return;
         }
