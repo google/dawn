@@ -93,10 +93,7 @@ DawnTestParam ForceWorkarounds(const DawnTestParam& originParam,
                                std::initializer_list<const char*> forceEnabledWorkarounds,
                                std::initializer_list<const char*> forceDisabledWorkarounds = {});
 
-struct GLFWwindow;
-
 namespace utils {
-    class BackendBinding;
     class TerribleCommandBuffer;
 }  // namespace utils
 
@@ -121,12 +118,11 @@ class DawnTestEnvironment : public testing::Environment {
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
     dawn_native::Instance* GetInstance() const;
-    GLFWwindow* GetWindowForBackend(dawn_native::BackendType type) const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
 
   private:
-    void CreateBackendWindow(dawn_native::BackendType type);
+    void DiscoverOpenGLAdapter();
 
     bool mUseWire = false;
     bool mEnableBackendValidation = false;
@@ -134,11 +130,6 @@ class DawnTestEnvironment : public testing::Environment {
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
     std::unique_ptr<dawn_native::Instance> mInstance;
-
-    // Windows don't usually like to be bound to one API than the other, for example switching
-    // from Vulkan to OpenGL causes crashes on some drivers. Because of this, we lazily created
-    // a window for each backing API.
-    std::unordered_map<dawn_native::BackendType, GLFWwindow*> mWindows;
 };
 
 class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
@@ -177,7 +168,6 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
   protected:
     dawn::Device device;
     dawn::Queue queue;
-    dawn::SwapChain swapchain;
 
     DawnProcTable backendProcs = {};
     DawnDevice backendDevice = nullptr;
@@ -203,8 +193,6 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
 
     void WaitABit();
     void FlushWire();
-
-    void SwapBuffersForCapture();
 
     bool SupportsExtensions(const std::vector<const char*>& extensions);
 
@@ -267,8 +255,6 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
 
     // Assuming the data is mapped, checks all expectations
     void ResolveExpectations();
-
-    std::unique_ptr<utils::BackendBinding> mBinding;
 
     dawn_native::PCIInfo mPCIInfo;
 

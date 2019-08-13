@@ -549,8 +549,6 @@ static_library("dawn_utils") {
   configs += [ "${dawn_root}/src/common:dawn_internal" ]
 
   sources = [
-    "src/utils/BackendBinding.cpp",
-    "src/utils/BackendBinding.h",
     "src/utils/ComboRenderPipelineDescriptor.cpp",
     "src/utils/ComboRenderPipelineDescriptor.h",
     "src/utils/DawnHelpers.cpp",
@@ -570,6 +568,24 @@ static_library("dawn_utils") {
     ":libdawn_wire",
     "${dawn_root}/src/common",
     "${dawn_shaderc_dir}:libshaderc",
+  ]
+}
+
+static_library("dawn_bindings") {
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+
+  sources = [
+    "src/utils/BackendBinding.cpp",
+    "src/utils/BackendBinding.h",
+  ]
+
+  public_deps = [
+    "${dawn_root}/src/dawn:dawn_headers",
+  ]
+
+  deps = [
+    ":libdawn_native",
+    "${dawn_root}/src/common",
     "third_party:glfw",
   ]
   libs = []
@@ -715,7 +731,6 @@ source_set("dawn_end2end_tests_sources") {
     ":libdawn_wire",
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:libdawn",
-    "third_party:glfw",
     "third_party:gmock_and_gtest",
   ]
 
@@ -767,6 +782,10 @@ source_set("dawn_end2end_tests_sources") {
 
     libs += [ "IOSurface.framework" ]
   }
+
+  if (dawn_enable_opengl) {
+    deps += [ "third_party:glfw" ]
+  }
 }
 
 source_set("dawn_white_box_tests_sources") {
@@ -780,7 +799,6 @@ source_set("dawn_white_box_tests_sources") {
     ":libdawn_wire",
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:libdawn",
-    "third_party:glfw",
     "third_party:gmock_and_gtest",
   ]
 
@@ -794,6 +812,10 @@ source_set("dawn_white_box_tests_sources") {
     if (is_linux) {
       sources += [ "src/tests/white_box/VulkanImageWrappingTests.cpp" ]
     }
+  }
+
+  if (dawn_enable_opengl) {
+    deps += [ "third_party:glfw" ]
   }
 
   libs = []
@@ -810,7 +832,6 @@ test("dawn_end2end_tests") {
     ":libdawn_wire",
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:libdawn",
-    "third_party:glfw",
     "third_party:gmock_and_gtest",
   ]
 
@@ -827,6 +848,10 @@ test("dawn_end2end_tests") {
     sources += [ "//gpu/dawn_end2end_tests_main.cc" ]
   } else {
     sources += [ "src/tests/End2EndTestsMain.cpp" ]
+  }
+
+  if (dawn_enable_opengl) {
+    deps += [ "third_party:glfw" ]
   }
 }
 
@@ -859,6 +884,7 @@ if (dawn_standalone) {
 
     # Export all of these as public deps so that `gn check` allows includes
     public_deps = [
+      ":dawn_bindings",
       ":dawn_utils",
       ":libdawn_native",
       ":libdawn_wire",

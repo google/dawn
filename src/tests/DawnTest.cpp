@@ -21,7 +21,6 @@
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
-#include "utils/BackendBinding.h"
 #include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
 #include "utils/TerribleCommandBuffer.h"
@@ -31,7 +30,11 @@
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
-#include "GLFW/glfw3.h"
+
+#ifdef DAWN_ENABLE_BACKEND_OPENGL
+#    include "GLFW/glfw3.h"
+#    include "dawn_native/OpenGLBackend.h"
+#endif  // DAWN_ENABLE_BACKEND_OPENGL
 
 namespace {
 
@@ -141,25 +144,23 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
 }
 
 void DawnTestEnvironment::SetUp() {
-    ASSERT_TRUE(glfwInit());
-
     mInstance = std::make_unique<dawn_native::Instance>();
     mInstance->EnableBackendValidation(mEnableBackendValidation);
     mInstance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
 
-    static constexpr dawn_native::BackendType kAllBackends[] = {
+    static constexpr dawn_native::BackendType kWindowlessBackends[] = {
         dawn_native::BackendType::D3D12,
         dawn_native::BackendType::Metal,
-        dawn_native::BackendType::OpenGL,
         dawn_native::BackendType::Vulkan,
     };
-
-    // Create a test window for each backend and discover an adapter using it.
-    for (dawn_native::BackendType backend : kAllBackends) {
+    for (dawn_native::BackendType backend : kWindowlessBackends) {
         if (detail::IsBackendAvailable(backend)) {
-            CreateBackendWindow(backend);
-            utils::DiscoverAdapter(mInstance.get(), mWindows[backend], backend);
+            mInstance.get()->DiscoverDefaultAdapters();
         }
+    }
+
+    if (detail::IsBackendAvailable(dawn_native::BackendType::OpenGL)) {
+        DiscoverOpenGLAdapter();
     }
 
     std::cout << "Testing configuration\n"
@@ -211,10 +212,6 @@ dawn_native::Instance* DawnTestEnvironment::GetInstance() const {
     return mInstance.get();
 }
 
-GLFWwindow* DawnTestEnvironment::GetWindowForBackend(dawn_native::BackendType type) const {
-    return mWindows.at(type);
-}
-
 bool DawnTestEnvironment::HasVendorIdFilter() const {
     return mHasVendorIdFilter;
 }
@@ -223,14 +220,23 @@ uint32_t DawnTestEnvironment::GetVendorIdFilter() const {
     return mVendorIdFilter;
 }
 
-void DawnTestEnvironment::CreateBackendWindow(dawn_native::BackendType type) {
+void DawnTestEnvironment::DiscoverOpenGLAdapter() {
+#ifdef DAWN_ENABLE_BACKEND_OPENGL
+    ASSERT_TRUE(glfwInit());
     glfwDefaultWindowHints();
-    utils::SetupGLFWWindowHintsForBackend(type);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    std::string windowName = "Dawn " + ParamName(type) + " test window";
+    std::string windowName = "Dawn OpenGL test window";
     GLFWwindow* window = glfwCreateWindow(400, 400, windowName.c_str(), nullptr, nullptr);
 
-    mWindows[type] = window;
+    glfwMakeContextCurrent(window);
+    dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
+    adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
+    mInstance->DiscoverAdapters(&adapterOptions);
+#endif  // DAWN_ENABLE_BACKEND_OPENGL
 }
 
 // Implementation of DawnTest
@@ -241,7 +247,6 @@ DawnTest::~DawnTest() {
     // We need to destroy child objects before the Device
     mReadbackSlots.clear();
     queue = dawn::Queue();
-    swapchain = dawn::SwapChain();
     device = dawn::Device();
 
     mWireClient = nullptr;
@@ -405,12 +410,6 @@ void DawnTest::SetUp() {
 
     backendProcs = dawn_native::GetProcs();
 
-    // Get the test window and create the device using it (esp. for OpenGL)
-    GLFWwindow* testWindow = gTestEnv->GetWindowForBackend(backendType);
-    DAWN_ASSERT(testWindow != nullptr);
-    mBinding.reset(utils::CreateBinding(backendType, testWindow, backendDevice));
-    DAWN_ASSERT(mBinding != nullptr);
-
     // Choose whether to use the backend procs and devices directly, or set up the wire.
     DawnDevice cDevice = nullptr;
     DawnProcTable procs;
@@ -448,21 +447,10 @@ void DawnTest::SetUp() {
     device = dawn::Device::Acquire(cDevice);
     queue = device.CreateQueue();
 
-    // The swapchain isn't used by tests but is useful when debugging with graphics debuggers that
-    // capture at frame boundaries.
-    dawn::SwapChainDescriptor swapChainDesc;
-    swapChainDesc.implementation = mBinding->GetSwapChainImplementation();
-    swapchain = device.CreateSwapChain(&swapChainDesc);
-    FlushWire();
-    swapchain.Configure(
-        static_cast<dawn::TextureFormat>(mBinding->GetPreferredSwapChainTextureFormat()),
-        dawn::TextureUsageBit::OutputAttachment, 400, 400);
-
     device.SetErrorCallback(OnDeviceError, this);
 }
 
 void DawnTest::TearDown() {
-    swapchain = dawn::SwapChain();
     FlushWire();
 
     MapSlotsSynchronously();
@@ -572,12 +560,6 @@ void DawnTest::WaitABit() {
     FlushWire();
 
     utils::USleep(100);
-}
-
-void DawnTest::SwapBuffersForCapture() {
-    // Insert a frame boundary for API capture tools.
-    dawn::Texture backBuffer = swapchain.GetNextTexture();
-    swapchain.Present(backBuffer);
 }
 
 void DawnTest::FlushWire() {
