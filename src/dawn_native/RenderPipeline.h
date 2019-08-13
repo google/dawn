@@ -78,9 +78,8 @@ namespace dawn_native {
         dawn::TextureFormat GetDepthStencilFormat() const;
         uint32_t GetSampleCount() const;
 
-        // A pipeline can be used in a render pass if its attachment info matches the actual
-        // attachments in the render pass. This returns whether it is the case.
-        MaybeError ValidateCompatibleWith(const BeginRenderPassCmd* renderPassCmd) const;
+        const AttachmentState* GetAttachmentState() const;
+
         std::bitset<kMaxVertexAttributes> GetAttributesUsingInput(uint32_t slot) const;
         std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexBuffers> attributesUsingInput;
 

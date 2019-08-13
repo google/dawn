@@ -56,15 +56,11 @@ namespace dawn_native {
 
       private:
         MaybeError ValidateFinish(const CommandBufferDescriptor* descriptor);
-        MaybeError ValidateComputePass(CommandIterator* commands);
-        MaybeError ValidateRenderPass(CommandIterator* commands, BeginRenderPassCmd* renderPass);
 
         EncodingContext mEncodingContext;
 
         bool mWereResourceUsagesAcquired = false;
         CommandBufferResourceUsage mResourceUsages;
-
-        unsigned int mDebugGroupStackSize = 0;
     };
 
 }  // namespace dawn_native

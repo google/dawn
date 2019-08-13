@@ -514,16 +514,10 @@ namespace dawn_native {
         return mAttachmentState->GetSampleCount();
     }
 
-    MaybeError RenderPipelineBase::ValidateCompatibleWith(
-        const BeginRenderPassCmd* renderPass) const {
+    const AttachmentState* RenderPipelineBase::GetAttachmentState() const {
         ASSERT(!IsError());
 
-        if (renderPass->attachmentState.Get() != mAttachmentState.Get()) {
-            return DAWN_VALIDATION_ERROR(
-                "Pipeline attachment state is not compatible with render pass");
-        }
-
-        return {};
+        return mAttachmentState.Get();
     }
 
     std::bitset<kMaxVertexAttributes> RenderPipelineBase::GetAttributesUsingInput(
