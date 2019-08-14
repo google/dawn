@@ -27,7 +27,7 @@ namespace dawn_native { namespace metal {
                                                        options:MTLResourceStorageModeShared];
 
         if (mBuffer == nil) {
-            return DAWN_CONTEXT_LOST_ERROR("Unable to allocate buffer.");
+            return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
         }
 
         mMappedPointer = [mBuffer contents];
