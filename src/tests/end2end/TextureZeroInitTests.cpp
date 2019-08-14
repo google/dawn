@@ -86,6 +86,8 @@ class TextureZeroInitTest : public DawnTest {
     constexpr static dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
     constexpr static dawn::TextureFormat kDepthStencilFormat =
         dawn::TextureFormat::Depth24PlusStencil8;
+    constexpr static dawn::TextureFormat kNonrenderableColorFormat =
+        dawn::TextureFormat::RGBA16Snorm;
 };
 
 // This tests that the code path of CopyTextureToBuffer clears correctly to Zero after first usage
@@ -561,6 +563,34 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     // Expect the buffer to be zeroed out by the compute pass
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
     EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferTex, 0, 4);
+}
+
+// This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
+TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
+    // skip test for other backends since they are not implemented yet
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12());
+
+    dawn::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, dawn::TextureUsageBit::CopySrc, kNonrenderableColorFormat);
+    dawn::Texture texture = device.CreateTexture(&descriptor);
+
+    // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
+    uint32_t bufferSize = 8 * kSize * kSize;
+    std::vector<uint8_t> data(bufferSize, 100);
+    dawn::Buffer bufferDst = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
+
+    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, 0, 0);
+    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    dawn::Extent3D copySize = {kSize, kSize, 1};
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+    dawn::CommandBuffer commands = encoder.Finish();
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+
+    std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferDst, 0, 8);
 }
 
 DAWN_INSTANTIATE_TEST(

@@ -16,9 +16,11 @@
 
 #include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/AdapterVk.h"
+#include "dawn_native/vulkan/BufferVk.h"
 #include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -453,33 +455,8 @@ namespace dawn_native { namespace vulkan {
             ASSERT(false);
         }
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-            VkImageSubresourceRange range = {};
-            range.aspectMask = GetVkAspectMask();
-            range.baseMipLevel = 0;
-            range.levelCount = GetNumMipLevels();
-            range.baseArrayLayer = 0;
-            range.layerCount = GetArrayLayers();
-            TransitionUsageNow(ToBackend(GetDevice())->GetPendingRecordingContext(),
-                               dawn::TextureUsageBit::CopyDst);
-
-            if (GetFormat().HasDepthOrStencil()) {
-                VkClearDepthStencilValue clear_color[1];
-                clear_color[0].depth = 1.0f;
-                clear_color[0].stencil = 1u;
-                ToBackend(GetDevice())
-                    ->fn.CmdClearDepthStencilImage(
-                        ToBackend(GetDevice())->GetPendingCommandBuffer(), GetHandle(),
-                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clear_color, 1, &range);
-            } else {
-                // TODO(natlee@microsoft.com): use correct union member depending on the texture
-                // format
-                VkClearColorValue clear_color = {{1.0, 1.0, 1.0, 1.0}};
-
-                ToBackend(GetDevice())
-                    ->fn.CmdClearColorImage(ToBackend(GetDevice())->GetPendingCommandBuffer(),
-                                            GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                            &clear_color, 1, &range);
-            }
+            ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(), 0, GetNumMipLevels(),
+                         0, GetArrayLayers(), TextureBase::ClearValue::NonZero);
         }
     }
 
@@ -679,36 +656,80 @@ namespace dawn_native { namespace vulkan {
                                uint32_t baseMipLevel,
                                uint32_t levelCount,
                                uint32_t baseArrayLayer,
-                               uint32_t layerCount) {
+                               uint32_t layerCount,
+                               TextureBase::ClearValue clearValue) {
         VkImageSubresourceRange range = {};
         range.aspectMask = GetVkAspectMask();
         range.baseMipLevel = baseMipLevel;
         range.levelCount = levelCount;
         range.baseArrayLayer = baseArrayLayer;
         range.layerCount = layerCount;
+        uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
 
         TransitionUsageNow(recordingContext, dawn::TextureUsageBit::CopyDst);
         if (GetFormat().HasDepthOrStencil()) {
-            VkClearDepthStencilValue clear_color[1];
-            clear_color[0].depth = 0.0f;
-            clear_color[0].stencil = 0u;
+            VkClearDepthStencilValue clearDepthStencilValue[1];
+            clearDepthStencilValue[0].depth = clearColor;
+            clearDepthStencilValue[0].stencil = clearColor;
             ToBackend(GetDevice())
                 ->fn.CmdClearDepthStencilImage(recordingContext->commandBuffer, GetHandle(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clear_color, 1,
-                                               &range);
-        } else {
-            VkClearColorValue clear_color[1];
-            clear_color[0].float32[0] = 0.0f;
-            clear_color[0].float32[1] = 0.0f;
-            clear_color[0].float32[2] = 0.0f;
-            clear_color[0].float32[3] = 0.0f;
+                                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                               clearDepthStencilValue, 1, &range);
+        } else if (GetFormat().isRenderable) {
+            VkClearColorValue clearColorValue = {{clearColor, clearColor, clearColor, clearColor}};
             ToBackend(GetDevice())
                 ->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
-                                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clear_color, 1,
+                                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColorValue, 1,
                                         &range);
+        } else {
+            // TODO(natlee@microsoft.com): test compressed textures are cleared
+            // create temp buffer with clear color to copy to the texture image
+            dawn_native::vulkan::Device* device =
+                reinterpret_cast<dawn_native::vulkan::Device*>(GetDevice());
+            dawn_native::BufferDescriptor descriptor;
+            descriptor.size = (GetSize().width / GetFormat().blockWidth) *
+                              (GetSize().height / GetFormat().blockHeight) *
+                              GetFormat().blockByteSize;
+            descriptor.nextInChain = nullptr;
+            descriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::MapWrite;
+            std::unique_ptr<Buffer> srcBuffer =
+                std::make_unique<dawn_native::vulkan::Buffer>(device, &descriptor);
+            uint8_t* clearBuffer = nullptr;
+            device->ConsumedError(srcBuffer->MapAtCreation(&clearBuffer));
+            std::fill(reinterpret_cast<uint32_t*>(clearBuffer),
+                      reinterpret_cast<uint32_t*>(clearBuffer + descriptor.size), clearColor);
+
+            // compute the buffer image copy to set the clear region of entire texture
+            dawn_native::BufferCopy bufferCopy;
+            bufferCopy.buffer = srcBuffer.get();
+            bufferCopy.imageHeight = 0;
+            bufferCopy.offset = 0;
+            bufferCopy.rowPitch = 0;
+
+            dawn_native::TextureCopy textureCopy;
+            textureCopy.texture = this;
+            textureCopy.origin = {0, 0, 0};
+            textureCopy.mipLevel = baseMipLevel;
+            textureCopy.arrayLayer = baseArrayLayer;
+
+            Extent3D copySize = {GetSize().width, GetSize().height, 1};
+
+            VkBufferImageCopy region =
+                ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize);
+
+            // copy the clear buffer to the texture image
+            srcBuffer->TransitionUsageNow(recordingContext, dawn::BufferUsageBit::CopySrc);
+            ToBackend(GetDevice())
+                ->fn.CmdCopyBufferToImage(recordingContext->commandBuffer, srcBuffer->GetHandle(),
+                                          GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+                                          &region);
         }
-        SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer, layerCount);
-        GetDevice()->IncrementLazyClearCountForTesting();
+
+        if (clearValue == TextureBase::ClearValue::Zero) {
+            SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+                                               layerCount);
+            GetDevice()->IncrementLazyClearCountForTesting();
+        }
     }
 
     void Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
@@ -729,7 +750,8 @@ namespace dawn_native { namespace vulkan {
 
             // If subresource has not been initialized, clear it to black as it could contain dirty
             // bits from recycled memory
-            ClearTexture(recordingContext, baseMipLevel, levelCount, baseArrayLayer, layerCount);
+            ClearTexture(recordingContext, baseMipLevel, levelCount, baseArrayLayer, layerCount,
+                         TextureBase::ClearValue::Zero);
         }
     }
 

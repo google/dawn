@@ -16,11 +16,17 @@
 #define DAWNNATIVE_VULKAN_UTILSVULKAN_H_
 
 #include "common/vulkan_platform.h"
+#include "dawn_native/Commands.h"
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native { namespace vulkan {
 
     VkCompareOp ToVulkanCompareOp(dawn::CompareFunction op);
+
+    Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D& copySize);
+    VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
+                                                   const TextureCopy& textureCopy,
+                                                   const Extent3D& copySize);
 
 }}  // namespace dawn_native::vulkan
 

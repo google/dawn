@@ -27,6 +27,7 @@
 #include "dawn_native/vulkan/RenderPassCache.h"
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -41,59 +42,6 @@ namespace dawn_native { namespace vulkan {
                 default:
                     UNREACHABLE();
             }
-        }
-
-        // Vulkan SPEC requires the source/destination region specified by each element of
-        // pRegions must be a region that is contained within srcImage/dstImage. Here the size of
-        // the image refers to the virtual size, while Dawn validates texture copy extent with the
-        // physical size, so we need to re-calculate the texture copy extent to ensure it should fit
-        // in the virtual size of the subresource.
-        Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy,
-                                          const Extent3D& copySize) {
-            Extent3D validTextureCopyExtent = copySize;
-            const TextureBase* texture = textureCopy.texture.Get();
-            Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(textureCopy.mipLevel);
-            if (textureCopy.origin.x + copySize.width > virtualSizeAtLevel.width) {
-                ASSERT(texture->GetFormat().isCompressed);
-                validTextureCopyExtent.width = virtualSizeAtLevel.width - textureCopy.origin.x;
-            }
-            if (textureCopy.origin.y + copySize.height > virtualSizeAtLevel.height) {
-                ASSERT(texture->GetFormat().isCompressed);
-                validTextureCopyExtent.height = virtualSizeAtLevel.height - textureCopy.origin.y;
-            }
-
-            return validTextureCopyExtent;
-        }
-
-        VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
-                                                       const TextureCopy& textureCopy,
-                                                       const Extent3D& copySize) {
-            const Texture* texture = ToBackend(textureCopy.texture.Get());
-
-            VkBufferImageCopy region;
-
-            region.bufferOffset = bufferCopy.offset;
-            // In Vulkan the row length is in texels while it is in bytes for Dawn
-            const Format& format = texture->GetFormat();
-            ASSERT(bufferCopy.rowPitch % format.blockByteSize == 0);
-            region.bufferRowLength = bufferCopy.rowPitch / format.blockByteSize * format.blockWidth;
-            region.bufferImageHeight = bufferCopy.imageHeight;
-
-            region.imageSubresource.aspectMask = texture->GetVkAspectMask();
-            region.imageSubresource.mipLevel = textureCopy.mipLevel;
-            region.imageSubresource.baseArrayLayer = textureCopy.arrayLayer;
-            region.imageSubresource.layerCount = 1;
-
-            region.imageOffset.x = textureCopy.origin.x;
-            region.imageOffset.y = textureCopy.origin.y;
-            region.imageOffset.z = textureCopy.origin.z;
-
-            Extent3D imageExtent = ComputeTextureCopyExtent(textureCopy, copySize);
-            region.imageExtent.width = imageExtent.width;
-            region.imageExtent.height = imageExtent.height;
-            region.imageExtent.depth = copySize.depth;
-
-            return region;
         }
 
         VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,

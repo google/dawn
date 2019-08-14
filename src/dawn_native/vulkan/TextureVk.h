@@ -75,7 +75,8 @@ namespace dawn_native { namespace vulkan {
                           uint32_t baseMipLevel,
                           uint32_t levelCount,
                           uint32_t baseArrayLayer,
-                          uint32_t layerCount);
+                          uint32_t layerCount,
+                          TextureBase::ClearValue);
 
         VkImage mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;

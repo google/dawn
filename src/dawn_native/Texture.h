@@ -43,7 +43,7 @@ namespace dawn_native {
     class TextureBase : public ObjectBase {
       public:
         enum class TextureState { OwnedInternal, OwnedExternal, Destroyed };
-
+        enum class ClearValue { Zero, NonZero };
         TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
 
         static TextureBase* MakeError(DeviceBase* device);
