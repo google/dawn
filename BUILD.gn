@@ -769,6 +769,7 @@ source_set("dawn_end2end_tests_sources") {
     "src/tests/end2end/ObjectCachingTests.cpp",
     "src/tests/end2end/OpArrayLengthTests.cpp",
     "src/tests/end2end/PrimitiveTopologyTests.cpp",
+    "src/tests/end2end/RenderBundleTests.cpp",
     "src/tests/end2end/RenderPassLoadOpTests.cpp",
     "src/tests/end2end/RenderPassTests.cpp",
     "src/tests/end2end/SamplerTests.cpp",

@@ -17,6 +17,7 @@
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/RenderBundle.h"
 #include "dawn_native/metal/BufferMTL.h"
 #include "dawn_native/metal/ComputePipelineMTL.h"
 #include "dawn_native/metal/DeviceMTL.h"
@@ -871,17 +872,10 @@ namespace dawn_native { namespace metal {
         id<MTLRenderCommandEncoder> encoder =
             [commandBuffer renderCommandEncoderWithDescriptor:mtlRenderPass];
 
-        Command type;
-        while (mCommands.NextCommandId(&type)) {
+        auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {
             switch (type) {
-                case Command::EndRenderPass: {
-                    mCommands.NextCommand<EndRenderPassCmd>();
-                    [encoder endEncoding];
-                    return;
-                } break;
-
                 case Command::Draw: {
-                    DrawCmd* draw = mCommands.NextCommand<DrawCmd>();
+                    DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
                     vertexInputBuffers.Apply(encoder, lastPipeline);
                     storageBufferLengths.Apply(lastPipeline, encoder);
@@ -897,7 +891,7 @@ namespace dawn_native { namespace metal {
                 } break;
 
                 case Command::DrawIndexed: {
-                    DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
+                    DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
                     size_t formatSize =
                         IndexFormatSize(lastPipeline->GetVertexInputDescriptor()->indexFormat);
 
@@ -919,7 +913,7 @@ namespace dawn_native { namespace metal {
                 } break;
 
                 case Command::DrawIndirect: {
-                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
+                    DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
                     vertexInputBuffers.Apply(encoder, lastPipeline);
                     storageBufferLengths.Apply(lastPipeline, encoder);
@@ -932,7 +926,7 @@ namespace dawn_native { namespace metal {
                 } break;
 
                 case Command::DrawIndexedIndirect: {
-                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
+                    DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
                     vertexInputBuffers.Apply(encoder, lastPipeline);
                     storageBufferLengths.Apply(lastPipeline, encoder);
@@ -948,8 +942,8 @@ namespace dawn_native { namespace metal {
                 } break;
 
                 case Command::InsertDebugMarker: {
-                    InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                    char* label = mCommands.NextData<char>(cmd->length + 1);
+                    InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
+                    char* label = iter->NextData<char>(cmd->length + 1);
                     NSString* mtlLabel = [[NSString alloc] initWithUTF8String:label];
 
                     [encoder insertDebugSignpost:mtlLabel];
@@ -957,14 +951,14 @@ namespace dawn_native { namespace metal {
                 } break;
 
                 case Command::PopDebugGroup: {
-                    mCommands.NextCommand<PopDebugGroupCmd>();
+                    iter->NextCommand<PopDebugGroupCmd>();
 
                     [encoder popDebugGroup];
                 } break;
 
                 case Command::PushDebugGroup: {
-                    PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                    char* label = mCommands.NextData<char>(cmd->length + 1);
+                    PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
+                    char* label = iter->NextData<char>(cmd->length + 1);
                     NSString* mtlLabel = [[NSString alloc] initWithUTF8String:label];
 
                     [encoder pushDebugGroup:mtlLabel];
@@ -972,7 +966,7 @@ namespace dawn_native { namespace metal {
                 } break;
 
                 case Command::SetRenderPipeline: {
-                    SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
+                    SetRenderPipelineCmd* cmd = iter->NextCommand<SetRenderPipelineCmd>();
                     RenderPipeline* newPipeline = ToBackend(cmd->pipeline).Get();
 
                     vertexInputBuffers.OnSetPipeline(lastPipeline, newPipeline);
@@ -982,6 +976,49 @@ namespace dawn_native { namespace metal {
                     newPipeline->Encode(encoder);
 
                     lastPipeline = newPipeline;
+                } break;
+
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
+                    uint64_t* dynamicOffsets = nullptr;
+                    if (cmd->dynamicOffsetCount > 0) {
+                        dynamicOffsets = iter->NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
+
+                    ApplyBindGroup(cmd->index, ToBackend(cmd->group.Get()), cmd->dynamicOffsetCount,
+                                   dynamicOffsets, ToBackend(lastPipeline->GetLayout()),
+                                   &storageBufferLengths, encoder, nil);
+                } break;
+
+                case Command::SetIndexBuffer: {
+                    SetIndexBufferCmd* cmd = iter->NextCommand<SetIndexBufferCmd>();
+                    auto b = ToBackend(cmd->buffer.Get());
+                    indexBuffer = b->GetMTLBuffer();
+                    indexBufferBaseOffset = cmd->offset;
+                } break;
+
+                case Command::SetVertexBuffers: {
+                    SetVertexBuffersCmd* cmd = iter->NextCommand<SetVertexBuffersCmd>();
+                    const Ref<BufferBase>* buffers = iter->NextData<Ref<BufferBase>>(cmd->count);
+                    const uint64_t* offsets = iter->NextData<uint64_t>(cmd->count);
+
+                    vertexInputBuffers.OnSetVertexBuffers(cmd->startSlot, cmd->count, buffers,
+                                                          offsets);
+                } break;
+
+                default:
+                    UNREACHABLE();
+                    break;
+            }
+        };
+
+        Command type;
+        while (mCommands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::EndRenderPass: {
+                    mCommands.NextCommand<EndRenderPassCmd>();
+                    [encoder endEncoding];
+                    return;
                 } break;
 
                 case Command::SetStencilReference: {
@@ -1030,36 +1067,20 @@ namespace dawn_native { namespace metal {
                                         alpha:cmd->color.a];
                 } break;
 
-                case Command::SetBindGroup: {
-                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    uint64_t* dynamicOffsets = nullptr;
-                    if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                case Command::ExecuteBundles: {
+                    ExecuteBundlesCmd* cmd = mCommands.NextCommand<ExecuteBundlesCmd>();
+                    auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
+
+                    for (uint32_t i = 0; i < cmd->count; ++i) {
+                        CommandIterator* iter = bundles[i]->GetCommands();
+                        iter->Reset();
+                        while (iter->NextCommandId(&type)) {
+                            EncodeRenderBundleCommand(iter, type);
+                        }
                     }
-
-                    ApplyBindGroup(cmd->index, ToBackend(cmd->group.Get()), cmd->dynamicOffsetCount,
-                                   dynamicOffsets, ToBackend(lastPipeline->GetLayout()),
-                                   &storageBufferLengths, encoder, nil);
                 } break;
 
-                case Command::SetIndexBuffer: {
-                    SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
-                    auto b = ToBackend(cmd->buffer.Get());
-                    indexBuffer = b->GetMTLBuffer();
-                    indexBufferBaseOffset = cmd->offset;
-                } break;
-
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
-                    const Ref<BufferBase>* buffers =
-                        mCommands.NextData<Ref<BufferBase>>(cmd->count);
-                    const uint64_t* offsets = mCommands.NextData<uint64_t>(cmd->count);
-
-                    vertexInputBuffers.OnSetVertexBuffers(cmd->startSlot, cmd->count, buffers,
-                                                          offsets);
-                } break;
-
-                default: { UNREACHABLE(); } break;
+                default: { EncodeRenderBundleCommand(&mCommands, type); } break;
             }
         }
 

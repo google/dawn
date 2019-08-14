@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/RenderBundle.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/BufferD3D12.h"
@@ -398,7 +399,7 @@ namespace dawn_native { namespace d3d12 {
                 Command type;
                 PipelineLayout* lastLayout = nullptr;
 
-                while (commands->NextCommandId(&type)) {
+                auto HandleCommand = [&](CommandIterator* commands, Command type) {
                     switch (type) {
                         case Command::SetComputePipeline: {
                             SetComputePipelineCmd* cmd =
@@ -430,6 +431,26 @@ namespace dawn_native { namespace d3d12 {
                         } break;
                         default:
                             SkipCommand(commands, type);
+                    }
+                };
+
+                while (commands->NextCommandId(&type)) {
+                    switch (type) {
+                        case Command::ExecuteBundles: {
+                            ExecuteBundlesCmd* cmd = commands->NextCommand<ExecuteBundlesCmd>();
+                            auto bundles = commands->NextData<Ref<RenderBundleBase>>(cmd->count);
+
+                            for (uint32_t i = 0; i < cmd->count; ++i) {
+                                CommandIterator* commands = bundles[i]->GetCommands();
+                                commands->Reset();
+                                while (commands->NextCommandId(&type)) {
+                                    HandleCommand(commands, type);
+                                }
+                            }
+                        } break;
+                        default:
+                            HandleCommand(commands, type);
+                            break;
                     }
                 }
 
@@ -987,6 +1008,155 @@ namespace dawn_native { namespace d3d12 {
         PipelineLayout* lastLayout = nullptr;
         VertexBuffersInfo vertexBuffersInfo = {};
 
+        auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {
+            switch (type) {
+                case Command::Draw: {
+                    DrawCmd* draw = iter->NextCommand<DrawCmd>();
+
+                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
+                    commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
+                                               draw->firstVertex, draw->firstInstance);
+                } break;
+
+                case Command::DrawIndexed: {
+                    DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
+
+                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
+                    commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
+                                                      draw->firstIndex, draw->baseVertex,
+                                                      draw->firstInstance);
+                } break;
+
+                case Command::DrawIndirect: {
+                    DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
+
+                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
+                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
+                    ComPtr<ID3D12CommandSignature> signature =
+                        ToBackend(GetDevice())->GetDrawIndirectSignature();
+                    commandList->ExecuteIndirect(signature.Get(), 1,
+                                                 buffer->GetD3D12Resource().Get(),
+                                                 draw->indirectOffset, nullptr, 0);
+                } break;
+
+                case Command::DrawIndexedIndirect: {
+                    DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
+
+                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
+                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
+                    ComPtr<ID3D12CommandSignature> signature =
+                        ToBackend(GetDevice())->GetDrawIndexedIndirectSignature();
+                    commandList->ExecuteIndirect(signature.Get(), 1,
+                                                 buffer->GetD3D12Resource().Get(),
+                                                 draw->indirectOffset, nullptr, 0);
+                } break;
+
+                case Command::InsertDebugMarker: {
+                    InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
+                    const char* label = iter->NextData<char>(cmd->length + 1);
+
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
+                        // PIX color is 1 byte per channel in ARGB format
+                        constexpr uint64_t kPIXBlackColor = 0xff000000;
+                        ToBackend(GetDevice())
+                            ->GetFunctions()
+                            ->pixSetMarkerOnCommandList(commandList.Get(), kPIXBlackColor, label);
+                    }
+                } break;
+
+                case Command::PopDebugGroup: {
+                    iter->NextCommand<PopDebugGroupCmd>();
+
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
+                        ToBackend(GetDevice())
+                            ->GetFunctions()
+                            ->pixEndEventOnCommandList(commandList.Get());
+                    }
+                } break;
+
+                case Command::PushDebugGroup: {
+                    PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
+                    const char* label = iter->NextData<char>(cmd->length + 1);
+
+                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
+                        // PIX color is 1 byte per channel in ARGB format
+                        constexpr uint64_t kPIXBlackColor = 0xff000000;
+                        ToBackend(GetDevice())
+                            ->GetFunctions()
+                            ->pixBeginEventOnCommandList(commandList.Get(), kPIXBlackColor, label);
+                    }
+                } break;
+
+                case Command::SetRenderPipeline: {
+                    SetRenderPipelineCmd* cmd = iter->NextCommand<SetRenderPipelineCmd>();
+                    RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
+                    PipelineLayout* layout = ToBackend(pipeline->GetLayout());
+
+                    commandList->SetGraphicsRootSignature(layout->GetRootSignature().Get());
+                    commandList->SetPipelineState(pipeline->GetPipelineState().Get());
+                    commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
+
+                    bindingTracker->SetInheritedBindGroups(commandList, lastLayout, layout);
+
+                    lastPipeline = pipeline;
+                    lastLayout = layout;
+                } break;
+
+                case Command::SetBindGroup: {
+                    SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
+                    BindGroup* group = ToBackend(cmd->group.Get());
+                    uint64_t* dynamicOffsets = nullptr;
+
+                    if (cmd->dynamicOffsetCount > 0) {
+                        dynamicOffsets = iter->NextData<uint64_t>(cmd->dynamicOffsetCount);
+                    }
+
+                    bindingTracker->SetBindGroup(commandList, lastLayout, group, cmd->index,
+                                                 cmd->dynamicOffsetCount, dynamicOffsets);
+                } break;
+
+                case Command::SetIndexBuffer: {
+                    SetIndexBufferCmd* cmd = iter->NextCommand<SetIndexBufferCmd>();
+
+                    Buffer* buffer = ToBackend(cmd->buffer.Get());
+                    D3D12_INDEX_BUFFER_VIEW bufferView;
+                    bufferView.BufferLocation = buffer->GetVA() + cmd->offset;
+                    bufferView.SizeInBytes = buffer->GetSize() - cmd->offset;
+                    // TODO(cwallez@chromium.org): Make index buffers lazily applied, right now
+                    // this will break if the pipeline is changed for one with a different index
+                    // format after SetIndexBuffer
+                    bufferView.Format =
+                        DXGIIndexFormat(lastPipeline->GetVertexInputDescriptor()->indexFormat);
+
+                    commandList->IASetIndexBuffer(&bufferView);
+                } break;
+
+                case Command::SetVertexBuffers: {
+                    SetVertexBuffersCmd* cmd = iter->NextCommand<SetVertexBuffersCmd>();
+                    auto buffers = iter->NextData<Ref<BufferBase>>(cmd->count);
+                    auto offsets = iter->NextData<uint64_t>(cmd->count);
+
+                    vertexBuffersInfo.startSlot =
+                        std::min(vertexBuffersInfo.startSlot, cmd->startSlot);
+                    vertexBuffersInfo.endSlot =
+                        std::max(vertexBuffersInfo.endSlot, cmd->startSlot + cmd->count);
+
+                    for (uint32_t i = 0; i < cmd->count; ++i) {
+                        Buffer* buffer = ToBackend(buffers[i].Get());
+                        auto* d3d12BufferView =
+                            &vertexBuffersInfo.d3d12BufferViews[cmd->startSlot + i];
+                        d3d12BufferView->BufferLocation = buffer->GetVA() + offsets[i];
+                        d3d12BufferView->SizeInBytes = buffer->GetSize() - offsets[i];
+                        // The bufferView stride is set based on the input state before a draw.
+                    }
+                } break;
+
+                default:
+                    UNREACHABLE();
+                    break;
+            }
+        };
+
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
@@ -999,98 +1169,6 @@ namespace dawn_native { namespace d3d12 {
                         ResolveMultisampledRenderPass(commandList, renderPass);
                     }
                     return;
-                } break;
-
-                case Command::Draw: {
-                    DrawCmd* draw = mCommands.NextCommand<DrawCmd>();
-
-                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
-                    commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
-                                               draw->firstVertex, draw->firstInstance);
-                } break;
-
-                case Command::DrawIndexed: {
-                    DrawIndexedCmd* draw = mCommands.NextCommand<DrawIndexedCmd>();
-
-                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
-                    commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
-                                                      draw->firstIndex, draw->baseVertex,
-                                                      draw->firstInstance);
-                } break;
-
-                case Command::DrawIndirect: {
-                    DrawIndirectCmd* draw = mCommands.NextCommand<DrawIndirectCmd>();
-
-                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
-                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
-                    ComPtr<ID3D12CommandSignature> signature =
-                        ToBackend(GetDevice())->GetDrawIndirectSignature();
-                    commandList->ExecuteIndirect(signature.Get(), 1,
-                                                 buffer->GetD3D12Resource().Get(),
-                                                 draw->indirectOffset, nullptr, 0);
-                } break;
-
-                case Command::DrawIndexedIndirect: {
-                    DrawIndexedIndirectCmd* draw = mCommands.NextCommand<DrawIndexedIndirectCmd>();
-
-                    FlushSetVertexBuffers(commandList, &vertexBuffersInfo, lastPipeline);
-                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
-                    ComPtr<ID3D12CommandSignature> signature =
-                        ToBackend(GetDevice())->GetDrawIndexedIndirectSignature();
-                    commandList->ExecuteIndirect(signature.Get(), 1,
-                                                 buffer->GetD3D12Resource().Get(),
-                                                 draw->indirectOffset, nullptr, 0);
-                } break;
-
-                case Command::InsertDebugMarker: {
-                    InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
-                    const char* label = mCommands.NextData<char>(cmd->length + 1);
-
-                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
-                        // PIX color is 1 byte per channel in ARGB format
-                        constexpr uint64_t kPIXBlackColor = 0xff000000;
-                        ToBackend(GetDevice())
-                            ->GetFunctions()
-                            ->pixSetMarkerOnCommandList(commandList.Get(), kPIXBlackColor, label);
-                    }
-                } break;
-
-                case Command::PopDebugGroup: {
-                    mCommands.NextCommand<PopDebugGroupCmd>();
-
-                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
-                        ToBackend(GetDevice())
-                            ->GetFunctions()
-                            ->pixEndEventOnCommandList(commandList.Get());
-                    }
-                } break;
-
-                case Command::PushDebugGroup: {
-                    PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
-                    const char* label = mCommands.NextData<char>(cmd->length + 1);
-
-                    if (ToBackend(GetDevice())->GetFunctions()->IsPIXEventRuntimeLoaded()) {
-                        // PIX color is 1 byte per channel in ARGB format
-                        constexpr uint64_t kPIXBlackColor = 0xff000000;
-                        ToBackend(GetDevice())
-                            ->GetFunctions()
-                            ->pixBeginEventOnCommandList(commandList.Get(), kPIXBlackColor, label);
-                    }
-                } break;
-
-                case Command::SetRenderPipeline: {
-                    SetRenderPipelineCmd* cmd = mCommands.NextCommand<SetRenderPipelineCmd>();
-                    RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
-                    PipelineLayout* layout = ToBackend(pipeline->GetLayout());
-
-                    commandList->SetGraphicsRootSignature(layout->GetRootSignature().Get());
-                    commandList->SetPipelineState(pipeline->GetPipelineState().Get());
-                    commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
-
-                    bindingTracker->SetInheritedBindGroups(commandList, lastLayout, layout);
-
-                    lastPipeline = pipeline;
-                    lastLayout = layout;
                 } break;
 
                 case Command::SetStencilReference: {
@@ -1128,56 +1206,20 @@ namespace dawn_native { namespace d3d12 {
                     commandList->OMSetBlendFactor(static_cast<const FLOAT*>(&cmd->color.r));
                 } break;
 
-                case Command::SetBindGroup: {
-                    SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    BindGroup* group = ToBackend(cmd->group.Get());
-                    uint64_t* dynamicOffsets = nullptr;
-
-                    if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
-                    }
-
-                    bindingTracker->SetBindGroup(commandList, lastLayout, group, cmd->index,
-                                                 cmd->dynamicOffsetCount, dynamicOffsets);
-                } break;
-
-                case Command::SetIndexBuffer: {
-                    SetIndexBufferCmd* cmd = mCommands.NextCommand<SetIndexBufferCmd>();
-
-                    Buffer* buffer = ToBackend(cmd->buffer.Get());
-                    D3D12_INDEX_BUFFER_VIEW bufferView;
-                    bufferView.BufferLocation = buffer->GetVA() + cmd->offset;
-                    bufferView.SizeInBytes = buffer->GetSize() - cmd->offset;
-                    // TODO(cwallez@chromium.org): Make index buffers lazily applied, right now
-                    // this will break if the pipeline is changed for one with a different index
-                    // format after SetIndexBuffer
-                    bufferView.Format =
-                        DXGIIndexFormat(lastPipeline->GetVertexInputDescriptor()->indexFormat);
-
-                    commandList->IASetIndexBuffer(&bufferView);
-                } break;
-
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = mCommands.NextCommand<SetVertexBuffersCmd>();
-                    auto buffers = mCommands.NextData<Ref<BufferBase>>(cmd->count);
-                    auto offsets = mCommands.NextData<uint64_t>(cmd->count);
-
-                    vertexBuffersInfo.startSlot =
-                        std::min(vertexBuffersInfo.startSlot, cmd->startSlot);
-                    vertexBuffersInfo.endSlot =
-                        std::max(vertexBuffersInfo.endSlot, cmd->startSlot + cmd->count);
+                case Command::ExecuteBundles: {
+                    ExecuteBundlesCmd* cmd = mCommands.NextCommand<ExecuteBundlesCmd>();
+                    auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
-                        Buffer* buffer = ToBackend(buffers[i].Get());
-                        auto* d3d12BufferView =
-                            &vertexBuffersInfo.d3d12BufferViews[cmd->startSlot + i];
-                        d3d12BufferView->BufferLocation = buffer->GetVA() + offsets[i];
-                        d3d12BufferView->SizeInBytes = buffer->GetSize() - offsets[i];
-                        // The bufferView stride is set based on the input state before a draw.
+                        CommandIterator* iter = bundles[i]->GetCommands();
+                        iter->Reset();
+                        while (iter->NextCommandId(&type)) {
+                            EncodeRenderBundleCommand(iter, type);
+                        }
                     }
                 } break;
 
-                default: { UNREACHABLE(); } break;
+                default: { EncodeRenderBundleCommand(&mCommands, type); } break;
             }
         }
     }
