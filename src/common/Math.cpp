@@ -63,7 +63,7 @@ uint64_t NextPowerOfTwo(uint64_t n) {
 #if defined(DAWN_COMPILER_MSVC)
     return n <= 1 ? 1 : 1ull << (64 - __lzcnt64(n - 1));
 #else
-    return n == 1 ? 1 : 1ull << (64 - __builtin_clzll(n - 1));
+    return n <= 1 ? 1 : 1ull << (64 - __builtin_clzll(n - 1));
 #endif
 }
 
