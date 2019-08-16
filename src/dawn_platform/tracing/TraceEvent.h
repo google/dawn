@@ -229,22 +229,22 @@
 // is not enabled, then this does nothing.
 // - category and name strings must have application lifetime (statics or
 //   literals). They may not include " chars.
-#define TRACE_EVENT_END0(category, name) \
-    INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category, name, TRACE_EVENT_FLAG_NONE)
-#define TRACE_EVENT_END1(category, name, arg1_name, arg1_val)                              \
-    INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category, name, TRACE_EVENT_FLAG_NONE, \
-                             arg1_name, arg1_val)
-#define TRACE_EVENT_END2(category, name, arg1_name, arg1_val, arg2_name, arg2_val)         \
-    INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category, name, TRACE_EVENT_FLAG_NONE, \
-                             arg1_name, arg1_val, arg2_name, arg2_val)
-#define TRACE_EVENT_COPY_END0(category, name) \
-    INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category, name, TRACE_EVENT_FLAG_COPY)
-#define TRACE_EVENT_COPY_END1(category, name, arg1_name, arg1_val)                         \
-    INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category, name, TRACE_EVENT_FLAG_COPY, \
-                             arg1_name, arg1_val)
-#define TRACE_EVENT_COPY_END2(category, name, arg1_name, arg1_val, arg2_name, arg2_val)    \
-    INTERNAL_TRACE_EVENT_ADD(TRACE_EVENT_PHASE_END, category, name, TRACE_EVENT_FLAG_COPY, \
-                             arg1_name, arg1_val, arg2_name, arg2_val)
+#define TRACE_EVENT_END0(platform, category, name) \
+    INTERNAL_TRACE_EVENT_ADD(platform, TRACE_EVENT_PHASE_END, category, name, TRACE_EVENT_FLAG_NONE)
+#define TRACE_EVENT_END1(platform, category, name, arg1_name, arg1_val)       \
+    INTERNAL_TRACE_EVENT_ADD(platform, TRACE_EVENT_PHASE_END, category, name, \
+                             TRACE_EVENT_FLAG_NONE, arg1_name, arg1_val)
+#define TRACE_EVENT_END2(platform, category, name, arg1_name, arg1_val, arg2_name, arg2_val) \
+    INTERNAL_TRACE_EVENT_ADD(platform, TRACE_EVENT_PHASE_END, category, name,                \
+                             TRACE_EVENT_FLAG_NONE, arg1_name, arg1_val, arg2_name, arg2_val)
+#define TRACE_EVENT_COPY_END0(platform, category, name) \
+    INTERNAL_TRACE_EVENT_ADD(platform, TRACE_EVENT_PHASE_END, category, name, TRACE_EVENT_FLAG_COPY)
+#define TRACE_EVENT_COPY_END1(platform, category, name, arg1_name, arg1_val)  \
+    INTERNAL_TRACE_EVENT_ADD(platform, TRACE_EVENT_PHASE_END, category, name, \
+                             TRACE_EVENT_FLAG_COPY, arg1_name, arg1_val)
+#define TRACE_EVENT_COPY_END2(platform, category, name, arg1_name, arg1_val, arg2_name, arg2_val) \
+    INTERNAL_TRACE_EVENT_ADD(platform, TRACE_EVENT_PHASE_END, category, name,                     \
+                             TRACE_EVENT_FLAG_COPY, arg1_name, arg1_val, arg2_name, arg2_val)
 
 // Records the value of a counter called "name" immediately. Value
 // must be representable as a 32 bit integer.
