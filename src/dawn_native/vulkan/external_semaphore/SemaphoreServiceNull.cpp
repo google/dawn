@@ -19,7 +19,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
 
     Service::Service(Device* device) : mDevice(device) {
         DAWN_UNUSED(mDevice);
-        DAWN_UNUSED(mSupportedFirstPass);
+        DAWN_UNUSED(mSupported);
     }
 
     Service::~Service() = default;

@@ -46,7 +46,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         Device* mDevice = nullptr;
 
         // True if early checks pass that determine if the service is supported
-        bool mSupportedFirstPass = false;
+        bool mSupported = false;
     };
 
 }}}  // namespace dawn_native::vulkan::external_semaphore

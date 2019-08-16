@@ -580,11 +580,19 @@ namespace dawn_native { namespace vulkan {
                                            VkSemaphore* outSignalSemaphore,
                                            VkDeviceMemory* outAllocation,
                                            std::vector<VkSemaphore>* outWaitSemaphores) {
+        const TextureDescriptor* textureDescriptor =
+            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+
         // Check services support this combination of handle type / image info
         if (!mExternalSemaphoreService->Supported()) {
             return DAWN_VALIDATION_ERROR("External semaphore usage not supported");
         }
-        if (!mExternalMemoryService->Supported()) {
+        if (!mExternalMemoryService->Supported(
+                VulkanImageFormat(textureDescriptor->format), VK_IMAGE_TYPE_2D,
+                VK_IMAGE_TILING_OPTIMAL,
+                VulkanImageUsage(textureDescriptor->usage,
+                                 GetValidInternalFormat(textureDescriptor->format)),
+                VK_IMAGE_CREATE_ALIAS_BIT_KHR)) {
             return DAWN_VALIDATION_ERROR("External memory usage not supported");
         }
 

@@ -31,7 +31,11 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         ~Service();
 
         // True if the device reports it supports this feature
-        bool Supported();
+        bool Supported(VkFormat format,
+                       VkImageType type,
+                       VkImageTiling tiling,
+                       VkImageUsageFlags usage,
+                       VkImageCreateFlags flags);
 
         // Given an external handle pointing to memory, import it into a VkDeviceMemory
         ResultOrError<VkDeviceMemory> ImportMemory(ExternalMemoryHandle handle,
@@ -42,7 +46,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         Device* mDevice = nullptr;
 
         // True if early checks pass that determine if the service is supported
-        bool mSupportedFirstPass = false;
+        bool mSupported = false;
     };
 
 }}}  // namespace dawn_native::vulkan::external_memory

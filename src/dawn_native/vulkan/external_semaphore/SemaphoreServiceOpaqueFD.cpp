@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "dawn_native/vulkan/AdapterVk.h"
+#include "dawn_native/vulkan/BackendVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 #include "dawn_native/vulkan/external_semaphore/SemaphoreService.h"
@@ -19,17 +21,43 @@
 namespace dawn_native { namespace vulkan { namespace external_semaphore {
 
     Service::Service(Device* device) : mDevice(device) {
-        const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
-        mSupportedFirstPass = info.externalSemaphore && info.externalSemaphoreFD;
-        // TODO(idanr): Query device here for additional support information, decide if supported
-        // This will likely be done through vkGetPhysicalDeviceExternalSemaphorePropertiesKHR, where
-        // we give it the intended handle type and see if it's supported
+        const VulkanDeviceInfo& deviceInfo = mDevice->GetDeviceInfo();
+        const VulkanGlobalInfo& globalInfo =
+            ToBackend(mDevice->GetAdapter())->GetBackend()->GetGlobalInfo();
+
+        mSupported = globalInfo.getPhysicalDeviceProperties2 &&
+                     globalInfo.externalSemaphoreCapabilities && deviceInfo.externalSemaphore &&
+                     deviceInfo.externalSemaphoreFD;
+
+        // Early out before we try using extension functions
+        if (!mSupported) {
+            return;
+        }
+
+        VkPhysicalDeviceExternalSemaphoreInfoKHR semaphoreInfo;
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO_KHR;
+        semaphoreInfo.pNext = nullptr;
+        semaphoreInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+
+        VkExternalSemaphorePropertiesKHR semaphoreProperties;
+        semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
+        semaphoreProperties.pNext = nullptr;
+
+        mDevice->fn.GetPhysicalDeviceExternalSemaphorePropertiesKHR(
+            ToBackend(mDevice->GetAdapter())->GetPhysicalDevice(), &semaphoreInfo,
+            &semaphoreProperties);
+
+        VkFlags requiredFlags = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
+                                VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT_KHR;
+        mSupported =
+            mSupported &&
+            ((semaphoreProperties.externalSemaphoreFeatures & requiredFlags) == requiredFlags);
     }
 
     Service::~Service() = default;
 
     bool Service::Supported() {
-        return mSupportedFirstPass;
+        return mSupported;
     }
 
     ResultOrError<VkSemaphore> Service::ImportSemaphore(ExternalSemaphoreHandle handle) {
