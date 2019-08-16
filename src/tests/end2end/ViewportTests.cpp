@@ -364,4 +364,39 @@ TEST_P(ViewportTest, ShrinkViewportAndShiftToBottomRightAndApplyDepth) {
     DoTest(info);
 }
 
+// X and y have fractions and they are smaller than 0.5, which is the center of point(0, 0). So
+// point(0, 0) is covered by the top left triangle as usual.
+TEST_P(ViewportTest, DoNotTruncateXAndY) {
+    ViewportParams viewport = {0.49, 0.49, 4.0, 4.0, 0.0, 1.0};
+    TestInfo info = {viewport, TopLeftTriangleColor, BottomRightTriangleColor};
+    DoTest(info);
+}
+
+// X and y have fractions and they are not smaller than 0.5, which is the center of point(0, 0). So
+// point(0, 0) is not covered by any trinagle.
+TEST_P(ViewportTest, DoNotTruncateXAndY2) {
+    ViewportParams viewport = {0.5, 0.5, 4.0, 4.0, 0.0, 1.0};
+    TestInfo info = {viewport, BackgroundColor, BottomRightTriangleColor};
+    DoTest(info);
+}
+
+// Width and height have fractions and they are greater than 3.5, which is the center of
+// point(3, 3). So point(3, 3) is covered by the bottom right triangle as usual.
+TEST_P(ViewportTest, DoNotTruncateWidthAndHeight) {
+    // Test failing on Intel devices (D3D, Vulkan and Metal) and D3D12.
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=205
+    DAWN_SKIP_TEST_IF(IsIntel() || IsD3D12());
+    ViewportParams viewport = {0.0, 0.0, 3.51, 3.51, 0.0, 1.0};
+    TestInfo info = {viewport, TopLeftTriangleColor, BottomRightTriangleColor};
+    DoTest(info);
+}
+
+// Width and height have fractions and they are not greater than 3.5, which is the center of
+// point(3, 3). So point(3, 3) is not covered by any triangle.
+TEST_P(ViewportTest, DoNotTruncateWidthAndHeight2) {
+    ViewportParams viewport = {0.0, 0.0, 3.5, 3.5, 0.0, 1.0};
+    TestInfo info = {viewport, TopLeftTriangleColor, BackgroundColor};
+    DoTest(info);
+}
+
 DAWN_INSTANTIATE_TEST(ViewportTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
