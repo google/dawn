@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "common/Math.h"
 #include "tests/DawnTest.h"
 
 #include "common/vulkan_platform.h"
@@ -906,6 +907,112 @@ TEST_P(VulkanImageWrappingUsageTests, ChainTextureCopy) {
     deviceVk->GetFencedDeleter()->DeleteWhenUnused(allocationC);
 
     IgnoreSignalSemaphore(device, wrappedTexCDevice1);
+}
+
+// Tests a larger image is preserved when importing
+// TODO(http://crbug.com/dawn/206): This fails on AMD
+TEST_P(VulkanImageWrappingUsageTests, LargerImage) {
+    DAWN_SKIP_TEST_IF(UsesWire() || IsIntel() || IsAMD());
+
+    close(defaultFd);
+
+    dawn::TextureDescriptor descriptor;
+    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.size.width = 640;
+    descriptor.size.height = 480;
+    descriptor.size.depth = 1;
+    descriptor.arrayLayerCount = 1;
+    descriptor.sampleCount = 1;
+    descriptor.format = dawn::TextureFormat::BGRA8Unorm;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::CopySrc;
+
+    // Fill memory with textures to trigger layout issues on AMD
+    std::vector<dawn::Texture> textures;
+    for (int i = 0; i < 20; i++) {
+        textures.push_back(device.CreateTexture(&descriptor));
+    }
+
+    dawn::Queue secondDeviceQueue = secondDevice.CreateQueue();
+
+    // Make an image on |secondDevice|
+    VkImage imageA;
+    VkDeviceMemory allocationA;
+    int memoryFdA;
+    VkDeviceSize allocationSizeA;
+    uint32_t memoryTypeIndexA;
+    CreateBindExportImage(secondDeviceVk, 640, 480, VK_FORMAT_R8G8B8A8_UNORM, &imageA, &allocationA,
+                          &allocationSizeA, &memoryTypeIndexA, &memoryFdA);
+
+    // Import the image on |secondDevice|
+    dawn::Texture wrappedTexture = WrapVulkanImage(secondDevice, &descriptor, memoryFdA,
+                                                   allocationSizeA, memoryTypeIndexA, {});
+
+    // Draw a non-trivial picture
+    int width = 640, height = 480, pixelSize = 4;
+    uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
+    uint32_t size = rowPitch * (height - 1) + width * pixelSize;
+    unsigned char data[size];
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+            float normRow = static_cast<float>(row) / height;
+            float normCol = static_cast<float>(col) / width;
+            float dist = sqrt(normRow * normRow + normCol * normCol) * 3;
+            dist = dist - static_cast<int>(dist);
+            data[4 * (row * width + col)] = static_cast<unsigned char>(dist * 255);
+            data[4 * (row * width + col) + 1] = static_cast<unsigned char>(dist * 255);
+            data[4 * (row * width + col) + 2] = static_cast<unsigned char>(dist * 255);
+            data[4 * (row * width + col) + 3] = 255;
+        }
+    }
+
+    // Write the picture
+    {
+        dawn::Buffer copySrcBuffer =
+            utils::CreateBufferFromData(secondDevice, data, size, dawn::BufferUsageBit::CopySrc);
+        dawn::BufferCopyView copySrc = utils::CreateBufferCopyView(copySrcBuffer, 0, rowPitch, 0);
+        dawn::TextureCopyView copyDst =
+            utils::CreateTextureCopyView(wrappedTexture, 0, 0, {0, 0, 0});
+        dawn::Extent3D copySize = {width, height, 1};
+
+        dawn::CommandEncoder encoder = secondDevice.CreateCommandEncoder();
+        encoder.CopyBufferToTexture(&copySrc, &copyDst, &copySize);
+        dawn::CommandBuffer commands = encoder.Finish();
+        secondDeviceQueue.Submit(1, &commands);
+    }
+
+    int signalFd = dawn_native::vulkan::ExportSignalSemaphoreOpaqueFD(secondDevice.Get(),
+                                                                      wrappedTexture.Get());
+    int memoryFd = GetMemoryFd(secondDeviceVk, allocationA);
+
+    // Import the image on |device|
+    dawn::Texture nextWrappedTexture = WrapVulkanImage(
+        device, &descriptor, memoryFd, allocationSizeA, memoryTypeIndexA, {signalFd});
+
+    // Copy the image into a buffer for comparison
+    dawn::BufferDescriptor copyDesc;
+    copyDesc.size = size;
+    copyDesc.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
+    dawn::Buffer copyDstBuffer = device.CreateBuffer(&copyDesc);
+    {
+        dawn::TextureCopyView copySrc =
+            utils::CreateTextureCopyView(nextWrappedTexture, 0, 0, {0, 0, 0});
+        dawn::BufferCopyView copyDst = utils::CreateBufferCopyView(copyDstBuffer, 0, rowPitch, 0);
+
+        dawn::Extent3D copySize = {width, height, 1};
+
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToBuffer(&copySrc, &copyDst, &copySize);
+        dawn::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    // Check the image is not corrupted on |device|
+    EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(data), copyDstBuffer, 0, size / 4);
+
+    IgnoreSignalSemaphore(device, nextWrappedTexture);
+    secondDeviceVk->GetFencedDeleter()->DeleteWhenUnused(imageA);
+    secondDeviceVk->GetFencedDeleter()->DeleteWhenUnused(allocationA);
 }
 
 DAWN_INSTANTIATE_TEST(VulkanImageWrappingValidationTests, VulkanBackend);
