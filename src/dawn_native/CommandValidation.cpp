@@ -192,6 +192,7 @@ namespace dawn_native {
                                                  "Command disallowed inside a render bundle"));
         }
 
+        DAWN_TRY(ValidateDebugGroups(debugGroupStackSize));
         DAWN_TRY(usageTracker.ValidateRenderPassUsages());
         ASSERT(resourceUsage != nullptr);
         *resourceUsage = usageTracker.AcquireResourceUsage();

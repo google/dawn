@@ -173,6 +173,65 @@ TEST_F(RenderBundleValidationTest, SimpleSuccess) {
     commandEncoder.Finish();
 }
 
+// Test that render bundle debug groups must be well nested.
+TEST_F(RenderBundleValidationTest, DebugGroups) {
+    DummyRenderPass renderPass(device);
+
+    utils::ComboRenderBundleEncoderDescriptor desc = {};
+    desc.colorFormatsCount = 1;
+    desc.cColorFormats[0] = renderPass.attachmentFormat;
+
+    // Test a single debug group works.
+    {
+        dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.PushDebugGroup("group");
+        renderBundleEncoder.PopDebugGroup();
+        renderBundleEncoder.Finish();
+    }
+
+    // Test nested debug groups work.
+    {
+        dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.PushDebugGroup("group");
+        renderBundleEncoder.PushDebugGroup("group2");
+        renderBundleEncoder.PopDebugGroup();
+        renderBundleEncoder.PopDebugGroup();
+        renderBundleEncoder.Finish();
+    }
+
+    // Test popping when no group is pushed is invalid.
+    {
+        dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.PopDebugGroup();
+        ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
+    }
+
+    // Test popping too many times is invalid.
+    {
+        dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.PushDebugGroup("group");
+        renderBundleEncoder.PopDebugGroup();
+        renderBundleEncoder.PopDebugGroup();
+        ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
+    }
+
+    // Test that a single debug group must be popped.
+    {
+        dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.PushDebugGroup("group");
+        ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
+    }
+
+    // Test that all debug groups must be popped.
+    {
+        dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.PushDebugGroup("group");
+        renderBundleEncoder.PushDebugGroup("group2");
+        renderBundleEncoder.PopDebugGroup();
+        ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
+    }
+}
+
 // Test render bundles do not inherit command buffer state
 TEST_F(RenderBundleValidationTest, StateInheritance) {
     DummyRenderPass renderPass(device);
