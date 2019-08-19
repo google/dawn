@@ -17,10 +17,36 @@
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/Format.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 namespace dawn_native {
+
+    MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
+                                             dawn::TextureFormat textureFormat) {
+        DAWN_TRY(ValidateTextureFormat(textureFormat));
+        const Format* format = nullptr;
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
+        if (!format->IsColor() || !format->isRenderable) {
+            return DAWN_VALIDATION_ERROR(
+                "The color attachment texture format is not color renderable");
+        }
+        return {};
+    }
+
+    MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
+                                                    dawn::TextureFormat textureFormat) {
+        DAWN_TRY(ValidateTextureFormat(textureFormat));
+        const Format* format = nullptr;
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
+        if (!format->HasDepthOrStencil() || !format->isRenderable) {
+            return DAWN_VALIDATION_ERROR(
+                "The depth stencil attachment texture format is not a renderable depth/stencil "
+                "format");
+        }
+        return {};
+    }
 
     MaybeError ValidateRenderBundleEncoderDescriptor(
         const DeviceBase* device,
@@ -38,11 +64,11 @@ namespace dawn_native {
         }
 
         for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
-            DAWN_TRY(ValidateTextureFormat(descriptor->colorFormats[i]));
+            DAWN_TRY(ValidateColorAttachmentFormat(device, descriptor->colorFormats[i]));
         }
 
         if (descriptor->depthStencilFormat != nullptr) {
-            DAWN_TRY(ValidateTextureFormat(*descriptor->depthStencilFormat));
+            DAWN_TRY(ValidateDepthStencilAttachmentFormat(device, *descriptor->depthStencilFormat));
         }
 
         return {};

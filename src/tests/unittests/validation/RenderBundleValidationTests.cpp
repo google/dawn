@@ -988,3 +988,33 @@ TEST_F(RenderBundleValidationTest, RenderPassSampleCountMismatch) {
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 }
+
+// Test that color attachment texture formats must be color renderable and
+// depth stencil texture formats must be depth/stencil.
+TEST_F(RenderBundleValidationTest, TextureFormats) {
+    // Test that color formats are validated as color.
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.colorFormatsCount = 1;
+        desc.cColorFormats[0] = dawn::TextureFormat::Depth24PlusStencil8;
+        ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+    }
+
+    // Test that color formats are validated as renderable.
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.colorFormatsCount = 1;
+        desc.cColorFormats[0] = dawn::TextureFormat::RGBA8Snorm;
+        ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+    }
+
+    // Test that depth/stencil formats are validated as depth/stencil.
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.cDepthStencilFormat = dawn::TextureFormat::RGBA8Unorm;
+        desc.depthStencilFormat = &desc.cDepthStencilFormat;
+        ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+    }
+
+    // Don't test non-renerable depth/stencil formats because we don't have any.
+}
