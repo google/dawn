@@ -50,8 +50,6 @@ namespace dawn_native { namespace opengl {
         AddFormat(dawn::TextureFormat::R8Sint, GL_R8I, GL_RED_INTEGER, GL_BYTE, Type::Int);
 
         // 2 bytes color formats
-        AddFormat(dawn::TextureFormat::R16Unorm, GL_R16, GL_RED, GL_UNSIGNED_SHORT, Type::Float);
-        AddFormat(dawn::TextureFormat::R16Snorm, GL_R16_SNORM, GL_RED, GL_SHORT, Type::Float);
         AddFormat(dawn::TextureFormat::R16Uint, GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
         AddFormat(dawn::TextureFormat::R16Sint, GL_R16I, GL_RED_INTEGER, GL_SHORT, Type::Int);
         AddFormat(dawn::TextureFormat::R16Float, GL_R16F, GL_RED, GL_HALF_FLOAT, Type::Float);
@@ -64,8 +62,6 @@ namespace dawn_native { namespace opengl {
         AddFormat(dawn::TextureFormat::R32Uint, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, Type::Uint);
         AddFormat(dawn::TextureFormat::R32Sint, GL_R32I, GL_RED_INTEGER, GL_INT, Type::Int);
         AddFormat(dawn::TextureFormat::R32Float, GL_R32F, GL_RED, GL_FLOAT, Type::Float);
-        AddFormat(dawn::TextureFormat::RG16Unorm, GL_RG16, GL_RG, GL_UNSIGNED_SHORT, Type::Float);
-        AddFormat(dawn::TextureFormat::RG16Snorm, GL_RG16_SNORM, GL_RG, GL_SHORT, Type::Float);
         AddFormat(dawn::TextureFormat::RG16Uint, GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
         AddFormat(dawn::TextureFormat::RG16Sint, GL_RG16I, GL_RG_INTEGER, GL_SHORT, Type::Int);
         AddFormat(dawn::TextureFormat::RG16Float, GL_RG16F, GL_RG, GL_HALF_FLOAT, Type::Float);
@@ -84,8 +80,6 @@ namespace dawn_native { namespace opengl {
         AddFormat(dawn::TextureFormat::RG32Uint, GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT, Type::Uint);
         AddFormat(dawn::TextureFormat::RG32Sint, GL_RG32I, GL_RG_INTEGER, GL_INT, Type::Int);
         AddFormat(dawn::TextureFormat::RG32Float, GL_RG32F, GL_RG, GL_FLOAT, Type::Float);
-        AddFormat(dawn::TextureFormat::RGBA16Unorm, GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT, Type::Float);
-        AddFormat(dawn::TextureFormat::RGBA16Snorm, GL_RGBA16_SNORM, GL_RGBA, GL_SHORT, Type::Float);
         AddFormat(dawn::TextureFormat::RGBA16Uint, GL_RGBA16UI, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
         AddFormat(dawn::TextureFormat::RGBA16Sint, GL_RGBA16I, GL_RGBA_INTEGER, GL_SHORT, Type::Int);
         AddFormat(dawn::TextureFormat::RGBA16Float, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT, Type::Float);

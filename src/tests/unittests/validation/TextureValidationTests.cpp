@@ -248,8 +248,6 @@ TEST_F(TextureValidationTest, NonRenderableAndOutputAttachment) {
     dawn::TextureFormat nonRenderableFormats[] = {
         dawn::TextureFormat::RG11B10Float, dawn::TextureFormat::R8Snorm,
         dawn::TextureFormat::RG8Snorm,     dawn::TextureFormat::RGBA8Snorm,
-        dawn::TextureFormat::R16Snorm,     dawn::TextureFormat::RG16Snorm,
-        dawn::TextureFormat::RGBA16Snorm,
     };
 
     for (dawn::TextureFormat format : nonRenderableFormats) {

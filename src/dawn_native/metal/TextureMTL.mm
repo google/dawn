@@ -134,10 +134,6 @@ namespace dawn_native { namespace metal {
             case dawn::TextureFormat::R8Sint:
                 return MTLPixelFormatR8Sint;
 
-            case dawn::TextureFormat::R16Unorm:
-                return MTLPixelFormatR16Unorm;
-            case dawn::TextureFormat::R16Snorm:
-                return MTLPixelFormatR16Snorm;
             case dawn::TextureFormat::R16Uint:
                 return MTLPixelFormatR16Uint;
             case dawn::TextureFormat::R16Sint:
@@ -159,10 +155,6 @@ namespace dawn_native { namespace metal {
                 return MTLPixelFormatR32Sint;
             case dawn::TextureFormat::R32Float:
                 return MTLPixelFormatR32Float;
-            case dawn::TextureFormat::RG16Unorm:
-                return MTLPixelFormatRG16Unorm;
-            case dawn::TextureFormat::RG16Snorm:
-                return MTLPixelFormatRG16Snorm;
             case dawn::TextureFormat::RG16Uint:
                 return MTLPixelFormatRG16Uint;
             case dawn::TextureFormat::RG16Sint:
@@ -194,10 +186,6 @@ namespace dawn_native { namespace metal {
                 return MTLPixelFormatRG32Sint;
             case dawn::TextureFormat::RG32Float:
                 return MTLPixelFormatRG32Float;
-            case dawn::TextureFormat::RGBA16Unorm:
-                return MTLPixelFormatRGBA16Unorm;
-            case dawn::TextureFormat::RGBA16Snorm:
-                return MTLPixelFormatRGBA16Snorm;
             case dawn::TextureFormat::RGBA16Uint:
                 return MTLPixelFormatRGBA16Uint;
             case dawn::TextureFormat::RGBA16Sint:

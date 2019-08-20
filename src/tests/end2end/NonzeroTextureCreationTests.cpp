@@ -105,13 +105,13 @@ TEST_P(NonzeroTextureCreationTests, NonrenderableTextureFormat) {
     descriptor.size.depth = 1;
     descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
-    descriptor.format = dawn::TextureFormat::RGBA16Snorm;
+    descriptor.format = dawn::TextureFormat::RGBA8Snorm;
     descriptor.mipLevelCount = 1;
     descriptor.usage = dawn::TextureUsageBit::CopySrc;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
-    uint32_t bufferSize = 8 * kSize * kSize;
+    uint32_t bufferSize = 4 * kSize * kSize;
     std::vector<uint8_t> data(bufferSize, 100);
     dawn::Buffer bufferDst = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);

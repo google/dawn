@@ -475,21 +475,6 @@ TEST_P(TextureFormatTest, RGBA8Unorm) {
     DoUnormTest<uint8_t>({dawn::TextureFormat::RGBA8Unorm, 4, Float, 4});
 }
 
-// Test the R16Unorm format
-TEST_P(TextureFormatTest, R16Unorm) {
-    DoUnormTest<uint16_t>({dawn::TextureFormat::R16Unorm, 2, Float, 1});
-}
-
-// Test the RG16Unorm format
-TEST_P(TextureFormatTest, RG16Unorm) {
-    DoUnormTest<uint16_t>({dawn::TextureFormat::RG16Unorm, 4, Float, 2});
-}
-
-// Test the RGBA16Unorm format
-TEST_P(TextureFormatTest, RGBA16Unorm) {
-    DoUnormTest<uint16_t>({dawn::TextureFormat::RGBA16Unorm, 8, Float, 4});
-}
-
 // Test the BGRA8Unorm format
 TEST_P(TextureFormatTest, BGRA8Unorm) {
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
@@ -514,21 +499,6 @@ TEST_P(TextureFormatTest, RG8Snorm) {
 // Test the RGBA8Snorm format
 TEST_P(TextureFormatTest, RGBA8Snorm) {
     DoSnormTest<int8_t>({dawn::TextureFormat::RGBA8Snorm, 4, Float, 4});
-}
-
-// Test the R16Snorm format
-TEST_P(TextureFormatTest, R16Snorm) {
-    DoSnormTest<int16_t>({dawn::TextureFormat::R16Snorm, 2, Float, 1});
-}
-
-// Test the RG16Snorm format
-TEST_P(TextureFormatTest, RG16Snorm) {
-    DoSnormTest<int16_t>({dawn::TextureFormat::RG16Snorm, 4, Float, 2});
-}
-
-// Test the RGBA16Snorm format
-TEST_P(TextureFormatTest, RGBA16Snorm) {
-    DoSnormTest<int16_t>({dawn::TextureFormat::RGBA16Snorm, 8, Float, 4});
 }
 
 // Test the R8Uint format

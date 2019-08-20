@@ -224,10 +224,6 @@ namespace dawn_native { namespace vulkan {
             case dawn::TextureFormat::R8Sint:
                 return VK_FORMAT_R8_SINT;
 
-            case dawn::TextureFormat::R16Unorm:
-                return VK_FORMAT_R16_UNORM;
-            case dawn::TextureFormat::R16Snorm:
-                return VK_FORMAT_R16_SNORM;
             case dawn::TextureFormat::R16Uint:
                 return VK_FORMAT_R16_UINT;
             case dawn::TextureFormat::R16Sint:
@@ -249,10 +245,6 @@ namespace dawn_native { namespace vulkan {
                 return VK_FORMAT_R32_SINT;
             case dawn::TextureFormat::R32Float:
                 return VK_FORMAT_R32_SFLOAT;
-            case dawn::TextureFormat::RG16Unorm:
-                return VK_FORMAT_R16G16_UNORM;
-            case dawn::TextureFormat::RG16Snorm:
-                return VK_FORMAT_R16G16_SNORM;
             case dawn::TextureFormat::RG16Uint:
                 return VK_FORMAT_R16G16_UINT;
             case dawn::TextureFormat::RG16Sint:
@@ -284,10 +276,6 @@ namespace dawn_native { namespace vulkan {
                 return VK_FORMAT_R32G32_SINT;
             case dawn::TextureFormat::RG32Float:
                 return VK_FORMAT_R32G32_SFLOAT;
-            case dawn::TextureFormat::RGBA16Unorm:
-                return VK_FORMAT_R16G16B16A16_UNORM;
-            case dawn::TextureFormat::RGBA16Snorm:
-                return VK_FORMAT_R16G16B16A16_SNORM;
             case dawn::TextureFormat::RGBA16Uint:
                 return VK_FORMAT_R16G16B16A16_UINT;
             case dawn::TextureFormat::RGBA16Sint:

@@ -106,10 +106,6 @@ namespace dawn_native { namespace d3d12 {
             case dawn::TextureFormat::R8Sint:
                 return DXGI_FORMAT_R8_SINT;
 
-            case dawn::TextureFormat::R16Unorm:
-                return DXGI_FORMAT_R16_UNORM;
-            case dawn::TextureFormat::R16Snorm:
-                return DXGI_FORMAT_R16_SNORM;
             case dawn::TextureFormat::R16Uint:
                 return DXGI_FORMAT_R16_UINT;
             case dawn::TextureFormat::R16Sint:
@@ -131,10 +127,6 @@ namespace dawn_native { namespace d3d12 {
                 return DXGI_FORMAT_R32_SINT;
             case dawn::TextureFormat::R32Float:
                 return DXGI_FORMAT_R32_FLOAT;
-            case dawn::TextureFormat::RG16Unorm:
-                return DXGI_FORMAT_R16G16_UNORM;
-            case dawn::TextureFormat::RG16Snorm:
-                return DXGI_FORMAT_R16G16_SNORM;
             case dawn::TextureFormat::RG16Uint:
                 return DXGI_FORMAT_R16G16_UINT;
             case dawn::TextureFormat::RG16Sint:
@@ -166,10 +158,6 @@ namespace dawn_native { namespace d3d12 {
                 return DXGI_FORMAT_R32G32_SINT;
             case dawn::TextureFormat::RG32Float:
                 return DXGI_FORMAT_R32G32_FLOAT;
-            case dawn::TextureFormat::RGBA16Unorm:
-                return DXGI_FORMAT_R16G16B16A16_UNORM;
-            case dawn::TextureFormat::RGBA16Snorm:
-                return DXGI_FORMAT_R16G16B16A16_SNORM;
             case dawn::TextureFormat::RGBA16Uint:
                 return DXGI_FORMAT_R16G16B16A16_UINT;
             case dawn::TextureFormat::RGBA16Sint:

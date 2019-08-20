@@ -87,7 +87,7 @@ class TextureZeroInitTest : public DawnTest {
     constexpr static dawn::TextureFormat kDepthStencilFormat =
         dawn::TextureFormat::Depth24PlusStencil8;
     constexpr static dawn::TextureFormat kNonrenderableColorFormat =
-        dawn::TextureFormat::RGBA16Snorm;
+        dawn::TextureFormat::RGBA8Snorm;
 };
 
 // This tests that the code path of CopyTextureToBuffer clears correctly to Zero after first usage
@@ -575,7 +575,7 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
-    uint32_t bufferSize = 8 * kSize * kSize;
+    uint32_t bufferSize = 4 * kSize * kSize;
     std::vector<uint8_t> data(bufferSize, 100);
     dawn::Buffer bufferDst = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
