@@ -113,25 +113,13 @@ class TextureFormatTest : public DawnTest {
   protected:
     void SetUp() {
         DawnTest::SetUp();
-
-        mSampleBGL = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-                     {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture}});
     }
-
-    // Describes what the "decompressed" data type for a texture format is. For example normalized
-    // formats are stored as integers but interpreted to produce floating point values.
-    enum ComponentType {
-        Uint,
-        Sint,
-        Float,
-    };
 
     // Structure containing all the information that tests need to know about the format.
     struct FormatTestInfo {
         dawn::TextureFormat format;
         uint32_t texelByteSize;
-        ComponentType type;
+        dawn::TextureComponentType type;
         uint32_t componentCount;
     };
 
@@ -161,13 +149,13 @@ class TextureFormatTest : public DawnTest {
         ASSERT(formatInfo.componentCount > 0 && formatInfo.componentCount <= 4);
         dawn::TextureFormat format;
         switch (formatInfo.type) {
-            case Float:
+            case dawn::TextureComponentType::Float:
                 format = floatFormats[formatInfo.componentCount - 1];
                 break;
-            case Sint:
+            case dawn::TextureComponentType::Sint:
                 format = sintFormats[formatInfo.componentCount - 1];
                 break;
-            case Uint:
+            case dawn::TextureComponentType::Uint:
                 format = uintFormats[formatInfo.componentCount - 1];
                 break;
             default:
@@ -181,7 +169,8 @@ class TextureFormatTest : public DawnTest {
     // Return a pipeline that can be used in a full-texture draw to sample from the texture in the
     // bindgroup and output its decompressed values to the render target.
     dawn::RenderPipeline CreateSamplePipeline(FormatTestInfo sampleFormatInfo,
-                                              FormatTestInfo renderFormatInfo) {
+                                              FormatTestInfo renderFormatInfo,
+                                              dawn::BindGroupLayout bgl) {
         utils::ComboRenderPipelineDescriptor desc(device);
 
         dawn::ShaderModule vsModule =
@@ -199,13 +188,13 @@ class TextureFormatTest : public DawnTest {
         // Compute the prefix needed for GLSL types that handle our texture's data.
         const char* prefix = nullptr;
         switch (sampleFormatInfo.type) {
-            case Float:
+            case dawn::TextureComponentType::Float:
                 prefix = "";
                 break;
-            case Sint:
+            case dawn::TextureComponentType::Sint:
                 prefix = "i";
                 break;
-            case Uint:
+            case dawn::TextureComponentType::Uint:
                 prefix = "u";
                 break;
             default:
@@ -229,7 +218,7 @@ class TextureFormatTest : public DawnTest {
 
         desc.cVertexStage.module = vsModule;
         desc.cFragmentStage.module = fsModule;
-        desc.layout = utils::MakeBasicPipelineLayout(device, &mSampleBGL);
+        desc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
         desc.cColorStates[0]->format = renderFormatInfo.format;
 
         return device.CreateRenderPipeline(&desc);
@@ -281,12 +270,19 @@ class TextureFormatTest : public DawnTest {
         readbackBufferDesc.size = 4 * width * sampleFormatInfo.componentCount;
         dawn::Buffer readbackBuffer = device.CreateBuffer(&readbackBufferDesc);
 
+        // Create the bind group layout for sampling the texture
+        dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
+                     {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture, false,
+                      false, sampleFormatInfo.type}});
+
         // Prepare objects needed to sample from texture in the renderpass
-        dawn::RenderPipeline pipeline = CreateSamplePipeline(sampleFormatInfo, renderFormatInfo);
+        dawn::RenderPipeline pipeline =
+            CreateSamplePipeline(sampleFormatInfo, renderFormatInfo, bgl);
         dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
         dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
         dawn::BindGroup bindGroup = utils::MakeBindGroup(
-            device, mSampleBGL, {{0, sampler}, {1, sampleTexture.CreateDefaultView()}});
+            device, bgl, {{0, sampler}, {1, sampleTexture.CreateDefaultView()}});
 
         // Encode commands for the test that fill texture, sample it to render to renderTarget then
         // copy renderTarget in a buffer so we can read it easily.
@@ -372,7 +368,7 @@ class TextureFormatTest : public DawnTest {
     void DoUnormTest(FormatTestInfo formatInfo) {
         static_assert(!std::is_signed<T>::value && std::is_integral<T>::value, "");
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == Float);
+        ASSERT(formatInfo.type == dawn::TextureComponentType::Float);
 
         T maxValue = std::numeric_limits<T>::max();
         std::vector<T> textureData = {0, 1, maxValue, maxValue};
@@ -386,7 +382,7 @@ class TextureFormatTest : public DawnTest {
     void DoSnormTest(FormatTestInfo formatInfo) {
         static_assert(std::is_signed<T>::value && std::is_integral<T>::value, "");
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == Float);
+        ASSERT(formatInfo.type == dawn::TextureComponentType::Float);
 
         T maxValue = std::numeric_limits<T>::max();
         T minValue = std::numeric_limits<T>::min();
@@ -401,7 +397,7 @@ class TextureFormatTest : public DawnTest {
     void DoUintTest(FormatTestInfo formatInfo) {
         static_assert(!std::is_signed<T>::value && std::is_integral<T>::value, "");
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == Uint);
+        ASSERT(formatInfo.type == dawn::TextureComponentType::Uint);
 
         T maxValue = std::numeric_limits<T>::max();
         std::vector<T> textureData = {0, 1, maxValue, maxValue};
@@ -415,7 +411,7 @@ class TextureFormatTest : public DawnTest {
     void DoSintTest(FormatTestInfo formatInfo) {
         static_assert(std::is_signed<T>::value && std::is_integral<T>::value, "");
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == Sint);
+        ASSERT(formatInfo.type == dawn::TextureComponentType::Sint);
 
         T maxValue = std::numeric_limits<T>::max();
         T minValue = std::numeric_limits<T>::min();
@@ -428,7 +424,7 @@ class TextureFormatTest : public DawnTest {
 
     void DoFloat32Test(FormatTestInfo formatInfo) {
         ASSERT(sizeof(float) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == Float);
+        ASSERT(formatInfo.type == dawn::TextureComponentType::Float);
 
         std::vector<float> textureData = {+0.0f,  -0.0f, 1.0f,     1.0e-29f,
                                           1.0e29f, NAN,   INFINITY, -INFINITY};
@@ -440,7 +436,7 @@ class TextureFormatTest : public DawnTest {
 
     void DoFloat16Test(FormatTestInfo formatInfo) {
         ASSERT(sizeof(int16_t) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == Float);
+        ASSERT(formatInfo.type == dawn::TextureComponentType::Float);
 
         std::vector<float> uncompressedData = {+0.0f,  -0.0f, 1.0f,     1.01e-4f,
                                                1.0e4f, NAN,   INFINITY, -INFINITY};
@@ -455,24 +451,22 @@ class TextureFormatTest : public DawnTest {
         DoFormatRenderingTest(formatInfo, uncompressedData, textureData,
                               new ExpectFloat16(textureData));
     }
-
-  private:
-    dawn::BindGroupLayout mSampleBGL;
 };
 
 // Test the R8Unorm format
 TEST_P(TextureFormatTest, R8Unorm) {
-    DoUnormTest<uint8_t>({dawn::TextureFormat::R8Unorm, 1, Float, 1});
+    DoUnormTest<uint8_t>({dawn::TextureFormat::R8Unorm, 1, dawn::TextureComponentType::Float, 1});
 }
 
 // Test the RG8Unorm format
 TEST_P(TextureFormatTest, RG8Unorm) {
-    DoUnormTest<uint8_t>({dawn::TextureFormat::RG8Unorm, 2, Float, 2});
+    DoUnormTest<uint8_t>({dawn::TextureFormat::RG8Unorm, 2, dawn::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA8Unorm format
 TEST_P(TextureFormatTest, RGBA8Unorm) {
-    DoUnormTest<uint8_t>({dawn::TextureFormat::RGBA8Unorm, 4, Float, 4});
+    DoUnormTest<uint8_t>(
+        {dawn::TextureFormat::RGBA8Unorm, 4, dawn::TextureComponentType::Float, 4});
 }
 
 // Test the BGRA8Unorm format
@@ -480,25 +474,26 @@ TEST_P(TextureFormatTest, BGRA8Unorm) {
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
     std::vector<uint8_t> textureData = {maxValue, 1, 0, maxValue};
     std::vector<float> uncompressedData = {0.0f, 1.0f / maxValue, 1.0f, 1.0f};
-    DoFormatSamplingTest({dawn::TextureFormat::BGRA8Unorm, 4, Float, 4}, textureData,
-                         uncompressedData);
-    DoFormatRenderingTest({dawn::TextureFormat::BGRA8Unorm, 4, Float, 4}, uncompressedData,
-                          textureData);
+    DoFormatSamplingTest({dawn::TextureFormat::BGRA8Unorm, 4, dawn::TextureComponentType::Float, 4},
+                         textureData, uncompressedData);
+    DoFormatRenderingTest(
+        {dawn::TextureFormat::BGRA8Unorm, 4, dawn::TextureComponentType::Float, 4},
+        uncompressedData, textureData);
 }
 
 // Test the R8Snorm format
 TEST_P(TextureFormatTest, R8Snorm) {
-    DoSnormTest<int8_t>({dawn::TextureFormat::R8Snorm, 1, Float, 1});
+    DoSnormTest<int8_t>({dawn::TextureFormat::R8Snorm, 1, dawn::TextureComponentType::Float, 1});
 }
 
 // Test the RG8Snorm format
 TEST_P(TextureFormatTest, RG8Snorm) {
-    DoSnormTest<int8_t>({dawn::TextureFormat::RG8Snorm, 2, Float, 2});
+    DoSnormTest<int8_t>({dawn::TextureFormat::RG8Snorm, 2, dawn::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA8Snorm format
 TEST_P(TextureFormatTest, RGBA8Snorm) {
-    DoSnormTest<int8_t>({dawn::TextureFormat::RGBA8Snorm, 4, Float, 4});
+    DoSnormTest<int8_t>({dawn::TextureFormat::RGBA8Snorm, 4, dawn::TextureComponentType::Float, 4});
 }
 
 // Test the R8Uint format
@@ -506,7 +501,7 @@ TEST_P(TextureFormatTest, R8Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint8_t>({dawn::TextureFormat::R8Uint, 1, Uint, 1});
+    DoUintTest<uint8_t>({dawn::TextureFormat::R8Uint, 1, dawn::TextureComponentType::Uint, 1});
 }
 
 // Test the RG8Uint format
@@ -514,7 +509,7 @@ TEST_P(TextureFormatTest, RG8Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint8_t>({dawn::TextureFormat::RG8Uint, 2, Uint, 2});
+    DoUintTest<uint8_t>({dawn::TextureFormat::RG8Uint, 2, dawn::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA8Uint format
@@ -522,7 +517,7 @@ TEST_P(TextureFormatTest, RGBA8Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint8_t>({dawn::TextureFormat::RGBA8Uint, 4, Uint, 4});
+    DoUintTest<uint8_t>({dawn::TextureFormat::RGBA8Uint, 4, dawn::TextureComponentType::Uint, 4});
 }
 
 // Test the R16Uint format
@@ -530,7 +525,7 @@ TEST_P(TextureFormatTest, R16Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint16_t>({dawn::TextureFormat::R16Uint, 2, Uint, 1});
+    DoUintTest<uint16_t>({dawn::TextureFormat::R16Uint, 2, dawn::TextureComponentType::Uint, 1});
 }
 
 // Test the RG16Uint format
@@ -538,7 +533,7 @@ TEST_P(TextureFormatTest, RG16Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint16_t>({dawn::TextureFormat::RG16Uint, 4, Uint, 2});
+    DoUintTest<uint16_t>({dawn::TextureFormat::RG16Uint, 4, dawn::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA16Uint format
@@ -546,7 +541,7 @@ TEST_P(TextureFormatTest, RGBA16Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint16_t>({dawn::TextureFormat::RGBA16Uint, 8, Uint, 4});
+    DoUintTest<uint16_t>({dawn::TextureFormat::RGBA16Uint, 8, dawn::TextureComponentType::Uint, 4});
 }
 
 // Test the R32Uint format
@@ -554,7 +549,7 @@ TEST_P(TextureFormatTest, R32Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint32_t>({dawn::TextureFormat::R32Uint, 4, Uint, 1});
+    DoUintTest<uint32_t>({dawn::TextureFormat::R32Uint, 4, dawn::TextureComponentType::Uint, 1});
 }
 
 // Test the RG32Uint format
@@ -562,7 +557,7 @@ TEST_P(TextureFormatTest, RG32Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint32_t>({dawn::TextureFormat::RG32Uint, 8, Uint, 2});
+    DoUintTest<uint32_t>({dawn::TextureFormat::RG32Uint, 8, dawn::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA32Uint format
@@ -570,7 +565,8 @@ TEST_P(TextureFormatTest, RGBA32Uint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoUintTest<uint32_t>({dawn::TextureFormat::RGBA32Uint, 16, Uint, 4});
+    DoUintTest<uint32_t>(
+        {dawn::TextureFormat::RGBA32Uint, 16, dawn::TextureComponentType::Uint, 4});
 }
 
 // Test the R8Sint format
@@ -578,7 +574,7 @@ TEST_P(TextureFormatTest, R8Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int8_t>({dawn::TextureFormat::R8Sint, 1, Sint, 1});
+    DoSintTest<int8_t>({dawn::TextureFormat::R8Sint, 1, dawn::TextureComponentType::Sint, 1});
 }
 
 // Test the RG8Sint format
@@ -586,7 +582,7 @@ TEST_P(TextureFormatTest, RG8Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int8_t>({dawn::TextureFormat::RG8Sint, 2, Sint, 2});
+    DoSintTest<int8_t>({dawn::TextureFormat::RG8Sint, 2, dawn::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA8Sint format
@@ -594,7 +590,7 @@ TEST_P(TextureFormatTest, RGBA8Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int8_t>({dawn::TextureFormat::RGBA8Sint, 4, Sint, 4});
+    DoSintTest<int8_t>({dawn::TextureFormat::RGBA8Sint, 4, dawn::TextureComponentType::Sint, 4});
 }
 
 // Test the R16Sint format
@@ -602,7 +598,7 @@ TEST_P(TextureFormatTest, R16Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int16_t>({dawn::TextureFormat::R16Sint, 2, Sint, 1});
+    DoSintTest<int16_t>({dawn::TextureFormat::R16Sint, 2, dawn::TextureComponentType::Sint, 1});
 }
 
 // Test the RG16Sint format
@@ -610,7 +606,7 @@ TEST_P(TextureFormatTest, RG16Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int16_t>({dawn::TextureFormat::RG16Sint, 4, Sint, 2});
+    DoSintTest<int16_t>({dawn::TextureFormat::RG16Sint, 4, dawn::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA16Sint format
@@ -618,7 +614,7 @@ TEST_P(TextureFormatTest, RGBA16Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int16_t>({dawn::TextureFormat::RGBA16Sint, 8, Sint, 4});
+    DoSintTest<int16_t>({dawn::TextureFormat::RGBA16Sint, 8, dawn::TextureComponentType::Sint, 4});
 }
 
 // Test the R32Sint format
@@ -626,7 +622,7 @@ TEST_P(TextureFormatTest, R32Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int32_t>({dawn::TextureFormat::R32Sint, 4, Sint, 1});
+    DoSintTest<int32_t>({dawn::TextureFormat::R32Sint, 4, dawn::TextureComponentType::Sint, 1});
 }
 
 // Test the RG32Sint format
@@ -634,7 +630,7 @@ TEST_P(TextureFormatTest, RG32Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int32_t>({dawn::TextureFormat::RG32Sint, 8, Sint, 2});
+    DoSintTest<int32_t>({dawn::TextureFormat::RG32Sint, 8, dawn::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA32Sint format
@@ -642,37 +638,37 @@ TEST_P(TextureFormatTest, RGBA32Sint) {
     // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
     DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
 
-    DoSintTest<int32_t>({dawn::TextureFormat::RGBA32Sint, 16, Sint, 4});
+    DoSintTest<int32_t>({dawn::TextureFormat::RGBA32Sint, 16, dawn::TextureComponentType::Sint, 4});
 }
 
 // Test the R32Float format
 TEST_P(TextureFormatTest, R32Float) {
-    DoFloat32Test({dawn::TextureFormat::R32Float, 4, Float, 1});
+    DoFloat32Test({dawn::TextureFormat::R32Float, 4, dawn::TextureComponentType::Float, 1});
 }
 
 // Test the RG32Float format
 TEST_P(TextureFormatTest, RG32Float) {
-    DoFloat32Test({dawn::TextureFormat::RG32Float, 8, Float, 2});
+    DoFloat32Test({dawn::TextureFormat::RG32Float, 8, dawn::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA32Float format
 TEST_P(TextureFormatTest, RGBA32Float) {
-    DoFloat32Test({dawn::TextureFormat::RGBA32Float, 16, Float, 4});
+    DoFloat32Test({dawn::TextureFormat::RGBA32Float, 16, dawn::TextureComponentType::Float, 4});
 }
 
 // Test the R16Float format
 TEST_P(TextureFormatTest, R16Float) {
-    DoFloat16Test({dawn::TextureFormat::R16Float, 2, Float, 1});
+    DoFloat16Test({dawn::TextureFormat::R16Float, 2, dawn::TextureComponentType::Float, 1});
 }
 
 // Test the RG16Float format
 TEST_P(TextureFormatTest, RG16Float) {
-    DoFloat16Test({dawn::TextureFormat::RG16Float, 4, Float, 2});
+    DoFloat16Test({dawn::TextureFormat::RG16Float, 4, dawn::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA16Float format
 TEST_P(TextureFormatTest, RGBA16Float) {
-    DoFloat16Test({dawn::TextureFormat::RGBA16Float, 8, Float, 4});
+    DoFloat16Test({dawn::TextureFormat::RGBA16Float, 8, dawn::TextureComponentType::Float, 4});
 }
 
 // Test the RGBA8Unorm format
@@ -689,10 +685,12 @@ TEST_P(TextureFormatTest, RGBA8UnormSrgb) {
         uncompressedData.push_back(textureData[i + 3] / float(maxValue));
     }
 
-    DoFloatFormatSamplingTest({dawn::TextureFormat::RGBA8UnormSrgb, 4, Float, 4}, textureData,
-                              uncompressedData, 1.0e-3);
-    DoFormatRenderingTest({dawn::TextureFormat::RGBA8UnormSrgb, 4, Float, 4}, uncompressedData,
-                          textureData);
+    DoFloatFormatSamplingTest(
+        {dawn::TextureFormat::RGBA8UnormSrgb, 4, dawn::TextureComponentType::Float, 4}, textureData,
+        uncompressedData, 1.0e-3);
+    DoFormatRenderingTest(
+        {dawn::TextureFormat::RGBA8UnormSrgb, 4, dawn::TextureComponentType::Float, 4},
+        uncompressedData, textureData);
 }
 
 // Test the BGRA8UnormSrgb format
@@ -714,10 +712,12 @@ TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
         uncompressedData.push_back(textureData[i + 3] / float(maxValue));
     }
 
-    DoFloatFormatSamplingTest({dawn::TextureFormat::BGRA8UnormSrgb, 4, Float, 4}, textureData,
-                              uncompressedData, 1.0e-3);
-    DoFormatRenderingTest({dawn::TextureFormat::BGRA8UnormSrgb, 4, Float, 4}, uncompressedData,
-                          textureData);
+    DoFloatFormatSamplingTest(
+        {dawn::TextureFormat::BGRA8UnormSrgb, 4, dawn::TextureComponentType::Float, 4}, textureData,
+        uncompressedData, 1.0e-3);
+    DoFormatRenderingTest(
+        {dawn::TextureFormat::BGRA8UnormSrgb, 4, dawn::TextureComponentType::Float, 4},
+        uncompressedData, textureData);
 }
 
 // Test the RGB10A2Unorm format
@@ -741,10 +741,12 @@ TEST_P(TextureFormatTest, RGB10A2Unorm) {
     };
     // clang-format on
 
-    DoFloatFormatSamplingTest({dawn::TextureFormat::RGB10A2Unorm, 4, Float, 4}, textureData,
-                              uncompressedData, 1.0e-5);
-    DoFormatRenderingTest({dawn::TextureFormat::RGB10A2Unorm, 4, Float, 4}, uncompressedData,
-                          textureData);
+    DoFloatFormatSamplingTest(
+        {dawn::TextureFormat::RGB10A2Unorm, 4, dawn::TextureComponentType::Float, 4}, textureData,
+        uncompressedData, 1.0e-5);
+    DoFormatRenderingTest(
+        {dawn::TextureFormat::RGB10A2Unorm, 4, dawn::TextureComponentType::Float, 4},
+        uncompressedData, textureData);
 }
 
 // Test the RG11B10Float format
@@ -786,8 +788,9 @@ TEST_P(TextureFormatTest, RG11B10Float) {
     };
     // clang-format on
 
-    DoFloatFormatSamplingTest({dawn::TextureFormat::RG11B10Float, 4, Float, 4}, textureData,
-                              uncompressedData);
+    DoFloatFormatSamplingTest(
+        {dawn::TextureFormat::RG11B10Float, 4, dawn::TextureComponentType::Float, 4}, textureData,
+        uncompressedData);
     // This format is not renderable.
 }
 

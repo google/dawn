@@ -56,8 +56,9 @@
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage bit"},
             {"name": "type", "type": "binding type"},
-            {"name": "dynamic", "type": "bool", "default": "false" },
-            {"name": "multisampled", "type": "bool", "default": "false" }
+            {"name": "dynamic", "type": "bool", "default": "false"},
+            {"name": "multisampled", "type": "bool", "default": "false"},
+            {"name": "texture component type", "type": "texture component type", "default": "float"}
         ]
     },
     "bind group layout descriptor": {
@@ -1150,6 +1151,14 @@
             {"value": 0, "name": "all"},
             {"value": 1, "name": "stencil only"},
             {"value": 2, "name": "depth only"}
+        ]
+    },
+    "texture component type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "float"},
+            {"value": 1, "name": "sint"},
+            {"value": 2, "name": "uint"}
         ]
     },
     "texture copy view": {

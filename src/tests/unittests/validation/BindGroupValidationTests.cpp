@@ -306,6 +306,30 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, outputTextureView}}));
 }
 
+// Check that a texture must have the correct component type
+TEST_F(BindGroupValidationTest, TextureComponentType) {
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture, false,
+                  false, dawn::TextureComponentType::Float}});
+
+    // Control case: setting a Float typed texture view works.
+    utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
+
+    // Make an output attachment texture and try to set it for a SampledTexture binding
+    dawn::TextureDescriptor descriptor;
+    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.size = {16, 16, 1};
+    descriptor.arrayLayerCount = 1;
+    descriptor.sampleCount = 1;
+    descriptor.format = dawn::TextureFormat::RGBA8Uint;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = dawn::TextureUsageBit::Sampled;
+    dawn::Texture uintTexture = device.CreateTexture(&descriptor);
+    dawn::TextureView uintTextureView = uintTexture.CreateDefaultView();
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, uintTextureView}}));
+}
+
 // Check that a UBO must have the correct usage
 TEST_F(BindGroupValidationTest, BufferUsageUBO) {
     dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
@@ -480,24 +504,6 @@ TEST_F(BindGroupLayoutValidationTest, DynamicAndTypeCompatibility) {
         device, {
                     {0, dawn::ShaderStageBit::Compute, dawn::BindingType::Sampler, true},
                 }));
-}
-
-// This test verifies that the BindGroupLayout cache is successfully caching/deduplicating objects.
-//
-// NOTE: This test only works currently because unittests are run without the wire - so the returned
-// BindGroupLayout pointers are actually visibly equivalent. With the wire, this would not be true.
-TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutCache) {
-    auto layout1 = utils::MakeBindGroupLayout(
-        device, {
-                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-                });
-    auto layout2 = utils::MakeBindGroupLayout(
-        device, {
-                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-                });
-
-    // Caching should cause these to be the same.
-    ASSERT_EQ(layout1.Get(), layout2.Get());
 }
 
 // This test verifies that visibility of bindings in BindGroupLayout can't be none

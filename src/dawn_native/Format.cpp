@@ -38,6 +38,25 @@ namespace dawn_native {
         return aspect != Color;
     }
 
+    bool Format::HasComponentType(dawn::TextureComponentType componentType) const {
+        // Depth stencil textures need to be special cased but we don't support sampling them yet.
+        if (aspect != Color) {
+            return false;
+        }
+
+        // Check that Type is correctly mirrors TextureComponentType except for "Other".
+        static_assert(static_cast<dawn::TextureComponentType>(Type::Float) ==
+                          dawn::TextureComponentType::Float,
+                      "");
+        static_assert(
+            static_cast<dawn::TextureComponentType>(Type::Sint) == dawn::TextureComponentType::Sint,
+            "");
+        static_assert(
+            static_cast<dawn::TextureComponentType>(Type::Uint) == dawn::TextureComponentType::Uint,
+            "");
+        return static_cast<dawn::TextureComponentType>(type) == componentType;
+    }
+
     size_t Format::GetIndex() const {
         return ComputeFormatIndex(format);
     }
@@ -54,6 +73,9 @@ namespace dawn_native {
         FormatTable table;
         std::bitset<kKnownFormatCount> formatsSet;
 
+        using Type = Format::Type;
+        using Aspect = Format::Aspect;
+
         auto AddFormat = [&table, &formatsSet](Format format) {
             size_t index = ComputeFormatIndex(format.format);
             ASSERT(index < table.size());
@@ -67,13 +89,14 @@ namespace dawn_native {
         };
 
         auto AddColorFormat = [&AddFormat](dawn::TextureFormat format, bool renderable,
-                                           uint32_t byteSize) {
+                                           uint32_t byteSize, Type type) {
             Format internalFormat;
             internalFormat.format = format;
             internalFormat.isRenderable = renderable;
             internalFormat.isCompressed = false;
             internalFormat.isSupported = true;
-            internalFormat.aspect = Format::Aspect::Color;
+            internalFormat.aspect = Aspect::Color;
+            internalFormat.type = type;
             internalFormat.blockByteSize = byteSize;
             internalFormat.blockWidth = 1;
             internalFormat.blockHeight = 1;
@@ -88,6 +111,7 @@ namespace dawn_native {
             internalFormat.isCompressed = false;
             internalFormat.isSupported = true;
             internalFormat.aspect = aspect;
+            internalFormat.type = Type::Other;
             internalFormat.blockByteSize = byteSize;
             internalFormat.blockWidth = 1;
             internalFormat.blockHeight = 1;
@@ -101,7 +125,8 @@ namespace dawn_native {
             internalFormat.isRenderable = false;
             internalFormat.isCompressed = true;
             internalFormat.isSupported = isSupported;
-            internalFormat.aspect = Format::Aspect::Color;
+            internalFormat.aspect = Aspect::Color;
+            internalFormat.type = Type::Float;
             internalFormat.blockByteSize = byteSize;
             internalFormat.blockWidth = width;
             internalFormat.blockHeight = height;
@@ -111,57 +136,57 @@ namespace dawn_native {
         // clang-format off
 
         // 1 byte color formats
-        AddColorFormat(dawn::TextureFormat::R8Unorm, true, 1);
-        AddColorFormat(dawn::TextureFormat::R8Snorm, false, 1);
-        AddColorFormat(dawn::TextureFormat::R8Uint, true, 1);
-        AddColorFormat(dawn::TextureFormat::R8Sint, true, 1);
+        AddColorFormat(dawn::TextureFormat::R8Unorm, true, 1, Type::Float);
+        AddColorFormat(dawn::TextureFormat::R8Snorm, false, 1, Type::Float);
+        AddColorFormat(dawn::TextureFormat::R8Uint, true, 1, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::R8Sint, true, 1, Type::Sint);
 
         // 2 bytes color formats
-        AddColorFormat(dawn::TextureFormat::R16Uint, true, 2);
-        AddColorFormat(dawn::TextureFormat::R16Sint, true, 2);
-        AddColorFormat(dawn::TextureFormat::R16Float, true, 2);
-        AddColorFormat(dawn::TextureFormat::RG8Unorm, true, 2);
-        AddColorFormat(dawn::TextureFormat::RG8Snorm, false, 2);
-        AddColorFormat(dawn::TextureFormat::RG8Uint, true, 2);
-        AddColorFormat(dawn::TextureFormat::RG8Sint, true, 2);
+        AddColorFormat(dawn::TextureFormat::R16Uint, true, 2, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::R16Sint, true, 2, Type::Sint);
+        AddColorFormat(dawn::TextureFormat::R16Float, true, 2, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RG8Unorm, true, 2, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RG8Snorm, false, 2, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RG8Uint, true, 2, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::RG8Sint, true, 2, Type::Sint);
 
         // 4 bytes color formats
-        AddColorFormat(dawn::TextureFormat::R32Uint, true, 4);
-        AddColorFormat(dawn::TextureFormat::R32Sint, true, 4);
-        AddColorFormat(dawn::TextureFormat::R32Float, true, 4);
-        AddColorFormat(dawn::TextureFormat::RG16Uint, true, 4);
-        AddColorFormat(dawn::TextureFormat::RG16Sint, true, 4);
-        AddColorFormat(dawn::TextureFormat::RG16Float, true, 4);
-        AddColorFormat(dawn::TextureFormat::RGBA8Unorm, true, 4);
-        AddColorFormat(dawn::TextureFormat::RGBA8UnormSrgb, true, 4);
-        AddColorFormat(dawn::TextureFormat::RGBA8Snorm, false, 4);
-        AddColorFormat(dawn::TextureFormat::RGBA8Uint, true, 4);
-        AddColorFormat(dawn::TextureFormat::RGBA8Sint, true, 4);
-        AddColorFormat(dawn::TextureFormat::BGRA8Unorm, true, 4);
-        AddColorFormat(dawn::TextureFormat::BGRA8UnormSrgb, true, 4);
-        AddColorFormat(dawn::TextureFormat::RGB10A2Unorm, true, 4);
+        AddColorFormat(dawn::TextureFormat::R32Uint, true, 4, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::R32Sint, true, 4, Type::Sint);
+        AddColorFormat(dawn::TextureFormat::R32Float, true, 4, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RG16Uint, true, 4, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::RG16Sint, true, 4, Type::Sint);
+        AddColorFormat(dawn::TextureFormat::RG16Float, true, 4, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RGBA8Unorm, true, 4, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RGBA8UnormSrgb, true, 4, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RGBA8Snorm, false, 4, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RGBA8Uint, true, 4, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::RGBA8Sint, true, 4, Type::Sint);
+        AddColorFormat(dawn::TextureFormat::BGRA8Unorm, true, 4, Type::Float);
+        AddColorFormat(dawn::TextureFormat::BGRA8UnormSrgb, true, 4, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RGB10A2Unorm, true, 4, Type::Float);
 
-        AddColorFormat(dawn::TextureFormat::RG11B10Float, false, 4);
+        AddColorFormat(dawn::TextureFormat::RG11B10Float, false, 4, Type::Float);
 
         // 8 bytes color formats
-        AddColorFormat(dawn::TextureFormat::RG32Uint, true, 8);
-        AddColorFormat(dawn::TextureFormat::RG32Sint, true, 8);
-        AddColorFormat(dawn::TextureFormat::RG32Float, true, 8);
-        AddColorFormat(dawn::TextureFormat::RGBA16Uint, true, 8);
-        AddColorFormat(dawn::TextureFormat::RGBA16Sint, true, 8);
-        AddColorFormat(dawn::TextureFormat::RGBA16Float, true, 8);
+        AddColorFormat(dawn::TextureFormat::RG32Uint, true, 8, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::RG32Sint, true, 8, Type::Sint);
+        AddColorFormat(dawn::TextureFormat::RG32Float, true, 8, Type::Float);
+        AddColorFormat(dawn::TextureFormat::RGBA16Uint, true, 8, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::RGBA16Sint, true, 8, Type::Sint);
+        AddColorFormat(dawn::TextureFormat::RGBA16Float, true, 8, Type::Float);
 
         // 16 bytes color formats
-        AddColorFormat(dawn::TextureFormat::RGBA32Uint, true, 16);
-        AddColorFormat(dawn::TextureFormat::RGBA32Sint, true, 16);
-        AddColorFormat(dawn::TextureFormat::RGBA32Float, true, 16);
+        AddColorFormat(dawn::TextureFormat::RGBA32Uint, true, 16, Type::Uint);
+        AddColorFormat(dawn::TextureFormat::RGBA32Sint, true, 16, Type::Sint);
+        AddColorFormat(dawn::TextureFormat::RGBA32Float, true, 16, Type::Float);
 
         // Depth stencil formats
-        AddDepthStencilFormat(dawn::TextureFormat::Depth32Float, Format::Aspect::Depth, 4);
-        AddDepthStencilFormat(dawn::TextureFormat::Depth24Plus, Format::Aspect::Depth, 4);
+        AddDepthStencilFormat(dawn::TextureFormat::Depth32Float, Aspect::Depth, 4);
+        AddDepthStencilFormat(dawn::TextureFormat::Depth24Plus, Aspect::Depth, 4);
         // TODO(cwallez@chromium.org): It isn't clear if this format should be copyable
         // because its size isn't well defined, is it 4, 5 or 8?
-        AddDepthStencilFormat(dawn::TextureFormat::Depth24PlusStencil8, Format::Aspect::DepthStencil, 4);
+        AddDepthStencilFormat(dawn::TextureFormat::Depth24PlusStencil8, Aspect::DepthStencil, 4);
 
         // BC compressed formats
         bool isBCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionBC);

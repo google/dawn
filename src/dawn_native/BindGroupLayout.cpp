@@ -36,6 +36,7 @@ namespace dawn_native {
             const BindGroupLayoutBinding& binding = descriptor->bindings[i];
             DAWN_TRY(ValidateShaderStageBit(binding.visibility));
             DAWN_TRY(ValidateBindingType(binding.type));
+            DAWN_TRY(ValidateTextureComponentType(binding.textureComponentType));
 
             if (binding.binding >= kMaxBindingsPerGroup) {
                 return DAWN_VALIDATION_ERROR("some binding index exceeds the maximum value");
@@ -98,7 +99,8 @@ namespace dawn_native {
             HashCombine(&hash, info.dynamic, info.multisampled);
 
             for (uint32_t binding : IterateBitSet(info.mask)) {
-                HashCombine(&hash, info.visibilities[binding], info.types[binding]);
+                HashCombine(&hash, info.visibilities[binding], info.types[binding],
+                            info.textureComponentTypes[binding]);
             }
 
             return hash;
@@ -112,7 +114,8 @@ namespace dawn_native {
 
             for (uint32_t binding : IterateBitSet(a.mask)) {
                 if ((a.visibilities[binding] != b.visibilities[binding]) ||
-                    (a.types[binding] != b.types[binding])) {
+                    (a.types[binding] != b.types[binding]) ||
+                    (a.textureComponentTypes[binding] != b.textureComponentTypes[binding])) {
                     return false;
                 }
             }
@@ -133,6 +136,7 @@ namespace dawn_native {
             uint32_t index = binding.binding;
             mBindingInfo.visibilities[index] = binding.visibility;
             mBindingInfo.types[index] = binding.type;
+            mBindingInfo.textureComponentTypes[index] = binding.textureComponentType;
 
             if (binding.dynamic) {
                 mBindingInfo.dynamic.set(index);

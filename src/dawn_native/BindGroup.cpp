@@ -63,15 +63,27 @@ namespace dawn_native {
 
         MaybeError ValidateTextureBinding(const DeviceBase* device,
                                           const BindGroupBinding& binding,
-                                          dawn::TextureUsageBit requiredUsage) {
+                                          dawn::TextureUsageBit requiredUsage,
+                                          bool multisampledBinding,
+                                          dawn::TextureComponentType requiredComponentType) {
             if (binding.textureView == nullptr || binding.sampler != nullptr ||
                 binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected texture binding");
             }
             DAWN_TRY(device->ValidateObject(binding.textureView));
 
-            if (!(binding.textureView->GetTexture()->GetUsage() & requiredUsage)) {
+            TextureBase* texture = binding.textureView->GetTexture();
+
+            if (!(texture->GetUsage() & requiredUsage)) {
                 return DAWN_VALIDATION_ERROR("texture binding usage mismatch");
+            }
+
+            if (texture->IsMultisampledTexture() != multisampledBinding) {
+                return DAWN_VALIDATION_ERROR("texture multisampling mismatch");
+            }
+
+            if (!texture->GetFormat().HasComponentType(requiredComponentType)) {
+                return DAWN_VALIDATION_ERROR("texture component type usage mismatch");
             }
 
             return {};
@@ -134,7 +146,9 @@ namespace dawn_native {
                     break;
                 case dawn::BindingType::SampledTexture:
                     DAWN_TRY(
-                        ValidateTextureBinding(device, binding, dawn::TextureUsageBit::Sampled));
+                        ValidateTextureBinding(device, binding, dawn::TextureUsageBit::Sampled,
+                                               layoutInfo.multisampled[bindingIndex],
+                                               layoutInfo.textureComponentTypes[bindingIndex]));
                     break;
                 case dawn::BindingType::Sampler:
                     DAWN_TRY(ValidateSamplerBinding(device, binding));
