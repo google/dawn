@@ -173,20 +173,27 @@ namespace dawn_native { namespace opengl {
 
                 gl.Uniform1i(location, textureUnit);
 
-                GLuint samplerIndex =
-                    indices[combined.samplerLocation.group][combined.samplerLocation.binding];
-                mUnitsForSamplers[samplerIndex].push_back(textureUnit);
-
                 GLuint textureIndex =
                     indices[combined.textureLocation.group][combined.textureLocation.binding];
                 mUnitsForTextures[textureIndex].push_back(textureUnit);
+
+                dawn::TextureComponentType componentType =
+                    layout->GetBindGroupLayout(combined.textureLocation.group)
+                        ->GetBindingInfo()
+                        .textureComponentTypes[combined.textureLocation.binding];
+                bool shouldUseFiltering = componentType == dawn::TextureComponentType::Float;
+
+                GLuint samplerIndex =
+                    indices[combined.samplerLocation.group][combined.samplerLocation.binding];
+                mUnitsForSamplers[samplerIndex].push_back({textureUnit, shouldUseFiltering});
 
                 textureUnit++;
             }
         }
     }
 
-    const std::vector<GLuint>& PipelineGL::GetTextureUnitsForSampler(GLuint index) const {
+    const std::vector<PipelineGL::SamplerUnit>& PipelineGL::GetTextureUnitsForSampler(
+        GLuint index) const {
         ASSERT(index < mUnitsForSamplers.size());
         return mUnitsForSamplers[index];
     }

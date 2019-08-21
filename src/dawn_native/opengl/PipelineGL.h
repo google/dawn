@@ -39,7 +39,13 @@ namespace dawn_native { namespace opengl {
         using BindingLocations =
             std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
 
-        const std::vector<GLuint>& GetTextureUnitsForSampler(GLuint index) const;
+        // For each unit a sampler is bound to we need to know if we should use filtering or not
+        // because int and uint texture are only complete without filtering.
+        struct SamplerUnit {
+            GLuint unit;
+            bool shouldUseFiltering;
+        };
+        const std::vector<SamplerUnit>& GetTextureUnitsForSampler(GLuint index) const;
         const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
         GLuint GetProgramHandle() const;
 
@@ -47,7 +53,7 @@ namespace dawn_native { namespace opengl {
 
       private:
         GLuint mProgram;
-        std::vector<std::vector<GLuint>> mUnitsForSamplers;
+        std::vector<std::vector<SamplerUnit>> mUnitsForSamplers;
         std::vector<std::vector<GLuint>> mUnitsForTextures;
     };
 

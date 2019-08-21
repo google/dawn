@@ -246,12 +246,18 @@ namespace dawn_native { namespace opengl {
                     } break;
 
                     case dawn::BindingType::Sampler: {
-                        GLuint sampler =
-                            ToBackend(group->GetBindingAsSampler(bindingIndex))->GetHandle();
+                        Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                         GLuint samplerIndex = indices[bindingIndex];
 
-                        for (auto unit : pipeline->GetTextureUnitsForSampler(samplerIndex)) {
-                            gl.BindSampler(unit, sampler);
+                        for (PipelineGL::SamplerUnit unit :
+                             pipeline->GetTextureUnitsForSampler(samplerIndex)) {
+                            // Only use filtering for certain texture units, because int and uint
+                            // texture are only complete without filtering
+                            if (unit.shouldUseFiltering) {
+                                gl.BindSampler(unit.unit, sampler->GetFilteringHandle());
+                            } else {
+                                gl.BindSampler(unit.unit, sampler->GetNonFilteringHandle());
+                            }
                         }
                     } break;
 

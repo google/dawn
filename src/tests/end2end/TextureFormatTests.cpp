@@ -498,146 +498,92 @@ TEST_P(TextureFormatTest, RGBA8Snorm) {
 
 // Test the R8Uint format
 TEST_P(TextureFormatTest, R8Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint8_t>({dawn::TextureFormat::R8Uint, 1, dawn::TextureComponentType::Uint, 1});
 }
 
 // Test the RG8Uint format
 TEST_P(TextureFormatTest, RG8Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint8_t>({dawn::TextureFormat::RG8Uint, 2, dawn::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA8Uint format
 TEST_P(TextureFormatTest, RGBA8Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint8_t>({dawn::TextureFormat::RGBA8Uint, 4, dawn::TextureComponentType::Uint, 4});
 }
 
 // Test the R16Uint format
 TEST_P(TextureFormatTest, R16Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint16_t>({dawn::TextureFormat::R16Uint, 2, dawn::TextureComponentType::Uint, 1});
 }
 
 // Test the RG16Uint format
 TEST_P(TextureFormatTest, RG16Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint16_t>({dawn::TextureFormat::RG16Uint, 4, dawn::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA16Uint format
 TEST_P(TextureFormatTest, RGBA16Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint16_t>({dawn::TextureFormat::RGBA16Uint, 8, dawn::TextureComponentType::Uint, 4});
 }
 
 // Test the R32Uint format
 TEST_P(TextureFormatTest, R32Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint32_t>({dawn::TextureFormat::R32Uint, 4, dawn::TextureComponentType::Uint, 1});
 }
 
 // Test the RG32Uint format
 TEST_P(TextureFormatTest, RG32Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint32_t>({dawn::TextureFormat::RG32Uint, 8, dawn::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA32Uint format
 TEST_P(TextureFormatTest, RGBA32Uint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoUintTest<uint32_t>(
         {dawn::TextureFormat::RGBA32Uint, 16, dawn::TextureComponentType::Uint, 4});
 }
 
 // Test the R8Sint format
 TEST_P(TextureFormatTest, R8Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int8_t>({dawn::TextureFormat::R8Sint, 1, dawn::TextureComponentType::Sint, 1});
 }
 
 // Test the RG8Sint format
 TEST_P(TextureFormatTest, RG8Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int8_t>({dawn::TextureFormat::RG8Sint, 2, dawn::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA8Sint format
 TEST_P(TextureFormatTest, RGBA8Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int8_t>({dawn::TextureFormat::RGBA8Sint, 4, dawn::TextureComponentType::Sint, 4});
 }
 
 // Test the R16Sint format
 TEST_P(TextureFormatTest, R16Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int16_t>({dawn::TextureFormat::R16Sint, 2, dawn::TextureComponentType::Sint, 1});
 }
 
 // Test the RG16Sint format
 TEST_P(TextureFormatTest, RG16Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int16_t>({dawn::TextureFormat::RG16Sint, 4, dawn::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA16Sint format
 TEST_P(TextureFormatTest, RGBA16Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int16_t>({dawn::TextureFormat::RGBA16Sint, 8, dawn::TextureComponentType::Sint, 4});
 }
 
 // Test the R32Sint format
 TEST_P(TextureFormatTest, R32Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int32_t>({dawn::TextureFormat::R32Sint, 4, dawn::TextureComponentType::Sint, 1});
 }
 
 // Test the RG32Sint format
 TEST_P(TextureFormatTest, RG32Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int32_t>({dawn::TextureFormat::RG32Sint, 8, dawn::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA32Sint format
 TEST_P(TextureFormatTest, RGBA32Sint) {
-    // TODO(cwallez@chromium.org): This fails on the Intel GL driver, understand why.
-    DAWN_SKIP_TEST_IF(IsOpenGL() && IsIntel());
-
     DoSintTest<int32_t>({dawn::TextureFormat::RGBA32Sint, 16, dawn::TextureComponentType::Sint, 4});
 }
 
