@@ -1,6 +1,7 @@
 *.pyc
 
 # Directories added by gclient sync and the GN build
+.cipd
 .gclient
 .gclient_entries
 build
@@ -19,7 +20,6 @@ third_party/markupsafe/
 third_party/shaderc/
 third_party/spirv-cross/
 third_party/spirv-headers/
-third_party/stb/
 tools
 out
 
