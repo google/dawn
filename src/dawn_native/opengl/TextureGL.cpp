@@ -187,6 +187,11 @@ namespace dawn_native { namespace opengl {
                                GLint baseArrayLayer,
                                uint32_t layerCount) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+        // TODO(jiawei.shao@intel.com): initialize the textures with compressed formats.
+        if (GetFormat().isCompressed) {
+            return;
+        }
+
         if (GetFormat().HasDepthOrStencil()) {
             bool doDepthClear = GetFormat().HasDepth();
             bool doStencilClear = GetFormat().HasStencil();

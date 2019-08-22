@@ -69,6 +69,9 @@ if (dawn_enable_opengl) {
     args = [
       "--gl-xml",
       rebase_path("third_party/khronos/gl.xml", root_build_dir),
+      "--supported-extensions",
+      rebase_path("src/dawn_native/opengl/supported_extensions.json",
+                  root_build_dir),
     ]
     outputs = [
       "dawn_native/opengl/OpenGLFunctionsBase_autogen.cpp",

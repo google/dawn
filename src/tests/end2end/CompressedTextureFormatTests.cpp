@@ -455,6 +455,9 @@ TEST_P(CompressedTextureBCFormatTest, Basic) {
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
 
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -497,6 +500,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
 
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -522,6 +528,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
 
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -544,6 +553,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
@@ -581,6 +593,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
@@ -635,9 +650,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyPartofTextureSubResourceIntoNonZeroMip
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
-    // subresource and does not fit in another one on Vulkan. Currently this test causes an error if
-    // Vulkan validation layer is enabled.
-    DAWN_SKIP_TEST_IF(IsVulkan());
+    // subresource and does not fit in another one on Vulkan and OpenGL. Currently this test causes
+    // an error if Vulkan validation layer is enabled.
+    DAWN_SKIP_TEST_IF(IsVulkan() || IsOpenGL());
 
     CopyConfig srcConfig;
     srcConfig.textureDescriptor.size = {60, 60, 1};
@@ -697,6 +712,9 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
 
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -726,6 +744,9 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
@@ -758,6 +779,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
@@ -821,6 +845,9 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
 
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -842,6 +869,9 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan wire
     // bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows() && UsesWire());
+
+    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 

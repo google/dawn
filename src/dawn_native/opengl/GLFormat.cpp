@@ -94,6 +94,22 @@ namespace dawn_native { namespace opengl {
         AddFormat(dawn::TextureFormat::Depth24Plus, GL_DEPTH_COMPONENT32F, GL_DEPTH, GL_FLOAT, Type::DepthStencil);
         AddFormat(dawn::TextureFormat::Depth24PlusStencil8, GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, Type::DepthStencil);
 
+        // Block compressed formats
+        AddFormat(dawn::TextureFormat::BC1RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC1RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC2RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC2RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC3RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC3RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC4RSnorm, GL_COMPRESSED_SIGNED_RED_RGTC1, GL_RED, GL_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC4RUnorm, GL_COMPRESSED_RED_RGTC1, GL_RED, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC5RGSnorm, GL_COMPRESSED_SIGNED_RG_RGTC2, GL_RG, GL_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC5RGUnorm, GL_COMPRESSED_RG_RGTC2, GL_RG, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC6HRGBSfloat, GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
+        AddFormat(dawn::TextureFormat::BC6HRGBUfloat, GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
+        AddFormat(dawn::TextureFormat::BC7RGBAUnorm, GL_COMPRESSED_RGBA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(dawn::TextureFormat::BC7RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+
         // clang-format on
 
         return table;

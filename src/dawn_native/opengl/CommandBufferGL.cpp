@@ -352,6 +352,28 @@ namespace dawn_native { namespace opengl {
             gl.DeleteFramebuffers(1, &readFbo);
             gl.DeleteFramebuffers(1, &writeFbo);
         }
+
+        // OpenGL SPEC requires the source/destination region must be a region that is contained
+        // within srcImage/dstImage. Here the size of the image refers to the virtual size, while
+        // Dawn validates texture copy extent with the physical size, so we need to re-calculate the
+        // texture copy extent to ensure it should fit in the virtual size of the subresource.
+        Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy,
+                                          const Extent3D& copySize) {
+            Extent3D validTextureCopyExtent = copySize;
+            const TextureBase* texture = textureCopy.texture.Get();
+            Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(textureCopy.mipLevel);
+            if (textureCopy.origin.x + copySize.width > virtualSizeAtLevel.width) {
+                ASSERT(texture->GetFormat().isCompressed);
+                validTextureCopyExtent.width = virtualSizeAtLevel.width - textureCopy.origin.x;
+            }
+            if (textureCopy.origin.y + copySize.height > virtualSizeAtLevel.height) {
+                ASSERT(texture->GetFormat().isCompressed);
+                validTextureCopyExtent.height = virtualSizeAtLevel.height - textureCopy.origin.y;
+            }
+
+            return validTextureCopyExtent;
+        }
+
     }  // namespace
 
     CommandBuffer::CommandBuffer(CommandEncoderBase* encoder,
@@ -436,28 +458,60 @@ namespace dawn_native { namespace opengl {
                     gl.ActiveTexture(GL_TEXTURE0);
                     gl.BindTexture(target, texture->GetHandle());
 
-                    gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
-                                   src.rowPitch / texture->GetFormat().blockByteSize);
+                    const Format& formatInfo = texture->GetFormat();
+                    gl.PixelStorei(
+                        GL_UNPACK_ROW_LENGTH,
+                        src.rowPitch / texture->GetFormat().blockByteSize * formatInfo.blockWidth);
                     gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.imageHeight);
-                    switch (texture->GetDimension()) {
-                        case dawn::TextureDimension::e2D:
-                            if (texture->GetArrayLayers() > 1) {
-                                gl.TexSubImage3D(
-                                    target, dst.mipLevel, dst.origin.x, dst.origin.y,
-                                    dst.arrayLayer, copySize.width, copySize.height, 1,
-                                    format.format, format.type,
-                                    reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
-                            } else {
-                                gl.TexSubImage2D(
-                                    target, dst.mipLevel, dst.origin.x, dst.origin.y,
-                                    copySize.width, copySize.height, format.format, format.type,
-                                    reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
-                            }
-                            break;
 
-                        default:
-                            UNREACHABLE();
+                    if (texture->GetFormat().isCompressed) {
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, formatInfo.blockByteSize);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, formatInfo.blockWidth);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, formatInfo.blockHeight);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 1);
+
+                        ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
+                        uint64_t copyDataSize =
+                            (copySize.width / texture->GetFormat().blockWidth) *
+                            (copySize.height / texture->GetFormat().blockHeight) *
+                            texture->GetFormat().blockByteSize;
+                        Extent3D copyExtent = ComputeTextureCopyExtent(dst, copySize);
+
+                        if (texture->GetArrayLayers() > 1) {
+                            gl.CompressedTexSubImage3D(
+                                target, dst.mipLevel, dst.origin.x, dst.origin.y, dst.arrayLayer,
+                                copyExtent.width, copyExtent.height, 1, format.internalFormat,
+                                copyDataSize,
+                                reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
+                        } else {
+                            gl.CompressedTexSubImage2D(
+                                target, dst.mipLevel, dst.origin.x, dst.origin.y, copyExtent.width,
+                                copyExtent.height, format.internalFormat, copyDataSize,
+                                reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
+                        }
+                    } else {
+                        switch (texture->GetDimension()) {
+                            case dawn::TextureDimension::e2D:
+                                if (texture->GetArrayLayers() > 1) {
+                                    gl.TexSubImage3D(target, dst.mipLevel, dst.origin.x,
+                                                     dst.origin.y, dst.arrayLayer, copySize.width,
+                                                     copySize.height, 1, format.format, format.type,
+                                                     reinterpret_cast<void*>(
+                                                         static_cast<uintptr_t>(src.offset)));
+                                } else {
+                                    gl.TexSubImage2D(target, dst.mipLevel, dst.origin.x,
+                                                     dst.origin.y, copySize.width, copySize.height,
+                                                     format.format, format.type,
+                                                     reinterpret_cast<void*>(
+                                                         static_cast<uintptr_t>(src.offset)));
+                                }
+                                break;
+
+                            default:
+                                UNREACHABLE();
+                        }
                     }
+
                     gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
                     gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 
@@ -473,6 +527,12 @@ namespace dawn_native { namespace opengl {
                     Buffer* buffer = ToBackend(dst.buffer.Get());
                     const GLFormat& format = texture->GetGLFormat();
                     GLenum target = texture->GetGLTarget();
+
+                    // TODO(jiawei.shao@intel.com): support texture-to-buffer copy with compressed
+                    // texture formats.
+                    if (texture->GetFormat().isCompressed) {
+                        UNREACHABLE();
+                    }
 
                     texture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
                                                                  1);
@@ -520,7 +580,12 @@ namespace dawn_native { namespace opengl {
                         mCommands.NextCommand<CopyTextureToTextureCmd>();
                     auto& src = copy->source;
                     auto& dst = copy->destination;
-                    auto& copySize = copy->copySize;
+
+                    // TODO(jiawei.shao@intel.com): add workaround for the case that imageExtentSrc
+                    // is not equal to imageExtentDst. For example when copySize fits in the virtual
+                    // size of the source image but does not fit in the one of the destination
+                    // image.
+                    Extent3D copySize = ComputeTextureCopyExtent(dst, copy->copySize);
                     Texture* srcTexture = ToBackend(src.texture.Get());
                     Texture* dstTexture = ToBackend(dst.texture.Get());
                     srcTexture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
