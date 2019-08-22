@@ -57,13 +57,14 @@ namespace {
                         {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::StorageBuffer},
                     })};
 
-            dawn::PipelineLayoutDescriptor pipelineLayoutDesc;
+            dawn::PipelineLayoutDescriptor pipelineLayoutDesc = {};
             pipelineLayoutDesc.bindGroupLayoutCount = 2;
             pipelineLayoutDesc.bindGroupLayouts = bgls;
 
             pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 
-            utils::ComboRenderPipelineDescriptor descriptor = MakeRenderPipelineDescriptor();
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            InitializeRenderPipelineDescriptor(&descriptor);
             pipeline = device.CreateRenderPipeline(&descriptor);
 
             float data[4];
@@ -94,17 +95,15 @@ namespace {
                                               {1, vertexStorageBuffer, 0, sizeof(kVertices)}});
         }
 
-        utils::ComboRenderPipelineDescriptor MakeRenderPipelineDescriptor() {
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.layout = pipelineLayout;
-            descriptor.cVertexStage.module = vsModule;
-            descriptor.cFragmentStage.module = fsModule;
-            descriptor.cVertexInput.bufferCount = 1;
-            descriptor.cVertexInput.cBuffers[0].stride = 2 * sizeof(float);
-            descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
-            descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float2;
-
-            return descriptor;
+        void InitializeRenderPipelineDescriptor(utils::ComboRenderPipelineDescriptor* descriptor) {
+            descriptor->layout = pipelineLayout;
+            descriptor->cVertexStage.module = vsModule;
+            descriptor->cFragmentStage.module = fsModule;
+            descriptor->cVertexInput.bufferCount = 1;
+            descriptor->cVertexInput.cBuffers[0].stride = 2 * sizeof(float);
+            descriptor->cVertexInput.cBuffers[0].attributeCount = 1;
+            descriptor->cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float2;
+            descriptor->cVertexInput.cAttributes[0].shaderLocation = 0;
         }
 
         dawn::ShaderModule vsModule;
@@ -692,7 +691,8 @@ TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
     renderBundleDesc.cColorFormats[1] = dawn::TextureFormat::RG16Float;
     renderBundleDesc.cColorFormats[2] = dawn::TextureFormat::R16Sint;
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDesc = MakeRenderPipelineDescriptor();
+    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
+    InitializeRenderPipelineDescriptor(&renderPipelineDesc);
     renderPipelineDesc.colorStateCount = 3;
     renderPipelineDesc.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
     renderPipelineDesc.cColorStates[1]->format = dawn::TextureFormat::RG16Float;
@@ -740,7 +740,8 @@ TEST_F(RenderBundleValidationTest, PipelineDepthStencilFormatMismatch) {
     renderBundleDesc.cDepthStencilFormat = dawn::TextureFormat::Depth24PlusStencil8;
     renderBundleDesc.depthStencilFormat = &renderBundleDesc.cDepthStencilFormat;
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDesc = MakeRenderPipelineDescriptor();
+    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
+    InitializeRenderPipelineDescriptor(&renderPipelineDesc);
     renderPipelineDesc.colorStateCount = 1;
     renderPipelineDesc.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
     renderPipelineDesc.depthStencilState = &renderPipelineDesc.cDepthStencilState;
@@ -788,7 +789,8 @@ TEST_F(RenderBundleValidationTest, PipelineSampleCountMismatch) {
     renderBundleDesc.cColorFormats[0] = dawn::TextureFormat::RGBA8Unorm;
     renderBundleDesc.sampleCount = 4;
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDesc = MakeRenderPipelineDescriptor();
+    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
+    InitializeRenderPipelineDescriptor(&renderPipelineDesc);
     renderPipelineDesc.colorStateCount = 1;
     renderPipelineDesc.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
     renderPipelineDesc.sampleCount = 4;
