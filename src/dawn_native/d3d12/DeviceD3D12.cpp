@@ -120,6 +120,10 @@ namespace dawn_native { namespace d3d12 {
         // Call Tick() again to clear them before releasing the allocator.
         mResourceAllocator->Tick(mCompletedSerial);
 
+        if (mFenceEvent != nullptr) {
+            ::CloseHandle(mFenceEvent);
+        }
+
         ASSERT(mUsedComObjectRefs.Empty());
         ASSERT(mPendingCommands.commandList == nullptr);
     }
