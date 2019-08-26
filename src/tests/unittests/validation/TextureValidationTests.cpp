@@ -257,6 +257,13 @@ TEST_F(TextureValidationTest, NonRenderableAndOutputAttachment) {
     }
 }
 
+// Test it is an error to create a texture with format "None".
+TEST_F(TextureValidationTest, TextureFormatNone) {
+    dawn::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+    descriptor.format = dawn::TextureFormat::None;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+}
+
 // TODO(jiawei.shao@intel.com): add tests to verify we cannot create 1D or 3D textures with
 // compressed texture formats.
 class CompressedTextureFormatsValidationTests : public TextureValidationTest {

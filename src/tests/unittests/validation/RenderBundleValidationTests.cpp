@@ -587,6 +587,20 @@ TEST_F(RenderBundleValidationTest, RequiresAtLeastOneTextureFormat) {
     }
 }
 
+TEST_F(RenderBundleValidationTest, ColorFormatNone) {
+    utils::ComboRenderBundleEncoderDescriptor desc = {};
+    desc.colorFormatsCount = 1;
+    desc.cColorFormats[0] = dawn::TextureFormat::None;
+    ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+}
+
+TEST_F(RenderBundleValidationTest, DepthStencilFormatNone) {
+    utils::ComboRenderBundleEncoderDescriptor desc = {};
+    const dawn::TextureFormat kFormatNone = dawn::TextureFormat::None;
+    desc.depthStencilFormat = &kFormatNone;
+    ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+}
+
 // Test that resource usages are validated inside render bundles.
 TEST_F(RenderBundleValidationTest, UsageTracking) {
     DummyRenderPass renderPass(device);

@@ -61,11 +61,11 @@ class Type:
         self.name = Name(name, native=native)
         self.category = json_data['category']
 
-EnumValue = namedtuple('EnumValue', ['name', 'value'])
+EnumValue = namedtuple('EnumValue', ['name', 'value', 'valid'])
 class EnumType(Type):
     def __init__(self, name, json_data):
         Type.__init__(self, name, json_data)
-        self.values = [EnumValue(Name(m['name']), m['value']) for m in self.json_data['values']]
+        self.values = [EnumValue(Name(m['name']), m['value'], m.get('valid', True)) for m in self.json_data['values']]
 
         # Assert that all values are unique in enums
         all_values = set()

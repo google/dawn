@@ -26,9 +26,11 @@
 namespace dawn_native {
     MaybeError ValidateTextureDescriptor(const DeviceBase* device,
                                          const TextureDescriptor* descriptor);
-    MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
-                                             const TextureBase* texture,
+    MaybeError ValidateTextureViewDescriptor(const TextureBase* texture,
                                              const TextureViewDescriptor* descriptor);
+    TextureViewDescriptor GetTextureViewDescriptorWithDefaults(
+        const TextureBase* texture,
+        const TextureViewDescriptor* descriptor);
 
     bool IsValidSampleCount(uint32_t sampleCount);
 

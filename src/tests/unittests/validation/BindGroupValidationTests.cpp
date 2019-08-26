@@ -221,7 +221,7 @@ TEST_F(BindGroupValidationTest, TextureBindingType) {
         viewDesc.baseMipLevel = 0;
         viewDesc.mipLevelCount = 0;
         viewDesc.baseArrayLayer = 0;
-        viewDesc.arrayLayerCount = 0;
+        viewDesc.arrayLayerCount = 1000;
 
         dawn::TextureView errorView;
         ASSERT_DEVICE_ERROR(errorView = mSampledTexture.CreateView(&viewDesc));

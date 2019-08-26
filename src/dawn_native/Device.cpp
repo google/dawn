@@ -660,8 +660,10 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateTextureViewInternal(TextureViewBase** result,
                                                      TextureBase* texture,
                                                      const TextureViewDescriptor* descriptor) {
-        DAWN_TRY(ValidateTextureViewDescriptor(this, texture, descriptor));
-        DAWN_TRY_ASSIGN(*result, CreateTextureViewImpl(texture, descriptor));
+        DAWN_TRY(ValidateObject(texture));
+        TextureViewDescriptor desc = GetTextureViewDescriptorWithDefaults(texture, descriptor);
+        DAWN_TRY(ValidateTextureViewDescriptor(texture, &desc));
+        DAWN_TRY_ASSIGN(*result, CreateTextureViewImpl(texture, &desc));
         return {};
     }
 

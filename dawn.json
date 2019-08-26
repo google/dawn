@@ -1137,7 +1137,7 @@
                 "name": "create view",
                 "returns": "texture view",
                 "args": [
-                    {"name": "descriptor", "type": "texture view descriptor", "annotation": "const*"}
+                    {"name": "descriptor", "type": "texture view descriptor", "annotation": "const*", "optional": true}
                 ]
             },
             {
@@ -1252,7 +1252,8 @@
             {"value": 48, "name": "BC6H RGB ufloat"},
             {"value": 49, "name": "BC6H RGB sfloat"},
             {"value": 50, "name": "BC7 RGBA unorm"},
-            {"value": 51, "name": "BC7 RGBA unorm srgb"}
+            {"value": 51, "name": "BC7 RGBA unorm srgb"},
+            {"value": 4294967295, "name": "none", "valid": false}
         ]
     },
     "texture usage bit": {
@@ -1271,12 +1272,12 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "format", "type": "texture format"},
-            {"name": "dimension", "type": "texture view dimension"},
+            {"name": "format", "type": "texture format", "default": "none"},
+            {"name": "dimension", "type": "texture view dimension", "default": "none"},
             {"name": "base mip level", "type": "uint32_t", "default": "0"},
-            {"name": "mip level count", "type": "uint32_t", "default": "1"},
+            {"name": "mip level count", "type": "uint32_t", "default": "0"},
             {"name": "base array layer", "type": "uint32_t", "default": "0"},
-            {"name": "array layer count", "type": "uint32_t", "default": "1"}
+            {"name": "array layer count", "type": "uint32_t", "default": "0"}
         ],
         "TODO": [
             "jiawei.shao@intel.com: Allow choosing the aspect (depth vs. stencil)"
@@ -1293,7 +1294,8 @@
             {"value": 2, "name": "2D array"},
             {"value": 3, "name": "cube"},
             {"value": 4, "name": "cube array"},
-            {"value": 5, "name": "3D"}
+            {"value": 5, "name": "3D"},
+            {"value": 4294967295, "name": "none", "valid": false}
         ],
         "TODO": [
             "jiawei.shao@intel.com: support 1D and 3D texture views"
