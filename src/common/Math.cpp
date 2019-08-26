@@ -61,7 +61,14 @@ uint32_t Log2(uint64_t value) {
 
 uint64_t NextPowerOfTwo(uint64_t n) {
 #if defined(DAWN_COMPILER_MSVC)
-    return n <= 1 ? 1 : 1ull << (64 - __lzcnt64(n - 1));
+    if (n <= 1) {
+        return 1;
+    }
+
+    unsigned long firstBitIndex = 0ul;
+    unsigned char ret = _BitScanReverse64(&firstBitIndex, n - 1);
+    ASSERT(ret != 0);
+    return 1ull << (firstBitIndex + 1);
 #else
     return n <= 1 ? 1 : 1ull << (64 - __builtin_clzll(n - 1));
 #endif
