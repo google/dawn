@@ -66,7 +66,7 @@
             { "name": "request serial", "type": "uint32_t" },
             { "name": "status", "type": "uint32_t" }
         ],
-        "device error callback": [
+        "device uncaptured error callback": [
             { "name": "type", "type": "error type"},
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],

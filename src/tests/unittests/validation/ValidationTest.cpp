@@ -56,7 +56,7 @@ dawn::Device ValidationTest::CreateDeviceFromAdapter(
         deviceToTest = dawn::Device::Acquire(adapterToTest.CreateDevice(&descriptor));
     }
 
-    deviceToTest.SetErrorCallback(ValidationTest::OnDeviceError, this);
+    deviceToTest.SetUncapturedErrorCallback(ValidationTest::OnDeviceError, this);
     return deviceToTest;
 }
 

@@ -29,7 +29,7 @@ namespace dawn_wire { namespace client {
 
         Client* GetClient();
         void HandleError(DawnErrorType errorType, const char* message);
-        void SetErrorCallback(DawnErrorCallback errorCallback, void* errorUserdata);
+        void SetUncapturedErrorCallback(DawnErrorCallback errorCallback, void* errorUserdata);
 
       private:
         Client* mClient = nullptr;

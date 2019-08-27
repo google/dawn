@@ -16,13 +16,13 @@
 
 namespace dawn_wire { namespace server {
 
-    void Server::ForwardDeviceError(DawnErrorType type, const char* message, void* userdata) {
+    void Server::ForwardUncapturedError(DawnErrorType type, const char* message, void* userdata) {
         auto server = static_cast<Server*>(userdata);
-        server->OnDeviceError(type, message);
+        server->OnUncapturedError(type, message);
     }
 
-    void Server::OnDeviceError(DawnErrorType type, const char* message) {
-        ReturnDeviceErrorCallbackCmd cmd;
+    void Server::OnUncapturedError(DawnErrorType type, const char* message) {
+        ReturnDeviceUncapturedErrorCallbackCmd cmd;
         cmd.type = type;
         cmd.message = message;
 

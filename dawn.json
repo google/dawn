@@ -522,7 +522,7 @@
                 "name": "tick"
             },
             {
-                "name": "set error callback",
+                "name": "set uncaptured error callback",
                 "args": [
                     {"name": "callback", "type": "error callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}

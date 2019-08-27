@@ -94,7 +94,7 @@ namespace dawn_native {
         }
     }
 
-    void DeviceBase::SetErrorCallback(dawn::ErrorCallback callback, void* userdata) {
+    void DeviceBase::SetUncapturedErrorCallback(dawn::ErrorCallback callback, void* userdata) {
         mErrorCallback = callback;
         mErrorUserdata = userdata;
     }

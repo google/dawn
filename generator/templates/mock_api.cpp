@@ -50,14 +50,14 @@ void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, DawnDevice* d
     {% endfor %}
 }
 
-void ProcTableAsClass::DeviceSetErrorCallback(DawnDevice self,
+void ProcTableAsClass::DeviceSetUncapturedErrorCallback(DawnDevice self,
                                               DawnErrorCallback callback,
                                               void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->deviceErrorCallback = callback;
     object->userdata1 = userdata;
 
-    OnDeviceSetErrorCallback(self, callback, userdata);
+    OnDeviceSetUncapturedErrorCallback(self, callback, userdata);
 }
 
 void ProcTableAsClass::DeviceCreateBufferMappedAsync(DawnDevice self,

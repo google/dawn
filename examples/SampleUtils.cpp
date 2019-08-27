@@ -161,7 +161,7 @@ dawn::Device CreateCppDawnDevice() {
     }
 
     dawnSetProcs(&procs);
-    procs.deviceSetErrorCallback(cDevice, PrintDeviceError, nullptr);
+    procs.deviceSetUncapturedErrorCallback(cDevice, PrintDeviceError, nullptr);
     return dawn::Device::Acquire(cDevice);
 }
 

@@ -458,7 +458,7 @@ void DawnTest::SetUp() {
     device = dawn::Device::Acquire(cDevice);
     queue = device.CreateQueue();
 
-    device.SetErrorCallback(OnDeviceError, this);
+    device.SetUncapturedErrorCallback(OnDeviceError, this);
 }
 
 void DawnTest::TearDown() {

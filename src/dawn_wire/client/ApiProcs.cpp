@@ -413,11 +413,11 @@ namespace dawn_wire { namespace client {
     void ClientDeviceRelease(DawnDevice) {
     }
 
-    void ClientDeviceSetErrorCallback(DawnDevice cSelf,
-                                      DawnErrorCallback callback,
-                                      void* userdata) {
+    void ClientDeviceSetUncapturedErrorCallback(DawnDevice cSelf,
+                                                DawnErrorCallback callback,
+                                                void* userdata) {
         Device* device = reinterpret_cast<Device*>(cSelf);
-        device->SetErrorCallback(callback, userdata);
+        device->SetUncapturedErrorCallback(callback, userdata);
     }
 
 }}  // namespace dawn_wire::client

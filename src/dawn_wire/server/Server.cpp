@@ -31,7 +31,7 @@ namespace dawn_wire { namespace server {
         auto* deviceData = DeviceObjects().Allocate(1);
         deviceData->handle = device;
 
-        mProcs.deviceSetErrorCallback(device, ForwardDeviceError, this);
+        mProcs.deviceSetUncapturedErrorCallback(device, ForwardUncapturedError, this);
     }
 
     Server::~Server() {

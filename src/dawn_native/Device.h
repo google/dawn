@@ -148,7 +148,7 @@ namespace dawn_native {
 
         void Tick();
 
-        void SetErrorCallback(dawn::ErrorCallback callback, void* userdata);
+        void SetUncapturedErrorCallback(dawn::ErrorCallback callback, void* userdata);
         void Reference();
         void Release();
 

@@ -59,7 +59,7 @@ class WireErrorCallbackTests : public WireTest {
 
 // Test the return wire for device error callbacks
 TEST_F(WireErrorCallbackTests, DeviceErrorCallback) {
-    dawnDeviceSetErrorCallback(device, ToMockDeviceErrorCallback, this);
+    dawnDeviceSetUncapturedErrorCallback(device, ToMockDeviceErrorCallback, this);
 
     // Setting the error callback should stay on the client side and do nothing
     FlushClient();
