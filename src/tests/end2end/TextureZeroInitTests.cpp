@@ -312,8 +312,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
         kDepthStencilFormat);
     dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
-    utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateDefaultView()},
-                                                          depthStencilTexture.CreateDefaultView());
+    utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateView()},
+                                                          depthStencilTexture.CreateView());
     renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Load;
     renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Clear;
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearStencil = 0;
@@ -347,8 +347,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
         kDepthStencilFormat);
     dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
-    utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateDefaultView()},
-                                                          depthStencilTexture.CreateDefaultView());
+    utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateView()},
+                                                          depthStencilTexture.CreateView());
     renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.0f;
     renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Load;
@@ -382,8 +382,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
         kDepthStencilFormat);
     dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
-    utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateDefaultView()},
-                                                          depthStencilTexture.CreateDefaultView());
+    utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateView()},
+                                                          depthStencilTexture.CreateView());
     renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Load;
     renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Load;
 
@@ -467,12 +467,12 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     dawn::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     // Create bindgroup
-    dawn::BindGroup bindGroup = utils::MakeBindGroup(
-        device, bindGroupLayout, {{0, sampler}, {1, texture.CreateDefaultView()}});
+    dawn::BindGroup bindGroup =
+        utils::MakeBindGroup(device, bindGroupLayout, {{0, sampler}, {1, texture.CreateView()}});
 
     // Encode pass and submit
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    utils::ComboRenderPassDescriptor renderPassDesc({renderTexture.CreateDefaultView()});
+    utils::ComboRenderPassDescriptor renderPassDesc({renderTexture.CreateView()});
     renderPassDesc.cColorAttachmentsInfoPtr[0]->clearColor = {1.0, 1.0, 1.0, 1.0};
     renderPassDesc.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
@@ -540,7 +540,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     // Create bindgroup
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, bindGroupLayout,
-        {{0, texture.CreateDefaultView()}, {1, bufferTex, 0, bufferSize}, {2, sampler}});
+        {{0, texture.CreateView()}, {1, bufferTex, 0, bufferSize}, {2, sampler}});
 
     // Encode the pass and submit
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();

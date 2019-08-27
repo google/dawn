@@ -77,7 +77,7 @@ class CullingTest : public DawnTest {
                 bool isCWTriangleCulled) {
         dawn::Texture colorTexture = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
 
-        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateDefaultView()});
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
         renderPassDescriptor.cColorAttachmentsInfoPtr[0]->clearColor = {0.0, 0.0, 1.0, 1.0};
         renderPassDescriptor.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
 

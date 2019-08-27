@@ -114,7 +114,7 @@ protected:
         dawn::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
 
-        mTextureView = texture.CreateDefaultView();
+        mTextureView = texture.CreateView();
     }
 
     void TestAddressModes(AddressModeTestCase u, AddressModeTestCase v, AddressModeTestCase w) {

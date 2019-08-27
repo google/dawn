@@ -48,7 +48,7 @@ class BindGroupValidationTest : public ValidationTest {
             descriptor.mipLevelCount = 1;
             descriptor.usage = dawn::TextureUsage::Sampled;
             mSampledTexture = device.CreateTexture(&descriptor);
-            mSampledTextureView = mSampledTexture.CreateDefaultView();
+            mSampledTextureView = mSampledTexture.CreateView();
         }
     }
 
@@ -295,7 +295,7 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
     descriptor.mipLevelCount = 1;
     descriptor.usage = dawn::TextureUsage::OutputAttachment;
     dawn::Texture outputTexture = device.CreateTexture(&descriptor);
-    dawn::TextureView outputTextureView = outputTexture.CreateDefaultView();
+    dawn::TextureView outputTextureView = outputTexture.CreateView();
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, outputTextureView}}));
 }
 
@@ -318,7 +318,7 @@ TEST_F(BindGroupValidationTest, TextureComponentType) {
     descriptor.mipLevelCount = 1;
     descriptor.usage = dawn::TextureUsage::Sampled;
     dawn::Texture uintTexture = device.CreateTexture(&descriptor);
-    dawn::TextureView uintTextureView = uintTexture.CreateDefaultView();
+    dawn::TextureView uintTextureView = uintTexture.CreateView();
 
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, uintTextureView}}));
 }

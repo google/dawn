@@ -389,8 +389,7 @@
                 ]
             },
             {
-                "name": "end pass",
-                "TODO": "This returns the top-level encoder in the WebGPU IDL"
+                "name": "end pass"
             }
         ]
     },
@@ -1008,8 +1007,7 @@
                 ]
             },
             {
-                "name": "end pass",
-                "TODO": "This returns the top-level encoder in the WebGPU IDL"
+                "name": "end pass"
             }
         ]
     },
@@ -1129,10 +1127,6 @@
     "texture": {
         "category": "object",
         "methods": [
-            {
-                "name": "create default view",
-                "returns": "texture view"
-            },
             {
                 "name": "create view",
                 "returns": "texture view",

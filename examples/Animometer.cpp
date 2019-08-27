@@ -152,7 +152,7 @@ void frame() {
     }
     ubo.SetSubData(0, kNumTriangles * sizeof(ShaderData), shaderData.data());
 
-    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()});
+    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()});
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);

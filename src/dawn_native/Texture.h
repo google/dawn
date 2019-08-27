@@ -80,7 +80,6 @@ namespace dawn_native {
         Extent3D GetMipLevelVirtualSize(uint32_t level) const;
 
         // Dawn API
-        TextureViewBase* CreateDefaultView();
         TextureViewBase* CreateView(const TextureViewDescriptor* descriptor);
         void Destroy();
 

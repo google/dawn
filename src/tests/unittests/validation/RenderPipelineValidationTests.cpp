@@ -166,7 +166,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
             textureDescriptor.sampleCount = kMultisampledCount;
             dawn::Texture multisampledColorTexture = device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
-                {multisampledColorTexture.CreateDefaultView()});
+                {multisampledColorTexture.CreateView()});
 
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -183,7 +183,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
             dawn::Texture multisampledDepthStencilTexture =
                 device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
-                {}, multisampledDepthStencilTexture.CreateDefaultView());
+                {}, multisampledDepthStencilTexture.CreateView());
 
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -202,7 +202,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
             textureDescriptor.sampleCount = kMultisampledCount;
             dawn::Texture multisampledColorTexture = device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
-                {multisampledColorTexture.CreateDefaultView()});
+                {multisampledColorTexture.CreateView()});
 
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -219,7 +219,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
             dawn::Texture multisampledDepthStencilTexture =
                 device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
-                {}, multisampledDepthStencilTexture.CreateDefaultView());
+                {}, multisampledDepthStencilTexture.CreateView());
 
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -238,7 +238,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
             textureDescriptor.sampleCount = 1;
             dawn::Texture nonMultisampledColorTexture = device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor nonMultisampledRenderPassDescriptor(
-                { nonMultisampledColorTexture.CreateDefaultView() });
+                {nonMultisampledColorTexture.CreateView()});
 
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             dawn::RenderPassEncoder renderPass =
@@ -256,7 +256,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
             dawn::Texture multisampledDepthStencilTexture =
                 device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
-                {}, multisampledDepthStencilTexture.CreateDefaultView());
+                {}, multisampledDepthStencilTexture.CreateView());
 
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);

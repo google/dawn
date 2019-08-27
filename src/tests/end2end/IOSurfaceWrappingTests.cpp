@@ -251,7 +251,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
             textureDescriptor.usage = dawn::TextureUsage::Sampled;
             dawn::Texture wrappingTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
 
-            dawn::TextureView textureView = wrappingTexture.CreateDefaultView();
+            dawn::TextureView textureView = wrappingTexture.CreateView();
 
             dawn::SamplerDescriptor samplerDescriptor = utils::GetDefaultSamplerDescriptor();
             dawn::Sampler sampler = device.CreateSampler(&samplerDescriptor);
@@ -344,7 +344,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         textureDescriptor.usage = dawn::TextureUsage::OutputAttachment;
         dawn::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
 
-        dawn::TextureView ioSurfaceView = ioSurfaceTexture.CreateDefaultView();
+        dawn::TextureView ioSurfaceView = ioSurfaceTexture.CreateView();
 
         utils::ComboRenderPassDescriptor renderPassDescriptor({ioSurfaceView}, {});
         renderPassDescriptor.cColorAttachmentsInfoPtr[0]->clearColor = {1 / 255.0f, 2 / 255.0f,

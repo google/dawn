@@ -279,8 +279,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::Texture backbuffer, size_t i
     }
 
     {
-        utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()},
-                                                    depthStencilView);
+        utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()}, depthStencilView);
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(renderPipeline);
         pass.SetVertexBuffers(0, 1, &bufferDst, zeroOffsets);

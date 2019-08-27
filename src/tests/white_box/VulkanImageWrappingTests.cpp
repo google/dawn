@@ -404,7 +404,7 @@ class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
 
     // Clear a texture on a given device
     void ClearImage(dawn::Device device, dawn::Texture wrappedTexture, dawn::Color clearColor) {
-        dawn::TextureView wrappedView = wrappedTexture.CreateDefaultView();
+        dawn::TextureView wrappedView = wrappedTexture.CreateView();
 
         // Submit a clear operation
         utils::ComboRenderPassDescriptor renderPassDescriptor({wrappedView}, {});

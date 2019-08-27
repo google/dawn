@@ -139,7 +139,7 @@ void init() {
 
     pipeline = device.CreateRenderPipeline(&descriptor);
 
-    dawn::TextureView view = texture.CreateDefaultView();
+    dawn::TextureView view = texture.CreateView();
 
     bindGroup = utils::MakeBindGroup(device, bgl, {
         {0, sampler},
@@ -154,8 +154,7 @@ void frame() {
     if (s.b >= 1.0f) {s.b = 0.0f;}
 
     dawn::Texture backbuffer = swapchain.GetNextTexture();
-    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateDefaultView()},
-                                                depthStencilView);
+    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()}, depthStencilView);
 
     static const uint64_t vertexBufferOffsets[1] = {0};
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();

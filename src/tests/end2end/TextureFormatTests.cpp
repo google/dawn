@@ -280,8 +280,8 @@ class TextureFormatTest : public DawnTest {
             CreateSamplePipeline(sampleFormatInfo, renderFormatInfo, bgl);
         dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
         dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
-        dawn::BindGroup bindGroup = utils::MakeBindGroup(
-            device, bgl, {{0, sampler}, {1, sampleTexture.CreateDefaultView()}});
+        dawn::BindGroup bindGroup =
+            utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, sampleTexture.CreateView()}});
 
         // Encode commands for the test that fill texture, sample it to render to renderTarget then
         // copy renderTarget in a buffer so we can read it easily.
@@ -295,7 +295,7 @@ class TextureFormatTest : public DawnTest {
             encoder.CopyBufferToTexture(&bufferView, &textureView, &extent);
         }
 
-        utils::ComboRenderPassDescriptor renderPassDesc({renderTarget.CreateDefaultView()});
+        utils::ComboRenderPassDescriptor renderPassDesc({renderTarget.CreateView()});
         dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDesc);
         renderPass.SetPipeline(pipeline);
         renderPass.SetBindGroup(0, bindGroup, 0, nullptr);

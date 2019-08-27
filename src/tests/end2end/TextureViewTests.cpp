@@ -357,7 +357,7 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     constexpr uint32_t kMipLevels = 1;
     initTexture(kLayers, kMipLevels);
 
-    dawn::TextureView textureView = mTexture.CreateDefaultView();
+    dawn::TextureView textureView = mTexture.CreateView();
 
     const char* fragmentShader = R"(
             #version 450

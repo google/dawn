@@ -112,7 +112,7 @@ class ViewportTest : public DawnTest {
         // Note that we may explicitly call SetViewport() in this pass
         {
             utils::ComboRenderPassDescriptor renderPassDescriptor1(
-                {colorTexture1.CreateDefaultView()}, depthStencilTexture1.CreateDefaultView());
+                {colorTexture1.CreateView()}, depthStencilTexture1.CreateView());
             renderPassDescriptor1.cColorAttachmentsInfoPtr[0]->clearColor = {0.0, 0.0, 1.0, 1.0};
             renderPassDescriptor1.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
 
@@ -137,7 +137,7 @@ class ViewportTest : public DawnTest {
         // (0, 0, rendertarget's width, rendertarget's height, 0.0, 1.0) by default.
         {
             utils::ComboRenderPassDescriptor renderPassDescriptor2(
-                {colorTexture2.CreateDefaultView()}, depthStencilTexture2.CreateDefaultView());
+                {colorTexture2.CreateView()}, depthStencilTexture2.CreateView());
             renderPassDescriptor2.cColorAttachmentsInfoPtr[0]->clearColor = {0.0, 0.0, 1.0, 1.0};
             renderPassDescriptor2.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Clear;
 
