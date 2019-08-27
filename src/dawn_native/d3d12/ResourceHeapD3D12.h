@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn Authors
+// Copyright 2019 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,30 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_STAGINGBUFFERD3D12_H_
-#define DAWNNATIVE_STAGINGBUFFERD3D12_H_
+#ifndef DAWNNATIVE_D3D12_RESOURCEHEAPD3D12_H_
+#define DAWNNATIVE_D3D12_RESOURCEHEAPD3D12_H_
 
-#include "dawn_native/ResourceMemoryAllocation.h"
-#include "dawn_native/StagingBuffer.h"
+#include "dawn_native/ResourceHeap.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
 
-    class Device;
-
-    class StagingBuffer : public StagingBufferBase {
+    // Wrapper for physical memory used with or without a resource object.
+    class ResourceHeap : public ResourceHeapBase {
       public:
-        StagingBuffer(size_t size, Device* device);
-        ~StagingBuffer();
+        ResourceHeap(ComPtr<ID3D12Resource> resource);
 
-        ID3D12Resource* GetResource() const;
+        ~ResourceHeap() = default;
 
-        MaybeError Initialize() override;
+        ComPtr<ID3D12Resource> GetD3D12Resource() const;
+        D3D12_GPU_VIRTUAL_ADDRESS GetGPUPointer() const;
 
       private:
-        Device* mDevice;
-        ResourceMemoryAllocation mUploadHeap;
+        ComPtr<ID3D12Resource> mResource;
     };
 }}  // namespace dawn_native::d3d12
 
-#endif  // DAWNNATIVE_STAGINGBUFFERD3D12_H_
+#endif  // DAWNNATIVE_D3D12_RESOURCEHEAPD3D12_H_

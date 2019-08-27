@@ -14,7 +14,7 @@
 
 #include "dawn_native/d3d12/StagingBufferD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
-#include "dawn_native/d3d12/ResourceAllocator.h"
+#include "dawn_native/d3d12/ResourceHeapD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -36,12 +36,11 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-        mUploadHeap = mDevice->GetResourceAllocator()->Allocate(
-            D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor, D3D12_RESOURCE_STATE_GENERIC_READ);
+        DAWN_TRY_ASSIGN(mUploadHeap, mDevice->AllocateMemory(
+                                         D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor,
+                                         D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_FLAG_NONE));
 
-        // TODO(bryan.bernhart@intel.com): Record the GPU pointer for generic non-upload usage.
-
-        if (FAILED(mUploadHeap->Map(0, nullptr, &mMappedPointer))) {
+        if (FAILED(GetResource()->Map(0, nullptr, &mMappedPointer))) {
             return DAWN_DEVICE_LOST_ERROR("Unable to map staging buffer.");
         }
 
@@ -50,14 +49,14 @@ namespace dawn_native { namespace d3d12 {
 
     StagingBuffer::~StagingBuffer() {
         // Invalidate the CPU virtual address & flush cache (if needed).
-        mUploadHeap->Unmap(0, nullptr);
+        GetResource()->Unmap(0, nullptr);
         mMappedPointer = nullptr;
 
-        mDevice->GetResourceAllocator()->Release(mUploadHeap);
+        mDevice->DeallocateMemory(mUploadHeap);
     }
 
     ID3D12Resource* StagingBuffer::GetResource() const {
-        return mUploadHeap.Get();
+        return ToBackend(mUploadHeap.GetResourceHeap())->GetD3D12Resource().Get();
     }
 
 }}  // namespace dawn_native::d3d12
