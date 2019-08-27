@@ -36,24 +36,24 @@ namespace dawn_native { namespace vulkan {
 
         if (mDevice->fn.CreateBuffer(mDevice->GetVkDevice(), &createInfo, nullptr, &mBuffer) !=
             VK_SUCCESS) {
-            return DAWN_CONTEXT_LOST_ERROR("Unable to create staging buffer.");
+            return DAWN_DEVICE_LOST_ERROR("Unable to create staging buffer.");
         }
 
         VkMemoryRequirements requirements;
         mDevice->fn.GetBufferMemoryRequirements(mDevice->GetVkDevice(), mBuffer, &requirements);
 
         if (!mDevice->GetMemoryAllocator()->Allocate(requirements, true, &mAllocation)) {
-            return DAWN_CONTEXT_LOST_ERROR("Unable to allocate memory for staging buffer.");
+            return DAWN_DEVICE_LOST_ERROR("Unable to allocate memory for staging buffer.");
         }
 
         if (mDevice->fn.BindBufferMemory(mDevice->GetVkDevice(), mBuffer, mAllocation.GetMemory(),
                                          mAllocation.GetMemoryOffset()) != VK_SUCCESS) {
-            return DAWN_CONTEXT_LOST_ERROR("Unable to attach memory to the staging buffer.");
+            return DAWN_DEVICE_LOST_ERROR("Unable to attach memory to the staging buffer.");
         }
 
         mMappedPointer = mAllocation.GetMappedPointer();
         if (mMappedPointer == nullptr) {
-            return DAWN_CONTEXT_LOST_ERROR("Unable to map staging buffer.");
+            return DAWN_DEVICE_LOST_ERROR("Unable to map staging buffer.");
         }
 
         return {};

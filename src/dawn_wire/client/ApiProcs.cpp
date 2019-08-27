@@ -59,7 +59,7 @@ namespace dawn_wire { namespace client {
         MemoryTransferService::ReadHandle* readHandle =
             buffer->device->GetClient()->GetMemoryTransferService()->CreateReadHandle(buffer->size);
         if (readHandle == nullptr) {
-            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, nullptr, 0, userdata);
+            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, userdata);
             return;
         }
 
@@ -90,7 +90,7 @@ namespace dawn_wire { namespace client {
             buffer->device->GetClient()->GetMemoryTransferService()->CreateWriteHandle(
                 buffer->size);
         if (writeHandle == nullptr) {
-            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, nullptr, 0, userdata);
+            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, userdata);
             return;
         }
 
@@ -223,7 +223,7 @@ namespace dawn_wire { namespace client {
             result.buffer = reinterpret_cast<DawnBuffer>(buffer);
             result.data = nullptr;
             result.dataLength = 0;
-            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, result, userdata);
+            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, result, userdata);
             return;
         }
 

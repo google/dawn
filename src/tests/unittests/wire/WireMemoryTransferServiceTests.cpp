@@ -513,9 +513,9 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadHandleCreationFailure) {
     MockReadHandleCreationFailure();
 
     // Failed creation of a ReadHandle is a fatal failure and the client synchronously receives a
-    // CONTEXT_LOST callback.
+    // DEVICE_LOST callback.
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, nullptr, 0, _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, _))
         .Times(1);
 
     dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
@@ -580,9 +580,9 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeInitialDataFailur
     MockClientReadHandleDeserializeInitializeFailure(clientHandle);
 
     // Failed deserialization is a fatal failure and the client synchronously receives a
-    // CONTEXT_LOST callback.
+    // DEVICE_LOST callback.
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, nullptr, 0, _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, _))
         .Times(1);
 
     // The handle will be destroyed since deserializing failed.
@@ -702,9 +702,9 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleCreationFailure) {
     MockWriteHandleCreationFailure();
 
     // Failed creation of a WriteHandle is a fatal failure and the client synchronously receives a
-    // CONTEXT_LOST callback.
+    // DEVICE_LOST callback.
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, nullptr, 0, _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, _))
         .Times(1);
 
     dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
@@ -765,9 +765,9 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleOpenFailure) {
     // Mock a failure.
     MockClientWriteHandleOpenFailure(clientHandle);
 
-    // Failing to open a handle is a fatal failure and the client receives a CONTEXT_LOST callback.
+    // Failing to open a handle is a fatal failure and the client receives a DEVICE_LOST callback.
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, nullptr, 0, _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, _))
         .Times(1);
 
     // Since opening the handle fails, it gets destroyed immediately.
@@ -885,9 +885,9 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncWriteHandleCreatio
     descriptor.size = sizeof(mBufferContent);
 
     // Failed creation of a WriteHandle is a fatal failure. The client synchronously receives
-    // a CONTEXT_LOST callback.
+    // a DEVICE_LOST callback.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, _, nullptr, 0, _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, _, nullptr, 0, _))
         .Times(1);
 
     dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback, nullptr);
@@ -934,9 +934,9 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncHandleOpenFailure)
     // Since the mapping succeeds, the client opens the WriteHandle.
     MockClientWriteHandleOpenFailure(clientHandle);
 
-    // Failing to open a handle is a fatal failure. The client receives a CONTEXT_LOST callback.
+    // Failing to open a handle is a fatal failure. The client receives a DEVICE_LOST callback.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, _, nullptr, 0, _))
+                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, _, nullptr, 0, _))
         .Times(1);
 
     // Since opening the handle fails, it is destroyed immediately.

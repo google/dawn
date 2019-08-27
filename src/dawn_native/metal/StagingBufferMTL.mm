@@ -32,7 +32,7 @@ namespace dawn_native { namespace metal {
 
         mMappedPointer = [mBuffer contents];
         if (mMappedPointer == nullptr) {
-            return DAWN_CONTEXT_LOST_ERROR("Unable to map staging buffer.");
+            return DAWN_DEVICE_LOST_ERROR("Unable to map staging buffer.");
         }
 
         return {};

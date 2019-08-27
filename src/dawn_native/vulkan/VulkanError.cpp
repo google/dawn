@@ -67,7 +67,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         std::string message = std::string(context) + " failed with " + VkResultAsString(result);
-        return DAWN_CONTEXT_LOST_ERROR(message);
+        return DAWN_DEVICE_LOST_ERROR(message);
     }
 
 }}  // namespace dawn_native::vulkan

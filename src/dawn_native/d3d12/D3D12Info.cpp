@@ -33,7 +33,7 @@ namespace dawn_native { namespace d3d12 {
             D3D12_FEATURE_DATA_ARCHITECTURE arch = {};
             if (FAILED(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &arch,
                                                                 sizeof(arch)))) {
-                return DAWN_CONTEXT_LOST_ERROR("CheckFeatureSupport failed");
+                return DAWN_DEVICE_LOST_ERROR("CheckFeatureSupport failed");
             }
 
             info.isUMA = arch.UMA;

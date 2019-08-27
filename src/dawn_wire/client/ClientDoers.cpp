@@ -88,7 +88,7 @@ namespace dawn_wire { namespace client {
         if (!GetMappedData()) {
             // Dawn promises that all callbacks are called in finite time. Even if a fatal error
             // occurs, the callback is called.
-            request.readCallback(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, nullptr, 0,
+            request.readCallback(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0,
                                  request.userdata);
             return false;
         } else {
@@ -152,7 +152,7 @@ namespace dawn_wire { namespace client {
         if (!GetMappedData()) {
             // Dawn promises that all callbacks are called in finite time. Even if a fatal error
             // occurs, the callback is called.
-            request.writeCallback(DAWN_BUFFER_MAP_ASYNC_STATUS_CONTEXT_LOST, nullptr, 0,
+            request.writeCallback(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0,
                                   request.userdata);
             return false;
         } else {

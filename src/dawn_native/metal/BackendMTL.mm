@@ -52,7 +52,7 @@ namespace dawn_native { namespace metal {
             }
 
             if (vendorId == 0) {
-                return DAWN_CONTEXT_LOST_ERROR("Failed to find vendor id with the device");
+                return DAWN_DEVICE_LOST_ERROR("Failed to find vendor id with the device");
             }
 
             // Set vendor id with 0
@@ -102,7 +102,7 @@ namespace dawn_native { namespace metal {
             // Get a matching dictionary for the IOGraphicsAccelerator2
             CFMutableDictionaryRef matchingDict = IORegistryEntryIDMatching([device registryID]);
             if (matchingDict == nullptr) {
-                return DAWN_CONTEXT_LOST_ERROR("Failed to create the matching dict for the device");
+                return DAWN_DEVICE_LOST_ERROR("Failed to create the matching dict for the device");
             }
 
             // IOServiceGetMatchingService will consume the reference on the matching dictionary,
@@ -110,7 +110,7 @@ namespace dawn_native { namespace metal {
             io_registry_entry_t acceleratorEntry =
                 IOServiceGetMatchingService(kIOMasterPortDefault, matchingDict);
             if (acceleratorEntry == IO_OBJECT_NULL) {
-                return DAWN_CONTEXT_LOST_ERROR(
+                return DAWN_DEVICE_LOST_ERROR(
                     "Failed to get the IO registry entry for the accelerator");
             }
 
@@ -119,8 +119,7 @@ namespace dawn_native { namespace metal {
             if (IORegistryEntryGetParentEntry(acceleratorEntry, kIOServicePlane, &deviceEntry) !=
                 kIOReturnSuccess) {
                 IOObjectRelease(acceleratorEntry);
-                return DAWN_CONTEXT_LOST_ERROR(
-                    "Failed to get the IO registry entry for the device");
+                return DAWN_DEVICE_LOST_ERROR("Failed to get the IO registry entry for the device");
             }
 
             ASSERT(deviceEntry != IO_OBJECT_NULL);

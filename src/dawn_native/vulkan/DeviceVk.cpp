@@ -397,7 +397,7 @@ namespace dawn_native { namespace vulkan {
             }
 
             if (universalQueueFamily == -1) {
-                return DAWN_CONTEXT_LOST_ERROR("No universal queue family");
+                return DAWN_DEVICE_LOST_ERROR("No universal queue family");
             }
             mQueueFamily = static_cast<uint32_t>(universalQueueFamily);
         }

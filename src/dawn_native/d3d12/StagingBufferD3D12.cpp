@@ -42,7 +42,7 @@ namespace dawn_native { namespace d3d12 {
         // TODO(bryan.bernhart@intel.com): Record the GPU pointer for generic non-upload usage.
 
         if (FAILED(mUploadHeap->Map(0, nullptr, &mMappedPointer))) {
-            return DAWN_CONTEXT_LOST_ERROR("Unable to map staging buffer.");
+            return DAWN_DEVICE_LOST_ERROR("Unable to map staging buffer.");
         }
 
         return {};

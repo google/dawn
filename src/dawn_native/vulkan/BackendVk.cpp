@@ -61,7 +61,7 @@ namespace dawn_native { namespace vulkan {
 
     MaybeError Backend::Initialize() {
         if (!mVulkanLib.Open(kVulkanLibName)) {
-            return DAWN_CONTEXT_LOST_ERROR(std::string("Couldn't open ") + kVulkanLibName);
+            return DAWN_DEVICE_LOST_ERROR(std::string("Couldn't open ") + kVulkanLibName);
         }
 
         DAWN_TRY(mFunctions.LoadGlobalProcs(mVulkanLib));
