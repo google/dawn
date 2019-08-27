@@ -28,7 +28,6 @@ namespace utils {
         ComboRenderBundleEncoderDescriptor();
 
         std::array<dawn::TextureFormat, kMaxColorAttachments> cColorFormats;
-        dawn::TextureFormat cDepthStencilFormat;
     };
 
 }  // namespace utils

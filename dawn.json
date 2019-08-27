@@ -857,7 +857,7 @@
         "members": [
             {"name": "color formats count", "type": "uint32_t"},
             {"name": "color formats", "type": "texture format", "annotation": "const*", "length": "color formats count"},
-            {"name": "depth stencil format", "type": "texture format", "annotation": "const*", "optional": true},
+            {"name": "depth stencil format", "type": "texture format", "default": "none"},
             {"name": "sample count", "type": "uint32_t", "default": "1"}
         ]
     },

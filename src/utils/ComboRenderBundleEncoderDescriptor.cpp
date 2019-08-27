@@ -21,8 +21,6 @@ namespace utils {
     ComboRenderBundleEncoderDescriptor::ComboRenderBundleEncoderDescriptor() {
         dawn::RenderBundleEncoderDescriptor* descriptor = this;
 
-        descriptor->sampleCount = 1;
-        descriptor->depthStencilFormat = nullptr;
         descriptor->colorFormatsCount = 0;
         descriptor->colorFormats = &cColorFormats[0];
     }

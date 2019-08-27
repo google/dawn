@@ -23,32 +23,27 @@ namespace dawn_native {
 
     AttachmentStateBlueprint::AttachmentStateBlueprint(
         const RenderBundleEncoderDescriptor* descriptor)
-        : mHasDepthStencilAttachment(descriptor->depthStencilFormat != nullptr),
-          mSampleCount(descriptor->sampleCount) {
+        : mSampleCount(descriptor->sampleCount) {
         for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
             mColorAttachmentsSet.set(i);
             mColorFormats[i] = descriptor->colorFormats[i];
         }
-        if (mHasDepthStencilAttachment) {
-            mDepthStencilFormat = *descriptor->depthStencilFormat;
-        }
+        mDepthStencilFormat = descriptor->depthStencilFormat;
     }
 
     AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor)
-        : mHasDepthStencilAttachment(descriptor->depthStencilState != nullptr),
-          mSampleCount(descriptor->sampleCount) {
+        : mSampleCount(descriptor->sampleCount) {
         for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
             ASSERT(descriptor->colorStates[i] != nullptr);
             mColorAttachmentsSet.set(i);
             mColorFormats[i] = descriptor->colorStates[i]->format;
         }
-        if (mHasDepthStencilAttachment) {
+        if (descriptor->depthStencilState != nullptr) {
             mDepthStencilFormat = descriptor->depthStencilState->format;
         }
     }
 
-    AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor)
-        : mHasDepthStencilAttachment(descriptor->depthStencilAttachment != nullptr) {
+    AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor) {
         for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
             TextureViewBase* attachment = descriptor->colorAttachments[i]->attachment;
             mColorAttachmentsSet.set(i);
@@ -59,7 +54,7 @@ namespace dawn_native {
                 ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
             }
         }
-        if (mHasDepthStencilAttachment) {
+        if (descriptor->depthStencilAttachment != nullptr) {
             TextureViewBase* attachment = descriptor->depthStencilAttachment->attachment;
             mDepthStencilFormat = attachment->GetFormat().format;
             if (mSampleCount == 0) {
@@ -84,10 +79,8 @@ namespace dawn_native {
             HashCombine(&hash, attachmentState->mColorFormats[i]);
         }
 
-        // Hash depth stencil attachments
-        if (attachmentState->mHasDepthStencilAttachment) {
-            HashCombine(&hash, attachmentState->mDepthStencilFormat);
-        }
+        // Hash depth stencil attachment
+        HashCombine(&hash, attachmentState->mDepthStencilFormat);
 
         // Hash sample count
         HashCombine(&hash, attachmentState->mSampleCount);
@@ -99,8 +92,7 @@ namespace dawn_native {
         const AttachmentStateBlueprint* a,
         const AttachmentStateBlueprint* b) const {
         // Check set attachments
-        if (a->mColorAttachmentsSet != b->mColorAttachmentsSet ||
-            a->mHasDepthStencilAttachment != b->mHasDepthStencilAttachment) {
+        if (a->mColorAttachmentsSet != b->mColorAttachmentsSet) {
             return false;
         }
 
@@ -112,10 +104,8 @@ namespace dawn_native {
         }
 
         // Check depth stencil format
-        if (a->mHasDepthStencilAttachment) {
-            if (a->mDepthStencilFormat != b->mDepthStencilFormat) {
-                return false;
-            }
+        if (a->mDepthStencilFormat != b->mDepthStencilFormat) {
+            return false;
         }
 
         // Check sample count
@@ -144,11 +134,11 @@ namespace dawn_native {
     }
 
     bool AttachmentState::HasDepthStencilAttachment() const {
-        return mHasDepthStencilAttachment;
+        return mDepthStencilFormat != dawn::TextureFormat::None;
     }
 
     dawn::TextureFormat AttachmentState::GetDepthStencilFormat() const {
-        ASSERT(mHasDepthStencilAttachment);
+        ASSERT(HasDepthStencilAttachment());
         return mDepthStencilFormat;
     }
 

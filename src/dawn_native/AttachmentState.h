@@ -51,8 +51,8 @@ namespace dawn_native {
       protected:
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
         std::array<dawn::TextureFormat, kMaxColorAttachments> mColorFormats;
-        bool mHasDepthStencilAttachment = false;
-        dawn::TextureFormat mDepthStencilFormat;
+        // Default (texture format None) indicates there is no depth stencil attachment.
+        dawn::TextureFormat mDepthStencilFormat = dawn::TextureFormat::None;
         uint32_t mSampleCount = 0;
     };
 

@@ -59,7 +59,8 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Color formats count exceeds maximum");
         }
 
-        if (descriptor->colorFormatsCount == 0 && !descriptor->depthStencilFormat) {
+        if (descriptor->colorFormatsCount == 0 &&
+            descriptor->depthStencilFormat == dawn::TextureFormat::None) {
             return DAWN_VALIDATION_ERROR("Should have at least one attachment format");
         }
 
@@ -67,8 +68,8 @@ namespace dawn_native {
             DAWN_TRY(ValidateColorAttachmentFormat(device, descriptor->colorFormats[i]));
         }
 
-        if (descriptor->depthStencilFormat != nullptr) {
-            DAWN_TRY(ValidateDepthStencilAttachmentFormat(device, *descriptor->depthStencilFormat));
+        if (descriptor->depthStencilFormat != dawn::TextureFormat::None) {
+            DAWN_TRY(ValidateDepthStencilAttachmentFormat(device, descriptor->depthStencilFormat));
         }
 
         return {};
